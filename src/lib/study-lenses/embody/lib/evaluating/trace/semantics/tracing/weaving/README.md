@@ -7,33 +7,34 @@ intercepted), and aspect assembly (wiring them together).
 ## How it fits
 
 ```text
-User config + JS source
+resolved options + validated source
        ↓
-  create-aspect.ts   ← builds Aran aspect from config
+  aspect assembly     ← builds the Aran aspect from the options (weave-time gating)
        ↓
   Aran flexible weave
        ↓
-  pointcut functions  ← decide which AranLang nodes to intercept
+  pointcut functions  ← decide which nodes to intercept; return semantic +
+       ↓                 co-gating discriminants and the resolved tag
+  advice functions    ← receive runtime values, hand payloads to the dispatcher
        ↓
-  advice functions    ← receive runtime values, call emitExpression/emitResolve
-       ↓
-  trace events        ← frozen TraceEvent objects in state.trace (node: syntaxId string)
+  trace events        ← frozen, wire-safe (nodePath string — never a node reference)
 ```
 
-- **Upstream**: User provides a config (options.schema.json) and JS source code
-- **This module**: Translates config into Aran weaving/advice, emits frozen
-  `TraceEvent` objects
-- **Two-way linking**: `ASTNode.events[]` and `ASTNode.visits` are built by the
-  internal `link()` post-execution — never by advice
+- **Upstream**: the tracer entry provides resolved options and validated source
+- **This module**: translates options into Aran weaving/advice; advice hands
+  payloads to the dispatcher (`advice/emit-*`), which gates against the runtime
+  gate bundle, stamps, freezes, and emits
+- **Two-way linking**: node event lists and visits are built by linking after
+  the run settles — never by advice
 
 ## Directory structure
 
-| Path               | Purpose                                                    |
-| ------------------ | ---------------------------------------------------------- |
-| `types.ts`         | JejTag (AST metadata) and TracerState (runtime state)      |
-| `create-aspect.ts` | Main entry point — builds Aran flexible aspect from config |
-| `pointcut/`        | One pointcut function per Aran hook category (5 files)     |
-| `advice/`          | Advice stubs — one per Aran hook category (5 files)        |
+| Path               | Purpose                                                                                   |
+| ------------------ | ----------------------------------------------------------------------------------------- |
+| `types.ts`         | JejTag (AST metadata) and TracerState (runtime state)                                     |
+| `create-aspect.ts` | Main entry point — builds the Aran flexible aspect from the options                       |
+| `pointcut/`        | One pointcut function per Aran hook category                                              |
+| `advice/`          | Advice per Aran hook + the dispatcher (`emit-expression` / `emit-resolve` / `emit-error`) |
 
 ## Key concepts
 

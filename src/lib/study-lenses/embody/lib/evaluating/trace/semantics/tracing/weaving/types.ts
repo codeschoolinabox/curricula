@@ -4,7 +4,15 @@
  * JejTag: metadata embedded into every AranLang node via the tag field.
  * TracerState: runtime state shared between advice functions.
  *
- * Both must be Json-serializable (Aran requirement).
+ * Both must be Json-serializable (Aran requirement): pointcut return arrays
+ * and the initial state are CODE-GENERATED into the woven output. No
+ * functions, Maps, Sets, or class instances — plain JSON shapes only.
+ *
+ * Config does NOT live here: weave-time gating reads the resolved options on
+ * the main thread (in aspect assembly), and the runtime-checked gates (range,
+ * filter arrays, iteration cap) reach the worker via the engine spec's
+ * `workerConfig` as the runtime gate bundle (`../../types.ts` seam 2) — never
+ * baked into the woven code.
  */
 
 import type {
@@ -27,6 +35,10 @@ import type {
  * (ESTree type name) serves as runtime discriminant. Optional fields are
  * sparse — each ESTree node type only populates the fields relevant to it.
  *
+ * `nodePath` is stamped onto every resolved tag at weave time (the tag
+ * resolution seam) — advice reads `tag.nodePath` to attribute events; it is
+ * the same string that keys the ast record.
+ *
  * Optional fields by ESTree node type:
  * - `operator`                — BinaryExpression, UnaryExpression, LogicalExpression, AssignmentExpression, UpdateExpression
  * - `loopKind`                — WhileStatement, DoWhileStatement, ForStatement, ForOfStatement
@@ -44,6 +56,8 @@ export type JejTag = {
 	readonly loc: SourceLocation;
 	readonly node: string;
 	readonly source: string;
+	/** Stamped at tag resolution; keys the ast record. */
+	readonly nodePath: string;
 
 	readonly operator?: string;
 	readonly loopKind?: LoopKind;
@@ -92,36 +106,42 @@ export type ScopeInfo = {
 	creationStep: number;
 	depth: number;
 	kind: string;
-	structure: string | null;
+	structure: ControlFlowStructure | null;
 	structureStep: number | null;
 	variables: Record<string, VariableInfo>;
 };
 
 /**
  * Runtime state passed between advice functions.
- * Must be Json-serializable (Aran clones initial_state via JSON).
+ * Must be Json-serializable (Aran code-generates the initial state).
  *
- * Tracks scope nesting, variable ownership, and step counting.
- * The config is embedded so advice functions can check it for conditional dispatch.
+ * Tracks scope nesting, variable ownership, step counting, and provenance.
  *
  * iterationCounters: keyed by loop source location (e.g., "5:0").
- *   Reset by expression-after when a loop test evaluates false.
+ *   Reset when a loop test evaluates false; the CAP the counters are checked
+ *   against arrives in the runtime gate bundle, not in state.
  *
  * lastExpressionResult: raw value from the most recent expression@after or
  *   apply@around. Read by effect-before for assignment values.
  *
- * onEvent: optional callback for streaming events to the main thread.
- *   Set by worker setup to postMessage. Not set in tests — events just
- *   accumulate in trace[]. Not Json-serializable (function), but safe
- *   because Aran only clones initialState at startup.
+ * onEvent: optional callback for streaming events to the engine
+ *   (`api.emit`). Set by the worker logic at setup — never part of the
+ *   code-generated initial state (functions aren't Json). Not set in Node
+ *   unit tests — events just accumulate in trace[].
  */
 export type TracerState = {
+	/**
+	 * Every emitted event, retained worker-side so engine-less Node unit
+	 * tests can execute woven output and inspect the stream directly.
+	 * Deliberate duplication with the engine's items array — acceptable at
+	 * JEJ program scale, not a leak to "fix".
+	 */
 	trace: unknown[];
 	/** Internal step counter for scope/variable cross-references.
 	 *  Incremented by block-setup (scope creation) and block-declaration
 	 *  (variable registration). Not visible on events. */
 	step: number;
-	/** Contiguous event counter. Only incremented by emitEvent().
+	/** Contiguous event counter. Only incremented by the dispatcher.
 	 *  Appears as the `step` field on every TraceEvent. */
 	eventStep: number;
 	scopeStack: ScopeInfo[];
@@ -134,26 +154,27 @@ export type TracerState = {
 	 *  current value for compound assignment operands (x += 5 needs [currentX, 5]). */
 	lastReadValues: Record<string, unknown>;
 	onEvent?: (event: unknown) => void;
-	config: Record<string, unknown>;
 	/** Variable name → binding kind ('let'/'const'). Built during instrument()
 	 *  pre-walk. Used by block-declaration to emit correct kind on declare events
 	 *  because the block tag (Program/Block) has no bindingKind. */
 	variableKinds: Record<string, 'let' | 'const'>;
 
 	/** nodePath of the most recently emitted TraceEvent (expression or resolve).
-	 *  Updated by emitExpression and emitResolve after every event.
-	 *  Used by block@throwing as the approximate ErrorEvent location.
-	 *  Initialized to '' before the first event. */
+	 *  Updated by the dispatcher after every event. Used by block@throwing as
+	 *  the ErrorEvent's APPROXIMATE location. Initialized to '' before the
+	 *  first event. */
 	lastEmittedNodePath: string;
 
-	/** JejTag of the most recently emitted TraceEvent.
-	 *  Provides type/loc/source for ErrorEvent — uses the last expression's tag
-	 *  rather than the program block's tag (Option A: accurate-ish location).
-	 *  Updated alongside lastEmittedNodePath. Null before the first event. */
+	/** JejTag of the most recently emitted TraceEvent — type/loc/source for
+	 *  the ErrorEvent's approximate location. Null before the first event. */
 	lastEmittedTag: JejTag | null;
 
-	/** nodePath → visit count. Incremented by emitResolve on every ResolveEvent.
-	 *  Returned in TraceResult.visitCounts. Used by link() to populate ASTNode.visits.
-	 *  Initialized to {} before execution. */
+	/** nodePath → visit count. Incremented by the resolve dispatcher on every
+	 *  ResolveEvent (once per logical evaluation). Rides the halt payload to
+	 *  the thread; linking mirrors it onto ASTNode.visits. */
 	visitCounts: Record<string, number>;
+
+	/** Monotonic provenance counter — the next ResolveEvent's valueId.
+	 *  Starts at 1; only advances when `resolve.provenance` is enabled. */
+	valueIdCounter: number;
 };

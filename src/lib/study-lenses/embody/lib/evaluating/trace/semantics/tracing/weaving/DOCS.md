@@ -1,5 +1,61 @@
 # Weaving — Architecture
 
+## Architectural Sketch
+
+### Execution phases
+
+1. **Tag capture** (during transpile, side-effectful) — the digest extracts each
+   node's surviving metadata into the tag map, keyed by hash. Input: parsed
+   program. Output: populated tag map.
+
+2. **Tag resolution** (weave time, pure per node) — hash tags on the nodes a
+   pointcut inspects are resolved to full tag objects, stamped with their node
+   path, preserving object identity for the comparisons pointcuts make. Input:
+   hash-tagged nodes + tag map. Output: rich-tagged nodes.
+
+3. **Pointcut decision** (weave time, pure per node) — each registered pointcut
+   answers, per node: intercept or skip, and — for intercepted nodes — the
+   semantic discriminant (what this is) and the co-gating discriminant (how to
+   emit). A disabled layer gate registers no pointcut at all. Input: rich-tagged
+   node + resolved options. Output: a point array (JSON-only, code-generated
+   into the woven output) or a skip.
+
+4. **Advice dispatch** (runtime, worker-side) — each woven advice call receives
+   the run state and its point data, updates the state, builds its event through
+   the generators, and hands the payload to the dispatcher — which applies the
+   runtime gate bundle and emits.
+
+### Data flow
+
+```mermaid
+flowchart TD
+    A[parsed program] -->|digest — capture surviving metadata| B[tag map: hash → tag]
+    C[hash-tagged IR nodes] -->|tag resolution — identity-preserving, stamps node path| D[rich-tagged nodes]
+    B --> D
+    D -->|pointcut decision — resolved options gate at weave time| E{intercept?}
+    E -->|skip — no advice call woven| F[silent node: zero runtime cost]
+    E -->|point array — semantic + co-gating discriminants, JSON-only| G[woven advice call in the instrumented source]
+    G -->|runtime: state update + event build| H[event payload]
+    H -->|dispatcher — runtime gates, stamp, freeze, emit| I[wire-safe trace event]
+```
+
+### Structural constraints
+
+- Point arrays and the initial state are code-generated: JSON shapes only (see §
+  Aran constraints below).
+- Tag-map resolution must succeed for every hash a pointcut encounters — a miss
+  is a digest bug and throws loudly, never a silent default.
+- The co-gating decision is made once, at weave time; advice switches on the
+  discriminant with no boolean re-derivation at runtime.
+
+### Out of scope
+
+- The dispatcher's own contract (range/filter application, stamping, visit
+  counts) — [`../DOCS.md`](../DOCS.md).
+- The runtime gate bundle's delivery (engine worker config) — the tracer entry's
+  concern.
+- Event field vocabulary — [`../types.ts`](../types.ts) and the tracer README.
+
 ## Why flexible weave
 
 Aran offers two weave modes. We use **flexible** because it provides
@@ -92,20 +148,32 @@ parallel advice systems.
 
 ## State design
 
-TracerState is Json-serializable (Aran requirement). Contains:
+TracerState is Json-serializable (Aran requirement — the initial state is
+code-generated into the woven output). Contains:
 
 - `trace[]` — accumulated events
 - `step` — internal step counter for cross-references (see Step numbering below)
 - `eventStep` — contiguous event counter for user-facing `step` field
 - `scopeStack[]` — scope nesting for depth/creation tracking
-- `iterationCounters{}` — per-loop iteration counts (keyed by source location)
+- `iterationCounters{}` — per-loop iteration counts (keyed by source location);
+  the CAP they are checked against arrives in the runtime gate bundle
 - `lastExpressionResult` — most recent expression result (for assignment values)
 - `previousExpressionResult` — prior expression result (for short-circuit
   recovery)
 - `lastReadValues{}` — last read values per variable (for compound assignment
   operands)
-- `config{}` — user's config for conditional dispatch
-- `onEvent?` — streaming callback (set by worker, not Json-serializable)
+- `variableKinds{}` — name → binding kind, from the instrument pre-walk
+- `lastEmittedNodePath` / `lastEmittedTag` — the error event's approximate
+  location register, updated by the dispatcher on every emission
+- `visitCounts{}` — node path → visit count, bumped by the resolve dispatcher
+- `valueIdCounter` — the monotonic provenance counter
+- `onEvent?` — streaming callback (installed by the worker logic at setup, never
+  part of the generated state)
+
+Config does NOT live in state: weave-time gating is resolved during aspect
+assembly on the main thread, and the runtime-checked gates (range window, name
+filters, iteration cap) reach the dispatcher via the runtime gate bundle
+delivered as the engine spec's worker config (`../../types.ts` seam 2).
 
 ### Step numbering: single contiguous counter, optional cross-references
 
@@ -182,26 +250,23 @@ binding events need scope references even when scope events are disabled.
 
 ## Loop guards
 
-When `maxIterations` is configured, a statement@before hook on WhileStatement
-tracks iteration count and throws RangeError if exceeded. This runs regardless
-of controlFlow config — it's a safety mechanism, not a trace feature.
+The block-level advice tracks per-loop iteration counts and throws the
+**branded** limit error when the cap (from the runtime gate bundle) is exceeded.
+The brand is a structural marker the halt author recognizes — classification
+never reads message text. The guard runs regardless of the statement-layer
+config — it is a safety mechanism, not a trace feature.
 
 ## Execution time limits
 
-Tracked OUTSIDE Aran, in the wrapper that evaluates instrumented code. The
-wrapper starts a timer, pauses during I/O interactions (prompt/confirm/alert),
-and checks against maxSeconds. Simpler and more accurate than in-advice timing.
+Engine-owned. The engine's time budget counts only while the worker is unblocked
+— it pauses while an emitted event awaits its pull (a learner examining a step)
+and while a dialog round-trip is serviced. Nothing in the weave measures time.
 
 ---
 
 ## Co-gating discriminant
 
-> **Intended design** — the current pointcuts use simple semantic discriminants
-> only. The co-gating discriminant system below describes the pointcut rewrite
-> target: once implemented, pointcuts will return both a semantic discriminant
-> and a co-gating discriminant per intercepted node.
-
-Pointcut functions will make two decisions per intercepted node at weave time:
+Pointcut functions make two decisions per intercepted node at weave time:
 
 1. **What to intercept** (semantic discriminant) — `'literal'`, `'read'`,
    `'shortCircuiting'`, etc. One per intercepted node type.

@@ -2,14 +2,45 @@
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
 	"$id": "options.schema.json",
 	"title": "JEJ Trace Options",
-	"description": "Controls which runtime events appear in the trace output. Structured by the 4-layer mental model: resolve (data), expression (which code produced values), statements (control flow), scopes (structure). Boolean shorthand is expanded by expand-shorthand.ts before this schema is applied — this schema describes the POST-expansion shape.",
+	"description": "Controls which runtime events appear in the trace output. Structured by the 5-layer mental model: ast (static, not configurable), resolve (data), expression (which code produced values), statements (control flow), scopes (structure) — plus the top-level errors flag gating the error channel. Boolean shorthand is expanded by expand-shorthand.ts before this schema is applied — this schema describes the POST-expansion shape.",
 	"type": "object",
 	"additionalProperties": false,
 	"properties": {
 		"resolve": {
-			"description": "Data layer — emit ResolveEvents carrying the produced value after every expression-producing event. Default true. Turning off gives context events with no values.",
-			"type": "boolean",
-			"default": true
+			"description": "Data layer — ResolveEvents carrying the produced value after every expression-producing event. Three orthogonal sub-flags: dependent (co-gating with the paired expression event, decided at weave time), provenance (valueId + sourceValueIds for data-flow reconstruction), kinds (per-ResolveKind gates). Boolean shorthand expands to this object.",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"dependent": {
+					"description": "When true (default), a ResolveEvent fires only when its paired expression event also fires. When false, resolves fire independently of expression gating (a pure data trace).",
+					"type": "boolean",
+					"default": true
+				},
+				"provenance": {
+					"description": "When true (default), every ResolveEvent carries valueId + sourceValueIds. Opt out to trim payload.",
+					"type": "boolean",
+					"default": true
+				},
+				"kinds": {
+					"description": "Per-kind gates for ResolveEvents. Boolean shorthand covers all kinds.",
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"variable": { "type": "boolean", "default": true },
+						"literal": { "type": "boolean", "default": true },
+						"operator": { "type": "boolean", "default": true },
+						"shortCircuit": { "type": "boolean", "default": true },
+						"conditional": { "type": "boolean", "default": true },
+						"assignment": { "type": "boolean", "default": true },
+						"increment": { "type": "boolean", "default": true },
+						"property": { "type": "boolean", "default": true },
+						"call": { "type": "boolean", "default": true },
+						"template": { "type": "boolean", "default": true }
+					},
+					"default": {}
+				}
+			},
+			"default": {}
 		},
 
 		"expression": {
@@ -153,7 +184,7 @@
 							"default": true
 						},
 						"comma": {
-							"description": "Comma / sequence expression (easter egg — not in standard JEJ). Pointcut context gate for sub-expressions within a SequenceExpression.",
+							"description": "Comma / sequence expression (admitted by the JEJ gate, rare in learner programs). Pointcut context gate: controls whether sub-expression events fire within a SequenceExpression. No dedicated event type — the grouping itself is not an event.",
 							"type": "boolean",
 							"default": true
 						},
@@ -401,15 +432,35 @@
 			"additionalProperties": false,
 			"properties": {
 				"script": {
-					"description": "Script-level scope (top-level in normal JEJ programs, or with-statement programs).",
+					"description": "Script-level scope (the program's top-level scope).",
 					"type": "object",
 					"additionalProperties": false,
 					"properties": {
-						"create": { "description": "Scope created.", "type": "boolean", "default": true },
-						"enter": { "description": "Execution enters scope.", "type": "boolean", "default": true },
-						"interrupt": { "description": "Scope interrupted by break or runtime error.", "type": "boolean", "default": true },
-						"completion": { "description": "Scope completes normally.", "type": "boolean", "default": true },
-						"leave": { "description": "Execution leaves scope. Always fires (like finally).", "type": "boolean", "default": true },
+						"create": {
+							"description": "Scope created.",
+							"type": "boolean",
+							"default": true
+						},
+						"enter": {
+							"description": "Execution enters scope.",
+							"type": "boolean",
+							"default": true
+						},
+						"interrupt": {
+							"description": "Scope interrupted by break or runtime error.",
+							"type": "boolean",
+							"default": true
+						},
+						"completion": {
+							"description": "Scope completes normally.",
+							"type": "boolean",
+							"default": true
+						},
+						"leave": {
+							"description": "Execution leaves scope. Always fires (like finally).",
+							"type": "boolean",
+							"default": true
+						},
 						"declare": {
 							"description": "A variable is hoisted into this scope (TDZ start). Fires once per variable at scope creation. Same BindingEvent(declare) type as other declare events.",
 							"type": "boolean",
@@ -424,11 +475,31 @@
 					"type": "object",
 					"additionalProperties": false,
 					"properties": {
-						"create": { "description": "Scope created.", "type": "boolean", "default": true },
-						"enter": { "description": "Execution enters scope.", "type": "boolean", "default": true },
-						"interrupt": { "description": "Scope interrupted by break or runtime error.", "type": "boolean", "default": true },
-						"completion": { "description": "Scope completes normally.", "type": "boolean", "default": true },
-						"leave": { "description": "Execution leaves scope. Always fires (like finally).", "type": "boolean", "default": true },
+						"create": {
+							"description": "Scope created.",
+							"type": "boolean",
+							"default": true
+						},
+						"enter": {
+							"description": "Execution enters scope.",
+							"type": "boolean",
+							"default": true
+						},
+						"interrupt": {
+							"description": "Scope interrupted by break or runtime error.",
+							"type": "boolean",
+							"default": true
+						},
+						"completion": {
+							"description": "Scope completes normally.",
+							"type": "boolean",
+							"default": true
+						},
+						"leave": {
+							"description": "Execution leaves scope. Always fires (like finally).",
+							"type": "boolean",
+							"default": true
+						},
 						"declare": {
 							"description": "A variable is hoisted into this scope (TDZ start). Fires once per variable at scope creation.",
 							"type": "boolean",
@@ -441,8 +512,8 @@
 			"default": {}
 		},
 
-		"with": {
-			"description": "Easter egg — trace the with statement. When active, program runs as script (sloppy mode). Not in standard JEJ documentation.",
+		"errors": {
+			"description": "The error channel — emit an ErrorEvent when a runtime error exits the program unhandled. Default true. False suppresses the event, never the settlement's halt. The event's location is approximate (last emitted event's node).",
 			"type": "boolean",
 			"default": true
 		}

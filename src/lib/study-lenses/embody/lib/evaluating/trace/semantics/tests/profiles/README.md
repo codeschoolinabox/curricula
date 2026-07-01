@@ -6,24 +6,24 @@ etc.) to test a specific expected behavior in isolation.
 
 ## Profile catalog
 
-| Profile                    | Config shape                                                                                    | What it isolates                                                                            | Expected behavior                                                          |
-| -------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| `ALL_OFF`                  | every gate `false`                                                                              | baseline                                                                                    | zero events for any program                                                |
-| `ALL_ON`                   | schema defaults                                                                                 | baseline                                                                                    | canonical full event stream                                                |
-| `RESOLVE_ONLY_COGATED`     | `{ expression:false, statements:false, scopes:false, resolve:true }`                            | co-gating: resolves suppressed because expression events are off (`dependent:true` default) | zero events                                                                |
-| `RESOLVE_ONLY_INDEPENDENT` | `{ expression:false, statements:false, scopes:false, resolve:{ dependent:false, kinds:true } }` | independent mode — resolves fire regardless of expression gating                            | ResolveEvents only                                                         |
-| `EXPRESSION_ONLY`          | `{ statements:false, scopes:false, resolve:false, expression:true }`                            | expression events without paired resolves                                                   | LiteralEvent, BindingEvent(read), PureOperatorEvent, etc.                  |
-| `STATEMENTS_ONLY`          | `{ expression:false, scopes:false, resolve:false, statements:true }`                            | control flow without data values                                                            | ConditionalEvent, LoopEvent, JumpEvent, BindingEvent(initialize/available) |
-| `SCOPES_ONLY`              | `{ expression:false, statements:false, resolve:false, scopes:true }`                            | scope lifecycle without data or control flow                                                | ScopeEvent + BindingEvent(declare) only                                    |
-| `PROVENANCE_ON`            | `ALL_ON` + explicit `resolve.provenance:true` (same as default)                                 | provenance fields present on every ResolveEvent                                             | ResolveEvents carry `valueId` + `sourceValueIds`                           |
-| `PROVENANCE_OFF`           | `ALL_ON` with `resolve:{ provenance:false }`                                                    | provenance opt-out                                                                          | ResolveEvents have no `valueId` / `sourceValueIds`                         |
-| `ERRORS_ONLY`              | `{ errors:true, expression:false, statements:false, scopes:false, resolve:false }`              | ErrorEvent isolation                                                                        | only ErrorEvents on runtime-error programs                                 |
-| `NO_ERRORS`                | `ALL_ON` with `errors:false`                                                                    | error suppression                                                                           | ErrorEvents NOT emitted even on runtime errors; `ok:false` still set       |
+| Profile                    | Config shape                                                                                    | What it isolates                                                                            | Expected behavior                                                                             |
+| -------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `ALL_OFF`                  | every gate `false`                                                                              | baseline                                                                                    | zero events for any program                                                                   |
+| `ALL_ON`                   | schema defaults                                                                                 | baseline                                                                                    | canonical full event stream                                                                   |
+| `RESOLVE_ONLY_COGATED`     | `{ expression:false, statements:false, scopes:false, resolve:true }`                            | co-gating: resolves suppressed because expression events are off (`dependent:true` default) | zero events                                                                                   |
+| `RESOLVE_ONLY_INDEPENDENT` | `{ expression:false, statements:false, scopes:false, resolve:{ dependent:false, kinds:true } }` | independent mode — resolves fire regardless of expression gating                            | ResolveEvents only                                                                            |
+| `EXPRESSION_ONLY`          | `{ statements:false, scopes:false, resolve:false, expression:true }`                            | expression events without paired resolves                                                   | LiteralEvent, BindingEvent(read), PureOperatorEvent, etc.                                     |
+| `STATEMENTS_ONLY`          | `{ expression:false, scopes:false, resolve:false, statements:true }`                            | control flow without data values                                                            | ConditionalEvent, LoopEvent, JumpEvent, BindingEvent(initialize/available)                    |
+| `SCOPES_ONLY`              | `{ expression:false, statements:false, resolve:false, scopes:true }`                            | scope lifecycle without data or control flow                                                | ScopeEvent + BindingEvent(declare) only                                                       |
+| `PROVENANCE_ON`            | `ALL_ON` + explicit `resolve.provenance:true` (same as default)                                 | provenance fields present on every ResolveEvent                                             | ResolveEvents carry `valueId` + `sourceValueIds`                                              |
+| `PROVENANCE_OFF`           | `ALL_ON` with `resolve:{ provenance:false }`                                                    | provenance opt-out                                                                          | ResolveEvents have no `valueId` / `sourceValueIds`                                            |
+| `ERRORS_ONLY`              | `{ errors:true, expression:false, statements:false, scopes:false, resolve:false }`              | ErrorEvent isolation                                                                        | only ErrorEvents on runtime-error programs                                                    |
+| `NO_ERRORS`                | `ALL_ON` with `errors:false`                                                                    | error suppression                                                                           | ErrorEvents NOT emitted even on runtime errors; the settlement still carries the errored halt |
 
 ## Where profiles live
 
-`trace/tests/profiles/profiles.ts` exports a **single default object**
-containing all 11 profiles:
+`profiles.ts` (this directory) exports a **single default object** containing
+all 11 profiles:
 
 ```typescript
 import profiles from './profiles.js';
@@ -35,7 +35,7 @@ object.
 
 ## One test file per profile
 
-Each profile has a dedicated test file in `trace/tests/profiles/`:
+Each profile has a dedicated test file in this directory:
 
 | File                                       | Profile                    |
 | ------------------------------------------ | -------------------------- |
@@ -79,5 +79,7 @@ complete event stream.
 
 ## Related
 
-- `trace/DOCS.md` — vocabulary, test taxonomy, architecture axes
-- `tracing/tests/README.md` — full test file inventory across all 7 tiers
+- [`../../DOCS.md`](../../DOCS.md) — tracer phases + test taxonomy
+- [`../README.md`](../README.md) — the tracer-level T4–T7 inventory
+- [`../../tracing/tests/README.md`](../../tracing/tests/README.md) — T1/T2/T3
+  inventory
