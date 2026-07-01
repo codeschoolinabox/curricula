@@ -2074,7 +2074,7 @@ the observing, and the judgment that closes each turn have no substitute.
 
 ---
 
-## Ch5 Developers, Computers, Users, Agents, and You
+## Ch4⟡ Snippetry
 
 ### Metaphor anchor
 
@@ -2085,12 +2085,15 @@ sketchbooks, Bach's inventions. A serious genre in its own right._
 
 ### Overview
 
-Training wheels come off. You Frogram for yourself through 💭 **snippetry**:
-small, complete, self-contained programs as an ongoing practice. You explore
-JavaScript's full multi-paradigmatic range, develop your compositional voice,
-and discover that Frogramming has value beyond productivity: for mastery,
-exploration, delight, the steady upkeep of one's craft, and the new thoughts it
-lets you think.
+The cycle, practiced for life. Training wheels come off. You Frogram for
+yourself through 💭 **snippetry**: small, complete, self-contained programs as
+an ongoing practice — and **each snippet is one honest turn of the cycle**: a
+proposal (even a private one — _what if?_), a discovery of what the machine
+affords, a verification, a next thought. You explore JavaScript's full
+multi-paradigmatic range, develop your compositional voice, and discover that
+Frogramming and Vibetoading have value beyond productivity: for mastery,
+exploration, delight, the steady upkeep of one's craft, and the new thoughts
+they let you think.
 
 Snippetry is the answer to a central question of the curriculum: _why write code
 when LLMs can write the notation? How do I keep my Frogramming sharp —
@@ -2099,8 +2102,9 @@ provides the daily reps?_ Snippetry is the experience-form of NM-maintenance —
 the daily reps that keep the automated library of past experiences alive once
 full-codebase work no longer provides them.
 
-**Arc closure.** The arc that opened in Ch1 with _write for future-you as an
-audience_ closes here as _write for yourself as a human_. Same self, end-to-end.
+**Arc closure.** The arc that opened in Ch0⟡ with _write for future-you as an
+audience_ closes here as _write for yourself as a human_. Same self, end-to-end
+— there you wrote for you-as-audience; here you write for you-as-human.
 
 The chapter's intellectual-agency move: _you can use programming as a tool for
 thought, on whatever problems and ideas interest you, for the rest of your
@@ -2108,11 +2112,11 @@ life._ Snippetry is how the Frogrammer keeps the NM alive between full-codebase
 projects — and how the Vibetoader sketches quick experiences without the weight
 of production.
 
-**The both-twins corner of the twin/process 2×2** (see `ontology.md` §4): Ch5
-develops the both-twins state in its merged form — V and F operating as a single
-integrated practice. Snippetry is where the two stances stop being separate hats
-and start being the same gesture: each small program is at once a user-twin
-sketch and an NM-twin probe. The Bakhtiarian-loop unification names this in
+**The both-twins corner of the twin/process 2×2** (see `ontology.md` §4): this
+chapter develops the both-twins state in its merged form — V and F operating as
+a single integrated practice. Snippetry is where the two stances stop being
+separate hats and start being the same gesture: each small program is at once a
+user-twin sketch and an NM-twin probe. The cycle's V/F unification names this in
 operational terms.
 
 > The best authors and the best JavaScript developers are those who obsess about
@@ -2122,13 +2126,15 @@ operational terms.
 > — [Angus Croll](https://anguscroll.com/),
 > [If Hemingway Wrote JavaScript](https://anguscroll.com/hemingway/)
 
-### 5.1 The Notional Machine and Programming Paradigms
+### Paradigms as affordance-territory
 
-**JavaScript is multi-paradigmatic.** Chapters 1–4 taught imperative
-programming. Chapter 5 is where you discover that the same language supports
-fundamentally different ways of thinking about computation: functional,
-object-oriented, declarative. Paradigm exploration is a core activity, not a
-sidebar.
+**JavaScript is multi-paradigmatic.** Ch0⟡–Ch3⟡ taught imperative programming.
+This chapter is where you discover that the same language supports fundamentally
+different ways of thinking about computation: functional, object-oriented,
+declarative. **Paradigms are affordance-territory** — each one is a region of
+what the language makes easy, hard, or newly thinkable, and exploring them is
+running the F-stroke of the cycle across a wider map. Paradigm exploration is a
+core activity, not a sidebar.
 
 Once you understand programs as event streams, the paradigm distinctions become
 grounded in the same vocabulary. All paradigms run on a machine that produces
@@ -2137,29 +2143,29 @@ event stream — how explicitly and in what terms the event sequence is specifie
 
 | Paradigm                                             | Relationship to the evaluation event stream                                                                                                       |
 | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Imperative** (JS Ch1–4)                            | Explicit event sequence — every step specified. JS's actual NM vocabulary.                                                                        |
-| **OOP in JS** (Ch5)                                  | Syntactic organization on top of the same machine — method calls = prototype chain walk + function call events. A style, not a different machine. |
+| **Imperative** (JS Ch0⟡–Ch3⟡)                        | Explicit event sequence — every step specified. JS's actual NM vocabulary.                                                                        |
+| **OOP in JS** (Ch4⟡)                                 | Syntactic organization on top of the same machine — method calls = prototype chain walk + function call events. A style, not a different machine. |
 | **OOP in purpose-built languages** (Java, Smalltalk) | Genuinely different NMs — message-send events, virtual dispatch. Different event vocabulary.                                                      |
-| **Functional in JS** (Ch5)                           | Compose transformations; the same machine generates events from function application. Same machine, different organization.                       |
+| **Functional in JS** (Ch4⟡)                          | Compose transformations; the same machine generates events from function application. Same machine, different organization.                       |
 | **Declarative** (regex, SQL)                         | Specify the goal; delegate event generation. Maximum decoupling from the event sequence.                                                          |
-| **Event-driven** (JS Ch5 event loop)                 | External events — clicks, timers — enter the stream as first-class participants.                                                                  |
+| **Event-driven** (JS Ch4⟡ event loop)                | External events — clicks, timers — enter the stream as first-class participants.                                                                  |
 
-Imperative programming — what you learned in Chapters 1–4 — is explicit about
-the event sequence: every step is specified, every event directed. Other
-paradigms have different relationships to that stream. You explore them here.
+Imperative programming — what you learned in Ch0⟡–Ch3⟡ — is explicit about the
+event sequence: every step is specified, every event directed. Other paradigms
+have different relationships to that stream. You explore them here.
 
-**Looking further: Welcome to Algorithms.** The evaluation event vocabulary you
-built in Ch2 is one conceptual bridge from embodied computing to CS. WtA's
-step-counting and Big O analysis require the same cognitive habit — counting
-discrete operations — though the abstraction differs: evaluation events are
-implementation-level; algorithmic steps are defined relative to input size and
-are intentionally implementation-agnostic. The machine you learned makes that
-work tractable and visible.
+**Looking further — beyond this course.** The evaluation event vocabulary you
+built in Ch1⟡ is one conceptual bridge from embodied computing to CS.
+Step-counting and Big O analysis — algorithm study, beyond this course — require
+the same cognitive habit — counting discrete operations — though the abstraction
+differs: evaluation events are implementation-level; algorithmic steps are
+defined relative to input size and are intentionally implementation-agnostic.
+The machine you learned makes that work tractable and visible.
 
-### 5.2 The training-wheels-off commitment
+### The training-wheels-off commitment
 
-Chapter 5 is where you **graduate from the scaffolded curriculum environment**
-into real browser evaluation with real consequences.
+This chapter is where you **graduate from the scaffolded curriculum
+environment** into real browser evaluation with real consequences.
 
 <strong>What comes off:</strong>
 
@@ -2184,7 +2190,7 @@ into real browser evaluation with real consequences.
   (loupe for event loop, promisees for Promises, etc.) with different notional
   machine perspectives. Training wheels come off, but power tools are available.
 - **Four sandbox modes** offering different constraints and affordances:
-  - **Script without HTML** — pure computation, closest to Chs 1–4
+  - **Script without HTML** — pure computation, closest to Ch0⟡–Ch3⟡
   - **Module without HTML** — introduces ES module semantics
   - **HTML file with a script tag** — DOM available, split view of code and
     rendered page
@@ -2194,18 +2200,21 @@ into real browser evaluation with real consequences.
   embedded in a full page, and to choose the mode that fits your snippet's
   needs.
 
-### 5.3 The collaborative gist system
+### The collaborative gist system
 
-You can save snippets as gists, browse gists saved by other learners, and remix
-them. This makes Chapter 5 collaborative across all learners: your practice is
-your own, but it's enriched by what others are exploring. The remix workflow —
-take someone else's snippet, change its intent, make it yours — is a core
-snippetry activity.
+Snippets save as gists; you browse gists saved by other learners and remix them
+(this collaborative system arrives with the live course). It makes the chapter
+collaborative across all learners: your practice is your own, but it's enriched
+by what others are exploring. The remix workflow — take someone else's snippet,
+change its intent, make it yours — is a core snippetry activity, and it is **the
+cycle run cooperatively**: their discovery becomes your proposal, your discovery
+seeds someone else's next turn.
 
-_"You" is the fifth audience_ — both singular (your own practice) and plural
-(sharing with and remixing from peers through the collaborative gist system).
+_"You" is the fifth audience of source code_ — both singular (your own practice)
+and plural (sharing with and remixing from peers through the collaborative gist
+system).
 
-### 5.4 Balance: broad exploration and productive constraint
+### Balance: broad exploration and productive constraint
 
 The practice balances **broad exploration** and **productive constraint**. You
 develop your own sense of which balance serves your learning and your voice.
@@ -2216,19 +2225,20 @@ The seven sub-areas of the LOs below give shape to the practice — but they are
 facets, not a sequence. Most weeks you wear several of these hats in a single
 session.
 
-### 5.5 Looking forward — agentic AI
+### Looking forward — agentic AI
 
-Chapter 4 framed LLMs as authoring partners. The world is moving past that
-frame. **Agentic AI systems** — LLMs that plan, decompose problems, make
-architectural choices, call tools, and modify state autonomously — are arriving.
-The collaboration shape changes; the specification work shifts; the verification
-work shifts. Welcome to Algorithms picks this up.
+Chapter 3⟡ framed the LLM as a co-author accelerating both hands of the cycle —
+never running it. The world keeps moving. **Agentic AI systems** — LLMs that
+plan, decompose problems, make architectural choices, call tools, and modify
+state autonomously — are arriving. The collaboration shape changes; the
+specification work shifts; the verification work shifts. That territory lies
+beyond this course.
 
 Snippetry is one of the things that survives the shift, because the point of
 writing a snippet has never been to ship the code. It's to keep the NM alive,
 develop your voice, and think with the medium. Whatever LLMs become next, _doing
 it yourself sometimes_ remains the practice that builds the model AI can't have
-for you.
+for you — the cycle stays yours to run.
 
 ## Learning objectives by layer
 
@@ -2274,7 +2284,7 @@ for you.
   changed at Strategy/Implementation (PBIS) and what stayed at Purpose/Behavior
 - 🐣 Snippetry as **perspective-stacked V and F simultaneously** — writing
   snippets as both at once, toward a purpose of your choosing
-- 🐥 Recognize when V and F merge in your own practice (the Bakhtiarian-loop
+- 🐥 Recognize when V and F merge in your own practice (the cycle's V/F
   unification — the merged form of the both-twins corner from the twin/process
   2×2 in ontology §4)
 
@@ -2321,8 +2331,8 @@ for you.
   GEB-flavored image of V and F as mutual access points to a single merged
   practice. Recognize the parallel without the curriculum laboring it
 - 🐥 _(deeper section)_ Self-twinning as a theory of consciousness: the
-  predictive model of self is the seat of self. The arc you've traveled — Ch1's
-  write-for-future-you to Ch5's write-for-yourself-
+  predictive model of self is the seat of self. The arc you've traveled — Ch0⟡'s
+  write-for-future-you to Ch4⟡'s write-for-yourself-
   the-audience-you-are-becoming — is the curriculum's operational encounter with
   that idea (see ontology §6 L4 matrix, Twinning row, and the Preamble's
   "audience YOU are becoming" table)
