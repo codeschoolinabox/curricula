@@ -1657,11 +1657,11 @@ machine-twin in Ch1⟡; the next chapter asks what kind of twin an LLM deserves.
 
 ---
 
-## Ch4 Developers, Computers, Users, and Agents
+## Ch3⟡ Co-AIthoring
 
-No new language features. This chapter applies all Chapter 1–3 skills in
-collaboration with an LLM. 🤖 Agents are a fourth audience: they read and
-understand code differently from 🧑 humans, and writing _for and with_ them
+No new language features. This chapter applies all Ch0⟡–Ch2⟡ skills in
+collaboration with an LLM co-author. 🤖 Agents are a fourth audience: they read
+and understand code differently from 🧑 humans, and writing _for and with_ them
 requires its own communication skills.
 
 ### Metaphor anchor
@@ -1670,41 +1670,67 @@ _**The composer-virtuoso asymmetric duet** — with an alien virtuoso this time.
 Dazzling, fast, pattern-rich, but cognitively distinct from human virtuosos.
 Collaboration is specifically different, and this chapter digs into why._
 
-### Overview
+### The new beast
 
-You're now ready for the alien virtuoso because Chapters 1–3 gave you the
-experiences that built the twins. The principle from README.md § How Learning
-Happens — that understanding is non-delegable — is what made the chapter
-ordering necessary. This chapter is where the LLM joins the work, with the twins
-already running.
+You arrive here carrying a feeling Ch2⟡ deliberately left with you: the
+simulated user was useful, tireless, always available — and _thin_. It
+cooperated too easily; it hesitated in the wrong places. That feeling is this
+chapter's opening premise, now said plainly: **the LLM is a new beast.** It is
+not a user — you felt the difference every time the simulation was too
+agreeable. It is not a notional machine — you cannot trace it, and the same
+prompt does not produce the same events. Neither of your twins fits it. It needs
+its own twinning, and building that third twin — a model of a process that
+itself models what _you_ model — is this chapter's work.
 
 The chapter's intellectual-agency move: _you direct an alien intelligence — and
-you stay in charge of what gets built._ Twinning the LLM means twinning a
-process that twins what _you_ twin (the user, or the NM). Your job is to align —
-and to relish productive divergence.
+you stay in charge of what gets built._ Your job is to align — and to relish
+productive divergence.
 
-**Chapter 4's shape draws on a 4-level AI-adoption model** originally developed
-by Evan Cole with collaborators Janet Tilstra and Joslenne Peña (the curriculum
-author's prior work). That model has since been refined into the framework now
-canonical in `ontology.md`: the **§9 lenses** (a general-systems view of
-analytical levels at which any system can be read, with AI as one instance),
-**§10 substrate substitution** (deterministic → non-deterministic at
-artifact-logic), and **§11 three roles of agential AI** (Role 1 study partner /
-Role 2 dev collaborator / Role 3 active component). **Chapter 4 = Role 2 (dev
-collaborator)** — Role 1 already worked quietly across Ch0–3; Role 3 is deferred
-to later learning. The organizing line for the chapter: _you twin the AI as
-collaborator — F's lens reads it as cognitive substrate (NM-grounded mode); V's
-lens reads its behavioral surface (user-grounded mode); two modes of
-collaboration, one JEJ artifact under construction_. See ontology §11 for the
-canonical framework.
+### The whole cycle, named
 
-**The both-twins corner of the twin/process 2×2** (see `ontology.md` §4): Ch4
-develops the both-twins state in its LLM-collaborative form — V and F operating
-together alongside an alien third intelligence. The user-twin and the NM-twin
-both stay yours; what gets delegated is the production of the code that
-satisfies both.
+You have run the affordance-discovery cycle by hand, in both directions. On the
+F-hand, seven times along Ch1⟡'s chain: a wanted behavior met a gap, the machine
+turned out to afford something, and the discovery cashed out — the vanishing
+answer became a binding; the unusable boolean became a branch. On the V-hand,
+five times through Ch2⟡: a proposed experience met an observed human, and the
+divergence rebuilt the proposal — the peer who finished your task while holding
+a wrong model of it taught you more than any success. Here is the whole thing,
+named once: **an experience is proposed; an affordance is discovered that can
+realize it; the realization is verified by prediction; and what was learned
+reshapes the next proposal.** V proposes; F discovers and verifies; each turn
+reshapes the next.
 
-### 4.0 Wrapping premise — code is the UI for the NM
+Naming it matters now because this chapter accelerates it, and you cannot safely
+accelerate what you cannot see whole. So, a brief forest-view before the trees:
+**co-authoring** means an LLM joins the cycle as a co-author — of code in the
+F-direction, of proposals and specs in the V-direction — while every
+verification and every judgment stays yours. The chapter's anchor line, worth
+memorizing because everything below is an application of it: **AI accelerates
+the cycle; it cannot run it for you.**
+
+What you bring to that acceleration is a set of moves you already own — not a
+checklist, but prompts distilled from moments you lived. Each carries the
+condition under which it breaks, because a prompt that can't break can't teach:
+
+- **The V-stroke question** — _who is this for, and what will they do first?_
+  You lived it grounding personas in real people (Ch2⟡). It breaks when asked
+  about no one in particular: with no real person behind the answer, it
+  generates fiction.
+- **The F-affordance question** — _what does the machine afford here?_ You lived
+  it at every gap on Ch1⟡'s chain. It breaks when asked of a machine you haven't
+  twinned: every answer sounds plausible when you can't predict.
+- **The event-prediction move** — internal events (Ch1⟡'s verify) or interaction
+  events (Ch2⟡'s), committed in writing _before_ running or observing. It breaks
+  silently when written after — a postdiction wearing prediction's clothes.
+- **The divergence question** — _where did reality diverge, and which twin
+  updates?_ You lived it in the peer debrief. It breaks when divergence gets
+  explained away instead of spent.
+
+These four return throughout the chapter, joined — one lived cycle at a time,
+never front-loaded — by the co-authoring moves this chapter adds. Guides you
+break, not scripts you follow.
+
+### Code is the UI for the NM
 
 Up to now this course has framed code text as **what you write to talk to the
 four audiences**. There's a deeper way to see the same fact: source code is the
@@ -1713,8 +1739,8 @@ Authoring code is _one_ way to operate that panel. Describing intent to an LLM
 is another. Either way, the NM is the thing the panel controls.
 
 LLMs let you **delegate operation of the control panel** while still owning the
-machine. The same Frogrammer/Vibetoader spectrum from Ch0.3 applies — but now to
-your conversation with the alien virtuoso, not just to your typing:
+machine. The same Frogrammer/Vibetoader spectrum from Ch0⟡'s Two Hats applies —
+but now to your conversation with the alien virtuoso, not just to your typing:
 
 - 🔬 **NM-grounded conversation** (Frogramming-with-delegation) — _"Make the NM
   declare a `const balance = 0`, then enter a `while` loop that decrements it
@@ -1728,9 +1754,11 @@ your conversation with the alien virtuoso, not just to your typing:
   virtuoso.
 
 Both produce text in the same control panel; the difference is **which audience
-you twin during the conversation**. This is why every section below revisits a
-Ch1–Ch3 audience: agent communication is what you've already been doing, just
-refracted through the alien.
+you twin during the conversation**. This is why every section below revisits an
+audience you have already twinned: agent communication is what you've been doing
+all course, refracted through the alien. And both modes are the cycle's two
+directions of acceleration: the F-direction co-authors the _realization_; the
+V-direction co-authors the _proposal_. In both, the anchor line holds.
 
 Within either mode, _how much_ of each task you hand the virtuoso is a per-task
 choice — the **human–AI slider** (`ontology.md` §11): Productive Struggle ↔
@@ -1756,18 +1784,20 @@ observe, predict, and debug the machine _directly_ — the NM view that exists
 regardless of who (or what) wrote the code text. Frogramming with delegation is
 only sustainable if you keep the direct NM view alive.
 
-### 4.1 What is an LLM?
+### What is an LLM?
 
-An LLM is not a database, not a keyword-lookup system, and not a search engine
-over a corpus. It is a model that predicts the next token from context.
-"Predicting the next token" in practical terms means: given everything in the
-conversation so far, the model produces the most plausible continuation
-according to patterns it learned during training.
+The new beast deserves an anatomy lesson. An LLM is not a database, not a
+keyword-lookup system, and not a search engine over a corpus. It is a model that
+predicts the next token from context. "Predicting the next token" in practical
+terms means: given everything in the conversation so far, the model produces the
+most plausible continuation according to patterns it learned during training.
 
 Same prompt, different outputs is **stochasticity**: the model samples from a
 probability distribution; the temperature setting controls how much it strays
 from the most probable continuation. Different runs of the same prompt visit
-different points on that distribution.
+different points on that distribution. (This is also why your Ch2⟡ simulated
+user cooperated differently on different days — and why it could never be traced
+like a machine.)
 
 LLM "cognition" differs from human reasoning in several ways: no episodic memory
 across conversations by default; no persistent goals; no embodiment; no
@@ -1778,18 +1808,45 @@ where the model is fluent right next to domains where it's confidently wrong.
 The **Gell-Mann Amnesia effect** is what happens when you read an LLM's output
 on a topic you understand, notice it's wrong, then trust it on the next topic
 where you can't check. The effect is older than LLMs; LLMs just made it ambient.
+Twinning the beast means holding its anatomy — pattern-fluent, memoryless,
+stochastic, jagged — while you work with it, the way the NM-twin holds
+evaluation events and the user-twin holds a human's actual behavior.
 
-### 4.2 Collaborating in Prose
+**The framework lineage.** This chapter's shape draws on a 4-level AI-adoption
+model originally developed by Evan Cole with collaborators Janet Tilstra and
+Joslenne Peña (the curriculum author's prior work). That model has since been
+refined into the framework now canonical in `ontology.md`: the **§9 lenses** (a
+general-systems view of analytical levels at which any system can be read, with
+AI as one instance), **§10 substrate substitution** (deterministic →
+non-deterministic at artifact-logic), and **§11 three roles of agential AI**
+(Role 1 study partner / Role 2 dev collaborator / Role 3 active component).
+**This chapter = Role 2 (dev collaborator)** — Role 1 worked quietly across
+Ch0⟡–Ch1⟡; Ch2⟡ ran AI in the _user role_, a practice apparatus rather than Role
+2 (it produced behavior to observe, never work-product); Role 3 lies beyond this
+course. The organizing line: _you twin the AI as collaborator — F's lens reads
+it as cognitive substrate (NM-grounded mode); V's lens reads its behavioral
+surface (user-grounded mode); two modes of collaboration, one JEJ artifact under
+construction_. See ontology §11 for the canonical framework.
+
+**The both-twins corner of the twin/process 2×2** (see `ontology.md` §4): this
+chapter develops the both-twins state in its LLM-collaborative form — V and F
+operating together alongside an alien third intelligence. The user-twin and the
+NM-twin both stay yours; what gets delegated is production.
+
+### Co-authoring in prose
 
 Prose to the LLM is your control panel for it. The quality of the prose shapes
-what the LLM produces. The same predictive discipline that drives Ch2's
-expression assertions applies here: form a prediction about what your prompt
-will produce, observe the actual output, update your model.
+what the LLM produces. The same predictive discipline that drove Ch1⟡'s
+assertions applies here: form a prediction about what your prompt will produce,
+observe the actual output, update your model. This is the event-prediction move,
+third domain: internal events, interaction events, now generation.
 
 Practical moves:
 
 - Hypothesize what patterns an LLM response might be matching
-- Write clear, specific prompts that provide necessary context
+- Write clear, specific prompts that provide necessary context — the
+  F-affordance question and the V-stroke question both make prompts sharper, and
+  both break the same way here as they did by hand
 - Ask the same question multiple ways; observe how outputs vary
 - When a response isn't useful, identify what to change and observe the effect
 - **Predictive stepping at the prompt level**: predict how changes to a prompt
@@ -1799,10 +1856,10 @@ Reflecting on when it helped to let the LLM lead versus when you needed to drive
 is the metacognitive complement: the discipline of noticing your own role in the
 collaboration.
 
-### 4.3 Agents and Developer Communication
+### The developer surface, co-authored
 
-<em>Revisits Chapter 1: comments, variable names — with an LLM
-collaborator.</em>
+<em>Revisits the craft thread — comments (running since Ch0⟡) and naming (Ch1⟡'s
+chain) — with an LLM co-author.</em>
 
 The developer audience is where LLMs are most reliably useful: comments and
 variable names are pattern-rich, conventionally bounded, and don't require
@@ -1816,32 +1873,39 @@ to generate useful developer-facing output. **Calibrate**: where is the LLM
 reliable at developer-facing output? Where does it fail? **Delegate**: is this a
 task where the LLM adds value, or does using it undermine your learning?
 
-### 4.4 Agents and Computer Communication
+### The machine, kept yours
 
-<em>Revisits Chapter 2: tracing, asserting — with an LLM collaborator.</em>
+<em>Revisits Ch1⟡ — tracing, asserting — with an LLM co-author.</em>
 
 This is where the asymmetry shows. LLMs are better at _generating_ code than at
 _tracing_ it. They produce plausible-looking but often wrong traces. The skill:
 evaluate LLM-generated traces for correctness, not trust them.
 
-Trace LLM-generated code using predictive stepping and trace tables (Ch2 skills
+Trace LLM-generated code using predictive stepping and trace tables (Ch1⟡ skills
 applied to unfamiliar code). Have the LLM trace code, then evaluate whether its
 traces correctly track state. Have the LLM explain code, then describe whether
-the explanation matches a PBIS analysis.
+the explanation matches a PBIS analysis. This is **the F-affordance question**
+run at conversational speed — _what does the machine afford here?_ — and it
+breaks here exactly as it broke by hand: without your own NM-twin, every answer
+the LLM gives sounds plausible. The F-direction of acceleration in one sentence:
+the LLM proposes affordances, explanations, and fixes faster than you could type
+them — and every one of them passes through your prediction before it earns
+trust.
 
 **Calibrate** this asymmetry deliberately: use the LLM where it's strong, do the
 work yourself where it's weak. **Delegate** the question: when should you trace
 yourself vs ask the LLM to trace? The answer is context-dependent — sometimes
 the tracing _is_ the learning.
 
-### 4.5 Agents and User Communication
+### User programs, co-authored
 
-<em>Revisits Chapter 3: user programs — with an LLM collaborator.</em>
+<em>Revisits Ch2⟡ — user programs and their verification — with an LLM
+co-author.</em>
 
-The full user-program skill stack from Ch3 now operates over LLM-generated code:
-reading, PBIS evaluation, code review, test design, debugging, documentation
-review. Each Ch3 skill — _Refactor_, _Describe_, _Test_, _Review_ — applies, but
-now your collaborator is the alien.
+The full user-program skill stack now operates over LLM-generated code: reading,
+PBIS evaluation, code review, test design, debugging, documentation review. Each
+skill — _Refactor_, _Describe_, _Test_, _Review_ — applies, but now your
+collaborator is the alien.
 
 Specific moves: apply full PBIS evaluation to LLM-generated programs;
 code-review LLM-generated code using the established framework; design test
@@ -1853,37 +1917,45 @@ and review full documentation.
 The discipline is to keep your twins running through the loop, not to delegate
 the twins to the LLM.
 
-### 4.6 Looking Back, Looking Forward
+### Accelerating the V-direction
 
-Up to this point the LLM has done the notation work — writing the code — while
-you have done the design work. That's the authoring-partner frame, and it's the
+The other hand accelerates too. The LLM can **widen your proposals** — generate
+five experience-variations where you'd have settled for the first; **draft
+user-stories** from your interview notes for you to correct and own;
+**synthesize observation notes** across cycles into patterns worth testing. This
+is design-_process_ acceleration, and it is real.
+
+What it is not: observation. The Ch2⟡ ladder still governs — real people first,
+the simulated user as always-available understudy, and the LLM's synthesis of an
+observation is never the observation itself. A drafted user-story is a proposal
+until a divergence-tested prediction backs it; the V-stroke question still
+breaks when there's no one real behind it. Vibetoading-with-delegation done with
+a live user-twin is V-corner work; done without any twin it is the no-twin
+corner of the §4 2×2 — not Vibetoading — and the two look identical from
+outside. Decompose a complex request into smaller, verifiable steps; wear the
+Vibetoader hat intentionally when the moment calls for it; evaluate code you
+didn't write or review during generation (PBIS autopsy); identify where the
+jagged frontier manifested in a concrete collaboration. Reflect on the
+difference between _"it runs"_ and _"I understand it"_ — the boundary the LLM
+tests every day.
+
+### Looking back, looking forward
+
+Up to this point the LLM has done production work — writing code, drafting
+stories — while you have run the cycle. That's the co-author frame, and it's the
 right one for finding your bearings. But it's a simplification of a moving
 target.
 
-**Agentic AI systems** are emerging — LLMs that don't just write notation but do
-design work too: planning, decomposing problems, making architectural choices,
-calling tools, modifying state autonomously. That's a more complex collaboration
-than the one this chapter covered. It doesn't replace your role so much as shift
-what you attend to — from writing the code to specifying observable outcomes
-that humans can still evaluate, directing a system that does more than
-transcribe. Flag this as territory for post-curriculum learning; _Welcome to
-Algorithms_ picks it up. Chapter 5 will return briefly to it in its closing
-moments.
-
-### 🎨 4.7 Vibetoading with the LLM
-
-Vibetoading-with-delegation is its own discipline. Decompose a complex request
-into smaller, verifiable steps; wear the Vibetoader hat intentionally when the
-moment calls for it. Evaluate code you didn't write or review during generation
-(PBIS autopsy). Identify where the jagged frontier manifested in a concrete
-collaboration. Reflect on the difference between _"it runs"_ and _"I understand
-it"_ — the boundary the LLM tests every day.
-
-The failure mode here is twin-ignored (no user-twin, no NM-twin) — what the §4
-2×2 calls the no-twin corner. Vibetoading-with-LLMs done with a user-twin is
-V-corner work; done without any twin is the no-twin corner, not Vibetoading. The
-distinction matters because the practice that works and the practice that decays
-look similar from outside.
+**Agentic AI systems** are emerging — LLMs that don't just produce but do design
+work too: planning, decomposing problems, making architectural choices, calling
+tools, modifying state autonomously. That's a more complex collaboration than
+the one this chapter covered. It doesn't replace your role so much as shift what
+you attend to — from writing the code to specifying observable outcomes that
+humans can still evaluate, directing a system that does more than transcribe.
+Flag this as territory for learning beyond this course; Chapter 4⟡ returns
+briefly to it in its closing moments. Whatever the delegation level, the anchor
+holds: **AI accelerates the cycle; it cannot run it for you** — the proposing,
+the observing, and the judgment that closes each turn have no substitute.
 
 ## Learning objectives by layer
 
@@ -1931,6 +2003,10 @@ look similar from outside.
 - 🐣 Describe gaps between your intent and LLM output using PBIS vocabulary
 - 🐥 Debug LLM-generated code: detect bugs, identify root causes, fix them
 - 🐥 Full documentation generation and review
+- 🐣 Have the LLM draft a user-story from your interview notes, then correct and
+  own it — authorship stays yours
+- 🐣 Use the LLM to widen a proposal space (five variations where you had one),
+  then choose with the user-twin
 
 ### Layer 2 — Methodology
 
@@ -1938,6 +2014,10 @@ look similar from outside.
   predict-trace-verify the LLM's output against the NM
 - 🥚 Use user-grounded conversation explicitly: specify behavior in
   user-experience terms; evaluate against user outcomes
+- 🥚 Deploy the four distilled prompts — V-stroke, F-affordance,
+  event-prediction, divergence — and name the breaking condition of each
+- 🥚 Articulate the anchor: AI accelerates the cycle but cannot run it —
+  proposing, observing, and closing judgment have no substitute
 - 🐣 **Calibrate**: where is the LLM reliable at developer-facing output? Where
   does it fail?
 - 🐣 **Calibrate** at the trace level: LLMs are better at generating code than
@@ -1949,6 +2029,9 @@ look similar from outside.
   twin-grounded alternative to twin-ignored or twin-wrong LLM use)
 - 🐣 🎨 Wear the Vibetoader hat intentionally — choose it for the scope where
   it's right
+- 🐣 Distinguish V-direction process-acceleration (drafting, widening,
+  synthesizing — delegable) from observation (never delegable; the Ch2⟡ ladder
+  governs)
 - 🐣 Use the human–AI slider **diagnostically**: after a task, place where AI
   use actually sat and judge it against your goal (mastery, speed, exploration)
 - 🐥 Use the human–AI slider **prescriptively**: given a goal and the mastery
@@ -1956,7 +2039,7 @@ look similar from outside.
   still building the skill, freer once it's mastered
 - 🐣 Distinguish the slider's question (_how much_ you delegate the task) from
   V/F's question (_which twin_ you shoulder) — they are orthogonal
-- 🐥 Apply §11 Role 2 (dev collaborator) to Ch4 work: twin the AI as
+- 🐥 Apply §11 Role 2 (dev collaborator) to Ch3⟡ work: twin the AI as
   collaborator through F's lens (NM-grounded mode) or V's lens (user-grounded
   mode)
 - 🐔 **Code is content, not deliverable** — AI-generated code is material to
@@ -1980,8 +2063,8 @@ look similar from outside.
   did the task, not whether you were learning or applying. Sit with what a
   single position does and doesn't capture
 - 🐔 Recognize the emergence of **agentic AI systems** (LLMs doing design work,
-  not just notation) as a more complex development than the authoring-partner
-  frame covers; flag as territory for post-curriculum learning
+  not just notation) as a more complex development than the co-author frame
+  covers; flag as territory for learning beyond this course
 - 🐥 _(deeper section)_ Encounter Friston's "A Duet for One" — _"understanding
   just IS the alignment of generative models into a single coherent predictive
   process"_ — and consider: does this framing illuminate your conversations with
