@@ -22,6 +22,17 @@ import type { ClassifiedToken } from '../../classifying/types.js';
 export type UsageKind = 'declared' | 'read' | 'assigned' | 'read-and-assigned';
 
 /**
+ * Which resolution chain the engine walks to find a name, read off AST position
+ * alone: `scope-chain` for a bare reference (`x`, `Math` — the `binding:access`
+ * event) or `prototype-chain` for a property access (`o.x`'s `x`, `str.length`'s
+ * `length` — the `proto-check` event). Like `UsageKind`, a syntactic-position enum
+ * that needs no binding resolution. V4 "two chains" is the form that quizzes it, and
+ * its group-key axis (`chain:<role>:<name>`, via `../keying/chain-group-key.ts`)
+ * keys on it.
+ */
+export type ChainRole = 'scope-chain' | 'prototype-chain';
+
+/**
  * One genuine variable occurrence in the source, as the single AST descent emits
  * it: its `[start, end)` `range` (zero-indexed, half-open — a node-anchored
  * item's `anchorRange`), the identifier `name`, and its `usageKind`. Property
