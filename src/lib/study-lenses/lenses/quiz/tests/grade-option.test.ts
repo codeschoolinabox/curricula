@@ -10,6 +10,7 @@
 import { describe, expect, it } from 'vitest';
 
 import embody from '../../../embody/index.js';
+import type { McqQuizItem } from '../../../lib/quizzing/types.js';
 import buildQuiz from '../lib/build-quiz.js';
 import gradeOption from '../lib/grade-option.js';
 
@@ -18,9 +19,12 @@ describe('gradeOption — answer → verdict', () => {
 	// can't be tested through the public signature — `gradeOption` requires an
 	// McqQuizItem and always builds an mcq response — so only the unknown-id
 	// malformed path is reachable here.)
+	// `items` is the wide `QuizItem` union (build-quiz filters by mode, not to a
+	// narrow type); narrow the lookup to the mcq form so `answerOptionIds` is typed.
 	const items = buildQuiz(embody('let x = 1; x;'))?.items ?? [];
-	const identifierItem = items.find((item) =>
-		item.answerOptionIds.includes('identifier'),
+	const identifierItem = items.find(
+		(item): item is McqQuizItem =>
+			item.mode === 'mcq' && item.answerOptionIds.includes('identifier'),
 	);
 
 	it('the fixture yields an identifier V1 item (guard)', () => {

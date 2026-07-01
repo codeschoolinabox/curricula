@@ -23,12 +23,16 @@ describe('masteryFold — fold a graded verdict into MasteryState', () => {
 	// `lib/quizzing/keying/classification-group-key.ts`); `let` is the keyword item
 	// on `category:keyword`. Real items + real verdicts ground the fold in the live
 	// contract.
+	// `items` is the wide `QuizItem` union (build-quiz filters by mode, not to a
+	// narrow type); narrow the lookups to the mcq form so `answerOptionIds` is typed.
 	const items = buildQuiz(embody('let x = 1; x;'))?.items ?? [];
-	const identifierItem = items.find((item) =>
-		item.answerOptionIds.includes('identifier'),
+	const identifierItem = items.find(
+		(item): item is McqQuizItem =>
+			item.mode === 'mcq' && item.answerOptionIds.includes('identifier'),
 	);
-	const keywordItem = items.find((item) =>
-		item.answerOptionIds.includes('keyword'),
+	const keywordItem = items.find(
+		(item): item is McqQuizItem =>
+			item.mode === 'mcq' && item.answerOptionIds.includes('keyword'),
 	);
 
 	it('the fixture yields the identifier V1 item on category:identifier (guard)', () => {

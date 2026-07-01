@@ -272,9 +272,12 @@ describe('<quiz Component> — Slice A inc 1: read-only un-colorized editor', ()
 		it('tab labels are neutral bare indices (1..N), never the prompt or a gesture verb', async () => {
 			const referenceCount = bundleSizeAt(11, 12);
 			const { container } = await mountAndPick(REFERENCE_X);
-			const labels = [...container.querySelectorAll('[data-quiz-tab]')].map(
-				(tab) => tab.textContent,
-			);
+			// Array.from (not `[...spread]`): NodeList iteration needs `dom.iterable`,
+			// which is off in this repo's tsconfig (TS2488 on the spread).
+			// eslint-disable-next-line unicorn/prefer-spread
+			const labels = Array.from(
+				container.querySelectorAll('[data-quiz-tab]'),
+			).map((tab) => tab.textContent);
 			expect(labels).toEqual(
 				Array.from({ length: referenceCount }, (_, index) => String(index + 1)),
 			);
