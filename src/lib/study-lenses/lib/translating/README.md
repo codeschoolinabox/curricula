@@ -53,12 +53,15 @@ cannot silently fall out of sync as JEJ evolves.
 **Language registry** — `LANGUAGE_METADATA`, a
 `Record<LanguageCode, LanguageMetadata>` ported verbatim from Legesher's
 generated registry. Each entry carries `name` (English), `native`, `iso639_2`,
-`bcp47`, `rtl` (four RTL languages: `ar` `fa` `he` `ur`), and `status`. The
-registry is the source of the dropdown's labels and of a rendered line's text
-direction; it is independent of any pack (a language can be registered before
-its pack is authored). `LanguageCode` is a **closed** union of the registered
-ISO codes — ported closed from Legesher, with no `| string` escape hatch — so
-`Record<LanguageCode, LanguageMetadata>` stays exhaustively checked.
+`bcp47`, `rtl` (four RTL languages: `ar` `fa` `he` `ur`), and `status` (all
+shipped entries port as `experimental` — Legesher's posture, and our JS packs
+are freshly authored and unreviewed; `status` is metadata, not a
+pack-availability gate). The registry is the source of the dropdown's labels and
+of a rendered line's text direction; it is independent of any pack (a language
+can be registered before its pack is authored). `LanguageCode` is a **closed**
+union of the registered ISO codes — ported closed from Legesher, with no
+`| string` escape hatch — so `Record<LanguageCode, LanguageMetadata>` stays
+exhaustively checked.
 
 **Translation span** — a `TranslationSpan`:
 `{ range: [start, end), english, native, category }` where `category` is
@@ -180,14 +183,16 @@ Behavior:
   reference is the learner's variable, not the global, and must not translate.
   Resolution is **lexical**: a `builtins` span is suppressed iff the identifier
   resolves to an in-scope binding at its position — a scope-chain walk from the
-  identifier's innermost scope upward, reusing
-  [`../../embody/lib/validating/check-undeclared-globals.ts`](../../embody/lib/validating/check-undeclared-globals.ts)'s
-  `findChildScope` + `isNameDeclared` over
+  identifier's innermost scope upward over
   [`../../embody/lib/scope/build-scope.ts`](../../embody/lib/scope/build-scope.ts)'s
-  scope tree (the same machinery that module uses to decide
-  allowed-global-vs-user-binding). A name declared in an unrelated sibling block
-  does not suppress a genuine global elsewhere. Errs toward not-translating a
-  true shadow — the safe direction for a display projection.
+  `ScopeAnalysis` (the `ScopeInfo` tree). This is the same resolution
+  [`../../embody/lib/validating/check-undeclared-globals.ts`](../../embody/lib/validating/check-undeclared-globals.ts)
+  uses to decide allowed-global-vs-user-binding, in its `findChildScope` +
+  `isNameDeclared` helpers — **currently module-private**, so the builtin
+  increment either exports them (additive) or mirrors the walk (an AR-3 call). A
+  name declared in an unrelated sibling block does not suppress a genuine global
+  elsewhere. Errs toward not-translating a true shadow — the safe direction for
+  a display projection.
 - **Member vs. same-named global.** `floor` is a `members` key; a bare
   identifier `floor` (a learner variable) is not a member and yields no span —
   only `x.floor` (a `MemberExpression.property`) does. The AST guard, not the

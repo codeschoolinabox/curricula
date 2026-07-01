@@ -49,11 +49,12 @@ identity; no pack).
    range of every `Identifier` that is neither a declaration id nor a member
    property). Both are facts the emit phase filters by pack membership.
 
-3. **Resolve scope** (pure) — build the scope tree with `buildScope(ast)`; phase
-   4 suppresses a `builtins` candidate iff the identifier resolves to an
-   in-scope binding at its position (scope-chain walk from its innermost scope
-   upward), reusing `check-undeclared-globals.ts`'s `findChildScope` +
-   `isNameDeclared` (lexical resolution — § Decisions D3).
+3. **Resolve scope** (pure) — `buildScope(ast)` returns a `ScopeAnalysis` (the
+   `ScopeInfo` tree); phase 4 suppresses a `builtins` candidate iff the
+   identifier resolves to an in-scope binding at its position (scope-chain walk
+   from its innermost scope upward). Same resolution as
+   `check-undeclared-globals.ts`, whose `findChildScope` + `isNameDeclared` are
+   module-private — export or mirror (AR-3 call). Lexical — § Decisions D3.
 
 4. **Emit spans** (pure) — three disjoint triggers over the phase-2/3 facts:
    - **keyword** — a token contributes a `keyword` span iff its text is a
@@ -89,7 +90,7 @@ flowchart TD
     In["TranslateInput<br/>{ code, tokens, ast, pack }"]
     Shaped["shape-confirmed input"]
     Facts["AST facts<br/>(member-property set +<br/>identifier-reference set)"]
-    Decls["scope tree<br/>(lexical; buildScope + scope-chain walk)"]
+    Decls["ScopeAnalysis (ScopeInfo tree)<br/>(lexical scope-chain walk)"]
     KW["keyword spans<br/>(tokens: .keyword ∩ pack.keywords;<br/>true/false/null guarded by member-property set)"]
     Mem["member spans<br/>(member-property set ∩ pack.members)"]
     Bi["builtin spans<br/>(identifier-reference set ∩ pack.builtins,<br/>minus in-scope bindings)"]
@@ -187,14 +188,16 @@ per DEV.md).
 - **D3 — Builtin shadow = lexical scope resolution** (AR-1 C3; human ruling at
   the Phase-0 gate — lexical over coarse). A `builtins` span is suppressed iff
   the identifier resolves to an in-scope binding at its position, via a
-  scope-chain walk reusing `check-undeclared-globals.ts`'s `findChildScope` +
-  `isNameDeclared` over `buildScope(ast)`'s scope tree — the same machinery that
-  module uses to decide allowed-global-vs-user-binding. Chosen over coarse
-  flat-name suppression (which under-translates a genuine global sharing a name
-  with an unrelated block-local) and over no-scope (which mistranslates a real
-  shadow). Errs toward not-translating a true shadow. The `lib/` peer rule
-  permits the `embody/lib/scope/` + `embody/lib/validating/` imports; the
-  siblings already take them.
+  scope-chain walk over `buildScope(ast)`'s `ScopeAnalysis` — the same
+  resolution `check-undeclared-globals.ts` uses to decide
+  allowed-global-vs-user-binding. Its `findChildScope` + `isNameDeclared` are
+  **module-private today**, so the builtin increment exports them (additive) or
+  mirrors the walk — an AR-3 call. Chosen over coarse flat-name suppression
+  (which under-translates a genuine global sharing a name with an unrelated
+  block-local) and over no-scope (which mistranslates a real shadow). Errs
+  toward not-translating a true shadow. The `lib/` peer rule permits the
+  `embody/lib/scope/` + `embody/lib/validating/` imports; the siblings already
+  take them.
 
 - **D4 — Keyword guard is `.keyword` totality + a property guard** (AR-1 C4,
   sharpened per AR-2 C1). All 16 JEJ keyword keys — including
