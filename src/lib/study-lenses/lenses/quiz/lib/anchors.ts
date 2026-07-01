@@ -6,6 +6,8 @@
  * (inc 3) resolves a range to its quiz item(s).
  */
 
+import freezeInPlace from '@utils/freeze-in-place.js';
+
 import type { ClassifiedToken } from '../../../lib/classifying/types.js';
 import type { QuizItem } from '../../../lib/quizzing/types.js';
 import type { ActiveTab } from '../types.js';
@@ -65,15 +67,19 @@ function searchByOffset(
  *
  * @param items - The admitted quiz items (mode-filtered upstream by build-quiz).
  * @param range - The picked token's half-open `[start, end)` range.
- * @returns The items whose `anchorRange` equals `range` — the co-anchored bundle.
+ * @returns The items whose `anchorRange` equals `range` — the co-anchored bundle,
+ *   deep-frozen (the items are already frozen upstream; the array is frozen here
+ *   so the resolution is immutable at the boundary).
  */
 function itemsAt(
 	items: readonly QuizItem[],
 	range: readonly [number, number],
 ): readonly QuizItem[] {
-	return items.filter(
-		(item) =>
-			item.anchorRange[0] === range[0] && item.anchorRange[1] === range[1],
+	return freezeInPlace(
+		items.filter(
+			(item) =>
+				item.anchorRange[0] === range[0] && item.anchorRange[1] === range[1],
+		),
 	);
 }
 

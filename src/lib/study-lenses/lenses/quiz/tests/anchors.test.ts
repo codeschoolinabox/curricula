@@ -112,6 +112,14 @@ describe('itemsAt — item resolution', () => {
 		expect(anchors.itemsAt(items, [9999, 10_000])).toEqual([]);
 	});
 
+	it('returns a frozen array — immutable at the module boundary', () => {
+		// The bundle the panel drives is deep-frozen: the items are already frozen
+		// upstream (build-quiz), and the array itself is frozen here so nothing can
+		// mutate the returned resolution. (Every other lens boundary freezes.)
+		const found = anchors.itemsAt(items, [reference.start, reference.end]);
+		expect(Object.isFrozen(found)).toBe(true);
+	});
+
 	it('returns the single item at a lone-anchor token (One)', () => {
 		const found = anchors.itemsAt(items, [operator.start, operator.end]);
 		expect(found.length).toBe(1);
