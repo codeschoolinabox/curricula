@@ -1339,211 +1339,297 @@ numbers and arithmetic applied to time as a domain.
 
 ---
 
-## Ch3 Developers, Computers, and Users
+## Ch2⟡ Vibetoading
 
-Language features: `prompt`, `alert`, `confirm`. All control flow features
-(`if`, `while`, `break`/`continue`) were introduced in Chapter 2 and are now
-applied in programs where user interactions are the fixed behavioral anchors.
+No new language features — and that is the point. This chapter assumes **full
+mastery of the Ch1⟡ JEJ-core chain** (C0–C6 plus the four beats; electives not
+required). Prototypes are JEJ text-dialog programs: `prompt`, `alert`,
+`confirm`, and everything the chain taught you.
 
 ### Metaphor anchor
 
-_**Writing for an audience, the composer's design thinking** — the concert
-audience is real: they cheer, boo, throw tomatoes or flowers. The composer
-rehearses with the mechanism, workshops with virtuosos, and focus-groups with
-listeners. Design thinking across the whole situation._
+_**Workshopping the piece with the audience** — the concert audience is real:
+they cheer, boo, throw tomatoes or flowers. The composer rehearses with the
+mechanism, workshops with virtuosos, and focus-groups with listeners — and
+learns, each time, that what the piece does to a listener is not what the score
+said to the composer._
 
 ### Overview
 
-Users enter the picture. Programs now interact via `prompt`, `alert`, `confirm`.
-User-visible behavior becomes the anchor that all prior reading, tracing,
-refactoring, and reviewing skills must preserve. **Design thinking across the
-whole situation begins here.**
+Living the cycle on the V-hand. Users enter in depth: you propose experiences,
+prototype them cheaply, predict how real people will behave inside them, and
+watch what actually happens. **Design thinking across the whole situation is
+built here — with the same rigor Ch1⟡ gave computational thinking.**
 
-All Chapter 2 skills — PBIS, naming variables, logging strategies, backtracing,
-refactoring, code review — are practiced here under a new constraint:
-user-visible behavior must be preserved.
+The V-cycle is this chapter's chain-link: an **experience-goal** → a **cheap JEJ
+prototype** → **interaction-event predictions, in writing, in advance** →
+**observation of real behavior** → **divergence** → **refinement** — and each
+cycle's findings seed the next. The rigor engine is the prediction step:
+**interaction-event prediction** is the V-analog of Ch1⟡'s internal-event
+prediction. What will this user do first? Where will they hesitate? What will
+they misread? When will they backtrack? Written in advance, these are
+falsifiable — and being wrong is the productive outcome, because the diff
+between prediction and observation is where the user-twin improves. What gets
+graded in this chapter is that diff, never the prototype's polish.
 
-The chapter's intellectual-agency move: _you make programs for people who will
-never see your code, and the test of your work is whether it serves them._ The
-user-twin is the V-side of the V/F symmetry.
+**The V-side two-layer misconception** earns the rigor-parity: _a user can
+complete your task while holding a wrong model of your interface._ Task-success
+is not twin-validity — exactly as Ch1⟡ taught that correct output is not
+model-validity. Verifying the twin takes interaction-event prediction, not just
+a passed task.
+
+**The radio-drama constraint is a feature.** Text-dialog prototypes carry all of
+the design thinking on a minimal surface: no layout, no styling, no frameworks —
+nothing to polish, so prototypes stay disposable and iteration stays cheap.
+Full-JS design surfaces arrive in Ch4⟡; the discipline built here is what will
+make them worth building.
+
+All Ch1⟡ skills — PBIS, naming, logging strategies, backtracing, refactoring,
+code review — are practiced here under a new constraint: **user-visible behavior
+must be preserved** (or changed only on purpose, as the cycle's next proposal).
 
 **The second level of code audience.** Code has two audiences in any chapter,
 not one. The first is _deterministic_ — the NM, which evaluates code literally
 and predictably (F's territory). The second is _non-deterministic and emergent_
 — the user's lived experience of what the NM produces. Both V and F write for
 the second audience; neither controls it directly. The NM is the instrument; the
-experience is the concert. The work of both hats is to set up conditions that
-make the experience the program serves possible. (Two-scale instrument reading —
-see ontology §7 strand-4 and `metaphor.md` two-scale extension.)
+experience is the concert. (Two-scale instrument reading — see ontology §7
+strand-4 and `metaphor.md` two-scale extension; V5 lives there.)
 
-### 3.1 User Input and Output
+The chapter's intellectual-agency move: _you make programs for people who will
+never see your code, and the test of your work is whether it serves them._ The
+user-twin is the V-side of the V/F symmetry.
 
-`prompt`, `alert`, `confirm` are user-facing I/O. They cross a different
-boundary than `console.log`: devtools console is **developer space**; these
-three are **user space**. The same program can address both audiences in the
-same run, in different channels.
+### How you will observe: the ladder
 
-The data-flow loop now grows past the Ch1→Ch2 dev↔NM loop. _"The program's data
-enters the user through their eyes via a prompt; the user processes it and
-transforms it into a response; the response enters the program through `prompt`
-and a resolve event."_ Two-way I/O is the foundational pattern of programs that
-interact with people.
+Every V-cycle needs someone to observe, and **every V-cycle in this chapter is
+runnable alone, on demand** — that guarantee is the point of the ladder's
+always-available rung.
 
-**Top-level doc comments** name the program's purpose and behavior for the
-developer reading it _and_ the user it serves. Their structure is now
-program-scale, not line-scale.
+- **Real people — encouraged whenever possible.** Peers and friends are the
+  richest observation there is: genuinely surprising, genuinely human. V3 and
+  V5's think-aloud are designed peer moments.
+- **Local-LLM simulated users — the always-available mechanism.** A device-local
+  model plays an interview subject, a walkthrough participant, a stand-in test
+  user: autonomous behavior that can genuinely surprise you, so the whole
+  design-thinking cycle runs on demand, alone, as many times as you need. And a
+  standing reminder, woven through every use: **the simulation is fallible** — a
+  thin imitation of a human. Knowing what a simulated user can and cannot
+  falsify is itself one of this chapter's learning objectives. You will _feel_
+  the thinness; keep the feeling. This chapter's closing beat spends it.
+- **Yourself as first user** — the warm-up rung (V1): cold-run your own program
+  and observe your own hesitations.
+- **Personas + heuristics** — the static proxy (V2): grounded stand-ins to
+  predict against when no live observer is on hand.
 
-`null` makes its first meaningful appearance: it is what `prompt()` returns when
-the user cancels. Distinct from `undefined`, distinct from empty string. The
-first encounter teaches when each falsy value carries which signal.
+One line of symmetry worth noticing: the embody/lenses infrastructure is the
+F-side's instrument — it makes the notional machine observable. The local-LLM
+simulated user is the V-side's — it makes user-observation available. Each hand
+gets a way to _watch its audience_.
 
-**The two-scale reading.** Up to now, the work has been about one instrument:
-the machine playing the score (the NM evaluating code). Chapter 3 reveals a
-second instrument: the user's experience of the played piece. The user's
-experience is _not_ under your direct control — it takes place in the body of
-the user, but it _arises from the interaction_ between the parties (the user,
-the program, the context). The work the program serves is the _concert_ — the
-experience that emerges when machine, audience, and context meet. Both V and F
-orient toward that concert; the design discipline of Ch3 is to set up conditions
-that make the experience the program serves possible.
+### V1 — Self as instrument
 
-### 3.2 Variable Program Behaviors
+Cold-run your own program: pick a Ch1⟡ cash-out you wrote weeks (or hours) ago
+and run it as if you had never seen it. Where do _you_ hesitate at a prompt's
+wording? Which alert reads as noise? **Intent ≠ experience** — and you just felt
+the gap from the inside.
 
-**Input/output pairs as test cases** in the top-level doc comment extend
-predictive assertion from values and bindings (Ch2) to program-level behavior.
-<em>"For input X, the program should output Y."</em>
+Interaction-event prediction begins here, on the cheapest observer available:
+before the cold run, write down what a stranger's first action would be, where
+they would stall, what they would misread. Then be the stranger, as honestly as
+you can.
 
-**Test coverage** asks: are all conditional paths covered by your test cases?
-Branches without test inputs are silent corners where bugs hide.
+**Cash-out:** the program's **communication surface rewritten for the cold
+reader** — prompt wording, alert text, the top-of-program comment. **Seeds V2:**
+you are a poor stand-in for anyone but yourself; predicting for _other_ people
+needs a model of other people.
 
-**Fixing bugs** here means something different from fixing parse or runtime
-errors: the code runs without error, but produces wrong user-facing behavior.
-The fix is upstream — in the predictive model.
+### V2 — Persona and scenario
 
-**Modifying programs**: one change at a time; predict; run; note the result.
-User interactions become the fixed points in the same way `console.log` output
-was the fixed point of refactoring in Ch2.
+Personas ground predictions in **real people you know** — not demographic
+fictions but composites of your actual neighbor, cousin, classmate. A scenario
+walks a persona through your program; your interaction-event predictions now
+have a subject other than you.
 
-### 3.3 Validating User Input
+**A local-LLM simulated user can _play_ the persona**: hand it the persona
+sketch and interview it, or walk it through the dialog turn by turn — an
+interactive rehearsal available any hour, entirely on your own (that is its
+purpose; a real person in the persona's seat is better whenever you can get one,
+and the simulation stays a fallible understudy). **Happy-path bias** gets named
+here: personas you invent tend to cooperate; real users — and sometimes even
+simulated ones — do not. **Nielsen's heuristics** enter as predict-against
+guardrails: visibility of status, match to the real world, error prevention —
+not a checklist to grade with, but lenses that sharpen predictions before an
+observation.
 
-A **program structure pattern** emerges: input + validation (while loop) → logic
-(conditional) → output. The phases become visible once the program has a user
-dimension; they were latent in pure-logic Ch2 programs.
+**Cash-out:** a persona-grounded prediction sheet and a prototype revised where
+the walkthrough broke it. **Seeds V3:** a persona — played by you or by a model
+— is still a proxy. The real thing is a peer.
 
-Getting numbers from users: cast to number, validate the cast (`isNaN`,
-`Number.isFinite`), validate the range. The user might type anything; the
-program must defend the NM-side state-space.
+### V3 — Peer as user
 
-**Full user-story-based top-level comments** structure the doc comment as a user
-story with personas and scenarios — the developer audience and the user audience
-addressed in one piece of structured prose.
+**The gold standard.** Share your program with a peer — JEJ programs are tiny by
+design, single-page-printable: send the text by message, email, or copy-paste,
+and they run it in any browser console. Before they run it, **commit your
+predictions publicly** — tell them (or a third party) exactly what you expect
+them to do first, where they'll hesitate, what they'll misread. Then watch. No
+coaching, no rescuing.
 
-### 3.4 PBIS in User Programs
+This is where the **two-layer misconception** stops being a slogan: your peer
+completes the task — and then you ask them to explain what the program did, and
+their model of it is wrong. Task-success, wrong twin. You would never have seen
+it without the prediction and the debrief.
 
-PBIS (Purpose, Behavior, Implementation, Strategy) from Ch2 now applies to
-programs with a user dimension. _Purpose_ is now "why this exists for a user."
-_Behavior_ is now what the user experiences, not just what the console shows.
+Solo learners: a simulated user stands in — run the same committed-prediction
+protocol against it, and remember the understudy's range is narrower than a
+human's (some divergences it simply cannot produce). **Cash-out:** your first
+real prediction-vs-observation diff on a genuine other mind. **Seeds V4:**
+predictions about one user generalize into claims about _kinds_ of users — which
+is what a spec is.
 
-BSI variations in user programs: same user-facing behavior, different strategies
-and implementations. **Input validation strategies** and their tradeoffs —
-all-in-while-head, boolean flag, do-while — are an early exercise in seeing the
-same Behavior expressed three ways.
+### V4 — User story from spec
 
-**Describing user programs** uses PBIS close reading where the user's experience
-is now part of the analysis. The developer-facing output of Ch2 is one signal
-among several; user-visible behavior is the primary one.
+A **spec is a hypothesis about a user.** Writing programs from spec — graduated
+scaffolding: stepped examples → starter code → spec + goals → spec only —
+becomes V-work the moment you read the spec as a claim about what someone needs.
+**Interview a simulated user to derive or pressure-test a spec**: what would
+this persona actually ask of the program? The interview yields behavior to
+observe — answers, confusions, wants; **you** then write down what a spec
+covering that need would have to say. (Same understudy rules: fallible,
+always-available, outranked by a real interviewee.)
 
-### 3.5 Developing Programs
+**Acceptance criteria are interaction-event predictions** dressed for work:
+"given a cancelled prompt, the user sees a graceful goodbye" is falsifiable in
+exactly the V-cycle way. **Full user-story-based top-level comments** structure
+the doc comment as a user story with personas and scenarios — the developer
+audience and the user audience addressed in one piece of structured prose.
 
-**Refactoring user programs**: changing code without changing user-visible
-behavior. The console output of Ch2 was the fixed point; now user interactions
-are the fixed point.
+The modify/refactor V-side skills land here: **refactoring user programs**
+(changing code without changing user-visible behavior — user interactions are
+the fixed point), **reverse-engineering as validation** (describe behavior →
+plan goals/strategy → rebuild from an obfuscated program: inferring Purpose from
+Implementation, then checking the inference against a user's actual need), and
+**writing programs from unstructured guidance** (plain English, word problems,
+your own ideas) — where Vibetoading meets Frogramming most directly: the
+user-twin proposes; the NM-twin must produce notation that realizes the
+proposal.
 
-**Writing programs from spec** introduces graduated scaffolding: stepped
-examples → starter code → spec + goals → spec only. Each step reduces the
-support; by the last step you produce the program independently.
+**Cash-out:** a spec you wrote, pressure-tested, implemented, and verified
+against its own acceptance criteria. **Seeds V5:** every cycle so far watched
+one interaction at a time. Experiences are journeys.
 
-**Reverse engineering**: describe behavior → plan goals/strategy → write code
-from an obfuscated program. The discipline of inferring Purpose from
-Implementation.
-
-Writing programs from unstructured guidance (plain English, word problems, your
-own ideas) is where Vibetoading meets Frogramming most directly: the user-twin
-proposes; the NM-twin must produce notation that realizes the proposal.
-
-### 3.6 Plaintext Programs
+### V5 — Plaintext at experience scale
 
 _The IDE disappears. A plain text editor and a run button: nothing else. No
 lenses, no syntax highlighting, no autocomplete, no error highlighting._
 
-Reading and understanding programs without IDE assistance strips away the
-tooling that has been scaffolding comprehension. Writing syntactically correct
-code without autocomplete or error highlighting relies on internalized knowledge
-instead of tool feedback.
+The capstone runs at two scales at once. At the code scale, reading and writing
+without IDE assistance strips away the tooling that has been scaffolding
+comprehension — by experiencing each tool's absence, you learn concretely what
+it was compensating for; the crutch is identified as a tool, not as essential
+infrastructure.
 
-The exercise teaches concretely what IDE tools do: by experiencing their
-absence, you understand what each tool was compensating for. The crutch is
-identified as a tool, not as essential infrastructure.
+At the experience scale, **the two-scale reading** comes due: up to now, the
+work has been about one instrument — the machine playing the score (the NM
+evaluating code). This chapter has been revealing a second instrument: the
+user's experience of the played piece. That experience is _not_ under your
+direct control — it takes place in the body of the user, and it _arises from the
+interaction_ between the parties (the user, the program, the context). The work
+the program serves is the _concert_ — the experience that emerges when machine,
+audience, and context meet. Both V and F orient toward that concert; the design
+discipline of this chapter is setting up the conditions that make it possible.
+
+**The whole-journey trace:** predict, in writing, a user's entire path through
+your capstone program — every prompt, every hesitation, every wrong turn and
+recovery — then observe a **peer thinking aloud** as they travel it (the richest
+observation of the course; a simulated user stands in when no peer can, with the
+usual caveat about its range). Diff the journey against the prediction. That
+diff is the chapter's masterwork.
+
+### What this chapter does not do
+
+Three deliberate non-doings, each a referral to the field beyond this course: no
+**ethnography or user discovery** (finding out who your users even are — field
+research is its own discipline); no **product-market or systemic questions**
+(whether this program should exist, for whom, at what cost); no **formal
+UX-research methodology** (sample design, statistical validity, research ops).
+This chapter is breadth-scoped, not depth-scoped: the whole design-thinking
+cycle, on a small honest surface.
+
+### Closing beat — the new beast
+
+You have now spent five cycles with a simulated user in reach, and you have felt
+it: the thing is useful, tireless, always available — and _thin_. It cooperates
+too easily. It hesitates in the wrong places. It is not a user, and it is not a
+machine you can trace. File that feeling precisely, because it is the opening
+premise of Ch3⟡: **the LLM is a new beast — neither user nor notional machine —
+and it needs its own twinning.** You built a user-twin in this chapter and a
+machine-twin in Ch1⟡; the next chapter asks what kind of twin an LLM deserves.
 
 ## Learning objectives by layer
 
 ### Layer 0 — Mastery
 
-- 🥚 `prompt`, `alert`, `confirm`: user-facing I/O; devtools console is
-  developer space, these are user space
-- 🥚 `null`: what `prompt()` returns when the user cancels
 - 🥚 **emit events**: data crossing the computation/interaction boundary (the NM
   doc's I/O channel events)
+- 🥚 Trace a dialog program's full event stream with the user's answers as
+  resolve values — the NM side of an interaction is still fully predictable
+- 🐣 Hold the deterministic/emergent split: NM events can be predicted;
+  interaction events can only be hypothesized and observed
 
 ### Layer 1 — Rhetoric
 
-- 🥚 Top-level doc comments: program name, purpose, and behavior
-- 🥚 Writing simple programs that process user input or perform string/number
-  operations on it
-- 🥚 Input/output pairs as test cases in the top-level doc comment
-- 🥚 Test coverage: are all conditional paths covered by your test cases?
-- 🐣 **Fixing bugs**: code runs without error but produces wrong user-facing
-  behavior
-- 🐣 **Modifying programs**: one change at a time, predict, run, note the
-  result; user interactions as fixed points
-- 🥚 **Program structure pattern**: input + validation (while loop) → logic
-  (conditional) → output
-- 🥚 Getting numbers from users: cast to number, validate the cast, validate the
-  range
-- 🥚 Full user-story-based top-level comments
-- 🥚 **BSI variations in user programs**: same user-facing behavior, different
-  strategies and implementations
-- 🥚 Input validation strategies and their tradeoffs: all-in-while-head, boolean
-  flag, do-while
-- 🐣 **Describing user programs**: PBIS close reading where Purpose is now "why
-  this exists for a user"
-- 🐣 **Refactoring user programs**: changing code without changing user-visible
-  behavior
+- 🥚 Treat prompt wording, alert text, and dialog sequencing as the program's
+  **communication surface** — every word of it is a micro-decision aimed at the
+  user audience
+- 🥚 Write **interaction-event predictions**: falsifiable, in writing, in
+  advance (first action, hesitations, misreads, backtracks)
+- 🥚 Write divergence notes: what was predicted, what was observed, which twin
+  updates
+- 🥚 **Full user-story-based top-level comments**: the doc comment as a user
+  story with personas and scenarios — developer audience and user audience in
+  one structured prose block
+- 🥚 Write **acceptance criteria as interaction-event predictions**
+- 🐣 **Describing user programs**: PBIS close reading where _Purpose_ is "why
+  this exists for a user" and _Behavior_ is what the user experiences, not just
+  what the console shows
+- 🐣 Rewrite a communication surface for the cold reader without changing
+  program behavior
+- 🐣 Reading and understanding programs without IDE assistance (plaintext mode);
+  writing syntactically correct code without autocomplete or error highlighting
+- 🐥 Appreciating concretely what IDE tools do (by experiencing their absence)
 - 🐥 **Writing programs from spec**: graduated scaffolding (stepped examples →
   starter code → spec + goals → spec only)
-- 🐔 **Reverse engineering**: describe behavior → plan goals/strategy → write
-  code from an obfuscated program
+- 🐔 **Reverse engineering as validation**: describe behavior → plan
+  goals/strategy → rebuild — inferring Purpose from Implementation
 - 🐔 Writing programs from unstructured guidance (plain English, word problems,
   your own ideas)
-- 🐣 Reading and understanding programs without IDE assistance (plaintext mode)
-- 🐣 Writing syntactically correct code without autocomplete or error
-  highlighting
-- 🐥 Appreciating concretely what IDE tools do (by experiencing their absence)
 
 ### Layer 2 — Methodology
 
-- 🥚 Wear the V hat consciously: prototype-test-iterate is V's bridging practice
-  operationalized — even on tiny user programs
-- 🥚 The **data-flow loop** anchor: _"The program's data enters the user through
-  their eyes via a prompt; the user processes it and transforms it into a
-  response; the response enters the program through `prompt` and a resolve
-  event…"_ — this is the Ch1→Ch2 dev↔NM loop grown into the dev↔NM↔user loop
+- 🥚 Wear the V hat consciously: propose-prototype-predict-observe-refine is V's
+  bridging practice operationalized — even on tiny text-dialog programs
+- 🥚 The **data-flow loop**, run deliberately: Ch0⟡ established the dev↔user
+  channels; Ch1⟡ revealed the machine in the middle; this chapter drives the
+  whole dev↔NM↔user loop on purpose — _"the program's data enters the user
+  through their eyes; the user transforms it into a response; the response
+  enters the program through `prompt` and a resolve event"_
+- 🥚 Choose an observe mechanism from the ladder for each cycle — and name what
+  that mechanism can and cannot falsify (a simulated user's validity ceiling is
+  part of the answer, every time)
+- 🥚 Name **happy-path bias** in your own personas and predictions
+- 🐣 Use **Nielsen's heuristics** as predict-against guardrails, not a grading
+  checklist
+- 🐣 Run the **committed-prediction protocol**: predictions stated publicly
+  before observation; no coaching during; debrief for the user's model after
 - 🐣 Operate the V/F coordination bridge: users' needs drive data shape; data
   shape supports flexible user experiences
+- 🐔 Catch a **two-layer misconception** live: task completed, model wrong — and
+  explain why output-success could not have revealed it
 - 🐔 Engage in V↔F coordination on a small interaction: propose a use-case
   experience, discover what the NM affords, iterate. Notice how each step
   changes what you can propose next — and how you start picking up the other's
-  craft along the way (the Bakhtiarian dynamic, open-ended)
+  craft along the way (the cycle's dynamic, open-ended)
 - 🐔 Hold the two-scale reading: the machine plays the score (NM evaluation);
   the user's experience arises from interaction; the _concert_ is what your work
   serves
@@ -1554,6 +1640,8 @@ identified as a tool, not as essential infrastructure.
   snippet's, but whose implementation/strategy differs
 - 🐣 Sketch a user interaction in plain English; predict what NM events would
   need to happen; implement and verify
+- 🐣 Prototype one experience-goal three ways in ten minutes each — and let two
+  of them die (disposability as a snippetry skill)
 
 ### Layer 4 — Philosophy
 
@@ -1563,6 +1651,9 @@ identified as a tool, not as essential infrastructure.
   never the static side. What does that asymmetry mean for design?
 - 🐣 _(easter egg)_ Recognize the cybernetic loop in the data-flow anchor —
   circular causality is implicit. Wiener referenced in deeper section.
+- 🐣 _(open question)_ What, exactly, can a simulated human falsify? Where is
+  the ceiling — and is the ceiling a property of the model or of simulation
+  itself?
 
 ---
 
