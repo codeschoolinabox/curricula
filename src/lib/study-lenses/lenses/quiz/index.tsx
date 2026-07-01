@@ -20,7 +20,12 @@ import type { ComponentType, ReactElement } from 'react';
 import freezeInPlace from '@utils/freeze-in-place.js';
 
 import type { ClassifiedToken } from '../../lib/classifying/types.js';
-import type { McqQuizItem, QuizItem } from '../../lib/quizzing/types.js';
+import type {
+	CodeSurfaceQuizItem,
+	McqQuizItem,
+	QuizItem,
+	SelectInCodeQuizItem,
+} from '../../lib/quizzing/types.js';
 import type { LensModule, LensProps as LensProperties } from '../types.js';
 
 import quizCore from './core.js';
@@ -28,10 +33,12 @@ import anchors from './lib/anchors.js';
 import buildQuiz from './lib/build-quiz.js';
 import masteryDecorations from './lib/decorations.js';
 import gradeOption from './lib/grade-option.js';
+import gradeRanges from './lib/grade-ranges.js';
 import type {
 	ActiveTab,
 	MasteryDecos,
 	MasteryState,
+	PendingSelection,
 	ProgressBucket,
 	VerdictsByItemId,
 } from './types.js';
@@ -112,6 +119,25 @@ const EMPTY_MASTERY = freezeInPlace<MasteryState>({});
 const EMPTY_VERDICTS = freezeInPlace<VerdictsByItemId>({});
 const EMPTY_BUNDLE = freezeInPlace<readonly QuizItem[]>([]);
 
+// The empty pending selection, hoisted as a stable frozen reference (the
+// [activeTab] reset assigns it as a referential no-op when already empty).
+const EMPTY_PENDING = freezeInPlace<PendingSelection>([]);
+
+// Whether an item is answered by a gesture in the read-only editor (a code
+// surface) rather than the panel (mcq). The derived answer-phase flag is
+// `armed = isCodeSurface(activeItem) && !activeVerdict` — a graded code-surface
+// tab is disarmed (back in anchor phase).
+function isCodeSurface(
+	item: QuizItem | undefined,
+): item is CodeSurfaceQuizItem | SelectInCodeQuizItem {
+	return (
+		item !== undefined &&
+		(item.mode === 'click-token' ||
+			item.mode === 'click-line' ||
+			item.mode === 'select-in-code')
+	);
+}
+
 // Slice A reads no config knob (the V1 form is parameterless), so the wrapper
 // takes only `embodiment`; the `core.config(props.config)` resolution lands
 // with the first knob (inc 8).
@@ -139,6 +165,15 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 	const itemsReference = useRef<readonly QuizItem[]>(items);
 	itemsReference.current = items;
 
+	// Mirror refs the mount-time `mousedown` handler reads so it knows, every
+	// render, whether the editor is armed (answer phase) and which item to grade —
+	// without re-binding the handler (the CM-lens remount scar). `armedReference`
+	// carries the DERIVED `armed` (which folds in `!activeVerdict`), so a graded
+	// code-surface tab is correctly disarmed; both are assigned after the pick +
+	// tab derivation below.
+	const armedReference = useRef<boolean>(false);
+	const activeItemReference = useRef<QuizItem | undefined>(undefined);
+
 	// The picked anchor's range (per-mount UI state); null when nothing — or
 	// whitespace — is selected. Drives the highlight decoration.
 	const [pickedRange, setPickedRange] = useState<
@@ -160,6 +195,38 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 	// Per-group mastery accrued from graded answers (inc 5). Disposable practice:
 	// reset on source change. Drives the two color-free decoration channels.
 	const [mastery, setMastery] = useState<MasteryState>(EMPTY_MASTERY);
+
+	// The ranges the learner has staged in answer phase (empty in anchor phase).
+	// Single-slot for click-token (a click replaces); a toggle-set for
+	// select-in-code (6c). Cleared on any tab change (the single-owner reset).
+	const [pendingSelection, setPendingSelection] =
+		useState<PendingSelection>(EMPTY_PENDING);
+
+	// Resolve the picked anchor to its co-anchored bundle, then derive the active
+	// item, its verdict, and the answer-phase `armed` flag. `activeItem` /
+	// `activeVerdict` / `armed` are DERIVED, not stored: `activeVerdict` being
+	// derived is why Slice A's `resetVerdictOnRepick` is gone, and `armed` being
+	// derived is why there is no stored phase flag. For the one render after a
+	// re-pick — before `resetTabOnRepick` settles the tab + clears verdicts — the
+	// OLD `activeTab` indexes the NEW bundle: usually out-of-range (`undefined` →
+	// anchor phase, blank panel), or, if the new bundle is long enough, the new
+	// bundle's item there shows (and, only when re-picking the SAME token, its prior
+	// verdict) for that single frame. Both settle next frame; do NOT "fix" this with
+	// a clamp that would mask a real bug. The derivation lives ABOVE the effects so
+	// `syncAnchorHighlight` can read `armed` (suppressing the anchor-hit in answer
+	// phase); the mount handler reads `armed` / `activeItem` through the refs below.
+	const bundle =
+		pickedRange === null ? EMPTY_BUNDLE : anchors.itemsAt(items, pickedRange);
+	const activeItem = activeTab === null ? undefined : bundle[activeTab];
+	const activeVerdict =
+		activeItem === undefined ? undefined : verdictsByItemId[activeItem.id];
+	// The answer phase: the active tab is a code surface AND it has not been graded
+	// yet (a verdict disarms — README § Interaction contract step 6). The handler
+	// branches on `armed` (not the item's mode), so a graded code tab re-picks
+	// rather than re-staging.
+	const armed = isCodeSurface(activeItem) && activeVerdict === undefined;
+	activeItemReference.current = activeItem;
+	armedReference.current = armed;
 
 	useEffect(
 		function mountEditor() {
@@ -190,15 +257,26 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 										offset === null
 											? null
 											: anchors.anchorAt(offset, classifiedReference.current);
-									setPickedRange(
-										token === null ? null : [token.start, token.end],
-									);
-									// The lens HANDLED this mousedown as an anchor pick — return
-									// `true` to signal handled, so CodeMirror then `preventDefault`s
-									// the browser event and skips its own built-in text-selection
-									// gesture (a click on this read-only surface is a pick, never a
-									// cursor/selection move; `return false` lets that gesture run —
-									// and crashes jsdom's layout-less `Range.getClientRects`).
+									if (armedReference.current) {
+										// Answer phase: an in-token click STAGES the range (single-
+										// slot for click-token — a click replaces the pending
+										// selection). A null/whitespace click is a no-op (it neither
+										// exits answer phase nor grades).
+										if (token !== null) {
+											setPendingSelection(() => [[token.start, token.end]]);
+										}
+									} else {
+										// Anchor phase: the click re-picks (or clears on whitespace).
+										setPickedRange(
+											token === null ? null : [token.start, token.end],
+										);
+									}
+									// The lens HANDLED this mousedown (a pick or a stage) — return
+									// `true` to signal handled, so CodeMirror `preventDefault`s the
+									// browser event and skips its built-in text-selection gesture (a
+									// click on this read-only surface is a pick or an answer, never a
+									// cursor move; `return false` lets that gesture run — and crashes
+									// jsdom's layout-less `Range.getClientRects`).
 									return true;
 								},
 							}),
@@ -222,12 +300,17 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 	);
 
 	// Sync the highlight: dispatch the picked range into the mounted view's
-	// decoration field whenever the pick changes — no remount.
+	// decoration field whenever the pick (or the phase) changes — no remount. The
+	// anchor-hit background is SUPPRESSED in answer phase (dispatch null), so the
+	// picked token and the staged tokens read on distinct axes (DOCS § Pending
+	// selection is a fourth axis).
 	useEffect(
 		function syncAnchorHighlight() {
-			editorView.current?.dispatch({ effects: setAnchorHit.of(pickedRange) });
+			editorView.current?.dispatch({
+				effects: setAnchorHit.of(armed ? null : pickedRange),
+			});
 		},
-		[pickedRange],
+		[pickedRange, armed],
 	);
 
 	// Clear the pick + the durable mastery + the per-item verdicts when the source
@@ -268,6 +351,19 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 		[pickedRange],
 	);
 
+	// Clear the staged pending selection whenever the active tab changes — the
+	// SINGLE owner of the pending reset. This covers tab-switch, re-pick (which
+	// resets `activeTab` via `resetTabOnRepick`), and source-change (which cascades
+	// through `pickedRange` → `activeTab`). A second `setPendingSelection` in those
+	// effects would be the double-write the single-owner discipline forbids (mirrors
+	// `activeTab`'s single reset owner).
+	useEffect(
+		function clearPendingOnTabChange() {
+			setPendingSelection(EMPTY_PENDING);
+		},
+		[activeTab],
+	);
+
 	// The render-ready decoration ranges for both channels, recomputed when the
 	// mastery state changes (`items` is stable per mount). Dispatched into the
 	// mounted view below — no remount (the field reads it through a `StateEffect`,
@@ -285,21 +381,6 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 		[masteryDecos],
 	);
 
-	// Resolve the picked anchor to its co-anchored bundle, then derive the active
-	// item + its verdict. `activeItem` / `activeVerdict` are DERIVED, not stored:
-	// `activeVerdict` being derived is exactly why Slice A's `resetVerdictOnRepick`
-	// is gone. For the one render after a re-pick — before `resetTabOnRepick` settles
-	// the tab + clears verdicts — the OLD `activeTab` indexes the NEW bundle: usually
-	// out-of-range (`undefined` → anchor phase, blank panel), or, if the new bundle is
-	// long enough, the new bundle's item there shows (and, only when re-picking the
-	// SAME token, its prior verdict) for that single frame. Both settle next frame; do
-	// NOT "fix" this with a clamp that would mask a real bug.
-	const bundle =
-		pickedRange === null ? EMPTY_BUNDLE : anchors.itemsAt(items, pickedRange);
-	const activeItem = activeTab === null ? undefined : bundle[activeTab];
-	const activeVerdict =
-		activeItem === undefined ? undefined : verdictsByItemId[activeItem.id];
-
 	// Grade the picked mcq answer into the per-item verdict map, then fold it into
 	// mastery. Function declarations (a block-bodied arrow trips `arrow-body-style`);
 	// both setters are functional updaters reading the latest state, never a
@@ -311,6 +392,33 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 			freezeInPlace({ ...prior, [item.id]: result }),
 		);
 		setMastery((prior) => quizCore.masteryFold(prior, item, result));
+	}
+
+	// Grade the staged code-surface answer into the per-item verdict map, then fold
+	// it into mastery — the code-surface analogue of `answer`. The verdict makes
+	// `armed` false (the `!activeVerdict` disarm), returning the editor to anchor
+	// phase; pending is cleared by the tab-switch / re-pick of a retry. `confirm` and
+	// `cancel` are React panel handlers (re-created each render), so they read the
+	// latest `activeItem` / `pendingSelection` directly — unlike the mount-bound
+	// `mousedown` handler, which must read refs. The `isCodeSurface` guard makes the
+	// never-`malformed` invariant explicit + type-narrows: an mcq active tab is
+	// anchor phase (its Confirm never renders), so `confirm` only ever grades a
+	// code-surface item.
+	function confirm(): void {
+		if (activeItem === undefined || !isCodeSurface(activeItem)) return;
+		const result = gradeRanges(activeItem, pendingSelection);
+		setVerdictsByItemId((prior) =>
+			freezeInPlace({ ...prior, [activeItem.id]: result }),
+		);
+		setMastery((prior) => quizCore.masteryFold(prior, activeItem, result));
+	}
+
+	// Leave answer phase without grading: reset to the bundle's default (first mcq)
+	// tab, which makes `armed` false (anchor phase); the [activeTab] effect clears
+	// pending. `defaultActiveTab` is non-null here — an armed bundle has a
+	// co-anchored mcq (V1 co-anchors every token).
+	function cancel(): void {
+		setActiveTab(anchors.defaultActiveTab(bundle));
 	}
 
 	// The `mcq` arm: the prompt + one option button per choice. Extracted (B2) so
@@ -334,14 +442,41 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 		);
 	}
 
+	// The code-surface arm (click-token in 6b): the prompt + the answer-phase
+	// controls. Confirm grades the staged ranges (count-bearing so the staged size
+	// is visible); Cancel returns to anchor phase. Both render only while armed —
+	// after grading, the editor is disarmed and the shared verdict region (below)
+	// stands alone.
+	function renderCodeSurfaceTab(item: CodeSurfaceQuizItem): ReactElement {
+		return (
+			<>
+				<p>{item.prompt}</p>
+				{armed ? (
+					<>
+						<button type="button" data-quiz-confirm onClick={confirm}>
+							Confirm ({pendingSelection.length} selected)
+						</button>
+						<button type="button" data-quiz-cancel onClick={cancel}>
+							Cancel
+						</button>
+					</>
+				) : null}
+			</>
+		);
+	}
+
 	// The active tab's body, dispatched on its `item.mode` via an if-chain (mirrors
 	// `grade.ts`) — each guard narrows the union before touching a mode-specific
-	// field. 6a renders only the `mcq` arm; the code-surface arms (and the
-	// `const _never: never` exhaustiveness assert) land in 6b/6c, so the chain ends
-	// in a `return null` fallback (unreachable — the build filter admits only mcq).
+	// field. 6a/6b render the `mcq` + `click-token` arms; `select-in-code` (and the
+	// `const _never: never` exhaustiveness assert) lands in 6c, so the chain still
+	// ends in a `return null` fallback (unreachable — the filter admits only the two
+	// handled modes).
 	function renderActiveTab(): ReactElement | null {
 		if (activeItem === undefined) return null;
 		if (activeItem.mode === 'mcq') return renderMcqTab(activeItem);
+		if (activeItem.mode === 'click-token') {
+			return renderCodeSurfaceTab(activeItem);
+		}
 		return null;
 	}
 
@@ -357,7 +492,11 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 
 	return (
 		<div data-lens="quiz">
-			<main data-quiz-editor ref={editorContainer} />
+			<main
+				data-quiz-editor
+				data-quiz-phase={armed ? 'answer' : 'anchor'}
+				ref={editorContainer}
+			/>
 			{activeItem ? (
 				<aside data-quiz-panel>
 					{/* Minimal ARIA tabs — role=tablist/tab + aria-selected is the a11y

@@ -18,7 +18,13 @@
  */
 
 import { EditorView } from '@codemirror/view';
-import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
+import {
+	act,
+	cleanup,
+	fireEvent,
+	render,
+	waitFor,
+} from '@testing-library/react';
 import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -205,7 +211,8 @@ describe('<quiz Component> — Slice A inc 1: read-only un-colorized editor', ()
 	// verified at the 🔍 sandbox; here we lock the panel state machine the pick
 	// drives.
 	describe('co-anchored tabs + per-item verdict', () => {
-		// `let x = 1; x;`: `=`=[6,7) is lone-V1; ref `x`=[11,12) → V1+V7 (two mcq).
+		// `let x = 1; x;`: `=`=[6,7) is lone-V1; ref `x`=[11,12) → V1+V7 (mcq) +
+		// V8 (click-token, admitted in 6b) = 3 tabs.
 		const REFERENCE_X = 11;
 		const OPERATOR = 6;
 
@@ -235,9 +242,9 @@ describe('<quiz Component> — Slice A inc 1: read-only un-colorized editor', ()
 			return { container, cmContent, spy };
 		}
 
-		it('a co-anchored token shows one tab per item — the reference x → 2 tabs', async () => {
+		it('a co-anchored token shows one tab per item — the reference x → 3 tabs (V1+V7+V8)', async () => {
 			const { container } = await mountAndPick(REFERENCE_X);
-			expect(container.querySelectorAll('[data-quiz-tab]').length).toBe(2);
+			expect(container.querySelectorAll('[data-quiz-tab]').length).toBe(3);
 		});
 
 		it('a deeper co-anchored token shows a tab per item — the declaration x → 3 tabs', async () => {
@@ -252,7 +259,7 @@ describe('<quiz Component> — Slice A inc 1: read-only un-colorized editor', ()
 			const labels = [...container.querySelectorAll('[data-quiz-tab]')].map(
 				(tab) => tab.textContent,
 			);
-			expect(labels).toEqual(['1', '2']);
+			expect(labels).toEqual(['1', '2', '3']);
 		});
 
 		it('the default active tab is the first mcq — tab 0 aria-selected (never auto-arm)', async () => {
@@ -438,6 +445,315 @@ describe('<quiz Component> — Slice A inc 1: read-only un-colorized editor', ()
 							.quizVerdict,
 					).toBe('incorrect');
 				});
+			});
+		});
+
+		// Inc 6b: the answer phase (click-token / V8). Once the filter admits
+		// click-token, the reference `x` [11,12) bundle is [V1, V7, V8]; selecting
+		// the V8 tab ARMS the editor (data-quiz-phase → answer), an in-token click
+		// STAGES a range, and Confirm grades it. V8 targets the DECLARATION `x`
+		// [4,5), so the answer is a staged click at offset 4. The Confirm count
+		// (`Confirm (N selected)`) makes staging observable in jsdom; the
+		// `.cm-quiz-pending` PAINT + the real click are sandbox-only.
+		describe('answer phase — click-token (V8)', () => {
+			const phaseOf = (root: Element) =>
+				root.querySelector<HTMLElement>('[data-quiz-editor]')?.dataset
+					.quizPhase;
+
+			// Pick the reference `x`, then select its click-token (V8) tab — arming the
+			// editor. Returns the mount handles; re-point `spy` to stage an answer click.
+			async function armClickToken() {
+				const v8 = (buildQuiz(embody('let x = 1; x;'))?.items ?? []).find(
+					(item) => item.mode === 'click-token',
+				);
+				if (v8 === undefined) throw new Error('no click-token item admitted');
+				const handles = await mountAndPick(11); // the reference `x` [11,12)
+				fireEvent.click(
+					handles.container.querySelector(
+						`[data-quiz-tab="${v8.id}"]`,
+					) as HTMLElement,
+				);
+				await waitFor(() => {
+					expect(phaseOf(handles.container)).toBe('answer');
+				});
+				return handles;
+			}
+
+			// Stage the token at `offset` (an answer-phase editor click) and wait for
+			// the Confirm count to reflect it, then click Confirm.
+			async function stageAndConfirm(
+				handles: Awaited<ReturnType<typeof mountAndPick>>,
+				offset: number,
+			) {
+				handles.spy.mockReturnValue(offset);
+				handles.cmContent.dispatchEvent(
+					new MouseEvent('mousedown', {
+						bubbles: true,
+						clientX: 1,
+						clientY: 1,
+					}),
+				);
+				await waitFor(() => {
+					expect(
+						handles.container.querySelector('[data-quiz-confirm]')?.textContent,
+					).toContain('1 selected');
+				});
+				fireEvent.click(
+					handles.container.querySelector('[data-quiz-confirm]') as HTMLElement,
+				);
+			}
+
+			// Stage the token at `offset` without confirming (an answer-phase click).
+			function stage(
+				handles: Awaited<ReturnType<typeof mountAndPick>>,
+				offset: number,
+			) {
+				handles.spy.mockReturnValue(offset);
+				handles.cmContent.dispatchEvent(
+					new MouseEvent('mousedown', {
+						bubbles: true,
+						clientX: 1,
+						clientY: 1,
+					}),
+				);
+			}
+
+			it('the editor opens in anchor phase (data-quiz-phase = anchor)', async () => {
+				const { container } = await mountAndPick(11);
+				expect(phaseOf(container)).toBe('anchor');
+			});
+
+			it('selecting the click-token tab arms the editor (anchor → answer)', async () => {
+				const { container } = await armClickToken();
+				expect(phaseOf(container)).toBe('answer');
+			});
+
+			it('an armed click-token tab shows Confirm and Cancel controls', async () => {
+				const { container } = await armClickToken();
+				expect(container.querySelector('[data-quiz-confirm]')).not.toBeNull();
+				expect(container.querySelector('[data-quiz-cancel]')).not.toBeNull();
+			});
+
+			it('staging the declaration target then Confirm grades correct', async () => {
+				const handles = await armClickToken();
+				await stageAndConfirm(handles, 4); // the declaration `x` [4,5) — V8's target
+				await waitFor(() => {
+					expect(
+						handles.container.querySelector<HTMLElement>('[data-quiz-verdict]')
+							?.dataset.quizVerdict,
+					).toBe('correct');
+				});
+			});
+
+			it('staging a non-target token then Confirm grades incorrect', async () => {
+				const handles = await armClickToken();
+				await stageAndConfirm(handles, 11); // the reference itself — NOT the target
+				await waitFor(() => {
+					expect(
+						handles.container.querySelector<HTMLElement>('[data-quiz-verdict]')
+							?.dataset.quizVerdict,
+					).toBe('incorrect');
+				});
+			});
+
+			it('click-token staging is single-slot — a second click REPLACES, not appends', async () => {
+				const handles = await armClickToken();
+				stage(handles, 11); // stage the reference first...
+				await waitFor(() => {
+					expect(
+						handles.container.querySelector('[data-quiz-confirm]')?.textContent,
+					).toContain('1 selected');
+				});
+				stage(handles, 4); // ...then the declaration — replaces (still ONE staged)
+				await waitFor(() => {
+					expect(
+						handles.container.querySelector('[data-quiz-confirm]')?.textContent,
+					).toContain('1 selected');
+				});
+				// The staged range is [4,5) (the replacement), so Confirm grades correct;
+				// had it appended ([11,12)+[4,5)) the set would not equal the target.
+				fireEvent.click(
+					handles.container.querySelector('[data-quiz-confirm]') as HTMLElement,
+				);
+				await waitFor(() => {
+					expect(
+						handles.container.querySelector<HTMLElement>('[data-quiz-verdict]')
+							?.dataset.quizVerdict,
+					).toBe('correct');
+				});
+			});
+
+			it('grading a code-surface answer returns to anchor phase (the verdict disarms)', async () => {
+				const handles = await armClickToken();
+				await stageAndConfirm(handles, 4);
+				await waitFor(() => {
+					expect(
+						handles.container.querySelector('[data-quiz-verdict]'),
+					).not.toBeNull();
+				});
+				expect(phaseOf(handles.container)).toBe('anchor');
+			});
+
+			it('after a graded code-surface verdict, an editor click RE-PICKS (the handler is disarmed, not staging)', async () => {
+				const handles = await armClickToken();
+				await stageAndConfirm(handles, 4); // grade correct → verdict → disarm
+				await waitFor(() => {
+					expect(
+						handles.container.querySelector('[data-quiz-verdict]'),
+					).not.toBeNull();
+				});
+				// A post-grade click on the `=` operator must RE-PICK (anchor phase) →
+				// the lone `=` bundle (no tablist). A mode-only `armed` (missing the
+				// !activeVerdict disarm) would instead STAGE the click and leave the
+				// 3-tab V8 bundle intact, so the tablist would persist.
+				handles.spy.mockReturnValue(6);
+				handles.cmContent.dispatchEvent(
+					new MouseEvent('mousedown', {
+						bubbles: true,
+						clientX: 1,
+						clientY: 1,
+					}),
+				);
+				await waitFor(() => {
+					expect(
+						handles.container.querySelector('[data-quiz-tablist]'),
+					).toBeNull();
+				});
+			});
+
+			it('switching away from the click-token tab clears the staged pending selection', async () => {
+				const handles = await armClickToken();
+				stage(handles, 4); // stage the declaration (do not confirm)
+				await waitFor(() => {
+					expect(
+						handles.container.querySelector('[data-quiz-confirm]')?.textContent,
+					).toContain('1 selected');
+				});
+				// Switch to the first mcq tab, then back to V8 — the tab-switch must have
+				// cleared pending (the single-owner [activeTab] reset).
+				fireEvent.click(
+					handles.container.querySelectorAll('[data-quiz-tab]')[0],
+				);
+				const v8 = (buildQuiz(embody('let x = 1; x;'))?.items ?? []).find(
+					(item) => item.mode === 'click-token',
+				);
+				if (v8 === undefined) throw new Error('no click-token item admitted');
+				fireEvent.click(
+					handles.container.querySelector(
+						`[data-quiz-tab="${v8.id}"]`,
+					) as HTMLElement,
+				);
+				await waitFor(() => {
+					expect(phaseOf(handles.container)).toBe('answer');
+				});
+				expect(
+					handles.container.querySelector('[data-quiz-confirm]')?.textContent,
+				).toContain('0 selected');
+			});
+
+			it('re-picking the anchor clears the staged pending selection', async () => {
+				const handles = await armClickToken();
+				await stageAndConfirm(handles, 4); // stage + grade → verdict, disarm
+				await waitFor(() => {
+					expect(
+						handles.container.querySelector('[data-quiz-verdict]'),
+					).not.toBeNull();
+				});
+				// The verdict disarmed the editor, so this click RE-PICKS the reference
+				// (a fresh pick). Re-arming its V8 tab must show 0 staged — the re-pick
+				// (via the activeTab reset) cleared the pending from the graded attempt.
+				handles.spy.mockReturnValue(11);
+				handles.cmContent.dispatchEvent(
+					new MouseEvent('mousedown', {
+						bubbles: true,
+						clientX: 1,
+						clientY: 1,
+					}),
+				);
+				const v8 = (buildQuiz(embody('let x = 1; x;'))?.items ?? []).find(
+					(item) => item.mode === 'click-token',
+				);
+				if (v8 === undefined) throw new Error('no click-token item admitted');
+				await waitFor(() => {
+					expect(
+						handles.container.querySelector(`[data-quiz-tab="${v8.id}"]`),
+					).not.toBeNull();
+				});
+				fireEvent.click(
+					handles.container.querySelector(
+						`[data-quiz-tab="${v8.id}"]`,
+					) as HTMLElement,
+				);
+				await waitFor(() => {
+					expect(phaseOf(handles.container)).toBe('answer');
+				});
+				expect(
+					handles.container.querySelector('[data-quiz-confirm]')?.textContent,
+				).toContain('0 selected');
+			});
+
+			it('cancel returns to anchor phase without grading', async () => {
+				const { container } = await armClickToken();
+				fireEvent.click(
+					container.querySelector('[data-quiz-cancel]') as HTMLElement,
+				);
+				await waitFor(() => {
+					expect(phaseOf(container)).toBe('anchor');
+				});
+				expect(container.querySelector('[data-quiz-verdict]')).toBeNull();
+			});
+
+			it('cancel clears the staged pending selection (via the tab-switch reset)', async () => {
+				const handles = await armClickToken();
+				stage(handles, 4); // stage the declaration
+				await waitFor(() => {
+					expect(
+						handles.container.querySelector('[data-quiz-confirm]')?.textContent,
+					).toContain('1 selected');
+				});
+				fireEvent.click(
+					handles.container.querySelector('[data-quiz-cancel]') as HTMLElement,
+				);
+				await waitFor(() => {
+					expect(phaseOf(handles.container)).toBe('anchor');
+				});
+				// Re-arm the V8 tab: the count must be 0 — cancel resets activeTab to the
+				// default mcq, and the [activeTab] effect cleared pending on that switch.
+				const v8 = (buildQuiz(embody('let x = 1; x;'))?.items ?? []).find(
+					(item) => item.mode === 'click-token',
+				);
+				if (v8 === undefined) throw new Error('no click-token item admitted');
+				fireEvent.click(
+					handles.container.querySelector(
+						`[data-quiz-tab="${v8.id}"]`,
+					) as HTMLElement,
+				);
+				await waitFor(() => {
+					expect(phaseOf(handles.container)).toBe('answer');
+				});
+				expect(
+					handles.container.querySelector('[data-quiz-confirm]')?.textContent,
+				).toContain('0 selected');
+			});
+
+			it('a whitespace click in answer phase is a no-op (stays armed, no verdict)', async () => {
+				const { container, cmContent, spy } = await armClickToken();
+				spy.mockReturnValue(null); // whitespace / no token
+				// Wrap in act so any (buggy) state update from the handler FLUSHES before
+				// the assertions — a synchronous check would miss a re-render that
+				// wrongly cleared the pick. (Sync act suffices — the staging setter is
+				// synchronous.)
+				act(() => {
+					cmContent.dispatchEvent(
+						new MouseEvent('mousedown', {
+							bubbles: true,
+							clientX: 1,
+							clientY: 1,
+						}),
+					);
+				});
+				expect(phaseOf(container)).toBe('answer');
+				expect(container.querySelector('[data-quiz-verdict]')).toBeNull();
 			});
 		});
 	});

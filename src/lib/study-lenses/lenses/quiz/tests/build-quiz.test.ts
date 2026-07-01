@@ -60,9 +60,9 @@ describe('buildQuiz — quiz model builder', () => {
 		// A real-composition snippet with `x` declared AND referenced, so the
 		// quizzing registry emits V1 (every token) plus the node-anchored mcq forms
 		// V2/V6/V7 AND the code-answer forms V8 (click-token) / V10a-c
-		// (select-in-code). Inc 6a admits by MODE — `mcq` only — so V8/V10 are
-		// excluded while every mcq form (not just V1) reaches the panel, and the
-		// kept array stays the wide `QuizItem` union. (embody('OK') has a STUB AST
+		// (select-in-code). Inc 6b admits by MODE — `mcq` + `click-token` — so V8
+		// reaches the panel while V10a-c (select-in-code) stay excluded until 6c, and
+		// the kept array stays the wide `QuizItem` union. (embody('OK') has a STUB AST
 		// with body:[], so only V1 fires and the widen is untestable — use this.)
 		const CODE = 'let x = 1; x;';
 
@@ -73,10 +73,18 @@ describe('buildQuiz — quiz model builder', () => {
 			expect(items.length).toBeGreaterThan(classified.length);
 		});
 
-		it('every admitted item is mcq mode — no code-answer mode leaks through', () => {
+		it('admits mcq + click-token, but no select-in-code leaks through (the 6b filter)', () => {
 			const items = buildQuiz(embody(CODE))?.items ?? [];
 			expect(items.length).toBeGreaterThan(0);
-			expect(items.every((item) => item.mode === 'mcq')).toBe(true);
+			// The 6b filter is `mcq || click-token`; select-in-code (V10a/b/c) stays
+			// out until 6c. So every admitted item is one of the two handled modes,
+			// and none is select-in-code.
+			expect(
+				items.every(
+					(item) => item.mode === 'mcq' || item.mode === 'click-token',
+				),
+			).toBe(true);
+			expect(items.some((item) => item.mode === 'select-in-code')).toBe(false);
 		});
 
 		it('admits structurally-distinct mcq forms beyond V1 — the filter is mode-based, not a V1/V7 allowlist', () => {

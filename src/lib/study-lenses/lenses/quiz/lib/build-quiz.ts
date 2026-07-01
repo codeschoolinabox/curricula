@@ -2,10 +2,10 @@
  * @file The quiz lens's model builder — the single Acorn re-parse site. Parses
  * the snippet, delegates token classification to `lib/classifying`, runs
  * `generateQuiz`, and filters the mixed-mode stream by `item.mode` (the staged
- * inc-6 filter — `mcq` today; see `./README.md` § Form scoping). Returns the
- * quiz model the wrapper drives, or `null` on an internal parse failure
- * (defense-in-depth — the `status.parsed` gate should already have prevented
- * the mount). Pure: no React, no CodeMirror.
+ * inc-6 filter — `mcq` + `click-token` (6b); see `./README.md` § Form scoping).
+ * Returns the quiz model the wrapper drives, or `null` on an internal parse
+ * failure (defense-in-depth — the `status.parsed` gate should already have
+ * prevented the mount). Pure: no React, no CodeMirror.
  *
  * The filter is a plain boolean predicate (not a type-predicate), so the kept
  * `items` stay the wide `QuizItem` union — the panel discriminates on `mode`,
@@ -74,11 +74,11 @@ function buildQuiz(snippet: Snippet): QuizModel | null {
 
 	// `generateQuiz` runs the full generator registry, so its output is a
 	// mixed-mode stream. Inc 6 admits by `item.mode` (see `./README.md` § Form
-	// scoping): `mcq` today (`+click-token` in 6b, `+select-in-code` in 6c). The
-	// predicate is a plain boolean, not a type-predicate, so the kept array stays
-	// the wide `QuizItem` union — the panel discriminates on `mode`, not the filter.
+	// scoping): `mcq` + `click-token` (6b; `+select-in-code` in 6c). The predicate
+	// is a plain boolean, not a type-predicate, so the kept array stays the wide
+	// `QuizItem` union — the panel discriminates on `mode`, not the filter.
 	const items = generateQuiz(snippet, classified).filter(
-		(item) => item.mode === 'mcq',
+		(item) => item.mode === 'mcq' || item.mode === 'click-token',
 	);
 
 	// `classified` + the V1 items are already deep-frozen upstream; freeze the

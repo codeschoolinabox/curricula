@@ -91,14 +91,14 @@ describe('anchorAt — token resolution', () => {
 
 describe('itemsAt — item resolution', () => {
 	// Real-composition snippet: `x` is declared AND referenced, so the registry
-	// co-anchors several mcq forms per identifier (V1 on every token; V6/V7 on the
-	// identifiers) — the bundle a clicked range resolves to. `itemsAt` is
-	// mode-agnostic (it matches on `anchorRange` only), so it returns the FULL
-	// co-anchored bundle build-quiz admits, not just the first item. Token map:
-	// `let`=[0,3) `x`=[4,5) `=`=[6,7) `1`=[8,9) `;`=[9,10) `x`=[11,12) `;`=[12,13).
-	// These counts also cross-check build-quiz's mode filter (a leaked V8/V10
-	// code-answer item at a shared range would inflate the count); build-quiz.test.ts
-	// locks that filter in isolation, so a count failure here points there.
+	// co-anchors several forms per identifier — the declaration carries V1/V6/V7
+	// (mcq); the reference carries V1/V7 (mcq) + V8 (click-token, admitted in 6b).
+	// `itemsAt` is mode-agnostic (it matches on `anchorRange` only), so it returns
+	// the FULL co-anchored bundle build-quiz admits, not just the first item. Token
+	// map: `let`=[0,3) `x`=[4,5) `=`=[6,7) `1`=[8,9) `;`=[9,10) `x`=[11,12) `;`=[12,13).
+	// These counts also cross-check build-quiz's mode filter (a leaked V10
+	// select-in-code item — not admitted until 6c — would inflate the count);
+	// build-quiz.test.ts locks that filter in isolation, so a count failure points there.
 	const CODE = 'let x = 1; x;';
 	const model = buildQuiz(embody(CODE));
 	const items = model?.items ?? [];
@@ -128,13 +128,13 @@ describe('itemsAt — item resolution', () => {
 
 	it('returns EVERY co-anchored item at a shared range, not just the first (Many)', () => {
 		const found = anchors.itemsAt(items, [reference.start, reference.end]);
-		expect(found.length).toBe(2); // V1 + V7 both anchor the reference `x`
+		expect(found.length).toBe(3); // V1 + V7 + V8 anchor the reference `x` (6b)
 	});
 
-	it('the co-anchored bundle is heterogeneous by form (V1 + V7), not one repeated form (Many)', () => {
+	it('the co-anchored bundle is heterogeneous by form AND mode (V1/V7 mcq + V8 click-token), not one repeated form (Many)', () => {
 		const found = anchors.itemsAt(items, [reference.start, reference.end]);
 		const forms = new Set(found.map((item) => item.form));
-		expect(forms).toEqual(new Set(['V1', 'V7']));
+		expect(forms).toEqual(new Set(['V1', 'V7', 'V8']));
 	});
 
 	it('resolves a deeper bundle at the declaration — the count is range-driven, not constant (Boundary)', () => {
