@@ -55,28 +55,40 @@ The full field-level contract is [`tracing/types.ts`](./tracing/types.ts); this
 table pins the category vocabulary, the layer each category (or variant) belongs
 to, and its config gate.
 
-| Category      | Events                                                     | Layer (`semantics`)                                                                 | Config gate                                                            | Paired `ResolveEvent` kind                          |
-| ------------- | ---------------------------------------------------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | --------------------------------------------------- |
-| `resolve`     | the produced value, after every expression                 | `resolve`                                                                           | `resolve` (+ `dependent` / `provenance` / `kinds`)                     | —                                                   |
-| `variable`    | declare / initialize / available / read / update           | declare → `scope`; initialize, available → `statement`; read, update → `expression` | `scopes.*.declare`, `statements.variables.*`, `expression.variables.*` | `variable` (read); update rides `assignment`        |
-| `literal`     | string / number / boolean / null / undefined / regex       | `expression`                                                                        | `expression.literals.*`                                                | `literal`                                           |
-| `operator`    | pure (arithmetic, comparison, typeof, …) / shortCircuiting | `expression`                                                                        | `expression.operators.*`                                               | `operator` / `shortCircuit`                         |
-| `assignment`  | simple / compound assignment expressions                   | `expression`                                                                        | `expression.operators.assignment.*`                                    | `assignment`                                        |
-| `property`    | dot / bracket / optionalChaining access                    | `expression`                                                                        | `expression.properties.*`                                              | `property`                                          |
-| `function`    | call (name + arguments)                                    | `expression`                                                                        | `expression.functions.call`                                            | `call` (carries the return value — no return event) |
-| `template`    | begin / evaluation / end                                   | `expression`                                                                        | `expression.templates.*`                                               | `template` (on end)                                 |
-| `conditional` | test / branch — `if` and ternary                           | `if` → `statement`; ternary → `expression`                                          | `statements.conditionals.*`, `expression.operators.conditional`        | `conditional` (ternary)                             |
-| `loop`        | setup / test / iteration / increment / do                  | `statement`                                                                         | `statements.{while,doWhile,for,forOf}.*`                               | —                                                   |
-| `jump`        | break / continue                                           | `statement`                                                                         | `statements.break` / `statements.continue`                             | —                                                   |
-| `debugger`    | debugger statement                                         | `statement`                                                                         | `statements.debugger`                                                  | —                                                   |
-| `scope`       | create / enter / interrupt / completion / leave            | `scope`                                                                             | `scopes.{script,block}.*`                                              | —                                                   |
-| `error`       | the unhandled runtime error                                | `error`                                                                             | `errors` (top-level)                                                   | —                                                   |
+| Category      | Events                                                                          | Layer (`semantics`)                                                                 | Config gate                                                            | Paired `ResolveEvent` kind                          |
+| ------------- | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | --------------------------------------------------- |
+| `resolve`     | the produced value, after every expression                                      | `resolve`                                                                           | `resolve` (+ `dependent` / `provenance` / `kinds`)                     | —                                                   |
+| `variable`    | declare / initialize / available / read / update                                | declare → `scope`; initialize, available → `statement`; read, update → `expression` | `scopes.*.declare`, `statements.variables.*`, `expression.variables.*` | `variable` (read); update rides `assignment`        |
+| `literal`     | string / number / bigint / boolean / null / undefined / regex                   | `expression`                                                                        | `expression.literals.*`                                                | `literal`                                           |
+| `operator`    | pure (arithmetic, comparison, typeof, …) / shortCircuiting                      | `expression`                                                                        | `expression.operators.*`                                               | `operator` / `shortCircuit`                         |
+| `assignment`  | simple / compound assignment expressions                                        | `expression`                                                                        | `expression.operators.assignment.*`                                    | `assignment`                                        |
+| `property`    | dot / bracket / optionalChaining access                                         | `expression`                                                                        | `expression.properties.*`                                              | `property`                                          |
+| `function`    | call (name + arguments)                                                         | `expression`                                                                        | `expression.functions.call`                                            | `call` (carries the return value — no return event) |
+| `template`    | begin / evaluation / end                                                        | `expression`                                                                        | `expression.templates.*`                                               | `template` (on end)                                 |
+| `conditional` | test / branch — `if` and ternary                                                | `if` → `statement`; ternary → `expression`                                          | `statements.conditionals.*`, `expression.operators.conditional`        | `conditional` (ternary)                             |
+| `loop`        | setup / test / iteration / increment / do                                       | `statement`                                                                         | `statements.{while,doWhile,for,forOf}.*`                               | —                                                   |
+| `jump`        | break / continue                                                                | `statement`                                                                         | `statements.break` / `statements.continue`                             | —                                                   |
+| `debugger`    | debugger statement                                                              | `statement`                                                                         | `statements.debugger`                                                  | —                                                   |
+| `scope`       | create / enter / interrupt / completion / leave (exit moments carry a `reason`) | `scope`                                                                             | `scopes.{script,block}.*` (`for`/`for-of` scopes ride `block`)         | —                                                   |
+| `error`       | the unhandled runtime error                                                     | `error`                                                                             | `errors` (top-level)                                                   | —                                                   |
 
-Four vocabulary rules the table encodes:
+Five vocabulary rules the table encodes:
 
-- **The ResolveEvent IS the value.** Expression events carry _context_
-  (operator, operands, name, kind); the paired `ResolveEvent` carries the
-  produced value. No expression event carries a result field.
+- **The ResolveEvent owns the RESOLVED value.** An expression event carries
+  _context_ (operator, operands, name, kind); the produced value of the
+  expression lives in exactly one place — the paired `ResolveEvent`. No
+  expression event carries a duplicate `result` field. (This does not forbid a
+  value that is the event's OWN subject: `AssignmentOperatorEvent.value` and
+  `BindingEvent(update).value` carry the value _written_ — the operator and
+  lifecycle perspectives — which is a different thing from the resolve's "value
+  the expression produced.")
+- **Expression↔resolve pairing.** A paired `ResolveEvent` is the NEXT event on
+  the same `nodePath` after its expression event (adjacent in the stream —
+  follow `next` and match `nodePath`). Co-gating (`resolve.dependent: true`,
+  default) means the resolve fires only when its expression does; with
+  `dependent: false` resolves fire alone. One deliberate hole: expression ON +
+  resolve ON + `dependent: false` still pairs them (both fire), it just no
+  longer co-gates the resolve on the expression.
 - **Dual perspective is intentional.** `x = 5` with all gates on fires
   `AssignmentOperatorEvent` (operator view) + `BindingEvent(update)` (variable
   view) + `ResolveEvent(assignment)` (data view), all sharing one `nodePath`.
@@ -98,9 +110,12 @@ Using a different name in code is a bug, not a stylistic choice.
 - **trace event** — one typed, wire-safe record of an observable moment. Always
   scalar-only fields (`nodePath` string, never an AST reference) so it crosses
   the worker boundary by structured clone.
-- **linked event** — a trace event after linking: the same data plus a direct
-  `.node` reference into the frozen ast record. Only `TraceResult.events`
-  carries linked events; the stream yields wire-safe ones.
+- **chained event** — the DELIVERED form of a trace event: the same wire-safe
+  data plus the doubly-linked `prev`/`next` chain, so any single event can walk
+  the whole stream. Both the streamed handle items and `TraceResult.events` are
+  chained events. The chain is thread-built and its fields are non-enumerable
+  (so `JSON.stringify` skips them); the event is never mutated and carries no
+  `.node` ref — attribute via `nodePath`.
 - **nodePath** — the Aran-assigned path string (e.g. `$.body.0.test.left`)
   uniquely identifying a syntax node. The key into the ast record; stable across
   identical programs. (The former synonym `syntaxId` is retired **in this
@@ -113,13 +128,22 @@ Using a different name in code is a bug, not a stylistic choice.
   sandbox (the dialog traps are installed at setup), and every OTHER identifier
   read behaves exactly as raw JS says — `ReferenceError` at the moment of
   evaluation, never a substituted value.
-- **ast record** — the flat `Record<nodePath, ASTNode>` built at instrument
-  time. `ast['$']` is the root Program node. Mutable (`events: []`, `visits: 0`)
-  until linking freezes it.
-- **linking** — the post-settlement pass that attaches `.node` to each event,
-  back-fills `ASTNode.events[]`, populates `ASTNode.visits` from the visit
-  counts, and deep-freezes the record (cycle-guarded: `.parent` and
-  `.events[i].node` are circular).
+- **ast record** — the flat `Record<nodePath, ASTNode>` built and FROZEN at
+  instrument time. `ast['$']` is the root Program node. ACYCLIC — a node has
+  `parentPath` (a string), no `parent` back-ref and no event ref — so the whole
+  record is `JSON.stringify`-safe with no replacer.
+- **indexing** — the post-settlement pass (formerly "linking") that builds the
+  `prev`/`next` event chain and the `eventsByNode` map. It MUTATES NOTHING
+  frozen: the ast is already frozen, events are frozen at yield; indexing only
+  constructs new structures. Runs once; the result is memoized.
+- **eventsByNode** — `Record<nodePath, readonly step[]>`: for each node, the
+  `step`s of the events that fired on it, in order (replaces the old
+  `ASTNode.events[]` back-ref). Resolve an event by step against
+  `TraceResult.events`.
+- **scope-chain / proto-chain walk** — the ordered list of frames/objects
+  checked while resolving an identifier (up the scope chain) or a member (up the
+  prototype chain), each a hit or a miss — the NM's "two chains, one shape"
+  leverage point. Optional payload on read / property-access events (D1).
 - **layer** — one band of the 5-layer mental model. Every event names its layer
   in `semantics`; config gates are organized by layer.
 - **co-gating** — the default coupling (`resolve.dependent: true`) under which a
@@ -136,7 +160,8 @@ Using a different name in code is a bug, not a stylistic choice.
   runtime gates, so counts are range- and filter-independent — but a node whose
   advice was weave-time-skipped (its layer gate disabled) is not counted at all:
   visits mean "traced evaluations", not "all evaluations under any config". Ride
-  the halt payload to the thread, mirrored onto `ASTNode.visits` by linking.
+  the halt payload to the thread and are carried on `TraceResult.visitCounts`
+  (empty when the run ended without a halt).
 - **JejTag** — the per-node metadata bundle (loc, ESTree type, source text,
   operator, literalKind, …) built by the digest at instrument time, embedded
   into the woven code, and handed to advice at runtime. JSON-safe by
@@ -161,7 +186,9 @@ Using a different name in code is a bug, not a stylistic choice.
   `workerConfig`, not baked into the woven code. Weave-time decisions
   (pointcuts, tags, initial state) are code-generated by Aran and must ride the
   code; runtime gates deliberately are not, so the instrumented code is
-  range-independent and a highlight change never re-instruments.
+  range-independent (cache-friendly for a future seam; there is no
+  instrument-once/run-many API today, so each `traceSemantics` call still
+  re-instruments).
 - **range filter** — the `TraceConfig.range` source window; events outside it
   are dropped at dispatch, worker-side, reading the runtime gate bundle. The ast
   record is never range-filtered.
@@ -172,9 +199,11 @@ Using a different name in code is a bug, not a stylistic choice.
   typed `refinement` — there is no `'iteration-limit'` outcome value; consumers
   check the refinement, not the outcome.
 - **value representation** — the tagged, clone-safe rendering of a runtime value
-  (`{ type: 'number', value, isNaN? }`, `{ type: 'undefined' }`, …) that
-  disambiguates what JSON cannot (NaN, ±Infinity, -0, null-vs-object,
-  functions). Built worker-side by `represent-value`.
+  (`{ type: 'number', value, isNaN? }`, `{ type: 'bigint', value }`,
+  `{ type: 'undefined' }`, …) that disambiguates what JSON cannot (NaN,
+  ±Infinity, -0, bigint-vs-number, null-vs-object, functions). `bigint` rides as
+  a decimal STRING (a raw bigint is not JSON-safe). Built worker-side by
+  `represent-value`.
 - **worker logic** — the worker-side half: registers the advice globals, wires
   the dispatcher's emit to the engine, installs the dialog traps, and authors
   the halt.
@@ -197,11 +226,16 @@ Using a different name in code is a bug, not a stylistic choice.
   ended (`completed / errored / cancelled / failed / timed-out` plus carried
   data); the refinement is this tracer's typed annotation on an errored
   settlement identifying an instrumentation-owned iteration limit.
-- **handle** — the lazy `AsyncIterable` of trace events plus `result`, `cancel`,
-  `fail`. Nothing runs until the first pull or `result` access; breaking out of
-  a `for await` cancels.
-- **trace result** — what `result` resolves with: the linked `events`, the
-  frozen `ast` record, the echoed `code`, the resolved `options` snapshot, the
+- **handle** — the lazy `AsyncIterable` of chained trace events plus `result`,
+  `cancel`, `fail`. Nothing runs until the first pull or `result` access.
+  Step-through facts a lens depends on (engine-owned, surfaced here because they
+  decide whether a stepper works): the time budget PAUSES while an event awaits
+  its pull (learner think-time is free); the stream is ONE-SHOT (iterate once —
+  a second iterator is unsupported); and awaiting `result` without iterating
+  DRAINS the run to settlement. Breaking out of a `for await` cancels.
+- **trace result** — what `result` resolves with (memoized): the chained
+  `events`, the frozen acyclic `ast` record, the `eventsByNode` index, the
+  echoed `code`, the resolved (`ResolvedTraceOptions`) `options` snapshot, the
   `visitCounts`, and the settlement. (The former synonym `logs` is retired.)
 
 ## Bounded context
@@ -214,7 +248,7 @@ preparation (shorthand expansion → default filling → schema validation →
 cross-field checks, in [`prepare/`](./prepare/)); the Aran instrumentation
 pipeline and its weave-time gating; the worker logic, thin worker entry, and
 thread logic; the iteration limit and its branded classification; the dialog
-round-trips; the linking pass; the built handle and its typed facade.
+round-trips; the indexing pass; the built handle and its typed facade.
 
 Two gate decisions are deliberate, named commitments:
 
@@ -246,7 +280,7 @@ It does **not** own, and explicitly excludes:
   belong to the embody adapter. `snippet.evaluation.events.trace.semantics`
   wiring is embodiment territory.
 - **Lenses and rendering.** Step-through UIs, editors, and quizzes consume the
-  stream and the linked result; none of their concerns live here.
+  stream and the indexed result; none of their concerns live here.
 - **Console interception.** `console.*` calls pass through to the worker's
   native console; pairing console output with a trace is intercept/embody
   territory. Dialogs are traced-through (real round-trips), not evented — a
@@ -262,49 +296,83 @@ It does **not** own, and explicitly excludes:
 On a settled run:
 
 ```text
-events       readonly LinkedTraceEvent[]         ordered stream; each has .node into ast
-code         string                              original source, echoed back
-ast          Readonly<Record<nodePath, ASTNode>> frozen; ast['$'] = root Program
-options      TraceOptions                        resolved config snapshot
-visitCounts  Readonly<Record<nodePath, number>>  mirrors node.visits
-settlement   TraceSettlement                     outcome · halt · refinement? · engineError? · durationMs
+events       readonly ChainedTraceEvent[]         ordered stream; prev/next chain, nodePath into ast
+code         string                               original source, echoed back
+ast          Readonly<Record<nodePath, ASTNode>>  frozen, acyclic; ast['$'] = root Program
+eventsByNode Readonly<Record<nodePath, step[]>>   which events fired on each node
+options      ResolvedTraceOptions                 resolved (post-expansion) config snapshot
+visitCounts  Readonly<Record<nodePath, number>>   traced evaluations per node; empty without a halt
+settlement   TraceSettlement                      outcome · halt · refinement? · engineError? · durationMs
 ```
 
 Every field is present on every settled run: the gate and instrumentation run
-eagerly (so `code`, `ast`, and `options` exist for every handle), and linking
-runs after ANY settlement — the ast record and the streamed events both live
-thread-side, so even a cancelled or timed-out run returns its events linked.
-`visitCounts` ride the halt: a stop without a halt leaves them empty and every
-`node.visits` 0. An errored run keeps every event up to the throw. Serialization
-note: `node.parent` and `node.events[i].node` are circular — `JSON.stringify`
-needs a replacer; `node.parentPath` and `event.step` are the serialization-safe
-alternatives.
+eagerly (so `code`, `ast`, `options` exist for every handle), and indexing runs
+after ANY settlement — the ast record and the streamed events both live
+thread-side, so even a cancelled or timed-out run returns a fully chained,
+navigable stream. `visitCounts` ride the halt: a stop without a halt leaves them
+empty. An errored run keeps every event up to the throw. Serialization: the
+whole result is `JSON.stringify`-safe with NO replacer — the ast is acyclic
+(navigate with `node.parentPath`), events carry no node ref (use `nodePath`),
+and the chain's `prev`/`next` are non-enumerable.
 
-The six settlement shapes (the T7 matrix mirrors this table):
+The seven settlement shapes (the T7 matrix mirrors this table):
 
 | `outcome`   | `halt`          | `refinement`      | `engineError`                                | meaning                                                                         |
 | ----------- | --------------- | ----------------- | -------------------------------------------- | ------------------------------------------------------------------------------- |
 | `completed` | natural         | —                 | —                                            | the program ran out                                                             |
 | `errored`   | present (throw) | iff branded limit | —                                            | the program threw (learner error or iteration limit)                            |
 | `errored`   | `null`          | —                 | `worker-error` / `call-error` / `hook-error` | the engine ended the run — `call-error` is the dialog-without-provider terminal |
+| `errored`   | present (throw) | —                 | `hook-error`                                 | the one coexistence corner: a thread hook threw while refining an errored halt  |
 | `cancelled` | `null`          | —                 | —                                            | consumer cancel (or a broken-out `for await`)                                   |
 | `failed`    | `null`          | —                 | — (`failReason` present)                     | consumer `fail(reason)`                                                         |
 | `timed-out` | `null`          | —                 | `timeout`                                    | the time budget exhausted                                                       |
 
 ## Structure
 
-| File / directory            | Purpose                                                                                                                       |
-| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `trace-semantics.ts`        | Public entry: `traceSemantics(code, config?)` — gate, prepare, instrument, build the engine generator, wrap the typed handle  |
-| `types.ts`                  | The public contract: result, settlement, handle, halt, refinement                                                             |
-| `config.types.ts`           | `TraceConfig` / `TraceOptions` — the layer-gate contract                                                                      |
-| `options.schema.json`       | JSON Schema for `TraceOptions`; drives default-filling in `prepare/`                                                          |
-| `semantics-worker-entry.ts` | Thin worker entry wiring the engine bootstrap to this tracer's worker logic                                                   |
-| `semantics-worker-setup.ts` | Worker logic: advice registration, dispatcher wiring, dialog traps, halt author                                               |
-| `semantics-thread-logic.ts` | Thread logic: message narrowing, dialog servicing, iteration-limit refinement                                                 |
-| `prepare/`                  | Config pipeline: expand shorthand → fill defaults → validate → cross-field checks                                             |
-| `tracing/`                  | The Aran instrumentation pipeline: digest/tags, weaving (pointcuts + advice), event generators, value representation, linking |
-| `tests/`                    | Tracer-level suites: profiles, schema conformance, semantic equivalence, browser fidelity                                     |
+| File / directory            | Purpose                                                                                                                        |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `trace-semantics.ts`        | Public entry: `traceSemantics(code, config?)` — gate, prepare, instrument, call the engine factory, wrap the typed handle      |
+| `types.ts`                  | The public contract: result, settlement, handle, halt, refinement                                                              |
+| `config.types.ts`           | `TraceConfig` / `TraceOptions` — the layer-gate contract                                                                       |
+| `options.schema.json`       | JSON Schema for `TraceOptions`; drives default-filling in `prepare/`                                                           |
+| `semantics-worker-entry.ts` | Thin worker entry wiring the engine bootstrap to this tracer's worker logic                                                    |
+| `semantics-worker-setup.ts` | Worker logic: advice registration, dispatcher wiring, dialog traps, halt author                                                |
+| `semantics-thread-logic.ts` | Thread logic: message narrowing, dialog servicing, iteration-limit refinement                                                  |
+| `prepare/`                  | Config pipeline: expand shorthand → fill defaults → validate → cross-field checks                                              |
+| `tracing/`                  | The Aran instrumentation pipeline: digest/tags, weaving (pointcuts + advice), event generators, value representation, indexing |
+| `tests/`                    | Tracer-level suites: profiles, schema conformance, semantic equivalence, browser fidelity                                      |
+
+## Notional-machine correspondence
+
+The event vocabulary is litigated against the ECMAScript spec (with the Aran
+author) and locked; this section is the correspondence the
+[notional machine](../../../../language-levels/just-enough-javascript/notional-machine.md)
+canon asks for, so a learner reading the canon — or using both tracers — meets
+one consistent machine.
+
+**Scope + binding moments → the canon:**
+
+| This tracer                            | Notional machine                                               | Note                                                                                                                 |
+| -------------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `scope` create                         | environment created (creation phase begins)                    | The environment EXISTS but is not yet entered — the moment TDZ starts.                                               |
+| `scope` enter                          | execution enters the environment                               | Distinct from create: creation-phase vs execution-phase is the pair that teaches the TDZ.                            |
+| `scope` interrupt / completion / leave | pop (with `reason`: normal / break / continue / error / limit) | The five Aran-shaped moments; the exit moments carry the NM's observable pop `reason`.                               |
+| `variable` declare                     | binding created into TDZ (creation phase)                      | One per declared binding at scope create.                                                                            |
+| `variable` initialize                  | binding receives its first value (TDZ ends)                    | `explicit` distinguishes `let x = 5` from `let x;`.                                                                  |
+| `variable` available                   | binding is usable                                              | The moment initialize makes the binding readable; a separate event so a lens can mark TDZ-exit.                      |
+| `scope` kind `for` / `for-of`          | the loop-head / per-iteration environment                      | One create/enter PER ITERATION (a push per iteration); the loop var's events reference that iteration's create step. |
+| `scopeChainWalk` / `protoChainWalk`    | the resolution walk (the canon's central leverage point)       | Optional; the chain of hits/misses that explains shadowing and the ReferenceError.                                   |
+
+**Cross-tracer (variables ↔ semantics), same program:** the sibling
+[`../variables/`](../variables/) tracer models the SAME scope structure with its
+own vocabulary. Both are NM-faithful; the mapping:
+
+| Variables tracer                       | Semantics tracer                                                     |
+| -------------------------------------- | -------------------------------------------------------------------- |
+| scope push + declare burst             | `scope` create + per-binding `variable` declare                      |
+| scope pop (+ reason)                   | `scope` interrupt/leave (+ `reason`)                                 |
+| `for` / `for-of` scope                 | `scope` kind `for` / `for-of` (same per-iteration model)             |
+| initialize / read / assign / increment | `variable` initialize / read / update, dual-perspective `assignment` |
 
 ## Navigation
 

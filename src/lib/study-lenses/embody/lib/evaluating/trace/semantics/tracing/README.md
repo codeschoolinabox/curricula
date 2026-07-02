@@ -7,31 +7,32 @@ events back onto the ast record after the run settles. The sandbox that executes
 the instrumented source is the engine's — this module never touches a Worker or
 the transport.
 
-The ubiquitous language (trace event, linked event, nodePath, ast record,
-linking, runtime gate bundle, co-gating, provenance, visit counts, JejTag,
-pointcut, advice, dispatcher) is pinned once, in
+The ubiquitous language (trace event, chained event, nodePath, ast record,
+indexing, eventsByNode, runtime gate bundle, co-gating, provenance, visit
+counts, JejTag, pointcut, advice, dispatcher) is pinned once, in
 [`../README.md § Glossary`](../README.md); this module adds no vocabulary of its
 own.
 
 ## What lives here
 
-| File / directory    | Purpose                                                                                                                       |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `instrument.ts`     | Main-thread pipeline: pre-walk → parse → digest (tag map) → aspect assembly → weave → generate; builds the mutable ast record |
-| `link.ts`           | Post-settlement linking: node refs onto events, per-node event lists, visits from the halt, cycle-guarded freeze              |
-| `types.ts`          | The event contract: wire-safe `TraceEvent` union, `LinkedTraceEvent`, `ASTNode`, value representations                        |
-| `weaving/`          | Pointcuts (weave-time gating + discriminants) and advice (runtime observation + dispatch)                                     |
-| `event-generators/` | Pure factory functions, one per event category                                                                                |
-| `represent-value/`  | Clone-safe value representation (built worker-side, before the boundary)                                                      |
-| `tests/`            | T2 engine-seam conformance + T3 pipeline-seam suites ([`tests/README.md`](./tests/README.md))                                 |
+| File / directory    | Purpose                                                                                                                                           |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `instrument.ts`     | Main-thread pipeline: pre-walk → parse → digest (tag map) → aspect assembly → weave → generate; builds and freezes the acyclic ast record         |
+| `link.ts`           | Post-settlement indexing: the `prev`/`next` event chain + the `eventsByNode` map (no mutation — the ast is frozen at instrument, events at yield) |
+| `types.ts`          | The event contract: wire-safe `TraceEvent` union, delivered `ChainedTraceEvent`, acyclic `ASTNode`, value representations                         |
+| `weaving/`          | Pointcuts (weave-time gating + discriminants) and advice (runtime observation + dispatch)                                                         |
+| `event-generators/` | Pure factory functions, one per event category                                                                                                    |
+| `represent-value/`  | Clone-safe value representation (built worker-side, before the boundary)                                                                          |
+| `tests/`            | T2 engine-seam conformance + T3 pipeline-seam suites ([`tests/README.md`](./tests/README.md))                                                     |
 
 ## Two facts that shape everything
 
 - **Wire safety.** Events cross the worker boundary by structured clone, so
   every event field is a scalar or plain frozen object; `nodePath` (a string) is
-  the link to syntax during streaming, and the direct `.node` reference exists
-  only after linking. Events sharing a `nodePath` describe the same construct
-  from different perspectives (the dual-perspective rule —
+  the link to syntax — always, there is no `.node` reference. The delivered
+  events add only the non-enumerable `prev`/`next` chain (thread-built). Events
+  sharing a `nodePath` describe the same construct from different perspectives
+  (the dual-perspective rule —
   [`../README.md § Event categories`](../README.md)).
 - **Weave-time gating.** Config gates are resolved while weaving: a disabled
   gate injects no advice call at all. Only the runtime gate bundle (range

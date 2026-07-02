@@ -23,6 +23,14 @@ Taxonomy: [`../DOCS.md § Test taxonomy`](../DOCS.md).
   seam). The fake structured-clones every payload, so clone-safety violations
   surface here — but a green fake run is evidence for logic, never for transport
   fidelity.
+- **Dialog providers vs the fake's contract.** The fake transport is built
+  around ONE thread-logic object, but this tracer resolves its dialog provider
+  per run (so the thread logic closes over that run's providers). The Node
+  harness bridges this by constructing the fake with the run's thread logic — a
+  test helper builds `traceSemantics`'s spec and hands the SAME thread-logic
+  instance to the fake, rather than assuming a static module singleton. Pin this
+  in the T2 conformance helper so no suite reaches for a shared thread logic
+  that the per-run dialog closure would break.
 - **The browser suite** runs the real worker + shared-memory transport
   (COOP/COEP provisioned by the vitest workspace). Its matrix is per-settlement:
   completed / errored (halt attribution) / cancelled (break mid-stream) /

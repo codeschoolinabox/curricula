@@ -140,10 +140,14 @@ functions, Maps, Sets, Dates, or class instances.
 
 Not two categories (internal/dispatch). One set of advice functions that:
 
-1. Always update internal state (scope stack, variable maps, step counter)
-2. Conditionally call `emitExpression()` / `emitResolve()` based on config
+1. Always update internal run state (scope stack, variable maps, and the
+   recorded emitted-steps for cross-references) — but NOT any step counter: the
+   single step number is minted by the dispatcher at emission, after the runtime
+   gates, so nothing that fails a gate consumes a number.
+2. Conditionally hand a payload to the dispatcher (`emit-expression` /
+   `emit-resolve` / `emit-error`) based on the co-gating discriminant.
 
-An `if` check before calling the wrapper is simpler than maintaining two
+An `if` check before calling the dispatcher is simpler than maintaining two
 parallel advice systems.
 
 ## State design
@@ -206,26 +210,26 @@ internal identifier ever appears on an event.
 
 ## ASTNode lifecycle
 
-ASTNodes are built during `instrument()` with `events: []` and `visits: 0`. They
-are **NOT frozen at instrument time** — they stay mutable until `link()`
-completes after execution (when `.events[]` and `.visits` are populated and
-frozen).
+ASTNodes are built during `instrument()` and **FROZEN there** — the record is a
+pure function of the source and never changes during or after the run. It is
+ACYCLIC: a node carries `parentPath` (a string), never a `parent` back-ref, and
+no event ref. So there is no cycle guard and no post-run mutation of the record.
 
 `TraceEvent.nodePath` stores a **nodePath string** — not an ASTNode. Advice
-emits events via `emitExpression(state, tag, nodePath, category, data)` and
-`emitResolve(state, tag, nodePath, kind, value)`. Both keep events wire-safe.
+hands the dispatcher a payload; the dispatcher stamps the wire-safe base fields
+(`nodePath` among them) and emits. Events never carry a node reference.
 
-`block@throwing` advice on the outermost block calls
-`emitError(state, tag, nodePath, error)` then returns the error (re-throws).
-Location is approximate (last emitted nodePath). Gated by
+`block@throwing` advice on the outermost block hands the error dispatcher the
+thrown value; the error event's location is approximate — the last emitted node,
+or the Program node when nothing was emitted (`attribution`). Gated by
 `config.errors !== false`.
 
-Two-way linking (`ASTNode.events[]`) is built **post-execution** by the internal
-`link()` — never during execution. Advice never writes to ASTNode objects.
-
-Cycle guard: `deepFreezeInPlace` uses a `visited: Set` to handle both
-`ASTNode.parent` and `events[i].node` circular refs (both formed after
-`link()`).
+The two directions of navigation are built **post-settlement**, thread-side, by
+the indexing pass — NOT during execution and NOT by mutating anything frozen:
+`TraceResult.eventsByNode` (nodePath → the `step`s that fired) is a fresh map,
+and the delivered events carry a `prev`/`next` chain (non-enumerable). Advice
+never writes to ASTNode objects, and the indexer never writes into the frozen
+ast record or a frozen event.
 
 ## Pointcut → advice data flow
 

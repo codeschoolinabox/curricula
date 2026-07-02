@@ -83,9 +83,9 @@ gates are open.
   `state.lastEmittedNodePath` and `state.lastEmittedTag`.
 - `emit-resolve.ts` — `emitResolve(state, tag, nodePath, kind, value)`: same
   mechanics, also increments `state.visitCounts[nodePath]`. Produces a
-  `ResolveEvent`. Called independently by advice after the expression event.
-  Two-way linking (`ASTNode.events`) is built by `link()` post-execution — NOT
-  by these emitters.
+  `ResolveEvent`. Called independently by advice after the expression event. The
+  node → events index (`eventsByNode`) is built post-settlement by the indexing
+  pass — NOT by these emitters, which never touch the frozen ast.
 - `lookup-variable.ts` — Walks scopeStack top-down to find variable info.
 
 ## Shared constants (in parent directory)

@@ -30,10 +30,12 @@ instrumentation pipeline's own architecture:
 3. **Instrument** (sync, pure) — the Aran weave, on the main thread. Input: the
    validated program + resolved options. Output: the instrumented source string
    (carrying the weave-time decisions: which advice calls exist at all, each
-   with its tag and discriminants), the tag map, and the mutable ast record
-   (every node keyed by path, events empty, visits zero). Layer gating is
-   decided here — a disabled gate means no advice call is woven, so disabled
-   layers cost nothing at runtime.
+   with its tag and discriminants), the tag map, and the ast record — built and
+   FROZEN here (it is a pure function of the source and never changes during or
+   after the run; it is ACYCLIC — nodes carry `parentPath`, not a `parent`
+   back-ref — so which events fired on a node, and its visit count, live on the
+   RESULT, not the node). Layer gating is decided here — a disabled gate means
+   no advice call is woven, so disabled layers cost nothing at runtime.
 
 4. **Run and emit** (factory call sync and lazy; emission async) — assemble the
    engine spec (instrumented source + thin worker entry + the runtime gate
@@ -42,13 +44,16 @@ instrumentation pipeline's own architecture:
    pull. (The entry also forwards the engine's test-only transport seam,
    sibling-style — invisible to the public signature; the Node suites run on the
    engine's fake transport through it.) Worker-side, the advice observes each
-   moment, builds the event, and hands it to the dispatcher, which applies the
-   runtime gates (range window, name filters), stamps the wire-safe base fields
-   and the step, freezes the event, accumulates visit counts, and emits. Dialog
-   calls block the worker on the engine's call channel until the thread's
-   provider answers with the real value. The loop cap throws the branded limit
-   error; the halt author classifies it structurally and carries the visit
-   counts on every worker-side stop, natural end included.
+   moment, builds the event, and hands it to the dispatcher, which — for a
+   resolve event — bumps the node's visit count FIRST (before any gate, so
+   counts are range- and filter-independent), then applies the runtime gates
+   (range window, name filters); an event that survives the gates consumes the
+   next step number (numbering lives at the emission layer, after the gates —
+   only emitted events are numbered), is stamped with its wire-safe base fields,
+   frozen, and emitted. Dialog calls block the worker on the engine's call
+   channel until the thread's provider answers with the real value. The loop cap
+   throws the branded limit error; the halt author classifies it structurally
+   and carries the visit counts on every worker-side stop, natural end included.
 
 5. **Narrow** (per message, pure) — the thread maps one opaque worker message to
    one typed trace event, or drops a malformed one. Stateless; the worker
@@ -59,11 +64,15 @@ instrumentation pipeline's own architecture:
    when the halt carries the brand, the engine error or fail reason when the
    engine or consumer ended the run, and the consumed duration.
 
-7. **Link** (sync, after any settlement) — attach each event's node reference,
-   back-fill each node's event list, mirror the halt's visit counts onto the
-   nodes (zero when no halt), and deep-freeze the ast record (cycle-guarded).
-   Output: the trace result — linked events, source echo, frozen ast, options
-   snapshot, visit counts, settlement.
+7. **Index** (sync, after any settlement) — no mutation of any frozen thing:
+   build the doubly-linked `prev`/`next` chain over the delivered events
+   (thread-side, non-enumerable fields, so the wire events stayed scalar and the
+   whole result stays JSON-safe), and the `eventsByNode` index (nodePath → the
+   `step`s that fired there). The ast record was already frozen at Instrument;
+   visit counts ride the halt (empty when no halt). Output: the trace result —
+   chained events, source echo, frozen acyclic ast, `eventsByNode`, options
+   snapshot, visit counts, settlement. Assembly is one-shot; the facade memoizes
+   it so repeated `result` access returns the same object.
 
 ### Data flow
 
@@ -71,9 +80,9 @@ instrumentation pipeline's own architecture:
 flowchart TD
     SRC[JEJ source string + raw config] -->|gate + prepare — sync, throws on parse / JEJ violation / invalid config| VALID[validated program + resolved options + runtime gates + dialog provider]
     VALID -->|instrument — pure, main thread, weave-time gating| CODE[instrumented source carrying tags and discriminants]
-    VALID -->|instrument — same pass, stays thread-side| RECORD[tag map + mutable ast record]
+    VALID -->|instrument — same pass, stays thread-side| RECORD[tag map + frozen acyclic ast record]
     CODE -->|engine spec: code + worker entry + runtime gate bundle + thread logic + time budget| RUN[running program in engine sandbox — lazy]
-    RUN -->|advice observes · dispatcher gates, stamps, freezes, counts visits| MSG[wire-safe event message]
+    RUN -->|advice observes · dispatcher counts visit, then gates, numbers, stamps, freezes| MSG[wire-safe event message]
     MSG -->|narrow — pure, malformed → drop| EVENT[typed trace event on the stream]
     RUN -->|dialog call — blocks the program| REQ[dialog request]
     REQ -->|serviced by the resolved provider — or a call-error stop| VAL[real dialog value]
@@ -84,7 +93,7 @@ flowchart TD
     EVENT -->|accumulated stream| LINKIN[settled run: events + settlement]
     SETTLEMENT --> LINKIN
     RECORD --> LINKIN
-    LINKIN -->|link — node refs · per-node event lists · visits from the halt, zero without one · cycle-guarded freeze| RESULT[trace result: linked events · code · frozen ast · options · visit counts · settlement]
+    LINKIN -->|index — prev/next chain · eventsByNode · visits from the halt, zero without one · memoized, no mutation| RESULT[trace result: chained events · code · frozen acyclic ast · eventsByNode · options · visit counts · settlement]
 ```
 
 ### Structural constraints
@@ -97,8 +106,11 @@ flowchart TD
   into a settlement — never an exception.
 - **Instrument is pure and range-independent.** Same program + same options →
   same instrumented source. The runtime-checked gates (range window, name
-  filters, iteration cap) ride the worker config, never the woven code — a
-  highlight change never re-instruments.
+  filters, iteration cap) ride the worker config, never the woven code — so the
+  woven output is range-independent (cache-friendly for a FUTURE caching seam).
+  Today there is no instrument-once/run-many API, so each `traceSemantics` call
+  re-instruments; the range property is what a cache would exploit, not a
+  promise the current surface keeps.
 - **Weave-time gating is total for layer gates.** A disabled gate produces no
   advice call at all (no runtime check, no invocation). The runtime gate bundle
   carries exactly three things: the range window and the name filters (checked
@@ -108,14 +120,19 @@ flowchart TD
 - **Gating is worker-side, always.** Every emission costs a full engine pause
   round-trip even when dropped; nothing may be gated in the thread's narrow
   phase. The narrow phase drops only malformed messages.
-- **Events are wire-safe until linking.** No event field references the ast; the
-  node reference exists only on the linked result. The dispatcher stamps every
-  base field so the thread stays stateless.
-- **The worker holds the only mutable RUN state; per-message thread processing
-  is pure.** Scope stack, counters, provenance ids, visit counts live
-  worker-side; the thread narrows, services dialogs, and refines. The single
-  thread-side mutation is the one post-settlement linking pass over the
-  (deliberately still-mutable) ast record.
+- **Events are wire-safe, always.** No event field ever references the ast —
+  attribute via `nodePath` into the frozen record. The delivered events add only
+  the `prev`/`next` chain (non-enumerable, thread-built); each event is frozen
+  once at yield and never mutated. The dispatcher stamps every base field so the
+  thread stays stateless.
+- **The worker holds the only mutable RUN state; the thread mutates nothing
+  frozen.** Scope stack, counters, provenance ids, visit counts live
+  worker-side; the thread narrows, services dialogs, and refines. The Index
+  phase builds NEW structures (the chain wrappers, the `eventsByNode` map) — it
+  never writes into the already-frozen ast record or a frozen event. The one
+  mutable closure it does hold — the `next` pointer each chain accessor reads —
+  is a named exception to the no-mutable-closure rule (DEV.md), scoped to the
+  narrow phase.
 - **Limit classification is structural.** The loop cap throws a branded error;
   the halt author recognizes the brand; the refinement types it. Message text is
   never matched, so a learner-thrown error can never be misclassified as an
@@ -123,10 +140,10 @@ flowchart TD
 - **Dialog values are real or the run fails.** The provider answers with the
   real value; with no provider in reach, the run settles as a call error. A
   fabricated dialog value never enters the data layer.
-- **Linking runs exactly once, after any settlement.** It is not idempotent
-  (per-node event lists would double); the single call site is the entry's
-  result assembly. Visit counts default to zero when the run ended without a
-  halt.
+- **Indexing runs exactly once, after any settlement.** The single call site is
+  the entry's result assembly; the facade memoizes the result so repeated
+  `result` access does not rebuild the chain or index. Visit counts default to
+  zero when the run ended without a halt.
 - **The error channel never replaces the halt.** The error event is emitted
   (config-gated) and the error re-thrown, so the settlement still carries the
   halt with the same approximate attribution. Disabling the channel suppresses
@@ -159,10 +176,10 @@ shared-memory pause protocol borrowed from a sibling, a bespoke message pump,
 timeout heuristics, and string-matched limit classification. All of that is the
 engine's job, done once and conformance-tested. What remains here is exactly the
 domain: instrumentation, gating, event vocabulary, non-time limits, dialog
-semantics, linking. The worker logic registers the advice on the worker's global
-scope (the engine's documented channel for lookup-resolved instrumentation),
-wires the dispatcher's emission to the engine's emit, and authors the halt; the
-thread logic narrows, services dialogs, and refines.
+semantics, indexing. The worker logic registers the advice on the worker's
+global scope (the engine's documented channel for lookup-resolved
+instrumentation), wires the dispatcher's emission to the engine's emit, and
+authors the halt; the thread logic narrows, services dialogs, and refines.
 
 ### Runtime errors are ECMA-faithful — the gate never pre-empts them
 
@@ -217,13 +234,34 @@ Visit counts increment once per logical evaluation (an increment expression is
 one visit, not its three desugared sub-events), so they mean what a learner sees
 on the page.
 
-### Always linked
+### Always indexed, never mutated
 
 The ast record and every streamed event live thread-side by the time any
-settlement arrives, so linking is unconditional — a cancelled or timed-out run
-still returns navigable, linked events. What an engine-made stop cannot deliver
-is the worker's metrics (visit counts ride the halt), so those default to zero —
-absence of evidence, stated as such.
+settlement arrives, so indexing is unconditional — a cancelled or timed-out run
+still returns a fully chained, navigable stream. And it is pure construction,
+not linking-by-mutation: the old design tried to attach a `.node` ref onto each
+event and back-fill `node.events[]`, but the engine freezes every event at yield
+(a strict-mode write would throw) and a `parent` back-ref made the ast cyclic.
+The human's chain design dissolves both: events are immutable and navigate by
+`nodePath` + `prev`/`next`; the ast is acyclic and frozen at instrument time;
+back-refs are a fresh `eventsByNode` index. No cycle, no mutation, no
+serialization replacer. What an engine-made stop cannot deliver is the worker's
+metrics (visit counts ride the halt), so those default to zero — absence of
+evidence, stated as such.
+
+### The timer measures runtime, not event count (D4 — an engine requirement)
+
+A learner tracing a loop must not hit a surprise timeout on a program that
+finishes instantly. The timeout MUST measure only elapsed worker RUNTIME —
+pausing for I/O (a dialog round-trip) AND for consumer think-time (an event
+awaiting its pull) — never a synthetic per-event charge. The engine today
+deducts a flat per-yield charge that makes the budget scale with EMITTED-EVENT
+COUNT (at expression granularity, ~1000 events exhausts the default budget with
+zero real runtime), which violates this requirement. This tracer cannot fix it
+alone — the charge lives in the engine's pause path. So this is a **cross-module
+requirement on the engine**: a runtime-only budget (a yield-charge opt-out).
+Until it lands, the tracer's `seconds` is not a learner-honest limit for dense
+traces; loop safety meanwhile rests on the `iterations` cap, not the clock.
 
 ## Test taxonomy
 

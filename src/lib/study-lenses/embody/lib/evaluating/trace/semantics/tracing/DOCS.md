@@ -1,9 +1,9 @@
 # tracing — Architecture
 
 The instrumentation pipeline: validated source in, instrumented source + tag
-map + mutable ast record out, plus the worker-side machinery (advice,
+map + frozen acyclic ast record out, plus the worker-side machinery (advice,
 dispatcher, event generators, value representation) that the woven code drives
-at runtime and the linking pass that assembles the final result. The sandbox
+at runtime and the indexing pass that assembles the final result. The sandbox
 itself — worker lifecycle, transport, time budget — is the engine's
 ([`../../../../../../lib/engine/DOCS.md`](../../../../../../lib/engine/DOCS.md));
 the enclosing tracer's phase map is
@@ -24,9 +24,11 @@ the enclosing tracer's phase map is
    properties) into a tag map keyed by node path. Input: AST + parent info.
    Output: Aran IR + tag map.
 
-3. **Build the ast record** (sync) — every node keyed by path, with parent
-   references and their scalar path twins, empty event lists, zero visits.
-   Deliberately MUTABLE — linking populates and freezes it after the run.
+3. **Build + freeze the ast record** (sync) — every node keyed by path, with
+   `parentPath` (a string — no `parent` back-ref) and its ESTree children; no
+   event list and no visit count on the node (those live on the result). FROZEN
+   here — a pure function of the source, acyclic (so JSON-safe), never changed
+   during or after the run.
 
 4. **Aspect assembly** (sync, pure) — read the resolved options and the tag map
    to build the pointcuts and the advice registry. Each pointcut is wrapped so
@@ -49,10 +51,13 @@ the enclosing tracer's phase map is
    exceeded. The program-level throwing hook emits the error event (approximate
    location) and re-throws.
 
-7. **Link** (sync, thread-side, after any settlement) — for each streamed event,
-   attach the node reference from the ast record; back-fill each node's event
-   list; mirror the halt's visit counts onto node visits (zero without a halt);
-   deep-freeze the record with a cycle guard. Never called twice.
+7. **Index** (sync, thread-side, after any settlement) — build, without mutating
+   anything: the doubly-linked `prev`/`next` chain over the events
+   (non-enumerable fields) and the `eventsByNode` map (nodePath → the `step`s
+   that fired there). The ast record was already frozen at Instrument (acyclic,
+   no `parent` back-ref), and events are frozen at yield — nothing is written
+   into either. Visit counts come from the halt (zero without one). Runs once;
+   the result is memoized.
 
 ### Data flow
 
@@ -61,7 +66,7 @@ flowchart TD
     A[validated source + resolved options] -->|pre-walk, pure| B[parent info map]
     A -->|transpile with digest, side-effectful| C[Aran IR + tag map]
     B --> C
-    C -->|build record| D[mutable ast record: path → node, empty events, zero visits]
+    C -->|build record · freeze| D[frozen acyclic ast record: path → node, parentPath only]
     C -->|aspect assembly — weave-time gating, tag resolution, discriminants| E[pointcuts + advice registry]
     E -->|weave · retropile standalone · generate| F[instrumented source string]
     F -->|runs in the engine sandbox| G[advice fires per observable moment]
@@ -70,7 +75,7 @@ flowchart TD
     H -->|visit counts ride the halt payload — absent on engine-made stops| K[halt-carried visit counts]
     D --> J
     K --> J
-    I -->|link — once, after any settlement| J[frozen ast record + linked events + node visits]
+    I -->|index — once, after any settlement, no mutation| J[chained events + eventsByNode + visit counts]
 ```
 
 ### Structural constraints
@@ -79,17 +84,19 @@ flowchart TD
   complete before aspect assembly — transpile → aspect → weave, in that order.
 - **The tag map never crosses to the worker.** Tags reach advice embedded in the
   woven source (pointcut return arrays are code-generated); the map stays
-  thread-side, solely for building the ast record. It can never ride the initial
-  state (Aran code-generates state; a Map cannot be expressed).
+  thread-side, solely for building the (immediately frozen) ast record. It can
+  never ride the initial state (Aran code-generates state; a Map cannot be
+  expressed).
 - **Everything code-generated is JSON.** Pointcut return arrays and the initial
   state are reconstructed as generated code — plain JSON shapes only, no
   functions, Maps, Sets, or class instances. The emission callback is installed
   by the worker logic at setup (a worker global), never part of the generated
   state.
-- **The ast record freezes after linking, not after digest.** Parent references
-  exist from digest time; event lists and visits arrive at link time; the freeze
-  is cycle-guarded (parent and event-node references are circular) and
-  single-shot.
+- **The ast record freezes at instrument time and is acyclic.** Nodes carry
+  `parentPath` (a string), never a `parent` back-ref, so there is no cycle and
+  no cycle-guard; which events fired on a node and its visit count live on the
+  result (`eventsByNode`, `visitCounts`), not the node. The record never changes
+  during or after the run.
 - **Value representation runs worker-side.** After the clone boundary an Error's
   prototype is stripped (`instanceof Error` fails), so thrown values and event
   payload values are represented where they are still themselves.
@@ -128,10 +135,14 @@ type BaseEvent = {
 ```
 
 An earlier design carried `node: ASTNode` (a direct reference). The final design
-uses `nodePath` plus `type`, `loc`, `source` stamped at emit time:
-`ASTNode.parent` is circular, structured clone throws on circular objects, and
-events must cross the worker boundary. The full node is recoverable via
-`ast[event.nodePath]` after linking (`event.node` on the linked result).
+uses `nodePath` plus `type`, `loc`, `source` stamped at emit time — a direct
+node ref would have been circular (via `ASTNode.parent`) and could not
+structured-clone across the worker boundary, and the engine freezes the event at
+yield so nothing could be attached later. The node is recovered via
+`ast[event.nodePath]`; the events that fired on a node are found via
+`TraceResult.eventsByNode[nodePath]`. The delivered event also carries the
+`prev`/`next` chain (thread-built, non-enumerable) for whole-stream traversal —
+still no node ref, still immutable.
 
 `semantics` is fixed per event VARIANT (encoded in the types — a generator
 cannot stamp the wrong layer and still typecheck). The five values map the
@@ -163,9 +174,34 @@ substitution (below) relies on one tag serving several paths.
 For `x++` / `++x` / `x--` / `--x`, Aran desugars into read + arithmetic +
 assign, each with its own path pointing at the desugared sub-expression. The
 tracer substitutes the UpdateExpression's own path for all three sub-events, so
-the linked record shows all of them on the node the learner wrote, and the visit
-count registers one logical evaluation. The `prefix` tag field gates
-`increment.prefix` / `increment.postfix` at weave time.
+`eventsByNode` groups all of them under the node the learner wrote, and the
+visit count registers one logical evaluation.
+
+**Mechanism note (verified on aran@5.2.2):** the `prefix` tag does NOT reach a
+woven node the way the pointcut expects — the desugar makes the sub-nodes
+inherit the argument Identifier's hash, so no AranLang node ever carries the
+UpdateExpression's own tag. The `prefix` gate and the path re-stamp therefore
+ride the **pre-walk propagation** pattern already used for `bindingKind`
+(propagate the UpdateExpression's metadata onto the argument node before
+transpile), not a tag read at the sub-node. Implementation detail, not a
+redesign.
+
+### Runtime-error fidelity: the Aran situ that actually throws
+
+**Verified empirically on aran@5.2.2.** The legacy pipeline (`kind: 'eval'` +
+`situ: { type: 'local', mode: 'strict' }` + standalone retropile) can NEVER
+reproduce a global-read ReferenceError: standalone's default `scope.read`
+parameter returns cached accessor arrows UNINVOKED, so every global read
+(declared or not) mistraces — this is the observed `"5() => boom"` fabrication.
+The mechanism that IS faithful, proven end-to-end (ReferenceError at the
+evaluation moment, never-taken branch silent, TDZ/const throws, `block@throwing`
+observes the error, all JEJ constructs pass): **`kind: 'eval'`,
+`situ: { type: 'global' }`, and a `'use strict'` directive injected into the
+Program AST.** This is the pinned I-9b mechanism; the woven runtime throws real
+errors, and I-9b's tests pin the error NAME, never the message text (aran
+authors its own TDZ/const messages). One named boundary: under a global situ,
+worker-realm names (`self`, `postMessage`, …) resolve instead of throwing —
+real-realm browser tests cover it (and may shadow common worker globals).
 
 ### ControlFlow split into three granular categories
 

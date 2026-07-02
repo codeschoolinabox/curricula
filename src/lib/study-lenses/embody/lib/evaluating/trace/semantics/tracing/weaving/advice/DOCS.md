@@ -424,8 +424,8 @@ The advice substitutes the UpdateExpression's own syntaxId for all three
 sub-events. All three calls to `emitExpression()` and `emitResolve()` use the
 UpdateExpression syntaxId instead of the desugared sub-expression syntaxId.
 
-After `link()`, `linked.ast[updateExpressionSyntaxId].events` contains all three
-sub-events, grouped under the original source node.
+After indexing, `eventsByNode[updateExpressionNodePath]` contains all three
+sub-events' `step`s, grouped under the original source node.
 
 **Detection**: the pointcut reads `JejTag.prefix` (present on UpdateExpression
 nodes, absent on other nodes). `prefix: true` = `++x`/`--x` (prefix form),
