@@ -108,16 +108,28 @@
 }
 
 /*
- * The output-panels column keeps its internal vertical stacking (User Interface
- * above Developer Console) via a non-content-row-child selector, since it is now
- * nested in the Splitter's sized pane. Its WIDTH comes from that pane's px basis
- * (no longer `flex: 0 1 24rem` here). Inc C supersedes this stacking with the
- * vertical Splitter.
+ * The output-panels column stacks its children vertically — the vertical
+ * <Splitter> (User Interface above Developer Console) and, after it, the pending
+ * dialog. Its WIDTH comes from the horizontal Splitter's sized-pane px basis (no
+ * longer `flex: 0 1 24rem`). The UI/console stacking itself is the column
+ * Splitter's job now (inc C); this rule only lays the Splitter + dialog out.
  */
 [data-orchestrator-root] [data-orchestrator-output-panels] {
 	display: flex;
 	flex-direction: column;
 	gap: 0.5rem;
+}
+
+/*
+ * The vertical Splitter fills the panels column so it divides the full column
+ * height (= the active-surface height, via the horizontal Splitter's stretch)
+ * between the UI and console panels; a pending dialog takes natural height below.
+ */
+[data-orchestrator-root]
+	[data-orchestrator-output-panels]
+	> [data-orchestrator-splitter] {
+	flex: 1 1 auto;
+	min-height: 0;
 }
 
 /* Each output panel stacks its dismiss control above its log; the User

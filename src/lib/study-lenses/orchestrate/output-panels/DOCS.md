@@ -70,6 +70,15 @@ up, mirroring [`../dock/DOCS.md`](../dock/DOCS.md).)
   `-output-panel-dismiss="<ChannelKind>"` (each ✕). The interactive controls
   (`-pending-dialog` + input + OK / Cancel) carry stable test selectors; tests
   anchor on attribute, never label text.
+- **The two panels are laid out by a vertical `<Splitter>`**
+  ([`../splitter/`](../splitter/DOCS.md)): User Interface (the sized pane) above
+  Developer Console (the flex pane), with a draggable divider between them; the
+  pending dialog renders AFTER the Splitter (still inside the section, so it
+  stays answerable even when both panels are dismissed). A presentational
+  wrapper — it changes DOM nesting (the panels sit in `-splitter-pane` wrappers,
+  no longer adjacent siblings), not the prop flow. Single-pane with no handle
+  when one channel is dismissed; renders nothing when both are (the section root
+  stays).
 
 ## Out of scope
 

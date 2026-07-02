@@ -48,6 +48,7 @@
 
 import React from 'react';
 
+import Splitter from '../splitter/index.js';
 import type {
 	ChannelKind,
 	InteractionAnswer,
@@ -127,52 +128,67 @@ function OutputPanels({
 	const promptInputReference = React.useRef<HTMLInputElement>(null);
 	return (
 		<section data-orchestrator-output-panels aria-label="program output">
-			{dismissed['user-interface'] ? null : (
-				<div data-orchestrator-output-panel="user-interface">
-					{pending === null ? (
-						<button
-							type="button"
-							data-orchestrator-output-panel-dismiss="user-interface"
-							aria-label="dismiss user-interface panel"
-							onClick={() => onDismiss('user-interface')}
-						>
-							✕
-						</button>
-					) : null}
-					<div
-						data-orchestrator-output-channel="user-interface"
-						role="log"
-						aria-live="polite"
-						aria-label="user-interface output"
-					>
-						{output['user-interface'].map((line, index) => (
-							<div key={index}>{line}</div>
-						))}
-					</div>
-				</div>
-			)}
-			{dismissed['developer-console'] ? null : (
-				<div data-orchestrator-output-panel="developer-console">
-					<button
-						type="button"
-						data-orchestrator-output-panel-dismiss="developer-console"
-						aria-label="dismiss developer-console panel"
-						onClick={() => onDismiss('developer-console')}
-					>
-						✕
-					</button>
-					<div
-						data-orchestrator-output-channel="developer-console"
-						role="log"
-						aria-live="polite"
-						aria-label="developer-console output"
-					>
-						{output['developer-console'].map((line, index) => (
-							<div key={index}>{line}</div>
-						))}
-					</div>
-				</div>
-			)}
+			<Splitter
+				orientation="column"
+				sizedPane="first"
+				resizeMode="proportional"
+				defaultBasisPx={200}
+				minPx={96}
+				maxPx={1200}
+				maxFraction={0.75}
+				stepPx={16}
+				label="resize the user interface and the developer console"
+				first={
+					dismissed['user-interface'] ? null : (
+						<div data-orchestrator-output-panel="user-interface">
+							{pending === null ? (
+								<button
+									type="button"
+									data-orchestrator-output-panel-dismiss="user-interface"
+									aria-label="dismiss user-interface panel"
+									onClick={() => onDismiss('user-interface')}
+								>
+									✕
+								</button>
+							) : null}
+							<div
+								data-orchestrator-output-channel="user-interface"
+								role="log"
+								aria-live="polite"
+								aria-label="user-interface output"
+							>
+								{output['user-interface'].map((line, index) => (
+									<div key={index}>{line}</div>
+								))}
+							</div>
+						</div>
+					)
+				}
+				second={
+					dismissed['developer-console'] ? null : (
+						<div data-orchestrator-output-panel="developer-console">
+							<button
+								type="button"
+								data-orchestrator-output-panel-dismiss="developer-console"
+								aria-label="dismiss developer-console panel"
+								onClick={() => onDismiss('developer-console')}
+							>
+								✕
+							</button>
+							<div
+								data-orchestrator-output-channel="developer-console"
+								role="log"
+								aria-live="polite"
+								aria-label="developer-console output"
+							>
+								{output['developer-console'].map((line, index) => (
+									<div key={index}>{line}</div>
+								))}
+							</div>
+						</div>
+					)
+				}
+			/>
 			{pending === null ? null : (
 				<div
 					data-orchestrator-pending-dialog

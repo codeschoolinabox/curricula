@@ -94,7 +94,10 @@ at most one interaction is pending at a time. The Developer Console panel is
 - `data-orchestrator-output-panel="user-interface|developer-console"` — the
   per-channel **panel wrapper** (the dismissable unit: groups the channel's ✕ +
   log so the panel can be hidden and CSS can lay out the pair). Absent when that
-  channel is dismissed. The two wrappers are siblings, User Interface first.
+  channel is dismissed. The panels sit in the vertical `<Splitter>`'s panes —
+  User Interface (the sized pane) above Developer Console (the flex pane) in DOM
+  ORDER (no longer adjacent siblings; a handle + `-splitter-pane` wrappers sit
+  between them). See [`../splitter/`](../splitter/README.md).
 - `data-orchestrator-output-channel="user-interface|developer-console"` — the
   `role="log"` lines region inside each panel wrapper (value is a
   `ChannelKind`). **Renamed** from the retired `data-orchestrator-dock-channel`

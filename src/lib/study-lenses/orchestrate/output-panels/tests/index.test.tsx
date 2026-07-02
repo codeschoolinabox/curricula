@@ -101,15 +101,25 @@ describe('<OutputPanels>', () => {
 			expect(developerConsole?.getAttribute('aria-live')).toBe('polite');
 		});
 
-		it('renders the user-interface panel above the developer-console panel', () => {
+		it('renders the user-interface panel above the developer-console panel (DOM order, not adjacency — they sit in splitter panes now)', () => {
 			const { container } = renderPanels();
-			const ui = container.querySelector(
-				'[data-orchestrator-output-panel="user-interface"]',
+			const panels = container.querySelectorAll(
+				'[data-orchestrator-output-panel]',
 			);
-			const developerConsole = container.querySelector(
-				'[data-orchestrator-output-panel="developer-console"]',
-			);
-			expect(ui?.nextElementSibling).toBe(developerConsole);
+			expect(panels).toHaveLength(2);
+			// UI precedes console in DOM order — asserted by order, NOT
+			// nextElementSibling (a handle + `-splitter-pane` wrappers sit between
+			// them) and NOT bitwise compareDocumentPosition (repo bans no-bitwise).
+			expect(
+				panels[0].querySelector(
+					'[data-orchestrator-output-channel="user-interface"]',
+				),
+			).not.toBeNull();
+			expect(
+				panels[1].querySelector(
+					'[data-orchestrator-output-channel="developer-console"]',
+				),
+			).not.toBeNull();
 		});
 	});
 
@@ -336,17 +346,23 @@ describe('<OutputPanels> — Interactive User Interface panel (pending dialog, i
 				() => {},
 				output,
 			);
-			// panels stay ordered UI-above-console; the dialog renders AFTER both
-			// panels, so the UI panel's immediate sibling is still the dev panel.
-			const userInterfacePanel = container.querySelector(
-				'[data-orchestrator-output-panel="user-interface"]',
+			// panels stay ordered UI-above-console in DOM order (they sit in the
+			// column Splitter's panes now, so no longer adjacent siblings); the
+			// dialog renders AFTER the Splitter.
+			const panels = container.querySelectorAll(
+				'[data-orchestrator-output-panel]',
 			);
-			const developerConsolePanel = container.querySelector(
-				'[data-orchestrator-output-panel="developer-console"]',
-			);
-			expect(userInterfacePanel?.nextElementSibling).toBe(
-				developerConsolePanel,
-			);
+			expect(panels).toHaveLength(2);
+			expect(
+				panels[0].querySelector(
+					'[data-orchestrator-output-channel="user-interface"]',
+				),
+			).not.toBeNull();
+			expect(
+				panels[1].querySelector(
+					'[data-orchestrator-output-channel="developer-console"]',
+				),
+			).not.toBeNull();
 			// the UI log holds only its lines — the dialog is not inside it
 			const uiLog = container.querySelector(
 				'[data-orchestrator-output-channel="user-interface"]',
@@ -489,5 +505,158 @@ describe('<OutputPanels> — per-panel dismissal (inc 5)', () => {
 		expect(
 			container.querySelector('[data-orchestrator-pending-cancel]'),
 		).not.toBeNull();
+	});
+});
+
+describe('<OutputPanels> — vertical resizable Splitter (inc C)', () => {
+	const oneDismissed: OutputPanelDismissal = Object.freeze({
+		'user-interface': true,
+		'developer-console': false,
+	});
+	const bothDismissed: OutputPanelDismissal = Object.freeze({
+		'user-interface': true,
+		'developer-console': true,
+	});
+	const consoleOnlyDismissed: OutputPanelDismissal = Object.freeze({
+		'user-interface': false,
+		'developer-console': true,
+	});
+
+	it('wraps the two panels in a column Splitter — UI in the sized pane, console in the flex pane', () => {
+		const { container } = renderPanels();
+		const splitter = container.querySelector(
+			'[data-orchestrator-output-panels] [data-orchestrator-splitter="column"]',
+		);
+		expect(splitter).not.toBeNull();
+		const sized = splitter!.querySelector(
+			'[data-orchestrator-splitter-pane="sized"]',
+		);
+		const flex = splitter!.querySelector(
+			'[data-orchestrator-splitter-pane="flex"]',
+		);
+		expect(sized).not.toBeNull();
+		expect(flex).not.toBeNull();
+		expect(
+			sized!.querySelector(
+				'[data-orchestrator-output-channel="user-interface"]',
+			),
+		).not.toBeNull();
+		expect(
+			flex!.querySelector(
+				'[data-orchestrator-output-channel="developer-console"]',
+			),
+		).not.toBeNull();
+	});
+
+	it('renders a handle between the panels when both are present', () => {
+		const { container } = renderPanels();
+		expect(
+			container.querySelector('[data-orchestrator-splitter-handle]'),
+		).not.toBeNull();
+	});
+
+	it('pins the vertical config + orientation on the handle (ARIA)', () => {
+		const { container } = renderPanels();
+		const handle = container.querySelector(
+			'[data-orchestrator-splitter-handle]',
+		);
+		expect(handle).not.toBeNull();
+		// column → aria-orientation horizontal (the inversion)
+		expect(handle!.getAttribute('aria-orientation')).toBe('horizontal');
+		expect(handle!.getAttribute('aria-valuenow')).toBe('200'); // defaultBasisPx
+		expect(handle!.getAttribute('aria-valuemin')).toBe('96'); // minPx
+		expect(handle!.getAttribute('aria-valuemax')).toBe('1200'); // maxPx (jsdom container 0 → guard)
+	});
+
+	it('keeps the pending dialog AFTER the Splitter (ordered after it within the section, not inside it)', () => {
+		const { container } = renderPanels({
+			pending: { kind: 'confirm', message: 'x' },
+		});
+		const section = container.querySelector(
+			'[data-orchestrator-output-panels]',
+		);
+		const splitter = container.querySelector(
+			'[data-orchestrator-splitter="column"]',
+		);
+		expect(section).not.toBeNull();
+		expect(splitter).not.toBeNull();
+		expect(
+			container.querySelector('[data-orchestrator-pending-dialog]'),
+		).not.toBeNull();
+		// NOT nested inside the Splitter…
+		expect(
+			splitter!.querySelector('[data-orchestrator-pending-dialog]'),
+		).toBeNull();
+		// …AND ordered after it (DOM order among the section's children; no
+		// bitwise, no getAttribute('data-…') — `.matches()` on a selector).
+		// eslint-disable-next-line unicorn/prefer-spread -- HTMLCollection spread fails tsc without dom.iterable
+		const children = Array.from(section!.children);
+		const splitterIndex = children.indexOf(splitter!);
+		const dialogIndex = children.findIndex((element) =>
+			element.matches('[data-orchestrator-pending-dialog]'),
+		);
+		expect(splitterIndex).toBeGreaterThanOrEqual(0);
+		expect(dialogIndex).toBeGreaterThan(splitterIndex);
+	});
+
+	it('collapses to single-pane showing the DEVELOPER-CONSOLE channel when only the user-interface is dismissed', () => {
+		const { container } = renderPanels({ dismissed: oneDismissed });
+		expect(
+			container.querySelector('[data-orchestrator-splitter="column"]'),
+		).not.toBeNull();
+		expect(
+			container.querySelector('[data-orchestrator-splitter-handle]'),
+		).toBeNull();
+		// which channel SURVIVED matters (an AND-coupled dismissal gate would keep
+		// the wrong one) — assert identity, both directions.
+		expect(
+			container.querySelector(
+				'[data-orchestrator-output-channel="developer-console"]',
+			),
+		).not.toBeNull();
+		expect(
+			container.querySelector(
+				'[data-orchestrator-output-channel="user-interface"]',
+			),
+		).toBeNull();
+	});
+
+	it('collapses to single-pane showing the USER-INTERFACE channel when only the developer-console is dismissed', () => {
+		const { container } = renderPanels({ dismissed: consoleOnlyDismissed });
+		expect(
+			container.querySelector('[data-orchestrator-splitter="column"]'),
+		).not.toBeNull();
+		expect(
+			container.querySelector('[data-orchestrator-splitter-handle]'),
+		).toBeNull();
+		expect(
+			container.querySelector(
+				'[data-orchestrator-output-channel="user-interface"]',
+			),
+		).not.toBeNull();
+		expect(
+			container.querySelector(
+				'[data-orchestrator-output-channel="developer-console"]',
+			),
+		).toBeNull();
+	});
+
+	// INVARIANT GUARD (not proof of splitter-wiring): both-null makes <Splitter>
+	// return null — DOM-indistinguishable from never calling it — so this can't
+	// verify inc-C's code runs for this branch (it passes even pre-impl). It
+	// protects the inc-5 "root stays when both dismissed" contract through the
+	// refactor. AR-4 confirms by source that this branch flows through the SAME
+	// single <Splitter first={...} second={...}> call site (no special bypass).
+	it('renders no Splitter panes but keeps the section when BOTH channels are dismissed', () => {
+		const { container } = renderPanels({ dismissed: bothDismissed });
+		expect(
+			container.querySelector('[data-orchestrator-output-panels]'),
+		).not.toBeNull();
+		expect(
+			container.querySelector('[data-orchestrator-splitter-handle]'),
+		).toBeNull();
+		expect(
+			container.querySelector('[data-orchestrator-output-panel]'),
+		).toBeNull();
 	});
 });

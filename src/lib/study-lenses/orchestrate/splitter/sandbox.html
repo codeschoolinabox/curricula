@@ -77,13 +77,23 @@
 				sizedPane: 'first',
 				defaultBasisPx: 200,
 				minPx: 96,
-				maxPx: 600,
+				maxPx: 1200,
+				maxFraction: 0.75,
 				stepPx: 16,
 				resizeMode: 'proportional', // UI/console keep their ratio on height resize
 				label: 'resize the user interface and the developer console',
 				first: pane('User Interface', '#ecfdf5'),
 				second: pane('Developer Console', '#fef2f2'),
 			});
+			// Wrap the vertical splitter in the REAL output-panels section so the
+			// actual inc-C CSS chain applies ([data-orchestrator-output-panels] >
+			// [data-orchestrator-splitter] { flex:1 } — the fill rule this sandbox
+			// exists to verify), matching what <OutputPanels> renders.
+			const outputColumn = h(
+				'section',
+				{ 'data-orchestrator-output-panels': '' },
+				vertical,
+			);
 
 			const horizontal = h(Splitter, {
 				orientation: 'row',
@@ -95,7 +105,7 @@
 				stepPx: 16,
 				label: 'resize the active surface and the output panels',
 				first: pane('active surface (editor / lens)', '#eef2ff'),
-				second: vertical,
+				second: outputColumn,
 			});
 
 			const app = h(
