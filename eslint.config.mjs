@@ -43,13 +43,13 @@ export default tseslint.config(
 			// files during the redo — re-include when the writeme lens stabilizes.
 			'src/lib/study-lenses/lenses/writeme/lib/**',
 			'src/lib/study-lenses/lenses/writeme/tests/**',
-			// WIP tracer engine — Phase B redesign in progress per
-			// EMBODY-IMPL-HANDOFF.md. The full evaluating/ subtree (trace,
-			// intercept, run, shared) is mid-refactor; lint rules don't yet
-			// apply cleanly. Vitest still runs these (run.browser.test.ts =
-			// 27 passing tests verified post Sprint 5.3). Re-include
-			// directory-by-directory as each lands its Phase B sub-task.
-			'src/lib/study-lenses/embody/lib/evaluating/trace/**',
+			// WIP tracer engine — mid-refactor subtrees where lint rules don't
+			// yet apply cleanly; re-included directory-by-directory as each lands.
+			// trace/variables is now in CI; trace/semantics (engine-consumer
+			// rebuild, EMBODY-ROADMAP STEP 5) and the trace/syntax design stub
+			// remain excluded. Vitest still runs the un-excluded suites.
+			'src/lib/study-lenses/embody/lib/evaluating/trace/semantics/**',
+			'src/lib/study-lenses/embody/lib/evaluating/trace/syntax/**',
 			'src/lib/study-lenses/embody/lib/evaluating/intercept/**',
 			'src/lib/study-lenses/embody/lib/evaluating/run/**',
 			'src/lib/study-lenses/embody/lib/evaluating/shared/**',
