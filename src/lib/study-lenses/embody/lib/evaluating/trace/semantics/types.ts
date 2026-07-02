@@ -17,11 +17,15 @@
 
 import type {
 	ASTNode,
-	LinkedTraceEvent,
+	ChainedTraceEvent,
 	TraceEvent,
 	ValueRepresentation,
 } from './tracing/types.js';
-import type { SourceRange, TraceConfig, TraceOptions } from './config.types.js';
+import type {
+	ResolvedTraceOptions,
+	SourceRange,
+	TraceConfig,
+} from './config.types.js';
 
 // ─── Gate boundary error ──────────────────────────────────────────────────────
 
@@ -143,25 +147,39 @@ type TraceSettlement = {
 
 /**
  * What `result` resolves with. The gate and instrumentation run eagerly, so
- * `code`, `ast`, and `options` exist for every handle; linking runs after
- * ANY settlement (the ast record and streamed events both live thread-side),
- * so `events` are always linked. `visitCounts` ride the halt — an engine-made
- * stop (timeout, cancel, fail, crash) has no halt, so they are empty and
- * every `node.visits` is 0.
+ * `code`, `ast`, and `options` exist for every handle; the INDEX phase runs
+ * after ANY settlement (the ast record and the streamed events both live
+ * thread-side), so `events` are always the chained delivered form and
+ * `eventsByNode` is always built. `visitCounts` ride the halt — an
+ * engine-made stop (timeout, cancel, fail, crash) has no halt, so they are
+ * empty (every node's count 0).
  *
- * Serialization: `node.parent` and `node.events[i].node` are circular —
- * `JSON.stringify` needs a replacer; `node.parentPath` and `event.step` are
- * the serialization-safe alternatives.
+ * FULLY `JSON.stringify`-safe with no replacer: the ast record is acyclic
+ * (no `parent` back-ref — use `parentPath`), events carry no node refs (use
+ * `nodePath`), and the `prev`/`next` chain fields are non-enumerable.
+ *
+ * Assembling this result is ONE-SHOT (the chain + index are built once), but
+ * `result` is multi-access — the facade MEMOIZES the assembled value, so
+ * repeated `await handle.result` returns the same frozen object.
  */
 type TraceResult = {
-	/** Ordered, linked event stream — each event has `.node` into `ast`. */
-	readonly events: readonly LinkedTraceEvent[];
+	/**
+	 * Ordered event stream in the delivered chained form — traverse via
+	 * `event.prev` / `event.next`; attribute via `event.nodePath` into `ast`.
+	 */
+	readonly events: readonly ChainedTraceEvent[];
 	/** Original source code, echoed back. */
 	readonly code: string;
-	/** Flat frozen record; `ast['$']` is the root Program node. */
+	/** Flat frozen acyclic record; `ast['$']` is the root Program node. */
 	readonly ast: Readonly<Record<string, ASTNode>>;
-	/** The resolved options snapshot — which event gates were enabled. */
-	readonly options: TraceOptions;
+	/**
+	 * nodePath → the `step`s of the events that fired on that node, in order
+	 * (replaces the old `ASTNode.events[]` back-ref). Look up an event by step
+	 * against `events`.
+	 */
+	readonly eventsByNode: Readonly<Record<string, readonly number[]>>;
+	/** The resolved (post-expansion) options snapshot — which gates were enabled. */
+	readonly options: ResolvedTraceOptions;
 	/** nodePath → visit count; empty when the run ended without a halt. */
 	readonly visitCounts: Readonly<Record<string, number>>;
 	readonly settlement: TraceSettlement;
@@ -173,7 +191,7 @@ type TraceResult = {
  * breaking out of a `for await` is equivalent to `cancel()`; `fail(reason)`
  * is the structured consumer stop.
  */
-type TraceHandle = AsyncIterable<TraceEvent> & {
+type TraceHandle = AsyncIterable<ChainedTraceEvent> & {
 	readonly result: Promise<TraceResult>;
 	readonly cancel: () => void;
 	readonly fail: (reason?: unknown) => void;
@@ -202,8 +220,11 @@ type TraceMessage = TraceEvent;
 /**
  * The resolved runtime-checked gates, delivered to the worker logic via the
  * engine spec's `workerConfig` — deliberately NOT baked into the woven code,
- * so the instrumented output is range-independent and a highlight change
- * never re-instruments (README § runtime gate bundle).
+ * so the instrumented output is RANGE-INDEPENDENT (the same woven code serves
+ * any range/filter). That keeps re-instrumentation cache-friendly for a
+ * FUTURE caching seam; TODAY each `traceSemantics` call re-instruments (there
+ * is no public instrument-once/run-many API — caching is out of scope). See
+ * README § runtime gate bundle.
  *
  * Weave-time decisions (pointcut gating, tags, initial state) are Aran
  * code-generated and ride `spec.code`; everything the dispatcher checks at
@@ -212,12 +233,27 @@ type TraceMessage = TraceEvent;
 type RuntimeGates = {
 	/** Source window; events outside it are dropped at dispatch. */
 	readonly range?: SourceRange;
-	/** Per-category name allowlists (variables, functions, properties, operators). */
+	/**
+	 * Per-SITE name allowlists — one bucket per config `filter` field, carried
+	 * losslessly (each config filter maps to exactly one bucket; buckets are
+	 * NOT merged). An empty/absent bucket means "no name filter for that site".
+	 * The dispatcher applies the bucket matching the event's origin, by the
+	 * event's own name key (variable name, operator string, property key,
+	 * function name).
+	 */
 	readonly filters?: {
-		readonly variables?: readonly string[];
-		readonly functions?: readonly string[];
-		readonly properties?: readonly string[];
+		/** `expression.variables.filter` — variable read/update names. */
+		readonly expressionVariables?: readonly string[];
+		/** `statements.variables.filter` — initialize/available binding names. */
+		readonly statementsVariables?: readonly string[];
+		/** `expression.operators.filter` — operator strings. */
 		readonly operators?: readonly string[];
+		/** `expression.operators.assignment.filter` — assignment operator strings. */
+		readonly assignment?: readonly string[];
+		/** `expression.properties.filter` — property keys. */
+		readonly properties?: readonly string[];
+		/** `expression.functions.filter` — called function names. */
+		readonly functions?: readonly string[];
 	};
 	/** The loop iteration cap; exceeding it throws the branded limit error. */
 	readonly iterations?: number;

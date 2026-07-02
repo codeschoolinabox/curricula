@@ -205,6 +205,11 @@
 					"properties": {
 						"string": { "type": "boolean", "default": true },
 						"number": { "type": "boolean", "default": true },
+						"bigint": {
+							"description": "BigInt literals (42n). A distinct JEJ primitive — typeof returns 'bigint', and mixing with number throws TypeError.",
+							"type": "boolean",
+							"default": true
+						},
 						"boolean": { "type": "boolean", "default": true },
 						"null": { "type": "boolean", "default": true },
 						"undefined": { "type": "boolean", "default": true },
@@ -218,17 +223,17 @@
 				},
 
 				"templates": {
-					"description": "Template literal events. begin/end bracket the evaluation; evaluation fires per ${} expression.",
+					"description": "Template literal events. begin/end bracket the evaluation; evaluation fires per ${} expression. CO-GATING INVARIANT: evaluation and end carry a required `beginStep` referencing their begin event, so the prepare pipeline forces begin ON whenever evaluation or end is ON — a template sub-event is never orphaned from its begin.",
 					"type": "object",
 					"additionalProperties": false,
 					"properties": {
 						"begin": {
-							"description": "Template evaluation starts. Includes static string parts and expression count.",
+							"description": "Template evaluation starts. Includes static string parts and expression count. Forced ON when evaluation or end is ON (co-gating invariant).",
 							"type": "boolean",
 							"default": true
 						},
 						"evaluation": {
-							"description": "A ${} expression inside the template is evaluated. Includes index and value.",
+							"description": "A ${} expression inside the template is evaluated. Includes index, value, and (when the interpolated value is not already a string) the coercion that produced the concatenated text.",
 							"type": "boolean",
 							"default": true
 						},
@@ -392,7 +397,7 @@
 				},
 
 				"forOf": {
-					"description": "for...of loop events. In JEJ, iterates over strings and arrays.",
+					"description": "for...of loop events. In JEJ, for-of iterates over strings (character by character).",
 					"type": "object",
 					"additionalProperties": false,
 					"properties": {
@@ -447,7 +452,7 @@
 							"default": true
 						},
 						"interrupt": {
-							"description": "Scope interrupted by break or runtime error.",
+							"description": "Scope exited abruptly — the ScopeEvent's `reason` says why: break, continue, error (a runtime throw), or limit (the iteration cap).",
 							"type": "boolean",
 							"default": true
 						},
@@ -462,7 +467,7 @@
 							"default": true
 						},
 						"declare": {
-							"description": "A variable is hoisted into this scope (TDZ start). Fires once per variable at scope creation. Same BindingEvent(declare) type as other declare events.",
+							"description": "A variable is declared into this scope during its creation phase (TDZ start). Fires once per variable at scope creation. Same BindingEvent(declare) type as other declare events.",
 							"type": "boolean",
 							"default": true
 						}
@@ -486,7 +491,7 @@
 							"default": true
 						},
 						"interrupt": {
-							"description": "Scope interrupted by break or runtime error.",
+							"description": "Scope exited abruptly — the ScopeEvent's `reason` says why: break, continue, error (a runtime throw), or limit (the iteration cap).",
 							"type": "boolean",
 							"default": true
 						},
@@ -501,7 +506,7 @@
 							"default": true
 						},
 						"declare": {
-							"description": "A variable is hoisted into this scope (TDZ start). Fires once per variable at scope creation.",
+							"description": "A variable is declared into this scope during its creation phase (TDZ start). Fires once per variable at scope creation.",
 							"type": "boolean",
 							"default": true
 						}

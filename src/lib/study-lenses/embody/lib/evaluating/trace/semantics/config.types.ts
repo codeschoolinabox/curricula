@@ -116,16 +116,16 @@ export type TraceConfig = {
  * kinds; the object form gates kind-by-kind.
  */
 export type ResolveKindsOptions = {
-	variable?: boolean;
-	literal?: boolean;
-	operator?: boolean;
-	shortCircuit?: boolean;
-	conditional?: boolean;
-	assignment?: boolean;
-	increment?: boolean;
-	property?: boolean;
-	call?: boolean;
-	template?: boolean;
+	readonly variable?: boolean;
+	readonly literal?: boolean;
+	readonly operator?: boolean;
+	readonly shortCircuit?: boolean;
+	readonly conditional?: boolean;
+	readonly assignment?: boolean;
+	readonly increment?: boolean;
+	readonly property?: boolean;
+	readonly call?: boolean;
+	readonly template?: boolean;
 };
 
 /**
@@ -140,9 +140,9 @@ export type ResolveKindsOptions = {
  * - `kinds` (default all true) — per-kind gates, orthogonal to `dependent`.
  */
 export type ResolveOptions = {
-	dependent?: boolean;
-	provenance?: boolean;
-	kinds?: boolean | ResolveKindsOptions;
+	readonly dependent?: boolean;
+	readonly provenance?: boolean;
+	readonly kinds?: boolean | ResolveKindsOptions;
 };
 
 /**
@@ -174,7 +174,7 @@ export type TraceOptions = {
 					| {
 							read?: boolean;
 							update?: boolean;
-							filter?: string[];
+							readonly filter?: readonly string[];
 					  };
 				operators?:
 					| boolean
@@ -197,7 +197,7 @@ export type TraceOptions = {
 								| {
 										simple?: boolean;
 										compound?: boolean;
-										filter?: string[];
+										readonly filter?: readonly string[];
 								  };
 							increment?:
 								| boolean
@@ -208,13 +208,14 @@ export type TraceOptions = {
 							in?: boolean;
 							void?: boolean;
 							comma?: boolean;
-							filter?: string[];
+							readonly filter?: readonly string[];
 					  };
 				literals?:
 					| boolean
 					| {
 							string?: boolean;
 							number?: boolean;
+							bigint?: boolean;
 							boolean?: boolean;
 							null?: boolean;
 							undefined?: boolean;
@@ -233,13 +234,13 @@ export type TraceOptions = {
 							dot?: boolean;
 							bracket?: boolean;
 							optionalChaining?: boolean;
-							filter?: string[];
+							readonly filter?: readonly string[];
 					  };
 				functions?:
 					| boolean
 					| {
 							call?: boolean;
-							filter?: string[];
+							readonly filter?: readonly string[];
 					  };
 		  };
 
@@ -251,7 +252,7 @@ export type TraceOptions = {
 					| {
 							initialize?: boolean;
 							available?: boolean;
-							filter?: string[];
+							readonly filter?: readonly string[];
 					  };
 				conditionals?:
 					| boolean
@@ -317,3 +318,29 @@ export type TraceOptions = {
 
 	errors?: boolean;
 };
+
+// ─── ResolvedTraceOptions (the post-expansion snapshot) ──────
+
+/** Deeply readonly view — arrays and nested objects included. */
+type DeepReadonly<T> = T extends readonly (infer U)[]
+	? readonly DeepReadonly<U>[]
+	: T extends object
+		? { readonly [K in keyof T]: DeepReadonly<T[K]> }
+		: T;
+
+/**
+ * The options snapshot carried on `TraceResult.options` — the config AFTER
+ * the prepare pipeline expands shorthands and fills defaults. A consumer
+ * reads it to learn which gates were actually enabled, without re-deriving.
+ *
+ * @remarks
+ * At RUNTIME every layer is its object form with all sub-gates present as
+ * booleans — no shorthand survives expansion — and `options.schema.json`
+ * pins that expanded shape. The TYPE is a deeply-readonly VIEW of
+ * {@link TraceOptions} (the frozen result field is immutable); it does not
+ * re-encode "no shorthand remains" at the type level, since the schema is the
+ * authority for the expanded shape. `for`/`for-of` scope events ride the
+ * `scopes.block` gate (they are block-level environments; the event's `kind`
+ * distinguishes them) — there is no separate `scopes.for` gate.
+ */
+export type ResolvedTraceOptions = DeepReadonly<TraceOptions>;

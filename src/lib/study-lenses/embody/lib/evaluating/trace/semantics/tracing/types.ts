@@ -105,6 +105,19 @@ export type RegExpValue = {
 };
 
 /**
+ * BigInt value — typeof returns 'bigint', a distinct JEJ-admitted primitive
+ * (`42n`). Carried as a DECIMAL STRING: a raw bigint is not JSON-safe
+ * (`JSON.stringify(42n)` throws) and does not structured-clone into a plain
+ * value, so the string keeps the event wire- and serialization-safe while
+ * preserving the exact magnitude and the `typeof` distinction the notional
+ * machine teaches (`42n + 1` → TypeError, never silently a number).
+ */
+export type BigIntValue = {
+	readonly type: 'bigint';
+	readonly value: string;
+};
+
+/**
  * A thrown Error, represented worker-side BEFORE the clone boundary strips
  * its prototype (`instanceof Error` is false after structured clone — the
  * representation must be built where the error is still an Error).
@@ -118,6 +131,7 @@ export type ErrorValue = {
 export type ValueRepresentation =
 	| StringValue
 	| NumberValue
+	| BigIntValue
 	| BooleanValue
 	| UndefinedValue
 	| NullValue
@@ -125,6 +139,36 @@ export type ValueRepresentation =
 	| FunctionValue
 	| RegExpValue
 	| ErrorValue;
+
+// ============================================================================
+// Resolution-walk steps (the NM's "central pedagogical leverage point")
+// ============================================================================
+//
+// PROVISIONAL SHAPES — confirm with the Aran author before locking (D1).
+// The two chains have the same shape: an ordered list of checked frames from
+// innermost outward, each a hit or a miss; a full miss ends resolution in a
+// ReferenceError (scope chain) or `undefined` (proto chain).
+
+/**
+ * One frame checked while resolving an identifier up the scope chain.
+ * `scopeCreationStep` is NAVIGABLE to that scope's create event (null when it
+ * was not emitted). `hit` marks the frame that owns the binding; exactly one
+ * `hit: true` on a successful resolve, none on the miss that throws.
+ */
+export type ScopeChainStep = {
+	readonly scopeCreationStep: number | null;
+	readonly hit: boolean;
+};
+
+/**
+ * One object checked while resolving a member up the prototype chain.
+ * `object` is the checked object's representation; `hit` marks the object
+ * that owns the property. No `hit` anywhere → the access resolves `undefined`.
+ */
+export type ProtoChainStep = {
+	readonly object: ValueRepresentation;
+	readonly hit: boolean;
+};
 
 // ============================================================================
 // Source Location (ESTree-style)
@@ -160,31 +204,30 @@ export type ControlFlowStructure = 'conditional' | LoopKind;
  * An ESTree-style AST node enriched with tracing metadata.
  *
  * @remarks
- * Part of the static `ast` layer — built mutable at instrument time
- * (`events: []`, `visits: 0`), populated and deep-frozen by linking after
- * the run settles. `TraceResult.ast` maps every `nodePath` to its node;
- * `ast['$']` is the root Program node.
+ * Part of the static `ast` layer — built and FROZEN at instrument time (it is
+ * a pure function of the source; nothing about it changes during or after the
+ * run). `TraceResult.ast` maps every `nodePath` to its node; `ast['$']` is
+ * the root Program node.
  *
- * **Circular references**: `parent` and `events[i].node` form cycles.
- * `JSON.stringify` throws without a replacer — `parentPath` and
- * `events.map((e) => e.step)` are the serialization-safe alternatives.
+ * **Acyclic by design.** The node carries NO `parent` back-reference (the one
+ * cycle source in the old design) — navigate up with `parentPath`
+ * (`ast[node.parentPath]`) and down via the ESTree child references. Which
+ * events fired on a node, and how many times it was visited, live on the
+ * result, not the node: `TraceResult.eventsByNode[node.nodePath]` (the
+ * navigable `step`s) and `TraceResult.visitCounts[node.nodePath]`. So the
+ * whole `ast` record is `JSON.stringify`-safe with no replacer.
  *
  * Standard ESTree children (`.body`, `.left`, `.right`, `.test`, etc.) are
- * also present as ASTNode references. Not typed statically here — use
- * `node.type` to discriminate before accessing children.
+ * present as ASTNode references (a tree — no cycles). Not typed statically
+ * here — use `node.type` to discriminate before accessing children.
  */
 export type ASTNode = {
 	readonly nodePath: string;
-	readonly parent: ASTNode | null;
-	/** Scalar twin of `parent` — null at the Program root. */
+	/** Path to the parent — null at the Program root. Navigate: `ast[parentPath]`. */
 	readonly parentPath: string | null;
 	readonly type: string;
 	readonly loc: SourceLocation;
 	readonly source: string;
-	/** Every linked event that fired on this node, in step order. */
-	readonly events: readonly LinkedTraceEvent[];
-	/** How many times execution passed through this node (0 if never). */
-	readonly visits: number;
 } & { readonly [key: string]: unknown };
 
 // ============================================================================
@@ -272,21 +315,40 @@ export type BindingEvent = BaseEvent & {
 	 * the declare event was not emitted.
 	 */
 	readonly declarationStep?: number;
-	/** Present on initialize and update: the value being written. */
-	readonly value?: ValueRepresentation;
-	/**
-	 * On 'initialize' only:
-	 * true  = explicit initializer (`let x = 5` or `const x = 5`)
-	 * false = implicit undefined (`let x;`)
-	 */
-	readonly explicit?: boolean;
 } & (
 		| { readonly event: 'declare'; readonly semantics: 'scope' }
 		| {
-				readonly event: 'initialize' | 'available';
+				readonly event: 'initialize';
 				readonly semantics: 'statement';
+				/** The value being written. */
+				readonly value: ValueRepresentation;
+				/**
+				 * true  = explicit initializer (`let x = 5` / `const x = 5`)
+				 * false = implicit undefined (`let x;`)
+				 */
+				readonly explicit: boolean;
 		  }
-		| { readonly event: 'read' | 'update'; readonly semantics: 'expression' }
+		| { readonly event: 'available'; readonly semantics: 'statement' }
+		| {
+				readonly event: 'read';
+				readonly semantics: 'expression';
+				/**
+				 * PROVISIONAL (D1 — confirm with Aran author): the scope-chain
+				 * walk that resolved this read — each frame checked from
+				 * innermost out, ending in the owning frame. The NM's central
+				 * leverage point for shadowing; a full miss instead throws a
+				 * ReferenceError (no read event fires — the walk surfaces on the
+				 * error path, shape pending). Omitted when chain-walk tracing is
+				 * off.
+				 */
+				readonly scopeChainWalk?: readonly ScopeChainStep[];
+		  }
+		| {
+				readonly event: 'update';
+				readonly semantics: 'expression';
+				/** The value being written. */
+				readonly value: ValueRepresentation;
+		  }
 	);
 
 // ============================================================================
@@ -303,6 +365,14 @@ export type PropertyAccessEvent = BaseEvent & {
 	readonly kind: PropertyAccessKind;
 	readonly object: ValueRepresentation;
 	readonly key: string | number;
+	/**
+	 * PROVISIONAL (D1 — confirm with Aran author): the prototype-chain walk
+	 * that resolved this member — each object checked from the base outward,
+	 * ending in the owner or a full miss (→ `undefined`). Same shape as the
+	 * scope-chain walk, the NM's "two chains, one shape" leverage point.
+	 * Omitted when chain-walk tracing is off.
+	 */
+	readonly protoChainWalk?: readonly ProtoChainStep[];
 	/** optionalChaining only: base was nullish, no lookup occurred */
 	readonly shortCircuited?: true;
 };
@@ -382,13 +452,14 @@ export type OperatorEvent = PureOperatorEvent | ShortCircuitingOperatorEvent;
 // ============================================================================
 // 4. Literal Events
 // ============================================================================
-// Config: expression.literals.{string,boolean,number,undefined,null,regex}
+// Config: expression.literals.{string,boolean,number,bigint,undefined,null,regex}
 // Followed by ResolveEvent (kind: 'literal') carrying the literal value.
 
 export type LiteralKind =
 	| 'string'
 	| 'boolean'
 	| 'number'
+	| 'bigint'
 	| 'undefined'
 	| 'null'
 	| 'regex';
@@ -421,7 +492,16 @@ export type TemplateEvaluationEvent = BaseEvent & {
 	readonly index: number;
 	/** The interpolated expression's evaluated value */
 	readonly value: ValueRepresentation;
-	/** NAVIGABLE: the template begin event's `step` (begin gates the sub-events, so it is always emitted when this one is). */
+	/**
+	 * Present only when the interpolated value was not already a string — the
+	 * ToString coercion that produced the concatenated text (makes template
+	 * coercion visible, symmetric with operator/test coercion).
+	 */
+	readonly coercion?: ValueRepresentation;
+	/**
+	 * NAVIGABLE: the template begin event's `step`. Always present because the
+	 * config co-gates begin ON whenever evaluation is ON (schema invariant).
+	 */
 	readonly beginStep: number;
 };
 
@@ -445,13 +525,39 @@ export type TemplateEvent =
 // 'declare' events for variables in this scope are BindingEvent(declare),
 // gated by scopes.{script,block}.declare.
 
-export type ScopeKind = 'script' | 'block';
+/**
+ * The scope's shape. `script` and `block` are the ECMA/NM environment kinds;
+ * `for` and `for-of` name the loop-head environments the NM makes observable
+ * (D3 — mirrors the sibling variables tracer's synthesized loop scopes so a
+ * learner using both tracers sees the same scope structure).
+ *
+ * A classic `for (let i …)` head env surfaces as kind `'for'`; the NM's
+ * per-iteration copy surfaces as ONE create/enter per iteration (a scope
+ * push per iteration), and `i`'s declare/read/update events across iterations
+ * each reference the CURRENT iteration's create `step` via `scopeCreationStep`.
+ * A `for-of` per-iteration binding env surfaces as kind `'for-of'`, same
+ * per-iteration cardinality.
+ */
+export type ScopeKind = 'script' | 'block' | 'for' | 'for-of';
 export type ScopeEventType =
 	| 'create'
 	| 'enter'
 	| 'interrupt'
 	| 'completion'
 	| 'leave';
+
+/**
+ * Why a scope exited — the NM makes the pop reason the observable thing (the
+ * learner sees the reason, never the guard throw). `'limit'` is the branded
+ * iteration cap. Present on the abrupt/exit moments (interrupt, and leave when
+ * abrupt); a normal completion carries `'normal'` or omits it.
+ */
+export type ScopePopReason =
+	| 'normal'
+	| 'break'
+	| 'continue'
+	| 'error'
+	| 'limit';
 
 export type ScopeEvent = BaseEvent & {
 	readonly semantics: 'scope';
@@ -472,6 +578,12 @@ export type ScopeEvent = BaseEvent & {
 	readonly parentCreationStep?: number;
 	/** The control-flow structure this scope belongs to, when it has one. */
 	readonly structure?: ControlFlowStructure;
+	/**
+	 * Why the scope exited (D2). Present on the exit moments (interrupt, and
+	 * leave); `'break'`/`'continue'`/`'error'`/`'limit'` name the abrupt cause,
+	 * `'normal'` a clean fall-through. Omitted on create/enter.
+	 */
+	readonly reason?: ScopePopReason;
 };
 
 // ============================================================================
@@ -615,8 +727,14 @@ export type FunctionEvent = FunctionCallEvent;
 // after emitting, so the run still settles as errored with the halt carrying
 // the same attribution. `errors: false` suppresses the event, never the halt.
 //
-// LOCATION IS APPROXIMATE: the program-level hook that observes the error has
-// no precise node; nodePath/type/loc/source are the LAST EMITTED event's.
+// LOCATION IS APPROXIMATE and HONESTLY LABELLED (`attribution`): the
+// program-level hook that observes the error has no precise node.
+//   - 'last-emitted' — nodePath/type/loc/source are the last emitted event's
+//     (the throw happened at or after it).
+//   - 'program' — nothing was emitted before the throw (e.g. the ERRORS_ONLY
+//     profile, or an error on the very first evaluation); the event attributes
+//     to the Program node ('$', whole-program loc). A program-level error IS a
+//     program-level event — no empty required fields.
 // Precise error attribution is a named deferred concern (README § error
 // channel).
 
@@ -628,6 +746,13 @@ export type ErrorEvent = BaseEvent & {
 	readonly message: string;
 	/** The thrown value, represented worker-side ({@link ErrorValue} for Errors). */
 	readonly thrownValue: ValueRepresentation;
+	/**
+	 * How this event's location was derived — `'last-emitted'` (the base
+	 * fields are the preceding event's) or `'program'` (nothing preceded the
+	 * throw; attributed to the Program node). Lets a lens flag an approximate
+	 * highlight honestly instead of pointing confidently at the wrong node.
+	 */
+	readonly attribution: 'last-emitted' | 'program';
 };
 
 // ============================================================================
@@ -664,7 +789,9 @@ export type ResolveEvent = BaseEvent & {
 	/**
 	 * Provenance (gated by `resolve.provenance`, default true): a unique id
 	 * for this produced value. The full data-flow graph is reconstructable
-	 * from the resolve stream alone.
+	 * from the resolve stream alone. Assigned at the emission layer with the
+	 * step, so a gate-dropped resolve consumes no id and no live event
+	 * references it (`sourceValueIds` only ever names ids that were emitted).
 	 */
 	readonly valueId?: number;
 	/** Provenance: the valueIds of the ResolveEvents this value was computed from. */
@@ -675,6 +802,11 @@ export type ResolveEvent = BaseEvent & {
 // Master Union
 // ============================================================================
 
+/**
+ * The wire-safe event union — every field a scalar or plain frozen object,
+ * so an event crosses the worker boundary by structured clone. This is what
+ * the worker emits and what the thread narrows.
+ */
 export type TraceEvent =
 	| BindingEvent
 	| PropertyAccessEvent
@@ -692,10 +824,29 @@ export type TraceEvent =
 	| ResolveEvent;
 
 /**
- * A trace event after linking: the same wire-safe data plus a direct `.node`
- * reference into the frozen ast record. Only `TraceResult.events` carries
- * linked events; the streamed events are wire-safe {@link TraceEvent}s.
+ * The DELIVERED form of a trace event: the same wire-safe data, plus the
+ * doubly-linked `prev`/`next` chain so any single event can traverse the whole
+ * stream. Both the streamed handle items and `TraceResult.events` are
+ * `ChainedTraceEvent`s.
+ *
+ * @remarks
+ * The chain is built THREAD-side in the narrow phase, never worker-side: the
+ * getters do not survive structured clone, so the wire event stays scalar.
+ * `prev`/`next` are NON-ENUMERABLE (so `JSON.stringify` skips them — no
+ * circular-chain serialization) and `next` is an accessor over a thread-side
+ * pointer, `null` until the successor is wrapped (re-read it later on a
+ * retained event and the successor is there). No event is ever mutated: each
+ * is frozen once at yield, and the accessor closing over a mutable pointer is
+ * a NAMED exception to the no-mutable-closure rule (DEV.md), scoped to the
+ * narrow phase.
+ *
+ * There is no `.node` reference — attribute via `event.nodePath` into
+ * `TraceResult.ast`, and find a node's events via
+ * `TraceResult.eventsByNode[nodePath]`. Keeping the link as `prev`/`next`
+ * `step`-navigable data (not object refs) is what keeps events immutable and
+ * the whole result JSON-safe.
  */
-export type LinkedTraceEvent = TraceEvent & {
-	readonly node: ASTNode;
+export type ChainedTraceEvent = TraceEvent & {
+	readonly prev: ChainedTraceEvent | null;
+	readonly next: ChainedTraceEvent | null;
 };
