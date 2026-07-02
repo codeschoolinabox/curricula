@@ -148,11 +148,13 @@ to the LLM shift.** A Vibetoader directing an LLM iterates on user-visible
 behavior; their twin is the user, and the NM is operated by the LLM virtuoso. A
 Frogrammer directing an LLM still operates the NM through their twin, with the
 LLM doing the notation work. Both are engaged in genuine work; both shoulder a
-non-delegable twin; they delegate different audiences to the LLM. Same
-comparison, both-non-delegable framing. With or without an LLM, **predicting
-against the twin you shoulder** is the skill the course builds — NM-prediction
-for Frogramming, user-behavior prediction (through prototyping and testing with
-real people) for Vibetoading.
+non-delegable twin; they delegate different audiences to the LLM. Here
+_non-delegable_ carries the twin-parity sense — each hand's twin is its owner's
+to build — distinct from the intro's narrower reservation of the word for the
+F-hand as the survival-critical half genAI threatens. With or without an LLM,
+**predicting against the twin you shoulder** is the skill the course builds —
+NM-prediction for Frogramming, user-behavior prediction (through prototyping and
+testing with real people) for Vibetoading.
 
 This frame treats LLMs as authoring partners. Agentic systems where LLMs plan,
 execute, and modify state autonomously are a more complex picture deferred to

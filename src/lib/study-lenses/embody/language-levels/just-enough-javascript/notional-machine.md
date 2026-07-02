@@ -41,7 +41,7 @@ See also:
 - [`lib/evaluating/trace/semantics/`](../../lib/evaluating/trace/semantics/) —
   semantic tracer: README + DOCS for finer-grained instrumentation
 
-[metaphor]: ../../../spiralearn/welcome-to-frogramming/README.md
+[metaphor]: ../../../spiralearn/frogramming-and-vibetoading/README.md
 
 **Operational implementation.** The NM components described here are implemented
 as step categories in the **syntax tracer** at
@@ -615,8 +615,8 @@ to the user as a browser dialog.
 | `confirm(msg)` | message + OK/Cancel              | `boolean`          | two-way ←──→ |
 | `prompt(msg)`  | message + text field + OK/Cancel | `string` or `null` | two-way ←──→ |
 
-The User Interface channel is the primary subject of Chapter 3: writing programs
-that communicate with users via these three functions.
+The User Interface channel is the primary subject of Chapter 2 (Vibetoading):
+writing programs that communicate with users via these three functions.
 
 **Tracer visibility.** I/O channel interactions are observable as
 `category: 'emit'` events with

@@ -129,10 +129,10 @@ progressively larger scales.
 
 You will not be asked to descend through these in order or in unison. The
 chapters walk you through the phases of mastering the affordance-discovery cycle
-— naming it, living it with each hand, accelerating it, practicing it — meeting
-every audience of source code in Ch0 and deepening one twin per phase, and the
-layers run underneath. Stay where you want. Come back when you want to find
-more.
+— naming it, living it with each hand, concretizing and accelerating it,
+practicing it — meeting every audience of source code in Ch0 and deepening one
+twin per phase, and the layers run underneath. Stay where you want. Come back
+when you want to find more.
 
 ---
 

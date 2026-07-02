@@ -113,6 +113,7 @@ const config: Config = {
 			createStudyLensesPlugin,
 			{
 				contentRoots: [
+					'spiralearn/frogramming-and-vibetoading',
 					'spiralearn/welcome-to-frogramming',
 					'spiralearn/sandbox',
 				],
@@ -142,6 +143,34 @@ const config: Config = {
 				sidebarItemsGenerator: createStudySidebarGenerator({
 					contentRoot: studyLensContentRoot(
 						'spiralearn/welcome-to-frogramming',
+					),
+				}),
+			},
+		],
+		// --- Frogramming & Vibetoading (5-chapter affordance-cycle reshape) ---
+		// The going-forward curriculum. The original 6-chapter
+		// welcome-to-frogramming/ tree is preserved as a historical record,
+		// still served at /welcome-to-frogramming/.
+		[
+			'@docusaurus/plugin-content-docs',
+			{
+				id: 'frogramming-and-vibetoading',
+				path: 'spiralearn/frogramming-and-vibetoading',
+				routeBasePath: 'frogramming-and-vibetoading',
+				sidebarPath: './sidebars/frogramming-and-vibetoading.mjs',
+				beforeDefaultRemarkPlugins: [
+					[
+						createRemarkStudyLenses,
+						{
+							contentRoot: studyLensContentRoot(
+								'spiralearn/frogramming-and-vibetoading',
+							),
+						},
+					],
+				],
+				sidebarItemsGenerator: createStudySidebarGenerator({
+					contentRoot: studyLensContentRoot(
+						'spiralearn/frogramming-and-vibetoading',
 					),
 				}),
 			},
@@ -198,8 +227,13 @@ const config: Config = {
 			title: 'Spir@learn',
 			items: [
 				{
+					to: '/frogramming-and-vibetoading/',
+					label: 'Frogramming & Vibetoading',
+					position: 'left',
+				},
+				{
 					to: '/welcome-to-frogramming/',
-					label: 'Welcome to Frogramming',
+					label: 'Welcome to Frogramming (historical)',
 					position: 'left',
 				},
 				// {
@@ -221,7 +255,11 @@ const config: Config = {
 					title: 'spiralearn',
 					items: [
 						{
-							label: 'Welcome to Frogramming',
+							label: 'Frogramming & Vibetoading',
+							to: '/frogramming-and-vibetoading/',
+						},
+						{
+							label: 'Welcome to Frogramming (historical)',
 							to: '/welcome-to-frogramming/',
 						},
 						// {

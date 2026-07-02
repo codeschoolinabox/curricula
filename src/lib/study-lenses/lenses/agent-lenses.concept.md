@@ -178,9 +178,10 @@ cheap.
 A **dev**-agent reads the source and **predicts the output before it runs**;
 then we run it and show where the agent's prediction diverged from reality. This
 is _literally_ the predict-and-twin loop the curriculum is built on
-(**welcome-to-frogramming/ontology.md:400**) — and the agent being **wrong** is
-the instructive part, not a failure. Sidesteps "is the local model good enough
-to review code" by not requiring it to be.
+(**frogramming-and-vibetoading/ontology.md §4**, "The predict-and-twin
+practice") — and the agent being **wrong** is the instructive part, not a
+failure. Sidesteps "is the local model good enough to review code" by not
+requiring it to be.
 
 ### ④ The Spec → feedback → rewrite loop — _north star, not v1_
 
@@ -236,16 +237,16 @@ do nothing else here, this refactor is the safe, clearly-good move.
 - [`../embody/language-levels/just-enough-javascript/generator/`](../embody/language-levels/just-enough-javascript/generator/)
   — prior local-model art (impl deferred); `spike-jej--slopp/backend-llm.js` (in
   the `0--home` tree) is the working WebLLM spike.
-- **welcome-to-frogramming/README.md:307** (dev/user split is architecturally
-  visible) · **ontology.md:400** (predict-and-twin loop) · Chapter 4 adds
-  **Agents** as the fourth audience.
+- **frogramming-and-vibetoading/README.md** (dev/user split is architecturally
+  visible) · **ontology.md §4** (predict-and-twin practice) · Chapter 3
+  (Co-AIthoring) foregrounds **Agents** as the fourth audience.
 
 [^dreams]:
     **Wilder dreams** — L4 "wonder" territory, beyond any v1, recorded here so
     they aren't lost.
 
     _The literal fourth audience._ A lens where an agent reads _your_ code and
-    you watch it form its (mis)understanding — Chapter 4's "writing for and with
+    you watch it form its (mis)understanding — Chapter 3's "writing for and with
     agents" made watchable. The agent as _itself_, not standing in for dev or
     user.
 

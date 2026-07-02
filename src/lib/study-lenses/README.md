@@ -16,7 +16,7 @@ the syllabus's metaphor — what the 🔬 Frogrammer grounds their predictions i
 
 **Code is the UI.** The JS source text is the _control panel_ through which a
 programmer operates the NM. Authoring code is one way to operate that panel;
-describing intent to an LLM is another (Chapter 4). Either way, the NM is the
+describing intent to an LLM is another (Chapter 3). Either way, the NM is the
 thing the panel controls — and you can also observe it directly through visual
 debuggers / embody / lenses, bypassing the panel entirely.
 
@@ -52,7 +52,7 @@ flowchart LR
 Get the NM right and embody / lenses / orchestrate / curriculum follow. This
 package's internal directory structure mirrors the chain.
 
-[metaphor]: ../../../spiralearn/welcome-to-frogramming/README.md
+[metaphor]: ../../../spiralearn/frogramming-and-vibetoading/README.md
 
 ## Four audiences of code
 
@@ -119,8 +119,8 @@ The framework's quadrants apply at **two scopes** — snippet scope (one
 `<StudyLenses>` instance) and curricular scope (the embedding LMS arranging
 instances). We own the snippet scope; the LMS owns the curricular scope. The
 curriculum's
-[`pedagogy.md` §7](../../../spiralearn/welcome-to-frogramming/pedagogy.md) is
-the curriculum-scope treatment of the same two axes.
+[`pedagogy.md` §7](../../../spiralearn/frogramming-and-vibetoading/pedagogy.md)
+is the curriculum-scope treatment of the same two axes.
 
 | Pyramid layer                      | Snippet scope (us)                                                                                                                                                                                                           | Curricular scope (LMS)                                   |
 | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
