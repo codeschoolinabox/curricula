@@ -67,7 +67,7 @@ This is the part that makes the idea more than a bolt-on. The curriculum's
 central conceit is that JavaScript makes the developer/user split
 **architecturally visible**: `console.log` lives in devtools (developer space),
 `prompt`/`alert`/`confirm` live in browser UI (user space) — see
-**welcome-to-frogramming/README.md:307**. The intercept layer doesn't merely
+**frogramming-and-vibetoading/README.md**. The intercept layer doesn't merely
 _also_ expose those two channels; it reifies that split into its API:
 
 - **Dev channel = observable.** Console events stream out one at a time, each
