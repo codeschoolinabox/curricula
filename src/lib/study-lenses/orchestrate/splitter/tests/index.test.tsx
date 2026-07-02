@@ -148,6 +148,29 @@ describe('<Splitter> — two-pane render + ARIA contract', () => {
 		const { container } = renderSplitter();
 		expect(getHandle(container).getAttribute('aria-valuemax')).toBe('1000');
 	});
+
+	it('RE-MEASURES aria-valuemax when a single-pane splitter gains its second pane (the container ref only attaches in two-pane)', () => {
+		stubRect(1000, 1000);
+		const props = {
+			orientation: 'row' as const,
+			sizedPane: 'first' as const,
+			defaultBasisPx: 200,
+			minPx: 0,
+			maxPx: 900,
+			maxFraction: 0.6,
+			stepPx: 16,
+			label: 'resize panes',
+			first: PANE_A,
+		};
+		const { container, rerender } = render(
+			<Splitter {...props} second={null} />,
+		);
+		expect(getHandle(container)).toBeNull(); // single-pane, no container ref yet
+		rerender(<Splitter {...props} second={PANE_B} />);
+		// the handle appears AND aria-valuemax reflects the measured effective cap
+		// (1000 × 0.6 = 600), not the seeded raw maxPx (900).
+		expect(getHandle(container).getAttribute('aria-valuemax')).toBe('600');
+	});
 });
 
 describe('<Splitter> — drag wiring (mouse + window listeners; direction, not exact layout)', () => {

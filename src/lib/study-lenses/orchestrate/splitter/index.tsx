@@ -154,6 +154,12 @@ function Splitter({
 		[dragging, orientation, sizedPane, minPx],
 	);
 
+	// The container ref only attaches in the two-pane render; `bothPanesPresent`
+	// is a trackExtent dep so the effect RE-RUNS the moment a single-pane splitter
+	// gains its second pane (e.g. the horizontal splitter when output appears at
+	// run-start), measuring the now-attached container + installing the observer.
+	const bothPanesPresent = first !== null && second !== null;
+
 	// Track the effective max so aria-valuemax reports the REACHABLE ceiling, not
 	// the raw maxPx. Measured on mount and on container resize (feature-detected
 	// ResizeObserver — jsdom lacks it); the interaction handlers below also
@@ -199,7 +205,7 @@ function Splitter({
 				if (observer !== null) observer.disconnect();
 			};
 		},
-		[maxPx, maxFraction, orientation, minPx, resizeMode],
+		[maxPx, maxFraction, orientation, minPx, resizeMode, bothPanesPresent],
 	);
 
 	function onHandleMouseDown(event: React.MouseEvent<HTMLDivElement>): void {

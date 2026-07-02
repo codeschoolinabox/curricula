@@ -16,8 +16,8 @@ the User Interface and Developer Console panels.
 splitter/
   README.md    (this)
   DOCS.md      architectural sketch + Mermaid data-state flow
-  types.ts     SplitOrientation | SizedPane (the shared named exports)
-  geometry.ts  the pure core (default-exported bag of 4 functions)
+  types.ts     SplitOrientation | SizedPane | ResizeMode (shared exports)
+  geometry.ts  the pure core (default-exported bag of 5 functions)
   index.tsx    <Splitter> — the component (the only impure glue)
   tests/       geometry.test.ts (pure) + index.test.tsx (jsdom wiring)
 ```
