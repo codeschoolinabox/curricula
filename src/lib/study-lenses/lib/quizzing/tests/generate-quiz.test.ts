@@ -58,7 +58,18 @@ describe('generateQuiz', () => {
 					generateQuiz(snippet, classifyOf(snippet)).map((item) => item.form),
 				),
 			).toEqual(
-				new Set(['V1', 'V2', 'V6', 'V7', 'V8', 'V10a', 'V10b', 'V10c', 'V4']),
+				new Set([
+					'V1',
+					'V2',
+					'V3',
+					'V6',
+					'V7',
+					'V8',
+					'V10a',
+					'V10b',
+					'V10c',
+					'V4',
+				]),
 			);
 		});
 
@@ -72,6 +83,7 @@ describe('generateQuiz', () => {
 				new Set([
 					'V1',
 					'V2',
+					'V3',
 					'V6',
 					'V6b',
 					'V7',
@@ -93,7 +105,9 @@ describe('generateQuiz', () => {
 				new Set(
 					generateQuiz(snippet, classifyOf(snippet)).map((item) => item.form),
 				),
-			).toEqual(new Set(['V1', 'V7', 'V8', 'V10a', 'V10b', 'V10c', 'V4']));
+			).toEqual(
+				new Set(['V1', 'V3', 'V7', 'V8', 'V10a', 'V10b', 'V10c', 'V4']),
+			);
 		});
 
 		it('emits exactly one V2 item (the declaration) for a contextual keyword as a property', () => {
@@ -115,6 +129,25 @@ describe('generateQuiz', () => {
 				.map((item) => item.groupKey);
 			expect(chainGroupKeys).toContain('chain:scope-chain:Math');
 			expect(chainGroupKeys).toContain('chain:prototype-chain:max');
+		});
+
+		it('fires V3 realm provenance end-to-end for a bare intrinsic global', () => {
+			// the realm branch (undeclared name → realm-table hit) reaches output
+			const snippet = embody('Math;');
+			const v3 = generateQuiz(snippet, classifyOf(snippet)).filter(
+				(item) => item.form === 'V3',
+			);
+			expect(v3).toHaveLength(1);
+			expect(v3[0]?.groupKey).toBe('realm:Math');
+		});
+
+		it('keys V3 on the binding axis when a program decl shadows a realm name', () => {
+			// resolveBinding-first: `let Math` wins, so V3 is program-declared, not realm
+			const snippet = embody('let Math = 1; Math;');
+			const v3GroupKeys = generateQuiz(snippet, classifyOf(snippet))
+				.filter((item) => item.form === 'V3')
+				.map((item) => item.groupKey);
+			expect(v3GroupKeys).toEqual(['binding:4-8', 'binding:4-8']);
 		});
 	});
 
