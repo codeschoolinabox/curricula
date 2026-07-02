@@ -26,6 +26,8 @@ import type {
 	SandboxMode,
 } from '../types.js';
 
+import './dock.css';
+
 type DockProperties = Readonly<{
 	/** The dock's display state — surfaced as `data-orchestrator-dock-collapsed`. */
 	readonly collapsed: boolean;

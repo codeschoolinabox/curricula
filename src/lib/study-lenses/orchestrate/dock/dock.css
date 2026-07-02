@@ -1,0 +1,346 @@
+/*
+ * dock.css — the omnipresent region's run/debug controls band. Side-effect
+ * imported by ./index.tsx (the lens-CSS precedent: lenses/blanks/blanks.css
+ * imported for side effect). Presentation only; the JSX is frozen.
+ *
+ * SCOPING: every rule descends from [data-orchestrator-dock] (the dock root),
+ * mirroring the blanks lens under [data-lens='blanks']. That attribute is
+ * globally unique, so the stylesheet cannot leak into a consumer page or another
+ * tool. (No static leak-guard test covers this file yet — a follow-up analogous
+ * to ../tests/orchestrate-css.test.ts is open; the unique attribute prefix is the
+ * current safeguard.) This file does NOT style the region layout (the flex row, phases panel,
+ * content row) — that lives in ../orchestrate.css and is owned by another
+ * workstream. The dock ROOT is a flex ITEM of that region, so this file sets only
+ * INSIDE properties on the root (padding/border/background/display/gap for its
+ * own children) and never region-item properties (margin, width/min/max-width,
+ * flex*, align-self, order, position:absolute|fixed) — those negotiate with the
+ * region's flex algorithm and belong to ../orchestrate.css.
+ *
+ * COLLAPSE (load-bearing DOM invariant, NOT unit-test-backed): the controls
+ * strip is the dock root's ONLY direct <div> child — the collapse button, Run,
+ * Cancel, and the outcome are <button>/<span> siblings. `> div` therefore
+ * uniquely selects the strip; collapsing hides it while Run stays reachable. If
+ * anyone ever wraps Run+Cancel in a <div>, this selector would hide them too —
+ * keep them non-div siblings. This invariant is verified at the 🔍 sandbox
+ * checkpoint, not by a test.
+ *
+ * COLOUR GRAMMAR: no new resting hue is introduced. Status reuses the region's
+ * palette (success #2e7d32, danger #c62828) plus a warning amber #b45309; the
+ * primary action (Run) is a neutral slate emphasis (weight + contrast, not a
+ * competing hue). Blue #2563eb appears ONLY as the transient keyboard
+ * focus-visible ring. jsdom computes no layout, so geometry/colour is verified
+ * at the sandbox checkpoint (light AND dark); values here are tuned starting
+ * points. The dark block is real (oneDark #282c34 washes out faint tints).
+ */
+
+/* Dock root — a self-contained controls row (INSIDE properties only). */
+[data-orchestrator-dock] {
+	display: flex;
+	flex-flow: row wrap;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.375rem 0.625rem;
+	border: 1px solid #d8dce0;
+	border-radius: 6px;
+	background: #f7f8fa;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+	font-family: system-ui, sans-serif;
+	font-size: 0.85rem;
+	color: #2d333b;
+}
+
+/* The controls strip — the dock root's ONLY direct <div> child (see header). */
+[data-orchestrator-dock] > div {
+	display: flex;
+	flex-flow: row wrap;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+/* Collapsed: hide the controls strip; Run/Cancel/outcome (siblings) stay shown. */
+[data-orchestrator-dock][data-orchestrator-dock-collapsed='true'] > div {
+	display: none;
+}
+
+/* Ghost button — the shared family look for every dock button (base tier). */
+[data-orchestrator-dock] button {
+	padding: 0.25rem 0.6rem;
+	border: 1px solid #c4c9d0;
+	border-radius: 4px;
+	background: #fff;
+	color: #2d333b;
+	font: inherit;
+	cursor: pointer;
+}
+
+[data-orchestrator-dock] button:hover {
+	background: #f0f2f5;
+}
+
+/* Hover cross-fades — added only when motion is welcome (reduced-motion-safe;
+ * the state cues above are all instantaneous, so nothing is lost without them). */
+@media (prefers-reduced-motion: no-preference) {
+	[data-orchestrator-dock] button {
+		transition: background-color 120ms, border-color 120ms, box-shadow 120ms;
+	}
+}
+
+/* Keyboard focus ring — the ONE transient use of the blue accent (a11y). */
+[data-orchestrator-dock] button:focus-visible,
+[data-orchestrator-dock] input:focus-visible {
+	outline: 2px solid #2563eb;
+	outline-offset: 2px;
+}
+
+/* Number inputs (seconds / iterations) — same control token family as buttons. */
+[data-orchestrator-dock] [data-orchestrator-dock-limit] {
+	width: 5rem;
+	padding: 0.2rem 0.35rem;
+	border: 1px solid #c4c9d0;
+	border-radius: 4px;
+	background: #fff;
+	color: #2d333b;
+	font: inherit;
+}
+
+/* Danger-only debugger checkbox — folded into the control family. */
+[data-orchestrator-dock] [data-orchestrator-dock-debugger] {
+	cursor: pointer;
+	accent-color: #2d333b;
+}
+
+/*
+ * The script-mode hint — a warning ASIDE. The left-accent bar means "warning"
+ * and is reserved to this element across the tool family (quiz cards do not use
+ * it), so the motif keeps a single meaning.
+ */
+[data-orchestrator-dock] [data-orchestrator-dock-type-hint] {
+	padding: 0.15rem 0.4rem;
+	border-left: 3px solid #b45309;
+	background: rgba(245, 158, 11, 0.12);
+	color: #b45309;
+	font-size: 0.8rem;
+	font-style: italic;
+}
+
+/* Danger sandbox toggle — reuses the region's danger red (status, not action). */
+[data-orchestrator-dock] [data-orchestrator-dock-sandbox-toggle='danger'] {
+	border-color: #c62828;
+	color: #c62828;
+}
+
+/*
+ * Run — the PRIMARY action. Neutral slate emphasis (weight + contrast), NOT a
+ * status hue. Specificity 0-2-0 overrides the 0-1-1 base ghost rule.
+ */
+[data-orchestrator-dock] [data-orchestrator-dock-run] {
+	border-color: #2d333b;
+	background: #2d333b;
+	color: #fff;
+	font-weight: 600;
+}
+
+[data-orchestrator-dock] [data-orchestrator-dock-run]:hover {
+	border-color: #1f2428;
+	background: #1f2428;
+}
+
+/*
+ * Running — a distinct in-flight affordance with a STATIC, reduced-motion-proof
+ * channel: the inset ring's PRESENCE (idle/settled have none) plus the green
+ * tint plus cursor:progress carry the signal even with motion disabled; the
+ * pulse below is added only when motion is welcome. (idle & settled fall through
+ * to the primary rule above — no separate rule needed.)
+ */
+[data-orchestrator-dock]
+	[data-orchestrator-dock-run][data-orchestrator-dock-run-state='running'] {
+	border-color: #2e7d32;
+	background: #2e7d32;
+	box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.7);
+	cursor: progress;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	[data-orchestrator-dock]
+		[data-orchestrator-dock-run][data-orchestrator-dock-run-state='running'] {
+		animation: orchestrator-dock-run-pulse 1.2s ease-in-out infinite;
+	}
+}
+
+@keyframes orchestrator-dock-run-pulse {
+	50% {
+		opacity: 0.72;
+	}
+}
+
+/*
+ * Cancel — the QUIET tertiary button, subordinate to Run. Selected as Run's
+ * adjacent sibling (attribute-anchored, no label-text coupling). NOTE: Cancel
+ * renders in every run-state and carries no data-attribute of its own, and the
+ * run-state lives on the Run sibling — so its appearance CANNOT be tied to run
+ * state via a selector. Accepted limitation; it reads as a low-emphasis control.
+ */
+[data-orchestrator-dock] [data-orchestrator-dock-run] + button {
+	border-color: transparent;
+	background: none;
+	color: #57606a;
+	font-weight: 400;
+}
+
+[data-orchestrator-dock] [data-orchestrator-dock-run] + button:hover {
+	background: #f0f2f5;
+	color: #2d333b;
+}
+
+/*
+ * Outcome badge — a pill. Base is neutral (also the fallback for any future
+ * outcome value). The dock renders the outcome WORD verbatim and never branches
+ * on it; the per-value tints below live ONLY in CSS, so the component stays
+ * value-agnostic. Non-colour channels: the rendered word + the border STYLE
+ * (solid = terminal result, dashed = bound exceeded, dotted = didn't complete).
+ * The value set is the locked EndReportOutcome union (../types.ts).
+ */
+[data-orchestrator-dock] [data-orchestrator-dock-outcome] {
+	padding: 0.1rem 0.5rem;
+	border: 1px solid #c4c9d0;
+	border-radius: 999px;
+	background: #fff;
+	color: #57606a;
+	font-size: 0.8rem;
+}
+
+[data-orchestrator-dock] [data-orchestrator-dock-outcome='completed'] {
+	border-style: solid;
+	border-color: #2e7d32;
+	background: rgba(46, 125, 50, 0.12);
+	color: #2e7d32;
+}
+
+[data-orchestrator-dock] [data-orchestrator-dock-outcome='errored'],
+[data-orchestrator-dock] [data-orchestrator-dock-outcome='failed'] {
+	border-style: solid;
+	border-color: #c62828;
+	background: rgba(198, 40, 40, 0.12);
+	color: #c62828;
+}
+
+[data-orchestrator-dock] [data-orchestrator-dock-outcome='timed-out'],
+[data-orchestrator-dock] [data-orchestrator-dock-outcome='limit-exceeded'] {
+	border-style: dashed;
+	border-color: #b45309;
+	background: rgba(245, 158, 11, 0.12);
+	color: #b45309;
+}
+
+[data-orchestrator-dock] [data-orchestrator-dock-outcome='cancelled'],
+[data-orchestrator-dock] [data-orchestrator-dock-outcome='not-runnable'] {
+	border-style: dotted;
+	border-color: #8b949e;
+	background: rgba(139, 148, 158, 0.12);
+	color: #57606a;
+}
+
+/*
+ * Dark scheme — oneDark (#282c34) kills faint tints, so surfaces lift to low-
+ * opacity whites, borders/text brighten, and the status/outcome tints deepen.
+ */
+@media (prefers-color-scheme: dark) {
+	[data-orchestrator-dock] {
+		border-color: rgba(255, 255, 255, 0.15);
+		background: rgba(255, 255, 255, 0.04);
+		color: #c9d1d9;
+	}
+
+	[data-orchestrator-dock] button,
+	[data-orchestrator-dock] [data-orchestrator-dock-limit] {
+		border-color: rgba(255, 255, 255, 0.2);
+		background: rgba(255, 255, 255, 0.08);
+		color: #c9d1d9;
+	}
+
+	[data-orchestrator-dock] button:hover {
+		background: rgba(255, 255, 255, 0.14);
+	}
+
+	[data-orchestrator-dock] button:focus-visible,
+	[data-orchestrator-dock] input:focus-visible {
+		outline-color: #60a5fa;
+	}
+
+	[data-orchestrator-dock] [data-orchestrator-dock-debugger] {
+		accent-color: #c9d1d9;
+	}
+
+	[data-orchestrator-dock] [data-orchestrator-dock-type-hint] {
+		border-left-color: #f0b429;
+		background: rgba(245, 158, 11, 0.18);
+		color: #f0b429;
+	}
+
+	[data-orchestrator-dock] [data-orchestrator-dock-sandbox-toggle='danger'] {
+		border-color: #f28b82;
+		color: #f28b82;
+	}
+
+	[data-orchestrator-dock] [data-orchestrator-dock-run] {
+		border-color: rgba(255, 255, 255, 0.25);
+		background: rgba(255, 255, 255, 0.14);
+		color: #fff;
+	}
+
+	[data-orchestrator-dock] [data-orchestrator-dock-run]:hover {
+		border-color: rgba(255, 255, 255, 0.35);
+		background: rgba(255, 255, 255, 0.22);
+	}
+
+	[data-orchestrator-dock]
+		[data-orchestrator-dock-run][data-orchestrator-dock-run-state='running'] {
+		border-color: #2e7d32;
+		background: #2e7d32;
+		box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.5);
+	}
+
+	[data-orchestrator-dock] [data-orchestrator-dock-run] + button {
+		border-color: transparent;
+		background: none;
+		color: #8b949e;
+	}
+
+	[data-orchestrator-dock] [data-orchestrator-dock-run] + button:hover {
+		background: rgba(255, 255, 255, 0.1);
+		color: #c9d1d9;
+	}
+
+	[data-orchestrator-dock] [data-orchestrator-dock-outcome] {
+		border-color: rgba(255, 255, 255, 0.2);
+		background: rgba(255, 255, 255, 0.06);
+		color: #c9d1d9;
+	}
+
+	[data-orchestrator-dock] [data-orchestrator-dock-outcome='completed'] {
+		border-color: #4caf50;
+		background: rgba(76, 175, 80, 0.22);
+		color: #7bd88f;
+	}
+
+	[data-orchestrator-dock] [data-orchestrator-dock-outcome='errored'],
+	[data-orchestrator-dock] [data-orchestrator-dock-outcome='failed'] {
+		border-color: #f28b82;
+		background: rgba(242, 139, 130, 0.22);
+		color: #f28b82;
+	}
+
+	[data-orchestrator-dock] [data-orchestrator-dock-outcome='timed-out'],
+	[data-orchestrator-dock] [data-orchestrator-dock-outcome='limit-exceeded'] {
+		border-color: #f0b429;
+		background: rgba(240, 180, 41, 0.22);
+		color: #f0b429;
+	}
+
+	[data-orchestrator-dock] [data-orchestrator-dock-outcome='cancelled'],
+	[data-orchestrator-dock] [data-orchestrator-dock-outcome='not-runnable'] {
+		border-color: rgba(255, 255, 255, 0.3);
+		background: rgba(255, 255, 255, 0.1);
+		color: #c9d1d9;
+	}
+}

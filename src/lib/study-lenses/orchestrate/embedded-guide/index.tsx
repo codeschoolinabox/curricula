@@ -20,6 +20,8 @@
 
 import React from 'react';
 
+import './embedded-guide.css';
+
 type EmbeddedGuideProperties = Readonly<{
 	/** Whether the guide is expanded — the orchestrator-owned disclosure state. */
 	readonly revealed: boolean;

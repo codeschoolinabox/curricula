@@ -1,0 +1,137 @@
+/*
+ * embedded-guide.css — the omnipresent region's META tool: a disclosure that
+ * reveals authored, program-independent documentation of the instrument itself.
+ * Side-effect imported by ./index.tsx (precedent: lenses/blanks/blanks.css).
+ * Presentation only; the JSX is frozen.
+ *
+ * SCOPING: every rule descends from [data-orchestrator-guide] (the guide root),
+ * mirroring the blanks lens under [data-lens='blanks']. The guide root is a flex
+ * ITEM of the region row (../orchestrate.css) — this file sets only INSIDE
+ * properties on the root and never region-item properties (margin/width/flex*/
+ * align-self/order/absolute positioning), which belong to ../orchestrate.css.
+ * (No static leak-guard test covers this file yet — a follow-up analogous to
+ * ../tests/orchestrate-css.test.ts is open; the unique attribute prefix is the
+ * current safeguard.)
+ *
+ * The disclosure state is carried by the button LABEL ("Show/Hide the guide")
+ * and by the presence of the content container, so no caret is drawn (a static
+ * caret would misrepresent state). The blue #2563eb appears only as the
+ * transient keyboard focus ring. jsdom computes no layout — verified at the 🔍
+ * sandbox checkpoint (light AND dark). Dark block is real (oneDark washes tints).
+ */
+
+/* Guide root — a downward-growing column (INSIDE properties only). */
+[data-orchestrator-guide] {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	font-family: system-ui, sans-serif;
+	font-size: 0.85rem;
+	color: #57606a;
+}
+
+/* The reveal button — the only direct <button>; ghost-button family look.
+ * align-self:flex-start is on this DESCENDANT (not the tool root), so it hugs
+ * its label instead of stretching the column full width. */
+[data-orchestrator-guide] > button {
+	align-self: flex-start;
+	padding: 0.25rem 0.6rem;
+	border: 1px solid #c4c9d0;
+	border-radius: 4px;
+	background: #fff;
+	color: #2d333b;
+	font: inherit;
+	cursor: pointer;
+}
+
+[data-orchestrator-guide] > button:hover {
+	background: #f0f2f5;
+}
+
+/* Hover cross-fade — added only when motion is welcome (reduced-motion-safe). */
+@media (prefers-reduced-motion: no-preference) {
+	[data-orchestrator-guide] > button {
+		transition: background-color 120ms, border-color 120ms, box-shadow 120ms;
+	}
+}
+
+[data-orchestrator-guide] > button:focus-visible {
+	outline: 2px solid #2563eb;
+	outline-offset: 2px;
+}
+
+/* The revealed panel — a card holding the topic list (present only when open). */
+[data-orchestrator-guide] [data-orchestrator-guide-content] {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	padding: 0.5rem 0.75rem;
+	border: 1px solid #d8dce0;
+	border-radius: 6px;
+	background: #fafafa;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+/* Each of the five topics — separated by a hairline (the first gets none). */
+[data-orchestrator-guide] [data-orchestrator-guide-topic] {
+	border-top: 1px solid #eee;
+	padding-top: 0.5rem;
+}
+
+[data-orchestrator-guide] [data-orchestrator-guide-topic]:first-child {
+	border-top: none;
+	padding-top: 0;
+}
+
+[data-orchestrator-guide] [data-orchestrator-guide-topic] h3 {
+	margin: 0 0 0.25rem;
+	font-size: 0.9rem;
+	font-weight: 600;
+	color: #2d333b;
+}
+
+[data-orchestrator-guide] [data-orchestrator-guide-topic] p {
+	margin: 0;
+	color: #57606a;
+	line-height: 1.5;
+}
+
+/*
+ * Dark scheme — surfaces lift to low-opacity whites; borders/text brighten.
+ */
+@media (prefers-color-scheme: dark) {
+	[data-orchestrator-guide] {
+		color: #8b949e;
+	}
+
+	[data-orchestrator-guide] > button {
+		border-color: rgba(255, 255, 255, 0.2);
+		background: rgba(255, 255, 255, 0.08);
+		color: #c9d1d9;
+	}
+
+	[data-orchestrator-guide] > button:hover {
+		background: rgba(255, 255, 255, 0.14);
+	}
+
+	[data-orchestrator-guide] > button:focus-visible {
+		outline-color: #60a5fa;
+	}
+
+	[data-orchestrator-guide] [data-orchestrator-guide-content] {
+		border-color: rgba(255, 255, 255, 0.15);
+		background: rgba(255, 255, 255, 0.04);
+	}
+
+	[data-orchestrator-guide] [data-orchestrator-guide-topic] {
+		border-top-color: rgba(255, 255, 255, 0.1);
+	}
+
+	[data-orchestrator-guide] [data-orchestrator-guide-topic] h3 {
+		color: #c9d1d9;
+	}
+
+	[data-orchestrator-guide] [data-orchestrator-guide-topic] p {
+		color: #8b949e;
+	}
+}
