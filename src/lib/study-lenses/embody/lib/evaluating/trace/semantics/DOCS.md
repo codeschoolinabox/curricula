@@ -249,19 +249,29 @@ serialization replacer. What an engine-made stop cannot deliver is the worker's
 metrics (visit counts ride the halt), so those default to zero — absence of
 evidence, stated as such.
 
-### The timer measures runtime, not event count (D4 — an engine requirement)
+### The budget already measures runtime; the yield charge is the one gap (D4)
 
 A learner tracing a loop must not hit a surprise timeout on a program that
-finishes instantly. The timeout MUST measure only elapsed worker RUNTIME —
-pausing for I/O (a dialog round-trip) AND for consumer think-time (an event
-awaiting its pull) — never a synthetic per-event charge. The engine today
-deducts a flat per-yield charge that makes the budget scale with EMITTED-EVENT
-COUNT (at expression granularity, ~1000 events exhausts the default budget with
-zero real runtime), which violates this requirement. This tracer cannot fix it
-alone — the charge lives in the engine's pause path. So this is a **cross-module
-requirement on the engine**: a runtime-only budget (a yield-charge opt-out).
-Until it lands, the tracer's `seconds` is not a learner-honest limit for dense
-traces; loop safety meanwhile rests on the `iterations` cap, not the clock.
+finishes instantly. The engine's budget ALREADY does most of what that needs
+(verified in `lib/engine/evaluate.ts` `createBudget`): it counts only elapsed
+worker RUNTIME (`performance.now()` deltas while the worker is unblocked), and
+it PAUSES for both I/O — `pauseForCall` disarms the timer with no charge — and
+consumer think-time — a yielded event awaiting its pull does not accrue time. So
+the "measure runtime, exclude I/O" requirement is met.
+
+The ONE gap is a deliberate synthetic penalty layered ON TOP: `pauseForYield`
+also deducts a flat `YIELD_CHARGE_MS = 5` per YIELDED event (not per drop, not
+per call). Its purpose is to keep render-bound loops finite in wall-clock terms
+— but at this tracer's expression granularity it becomes the BINDING limit:
+~1000 emitted events exhaust the default 5 s budget with zero real runtime, so a
+fast program that emits densely can time out mid-trace. This is the only thing
+that makes `seconds` not a learner-honest limit for dense traces.
+
+The tracer cannot change the charge (it lives in the engine's pause path). So
+the D4 ask is NARROW: a **yield-charge opt-out** on the engine spec (a consumer
+that owns its own iteration cap does not need the synthetic wall-clock valve).
+Meanwhile loop safety rests on the `iterations` cap, not the clock, and a higher
+`seconds` buys headroom against the charge.
 
 ## Test taxonomy
 
