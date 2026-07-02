@@ -71,7 +71,12 @@
 		"wllama",
 		"qwen",
 		"smol",
-		"mistranspiles"
+		"mistranspiles",
+		"legesher",
+		"Español",
+		"Français",
+		"Deutsch",
+		"العربية"
 	],
 	"ignorePaths": [
 		"node_modules",
@@ -84,7 +89,8 @@
 		"*.jpg",
 		"*.gif",
 		"*.ico",
-		"src/lib/sl-trace-js-aran-legacy/record/legacy-aran-trace"
+		"src/lib/sl-trace-js-aran-legacy/record/legacy-aran-trace",
+		"src/lib/study-lenses/lib/translating/packs/**"
 	],
 	"enableFiletypes": ["mdx"]
 }
