@@ -1,4 +1,4 @@
-# Welcome to Frogramming — Pedagogy
+# Frogramming & Vibetoading: Affordance-Discovery Cycle(s) — Pedagogy
 
 > The _design principles for the learning experience_ — how the concepts named
 > in `ontology.md` get taught. Introduction order, exercise patterns,
@@ -117,37 +117,40 @@ it."_ Predicting the chain of internal events is what closes that gap.
 SOLO taxonomy from education research distinguishes Pre-, Uni-, Multi-,
 Relational-, and Extended-Abstract levels of conceptual integration —
 prestructural through to network-of-connected-concepts. A learner's relationship
-to a concept progresses through these levels at its own pace. Chapters 1–3 of
+to a concept progresses through these levels at its own pace. Chapters 0⟡–2⟡ of
 this course are _weighted toward_ Building Structure (Pre/Uni/Multistructural —
-concepts isolated, models forming, no AI in the work). Chapter 4 is _weighted
-toward_ the threshold crossing (Relational — concepts connect; AI outputs become
-evaluable). Chapter 5 is _weighted toward_ Leveraging Structure (Extended
-Abstract): all quadrants of human-AI collaboration become viable, and snippetry
-maintains the automated library (the _automaticity_ named in the opener) once
-full-codebase work no longer provides daily reps. Within any chapter, a learner
-is at varying SOLO levels for different concepts; the mapping is suggestive, not
-strict. The threshold matters because **AI cannot help when learners don't yet
-know what to verify.** Until you can recognize what to verify, an LLM's output
-is unevaluable from your seat — even if it happens to be correct.
+concepts isolated, models forming, **no AI _authoring_ the work**: Ch2⟡'s
+simulated users sit in the audience seat, producing behavior to observe, never
+work-product — see ontology §11's simulated-audience note). Chapter 3⟡ is
+_weighted toward_ the threshold crossing (Relational — concepts connect; AI
+outputs become evaluable). Chapter 4⟡ is _weighted toward_ Leveraging Structure
+(Extended Abstract): all quadrants of human-AI collaboration become viable, and
+snippetry maintains the automated library (the _automaticity_ named in the
+opener) once full-codebase work no longer provides daily reps. Within any
+chapter, a learner is at varying SOLO levels for different concepts; the mapping
+is suggestive, not strict. The threshold matters because **AI cannot help when
+learners don't yet know what to verify.** Until you can recognize what to
+verify, an LLM's output is unevaluable from your seat — even if it happens to be
+correct.
 
-**Why Chapter 4 lands where it does.** Chapter ordering here isn't arbitrary —
+**Why Chapter 3⟡ lands where it does.** Chapter ordering here isn't arbitrary —
 it's a structural consequence of the principle. Until you have the twins (the
-NM-twin, the user-twin, the developer-twin), you can't evaluate AI output,
-direct it meaningfully, or recognize when it's confidently misleading you.
-There's a sharper way to put this: until you have the twins, you don't know what
-to ask the LLM well, and an LLM responding to ill-formed queries samples like
-random encounter, not like a teacher. Once the twins are running, your queries
-become well-posed enough that the LLM's responses approximate pedagogical
-sampling — and you have the model to verify them against. The threshold isn't
-sequential ("we covered Ch1–3 first, now Ch4"); it's structural (pre-twin
-queries elicit non-pedagogical samples; post-twin queries elicit something
-closer to pedagogical samples that you can also evaluate). Once across the
-threshold, the LLM becomes a steerable participant. Chapter 4's structure —
-every section evaluating LLM output rather than producing it — is the
-operational mechanism that lets the chapter work safely. **Code is content, not
-deliverable** is the framing this section names for Ch4: AI-generated code is
-material to study, not work-product to ship — which is what keeps the chapter
-pedagogical rather than productivity-oriented.
+NM-twin, the user-twin, the developer-twin woven through them as craft), you
+can't evaluate AI output, direct it meaningfully, or recognize when it's
+confidently misleading you. There's a sharper way to put this: until you have
+the twins, you don't know what to ask the LLM well, and an LLM responding to
+ill-formed queries samples like random encounter, not like a teacher. Once the
+twins are running, your queries become well-posed enough that the LLM's
+responses approximate pedagogical sampling — and you have the model to verify
+them against. The threshold isn't sequential ("we covered Ch0⟡–Ch2⟡ first, now
+Ch3⟡"); it's structural (pre-twin queries elicit non-pedagogical samples;
+post-twin queries elicit something closer to pedagogical samples that you can
+also evaluate). Once across the threshold, the LLM becomes a steerable
+participant. Chapter 3⟡'s structure — every section evaluating LLM output rather
+than producing it — is the operational mechanism that lets the chapter work
+safely. **Code is content, not deliverable** is the framing this section names
+for Ch3⟡: AI-generated code is material to study, not work-product to ship —
+which is what keeps the chapter pedagogical rather than productivity-oriented.
 
 **The existing scaffolding, reread as instances of the principle.** Each piece
 of this curriculum's apparatus is **pedagogical sampling at a particular
@@ -177,7 +180,7 @@ granularity**:
 - **Errors-as-information** is pedagogical sampling at the moment of
   model-divergence: the machine is honest, and an error is a surprise that
   updates your model.
-- **Snippetry** (Ch5) is pedagogical sampling _for self_ — the learner becomes
+- **Snippetry** (Ch4⟡) is pedagogical sampling _for self_ — the learner becomes
   their own pedagogical sampler for NM-maintenance once full-codebase work no
   longer provides daily reps. Each snippet is a self-curated experience.
 
@@ -310,7 +313,7 @@ vocabulary:
   Clark, Jakob Hohwy) cited in deeper sections as "how minds work as predictive
   engines"
 - ✓ **"active inference"** — usable but requires explanation; introduce as the
-  dyadic-Friston frame in Ch4
+  dyadic-Friston frame in Ch3⟡
 
 ### The pedagogical consequence
 
@@ -429,7 +432,7 @@ Operates at multiple granularities:
 | **Study Lenses**                                             | internal-event level (what the NM is doing, made observable)                                               |
 | **Just Enough JavaScript**                                   | language-feature surface — fewer features chosen deliberately                                              |
 | **Errors-as-information**                                    | moment of model-divergence                                                                                 |
-| **Snippetry** (Ch5)                                          | pedagogical sampling _for self_ — the learner becomes their own pedagogical sampler                        |
+| **Snippetry** (Ch4⟡)                                         | pedagogical sampling _for self_ — the learner becomes their own pedagogical sampler                        |
 
 #### §6 The spiderweb curriculum + the spiral as traversal
 
@@ -569,11 +572,11 @@ fork from plain markdown.
 Source code is _the control panel through which the programmer operates the NM_.
 LLM prompting is an alternative way to operate the same panel.
 
-Ch4 framing: **"code is content, not deliverable."** AI-generated code is
+Ch3⟡ framing: **"code is content, not deliverable."** AI-generated code is
 material to study, not work-product to ship.
 
 The principle is shared between this curriculum and `study-lenses/`'s README —
-it's an org-wide commitment, not a Ch4-only flourish.
+it's an org-wide commitment, not a Ch3⟡-only flourish.
 
 #### §12-ter Full Complexity, Max Simplicity
 
@@ -679,7 +682,7 @@ simultaneously. Perspective stacking (ontology §7) operationalized.
 
 ### Static vs Dynamic
 
-Foundational conceptual distinction (Ch1 introduces it):
+Foundational conceptual distinction (Ch0⟡ introduces it, on the greeter):
 
 - **Static**: source code (text). Comments live here. Developer reads this
   without running the program.
@@ -690,9 +693,9 @@ Setting up the dev-twin: the developer who reads code sees the static text, not
 the runtime. Understanding this distinction is prerequisite to understanding why
 comments and logs serve different purposes.
 
-### Code is content, not deliverable (Ch4 framing)
+### Code is content, not deliverable (Ch3⟡ framing)
 
-Cross-link to ontology §11. In Ch4, LLM-generated code is _material to study_,
+Cross-link to ontology §11. In Ch3⟡, LLM-generated code is _material to study_,
 not work-product to ship. This is what keeps the chapter pedagogical rather than
 productivity-oriented.
 
@@ -708,8 +711,8 @@ developed in subsequent Wave-3 commits and in the ontology↔pedagogy audit pass
 
 - Scaffolding patterns: PRIMM, Block Model, PBIS (Purpose / Behavior /
   Implementation / Strategy — the four-level reading framework introduced in
-  Ch3), Study Lenses, Cognitive Load, JEJ, errors-as-information, Snippetry (the
-  names are introduced in the scaffolding bullets above; full per-pattern
+  Ch1⟡), Study Lenses, Cognitive Load, JEJ, errors-as-information, Snippetry
+  (the names are introduced in the scaffolding bullets above; full per-pattern
   treatment lives here when developed)
 - Sequence: when each concept first lands (the ladder), how it deepens (the
   spiral)
