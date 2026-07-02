@@ -682,6 +682,20 @@ The dock owns no execution backend: the orchestrator consumes
 engine (and the deferred danger-iframe backend) sit behind the `EvaluateHandle`
 contract, off the dock's surface entirely.
 
+#### Resizable dividers
+
+The content-row children are laid out by resizable `<Splitter>`s
+([`./splitter/`](./splitter/DOCS.md)), PRESENTATIONAL layout wrappers that do not
+change the data flow above (`<OutputPanels>` receives the same props), only the
+DOM nesting (surface / panels now sit in `-splitter-pane` wrappers). A
+**horizontal** Splitter divides the active surface and the output-panels column
+(`sizedPane="second"`, `resizeMode="fixed"`); a **vertical** Splitter inside the
+output-panels column divides the User Interface and Developer Console panels
+(`sizedPane="first"`, `resizeMode="proportional"` — the split keeps its ratio as
+the column height changes), with the pending dialog kept AFTER it. Each Splitter
+is single-pane with no handle when only one child is present (idle → no panels;
+one channel dismissed) and renders nothing when both are absent.
+
 ### Internal event taxonomy
 
 The internal `EventBus` carries intra-component coordination events. Each

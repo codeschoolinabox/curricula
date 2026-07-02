@@ -1016,11 +1016,13 @@ control**: its two channels render as the **output panels** (see § The output
 panels) **beside** the active surface — to its right — never under it,
 preserving the user/dev audience split spatially. `data-orchestrator-root` is a
 flex **column** (chrome · content row); the content row
-(`data-orchestrator-content-row`) is a flex **row** (active surface · output
-panels). The region is **not** a wrapper around the panel; the only new
-container is the content row, which groups the active surface and the output
-panels into the bottom row. The arrangement is produced by DOM order plus the
-co-located `orchestrate.css`, not by a band wrapper.
+(`data-orchestrator-content-row`) is a **block** wrapper around a horizontal
+resizable `<Splitter>` (see [`./splitter/`](./splitter/README.md)) that lays the
+active surface and the output panels out side by side — the Splitter's
+`align-items: stretch` gives them equal height, the active surface driving it.
+Inside the output-panels column a **vertical** `<Splitter>` divides the User
+Interface and Developer Console. The arrangement is produced by the two Splitters
+plus the co-located `orchestrate.css`.
 
 The exact CSS / visual arrangement — ordering within the dock,
 collapsed-vs-expanded treatment, channel layout, the question-render surface's
