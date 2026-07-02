@@ -1,4 +1,4 @@
-# Welcome to Frogramming — A Manifesto for Curriculum Authors, Forkers, and Contributors
+# Frogramming & Vibetoading: Affordance-Discovery Cycle(s) — A Manifesto for Curriculum Authors, Forkers, and Contributors
 
 > Addressed to **you** — the person teaching with this material, adapting it for
 > your context, or extending it. The _why_ of the course's design commitments,
@@ -46,12 +46,13 @@ learners, what carries the weight.
 
 A short version, for orientation:
 
-> _Welcome to Frogramming_ is a self-paced JavaScript curriculum that treats
-> programming as **collaborative communication**. Source code simultaneously
-> addresses four audiences (developers, the computer, users, agents). The course
-> teaches learners to recognize which audience they're addressing in any moment,
-> to twin (build accurate mental models of) each one, and to direct their
-> decisions so the code does what it's designed to do for each.
+> _Frogramming & Vibetoading: Affordance-Discovery Cycle(s)_ is a self-paced
+> JavaScript curriculum that treats programming as **collaborative
+> communication**. Source code simultaneously addresses four audiences
+> (developers, the computer, users, agents). The course teaches learners to
+> recognize which audience they're addressing in any moment, to twin (build
+> accurate mental models of) each one, and to direct their decisions so the code
+> does what it's designed to do for each.
 
 The course teaches a specific stance — **Frogramming** — in depth. The
 Frogrammer is the developer who grounds their work in the notional machine of
@@ -59,8 +60,9 @@ their language: they predict what the machine will do, they trace its
 evaluation, they verify divergence, and they direct it with precision. Alongside
 Frogramming, the course honors **Vibetoading** — the practice of grounding work
 in the user's experience and delegating the machine intentionally — as an
-equally non-delegable companion practice (taught at gesture-level here; deeper
-waters in _Welcome to Design_).
+equally non-delegable companion practice, built with the same rigor in its own
+chapter (breadth-scoped to this course's slice; deeper waters in the field of
+design research, beyond this course).
 
 Both stances shoulder a non-delegable twin: the Frogrammer twins the notional
 machine; the Vibetoader twins the user. **AI cannot have either twin for the
@@ -151,9 +153,9 @@ commitment.
 ### 5. JEJ + the substrate chain
 
 **Just Enough JavaScript** (JEJ) is the deliberately constrained language subset
-for Chs 1–4: imperative programs that interact with users through text and
+for Ch0–Ch3: imperative programs that interact with users through text and
 numbers, single-page-printable, traceable step-by-step. The constraint is
-pedagogical. Ch5 lifts it.
+pedagogical. Ch4 lifts it.
 
 The infrastructural chain that makes the pedagogy operational:
 
@@ -176,7 +178,7 @@ This chain is **infrastructure under the pedagogy, inspired by the pedagogy's
 implications.** When you adapt: you can swap JEJ for a different language-level
 constraint, but the chain's _shape_ — language subset / conceptual model /
 operational embodiment / pedagogical perspectives / orchestration — is the
-pattern that makes the course work. The LMS layer is _out_ of WtF's scope
+pattern that makes the course work. The LMS layer is _out_ of F&V's scope
 (beyond the Quine-y / lens-y / web-standards-based philosophy).
 
 ### 6. Markdown + Study Lenses (no special platform features)
@@ -270,12 +272,13 @@ NM-shape-agnostic.
 
 ### The chapter sequence
 
-The current Ch0 → Ch5 sequence (conceptual orientation → developers →
-
-- computer → + users → + agents → + you) is one valid traversal of the
-  spiderweb. Other traversals can work. What stays: the audience-ladder _adds_
-  audiences chapter by chapter; the spiral within each chapter _revisits_ skills
-  at increasing depth.
+The current Ch0 → Ch4 sequence (name the cycle → live it F-hand → live it V-hand
+→ concretize + accelerate → practice for life) is one valid traversal of the
+spiderweb. Other traversals can work. What stays: the chapters follow
+**loop-mastery phases** — all of source code's audiences are introduced together
+in Ch0 at boundary-primitive level, and each chapter deepens the twin its phase
+needs (with the developer-twin woven throughout as craft); the spiral within
+each chapter _revisits_ skills at increasing depth.
 
 ### The specific exercises
 

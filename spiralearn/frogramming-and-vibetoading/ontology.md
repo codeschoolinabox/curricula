@@ -1,6 +1,6 @@
-# Welcome to Frogramming — Curriculum Ontology
+# Frogramming & Vibetoading: Affordance-Discovery Cycle(s) — Curriculum Ontology
 
-> **Purpose**: this document is the substantive ontology of the WtF curriculum.
+> **Purpose**: this document is the substantive ontology of the F&V curriculum.
 > It captures the _conclusions_ of an extended thinking-together process — the
 > framework, not the conversation. It weaves substance from `README.md`,
 > `narrative/README.md`, and the `study-lenses/` infrastructure documentation.
@@ -161,7 +161,7 @@ the diagram invites most directly:
 
 | Role                | Elements                                                       |
 | ------------------- | -------------------------------------------------------------- |
-| Actors              | Development Team · Users · Computer · (Ch4: Agents)            |
+| Actors              | Development Team · Users · Computer · (Ch3: Agents)            |
 | Mediating artifacts | Source Code (center) · User Interface · Computer Output        |
 | Bridging processes  | Design Thinking ↔ Developer Intentions ↔ Computer Instructions |
 | Outer circle        | Real-World Context — the accountability questions above        |
@@ -262,8 +262,8 @@ user-space possibilities — a real user's name doesn't fit the field, a charact
 set isn't supported, a date format assumes a calendar system the user doesn't
 use.
 
-_(See §7 — Affordances strand — for the Mikhak loop: the affordance-discovery
-dialogue between F and V that surfaces what neither sees alone.)_
+_(See §7 — Affordances strand — for the affordance-discovery cycle: the F↔V
+dialogue that surfaces what neither sees alone.)_
 
 ---
 
@@ -274,16 +274,16 @@ flowchart LR
     C[real-world context] <--> U[user] <--> A[computational artifact] <--> NM[notional machine] <--> CS[CS / theory]
 ```
 
-The curriculum's geometry is a five-point chain. WtF's working range is the
-inner three; the outer two are reach-points the curriculum gestures at and
-follow-on courses develop.
+The curriculum's geometry is a five-point chain. F&V's working range is the
+inner three; the outer two are reach-points the curriculum gestures at, with
+referrals out to the field beyond this course.
 
 #### The five chain-points
 
 - **Real-world context** — the world the user inhabits. Contexts, situations,
-  problems, sociocultural surrounds. Reach-point here; follow-on-deepening
-  territory for _Welcome to Design_. Load-bearing in §2's rhetorical situation
-  (where its outer ring carries this work).
+  problems, sociocultural surrounds. Reach-point here; its depth belongs to the
+  field of design research, beyond this course. Load-bearing in §2's rhetorical
+  situation (where its outer ring carries this work).
 - **User** — the person or population the artifact is built for. V's twin (§4) —
   the grounded particular V is building a generative model of.
 - **Computational artifact** — what's made. Software, hardware, hybrids
@@ -293,8 +293,8 @@ follow-on courses develop.
   behaves. F's twin (§4) — the grounded particular F is building a generative
   model of.
 - **CS / theory** — formal abstractions of computation. Algorithms, complexity,
-  correctness, type theory, formal verification. Reach-point here;
-  follow-on-deepening territory for _Welcome to Algorithms_.
+  correctness, type theory, formal verification. Reach-point here; its depth
+  belongs to algorithm study and CS theory, beyond this course.
 
 #### Two bridging practices — V and F traverse the chain
 
@@ -315,31 +315,26 @@ _computational thinking_ requires twinning the NM; without the NM-twin, what's
 happening is _computational process_ (unit tests, patterns, refactoring moves)
 but not computational _thinking_. See §4 for the failure-mode elaboration.
 
-#### Course geometry — sliding windows of three
+#### Course geometry — this course's window
 
-The three Spiralearn courses sit on the chain as overlapping windows of three
-adjacent chain-points:
+This course sits on the chain as a window of three adjacent chain-points: **user
+↔ artifact ↔ notional machine**. The course's focus is the circuit its window
+traces — the lateral motion V, F, or both run between its window's chain-points.
+The chain-points outside the window remain real and named (context on one side,
+CS/theory on the other); the course gestures at them and refers out to the
+field, but its lived work stays inside the window.
 
-| Course                       | Chain window                              |
-| ---------------------------- | ----------------------------------------- |
-| _Welcome to Design_          | real-world context ↔ user ↔ artifact      |
-| **_Welcome to Frogramming_** | user ↔ artifact ↔ notional machine        |
-| _Welcome to Algorithms_      | artifact ↔ notional machine ↔ CS / theory |
-
-Shared edges between adjacent windows are curriculum hand-off points. Each
-course's focus is the circuit its window traces — the lateral motion V, F, or
-both run between its window's chain-points.
-
-#### Bakhtiarian loops — the chain's lateral motion
+#### Affordance-discovery cycles — the chain's lateral motion
 
 V and F traverse the chain iteratively (the V/F dynamic developed in §4): V
 proposes use-case experiences; F discovers substrate-affordances; each turn
-reshapes what the next can hold. This iterative traversal forms **Bakhtiarian
-loops** — plural deliberately; different grains of loop run between different
-parts of the chain, between adjacent points and across course-windows. See §4
-(V/F dialogue), §7 (affordance-loop strand operationalization), and §14 (the MU
-recursive-traversal pattern) for the grain-distinctions. WtF's central loop is
-the user ↔ artifact ↔ NM circuit — its own three-point window.
+reshapes what the next can hold. This iterative traversal forms
+**affordance-discovery cycles** — plural deliberately; different grains of cycle
+run between different parts of the chain, between adjacent points and across
+wider spans. See §4 (V/F dialogue), §7 (the affordance strand's
+operationalization), and §14 (the MU recursive-traversal pattern) for the
+grain-distinctions. F&V's central cycle is the user ↔ artifact ↔ NM circuit —
+its own three-point window.
 
 #### Hardware: in the mix; perpendicularity deferred
 
@@ -430,12 +425,14 @@ above:
 
 |                    | **NM-twin: NO**                                                                                      | **NM-twin: YES**                                                                                                                                       |
 | ------------------ | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **User-twin: NO**  | **Pure process** — twin-less; follows checklists / patterns / steps without grounding in either twin | **🔬 Frogrammer** — twins the NM (Ch2 develops this)                                                                                                   |
-| **User-twin: YES** | **🎨 Vibetoader** — twins the user (Ch3 develops this)                                               | **The both-twins state** — the transcendent practice Ch4 (V + F operating alongside an LLM) and Ch5 (V + F merged in snippetry) develop in the learner |
+| **User-twin: NO**  | **Pure process** — twin-less; follows checklists / patterns / steps without grounding in either twin | **🔬 Frogrammer** — twins the NM (Ch1 develops this)                                                                                                   |
+| **User-twin: YES** | **🎨 Vibetoader** — twins the user (Ch2 develops this)                                               | **The both-twins state** — the transcendent practice Ch3 (V + F operating alongside an LLM) and Ch4 (V + F merged in snippetry) develop in the learner |
 
-Three of the four corners get curriculum-chapter mappings: Ch2 = F, Ch3 = V,
-Ch4 + Ch5 = both. The fourth corner (no twin) is the starting position the
-curriculum brings learners _out of_.
+Three of the four corners get curriculum-chapter mappings: Ch1 = 🔬 F corner,
+Ch2 = 🎨 V corner, Ch3 + Ch4 = both-twins. The fourth corner (no twin) is the
+starting position the curriculum brings learners _out of_. Corner-mapping names
+_which twin a chapter develops_, not the learner's total twin-state — a learner
+living Ch2's V corner still owns the NM-twin Ch1 built.
 
 > **Flipside reading (with §9 two-lens reading).** The both-twins state names
 > the **practitioner-side** — one practitioner holding V's twin (user) + F's
@@ -550,21 +547,21 @@ of LLM-collaborative Frogramming.
 - **Strengths**: precision; pattern-recognition at the event level; calm in the
   face of errors-as-information
 
-#### V/F dynamic — the Bakhtiarian loop
+#### V/F dynamic — the affordance-discovery cycle
 
 V and F engage iteratively, learning each other's craft as they go. V proposes
 use-case experiences (_"imagine an interaction where…"_); F discovers what the
 substrate affords (_"this becomes possible, and it also enables…"_). Each turn
 shifts what V can propose and what F can build. The exchange is open-ended — no
 fixed number of beats, no required rhythm.[^achilles-tortoise] Over time, V and
-F merge in the practitioner; Ch5's snippetry is where the merging crystallizes
+F merge in the practitioner; Ch4's snippetry is where the merging crystallizes
 into a single integrated practice (the both-twins corner of the §4 2×2, in its
 merged form).
 
-The loop's **geometric home is §3's chain**: V and F traverse the chain
+The cycle's **geometric home is §3's chain**: V and F traverse the chain
 laterally, running iterative exchange between V's twin-position (user) and F's
-twin-position (NM) through the central artifact. WtF's central loop is exactly
-that three-point circuit; loops at other grains (adjacent-pair, course-window,
+twin-position (NM) through the central artifact. F&V's central cycle is exactly
+that three-point circuit; cycles at other grains (adjacent-pair, window-scale,
 meta-pattern) run across other parts of the chain — see §7 for the strand-5
 operationalization and §14 for the MU recursive-traversal pattern.
 
@@ -637,14 +634,18 @@ meta-pattern.
   Implementer / Curator / Orchestrator) — Evan Cole / Janet Tilstra / Joslenne
   Peña prior work; the 2-D precursor the §11 human–AI slider distills into a
   per-task 1-D reading. The companion POC tool attributes its framework to both
-  this quick-read and WtF.
+  this quick-read and F&V.
 - **Bakhtiar Mikhak — engineering × physics co-evolution** — the deeper pattern
   V/F instantiates. Faraday/Maxwell-style mutual constitution: engineering
   practice and theoretical practice shape each other; neither is downstream of
   the other. Same teacher who introduced the user to the data/interaction
   architectural pattern (which inspired embody/lenses) AND the
   _infrastructure-is-research-contribution_ claim (canonical at
-  `translational-framing.md` §6).
+  `translational-framing.md` §6). In earlier drafts the affordance-discovery
+  cycle carried his name — the "Mikhak loop," adjectivally the "Bakhtiarian
+  loop(s)" — before the curriculum settled on the descriptive term; this entry
+  keeps the lineage. (Its literary precursor, Hofstadter's Achilles/Tortoise
+  dialogue, is credited at the V/F-dynamic subsection's footnote.)
 
 <details>
 <summary>**Visualization: V/F + the rhetorical model** _(introduced as primary diagram in §2; reproduced here for V/F context)_</summary>
@@ -668,13 +669,13 @@ emit when their attention is at a given chain-point and they're describing,
 predicting, or designing what lives there. The five tiers correspond 1:1 to §3's
 five chain-points.
 
-| Tier                       | Speak (linguistic register)                                                                                                              | Who works it                                        |
-| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| **Real-world context**     | **Context-speak** — English about world, situations, communities, sociocultural conditions; user-research and ethnographic vocabulary    | V's reach-point; deepens in _Welcome to Design_     |
-| **User**                   | **User-speak** — personas, user stories, journey and interaction vocabulary, accessibility registers; what V emits when twinning a user  | 🎨 V (V's twin-position)                            |
-| **Computational artifact** | **Artifact-speak** — code-as-text + machine internals; static (code text) and dynamic (NM events) faces of the made-thing                | both V and F engage                                 |
-| **Notional machine**       | **NM-speak** — operational vocabulary: events, scopes, evaluation steps, predict-trace-verify language; what F emits when twinning an NM | 🔬 F (F's twin-position)                            |
-| **CS / theory**            | **CS-speak** — formal proofs, complexity classes, type theory, lambda calculus, formal verification                                      | F's reach-point; deepens in _Welcome to Algorithms_ |
+| Tier                       | Speak (linguistic register)                                                                                                              | Who works it                                |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| **Real-world context**     | **Context-speak** — English about world, situations, communities, sociocultural conditions; user-research and ethnographic vocabulary    | V's reach-point; deepens beyond this course |
+| **User**                   | **User-speak** — personas, user stories, journey and interaction vocabulary, accessibility registers; what V emits when twinning a user  | 🎨 V (V's twin-position)                    |
+| **Computational artifact** | **Artifact-speak** — code-as-text + machine internals; static (code text) and dynamic (NM events) faces of the made-thing                | both V and F engage                         |
+| **Notional machine**       | **NM-speak** — operational vocabulary: events, scopes, evaluation steps, predict-trace-verify language; what F emits when twinning an NM | 🔬 F (F's twin-position)                    |
+| **CS / theory**            | **CS-speak** — formal proofs, complexity classes, type theory, lambda calculus, formal verification                                      | F's reach-point; deepens beyond this course |
 
 #### Bridging practices traverse tier-subsets
 
@@ -801,13 +802,16 @@ produce.
 Connections to target systems. Building a generative model of a process outside
 your own mind that aligns with that process's actual behavior.
 
-**Targets across chapters**:
+**Targets across chapters** (all of source code's audiences are met together in
+Ch0 at boundary-primitive level; each twin is then deepened in the phase that
+needs it):
 
-- Ch1: 🧑‍💻 the developer who reads your code (incl. future-you)
-- Ch2: 💻 the computer (NM) that evaluates your code
-- Ch3: the user who experiences your program
-- Ch4: 🤖 the agent (LLM) you collaborate with
-- Ch5: yourself as poly-perspective being
+- Ch0 onward: 🧑‍💻 the developer who reads your code (incl. future-you) — woven
+  through every chapter as craft
+- Ch1: 💻 the computer (NM) that evaluates your code
+- Ch2: the user who experiences your program
+- Ch3: 🤖 the agent (LLM) you collaborate with
+- Ch4: yourself as poly-perspective being
 
 **Cognitive-science grounding**: twinning IS active inference (canonical at
 `pedagogy.md` "The pedagogical claim from Friston").
@@ -870,21 +874,22 @@ affordance-space.
 
 Equal status with the other four strands.
 
-The Mikhak loop is an _affordance-discovery dialogue_: F probes
-substrate-affordances; V probes user-affordances; their dialogue surfaces
-affordances neither saw alone.
+The affordance-discovery cycle is F and V's dialogue on this strand: F probes
+substrate-affordances; V probes user-affordances; their exchange surfaces
+affordances neither saw alone. (The cycle carried Bakhtiar Mikhak's name in
+earlier drafts — see §4 Lineage.)
 
-**Geometric home — §3's chain.** The Mikhak loop's geometric home is §3: V
-probes affordances anchored at the user-side of the chain; F probes affordances
+**Geometric home — §3's chain.** The cycle's geometric home is §3: V probes
+affordances anchored at the user-side of the chain; F probes affordances
 anchored at the NM-side; their dialogue traverses the central artifact and
-surfaces affordances neither sees alone. WtF's Mikhak loop is exactly the user ↔
-artifact ↔ NM circuit — strand-5's operationalization of §3's lateral motion.
+surfaces affordances neither sees alone. F&V's central cycle is exactly the user
+↔ artifact ↔ NM circuit — strand-5's operationalization of §3's lateral motion.
 
 > _(See §9 for the lens-traversal framing: V and F traverse the §9 lenses
 > (analytical levels), each naturally anchoring at a particular lens — F at
 > artifact-logic, V at artifact-surface — but probing affordances across the
-> range. The Mikhak loop is the strand-5 operationalization of this cross-lens
-> dialogue.)_
+> range. The affordance-discovery cycle is the strand-5 operationalization of
+> this cross-lens dialogue.)_
 
 #### Strands × Study-lenses cross-map (OPEN-ENDED DEVELOPMENT GUIDE)
 
@@ -924,15 +929,16 @@ layers — embody **crystallizes** its dynamic flow into a static-but-4D structu
 that makes all facets explorable. The data thread stitches everything together
 _because_ the substrate makes the motion legible.
 
-#### Ch3 anchor (the data-flow loop)
+#### Ch2 anchor (the data-flow loop)
 
-A vivid concrete loop becomes Ch3's anchor:
+A vivid concrete loop becomes Ch2's anchor:
 
 > The program's data enters the user through their eyes via a prompt; the user
 > processes it and transforms it into a response; the response enters the
 > program through prompt and a resolve event; the program processes; …
 
-This grows the Ch1→Ch2 dev↔NM loop into the Ch3 dev↔NM↔user loop. Cybernetics
+Ch0 establishes the dev↔user channels; Ch1 reveals the NM sitting in the middle
+of them; Ch2 drives the whole dev↔NM↔user loop deliberately. Cybernetics
 referenced as side/footnote, not in body.
 
 ---
@@ -970,7 +976,7 @@ metaphysical claims — arbitrary slices on a continuum, chosen for the minimal
 actionable mental model. We do not mark phase-changes between lenses.
 
 **Theory-side (most reductive) — F's natural reach extends through here
-ontologically; WtF defers practical work to follow-on courses:**
+ontologically; F&V defers practical work here to the field beyond this course:**
 
 - **(1) Platonic** — _Levin's Platonic Space._ The informational interpretation
   of the physical world; the philosophical commitment that the material is
@@ -1025,7 +1031,7 @@ question each asks:
 - **F asks**: _what does the artifact compute? what's its NM?_ F's anchor-lens:
   **artifact-logic** — where computation-as-substrate is most legible. F's reach
   extends down into computing-infrastructure (substrate beneath the artifact) —
-  ontologically F-territory, deferred to follow-on courses in WtF.
+  ontologically F-territory, deferred beyond this course in F&V.
 - **V asks**: _what does the artifact feel like? what does it afford the person
   on the other side?_ V's anchor-lens: **artifact-surface** — where the
   artifact's outward presentation lives. V's reach extends up into
@@ -1150,16 +1156,16 @@ LLM-assisted workflow, not less:
 - Testing discipline oriented toward visible behavior
 - Agile development vs Waterfall, all over again
 
-Chapter 3 (users, PBIS, visible behavior) carries particular weight for this
-reason.
+Chapter 2 (users, visible behavior, interaction-event prediction — with Ch1's
+PBIS discipline underneath) carries particular weight for this reason.
 
-#### Agentic emergence (Ch4.5 and Ch5 closing)
+#### Agentic emergence (Ch3's and Ch4's closing moments)
 
-The authoring-partner frame (LLM = virtuoso, §11 Role 2) is a simplification.
-**Agentic AI systems** that plan, execute, call tools, modify state autonomously
-are emerging. That's a more complex collaboration (§11 Role 3 territory) —
+The co-author frame (LLM = virtuoso, §11 Role 2) is a simplification. **Agentic
+AI systems** that plan, execute, call tools, modify state autonomously are
+emerging. That's a more complex collaboration (§11 Role 3 territory) —
 specifying observable outcomes humans can still evaluate becomes load-bearing.
-Flag as territory for post-curriculum learning.
+Flag as territory for learning beyond this course.
 
 #### The PL-future
 
@@ -1226,7 +1232,7 @@ different cognition.
 LLMs are often better at notation than many humans — faster, broader repertoire,
 fewer typos. Pretending otherwise would be dishonest. But great Frogramming
 isn't only about productivity. Design judgment, context awareness, aesthetic and
-ethical taste aren't where LLMs excel. And Chapter 5 develops the case for
+ethical taste aren't where LLMs excel. And Chapter 4 develops the case for
 Frogramming-for-its-own-sake.
 
 #### Three roles of agential AI
@@ -1289,7 +1295,7 @@ distinctions, not arbitrary slices.
 #### The human–AI slider — per-task depth-of-involvement
 
 The three roles describe _where_ AI sits relative to the work. Within a role —
-especially Role 2, the band WtF teaches — _how much_ of a given task you hand to
+especially Role 2, the band F&V teaches — _how much_ of a given task you hand to
 the AI is itself a per-task choice. The **human–AI slider** reads that choice: a
 single continuous reading of the depth-of-involvement axis above, applied one
 task at a time. It is a teaching and reflection instrument laid over the
@@ -1306,7 +1312,7 @@ Its two poles carry the curriculum's existing glyphs:
 Five bands name positions along it, each bridging to a stance already defined
 elsewhere in this document:
 
-| Band         | Position | Who does the cognitive work       | WtF bridge — _delegation depth_, not which-twin                                                        |
+| Band         | Position | Who does the cognitive work       | F&V bridge — _delegation depth_, not which-twin                                                        |
 | ------------ | -------- | --------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | Fully human  | 0–19%    | you, unaided                      | mastery-contract territory — you operate the control panel yourself; the reps that build the twin (§1) |
 | Mostly human | 20–39%   | you lead; AI assists at the edges | you still operate the panel; the AI fills in notation at the margins                                   |
@@ -1339,7 +1345,7 @@ learning rationale. The format, illustratively:
 | 3   | Verify the trace         | 🧑 Fully human | the verification is the learning                    |
 
 (🧑 marks human-leaning bands, 🤖 AI-leaning, Balanced bare; no new glyph.
-Chapter 4 carries the first full worked recipe.)
+Chapter 3 carries the first full worked recipe.)
 
 > **Understanding is non-delegable** (§1, Principle 1). The slider reads who did
 > the _task_, never who did the _understanding_. A task can sit at Fully AI
@@ -1353,7 +1359,7 @@ Chapter 4 carries the first full worked recipe.)
 **Lineage.** The slider distills the collAIboration "Human+AI Collaboration
 Roles" quadrant roles (Strategist / Implementer / Curator / Orchestrator) into a
 per-task 1-D reading — the same Evan Cole / Janet Tilstra / Joslenne Peña prior
-work Chapter 4 draws its shape from (see §4 _Lineage_ and `chapters.md` Ch4
+work Chapter 3 draws its shape from (see §4 _Lineage_ and `chapters.md` Ch3
 overview). An interactive companion tool exists
 ([repo](https://github.com/colevandersWands/cognitive-delegation-sliders) ·
 [live](https://colevandersWands.github.io/cognitive-delegation-sliders/)); a
@@ -1371,11 +1377,21 @@ flowchart LR
 
 #### Curriculum mapping
 
-**Ch0–3 quietly assume Role 1.** Every learner using AI to learn is in Role 1 by
-default; the curriculum makes that engagement deliberate through Study Lenses +
-AI explanations + tutor patterns.
+**Ch0–Ch1 quietly assume Role 1.** Every learner using AI to learn is in Role 1
+by default; the curriculum makes that engagement deliberate through Study
+Lenses + AI explanations + tutor patterns.
 
-**Ch4 foregrounds Role 2.** _In Ch4, AI is the development collaborator. The
+**Ch2 adds AI as simulated audience — a use-mode, not a new role.** A local-LLM
+simulated user plays interview subject, walkthrough participant, and stand-in
+tester so that every V-cycle is runnable on demand by a learner studying alone.
+This is not Role 2: the simulation produces _behavior to observe_, never
+work-product that enters the artifact. Nor is it the slider's delegation axis:
+nothing of the learner's task is handed over — the AI sits in the _audience
+seat_, playing the very thing the learner is building a twin of. Classify it as
+Role-1-flavored practice apparatus, with its fallibility ceiling (what a
+simulated user can and cannot falsify) taught as Ch2 content.
+
+**Ch3 foregrounds Role 2.** _In Ch3, AI is the development collaborator. The
 artifact being built is a conventional JEJ program; the AI is an external
 co-author, not artifact-logic substrate. You twin the AI as collaborator — F's
 lens (NM-grounded mode) reads the AI as a cognitive substrate you operate; V's
@@ -1384,14 +1400,14 @@ affordances. The layers of AI-understanding (§9 + §10) help you read_ **what**
 _you're twinning,_ **where** _it sits relative to your work, and_ **how** _to
 operationalize the collaboration while building JEJ._
 
-**Ch5 remains in Role 2** with the snippets-surface expanded to **full JS** (not
+**Ch4 remains in Role 2** with the snippets-surface expanded to **full JS** (not
 just JEJ). The student practices Role-2 collaboration on a broader programming
 language surface, building snippetry-as-craft.
 
-**Role 3 is deferred to WtA** (Welcome to Algorithms / follow-on courses),
-matching the metaphor's existing alien-composers deferral (see `metaphor.md` —
-"Alien composers (teased, deferred)"). WtF teaches the framework so learners can
-recognize Role 3 when they encounter it, but does not teach Role-3 building.
+**Role 3 lies beyond this course**, matching the metaphor's existing
+alien-composers deferral (see `metaphor.md` — "Alien composers (teased,
+deferred)"). F&V teaches the framework so learners can recognize Role 3 when
+they encounter it, but does not teach Role-3 building.
 
 ---
 
@@ -1419,12 +1435,12 @@ of evaluation, not the final output.
 
 Four orthogonal axes — distinct ways of carving the programming space:
 
-| Term                     | What it means                                                                                                               | In WtF                                                              |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| **Programming paradigm** | A design philosophy for organizing programs (imperative / functional / OOP / declarative)                                   | Ch1–4 is imperative; functional / OOP / declarative deferred to Ch5 |
-| **Computational domain** | What you are computing _about_ — medicine, finance, games, etc. Domain expertise is a separate axis from programming skill. | WtF is domain-agnostic by design                                    |
-| **Computational idiom**  | Types of operators/operations available within a language (logic, strings, numbers, regex, bits, dates)                     | Ch2's sections 2A–2F organized by idiom                             |
-| **Model of computation** | A formal mathematical framework defining what computation _is_ (Turing machines, lambda calculus)                           | Largely deferred to WtA                                             |
+| Term                     | What it means                                                                                                               | In F&V                                                                                        |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| **Programming paradigm** | A design philosophy for organizing programs (imperative / functional / OOP / declarative)                                   | Ch0–Ch3 is imperative; functional / OOP / declarative deferred to Ch4                         |
+| **Computational domain** | What you are computing _about_ — medicine, finance, games, etc. Domain expertise is a separate axis from programming skill. | F&V is domain-agnostic by design                                                              |
+| **Computational idiom**  | Types of operators/operations available within a language (logic, strings, numbers, regex, bits, dates)                     | Ch1's cycle chain runs the core idioms in dependency order; elective idiom sections follow it |
+| **Model of computation** | A formal mathematical framework defining what computation _is_ (Turing machines, lambda calculus)                           | Largely beyond this course                                                                    |
 
 **Orthogonality test**: when you encounter a new concept, ask — is this about
 how I organize my program (paradigm)? about what I'm computing about (domain)?
@@ -1476,9 +1492,9 @@ don't match. What the curriculum lifts from GEB is the **recursive dissolution**
 pattern: in the glyph, H descends through R through MU; R descends through H
 through MU — each pole reached by traversing its opposite. V/F carry the shape,
 not the mechanism — V's deep practice keeps surfacing F's territory, F's deep
-practice keeps surfacing V's, and over iterations of the Bakhtiarian loop the
-two merge in the practitioner. Ch5's both-twins state is that merging in
-operational form.
+practice keeps surfacing V's, and over iterations of the affordance-discovery
+cycle the two merge in the practitioner. Ch4's both-twins state is that merging
+in operational form.
 
 _a MU-rhyming snippet:_
 
@@ -1513,22 +1529,22 @@ mu; // frogram, vibetoad
 > **The swap.** The closing `mu;` inverts the comment order from the opening
 > line. JavaScript preserves insertion order, so to the NM the opening and
 > closing `mu;` lines reveal the same keys in the same order. The inverted
-> comment is a Ch5-snippetry move — the rule is known, broken on purpose; a
-> mature WtF'er notices the swap and recognizes meaning in the intentional
+> comment is a Ch4-snippetry move — the rule is known, broken on purpose; a
+> mature F&V'er notices the swap and recognizes meaning in the intentional
 > rule-break: starting from either pole and traversing through the other returns
 > you to the same whole.
 
 #### See also (read with the MU pattern in mind)
 
-- §4 V/F lens-pair, especially the **Bakhtiarian loop** subsection and its
-  Achilles/Tortoise footnote — the iterative dynamic V/F carry and its literary
-  lineage
+- §4 V/F lens-pair, especially the **affordance-discovery cycle** subsection and
+  its Achilles/Tortoise footnote — the iterative dynamic V/F carry and its
+  literary lineage
 - §7 the **Twinning strand** (with §6's L4-by-strand table for its philosophy
   reading) — self-twinning as theory of consciousness, the recursion that
   twinning operationally enacts
 - The **audience-YOU-are-becoming** read of the chapter arc (canonical at
-  `chapters.md` § "The audience YOU are becoming") — Ch1's write-for-future-you
-  → Ch5's write-for-yourself-as-merged-V/F is the curriculum's lived descent
+  `chapters.md` § "The audience YOU are becoming") — Ch0's write-for-future-you
+  → Ch4's write-for-yourself-as-merged-V/F is the curriculum's lived descent
 - §9's **practitioner-side / lens-reading-side flipside** — dual-twinning is the
   practitioner-side perceiving; the artifact's two-lens reading
   (artifact-logic + artifact-surface) is what the lenses surface;

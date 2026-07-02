@@ -1,4 +1,4 @@
-# Welcome to Frogramming — Translational Framing
+# Frogramming & Vibetoading: Affordance-Discovery Cycle(s) — Translational Framing
 
 > _The curriculum-side companion to
 > [`DGMD-E-1-artifacts/embodying-tcer/`](../../../DGMD-E-1-artifacts/embodying-tcer/).
@@ -349,7 +349,8 @@ evidence claims live in their existing homes.
   `0-curricula/spiralearn/welcome-to-programming/research-framing.md`
 - **Repo-level research framing**: `0-curricula/research-framing.md`
 - **Per-chapter research framings**: each chapter directory has its own
-  `research-framing.md` (most-detailed: Ch4's, on Human-AI collaboration)
+  `research-framing.md` (most-detailed: Welcome to Programming's Ch4, on
+  Human-AI collaboration)
 
 ---
 

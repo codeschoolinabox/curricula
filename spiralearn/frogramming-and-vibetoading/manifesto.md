@@ -1,4 +1,4 @@
-# Welcome to Frogramming — The Manifesto
+# Frogramming & Vibetoading: Affordance-Discovery Cycle(s) — The Manifesto
 
 > The _vision_ of computing and computing education that this curriculum stands
 > on. Computing as embodied, rhetorical, and humanly authored; programming
@@ -46,18 +46,24 @@ resource-intensive, less expensive; more learnable than what exists today. We
 hope it will challenge what we even imagine qualifies as computing. _We want a
 human future with technology, not a technological future with humans._
 
-Welcome to Frogramming is a course for that. The notation layer of software is
-changing quickly: LLMs already write a substantial share of the code being
-written, and the share is growing. What genAI directly threatens is
-_programming_ — the writing of notation. What survives the threat, and what this
-course builds, is _Frogramming_: the skill of understanding what a machine
-actually does, of predicting where notation succeeds and fails, of recovering
-when prediction and reality diverge. The course exists for people who want the
-skill set that keeps systems comprehensible as they become more pervasive, and
-the agency to shape how they're built. (Other non-delegable practices live
-alongside this one — user-grounded design, called _Vibetoading_ in the course's
-vocabulary — but those aren't directly threatened by genAI in the same way; the
-LLM-shift section below develops the distinction.)
+**Frogramming & Vibetoading: Affordance-Discovery Cycle(s)** is a course for
+that. The notation layer of software is changing quickly: LLMs already write a
+substantial share of the code being written, and the share is growing. What
+genAI directly threatens is _programming_ — the writing of notation. What
+survives the threat, and what this course builds at depth, is _Frogramming_: the
+skill of understanding what a machine actually does, of predicting where
+notation succeeds and fails, of recovering when prediction and reality diverge.
+And what the course teaches through both of its named practices is the
+**affordance-discovery cycle** — the turn-taking dynamic by which proposed
+experiences meet what machines afford — the transferable skill that outlives any
+notation layer. Two claims, two objects: the cycle is the course's
+transferable-value claim; F-hand predictive mastery is its
+non-delegable-survival claim. The course exists for people who want the skill
+set that keeps systems comprehensible as they become more pervasive, and the
+agency to shape how they're built. (The cycle's other hand — user-grounded
+design, called _Vibetoading_ and built with the same rigor in its own chapter —
+isn't directly threatened by genAI in the same way; the LLM-shift section below
+develops the distinction.)
 
 Tomorrow's technology must be built with today's, which is also the practical
 reason older technology is worth teaching. The warty old languages and tools
@@ -104,13 +110,13 @@ specifically.
 
 Experienced collaborators who handle much of the notation — senior engineers,
 pair partners — have always been part of software. LLMs are a new kind of such
-collaborator: same role, different cognition. Chapter 4 develops the
+collaborator: same role, different cognition. Chapter 3 develops the
 differences.
 
 **Honest framing**: LLMs are often better at notation than many humans — faster,
 with a broader repertoire, fewer typos. Pretending otherwise would be dishonest.
 But great Frogramming isn't only about productivity. Design judgment, context
-awareness, aesthetic and ethical taste aren't where LLMs excel. And Chapter 5
+awareness, aesthetic and ethical taste aren't where LLMs excel. And Chapter 4
 develops the case for Frogramming-for-its-own-sake — the practice of keeping
 your NM-fluency sharp when you're no longer writing most of the notation
 yourself.
@@ -121,8 +127,8 @@ _wrong thing correctly_. This makes certain practices _more_ important in an
 LLM-assisted workflow, not less: short iterations of user-visible behavior we
 can actually evaluate, human-evaluable acceptance criteria, testing discipline
 oriented toward visible behavior; Agile development vs Waterfall all over again!
-Chapter 3 (users, PBIS, visible behavior) carries particular weight for this
-reason.
+Chapter 2 (users, visible behavior, interaction-event prediction — with Ch1's
+PBIS discipline underneath) carries particular weight for this reason.
 
 **NM understanding matters more now, not less.** LLMs can write the notation —
 pull the levers, work the controls — but the notional machine they're directing
