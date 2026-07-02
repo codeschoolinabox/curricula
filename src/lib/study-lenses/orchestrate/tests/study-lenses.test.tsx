@@ -1010,6 +1010,109 @@ describe('<StudyLenses> — Redesign: chrome above the active surface (content r
 	});
 });
 
+describe('<StudyLenses> — Redesign: resizable divider wraps the content row (inc B)', () => {
+	it('wraps the content-row children in a row Splitter (editor mode)', () => {
+		const { container } = render(<StudyLenses snippet="OK" />);
+		const splitter = container.querySelector(
+			'[data-orchestrator-content-row] [data-orchestrator-splitter="row"]',
+		);
+		expect(splitter).not.toBeNull();
+		// the editor host is INSIDE the splitter (a pane), not a bare content-row child
+		expect(splitter?.querySelector('[data-orchestrator-host]')).not.toBeNull();
+	});
+
+	it('wraps the content-row children in a row Splitter (lens mode)', () => {
+		const { container } = render(
+			<StudyLenses snippet="OK" lens="debug-props" />,
+		);
+		const splitter = container.querySelector(
+			'[data-orchestrator-content-row] [data-orchestrator-splitter="row"]',
+		);
+		expect(splitter).not.toBeNull();
+		expect(splitter?.querySelector('[data-lens="debug-props"]')).not.toBeNull();
+	});
+
+	it('at idle the row Splitter is single-pane — no handle (active surface fills)', () => {
+		const { container } = render(<StudyLenses snippet="OK" />);
+		expect(
+			container.querySelector('[data-orchestrator-splitter="row"]'),
+		).not.toBeNull();
+		// idle → OutputPanels null → single-pane → NO handle
+		expect(
+			container.querySelector('[data-orchestrator-splitter-handle]'),
+		).toBeNull();
+	});
+
+	it('once a run starts the row Splitter gets a handle, pins the config, and OutputPanels is the sized (second) pane (editor mode)', async () => {
+		const { container } = render(<StudyLenses snippet="OK" />);
+		fireEvent.click(container.querySelector('[data-orchestrator-dock-run]')!);
+		const handle = container.querySelector(
+			'[data-orchestrator-splitter-handle]',
+		);
+		expect(handle).not.toBeNull();
+		// Pin the human-decided config (jsdom-readable via ARIA; jsdom measures the
+		// container as 0, so aria-valuemax falls back to maxPx via the guard).
+		expect(handle!.getAttribute('aria-valuenow')).toBe('384'); // defaultBasisPx
+		expect(handle!.getAttribute('aria-valuemin')).toBe('240'); // minPx
+		expect(handle!.getAttribute('aria-valuemax')).toBe('960'); // maxPx
+		// sizedPane="second" → the output panels carry the basis (the sized pane).
+		const sized = container.querySelector(
+			'[data-orchestrator-splitter-pane="sized"]',
+		);
+		expect(sized).not.toBeNull();
+		expect(
+			sized!.querySelector('[data-orchestrator-output-panels]'),
+		).not.toBeNull();
+		await act(async () => {});
+	});
+
+	it('once a run starts the row Splitter gets a handle and OutputPanels is the sized pane (lens mode — mirror of the editor branch)', async () => {
+		const { container } = render(
+			<StudyLenses snippet="OK" lens="debug-props" />,
+		);
+		fireEvent.click(container.querySelector('[data-orchestrator-dock-run]')!);
+		expect(
+			container.querySelector('[data-orchestrator-splitter-handle]'),
+		).not.toBeNull();
+		const sized = container.querySelector(
+			'[data-orchestrator-splitter-pane="sized"]',
+		);
+		expect(sized).not.toBeNull();
+		expect(
+			sized!.querySelector('[data-orchestrator-output-panels]'),
+		).not.toBeNull();
+		await act(async () => {});
+	});
+
+	it('collapses the row Splitter to single-pane when BOTH channels are dismissed mid-run with nothing pending (active surface fills, no handle)', async () => {
+		const { container } = render(<StudyLenses snippet="OK" />);
+		fireEvent.click(container.querySelector('[data-orchestrator-dock-run]')!);
+		expect(
+			container.querySelector('[data-orchestrator-splitter-handle]'),
+		).not.toBeNull();
+		// dismiss BOTH channels (no interaction pending → both ✕ present)
+		fireEvent.click(
+			container.querySelector(
+				'[data-orchestrator-output-panel-dismiss="developer-console"]',
+			)!,
+		);
+		fireEvent.click(
+			container.querySelector(
+				'[data-orchestrator-output-panel-dismiss="user-interface"]',
+			)!,
+		);
+		// both dismissed + no pending → OutputPanels collapses → single-pane, no
+		// handle, active surface fills (the row Splitter shows no empty box).
+		expect(
+			container.querySelector('[data-orchestrator-splitter-handle]'),
+		).toBeNull();
+		expect(
+			container.querySelector('[data-orchestrator-output-panels]'),
+		).toBeNull();
+		await act(async () => {});
+	});
+});
+
 describe('<StudyLenses> — Redesign: output panels in the content row (channels left the dock)', () => {
 	// Appear-on-run (inc 5): the panels mount only once a run starts, so these
 	// drive a Run first; idle-absence is pinned in the inc-5 describe.

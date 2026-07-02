@@ -95,25 +95,27 @@
  * both channels dismissed) it occupies the full row. That is the styling
  * guarantee the contract names; it does not depend on DOM order.
  */
+/*
+ * The content row is now a plain BLOCK wrapper; the row <Splitter> inside it is
+ * the flex container (active surface | output panels), superseding the inc-6
+ * flex-row + per-child width rules. The Splitter's align-stretch makes the
+ * active surface and the output column EQUAL height — the active surface drives
+ * the height and the column matches (the height a vertical splitter divides in
+ * inc C).
+ */
 [data-orchestrator-root] [data-orchestrator-content-row] {
-	display: flex;
-	flex-flow: row nowrap;
-	gap: 0.5rem;
-	align-items: flex-start;
+	display: block;
 }
 
-[data-orchestrator-root]
-	[data-orchestrator-content-row]
-	> :not([data-orchestrator-output-panels]) {
-	flex: 1 1 auto;
-	min-width: 0; /* let the active surface shrink below its content width */
-}
-
-[data-orchestrator-root]
-	[data-orchestrator-content-row]
-	> [data-orchestrator-output-panels] {
+/*
+ * The output-panels column keeps its internal vertical stacking (User Interface
+ * above Developer Console) via a non-content-row-child selector, since it is now
+ * nested in the Splitter's sized pane. Its WIDTH comes from that pane's px basis
+ * (no longer `flex: 0 1 24rem` here). Inc C supersedes this stacking with the
+ * vertical Splitter.
+ */
+[data-orchestrator-root] [data-orchestrator-output-panels] {
 	display: flex;
-	flex: 0 1 24rem;
 	flex-direction: column;
 	gap: 0.5rem;
 }

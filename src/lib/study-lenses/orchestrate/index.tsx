@@ -73,6 +73,7 @@ import type { LintDiagnostic } from './lib/editing/types.js';
 import deriveInterpretedDiagnostics from './lib/error-interpreting/derive-interpreted-diagnostics.js';
 import OutputPanels from './output-panels/index.js';
 import PhasesPanel from './phases-panel/index.js';
+import Splitter from './splitter/index.js';
 import type {
 	LiveEmbodiment,
 	EventBus,
@@ -1018,6 +1019,26 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 			type === 'script' &&
 			liveEmbodiment?.embodiment.validation?.isJeJ === true;
 
+		// The appear-on-run output panels — the row Splitter's second pane.
+		// Collapses to null (so the Splitter is single-pane and the active surface
+		// fills the row) at idle, AND when BOTH channels are dismissed with no
+		// interaction pending (otherwise the fixed-basis sized pane would leave an
+		// empty box + live handle). A pending dialog keeps the panels mounted so it
+		// stays answerable even when both channel panels are gone.
+		const bothChannelsDismissed =
+			dismissed['user-interface'] && dismissed['developer-console'];
+		const outputPanels =
+			runState === 'idle' ||
+			(bothChannelsDismissed && pending === null) ? null : (
+				<OutputPanels
+					output={channelOutput}
+					pending={pending}
+					onAnswer={onAnswer}
+					dismissed={dismissed}
+					onDismiss={onDismiss}
+				/>
+			);
+
 		if (state.mode === 'lens') {
 			// Coherence invariant (enforced by transition logic; the type system
 			// cannot): mode='lens' ⇒ the live slot is non-null AND
@@ -1081,19 +1102,24 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 						/>
 					</section>
 					<div data-orchestrator-content-row>
-						<lensModule.Component
-							embodiment={liveEmbodiment.embodiment}
-							config={state.resolvedConfig}
+						<Splitter
+							orientation="row"
+							sizedPane="second"
+							resizeMode="fixed"
+							defaultBasisPx={384}
+							minPx={240}
+							maxPx={960}
+							maxFraction={0.6}
+							stepPx={16}
+							label="resize the active surface and the output panels"
+							first={
+								<lensModule.Component
+									embodiment={liveEmbodiment.embodiment}
+									config={state.resolvedConfig}
+								/>
+							}
+							second={outputPanels}
 						/>
-						{runState === 'idle' ? null : (
-							<OutputPanels
-								output={channelOutput}
-								pending={pending}
-								onAnswer={onAnswer}
-								dismissed={dismissed}
-								onDismiss={onDismiss}
-							/>
-						)}
 					</div>
 				</div>
 			);
@@ -1140,20 +1166,25 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 					/>
 				</section>
 				<div data-orchestrator-content-row>
-					<EditorComponent
-						snippet={snippet}
-						onSnippetChange={handleSnippetChange}
-						interpretedDiagnostics={interpretedDiagnostics}
+					<Splitter
+						orientation="row"
+						sizedPane="second"
+						resizeMode="fixed"
+						defaultBasisPx={384}
+						minPx={240}
+						maxPx={960}
+						maxFraction={0.6}
+						stepPx={16}
+						label="resize the active surface and the output panels"
+						first={
+							<EditorComponent
+								snippet={snippet}
+								onSnippetChange={handleSnippetChange}
+								interpretedDiagnostics={interpretedDiagnostics}
+							/>
+						}
+						second={outputPanels}
 					/>
-					{runState === 'idle' ? null : (
-						<OutputPanels
-							output={channelOutput}
-							pending={pending}
-							onAnswer={onAnswer}
-							dismissed={dismissed}
-							onDismiss={onDismiss}
-						/>
-					)}
 				</div>
 			</div>
 		);
