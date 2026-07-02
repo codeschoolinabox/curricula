@@ -153,3 +153,88 @@
 	border-radius: 0.25rem;
 	padding: 0.5rem;
 }
+
+/*
+ * The <Splitter>: a flex container with two panes and a draggable handle
+ * between them. STATIC layout only — the per-instance basis is inline
+ * (`flex-basis` px on the sized pane, the one dynamic value the contract
+ * allows). `row` = side-by-side (vertical handle, horizontal drag); `column` =
+ * stacked (horizontal handle, vertical drag). jsdom computes no layout, so the
+ * drag FEEL / limits / grabbability are verified only at the Sandbox
+ * checkpoint. Reproduces the content-row `min-width: 0` so the flex pane can
+ * shrink below its content width.
+ */
+[data-orchestrator-root] [data-orchestrator-splitter] {
+	display: flex;
+	min-width: 0;
+	min-height: 0;
+}
+
+[data-orchestrator-root] [data-orchestrator-splitter='row'] {
+	flex-flow: row nowrap;
+}
+
+[data-orchestrator-root] [data-orchestrator-splitter='column'] {
+	flex-flow: column nowrap;
+}
+
+/* The flex pane fills the space the sized pane leaves; min-*: 0 lets it shrink
+ * below its content width/height (load-bearing, same as the content row). */
+[data-orchestrator-root] [data-orchestrator-splitter-pane='flex'] {
+	flex: 1 1 0;
+	min-width: 0;
+	min-height: 0;
+}
+
+/* The sized pane holds its inline flex-basis (px) and neither grows nor
+ * shrinks; min-*: 0 keeps overflow from forcing it past its basis. */
+[data-orchestrator-root] [data-orchestrator-splitter-pane='sized'] {
+	flex: 0 0 auto;
+	min-width: 0;
+	min-height: 0;
+}
+
+/* The fill-chain: each pane is a flex host and its single child — text, an
+ * editor, or a NESTED splitter — fills the pane in both axes. Without this a
+ * nested splitter sizes to its content, so a vertical splitter can't divide the
+ * height a horizontal splitter's pane gives it (the flex child collapses). */
+[data-orchestrator-root] [data-orchestrator-splitter-pane] {
+	display: flex;
+}
+
+[data-orchestrator-root] [data-orchestrator-splitter-pane] > * {
+	flex: 1 1 auto;
+	min-width: 0;
+	min-height: 0;
+}
+
+/* The handle: a thin, grabbable divider with a focus-visible ring for keyboard
+ * users. Hit-area + resize cursor are per-orientation. */
+[data-orchestrator-root] [data-orchestrator-splitter-handle] {
+	flex: 0 0 auto;
+	align-self: stretch;
+	background: #ddd;
+}
+
+[data-orchestrator-root] [data-orchestrator-splitter-handle]:hover {
+	background: #bbb;
+}
+
+[data-orchestrator-root] [data-orchestrator-splitter-handle]:focus-visible {
+	outline: 2px solid #1565c0;
+	outline-offset: 1px;
+}
+
+[data-orchestrator-root]
+	[data-orchestrator-splitter='row']
+	> [data-orchestrator-splitter-handle] {
+	width: 0.375rem;
+	cursor: col-resize;
+}
+
+[data-orchestrator-root]
+	[data-orchestrator-splitter='column']
+	> [data-orchestrator-splitter-handle] {
+	height: 0.375rem;
+	cursor: row-resize;
+}

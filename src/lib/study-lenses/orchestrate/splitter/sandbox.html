@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>&lt;Splitter&gt; sandbox — resizable dividers</title>
+		<style>
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+			html,
+			body,
+			#root {
+				height: 100%;
+			}
+			body {
+				font-family:
+					system-ui,
+					-apple-system,
+					sans-serif;
+				font-size: 14px;
+				color: #222;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="root"></div>
+
+		<!--
+			Inline module script (the repo's sandbox convention — see
+			../lib/editing/sandbox.html): NOT tsc/eslint-gated dev tooling. Mounts
+			the two real <Splitter> configs nested as <StudyLenses> wires them — a
+			horizontal row (active surface | panels column, panels sized) whose
+			second pane is a vertical column (User Interface | Developer Console,
+			UI sized). This is where drag FEEL / limits / cursor / focus-ring /
+			keyboard are actually verified (jsdom computes no layout).
+
+			Run: npx vite --config src/lib/study-lenses/orchestrate/splitter/vite.sandbox.config.ts
+		-->
+		<script type="module">
+			import React from 'react';
+			import { createRoot } from 'react-dom/client';
+
+			import '../orchestrate.css';
+			// Real extension (not the repo's .js source specifier): this inline
+			// script is a JS context, where Vite does NOT remap .js → .tsx — the
+			// sandbox convention (see ../lib/editing/sandbox.html) imports the
+			// actual file. index.tsx's OWN .js specifiers still resolve (TS ctx).
+			import Splitter from './index.tsx';
+
+			const h = React.createElement;
+
+			function pane(title, background) {
+				return h(
+					'div',
+					{
+						style: {
+							background,
+							height: '100%',
+							overflow: 'auto',
+							padding: '1rem',
+						},
+					},
+					h('strong', null, title),
+					h(
+						'p',
+						{ style: { marginTop: '0.5rem', color: '#555' } },
+						'Drag the dividers. Keyboard: Tab to a handle, then arrows / Home / End.',
+					),
+				);
+			}
+
+			const vertical = h(Splitter, {
+				orientation: 'column',
+				sizedPane: 'first',
+				defaultBasisPx: 200,
+				minPx: 96,
+				maxPx: 600,
+				stepPx: 16,
+				resizeMode: 'proportional', // UI/console keep their ratio on height resize
+				label: 'resize the user interface and the developer console',
+				first: pane('User Interface', '#ecfdf5'),
+				second: pane('Developer Console', '#fef2f2'),
+			});
+
+			const horizontal = h(Splitter, {
+				orientation: 'row',
+				sizedPane: 'second',
+				defaultBasisPx: 384,
+				minPx: 240,
+				maxPx: 900,
+				maxFraction: 0.6,
+				stepPx: 16,
+				label: 'resize the active surface and the output panels',
+				first: pane('active surface (editor / lens)', '#eef2ff'),
+				second: vertical,
+			});
+
+			const app = h(
+				'div',
+				{
+					'data-orchestrator-root': '',
+					style: {
+						height: '100%',
+						padding: '1rem',
+						display: 'flex',
+						flexDirection: 'column',
+						gap: '0.5rem',
+					},
+				},
+				h(
+					'h1',
+					{ style: { fontSize: '1rem' } },
+					'<Splitter> isolation sandbox',
+				),
+				h(
+					'p',
+					{ style: { color: '#666', fontSize: '13px' } },
+					'The editor (left) fills the area height; the UI/console divider splits that same height on the right. Drag both dividers.',
+				),
+				// A definite-height host (grid stretches its child to fill) — stands
+				// in for the app shell / editor giving the row a height to divide.
+				h(
+					'div',
+					{ style: { flex: '1 1 auto', minHeight: '0', display: 'grid' } },
+					horizontal,
+				),
+			);
+
+			createRoot(document.getElementById('root')).render(app);
+		</script>
+	</body>
+</html>
