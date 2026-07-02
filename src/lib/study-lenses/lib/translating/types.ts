@@ -69,12 +69,16 @@ export type LanguagePack = {
  * shapes `../classifying/` takes, plus the loaded pack. A parsed `Snippet`
  * carries `code`/`tokens`/`ast` on `source.code`, `raw.tokens`, `raw.ast`
  * (typed loosely there; the narrowing cast is the caller's one-line boundary).
- * The AST is required — member and builtin triggers are AST/scope-context
- * decisions, not token-type decisions, so `ClassifiedToken[]` is insufficient.
+ * The AST is required — keyword, member, and builtin triggers are
+ * AST/scope-context decisions, not token-type decisions, so `ClassifiedToken[]`
+ * is insufficient. `tokens` is embody's context-free `acorn.tokenizer()` output,
+ * re-admitted for keyword LOCATION only — never read `Token.type.keyword` for
+ * role (it mislabels a keyword-as-property and is `undefined` for `let`; see
+ * ./DOCS.md § Decisions D4).
  */
 export type TranslateInput = {
 	readonly code: string;
-	readonly tokens: readonly Token[];
+	readonly tokens: readonly Token[]; // location only — never read .keyword (DOCS D4)
 	readonly ast: Node;
 	readonly pack: LanguagePack;
 };

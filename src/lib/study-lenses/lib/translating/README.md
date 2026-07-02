@@ -73,25 +73,58 @@ translated.
 
 **Translate trigger** — which tokens become spans. Membership in the pack is
 necessary but **not** sufficient; each partition carries a role guard so a user
-token that merely shares a name is never translated:
+token that merely shares a name is never translated. The governing principle:
+**the AST decides identity, the token stream decides location** — the module
+reads acorn's token stream only for a keyword's `[start, end)` offset, and
+**never** reads a token's `.keyword` flag to decide whether something is a
+keyword.
 
-- **keyword** — a reserved-word keyword token (acorn `.keyword`) whose text is a
-  `keywords` key (`if`, `typeof`, `null`, `in`, `new`, …) and — for the
-  value-literals `true`/`false`/`null`, which are legal property names
-  (`x.null`) — not itself a `MemberExpression.property`. All 16 JEJ keyword keys
-  tokenize as reserved-word keyword tokens (none is a contextual keyword emitted
-  as a `name`), so `.keyword` ∩ pack membership is total over them; widening the
-  surface with a contextual keyword (e.g. `of`) is a guard-review event. (Note:
-  the semantic taxonomy in [`../classifying/`](../classifying/) bins
-  `typeof`/`in` as operators and `null`/`true`/`false` as literals — so the
-  trigger keys on **pack membership**, not on classifying's `keyword` category.)
+- **keyword** — a keyword span exists **because an AST node of the right type
+  occupies that position**, not because a token is flagged. `if` is a span
+  because there is an `IfStatement`; `let`/`const` because there is a
+  `VariableDeclaration`; `new` a `NewExpression`; `typeof` a `UnaryExpression`
+  with that operator; `in` a `BinaryExpression` with that operator;
+  `true`/`false`/`null` a value `Literal` whose source slice is that word. The
+  token stream supplies only _where_ — the keyword's offset — never _whether_.
+  This makes **over-translation of a keyword-surface word used as a non-keyword
+  structurally impossible**: such a word is a `MemberExpression.property`
+  Identifier (`console.if`, `x.let`, `x.null`), never a keyword-role node, so it
+  yields no span by construction; the same word inside a template (`` `if` ``)
+  is a `TemplateElement`, not a keyword-bearing node. (A _mis-location_ of a
+  gap-scanned keyword — `else`/binary `in`/do-while tail `while` — is a separate
+  failure class, bounded in [`./DOCS.md`](./DOCS.md).) The failure mode is
+  therefore **safe under-translation** (a keyword left in English), never the
+  corruption of a learner's property name. The `.keyword` flag is deliberately
+  **unread**: it is unreliable on the stream this module receives — embody's
+  context-free `acorn.tokenizer()` tags a keyword-as-property (`console.if`'s
+  `if` → `[keyword:if]`) and reports `let` as `.keyword === undefined` — so
+  keying on it would both mistranslate properties and miss `let`. (Full
+  rationale: [`./DOCS.md`](./DOCS.md) § Decisions D4 + the anti-regression pin.)
+  Widening the surface with a new contextual keyword (e.g. `of`) needs no
+  `.keyword`-guard re-audit — identity rides its node type (`ForOfStatement`) —
+  though a genuinely new keyword still needs its own identity + location rule
+  wired (never a lexical-flag branch). (Note: the semantic taxonomy in
+  [`../classifying/`](../classifying/) bins `typeof`/`in` as operators and
+  `null`/`true`/`false` as literals — the trigger keys on **pack membership +
+  node identity**, not on classifying's `keyword` category.)
 - **member** — a non-computed `MemberExpression.property` name whose text is a
   `members` key (`.floor`, `.charAt`). Safe to translate fully because **JEJ has
-  no user-defined properties** (no object literals, arrays, or property
-  assignment), so every `.member` is built-in.
-- **builtin** — an identifier reference whose text is a `builtins` key and which
-  resolves to the global (not shadowed by a learner binding, not a declaration
-  id). Shadow resolution is the one scope-aware guard — see § Edge cases.
+  no user-defined properties** — no object literals, arrays, or classes, so
+  there are no user-defined objects to carry non-curated properties, and every
+  `.member` is built-in. **This totality is a JEJ-shape bet:** it holds only
+  while the node allowlist
+  ([`../../embody/lib/validating/just-enough-js.ts`](../../embody/lib/validating/just-enough-js.ts))
+  admits no `ObjectExpression`/`Property` (or class bodies); adding any would
+  break "every `.member` is built-in" and require an object-resolves-to-builtin
+  guard — a surface-change event, not a silent regression.
+- **builtin** — a `builtins`-key Identifier in **reference** position (not a
+  declaration id, not a non-computed member property, not a label) that
+  **resolves to the global** (not shadowed by a learner binding). The two
+  filters are distinct: _reference classification_ excludes decl-ids, members,
+  and labels; _scope resolution_ then suppresses a genuine shadow. A **computed**
+  member property that names a global **is** a reference and does translate
+  (`x[Math]` renders `Math`); only a **non-computed** `.property` is a member.
+  Both guards are detailed in § Edge cases.
 
 **Forward vs. reverse.** _Forward_ (`translateTokens`) reads canonical English
 and emits native spans for display. _Reverse_ (`reversePack`) inverts a pack
@@ -157,8 +190,9 @@ const toEnglish = reversePack({ pack }); // { keywords, builtins, members }; thr
 (`tokens: readonly acorn.Token[]`, `ast: acorn.Node`) — the same narrow inputs
 `../classifying/` takes, so the `Snippet → TranslateInput` narrowing is the
 caller's one-line boundary cast; tests build inputs with a bare `acorn.parse`.
-`translateTokens` needs the AST (not just the token stream) because member and
-builtin triggers are AST/scope-context decisions, not token-type decisions.
+`translateTokens` needs the AST (not just the token stream) because keyword,
+member, and builtin triggers are AST/scope-context decisions, not token-type
+decisions.
 
 Behavior:
 
@@ -192,13 +226,35 @@ Behavior:
   increment either exports them (additive) or mirrors the walk (an AR-3 call). A
   name declared in an unrelated sibling block does not suppress a genuine global
   elsewhere. Errs toward not-translating a true shadow — the safe direction for
-  a display projection.
+  a display projection. Resolution is **scope-threaded**, not position-based: in
+  `for (const console of console)` the iterable RHS resolves in the **parent**
+  scope (the loop variable is not yet bound there), so the RHS `console`
+  translates as the global while the binding and body references are suppressed.
+  This mirrors `check-undeclared-globals.ts`'s walk, which evaluates a `for…of`
+  iterable in the enclosing scope.
 - **Member vs. same-named global.** `floor` is a `members` key; a bare
   identifier `floor` (a learner variable) is not a member and yields no span —
   only `x.floor` (a `MemberExpression.property`) does. The AST guard, not the
   name, decides.
-- **Computed member access** (`obj[expr]`) — the property is an expression, not
-  a name token; not translated.
+- **Computed member access** (`obj[expr]`). A computed property is **not** a
+  member — members are non-computed `.property` names only — so `obj["floor"]`
+  (property is a string `Literal`) and `obj[x]` (property is an arbitrary
+  expression) yield no member span. But a computed property that is itself a
+  bare **global reference** is a reference and translates as a **builtin**:
+  `x[Math]` renders `Math`. The axis is member-vs-reference, not
+  translate-vs-not.
+- **Keyword- or builtin-named labels.** A statement label is an Identifier but
+  never a reference: in `console: while (a) { break console }`, neither
+  `console` translates (one is a `LabeledStatement.label`, the other a
+  `BreakStatement.label`). Label exclusion is **explicit**, not inherited — and
+  the reason is a **mechanism inversion**: the validator's global-walk
+  ([`../../embody/lib/validating/check-undeclared-globals.ts`](../../embody/lib/validating/check-undeclared-globals.ts))
+  has no label case, so a global-named label reaches its `Identifier` arm, where
+  `allowedGlobals.has(name)` short-circuits to _no violation_. That same
+  membership is the translating **trigger** — so the identical walk would emit a
+  `builtin` span for a `Math:` label. The three label positions
+  (`LabeledStatement.label`, `BreakStatement.label`, `ContinueStatement.label`)
+  are therefore removed from the reference set explicitly.
 - **Advisory-stumble keywords** (`new`, `null`) are in the surface and translate
   like any keyword; their pedagogy lives in `../documenting/`, not here.
 - **Non-JEJ code.** Translation is only meaningful for valid JEJ (packs cover
