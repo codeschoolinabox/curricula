@@ -216,22 +216,22 @@ metaphor literal, not just illustrative.
 
 Brief sidebar candidates, each picking up an aspect of the metaphor:
 
-- **Mozart** — masterpieces for an instrument he disliked (Ch1⟡ sidebar)
+- **Mozart** — masterpieces for an instrument he disliked (Ch1 sidebar)
 - **Bach studying Buxtehude** — Bach walked 400km to hear Buxtehude play;
-  composers learn from scores and performances of masters (Ch0⟡ or Ch1⟡ sidebar)
-- **Ligeti** — depth at any scale (Ch4⟡ sidebar or epigraph; _Musica Ricercata_
+  composers learn from scores and performances of masters (Ch0 or Ch1 sidebar)
+- **Ligeti** — depth at any scale (Ch4 sidebar or epigraph; _Musica Ricercata_
   is the explicit precedent for Snippetry's
   one-feature-at-a-time-explored-deeply pattern)
-- **Ada Lovelace** — on the Analytical Engine weaving algebraical patterns (Ch1⟡
-  or Ch3⟡ sidebar)
-- **Babbage** — the loom-inspired dream that became modern computing (Ch0⟡ or
+- **Ada Lovelace** — on the Analytical Engine weaving algebraical patterns (Ch1
+  or Ch3 sidebar)
+- **Babbage** — the loom-inspired dream that became modern computing (Ch0 or
   historical-anchor sidebar)
 
 ---
 
 ## 4. The 8 AI-collaboration skills
 
-Chapter 3⟡ develops 8 collaboration skills with the alien virtuoso (the LLM).
+Chapter 3 develops 8 collaboration skills with the alien virtuoso (the LLM).
 Each has a specific composer-virtuoso activity.
 
 | Skill                  | Composer-virtuoso activity                                                                                                            |
@@ -426,9 +426,9 @@ roles require different composer-vs-virtuoso balances:
   constraints
 - Most professional work is somewhere between, and varies day-to-day
 
-Chapter 2⟡'s reverse-engineering, program-modification, and refactoring skills
-(V4's validation work, with Ch1⟡'s modify-and-predict discipline underneath) all
-live in the arrangement-and-variation domain. Snippetry (Ch4⟡) is explicitly
+Chapter 2's reverse-engineering, program-modification, and refactoring skills
+(V4's validation work, with Ch1's modify-and-predict discipline underneath) all
+live in the arrangement-and-variation domain. Snippetry (Ch4) is explicitly
 greenfield _at small scale_.
 
 ### The two-scale instrument reading (carries from ontology §7)
@@ -457,7 +457,7 @@ metaphor-illustration form.
 | **As a notational target**                | The writer's view: what the score aims at; the abstract entity your syntax controls                                                                                         |
 | **As an abstraction boundary**            | The architect's view: what's above the NM (your code) is your concern; what's below (interpreter, hardware) isn't. Some NM parts are themselves black-boxed (built-in APIs) |
 
-Each angle reveals something the others don't. Chapter 1⟡ develops all four in
+Each angle reveals something the others don't. Chapter 1 develops all four in
 different moments.
 
 </details>
@@ -504,7 +504,7 @@ pick up.
 
 A single language can also have multiple NM frameworks: different pedagogical
 accounts of the same underlying machine, each emphasizing different aspects.
-Chapter 1⟡ presents one particular account of JavaScript's NM (the one this
+Chapter 1 presents one particular account of JavaScript's NM (the one this
 curriculum commits to). Future chapters, alternate curricula, or more advanced
 treatments could present others. The curriculum's commitment is that students
 should learn what it _means_ to master an NM, using JS as the specific case —
@@ -694,7 +694,7 @@ outcome you want).
 
 </details>
 
-Chapter 2⟡ (users, visible behavior, interaction-event prediction — with Ch1⟡'s
+Chapter 2 (users, visible behavior, interaction-event prediction — with Ch1's
 PBIS discipline underneath) carries particular weight in an LLM-assisted
 workflow precisely because it cultivates this kind of check.
 
@@ -771,14 +771,14 @@ These connections are natural but outside the core narrative. Chapter authors
 can pick them up when relevant.
 
 - **Code review ↔ co-composer critique** — composers workshop each other's
-  scores; developers review each other's code. Natural for Ch1⟡ or Ch3⟡.
+  scores; developers review each other's code. Natural for Ch1 or Ch3.
 - **Documentation ↔ program notes** — a concert program explains the piece to
-  the audience. READMEs and docstrings do the same. Ch1⟡, Ch2⟡.
+  the audience. READMEs and docstrings do the same. Ch1, Ch2.
 - **Deployment environment ↔ concert acoustics** — the venue shapes what the
   score sounds like. Browser vs. Node vs. edge vs. embedded shapes what code
   does. Later courses.
 - **Testing ↔ rehearsal** — rehearsal catches problems before performance. Tests
-  catch problems before deployment. Ch0⟡ onward — the expected-run pair in the
+  catch problems before deployment. Ch0 onward — the expected-run pair in the
   greeter's comment is already a rehearsal note.
 - **Polyphony / fugue form ↔ concurrency / async** — when later chapters
   introduce asynchronous code, the musical analogy is ready.

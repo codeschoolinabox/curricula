@@ -2,7 +2,7 @@
 
 > **Purpose**: chapter-by-chapter redraft with 5-layer learning-objective grids,
 > drawing framing from `ontology.md` and the intellectual-agency meta-LO from
-> `guide.learners.md`. Five chapters (Ch0⟡–Ch4⟡), each with a unified overview +
+> `guide.learners.md`. Five chapters (Ch0–Ch4), each with a unified overview +
 > five layer-headed LO lists (`### Layer 0` through `### Layer 4`).
 >
 > **Companions** (siblings, by co-location):
@@ -37,7 +37,7 @@
 
 ### What to expect from this file
 
-- Five chapters (Ch0⟡–Ch4⟡). Each chapter has a unified overview block with
+- Five chapters (Ch0–Ch4). Each chapter has a unified overview block with
   framing prose, followed by five layer-headed LO lists.
 - Each LO is marked with a difficulty progression: 🥚 (entry) / 🐣 (developing)
   / 🐥 (competent) / 🐔 (mastery).
@@ -48,28 +48,28 @@
 
 ### Density map (rough drafting density, not LO targets)
 
-|      | L0 mastery          | L1 rhetoric | L2 methodology | L3 snippetry | L4 philosophy |
-| ---- | ------------------- | ----------- | -------------- | ------------ | ------------- |
-| Ch0⟡ | sparse              | dense       | medium         | sparse       | medium        |
-| Ch1⟡ | dense               | dense       | medium         | medium       | sparse        |
-| Ch2⟡ | sparse              | dense       | dense          | medium       | sparse        |
-| Ch3⟡ | medium              | dense       | dense          | medium       | medium        |
-| Ch4⟡ | dense (maintenance) | sparse      | dense          | dense        | dense         |
+|     | L0 mastery          | L1 rhetoric | L2 methodology | L3 snippetry | L4 philosophy |
+| --- | ------------------- | ----------- | -------------- | ------------ | ------------- |
+| Ch0 | sparse              | dense       | medium         | sparse       | medium        |
+| Ch1 | dense               | dense       | medium         | medium       | sparse        |
+| Ch2 | sparse              | dense       | dense          | medium       | sparse        |
+| Ch3 | medium              | dense       | dense          | medium       | medium        |
+| Ch4 | dense (maintenance) | sparse      | dense          | dense        | dense         |
 
 ### Loop-mastery phases (the chapter sequence)
 
 Chapters follow the phases of mastering the affordance-discovery cycle. All of
-source code's audiences are introduced together in Ch0⟡ at boundary-primitive
+source code's audiences are introduced together in Ch0 at boundary-primitive
 level; each chapter then deepens the twin its phase needs — with the
 developer-twin woven through every chapter as craft.
 
 | Chapter | Loop-phase                               | Twin deepened                            | Language features                                                             |
 | ------- | ---------------------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------- |
-| Ch0⟡    | **name** the cycle; ground the situation | all audiences met at boundary primitives | `prompt`/`alert`/`confirm`, string literals, comments, `null` (read/run only) |
-| Ch1⟡    | **live** it, F-hand                      | 💻 the computer (NM)                     | the full JEJ-core chain (C0–C6) + electives                                   |
-| Ch2⟡    | **live** it, V-hand                      | the user                                 | none new — full JEJ-core applied in text-dialog prototypes                    |
-| Ch3⟡    | **concretize + accelerate**, both hands  | 🤖 agents (LLMs)                         | none new — co-authored JEJ                                                    |
-| Ch4⟡    | **practice** it for life                 | you                                      | training wheels off — full JS                                                 |
+| Ch0     | **name** the cycle; ground the situation | all audiences met at boundary primitives | `prompt`/`alert`/`confirm`, string literals, comments, `null` (read/run only) |
+| Ch1     | **live** it, F-hand                      | 💻 the computer (NM)                     | the full JEJ-core chain (C0–C6) + electives                                   |
+| Ch2     | **live** it, V-hand                      | the user                                 | none new — full JEJ-core applied in text-dialog prototypes                    |
+| Ch3     | **concretize + accelerate**, both hands  | 🤖 agents (LLMs)                         | none new — co-authored JEJ                                                    |
+| Ch4     | **practice** it for life                 | you                                      | training wheels off — full JS                                                 |
 
 ### The audience YOU are becoming
 
@@ -81,11 +81,11 @@ poly-perspective self.
 
 | Chapter | Future-you is…                                                                  |
 | ------- | ------------------------------------------------------------------------------- |
-| Ch0⟡    | future-you meets the audiences (reads the greeter as the stranger it addresses) |
-| Ch1⟡    | future-you reads code and traces the NM (dev-reader + NM perspective)           |
-| Ch2⟡    | future-you considers users (added perspective: user)                            |
-| Ch3⟡    | future-you collaborates with LLMs as a duet (first conscious perspective-stack) |
-| Ch4⟡    | future-you snippets-as-merged-V/F (perspective-stacked-singularity)             |
+| Ch0     | future-you meets the audiences (reads the greeter as the stranger it addresses) |
+| Ch1     | future-you reads code and traces the NM (dev-reader + NM perspective)           |
+| Ch2     | future-you considers users (added perspective: user)                            |
+| Ch3     | future-you collaborates with LLMs as a duet (first conscious perspective-stack) |
+| Ch4     | future-you snippets-as-merged-V/F (perspective-stacked-singularity)             |
 
 ### Spiral (skills) × phases (the cycle)
 
@@ -93,7 +93,7 @@ Two dimensions organize the chapter sequence:
 
 - The **phases** (chapter sequence) walk the learner through mastering the cycle
   — name it, live it with each hand, concretize and accelerate it, practice it
-  for life. Audiences are not added one per chapter: all are met in Ch0⟡, and
+  for life. Audiences are not added one per chapter: all are met in Ch0, and
   each phase deepens the twin it needs.
 - The **spiral** (within each chapter) revisits skills at increasing depth: read
   → trace → describe → modify → write. Bruner's spiral curriculum
@@ -109,23 +109,23 @@ block, not repeated per layer):
 
 | Chapter | Metaphor anchor                                                                   |
 | ------- | --------------------------------------------------------------------------------- |
-| Ch0⟡    | the recital as rhetorical situation (the score-as-communication reading folds in) |
-| Ch1⟡    | studying the instrument's mechanism                                               |
-| Ch2⟡    | workshopping the piece with the audience                                          |
-| Ch3⟡    | the composer-virtuoso asymmetric duet (with an alien virtuoso)                    |
-| Ch4⟡    | the composer's daily practice (Ligeti / Bach / sketches)                          |
+| Ch0     | the recital as rhetorical situation (the score-as-communication reading folds in) |
+| Ch1     | studying the instrument's mechanism                                               |
+| Ch2     | workshopping the piece with the audience                                          |
+| Ch3     | the composer-virtuoso asymmetric duet (with an alien virtuoso)                    |
+| Ch4     | the composer's daily practice (Ligeti / Bach / sketches)                          |
 
 The metaphor system is **teaching apparatus, explicitly NOT structural guide** —
 see `metaphor.md` for the canonical treatment.
 
 ---
 
-## Ch0⟡ What is Programming?
+## Ch0 What is Programming?
 
 Language features — demonstrated, not authored: comments, `console.log`,
 `prompt` / `alert` / `confirm`, string literals, and `null` (as `prompt`'s
 cancel answer). Just Enough JavaScript starts here. You read, predict, and run;
-your first _writing_ comes in Ch1⟡.
+your first _writing_ comes in Ch1.
 
 ### Metaphor anchor
 
@@ -178,13 +178,13 @@ Three human audiences read your code:
 A fourth audience has recently arrived: **🤖 Agents (LLMs)** — they read and
 understand code differently from humans; they can infer intent from examples,
 find patterns, suggest changes, and help you write it. Writing _for and with_
-agents is its own communication skill, developed in Chapter 3⟡.
+agents is its own communication skill, developed in Chapter 3.
 
 The central skill this course teaches is writing code that **addresses all four
 audiences simultaneously**. You meet all of them in this chapter, at their
 boundary primitives (§0.4), before you write a line; the chapters that follow
-deepen one twin at a time — the computer in Ch1⟡, users in Ch2⟡, agents in Ch3⟡,
-and you in Ch4⟡ — with the developer-twin woven through them all as craft. They
+deepen one twin at a time — the computer in Ch1, users in Ch2, agents in Ch3,
+and you in Ch4 — with the developer-twin woven through them all as craft. They
 all matter in real work.
 
 The curriculum tracks five **strands** — five _kinds of connection_ a learner is
@@ -233,9 +233,9 @@ abstract now will become concrete. For now, use them as orientation.
 
 <strong>Where F&V fits in the larger journey:</strong>
 
-| F&V                                                                                                                                                                                     | What follows                                                                                                                                                |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Learning to program** — build fluency in the embodied language of computation. Chapter 4⟡ is the first pivot: snippetry is where you begin using programming to explore and discover. | **Programming to learn** — use programming as a tool to explore algorithms, complexity, paradigms, and domains (beyond this course: the field is wide open) |
+| F&V                                                                                                                                                                                    | What follows                                                                                                                                                |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Learning to program** — build fluency in the embodied language of computation. Chapter 4 is the first pivot: snippetry is where you begin using programming to explore and discover. | **Programming to learn** — use programming as a tool to explore algorithms, complexity, paradigms, and domains (beyond this course: the field is wide open) |
 
 F&V is a prerequisite for any Spiralearn curriculum that requires computational
 thinking. What follows it lies beyond this course: algorithm study (strategy
@@ -260,12 +260,12 @@ durable.
 
 <strong>Three vocabulary distinctions worth having early:</strong>
 
-| Term                     | What it means                                                                                                                                                                                                                                                          | In F&V                                                                                                                                                                                                                                                     |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Programming paradigm** | A design philosophy for organizing programs — how you decompose problems, structure solutions, manage state                                                                                                                                                            | Ch0⟡–Ch3⟡ is imperative: sequences of statements, explicit control flow, mutable state. Functional, OOP, and declarative are deferred to Ch4⟡.                                                                                                             |
-| **Computational domain** | What you are computing _about_ — the thing in the world you are modeling. A programmer who understands medicine writes better medical software; one who understands finance builds better financial tools. Domain expertise is a separate axis from programming skill. | F&V is largely domain-agnostic by design — the same NM skills transfer to any domain.                                                                                                                                                                      |
-| **Computational idioms** | Types of operators and operations available within a programming language — how you manipulate values. Different languages emphasize different idioms; mastering an idiom means fluency with a category of operations.                                                 | Ch1⟡'s cycle chain runs the core idioms in dependency order (strings, then logic on strings, then numbers); elective idiom sections (Regex, Dates, Bitwise, BigInt) follow the chain, off the spine. Distinct from computational domains (subject matter). |
-| **Model of computation** | A formal mathematical framework defining what computation _is_ — Turing machines, lambda calculus, finite automata                                                                                                                                                     | Largely beyond this course                                                                                                                                                                                                                                 |
+| Term                     | What it means                                                                                                                                                                                                                                                          | In F&V                                                                                                                                                                                                                                                    |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Programming paradigm** | A design philosophy for organizing programs — how you decompose problems, structure solutions, manage state                                                                                                                                                            | Ch0–Ch3 is imperative: sequences of statements, explicit control flow, mutable state. Functional, OOP, and declarative are deferred to Ch4.                                                                                                               |
+| **Computational domain** | What you are computing _about_ — the thing in the world you are modeling. A programmer who understands medicine writes better medical software; one who understands finance builds better financial tools. Domain expertise is a separate axis from programming skill. | F&V is largely domain-agnostic by design — the same NM skills transfer to any domain.                                                                                                                                                                     |
+| **Computational idioms** | Types of operators and operations available within a programming language — how you manipulate values. Different languages emphasize different idioms; mastering an idiom means fluency with a category of operations.                                                 | Ch1's cycle chain runs the core idioms in dependency order (strings, then logic on strings, then numbers); elective idiom sections (Regex, Dates, Bitwise, BigInt) follow the chain, off the spine. Distinct from computational domains (subject matter). |
+| **Model of computation** | A formal mathematical framework defining what computation _is_ — Turing machines, lambda calculus, finite automata                                                                                                                                                     | Largely beyond this course                                                                                                                                                                                                                                |
 
 These are orthogonal axes. You can write functional medical software or
 imperative medical software — the domain (medicine) is independent of the
@@ -278,7 +278,7 @@ about what computation fundamentally is (model)?
 
 Two questions this taxonomy answers before you even ask them:
 
-- _"Why aren't we doing functional programming?"_ — Paradigm. Deferred to Ch4⟡.
+- _"Why aren't we doing functional programming?"_ — Paradigm. Deferred to Ch4.
 - _"Why aren't we working on a specific project like a web app or game?"_ —
   Domain. F&V is domain-agnostic by design.
 
@@ -297,12 +297,12 @@ machine's event vocabulary you want to think in.
 Just Enough JavaScript is deliberately small. It excludes classes, most array
 methods, async/await, modules, destructuring, generators, and dozens of other
 features JS has. This is not an oversight. Fewer features means more cognitive
-bandwidth for the concepts that actually matter in Ch0⟡–Ch3⟡: how the machine
+bandwidth for the concepts that actually matter in Ch0–Ch3: how the machine
 evaluates, how values and bindings behave, how control flow works.
 
 The constraints are temporary and intentional:
 
-- Ch4⟡ lifts most of them
+- Ch4 lifts most of them
 - Beyond this course, algorithm study adds functions, arrays, and objects — and
   uses them to study algorithms
 - Trees and Separation of Concerns add DOM manipulation, event handling, and
@@ -411,7 +411,7 @@ the loop:
 The per-task, continuous form of this grid's Humans-only ↔ LLM-collab axis is
 the **human–AI slider** — Productive Struggle (🧑 Human) ↔ Cognitive Delegation
 (🤖 AI), five bands, applied one task at a time. Canonical at `ontology.md` §11;
-you'll use it diagnostically in Chapter 3⟡.
+you'll use it diagnostically in Chapter 3.
 
 #### Related vocabulary
 
@@ -439,7 +439,7 @@ names specific working modes within it.
 You will not write code in this chapter. You will read one small program,
 predict what it does, run it, and watch it address two audiences in a single
 run. Everything below is **demonstrated, not authored** — the primitives are
-yours to run and observe; making them your own begins in Ch1⟡.
+yours to run and observe; making them your own begins in Ch1.
 
 The program is a greeter:
 
@@ -473,7 +473,7 @@ same program addresses both audiences in the same run, on different channels —
 the rhetorical model of §0.1, running before your eyes. The data flows both
 ways: the program's words enter the user through their eyes; the user's answer
 enters the program through `prompt`. This chapter establishes the developer↔user
-channels; Ch1⟡ reveals the machine sitting in the middle of them.
+channels; Ch1 reveals the machine sitting in the middle of them.
 
 **Static vs. dynamic.** The source text above never changes. Every run is
 different — type a different name, click Cancel instead of OK. That gap has a
@@ -508,19 +508,19 @@ so that stranger can pick up where you left off without phoning you.
 **Cancel** instead of answering? Run it and watch. The answer is `null` — not an
 answer, not empty text, but the machine's own way of saying _no answer was
 given_. It is the first value you meet that exists to mark an absence. File the
-feeling; `null`'s full story unfolds along Ch1⟡'s chain.
+feeling; `null`'s full story unfolds along Ch1's chain.
 
 **Cliffhanger ① — the answer vanishes.** The greeter asks for a name, the user
 gives one … and the program cannot use it. It greets everyone identically,
 because the answer was gone the moment the dialog closed. You can feel the
 program that _should_ exist — one that greets you by name — and today's
 primitives cannot build it. The machine affords a way to **hold on to** an
-answer. Discovering it is the first move of Ch1⟡.
+answer. Discovering it is the first move of Ch1.
 
 **Cliffhanger ② — a question with an unusable answer.** `confirm` answers `true`
 or `false` — a real answer, every run — and the greeter can do nothing with it.
 A yes/no answer begs for a program that _behaves differently_ depending on which
-it got. That affordance arrives mid-chain in Ch1⟡, and when it does, `confirm`
+it got. That affordance arrives mid-chain in Ch1, and when it does, `confirm`
 will be sitting there, a ready-made condition.
 
 ### 0.5 One Tiny Cycle, Lived
@@ -536,9 +536,9 @@ not a failure. It is the engine: it tells you exactly what to discover next, and
 each turn reshapes the one after it.
 
 That is the **affordance-discovery cycle**. V proposes; F discovers and
-verifies. This course teaches it by having you live it — F-hand through Ch1⟡,
-V-hand through Ch2⟡, both hands named whole and accelerated in Ch3⟡, and as a
-lifelong practice in Ch4⟡. There is no recipe to memorize. You have already run
+verifies. This course teaches it by having you live it — F-hand through Ch1,
+V-hand through Ch2, both hands named whole and accelerated in Ch3, and as a
+lifelong practice in Ch4. There is no recipe to memorize. You have already run
 one turn.
 
 ## Learning objectives by layer
@@ -566,8 +566,8 @@ one turn.
   computer, users, 🤖 agents (LLMs)
 - 🥚 Explain what it means for code to _address_ each audience simultaneously
 - 🥚 Describe how the twins deepen across chapters: all four audiences meet you
-  here at their boundary primitives; the computer-twin deepens in Ch1⟡, the
-  user-twin in Ch2⟡, the agent-twin in Ch3⟡, the self-twin in Ch4⟡ — with the
+  here at their boundary primitives; the computer-twin deepens in Ch1, the
+  user-twin in Ch2, the agent-twin in Ch3, the self-twin in Ch4 — with the
   developer-twin woven through them all as craft
 - 🥚 Identify agents (LLMs) as a fourth audience: they read and understand code
   differently from humans
@@ -616,9 +616,9 @@ one turn.
 
 ### Layer 3 — Snippetry
 
-<em>(sparse at L3 in Ch0⟡ — snippetry formalizes in Ch4⟡)</em>
+<em>(sparse at L3 in Ch0 — snippetry formalizes in Ch4)</em>
 
-- 🥚 Recognize that _informal_ snippetry can begin from Ch0⟡ — small,
+- 🥚 Recognize that _informal_ snippetry can begin from Ch0 — small,
   curiosity-driven exploratory programs are welcome from day one
 - 🐣 Identify what you'd want to play with first, given the curriculum's
   trajectory
@@ -634,7 +634,7 @@ one turn.
 
 ---
 
-## Ch1⟡ Frogramming
+## Ch1 Frogramming
 
 Language features enter where the chain needs them: comments and the `console`
 API (distributed as craft along the whole chain); `let` / `const`; string
@@ -662,8 +662,8 @@ cycle has the same shape, lived rather than memorized: a behavior the previous
 cycle made possible runs into a gap; the machine turns out to afford something;
 you verify the discovery by predicting **internal events** before running; and
 the cycle cashes out into new user-facing behavior — which is where you now
-**write**. Ch0⟡'s predict-and-run becomes predict-verify-write. Every cash-out
-seeds the next cycle's gap; the two cliffhangers Ch0⟡ set are cashed on this
+**write**. Ch0's predict-and-run becomes predict-verify-write. Every cash-out
+seeds the next cycle's gap; the two cliffhangers Ch0 set are cashed on this
 chain, on schedule.
 
 The chain's material is deliberately ordered: **strings before numbers**.
@@ -675,7 +675,7 @@ the strings. What the ordering separates is number _arithmetic and conversion_,
 because that is where the machine's most confusing behavior lives, and it
 deserves its own cycle.
 
-**The test thread matures every cycle.** Ch0⟡ left you reading a prose
+**The test thread matures every cycle.** Ch0 left you reading a prose
 expected-run pair in a comment; on this chain the pairs become executable
 (`console.assert`), then per-branch, then boundary-aware, then
 validity-checking, and by the end of the chapter they are a systematized suite.
@@ -685,7 +685,7 @@ all of it required**. After the final beat, a set of elective sections (BigInt,
 Regular Expressions, Bitwise Computation, Dates) sits off the chain: real
 material, taken by interest, never blocking.
 
-`undefined` is encountered naturally through bindings. `null` arrived in Ch0⟡ as
+`undefined` is encountered naturally through bindings. `null` arrived in Ch0 as
 `prompt`'s cancel answer; its story continues mid-chain when truthiness gives it
 work to do.
 
@@ -716,12 +716,12 @@ The machine has two viewing levels:
   lifecycle, scope creation and chain-walking, value resolution, coercion,
   errors
 
-This is a different cut than Ch0⟡'s static-vs-dynamic. That distinction
-separated the _text_ from the _run_. This one lives entirely inside the run:
-even while a program is evaluating, what the syntax shows you and what the
-machine is doing are two different views, and much of the machine's real work is
-invisible in the syntax. You will feel the difference the first time a trace
-shows events no line of code names.
+This is a different cut than Ch0's static-vs-dynamic. That distinction separated
+the _text_ from the _run_. This one lives entirely inside the run: even while a
+program is evaluating, what the syntax shows you and what the machine is doing
+are two different views, and much of the machine's real work is invisible in the
+syntax. You will feel the difference the first time a trace shows events no line
+of code names.
 
 Behind the scenes, the machine maintains **state** — values, bindings, scopes —
 that events read and mutate. The events are what happen; the state is what they
@@ -779,7 +779,7 @@ step through. It serves two roles:
 <strong>Console and comments as craft, from here on.</strong>
 
 The developer audience's tools are distributed along this chain, arriving where
-the work needs them. Now: `console.log` (you know it from Ch0⟡) and
+the work needs them. Now: `console.log` (you know it from Ch0) and
 `console.assert(condition, message)` — silent when true, loud when false — the
 tool the test thread grows on. Later on the chain: `console.count` when loops
 give it something to count; `console.group` and `console.time` when programs
@@ -798,7 +798,7 @@ developer audience — including future-you — and every word, placement, and
 method choice shapes how they read. Real codebases are full of funny, desperate,
 and poetic comments; reading them is part of learning the register.
 
-**Verify:** re-trace a Ch0⟡ greeter — this time as an event stream. Call events,
+**Verify:** re-trace a Ch0 greeter — this time as an event stream. Call events,
 resolve events, the `null` resolve on cancel. Same program you already know; new
 eyes.
 
@@ -806,7 +806,7 @@ eyes.
 `console.assert` is now in your vocabulary, and the next cycle makes it
 executable.
 
-**Seeds the next cycle:** you can now see the events — and the first gap Ch0⟡
+**Seeds the next cycle:** you can now see the events — and the first gap Ch0
 left you is still open: the answer still vanishes.
 
 ### C1 — Bindings: holding on
@@ -904,8 +904,8 @@ expressions resolving step by step, methods found by lookup.
 ### C3 — String-based conditionals: answers with consequences
 
 **The gap (cliffhanger ② cashed):** `confirm` answers `true` or `false` every
-run, and Ch0⟡'s greeter could do nothing with it. Branching gives boolean
-answers their work — and text answers too.
+run, and Ch0's greeter could do nothing with it. Branching gives boolean answers
+their work — and text answers too.
 
 `if` / `else if` / `else` make the evaluation path depend on values. Tracing a
 conditional means tracing the predicate expression, then following the branch
@@ -917,7 +917,7 @@ choice; learners refactor between all three.
 `includes`, `startsWith`, `endsWith` — born as conditions, immediately consumed:
 `if (answer.startsWith('y'))`. Their prototype lookup is the same C2 mechanism,
 extended to methods whose answers drive branches.
-**`confirm`-as-ready-made-condition** closes Ch0⟡'s loose end:
+**`confirm`-as-ready-made-condition** closes Ch0's loose end:
 `if (confirm('Ready?'))` — the dialog _is_ a predicate.
 
 **Truthiness, the non-numeric half.** Values need not be booleans to drive a
@@ -1115,7 +1115,7 @@ output, documented pairs.
 **Cash-out (you write):** robust, tested, documented programs — and the
 chapter's closing beat, the F-side of the course's symmetry: **this chapter was
 one cycle chain, run on the machine side.** The proposals stayed modest (greet,
-gate, retry, validate) so the discoveries could go deep. Ch2⟡ swings the other
+gate, retry, validate) so the discoveries could go deep. Ch2 swings the other
 hand: the proposals get the depth, with the machine you now own underneath.
 
 ### Consolidation Beat D — the whole machine
@@ -1124,8 +1124,8 @@ One full-program trace touching every event family: lifecycle, resolve, lookup,
 branch, iteration, coercion. The NM-twin is operational — you can predict,
 verify, and direct the machine through every construct in JEJ-core.
 
-**This is the gate Ch2⟡ assumes:** full mastery of the chain — C0 through C6
-plus the four beats. The electives below are not part of the gate.
+**This is the gate Ch2 assumes:** full mastery of the chain — C0 through C6 plus
+the four beats. The electives below are not part of the gate.
 
 ### Electives — off the chain, by interest
 
@@ -1175,7 +1175,7 @@ numbers and arithmetic applied to time as a domain.
   observable moments; the tracer captures these automatically; trace tables
   record them by hand
 - 🥚 The two viewing levels inside a run: visual-syntax vs behind-the-scenes —
-  distinct from Ch0⟡'s static-vs-dynamic (text vs run)
+  distinct from Ch0's static-vs-dynamic (text vs run)
 - 🥚 Fix errors: parse errors (creation phase) vs runtime errors (evaluation
   phase); locate the source line; categorize the failure type
 - 🥚 An error is not a personal failure and not the machine breaking; it is the
@@ -1343,10 +1343,10 @@ numbers and arithmetic applied to time as a domain.
 
 ---
 
-## Ch2⟡ Vibetoading
+## Ch2 Vibetoading
 
 No new language features — and that is the point. This chapter assumes **full
-mastery of the Ch1⟡ JEJ-core chain** (C0–C6 plus the four beats; electives not
+mastery of the Ch1 JEJ-core chain** (C0–C6 plus the four beats; electives not
 required). Prototypes are JEJ text-dialog programs: `prompt`, `alert`,
 `confirm`, and everything the chain taught you.
 
@@ -1363,13 +1363,13 @@ said to the composer._
 Living the cycle on the V-hand. Users enter in depth: you propose experiences,
 prototype them cheaply, predict how real people will behave inside them, and
 watch what actually happens. **Design thinking across the whole situation is
-built here — with the same rigor Ch1⟡ gave computational thinking.**
+built here — with the same rigor Ch1 gave computational thinking.**
 
 The V-cycle is this chapter's chain-link: an **experience-goal** → a **cheap JEJ
 prototype** → **interaction-event predictions, in writing, in advance** →
 **observation of real behavior** → **divergence** → **refinement** — and each
 cycle's findings seed the next. The rigor engine is the prediction step:
-**interaction-event prediction** is the V-analog of Ch1⟡'s internal-event
+**interaction-event prediction** is the V-analog of Ch1's internal-event
 prediction. What will this user do first? Where will they hesitate? What will
 they misread? When will they backtrack? Written in advance, these are
 falsifiable — and being wrong is the productive outcome, because the diff
@@ -1378,17 +1378,17 @@ graded in this chapter is that diff, never the prototype's polish.
 
 **The V-side two-layer misconception** earns the rigor-parity: _a user can
 complete your task while holding a wrong model of your interface._ Task-success
-is not twin-validity — exactly as Ch1⟡ taught that correct output is not
+is not twin-validity — exactly as Ch1 taught that correct output is not
 model-validity. Verifying the twin takes interaction-event prediction, not just
 a passed task.
 
 **The radio-drama constraint is a feature.** Text-dialog prototypes carry all of
 the design thinking on a minimal surface: no layout, no styling, no frameworks —
 nothing to polish, so prototypes stay disposable and iteration stays cheap.
-Full-JS design surfaces arrive in Ch4⟡; the discipline built here is what will
+Full-JS design surfaces arrive in Ch4; the discipline built here is what will
 make them worth building.
 
-All Ch1⟡ skills — PBIS, naming, logging strategies, backtracing, refactoring,
+All Ch1 skills — PBIS, naming, logging strategies, backtracing, refactoring,
 code review — are practiced here under a new constraint: **user-visible behavior
 must be preserved** (or changed only on purpose, as the cycle's next proposal).
 
@@ -1433,7 +1433,7 @@ gets a way to _watch its audience_.
 
 ### V1 — Self as instrument
 
-Cold-run your own program: pick a Ch1⟡ cash-out you wrote weeks (or hours) ago
+Cold-run your own program: pick a Ch1 cash-out you wrote weeks (or hours) ago
 and run it as if you had never seen it. Where do _you_ hesitate at a prompt's
 wording? Which alert reads as noise? **Intent ≠ experience** — and you just felt
 the gap from the inside.
@@ -1566,9 +1566,9 @@ You have now spent five cycles with a simulated user in reach, and you have felt
 it: the thing is useful, tireless, always available — and _thin_. It cooperates
 too easily. It hesitates in the wrong places. It is not a user, and it is not a
 machine you can trace. File that feeling precisely, because it is the opening
-premise of Ch3⟡: **the LLM is a new beast — neither user nor notional machine —
+premise of Ch3: **the LLM is a new beast — neither user nor notional machine —
 and it needs its own twinning.** You built a user-twin in this chapter and a
-machine-twin in Ch1⟡; the next chapter asks what kind of twin an LLM deserves.
+machine-twin in Ch1; the next chapter asks what kind of twin an LLM deserves.
 
 ## Learning objectives by layer
 
@@ -1613,8 +1613,8 @@ machine-twin in Ch1⟡; the next chapter asks what kind of twin an LLM deserves.
 
 - 🥚 Wear the V hat consciously: propose-prototype-predict-observe-refine is V's
   bridging practice operationalized — even on tiny text-dialog programs
-- 🥚 The **data-flow loop**, run deliberately: Ch0⟡ established the dev↔user
-  channels; Ch1⟡ revealed the machine in the middle; this chapter drives the
+- 🥚 The **data-flow loop**, run deliberately: Ch0 established the dev↔user
+  channels; Ch1 revealed the machine in the middle; this chapter drives the
   whole dev↔NM↔user loop on purpose — _"the program's data enters the user
   through their eyes; the user transforms it into a response; the response
   enters the program through `prompt` and a resolve event"_
@@ -1661,9 +1661,9 @@ machine-twin in Ch1⟡; the next chapter asks what kind of twin an LLM deserves.
 
 ---
 
-## Ch3⟡ Co-AIthoring
+## Ch3 Co-AIthoring
 
-No new language features. This chapter applies all Ch0⟡–Ch2⟡ skills in
+No new language features. This chapter applies all Ch0–Ch2 skills in
 collaboration with an LLM co-author. 🤖 Agents are a fourth audience: they read
 and understand code differently from 🧑 humans, and writing _for and with_ them
 requires its own communication skills.
@@ -1676,15 +1676,15 @@ Collaboration is specifically different, and this chapter digs into why._
 
 ### The new beast
 
-You arrive here carrying a feeling Ch2⟡ deliberately left with you: the
-simulated user was useful, tireless, always available — and _thin_. It
-cooperated too easily; it hesitated in the wrong places. That feeling is this
-chapter's opening premise, now said plainly: **the LLM is a new beast.** It is
-not a user — you felt the difference every time the simulation was too
-agreeable. It is not a notional machine — you cannot trace it, and the same
-prompt does not produce the same events. Neither of your twins fits it. It needs
-its own twinning, and building that third twin — a model of a process that
-itself models what _you_ model — is this chapter's work.
+You arrive here carrying a feeling Ch2 deliberately left with you: the simulated
+user was useful, tireless, always available — and _thin_. It cooperated too
+easily; it hesitated in the wrong places. That feeling is this chapter's opening
+premise, now said plainly: **the LLM is a new beast.** It is not a user — you
+felt the difference every time the simulation was too agreeable. It is not a
+notional machine — you cannot trace it, and the same prompt does not produce the
+same events. Neither of your twins fits it. It needs its own twinning, and
+building that third twin — a model of a process that itself models what _you_
+model — is this chapter's work.
 
 The chapter's intellectual-agency move: _you direct an alien intelligence — and
 you stay in charge of what gets built._ Your job is to align — and to relish
@@ -1693,10 +1693,10 @@ productive divergence.
 ### The whole cycle, named
 
 You have run the affordance-discovery cycle by hand, in both directions. On the
-F-hand, seven times along Ch1⟡'s chain: a wanted behavior met a gap, the machine
+F-hand, seven times along Ch1's chain: a wanted behavior met a gap, the machine
 turned out to afford something, and the discovery cashed out — the vanishing
 answer became a binding; the unusable boolean became a branch. On the V-hand,
-five times through Ch2⟡: a proposed experience met an observed human, and the
+five times through Ch2: a proposed experience met an observed human, and the
 divergence rebuilt the proposal — the peer who finished your task while holding
 a wrong model of it taught you more than any success. Here is the whole thing,
 named once: **an experience is proposed; an affordance is discovered that can
@@ -1717,14 +1717,14 @@ checklist, but prompts distilled from moments you lived. Each carries the
 condition under which it breaks, because a prompt that can't break can't teach:
 
 - **The V-stroke question** — _who is this for, and what will they do first?_
-  You lived it grounding personas in real people (Ch2⟡). It breaks when asked
+  You lived it grounding personas in real people (Ch2). It breaks when asked
   about no one in particular: with no real person behind the answer, it
   generates fiction.
 - **The F-affordance question** — _what does the machine afford here?_ You lived
-  it at every gap on Ch1⟡'s chain. It breaks when asked of a machine you haven't
+  it at every gap on Ch1's chain. It breaks when asked of a machine you haven't
   twinned: every answer sounds plausible when you can't predict.
-- **The event-prediction move** — internal events (Ch1⟡'s verify) or interaction
-  events (Ch2⟡'s), committed in writing _before_ running or observing. It breaks
+- **The event-prediction move** — internal events (Ch1's verify) or interaction
+  events (Ch2's), committed in writing _before_ running or observing. It breaks
   silently when written after — a postdiction wearing prediction's clothes.
 - **The divergence question** — _where did reality diverge, and which twin
   updates?_ You lived it in the peer debrief. It breaks when divergence gets
@@ -1743,7 +1743,7 @@ Authoring code is _one_ way to operate that panel. Describing intent to an LLM
 is another. Either way, the NM is the thing the panel controls.
 
 LLMs let you **delegate operation of the control panel** while still owning the
-machine. The same Frogrammer/Vibetoader spectrum from Ch0⟡'s Two Hats applies —
+machine. The same Frogrammer/Vibetoader spectrum from Ch0's Two Hats applies —
 but now to your conversation with the alien virtuoso, not just to your typing:
 
 - 🔬 **NM-grounded conversation** (Frogramming-with-delegation) — _"Make the NM
@@ -1799,9 +1799,9 @@ most plausible continuation according to patterns it learned during training.
 Same prompt, different outputs is **stochasticity**: the model samples from a
 probability distribution; the temperature setting controls how much it strays
 from the most probable continuation. Different runs of the same prompt visit
-different points on that distribution. (This is also why your Ch2⟡ simulated
-user cooperated differently on different days — and why it could never be traced
-like a machine.)
+different points on that distribution. (This is also why your Ch2 simulated user
+cooperated differently on different days — and why it could never be traced like
+a machine.)
 
 LLM "cognition" differs from human reasoning in several ways: no episodic memory
 across conversations by default; no persistent goals; no embodiment; no
@@ -1825,8 +1825,8 @@ AI as one instance), **§10 substrate substitution** (deterministic →
 non-deterministic at artifact-logic), and **§11 three roles of agential AI**
 (Role 1 study partner / Role 2 dev collaborator / Role 3 active component).
 **This chapter = Role 2 (dev collaborator)** — Role 1 worked quietly across
-Ch0⟡–Ch1⟡; Ch2⟡ ran AI in the _user role_, a practice apparatus rather than Role
-2 (it produced behavior to observe, never work-product); Role 3 lies beyond this
+Ch0–Ch1; Ch2 ran AI in the _user role_, a practice apparatus rather than Role 2
+(it produced behavior to observe, never work-product); Role 3 lies beyond this
 course. The organizing line: _you twin the AI as collaborator — F's lens reads
 it as cognitive substrate (NM-grounded mode); V's lens reads its behavioral
 surface (user-grounded mode); two modes of collaboration, one JEJ artifact under
@@ -1840,7 +1840,7 @@ NM-twin both stay yours; what gets delegated is production.
 ### Co-authoring in prose
 
 Prose to the LLM is your control panel for it. The quality of the prose shapes
-what the LLM produces. The same predictive discipline that drove Ch1⟡'s
+what the LLM produces. The same predictive discipline that drove Ch1's
 assertions applies here: form a prediction about what your prompt will produce,
 observe the actual output, update your model. This is the event-prediction move,
 third domain: internal events, interaction events, now generation.
@@ -1862,7 +1862,7 @@ collaboration.
 
 ### The developer surface, co-authored
 
-<em>Revisits the craft thread — comments (running since Ch0⟡) and naming (Ch1⟡'s
+<em>Revisits the craft thread — comments (running since Ch0) and naming (Ch1's
 chain) — with an LLM co-author.</em>
 
 The developer audience is where LLMs are most reliably useful: comments and
@@ -1879,13 +1879,13 @@ task where the LLM adds value, or does using it undermine your learning?
 
 ### The machine, kept yours
 
-<em>Revisits Ch1⟡ — tracing, asserting — with an LLM co-author.</em>
+<em>Revisits Ch1 — tracing, asserting — with an LLM co-author.</em>
 
 This is where the asymmetry shows. LLMs are better at _generating_ code than at
 _tracing_ it. They produce plausible-looking but often wrong traces. The skill:
 evaluate LLM-generated traces for correctness, not trust them.
 
-Trace LLM-generated code using predictive stepping and trace tables (Ch1⟡ skills
+Trace LLM-generated code using predictive stepping and trace tables (Ch1 skills
 applied to unfamiliar code). Have the LLM trace code, then evaluate whether its
 traces correctly track state. Have the LLM explain code, then describe whether
 the explanation matches a PBIS analysis. This is **the F-affordance question**
@@ -1903,7 +1903,7 @@ the tracing _is_ the learning.
 
 ### User programs, co-authored
 
-<em>Revisits Ch2⟡ — user programs and their verification — with an LLM
+<em>Revisits Ch2 — user programs and their verification — with an LLM
 co-author.</em>
 
 The full user-program skill stack now operates over LLM-generated code: reading,
@@ -1929,7 +1929,7 @@ user-stories** from your interview notes for you to correct and own;
 **synthesize observation notes** across cycles into patterns worth testing. This
 is design-_process_ acceleration, and it is real.
 
-What it is not: observation. The Ch2⟡ ladder still governs — real people first,
+What it is not: observation. The Ch2 ladder still governs — real people first,
 the simulated user as always-available understudy, and the LLM's synthesis of an
 observation is never the observation itself. A drafted user-story is a proposal
 until a divergence-tested prediction backs it; the V-stroke question still
@@ -1956,7 +1956,7 @@ tools, modifying state autonomously. That's a more complex collaboration than
 the one this chapter covered. It doesn't replace your role so much as shift what
 you attend to — from writing the code to specifying observable outcomes that
 humans can still evaluate, directing a system that does more than transcribe.
-Flag this as territory for learning beyond this course; Chapter 4⟡ returns
+Flag this as territory for learning beyond this course; Chapter 4 returns
 briefly to it in its closing moments. Whatever the delegation level, the anchor
 holds: **AI accelerates the cycle; it cannot run it for you** — the proposing,
 the observing, and the judgment that closes each turn have no substitute.
@@ -2034,7 +2034,7 @@ the observing, and the judgment that closes each turn have no substitute.
 - 🐣 🎨 Wear the Vibetoader hat intentionally — choose it for the scope where
   it's right
 - 🐣 Distinguish V-direction process-acceleration (drafting, widening,
-  synthesizing — delegable) from observation (never delegable; the Ch2⟡ ladder
+  synthesizing — delegable) from observation (never delegable; the Ch2 ladder
   governs)
 - 🐣 Use the human–AI slider **diagnostically**: after a task, place where AI
   use actually sat and judge it against your goal (mastery, speed, exploration)
@@ -2043,7 +2043,7 @@ the observing, and the judgment that closes each turn have no substitute.
   still building the skill, freer once it's mastered
 - 🐣 Distinguish the slider's question (_how much_ you delegate the task) from
   V/F's question (_which twin_ you shoulder) — they are orthogonal
-- 🐥 Apply §11 Role 2 (dev collaborator) to Ch3⟡ work: twin the AI as
+- 🐥 Apply §11 Role 2 (dev collaborator) to Ch3 work: twin the AI as
   collaborator through F's lens (NM-grounded mode) or V's lens (user-grounded
   mode)
 - 🐔 **Code is content, not deliverable** — AI-generated code is material to
@@ -2078,7 +2078,7 @@ the observing, and the judgment that closes each turn have no substitute.
 
 ---
 
-## Ch4⟡ Snippetry
+## Ch4 Snippetry
 
 ### Metaphor anchor
 
@@ -2106,7 +2106,7 @@ provides the daily reps?_ Snippetry is the experience-form of NM-maintenance —
 the daily reps that keep the automated library of past experiences alive once
 full-codebase work no longer provides them.
 
-**Arc closure.** The arc that opened in Ch0⟡ with _write for future-you as an
+**Arc closure.** The arc that opened in Ch0 with _write for future-you as an
 audience_ closes here as _write for yourself as a human_. Same self, end-to-end
 — there you wrote for you-as-audience; here you write for you-as-human.
 
@@ -2132,7 +2132,7 @@ operational terms.
 
 ### Paradigms as affordance-territory
 
-**JavaScript is multi-paradigmatic.** Ch0⟡–Ch3⟡ taught imperative programming.
+**JavaScript is multi-paradigmatic.** Ch0–Ch3 taught imperative programming.
 This chapter is where you discover that the same language supports fundamentally
 different ways of thinking about computation: functional, object-oriented,
 declarative. **Paradigms are affordance-territory** — each one is a region of
@@ -2147,19 +2147,19 @@ event stream — how explicitly and in what terms the event sequence is specifie
 
 | Paradigm                                             | Relationship to the evaluation event stream                                                                                                       |
 | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Imperative** (JS Ch0⟡–Ch3⟡)                        | Explicit event sequence — every step specified. JS's actual NM vocabulary.                                                                        |
-| **OOP in JS** (Ch4⟡)                                 | Syntactic organization on top of the same machine — method calls = prototype chain walk + function call events. A style, not a different machine. |
+| **Imperative** (JS Ch0–Ch3)                          | Explicit event sequence — every step specified. JS's actual NM vocabulary.                                                                        |
+| **OOP in JS** (Ch4)                                  | Syntactic organization on top of the same machine — method calls = prototype chain walk + function call events. A style, not a different machine. |
 | **OOP in purpose-built languages** (Java, Smalltalk) | Genuinely different NMs — message-send events, virtual dispatch. Different event vocabulary.                                                      |
-| **Functional in JS** (Ch4⟡)                          | Compose transformations; the same machine generates events from function application. Same machine, different organization.                       |
+| **Functional in JS** (Ch4)                           | Compose transformations; the same machine generates events from function application. Same machine, different organization.                       |
 | **Declarative** (regex, SQL)                         | Specify the goal; delegate event generation. Maximum decoupling from the event sequence.                                                          |
-| **Event-driven** (JS Ch4⟡ event loop)                | External events — clicks, timers — enter the stream as first-class participants.                                                                  |
+| **Event-driven** (JS Ch4 event loop)                 | External events — clicks, timers — enter the stream as first-class participants.                                                                  |
 
-Imperative programming — what you learned in Ch0⟡–Ch3⟡ — is explicit about the
+Imperative programming — what you learned in Ch0–Ch3 — is explicit about the
 event sequence: every step is specified, every event directed. Other paradigms
 have different relationships to that stream. You explore them here.
 
 **Looking further — beyond this course.** The evaluation event vocabulary you
-built in Ch1⟡ is one conceptual bridge from embodied computing to CS.
+built in Ch1 is one conceptual bridge from embodied computing to CS.
 Step-counting and Big O analysis — algorithm study, beyond this course — require
 the same cognitive habit — counting discrete operations — though the abstraction
 differs: evaluation events are implementation-level; algorithmic steps are
@@ -2194,7 +2194,7 @@ environment** into real browser evaluation with real consequences.
   (loupe for event loop, promisees for Promises, etc.) with different notional
   machine perspectives. Training wheels come off, but power tools are available.
 - **Four sandbox modes** offering different constraints and affordances:
-  - **Script without HTML** — pure computation, closest to Ch0⟡–Ch3⟡
+  - **Script without HTML** — pure computation, closest to Ch0–Ch3
   - **Module without HTML** — introduces ES module semantics
   - **HTML file with a script tag** — DOM available, split view of code and
     rendered page
@@ -2231,7 +2231,7 @@ session.
 
 ### Looking forward — agentic AI
 
-Chapter 3⟡ framed the LLM as a co-author accelerating both hands of the cycle —
+Chapter 3 framed the LLM as a co-author accelerating both hands of the cycle —
 never running it. The world keeps moving. **Agentic AI systems** — LLMs that
 plan, decompose problems, make architectural choices, call tools, and modify
 state autonomously — are arriving. The collaboration shape changes; the
@@ -2335,8 +2335,8 @@ for you — the cycle stays yours to run.
   GEB-flavored image of V and F as mutual access points to a single merged
   practice. Recognize the parallel without the curriculum laboring it
 - 🐥 _(deeper section)_ Self-twinning as a theory of consciousness: the
-  predictive model of self is the seat of self. The arc you've traveled — Ch0⟡'s
-  write-for-future-you to Ch4⟡'s write-for-yourself-
+  predictive model of self is the seat of self. The arc you've traveled — Ch0's
+  write-for-future-you to Ch4's write-for-yourself-
   the-audience-you-are-becoming — is the curriculum's operational encounter with
   that idea (see ontology §6 L4 matrix, Twinning row, and the Preamble's
   "audience YOU are becoming" table)

@@ -1,4 +1,4 @@
-# Welcome to Frogramming — A Manifesto for Community
+# Frogramming & Vibetoading: Affordance-Discovery Cycle(s) — A Manifesto for Community
 
 > Addressed to **you** — the partner community, the cohort host, the mentor, the
 > friend, the colleague, the organization that's running this course with us or

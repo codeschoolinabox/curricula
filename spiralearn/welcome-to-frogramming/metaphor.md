@@ -58,11 +58,11 @@ on their own.
 | Other developers        | **Co-composers** — fellow score-readers                                                       |
 | The computer evaluating | **The mechanism playing the score blindly at performance time**                               |
 
-Chapter 0⟡ sets the recital's whole situation. Chapter 1⟡ studies the
-instrument's mechanism. Chapter 2⟡ workshops the piece with the audience —
-design thinking in full. Chapter 3⟡ teaches collaboration with the alien
-virtuoso (the LLM). Chapter 4⟡ turns to the composer's daily practice —
-snippetry — and hints at alien composers emerging on the horizon.
+Chapter 0 sets the recital's whole situation. Chapter 1 studies the instrument's
+mechanism. Chapter 2 workshops the piece with the audience — design thinking in
+full. Chapter 3 teaches collaboration with the alien virtuoso (the LLM). Chapter
+4 turns to the composer's daily practice — snippetry — and hints at alien
+composers emerging on the horizon.
 
 ---
 
@@ -138,13 +138,13 @@ automate fluent production because the virtuoso handles that.
 
 ## Human virtuoso vs alien virtuoso
 
-- **Human virtuoso (Ch0⟡–Ch2⟡)** — senior engineer with fluent hands; deep
-  idiom; patience for collaborative work
-- **Alien virtuoso (Ch3⟡)** — LLM. Dazzling, fast, pattern-rich, but weird.
+- **Human virtuoso (Ch0–Ch2)** — senior engineer with fluent hands; deep idiom;
+  patience for collaborative work
+- **Alien virtuoso (Ch3)** — LLM. Dazzling, fast, pattern-rich, but weird.
   Sometimes plays what you said rather than what you meant. Trained on millions
   of human virtuosos but cognitively distinct.
 - **Alien composers (teased, deferred)** — agentic AI systems that do design
-  work, not just notation. Ch3⟡'s and Ch4⟡'s closing moments flag this; full
+  work, not just notation. Ch3's and Ch4's closing moments flag this; full
   treatment lies beyond this course.
 
 ## Composer pedagogy mappings

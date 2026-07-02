@@ -110,13 +110,13 @@ specifically.
 
 Experienced collaborators who handle much of the notation — senior engineers,
 pair partners — have always been part of software. LLMs are a new kind of such
-collaborator: same role, different cognition. Chapter 3⟡ develops the
+collaborator: same role, different cognition. Chapter 3 develops the
 differences.
 
 **Honest framing**: LLMs are often better at notation than many humans — faster,
 with a broader repertoire, fewer typos. Pretending otherwise would be dishonest.
 But great Frogramming isn't only about productivity. Design judgment, context
-awareness, aesthetic and ethical taste aren't where LLMs excel. And Chapter 4⟡
+awareness, aesthetic and ethical taste aren't where LLMs excel. And Chapter 4
 develops the case for Frogramming-for-its-own-sake — the practice of keeping
 your NM-fluency sharp when you're no longer writing most of the notation
 yourself.
@@ -127,7 +127,7 @@ _wrong thing correctly_. This makes certain practices _more_ important in an
 LLM-assisted workflow, not less: short iterations of user-visible behavior we
 can actually evaluate, human-evaluable acceptance criteria, testing discipline
 oriented toward visible behavior; Agile development vs Waterfall all over again!
-Chapter 2⟡ (users, visible behavior, interaction-event prediction — with Ch1⟡'s
+Chapter 2 (users, visible behavior, interaction-event prediction — with Ch1's
 PBIS discipline underneath) carries particular weight for this reason.
 
 **NM understanding matters more now, not less.** LLMs can write the notation —

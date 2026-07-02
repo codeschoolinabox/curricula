@@ -1,4 +1,4 @@
-# Welcome to Frogramming — Study Lenses Infrastructure
+# Frogramming & Vibetoading: Affordance-Discovery Cycle(s) — Study Lenses Infrastructure
 
 > **Purpose**: technical-reader companion to the curriculum. Explains the JEJ →
 > NM → embody → lenses → orchestrator chain — the infrastructure beneath the
@@ -57,8 +57,8 @@
 
 Study Lenses is **an idea, not an implementation** — a design principle
 adaptable across host environments (browser, IDE, static site, mobile). This
-package is the browser embodiment for the Welcome to Frogramming curriculum;
-other implementations exist and more are possible.
+package is the browser embodiment for the F&V curriculum; other implementations
+exist and more are possible.
 
 The four-step reasoning framework (carries into §8 with the Explorotron
 foundations):

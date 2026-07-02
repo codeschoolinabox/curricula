@@ -130,7 +130,7 @@ progressively larger scales.
 You will not be asked to descend through these in order or in unison. The
 chapters walk you through the phases of mastering the affordance-discovery cycle
 — naming it, living it with each hand, accelerating it, practicing it — meeting
-every audience of source code in Ch0⟡ and deepening one twin per phase, and the
+every audience of source code in Ch0 and deepening one twin per phase, and the
 layers run underneath. Stay where you want. Come back when you want to find
 more.
 
@@ -296,8 +296,8 @@ For each chapter:
 Tools available to you throughout:
 
 - **Just Enough JavaScript** — a curated subset of JS, designed so that every
-  program you write in Ch0⟡–Ch3⟡ fits on a single page. The constraint is
-  pedagogical; Chapter 4⟡ lifts it.
+  program you write in Ch0–Ch3 fits on a single page. The constraint is
+  pedagogical; Chapter 4 lifts it.
 - **Study Lenses** — embedded in every page. Trace tables, variable
   highlighters, Parsons problems, fill-in-the-blanks, predictive stepping. The
   Frogrammer's _kit of magnifying glasses_ 🔬.
@@ -321,7 +321,7 @@ Throughout this course, exercises carry one of four markers. They mark priority
 
 When you finish a section, ask yourself: am I at 🥚 (I could do this reliably)?
 🐣 (I could with more time)? 🐥 (I have the shape of it)? Use this to decide
-where to spend more time before moving on. (In Chapter 3⟡ you will encounter the
+where to spend more time before moving on. (In Chapter 3 you will encounter the
 same self-assessment frame as a tool for deciding when it makes sense to
 delegate a programming task to an LLM — and when it doesn't.)
 
@@ -337,7 +337,7 @@ this"_ is a third state. Researchers call it the **liminal zone**: you are in
 transition, things feel unstable, your predictions are wrong in ways you cannot
 fully account for yet.
 
-You will spend time here, especially in Chapter 1⟡. Two states to distinguish:
+You will spend time here, especially in Chapter 1. Two states to distinguish:
 
 - **Stuck** — you cannot form a prediction at all. The concepts are too
   unfamiliar. This is a signal: you need more input. Reread the reference
@@ -350,16 +350,16 @@ The discomfort of being in the zone is not a sign that you are doing it wrong.
 It is a sign that one of programming's threshold concepts is forming — and that
 it will be transformative when it does.
 
-**Chapter 1⟡ specifically.** Chapter 1⟡ is the steepest part of this course. We
+**Chapter 1 specifically.** Chapter 1 is the steepest part of this course. We
 know this. You will know it too. The programs stay small while the machine
 underneath gets deep. But the chain is built so the work never disconnects from
 results: every cycle cashes out into new user-facing behavior — a greeter that
 remembers, a gate that answers, a menu that retries — and users have been
-visible since Ch0⟡'s first run. The steepness is real; the old complaint that
+visible since Ch0's first run. The steepness is real; the old complaint that
 "you can't build anything visible yet" is not.
 
-The machine literacy you build in Chapter 1⟡ is the foundation every subsequent
-chapter stands on. Chapters 2⟡, 3⟡, and 4⟡ become tractable because of what you
+The machine literacy you build in Chapter 1 is the foundation every subsequent
+chapter stands on. Chapters 2, 3, and 4 become tractable because of what you
 build here. Algorithm study beyond this course becomes tractable because of what
 you build here. Push through.
 

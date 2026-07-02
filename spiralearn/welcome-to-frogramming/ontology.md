@@ -161,7 +161,7 @@ the diagram invites most directly:
 
 | Role                | Elements                                                       |
 | ------------------- | -------------------------------------------------------------- |
-| Actors              | Development Team · Users · Computer · (Ch3⟡: Agents)           |
+| Actors              | Development Team · Users · Computer · (Ch3: Agents)            |
 | Mediating artifacts | Source Code (center) · User Interface · Computer Output        |
 | Bridging processes  | Design Thinking ↔ Developer Intentions ↔ Computer Instructions |
 | Outer circle        | Real-World Context — the accountability questions above        |
@@ -423,16 +423,16 @@ above:
 
 #### The twin / process 2×2
 
-|                    | **NM-twin: NO**                                                                                      | **NM-twin: YES**                                                                                                                                         |
-| ------------------ | ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **User-twin: NO**  | **Pure process** — twin-less; follows checklists / patterns / steps without grounding in either twin | **🔬 Frogrammer** — twins the NM (Ch1⟡ develops this)                                                                                                    |
-| **User-twin: YES** | **🎨 Vibetoader** — twins the user (Ch2⟡ develops this)                                              | **The both-twins state** — the transcendent practice Ch3⟡ (V + F operating alongside an LLM) and Ch4⟡ (V + F merged in snippetry) develop in the learner |
+|                    | **NM-twin: NO**                                                                                      | **NM-twin: YES**                                                                                                                                       |
+| ------------------ | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **User-twin: NO**  | **Pure process** — twin-less; follows checklists / patterns / steps without grounding in either twin | **🔬 Frogrammer** — twins the NM (Ch1 develops this)                                                                                                   |
+| **User-twin: YES** | **🎨 Vibetoader** — twins the user (Ch2 develops this)                                               | **The both-twins state** — the transcendent practice Ch3 (V + F operating alongside an LLM) and Ch4 (V + F merged in snippetry) develop in the learner |
 
-Three of the four corners get curriculum-chapter mappings: Ch1⟡ = 🔬 F corner,
-Ch2⟡ = 🎨 V corner, Ch3⟡ + Ch4⟡ = both-twins. The fourth corner (no twin) is the
+Three of the four corners get curriculum-chapter mappings: Ch1 = 🔬 F corner,
+Ch2 = 🎨 V corner, Ch3 + Ch4 = both-twins. The fourth corner (no twin) is the
 starting position the curriculum brings learners _out of_. Corner-mapping names
 _which twin a chapter develops_, not the learner's total twin-state — a learner
-living Ch2⟡'s V corner still owns the NM-twin Ch1⟡ built.
+living Ch2's V corner still owns the NM-twin Ch1 built.
 
 > **Flipside reading (with §9 two-lens reading).** The both-twins state names
 > the **practitioner-side** — one practitioner holding V's twin (user) + F's
@@ -554,7 +554,7 @@ use-case experiences (_"imagine an interaction where…"_); F discovers what the
 substrate affords (_"this becomes possible, and it also enables…"_). Each turn
 shifts what V can propose and what F can build. The exchange is open-ended — no
 fixed number of beats, no required rhythm.[^achilles-tortoise] Over time, V and
-F merge in the practitioner; Ch4⟡'s snippetry is where the merging crystallizes
+F merge in the practitioner; Ch4's snippetry is where the merging crystallizes
 into a single integrated practice (the both-twins corner of the §4 2×2, in its
 merged form).
 
@@ -803,15 +803,15 @@ Connections to target systems. Building a generative model of a process outside
 your own mind that aligns with that process's actual behavior.
 
 **Targets across chapters** (all of source code's audiences are met together in
-Ch0⟡ at boundary-primitive level; each twin is then deepened in the phase that
+Ch0 at boundary-primitive level; each twin is then deepened in the phase that
 needs it):
 
-- Ch0⟡ onward: 🧑‍💻 the developer who reads your code (incl. future-you) — woven
+- Ch0 onward: 🧑‍💻 the developer who reads your code (incl. future-you) — woven
   through every chapter as craft
-- Ch1⟡: 💻 the computer (NM) that evaluates your code
-- Ch2⟡: the user who experiences your program
-- Ch3⟡: 🤖 the agent (LLM) you collaborate with
-- Ch4⟡: yourself as poly-perspective being
+- Ch1: 💻 the computer (NM) that evaluates your code
+- Ch2: the user who experiences your program
+- Ch3: 🤖 the agent (LLM) you collaborate with
+- Ch4: yourself as poly-perspective being
 
 **Cognitive-science grounding**: twinning IS active inference (canonical at
 `pedagogy.md` "The pedagogical claim from Friston").
@@ -929,16 +929,16 @@ layers — embody **crystallizes** its dynamic flow into a static-but-4D structu
 that makes all facets explorable. The data thread stitches everything together
 _because_ the substrate makes the motion legible.
 
-#### Ch2⟡ anchor (the data-flow loop)
+#### Ch2 anchor (the data-flow loop)
 
-A vivid concrete loop becomes Ch2⟡'s anchor:
+A vivid concrete loop becomes Ch2's anchor:
 
 > The program's data enters the user through their eyes via a prompt; the user
 > processes it and transforms it into a response; the response enters the
 > program through prompt and a resolve event; the program processes; …
 
-Ch0⟡ establishes the dev↔user channels; Ch1⟡ reveals the NM sitting in the
-middle of them; Ch2⟡ drives the whole dev↔NM↔user loop deliberately. Cybernetics
+Ch0 establishes the dev↔user channels; Ch1 reveals the NM sitting in the middle
+of them; Ch2 drives the whole dev↔NM↔user loop deliberately. Cybernetics
 referenced as side/footnote, not in body.
 
 ---
@@ -1156,10 +1156,10 @@ LLM-assisted workflow, not less:
 - Testing discipline oriented toward visible behavior
 - Agile development vs Waterfall, all over again
 
-Chapter 2⟡ (users, visible behavior, interaction-event prediction — with Ch1⟡'s
+Chapter 2 (users, visible behavior, interaction-event prediction — with Ch1's
 PBIS discipline underneath) carries particular weight for this reason.
 
-#### Agentic emergence (Ch3⟡'s and Ch4⟡'s closing moments)
+#### Agentic emergence (Ch3's and Ch4's closing moments)
 
 The co-author frame (LLM = virtuoso, §11 Role 2) is a simplification. **Agentic
 AI systems** that plan, execute, call tools, modify state autonomously are
@@ -1232,7 +1232,7 @@ different cognition.
 LLMs are often better at notation than many humans — faster, broader repertoire,
 fewer typos. Pretending otherwise would be dishonest. But great Frogramming
 isn't only about productivity. Design judgment, context awareness, aesthetic and
-ethical taste aren't where LLMs excel. And Chapter 4⟡ develops the case for
+ethical taste aren't where LLMs excel. And Chapter 4 develops the case for
 Frogramming-for-its-own-sake.
 
 #### Three roles of agential AI
@@ -1345,7 +1345,7 @@ learning rationale. The format, illustratively:
 | 3   | Verify the trace         | 🧑 Fully human | the verification is the learning                    |
 
 (🧑 marks human-leaning bands, 🤖 AI-leaning, Balanced bare; no new glyph.
-Chapter 3⟡ carries the first full worked recipe.)
+Chapter 3 carries the first full worked recipe.)
 
 > **Understanding is non-delegable** (§1, Principle 1). The slider reads who did
 > the _task_, never who did the _understanding_. A task can sit at Fully AI
@@ -1359,7 +1359,7 @@ Chapter 3⟡ carries the first full worked recipe.)
 **Lineage.** The slider distills the collAIboration "Human+AI Collaboration
 Roles" quadrant roles (Strategist / Implementer / Curator / Orchestrator) into a
 per-task 1-D reading — the same Evan Cole / Janet Tilstra / Joslenne Peña prior
-work Chapter 3⟡ draws its shape from (see §4 _Lineage_ and `chapters.md` Ch3⟡
+work Chapter 3 draws its shape from (see §4 _Lineage_ and `chapters.md` Ch3
 overview). An interactive companion tool exists
 ([repo](https://github.com/colevandersWands/cognitive-delegation-sliders) ·
 [live](https://colevandersWands.github.io/cognitive-delegation-sliders/)); a
@@ -1377,11 +1377,11 @@ flowchart LR
 
 #### Curriculum mapping
 
-**Ch0⟡–Ch1⟡ quietly assume Role 1.** Every learner using AI to learn is in Role
-1 by default; the curriculum makes that engagement deliberate through Study
+**Ch0–Ch1 quietly assume Role 1.** Every learner using AI to learn is in Role 1
+by default; the curriculum makes that engagement deliberate through Study
 Lenses + AI explanations + tutor patterns.
 
-**Ch2⟡ adds AI as simulated audience — a use-mode, not a new role.** A local-LLM
+**Ch2 adds AI as simulated audience — a use-mode, not a new role.** A local-LLM
 simulated user plays interview subject, walkthrough participant, and stand-in
 tester so that every V-cycle is runnable on demand by a learner studying alone.
 This is not Role 2: the simulation produces _behavior to observe_, never
@@ -1389,9 +1389,9 @@ work-product that enters the artifact. Nor is it the slider's delegation axis:
 nothing of the learner's task is handed over — the AI sits in the _audience
 seat_, playing the very thing the learner is building a twin of. Classify it as
 Role-1-flavored practice apparatus, with its fallibility ceiling (what a
-simulated user can and cannot falsify) taught as Ch2⟡ content.
+simulated user can and cannot falsify) taught as Ch2 content.
 
-**Ch3⟡ foregrounds Role 2.** _In Ch3⟡, AI is the development collaborator. The
+**Ch3 foregrounds Role 2.** _In Ch3, AI is the development collaborator. The
 artifact being built is a conventional JEJ program; the AI is an external
 co-author, not artifact-logic substrate. You twin the AI as collaborator — F's
 lens (NM-grounded mode) reads the AI as a cognitive substrate you operate; V's
@@ -1400,9 +1400,9 @@ affordances. The layers of AI-understanding (§9 + §10) help you read_ **what**
 _you're twinning,_ **where** _it sits relative to your work, and_ **how** _to
 operationalize the collaboration while building JEJ._
 
-**Ch4⟡ remains in Role 2** with the snippets-surface expanded to **full JS**
-(not just JEJ). The student practices Role-2 collaboration on a broader
-programming language surface, building snippetry-as-craft.
+**Ch4 remains in Role 2** with the snippets-surface expanded to **full JS** (not
+just JEJ). The student practices Role-2 collaboration on a broader programming
+language surface, building snippetry-as-craft.
 
 **Role 3 lies beyond this course**, matching the metaphor's existing
 alien-composers deferral (see `metaphor.md` — "Alien composers (teased,
@@ -1435,12 +1435,12 @@ of evaluation, not the final output.
 
 Four orthogonal axes — distinct ways of carving the programming space:
 
-| Term                     | What it means                                                                                                               | In F&V                                                                                         |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| **Programming paradigm** | A design philosophy for organizing programs (imperative / functional / OOP / declarative)                                   | Ch0⟡–Ch3⟡ is imperative; functional / OOP / declarative deferred to Ch4⟡                       |
-| **Computational domain** | What you are computing _about_ — medicine, finance, games, etc. Domain expertise is a separate axis from programming skill. | F&V is domain-agnostic by design                                                               |
-| **Computational idiom**  | Types of operators/operations available within a language (logic, strings, numbers, regex, bits, dates)                     | Ch1⟡'s cycle chain runs the core idioms in dependency order; elective idiom sections follow it |
-| **Model of computation** | A formal mathematical framework defining what computation _is_ (Turing machines, lambda calculus)                           | Largely beyond this course                                                                     |
+| Term                     | What it means                                                                                                               | In F&V                                                                                        |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| **Programming paradigm** | A design philosophy for organizing programs (imperative / functional / OOP / declarative)                                   | Ch0–Ch3 is imperative; functional / OOP / declarative deferred to Ch4                         |
+| **Computational domain** | What you are computing _about_ — medicine, finance, games, etc. Domain expertise is a separate axis from programming skill. | F&V is domain-agnostic by design                                                              |
+| **Computational idiom**  | Types of operators/operations available within a language (logic, strings, numbers, regex, bits, dates)                     | Ch1's cycle chain runs the core idioms in dependency order; elective idiom sections follow it |
+| **Model of computation** | A formal mathematical framework defining what computation _is_ (Turing machines, lambda calculus)                           | Largely beyond this course                                                                    |
 
 **Orthogonality test**: when you encounter a new concept, ask — is this about
 how I organize my program (paradigm)? about what I'm computing about (domain)?
@@ -1493,7 +1493,7 @@ pattern: in the glyph, H descends through R through MU; R descends through H
 through MU — each pole reached by traversing its opposite. V/F carry the shape,
 not the mechanism — V's deep practice keeps surfacing F's territory, F's deep
 practice keeps surfacing V's, and over iterations of the affordance-discovery
-cycle the two merge in the practitioner. Ch4⟡'s both-twins state is that merging
+cycle the two merge in the practitioner. Ch4's both-twins state is that merging
 in operational form.
 
 _a MU-rhyming snippet:_
@@ -1529,7 +1529,7 @@ mu; // frogram, vibetoad
 > **The swap.** The closing `mu;` inverts the comment order from the opening
 > line. JavaScript preserves insertion order, so to the NM the opening and
 > closing `mu;` lines reveal the same keys in the same order. The inverted
-> comment is a Ch4⟡-snippetry move — the rule is known, broken on purpose; a
+> comment is a Ch4-snippetry move — the rule is known, broken on purpose; a
 > mature F&V'er notices the swap and recognizes meaning in the intentional
 > rule-break: starting from either pole and traversing through the other returns
 > you to the same whole.
@@ -1543,8 +1543,8 @@ mu; // frogram, vibetoad
   reading) — self-twinning as theory of consciousness, the recursion that
   twinning operationally enacts
 - The **audience-YOU-are-becoming** read of the chapter arc (canonical at
-  `chapters.md` § "The audience YOU are becoming") — Ch0⟡'s write-for-future-you
-  → Ch4⟡'s write-for-yourself-as-merged-V/F is the curriculum's lived descent
+  `chapters.md` § "The audience YOU are becoming") — Ch0's write-for-future-you
+  → Ch4's write-for-yourself-as-merged-V/F is the curriculum's lived descent
 - §9's **practitioner-side / lens-reading-side flipside** — dual-twinning is the
   practitioner-side perceiving; the artifact's two-lens reading
   (artifact-logic + artifact-surface) is what the lenses surface;
