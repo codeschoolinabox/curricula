@@ -1,8 +1,8 @@
-# Welcome to Frogramming — Chapters
+# Frogramming & Vibetoading: Affordance-Discovery Cycle(s) — Chapters
 
 > **Purpose**: chapter-by-chapter redraft with 5-layer learning-objective grids,
 > drawing framing from `ontology.md` and the intellectual-agency meta-LO from
-> `guide.learners.md`. Six chapters (Ch0–Ch5), each with a unified overview +
+> `guide.learners.md`. Five chapters (Ch0⟡–Ch4⟡), each with a unified overview +
 > five layer-headed LO lists (`### Layer 0` through `### Layer 4`).
 >
 > **Companions** (siblings, by co-location):
@@ -37,8 +37,8 @@
 
 ### What to expect from this file
 
-- Six chapters (Ch0–Ch5). Each chapter has a unified overview block with framing
-  prose, followed by five layer-headed LO lists.
+- Five chapters (Ch0⟡–Ch4⟡). Each chapter has a unified overview block with
+  framing prose, followed by five layer-headed LO lists.
 - Each LO is marked with a difficulty progression: 🥚 (entry) / 🐣 (developing)
   / 🐥 (competent) / 🐔 (mastery).
 - LO sparseness is **information**. Some chapter × layer cells will have few
@@ -48,48 +48,53 @@
 
 ### Density map (rough drafting density, not LO targets)
 
-|     | L0 mastery          | L1 rhetoric | L2 methodology | L3 snippetry | L4 philosophy |
-| --- | ------------------- | ----------- | -------------- | ------------ | ------------- |
-| Ch0 | sparse              | dense       | medium         | sparse       | medium        |
-| Ch1 | medium              | dense       | medium         | sparse       | sparse        |
-| Ch2 | dense               | dense       | medium         | medium       | sparse        |
-| Ch3 | medium              | dense       | dense          | medium       | sparse        |
-| Ch4 | medium              | dense       | dense          | medium       | medium        |
-| Ch5 | dense (maintenance) | dense       | dense          | dense        | dense         |
+|      | L0 mastery          | L1 rhetoric | L2 methodology | L3 snippetry | L4 philosophy |
+| ---- | ------------------- | ----------- | -------------- | ------------ | ------------- |
+| Ch0⟡ | sparse              | dense       | medium         | sparse       | medium        |
+| Ch1⟡ | dense               | dense       | medium         | medium       | sparse        |
+| Ch2⟡ | sparse              | dense       | dense          | medium       | sparse        |
+| Ch3⟡ | medium              | dense       | dense          | medium       | medium        |
+| Ch4⟡ | dense (maintenance) | sparse      | dense          | dense        | dense         |
 
-### Audience ladder
+### Loop-mastery phases (the chapter sequence)
 
-| Chapter | Adds audience                     | Language features introduced                          |
-| ------- | --------------------------------- | ----------------------------------------------------- |
-| Ch0     | (conceptual orientation; no code) | —                                                     |
-| Ch1     | 🧑‍💻 Developers                     | comments + full `console` API                         |
-| Ch2     | 💻 + Computer                     | NM core (2.0–2.8) + computational idioms (2A–2F)      |
-| Ch3     | + Users                           | `prompt`, `alert`, `confirm`; `null` first encounter  |
-| Ch4     | 🤖 + Agents                       | no new features (Ch1–3 applied with LLM collaborator) |
-| Ch5     | + You                             | training wheels off — full JS                         |
+Chapters follow the phases of mastering the affordance-discovery cycle. All of
+source code's audiences are introduced together in Ch0⟡ at boundary-primitive
+level; each chapter then deepens the twin its phase needs — with the
+developer-twin woven through every chapter as craft.
+
+| Chapter | Loop-phase                               | Twin deepened                            | Language features                                                             |
+| ------- | ---------------------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------- |
+| Ch0⟡    | **name** the cycle; ground the situation | all audiences met at boundary primitives | `prompt`/`alert`/`confirm`, string literals, comments, `null` (read/run only) |
+| Ch1⟡    | **live** it, F-hand                      | 💻 the computer (NM)                     | the full JEJ-core chain (C0–C6) + electives                                   |
+| Ch2⟡    | **live** it, V-hand                      | the user                                 | none new — full JEJ-core applied in text-dialog prototypes                    |
+| Ch3⟡    | **concretize + accelerate**, both hands  | 🤖 agents (LLMs)                         | none new — co-authored JEJ                                                    |
+| Ch4⟡    | **practice** it for life                 | you                                      | training wheels off — full JS                                                 |
 
 ### The audience YOU are becoming
 
 The student is themselves an audience throughout the curriculum, at increasing
-levels of recursion. This is the audience ladder read from the inside — the
-YOU-becoming reading of the same arc. Each chapter adds a perspective future-you
-must hold. The course teaches the student to BECOME a poly-perspective self.
+levels of recursion. This is the phase sequence read from the inside — the
+YOU-becoming reading of the same arc. Each phase asks future-you to hold more
+perspectives at once. The course teaches the student to BECOME a
+poly-perspective self.
 
 | Chapter | Future-you is…                                                                  |
 | ------- | ------------------------------------------------------------------------------- |
-| Ch1     | future-you reads code (basic dev-reader)                                        |
-| Ch2     | future-you traces NM (added perspective: NM)                                    |
-| Ch3     | future-you considers users (added perspective: user)                            |
-| Ch4     | future-you collaborates with LLMs as a duet (first conscious perspective-stack) |
-| Ch5     | future-you snippets-as-merged-V/F (perspective-stacked-singularity)             |
+| Ch0⟡    | future-you meets the audiences (reads the greeter as the stranger it addresses) |
+| Ch1⟡    | future-you reads code and traces the NM (dev-reader + NM perspective)           |
+| Ch2⟡    | future-you considers users (added perspective: user)                            |
+| Ch3⟡    | future-you collaborates with LLMs as a duet (first conscious perspective-stack) |
+| Ch4⟡    | future-you snippets-as-merged-V/F (perspective-stacked-singularity)             |
 
-### Spiral (skills) vs ladder (audiences)
+### Spiral (skills) × phases (the cycle)
 
 Two dimensions organize the chapter sequence:
 
-- The **ladder** (chapter sequence) adds an audience to the learner's awareness
-  — one new audience per chapter (developers → computer → users → agents →
-  self).
+- The **phases** (chapter sequence) walk the learner through mastering the cycle
+  — name it, live it with each hand, concretize and accelerate it, practice it
+  for life. Audiences are not added one per chapter: all are met in Ch0⟡, and
+  each phase deepens the twin it needs.
 - The **spiral** (within each chapter) revisits skills at increasing depth: read
   → trace → describe → modify → write. Bruner's spiral curriculum
   operationalized at the skill scale.
@@ -102,14 +107,13 @@ Each LO marks where a skill is _first introduced_, not where it ends.
 Each chapter has a single metaphor anchor (named once in each chapter's overview
 block, not repeated per layer):
 
-| Chapter | Metaphor anchor                                                |
-| ------- | -------------------------------------------------------------- |
-| Ch0     | the recital as rhetorical situation                            |
-| Ch1     | the score as inter-composer communication                      |
-| Ch2     | studying the instrument's mechanism                            |
-| Ch3     | writing for the audience; the composer's design thinking       |
-| Ch4     | the composer-virtuoso asymmetric duet (with an alien virtuoso) |
-| Ch5     | the composer's daily practice (Ligeti / Bach / sketches)       |
+| Chapter | Metaphor anchor                                                                   |
+| ------- | --------------------------------------------------------------------------------- |
+| Ch0⟡    | the recital as rhetorical situation (the score-as-communication reading folds in) |
+| Ch1⟡    | studying the instrument's mechanism                                               |
+| Ch2⟡    | workshopping the piece with the audience                                          |
+| Ch3⟡    | the composer-virtuoso asymmetric duet (with an alien virtuoso)                    |
+| Ch4⟡    | the composer's daily practice (Ligeti / Bach / sketches)                          |
 
 The metaphor system is **teaching apparatus, explicitly NOT structural guide** —
 see `metaphor.md` for the canonical treatment.

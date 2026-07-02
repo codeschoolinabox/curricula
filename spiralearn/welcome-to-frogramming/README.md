@@ -174,7 +174,8 @@ deepened in the phase that needs it.
 > **Chapter bodies and learning objectives live in
 > [`chapters.md`](./chapters.md).** The TL;DR chapter bullets above are the
 > syllabus-level chapter coverage; the full per-chapter content (Overview,
-> sub-sections 0.1, 0.2, …, 5.5, and the per-layer LO contracts) is in the
+> Ch0⟡'s numbered sections, Ch1⟡'s cycle chain C0–C6, Ch2⟡'s V-cycles V1–V5,
+> Ch3⟡'s and Ch4⟡'s named sections, and the per-layer LO contracts) is in the
 > companion file.
 
 ---
@@ -275,23 +276,25 @@ especially to recognize which the moment is asking for.
 Both hats shoulder a deep, non-delegable twin — a Frogrammer the notional
 machine, a Vibetoader the user. Neither's depth can be outsourced. This course
 teaches Frogramming in depth because the notional machine is what makes this a
-programming curriculum; design thinking and user research are taught at
-gesture-level (Chapter 3) with referrals out for the deeper practice. Once you
-understand what it means to _Frogram_, you can design your own NMs at the right
-abstraction for any system — a flowchart of cloud services, a state machine of
-UI components, or the JEJ NM at the bottom. The layer adapts; the skill is the
+programming curriculum; design thinking is built with the same rigor in its own
+chapter (Chapter 2⟡) — breadth-scoped to this course's slice of the practice,
+with referrals out to the field for the deeper disciplines. Once you understand
+what it means to _Frogram_, you can design your own NMs at the right abstraction
+for any system — a flowchart of cloud services, a state machine of UI
+components, or the JEJ NM at the bottom. The layer adapts; the skill is the
 same.
 
 **How do you build this predictive mastery? Five strands** run beneath the
 curriculum, progressively layering as the chapters advance:
 
 - **Twinning** (baseline): building an accurate mental model of a process
-  outside your own mind. Each chapter asks you to twin a different process: the
-  🧑‍💻 _developer_ who reads your code (Ch1), the 💻 _computer_ that evaluates it
-  (Ch2), the _user_ who experiences it (Ch3), the 🤖 _agent_ you collaborate
-  with (Ch4). You can't communicate well with something you don't understand.
-  **Vibetoading prioritizes _twinning_ the user; Frogramming prioritizes
-  _twinning_ the NM.**
+  outside your own mind. You meet every twin-target in Ch0⟡ at its boundary
+  primitive; each chapter then deepens one: the 🧑‍💻 _developer_ who reads your
+  code (met in Ch0⟡, woven throughout as craft), the 💻 _computer_ that
+  evaluates it (Ch1⟡), the _user_ who experiences it (Ch2⟡), the 🤖 _agent_ you
+  collaborate with (Ch3⟡). You can't communicate well with something you don't
+  understand. **Vibetoading prioritizes _twinning_ the user; Frogramming
+  prioritizes _twinning_ the NM.**
 
 - **Decisions (micro and macro)**: every keyword, name, operator, and structure
   in your code is a **micro**-decision. Every architectural choice, paradigm,
@@ -319,19 +322,20 @@ curriculum, progressively layering as the chapters advance:
   holds the _whole_ situation in view at once. This is where design thinking
   enters — rehearsing, workshopping, focus-testing, iterating across the full
   system, not just refining individual pieces. This strand surfaces most
-  strongly in Chapter 3 (users, PBIS) and deepens through Chapter 5.
+  strongly in Chapter 2⟡ (users, interaction-event prediction) and deepens
+  through Chapter 4⟡.
 
 - **Affordances**: any system — a language, an NM, a UI — is an
   _affordance-space_, a set of relational possibilities between agent and
   environment. A chair affords sitting, but only for organisms with the right
   body; Lisp affords macros, Haskell affords laziness, JS affords
   prototype-mutation. Learning JS isn't memorizing syntax — it's learning what
-  this affordance-space lets you do. The Mikhak loop is an _affordance-discovery
-  dialogue_: Frogramming probes substrate-affordances (what does the NM also
-  permit?); Vibetoading probes user-affordances (what does the UI also invite?);
-  the dialogue surfaces affordances neither hat saw alone. This strand runs
-  through every chapter and sharpens in Chapter 4 (agent collaboration) and
-  Chapter 5 (snippetry as affordance-play).
+  this affordance-space lets you do. The affordance-discovery cycle is the two
+  hats' dialogue on this strand: Frogramming probes substrate-affordances (what
+  does the NM also permit?); Vibetoading probes user-affordances (what does the
+  UI also invite?); the dialogue surfaces affordances neither hat saw alone.
+  This strand runs through every chapter and sharpens in Chapter 3⟡ (agent
+  collaboration) and Chapter 4⟡ (snippetry as affordance-play).
 
 **The data thread (the red thread).** Threading through and beneath all five
 strands is the word _data_ itself, accruing richer semantics at each layer —
@@ -341,11 +345,14 @@ the world the program changes). The strands are how the curriculum _teaches_;
 the data thread is what stitches it together — the same word deepening with
 every spiral pass.
 
-**The spiral (skills) and the ladder (audiences).** Each chapter adds an
-audience to the learner's awareness (the ladder: devs → +computer → +users →
-+agents → +you). Within each chapter, skills are revisited at increasing depth
-(the spiral: read → trace → describe → modify → write, practiced again with each
-new audience and language feature). Study Lenses generates exercises that drive
+**The spiral (skills) and the phases (the cycle).** The chapter sequence walks
+the phases of mastering the affordance-discovery cycle — name it, live it
+F-hand, live it V-hand, concretize and accelerate it, practice it for life.
+Audiences are not added one per chapter: all of source code's audiences are met
+in Chapter 0⟡ at their boundary primitives, and each phase deepens the twin it
+needs. Within each chapter, skills are revisited at increasing depth (the
+spiral: read → trace → describe → modify → write, practiced again with each
+deepened twin and language feature). Study Lenses generates exercises that drive
 this spiral at the exercise level. Each objective below marks where a skill is
 _first introduced_, not where it ends. The "builds on" progressions are rough
 through-lines: the strongest path from prior skills to the new one, not an
@@ -383,15 +390,15 @@ already solved it._ They haven't, because it isn't.
 **AI cannot help when learners don't yet know what to verify.** Until you have
 the twins (NM-twin, user-twin, developer-twin), you can't evaluate AI output,
 direct it meaningfully, or recognize when it's confidently misleading you. This
-is the structural reason Chapter 4 lands where it does — not as a sequential "we
-did Ch1–3 first" but as a threshold-crossing once you have something to verify
-against. **You have only mastered a skill when you can complete its exercises
-without AI.** That's the principle as a learning contract.
+is the structural reason Chapter 3⟡ lands where it does — not as a sequential
+"we did Ch0⟡–Ch2⟡ first" but as a threshold-crossing once you have something to
+verify against. **You have only mastered a skill when you can complete its
+exercises without AI.** That's the principle as a learning contract.
 
 The deeper unpacking — pedagogical sampling and the curated-vs-self-directed
 asymmetry, the two-layer misconception mechanism (confident explanations +
 output-only self-checking), the SOLO-taxonomy progression from Building
-Structure → AI Integration Threshold → Leveraging Structure, why Chapter 4's
+Structure → AI Integration Threshold → Leveraging Structure, why Chapter 3⟡'s
 structure (every section evaluating LLM output rather than producing it) makes
 the chapter work safely, and how each existing piece of scaffolding (PRIMM,
 Block Model, spiral curriculum, Cognitive Load Theory, Study Lenses, Just Enough
@@ -469,10 +476,10 @@ of any real language's NM; "key portions" is the realistic target.)
 **The concrete skill: prediction.** The course builds this mastery through
 prediction — you learn to predict what the notional machine will do before your
 code runs, then verify those predictions using Study Lenses and the browser's
-debugger. By the end of Chapter 4, you can trace every category of event the JS
-notional machine produces: scope creation, binding lifecycle, expression
-resolution, coercion, scope chain walks, prototype lookups. That's what
-"understanding the NM" means in practice — not abstract knowledge, but
+debugger. By the end of Chapter 1⟡'s chain, you can trace every category of
+event the JS notional machine produces: scope creation, binding lifecycle,
+expression resolution, coercion, scope chain walks, prototype lookups. That's
+what "understanding the NM" means in practice — not abstract knowledge, but
 demonstrable predictive accuracy.
 
 We focus on the machine, not on any specific domain the machine might be used
@@ -491,7 +498,7 @@ targets; both valuable.
 
 JavaScript has its own notional machine with specific characteristics and
 capabilities — scopes, bindings, values, coercion, scope chain lookup, prototype
-chain lookup. Chapter 2 studies this machine in depth.
+chain lookup. Chapter 1⟡ studies this machine in depth.
 
 **Just Enough JavaScript (JEJ)** is the deliberately constrained subset we use
 for most of the curriculum. "Few options, many possibilities" — depth on a small
@@ -520,7 +527,7 @@ five together, and Study Lenses making the machine's work visible throughout.
 
 ### 💭 Snippetry {#snippetry}
 
-Chapter 5 introduces **snippetry** — writing small, runnable, self-contained
+Chapter 4⟡ introduces **snippetry** — writing small, runnable, self-contained
 programs as an ongoing practice. The answer to "why write code when I'm no
 longer building full codebases? how do I build and maintain my NM for a
 programming language?" Snippetry is how the Frogrammer keeps the NM alive
@@ -548,10 +555,11 @@ metaphor: **a mechanical instrument, a composer, a virtuoso, a score, and an
 audience**. The instrument varies across chapters; the roles stay the same. If
 the metaphor doesn't click for you, the underlying ideas stand on their own.
 
-Chapter 2 studies the instrument's mechanism. Chapter 3 brings in the audience
-and design thinking. Chapter 4 teaches collaboration with the alien virtuoso
-(the LLM). Chapter 5 turns to the composer's daily practice — snippetry — and
-hints at alien composers emerging on the horizon.
+Chapter 0⟡ sets the recital's whole situation. Chapter 1⟡ studies the
+instrument's mechanism. Chapter 2⟡ workshops the piece with the audience —
+design thinking in full. Chapter 3⟡ teaches collaboration with the alien
+virtuoso (the LLM). Chapter 4⟡ turns to the composer's daily practice —
+snippetry — and hints at alien composers emerging on the horizon.
 
 The cast (six roles), the mapping to programming concepts, the two-scale
 instrument extension, the human-vs-alien virtuoso split, the
@@ -574,7 +582,7 @@ prerequisite; refer to them when you need them.
   companion reference, not a prerequisite.
 - **Studying with LLMs** — guidance and starter prompts for using LLM assistants
   as _study partners_, not code generators, while working through earlier
-  chapters. Distinct from Chapter 4, which is about agents as named
+  chapters. Distinct from Chapter 3⟡, which is about agents as named
   collaborators in the development process. The principle: an LLM can _support_
   your experience of building the twin but cannot _produce_ it for you.
 - **Learning Expectations** — a reference document for when you're in the middle
@@ -605,18 +613,18 @@ labels, table cells, audience lists — wherever the marked concept is the activ
 subject. This is a **reading aid**, not a memorization task; ignore any symbol
 whose meaning isn't yet clear and come back to this key when needed.
 
-| Symbol | Concept                         | What it marks                                                                                                                                                                     |
-| ------ | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 🐸     | The course / both hats together | The umbrella. Frog/toad ambiguity is a feature: it carries both hats at once. Appears in the title and stays out of body text.                                                    |
-| 🔬     | Frogrammer                      | Development grounded in the notional machine — predict, trace, verify, apply craft practices intentionally; shoulders the NM-twin, may delegate user-research.                    |
-| 🎨     | Vibetoader                      | Development grounded in the user — research, prototype, test with real people; shoulders the user-twin, may delegate the notional machine.                                        |
-| 🧑     | Human                           | Used at active Human / AI distinctions; also the Human (Productive Struggle) pole of the human–AI slider (§11).                                                                   |
-| 🤖     | AI / Agent                      | Used both for "AI" (in the Human/AI distinction) and for "Agent" (the fourth audience). Same thing, two framings. Also the AI (Cognitive Delegation) pole of the human–AI slider. |
-| 🧑‍💻     | Developer (audience)            | The human who reads and writes code — Chapter 1's audience.                                                                                                                       |
-| 💻     | Computer (audience)             | The machine that evaluates code — Chapter 2's audience. "Understanding the computer" = twinning the notional machine; the NM is the computer at our chosen level of abstraction.  |
-| 💭     | Snippetry                       | Small, runnable, self-contained programs as ongoing practice. The thought-bubble glyph is borrowed from the snippetry source repo.                                                |
+| Symbol | Concept                         | What it marks                                                                                                                                                                              |
+| ------ | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 🐸     | The course / both hats together | The umbrella. Frog/toad ambiguity is a feature: it carries both hats at once. Appears in the title and stays out of body text.                                                             |
+| 🔬     | Frogrammer                      | Development grounded in the notional machine — predict, trace, verify, apply craft practices intentionally; shoulders the NM-twin, may delegate user-research.                             |
+| 🎨     | Vibetoader                      | Development grounded in the user — research, prototype, test with real people; shoulders the user-twin, may delegate the notional machine.                                                 |
+| 🧑     | Human                           | Used at active Human / AI distinctions; also the Human (Productive Struggle) pole of the human–AI slider (§11).                                                                            |
+| 🤖     | AI / Agent                      | Used both for "AI" (in the Human/AI distinction) and for "Agent" (the fourth audience). Same thing, two framings. Also the AI (Cognitive Delegation) pole of the human–AI slider.          |
+| 🧑‍💻     | Developer (audience)            | The human who reads and writes code — met in Chapter 0⟡, woven through every chapter as craft.                                                                                             |
+| 💻     | Computer (audience)             | The machine that evaluates code — Chapter 1⟡'s deepened audience. "Understanding the computer" = twinning the notional machine; the NM is the computer at our chosen level of abstraction. |
+| 💭     | Snippetry                       | Small, runnable, self-contained programs as ongoing practice. The thought-bubble glyph is borrowed from the snippetry source repo.                                                         |
 
-**Flagged for later:** the User audience (Chapter 3) and the Notional Machine
+**Flagged for later:** the User audience (Chapter 2⟡) and the Notional Machine
 itself don't yet have locked symbols. Both will be picked once the rest of the
 symbology has been seen in rendered context — context will reveal what reads
 cleanly.
