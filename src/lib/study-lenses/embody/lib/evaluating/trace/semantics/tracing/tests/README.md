@@ -33,20 +33,20 @@ T1 lives co-located next to each source file; T4–T7 live at the tracer level
 
 ## T1 — Unit (co-located)
 
-| Location                                                 | What it tests                                                                                               |
-| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `weaving/advice/tests/gating.test.ts`                    | Config gate predicates — leaf gates, composite gates, filter logic                                          |
-| `weaving/advice/tests/scope-stack.test.ts`               | push/pop/lookup/shadowing                                                                                   |
-| `weaving/advice/tests/emit-expression.test.ts`           | Field stamping, range window, name filters, state mutations, emission callback                              |
-| `weaving/advice/tests/emit-resolve.test.ts`              | Same + visit-count bump + provenance ids                                                                    |
-| `weaving/advice/tests/emit-error.test.ts`                | Error-specific fields + ErrorValue + approximate-location register                                          |
-| `weaving/advice/tests/<advice>.test.ts` (one per advice) | Each advice's state updates + which emit it drives per discriminant                                         |
-| `weaving/pointcut/tests/*.test.ts`                       | Config-gated node selection + semantic AND co-gating discriminants                                          |
-| `event-generators/**/tests/*.test.ts`                    | Pure event factory output shapes (per-variant `semantics` included)                                         |
-| `represent-value/tests/represent-value.test.ts`          | Value representation incl. ObjectValue and ErrorValue branches                                              |
-| `tests/instrument.test.ts`                               | Parse + digest + tag map + mutable ast record construction                                                  |
-| `tests/link.test.ts`                                     | Events + ast record + halt visit counts → linked events, back-refs, cycle-guarded freeze, double-link guard |
-| `../prepare/tests/*.test.ts`                             | Config pipeline: expand-shorthand, fill-defaults, validate, verify-options, prepare-for-trace               |
+| Location                                                 | What it tests                                                                                                                                                                 |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `weaving/advice/tests/gating.test.ts`                    | Config gate predicates — leaf gates, composite gates, filter logic                                                                                                            |
+| `weaving/advice/tests/scope-stack.test.ts`               | push/pop/lookup/shadowing                                                                                                                                                     |
+| `weaving/advice/tests/emit-expression.test.ts`           | Field stamping, range window, name filters, state mutations, emission callback                                                                                                |
+| `weaving/advice/tests/emit-resolve.test.ts`              | Same + visit-count bump + provenance ids                                                                                                                                      |
+| `weaving/advice/tests/emit-error.test.ts`                | Error-specific fields + ErrorValue + approximate-location register                                                                                                            |
+| `weaving/advice/tests/<advice>.test.ts` (one per advice) | Each advice's state updates + which emit it drives per discriminant                                                                                                           |
+| `weaving/pointcut/tests/*.test.ts`                       | Config-gated node selection + semantic AND co-gating discriminants                                                                                                            |
+| `event-generators/**/tests/*.test.ts`                    | Pure event factory output shapes (per-variant `semantics` included)                                                                                                           |
+| `represent-value/tests/represent-value.test.ts`          | Value representation incl. ObjectValue and ErrorValue branches                                                                                                                |
+| `tests/instrument.test.ts`                               | Parse + digest + tag map + frozen acyclic ast record (parentPath only; no event list, no visit field, no cycle)                                                               |
+| `tests/link.test.ts`                                     | Events + halt visit counts → `eventsByNode` map + the `prev`/`next` chain; asserts NO mutation of the frozen ast/events, result is JSON-safe (no replacer), assembly memoized |
+| `../prepare/tests/*.test.ts`                             | Config pipeline: expand-shorthand, fill-defaults, validate, verify-options, prepare-for-trace                                                                                 |
 
 ---
 
@@ -69,12 +69,12 @@ fidelity).
 
 Each file tests the seam between two adjacent phases, with the rest mocked.
 
-| File                                   | Seam                | What it proves                                                                        |
-| -------------------------------------- | ------------------- | ------------------------------------------------------------------------------------- |
-| `tests/instrument-integration.test.ts` | digest → record     | ast record populated for every node; parent refs + path twins wired; tag map complete |
-| `tests/aspect-integration.test.ts`     | options → aspect    | weave-time gating registers exactly the enabled hooks; discriminants match the config |
-| `tests/advice-integration.test.ts`     | advice → dispatcher | woven programs executed in Node drive advice → frozen, stamped events accumulate      |
-| `tests/link-integration.test.ts`       | settlement → result | events + record + visit counts → linked result with back-refs and reference identity  |
+| File                                   | Seam                | What it proves                                                                                                                        |
+| -------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `tests/instrument-integration.test.ts` | digest → record     | frozen acyclic ast record populated for every node; `parentPath` wired; tag map complete                                              |
+| `tests/aspect-integration.test.ts`     | options → aspect    | weave-time gating registers exactly the enabled hooks; discriminants match the config                                                 |
+| `tests/advice-integration.test.ts`     | advice → dispatcher | woven programs executed in Node drive advice → frozen, stamped events accumulate                                                      |
+| `tests/link-integration.test.ts`       | settlement → result | events + halt visit counts → result with the `eventsByNode` map + chained events; `eventsByNode[path]` steps resolve against `events` |
 
 ---
 

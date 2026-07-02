@@ -55,24 +55,32 @@ instrumentation pipeline's own architecture:
    throws the branded limit error; the halt author classifies it structurally
    and carries the visit counts on every worker-side stop, natural end included.
 
-5. **Narrow** (per message, pure) — the thread maps one opaque worker message to
-   one typed trace event, or drops a malformed one. Stateless; the worker
-   authored the complete event.
+5. **Narrow + chain** (per message) — the thread maps one opaque worker message
+   to one typed trace event (or drops a malformed one), and wraps it INTO the
+   `prev`/`next` chain AS IT ARRIVES: `prev` is the event just before it, `next`
+   is an accessor that reads `null` until the SUCCESSOR is wrapped (so a
+   streamed item held during `for await` is already chained, and re-reading its
+   `next` later finds the successor). Both fields are non-enumerable; the event
+   is never mutated. The mapping itself is pure (the worker authored the
+   complete event); the only state the thread holds is the one chain-tail
+   pointer the accessors close over — a named exception to the
+   no-mutable-closure rule (DEV.md), scoped to this phase.
 
 6. **Settle** (sync) — surface the run's end: the engine's outcome as-is, the
    typed halt when the worker stopped on its own, the iteration-limit refinement
    when the halt carries the brand, the engine error or fail reason when the
    engine or consumer ended the run, and the consumed duration.
 
-7. **Index** (sync, after any settlement) — no mutation of any frozen thing:
-   build the doubly-linked `prev`/`next` chain over the delivered events
-   (thread-side, non-enumerable fields, so the wire events stayed scalar and the
-   whole result stays JSON-safe), and the `eventsByNode` index (nodePath → the
-   `step`s that fired there). The ast record was already frozen at Instrument;
+7. **Index + assemble** (sync, after any settlement) — no mutation of any frozen
+   thing. The `prev`/`next` chain already exists (built incrementally in phase
+   5), so all this phase adds is the `eventsByNode` index (nodePath → the
+   `step`s that fired there — it needs the whole run, hence post-settlement) and
+   the final result object. The ast record was already frozen at Instrument;
    visit counts ride the halt (empty when no halt). Output: the trace result —
-   chained events, source echo, frozen acyclic ast, `eventsByNode`, options
-   snapshot, visit counts, settlement. Assembly is one-shot; the facade memoizes
-   it so repeated `result` access returns the same object.
+   the (already chained) events, source echo, frozen acyclic ast,
+   `eventsByNode`, options snapshot, visit counts, settlement. This assembly is
+   one-shot; the facade memoizes it so repeated `result` access returns the same
+   object.
 
 ### Data flow
 
@@ -122,17 +130,17 @@ flowchart TD
   phase. The narrow phase drops only malformed messages.
 - **Events are wire-safe, always.** No event field ever references the ast —
   attribute via `nodePath` into the frozen record. The delivered events add only
-  the `prev`/`next` chain (non-enumerable, thread-built); each event is frozen
-  once at yield and never mutated. The dispatcher stamps every base field so the
-  thread stays stateless.
+  the `prev`/`next` chain (non-enumerable, wrapped thread-side as each event is
+  narrowed); each event is frozen once at yield and never mutated. The
+  dispatcher stamps every base field so the worker-side emit is self-contained.
 - **The worker holds the only mutable RUN state; the thread mutates nothing
   frozen.** Scope stack, counters, provenance ids, visit counts live
-  worker-side; the thread narrows, services dialogs, and refines. The Index
-  phase builds NEW structures (the chain wrappers, the `eventsByNode` map) — it
-  never writes into the already-frozen ast record or a frozen event. The one
-  mutable closure it does hold — the `next` pointer each chain accessor reads —
-  is a named exception to the no-mutable-closure rule (DEV.md), scoped to the
-  narrow phase.
+  worker-side. Thread-side, event mapping is pure; the only mutable state is the
+  one chain-tail pointer the `prev`/`next` accessors close over (the narrow
+  phase's named exception to the no-mutable-closure rule — DEV.md). Both the
+  narrow phase (chain wrappers) and the index phase (the `eventsByNode` map)
+  build only NEW structures — neither writes into the already-frozen ast record
+  or a frozen event.
 - **Limit classification is structural.** The loop cap throws a branded error;
   the halt author recognizes the brand; the refinement types it. Message text is
   never matched, so a learner-thrown error can never be misclassified as an

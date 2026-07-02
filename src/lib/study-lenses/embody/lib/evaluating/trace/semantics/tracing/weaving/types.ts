@@ -176,7 +176,8 @@ export type TracerState = {
 
 	/** nodePath → visit count. Incremented by the resolve dispatcher on every
 	 *  ResolveEvent (once per logical evaluation). Rides the halt payload to
-	 *  the thread; linking mirrors it onto ASTNode.visits. */
+	 *  the thread and surfaces on `TraceResult.visitCounts` (the acyclic
+	 *  ASTNode carries no visit field). */
 	visitCounts: Record<string, number>;
 
 	/** Monotonic provenance counter — the next ResolveEvent's valueId.

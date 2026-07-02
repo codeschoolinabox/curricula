@@ -1,14 +1,14 @@
 # prepare
 
-Pre-flight preparation pipeline for the JEJ trace engine. Called by the tracer
-(`createTracingGenerator`) as its first step, before any Aran instrumentation
-runs. Validates input, expands and fills the user's options against the
-canonical schema, runs cross-field semantic checks, and returns the prepared
-config ready for execution.
+Pre-flight preparation pipeline for the JEJ trace engine. Called by the public
+entry (`trace-semantics.ts`) as its first step (the Prepare phase), before any
+Aran instrumentation runs. Validates input, expands and fills the user's options
+against the canonical schema, runs cross-field semantic checks, and returns the
+resolved options (`ResolvedTraceOptions`) plus the range, iteration cap,
+seconds, and dialog provider — ready for instrumentation and the engine spec.
 
-Both the streaming path (`api/trace.ts`) and any batch consumer get identical
-prep without duplicating the logic, because the tracer itself is the single call
-site.
+The entry is the single call site, so every run gets identical prep without
+duplicating the logic.
 
 ## Pipeline
 

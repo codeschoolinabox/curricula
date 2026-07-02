@@ -2,10 +2,10 @@
 
 Turns a validated JEJ program into instrumented source (via Aran AST weaving),
 provides the worker-side machinery the woven code drives at runtime (advice,
-dispatcher, event generators, value representation), and links the streamed
-events back onto the ast record after the run settles. The sandbox that executes
-the instrumented source is the engine's — this module never touches a Worker or
-the transport.
+dispatcher, event generators, value representation), and builds the
+post-settlement index (`eventsByNode` + the `prev`/`next` event chain) without
+mutating the frozen ast or events. The sandbox that executes the instrumented
+source is the engine's — this module never touches a Worker or the transport.
 
 The ubiquitous language (trace event, chained event, nodePath, ast record,
 indexing, eventsByNode, runtime gate bundle, co-gating, provenance, visit

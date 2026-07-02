@@ -24,8 +24,10 @@ resolved options + validated source
 - **This module**: translates options into Aran weaving/advice; advice hands
   payloads to the dispatcher (`advice/emit-*`), which gates against the runtime
   gate bundle, stamps, freezes, and emits
-- **Two-way linking**: node event lists and visits are built by linking after
-  the run settles — never by advice
+- **Navigation**: the `eventsByNode` index and the `prev`/`next` event chain are
+  built post-settlement (the chain incrementally as events stream) — never by
+  advice, and never by mutating the frozen ast or a frozen event; the ast
+  carries no event-list or visit field (`TraceResult.visitCounts` does)
 
 ## Directory structure
 

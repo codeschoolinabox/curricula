@@ -22,9 +22,11 @@
  *
  * Events are WIRE-SAFE: every field is a scalar or a plain frozen object —
  * `nodePath` is a string key into the ast record, never an ASTNode reference
- * (`ASTNode.parent` is circular; a direct reference cannot cross the worker
- * boundary by structured clone). `LinkedTraceEvent` — the post-settlement
- * form on `TraceResult.events` — adds the direct `.node` reference.
+ * (a direct reference could not cross the worker boundary by structured
+ * clone). `ChainedTraceEvent` — the DELIVERED form on `TraceResult.events`
+ * and the streamed handle items — adds only the doubly-linked `prev`/`next`
+ * chain (non-enumerable, thread-built); there is no `.node` ref, and the ast
+ * record is acyclic, so the whole result is `JSON.stringify`-safe.
  *
  * @see ../config.types.ts for the TraceOptions config that gates these events
  * @see ../README.md for the category table and the ubiquitous language
@@ -197,7 +199,7 @@ export type LoopKind = 'while' | 'doWhile' | 'for' | 'forOf';
 export type ControlFlowStructure = 'conditional' | LoopKind;
 
 // ============================================================================
-// ASTNode — the static layer (built at instrument time, linked after)
+// ASTNode — the static layer (built and frozen at instrument time; acyclic)
 // ============================================================================
 
 /**

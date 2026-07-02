@@ -120,7 +120,7 @@ type TraceOutcome =
 	| 'timed-out';
 
 /**
- * How the run ended plus its carried data. The six shapes (README
+ * How the run ended plus its carried data. The seven shapes (README
  * § TraceResult shape):
  *
  * - `completed` — halt (natural), no engineError.
@@ -130,6 +130,10 @@ type TraceOutcome =
  *   crash (`worker-error`), an unserviceable dialog call (`call-error` —
  *   the dialog-without-provider terminal), or a throwing thread hook
  *   (`hook-error`).
+ * - `errored` + halt AND engineError (`hook-error`) — the one coexistence
+ *   corner: a thread hook threw while refining an errored halt, so the halt
+ *   stays and the engine also reports the hook failure. (`halt` and
+ *   `engineError` are independently optional here, so this is representable.)
  * - `cancelled` / `failed` — consumer stops; no halt, no engineError;
  *   `failReason` present iff failed.
  * - `timed-out` — engineError with cause `'timeout'`, no halt.

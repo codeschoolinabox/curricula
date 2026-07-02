@@ -226,7 +226,8 @@ Incremented inside `emit-resolve`: it fires exactly once per logical expression
 evaluation, so an increment expression contributes one visit despite its three
 desugared sub-events. Statement/block visits increment in their advice, once per
 pass. Counts accumulate worker-side, ride the halt payload (the engine's metrics
-channel — natural ends included), and linking mirrors them onto node visits.
+channel — natural ends included), and surface on `TraceResult.visitCounts` (the
+acyclic ast node carries no visit field).
 
 ### nodePath as the node identity
 
