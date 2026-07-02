@@ -30,7 +30,7 @@ orchestrate/
   lib/                       analysis helpers — all (embodiment) → result
     README.md                (index — links to per-lib READMEs/DOCS)
     recommender/             snippet-fit lens ranking (deferred backlog; sibling of the future Quiz engine)
-    socratizing/             Socratic micro-decision analysis (the Quiz button calls this)
+    socratizing/             Socratic micro-decision analysis (for a future socratize lens)
     editing/                 editor integration helpers (CodeMirror wrapper)
     error-interpreting/      learner-friendly error messages (feeds interpreted diagnostics)
 ```
@@ -247,9 +247,8 @@ sketch.
     `SandboxMode`).
   - _Surface:_ "surface" names any rendered region; the **active surface**
     specifically is the editor-or-lens host (§ Editor-vs-lens state machine).
-    The dock's **run/debug surface** + **output surface** and the Quiz
-    **question-render surface** are region tools — context disambiguates, but
-    the active surface is the one load-bearing sense.
+    The dock's **run/debug surface** + **output surface** are region tools —
+    context disambiguates, but the active surface is the one load-bearing sense.
 - **Source type** — `'script' | 'module'`, the snippet's program-type posture
   (`snippet.type`; selected by the dock's type toggle, default module). Module
   is the NM-study posture — the admission gate can run; script is the
@@ -332,12 +331,12 @@ sketch.
   toolbar; the picker and edit-return semantics survived the replacement.
 - **Omnipresent region** — the orchestrator-resident band of **cross-phase study
   tools** (spanning source → evaluation) that sits alongside the phase stations.
-  Its run/debug surface is the dock; its other inhabitants are the Quiz button
-  and the embedded guide (see § The omnipresent region). Distinct from **the
-  dock**, which is one surface within the region, not the region itself.
+  Its run/debug surface is the dock; its other inhabitant is the embedded guide
+  (see § The omnipresent region). Distinct from **the dock**, which is one
+  surface within the region, not the region itself.
 - **Tool kind** — the three-way classification of cross-phase tools:
   **generative** (produce something _about the program_; get an omnipresent
-  affordance — Run, Quiz), **reactive explainer** (explain one subject where it
+  affordance — Run), **reactive explainer** (explain one subject where it
   appears, not a button — `error-interpret`), and **meta** (document the
   instrument itself, program-independent — the embedded guide). Orthogonal to
   the per-phase-lens vs. cross-phase-tool axis.
@@ -387,10 +386,6 @@ sketch.
   tripped. (The embody substrate calls the seconds value the run's time budget
   and the iterations mechanism the loop guard; "run limits" is the
   learner-facing name over those two embody mechanisms.)
-- **Quiz button** — an omnipresent **generative** affordance (not a lens) that
-  calls `socratize` (`lib/socratizing/`) on the live embodiment to produce
-  Socratic questions about the program. The heavier block-model Quiz _engine_ is
-  deferred backlog (see § Deferred backlog).
 - **Collapse / expand** — the dock's two display states; collapsing hides the
   controls while output stays reachable (the exact visual treatment is a Phase-1
   presentational choice).
@@ -841,8 +836,6 @@ Those axes place the known tools:
 
 - **Run** — a cross-phase generative affordance (not a lens), mapping to
   `evaluation.events.{run, intercept}` on the embodiment.
-- **Quiz** — an omnipresent generative **button** that calls `socratize` now
-  (generator #1; a future dropdown dispatches to more generators).
 - **`format`** is an **editor-only subtoolbar**, not omnipresent — formatting
   mutates source, so it belongs to the home base.
 - **`error-interpret` is not a button** — it is the **reactive explainer**
@@ -987,16 +980,14 @@ verified end-to-end at the Sandbox checkpoint** (worker pauses → dialog render
 
 ### Region structure and where it mounts
 
-The region is **three presentation-only tool modules**, each mirroring
+The region is **two presentation-only tool modules**, each mirroring
 [`./phases-panel/`](./phases-panel/) (its own `README.md` + `DOCS.md` +
 `index.tsx` + `tests/`):
 
 - [`./dock/`](./dock/) — the run/debug surface (above).
-- [`./quiz-button/`](./quiz-button/) — the Quiz generative button + its
-  question-render surface (calls `socratize`).
 - [`./embedded-guide/`](./embedded-guide/) — the meta guide.
 
-A **fourth** presentation-only module — [`./output-panels/`](./output-panels/) —
+A **third** presentation-only module — [`./output-panels/`](./output-panels/) —
 renders the run's two I/O channels (§ The output panels). It mirrors the same
 module shape (`README.md` + `DOCS.md` + `index.tsx` + `tests/`) but mounts in
 the **content row** beside the active surface, **not** inside the omnipresent
@@ -1019,7 +1010,7 @@ The **region itself is a labelled landmark** grouping the tools; it is realised
 as flat siblings inside `data-orchestrator-root`, alongside the phases panel and
 the **content row**. **Render order (locked): all orchestrator chrome renders
 ABOVE the active surface** — phases panel first, then the omnipresent region
-(dock controls · Quiz · guide), then the **content row** last. No orchestrator
+(dock controls · guide), then the **content row** last. No orchestrator
 control ever renders below the active surface. The dock's run **output is not a
 control**: its two channels render as the **output panels** (see § The output
 panels) **beside** the active surface — to its right — never under it,
@@ -1046,8 +1037,7 @@ Named here so they are not mistaken for current surfaces:
   ranking library exists; there is no recommendations-panel UI, and none is
   planned for these three cycles. "Works within the NM phases later."
 - **The Quiz engine** — the heavy block-model quiz generator (sibling of the
-  recommender). The Cycle-3 Quiz button calls `socratize` directly; the engine
-  is a separate later DDD.
+  recommender). A separate later DDD.
 - **The block model** — the 3D Block-model × NM analysis feeding both the
   recommender and the future Quiz engine. Backlog.
 
@@ -1079,7 +1069,7 @@ a Phase-1 presentational choice; the names and value-spaces below are the locked
 contract.
 
 - `data-orchestrator-omnipresent-region` — the region landmark `<section>`
-  grouping the dock, Quiz button, and guide.
+  grouping the dock and guide.
 - `data-orchestrator-dock` — the dock root.
 - `data-orchestrator-dock-collapsed` — on the dock root; `="true"` or
   `="false"`.
@@ -1124,7 +1114,6 @@ contract.
   when `-dock-run-state="settled"`; `="<EndReport outcome>"` (the embody
   `EndReport` union, in its declared order: completed, errored, timed-out,
   cancelled, failed, limit-exceeded, not-runnable).
-- `data-orchestrator-quiz` — the Quiz button.
 - `data-orchestrator-guide` — the embedded-guide root.
 
 **Fate of `-toolbar` / `-lens-picker` under the Cycle-2 replacement — RESOLVED

@@ -80,6 +80,5 @@ flowchart TD
   deferred-backlog (named, not built); the dock surfaces the debugger _option_
   and the danger _toggle position_ (typed-before-wired) but the wrapping +
   iframe execution land with the danger backend.
-- **Quiz and the embedded guide** — sibling region modules
-  ([`../quiz-button/`](../quiz-button/),
-  [`../embedded-guide/`](../embedded-guide/)).
+- **The embedded guide** — a sibling region module
+  ([`../embedded-guide/`](../embedded-guide/)).

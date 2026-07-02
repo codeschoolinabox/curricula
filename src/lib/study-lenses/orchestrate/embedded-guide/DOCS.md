@@ -3,7 +3,7 @@
 ## Why this module exists
 
 Every other affordance in the package teaches _through_ the program — lenses,
-the panel's lifecycle display, the dock's run output, Quiz's questions. The
+the panel's lifecycle display, the dock's run output. The
 embedded guide is the one **meta** surface: it teaches the **instrument** (why
 stations appear and vanish, what the toggles and limits do, what danger mode
 risks), so a learner who is confused by the environment itself has somewhere to
@@ -50,5 +50,4 @@ disclosure flag, never of the snippet.
   treatment are Phase-1 presentational choices.
 - **`error-interpret`** — the reactive explainer (a shared utility surfaced in
   the editor gutter / dock console), NOT a button and NOT this module.
-- **The dock and the Quiz button** — sibling region modules
-  ([`../dock/`](../dock/), [`../quiz-button/`](../quiz-button/)).
+- **The dock** — a sibling region module ([`../dock/`](../dock/)).

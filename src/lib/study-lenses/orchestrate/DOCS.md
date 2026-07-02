@@ -59,7 +59,7 @@ locked-but-unbuilt it says so.
   that both teaches and displays the lifecycle and points phase-targeted lenses
   at each stage. Replaced `toolbar.tsx`.
 - **Cycle 3 — the omnipresent region** _(design locked, NOT built)._ Cross-phase
-  study tools: a Run dock and a Quiz button.
+  study tools: a Run dock and an embedded guide.
 
 Lens availability is **never JEJ-gated** — source-station lenses serve the full
 JS language (locked constraint, Cycle 2 Phase 0). What `validation.isJeJ` drives
@@ -623,9 +623,6 @@ surface is **the dock**, whose contract this sketch pins structurally:
   is tiered (plain run on `parsed`; NM tiers on `created`). The worker backend
   is the evaluating engine; the danger-iframe is a second backend behind the
   same contract, deliberately deferred.
-- **Quiz** — an omnipresent generative **button** that calls `socratize` now
-  (generator #1); a future dropdown dispatches to more generators. The heavier
-  block-model quiz engine (a recommender sibling) stays deferred backlog.
 - **`format`** is an **editor-only subtoolbar** (format mutates source).
 - **error-interpret** is **NOT a button** — a reactive explainer surfaced where
   the error appears: the editor gutter (static errors; the Cycle-1 wiring), the
@@ -635,10 +632,10 @@ surface is **the dock**, whose contract this sketch pins structurally:
   documentation of the instrument itself (stations, reveal rules, toggles,
   limits, danger).
 
-**Region structure (settled).** Three presentation-only **omnipresent** tool
-modules — [`./dock/`](./dock/), [`./quiz-button/`](./quiz-button/),
-[`./embedded-guide/`](./embedded-guide/) — plus a **fourth, content-row**
-module, [`./output-panels/`](./output-panels/), each mirroring `phases-panel/`
+**Region structure (settled).** Two presentation-only **omnipresent** tool
+modules — [`./dock/`](./dock/), [`./embedded-guide/`](./embedded-guide/) — plus
+a **third, content-row** module, [`./output-panels/`](./output-panels/), each
+mirroring `phases-panel/`
 (README, DOCS, `index.tsx`, tests/). `index.tsx` owns every state slot
 (`SnippetType` · `SandboxMode` · `RunLimits`, seeded from `OrchestratorConfig`;
 plus `OutputPanelDismissal` and the `PendingInteraction` slot), the live slot,
@@ -646,7 +643,7 @@ and the **run lifecycle** (it invokes `evaluation.events.{run, intercept}`,
 builds the async `IoMocks`, and accumulates the output); the tool modules import
 no `embody`, dispatch no bus events, and hold no orchestrator state. **Render
 order (locked):** `data-orchestrator-root` is a flex **column** — phases panel ·
-omnipresent region (dock controls · Quiz · guide) · **content row**
+omnipresent region (dock controls · guide) · **content row**
 (`data-orchestrator-content-row`, a flex **row**: active surface · output
 panels). All orchestrator chrome renders **above** the active surface; the
 dock's run **output is not a control** — its two channels render as the **output
@@ -1059,7 +1056,7 @@ This peer does NOT own:
 
 ## Future direction
 
-- **The omnipresent region** (Cycle 3): the Run dock + Quiz button (§ The
+- **The omnipresent region** (Cycle 3): the Run dock + embedded guide (§ The
   omnipresent region). Exact layout settled in Cycle 3.
 - **The dock's danger backend internals**: the worker backend's engine settles
   first; the danger-iframe backend (same embody-level contract) is specified

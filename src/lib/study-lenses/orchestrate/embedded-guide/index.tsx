@@ -7,8 +7,9 @@
  * ([`../index.tsx`](../index.tsx)) owns the disclosure state and threads it in.
  * This module imports no `embody`, reads no embodiment, dispatches no bus
  * events, and holds no orchestrator state — its content is the same regardless
- * of the snippet (the structural distinction from the program-dependent Quiz
- * button). The authored prose is real instrument documentation, not a mock.
+ * of the snippet (the structural distinction from the program-dependent
+ * generative lenses). The authored prose is real instrument documentation, not
+ * a mock.
  *
  * Selector contract (locked — [`../README.md` § Data attributes](../README.md)):
  * `data-orchestrator-guide` on the root. The disclosure treatment is a Phase-1

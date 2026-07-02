@@ -25,8 +25,8 @@ embedded-guide/
 `<EmbeddedGuide>` is **presentation only** and **program-independent**: it
 renders authored documentation of the instrument and a reveal affordance. It
 reads no embodiment, takes no program input, and holds no orchestrator state —
-unlike the dock (run/debug) and the Quiz button (generative, program-dependent),
-the guide is the same regardless of the snippet. Its content is real authored
+unlike the dock (run/debug) and the generative lenses (program-dependent), the
+guide is the same regardless of the snippet. Its content is real authored
 prose (drawn from the instrument's own design — stations, reveal rules, toggles,
 limits, danger), not a mock.
 
@@ -50,8 +50,8 @@ presentational choices.
   produces nothing about the program and is not a reactive explainer (that is
   `error-interpret`, surfaced where errors appear — not a button).
 - **Program-independent.** No embodiment access; the content does not change
-  with the snippet. This is the structural distinction from Quiz
-  (program-dependent).
+  with the snippet. This is the structural distinction from the generative
+  lenses (program-dependent).
 - **Authored content, not a mock.** The guide ships real instrument
   documentation; it is "stub-bridged" on nothing.
 

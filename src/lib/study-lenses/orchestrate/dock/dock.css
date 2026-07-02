@@ -111,8 +111,8 @@
 
 /*
  * The script-mode hint — a warning ASIDE. The left-accent bar means "warning"
- * and is reserved to this element across the tool family (quiz cards do not use
- * it), so the motif keeps a single meaning.
+ * and is reserved to this element across the tool family, so the motif keeps a
+ * single meaning.
  */
 [data-orchestrator-dock] [data-orchestrator-dock-type-hint] {
 	padding: 0.15rem 0.4rem;

@@ -71,11 +71,8 @@ import EmbeddedGuide from './embedded-guide/index.js';
 import createEventBus from './event-bus.js';
 import type { LintDiagnostic } from './lib/editing/types.js';
 import deriveInterpretedDiagnostics from './lib/error-interpreting/derive-interpreted-diagnostics.js';
-import analyzeMicroDecisions from './lib/socratizing/analyze-micro-decisions.js';
-import type { CodeQuestion } from './lib/socratizing/types.js';
 import OutputPanels from './output-panels/index.js';
 import PhasesPanel from './phases-panel/index.js';
-import QuizButton from './quiz-button/index.js';
 import type {
 	LiveEmbodiment,
 	EventBus,
@@ -855,15 +852,6 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 		const [dismissed, setDismissed] =
 			React.useState<OutputPanelDismissal>(EMPTY_DISMISSAL);
 
-		// The Quiz button's question slot + busy flag. Quiz socratizes the LIVE
-		// embodiment on demand via the real socratizing library; `questions` is null
-		// before the first run, the populated list after an ok:true result, and stays
-		// null on an ok:false (e.g. a parse failure).
-		const [questions, setQuestions] = React.useState<
-			readonly CodeQuestion[] | null
-		>(null);
-		const [generating, setGenerating] = React.useState(false);
-
 		// The embedded guide's disclosure state — collapsed by default. The guide
 		// is program-independent (no embodiment), so this slot is the only state it
 		// needs; handleGuideToggle flips it.
@@ -1006,29 +994,6 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 			);
 		}
 
-		// Quiz is a CLICK-HANDLER that socratizes the live embodiment on demand: it
-		// calls the real socratizing library and stores the questions for the
-		// <QuizButton> surface. Mirrors handleRun's null guard (liveEmbodiment is
-		// nullable). analyzeMicroDecisions is synchronous; `generating` brackets the
-		// call for the busy affordance — it never paints under a sync call, but keeps
-		// the prop contract honest for a future async generator. An ok:false result
-		// (e.g. a parse failure) leaves the surface empty.
-		function handleQuiz(): void {
-			if (liveEmbodiment === null) return;
-			setGenerating(true);
-			try {
-				const result = analyzeMicroDecisions(liveEmbodiment.embodiment);
-				setQuestions(result.ok ? result.questions : null);
-			} catch {
-				// Defense-in-depth: a stray library throw (e.g. from buildScope /
-				// filterQuestions on a malformed AST) keeps the prior questions; the
-				// finally guarantees the busy flag never sticks, so the button stays
-				// usable rather than disabling itself for the session.
-			} finally {
-				setGenerating(false);
-			}
-		}
-
 		// The embedded guide's reveal affordance flips the disclosure slot. The
 		// guide is meta / program-independent — this handler touches no embodiment.
 		function handleGuideToggle(): void {
@@ -1110,11 +1075,6 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 							onRun={handleRun}
 							onCancel={handleCancel}
 						/>
-						<QuizButton
-							questions={questions}
-							generating={generating}
-							onQuiz={handleQuiz}
-						/>
 						<EmbeddedGuide
 							revealed={guideRevealed}
 							onToggle={handleGuideToggle}
@@ -1173,11 +1133,6 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 						outcome={outcome}
 						onRun={handleRun}
 						onCancel={handleCancel}
-					/>
-					<QuizButton
-						questions={questions}
-						generating={generating}
-						onQuiz={handleQuiz}
 					/>
 					<EmbeddedGuide
 						revealed={guideRevealed}
