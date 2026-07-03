@@ -12,12 +12,12 @@ From our experience successful students:
 - [Overview](https://www.youtube.com/watch?v=75GFzikmRY0)
 - [Programming & Growth Mindset](https://www.digitaladventures.com/news/2016/5/2/how-learning-to-code-can-help-develop-a-growth-mindset)
 
-2. Live in the Learning Zone:
+1. Live in the Learning Zone:
 
 - [The Video](http://www.totalimmersion.net/blog/get-better-things-care-practice-learning-zone/)
 - [Balancing the Two](http://jonathanreeve.com.au/blog/2017/10/13/balancing-learning-and-performance)
 
-3. Embracing Confusion:
+1. Embracing Confusion:
 
 - [Good & Bad Confusion](https://theconversation.com/confused-dont-worry-because-that-can-be-a-good-thing-64421)
 - [Necessary to Learning](https://quantumprogress.wordpress.com/2011/04/22/embracing-confusion-as-a-necessary-part-of-learning-part-1/)

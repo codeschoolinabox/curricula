@@ -2,8 +2,8 @@
 
 > **Liminal**:
 >
-> 1.  relating to a transitional or initial stage of a process.
-> 2.  occupying a position at, or on both sides of, a boundary or threshold.
+> 1. relating to a transitional or initial stage of a process.
+> 2. occupying a position at, or on both sides of, a boundary or threshold.
 
 Mastering new concepts and skills isn't just a matter of adding on to your
 existing abilities. Often you need to _transform_ the way you understand and

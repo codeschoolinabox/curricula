@@ -72,7 +72,7 @@ because determining complexity and improving it are different skills.
 
 ### The Optimization Question (separate, after analysis)
 
-6. **Could a different decomposition change the growth?**
+1. **Could a different decomposition change the growth?**
    - A different skill entirely. Analysis tells you what you have; optimization
      asks if you could have something better. This connects to Chapter 6.1's
      "Can We Do Better?" question and eventually to space-vs-time tradeoffs.

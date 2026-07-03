@@ -57,7 +57,7 @@ AI changes the role of each
 
   </details>
 
-2. <details>
+1. <details>
    <summary>A Program + Generative AI</summary>
 
    ![a program](../../assets/a-program.png)

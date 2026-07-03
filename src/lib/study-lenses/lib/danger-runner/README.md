@@ -19,9 +19,11 @@ terminate). "Danger" ≠ "anything goes".
 
 ## Where this sits
 
-A **peer-independent** module under [`lib/`][lib], a sibling of
-[`local-llm/`][local-llm] and [`engine/`][engine]: the orchestrator reaches
-_down_ into it, it never reaches up. It is emphatically **not** an
+A module under [`lib/`][lib], a sibling of [`local-llm/`][local-llm] and
+[`engine/`][engine]: the orchestrator reaches _down_ into it, it never reaches
+up. It is **independent of the sibling engines** (`local-llm`, `engine`); its
+one lateral dependency is the [`lib/loop-guard/`][guardloops] utility peer (§
+Type ownership & dependency direction). It is emphatically **not** an
 [`embody/lib/evaluating/`][evaluating] engine. An embody engine satisfies the
 `Execution` / `EvaluateHandle` / `RunInstance` contract and routes through the
 Worker + `SharedArrayBuffer` machinery; **danger mode exists to bypass exactly
@@ -67,16 +69,21 @@ The runner **imports nothing from `orchestrate/`.** Its terminal-outcome type,
 `DangerOutcome`, is a hand-owned narrow union — the subset of the dock's
 `EndReportOutcome` a danger run can actually produce (`completed` | `errored` |
 `limit-exceeded` | `cancelled`). Subset-assignability to the dock's full union
-is checked **for free at the orchestrator**, where `setOutcome(result.outcome)`
-flows the value into `EndReportOutcome | null`. Owning the union keeps the
-dependency arrow honest (a `lib → orchestrate` type import would point the wrong
-way) and documents, in one place, that `timed-out` / `failed` / `not-runnable`
-are structurally unreachable on the bypass path.
+is realised **inside the D3 adapter**, which maps danger's outcome into the
+`EvaluateHandle`'s `endReport.outcome` the orchestrator reads uniformly (not a
+direct `setOutcome(result.outcome)`). Owning the union keeps the dependency
+arrow honest (a `lib → orchestrate` type import would point the wrong way) and
+documents, in one place, that `timed-out` / `failed` / `not-runnable` are
+structurally unreachable on the bypass path.
 
-The one **read-only** reach _sideways_ is [`guardLoops`][guardloops] from
-`embody/lib/evaluating/shared/`: the runner imports it as a pure source-rewrite
-utility (see § Design commitments) but creates and edits **nothing** under
-`embody/`.
+The one dependency is **read-only** and lateral — the sibling
+[`lib/loop-guard/`][guardloops] peer, whose `spliceLoopGuards(code, hooks)`
+splicer the runner drives with its own guard/reset call-text factories (§ Design
+commitments). "Lateral" not "up": both are `lib/` peers, so the arrow never
+reaches into `embody/`. The peer re-homes the loop-guard off embody's
+tsconfig-excluded legacy zone (where the older `guardLoops` verb still lives as
+the oracle it was re-authored from); the runner creates and edits **nothing**
+under `embody/`.
 
 > **Supersedes note.** The dock DOCS reserve this exact slot — "the deferred
 > danger-iframe backend … named, not built"
@@ -90,7 +97,7 @@ utility (see § Design commitments) but creates and edits **nothing** under
 > Reconciling the embody/dock docs to name this module is a separate,
 > embody/dock-owner-gated change; this README only records the divergence.
 
-[guardloops]: ../../embody/lib/evaluating/shared/guard-loops/guard-loops.ts
+[guardloops]: ../loop-guard/README.md
 [dockdocs]: ../../orchestrate/dock/DOCS.md
 [interceptreadme]: ../../embody/lib/evaluating/intercept/README.md
 [orchreadme]: ../../orchestrate/README.md
@@ -131,7 +138,9 @@ concern; danger deliberately runs code embody would refuse.
   and why a synchronous hang freezes the host page. It is _not_ "unlimited": see
   loop-guard.
 - **Loop-guard (kept as instrumentation, not sandbox)** — the per-iteration
-  counter rewrite ([`guardLoops`][guardloops]) the runner applies before eval. A
+  counter rewrite the runner applies before eval by driving the
+  [`lib/loop-guard/`][guardloops] peer's `spliceLoopGuards(code, hooks)` with
+  its own `makeGuard`/`makeReset` call-text factories (§ Design commitments). A
   runaway loop throws and maps to `limit-exceeded`. Instrumentation is what
   danger _keeps_; the Worker thread is the sandbox it _drops_. The two are
   deliberately distinct.
@@ -145,12 +154,15 @@ concern; danger deliberately runs code embody would refuse.
   The dock's **seconds** limit is a dock/UI concern, not the engine's — this
   utility takes no `seconds` option (see § Owns vs. excludes).
 - **Output mode (mocked vs native)** — chosen by the _presence_ of the `io`
-  option, not a separate flag. `io` is shaped to **match embody's `IoMocks`**
-  (the user-I/O verbs `alert`/`confirm`/`prompt` AND `console`), so the
-  orchestrator's one `buildIoMocks()` builder feeds both backends. **Mocked**
-  (`io` passed — e.g. the mobile / no-devtools path): the runner routes the
-  iframe's `alert`/`confirm`/`prompt`/`console` through these callbacks to the
-  on-screen surfaces. **Native** (`io` absent, the desktop default): nothing
+  option, not a separate flag. `io` is danger's OWN **synchronous**
+  `DangerIoMocks` (the user-I/O verbs `alert`/`confirm`/`prompt` AND `console`)
+  — NOT embody's awaited `IoMocks`, so the orchestrator builds a DISTINCT sync
+  danger builder (a shared `buildIoMocks()` is deliberately given up; § Type
+  ownership). **Mocked** (`io` passed — e.g. the mobile / no-devtools path):
+  `console` and `alert` render fire-and-forget in realtime, and
+  `confirm`/`prompt` return a **sync-scripted / computed** answer; a sync mock
+  cannot block for LIVE typed input, so live interactive dialogs stay **native**
+  (leave the verb unset). **Native** (`io` absent, the desktop default): nothing
   captured — real `console`, real devtools, real native dialogs — so `debugger;`
   stepping shows the learner's own code with no mock frames.
 - **Debugger wrap** — the danger-only affordance that wraps the snippet with a
@@ -162,11 +174,13 @@ concern; danger deliberately runs code embody would refuse.
 - **Outcome** — the terminal classification the runner reports back: `completed`
   | `errored` | `limit-exceeded` | `cancelled`. A subset of the dock's
   `EndReportOutcome`; the rest of that union is worker/parse-specific and
-  unreachable here. A loop-guard trip is recognised by embody's **message-match
+  unreachable here. A loop-guard trip is recognised by a **message-match
   predicate** (`name === 'RangeError'`, message includes `exceeded` and
-  `iterations`, and only when `iterations` is set), and the runner emits the
-  **public** `limit-exceeded` literal directly — embody's internal
-  `iteration-limit` is remapped upstream and is not copied here.
+  `iterations`, and only when `iterations` is set) over the `RangeError`
+  danger's own `makeGuard` authors — an intra-module contract (danger writes the
+  throw text and matches it) — and the runner emits the **public**
+  `limit-exceeded` literal directly. The predicate mirrors embody's, which
+  message-matches the same way.
 - **Cancel** — the dock's Cancel, wired to the handle's `cancel()`: tear the
   iframe down and settle `cancelled` if the run has not already settled. It
   **cannot** interrupt a synchronous on-thread hang (the event loop never yields
@@ -176,32 +190,37 @@ concern; danger deliberately runs code embody would refuse.
 
 - **In:** a raw code `string` (the editor buffer, verbatim — never a `Snippet`)
   and a {@link DangerRunOptions}: an optional `iterations` cap (forwarded to the
-  loop-guard), an optional `debuggerEnabled` flag (the `debugger;` wrap), and an
-  optional `io` matching embody's `IoMocks` (`alert`/`confirm`/`prompt` +
-  `console`; passed ⇒ mocked, absent ⇒ fully native). No `seconds` — that is a
-  dock/UI concern (see § Owns vs. excludes).
+  loop-guard), an optional `debuggerEnabled` flag (the `debugger;` wrap), an
+  optional sync `io` (danger's own `DangerIoMocks` —
+  `alert`/`confirm`/`prompt` + `console`; passed ⇒ mocked, absent ⇒ fully
+  native), a reserved `type` (`'script'` only — `<script type=module>` is out of
+  scope, § Excludes), and the declaration-only `strict` flag (script-mode
+  `"use strict";` toggle, default true). No `seconds` — that is a dock/UI
+  concern (see § Owns vs. excludes).
 - **Out:** a {@link DangerRunHandle} — `{ result, cancel }`. `result` is a
-  Promise that resolves **once** (never rejects, never earlier than a microtask)
+  Promise that resolves **once** (never rejects, never earlier than a macrotask)
   to a {@link DangerResult}: an `outcome`, plus an `error: { name, message }`
   present only when `outcome === 'errored'`. Console/dialog **output** is _not_
   in the result — it is native (`io` absent) or routed through the `io`
   callbacks (`io` passed); the result carries only how the run ended, so the
-  dock's run-state and outcome badge render uniformly across both backends.
+  dock's run-state and outcome badge render uniformly across danger and worker.
 
 There is **one caller entry point**, `dangerRun(code, options)`, called directly
 by the orchestrator's `handleRun` when `sandboxMode === 'danger'`. The
 which-outcome resolution and the iframe lifecycle are internal to that verb.
 
-**Integration (deferred Phase-1 wiring).** `handleRun` gains a
+**Integration (deferred Phase-1 wiring).** _SUPERSEDED by D3 (the adapter):_
+danger no longer widens `handleReference` — it reaches the panel through the
+adapter, which WRAPS the runner's handle into a uniform `EvaluateHandle`, so
+`handleReference` stays `EvaluateHandle`. `handleRun` gains a
 `sandboxMode === 'danger'` branch that calls `dangerRun(snippet, …)` with the
-raw buffer. Because a `DangerRunHandle` is a **narrower** shape than embody's
-`EvaluateHandle` (`{ result, cancel }` — no `fail`, no `AsyncIterable`), the
-orchestrator's `handleReference` slot widens to hold either, and the
-orchestrator adapts danger's top-level `result.outcome` **up** to the same
-`{ outcome }` reader it already uses for the worker's
-`runInstance.endReport.outcome` (one reader, not a branch at every read site).
-This wiring is the **only** `orchestrate/`-touching edit; it lands after the
-runner is proven, and the runner still imports no `orchestrate/` surface.
+raw buffer. A `DangerRunHandle` is still a **narrower** shape than embody's
+`EvaluateHandle` (`{ result, cancel }` — no `fail`, no `AsyncIterable`); the
+adapter maps danger's top-level `result.outcome` into the `EvaluateHandle`'s
+`endReport.outcome` the orchestrator already reads (one reader, not a branch at
+every read site). This adapter wiring is the **only** `orchestrate/`-touching
+edit; it lands after the runner is proven, and the runner still imports no
+`orchestrate/` surface.
 
 ## Owns vs. excludes
 
@@ -210,20 +229,25 @@ runner is proven, and the runner still imports no `orchestrate/` surface.
 - **The iframe lifecycle** — creating a permissive same-origin iframe, building
   and injecting the `<script>`, wiring the `__danger` bridge, and tearing the
   iframe down on settle or cancel.
-- **Loop-guard application** — running [`guardLoops`][guardloops] over the code
-  for the **iterations** limit and emitting the `loop1..loopK` counter globals
-  the guard references but does not declare (see § Edge cases), inline on the
-  prefix segment to preserve line numbers. Iterations only; the dock's seconds
-  limit is a UI concern, not this engine's (see Excludes).
+- **Loop-guard application** — driving the peer's
+  `spliceLoopGuards(code, hooks)` with danger's own `makeGuard`/`makeReset`
+  call-text factories (the `var`-global increment-and-throw and the reset, cap
+  embedded) for the **iterations** limit, provisioning the `loop1..loopK`
+  counter globals (`K` from the returned `loopCount`) the guard calls reference,
+  inline on the prefix segment to preserve line numbers, and catching the peer's
+  `LoopGuardError` (malformed source) → a pre-settled `errored` handle.
+  Iterations only; the dock's seconds limit is a UI concern, not this engine's
+  (see Excludes).
 - **The `debugger;` wrap** — a pure `(code, enabled) => code` helper, folded in
   here (danger-only, so no separate `orchestrate/lib/debugging`).
 - **Outcome classification** — mapping natural completion, a thrown error, a
-  loop-guard trip, and a cancel to the four-member `DangerOutcome`, using
-  embody's message-match _predicate_ but emitting the public `limit-exceeded`
-  literal.
-- **Async-settle discipline** — never settling `result` synchronously and never
-  invoking an `io` callback synchronously within the `dangerRun(...)` call (see
-  § Design commitments).
+  loop-guard trip, and a cancel to the four-member `DangerOutcome`, using a
+  message-match _predicate_ over danger's own `makeGuard`-authored `RangeError`
+  and emitting the public `limit-exceeded` literal.
+- **Async-settle discipline** — never settling `result` during `dangerRun`'s own
+  synchronous call frame, and never firing an `io` callback in that frame either
+  (injection is deferred a tick; a mock's own return is still synchronous when
+  it is later invoked — see § Design commitments and § Edge cases).
 
 ### Excludes
 
@@ -232,7 +256,8 @@ runner is proven, and the runner still imports no `orchestrate/` surface.
 - **Sandboxing** — off-thread isolation and external terminate are exactly what
   danger drops. There is no Worker and no `SharedArrayBuffer`.
 - **The dock and the output panels** — the runner reports an outcome and (in
-  mocked mode) routes console + user-I/O lines through the `io` callbacks;
+  mocked mode) routes console + user-I/O lines through the sync `io` callbacks
+  (`confirm`/`prompt` return a scripted answer; live typed dialogs stay native);
   _rendering_ run-state, the outcome badge, and the on-screen console/dialog
   surface is the orchestrator's and the output-panels module's. The runner
   imports no React and no `orchestrate/` surface.
@@ -266,14 +291,23 @@ names rather than hides:
   option stays optional so the runner is usable/testable standalone.
 - **A learner who literally throws `RangeError("… exceeded … iterations")`** → a
   documented, accepted false-positive: it classifies as `limit-exceeded`. There
-  is **no sentinel to disambiguate** — the guard throws a plain `RangeError` and
-  a sentinel would require editing `guardLoops` (forbidden); embody itself
-  message-matches, so this module inherits that exact trade.
-- **The `loop1..loopK` counter globals** — `guardLoops` _references_ them but
-  does **not** declare them (embody's Worker setup emits them). The runner
-  **must** emit `var loop1 = 0, …, loopK = 0` (K from the guard's returned
-  `loopCount`, never hardcoded) ahead of the code, or every loopy snippet throws
-  a `ReferenceError` and mis-reports as `errored`.
+  is **no sentinel to disambiguate** — danger's `makeGuard` emits a plain
+  `RangeError` (a sentinel would couple the peer to danger's classifier); embody
+  message-matches the same way, so the trade is a deliberate, shared one.
+- **The `loop1..loopK` counter globals** — danger's `makeGuard`/`makeReset` call
+  text _references_ them (a `var`-global increment/reset); the peer's splicer
+  does **not** declare them. The runner **must** emit
+  `var loop1 = 0, …, loopK = 0` (`K` from the splicer's returned `loopCount`,
+  never hardcoded) ahead of the code, or every loopy snippet throws a
+  `ReferenceError` and mis-reports as `errored`.
+- **Source that fails to parse** → the peer's `spliceLoopGuards` parses with
+  acorn in the synchronous build and throws a `LoopGuardError` (`parse-failed`)
+  _before_ the iframe exists. `dangerRun` catches it and returns a handle whose
+  `result` is **pre-settled `errored`** — never a synchronous throw out of
+  `dangerRun`, never a reject (the "returns a handle / never rejects" contract
+  holds). Syntax-error classification thus happens in the build; the iframe's
+  own `window.onerror` net then only ever matters for a throw the iframe's own
+  parser rejects that acorn accepted.
 - **A settled run, then Cancel** — a synchronous run settles _during_
   `appendChild`, before any human can click; a later `cancel()` is a no-op on
   the outcome (a settled latch, first-write-wins) and merely removes an inert
@@ -286,6 +320,17 @@ names rather than hides:
   `window.onerror`, installed before eval, only ever matters for a throw that
   beats the settle, which the top-level `try/catch` already covers — so async
   throws are outcome-invisible by design.)
+- **A mocked `io` cannot pause the script for live input.** A passed
+  `confirm`/`prompt` mock returns its value **synchronously** — a computed or
+  scripted answer — because the `<script>` runs synchronously and cannot
+  `await`; `console`/`alert` mocks render fire-and-forget in realtime. A sync
+  mock **cannot block** the thread for a live styled-panel typed answer
+  (blocking while pumping a UI is impossible in user-space JS). The asymmetry is
+  deliberate and honest, not a defect: **the sandbox offers live STYLED dialogs
+  (its Worker parks on a `SharedArrayBuffer` while an async mock resolves);
+  danger offers live NATIVE dialogs (leave the mock unset → the real,
+  thread-blocking `confirm`/`prompt`) OR sync-scripted / realtime-console mocked
+  io** — never a live typed dialog the script waits on.
 
 ## Design commitments
 
@@ -301,37 +346,48 @@ names rather than hides:
   behaviour that is the whole purpose. `CROSS_ORIGIN_ISOLATED = false` (as in
   `local-llm`) confirms no SAB is needed. The security cost is stated in full
   below.
-- **Result settles no earlier than a microtask; `io` callbacks never fire
-  synchronously within `dangerRun(...)`.** A trivial snippet settles _during_
+- **Result settles no earlier than a macrotask; no `io` callback fires within
+  `dangerRun`'s own synchronous call frame.** A trivial snippet settles _during_
   `appendChild`; if that settle were synchronous, React would coalesce
   `setRunState('running')` and `setRunState('settled')` in one batch and the
   running state would never paint, and a synchronous `console.log` mirror would
-  race the orchestrator's channel reset. Deferring the eval by a microtask/task
-  makes the run observably asynchronous and preserves both invariants. (The
-  Worker path never hit this because `postMessage` was always async.)
-- **Loop-guard reused read-only (iterations only).** The runner imports
-  [`guardLoops`][guardloops] (pure
-  `(code, maxIterations) => { code, loopCount }`, zero line-shift) for the
-  **iterations** limit; a trip → `limit-exceeded`. The dock's seconds limit is
-  out of scope for this engine (see Excludes): the locked orchestrate README
-  names a future per-iteration in-guard elapsed check for it, but that is an
-  embody-owner-gated change, and a wall-clock `setTimeout` would be ineffective
-  anyway (it cannot fire during a synchronous hang).
+  race the orchestrator's channel reset. Deferring the eval by a **macrotask**
+  (`setTimeout`, not a microtask — a microtask drains before the browser paints,
+  so `running` still would not commit) makes the run observably asynchronous and
+  preserves both invariants. (The Worker path never hit this because
+  `postMessage` was always async.)
+- **Loop-guard via the peer's splicer (iterations only).** The runner drives the
+  peer's [`spliceLoopGuards`][guardloops]`(code, { makeGuard, makeReset })`
+  (pure, zero line-shift; returns `{ code, loopCount }`) for the **iterations**
+  limit, authoring the two single-line call-text factories itself —
+  `makeGuard(i, loc)` emits the cap-embedded `var`-global increment-and-throw
+  `RangeError`, `makeReset(i)` emits the per-entry reset — and provisioning
+  `loop1..loopK` from the returned `loopCount`; a trip → `limit-exceeded`, a
+  malformed source → `LoopGuardError` → pre-settled `errored`. The dock's
+  seconds limit is out of scope for this engine (see Excludes): the locked
+  orchestrate README names a future per-iteration in-guard elapsed check for it,
+  but that is an embody-owner-gated change, and a wall-clock `setTimeout` would
+  be ineffective anyway (it cannot fire during a synchronous hang).
 - **`debugger;` wrap is pure, guard-second, and line-preserving.**
   `wrapWithDebugger(code, enabled)` is a no-op passthrough when disabled. The
   guard rewrite runs **first** (on pure user source; zero line/column shift).
   The runner then builds the script to preserve the learner's line numbers
-  exactly, mirroring embody's technique — the `"use strict"`, the
-  `var loop1=0,…` counter globals, the `try {`, and (when enabled) the leading
-  `debugger;` are all emitted on a single prefix segment **with no newline
-  before the user code**, so user line _N_ stays script line _N_ (zero shift,
-  not +1). The trailing `debugger;` and the `__danger.done()` call follow the
-  last user line and shift nothing above them. Line fidelity matters because
-  stepping _is_ the feature.
-- **`io` presence is the mode.** `io` absent ⇒ nothing captured (clean stepping;
-  real console + real native dialogs). `io` passed ⇒ the runner routes
-  `alert`/`confirm`/`prompt`/`console` through the callbacks; console mirroring
-  also forwards to native so USB/remote debugging still sees logs.
+  exactly, mirroring embody's technique — the `"use strict"` (emitted when
+  `strict`, the default), the `var loop1=0,…` counter globals, the `try {`, and
+  (when enabled) the leading `debugger;` are all emitted on a single prefix
+  segment **with no newline before the user code**, so user line _N_ stays
+  script line _N_ (zero shift, not +1). The trailing `debugger;` and the
+  `__danger.done()` call follow the last user line and shift nothing above them.
+  Line fidelity matters because stepping _is_ the feature.
+- **`io` presence is the mode (sync mocks).** `io` absent ⇒ nothing captured
+  (clean stepping; real console + real native dialogs). `io` passed ⇒ the runner
+  forwards `(message[, defaultValue])` to the
+  `alert`/`confirm`/`prompt`/`console` mocks and returns each mock's SYNC return
+  verbatim — danger defines no answer policy (a fixed/seeded/echoed answer is
+  the caller's builder's business); so `confirm`/`prompt` return a scripted
+  answer, a native-blocking typed dialog stays native (leave the verb unset),
+  and console mirroring is fire-and-forget, also forwarded to native so
+  USB/remote debugging still sees logs.
 - **Outcome is the only mandatory report.** `DangerResult` carries an `outcome`
   and, for the errored case, `{ name, message }` **primitives** — never the live
   `Error` (the iframe realm has its own `RangeError`; a cross-realm `instanceof`
@@ -351,6 +407,20 @@ it does not have:
   and mutate host state_, not merely hang the tab.
 - A synchronous hang **freezes the host page**, and nothing on-thread can
   recover it (the loop-guard catches loops only).
+- **A passed `io` mock is learner-reachable code.** The sync mocks are
+  `Object.assign`'d onto the iframe's `window` (§ Design commitments / DOCS.md §
+  Execution phases), so the learner's own script — running in the SAME realm —
+  can read or override `window.alert`/`confirm`/`prompt`/`console`. An accepted
+  exposure, inseparable from same-origin injection (the same realm openness that
+  makes the direct `__danger` bridge and native dialogs work).
+- **The `__danger` bridge and `loop1..loopK` counters are on the same window.**
+  They are assigned before the learner's script, in the same realm, so learner
+  code can read/override/forge them: a top-level `__danger.done()` pre-empts the
+  first-write-wins latch and masks a later real error (the badge would lie); a
+  reassigned counter defeats its own guard (risking the freeze that is already
+  the accepted danger). Accepted, inseparable from the same-realm injection that
+  makes the direct bridge and native dialogs work — teaching-integrity-wise the
+  learner only fools their own run.
 
 These are accepted, not mitigated away, because they are inseparable from the
 real-window/debugger behaviour danger exists to provide. The mitigations are
@@ -372,10 +442,11 @@ faithful jsdom analogue. The test boundary follows [`engine/`][engine] and
 the real transport.
 
 - **Pure helpers are unit-tested without a browser** — `wrapWithDebugger` (pure
-  string transform), the script-builder (the `"use strict"` + counter-globals +
-  `try/catch` assembly, line-preservation checked by asserting user line numbers
-  are unshifted), and the outcome classifier (the RangeError message-match
-  predicate) are data-in/data-out and fully ZOMBIES-coverable in Node.
+  string transform), the script-builder (an optional `"use strict"` +
+  counter-globals + `try/catch` assembly, line-preservation checked by asserting
+  user line numbers are unshifted), and the outcome classifier (the RangeError
+  message-match predicate) are data-in/data-out and fully ZOMBIES-coverable in
+  Node.
 - **The iframe runner is real-only** — a `*.browser.test.ts` (precedent:
   `local-llm`'s sandbox + `intercept/tests/*.browser.test.ts`) covers one case
   per transport-distinct settlement: `completed`, `errored`, `limit-exceeded`,
@@ -388,7 +459,7 @@ the real transport.
 ## Navigation
 
 - Parent: [`../README.md`](../README.md) — the package-level shared `lib/` (what
-  belongs here; peer-independence).
+  belongs here; independence from the sibling engines).
 - Structural exemplar: [`../local-llm/README.md`](../local-llm/README.md) — a
   stand-alone `lib/` runtime and the doc/dependency-direction template (own your
   contract; consumers re-map). Note its `sandbox.html` is a dev harness, not a
@@ -401,9 +472,13 @@ the real transport.
   Debugger option / Run limits / Execution backends behind one contract, and
   [`../../orchestrate/dock/DOCS.md`](../../orchestrate/dock/DOCS.md) (the
   reserved "deferred danger-iframe backend" slot this fills).
-- Read-only utility: [`guardLoops`][guardloops] — the pure loop-guard rewrite
-  the runner applies (importing fine; editing embody not).
+- The loop-guard splicer: [`lib/loop-guard/`][guardloops] — the `lib/` peer
+  whose `spliceLoopGuards(code, hooks)` the runner drives with its own
+  `makeGuard`/`makeReset` factories. Its oracle (the source it was re-authored
+  from, never an import target) is embody's legacy
+  [`shared/guard-loops/`](../../embody/lib/evaluating/shared/guard-loops/guard-loops.ts);
+  the runner imports the peer and edits nothing under `embody/`.
 - [`./DOCS.md`](./DOCS.md) — this module's architecture sketch and the deferred
   increment plan.
 - [`./types.ts`](./types.ts) — the contract in TypeScript (the run options, the
-  result, the mini-handle, the `io` mocks matching embody's `IoMocks`).
+  result, the mini-handle, and danger's own sync `io` mocks, `DangerIoMocks`).

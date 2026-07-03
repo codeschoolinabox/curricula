@@ -6,8 +6,9 @@
  * DOWN into this `lib/` module, never up (a `lib → orchestrate` import would be
  * backwards). It deliberately does NOT import the dock's `EndReportOutcome`: the
  * runner's {@link DangerOutcome} is a hand-owned narrow union, and its
- * subset-assignability to `EndReportOutcome` is checked for free at the
- * orchestrator's `setOutcome(result.outcome)` call site.
+ * subset-assignability to `EndReportOutcome` is realised inside the D3 adapter,
+ * which maps a `DangerResult` to a uniform `EvaluateHandle` the orchestrator
+ * reads via `endReport.outcome` — not a direct `setOutcome(result.outcome)`.
  *
  * The runner takes the RAW editor buffer (a `string`) and evaluates it as a real
  * `<script>` in a permissive, same-origin iframe on the MAIN thread, bypassing
@@ -58,7 +59,7 @@ type DangerOutcome = 'completed' | 'errored' | 'limit-exceeded' | 'cancelled';
  * constructors, so a cross-realm `instanceof` in the parent is unsound. Error
  * identity is read INSIDE the iframe's `catch` (same realm) and passed out as
  * `{ name, message }`. Console/dialog OUTPUT is never here — it is native (no
- * `io` passed) or routed through {@link DangerIo} (io passed).
+ * `io` passed) or routed through {@link DangerIoMocks} (io passed).
  */
 type DangerResult = Readonly<{
 	outcome: DangerOutcome;
@@ -70,14 +71,15 @@ type DangerResult = Readonly<{
 /**
  * The value `dangerRun` returns — a deliberately NARROWER shape than embody's
  * `EvaluateHandle` (`{ result, cancel }` only; no `fail`, no `AsyncIterable`).
- * It slots into the orchestrator's `handleReference.current = handle;
- * handle.result.then(commit)` unchanged, once that ref widens to hold either
- * handle (see README.md § What it produces — Integration).
+ * SUPERSEDED wiring (D3): rather than widening `handleReference` to hold either
+ * handle, the adapter WRAPS this into a uniform `EvaluateHandle`, so
+ * `handleReference` stays `EvaluateHandle` and the orchestrator reads it
+ * unchanged (see README.md § What it produces — Integration).
  */
 type DangerRunHandle = Readonly<{
 	/**
 	 * Resolves ONCE to a {@link DangerResult}; never rejects; never earlier than a
-	 * microtask (so the orchestrator's `running → settled` transition paints and an
+	 * macrotask (so the orchestrator's `running → settled` transition paints and an
 	 * `io` mirror never races the channel reset — DOCS.md § Structural constraints).
 	 */
 	result: Promise<DangerResult>;
@@ -90,31 +92,44 @@ type DangerRunHandle = Readonly<{
 	cancel: () => void;
 }>;
 
-// ─── IO (optional mocks; matches embody's IoMocks; absent ⇒ fully native) ─────
+// ─── IO (optional SYNC mocks; danger-owned; absent ⇒ fully native) ────────────
 
 /**
- * The mocked-mode output/interaction surface — deliberately shaped to MATCH
- * embody's `IoMocks`, so the orchestrator's one `buildIoMocks()` builder feeds
- * BOTH backends unchanged. It carries the user-I/O verbs (`alert` / `confirm` /
- * `prompt`) AND `console`.
+ * The console-only mock surface: a partial map of `console` method name → sync
+ * handler. Kept separate from the dialog verbs so a caller can mock `log` while
+ * leaving `warn` native (per-method smart merge — DOCS.md § Execution phases).
+ */
+type DangerConsoleMock = Partial<
+	Record<string, (...arguments_: readonly unknown[]) => void>
+>;
+
+/**
+ * The mocked-mode output/interaction surface — danger's OWN, deliberately
+ * SYNCHRONOUS type. It carries the user-I/O verbs (`alert` / `confirm` /
+ * `prompt`) AND `console`; every dialog verb returns its value synchronously —
+ * NO `| Promise<…>`.
+ *
+ * It does NOT import embody's `IoMocks`, and is NOT the same shape. Embody's
+ * mocks are AWAITED by its Worker engine (`embody/types.ts` — "Every mock is
+ * awaited"; its `console` is even `void | Promise<void>`), but danger evaluates a
+ * real synchronous `<script>` that cannot `await` a `Promise`-returning mock (it
+ * would coerce to `[object Promise]`). The sync-only signatures here ENCODE that
+ * constraint. The unified "one `buildIoMocks()` feeds both backends" is
+ * deliberately given up: the orchestrator builds a DISTINCT sync danger builder
+ * (README.md § Ubiquitous language — Output mode).
  *
  * Presence is the mode: `io` PASSED ⇒ mocked (the runner routes the iframe's
  * `alert`/`confirm`/`prompt`/`console` through these callbacks, e.g. to an
  * on-screen panel for a device without devtools); `io` ABSENT ⇒ no mocks, fully
- * native (real console, real native dialogs).
+ * native (real console, real native dialogs). A sync mock cannot block for LIVE
+ * typed input, so live interactive dialogs stay NATIVE — leave the verb unset
+ * (README.md § Edge cases).
  */
-type DangerConsoleMock = Partial<
-	Record<string, (...args: readonly unknown[]) => void>
->;
-
-type DangerIo = Readonly<{
-	alert?: (message: string) => void | Promise<void>;
-	confirm?: (message: string) => boolean | Promise<boolean>;
-	prompt?: (
-		message: string,
-		defaultValue?: string,
-	) => string | null | Promise<string | null>;
+type DangerIoMocks = Readonly<{
 	console?: DangerConsoleMock;
+	alert?: (message: string) => void;
+	confirm?: (message: string) => boolean;
+	prompt?: (message: string, defaultValue?: string) => string | null;
 }>;
 
 // ─── Options (raw string in; iterations, debugger, optional io mocks) ─────────
@@ -123,8 +138,9 @@ type DangerIo = Readonly<{
  * Inputs to one danger run. Frozen; per-run (no persistence across runs).
  *
  * @remarks
- * - `iterations` — the loop-guard iteration cap, forwarded to `guardLoops(code,
- *   iterations)`. OPTIONAL: with none set the guard is not applied and any
+ * - `iterations` — the loop-guard iteration cap danger embeds in its `makeGuard`
+ *   call-text when driving the peer's `spliceLoopGuards`. OPTIONAL: with none set
+ *   the guard is not applied and any
  *   `RangeError` is the learner's (`errored`) — this is the classifier's
  *   `iterations`-set gate and a library/test affordance. The dock caller always
  *   supplies `runLimits.iterations` (a non-optional number), so the unset case is
@@ -134,7 +150,16 @@ type DangerIo = Readonly<{
  * - `io` — PASSED ⇒ mocked mode: the runner routes the iframe's
  *   `alert`/`confirm`/`prompt`/`console` through these callbacks. ABSENT ⇒ no
  *   mocks, fully native (real console, real devtools, real native dialogs — clean
- *   `debugger;` stepping). See {@link DangerIo}.
+ *   `debugger;` stepping). See {@link DangerIoMocks}.
+ * - `type` — the `<script>` kind, reserved as the single literal `'script'` (a
+ *   classic inline `<script>`; the default). `'module'` is deliberately NOT
+ *   admitted: a `<script type=module>` is deferred/async and module-scoped, so the
+ *   top-level `var loop1..loopK` counter globals and the synchronous
+ *   `window.__danger` bridge would break — admitting it as an input value would be
+ *   a footgun. Module mode is out of scope (DOCS.md § Out of scope) until its
+ *   distinct settle path is designed.
+ * - `strict` — `true` (the default) emits `"use strict";` on the assembled
+ *   prefix; `false` runs sloppy (no directive). DECLARATION ONLY — impl is WP4.
  *
  * The dock's SECONDS limit is deliberately absent: it is a dock/UI concern, not
  * the engine's — this utility takes only the loop-guard `iterations` cap. See
@@ -143,7 +168,9 @@ type DangerIo = Readonly<{
 type DangerRunOptions = Readonly<{
 	iterations?: number;
 	debuggerEnabled?: boolean;
-	io?: DangerIo;
+	io?: DangerIoMocks;
+	type?: 'script';
+	strict?: boolean;
 }>;
 
 // ─── The verb (the one public entry point) ────────────────────────────────────
@@ -152,7 +179,7 @@ type DangerRunOptions = Readonly<{
  * Evaluate `code` as a real `<script>` in a permissive same-origin iframe and
  * report how it ended. Returns synchronously with a {@link DangerRunHandle}; the
  * script itself is injected on a later tick so `result` settles no earlier than a
- * microtask (DOCS.md § Structural constraints). Called by the orchestrator's
+ * macrotask (DOCS.md § Structural constraints). Called by the orchestrator's
  * `handleRun` when `sandboxMode === 'danger'`, with the raw editor buffer.
  */
 type DangerRun = (code: string, options: DangerRunOptions) => DangerRunHandle;
@@ -162,7 +189,7 @@ export type {
 	DangerResult,
 	DangerRunHandle,
 	DangerConsoleMock,
-	DangerIo,
+	DangerIoMocks,
 	DangerRunOptions,
 	DangerRun,
 };

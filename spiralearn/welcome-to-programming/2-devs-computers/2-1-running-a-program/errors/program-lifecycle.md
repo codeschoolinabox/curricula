@@ -122,9 +122,9 @@ thinking. These exercises only cover Errors.
 - [Syntax Parsers, Execution Contexts, and Lexical Environments](https://jsbeginners.com/understanding-the-weird-parts-notes-1/)
 - [different kinds of errors](https://education.launchcode.org/intro-to-professional-web-dev/chapters/errors-and-debugging/categories-of-errors.html)
 - JS Tutor snippets:
-    - [creation phase errors](https://goo.gl/1Psxu7)
-    - [creation phase errors](https://goo.gl/68af7H)
-    - [execution phase errors](https://goo.gl/WzbmNE)
+  - [creation phase errors](https://goo.gl/1Psxu7)
+  - [creation phase errors](https://goo.gl/68af7H)
+  - [execution phase errors](https://goo.gl/WzbmNE)
 - [JS error reference](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors)
 - [JavaScript Engines](https://www.youtube.com/watch?v=BMKWdLX9w3M)
 - [errors vs. bugs vs. defects](https://www.youtube.com/watch?v=pqSB3MrUtD4)

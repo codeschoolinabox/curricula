@@ -134,7 +134,7 @@ carrying AST-position locs on both sides.
 
 **Terminal kind details are open** (PLAN.md §Handoff §What's still open
 
-# 4). Sketches here are drafts to be finalized.
+# 4). Sketches here are drafts to be finalized
 
 ## Node vs edge classification
 
