@@ -54,6 +54,17 @@ type EvaluateSpec = {
 	 * running sloppy-mode constructs (`with`) pass false.
 	 */
 	readonly strict?: boolean;
+	/**
+	 * How the worker executes the code. Default `'function'` — the code is
+	 * wrapped in `new Function`, run under the `strict` preference, and its
+	 * globals arrive as the function's parameters; its natural end is
+	 * synchronous. `'module'` delivers and runs the code as an ES module
+	 * (always strict — `strict` is moot); its globals are installed on the
+	 * worker's `globalThis` (a module cannot receive parameters), and its
+	 * natural end is asynchronous — the natural-end halt fires when the
+	 * module-evaluation promise settles.
+	 */
+	readonly execution?: 'function' | 'module';
 };
 
 /** The consumer-authored thread-side hooks. */
@@ -216,10 +227,13 @@ type WorkerApi = {
 };
 
 /**
- * Injected as `new Function` parameters around the code. Keys MUST be
- * valid JavaScript identifiers — the bootstrap rejects invalid keys at
- * setup, settling the run as errored (worker-error), never throwing;
- * collision avoidance is consumer-owned.
+ * The returned globals' delivery depends on `EvaluateSpec.execution`: on the
+ * `'function'` path they are injected as `new Function` parameters around the
+ * code; on the `'module'` path they are installed on the worker's `globalThis`
+ * (a module cannot receive function parameters). Keys MUST be valid JavaScript
+ * identifiers so the code can reference them; on the `'function'` path the
+ * bootstrap rejects invalid keys at setup, settling the run as errored
+ * (worker-error), never throwing. Collision avoidance is consumer-owned.
  */
 type WorkerGlobals = Readonly<Record<string, unknown>>;
 
@@ -253,10 +267,12 @@ type WorkerSetupResult = {
 
 /**
  * The consumer-authored worker-side entry hook: the bootstrap hands it the
- * api and the spec's workerConfig. Parameter injection via the returned
- * globals is the shadowing channel, not the only one — setup may also
- * install worker-global state on the worker's globalThis (how
- * lookup-resolved instrumentation hooks register).
+ * api and the spec's workerConfig. On the `'function'` execution path,
+ * parameter injection via the returned globals is the shadowing channel, not
+ * the only one — setup may also install worker-global state on the worker's
+ * globalThis (how lookup-resolved instrumentation hooks register). On the
+ * `'module'` path the returned globals are themselves installed on globalThis
+ * (a module takes no parameters).
  */
 type WorkerSetup = (api: WorkerApi, workerConfig: unknown) => WorkerSetupResult;
 

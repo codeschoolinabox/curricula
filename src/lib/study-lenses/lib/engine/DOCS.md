@@ -24,13 +24,18 @@ example — the embody result vocabulary its adapter maps onto:
    entry); readiness is confirmed by handshake; shared memory and the worker
    config are delivered at setup; the consumer's worker logic returns its
    globals (validated as identifiers, loudly) and optional halt serializer; the
-   code is delivered and runs under the strict-mode preference. Environment
-   failures — shared memory unavailable, a throwing worker factory — are
-   worker-error terminations with the condition in the engine error, never
-   throws (a factory returning a non-`Worker` is a consumer-side type error;
-   should it reach runtime it settles via the engine's internal-defect path, not
-   this one); consumer setup failures (invalid global keys, a throwing setup,
-   clone-unsafe worker config) settle the same way.
+   code is delivered and run via one of two paths selected by the spec's
+   `execution` preference — the `'function'` path wraps it in `new Function`
+   (globals as parameters, strict per the `strict` preference), reaching its
+   natural end synchronously; the `'module'` path delivers it as an ES module
+   (globals installed on globalThis, always strict), whose natural end is
+   asynchronous — its natural-end halt fires when the module-evaluation promise
+   settles. Environment failures — shared memory unavailable, a throwing worker
+   factory — are worker-error terminations with the condition in the engine
+   error, never throws (a factory returning a non-`Worker` is a consumer-side
+   type error; should it reach runtime it settles via the engine's
+   internal-defect path, not this one); consumer setup failures (invalid global
+   keys, a throwing setup, clone-unsafe worker config) settle the same way.
 
 3. **Streaming** (async, per message) — the running program emits messages one
    at a time under the pause protocol; each is handed to the message hook and
@@ -61,7 +66,7 @@ example — the embody result vocabulary its adapter maps onto:
 
 ```mermaid
 flowchart TD
-    SPEC[spec<br/>code · worker factory · worker config ·<br/>thread logic · seconds · strict] --> HANDLE[lazy handle<br/>no work before first pull or result access]
+    SPEC[spec<br/>code · worker factory · worker config ·<br/>thread logic · seconds · strict · execution] --> HANDLE[lazy handle<br/>no work before first pull or result access]
     HANDLE -->|cancel or fail before the run starts| SETTLE
     HANDLE -->|first pull or result access| RUN[running program in module worker<br/>globals injected · halt serializer registered]
     RUN -->|emit: clone-safe message,<br/>pauses until disposed| MSG[message on thread]

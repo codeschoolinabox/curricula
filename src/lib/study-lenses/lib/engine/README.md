@@ -51,6 +51,10 @@ The spec is the whole coupling surface:
   when omitted.
 - `strict` — whether the code runs under a `"use strict"` prefix. Defaults to
   true; consumers running sloppy-mode constructs (`with`) pass false.
+- `execution` — how the worker runs the code. Defaults to `'function'` (wrapped
+  in `new Function`, run under the `strict` preference, globals as parameters,
+  synchronous natural end). `'module'` delivers it as an ES module (always
+  strict, globals installed on `globalThis`, asynchronous natural end).
 
 The handle is `AsyncIterable` over whatever `onMessage` yields, plus `result`
 (the items array + settlement), `cancel()`, and `fail(reason?)`. Construction is
@@ -97,22 +101,27 @@ setup(api: WorkerApi, workerConfig: unknown): WorkerSetupResult
 // returns { globals, serializeHalt? }
 ```
 
-The returned globals are injected as `new Function` parameters around the code.
-Keys MUST be valid JavaScript identifiers — the bootstrap rejects invalid keys
-at setup — and avoiding collisions with names the evaluated program uses is the
-consumer's job. Consumer failures at setup — invalid global keys, a throwing
-setup, clone-unsafe worker config — settle the run as `errored` with a
-worker-error engine error; the engine surfaces failures as settlements, never
-thrown exceptions. Injected globals are how interception works: a trapped
-`console` emits; a `prompt` calls. A global you don't inject keeps its native
-behavior in the Worker — inject only what you want to observe or replace. (Note
-for dialog mocks: Workers have no native `prompt`/`alert`/`confirm` at all — a
-program that calls them needs injected implementations to exist.)
+The returned globals' delivery depends on `EvaluateSpec.execution`: on the
+`'function'` path they are injected as `new Function` parameters around the
+code; on the `'module'` path they are installed on the worker's `globalThis` (a
+module cannot receive function parameters). Keys MUST be valid JavaScript
+identifiers so the code can reference them; on the `'function'` path the
+bootstrap rejects invalid keys at setup. Avoiding collisions with names the
+evaluated program uses is the consumer's job. Consumer failures at setup —
+invalid global keys, a throwing setup, clone-unsafe worker config — settle the
+run as `errored` with a worker-error engine error; the engine surfaces failures
+as settlements, never thrown exceptions. Injected globals are how interception
+works: a trapped `console` emits; a `prompt` calls. A global you don't inject
+keeps its native behavior in the Worker — inject only what you want to observe
+or replace. (Note for dialog mocks: Workers have no native
+`prompt`/`alert`/`confirm` at all — a program that calls them needs injected
+implementations to exist.)
 
-Parameter injection shadows; it is not the only channel. Setup may also install
-worker-GLOBAL state on the worker's `globalThis` — instrumentation that resolves
-its hooks by global lookup (Aran advice) registers there, not in the parameter
-list.
+On the `'function'` path, parameter injection shadows; it is not the only
+channel. Setup may also install worker-GLOBAL state on the worker's `globalThis`
+— instrumentation that resolves its hooks by global lookup (Aran advice)
+registers there, not in the parameter list. (On the `'module'` path the returned
+globals are themselves installed on `globalThis`.)
 
 `serializeHalt(kind, rawError)` is the **worker-side halt author**. The
 bootstrap invokes it on EVERY worker-side stop — `kind: 'natural-end'` when the
@@ -275,7 +284,7 @@ Using a different name in code is a bug, not a stylistic choice.
   here; the anti-goal is any engine code that interprets a payload.
 - **factory** — the `evaluate` entry point: spec in, handle out.
 - **spec** — the factory argument: code, worker factory, worker config, thread
-  logic, seconds, strict.
+  logic, seconds, strict, execution.
 - **worker logic** — consumer-authored, worker-side:
   `setup(api, workerConfig) → { globals, serializeHalt? }` (typed
   `WorkerSetup`). Owns traps, mocks, emission decisions, halt authoring.
