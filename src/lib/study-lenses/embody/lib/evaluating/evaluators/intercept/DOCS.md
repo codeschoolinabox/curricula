@@ -11,9 +11,9 @@ Vocabulary and the streamed-event table: [README.md](./README.md). The contract:
 
 ### Execution phases
 
-1. **Instrument** (sync, pure; throws the named boundary error on unparseable
-   input — reachable only through misuse, the adapter pre-gates) — the
-   evaluator's single line-preserving splice pass. Input: the source string.
+1. **Instrument** (sync, pure) — the evaluator's single line-preserving splice
+   pass; a parse failure returns the source unmodified (no throw), so the
+   engine's worker surfaces the real `SyntaxError`. Input: the source string.
    Output: instrumented source with (a) an iteration-guard call — carrying the
    loop's own stamped span — at the top of each guarded loop's braced body plus
    the counter reset `__$ir(n);` after the loop (the guarded set is the
@@ -25,7 +25,8 @@ Vocabulary and the streamed-event table: [README.md](./README.md). The contract:
    line numbers. The pass observes nothing.
 
 2. **Assemble** (sync, pure) — build the engine spec. Input: the instrumented
-   source plus the options (`seconds`, `iterations`, `io`). Output: the engine
+   source plus the options (`seconds`, `iterations`, `io`, `type`, `strict`) —
+   `type`/`strict` map onto the spec's `execution`/`strict`. Output: the engine
    spec — the instrumented code, the thin worker entry constructed as one
    adjacent `new Worker(new URL(…), { type: 'module' })` expression, the
    iteration limit as the clone-safe worker config, the io-bound thread logic,
@@ -34,7 +35,7 @@ Vocabulary and the streamed-event table: [README.md](./README.md). The contract:
 
 3. **Run** (factory call sync and lazy; emission async) — the engine runs the
    program in the sandbox with the console/dialog **global mocks** and the
-   instrumentation helpers injected as parameters. Input: the spec. Output: one
+   instrumentation helpers injected as globals. Input: the spec. Output: one
    **io round-trip** per trapped call (call-then-emit, below) plus a
    worker-authored halt. The worker holds the only mutable state — the 1-indexed
    step counter, the current-loc stack, and the iteration counters.
@@ -72,8 +73,8 @@ Vocabulary and the streamed-event table: [README.md](./README.md). The contract:
 
 ```mermaid
 flowchart TD
-    SRC[source string + options] -->|instrument — pure, line-preserving: iteration guards + loc stamps; throws on unparseable| ICODE[instrumented source, learner's own line numbers; options untouched]
-    ICODE -->|assemble: + worker entry + io-bound thread logic + iteration limit as worker config + seconds| SPEC[engine spec]
+    SRC[source string + options] -->|instrument — pure, line-preserving: iteration guards + loc stamps; unparseable → passed through unmodified| ICODE[instrumented source, learner's own line numbers; options untouched]
+    ICODE -->|assemble: + worker entry + io-bound thread logic + iteration limit as worker config + seconds + execution/strict| SPEC[engine spec]
     SPEC -->|evaluate — lazy, sandboxed worker; global mocks + guard/loc helpers injected| RUN[running program]
 
     RUN -->|any io call → call — blocking round-trip| REQ[io call-request: kind + method + args, clone-safe]
@@ -95,13 +96,23 @@ flowchart TD
 - **The instrumenter is pure and line-preserving.** One parse, string splices
   only, zero line shift — every stamped loc and every engine-reported line is
   the learner's own. It plants exactly two things (guards, loc wraps) and
-  observes nothing. Its throw on unparseable input is the evaluator's only
-  boundary throw.
-- **No JEJ gate.** The evaluator assumes a pre-admitted runnable string; JEJ
-  admission and the embody _not-runnable_ short-circuit live in the adapter. If
-  a non-JEJ program reached the evaluator anyway it would either throw at the
-  instrumenter's parse (misuse) or run in the sandbox and settle `errored` —
-  never crash the host.
+  observes nothing. The evaluator has **zero boundary throws**: unparseable
+  input passes through unmodified and the engine's worker surfaces the real
+  `SyntaxError`, settling `errored`.
+- **Unparseable input settles `errored` on both execution paths; the mechanism
+  differs.** On the `'function'` path the engine wraps construction and
+  execution in one `try/catch`, so a `SyntaxError` becomes a worker-authored
+  throw halt and the adapter reconstructs a terminal `ErrorNMEvent`. On the
+  `'module'` path a compile error surfaces at module instantiation as an
+  engine-made settlement (no worker-authored halt) — its exact settlement is
+  pinned by the engine's module-path work package. Either way the host never
+  crashes; the presence of the terminal `ErrorNMEvent` follows whether a throw
+  halt exists (adapter DOCS § R1).
+- **No JEJ gate.** The evaluator does not gate admission; JEJ admission and the
+  embody _not-runnable_ short-circuit live in the adapter. A non-JEJ or
+  unparseable program simply runs in the sandbox and settles `errored`
+  (unparseable input surfaces its `SyntaxError`) — the evaluator never throws
+  and never crashes the host.
 - **The engine owns the `try/catch`; the evaluator never wraps the program.**
   Wrapping the program to catch a throw and emit an error event would mask the
   throw as a natural completion (the engine would settle `completed`, not
@@ -175,6 +186,14 @@ flowchart TD
   rides as its `String(…)` form, so a round-trip never crashes the run.
 - **Sandbox torn down on every path** (the engine's guarantee — cancel, fail,
   timeout, natural end, and throw all tear the worker down).
+- **Execution posture is a forwarded option, not a correctness concern.** The
+  `type` / `strict` options map onto the engine spec's `execution` / `strict` at
+  Assemble: `'script'` + `strict:false` reproduces the oracle's `scriptMode`
+  sloppy toggle, `'module'` runs the code as an ES module (always strict), and
+  omitting both keeps the engine's strict default. Admissible JEJ is always
+  strict-safe (the only sloppy construct, `with`, fails the JEJ gate), so the
+  options carry the script-vs-module posture the run button exposes, not a
+  correctness need.
 
 ### Out of scope
 
@@ -189,12 +208,6 @@ the boundaries that are **structural constraints on this sketch** specifically:
   splices (guards, loc stamps) enforce and attribute; they observe nothing.
 - **No event linking, replay, AST record, or `visitCounts`** (no milestone
   consumer; not required by the embody contract).
-- **Sloppy-mode / `scriptMode` is not reproduced.** The oracle toggled a
-  `"use strict"` prefix for script-type snippets; this evaluator runs under the
-  engine's strict-mode default (`EvaluateSpec.strict` defaults true). Admissible
-  JEJ is always strict-safe (the only sloppy construct, `with`, fails the JEJ
-  gate), so there is no `strict` option here; the `script` snippet posture is
-  the adapter/embody's concern.
 
 ### Downstream: the embody adapter (out of scope here; specified for the gate)
 

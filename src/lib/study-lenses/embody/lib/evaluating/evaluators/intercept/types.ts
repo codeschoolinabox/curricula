@@ -180,6 +180,29 @@ type InterceptEvaluateOptions = {
 	readonly iterations?: number;
 	/** The consumer's I/O mocks; absent members fall back to inert defaults. */
 	readonly io?: InterceptIoMocks;
+	/**
+	 * The snippet's source-type posture. Omitted → leave `spec.execution`
+	 * unset (the engine's `'function'` default under strict — today's
+	 * behavior). `'script'` → `execution:'function'` with
+	 * `spec.strict = strict ?? true` (reproduces the oracle's `scriptMode`
+	 * toggle — pass `strict:false` for sloppy-mode constructs like `with`).
+	 * `'module'` → `execution:'module'` (always strict — `strict` is moot).
+	 * Assemble maps this onto the engine spec; the evaluator inspects it no
+	 * further.
+	 */
+	readonly type?: 'script' | 'module';
+	/**
+	 * The `"use strict"` preference for `type:'script'`. Default true;
+	 * meaningful only on the script path — `'module'` is always strict, and an
+	 * omitted `type` keeps the engine's strict default.
+	 */
+	readonly strict?: boolean;
+	/**
+	 * Reserved for the debugger-enabled run posture; forwarded to run assembly.
+	 * Its exact effect — and the phase it acts in — is pinned by a later work
+	 * package.
+	 */
+	readonly debuggerEnabled?: boolean;
 };
 
 /**
@@ -262,21 +285,12 @@ type InterceptEvaluateHandle = AsyncIterable<InterceptEvent> & {
 };
 
 /**
- * The instrumenter's boundary throw on unparseable input — the evaluator's
- * only synchronous throw, reachable only through misuse (the adapter
- * pre-gates JEJ admission). `name` is the discriminant a caller may branch
- * on; the `message` carries the parse failure.
- */
-type InterceptInstrumentError = Error & {
-	readonly name: 'InterceptInstrumentError';
-};
-
-/**
- * The evaluator's primary export: runnable code in, typed handle out. Assumes a
- * pre-admitted (runnable JEJ) string — the JEJ admission gate and the embody
- * _not-runnable_ shape are the adapter's concern (README § Bounded context).
- * The instrumenter throws an {@link InterceptInstrumentError} on unparseable
- * input (reachable only through misuse; the adapter pre-gates).
+ * The evaluator's primary export: runnable code in, typed handle out. The JEJ
+ * admission gate and the embody _not-runnable_ shape are the adapter's concern
+ * (README § Bounded context). Unparseable input passes through the instrumenter
+ * unmodified (no boundary throw); the engine's worker surfaces the real
+ * `SyntaxError` and the run settles `errored`. The evaluator has no boundary
+ * throws.
  */
 type InterceptEvaluate = (
 	code: string,
@@ -368,10 +382,11 @@ type InterceptWorkerConfig = {
  *   propagating through (for halt attribution), and restores the stack in
  *   `finally`.
  *
- * The names ride the engine's injected `new Function` parameters (the
- * delivery channel); the collision guard is the NAMING — `__$il` / `__$lc`
- * sit outside the JEJ (camelCase) identifier surface, so admissible learner
- * code cannot reference or shadow them.
+ * The names ride the engine's injected-globals channel (`new Function`
+ * parameters on the function path; installed on the worker's `globalThis` on
+ * the module path); the collision guard is the NAMING — `__$il` / `__$lc` sit
+ * outside the JEJ (camelCase) identifier surface, so admissible learner code
+ * cannot reference or shadow them.
  */
 type InterceptHelperProtocol = {
 	readonly __$il: (loopIndex: number, locString: string) => void;
@@ -396,7 +411,6 @@ export type {
 	InterceptSettlement,
 	InterceptEvaluateResult,
 	InterceptEvaluateHandle,
-	InterceptInstrumentError,
 	InterceptEvaluate,
 	InterceptMessage,
 	InterceptCallRequest,

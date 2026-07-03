@@ -80,12 +80,16 @@ program in its own `try/catch` and does **not** stream an `error` item — doing
 either would mask the throw as a natural completion. The old intercept's
 `ErrorEvent` is reconstructed by the embody adapter as the run's terminal
 `ErrorNMEvent` from that halt (see § Bounded context). The oracle's `creation` /
-`execution` phase is **not** reproduced: the engine collapses the program's
-construction (`new Function`) and execution into one `throw` halt
+`execution` phase is **not** reproduced: on the `'function'` path the engine
+collapses the program's construction (`new Function`) and execution into one
+`throw` halt
 ([`../../../../../lib/engine/worker/bootstrap.ts`](../../../../../lib/engine/worker/bootstrap.ts)),
-so the phase is not authorable worker-side; a construction `SyntaxError` is
-near-unreachable for admissible JEJ, and embody's `ErrorNMEvent` carries no
-phase.
+so the phase is not authorable worker-side; a construction `SyntaxError` is now
+a reachable ungated run-button path — unparseable input passes through the
+instrumenter unmodified and the worker's `new Function` compile surfaces the
+real `SyntaxError` as that throw halt, settling `errored` (the `'module'` path's
+compile-error settlement is the engine module-path work package's concern) — and
+embody's `ErrorNMEvent` carries no phase.
 
 ## Glossary (ubiquitous language)
 
@@ -169,10 +173,11 @@ them consistently.
   residual `Error.stack` extraction is deliberately not reproduced (brittle
   across browsers; no milestone consumer reads a throw's loc).
 - **terminal error** — the throw that ends a run: a `SyntaxError` from compiling
-  the program, any runtime throw, or the iteration guard's marked throw. It is
-  **not** a streamed event; it is carried as the **halt** on the settlement and
-  mapped by the adapter to the run's terminal `ErrorNMEvent` (or, when marked,
-  to the `limit-exceeded` outcome).
+  the program (the ungated path for unparseable input), any runtime throw, or
+  the iteration guard's marked throw. It is **not** a streamed event; it is
+  carried as the **halt** on the settlement and mapped by the adapter to the
+  run's terminal `ErrorNMEvent` (or, when marked, to the `limit-exceeded`
+  outcome).
 - **halt** — the worker-authored record of how the program stopped on its own: a
   natural end, or a throw with its `errorName`, `message`, stamped `loc` (when
   attributable), and `iterationLimit` marker (when the iteration guard fired).
@@ -209,9 +214,9 @@ It does **not** own, and explicitly excludes:
   deep-freeze), and reconstructing the run's terminal `ErrorNMEvent` and
   `EmbodyError` from an errored halt, belong to the embody adapter.
 - **The JEJ admission gate and the _not-runnable_ short-circuit.** This
-  evaluator assumes an admissible JEJ string; it parses only to splice (the
-  instrumenter throws a typed boundary error on unparseable input — reachable
-  only through misuse, since the adapter pre-gates). Admission lives in the
+  evaluator does not gate; it parses only to splice, and unparseable input
+  passes through the instrumenter unmodified (no throw) — the worker surfaces
+  the real `SyntaxError` and the run settles `errored`. Admission lives in the
   **adapter**, not here, for a contract reason — not an arbitrary asymmetry with
   the variables tracer. The variables tracer self-gates and _throws_ because its
   consumer (`traceVariableLifecycle`) is permitted to throw. The embody
