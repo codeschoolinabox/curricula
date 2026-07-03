@@ -223,8 +223,21 @@ describe('expressionAfter', () => {
 			);
 			expect(state.trace).toHaveLength(1);
 			const event = state.trace[0] as Record<string, unknown>;
-			expect(event.category).toBe('controlFlow');
+			expect(event.category).toBe('conditional');
 			expect(event.event).toBe('test');
+		});
+
+		it('test event is statement-layer', () => {
+			const state = makeState();
+			expressionAfter(
+				state,
+				true,
+				'test',
+				'conditional',
+				makeTag({ node: 'IfStatement', source: 'y > 5' }),
+			);
+			const event = state.trace[0] as Record<string, unknown>;
+			expect(event.semantics).toBe('statement');
 		});
 
 		it('result is boolean outcome', () => {

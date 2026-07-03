@@ -83,14 +83,14 @@ describe('createTraceEvent', () => {
 				},
 				'controlFlow.test',
 				{
-					kind: 'conditional',
+					kind: 'if',
 					value: { type: 'string', value: 'hello' },
 					result: true,
 					coercion: { type: 'boolean', value: true },
 					scopeCreationStep: 0,
 				},
 			);
-			expect(event.category).toBe('controlFlow');
+			expect(event.category).toBe('conditional');
 		});
 	});
 

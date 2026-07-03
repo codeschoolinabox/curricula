@@ -1,14 +1,11 @@
-import type {
-	IterationEvent,
-	LoopKind,
-	ValueRepresentation,
-} from '../../types.js';
+import type { LoopKind, ValueRepresentation } from '../../types.js';
 
 /**
- * Creates an IterationEvent for loop iteration start.
- * forOf-specific fields (iterable, iterationValue, iterationVariable) must all co-occur.
+ * Creates the domain fields for a loop iteration event. forOf-specific fields
+ * (iterable, iterationValue, iterationVariable) must all co-occur. The
+ * dispatcher stamps the base fields.
  *
- * @throws {Error} If index < 0 or forOf fields don't co-occur
+ * @throws {Error} If index < 0, or the forOf fields do not all co-occur
  */
 export default function createIterationEvent(
 	{
@@ -18,9 +15,8 @@ export default function createIterationEvent(
 		iterable,
 		iterationValue,
 		iterationVariable,
-		label,
 	}: IterationParams = {} as IterationParams,
-): Omit<IterationEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
+): IterationDomainFields {
 	if (index < 0) {
 		throw new Error('createIterationEvent: index must be >= 0');
 	}
@@ -36,15 +32,14 @@ export default function createIterationEvent(
 	}
 
 	return {
-		category: 'controlFlow',
-		event: 'iteration',
+		category: 'loop',
 		kind,
+		event: 'iteration',
 		index,
 		scopeCreationStep,
 		...(iterable !== undefined && { iterable }),
 		...(iterationValue !== undefined && { iterationValue }),
 		...(iterationVariable !== undefined && { iterationVariable }),
-		...(label !== undefined && { label }),
 	};
 }
 
@@ -55,5 +50,16 @@ type IterationParams = {
 	readonly iterable?: ValueRepresentation;
 	readonly iterationValue?: ValueRepresentation;
 	readonly iterationVariable?: string;
-	readonly label?: string;
+};
+
+/** Domain fields (base stamped downstream) for LoopEvent(iteration). */
+type IterationDomainFields = {
+	readonly category: 'loop';
+	readonly kind: LoopKind;
+	readonly event: 'iteration';
+	readonly index: number;
+	readonly scopeCreationStep: number;
+	readonly iterable?: ValueRepresentation;
+	readonly iterationValue?: ValueRepresentation;
+	readonly iterationVariable?: string;
 };

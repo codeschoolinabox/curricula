@@ -1,30 +1,30 @@
-import type { BranchEvent } from '../../types.js';
-
 /**
- * Creates a BranchEvent for if/else path selection.
- * Kind is always 'conditional' — set automatically.
+ * Creates the domain fields for a branch event — which path an if statement
+ * took. Branch fires only for if statements (ternaries have no branch
+ * sub-event), so kind is always 'if'. The dispatcher stamps the base fields.
  */
 export default function createBranchEvent(
-	{
-		branch,
-		scopeCreationStep,
-		label,
-	}: {
-		readonly branch: 'consequent' | 'alternate' | 'none';
-		readonly scopeCreationStep: number;
-		readonly label?: string;
-	} = {} as {
-		readonly branch: 'consequent' | 'alternate' | 'none';
-		readonly scopeCreationStep: number;
-		readonly label?: string;
-	},
-): Omit<BranchEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
+	{ branch, scopeCreationStep }: BranchParams = {} as BranchParams,
+): BranchDomainFields {
 	return {
-		category: 'controlFlow',
+		category: 'conditional',
+		kind: 'if',
 		event: 'branch',
-		kind: 'conditional',
 		branch,
 		scopeCreationStep,
-		...(label !== undefined && { label }),
 	};
 }
+
+type BranchParams = {
+	readonly branch: 'consequent' | 'alternate' | 'none';
+	readonly scopeCreationStep: number;
+};
+
+/** Domain fields (base stamped downstream) for ConditionalEvent(branch, kind 'if'). */
+type BranchDomainFields = {
+	readonly category: 'conditional';
+	readonly kind: 'if';
+	readonly event: 'branch';
+	readonly branch: 'consequent' | 'alternate' | 'none';
+	readonly scopeCreationStep: number;
+};

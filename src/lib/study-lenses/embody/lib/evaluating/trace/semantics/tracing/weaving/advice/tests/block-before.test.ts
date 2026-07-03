@@ -78,7 +78,7 @@ describe('blockBefore', () => {
 				makeTag({ node: 'IfStatement' }),
 			);
 			const branchEvents = (state.trace as Record<string, unknown>[]).filter(
-				(e) => e.category === 'controlFlow' && e.event === 'branch',
+				(e) => e.category === 'conditional' && e.event === 'branch',
 			);
 			expect(branchEvents).toHaveLength(1);
 			expect(branchEvents[0].branch).toBe('consequent');

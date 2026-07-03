@@ -367,7 +367,7 @@ describe('advice integration', () => {
 				'let x = 5;\nif (x > 3) {\n  let y = 1;\n} else {\n  let y = 2;\n}\n',
 				ALL_ENABLED,
 			);
-			const cfEvents = events.filter((e) => e.category === 'controlFlow');
+			const cfEvents = events.filter((e) => e.category === 'conditional');
 			const cfTypes = cfEvents.map((e) => (e as Record<string, unknown>).event);
 
 			expect(cfTypes).toContain('test');
@@ -381,10 +381,23 @@ describe('advice integration', () => {
 			);
 			const iterEvents = events.filter(
 				(e) =>
-					e.category === 'controlFlow' &&
+					e.category === 'loop' &&
 					(e as Record<string, unknown>).event === 'iteration',
 			);
 			expect(iterEvents.length).toBeGreaterThan(0);
+		});
+
+		it.skip('while-loop test event should classify as loop (blocked on I-5 expression-pointcut loopKind stamping)', () => {
+			const events = traceInNode(
+				'let i = 0;\nwhile (i < 2) {\n  i = i + 1;\n}\n',
+				ALL_ENABLED,
+			);
+			const whileTest = events.find(
+				(e) =>
+					e.category === 'loop' &&
+					(e as Record<string, unknown>).event === 'test',
+			);
+			expect(whileTest).toBeDefined();
 		});
 
 		it('for loop produces test + iteration events', () => {
@@ -392,7 +405,7 @@ describe('advice integration', () => {
 				'for (let i = 0; i < 3; i = i + 1) {\n  let x = i;\n}\n',
 				ALL_ENABLED,
 			);
-			const cfEvents = events.filter((e) => e.category === 'controlFlow');
+			const cfEvents = events.filter((e) => e.category === 'loop');
 			const cfTypes = cfEvents.map((e) => (e as Record<string, unknown>).event);
 
 			expect(cfTypes).toContain('test');

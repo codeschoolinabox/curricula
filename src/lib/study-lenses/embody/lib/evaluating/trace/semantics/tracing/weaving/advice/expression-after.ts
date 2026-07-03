@@ -65,15 +65,23 @@ export default function expressionAfter(
 			const testSource = point[1] as string;
 			const tag = point[2] as JejTag;
 			const boolResult = Boolean(result);
-			const kind = testSource;
 			// deferred: not yet migrated to scope-stack.ts currentScope() — deferred to S3 (read+operators slice)
 			const currentScope = state.scopeStack[state.scopeStack.length - 1];
 
-			if (isControlFlowGateOpen(state.config, kind, 'test')) {
+			if (isControlFlowGateOpen(state.config, testSource, 'test')) {
 				const coercion =
 					typeof result !== 'boolean' ? representValue(boolResult) : undefined;
 
-				emitEvent(state, tag, 'expression', 'controlFlow.test', {
+				// Resolve the construct's weave-time discriminant to the event's
+				// domain kind: 'conditional' is the if-statement tag, but the
+				// ConditionalEvent's kind is 'if' (ternary is wired at I-5). Loop
+				// kinds (while/doWhile/for/forOf) pass through unchanged.
+				const kind = testSource === 'conditional' ? 'if' : testSource;
+
+				// A control-flow test is a statement-layer moment for both if
+				// (ConditionalEvent kind 'if') and every loop (LoopEvent). The
+				// 'expression'-layer ternary is not wired until I-5.
+				emitEvent(state, tag, 'statement', 'controlFlow.test', {
 					kind,
 					value: representValue(result),
 					result: boolResult,
