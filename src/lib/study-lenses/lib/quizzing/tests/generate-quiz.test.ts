@@ -149,6 +149,25 @@ describe('generateQuiz', () => {
 				.map((item) => item.groupKey);
 			expect(v3GroupKeys).toEqual(['binding:4-8', 'binding:4-8']);
 		});
+
+		it('fires V5 value-category end-to-end for a bare intrinsic global', () => {
+			// the realm value-category form reaches output for an unshadowed global
+			const snippet = embody('Math;');
+			const v5 = generateQuiz(snippet, classifyOf(snippet)).filter(
+				(item) => item.form === 'V5',
+			);
+			expect(v5).toHaveLength(1);
+			expect(v5[0]?.groupKey).toBe('realm:Math');
+		});
+
+		it('stays silent (no V5) when a program decl shadows a realm name', () => {
+			// resolveBinding hits → V5 is silent; only V3 fires (program-declared)
+			const snippet = embody('let Math = 1; Math;');
+			const v5 = generateQuiz(snippet, classifyOf(snippet)).filter(
+				(item) => item.form === 'V5',
+			);
+			expect(v5).toEqual([]);
+		});
 	});
 
 	describe('Interfaces', () => {
