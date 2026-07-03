@@ -1,44 +1,48 @@
 # Control Flow Generators — Design Decisions
 
-## Seven event types from two config dimensions
+## Three event categories
 
-The config uses a 2D matrix: `kind` (what construct) x `events` (what happened).
-An event fires when both gates are enabled. The seven event types map to the
-`events` dimension; the `kind` is a parameter on each.
+Control flow is traced as three event categories, each generator a pure factory
+of its already-resolved kind (the advice decides the kind; these generators do
+not):
 
-Some events are specific to certain kinds:
+- **`conditional`** — `if` and `ternary`. Events: `test` (the condition
+  evaluation) and `branch` (which path an `if` took; ternaries have no branch
+  sub-event, so `branch` is always kind `if`).
+- **`loop`** — `while`, `doWhile`, `for`, `forOf`. Events: `test` (condition),
+  `iteration` (body entry), `do` (doWhile body-before-test), `setup` and
+  `increment` (for-loop init / update phases).
+- **`jump`** — `break` and `continue`.
 
-- `do` only fires for `doWhile`
-- `initialize` and `increment` only fire for `for`
-- `branch` only fires for `conditional`
-- `test`, `iteration`, and `jump` fire for multiple kinds
+`create-test-event` is the one generator that spans two categories: it splits on
+the resolved kind — if/ternary → `conditional`, any loop kind → `loop`.
 
 ## do-while semantics
 
-`DoEvent` fires before every body execution, not just the first. This makes each
+`do` fires before every body execution, not just the first. This makes each
 iteration's entry point explicit in the trace. For regular while/for loops, the
-entry point is the `test` event; for do-while, it's the `do` event.
+entry point is the `test` event; for do-while, it is the `do` event.
 
-## forOf-specific fields on IterationEvent
+## forOf-specific fields on the iteration event
 
 `for (const c of 'hello')` creates a new binding per iteration and iterates over
-a string. The `IterationEvent` carries `iterable` (the string, first iteration
+a string. The `iteration` event carries `iterable` (the string, first iteration
 only), `iterationValue` (current character), and `iterationVariable` (the loop
 variable name). These three fields co-occur — all present for forOf, all absent
 for other loop kinds.
 
-## JumpEvent references
+## jump references
 
-`JumpEvent` carries `targetScopeCreationStep` — a reference to the scope whose
-loop is being broken/continued. In JEJ without labels, this is always the
+The `jump` event carries `targetScopeCreationStep` — a reference to the scope
+whose loop is being broken/continued. In JEJ without labels, this is always the
 innermost enclosing loop's scope. With labels (easter egg), it may target an
-outer loop.
+outer loop. `jump` is the only control-flow event that still carries `label`.
 
-## TestEvent coercion field
+## test coercion field
 
-`TestEvent` has an optional `coercion?: ValueRepresentation` field. Present when
-the tested value is not already a boolean — it shows the `Boolean(value)`
-intermediate. Same pattern as operator coercion on `PureOperatorEvent`.
+The `test` event has an optional `coercion?: ValueRepresentation` field. Present
+when the tested value is not already a boolean — it shows the `Boolean(value)`
+intermediate. Same pattern as operator coercion on the pure-operator event.
 
 Examples:
 
@@ -54,5 +58,5 @@ Examples:
 ## All events carry scopeCreationStep
 
 Every control flow event references the scope it belongs to via
-`scopeCreationStep`. This enables consumers to correlate control flow events
-with their enclosing scope without relying on trace ordering.
+`scopeCreationStep`. This lets consumers correlate control flow events with their
+enclosing scope without relying on trace ordering.
