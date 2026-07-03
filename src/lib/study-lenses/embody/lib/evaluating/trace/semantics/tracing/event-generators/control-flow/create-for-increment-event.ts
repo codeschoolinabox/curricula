@@ -1,26 +1,26 @@
-import type { ForIncrementEvent } from '../../types.js';
-
 /**
- * Creates a ForIncrementEvent for the for-loop update/increment phase.
- * Kind is always 'for' — set automatically.
+ * Creates the domain fields for a for-loop increment (update) event. Kind is
+ * always 'for'. The dispatcher stamps the base fields.
  */
 export default function createForIncrementEvent(
-	{
-		scopeCreationStep,
-		label,
-	}: {
-		readonly scopeCreationStep: number;
-		readonly label?: string;
-	} = {} as {
-		readonly scopeCreationStep: number;
-		readonly label?: string;
-	},
-): Omit<ForIncrementEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
+	{ scopeCreationStep }: ForIncrementParams = {} as ForIncrementParams,
+): ForIncrementDomainFields {
 	return {
-		category: 'controlFlow',
-		event: 'increment',
+		category: 'loop',
 		kind: 'for',
+		event: 'increment',
 		scopeCreationStep,
-		...(label !== undefined && { label }),
 	};
 }
+
+type ForIncrementParams = {
+	readonly scopeCreationStep: number;
+};
+
+/** Domain fields (base stamped downstream) for LoopEvent(increment, kind 'for'). */
+type ForIncrementDomainFields = {
+	readonly category: 'loop';
+	readonly kind: 'for';
+	readonly event: 'increment';
+	readonly scopeCreationStep: number;
+};

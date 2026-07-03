@@ -1,26 +1,26 @@
-import type { DoEvent } from '../../types.js';
-
 /**
- * Creates a DoEvent for do-while loops. Fires before every body execution.
- * Kind is always 'doWhile' — set automatically.
+ * Creates the domain fields for a do-while body event — fires before every body
+ * execution. Kind is always 'doWhile'. The dispatcher stamps the base fields.
  */
 export default function createDoEvent(
-	{
-		scopeCreationStep,
-		label,
-	}: {
-		readonly scopeCreationStep: number;
-		readonly label?: string;
-	} = {} as {
-		readonly scopeCreationStep: number;
-		readonly label?: string;
-	},
-): Omit<DoEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
+	{ scopeCreationStep }: DoParams = {} as DoParams,
+): DoDomainFields {
 	return {
-		category: 'controlFlow',
-		event: 'do',
+		category: 'loop',
 		kind: 'doWhile',
+		event: 'do',
 		scopeCreationStep,
-		...(label !== undefined && { label }),
 	};
 }
+
+type DoParams = {
+	readonly scopeCreationStep: number;
+};
+
+/** Domain fields (base stamped downstream) for LoopEvent(do, kind 'doWhile'). */
+type DoDomainFields = {
+	readonly category: 'loop';
+	readonly kind: 'doWhile';
+	readonly event: 'do';
+	readonly scopeCreationStep: number;
+};

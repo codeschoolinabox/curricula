@@ -90,7 +90,7 @@ const generators = {
 		iteration: createIterationEvent,
 		jump: createJumpEvent,
 		do: createDoEvent,
-		initialize: createForInitializeEvent,
+		setup: createForInitializeEvent,
 		increment: createForIncrementEvent,
 	},
 

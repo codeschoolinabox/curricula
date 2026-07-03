@@ -94,7 +94,7 @@ describe('blockBefore', () => {
 				makeTag({ node: 'IfStatement' }),
 			);
 			const branchEvents = (state.trace as Record<string, unknown>[]).filter(
-				(e) => e.event === 'branch',
+				(e) => e.category === 'conditional' && e.event === 'branch',
 			);
 			expect(branchEvents[0].branch).toBe('alternate');
 		});
@@ -120,7 +120,7 @@ describe('blockBefore', () => {
 				makeTag({ loopKind: 'while' }),
 			);
 			const iterEvents = (state.trace as Record<string, unknown>[]).filter(
-				(e) => e.event === 'iteration',
+				(e) => e.category === 'loop' && e.event === 'iteration',
 			);
 			expect(iterEvents).toHaveLength(1);
 		});
@@ -167,7 +167,7 @@ describe('blockBefore', () => {
 				makeTag({ loopKind: 'doWhile' }),
 			);
 			const doEvents = (state.trace as Record<string, unknown>[]).filter(
-				(e) => e.event === 'do',
+				(e) => e.category === 'loop' && e.event === 'do',
 			);
 			expect(doEvents).toHaveLength(1);
 		});

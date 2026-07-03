@@ -1,26 +1,26 @@
-import type { ForInitializeEvent } from '../../types.js';
-
 /**
- * Creates a ForInitializeEvent for the for-loop initialization phase.
- * Kind is always 'for' — set automatically.
+ * Creates the domain fields for a for-loop setup (initialization) event. Kind is
+ * always 'for'. The dispatcher stamps the base fields.
  */
 export default function createForInitializeEvent(
-	{
-		scopeCreationStep,
-		label,
-	}: {
-		readonly scopeCreationStep: number;
-		readonly label?: string;
-	} = {} as {
-		readonly scopeCreationStep: number;
-		readonly label?: string;
-	},
-): Omit<ForInitializeEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
+	{ scopeCreationStep }: ForInitializeParams = {} as ForInitializeParams,
+): ForInitializeDomainFields {
 	return {
-		category: 'controlFlow',
-		event: 'initialize',
+		category: 'loop',
 		kind: 'for',
+		event: 'setup',
 		scopeCreationStep,
-		...(label !== undefined && { label }),
 	};
 }
+
+type ForInitializeParams = {
+	readonly scopeCreationStep: number;
+};
+
+/** Domain fields (base stamped downstream) for LoopEvent(setup, kind 'for'). */
+type ForInitializeDomainFields = {
+	readonly category: 'loop';
+	readonly kind: 'for';
+	readonly event: 'setup';
+	readonly scopeCreationStep: number;
+};
