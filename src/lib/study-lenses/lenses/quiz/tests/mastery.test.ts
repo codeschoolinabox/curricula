@@ -1,20 +1,26 @@
 /**
- * Pure tests for the quiz lens's mastery fold (`quizCore.masteryFold`, inc 5).
- * No jsdom — the fold is a pure reducer `(prior, item, verdict) → MasteryState`,
- * keyed per `groupKey`. Fixtures are real V1 items from `buildQuiz` and real
- * verdicts from `gradeOption`, so the fold is exercised against the live
- * `lib/quizzing` contract, not hand-rolled literals. The two-channel decoration
- * that renders this state is wired in `index.tsx` and verified at the 🔍 sandbox
- * checkpoint (the paint needs a real browser; jsdom can't lay out CodeMirror).
+ * Pure tests for the quiz lens's mastery fold (`quizCore.masteryFold`, inc 5 +
+ * earned propagation inc 7). No jsdom — the fold is a pure reducer
+ * `(prior, item, verdict) → MasteryState`, keyed per `groupKey`. Fixtures are
+ * real items from `buildQuiz` (mcq V1 for the inc-5 cases; select-in-code
+ * V10a/b/c for the inc-7 propagation cases) and real verdicts from `gradeOption`
+ * / `gradeRanges`, so the fold is exercised against the live `lib/quizzing`
+ * contract, not hand-rolled literals. The two-channel decoration that renders
+ * this state is wired in `index.tsx` and verified at the 🔍 sandbox checkpoint
+ * (the paint needs a real browser; jsdom can't lay out CodeMirror).
  */
 
 import { describe, expect, it } from 'vitest';
 
 import embody from '../../../embody/index.js';
-import type { McqQuizItem } from '../../../lib/quizzing/types.js';
+import type {
+	McqQuizItem,
+	SelectInCodeQuizItem,
+} from '../../../lib/quizzing/types.js';
 import quizCore from '../core.js';
 import buildQuiz from '../lib/build-quiz.js';
 import gradeOption from '../lib/grade-option.js';
+import gradeRanges from '../lib/grade-ranges.js';
 import type { MasteryState } from '../types.js';
 
 describe('masteryFold — fold a graded verdict into MasteryState', () => {
@@ -301,5 +307,292 @@ describe('masteryFold — fold a graded verdict into MasteryState', () => {
 			gradeOption(identifierItem, 'identifier'),
 		);
 		expect(Object.keys(next)).toEqual([identifierItem.groupKey]);
+	});
+
+	// ── inc 7 — earned propagation via unlocks ──────────────────
+	describe('earned propagation — a correct sameness gesture credits item.unlocks', () => {
+		// Sameness (select-in-code) items are sourced LIVE from buildQuiz (which admits
+		// select-in-code since 6c). Their groupKey/unlocks come from lib/quizzing —
+		// guarded below, then used in the assertions so a re-key surfaces loudly. On
+		// `let x = 1; x;`: V10a is a member of its own unlock group; V10c-read is
+		// self-excluded (it unlocks a binding-usage peer, not its own usage-kind group).
+		const v10a = items.find(
+			(item): item is SelectInCodeQuizItem =>
+				item.mode === 'select-in-code' && item.form === 'V10a',
+		);
+		const v10bRead = items.find(
+			(item): item is SelectInCodeQuizItem =>
+				item.mode === 'select-in-code' &&
+				item.form === 'V10b' &&
+				item.groupKey === 'usage:4-5:read',
+		);
+		const v10cRead = items.find(
+			(item): item is SelectInCodeQuizItem =>
+				item.mode === 'select-in-code' &&
+				item.form === 'V10c' &&
+				item.groupKey === 'usage-kind:read',
+		);
+		// Cross-variable source: V10c "read" unlocks BOTH bindings' read groups, so one
+		// gesture fans out to peers on different tokens (the visible-spread case).
+		const crossItems =
+			buildQuiz(embody('let a = 1; a; let b = 2; b;'))?.items ?? [];
+		const v10cReadCross = crossItems.find(
+			(item): item is SelectInCodeQuizItem =>
+				item.mode === 'select-in-code' &&
+				item.form === 'V10c' &&
+				item.groupKey === 'usage-kind:read',
+		);
+		// All-global source: a free global has no resolvable binding, so V10c's unlocks
+		// is EMPTY — the fold must still credit the own group and not crash.
+		const globalItems = buildQuiz(embody('g;'))?.items ?? [];
+		const v10cGlobal = globalItems.find(
+			(item): item is SelectInCodeQuizItem =>
+				item.mode === 'select-in-code' && item.form === 'V10c',
+		);
+
+		it('the fixture yields a V10a item that is a member of its own unlock group (guard)', () => {
+			expect(v10a?.groupKey).toBe('binding:4-5');
+			expect(v10a?.unlocks).toEqual(['binding:4-5']);
+		});
+
+		it('the fixture yields a self-excluded V10c read item unlocking a binding-usage peer (guard)', () => {
+			expect(v10cRead?.groupKey).toBe('usage-kind:read');
+			expect(v10cRead?.unlocks).toEqual(['usage:4-5:read']);
+			expect(v10cRead?.unlocks).not.toContain('usage-kind:read');
+			expect(v10bRead?.groupKey).toBe('usage:4-5:read'); // the peer's carrier
+		});
+
+		// ── Z — zero / propagation onto a not-yet-seen peer group ───
+
+		it('a correct sameness gesture credits both the own group and a not-yet-seen peer', () => {
+			if (v10cRead === undefined) throw new Error('no V10c read fixture');
+			const next = quizCore.masteryFold(
+				{},
+				v10cRead,
+				gradeRanges(v10cRead, v10cRead.targetRanges),
+			);
+			expect(next['usage-kind:read']).toEqual({ progress: 0.25, wrong: false });
+			expect(next['usage:4-5:read']).toEqual({ progress: 0.25, wrong: false });
+		});
+
+		// ── O — one / self-membership dedup (credited once, not twice) ─
+
+		it('dedups a self-membership unlock — V10a credits its own group exactly one step', () => {
+			if (v10a === undefined) throw new Error('no V10a fixture');
+			const next = quizCore.masteryFold(
+				{},
+				v10a,
+				gradeRanges(v10a, v10a.targetRanges),
+			);
+			// own key === the only unlock → exactly one entry at one step (NOT 0.5)
+			expect(Object.keys(next)).toEqual([v10a.groupKey]);
+			expect(next[v10a.groupKey]).toEqual({ progress: 0.25, wrong: false });
+		});
+
+		// ── M — many / self-excluded V10c fans out across bindings ──
+
+		it('credits the own group AND every peer for a self-excluded V10c across bindings', () => {
+			if (v10cReadCross === undefined) {
+				throw new Error('no cross-variable V10c fixture');
+			}
+			const expectedKeys = new Set([
+				v10cReadCross.groupKey,
+				...(v10cReadCross.unlocks ?? []),
+			]);
+			expect(expectedKeys.size).toBeGreaterThanOrEqual(3); // own + two peers
+			const next = quizCore.masteryFold(
+				{},
+				v10cReadCross,
+				gradeRanges(v10cReadCross, v10cReadCross.targetRanges),
+			);
+			expect(new Set(Object.keys(next))).toEqual(expectedKeys);
+			for (const key of expectedKeys) {
+				expect(next[key]).toEqual({ progress: 0.25, wrong: false });
+			}
+		});
+
+		it('propagating to a peer with prior progress accrues ON TOP (not a flat reset)', () => {
+			// The peer path is new code; guard against a flat `progress: MASTERY_STEP`
+			// credit by giving the peer non-zero prior progress via direct answers first.
+			if (v10bRead === undefined) throw new Error('no V10b read fixture');
+			if (v10cRead === undefined) throw new Error('no V10c read fixture');
+			const correctPeer = gradeRanges(v10bRead, v10bRead.targetRanges);
+			let afterDirect: MasteryState = {};
+			for (const verdict of [correctPeer, correctPeer]) {
+				afterDirect = quizCore.masteryFold(afterDirect, v10bRead, verdict);
+			}
+			expect(afterDirect['usage:4-5:read']).toEqual({
+				progress: 0.5,
+				wrong: false,
+			});
+			const afterPropagation = quizCore.masteryFold(
+				afterDirect,
+				v10cRead,
+				gradeRanges(v10cRead, v10cRead.targetRanges),
+			);
+			expect(afterPropagation['usage:4-5:read']).toEqual({
+				progress: 0.75,
+				wrong: false,
+			});
+		});
+
+		it('propagating to a peer already at the ceiling stays capped at 1', () => {
+			if (v10bRead === undefined) throw new Error('no V10b read fixture');
+			if (v10cRead === undefined) throw new Error('no V10c read fixture');
+			const correctPeer = gradeRanges(v10bRead, v10bRead.targetRanges);
+			let saturated: MasteryState = {};
+			for (const verdict of [
+				correctPeer,
+				correctPeer,
+				correctPeer,
+				correctPeer,
+			]) {
+				saturated = quizCore.masteryFold(saturated, v10bRead, verdict);
+			}
+			expect(saturated['usage:4-5:read'].progress).toBe(1);
+			const afterPropagation = quizCore.masteryFold(
+				saturated,
+				v10cRead,
+				gradeRanges(v10cRead, v10cRead.targetRanges),
+			);
+			expect(afterPropagation['usage:4-5:read']).toEqual({
+				progress: 1,
+				wrong: false,
+			});
+		});
+
+		// ── B — boundaries: peer wrong preserved; incorrect never propagates ─
+
+		it('correct propagation credits a peer progress but PRESERVES its prior wrong mark', () => {
+			if (v10bRead === undefined) throw new Error('no V10b read fixture');
+			if (v10cRead === undefined) throw new Error('no V10c read fixture');
+			// Mark the peer group wrong via an incorrect V10b-read gesture ([] ≠ targets).
+			const afterWrong = quizCore.masteryFold(
+				{},
+				v10bRead,
+				gradeRanges(v10bRead, []),
+			);
+			expect(afterWrong['usage:4-5:read']).toEqual({
+				progress: 0,
+				wrong: true,
+			});
+			// A correct V10c-read gesture unlocks the peer: progress accrues, wrong stays.
+			const afterPropagation = quizCore.masteryFold(
+				afterWrong,
+				v10cRead,
+				gradeRanges(v10cRead, v10cRead.targetRanges),
+			);
+			expect(afterPropagation['usage:4-5:read']).toEqual({
+				progress: 0.25,
+				wrong: true,
+			});
+			expect(afterPropagation['usage-kind:read']).toEqual({
+				progress: 0.25,
+				wrong: false,
+			});
+		});
+
+		it('an incorrect sameness gesture flags only the own group and does NOT propagate', () => {
+			if (v10cRead === undefined) throw new Error('no V10c read fixture');
+			const next = quizCore.masteryFold(
+				{},
+				v10cRead,
+				gradeRanges(v10cRead, []),
+			);
+			expect(next['usage-kind:read']).toEqual({ progress: 0, wrong: true });
+			expect(next['usage:4-5:read']).toBeUndefined();
+			expect(Object.keys(next)).toEqual(['usage-kind:read']);
+		});
+
+		// ── I — interface / empty unlocks tolerated ─────────────────
+
+		it('tolerates an empty unlocks list — credits only the own group (all-global V10c)', () => {
+			if (v10cGlobal === undefined) {
+				throw new Error('no all-global V10c fixture');
+			}
+			expect(v10cGlobal.unlocks).toEqual([]); // guard: the empty-unlocks case
+			const next = quizCore.masteryFold(
+				{},
+				v10cGlobal,
+				gradeRanges(v10cGlobal, v10cGlobal.targetRanges),
+			);
+			expect(Object.keys(next)).toEqual([v10cGlobal.groupKey]);
+			expect(next[v10cGlobal.groupKey]).toEqual({
+				progress: 0.25,
+				wrong: false,
+			});
+		});
+
+		// ── E — exceptions / every propagated entry is frozen ───────
+
+		it('deep-freezes the state including every propagated peer entry', () => {
+			if (v10cReadCross === undefined) {
+				throw new Error('no cross-variable V10c fixture');
+			}
+			const next = quizCore.masteryFold(
+				{},
+				v10cReadCross,
+				gradeRanges(v10cReadCross, v10cReadCross.targetRanges),
+			);
+			expect(Object.isFrozen(next)).toBe(true);
+			for (const key of Object.keys(next)) {
+				expect(Object.isFrozen(next[key])).toBe(true);
+			}
+		});
+
+		it('leaves a group outside the credited set untouched by reference', () => {
+			if (identifierItem === undefined) throw new Error('no fixture item');
+			if (v10cRead === undefined) throw new Error('no V10c read fixture');
+			// An mcq group unrelated to V10c-read's {usage-kind:read} ∪ {usage:4-5:read}.
+			const prior = quizCore.masteryFold(
+				{},
+				identifierItem,
+				gradeOption(identifierItem, 'identifier'),
+			);
+			const unrelated = prior['category:identifier'];
+			const next = quizCore.masteryFold(
+				prior,
+				v10cRead,
+				gradeRanges(v10cRead, v10cRead.targetRanges),
+			);
+			// The fold rebuilt only {groupKey} ∪ unlocks; the unrelated group is shared
+			// by reference across the spreads, never re-created.
+			expect(next['category:identifier']).toBe(unrelated);
+		});
+
+		// ── S — strings / keying: concept-group strings, never the item id ──
+
+		it('credits concept-group strings, never the item id', () => {
+			if (v10cReadCross === undefined) {
+				throw new Error('no cross-variable V10c fixture');
+			}
+			const next = quizCore.masteryFold(
+				{},
+				v10cReadCross,
+				gradeRanges(v10cReadCross, v10cReadCross.targetRanges),
+			);
+			// Propagation operates in the groupKey namespace — not the item id space.
+			expect(Object.keys(next)).not.toContain(v10cReadCross.id);
+			for (const key of Object.keys(next)) {
+				expect(key).toMatch(/^(binding|usage-kind|usage):/);
+			}
+		});
+
+		// regression ─ mcq fold unchanged (undefined unlocks → own group only)
+
+		it('an mcq fold (undefined unlocks) still credits exactly its own group — inc-5 parity', () => {
+			if (identifierItem === undefined) throw new Error('no fixture item');
+			expect(identifierItem.unlocks).toBeUndefined();
+			const next = quizCore.masteryFold(
+				{},
+				identifierItem,
+				gradeOption(identifierItem, 'identifier'),
+			);
+			expect(Object.keys(next)).toEqual([identifierItem.groupKey]);
+			expect(next[identifierItem.groupKey]).toEqual({
+				progress: 0.25,
+				wrong: false,
+			});
+		});
 	});
 });

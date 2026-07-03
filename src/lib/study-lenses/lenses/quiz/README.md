@@ -150,9 +150,8 @@ against a stable shape.
   (code-answer) — verbatim, so normal play never grades `malformed`.
 - **Group key** — `QuizItem.groupKey`: the mastery / propagation axis, a
   namespaced string (`category:<category>[:<role>]`, `binding:…`, `usage:…`).
-  Mastery folds verdicts **per `groupKey`**; "earned propagation" (a later
-  increment) bulk-credits a `groupKey` when a sameness item's `unlocks` names
-  it.
+  Mastery folds verdicts **per `groupKey`**; **earned propagation** (inc 7)
+  bulk-credits (one step) the `groupKey`s a sameness item's `unlocks` names.
 - **Mastery — two channels.** Per-`groupKey` state with **two orthogonal,
   color-free visual channels** so a learner with color-vision deficiency reads
   both: (1) **progress** — a monotonic accrual (how much of this group is
@@ -163,8 +162,8 @@ against a stable shape.
   `MasteryState` keys one `GroupMastery` per `groupKey`. The fold signature is
   `MasteryFold = (prior: MasteryState, item: QuizItem, verdict: Verdict) → MasteryState`
   (a `malformed` verdict is a no-op — mastery is never penalized for a UI bug).
-  Progress is monotonic-up (a correct answer accrues; propagation bulk-credits);
-  `wrong` toggles on an `incorrect` and clears on re-mastery. The fold that
+  Progress is monotonic-up (a correct answer accrues; earned propagation credits
+  peers one step); `wrong` toggles on an `incorrect` and clears on re-mastery. The fold that
   populates it is `masteryFold` ([`./core.ts`](./core.ts), inc 5); the pure
   `masteryDecorations` ([`./lib/decorations.ts`](./lib/decorations.ts)) then
   projects the state onto the two channels. _(The progress curve is **0..1
@@ -173,10 +172,12 @@ against a stable shape.
   `MASTERY_STEP = 0.25` (four correct answers saturate a group to `1`), rendered
   as four underline-density buckets; the `wrong` channel is an independent,
   color-free overline.)_
-- **Earned propagation** — completing a "sameness" question (e.g. "click every
-  occurrence of this variable") bulk-credits the `groupKey`s its `unlocks`
-  names, so mastery shown on one element spreads to its propagation peers.
-  Slice-B work; the data (`unlocks`) is already on the item.
+- **Earned propagation** (inc 7) — completing a "sameness" question (e.g. "click
+  every occurrence of this variable") **correctly** bulk-credits (one step) the
+  `groupKey`s its `unlocks` names, so mastery shown on one element spreads to its
+  propagation peers. Peers gain **progress only** — a peer's `wrong` mark clears
+  solely by re-answering that peer's own question; an incorrect gesture never
+  propagates. The sameness data (`unlocks`) comes from `lib/quizzing`.
 - **Block-Model homonym** (load-bearing — two `*Cell` types, do not conflate):
   - **`BlockCell`** (socratizing —
     [`../../orchestrate/lib/socratizing/types.ts`](../../orchestrate/lib/socratizing/types.ts)):
@@ -355,8 +356,9 @@ re-shape.)_
 The `QuizLensConfig`, `MasteryState`, and the `MasteryFold` **signature** were
 defined in Phase 0 ([`./types.ts`](./types.ts)) so the full contract was
 captured up front. The mastery fold + two-channel decorations landed in inc 5;
-inc 6 adds the code-as-answer modes (and the tabs + answer phase they need);
-propagation (`unlocks`), config filtering, and `recommend` remain later slices.
+inc 6 adds the code-as-answer modes (and the tabs + answer phase they need); inc
+7 acts on `unlocks` (earned propagation); config filtering and `recommend` remain
+later slices.
 
 ## Edge cases
 
@@ -390,8 +392,6 @@ Inherited from the lenses peer (single-writer state, disposable practice, no
   enumerated-not-built), so the lens never receives them. Inc 6 _does_ capture
   the generated code-answer modes — `click-token` (V8) and `select-in-code`
   (V10a/b/c) — see § Form scoping; these two are no longer deferred.
-- **No earned propagation** (inc 7). `unlocks` is carried on items but not acted
-  on.
 - **No config filtering** (inc 8). The `QuizFilter` toolbar (category / cell
   knobs) is deferred; `generateQuiz`'s `filter` is a no-op upstream today
   anyway.
@@ -452,8 +452,9 @@ Tests split: `tests/{core,mastery,build-quiz,anchors,decorations}.test.ts`
   enumerated multi-select panel form), the lens admits them through the same
   `item.mode` filter + per-mode dispatch — no panel re-shape. (Inc 6 brings the
   generated code-answer modes `click-token` + `select-in-code`.)
-- **Earned propagation** (inc 7) — act on `unlocks`: a passed sameness item
-  bulk-completes the `groupKey`s it names.
+- **Earned propagation** (inc 7, landed) — a correct sameness gesture
+  bulk-credits (one step) the `groupKey`s its `unlocks` names; propagated peers
+  gain progress only.
 - **Config knobs** (inc 8) — a toolbar (category / cell filters) → `QuizFilter`,
   once `generateQuiz` honors `filter` upstream.
 - **Real `recommend()`** (final inc) — a Block-Model-cell coverage report mapped

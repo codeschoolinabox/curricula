@@ -15,7 +15,7 @@ import freezeInPlace from '@utils/freeze-in-place.js';
 
 import type { LensConfig, Recommendation, Snippet } from '../types.js';
 
-import type { GroupMastery, MasteryFold } from './types.js';
+import type { GroupMastery, MasteryFold, MasteryState } from './types.js';
 
 /**
  * Module-level frozen-empty-array constant — shared across all `recommend()`
@@ -83,15 +83,23 @@ function recommend(_embodiment: Snippet): ReadonlyArray<Recommendation> {
 const MASTERY_STEP = 0.25;
 
 /**
- * The mastery fold (inc 5) — folds one graded interaction into the
- * per-`groupKey` mastery state. A pure reducer: returns a new frozen
- * `MasteryState` with the single `item.groupKey` entry updated and every other
+ * The mastery fold (inc 5; earned propagation inc 7) — folds one graded
+ * interaction into the per-`groupKey` mastery state. A pure reducer: returns a
+ * new frozen `MasteryState` with the credited group(s) updated and every other
  * group shared by reference.
  *
- * - **correct** → `progress` accrues one `MASTERY_STEP` toward the `1` ceiling
- *   (`Math.min`), and `wrong` clears (re-mastery).
- * - **incorrect** → `wrong` is set; `progress` is unchanged — the accrual is
- *   monotonic-up, so a wrong answer never erases earned progress.
+ * - **correct** → accrues one `MASTERY_STEP` toward the `1` ceiling (`Math.min`)
+ *   across the deduped set `{ item.groupKey } ∪ (item.unlocks ?? [])` (earned
+ *   propagation). The item's OWN group also clears `wrong` (re-mastery); each
+ *   propagated PEER gets **progress only** — its `wrong` mark is preserved
+ *   (cleared solely by re-answering that peer's own question). The dedup
+ *   collapses the sameness forms' self-membership asymmetry (V10a/b carry their
+ *   own key in `unlocks`, V10c omits it) so every group is credited exactly
+ *   once. A form with no `unlocks` (every mcq / click-token) reduces to the
+ *   single own-group update — byte-identical to inc 5.
+ * - **incorrect** → `wrong` is set on the item's own group only; `progress` is
+ *   unchanged (monotonic-up, so a wrong answer never erases earned progress) and
+ *   propagation does NOT fire (a wrong answer earns nothing for its peers).
  * - **malformed** → no-op: returns `prior` by reference. A caller / UI bug
  *   never moves mastery; the identity return also lets React's
  *   `setMastery(prior => …)` bail the decoration dispatch.
@@ -100,26 +108,51 @@ const MASTERY_STEP = 0.25;
  * verdict applies. The fold keeps no per-item record (`GroupMastery` is
  * `{ progress, wrong }` only), so re-answering the same token accrues again —
  * intended for disposable practice (monotonic, capped at `1`). Keyed on
- * `item.groupKey`, never `item.id`: mastery is a property of the concept group,
- * not the individual question.
+ * `groupKey`, never `item.id`: mastery is a property of the concept group, not
+ * the individual question — which is why one correct sameness gesture can credit
+ * several groups at once.
  *
  * @param prior - The mastery state before this interaction (frozen; `{}` at
  *   mount).
- * @param item - The graded quiz item; only its `groupKey` is read.
+ * @param item - The graded quiz item; its `groupKey` and (on `correct`) its
+ *   `unlocks` propagation peers are read.
  * @param verdict - The `grade` outcome for the learner's answer.
  * @returns A new frozen `MasteryState` (or `prior` unchanged on `malformed`).
  */
 const masteryFold: MasteryFold = function masteryFold(prior, item, verdict) {
 	if (verdict.status === 'malformed') return prior;
-	const priorProgress = prior[item.groupKey]?.progress ?? 0;
-	const group: GroupMastery =
-		verdict.status === 'correct'
-			? { progress: Math.min(1, priorProgress + MASTERY_STEP), wrong: false }
-			: { progress: priorProgress, wrong: true };
-	// `freezeInPlace` is a DEEP freeze, so freezing the spread result also freezes
-	// the new `group`; `prior`'s existing (already-frozen) groups are copied by
-	// reference and left untouched.
-	return freezeInPlace({ ...prior, [item.groupKey]: group });
+	if (verdict.status === 'incorrect') {
+		// Incorrect flags only the OWN group; progress is unchanged (monotonic-up)
+		// and propagation never fires — a wrong answer earns nothing for its peers.
+		const priorProgress = prior[item.groupKey]?.progress ?? 0;
+		return freezeInPlace({
+			...prior,
+			[item.groupKey]: { progress: priorProgress, wrong: true },
+		});
+	}
+	// Correct → accrue one MASTERY_STEP across the deduped set {groupKey} ∪ unlocks
+	// (earned propagation). The dedup collapses the sameness forms' self-membership
+	// asymmetry (V10a/b carry their own key in `unlocks`, V10c omits it) so every
+	// group is credited exactly once. The OWN group clears its `wrong` (re-mastery);
+	// a propagated PEER gets progress only, keeping its prior `wrong` (cleared solely
+	// by re-answering that peer's own question). unlocks-less forms (mcq /
+	// click-token) reduce to the single own-group update — byte-identical to inc 5.
+	const groups = new Set([item.groupKey, ...(item.unlocks ?? [])]);
+	let next: MasteryState = prior;
+	for (const key of groups) {
+		const isOwnGroup = key === item.groupKey;
+		const priorProgress = prior[key]?.progress ?? 0;
+		const priorWrong = prior[key]?.wrong ?? false;
+		const group: GroupMastery = {
+			progress: Math.min(1, priorProgress + MASTERY_STEP),
+			wrong: isOwnGroup ? false : priorWrong,
+		};
+		next = { ...next, [key]: group };
+	}
+	// `freezeInPlace` is a DEEP freeze, so freezing the final assembled `next` also
+	// freezes every new `group`; `prior`'s untouched (already-frozen) groups are
+	// copied by reference across the spreads and left as-is.
+	return freezeInPlace(next);
 };
 
 // Intentionally unfrozen — `./index.tsx` freezes the composed `LensModule`

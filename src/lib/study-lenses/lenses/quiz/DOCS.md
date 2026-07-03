@@ -204,7 +204,7 @@ flowchart TD
     Grade --> Verdict["verdict<br/>(per item id · this pick)"]
     Verdict --> VerdictDOM["verdict region (rendered)"]
 
-    Verdict -->|"fold per groupKey — masteryFold (inc 5)"| Mastery["mastery state<br/>(per groupKey · durable across picks)"]
+    Verdict -->|"fold per groupKey; on correct also credit item.unlocks (deduped set · one step · peers progress-only) — masteryFold (inc 5 · propagation inc 7)"| Mastery["mastery state<br/>(per groupKey · durable across picks)"]
     Mastery -->|"project items × mastery — masteryDecorations, pure"| Decos["MasteryDecos<br/>(progress + wrong ranges)"]
     Decos -->|"dispatch StateEffect → masteryField — view update"| MasteryDOM["two color-free channels (rendered)"]
 
@@ -321,7 +321,13 @@ die with the component instance.
   only `Decoration` / `StateField` glue (a `masteryField` fed by a
   `StateEffect`, exactly like the picked-anchor highlight). Both channels paint
   with `currentColor` (no hue) so a color-vision-deficient learner reads them on
-  independent axes.
+  independent axes. **Earned propagation (inc 7) rides the same fold:** on a
+  `correct` verdict `masteryFold` credits the deduped set
+  `{ groupKey } ∪ item.unlocks` one step each — the item's own group clears
+  `wrong`, propagated peers gain progress only (a peer's `wrong` clears solely by
+  re-answering its own question; an incorrect gesture never propagates). No new
+  stage and no `index.tsx` change — `masteryDecorations` already keys off
+  `groupKey`, so a credited peer paints on every item carrying its group.
 - **Pending selection is a fourth, orthogonal decoration axis.** The three inc-5
   channels are taken: anchor-hit (`background`), progress (underline density),
   wrong (overline) — all `currentColor`. The answer-phase staged selection
@@ -364,7 +370,6 @@ die with the component instance.
 - **`click-line` / `multi-mcq`.** `grade` handles both, but no generator emits
   them, so the lens never receives them. (Inc 6 _does_ capture the generated
   code-answer modes `click-token` + `select-in-code`.)
-- **Earned propagation** (inc 7). `unlocks` is carried but not acted on.
 - **Config filtering** (inc 8). The `QuizFilter` toolbar is deferred; the
   upstream `filter` is a no-op today anyway.
 - **Real `recommend()`** (final inc). Returns `[]`; the
@@ -590,7 +595,7 @@ them. It consumes — and never modifies — `lib/classifying` and `lib/quizzing
 
 See [`./README.md` § Future direction](./README.md#future-direction). Key
 directions in scope of this lens's evolution: code-as-answer capture (inc 6);
-earned propagation (inc 7); the config-knob toolbar → `QuizFilter` (inc 8); the
+earned propagation (inc 7, landed); the config-knob toolbar → `QuizFilter` (inc 8); the
 real `recommend()` with the `BlockCell → BlockModelCell` mapping (final inc);
 consuming `embodiment.raw.*` directly to drop the double-parse; and the
 span-render display fallback if read-only-CM click capture proves fragile at the
