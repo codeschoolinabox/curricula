@@ -50,4 +50,48 @@ describe('spliceLoopGuards', () => {
 			expect(result.loopCount).toBe(1);
 		});
 	});
+
+	describe('classic for loop', () => {
+		it('guards a counting for loop', () => {
+			const result = spliceLoopGuards(
+				'for (let i = 0; i < 10; i++) {\n\tsum += i;\n}\n',
+				hooks,
+			);
+			expect(result.code).toBe(
+				'for (let i = 0; i < 10; i++) {G1[1:0:3:1]\n\tsum += i;\n}R1\n',
+			);
+		});
+
+		it('guards an empty-header for loop', () => {
+			const result = spliceLoopGuards('for (;;) {\n\tbreak;\n}\n', hooks);
+			expect(result.code).toBe('for (;;) {G1[1:0:3:1]\n\tbreak;\n}R1\n');
+		});
+	});
+
+	describe('for-of loop', () => {
+		it('guards a declaration-target for-of loop', () => {
+			const result = spliceLoopGuards(
+				'for (const item of items) {\n\tuse(item);\n}\n',
+				hooks,
+			);
+			expect(result.code).toBe(
+				'for (const item of items) {G1[1:0:3:1]\n\tuse(item);\n}R1\n',
+			);
+		});
+
+		it('guards a destructuring for-of loop', () => {
+			const result = spliceLoopGuards(
+				'for (const [k, v] of entries) {\n\tuse(k);\n}\n',
+				hooks,
+			);
+			expect(result.code).toBe(
+				'for (const [k, v] of entries) {G1[1:0:3:1]\n\tuse(k);\n}R1\n',
+			);
+		});
+
+		it('guards an expression-target for-of loop', () => {
+			const result = spliceLoopGuards('for (x of xs) {\n\tuse(x);\n}\n', hooks);
+			expect(result.code).toBe('for (x of xs) {G1[1:0:3:1]\n\tuse(x);\n}R1\n');
+		});
+	});
 });

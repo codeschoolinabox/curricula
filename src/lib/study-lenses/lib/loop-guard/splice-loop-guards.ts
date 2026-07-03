@@ -51,7 +51,11 @@ export default function spliceLoopGuards(
  * AST node types this module guards — the single source of truth for the guarded
  * set. Internal: no consumer passes or receives a loop type.
  */
-const GUARDED_LOOP_TYPES = ['WhileStatement'] as const;
+const GUARDED_LOOP_TYPES = [
+	'WhileStatement',
+	'ForStatement',
+	'ForOfStatement',
+] as const;
 type LoopType = (typeof GUARDED_LOOP_TYPES)[number];
 
 /**
