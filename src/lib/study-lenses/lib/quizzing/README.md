@@ -101,41 +101,43 @@ the token carries a role (`identifier` and `keyword` are role-less, so they key
 on the bare category); binding-aware forms key on binding identity
 (`binding:<start>-<end>`, the declaration-site span); the usage-kind form keys
 on binding × use-type (`usage:<decl-start>-<decl-end>:<usageKind>`, so every
-occurrence of one binding used the same way shares a group), with a per-occurrence
-group-of-one fallback (`usage:occ:<start>-<end>`) for any occurrence with no
-resolvable binding — a free global, or any name the scope forest does not track
-(e.g. a function parameter in unvalidated code): the same resolution boundary V8
-already lives behind, so params and the like do not group under V7/V10b; the
-sameness form V10b carries this same binding × use-type key to bulk-credit it;
-the cross-variable sameness form V10c keys on the use-type alone
-(`usage-kind:<usageKind>`, binding-agnostic — the fourth namespaced axis); the
-const-update twin V6b keys on a curated element-type group
+occurrence of one binding used the same way shares a group), with a
+per-occurrence group-of-one fallback (`usage:occ:<start>-<end>`) for any
+occurrence with no resolvable binding — a free global, or any name the scope
+forest does not track (e.g. a function parameter in unvalidated code): the same
+resolution boundary V8 already lives behind, so params and the like do not group
+under V7/V10b; the sameness form V10b carries this same binding × use-type key
+to bulk-credit it; the cross-variable sameness form V10c keys on the use-type
+alone (`usage-kind:<usageKind>`, binding-agnostic — the fourth namespaced axis);
+the const-update twin V6b keys on a curated element-type group
 (`element-type:const-update`, the fifth axis — a single-value inline key, not a
 binding identity, since V6b is an execution-dimension runtime-error fact, not a
 keyword-recognition form like V1/V2); the two-chains form V4 keys on
 `chain:<role>:<name>` (role ∈ `scope-chain` | `prototype-chain` — the sixth
 namespaced axis, binding-agnostic: which chain a name is found through is a
 syntactic-position fact, so every occurrence of a name in a chain role shares a
-group); block and loop forms key on their structural
-anchor. Quizzing decides what a group is
-_keyed_ on; the
-lens decides how a completed group is _presented_. The group key is
-deterministic from `(snippet, classified, filter)` — it never depends on a lens
-display choice quizzing never receives.
+group); the realm forms V3 (provenance) and V5 (value-category) key on
+`realm:<name>` (the seventh namespaced axis, binding-agnostic — an unshadowed
+realm global shares one group across all its occurrences; V3 is dual-axis,
+keying `binding:<decl>` instead when a program declaration shadows the name);
+block and loop forms key on their structural anchor. Quizzing decides what a
+group is _keyed_ on; the lens decides how a completed group is _presented_. The
+group key is deterministic from `(snippet, classified, filter)` — it never
+depends on a lens display choice quizzing never receives.
 
 **Sameness unlock** — the earned-propagation mechanic, expressed as data. A
 "sameness" form (V10a/b/c — "click every occurrence of this same variable / used
 the same way") names, via its `unlocks` field, the group(s) whose propagation it
 earns. Each `unlocks` entry **is a `groupKey` string** — the same namespaced
-identity other `QuizItem`s carry in their `groupKey` (see _Group key_), not a new
-id space — so the lens matches an unlocked item's `unlocks` against its peers'
-`groupKey` to find the group to bulk-credit (e.g. a V10a binding-sameness item
-unlocks the `binding:<start>-<end>` group its V8 / V12 peers share). It lists one
-entry per distinct group earned and names whatever key those peers hold — so it
-survives a later `groupKey` re-key (the `usage:` axis gains binding × use-type
-grain at V10b) without changing. Passing a sameness item is what authorizes
-bulk-crediting its group. Quizzing emits the unlock relationship as data —
-`grade` never reads `unlocks`; the lens owns when propagation fires (over
+identity other `QuizItem`s carry in their `groupKey` (see _Group key_), not a
+new id space — so the lens matches an unlocked item's `unlocks` against its
+peers' `groupKey` to find the group to bulk-credit (e.g. a V10a binding-sameness
+item unlocks the `binding:<start>-<end>` group its V8 / V12 peers share). It
+lists one entry per distinct group earned and names whatever key those peers
+hold — so it survives a later `groupKey` re-key (the `usage:` axis gains binding
+× use-type grain at V10b) without changing. Passing a sameness item is what
+authorizes bulk-crediting its group. Quizzing emits the unlock relationship as
+data — `grade` never reads `unlocks`; the lens owns when propagation fires (over
 whatever peers survive the `filter`) and how it shows.
 
 **Curated bank vs generated** — two provenances of `QuizItem`s under one

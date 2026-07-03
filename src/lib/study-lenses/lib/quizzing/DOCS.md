@@ -102,12 +102,13 @@ Every `Snippet` read goes through a narrow helper **named for the domain
 question it answers** — never an inline field access in a generator or in
 `grade`. Three surface classes:
 
-| Class                                             | Examples                                                                             | Today                                    | Seam treatment                                                                                               |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------ | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| **A — Slice-A allowed**                           | `source.code`, `source.offsets`, `raw.tokens`, `raw.ast`, `status.parsed`            | populated, stable                        | thin accessor, **permanent**                                                                                 |
-| **B — scope shim (input migrates)**               | scope kinds, block-scope forest (via `embody/lib/scope/build-scope` + a static walk) | derivable from Class A                   | accessor body shims from Class A; **deletable** when `CreationEntwined.scopeTree` lands                      |
-| **B — occurrence→binding (resolution permanent)** | the binding a token occurrence resolves to under shadowing                           | computed in-module over the scope forest | accessor is **permanent**; only its input (the scope forest) migrates B→C — the resolution stays in quizzing |
-| **C — embody-stubbed**                            | `CreationEntwined`, `ScopeEntwined.scopeTree`, `byOffset`                            | `{}` / null / unbuilt                    | the accessor's eventual body, once embody ships the surface                                                  |
+| Class                                             | Examples                                                                             | Today                                                                         | Seam treatment                                                                                                                                                         |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **A — Slice-A allowed**                           | `source.code`, `source.offsets`, `raw.tokens`, `raw.ast`, `status.parsed`            | populated, stable                                                             | thin accessor, **permanent**                                                                                                                                           |
+| **B — scope shim (input migrates)**               | scope kinds, block-scope forest (via `embody/lib/scope/build-scope` + a static walk) | derivable from Class A                                                        | accessor body shims from Class A; **deletable** when `CreationEntwined.scopeTree` lands                                                                                |
+| **B — occurrence→binding (resolution permanent)** | the binding a token occurrence resolves to under shadowing                           | computed in-module over the scope forest                                      | accessor is **permanent**; only its input (the scope forest) migrates B→C — the resolution stays in quizzing                                                           |
+| **B — realm shim (table body deletable)**         | is a name a known realm global, and of what kind? (JeJ's 14 NM-doc globals)          | frozen curated table (`realm/read-realm-binding.ts`), `Object.hasOwn`-guarded | accessor is **permanent**; the **table body** swaps for a read of embody's realm surface (`RealmData` + `RealmBindingEntwined`) when it lands — every caller untouched |
+| **C — embody-stubbed**                            | `CreationEntwined`, `ScopeEntwined.scopeTree`, `byOffset`                            | `{}` / null / unbuilt                                                         | the accessor's eventual body, once embody ships the surface                                                                                                            |
 
 The V1 path reads **only Class A**, so it ships with **no shim**. What migrates
 B→C is an accessor's **input surface**, not always the accessor: for the scope
@@ -115,14 +116,21 @@ shim, the body is fully replaced when `CreationEntwined.scopeTree` lands
 (editing **one accessor body** — every caller untouched); for
 occurrence→binding, only the scope-forest input migrates while the shadowing
 resolution layered on top stays permanently in quizzing (no embody surface
-exposes occurrence→binding). Accessors are named for the domain question (e.g.
-"the binding this occurrence resolves to"), not for the embody field, so the
-name survives the input's B→C swap. The seam introduces **no** generic
-field-getter (over-abstraction) and tolerates **no** inline `snippet.raw.*` read
-in a generator (a leak). `byOffset` stays out even as a shim: click→token
-resolution binary-searches `ClassifiedToken` ranges, and per-node anchoring
-takes node identity from the single AST descent (Phase 2), not an offset index —
-so neither needs `byOffset` (both are Class-A answers).
+exposes occurrence→binding). The realm shim (`readRealmBinding`, the realm
+branch of V3 provenance / V5 value-category) is a third Class-B accessor: its
+frozen table **body** — JeJ's 14 realm globals from the notional machine — swaps
+for a read of embody's realm surface (`RealmData` + `RealmBindingEntwined`) when
+it lands, while the accessor name and its `RealmBindingData | null` signature
+survive; the return shape is stable across the swap because
+`RealmBindingEntwined.data` **is** a `RealmBindingData`, so no importer churns.
+Accessors are named for the domain question (e.g. "the binding this occurrence
+resolves to"), not for the embody field, so the name survives the input's B→C
+swap. The seam introduces **no** generic field-getter (over-abstraction) and
+tolerates **no** inline `snippet.raw.*` read in a generator (a leak). `byOffset`
+stays out even as a shim: click→token resolution binary-searches
+`ClassifiedToken` ranges, and per-node anchoring takes node identity from the
+single AST descent (Phase 2), not an offset index — so neither needs `byOffset`
+(both are Class-A answers).
 
 ## Data flow
 
@@ -348,23 +356,30 @@ the Snippet (the one-sided seam).
   binding-agnostic one parallel to `usage-kind:`: which chain a name is found
   through is a syntactic-position fact independent of which binding wins under
   shadowing, so every occurrence of a name in a chain role shares one group (all
-  `.length` accesses share `chain:prototype-chain:length`). On the
-  classification axis `identifier` / `keyword` (which classifying makes
-  role-less) stay on the bare two-segment form, while operator / literal /
+  `.length` accesses share `chain:prototype-chain:length`). The realm forms V3
+  (provenance) and V5 (value-category) key on `realm:<name>` (via
+  `../realm/read-realm-binding.ts`'s membership), the **seventh** namespaced
+  axis and binding-agnostic: an unshadowed realm global is not a program
+  binding, so every occurrence of one realm global shares one group (all `Math`
+  references share `realm:Math`). V3 is **dual-axis** — a program-declared
+  occurrence keys `binding:<decl>`, a realm occurrence `realm:<name>`, the
+  answer key co-varying with which resolver won; V5 fires only on the realm
+  branch. On the classification axis `identifier` / `keyword` (which classifying
+  makes role-less) stay on the bare two-segment form, while operator / literal /
   delimiter gain the `:<role>` refinement; the `category:`, `binding:`, `usage:`
-  (binding × use-type), `usage-kind:` (cross-variable), and `chain:`
-  (two-chains) serializers live in `keying/`, while two `groupKey`s stay inlined
-  in their generators rather than serialized in `keying/`: V7's
-  `usage:occ:<start>-<end>` group-of-one fallback (for an occurrence with no
-  resolvable binding) and V6b's fixed `element-type:const-update` (the
-  const-update twin's single-value element-type group — deliberately off the
-  `category:keyword` axis, which holds the text-surface keyword-recognition
-  forms V1/V2, because V6b is an execution-dimension runtime-error fact). The
-  category-ID form's propagation grain is thus intentionally finer than its
-  category answer key — a consumer wanting category-level grouping can
-  prefix-match on `category:<category>`. The key is deterministic from
-  `(snippet, classified, filter)` — never a function of a lens display choice
-  quizzing never receives.
+  (binding × use-type), `usage-kind:` (cross-variable), `chain:` (two-chains),
+  and `realm:` (V3/V5 provenance) serializers live in `keying/`, while two
+  `groupKey`s stay inlined in their generators rather than serialized in
+  `keying/`: V7's `usage:occ:<start>-<end>` group-of-one fallback (for an
+  occurrence with no resolvable binding) and V6b's fixed
+  `element-type:const-update` (the const-update twin's single-value element-type
+  group — deliberately off the `category:keyword` axis, which holds the
+  text-surface keyword-recognition forms V1/V2, because V6b is an
+  execution-dimension runtime-error fact). The category-ID form's propagation
+  grain is thus intentionally finer than its category answer key — a consumer
+  wanting category-level grouping can prefix-match on `category:<category>`. The
+  key is deterministic from `(snippet, classified, filter)` — never a function
+  of a lens display choice quizzing never receives.
 - **V1 `id` scheme is `form@start-end`** (e.g. `V1@12-13`), derivable from the
   form and the anchor alone; binding-flavored ids (`form/binding:x@decl`) are a
   later-form scheme that lands with occurrence→binding resolution.
