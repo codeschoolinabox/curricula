@@ -30,8 +30,8 @@
  *   embodiment; the dock's type toggle is its only writer.
  * - The orchestrator-level configs tier (`OrchestratorConfig`, read
  *   INTERNALLY from `configs.orchestrator` at a cast boundary — NOT a
- *   public-surface widening) seeds the dock's source-type, sandbox, and
- *   run-limit slots at mount. The dock's own value types — `RunLimits`,
+ *   public-surface widening) seeds the dock's source-type, strict, sandbox,
+ *   and run-limit slots at mount. The dock's own value types — `RunLimits`,
  *   `DockRunState`, `ChannelKind`, and the `EndReportOutcome` alias of
  *   embody's `EndReport['outcome']` — are internal-only.
  * - INTERNAL-only EventBus — no `subscribe` / `onEvent` prop on
@@ -383,6 +383,8 @@ type EndReportOutcome = EndReport['outcome'];
  * — disposability). See `./README.md` § Orchestrator-level settings.
  *
  * - `initialType` — seeds the source-type slot (default `'module'`).
+ * - `initialStrict` — seeds the strict slot (default `true`; meaningful only
+ *   when the source type is `'script'` — `'module'` is always strict).
  * - `dangerAvailable` — whether the sandbox toggle offers the `'danger'`
  *   position (educators may remove it per page; default `false`).
  * - `runLimits` — seeds the run-limits slots (partial; unset fields use
@@ -390,6 +392,7 @@ type EndReportOutcome = EndReport['outcome'];
  */
 type OrchestratorConfig = Readonly<{
 	initialType?: SnippetType;
+	initialStrict?: boolean;
 	dangerAvailable?: boolean;
 	runLimits?: Readonly<{ seconds?: number; iterations?: number }>;
 }>;
