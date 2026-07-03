@@ -4,14 +4,14 @@ import createPropertyAccessEvent from '../create-property-access-event.js';
 
 describe('createPropertyAccessEvent', () => {
 	describe('category and kind', () => {
-		it('category is propertyAccess', () => {
+		it('category is property', () => {
 			const event = createPropertyAccessEvent({
 				kind: 'dot',
 				object: 'Math',
 				key: 'PI',
 				value: { type: 'number', value: 3.141592653589793 },
 			});
-			expect(event.category).toBe('propertyAccess');
+			expect(event.category).toBe('property');
 		});
 
 		it('kind dot', () => {

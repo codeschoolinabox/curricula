@@ -10,7 +10,6 @@
  *   - resolve: { dependent, provenance, kinds } — both flags default TRUE
  *   - `{ resolve: true }` shorthand naturally expands via recursive expander
  *   - errors top-level flag defaults TRUE
- *   - with top-level flag defaults TRUE
  *   - nested shorthands (statements, expression, scopes) expand recursively
  */
 
@@ -48,10 +47,6 @@ describe('prepareConfig', () => {
 
 		it('populates scopes as object', () => {
 			expect(typeof prep({})['scopes']).toBe('object');
-		});
-
-		it('populates with default true', () => {
-			expect(prep({})['with']).toBe(true);
 		});
 
 		it('populates errors default true', () => {
@@ -363,10 +358,6 @@ describe('fine-grained overrides', () => {
 
 	it('{ errors: false } preserves errors false', () => {
 		expect(prep({ errors: false })['errors']).toBe(false);
-	});
-
-	it('{ with: false } preserves with false', () => {
-		expect(prep({ with: false })['with']).toBe(false);
 	});
 });
 

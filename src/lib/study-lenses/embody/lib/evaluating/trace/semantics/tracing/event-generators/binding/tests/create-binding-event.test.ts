@@ -4,14 +4,14 @@ import createBindingEvent from '../create-binding-event.js';
 
 describe('createBindingEvent', () => {
 	describe('category and fixed fields', () => {
-		it('category is binding', () => {
+		it('category is variable', () => {
 			const event = createBindingEvent({
 				kind: 'let',
 				event: 'declare',
 				name: 'x',
 				scopeCreationStep: 0,
 			});
-			expect(event.category).toBe('binding');
+			expect(event.category).toBe('variable');
 		});
 
 		it('kind matches input', () => {

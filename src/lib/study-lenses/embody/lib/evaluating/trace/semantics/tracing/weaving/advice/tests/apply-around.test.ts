@@ -246,7 +246,7 @@ describe('applyAround', () => {
 			);
 			expect(state.trace).toHaveLength(1);
 			const event = state.trace[0] as Record<string, unknown>;
-			expect(event.category).toBe('propertyAccess');
+			expect(event.category).toBe('property');
 			expect(event.kind).toBe('dot');
 		});
 	});
@@ -413,7 +413,7 @@ describe('applyAround', () => {
 			);
 			expect(state.trace).toHaveLength(1);
 			const event = state.trace[0] as Record<string, unknown>;
-			expect(event.category).toBe('binding');
+			expect(event.category).toBe('variable');
 			expect(event.event).toBe('read');
 			expect(event.kind).toBe('global');
 			expect(event.name).toBe('Math');

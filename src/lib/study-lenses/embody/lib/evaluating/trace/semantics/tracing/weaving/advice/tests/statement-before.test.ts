@@ -58,7 +58,7 @@ describe('statementBefore', () => {
 			statementBefore(state, 'jump', 'break', null, makeTag());
 			expect(state.trace).toHaveLength(1);
 			const event = state.trace[0] as Record<string, unknown>;
-			expect(event.category).toBe('controlFlow');
+			expect(event.category).toBe('jump');
 			expect(event.event).toBe('jump');
 		});
 

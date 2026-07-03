@@ -153,7 +153,7 @@ describe('expressionAfter', () => {
 			);
 			expect(state.trace).toHaveLength(1);
 			const event = state.trace[0] as Record<string, unknown>;
-			expect(event.category).toBe('binding');
+			expect(event.category).toBe('variable');
 			expect(event.event).toBe('read');
 		});
 

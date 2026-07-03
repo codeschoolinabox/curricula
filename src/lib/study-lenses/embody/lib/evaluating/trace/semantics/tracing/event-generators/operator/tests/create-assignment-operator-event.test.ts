@@ -4,7 +4,7 @@ import createAssignmentOperatorEvent from '../create-assignment-operator-event.j
 
 describe('createAssignmentOperatorEvent', () => {
 	describe('category and kind', () => {
-		it('category is operator', () => {
+		it('category is assignment', () => {
 			const event = createAssignmentOperatorEvent({
 				operator: '=',
 				target: 'x',
@@ -12,7 +12,7 @@ describe('createAssignmentOperatorEvent', () => {
 				result: { type: 'number', value: 5 },
 				scopeCreationStep: 0,
 			});
-			expect(event.category).toBe('operator');
+			expect(event.category).toBe('assignment');
 		});
 
 		it('kind is assignment', () => {

@@ -28,13 +28,7 @@ export default defineWorkspace([
 		test: {
 			name: 'unit',
 			include: ['src/{lib,plugins}/**/*.test.{ts,tsx}'],
-			exclude: [
-				'src/lib/**/*.browser.test.ts',
-				// WIP tracer redesign — Phase B2 / Step B7 work deferred per
-				// EMBODY-ROADMAP.md. Tests run against half-landed types
-				// would give misleading green signals.
-				'src/lib/study-lenses/embody/lib/evaluating/trace/semantics/**',
-			],
+			exclude: ['src/lib/**/*.browser.test.ts'],
 			environment: 'node',
 			// WHY server.deps.inline for CM packages: CodeMirror 6 uses
 			// instanceof checks on its Extension class. Vitest's default
@@ -78,12 +72,6 @@ export default defineWorkspace([
 		test: {
 			name: 'browser',
 			include: ['src/lib/**/*.browser.test.ts'],
-			exclude: [
-				// WIP tracer redesign — Phase B2 / Step B7 work deferred per
-				// EMBODY-ROADMAP.md. Tests run against half-landed types
-				// would give misleading green signals.
-				'src/lib/study-lenses/embody/lib/evaluating/trace/semantics/**',
-			],
 			// WHY sequential + retry: browser tests spawn Workers with
 			// SharedArrayBuffer pause protocol. Running test files in
 			// parallel exhausts the browser's Worker thread pool, causing

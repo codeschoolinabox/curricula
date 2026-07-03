@@ -9,7 +9,7 @@ describe('createJumpEvent', () => {
 			target: 'while',
 			targetScopeCreationStep: 3,
 		});
-		expect(event.category).toBe('controlFlow');
+		expect(event.category).toBe('jump');
 		expect(event.event).toBe('jump');
 		expect(event.kind).toBe('break');
 		expect(event.target).toBe('while');

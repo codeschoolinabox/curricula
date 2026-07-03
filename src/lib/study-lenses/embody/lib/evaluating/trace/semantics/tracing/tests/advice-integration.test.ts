@@ -174,7 +174,7 @@ describe('advice integration', () => {
 			const events = traceInNode('let x = 5;\n', ALL_ENABLED);
 			const bindingForX = events.filter(
 				(e) =>
-					e.category === 'binding' &&
+					e.category === 'variable' &&
 					(e as Record<string, unknown>).name === 'x',
 			);
 			const eventTypes = bindingForX.map(
@@ -190,7 +190,7 @@ describe('advice integration', () => {
 			const events = traceInNode('let x = 5;\n', ALL_ENABLED);
 			const declareEvent = events.find(
 				(e) =>
-					e.category === 'binding' &&
+					e.category === 'variable' &&
 					(e as Record<string, unknown>).event === 'declare' &&
 					(e as Record<string, unknown>).name === 'x',
 			);
@@ -202,7 +202,7 @@ describe('advice integration', () => {
 			const events = traceInNode('const y = 10;\n', ALL_ENABLED);
 			const declareEvent = events.find(
 				(e) =>
-					e.category === 'binding' &&
+					e.category === 'variable' &&
 					(e as Record<string, unknown>).event === 'declare' &&
 					(e as Record<string, unknown>).name === 'y',
 			);
@@ -214,7 +214,7 @@ describe('advice integration', () => {
 			const events = traceInNode('let x = 5;\n', ALL_ENABLED);
 			const initEvent = events.find(
 				(e) =>
-					e.category === 'binding' &&
+					e.category === 'variable' &&
 					(e as Record<string, unknown>).event === 'initialize' &&
 					(e as Record<string, unknown>).name === 'x',
 			) as Record<string, unknown>;
@@ -227,7 +227,7 @@ describe('advice integration', () => {
 			const events = traceInNode('let x = 1;\nx = 2;\n', ALL_ENABLED);
 			const assignEvents = events.filter(
 				(e) =>
-					e.category === 'binding' &&
+					e.category === 'variable' &&
 					(e as Record<string, unknown>).event === 'assign' &&
 					(e as Record<string, unknown>).name === 'x',
 			);
@@ -239,7 +239,7 @@ describe('advice integration', () => {
 			const events = traceInNode('let x = 1;\nlet y = x;\n', ALL_ENABLED);
 			const readEvent = events.find(
 				(e) =>
-					e.category === 'binding' &&
+					e.category === 'variable' &&
 					(e as Record<string, unknown>).event === 'read' &&
 					(e as Record<string, unknown>).name === 'x',
 			);
@@ -406,7 +406,7 @@ describe('advice integration', () => {
 			);
 			const jumpEvents = events.filter(
 				(e) =>
-					e.category === 'controlFlow' &&
+					e.category === 'jump' &&
 					(e as Record<string, unknown>).event === 'jump',
 			);
 			expect(jumpEvents.length).toBeGreaterThan(0);
@@ -474,12 +474,12 @@ describe('advice integration', () => {
 			const events = traceInNode('let x = 5;\nconst y = 10;\n', config);
 			const letBindings = events.filter(
 				(e) =>
-					e.category === 'binding' &&
+					e.category === 'variable' &&
 					(e as Record<string, unknown>).kind === 'let',
 			);
 			const constBindings = events.filter(
 				(e) =>
-					e.category === 'binding' &&
+					e.category === 'variable' &&
 					(e as Record<string, unknown>).kind === 'const',
 			);
 
@@ -504,12 +504,12 @@ describe('advice integration', () => {
 			const events = traceInNode('let x = 1;\nlet y = x;\n', config);
 			const readEvents = events.filter(
 				(e) =>
-					e.category === 'binding' &&
+					e.category === 'variable' &&
 					(e as Record<string, unknown>).event === 'read',
 			);
 			const declareEvents = events.filter(
 				(e) =>
-					e.category === 'binding' &&
+					e.category === 'variable' &&
 					(e as Record<string, unknown>).event === 'declare',
 			);
 

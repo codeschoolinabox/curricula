@@ -68,12 +68,12 @@ describe('effectBefore', () => {
 			});
 			effectBefore(state, 'x', makeTag({ operator: '+=', source: 'x += 5' }));
 			const opEvents = (state.trace as Record<string, unknown>[]).filter(
-				(e) => e.category === 'operator' && e.kind === 'assignment',
+				(e) => e.category === 'assignment' && e.kind === 'assignment',
 			);
 			expect(opEvents).toHaveLength(1);
 		});
 
-		it('does not emit operator event when operators.assignment is disabled', () => {
+		it('does not emit assignment event when operators.assignment is disabled', () => {
 			const state = makeState({
 				config: {
 					bindings: { kind: { let: true }, events: { assign: true } },
@@ -85,7 +85,7 @@ describe('effectBefore', () => {
 			});
 			effectBefore(state, 'x', makeTag({ operator: '+=', source: 'x += 5' }));
 			const opEvents = (state.trace as Record<string, unknown>[]).filter(
-				(e) => e.category === 'operator',
+				(e) => e.category === 'assignment',
 			);
 			expect(opEvents).toHaveLength(0);
 		});
