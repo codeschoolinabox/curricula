@@ -163,10 +163,10 @@ against a stable shape.
   `MasteryFold = (prior: MasteryState, item: QuizItem, verdict: Verdict) → MasteryState`
   (a `malformed` verdict is a no-op — mastery is never penalized for a UI bug).
   Progress is monotonic-up (a correct answer accrues; earned propagation credits
-  peers one step); `wrong` toggles on an `incorrect` and clears on re-mastery. The fold that
-  populates it is `masteryFold` ([`./core.ts`](./core.ts), inc 5); the pure
-  `masteryDecorations` ([`./lib/decorations.ts`](./lib/decorations.ts)) then
-  projects the state onto the two channels. _(The progress curve is **0..1
+  peers one step); `wrong` toggles on an `incorrect` and clears on re-mastery.
+  The fold that populates it is `masteryFold` ([`./core.ts`](./core.ts), inc 5);
+  the pure `masteryDecorations` ([`./lib/decorations.ts`](./lib/decorations.ts))
+  then projects the state onto the two channels. _(The progress curve is **0..1
   accrual** — ruled at the Phase-0 human gate 2026-06-28, over a
   consecutive-correct counter or a threshold-to-unlock. inc 5 set
   `MASTERY_STEP = 0.25` (four correct answers saturate a group to `1`), rendered
@@ -174,10 +174,10 @@ against a stable shape.
   color-free overline.)_
 - **Earned propagation** (inc 7) — completing a "sameness" question (e.g. "click
   every occurrence of this variable") **correctly** bulk-credits (one step) the
-  `groupKey`s its `unlocks` names, so mastery shown on one element spreads to its
-  propagation peers. Peers gain **progress only** — a peer's `wrong` mark clears
-  solely by re-answering that peer's own question; an incorrect gesture never
-  propagates. The sameness data (`unlocks`) comes from `lib/quizzing`.
+  `groupKey`s its `unlocks` names, so mastery shown on one element spreads to
+  its propagation peers. Peers gain **progress only** — a peer's `wrong` mark
+  clears solely by re-answering that peer's own question; an incorrect gesture
+  never propagates. The sameness data (`unlocks`) comes from `lib/quizzing`.
 - **Block-Model homonym** (load-bearing — two `*Cell` types, do not conflate):
   - **`BlockCell`** (socratizing —
     [`../../orchestrate/lib/socratizing/types.ts`](../../orchestrate/lib/socratizing/types.ts)):
@@ -357,8 +357,8 @@ The `QuizLensConfig`, `MasteryState`, and the `MasteryFold` **signature** were
 defined in Phase 0 ([`./types.ts`](./types.ts)) so the full contract was
 captured up front. The mastery fold + two-channel decorations landed in inc 5;
 inc 6 adds the code-as-answer modes (and the tabs + answer phase they need); inc
-7 acts on `unlocks` (earned propagation); config filtering and `recommend` remain
-later slices.
+7 acts on `unlocks` (earned propagation); config filtering and `recommend`
+remain later slices.
 
 ## Edge cases
 

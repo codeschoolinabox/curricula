@@ -324,9 +324,9 @@ die with the component instance.
   independent axes. **Earned propagation (inc 7) rides the same fold:** on a
   `correct` verdict `masteryFold` credits the deduped set
   `{ groupKey } ∪ item.unlocks` one step each — the item's own group clears
-  `wrong`, propagated peers gain progress only (a peer's `wrong` clears solely by
-  re-answering its own question; an incorrect gesture never propagates). No new
-  stage and no `index.tsx` change — `masteryDecorations` already keys off
+  `wrong`, propagated peers gain progress only (a peer's `wrong` clears solely
+  by re-answering its own question; an incorrect gesture never propagates). No
+  new stage and no `index.tsx` change — `masteryDecorations` already keys off
   `groupKey`, so a credited peer paints on every item carrying its group.
 - **Pending selection is a fourth, orthogonal decoration axis.** The three inc-5
   channels are taken: anchor-hit (`background`), progress (underline density),
@@ -595,8 +595,8 @@ them. It consumes — and never modifies — `lib/classifying` and `lib/quizzing
 
 See [`./README.md` § Future direction](./README.md#future-direction). Key
 directions in scope of this lens's evolution: code-as-answer capture (inc 6);
-earned propagation (inc 7, landed); the config-knob toolbar → `QuizFilter` (inc 8); the
-real `recommend()` with the `BlockCell → BlockModelCell` mapping (final inc);
-consuming `embodiment.raw.*` directly to drop the double-parse; and the
+earned propagation (inc 7, landed); the config-knob toolbar → `QuizFilter` (inc
+8); the real `recommend()` with the `BlockCell → BlockModelCell` mapping (final
+inc); consuming `embodiment.raw.*` directly to drop the double-parse; and the
 span-render display fallback if read-only-CM click capture proves fragile at the
 inc-2 checkpoint.
