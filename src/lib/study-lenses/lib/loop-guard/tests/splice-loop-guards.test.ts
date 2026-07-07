@@ -42,12 +42,19 @@ describe('spliceLoopGuards', () => {
 				'outer: while (x < 10) {\n\tx++;\n}\n',
 				hooks,
 			);
-			expect(result.code).toBe('outer: while (x < 10) {G1[1:7:3:1]\n\tx++;\n}R1\n');
+			expect(result.code).toBe(
+				'outer: while (x < 10) {G1[1:7:3:1]\n\tx++;\n}R1\n',
+			);
 		});
 
 		it('counts the one guarded loop', () => {
 			const result = spliceLoopGuards('while (x < 10) {\n\tx++;\n}\n', hooks);
 			expect(result.loopCount).toBe(1);
+		});
+
+		it('returns a frozen result when a loop was guarded', () => {
+			const result = spliceLoopGuards('while (x < 10) {\n\tx++;\n}\n', hooks);
+			expect(Object.isFrozen(result)).toBe(true);
 		});
 	});
 
@@ -127,9 +134,22 @@ describe('spliceLoopGuards', () => {
 		});
 
 		it('applies adjacent nested insertions without corruption', () => {
-			const result = spliceLoopGuards('while (a) {\n\twhile (b) {}\n}\n', hooks);
+			const result = spliceLoopGuards(
+				'while (a) {\n\twhile (b) {}\n}\n',
+				hooks,
+			);
 			expect(result.code).toBe(
 				'while (a) {G1[1:0:3:1]\n\twhile (b) {G2[2:1:2:13]}R2\n}R1\n',
+			);
+		});
+
+		it('places an inner do-while reset before the outer body close', () => {
+			const result = spliceLoopGuards(
+				'while (a) {\n\tdo {\n\t\tb--;\n\t} while (b > 0);\n}\n',
+				hooks,
+			);
+			expect(result.code).toBe(
+				'while (a) {G1[1:0:5:1]\n\tdo {G2[2:1:4:17]\n\t\tb--;\n\t} while (b > 0);;R2\n}R1\n',
 			);
 		});
 	});
@@ -140,12 +160,16 @@ describe('spliceLoopGuards', () => {
 				'do {\n\tx--;\n} while (x > 0);\n',
 				hooks,
 			);
-			expect(result.code).toBe('do {G1[1:0:3:16]\n\tx--;\n} while (x > 0);;R1\n');
+			expect(result.code).toBe(
+				'do {G1[1:0:3:16]\n\tx--;\n} while (x > 0);;R1\n',
+			);
 		});
 
 		it('self-terminates the reset when the do-while relied on ASI (no ;)', () => {
 			const result = spliceLoopGuards('do {\n\tx--;\n} while (x > 0)\n', hooks);
-			expect(result.code).toBe('do {G1[1:0:3:15]\n\tx--;\n} while (x > 0);R1\n');
+			expect(result.code).toBe(
+				'do {G1[1:0:3:15]\n\tx--;\n} while (x > 0);R1\n',
+			);
 		});
 
 		it('spans the loop-statement, not the body block, in the guard loc', () => {
@@ -245,6 +269,24 @@ describe('spliceLoopGuards', () => {
 			).toThrow(/single-line/);
 		});
 
+		it('throws when the guard text contains a carriage return', () => {
+			expect(() =>
+				spliceLoopGuards('while (x) {\n\tx++;\n}\n', {
+					makeGuard: () => 'G\r1',
+					makeReset,
+				}),
+			).toThrow(/single-line/);
+		});
+
+		it('throws when the reset text contains a line separator', () => {
+			expect(() =>
+				spliceLoopGuards('while (x) {\n\tx++;\n}\n', {
+					makeGuard,
+					makeReset: () => 'R\u20281',
+				}),
+			).toThrow(/single-line/);
+		});
+
 		it('throws when the source parses as neither module nor script', () => {
 			expect(() => spliceLoopGuards('while (', hooks)).toThrow(
 				/could not parse/,
@@ -268,7 +310,9 @@ describe('spliceLoopGuards', () => {
 				'\twhile (x < 10) {\n\t\tx++;\n\t}\n',
 				hooks,
 			);
-			expect(result.code).toBe('\twhile (x < 10) {G1[1:1:3:2]\n\t\tx++;\n\t}R1\n');
+			expect(result.code).toBe(
+				'\twhile (x < 10) {G1[1:1:3:2]\n\t\tx++;\n\t}R1\n',
+			);
 		});
 	});
 
@@ -304,6 +348,37 @@ describe('spliceLoopGuards', () => {
 				runs,
 			);
 		});
+
+		it.each([
+			[-1, 0],
+			[0, 0],
+			[1, 1],
+			[3, 3],
+		])('for loop runs the body %i times before max %i trips', (max, runs) => {
+			expect(
+				runGuardedIterations(
+					'for (let i = 0; i < 100; i++) {\n\tcount++;\n}\n',
+					max,
+				),
+			).toBe(runs);
+		});
+
+		it.each([
+			[-1, 0],
+			[0, 0],
+			[1, 1],
+			[3, 3],
+		])(
+			'for-of loop runs the body %i times before max %i trips',
+			(max, runs) => {
+				expect(
+					runGuardedIterations(
+						'for (const n of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {\n\tcount++;\n}\n',
+						max,
+					),
+				).toBe(runs);
+			},
+		);
 
 		it.each([
 			[-1, 0],
