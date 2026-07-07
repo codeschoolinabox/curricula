@@ -16,8 +16,8 @@ shape, peer responsibilities, and dependency rules.
 
 ## Directory layout
 
-Three peers under `study-lenses/` mirror the conceptual chain. The implementation
-peer (`orchestrate/`) wires everything together for the learner.
+Three peers under `study-lenses/` mirror the conceptual chain. The
+implementation peer (`orchestrate/`) wires everything together for the learner.
 
 ```text
 study-lenses/
@@ -390,8 +390,8 @@ may consume without an upward dependency between peers.
 
 Concrete:
 
-- `lib/*` (JEJ-peer shared adapters — completing, documenting, classifying,
-  …) may import from `embody/types.ts` (types), `embody/lib/*`, peer-shared
+- `lib/*` (JEJ-peer shared adapters — completing, documenting, classifying, …)
+  may import from `embody/types.ts` (types), `embody/lib/*`, peer-shared
   contracts (`orchestrate/lib/*/types.ts`), sibling `lib/*`, and `@-utils`.
   Never from `embody/` (top), `orchestrate/` (top), or `lenses/`. Any peer —
   `embody/`, `lenses/<lens>/*`, `orchestrate/` — may import from `lib/*`.
@@ -406,8 +406,8 @@ Concrete:
   `lenses/`.
 - `lenses/<lens>/*` may import from sibling lens-internal files, `lib/*`
   (JEJ-peer shared adapters), `orchestrate/lib/*`, and `@-utils`. Receives
-  `embodiment` via props from the orchestrator. Never imports from `embody/`
-  or `orchestrate/` (top).
+  `embodiment` via props from the orchestrator. Never imports from `embody/` or
+  `orchestrate/` (top).
 - `orchestrate/` may import from `orchestrate/lib/*`, `embody/`, `lenses/`,
   `@-utils`.
 - `orchestrate/lib/*` may import from sibling `orchestrate/lib/*`, `embody/`
