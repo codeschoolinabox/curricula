@@ -1,7 +1,9 @@
-import type { JumpEvent, LoopKind } from '../../types.js';
+import type { BaseEvent, JumpEvent, LoopKind } from '../../types.js';
+import type { DistributiveOmit, Equal, Expect } from '../conformance.js';
 
 /**
- * Creates a JumpEvent for break/continue statements.
+ * Creates the domain fields for a jump event (break/continue). The dispatcher
+ * stamps the base fields.
  */
 export default function createJumpEvent(
 	{
@@ -20,7 +22,7 @@ export default function createJumpEvent(
 		readonly targetScopeCreationStep: number;
 		readonly label?: string;
 	},
-): Omit<JumpEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
+): JumpDomainFields {
 	return {
 		category: 'jump',
 		event: 'jump',
@@ -30,3 +32,17 @@ export default function createJumpEvent(
 		...(label !== undefined && { label }),
 	};
 }
+
+/** Domain fields (base stamped downstream) for JumpEvent. */
+type JumpDomainFields = {
+	readonly category: 'jump';
+	readonly event: 'jump';
+	readonly kind: 'break' | 'continue';
+	readonly target: LoopKind;
+	readonly targetScopeCreationStep?: number;
+	readonly label?: string;
+};
+
+type _AssertJump = Expect<
+	Equal<JumpDomainFields, DistributiveOmit<JumpEvent, keyof BaseEvent>>
+>;

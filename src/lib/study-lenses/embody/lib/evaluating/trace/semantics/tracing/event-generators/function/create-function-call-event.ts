@@ -1,10 +1,16 @@
-import type { FunctionCallEvent, ValueRepresentation } from '../../types.js';
+import type {
+	BaseEvent,
+	FunctionCallEvent,
+	ValueRepresentation,
+} from '../../types.js';
+import type { DistributiveOmit, Equal, Expect } from '../conformance.js';
 
 /**
- * Creates a FunctionCallEvent for built-in function calls.
+ * Creates the domain fields for a FunctionCallEvent (built-in function calls).
+ * The dispatcher stamps the base fields.
  *
  * @param params - function name and arguments
- * @returns Domain-specific fields for a FunctionCallEvent
+ * @returns Domain fields for a FunctionCallEvent
  * @throws {Error} If name is missing or empty
  */
 export default function createFunctionCallEvent(
@@ -18,7 +24,7 @@ export default function createFunctionCallEvent(
 		readonly name: string;
 		readonly args: readonly ValueRepresentation[];
 	},
-): Omit<FunctionCallEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
+): FunctionCallDomainFields {
 	if (!name) {
 		throw new Error(
 			'createFunctionCallEvent: name is required and must be non-empty',
@@ -32,3 +38,18 @@ export default function createFunctionCallEvent(
 		args,
 	};
 }
+
+/** Domain fields (base stamped downstream) for FunctionCallEvent. */
+type FunctionCallDomainFields = {
+	readonly category: 'function';
+	readonly event: 'call';
+	readonly name: string;
+	readonly args: readonly ValueRepresentation[];
+};
+
+type _AssertFunctionCall = Expect<
+	Equal<
+		FunctionCallDomainFields,
+		DistributiveOmit<FunctionCallEvent, keyof BaseEvent>
+	>
+>;
