@@ -1,38 +1,29 @@
-import type {
-	LiteralEvent,
-	LiteralKind,
-	ValueRepresentation,
-} from '../../types.js';
+import type { BaseEvent, LiteralEvent, LiteralKind } from '../../types.js';
+import type { DistributiveOmit, Equal, Expect } from '../conformance.js';
 
 /**
- * Creates a LiteralEvent for when a value is created from a literal expression.
+ * Creates the domain fields for a LiteralEvent. The literal's value rides the
+ * paired ResolveEvent (kind: 'literal'), not this event. The dispatcher stamps
+ * the base fields.
  *
- * @param params - The literal kind and its value representation
- * @returns The domain-specific fields for a LiteralEvent (without BaseEvent metadata)
- * @throws {Error} If kind or value is missing
+ * @param params - the literal kind
+ * @returns Domain fields for a LiteralEvent
+ * @throws {Error} If kind is missing or invalid
  */
 export default function createLiteralEvent(
-	{
-		kind,
-		value,
-	}: {
+	{ kind }: { readonly kind: LiteralKind } = {} as {
 		readonly kind: LiteralKind;
-		readonly value: ValueRepresentation;
-	} = {} as { readonly kind: LiteralKind; readonly value: ValueRepresentation },
-): Omit<LiteralEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
+	},
+): LiteralDomainFields {
 	if (!kind || !VALID_KINDS.has(kind)) {
 		throw new Error(
 			`createLiteralEvent: kind must be one of ${Array.from(VALID_KINDS).join(', ')}`,
 		);
 	}
-	if (value === undefined || value === null) {
-		throw new Error('createLiteralEvent: value is required');
-	}
 
 	return {
 		category: 'literal',
 		kind,
-		value,
 	};
 }
 
@@ -44,3 +35,13 @@ const VALID_KINDS = new Set<LiteralKind>([
 	'null',
 	'regex',
 ]);
+
+/** Domain fields (base stamped downstream) for LiteralEvent. */
+type LiteralDomainFields = {
+	readonly category: 'literal';
+	readonly kind: LiteralKind;
+};
+
+type _AssertLiteral = Expect<
+	Equal<LiteralDomainFields, DistributiveOmit<LiteralEvent, keyof BaseEvent>>
+>;
