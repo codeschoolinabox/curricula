@@ -71,7 +71,9 @@ export default function blockDeclaration(
 				scopeCreationStep: currentScope.creationStep,
 				declarationStep: currentScope.variables[varName].declarationStep,
 				value: representValue(value),
-				...(tag.explicit !== undefined && { explicit: tag.explicit }),
+				// non-TDZ at block entry ⇒ a hoisted function declaration, whose
+				// binding is always explicitly defined (the function is the value).
+				explicit: true,
 			});
 		}
 

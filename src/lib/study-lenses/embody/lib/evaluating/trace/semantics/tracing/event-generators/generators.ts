@@ -35,7 +35,7 @@ const generators = {
 		declare: createBindingEvent,
 		initialize: createBindingEvent,
 		available: createBindingEvent,
-		assign: createBindingEvent,
+		update: createBindingEvent,
 		read: createBindingEvent,
 	},
 

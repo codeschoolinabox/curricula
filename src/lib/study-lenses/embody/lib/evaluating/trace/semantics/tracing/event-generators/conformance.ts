@@ -4,16 +4,31 @@
  * Each generator returns a hand-written `*DomainFields` type — the canonical
  * event's fields minus the base fields the dispatcher stamps. Because the
  * dispatcher merges then casts (`create-trace-event.ts` `as TraceEvent`), the
- * hand-written type has no automatic tie-back to `../types.ts`. A per-generator
- * `Expect<Equal<*DomainFields, DistributiveOmit<*Event, keyof BaseEvent>>>`
- * assertion restores it: a change to the canonical event that the generator
- * fails to mirror becomes a standalone-tsc-probe error at the generator.
+ * hand-written type has no automatic tie-back to `../types.ts`. These helpers
+ * restore a tie-back the standalone tsc probe enforces.
  *
- * `DistributiveOmit` (not the built-in `Omit`) is required because the
- * discriminated-union events (BindingEvent, ConditionalEvent, LoopEvent,
- * ScopeEvent) are unions of intersections — a plain `Omit` over such a union
- * collapses every variant to the common keys, discarding the per-variant
- * fields the generator produces.
+ * FLAT events (literal, property, operators, templates, function-call, scope,
+ * jump) use full bidirectional conformance:
+ *   `Expect<Equal<*DomainFields, DistributiveOmit<*Event, keyof BaseEvent>>>`
+ * — any change to the canonical event the generator fails to mirror fails the
+ * probe.
+ *
+ * DISCRIMINATED events (BindingEvent, ConditionalEvent, LoopEvent) cannot use
+ * `Equal`: the contract writes them as `BaseEvent & {common} & (variant-union)`
+ * — an intersection-of-union that `Omit`/`Extract`/`DistributiveOmit` all
+ * collapse to the common keys, discarding the per-variant fields (no generic TS
+ * expression recovers them). Those generators tie back two weaker-but-real
+ * ways: (1) a one-directional shape check
+ *   `Expect<[*DomainFields] extends [DistributiveOmit<*Event, keyof BaseEvent>]
+ *   ? true : false>`
+ * ties the common fields + the discriminant set to types.ts; (2) the
+ * generator's own `: *DomainFields` return annotation forces a correctly-
+ * narrowed body — a flat or mis-shaped return fails to compile. Residual
+ * per-variant field drift is covered by human/AR review, not the type system.
+ *
+ * `DistributiveOmit` distributes `Omit` over a genuine top-level union; for the
+ * intersection-of-union contracts above it reduces to a plain (collapsing)
+ * `Omit`, which is exactly what the one-directional check compares against.
  */
 
 /** `Omit` that distributes over a union, preserving each variant's members. */

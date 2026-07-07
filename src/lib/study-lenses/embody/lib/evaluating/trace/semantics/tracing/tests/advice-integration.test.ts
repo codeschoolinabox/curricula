@@ -289,16 +289,16 @@ describe('advice integration', () => {
 			expect(initEvent.value).toEqual({ type: 'number', value: 5 });
 		});
 
-		it('reassignment produces assign event (not initialize)', () => {
+		it('reassignment produces an update event (not initialize)', () => {
 			const events = traceInNode('let x = 1;\nx = 2;\n', ALL_ENABLED);
-			const assignEvents = events.filter(
+			const updateEvents = events.filter(
 				(e) =>
 					e.category === 'variable' &&
-					(e as Record<string, unknown>).event === 'assign' &&
+					(e as Record<string, unknown>).event === 'update' &&
 					(e as Record<string, unknown>).name === 'x',
 			);
 
-			expect(assignEvents.length).toBeGreaterThan(0);
+			expect(updateEvents.length).toBeGreaterThan(0);
 		});
 
 		it('variable read produces read event', () => {

@@ -452,7 +452,7 @@ describe('applyAround', () => {
 	});
 
 	describe('global variable write (aran.writeGlobalVariableStrict)', () => {
-		it('emits BindingEvent(assign) with kind global', () => {
+		it('emits BindingEvent(update) with kind global', () => {
 			const state = makeState({
 				config: {
 					...makeState().config,
@@ -470,7 +470,7 @@ describe('applyAround', () => {
 			);
 			expect(state.trace).toHaveLength(1);
 			const event = state.trace[0] as Record<string, unknown>;
-			expect(event.event).toBe('assign');
+			expect(event.event).toBe('update');
 			expect(event.kind).toBe('global');
 		});
 	});

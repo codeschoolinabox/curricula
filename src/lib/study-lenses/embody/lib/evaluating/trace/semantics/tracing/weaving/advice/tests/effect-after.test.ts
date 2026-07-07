@@ -47,11 +47,11 @@ function makeState(overrides: Partial<TracerState> = {}): TracerState {
 
 describe('effectAfter', () => {
 	describe('simple assignment (=)', () => {
-		it('emits BindingEvent(assign)', () => {
+		it('emits BindingEvent(update)', () => {
 			const state = makeState();
 			effectAfter(state, 'x', makeTag());
 			const assignEvents = (state.trace as Record<string, unknown>[]).filter(
-				(e) => e.event === 'assign',
+				(e) => e.event === 'update',
 			);
 			expect(assignEvents).toHaveLength(1);
 		});

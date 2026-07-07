@@ -72,12 +72,13 @@ export default function effectAfter(
 			}
 		} else {
 			// Subsequent write — this is a reassignment.
+			// gate key stays 'assign' until I-7 unifies the config schema
 			if (
 				isBindingGateOpen(state.config, lookup.info.kind, 'assign', variable)
 			) {
-				emitEvent(state, tag, 'expression', 'bindings.assign', {
+				emitEvent(state, tag, 'expression', 'bindings.update', {
 					kind: lookup.info.kind,
-					event: 'assign',
+					event: 'update',
 					name: variable,
 					scopeCreationStep: lookup.scope.creationStep,
 					declarationStep: lookup.info.declarationStep,

@@ -158,10 +158,11 @@ export default function applyAround(
 			discriminant === 'aran.writeGlobalVariableSloppy'
 		) {
 			const varName = args[0] as string;
+			// gate key stays 'assign' until I-7 unifies the config schema
 			if (isBindingGateOpen(state.config, 'global', 'assign', varName)) {
-				emitEvent(state, tag, 'expression', 'bindings.assign', {
+				emitEvent(state, tag, 'expression', 'bindings.update', {
 					kind: 'global',
-					event: 'assign',
+					event: 'update',
 					name: varName,
 					scopeCreationStep: 0,
 					value: representValue(callResult),
