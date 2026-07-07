@@ -130,6 +130,16 @@ describe('blockDeclaration', () => {
 			expect(initEvents).toHaveLength(1);
 		});
 
+		it('stamps explicit true on a non-deadzone initialize', () => {
+			const state = makeState();
+			blockDeclaration(state, { x: 5 }, 'Program', 'module', 'bare', makeTag());
+			const initEvent = (state.trace as Record<string, unknown>[]).find(
+				(e) => e.event === 'initialize',
+			) as Record<string, unknown>;
+
+			expect(initEvent.explicit).toBe(true);
+		});
+
 		it('emits available for non-deadzone values', () => {
 			const state = makeState();
 			blockDeclaration(state, { x: 5 }, 'Program', 'module', 'bare', makeTag());
