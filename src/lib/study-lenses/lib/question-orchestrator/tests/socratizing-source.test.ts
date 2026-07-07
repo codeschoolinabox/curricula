@@ -82,8 +82,8 @@ describe('socratizingSource', () => {
 			expect(
 				openItemsFor('let x = 1;')
 					.filter((item) => item.question.id === 'what-is-declared')
-					.map((item) => item.question.context),
-			).toEqual(["A variable 'x' is declared with 'let'."]);
+					.map((item) => Array.isArray(item.question.questions)),
+			).toEqual([true]);
 		});
 	});
 

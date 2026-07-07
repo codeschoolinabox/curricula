@@ -12,8 +12,6 @@
  * non-null); the sources are never re-parsed. See `./DOCS.md` § Execution phases.
  */
 
-import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
-
 import type { Snippet } from '../../embody/types.js';
 import classifyTokens from '../classifying/classify-tokens.js';
 import type { ClassifyInput } from '../classifying/types.js';
@@ -44,8 +42,8 @@ function composeQuestions(
 		embodiment.raw.tokens === null ||
 		embodiment.raw.ast === null
 	) {
-		return deepFreezeInPlace({
-			items: [],
+		return Object.freeze({
+			items: Object.freeze([]),
 			coverage: reportCoverage([], config.coverage?.cells ?? []),
 		});
 	}
@@ -69,7 +67,11 @@ function composeQuestions(
 			? laddered.slice(0, config.count)
 			: laddered;
 	const coverage = reportCoverage(capped, config.coverage?.cells ?? []);
-	return deepFreezeInPlace({ items: capped, coverage });
+	// Freeze only what compose owns — the wrapper object and the items array. The
+	// items, the coverage report, and its arrays are already frozen by the passes
+	// that built them; a deep freeze here would reach through `coverage.gaps` and
+	// freeze the CALLER's borrowed target cells in place.
+	return Object.freeze({ items: Object.freeze(capped), coverage });
 }
 
 export default composeQuestions;

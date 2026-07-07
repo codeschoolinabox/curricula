@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import embody from '../../../embody/index.js';
+import type { BlockCell } from '../../../orchestrate/lib/socratizing/types.js';
 import composeQuestions from '../compose-questions.js';
 import ladder from '../ladder.js';
 
@@ -37,6 +38,14 @@ describe('composeQuestions', () => {
 					},
 				}).coverage.gaps.length,
 			).toBe(1);
+		});
+
+		it('does not freeze caller-owned coverage cells borrowed into the gaps', () => {
+			const cell: BlockCell = { dimension: 'execution', level: 'atom' };
+			composeQuestions(embody('FAIL_AT_PARSE'), {
+				coverage: { cells: [cell] },
+			});
+			expect(Object.isFrozen(cell)).toBe(false);
 		});
 	});
 
@@ -117,8 +126,9 @@ describe('composeQuestions', () => {
 		it('caps the head of the laddered stream, not raw source order', () => {
 			const code = 'let x = 1; x;';
 			const { items: full } = composeQuestions(embody(code));
-			const { items: capped } = composeQuestions(embody(code), { count: 10 });
-			expect(capped).toEqual(full.slice(0, 10));
+			const k = Math.floor(full.length / 2);
+			const { items: capped } = composeQuestions(embody(code), { count: k });
+			expect(capped).toEqual(full.slice(0, k));
 		});
 	});
 
