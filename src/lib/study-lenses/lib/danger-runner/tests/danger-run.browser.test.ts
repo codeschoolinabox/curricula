@@ -168,4 +168,13 @@ describe('dangerRun — iframe core (browser)', () => {
 		}).result;
 		expect(result.outcome).toBe('limit-exceeded');
 	});
+
+	it('debuggerEnabled: true still parses, runs, and settles completed through the facade', async () => {
+		// Stepping is manual-eyeball, but the debugger-wrapped script must still PARSE
+		// and RUN — a mis-wire (dropped flag, or the `debugger;` glue breaking the build
+		// prefix so the script fails to parse) would settle errored. This pins the
+		// facade's wrapWithDebugger true-branch composition, untested by the flag-less cases.
+		const result = await dangerRun('1 + 1;', { debuggerEnabled: true }).result;
+		expect(result.outcome).toBe('completed');
+	});
 });

@@ -65,7 +65,10 @@ export default function dangerRun(
 	options: DangerRunOptions,
 ): DangerRunHandle {
 	const { iterations, debuggerEnabled } = options;
-	// inc-5 deferred: io routing not yet implemented — native output only.
+	// DEFERRED — accepted-but-ignored (loud, not silent): `io` (routing not
+	// implemented — native output only) and the mode axis `type` / `strict` (WP4;
+	// buildDangerScript always emits `"use strict";`, so `strict: false` and `type`
+	// are no-ops today).
 
 	let settled = false;
 	let resolveResult!: (result: DangerResult) => void;
