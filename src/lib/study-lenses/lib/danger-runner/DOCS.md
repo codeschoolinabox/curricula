@@ -211,6 +211,14 @@ above).
 
 ## Deferred increment plan (Phase 1+ — gated on the human DDD gate; do not start)
 
+**STATUS (2026-07-03):** increments 1–4 are SHIPPED as the design-stable TDD
+campaign (INC-A `classifyDangerError`, INC-B `wrapWithDebugger`, INC-C
+`buildDangerScript`, INC-D iframe core + cancel/latch, INC-E iteration guard —
+the loop-guard wired via the **interim** embody `guardLoops`, see § Structural
+constraints). Only **5 (io mocks)** and **6 (`handleRun` + adapter wiring)**
+remain deferred. Items 1–4 below are retained as the design record, not a live
+to-do.
+
 1. **iframe core** — create/connect the iframe, inject the raw `<script>`, map
    natural completion → `completed` and a thrown/syntax error → `errored`,
    teardown, and the async-settle discipline. Standalone, browser-testable.
@@ -236,7 +244,12 @@ above).
    builder as `io` when mocked (NOT the worker's `buildIoMocks()`). Deferred and
    coordinated (index.tsx is shared).
 
-## Verification (deferred — named here, not built in Phase 0)
+## Verification (design record — most is now BUILT; see status)
+
+**STATUS (2026-07-03):** the pure-helper Node tests and the iframe-runner
+`*.browser.test.ts` below are BUILT and green (45 tests). Only the
+eyeball-harness `vite.sandbox.config.ts` (freeze / dialog / `debugger;`) remains
+deferred.
 
 - **Pure helpers** — Node unit tests for `wrapWithDebugger`, `buildDangerScript`
   (assert user line numbers are unshifted), and `classifyDangerError` (the

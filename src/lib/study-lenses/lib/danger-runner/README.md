@@ -457,8 +457,9 @@ the real transport.
 - **The iframe runner is real-only** — a `*.browser.test.ts` (precedent:
   `local-llm`'s sandbox + `intercept/tests/*.browser.test.ts`) covers one case
   per transport-distinct settlement: `completed`, `errored`, `limit-exceeded`,
-  `cancelled`. This is **deferred verification named in `DOCS.md`**, not built
-  in Phase 0.
+  `cancelled`. **STATUS (2026-07-03): this `*.browser.test.ts` is now BUILT and
+  green (14 cases)**; only the eyeball harness for freeze / dialog / `debugger;`
+  remains deferred.
 - **The synchronous-hang freeze is not unit-testable** — asserting a frozen tab
   would freeze the test runner. It is a documented invariant, exercised only by
   hand behind `dangerAvailable`.
