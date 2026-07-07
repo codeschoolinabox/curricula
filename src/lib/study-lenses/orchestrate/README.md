@@ -581,7 +581,7 @@ the station-availability derivation consumes `snippet.type` + `validation.isJeJ`
 inspects `source.code` semantically. This invariant aligns with embody's
 anti-pattern (no consumer-side branching on `snippet.source.code`) and persists
 as the non-scenario real-composition path grows per
-[`../EMBODY-ROADMAP.md`](../EMBODY-ROADMAP.md).
+[`../ROADMAP.md`](../ROADMAP.md).
 
 ## The phases panel
 
@@ -693,13 +693,15 @@ knowable at Run, Cycle 3).
   the machine hasn't reported" — that is `pending`, which stays interactive;
   `pending` is the stubbed-slice case, not an error.) `barred` arises only on
   `creation` / `evaluation` (`source` / `realm` are `constant`; `parse` is never
-  barred), so **source-station study tools stay available for any parseable
-  JS**. _Scope today:_ the only staffed station is `source` (never barred), and
-  the barred-able stations are still roster-empty (already disabled), so the
-  disable clause **changes nothing observable yet** — it is locked for when
-  prediction lenses staff `creation` / `evaluation`. The **greying** (compact
-  cue) does apply now. Only `barred` gates — `ok` / `errored` / `constant` /
-  `pending` stay interactive.
+  barred), so **the source station stays available for any parseable JS** (a
+  source-station _lens_ may still self-gate its own `applicableTo` on JEJ — e.g.
+  `quiz`; that narrows the lens, not the station's status — see the locked
+  constraint below). _Scope today:_ the only staffed station is `source` (never
+  barred), and the barred-able stations are still roster-empty (already
+  disabled), so the disable clause **changes nothing observable yet** — it is
+  locked for when prediction lenses staff `creation` / `evaluation`. The
+  **greying** (compact cue) does apply now. Only `barred` gates — `ok` /
+  `errored` / `constant` / `pending` stay interactive.
 
 ### Lens → station binding (locked)
 
@@ -768,10 +770,17 @@ replaced `toolbar.tsx`). The panel module is presentation; `index.tsx` owns
 which surface mounts and runs the three derivations (each its own top-level
 `derive-station-*.ts` file beside `index.tsx`, which invokes them).
 
-> **Locked constraint (full-JS lens availability).** Source-station lenses
-> (`writeme`, `annotate`, `parsons`, `blanks`) serve the **full JS language**,
-> not just the JEJ subset — lens availability is never JEJ-gated. A learner
-> studying arbitrary (parseable) JS keeps the source-station study tools.
+> **Locked constraint (full-JS station availability).** The **source station**
+> is never JEJ-gated — it stays available for the **full JS language**, not just
+> the JEJ subset, so a learner studying arbitrary (parseable) JS keeps the
+> source station and the lenses that serve full JS (`writeme`, `annotate`,
+> `parsons`, `blanks`). An individual **lens** MAY narrow itself, however: it
+> may JEJ-gate its own `applicableTo` when its analysis assumes the JEJ scope
+> model. `quiz` does — its AST generators build ground truth that only holds
+> without functions/`var`/`class`, so it self-gates via the re-pointable
+> admission seam [`../lib/admitting/`](../lib/admitting/). This narrows the
+> lens, never the station: the source column still shows, staffed by the full-JS
+> lenses.
 
 **What `validation.isJeJ` drives — station availability.** The panel always
 mounts; what varies is **which stations are shown**. Stations split into two
@@ -1010,8 +1019,8 @@ The **region itself is a labelled landmark** grouping the tools; it is realised
 as flat siblings inside `data-orchestrator-root`, alongside the phases panel and
 the **content row**. **Render order (locked): all orchestrator chrome renders
 ABOVE the active surface** — phases panel first, then the omnipresent region
-(dock controls · guide), then the **content row** last. No orchestrator
-control ever renders below the active surface. The dock's run **output is not a
+(dock controls · guide), then the **content row** last. No orchestrator control
+ever renders below the active surface. The dock's run **output is not a
 control**: its two channels render as the **output panels** (see § The output
 panels) **beside** the active surface — to its right — never under it,
 preserving the user/dev audience split spatially. `data-orchestrator-root` is a
@@ -1021,8 +1030,8 @@ resizable `<Splitter>` (see [`./splitter/`](./splitter/README.md)) that lays the
 active surface and the output panels out side by side — the Splitter's
 `align-items: stretch` gives them equal height, the active surface driving it.
 Inside the output-panels column a **vertical** `<Splitter>` divides the User
-Interface and Developer Console. The arrangement is produced by the two Splitters
-plus the co-located `orchestrate.css`.
+Interface and Developer Console. The arrangement is produced by the two
+Splitters plus the co-located `orchestrate.css`.
 
 The exact CSS / visual arrangement — ordering within the dock,
 collapsed-vs-expanded treatment, channel layout, the question-render surface's

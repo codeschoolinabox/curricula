@@ -35,9 +35,10 @@ import STATIONS from './stations.js';
  * deliberate: when the validating slice lands, real refusals start
  * hiding with no change here.
  *
- * Hiding is a panel concern, never a lens concern — lens availability is
- * never JEJ-gated; a hidden station's lenses stay registered and
- * untouched.
+ * Station hiding is a panel concern, never a lens concern — a hidden
+ * station's lenses stay registered and untouched. (An individual lens
+ * may still self-gate its own applicableTo on JEJ — e.g. quiz; that is
+ * the lens's concern, orthogonal to this station-hiding derivation.)
  *
  * Pure and total: never throws (including on inputs unreachable through
  * today's embody, e.g. `'script'` paired with a non-null validation —

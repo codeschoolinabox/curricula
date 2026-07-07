@@ -167,6 +167,7 @@ function buildJejTag(
 	node: EstreeNode,
 	code: string,
 	parentInfo: Map<EstreeNode, { bindingKind?: 'let' | 'const' }>,
+	nodePath: string,
 ): JejTag {
 	const loc: SourceLocation = node.loc
 		? { start: { ...node.loc.start }, end: { ...node.loc.end } }
@@ -180,6 +181,7 @@ function buildJejTag(
 	const tag: Record<string, unknown> = {
 		loc,
 		node: node.type ?? 'Unknown',
+		nodePath,
 		source,
 	};
 
@@ -302,7 +304,7 @@ function createDigest(
 		filePath: string,
 	): string {
 		const hash = `${filePath}#${nodePath}`;
-		tagMap.set(hash, buildJejTag(node, code, parentInfo));
+		tagMap.set(hash, buildJejTag(node, code, parentInfo, nodePath));
 		return hash;
 	}
 

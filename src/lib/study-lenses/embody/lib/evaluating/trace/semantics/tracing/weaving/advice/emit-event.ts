@@ -34,7 +34,8 @@ export default function emitEvent(
 		step: state.eventStep,
 		semantics,
 		loc: tag.loc,
-		node: tag.node,
+		nodePath: tag.nodePath,
+		type: tag.node,
 		source: tag.source,
 	};
 	const event = createTraceEvent(metadata, generatorPath, payload);

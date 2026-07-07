@@ -21,6 +21,9 @@ requiring an upward dependency between peers.
 ```text
 lib/
   README.md              (this — orientation + navigation)
+  admitting/             JEJ-admission gate: is a snippet JEJ-compliant?
+                         a re-pointable boolean seam a lens self-gates
+                         its applicableTo on (consumed by quiz)
   classifying/           exhaustive token classification: category
                          set × role × range per token (consumed by
                          blanks + quizzing)
@@ -82,6 +85,9 @@ Inherits all conventions from [`../README.md`](../README.md),
 - **Parent peer index:** [`../README.md`](../README.md).
 - **Conceptual chain:** [`../README.md`](../README.md) § The story.
 - **Current inhabitants:**
+  - [`./admitting/README.md`](./admitting/README.md) — JEJ-admission gate: a
+    re-pointable boolean seam (`isJejCompliant(embodiment)`) a lens self-gates
+    its `applicableTo` on when its analysis assumes the JEJ scope model.
   - [`./classifying/README.md`](./classifying/README.md) — exhaustive
     syntax-element classification (category set × role × range per token).
   - [`./completing/README.md`](./completing/README.md) — completion-callback
@@ -97,5 +103,5 @@ Inherits all conventions from [`../README.md`](../README.md),
     editor lint diagnostics.
   - [`./local-llm/README.md`](./local-llm/README.md) — device-local
     language-model runtime: capability-aware model selection and load-once
-    backends, returning decomposed code; code-oriented and JeJ-agnostic. Injected
-    by aithor as its model runtime.
+    backends, returning decomposed code; code-oriented and JeJ-agnostic.
+    Injected by aithor as its model runtime.

@@ -1,7 +1,7 @@
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 import generators from './generators.js';
 
-import type { SourceLocation, TraceEvent } from '../types.js';
+import type { EventLayer, SourceLocation, TraceEvent } from '../types.js';
 
 /**
  * Creates a complete, frozen TraceEvent.
@@ -38,9 +38,10 @@ export default function createTraceEvent(
 }
 
 type SourceMetadata = {
-	readonly semantics: 'statement' | 'expression';
+	readonly semantics: EventLayer;
 	readonly loc: SourceLocation;
-	readonly node: string;
+	readonly nodePath: string;
+	readonly type: string;
 	readonly source: string;
 };
 

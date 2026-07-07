@@ -5,7 +5,8 @@ import createTraceEvent from '../create-trace-event.js';
 const metadata = {
 	semantics: 'expression' as const,
 	loc: { start: { line: 1, column: 0 }, end: { line: 1, column: 5 } },
-	node: 'Literal',
+	nodePath: '$.body.0.declarations.0.init',
+	type: 'Literal',
 	source: "'hello'",
 };
 
@@ -18,7 +19,8 @@ describe('createTraceEvent', () => {
 			});
 			expect(event.semantics).toBe('expression');
 			expect(event.loc).toEqual(metadata.loc);
-			expect(event.node).toBe('Literal');
+			expect(event.type).toBe('Literal');
+			expect(event.nodePath).toBe('$.body.0.declarations.0.init');
 			expect(event.source).toBe("'hello'");
 		});
 
@@ -44,7 +46,7 @@ describe('createTraceEvent', () => {
 	describe('resolves nested paths', () => {
 		it('operators.pure.arithmetic', () => {
 			const event = createTraceEvent(
-				{ ...metadata, node: 'BinaryExpression', source: '2 + 3' },
+				{ ...metadata, type: 'BinaryExpression', source: '2 + 3' },
 				'operators.pure.arithmetic',
 				{
 					subkind: 'arithmetic',
@@ -61,7 +63,7 @@ describe('createTraceEvent', () => {
 
 		it('operators.pure.negation.logical', () => {
 			const event = createTraceEvent(
-				{ ...metadata, node: 'UnaryExpression', source: '!x' },
+				{ ...metadata, type: 'UnaryExpression', source: '!x' },
 				'operators.pure.negation.logical',
 				{
 					subkind: 'negation.logical',
@@ -78,7 +80,7 @@ describe('createTraceEvent', () => {
 				{
 					...metadata,
 					semantics: 'statement' as const,
-					node: 'IfStatement',
+					type: 'IfStatement',
 					source: 'if (x)',
 				},
 				'controlFlow.test',

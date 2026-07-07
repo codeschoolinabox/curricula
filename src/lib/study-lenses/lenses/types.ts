@@ -25,8 +25,8 @@
  * frozen `Snippet` (the embodiment) directly — analysis is an internal
  * helper inside `orchestrate/lib/recommender/`, not a separate hand-off
  * type lenses consume. `BlockModelCell` and `Recommendation` migrate
- * ownership to WS2's `orchestrate/lib/recommender/types.ts` per
- * `02-analysis-and-recommender.md`; this file re-exports them as the
+ * ownership to the recommender's `orchestrate/lib/recommender/types.ts`
+ * (see `../ROADMAP.md` § P5b); this file re-exports them as the
  * lens-facing surface until that lock-in lands.
  *
  * **What was DELETED from `study-lenses/types.ts` and is NOT here**:
@@ -61,7 +61,7 @@ import type { ComponentType } from 'react';
 
 import type { Snippet } from '../embody/types.js';
 
-// --- Placeholders for WS2-owned types (see 02-analysis-and-recommender.md) ---
+// --- Placeholders for recommender-owned types (see ../ROADMAP.md § P5b) ---
 
 /**
  * 3D Block Model grid cell (Schulte 2008 + NM-components extension).
@@ -181,7 +181,11 @@ type LensProps = Readonly<{
  * [`./README.md`](./README.md) § Three-tier classification): Tier 1
  * (text-only) lenses' `applicableTo` always returns `true`. Tier 2
  * (AST-dependent) lenses return `embodiment.status.parsed`. Tier 3
- * (dynamic) lenses return `embodiment.status.created`.
+ * (dynamic) lenses return `embodiment.status.created`. A Tier-2 lens
+ * whose analysis assumes the JEJ scope model may ADDITIONALLY gate on
+ * JEJ admission — `quiz` is the first
+ * (`status.parsed && isJejCompliant(embodiment)`; see the
+ * `LensModule.phase` remarks below for why a lens self-gate is allowed).
  */
 type LensModule = Readonly<{
 	name: string;
@@ -202,13 +206,19 @@ type LensModule = Readonly<{
 	 * and never branch on the union shape. `Station[]` admits
 	 * multi-station lenses; the registered five each target one station.
 	 *
-	 * Lens availability is **never JEJ-gated** — source-station lenses
-	 * serve the full JS language (locked constraint, Cycle 2 Phase 0; see
-	 * `../orchestrate/README.md` § The phases panel). Station
-	 * AVAILABILITY is a panel concern, not a lens concern: when a
-	 * station is hidden (LL stations under script type or refused
-	 * admission), the panel hides the column — the lens stays
-	 * registered, undeclared, and untouched.
+	 * **Station** availability is **never JEJ-gated** — the source
+	 * station serves the full JS language (locked constraint, Cycle 2
+	 * Phase 0; see `../orchestrate/README.md` § The phases panel).
+	 * Station AVAILABILITY is a panel concern: when a station is hidden
+	 * (LL stations under script type or refused admission), the panel
+	 * hides the column — the lens stays registered, undeclared, and
+	 * untouched. An individual **lens**, however, MAY JEJ-gate its own
+	 * `applicableTo` when its analysis assumes the JEJ scope model —
+	 * `quiz` does (its AST generators build ground truth that holds only
+	 * without functions/`var`/`class`), via the re-pointable admission
+	 * seam `lib/admitting/isJejCompliant`. That narrows the lens, never
+	 * the station: the source column still shows, staffed by the
+	 * full-JS lenses (`writeme`, `annotate`, `parsons`, `blanks`).
 	 */
 	phase?: Station | readonly Station[];
 }>;

@@ -61,17 +61,21 @@ locked-but-unbuilt it says so.
 - **Cycle 3 — the omnipresent region** _(design locked, NOT built)._ Cross-phase
   study tools: a Run dock and an embedded guide.
 
-Lens availability is **never JEJ-gated** — source-station lenses serve the full
-JS language (locked constraint, Cycle 2 Phase 0). What `validation.isJeJ` drives
-is **station availability**: the panel always mounts; CORE stations (`source`,
-`parse`) show for any code, and the LL stations (`realm`, `creation`,
-`evaluation`) hide exactly where the language level's models do not apply
-(`type === 'script'` or admission explicitly refused). The three station
-derivations live as top-level `orchestrate/` files invoked by `index.tsx`
-(direct pure-TS unit tests; `orchestrate/lib/` is unavailable — it may never
-import from `lenses/`); the panel module is presentation. The run/debug surface
-(the dock — type toggle, sandbox toggle, run limits, debugger option) serves
-every snippet. See [`./README.md` § The phases panel](./README.md).
+**Station** availability is **never JEJ-gated** — the source station serves the
+full JS language (locked constraint, Cycle 2 Phase 0), staffed by the full-JS
+lenses (`writeme`, `annotate`, `parsons`, `blanks`). An individual lens MAY
+still self-gate its own `applicableTo` on JEJ (e.g. `quiz`, whose AST generators
+assume the JEJ scope model); that narrows the lens, never the station. What
+`validation.isJeJ` drives is **station availability**: the panel always mounts;
+CORE stations (`source`, `parse`) show for any code, and the LL stations
+(`realm`, `creation`, `evaluation`) hide exactly where the language level's
+models do not apply (`type === 'script'` or admission explicitly refused). The
+three station derivations live as top-level `orchestrate/` files invoked by
+`index.tsx` (direct pure-TS unit tests; `orchestrate/lib/` is unavailable — it
+may never import from `lenses/`); the panel module is presentation. The
+run/debug surface (the dock — type toggle, sandbox toggle, run limits, debugger
+option) serves every snippet. See
+[`./README.md` § The phases panel](./README.md).
 
 ## Architectural sketch
 
@@ -583,12 +587,14 @@ flowchart LR
   parsons / blanks / annotate / writeme → `'source'`. The non-source stations
   stay mostly empty until prediction lenses are built (backlog).
 - **Mount condition — resolved.** The panel always mounts; the availability
-  derivation decides which stations render. Source-station lenses serve the
-  **full JS language**, never JEJ-gated (locked constraint) — hiding an LL
-  station never touches lens registration. Learner signals: module-mode gutter
-  markers name the features that cost the NM stations; the dock's type-toggle
-  hint covers admissible-code-in-script-mode; the embedded guide documents the
-  reveal rules. See [`./README.md` § The phases panel](./README.md).
+  derivation decides which stations render. The source **station** is never
+  JEJ-gated (locked constraint) — hiding an LL station never touches lens
+  registration; an individual lens MAY still self-gate its own `applicableTo`
+  (e.g. `quiz`), which narrows the lens, not the station. Learner signals:
+  module-mode gutter markers name the features that cost the NM stations; the
+  dock's type-toggle hint covers admissible-code-in-script-mode; the embedded
+  guide documents the reveal rules. See
+  [`./README.md` § The phases panel](./README.md).
 - **Selector contract (locked):** `data-orchestrator-phases-panel` on the panel
   root; `data-orchestrator-station="<Station>"` per column (plus
   `data-orchestrator-station-status` — the styleable status state; no separate
@@ -635,15 +641,15 @@ surface is **the dock**, whose contract this sketch pins structurally:
 **Region structure (settled).** Two presentation-only **omnipresent** tool
 modules — [`./dock/`](./dock/), [`./embedded-guide/`](./embedded-guide/) — plus
 a **third, content-row** module, [`./output-panels/`](./output-panels/), each
-mirroring `phases-panel/`
-(README, DOCS, `index.tsx`, tests/). `index.tsx` owns every state slot
-(`SnippetType` · `SandboxMode` · `RunLimits`, seeded from `OrchestratorConfig`;
-plus `OutputPanelDismissal` and the `PendingInteraction` slot), the live slot,
-and the **run lifecycle** (it invokes `evaluation.events.{run, intercept}`,
-builds the async `IoMocks`, and accumulates the output); the tool modules import
-no `embody`, dispatch no bus events, and hold no orchestrator state. **Render
-order (locked):** `data-orchestrator-root` is a flex **column** — phases panel ·
-omnipresent region (dock controls · guide) · **content row**
+mirroring `phases-panel/` (README, DOCS, `index.tsx`, tests/). `index.tsx` owns
+every state slot (`SnippetType` · `SandboxMode` · `RunLimits`, seeded from
+`OrchestratorConfig`; plus `OutputPanelDismissal` and the `PendingInteraction`
+slot), the live slot, and the **run lifecycle** (it invokes
+`evaluation.events.{run, intercept}`, builds the async `IoMocks`, and
+accumulates the output); the tool modules import no `embody`, dispatch no bus
+events, and hold no orchestrator state. **Render order (locked):**
+`data-orchestrator-root` is a flex **column** — phases panel · omnipresent
+region (dock controls · guide) · **content row**
 (`data-orchestrator-content-row`, a flex **row**: active surface · output
 panels). All orchestrator chrome renders **above** the active surface; the
 dock's run **output is not a control** — its two channels render as the **output
@@ -685,9 +691,9 @@ contract, off the dock's surface entirely.
 #### Resizable dividers
 
 The content-row children are laid out by resizable `<Splitter>`s
-([`./splitter/`](./splitter/DOCS.md)), PRESENTATIONAL layout wrappers that do not
-change the data flow above (`<OutputPanels>` receives the same props), only the
-DOM nesting (surface / panels now sit in `-splitter-pane` wrappers). A
+([`./splitter/`](./splitter/DOCS.md)), PRESENTATIONAL layout wrappers that do
+not change the data flow above (`<OutputPanels>` receives the same props), only
+the DOM nesting (surface / panels now sit in `-splitter-pane` wrappers). A
 **horizontal** Splitter divides the active surface and the output-panels column
 (`sizedPane="second"`, `resizeMode="fixed"`); a **vertical** Splitter inside the
 output-panels column divides the User Interface and Developer Console panels

@@ -124,11 +124,14 @@ Tier 1 lenses (parsons line-shuffling, copy-type, annotate) work even on
 syntactically-broken snippets. Tier 2 lenses (blanks, variables/scope, ask) need
 a valid AST — they ignore the JEJ-validity question and operate on the AST
 regardless. A Tier-2 lens that also wants JEJ-subset compliance gates on
-`embodiment.status.validated` instead. Tier 3 lenses (trace-table and other
-NM-replay lenses) need the snippet to be evaluable — i.e. all four gates passed
-(per [`../embody/types.ts`](../embody/types.ts) §Status booleans), which
-includes the validate gate; `embodiment.status.created` is the load-bearing flag
-since it implies validate passed.
+`embodiment.status.validated` instead (until embody wires the validate stage
+into real composition, `status.validated` is stubbed `false` for real snippets,
+so such a lens bridges through the re-pointable admission seam
+[`../lib/admitting/`](../lib/admitting/) — `quiz` is the first). Tier 3 lenses
+(trace-table and other NM-replay lenses) need the snippet to be evaluable — i.e.
+all four gates passed (per [`../embody/types.ts`](../embody/types.ts) §Status
+booleans), which includes the validate gate; `embodiment.status.created` is the
+load-bearing flag since it implies validate passed.
 
 The `status` chain is monotonic by construction: `created` implies `validated`
 implies `parsed` implies `tokenized`. Lens-author logic only checks the field it
@@ -151,8 +154,8 @@ Inherits all conventions from [`../README.md`](../README.md) and the top-level
   **Type-only imports** from `embody/types.ts` (e.g.
   `import type { Snippet } from '../../embody/types.js'`) are OK. May also
   import (runtime + type) from `lib/*` (JEJ-peer shared adapters — see
-  [`../lib/README.md`](../lib/README.md)), `orchestrate/lib/*`, and
-  `@-utils`. (Per [`../DOCS.md` § Dependency rules](../DOCS.md).)
+  [`../lib/README.md`](../lib/README.md)), `orchestrate/lib/*`, and `@-utils`.
+  (Per [`../DOCS.md` § Dependency rules](../DOCS.md).)
 - **Disposable practice**. Lens-internal UI state (parsons shuffle, blanks
   fills) is per-mount only. When the snippet changes, React unmounts the lens;
   in-progress UI state is gone. Never reach for `localStorage`, refs across
@@ -212,12 +215,8 @@ Inherits all conventions from [`../README.md`](../README.md) and the top-level
 - **Orchestrator that mounts these lenses**:
   [`../orchestrate/README.md`](../orchestrate/README.md).
 - **Recommender that ranks these lenses**:
-  [`../orchestrate/lib/README.md`](../orchestrate/lib/README.md) →
-  [`02-analysis-and-recommender.md`](../.planning-handoffs/02-analysis-and-recommender.md).
-- **Migration plan**:
-  [`04-lens-migration.md`](../.planning-handoffs/04-lens-migration.md) (per-lens
-  migration sessions land each pedagogical lens against the new contract).
-- **Cross-handoff plugin alignment context**:
-  [`B-plugin-alignment.md`](../.planning-handoffs/B-plugin-alignment.md) — the
-  work-stream that landed `debug-props/` as the first lens against the new
-  `LensModule` contract.
+  [`../orchestrate/lib/README.md`](../orchestrate/lib/README.md) — contract in
+  [`../DOCS.md` § Recommender](../DOCS.md#recommender--applicability-filter--ranking-engine),
+  campaign phase in [`../ROADMAP.md`](../ROADMAP.md) § P5b.
+- **First lens against the current contract**: `debug-props/` — the reference
+  implementation of the `LensModule` contract.

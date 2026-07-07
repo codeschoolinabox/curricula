@@ -39,6 +39,15 @@ describe('instrument', () => {
 			}
 		});
 
+		it('tagMap entries have a $-rooted nodePath', () => {
+			const result = instrument('let x = 5;\n', {});
+
+			for (const tag of result.tagMap.values()) {
+				expect(typeof tag.nodePath).toBe('string');
+				expect(tag.nodePath.startsWith('$')).toBe(true);
+			}
+		});
+
 		it('tagMap entries have source (source text)', () => {
 			const result = instrument('let x = 5;\n', {});
 

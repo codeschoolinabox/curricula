@@ -9,9 +9,10 @@
    program. Output: populated tag map.
 
 2. **Tag resolution** (weave time, pure per node) — hash tags on the nodes a
-   pointcut inspects are resolved to full tag objects, stamped with their node
-   path, preserving object identity for the comparisons pointcuts make. Input:
-   hash-tagged nodes + tag map. Output: rich-tagged nodes.
+   pointcut inspects are looked up to their full tag objects (already carrying
+   their node path, stamped at digest), preserving object identity for the
+   comparisons pointcuts make. Input: hash-tagged nodes + tag map. Output:
+   rich-tagged nodes.
 
 3. **Pointcut decision** (weave time, pure per node) — each registered pointcut
    answers, per node: intercept or skip, and — for intercepted nodes — the
@@ -30,7 +31,7 @@
 ```mermaid
 flowchart TD
     A[parsed program] -->|digest — capture surviving metadata| B[tag map: hash → tag]
-    C[hash-tagged IR nodes] -->|tag resolution — identity-preserving, stamps node path| D[rich-tagged nodes]
+    C[hash-tagged IR nodes] -->|tag resolution — identity-preserving lookup, node path already stamped at digest| D[rich-tagged nodes]
     B --> D
     D -->|pointcut decision — resolved options gate at weave time| E{intercept?}
     E -->|skip — no advice call woven| F[silent node: zero runtime cost]

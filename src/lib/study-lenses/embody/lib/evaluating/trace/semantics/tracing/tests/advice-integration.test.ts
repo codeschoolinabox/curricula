@@ -164,6 +164,72 @@ describe('advice integration', () => {
 			}
 		});
 	});
+	// =====================================================================
+	// EVENT SOURCE ATTRIBUTION — wire-safe nodePath + type
+	// =====================================================================
+
+	describe('event source attribution', () => {
+		it('stamps a string nodePath on every emitted event', () => {
+			const events = traceInNode('let a = 1;\n', ALL_ENABLED);
+
+			for (const event of events) {
+				expect(typeof event.nodePath).toBe('string');
+			}
+		});
+
+		it('stamps a $-rooted nodePath, never the raw digest hash', () => {
+			const events = traceInNode('let a = 1;\n', ALL_ENABLED);
+
+			for (const event of events) {
+				expect(event.nodePath.startsWith('$')).toBe(true);
+			}
+		});
+
+		it('never leaks the file-hash separator into nodePath', () => {
+			const events = traceInNode('let a = 1;\n', ALL_ENABLED);
+
+			for (const event of events) {
+				expect(event.nodePath.includes('#')).toBe(false);
+			}
+		});
+
+		it('stamps distinct nodePaths for two distinct literals', () => {
+			const events = traceInNode('let a = 1;\nlet b = 2;\n', ALL_ENABLED);
+			const literals = events.filter((e) => e.category === 'literal');
+
+			expect(literals[0].nodePath).not.toBe(literals[1].nodePath);
+		});
+
+		it('stamps identical nodePath across repeated firings of one node', () => {
+			const events = traceInNode(
+				'let s = 0;\nwhile (s < 2) { s = s + 1; }\n',
+				ALL_ENABLED,
+			);
+			const loopTests = events.filter(
+				(e) =>
+					e.category === 'loop' &&
+					(e as Record<string, unknown>).event === 'test',
+			);
+			const paths = new Set(loopTests.map((e) => e.nodePath));
+
+			expect(paths.size).toBe(1);
+			expect(typeof loopTests[0].nodePath).toBe('string');
+		});
+
+		it('stamps the ESTree type name on a literal event', () => {
+			const events = traceInNode('let a = 1;\n', ALL_ENABLED);
+			const literal = events.find((e) => e.category === 'literal');
+
+			expect((literal as Record<string, unknown>).type).toBe('Literal');
+		});
+
+		it('stamps the ESTree type name on a non-literal event', () => {
+			const events = traceInNode('let a = 1 + 2;\n', ALL_ENABLED);
+			const op = events.find((e) => e.category === 'operator');
+
+			expect((op as Record<string, unknown>).type).toBe('BinaryExpression');
+		});
+	});
 
 	// =====================================================================
 	// BINDINGS — TDZ LIFECYCLE

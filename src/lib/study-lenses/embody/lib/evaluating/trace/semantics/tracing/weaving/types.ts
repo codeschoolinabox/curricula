@@ -35,9 +35,10 @@ import type {
  * (ESTree type name) serves as runtime discriminant. Optional fields are
  * sparse — each ESTree node type only populates the fields relevant to it.
  *
- * `nodePath` is stamped onto every resolved tag at weave time (the tag
- * resolution seam) — advice reads `tag.nodePath` to attribute events; it is
- * the same string that keys the ast record.
+ * `nodePath` is stamped onto every tag when it is built during Aran's digest
+ * phase (the `$`-rooted path Aran passes to the digest callback) — advice
+ * reads `tag.nodePath` to attribute events; it is the same string that keys
+ * the ast record.
  *
  * Optional fields by ESTree node type:
  * - `operator`                — BinaryExpression, UnaryExpression, LogicalExpression, AssignmentExpression, UpdateExpression
@@ -56,7 +57,7 @@ export type JejTag = {
 	readonly loc: SourceLocation;
 	readonly node: string;
 	readonly source: string;
-	/** Stamped at tag resolution; keys the ast record. */
+	/** Stamped at digest (tag construction); keys the ast record. */
 	readonly nodePath: string;
 
 	readonly operator?: string;

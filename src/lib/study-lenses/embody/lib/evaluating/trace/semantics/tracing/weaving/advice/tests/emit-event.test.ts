@@ -22,6 +22,7 @@ function makeTag(): JejTag {
 	return {
 		loc: { start: { line: 1, column: 0 }, end: { line: 1, column: 5 } },
 		node: 'Literal',
+		nodePath: '$.body.0.declarations.0.init',
 		source: '"hi"',
 	};
 }
@@ -66,14 +67,24 @@ describe('emitEvent', () => {
 		expect(event.loc).toEqual(tag.loc);
 	});
 
-	it('event has correct node from tag', () => {
+	it('event has correct type from tag', () => {
 		const state = makeState();
 		emitEvent(state, makeTag(), 'expression', 'literals.string', {
 			kind: 'string',
 			value: { type: 'string', value: 'hi' },
 		});
 		const event = state.trace[0] as Record<string, unknown>;
-		expect(event.node).toBe('Literal');
+		expect(event.type).toBe('Literal');
+	});
+
+	it('event has correct nodePath from tag', () => {
+		const state = makeState();
+		emitEvent(state, makeTag(), 'expression', 'literals.string', {
+			kind: 'string',
+			value: { type: 'string', value: 'hi' },
+		});
+		const event = state.trace[0] as Record<string, unknown>;
+		expect(event.nodePath).toBe('$.body.0.declarations.0.init');
 	});
 
 	it('event has correct source from tag', () => {
