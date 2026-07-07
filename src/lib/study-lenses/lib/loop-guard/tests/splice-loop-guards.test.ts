@@ -164,4 +164,50 @@ describe('spliceLoopGuards', () => {
 			expect(result.loopCount).toBe(1);
 		});
 	});
+
+	describe('for-in loops (not guarded)', () => {
+		it('leaves a for-in loop untouched', () => {
+			const code = 'for (const k in obj) {\n\tuse(k);\n}\n';
+			expect(spliceLoopGuards(code, hooks).code).toBe(code);
+		});
+
+		it('does not count a for-in loop', () => {
+			const code = 'for (const k in obj) {\n\tuse(k);\n}\n';
+			expect(spliceLoopGuards(code, hooks).loopCount).toBe(0);
+		});
+	});
+
+	describe('brace-less loops (not guarded)', () => {
+		it('leaves a brace-less while untouched', () => {
+			const code = 'while (x) x--;\n';
+			expect(spliceLoopGuards(code, hooks).code).toBe(code);
+		});
+
+		it('leaves a brace-less do-while untouched', () => {
+			const code = 'do x--; while (x > 0);\n';
+			expect(spliceLoopGuards(code, hooks).code).toBe(code);
+		});
+
+		it('guards only the braced loop in a mixed pair', () => {
+			const result = spliceLoopGuards(
+				'while (a) { a--; }\nwhile (b) b--;\n',
+				hooks,
+			);
+			expect(result.code).toBe(
+				'while (a) {G1[1:0:1:18] a--; }R1\nwhile (b) b--;\n',
+			);
+		});
+	});
+
+	describe('with-wrapped loops (script-mode fallback)', () => {
+		it('guards a loop inside a with statement', () => {
+			const result = spliceLoopGuards(
+				'with (o) {\n\twhile (o.x > 0) {\n\t\to.x--;\n\t}\n}\n',
+				hooks,
+			);
+			expect(result.code).toBe(
+				'with (o) {\n\twhile (o.x > 0) {G1[2:1:4:2]\n\t\to.x--;\n\t}R1\n}\n',
+			);
+		});
+	});
 });

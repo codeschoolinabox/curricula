@@ -90,11 +90,19 @@ type Insertion = { readonly offset: number; readonly text: string };
  * acceptance.
  */
 function parseSource(code: string): Node {
-	return parse(code, {
-		ecmaVersion: 'latest',
-		sourceType: 'module',
-		locations: true,
-	});
+	try {
+		return parse(code, {
+			ecmaVersion: 'latest',
+			sourceType: 'module',
+			locations: true,
+		});
+	} catch {
+		return parse(code, {
+			ecmaVersion: 'latest',
+			sourceType: 'script',
+			locations: true,
+		});
+	}
 }
 
 /**
