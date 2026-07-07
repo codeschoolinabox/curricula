@@ -6,8 +6,9 @@
  * `errored` via UNPARSEABLE source (which the try/catch cannot see — it settles
  * through the iframe's `error` event, or the run would hang). Plus the impure
  * invariants: the settle is a macrotask (never synchronous), the iframe is torn
- * down on settle, and cancel/latch (first-write-wins). Guard-trip
- * (`limit-exceeded`) — which needs the loop-guard — is a separate increment.
+ * down on settle, and cancel/latch (first-write-wins). It also covers the
+ * loop-guard trip: a bounded loop exceeding its cap settles `limit-exceeded`, and
+ * unparseable source with a cap settles `errored` via the build-phase guard.
  */
 
 import { describe, expect, it, vi } from 'vitest';
@@ -122,5 +123,49 @@ describe('dangerRun — iframe core (browser)', () => {
 		const again = await handle.result;
 		expect(again).toBe(settledResult);
 		expect(again.outcome).toBe('completed');
+	});
+
+	it('a BOUNDED loop that exceeds a low iterations cap → limit-exceeded', async () => {
+		// for i<5 with cap 3: the loop-guard trips at iteration 3. The loop is BOUNDED,
+		// so without the guard it would merely complete — this cleanly distinguishes
+		// guard-present from guard-absent with NO infinite-loop / freeze risk. Reaching
+		// limit-exceeded (not errored) also proves the runner emitted the loop1..loopK
+		// counter globals the guard references (else a ReferenceError → errored).
+		const result = await dangerRun(
+			'for (let i = 0; i < 5; i = i + 1) { let x = i; }',
+			{ iterations: 3 },
+		).result;
+		expect(result.outcome).toBe('limit-exceeded');
+		expect(result).not.toHaveProperty('error');
+	});
+
+	it('a bounded loop within the cap → completed (guard applied, no false-trip)', async () => {
+		const result = await dangerRun(
+			'for (let i = 0; i < 3; i = i + 1) { let x = i; }',
+			{ iterations: 100 },
+		).result;
+		expect(result.outcome).toBe('completed');
+	});
+
+	it('unparseable source WITH a cap → errored, and dangerRun still returns a handle', async () => {
+		// With a cap, guardLoops runs recast.parse FIRST, which throws on a syntax
+		// error. The build-phase try/catch must settle errored (deferred) rather than
+		// letting dangerRun throw synchronously out of the call.
+		const handle = dangerRun('let x = ;', { iterations: 100 });
+		const result = await handle.result; // handle exists; call did not throw
+		expect(result.outcome).toBe('errored');
+		// The real thrown identity flows through (not a canned constant).
+		expect(typeof result.error?.name).toBe('string');
+		expect((result.error?.message ?? '').length).toBeGreaterThan(0);
+	});
+
+	it('a true-infinite braced runaway with a cap → limit-exceeded (safe only WITH the guard)', async () => {
+		// The canonical danger case. Braced body so guardLoops instruments it; the cap
+		// trips it. Run only after the guard is wired — without the guard this would
+		// freeze the runner (the un-unit-testable freeze case, README § Edge cases).
+		const result = await dangerRun('while (true) { let x = 1; }', {
+			iterations: 50,
+		}).result;
+		expect(result.outcome).toBe('limit-exceeded');
 	});
 });

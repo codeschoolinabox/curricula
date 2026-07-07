@@ -44,7 +44,7 @@ export default function guardLoops(
 	}
 
 	const lineStarts = computeLineStartOffsets(code);
-	const insertions: readonly Insertion[] = loops.flatMap((loop, index) =>
+	const insertions: Insertion[] = loops.flatMap((loop, index) =>
 		planLoopInsertions(loop, index + 1, maxIterations, code, lineStarts),
 	);
 
@@ -66,7 +66,7 @@ export default function guardLoops(
  * on loopType without re-reading AST node types.
  */
 function collectLoops(ast: unknown): readonly CollectedLoop[] {
-	const loops: readonly CollectedLoop[] = [];
+	const loops: CollectedLoop[] = [];
 	(walk as (node: unknown, walker: Record<string, unknown>) => void)(ast, {
 		enter(node: Record<string, unknown>) {
 			// Only guard loops whose body is a BlockStatement. Brace-less

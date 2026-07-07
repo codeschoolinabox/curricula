@@ -6,19 +6,28 @@
  * isolation + external terminate); an on-thread hang can freeze the host page. That
  * is the gated, named danger (README.md § Security posture).
  *
- * This increment is the iframe CORE + cancel/latch. It composes `wrapWithDebugger`
- * → `buildDangerScript`, then owns the impure iframe lifecycle: assign the
- * `__danger = { done, fail }` bridge onto the iframe's `window` BEFORE injecting the
- * script, defer the injection a macrotask so `result` settles no earlier than a
- * macrotask, latch the first settle (first-write-wins), and tear the iframe down.
- * See DOCS.md § Execution phases.
+ * Composes `guardLoops` (INTERIM — embody's legacy guard, see the import comment) →
+ * `wrapWithDebugger` → `buildDangerScript`, then owns the impure iframe lifecycle:
+ * assign the `__danger = { done, fail }` bridge onto the iframe's `window` BEFORE
+ * injecting the script, defer the injection a macrotask so `result` settles no
+ * earlier than a macrotask, latch the first settle (first-write-wins), and tear the
+ * iframe down. See DOCS.md § Execution phases.
  *
- * DEFERRED (loud, not silent): the loop-guard splice (`iterations` → `guardLoops`,
- * emitting the `loop1..loopK` counters) lands in the NEXT increment, importing from
- * the `lib/loop-guard/` re-home rather than embody's excluded source; `io` mocks
- * (`DangerRunOptions.io`) and the orchestrate wiring stay deferred too. Native
- * output only.
+ * DEFERRED (loud, not silent): `io` mocks (`DangerRunOptions.io`) and the orchestrate
+ * wiring stay deferred; native output only. The loop-guard source is an interim
+ * embody import to re-point at `lib/loop-guard/`'s `spliceLoopGuards` once functional.
  */
+
+// INTERIM (ship-fast, user-authorized 2026-07-03): imports embody's legacy guardLoops
+// DIRECTLY. This knowingly diverges from DOCS.md § Structural constraints (revised in
+// b33e49d), which mandates `lib/loop-guard/`'s `spliceLoopGuards`. That peer now
+// splices while/for/for-of/do-while, but its typed error boundary (a LoopGuardError on
+// parse/injection failure — what danger's build-catch net-1 relies on) is still
+// mid-TDD in a concurrent session, so danger can't safely switch yet. Re-point here
+// (and revert the guard-loops.ts type-fix that makes this import typecheck) once that
+// boundary lands. This up-into-embody import is the arrow-direction violation the
+// re-home exists to fix.
+import guardLoops from '../../embody/lib/evaluating/shared/guard-loops/guard-loops.js';
 
 import buildDangerScript from './build-danger-script.js';
 import classifyDangerError from './classify-danger-error.js';
@@ -87,16 +96,25 @@ export default function dangerRun(
 		settle({ outcome: 'cancelled' });
 	}
 
-	// Build the script. The loop-guard (the `iterations` cap) is applied in the NEXT
-	// increment (loop-guard integration): until then loopCount is 0 and a snippet
-	// runs UNGUARDED. This is loud, not a silent drop — `iterations` is still threaded
-	// into the classifier below, and no live caller passes it yet (the orchestrate
-	// wiring is deferred). guardLoops is imported there, not here, so this strict,
-	// included module does not drag embody's excluded, non-strict source into the
-	// typecheck graph before its `lib/loop-guard/` re-home lands.
+	// Build phase — synchronous. With a cap, guardLoops applies the per-iteration
+	// counter rewrite (emitting the `loop1..loopK` globals it references) and runs
+	// recast.parse, which THROWS on unparseable code — so the build is wrapped: a
+	// parse/guard throw settles errored (deferred a tick, never synchronously) rather
+	// than throwing out of dangerRun. `iterations` unset ⇒ no guard (loopCount 0).
+	let built: { code: string; loopCount: number };
+	try {
+		built =
+			iterations === undefined
+				? { code, loopCount: 0 }
+				: guardLoops(code, iterations);
+	} catch (buildError) {
+		const { name, message } = readErrorPrimitives(buildError);
+		setTimeout(() => settle(classifyDangerError(name, message, iterations)), 0);
+		return { result, cancel };
+	}
 	const script = buildDangerScript(
-		wrapWithDebugger(code, debuggerEnabled ?? false),
-		0,
+		wrapWithDebugger(built.code, debuggerEnabled ?? false),
+		built.loopCount,
 	);
 
 	// A permissive, same-origin, NO-`sandbox`-attr iframe. It must be CONNECTED for
