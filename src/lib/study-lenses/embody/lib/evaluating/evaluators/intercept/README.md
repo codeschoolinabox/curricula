@@ -80,16 +80,16 @@ program in its own `try/catch` and does **not** stream an `error` item — doing
 either would mask the throw as a natural completion. The old intercept's
 `ErrorEvent` is reconstructed by the embody adapter as the run's terminal
 `ErrorNMEvent` from that halt (see § Bounded context). The oracle's `creation` /
-`execution` phase is **not** reproduced: on the `'function'` path the engine
-collapses the program's construction (`new Function`) and execution into one
-`throw` halt
+`execution` phase is **not** reproduced: the engine surfaces a program's compile
+error and its runtime throws through one `throw` halt — on the `'function'` path
+construction (`new Function`) and execution collapse into a single throw
 ([`../../../../../lib/engine/worker/bootstrap.ts`](../../../../../lib/engine/worker/bootstrap.ts)),
-so the phase is not authorable worker-side; a construction `SyntaxError` is now
-a reachable ungated run-button path — unparseable input passes through the
-instrumenter unmodified and the worker's `new Function` compile surfaces the
-real `SyntaxError` as that throw halt, settling `errored` (the `'module'` path's
-compile-error settlement is the engine module-path work package's concern) — and
-embody's `ErrorNMEvent` carries no phase.
+and the `'module'` path likewise surfaces a compile `SyntaxError` at
+instantiation as a throw halt — so the phase is not authorable worker-side. A
+code `SyntaxError` is now a reachable ungated run-button path: unparseable input
+passes through the instrumenter unmodified and the worker surfaces the real
+`SyntaxError` as that throw halt, settling `errored`. Embody's `ErrorNMEvent`
+carries no phase.
 
 ## Glossary (ubiquitous language)
 
@@ -216,13 +216,13 @@ It does **not** own, and explicitly excludes:
 - **The JEJ admission gate and the _not-runnable_ short-circuit.** This
   evaluator does not gate; it parses only to splice, and unparseable input
   passes through the instrumenter unmodified (no throw) — the worker surfaces
-  the real `SyntaxError` and the run settles `errored`. Admission lives in the
-  **adapter**, not here, for a contract reason — not an arbitrary asymmetry with
-  the variables tracer. The variables tracer self-gates and _throws_ because its
-  consumer (`traceVariableLifecycle`) is permitted to throw. The embody
-  `intercept()` member, by contrast, must **return a handle and never throw**
-  (canned scenarios and non-JEJ input both return a handle). The
-  not-runnable-without-throwing decision must therefore be made where the
+  the real `SyntaxError` as a throw halt and the run settles `errored`.
+  Admission lives in the **adapter**, not here, for a contract reason — not an
+  arbitrary asymmetry with the variables tracer. The variables tracer self-gates
+  and _throws_ because its consumer (`traceVariableLifecycle`) is permitted to
+  throw. The embody `intercept()` member, by contrast, must **return a handle
+  and never throw** (canned scenarios and non-JEJ input both return a handle).
+  The not-runnable-without-throwing decision must therefore be made where the
   not-runnable shape is produced — the adapter — which self-gates on JEJ
   admission rather than trusting a create-phase status that has not yet landed.
 - **Interior observation.** No variable, scope, expression, or control-flow

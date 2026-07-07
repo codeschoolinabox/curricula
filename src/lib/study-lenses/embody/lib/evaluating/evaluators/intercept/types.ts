@@ -289,8 +289,8 @@ type InterceptEvaluateHandle = AsyncIterable<InterceptEvent> & {
  * admission gate and the embody _not-runnable_ shape are the adapter's concern
  * (README § Bounded context). Unparseable input passes through the instrumenter
  * unmodified (no boundary throw); the engine's worker surfaces the real
- * `SyntaxError` and the run settles `errored`. The evaluator has no boundary
- * throws.
+ * `SyntaxError` as a throw halt and the run settles `errored`. The evaluator
+ * has no boundary throws.
  */
 type InterceptEvaluate = (
 	code: string,

@@ -98,16 +98,13 @@ flowchart TD
   the learner's own. It plants exactly two things (guards, loc wraps) and
   observes nothing. The evaluator has **zero boundary throws**: unparseable
   input passes through unmodified and the engine's worker surfaces the real
-  `SyntaxError`, settling `errored`.
-- **Unparseable input settles `errored` on both execution paths; the mechanism
-  differs.** On the `'function'` path the engine wraps construction and
-  execution in one `try/catch`, so a `SyntaxError` becomes a worker-authored
-  throw halt and the adapter reconstructs a terminal `ErrorNMEvent`. On the
-  `'module'` path a compile error surfaces at module instantiation as an
-  engine-made settlement (no worker-authored halt) — its exact settlement is
-  pinned by the engine's module-path work package. Either way the host never
-  crashes; the presence of the terminal `ErrorNMEvent` follows whether a throw
-  halt exists (adapter DOCS § R1).
+  `SyntaxError` as a throw halt, settling `errored`.
+- **Unparseable input settles `errored` as a throw halt on both execution
+  paths.** On the `'function'` path the engine wraps construction and execution
+  in one `try/catch`; on the `'module'` path it catches the module-evaluation
+  error at instantiation — either way a code `SyntaxError` becomes a
+  worker-authored throw halt (never a `worker-error`), so the adapter uniformly
+  reconstructs the terminal `ErrorNMEvent`. The host never crashes.
 - **No JEJ gate.** The evaluator does not gate admission; JEJ admission and the
   embody _not-runnable_ short-circuit live in the adapter. A non-JEJ or
   unparseable program simply runs in the sandbox and settles `errored`

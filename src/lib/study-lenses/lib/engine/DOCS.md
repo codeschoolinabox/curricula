@@ -30,12 +30,16 @@ example — the embody result vocabulary its adapter maps onto:
    natural end synchronously; the `'module'` path delivers it as an ES module
    (globals installed on globalThis, always strict), whose natural end is
    asynchronous — its natural-end halt fires when the module-evaluation promise
-   settles. Environment failures — shared memory unavailable, a throwing worker
-   factory — are worker-error terminations with the condition in the engine
-   error, never throws (a factory returning a non-`Worker` is a consumer-side
-   type error; should it reach runtime it settles via the engine's
-   internal-defect path, not this one); consumer setup failures (invalid global
-   keys, a throwing setup, clone-unsafe worker config) settle the same way.
+   settles. A code-level `SyntaxError` (an unparseable or uncompilable program)
+   is caught at construction or module instantiation on either path and surfaced
+   as a worker-authored throw halt, settling `errored` — never a worker-error
+   (which is reserved for environment, factory, and setup failures). Environment
+   failures — shared memory unavailable, a throwing worker factory — are
+   worker-error terminations with the condition in the engine error, never
+   throws (a factory returning a non-`Worker` is a consumer-side type error;
+   should it reach runtime it settles via the engine's internal-defect path, not
+   this one); consumer setup failures (invalid global keys, a throwing setup,
+   clone-unsafe worker config) settle the same way.
 
 3. **Streaming** (async, per message) — the running program emits messages one
    at a time under the pause protocol; each is handed to the message hook and
