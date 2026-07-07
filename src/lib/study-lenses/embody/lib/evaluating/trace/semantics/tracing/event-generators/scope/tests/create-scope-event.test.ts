@@ -6,7 +6,7 @@ describe('createScopeEvent', () => {
 	describe('category and fields', () => {
 		it('category is scope', () => {
 			const event = createScopeEvent({
-				kind: 'module',
+				kind: 'script',
 				event: 'create',
 				depth: 0,
 				creationStep: 0,
@@ -28,9 +28,9 @@ describe('createScopeEvent', () => {
 	});
 
 	describe('optional fields', () => {
-		it('parentCreationStep absent on top-level module', () => {
+		it('parentCreationStep absent on top-level script', () => {
 			const event = createScopeEvent({
-				kind: 'module',
+				kind: 'script',
 				event: 'create',
 				depth: 0,
 				creationStep: 0,
@@ -49,7 +49,7 @@ describe('createScopeEvent', () => {
 			expect(event.parentCreationStep).toBe(0);
 		});
 
-		it('structure and structureStep both present', () => {
+		it('structure present when provided', () => {
 			const event = createScopeEvent({
 				kind: 'block',
 				event: 'create',
@@ -57,10 +57,8 @@ describe('createScopeEvent', () => {
 				creationStep: 5,
 				parentCreationStep: 0,
 				structure: 'while',
-				structureStep: 4,
 			});
 			expect(event.structure).toBe('while');
-			expect(event.structureStep).toBe(4);
 		});
 
 		it('structure absent on bare block', () => {
@@ -72,21 +70,6 @@ describe('createScopeEvent', () => {
 				parentCreationStep: 0,
 			});
 			expect(event).not.toHaveProperty('structure');
-			expect(event).not.toHaveProperty('structureStep');
-		});
-
-		it('label present when provided', () => {
-			const event = createScopeEvent({
-				kind: 'block',
-				event: 'create',
-				depth: 1,
-				creationStep: 5,
-				parentCreationStep: 0,
-				structure: 'while',
-				structureStep: 4,
-				label: 'outer',
-			});
-			expect(event.label).toBe('outer');
 		});
 	});
 
@@ -98,30 +81,6 @@ describe('createScopeEvent', () => {
 					event: 'create',
 					depth: -1,
 					creationStep: 0,
-				}),
-			).toThrow();
-		});
-
-		it('throws when structure without structureStep', () => {
-			expect(() =>
-				createScopeEvent({
-					kind: 'block',
-					event: 'create',
-					depth: 1,
-					creationStep: 5,
-					structure: 'for',
-				}),
-			).toThrow();
-		});
-
-		it('throws when structureStep without structure', () => {
-			expect(() =>
-				createScopeEvent({
-					kind: 'block',
-					event: 'create',
-					depth: 1,
-					creationStep: 5,
-					structureStep: 4,
 				}),
 			).toThrow();
 		});
