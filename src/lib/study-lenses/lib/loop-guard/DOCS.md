@@ -1,9 +1,4 @@
-# loop-guard — Architectural Sketch
-
-> Written Phase 0, before the Phase 1 implementation increments land. The
-> Refactor step of each increment is held against this document — not what the
-> code does, but what shape a correct implementation must take. Domain terms
-> only; no function names, no variable names, no pseudocode.
+# lib/loop-guard — Architecture & Decisions
 
 ## Context
 
