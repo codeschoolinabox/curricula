@@ -210,4 +210,45 @@ describe('spliceLoopGuards', () => {
 			);
 		});
 	});
+
+	describe('line preservation', () => {
+		it('preserves the exact line count across multiple loops', () => {
+			const code =
+				'let x = 0;\nwhile (a) {\n\tx++;\n}\nfor (const y of ys) {\n\tuse(y);\n}\nlog(x);\n';
+			const result = spliceLoopGuards(code, hooks);
+			expect(result.code.split('\n').length).toBe(code.split('\n').length);
+		});
+
+		it('leaves lines outside any loop byte-identical', () => {
+			const code = 'let x = 0;\nwhile (a) {\n\tx++;\n}\nlog(x);\n';
+			const result = spliceLoopGuards(code, hooks);
+			expect(result.code.split('\n')[0]).toBe('let x = 0;');
+		});
+	});
+
+	describe('boundary failures', () => {
+		it('throws when the guard text contains a newline', () => {
+			expect(() =>
+				spliceLoopGuards('while (x) {\n\tx++;\n}\n', {
+					makeGuard: () => 'G\n1',
+					makeReset,
+				}),
+			).toThrow(/single-line/);
+		});
+
+		it('throws when the reset text contains a paragraph separator', () => {
+			expect(() =>
+				spliceLoopGuards('while (x) {\n\tx++;\n}\n', {
+					makeGuard,
+					makeReset: () => 'R\u20291',
+				}),
+			).toThrow(/single-line/);
+		});
+
+		it('throws when the source parses as neither module nor script', () => {
+			expect(() => spliceLoopGuards('while (', hooks)).toThrow(
+				/could not parse/,
+			);
+		});
+	});
 });

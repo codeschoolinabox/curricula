@@ -14,6 +14,7 @@ import { walk } from 'estree-walker';
 
 import type {
 	GuardResult,
+	LoopGuardError,
 	LoopLoc,
 	MakeGuard,
 	MakeReset,
@@ -90,18 +91,21 @@ type Insertion = { readonly offset: number; readonly text: string };
  * acceptance.
  */
 function parseSource(code: string): Node {
+	const ast = tryParse(code, 'module') ?? tryParse(code, 'script');
+	if (ast === null) {
+		throw makeError(
+			'parse-failed',
+			'spliceLoopGuards: could not parse source as module or script',
+		);
+	}
+	return ast;
+}
+
+function tryParse(code: string, sourceType: 'module' | 'script'): Node | null {
 	try {
-		return parse(code, {
-			ecmaVersion: 'latest',
-			sourceType: 'module',
-			locations: true,
-		});
+		return parse(code, { ecmaVersion: 'latest', sourceType, locations: true });
 	} catch {
-		return parse(code, {
-			ecmaVersion: 'latest',
-			sourceType: 'script',
-			locations: true,
-		});
+		return null;
 	}
 }
 
@@ -160,9 +164,43 @@ function planInsertions(
 ): readonly Insertion[] {
 	const isDoWhile = loop.loopType === 'DoWhileStatement';
 	const resetOffset = isDoWhile ? loop.stmtEnd : loop.bodyEnd;
-	const reset = makeReset(index);
+	const guard = assertSingleLine(makeGuard(index, loop.loc));
+	const reset = assertSingleLine(makeReset(index));
 	return [
-		{ offset: loop.bodyStart + 1, text: makeGuard(index, loop.loc) },
+		{ offset: loop.bodyStart + 1, text: guard },
 		{ offset: resetOffset, text: isDoWhile ? `;${reset}` : reset },
 	];
+}
+
+/** ECMAScript line terminators — any of these in injected text would shift line
+ * numbers and break the module's line-preservation invariant. */
+const LINE_TERMINATOR = /[\n\r\u2028\u2029]/;
+
+/**
+ * Guards line preservation at the caller boundary: a guard/reset factory return
+ * carrying a line terminator is rejected loudly rather than silently desyncing
+ * every downstream error line.
+ */
+function assertSingleLine(text: string): string {
+	if (LINE_TERMINATOR.test(text)) {
+		throw makeError(
+			'multiline-injection',
+			'spliceLoopGuards: guard/reset text must be single-line (it carries a line terminator)',
+		);
+	}
+	return text;
+}
+
+/**
+ * Builds the module's typed boundary error: a real `Error` (stack +
+ * `instanceof Error`) augmented with the discriminant tag and reason (types.ts).
+ */
+function makeError(
+	reason: LoopGuardError['reason'],
+	message: string,
+): LoopGuardError {
+	return Object.assign(new Error(message), {
+		loopGuardBoundary: true as const,
+		reason,
+	});
 }
