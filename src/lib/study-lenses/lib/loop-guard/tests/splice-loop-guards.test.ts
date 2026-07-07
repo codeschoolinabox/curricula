@@ -133,4 +133,35 @@ describe('spliceLoopGuards', () => {
 			);
 		});
 	});
+
+	describe('do-while loop', () => {
+		it('resets after the full statement with a leading semicolon (explicit ;)', () => {
+			const result = spliceLoopGuards(
+				'do {\n\tx--;\n} while (x > 0);\n',
+				hooks,
+			);
+			expect(result.code).toBe('do {G1[1:0:3:16]\n\tx--;\n} while (x > 0);;R1\n');
+		});
+
+		it('self-terminates the reset when the do-while relied on ASI (no ;)', () => {
+			const result = spliceLoopGuards('do {\n\tx--;\n} while (x > 0)\n', hooks);
+			expect(result.code).toBe('do {G1[1:0:3:15]\n\tx--;\n} while (x > 0);R1\n');
+		});
+
+		it('spans the loop-statement, not the body block, in the guard loc', () => {
+			const result = spliceLoopGuards(
+				'do {\n\tx--;\n} while (x > 0);\n',
+				hooks,
+			);
+			expect(result.code).toContain('G1[1:0:3:16]');
+		});
+
+		it('counts the one guarded do-while loop', () => {
+			const result = spliceLoopGuards(
+				'do {\n\tx--;\n} while (x > 0);\n',
+				hooks,
+			);
+			expect(result.loopCount).toBe(1);
+		});
+	});
 });

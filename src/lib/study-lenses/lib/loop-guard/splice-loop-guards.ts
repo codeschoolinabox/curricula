@@ -55,6 +55,7 @@ const GUARDED_LOOP_TYPES = [
 	'WhileStatement',
 	'ForStatement',
 	'ForOfStatement',
+	'DoWhileStatement',
 ] as const;
 type LoopType = (typeof GUARDED_LOOP_TYPES)[number];
 
@@ -73,8 +74,10 @@ type LoopNode = {
 };
 
 type CollectedLoop = {
+	readonly loopType: LoopType;
 	readonly bodyStart: number;
 	readonly bodyEnd: number;
+	readonly stmtEnd: number;
 	readonly loc: LoopLoc;
 };
 
@@ -117,8 +120,10 @@ function collectLoops(ast: Node): readonly CollectedLoop[] {
 				return;
 			}
 			loops.push({
+				loopType: node.type,
 				bodyStart: loop.body.start,
 				bodyEnd: loop.body.end,
+				stmtEnd: node.end,
 				loc: loop.loc,
 			});
 		},
@@ -132,7 +137,12 @@ function isGuardedLoopType(type: string): type is LoopType {
 
 /**
  * The two insertions for one loop: the guard immediately after the body's
- * opening brace, the reset immediately after its closing brace.
+ * opening brace, and the reset after the loop's closing structure — the body's
+ * `}` for every type except `do-while`, whose reset goes at the full statement's
+ * end (past the trailing `while (cond);`). The do-while reset text is prefixed
+ * with `;` so it stays a fresh statement regardless of the caller's text (the
+ * do-while grammar already force-terminates after `)`, so this is a harmless
+ * belt-and-suspenders — see DOCS.md § Reset self-termination).
  */
 function planInsertions(
 	loop: CollectedLoop,
@@ -140,8 +150,11 @@ function planInsertions(
 	makeGuard: MakeGuard,
 	makeReset: MakeReset,
 ): readonly Insertion[] {
+	const isDoWhile = loop.loopType === 'DoWhileStatement';
+	const resetOffset = isDoWhile ? loop.stmtEnd : loop.bodyEnd;
+	const reset = makeReset(index);
 	return [
 		{ offset: loop.bodyStart + 1, text: makeGuard(index, loop.loc) },
-		{ offset: loop.bodyEnd, text: makeReset(index) },
+		{ offset: resetOffset, text: isDoWhile ? `;${reset}` : reset },
 	];
 }
