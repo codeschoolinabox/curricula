@@ -68,7 +68,7 @@ describe('effectBefore', () => {
 			});
 			effectBefore(state, 'x', makeTag({ operator: '+=', source: 'x += 5' }));
 			const opEvents = (state.trace as Record<string, unknown>[]).filter(
-				(e) => e.category === 'assignment' && e.kind === 'assignment',
+				(e) => e.category === 'assignment',
 			);
 			expect(opEvents).toHaveLength(1);
 		});

@@ -1,13 +1,18 @@
 import type {
 	AssignmentOperatorEvent,
+	BaseEvent,
 	ValueRepresentation,
 } from '../../types.js';
+import type { DistributiveOmit, Equal, Expect } from '../conformance.js';
 
 /**
- * Creates an AssignmentOperatorEvent for =, +=, -=, ??=, ||=, &&=, etc.
+ * Creates the domain fields for an AssignmentOperatorEvent (=, +=, -=, ??=, ||=,
+ * &&=, etc.). Unlike pure operators, the written `value` stays on this event —
+ * it is the operator's own perspective on the write, not a separate resolve.
+ * The dispatcher stamps the base fields.
  *
- * @param params - operator, target, operands, result, scope ref, optional coercion/shortCircuited
- * @returns Domain-specific fields for an AssignmentOperatorEvent
+ * @param params - operator, target, operands, result (the written value), scope ref, optional coercion/shortCircuited
+ * @returns Domain fields for an AssignmentOperatorEvent
  * @throws {Error} If target is empty
  */
 export default function createAssignmentOperatorEvent(
@@ -20,10 +25,7 @@ export default function createAssignmentOperatorEvent(
 		coercedOperands,
 		shortCircuited,
 	}: AssignmentParams = {} as AssignmentParams,
-): Omit<
-	AssignmentOperatorEvent,
-	'step' | 'semantics' | 'loc' | 'node' | 'source'
-> {
+): AssignmentDomainFields {
 	if (!target) {
 		throw new Error(
 			'createAssignmentOperatorEvent: target is required and must be non-empty',
@@ -35,11 +37,10 @@ export default function createAssignmentOperatorEvent(
 
 	return {
 		category: 'assignment',
-		kind: 'assignment',
 		operator,
 		target,
 		operands,
-		result,
+		value: result,
 		scopeCreationStep,
 		...(coercionOccurred && { coercion: coercedOperands }),
 		...(shortCircuited && { shortCircuited }),
@@ -55,6 +56,25 @@ type AssignmentParams = {
 	readonly coercedOperands?: readonly ValueRepresentation[];
 	readonly shortCircuited?: true;
 };
+
+/** Domain fields (base stamped downstream) for AssignmentOperatorEvent. */
+type AssignmentDomainFields = {
+	readonly category: 'assignment';
+	readonly operator: string;
+	readonly target: string;
+	readonly operands: readonly ValueRepresentation[];
+	readonly value: ValueRepresentation;
+	readonly coercion?: readonly ValueRepresentation[];
+	readonly shortCircuited?: true;
+	readonly scopeCreationStep?: number;
+};
+
+type _AssertAssignment = Expect<
+	Equal<
+		AssignmentDomainFields,
+		DistributiveOmit<AssignmentOperatorEvent, keyof BaseEvent>
+	>
+>;
 
 /**
  * Compares two ValueRepresentation arrays for shallow equality.

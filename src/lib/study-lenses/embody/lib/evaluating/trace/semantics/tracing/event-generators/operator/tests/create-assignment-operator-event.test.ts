@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import createAssignmentOperatorEvent from '../create-assignment-operator-event.js';
 
 describe('createAssignmentOperatorEvent', () => {
-	describe('category and kind', () => {
+	describe('category', () => {
 		it('category is assignment', () => {
 			const event = createAssignmentOperatorEvent({
 				operator: '=',
@@ -13,20 +13,6 @@ describe('createAssignmentOperatorEvent', () => {
 				scopeCreationStep: 0,
 			});
 			expect(event.category).toBe('assignment');
-		});
-
-		it('kind is assignment', () => {
-			const event = createAssignmentOperatorEvent({
-				operator: '+=',
-				target: 'x',
-				operands: [
-					{ type: 'number', value: 10 },
-					{ type: 'number', value: 5 },
-				],
-				result: { type: 'number', value: 15 },
-				scopeCreationStep: 0,
-			});
-			expect(event.kind).toBe('assignment');
 		});
 	});
 
