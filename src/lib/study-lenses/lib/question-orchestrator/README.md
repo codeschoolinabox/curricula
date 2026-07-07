@@ -97,7 +97,7 @@ that change. (Open question for the gate — see [DOCS.md](./DOCS.md).)
 
 ```text
 composeQuestions(embodiment, config?)
-  -> if !embodiment.status.parsed: return { items: [], coverage: empty }   — degenerate path
+  -> if !embodiment.status.parsed: return { items: [], coverage: reportCoverage([], targets) }  — degenerate (spanned [], gaps = configured targets)
   -> build shared inputs ONCE: { embodiment, classifyTokens(embodiment), config }
   -> SOURCES.flatMap(source.run(inputs))      — closed + open + …; each adapter total
                                                 (defends its source, [] on failure), and
@@ -111,8 +111,10 @@ composeQuestions(embodiment, config?)
 **Unparseable embodiment (the degenerate path).** The two sources fail
 differently — `generateQuiz` **throws** on an unparsed snippet, while
 `analyzeMicroDecisions` returns `{ ok: false }`. `composeQuestions` therefore
-gates on `embodiment.status.parsed` up front and returns an empty `QuestionSet`
-**before** running any source; each adapter additionally defends its own call
+gates on `embodiment.status.parsed` up front and returns — **before** running any
+source — a set with no items, its coverage reported over the empty item pool
+(`spanned: []`, and every configured coverage target is a gap): nothing shipped,
+so nothing is covered. Each adapter additionally defends its own call
 (try/catch → `[]`). The function is total — it never throws.
 
 **Ladder rank (mixed / multi-cell / zero-cell).** An item carries `cells:
@@ -142,7 +144,8 @@ function composeQuestions(
 
 Pure function. Reads source + AST from the embodiment (never re-derives beyond
 the one classify pass). Mirrors the sibling libs' `embodiment`-first contract.
-Total: returns an empty set on an unparsed embodiment, never throws.
+Total: returns a set with no items (coverage reported over the empty pool) on an
+unparsed embodiment, never throws.
 
 ```ts
 // QuestionSet — a frozen composed set over both registers

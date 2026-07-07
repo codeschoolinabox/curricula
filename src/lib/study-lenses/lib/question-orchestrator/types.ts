@@ -51,12 +51,20 @@ type OrchestratedRegister = 'open' | 'closed';
  * source object lives on the register arm (see below), untouched.
  */
 type OrchestratedItemBase = Readonly<{
-	/** Globally unique, namespaced by source: `` `${sourceId}:${nativeId}` ``
-	 *  (e.g. `'quizzing:V1@12-13'`, `'socratizing:let-vs-const@…'` — native id
-	 *  shapes vary per source/form). Global uniqueness assumes native ids are
-	 *  unique within a source per snippet (holds for both sources today, though
-	 *  neither type guarantees it by charter). The native id is preserved so
-	 *  consumers can track shown/dismissed. */
+	/** Namespaced by source: `` `${sourceId}:${nativeId}` `` (e.g.
+	 *  `'quizzing:V1@12-13'`, `'quizzing:V6/binding:x@4-8'`,
+	 *  `'socratizing:what-is-declared'` — native id shapes vary per source/form).
+	 *  NOT globally unique. Quizzing's native ids are unique per snippet today
+	 *  (each encodes its span, or is one-per-key like `V10c/use-type:read`),
+	 *  though not guaranteed by charter; socratizing's are constant per analyzer
+	 *  (`'what-is-declared'`, `'what-value-stored'`), so a repeated node-type
+	 *  yields several items sharing one `id`. There is **no** per-item
+	 *  unique-identity field — do not dedup on `id`. For co-anchoring, key on
+	 *  `anchorOffsets`, which is intentionally many-to-one (`itemsAt` bundles
+	 *  cross-register items sharing an anchor) — a bundling key, not an identity.
+	 *  The native id is preserved so a consumer can drive socratizing's
+	 *  shown/dismissed adaptive fading, which keys on the stable analyzer id,
+	 *  not on per-item uniqueness. */
 	id: string;
 	/** Which registered source emitted this item (`'quizzing'` | `'socratizing'` | …). */
 	sourceId: string;
@@ -153,8 +161,8 @@ type CompositionConfig = {
 	};
 	/** Order items atom → block → relation → macro. Default: `true`. */
 	ladder?: boolean;
-	/** Max items in the composed set (`0` or omitted = no cap). Applied LAST,
-	 *  after coverage + ladder. */
+	/** Max items in the composed set (`0` or omitted = no cap). Applied after
+	 *  ladder, before the coverage report (so coverage describes the capped set). */
 	count?: number;
 };
 

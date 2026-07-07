@@ -103,10 +103,12 @@ source), but it is not the hand-rolled hazard an earlier draft implied.
 `composeQuestions(embodiment, config?) → QuestionSet`. Each phase, in domain terms
 (all synchronous; the whole function is total — it never throws):
 
-1. **Gate.** In: frozen embodiment. Out: the empty composed set if unparsed
-   (short-circuit), else proceed. (Total — this is why the two sources' divergent
-   failure modes never surface: `generateQuiz` *throws* on unparsed, so it is
-   never reached in that state.)
+1. **Gate.** In: frozen embodiment + config. Out: if unparsed, short-circuit — no
+   items, coverage reported by the coverage phase over the empty pool (nothing
+   spanned, so every configured coverage target is a gap; no gaps when none are
+   configured); else proceed to build inputs. (Total — this is why the two
+   sources' divergent failure modes never surface: `generateQuiz` *throws* on
+   unparsed, so it is never reached in that state.)
 2. **Build shared inputs.** In: parsed embodiment + config. Out: the shared inputs
    (embodiment + classified tokens + config), built once.
 3. **Run sources.** In: shared inputs. Out: a flat, mixed-register item pool. Each
@@ -127,7 +129,7 @@ Result: `QuestionSet { items, coverage }`, frozen.
 ```mermaid
 flowchart TD
     Emb["frozen embodiment"]
-    Emb -->|"gate on parse status — unparsed yields the empty set (total)"| Inputs["shared inputs:<br/>embodiment + classified tokens + config"]
+    Emb -->|"gate on parse status — unparsed short-circuits to no items + honest-gap coverage (total)"| Inputs["shared inputs:<br/>embodiment + classified tokens + config"]
     Inputs -->|"each source emits items; anchors normalized to offsets (pure, per-source total)"| Pool["mixed-register item pool"]
     Pool -->|"order by most-concrete Block level"| Laddered["laddered stream"]
     Laddered -->|"cap to the configured maximum"| Delivered["delivered items"]
@@ -149,7 +151,9 @@ Because it runs after the cap, it truthfully describes the delivered set — a c
 (per-source or composition) that drops a cell's only item honestly shows that cell
 as a gap. The orchestrator never synthesizes an item to fill a gap; a cell no
 source emitted is a permanent gap. (This is why README calls it "coverage-report,"
-not "coverage-target.")
+not "coverage-target.") The degenerate (unparsed) path is the limiting case: it
+reports over an empty item pool, so `spanned` is `[]` and every configured target
+is a gap.
 
 ## Bounded contexts (do-not-cross)
 
