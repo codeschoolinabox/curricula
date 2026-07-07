@@ -1,13 +1,17 @@
 import type {
+	BaseEvent,
 	ShortCircuitingOperatorEvent,
 	ValueRepresentation,
 } from '../../types.js';
+import type { DistributiveOmit, Equal, Expect } from '../conformance.js';
 
 /**
- * Creates a ShortCircuitingOperatorEvent for &&, ||, ??, ?:.
+ * Creates the domain fields for a ShortCircuitingOperatorEvent (&&, ||, ??). The
+ * result rides the paired ResolveEvent (kind: 'shortCircuit'), not this event.
+ * The dispatcher stamps the base fields.
  *
- * @param params - operator, left, optional right, result, optional shortCircuited
- * @returns Domain-specific fields for a ShortCircuitingOperatorEvent
+ * @param params - operator, left, optional right, optional shortCircuited
+ * @returns Domain fields for a ShortCircuitingOperatorEvent
  * @throws {Error} If shortCircuited with right present, or not shortCircuited without right
  */
 export default function createShortCircuitingOperatorEvent(
@@ -15,13 +19,9 @@ export default function createShortCircuitingOperatorEvent(
 		operator,
 		left,
 		right,
-		result,
 		shortCircuited,
 	}: ShortCircuitingParams = {} as ShortCircuitingParams,
-): Omit<
-	ShortCircuitingOperatorEvent,
-	'step' | 'semantics' | 'loc' | 'node' | 'source'
-> {
+): ShortCircuitingDomainFields {
 	if (shortCircuited && right !== undefined) {
 		throw new Error(
 			'createShortCircuitingOperatorEvent: right must be absent when shortCircuited',
@@ -38,7 +38,6 @@ export default function createShortCircuitingOperatorEvent(
 		kind: 'shortCircuiting',
 		operator,
 		left,
-		result,
 		...(right !== undefined && { right }),
 		...(shortCircuited && { shortCircuited }),
 	};
@@ -48,6 +47,22 @@ type ShortCircuitingParams = {
 	readonly operator: '&&' | '||' | '??';
 	readonly left: ValueRepresentation;
 	readonly right?: ValueRepresentation;
-	readonly result: ValueRepresentation;
 	readonly shortCircuited?: true;
 };
+
+/** Domain fields (base stamped downstream) for ShortCircuitingOperatorEvent. */
+type ShortCircuitingDomainFields = {
+	readonly category: 'operator';
+	readonly kind: 'shortCircuiting';
+	readonly operator: '&&' | '||' | '??';
+	readonly left: ValueRepresentation;
+	readonly right?: ValueRepresentation;
+	readonly shortCircuited?: true;
+};
+
+type _AssertShortCircuiting = Expect<
+	Equal<
+		ShortCircuitingDomainFields,
+		DistributiveOmit<ShortCircuitingOperatorEvent, keyof BaseEvent>
+	>
+>;

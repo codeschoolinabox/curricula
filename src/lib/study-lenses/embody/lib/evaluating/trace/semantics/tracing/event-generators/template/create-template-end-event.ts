@@ -1,27 +1,36 @@
-import type { TemplateEndEvent, ValueRepresentation } from '../../types.js';
+import type { BaseEvent, TemplateEndEvent } from '../../types.js';
+import type { DistributiveOmit, Equal, Expect } from '../conformance.js';
 
 /**
- * Creates a TemplateEndEvent when a template literal is fully assembled.
+ * Creates the domain fields for a TemplateEndEvent (a template literal is fully
+ * assembled). The assembled string rides the paired ResolveEvent
+ * (kind: 'template'), not this event. The dispatcher stamps the base fields.
  *
- * @param params - final string value and begin step reference
- * @returns Domain-specific fields for a TemplateEndEvent
+ * @param params - begin step reference
+ * @returns Domain fields for a TemplateEndEvent
  */
 export default function createTemplateEndEvent(
-	{
-		value,
-		beginStep,
-	}: {
-		readonly value: ValueRepresentation;
-		readonly beginStep: number;
-	} = {} as {
-		readonly value: ValueRepresentation;
+	{ beginStep }: { readonly beginStep: number } = {} as {
 		readonly beginStep: number;
 	},
-): Omit<TemplateEndEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
+): TemplateEndDomainFields {
 	return {
 		category: 'template',
 		event: 'end',
-		value,
 		beginStep,
 	};
 }
+
+/** Domain fields (base stamped downstream) for TemplateEndEvent. */
+type TemplateEndDomainFields = {
+	readonly category: 'template';
+	readonly event: 'end';
+	readonly beginStep: number;
+};
+
+type _AssertTemplateEnd = Expect<
+	Equal<
+		TemplateEndDomainFields,
+		DistributiveOmit<TemplateEndEvent, keyof BaseEvent>
+	>
+>;

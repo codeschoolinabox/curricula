@@ -1,14 +1,18 @@
 import type {
+	BaseEvent,
 	PureOperatorEvent,
 	PureOperatorSubkind,
 	ValueRepresentation,
 } from '../../types.js';
+import type { DistributiveOmit, Equal, Expect } from '../conformance.js';
 
 /**
- * Creates a PureOperatorEvent for operators that evaluate all operands.
+ * Creates the domain fields for a PureOperatorEvent (operators that evaluate all
+ * operands). The result rides the paired ResolveEvent (kind: 'operator'), not
+ * this event. The dispatcher stamps the base fields.
  *
- * @param params - subkind, operator string, operands, result, optional coercedOperands
- * @returns Domain-specific fields for a PureOperatorEvent
+ * @param params - subkind, operator string, operands, optional coercedOperands
+ * @returns Domain fields for a PureOperatorEvent
  * @throws {Error} If operands is empty
  */
 export default function createPureOperatorEvent(
@@ -16,10 +20,9 @@ export default function createPureOperatorEvent(
 		subkind,
 		operator,
 		operands,
-		result,
 		coercedOperands,
 	}: PureOperatorParams = {} as PureOperatorParams,
-): Omit<PureOperatorEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
+): PureOperatorDomainFields {
 	if (!operands || operands.length === 0) {
 		throw new Error('createPureOperatorEvent: operands must be non-empty');
 	}
@@ -33,7 +36,6 @@ export default function createPureOperatorEvent(
 		subkind,
 		operator,
 		operands,
-		result,
 		...(coercionOccurred && { coercion: coercedOperands }),
 	};
 }
@@ -42,9 +44,25 @@ type PureOperatorParams = {
 	readonly subkind: PureOperatorSubkind;
 	readonly operator: string;
 	readonly operands: readonly ValueRepresentation[];
-	readonly result: ValueRepresentation;
 	readonly coercedOperands?: readonly ValueRepresentation[];
 };
+
+/** Domain fields (base stamped downstream) for PureOperatorEvent. */
+type PureOperatorDomainFields = {
+	readonly category: 'operator';
+	readonly kind: 'pure';
+	readonly subkind: PureOperatorSubkind;
+	readonly operator: string;
+	readonly operands: readonly ValueRepresentation[];
+	readonly coercion?: readonly ValueRepresentation[];
+};
+
+type _AssertPureOperator = Expect<
+	Equal<
+		PureOperatorDomainFields,
+		DistributiveOmit<PureOperatorEvent, keyof BaseEvent>
+	>
+>;
 
 /**
  * Compares two ValueRepresentation arrays for shallow equality.

@@ -9,7 +9,6 @@ describe('createPropertyAccessEvent', () => {
 				kind: 'dot',
 				object: 'Math',
 				key: 'PI',
-				value: { type: 'number', value: 3.141592653589793 },
 			});
 			expect(event.category).toBe('property');
 		});
@@ -19,7 +18,6 @@ describe('createPropertyAccessEvent', () => {
 				kind: 'dot',
 				object: 'str',
 				key: 'length',
-				value: { type: 'number', value: 5 },
 			});
 			expect(event.kind).toBe('dot');
 		});
@@ -29,7 +27,6 @@ describe('createPropertyAccessEvent', () => {
 				kind: 'bracket',
 				object: 'str',
 				key: 0,
-				value: { type: 'string', value: 'h' },
 			});
 			expect(event.kind).toBe('bracket');
 		});
@@ -41,7 +38,6 @@ describe('createPropertyAccessEvent', () => {
 				kind: 'dot',
 				object: 'console',
 				key: 'log',
-				value: { type: 'function', name: 'log' },
 			});
 			expect(event.object).toBe('console');
 		});
@@ -51,7 +47,6 @@ describe('createPropertyAccessEvent', () => {
 				kind: 'dot',
 				object: 'Math',
 				key: 'PI',
-				value: { type: 'number', value: 3.14 },
 			});
 			expect(event.key).toBe('PI');
 		});
@@ -61,7 +56,6 @@ describe('createPropertyAccessEvent', () => {
 				kind: 'bracket',
 				object: 'str',
 				key: 2,
-				value: { type: 'string', value: 'c' },
 			});
 			expect(event.key).toBe(2);
 		});
@@ -73,7 +67,6 @@ describe('createPropertyAccessEvent', () => {
 				kind: 'optionalChaining',
 				object: 'input',
 				key: 'length',
-				value: { type: 'number', value: 5 },
 			});
 			expect(event).not.toHaveProperty('shortCircuited');
 		});
@@ -83,7 +76,6 @@ describe('createPropertyAccessEvent', () => {
 				kind: 'optionalChaining',
 				object: 'input',
 				key: 'length',
-				value: { type: 'undefined' },
 				shortCircuited: true,
 			});
 			expect(event.shortCircuited).toBe(true);
@@ -97,7 +89,6 @@ describe('createPropertyAccessEvent', () => {
 					kind: 'dot',
 					object: 'str',
 					key: 'length',
-					value: { type: 'number', value: 5 },
 					shortCircuited: true,
 				}),
 			).toThrow();

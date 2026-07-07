@@ -12,7 +12,6 @@ describe('createPureOperatorEvent', () => {
 					{ type: 'number', value: 2 },
 					{ type: 'number', value: 3 },
 				],
-				result: { type: 'number', value: 5 },
 			});
 			expect(event.category).toBe('operator');
 		});
@@ -25,7 +24,6 @@ describe('createPureOperatorEvent', () => {
 					{ type: 'number', value: 1 },
 					{ type: 'number', value: 1 },
 				],
-				result: { type: 'boolean', value: true },
 			});
 			expect(event.kind).toBe('pure');
 		});
@@ -35,13 +33,12 @@ describe('createPureOperatorEvent', () => {
 				subkind: 'typeof',
 				operator: 'typeof',
 				operands: [{ type: 'string', value: 'hello' }],
-				result: { type: 'string', value: 'string' },
 			});
 			expect(event.subkind).toBe('typeof');
 		});
 	});
 
-	describe('operands and result', () => {
+	describe('operands', () => {
 		it('preserves operands', () => {
 			const operands = [
 				{ type: 'number' as const, value: 10 },
@@ -51,20 +48,8 @@ describe('createPureOperatorEvent', () => {
 				subkind: 'arithmetic',
 				operator: '%',
 				operands,
-				result: { type: 'number', value: 1 },
 			});
 			expect(event.operands).toEqual(operands);
-		});
-
-		it('preserves result', () => {
-			const result = { type: 'boolean' as const, value: false };
-			const event = createPureOperatorEvent({
-				subkind: 'negation.logical',
-				operator: '!',
-				operands: [{ type: 'string', value: 'hello' }],
-				result,
-			});
-			expect(event.result).toEqual(result);
 		});
 	});
 
@@ -77,7 +62,6 @@ describe('createPureOperatorEvent', () => {
 					{ type: 'number', value: 5 },
 					{ type: 'number', value: 3 },
 				],
-				result: { type: 'number', value: 2 },
 			});
 			expect(event).not.toHaveProperty('coercion');
 		});
@@ -91,7 +75,6 @@ describe('createPureOperatorEvent', () => {
 				subkind: 'arithmetic',
 				operator: '-',
 				operands,
-				result: { type: 'number', value: 2 },
 				coercedOperands: operands,
 			});
 			expect(event).not.toHaveProperty('coercion');
@@ -105,7 +88,6 @@ describe('createPureOperatorEvent', () => {
 					{ type: 'string', value: '3' },
 					{ type: 'number', value: 4 },
 				],
-				result: { type: 'string', value: '34' },
 				coercedOperands: [
 					{ type: 'string', value: '3' },
 					{ type: 'string', value: '4' },
@@ -125,7 +107,6 @@ describe('createPureOperatorEvent', () => {
 					subkind: 'arithmetic',
 					operator: '+',
 					operands: [],
-					result: { type: 'number', value: 0 },
 				}),
 			).toThrow();
 		});

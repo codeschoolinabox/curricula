@@ -9,7 +9,6 @@ describe('createShortCircuitingOperatorEvent', () => {
 				operator: '&&',
 				left: { type: 'string', value: 'hello' },
 				right: { type: 'string', value: 'world' },
-				result: { type: 'string', value: 'world' },
 			});
 			expect(event.category).toBe('operator');
 		});
@@ -18,7 +17,6 @@ describe('createShortCircuitingOperatorEvent', () => {
 			const event = createShortCircuitingOperatorEvent({
 				operator: '||',
 				left: { type: 'string', value: 'hello' },
-				result: { type: 'string', value: 'hello' },
 				shortCircuited: true,
 			});
 			expect(event.kind).toBe('shortCircuiting');
@@ -31,7 +29,6 @@ describe('createShortCircuitingOperatorEvent', () => {
 				operator: '&&',
 				left: { type: 'boolean', value: true },
 				right: { type: 'string', value: 'yes' },
-				result: { type: 'string', value: 'yes' },
 			});
 			expect(event.right).toEqual({ type: 'string', value: 'yes' });
 		});
@@ -41,7 +38,6 @@ describe('createShortCircuitingOperatorEvent', () => {
 				operator: '??',
 				left: { type: 'string', value: 'hello' },
 				right: { type: 'string', value: 'fallback' },
-				result: { type: 'string', value: 'hello' },
 			});
 			expect(event).not.toHaveProperty('shortCircuited');
 		});
@@ -52,7 +48,6 @@ describe('createShortCircuitingOperatorEvent', () => {
 			const event = createShortCircuitingOperatorEvent({
 				operator: '||',
 				left: { type: 'string', value: 'hello' },
-				result: { type: 'string', value: 'hello' },
 				shortCircuited: true,
 			});
 			expect(event).not.toHaveProperty('right');
@@ -62,7 +57,6 @@ describe('createShortCircuitingOperatorEvent', () => {
 			const event = createShortCircuitingOperatorEvent({
 				operator: '&&',
 				left: { type: 'boolean', value: false },
-				result: { type: 'boolean', value: false },
 				shortCircuited: true,
 			});
 			expect(event.shortCircuited).toBe(true);
@@ -76,7 +70,6 @@ describe('createShortCircuitingOperatorEvent', () => {
 					operator: '||',
 					left: { type: 'string', value: 'hi' },
 					right: { type: 'string', value: 'nope' },
-					result: { type: 'string', value: 'hi' },
 					shortCircuited: true,
 				}),
 			).toThrow();
@@ -87,7 +80,6 @@ describe('createShortCircuitingOperatorEvent', () => {
 				createShortCircuitingOperatorEvent({
 					operator: '&&',
 					left: { type: 'boolean', value: true },
-					result: { type: 'string', value: 'yes' },
 				}),
 			).toThrow();
 		});
