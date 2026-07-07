@@ -12,9 +12,8 @@ lib knows about the other; this module is where a learning environment "places
 both registers on one grid" (the phrasing is [quizzing's own](../quizzing/README.md)
 — this lib makes it real).
 
-> **Design stage.** This module is specified here (`README.md`, `types.ts`,
-> `DOCS.md`); its entry function and source adapters are not yet built. Which
-> lenses consume the stream is a boundary described in
+> **Consumers.** The lib (entry, source adapters, and passes) is built and
+> unit-tested; which lenses consume the stream is a boundary described in
 > [DOCS.md § Consumers](./DOCS.md).
 
 ## Glossary (ubiquitous language)
@@ -207,11 +206,8 @@ only item will show that cell as a gap. If you want maximum coverage, cap loosel
 | `report-coverage.ts` | Spanned-cells + gaps over the delivered items (`CoverageReport`) |
 | `tests/` | Unit and integration tests |
 
-The `sources/` adapters and their registry are built; `ladder.ts`,
-`report-coverage.ts`, and `compose-questions.ts` land in the remaining
-increments. (The empty
-[`../../orchestrate/lib/recommender/`](../../orchestrate/lib/recommender/) folder
-is a thin precedent for a lib registered before it is built.)
+Every file above is built and unit-tested. What remains outside this lib is a
+consumer: which lens renders the stream (see § Consumers).
 
 ## Consumers (a boundary, built elsewhere)
 
