@@ -115,7 +115,8 @@ source), but it is not the hand-rolled hazard an earlier draft implied.
    source is total (defends its call, contributes `[]` on failure) and normalizes
    its items' anchors to offsets here.
 4. **Ladder.** In: item pool. Out: a laddered stream, ordered by each item's
-   most-concrete Block level (ties by source order; zero-cell items last).
+   most-concrete Block level (ties by emission/positional order in the pool — not
+   by `sourceId`; zero-cell items last).
 5. **Cap.** In: laddered stream + `config.count`. Out: the delivered items
    (the laddered head, `≤ count`).
 6. **Report coverage.** In: delivered items + `config.coverage.cells`. Out: the
