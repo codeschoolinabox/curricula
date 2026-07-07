@@ -118,13 +118,15 @@ never-throws-for-string contract).
 
 ## Consumers
 
-- **Current**: the [`quiz`](../../lenses/quiz/) lens. Its
-  [`core.ts`](../../lenses/quiz/core.ts) `applicableTo` returns
-  `status.parsed && isJejCompliant(embodiment)`; its model builder
-  [`lib/build-quiz.ts`](../../lenses/quiz/lib/build-quiz.ts) gates on it too
-  (the load-bearing gate — the wrapper runs the builder in an unconditional
-  `useMemo` before the render guard, so the generators must never see a non-JEJ
-  AST); the wrapper's render fallback follows from the builder returning `null`.
+- **Designed for**: the [`quiz`](../../lenses/quiz/) lens — **not yet wired**
+  (today [`core.ts`](../../lenses/quiz/core.ts) and
+  [`lib/build-quiz.ts`](../../lenses/quiz/lib/build-quiz.ts) still gate only on
+  `status.parsed`). The wiring increment makes `applicableTo` return
+  `status.parsed && isJejCompliant(embodiment)` and adds the same gate to the
+  model builder `build-quiz.ts` (the load-bearing gate — the wrapper runs the
+  builder in an unconditional `useMemo` before the render guard, so the
+  generators must never see a non-JEJ AST); the render fallback follows from the
+  builder returning `null`.
 - **Potential**: any other Tier-2 lens whose analysis assumes the JEJ scope
   model. The seam lives at the peer-independent `lib/*` level so a lens consumes
   it without reaching across the `lenses/` ↔ `embody/` boundary.
