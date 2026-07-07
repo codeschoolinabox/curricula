@@ -543,11 +543,17 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 		throw new Error(`unhandled quiz item mode: ${String(_never)}`);
 	}
 
-	if (!embodiment.status.parsed) {
+	// Defense-in-depth (mirrors blanks' `blankResult === null`): in production
+	// `applicableTo` gates on `status.parsed && isJejCompliant`, so unparseable /
+	// non-JEJ embodiments never reach the wrapper. If one does (e.g. the picker
+	// bypasses the recommender), `buildQuiz` returned `null` — for an unparsed OR a
+	// parseable-but-non-JEJ snippet — so `model === null` surfaces the fallback for
+	// both reasons without re-calling the validator per render.
+	if (!embodiment.status.parsed || model === null) {
 		return (
 			<div data-lens="quiz">
 				<div data-quiz-fallback role="alert">
-					The quiz lens needs parseable code.
+					The quiz lens needs parseable Just-Enough-JavaScript code.
 				</div>
 			</div>
 		);

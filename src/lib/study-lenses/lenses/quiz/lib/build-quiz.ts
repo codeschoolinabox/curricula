@@ -16,6 +16,7 @@ import * as acorn from 'acorn';
 
 import freezeInPlace from '@utils/freeze-in-place.js';
 
+import isJejCompliant from '../../../lib/admitting/is-jej-compliant.js';
 import classifyTokens from '../../../lib/classifying/classify-tokens.js';
 import type { ClassifiedToken } from '../../../lib/classifying/types.js';
 import generateQuiz from '../../../lib/quizzing/generate-quiz.js';
@@ -46,10 +47,13 @@ type QuizModel = Readonly<{
 function buildQuiz(snippet: Snippet): QuizModel | null {
 	// `generateQuiz` throws on an unparsed snippet, and the wrapper runs this in
 	// a `useMemo` that fires UNCONDITIONALLY (before the render gate) — so gate
-	// here too: an unparsed snippet yields no model (the wrapper renders the
-	// fallback). This is the canonical `status.parsed` gate; the re-parse `null`
-	// below is the defense-in-depth guard for the parsed-but-unparseable edge.
-	if (!snippet.status.parsed) return null;
+	// here too. This is also the LOAD-BEARING JEJ gate: the generators assume the
+	// JEJ scope model (no functions/`var`/`class`), so a parseable-but-non-JEJ
+	// snippet must yield no model — the generators never see a non-JEJ AST (see
+	// `../../../lib/admitting/`). An unparsed OR non-JEJ snippet yields null and
+	// the wrapper renders the fallback. The re-parse `null` below is the
+	// defense-in-depth guard for the parsed-but-unparseable edge.
+	if (!snippet.status.parsed || !isJejCompliant(snippet)) return null;
 
 	const { code } = snippet.source;
 

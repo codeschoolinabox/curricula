@@ -42,13 +42,33 @@ describe('quiz core', () => {
 		});
 	});
 
-	describe('applicableTo (Tier 2 — status.parsed)', () => {
-		it('returns true for a parseable snippet', () => {
+	describe('applicableTo (Tier 2 + JEJ admission gate)', () => {
+		it('returns true for a parseable, JEJ-compliant snippet', () => {
 			expect(core.applicableTo(embody('OK'))).toBe(true);
 		});
 
-		it('returns false for an unparseable snippet', () => {
+		it('returns true for real JEJ source', () => {
+			expect(core.applicableTo(embody('let x = 1; x;'))).toBe(true);
+		});
+
+		it('returns false for an unparseable snippet (short-circuits on status.parsed)', () => {
 			expect(core.applicableTo(embody('FAIL_AT_PARSE'))).toBe(false);
+		});
+
+		it('returns false for parseable-but-non-JEJ code (the new gate)', () => {
+			// `function f(){}` parses but is not JEJ — the quiz generators assume the
+			// JEJ scope model, so the lens gates itself out. The JEJ matrix is owned by
+			// lib/admitting; here we only prove the `status.parsed && isJejCompliant`
+			// composition.
+			expect(core.applicableTo(embody('function f() {}'))).toBe(false);
+		});
+
+		it('returns false for a recorded validation failure (delegation proof — no keyword to pattern-match)', () => {
+			// VALIDATION_FAIL's source.code is the bare identifier 'VALIDATION_FAIL'
+			// (parseable, no function/var/class keyword), non-JEJ only via its recorded
+			// validation.isJeJ=false. This forces genuine delegation to isJejCompliant —
+			// a source.code string-match fake could not satisfy it.
+			expect(core.applicableTo(embody('VALIDATION_FAIL'))).toBe(false);
 		});
 	});
 

@@ -13,6 +13,7 @@
 import cloneAndFreeze from '@utils/clone-and-freeze.js';
 import freezeInPlace from '@utils/freeze-in-place.js';
 
+import isJejCompliant from '../../lib/admitting/is-jej-compliant.js';
 import type { LensConfig, Recommendation, Snippet } from '../types.js';
 
 import type { GroupMastery, MasteryFold, MasteryState } from './types.js';
@@ -47,17 +48,21 @@ function config(overrides?: Partial<LensConfig>): LensConfig {
 }
 
 /**
- * The quiz lens's applicability gate — **Tier 2** per `../README.md`
- * § Three-tier classification. Returns `embodiment.status.parsed`: the lens
- * classifies tokens and generates questions from the AST, so an unparseable
- * snippet has nothing to anchor.
+ * The quiz lens's applicability gate — **Tier 2 + JEJ admission** per
+ * `../README.md` § Three-tier classification. Returns
+ * `embodiment.status.parsed && isJejCompliant(embodiment)`: the lens classifies
+ * tokens and generates questions whose ground truth (scope, TDZ, creation-phase)
+ * is statically decidable ONLY because JEJ excludes functions/`var`/`class`. An
+ * unparseable snippet has nothing to anchor; a parseable-but-non-JEJ one would
+ * yield confidently-wrong answers, so the lens gates itself out (the JEJ matrix
+ * lives in `../../lib/admitting/`; `status.parsed` short-circuits first).
  *
  * @param embodiment - The frozen `Snippet` the orchestrator considers
  *   surfacing this lens for.
- * @returns `true` when the snippet parsed successfully.
+ * @returns `true` when the snippet parsed successfully and is JEJ-admitted.
  */
 function applicableTo(embodiment: Snippet): boolean {
-	return embodiment.status.parsed;
+	return embodiment.status.parsed && isJejCompliant(embodiment);
 }
 
 /**

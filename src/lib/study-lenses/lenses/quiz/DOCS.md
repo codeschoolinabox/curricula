@@ -61,12 +61,15 @@ in isolation (vitest, no jsdom) plus the wrapper end-to-end (jsdom +
    parameterless), so the wrapper takes only `embodiment`; an absent config prop
    is therefore harmless, and the `core.config(props.config)` resolution
    (merging educator overrides — the `writeme` precedent) lands with the first
-   knob (inc 8, the config-filtering increment). The wrapper computes the parse
-   gate from `embodiment.status.parsed`. On `false` it renders the fallback
-   panel and stops (it never calls `generateQuiz`, which throws on unparsed). On
-   `true` it proceeds. The lens reads only `source.code` and `raw.*` (via
-   `classifyTokens`) — never `analysis` / `creation` / `realm` (all null on real
-   snippets under today's embody stubs).
+   knob (inc 8, the config-filtering increment). The gate is
+   `embodiment.status.parsed && isJejCompliant(embodiment)` — the load-bearing
+   copy lives in `build-quiz.ts` (run in an unconditional `useMemo`), which
+   returns `null` for an unparsed OR parseable-but-non-JEJ snippet; the wrapper
+   renders the fallback on `model === null` and never calls `generateQuiz`
+   (which throws on unparsed, and whose ground truth assumes the JEJ scope
+   model). On a parsed, JEJ-admitted snippet it proceeds. The lens reads only
+   `source.code` and `raw.*` (via `classifyTokens`) — never `analysis` /
+   `creation` / `realm` (all null on real snippets under today's embody stubs).
 
 2. **Build the quiz model** (sync, pure, memoized) — a `useMemo` keyed on
    `embodiment.source.code` runs the build pipeline: re-parse the source with
@@ -182,8 +185,8 @@ the whole transition set.
 ```mermaid
 flowchart TD
     Props["lens props<br/>frozen embodiment + (optional) frozen config"]
-    Props -->|"gate on status.parsed — sync, pure"| Gate{"parsed?"}
-    Gate -->|"no"| Fallback["fallback notice<br/>(needs parseable code)"]
+    Props -->|"gate on status.parsed && isJejCompliant — sync, pure"| Gate{"parsed & JEJ-admitted?"}
+    Gate -->|"no"| Fallback["fallback notice<br/>(needs parseable JEJ code)"]
     Gate -->|"yes · re-parse → classify → generate → filter by item.mode (staged) — pure, memoized"| Model["quiz model<br/>classified ranges + QuizItem[] (admitted modes)"]
 
     Model -->|"render read-only, un-colorized — effect"| Editor["editor host<br/>mousedown → click offset"]
@@ -305,10 +308,12 @@ die with the component instance.
   non-overlapping (EOF + zero-length dropped inside `classifyTokens`), so the
   binary search is unambiguous.
 - **`generateQuiz` throws on unparsed → only called behind the gate.** The lens
-  calls `generateQuiz` only inside `build-quiz.ts`, which runs only when
-  `status.parsed` (the gate / `showFallback` branch guarantees it). The internal
-  re-parse returning `null` is the second guard. The two must agree; the
-  `status.parsed` gate (not `buildQuiz === null`) is the canonical signal.
+  calls `generateQuiz` only inside `build-quiz.ts`, which returns `null` first
+  (no call) unless `status.parsed && isJejCompliant` — so the generators never
+  run on an unparsed OR non-JEJ AST (`model === null` drives the wrapper's
+  fallback). The internal re-parse returning `null` is the second guard. The two
+  must agree; the `status.parsed && isJejCompliant` gate (not
+  `buildQuiz === null`) is the canonical signal.
 - **`recommend()`'s signature is locked** at
   `(embodiment) => ReadonlyArray<Recommendation>`. Slice A returns the
   module-level frozen empty array; the final increment maps `QuizItem.cells`

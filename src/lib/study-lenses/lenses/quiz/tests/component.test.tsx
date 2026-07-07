@@ -80,6 +80,43 @@ describe('<quiz Component> — Slice A inc 1: read-only un-colorized editor', ()
 		});
 	});
 
+	// Zero — a parseable but non-JEJ snippet (a function): the JEJ gate hides the
+	// lens exactly as an unparseable one does (defense-in-depth in the wrapper —
+	// `applicableTo` gates it out in production, and buildQuiz returns null so the
+	// render fallback fires).
+	describe('non-JEJ snippet (fallback)', () => {
+		it('renders the data-quiz-fallback notice for parseable-but-non-JEJ code', () => {
+			const { container } = render(
+				<quizLens.Component
+					embodiment={embody('function f() {}')}
+					config={quizLens.config()}
+				/>,
+			);
+			expect(container.querySelector('[data-quiz-fallback]')).not.toBeNull();
+		});
+
+		it('the non-JEJ fallback notice carries role="alert"', () => {
+			const { container } = render(
+				<quizLens.Component
+					embodiment={embody('function f() {}')}
+					config={quizLens.config()}
+				/>,
+			);
+			const fallback = container.querySelector('[data-quiz-fallback]');
+			expect(fallback?.getAttribute('role')).toBe('alert');
+		});
+
+		it('mounts NO CodeMirror editor for non-JEJ code', () => {
+			const { container } = render(
+				<quizLens.Component
+					embodiment={embody('function f() {}')}
+					config={quizLens.config()}
+				/>,
+			);
+			expect(container.querySelector('.cm-editor')).toBeNull();
+		});
+	});
+
 	// One — happy path: a parseable snippet.
 	describe('parseable snippet', () => {
 		it('renders the data-lens="quiz" root (sync)', () => {

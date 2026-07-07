@@ -67,12 +67,19 @@ Fields:
   widens with the catalog (see [`./types.ts`](./types.ts) `QuizLensConfig` + §
   Future direction). Encode any future knobs as flat primitives / primitive
   arrays (e.g. `categories: ['identifier', …]`) — never nested objects.
-- `applicableTo(embodiment): boolean` — returns `embodiment.status.parsed`
-  (**Tier 2** per [`../README.md`](../README.md) § Three-tier classification).
-  The lens needs tokens + AST to classify and to generate questions; an
-  unparseable snippet has neither. (`status.validated` — JEJ-subset compliance —
-  lives only here, for a future tightening; nothing calls `applicableTo` today,
-  so the Component also gates on `status.parsed` itself — see § Edge cases.)
+- `applicableTo(embodiment): boolean` — returns
+  `embodiment.status.parsed && isJejCompliant(embodiment)` (**Tier 2 + JEJ
+  admission** per [`../README.md`](../README.md) § Three-tier classification).
+  The lens needs tokens + AST to classify and generate questions (so an
+  unparseable snippet is out), AND its ground truth (scope, TDZ, creation-phase)
+  is statically decidable only because JEJ excludes functions/`var`/`class` — so
+  a parseable-but-non-JEJ snippet would yield confidently-wrong answers and the
+  lens gates itself out. JEJ admission is decided by the re-pointable seam
+  [`../../lib/admitting/`](../../lib/admitting/) (which re-points to
+  `status.validated` once embody wires validation into real composition);
+  `status.parsed` short-circuits first. Nothing consults `applicableTo` before
+  mount today, so the load-bearing copy of the gate is in `build-quiz.ts` (§
+  Edge cases).
 - `recommend(embodiment): ReadonlyArray<Recommendation>` — returns the frozen
   empty array in Slice A. Real Block-Model-cell coverage recommendations are the
   final increment (it maps `QuizItem.cells` → `Recommendation.blockModelCell`;
@@ -216,8 +223,8 @@ against a stable shape.
                                        the pending count N is in the button's text content.
                     <button data-quiz-cancel> ... </button>   — returns to anchor phase (visible while armed).
     <div data-quiz-verdict="correct|incorrect|malformed">  — the ACTIVE item's verdict (per-item, not per-pick).
-  OR (unparseable snippet):
-  <div data-quiz-fallback role="alert">  — "needs parseable code" notice (no editor).
+  OR (unparseable OR non-JEJ snippet):
+  <div data-quiz-fallback role="alert">  — "needs parseable JEJ code" notice (no editor).
 </div>
 ```
 
@@ -233,11 +240,13 @@ The lens has **two interaction phases**, derived purely from the **active tab's
 `mode`** — there is no stored phase flag (see [`./DOCS.md`](./DOCS.md) § Why
 dispatch on active-tab mode).
 
-1. **Mount** — the wrapper reads `embodiment.source.code`; on `status.parsed` it
-   derives the classified tokens (anchors) and the quiz items — running
+1. **Mount** — the wrapper reads `embodiment.source.code`; on a parsed,
+   JEJ-admitted snippet (`status.parsed && isJejCompliant` — the `build-quiz.ts`
+   gate) it derives the classified tokens (anchors) and the quiz items — running
    `generateQuiz` and **filtering by `item.mode`** (§ Form scoping; `mcq` in 6a,
    `+click-token` in 6b, `+select-in-code` in 6c) — then mounts the read-only
-   un-colorized editor. On `!status.parsed` it renders the fallback.
+   un-colorized editor. Otherwise (`model === null` — unparsed OR non-JEJ) it
+   renders the fallback.
 2. **Pick** — a click in the editor (in **anchor phase**) resolves to a document
    offset (`view.posAtCoords`), then to the anchor token whose `[start, end)`
    contains it (`anchorAt`, binary search). The picked token highlights; the
@@ -363,13 +372,21 @@ remain later slices.
 ## Edge cases
 
 - **Unparseable snippet** (`embodiment.status.parsed === false`). `applicableTo`
-  returns `false` — so the lens is excluded once per-lens applicability gating
-  lands (a backlogged orchestrator seam; nothing consults `applicableTo` before
-  mount today). **Today the Component's own `status.parsed` gate is
-  load-bearing:** it renders the `data-quiz-fallback` notice ("`quiz` needs
-  parseable code") instead of the editor, and never calls `generateQuiz` (which
-  throws on unparsed) off the happy path. The internal re-parse returning `null`
-  is a second guard.
+  returns `false` (once per-lens applicability gating lands — nothing consults
+  it before mount today). **The load-bearing gate is `build-quiz.ts`:** it runs
+  in an unconditional `useMemo` and returns `null` for an unparsed snippet, so
+  `generateQuiz` (which throws on unparsed) is never called; the wrapper then
+  renders the `data-quiz-fallback` notice instead of the editor. The internal
+  re-parse returning `null` is a second guard.
+- **Parseable-but-non-JEJ snippet** (parses, but has functions/`var`/`class`/
+  `try`). `applicableTo` returns `false` and `build-quiz.ts` returns `null`
+  (both gate on `isJejCompliant` —
+  [`../../lib/admitting/`](../../lib/admitting/)), so the generators never see a
+  non-JEJ AST; the quiz's ground truth (scope, TDZ) only holds without
+  functions. The wrapper renders the same fallback. This dissolves the
+  function-scope problem **at the lens boundary**: the shared `lib/quizzing`
+  generators stay JEJ-agnostic (they gate only on `status.parsed` and keep their
+  own defensive `var`/function handling) — do NOT narrow them.
 - **Empty source** (`embodiment.source.code === ''`). Parses to zero tokens → no
   anchors. The editor renders empty; clicking does nothing; no panel. A neutral,
   non-error state.
@@ -484,8 +501,10 @@ Follows all conventions in [`../README.md`](../README.md) and
   snippet.
 - **No branching on `embodiment.source.code`** — the lens _renders_
   `source.code` (legitimate) but discriminates only on
-  `embodiment.status.parsed`.
-- **Tier 2 classification** — `applicableTo` returns `embodiment.status.parsed`.
+  `embodiment.status.parsed` and the JEJ verdict (via `isJejCompliant`, which
+  reads `status` / `validation`, never `source.code` content).
+- **Tier 2 + JEJ admission** — `applicableTo` returns
+  `embodiment.status.parsed && isJejCompliant(embodiment)`.
 
 ## Navigation
 

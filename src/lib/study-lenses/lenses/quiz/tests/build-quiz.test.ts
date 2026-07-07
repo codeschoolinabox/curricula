@@ -18,6 +18,21 @@ describe('buildQuiz — quiz model builder', () => {
 		expect(buildQuiz(embody('FAIL_AT_PARSE'))).toBeNull();
 	});
 
+	it('returns null for parseable-but-non-JEJ code (the load-bearing JEJ gate)', () => {
+		// `function f(){}` parses (status.parsed=true) but is not JEJ. buildQuiz runs
+		// in an unconditional useMemo BEFORE the render guard, so it must gate on
+		// isJejCompliant here — the generators never build questions from a non-JEJ
+		// AST (the dissolution of the function-scope problem).
+		expect(buildQuiz(embody('function f() {}'))).toBeNull();
+	});
+
+	it('returns null for a recorded validation failure (delegation proof)', () => {
+		// VALIDATION_FAIL parses (bare identifier 'VALIDATION_FAIL') but has
+		// validation.isJeJ=false — a non-JEJ input with no syntactic keyword to
+		// pattern-match, so the gate must actually call isJejCompliant.
+		expect(buildQuiz(embody('VALIDATION_FAIL'))).toBeNull();
+	});
+
 	it('returns null when the source is genuinely unparseable', () => {
 		// NB: embody('FAIL_AT_PARSE') has status.parsed=false but a PARSEABLE
 		// source ("FAIL_AT_PARSE" is a valid identifier) — the component gates on
