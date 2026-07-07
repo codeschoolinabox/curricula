@@ -94,4 +94,43 @@ describe('spliceLoopGuards', () => {
 			expect(result.code).toBe('for (x of xs) {G1[1:0:3:1]\n\tuse(x);\n}R1\n');
 		});
 	});
+
+	describe('sibling loops', () => {
+		it('numbers siblings in reading order with dense ids', () => {
+			const result = spliceLoopGuards(
+				'while (a) {\n\ta--;\n}\nwhile (b) {\n\tb--;\n}\n',
+				hooks,
+			);
+			expect(result.code).toBe(
+				'while (a) {G1[1:0:3:1]\n\ta--;\n}R1\nwhile (b) {G2[4:0:6:1]\n\tb--;\n}R2\n',
+			);
+		});
+
+		it('counts both sibling loops', () => {
+			const result = spliceLoopGuards(
+				'while (a) {\n\ta--;\n}\nwhile (b) {\n\tb--;\n}\n',
+				hooks,
+			);
+			expect(result.loopCount).toBe(2);
+		});
+	});
+
+	describe('nested loops', () => {
+		it('numbers the outer loop before the inner loop', () => {
+			const result = spliceLoopGuards(
+				'while (a) {\n\twhile (b) {\n\t\tb--;\n\t}\n\ta--;\n}\n',
+				hooks,
+			);
+			expect(result.code).toBe(
+				'while (a) {G1[1:0:6:1]\n\twhile (b) {G2[2:1:4:2]\n\t\tb--;\n\t}R2\n\ta--;\n}R1\n',
+			);
+		});
+
+		it('applies adjacent nested insertions without corruption', () => {
+			const result = spliceLoopGuards('while (a) {\n\twhile (b) {}\n}\n', hooks);
+			expect(result.code).toBe(
+				'while (a) {G1[1:0:3:1]\n\twhile (b) {G2[2:1:2:13]}R2\n}R1\n',
+			);
+		});
+	});
 });
