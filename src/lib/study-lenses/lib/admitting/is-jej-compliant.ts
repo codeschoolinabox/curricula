@@ -34,7 +34,8 @@ export default function isJejCompliant(embodiment: Snippet): boolean {
 	// Verdict-first: trust the embodiment's recorded JEJ verdict when the validate
 	// stage ran. Real composition still stubs `validation: null` today, so bridge
 	// by re-validating `source.code` — guarded by `type === 'module'` so this
-	// shadows `status.validated` exactly (structurally false under `script`).
+	// shadows `status.validated` (structurally false under `script`) for the
+	// parsed embodiments callers pass (see DOCS § Meaningful only for parsed).
 	// Re-point: delete the null branch → `return embodiment.status.validated;`.
 	return embodiment.validation === null
 		? embodiment.type === 'module' && validate(embodiment.source.code).ok
