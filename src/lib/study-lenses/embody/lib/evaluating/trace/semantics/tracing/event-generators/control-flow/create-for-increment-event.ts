@@ -1,3 +1,6 @@
+import type { BaseEvent, LoopEvent } from '../../types.js';
+import type { DistributiveOmit, Expect } from '../conformance.js';
+
 /**
  * Creates the domain fields for a for-loop increment (update) event. Kind is
  * always 'for'. The dispatcher stamps the base fields.
@@ -24,3 +27,11 @@ type ForIncrementDomainFields = {
 	readonly event: 'increment';
 	readonly scopeCreationStep: number;
 };
+
+type _AssertForIncrementShape = Expect<
+	[ForIncrementDomainFields] extends [
+		DistributiveOmit<LoopEvent, keyof BaseEvent>,
+	]
+		? true
+		: false
+>;

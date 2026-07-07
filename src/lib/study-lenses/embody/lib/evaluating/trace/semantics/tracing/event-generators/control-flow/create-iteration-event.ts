@@ -1,4 +1,10 @@
-import type { LoopKind, ValueRepresentation } from '../../types.js';
+import type {
+	BaseEvent,
+	LoopEvent,
+	LoopKind,
+	ValueRepresentation,
+} from '../../types.js';
+import type { DistributiveOmit, Expect } from '../conformance.js';
 
 /**
  * Creates the domain fields for a loop iteration event. forOf-specific fields
@@ -63,3 +69,9 @@ type IterationDomainFields = {
 	readonly iterationValue?: ValueRepresentation;
 	readonly iterationVariable?: string;
 };
+
+type _AssertIterationShape = Expect<
+	[IterationDomainFields] extends [DistributiveOmit<LoopEvent, keyof BaseEvent>]
+		? true
+		: false
+>;

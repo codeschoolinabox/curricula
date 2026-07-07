@@ -1,4 +1,11 @@
-import type { ValueRepresentation, LoopKind } from '../../types.js';
+import type {
+	BaseEvent,
+	ConditionalEvent,
+	LoopEvent,
+	ValueRepresentation,
+	LoopKind,
+} from '../../types.js';
+import type { DistributiveOmit, Expect } from '../conformance.js';
 
 /**
  * Creates the domain fields for a control-flow test event — the condition
@@ -73,3 +80,12 @@ type TestDomainFields =
 			readonly coercion?: ValueRepresentation;
 			readonly scopeCreationStep: number;
 	  };
+
+type _AssertTestShape = Expect<
+	[TestDomainFields] extends [
+		| DistributiveOmit<ConditionalEvent, keyof BaseEvent>
+		| DistributiveOmit<LoopEvent, keyof BaseEvent>,
+	]
+		? true
+		: false
+>;

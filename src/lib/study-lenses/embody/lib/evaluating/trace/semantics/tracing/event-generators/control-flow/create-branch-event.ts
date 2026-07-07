@@ -1,3 +1,6 @@
+import type { BaseEvent, ConditionalEvent } from '../../types.js';
+import type { DistributiveOmit, Expect } from '../conformance.js';
+
 /**
  * Creates the domain fields for a branch event — which path an if statement
  * took. Branch fires only for if statements (ternaries have no branch
@@ -28,3 +31,11 @@ type BranchDomainFields = {
 	readonly branch: 'consequent' | 'alternate' | 'none';
 	readonly scopeCreationStep: number;
 };
+
+type _AssertBranchShape = Expect<
+	[BranchDomainFields] extends [
+		DistributiveOmit<ConditionalEvent, keyof BaseEvent>,
+	]
+		? true
+		: false
+>;

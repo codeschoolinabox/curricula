@@ -1,3 +1,6 @@
+import type { BaseEvent, LoopEvent } from '../../types.js';
+import type { DistributiveOmit, Expect } from '../conformance.js';
+
 /**
  * Creates the domain fields for a do-while body event — fires before every body
  * execution. Kind is always 'doWhile'. The dispatcher stamps the base fields.
@@ -24,3 +27,9 @@ type DoDomainFields = {
 	readonly event: 'do';
 	readonly scopeCreationStep: number;
 };
+
+type _AssertDoShape = Expect<
+	[DoDomainFields] extends [DistributiveOmit<LoopEvent, keyof BaseEvent>]
+		? true
+		: false
+>;
