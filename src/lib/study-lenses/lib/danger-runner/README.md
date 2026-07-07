@@ -85,6 +85,13 @@ tsconfig-excluded legacy zone (where the older `guardLoops` verb still lives as
 the oracle it was re-authored from); the runner creates and edits **nothing**
 under `embody/`.
 
+**INTERIM (2026-07-03, user-authorized ship-fast):** the shipped `dangerRun`
+temporarily contradicts the paragraph above — it imports embody's legacy
+`guardLoops` **directly** and applies a two-line, behavior-preserving type-fix
+to `guard-loops.ts`, because `lib/loop-guard/`'s `spliceLoopGuards` typed error
+boundary is still mid-TDD. Both the import and the type-fix revert on migration
+to `spliceLoopGuards`. See the import comment in `danger-run.ts`.
+
 > **Supersedes note.** The dock DOCS reserve this exact slot — "the deferred
 > danger-iframe backend … named, not built"
 > ([`orchestrate/dock/DOCS.md`][dockdocs] §§ Owns no execution backend / Out of

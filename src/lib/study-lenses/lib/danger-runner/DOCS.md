@@ -193,7 +193,11 @@ category.
   the oracle it was re-authored from).** `DangerOutcome` is hand-owned; its
   subset-assignability to `EndReportOutcome` is realised inside the D3 adapter's
   outcome mapping, not by a backwards import or a direct
-  `setOutcome(result.outcome)`.
+  `setOutcome(result.outcome)`. **INTERIM (2026-07-03, user-authorized
+  ship-fast):** the shipped `dangerRun` instead imports embody's legacy
+  `guardLoops` directly (with a two-line behavior-preserving type-fix to
+  `guard-loops.ts`) until `spliceLoopGuards`' typed error boundary lands; both
+  revert on migration. See the import comment in `danger-run.ts`.
 
 ### Internal pure helpers (the pure side of the seam)
 
