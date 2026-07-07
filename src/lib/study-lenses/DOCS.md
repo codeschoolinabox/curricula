@@ -16,19 +16,22 @@ shape, peer responsibilities, and dependency rules.
 
 ## Directory layout
 
+> Revision ratified — the language-levels inversion adds a top-level
+> `language-levels/` peer and new `lib/` leaves; target layout in
+> [ARCHITECTURE.md](./ARCHITECTURE.md), campaign map in
+> [ROADMAP.md](./ROADMAP.md) § Revised decisions.
+
 Three peers under `study-lenses/` mirror the conceptual chain. The
 implementation peer (`orchestrate/`) wires everything together for the learner.
 
 ```text
 study-lenses/
   README.md
-  notional-machine.md
-  notional-machine.svg
-  reference.md
   DOCS.md
+  ARCHITECTURE.md               newcomer orientation (end-state sketch)
+  ROADMAP.md                    language-levels inversion campaign map (deletable)
   index.ts                      exports orchestrate's <StudyLenses>
                                 component as the public interface
-  sandbox.html                  whole-setup smoke test
 
   embody/                       NM embodiment (frozen data)
     README.md, DOCS.md, types.ts
@@ -105,24 +108,19 @@ a derivative snippet for an exercise is a lens concern.
 exercise UI + its own config panel — and nothing else. No toolbar, no
 lens-switching, no snippet state management, no pre-processing. All that
 infrastructure is the orchestrator's. The **trial / Phase-1 lens roster** (the
-validated-first set; the full migration roadmap covers more lenses — see
-[`.planning-handoffs/04-lens-migration.md`](./.planning-handoffs/04-lens-migration.md)):
+validated-first set):
 
 - `editor` — CodeMirror editor (lives in `orchestrate/editor/`, not `lenses/`).
   The default home base; the only writer of snippet state.
 - `annotate` — annotation workbench over code or generated flowchart; toggles
   between two views without losing annotations on either. Formerly `highlight`
-  (renamed during WS4 Phase 0; see `.planning-handoffs/04-lens-migration.md` §
-  Editor placement + annotate lens status).
+  (renamed during WS4 Phase 0).
 - `trace-table` — split view: code display + manual trace table + [check]
   button. Validates predictions against the JEJ tracer's ground truth. Different
-  configs for steps / values / operators (see
-  `.planning-handoffs/04-lens-migration.md` § lens design patterns for the
-  multi-variant pattern).
+  configs for steps / values / operators.
 
 Additional pedagogical lenses (`blanks` fill-in-the-blank, `parsons`
-line-ordering, …) land per the per-lens sessions in
-[`.planning-handoffs/04-lens-migration.md`](./.planning-handoffs/04-lens-migration.md).
+line-ordering, …) land per their own per-lens sessions.
 
 Each lens is self-describing via the `LensModule` contract in
 [`lenses/types.ts`](./lenses/types.ts):
@@ -134,6 +132,7 @@ type LensModule = Readonly<{
 	config: (overrides?: Partial<LensConfig>) => LensConfig;
 	applicableTo: (embodiment: Snippet) => boolean; // cheap O(1) gate
 	recommend: (embodiment: Snippet) => ReadonlyArray<Recommendation>;
+	phase?: Station | readonly Station[]; // pedagogical-target station(s)
 }>;
 ```
 
@@ -202,6 +201,11 @@ specified) until the worker-backend engine settles.
 
 ### Module is the NM-study default; script is the low-floor escape
 
+> Revision ratified — the language-levels inversion retargets the "no language
+> level under script" rule (every snippet has a level; levels declare their
+> admissible types); target in [ARCHITECTURE.md](./ARCHITECTURE.md), campaign
+> map in [ROADMAP.md](./ROADMAP.md) § Revised decisions.
+
 Every snippet carries a **source type** (`'script' | 'module'`,
 `embody(code, { type })`, default `'module'`). Module is the NM-study posture:
 implicit strict mode without `'use strict'` injection or line shift, and the
@@ -211,6 +215,11 @@ the run/debug surface; no language level is active. The dock's type toggle is
 the learner-facing selector.
 
 ### Language levels are semantic plugins inside embody
+
+> Revision ratified — the language-levels inversion moves the kernels to a
+> top-level `language-levels/` peer (the plugin concept is unchanged); target in
+> [ARCHITECTURE.md](./ARCHITECTURE.md), campaign map in
+> [ROADMAP.md](./ROADMAP.md) § Revised decisions.
 
 A language level provides the NM's semantic models (realm, creation, evaluation)
 plus a validator as admission gate guaranteeing those models never lie about
@@ -334,10 +343,9 @@ cell is `{level, scope, nmComponents}` populated only where the snippet ×
 available lenses intersect. A short snippet with no loops won't have trace-table
 options; a literal-only snippet won't have variables-lens options.
 
-WS1 (`.planning-handoffs/01-NM-components.md`) is the implementation
-pave-the-way: it wires `StepCategory` into the shared types and ties the syntax
-tracer's enum to Block-model cells. This DOCS section sets the direction; that
-handoff covers the implementation specifics.
+WS1 wired `StepCategory` into the shared types, tying the syntax tracer's enum
+to Block-model cells. This DOCS section sets the direction; the recommender
+itself lands per [ROADMAP.md](./ROADMAP.md) § P5b.
 
 ### What we explicitly do NOT own
 
@@ -369,6 +377,11 @@ handoff covers the implementation specifics.
   of truth, frozen at the seam.
 
 ## Dependency rules (one-way)
+
+> Revision ratified — the language-levels inversion adds the `language-levels/`
+> tier and splits `lib/` into leaf-engine vs consumer-lib element types; target
+> arrows in [ARCHITECTURE.md § The layer map](./ARCHITECTURE.md#the-layer-map),
+> campaign map in [ROADMAP.md](./ROADMAP.md) § Revised decisions.
 
 ```text
 src/lib/utils/   (@-aliased; outside javascript/)
@@ -416,29 +429,29 @@ Concrete:
 
 ## Categorization rationale (which `lib/*` modules go where)
 
-| Current path              | Target path                           | Why                                                            |
-| ------------------------- | ------------------------------------- | -------------------------------------------------------------- |
-| `lib/parse-old/`          | `embody/lib/parse-old/` (temp)        | Legacy; reference for new `parse/`; deleted after parity       |
-| (new)                     | `embody/lib/parse/`                   | Tokenize + AST-build → NM input                                |
-| `lib/ast/`                | `embody/lib/ast/`                     | AST utilities are NM-data shape                                |
-| `lib/validating/`         | `embody/lib/validating/`              | JEJ subset check → snippet metadata                            |
-| `lib/formatting/`         | `embody/lib/formatting/`              | JEJ formatting → snippet metadata                              |
-| `lib/evaluating/`         | `embody/lib/evaluating/`              | Evaluation engines that `embody.streams.evaluate.*` wrap       |
-| `lib/scope/`              | `embody/lib/scope/`                   | Scope analysis → NM scope-chain understanding                  |
-| `lib/socratizing/`        | `orchestrate/lib/socratizing/`        | Socratic micro-decision analysis (orchestrator-level pedagogy) |
-| (new)                     | `lib/documenting/`                    | JEJ docs for editor tooltips (landed at JEJ-peer `lib/`)       |
-| (new)                     | `lib/formatting-editor/`              | JEJ format-callback adapter (landed at JEJ-peer `lib/`)        |
-| (new)                     | `lib/linting/`                        | JEJ lint-diagnostic adapter (landed at JEJ-peer `lib/`)        |
-| `lib/completing/`         | `lib/completing/`                     | Autocomplete (landed at JEJ-peer `lib/`)                       |
-| (new)                     | `lib/classifying/`                    | Exhaustive token classification; consumed by blanks + quizzing |
-| `lib/editing/`            | `orchestrate/lib/editing/`            | Editor integration                                             |
-| `lib/error-interpreting/` | `orchestrate/lib/error-interpreting/` | Learner-friendly error messages (editor concern)               |
-| `lib/recommender/`        | `orchestrate/lib/recommender/`        | Exercise recommender; consumes embodiment after refactor       |
-| Cross-cutting infra       | stays at `src/lib/utils/`             | Used by all peers via @-alias                                  |
+| Current path              | Target path                           | Why                                                                                                                                                              |
+| ------------------------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `lib/parse-old/`          | `embody/lib/parse-old/` (temp)        | Legacy; reference for new `parse/`; deleted after parity                                                                                                         |
+| (new)                     | `embody/lib/parse/`                   | Tokenize + AST-build → NM input. _Revision ratified: the parse builder lands as a pure leaf at `lib/parse` — see [ROADMAP.md](./ROADMAP.md) § Revised decisions_ |
+| `lib/ast/`                | `embody/lib/ast/`                     | AST utilities are NM-data shape                                                                                                                                  |
+| `lib/validating/`         | `embody/lib/validating/`              | JEJ subset check → snippet metadata                                                                                                                              |
+| `lib/formatting/`         | `embody/lib/formatting/`              | JEJ formatting → snippet metadata                                                                                                                                |
+| `lib/evaluating/`         | `embody/lib/evaluating/`              | Evaluation engines that `embody.streams.evaluate.*` wrap                                                                                                         |
+| `lib/scope/`              | `embody/lib/scope/`                   | Scope analysis → NM scope-chain understanding                                                                                                                    |
+| `lib/socratizing/`        | `orchestrate/lib/socratizing/`        | Socratic micro-decision analysis (orchestrator-level pedagogy)                                                                                                   |
+| (new)                     | `lib/documenting/`                    | JEJ docs for editor tooltips (landed at JEJ-peer `lib/`)                                                                                                         |
+| (new)                     | `lib/formatting-editor/`              | JEJ format-callback adapter (landed at JEJ-peer `lib/`)                                                                                                          |
+| (new)                     | `lib/linting/`                        | JEJ lint-diagnostic adapter (landed at JEJ-peer `lib/`)                                                                                                          |
+| `lib/completing/`         | `lib/completing/`                     | Autocomplete (landed at JEJ-peer `lib/`)                                                                                                                         |
+| (new)                     | `lib/classifying/`                    | Exhaustive token classification; consumed by blanks + quizzing                                                                                                   |
+| `lib/editing/`            | `orchestrate/lib/editing/`            | Editor integration                                                                                                                                               |
+| `lib/error-interpreting/` | `orchestrate/lib/error-interpreting/` | Learner-friendly error messages (editor concern)                                                                                                                 |
+| `lib/recommender/`        | `orchestrate/lib/recommender/`        | Exercise recommender; consumes embodiment after refactor                                                                                                         |
+| Cross-cutting infra       | stays at `src/lib/utils/`             | Used by all peers via @-alias                                                                                                                                    |
 
-The moves landed in Phase A (its handoff self-deleted in `4526dc3`); the
-per-module re-typing schedule lives in
-[`EMBODY-ROADMAP.md`](./EMBODY-ROADMAP.md).
+The moves landed in Phase A (its handoff self-deleted in `4526dc3`). Per-module
+re-typing is reconciled just-in-time by whichever [ROADMAP.md](./ROADMAP.md)
+phase owns the module.
 
 ## Public API: `<StudyLenses>` (orchestrator-primary, not embody-primary)
 
@@ -502,9 +515,7 @@ js:trace?cols=value,steps  → lens="trace", merged into configs.lenses.trace
 
 The URL-style query is deep-merged INTO `configs.lenses[lens]` at emission time
 (there is no standalone `config` prop). The `lenses.json` directory cascade
-emits the rest of `configs`. See
-[`.planning-handoffs/03-orchestrator-and-contracts.md`](./.planning-handoffs/03-orchestrator-and-contracts.md)
-for the full lock + plugin alignment.
+emits the rest of `configs`.
 
 **Q-IV (per-snippet manual sequencing) is deferred.** The future shape (a new
 top-level prop / meta-key in `configs` / directory-level setting) is
@@ -542,6 +553,13 @@ the package-level gaps below are the ones beyond the embody surface.
   `configs.lenses`; the exact key set may evolve with the dock.
 
 ## Contributor guidelines
+
+> Revision ratified — the language-levels inversion adds
+> `language-levels/types.ts` as the canonical home for level types (the Snippet
+> contract stays in `embody/types.ts`); target in
+> [ARCHITECTURE.md](./ARCHITECTURE.md), campaign map in
+> [ROADMAP.md](./ROADMAP.md) § Revised decisions. Newcomer orientation lives in
+> [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 - Don't add new public-API functions ad hoc. Either fold observability features
   into embody, or keep them internal to the relevant peer.

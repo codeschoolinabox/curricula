@@ -46,7 +46,7 @@ export default tseslint.config(
 			// WIP tracer engine — mid-refactor subtrees where lint rules don't
 			// yet apply cleanly; re-included directory-by-directory as each lands.
 			// trace/variables is now in CI; trace/semantics (engine-consumer
-			// rebuild, EMBODY-ROADMAP STEP 5) and the trace/syntax design stub
+			// rebuild — see src/lib/study-lenses/ROADMAP.md) and the trace/syntax design stub
 			// remain excluded. Vitest still runs the un-excluded suites.
 			'src/lib/study-lenses/embody/lib/evaluating/trace/semantics/**',
 			'src/lib/study-lenses/embody/lib/evaluating/trace/syntax/**',

@@ -57,10 +57,9 @@ parentheses; sandbox-harness selectors use the key directly.
    first-fail kind (`embodiment.errors?.kind ?? null`). Verifies the embodiment
    pipeline ran (and surfaces canned scenario outcomes when a scenario keyword
    is in play; real composition for non-scenario input lands per
-   [`../../EMBODY-ROADMAP.md`](../../EMBODY-ROADMAP.md)). `Snippet.errors` is a
-   peer of `Snippet.status` in the embody contract; the panel echoes both
-   together so the harness can verify the first-fail-wins gate semantics at a
-   glance.
+   [`../../ROADMAP.md`](../../ROADMAP.md)). `Snippet.errors` is a peer of
+   `Snippet.status` in the embody contract; the panel echoes both together so
+   the harness can verify the first-fail-wins gate semantics at a glance.
 3. **Validation panel** (`validation`) — conditional rendering per the `Snippet`
    staircase. When `embodiment.validation` is present (validate-fail,
    create-fail, and apex leaves), the panel renders

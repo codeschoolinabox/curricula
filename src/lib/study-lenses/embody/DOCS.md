@@ -609,6 +609,12 @@ shape-stable across scenario-vs-real-composition dispatch.
 
 ## Language levels as plugins
 
+> Revision ratified — the language-levels inversion moves the kernels to a
+> top-level `language-levels/` peer consumed without embody (the plugin concept
+> and dependency direction are unchanged; the "why inside embody/" rationale
+> below is superseded); target in [`../ARCHITECTURE.md`](../ARCHITECTURE.md),
+> campaign map in [`../ROADMAP.md`](../ROADMAP.md) § Revised decisions.
+
 A **language level** is a plugin at `embody/language-levels/<name>/` providing
 the NM's semantic models — realm, creation, evaluation — plus a validator as
 **admission gate** guaranteeing those models never lie about admitted programs.

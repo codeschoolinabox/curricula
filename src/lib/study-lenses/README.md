@@ -176,6 +176,12 @@ who supplies the config reads the guided/unguided one).
 
 ### Why this architecture
 
+> Revision ratified — the language-levels inversion adds a learner/author
+> **desired-level dial** as the scaffolding-fade control alongside the automatic
+> code-driven appearance described below; target in
+> [ARCHITECTURE.md](./ARCHITECTURE.md), campaign map in
+> [ROADMAP.md](./ROADMAP.md) § Revised decisions.
+
 Three load-bearing principles from the paper:
 
 - **Skill transfer** (Chiaburu & Marinova, 2005) — learn skills in environments
@@ -221,9 +227,6 @@ The folder layout mirrors the conceptual chain:
 | [`lib/`](./lib/)                                                                             | JeJ-aware shared adapters (peer-independent)                                                       |
 | `sandbox-programs/`                                                                          | Test fixtures (may be moved later)                                                                 |
 
-(`.planning-handoff/` is a temporary dev artifact — intentionally not documented
-in README.)
-
 ## Why a language level?
 
 JEJ is _just enough_ JavaScript to write imperative programs that interact with
@@ -237,6 +240,12 @@ why we've defined the NM explicitly in
 The NM is the learning objective.
 
 ### A language level is semantic, not syntactic
+
+> Revision ratified — the language-levels inversion generalizes this definition
+> vacuously for the identity level ("Full JavaScript"): an always-true validator
+> with an empty set of models — "never lie about admitted programs" holds
+> trivially; target in [ARCHITECTURE.md](./ARCHITECTURE.md), campaign map in
+> [ROADMAP.md](./ROADMAP.md) § Revised decisions.
 
 In this package a **language level** is defined by the semantics it models, not
 by the syntax it includes — a deliberate divergence from the syntax-subset
@@ -473,6 +482,10 @@ type Result<TEvent> = {
 
 ## Navigation
 
+- [ARCHITECTURE.md](./ARCHITECTURE.md) — newcomer orientation: layer map, core
+  concepts, extension points
+- [ROADMAP.md](./ROADMAP.md) — the language-levels inversion campaign map
+  (deletable; removed when the campaign completes)
 - [reference.md](./embody/language-levels/just-enough-javascript/reference.md) —
   learner-facing language reference
 - [notional-machine.md](./embody/language-levels/just-enough-javascript/notional-machine.md)

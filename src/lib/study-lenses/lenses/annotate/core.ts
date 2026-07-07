@@ -82,9 +82,8 @@ function applicableTo(_embodiment: Snippet): boolean {
  * Block-Model placement recommendations for this lens. Returns `[]` —
  * the annotate lens appears in the orchestrator's picker (via
  * `applicableTo`) but contributes no recommendations to the
- * recommendations panel until the WS2 analysis pipeline lands. See
- * `../README.md` § Future direction and
- * `../../.planning-handoffs/02-analysis-and-recommender.md`.
+ * recommendations panel until the recommender lands (see
+ * `../../ROADMAP.md` § P5b). See `../README.md` § Future direction.
  *
  * @remarks `recommend` runs only on lenses `applicableTo` already
  * admitted — it is the richer relevance computation, not the cheap

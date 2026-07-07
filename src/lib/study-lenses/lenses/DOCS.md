@@ -198,8 +198,9 @@ split scales — the core can be unit-tested exhaustively without DOM machinery.
 
 ## Why `applicableTo` is split from `recommend`
 
-The WS2 recommender's architecture (per `02-analysis-and-recommender.md` and
-Explorotron Figure 3) is **applicability filter → ranking engine**. The
+The recommender's architecture (per
+[`../DOCS.md` § Recommender](../DOCS.md#recommender--applicability-filter--ranking-engine)
+and Explorotron Figure 3) is **applicability filter → ranking engine**. The
 applicability filter is a fast pure boolean (parse- failed snippet →
 AST-dependent lenses out); the ranking engine is the richer relevance
 computation that runs only on applicable lenses.

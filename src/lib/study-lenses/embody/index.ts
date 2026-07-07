@@ -13,12 +13,13 @@
  * 2. **Real composition** — any other input goes through `embody/lib/*`
  *    (tokenize → AST → static analyses → validation → script-scope
  *    creation). Real composition wires in slice-by-slice; see
- *    `EMBODY-ROADMAP.md` for the per-module landing schedule.
+ *    `../ROADMAP.md` — each campaign phase reconciles its module's
+ *    landing just-in-time.
  *
  * Both paths produce a deep-frozen `Snippet`. The factory's contract
  * (signature, frozen output, deep-freeze pass) is stable; real
  * composition wires into the non-scenario branch slice-by-slice per
- * `EMBODY-ROADMAP.md`. The scenario branch is permanent end-state.
+ * `../ROADMAP.md`. The scenario branch is permanent end-state.
  *
  * ## Eleven named scenarios
  *
@@ -57,7 +58,7 @@
  *             errors null); analysis/validation/creation still stubbed
  *             null (validated:F, created:F) pending lib/parse + lib/scope.
  *             Tokenize/parse failure → tokenize-fail / parse-fail leaf
- *             with populated errors (see EMBODY-ROADMAP.md)
+ *             with populated errors (see ../ROADMAP.md)
  *   |
  *   v
  * assemble Snippet per types.ts § 14 staircase
@@ -123,7 +124,7 @@
  *
  * @see ./types.ts — the `Snippet` contract
  * @see ./DOCS.md — architectural sketch + § Open holes
- * @see ../EMBODY-ROADMAP.md — incremental real-composition plan
+ * @see ../ROADMAP.md — the language-levels inversion campaign map
  */
 
 import { tokenizer as acornTokenizer, parse as acornParse } from 'acorn';
@@ -925,7 +926,7 @@ const APEX_OVERLAYS: Readonly<Record<string, ApexOverlay>> = Object.freeze({
 } satisfies Readonly<Partial<Record<EmbodyScenario, ApexOverlay>>>);
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Real-composition helpers (incrementally filled — see EMBODY-ROADMAP.md).
+// Real-composition helpers (incrementally filled — see ../ROADMAP.md).
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Internal result union from the two-stage acorn run. */
@@ -1149,8 +1150,8 @@ function buildApexRealSnippet(
  * substrings are not. Recognized scenario keywords from `EMBODY_SCENARIOS`
  * dispatch to canned Snippet shapes (`Snippet.source.code` holds the
  * normalized form). Any other input is routed to real composition via
- * `embody/lib/*` (see `EMBODY-ROADMAP.md` for the per-module landing
- * schedule).
+ * `embody/lib/*` (see `../ROADMAP.md` — phases reconcile their modules'
+ * landing just-in-time).
  *
  * @param code - Source string. Normalized via `trim().toUpperCase()` for
  *   scenario matching; raw form passed to real composition for non-scenario

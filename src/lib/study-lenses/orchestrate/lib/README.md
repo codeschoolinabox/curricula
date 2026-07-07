@@ -44,6 +44,6 @@ Inherits all conventions from [`../README.md`](../README.md) and the top-level
 
 - **Parent**: [`../README.md`](../README.md) — `orchestrate/` peer overview.
 - **Embodiment contract**: [`../../embody/types.ts`](../../embody/types.ts).
-- **Recommender plan**:
-  [`../../.planning-handoffs/02-analysis-and-recommender.md`](../../.planning-handoffs/02-analysis-and-recommender.md)
-  — WS2 owns this engine.
+- **Recommender plan**: [`../../ROADMAP.md`](../../ROADMAP.md) § P5b — the
+  contract is canonical in
+  [`../../DOCS.md` § Recommender](../../DOCS.md#recommender--applicability-filter--ranking-engine).

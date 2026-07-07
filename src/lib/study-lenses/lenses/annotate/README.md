@@ -61,10 +61,9 @@ Fields:
   disables itself when `embodiment.status.parsed === false`, surfacing the
   limitation at the affordance rather than at runtime.
 - `recommend(embodiment): ReadonlyArray<Recommendation>` — returns `[]` for this
-  batch. Block-Model placement contributions land in a follow-up commit once the
-  WS2 analysis pipeline ships per
-  [`../../.planning-handoffs/02-analysis-and-recommender.md`](../../.planning-handoffs/02-analysis-and-recommender.md).
-  See [Future direction](#future-direction).
+  batch. Block-Model placement contributions land once the recommender ships per
+  [`../../ROADMAP.md`](../../ROADMAP.md) § P5b. See
+  [Future direction](#future-direction).
 
 ## Why this lens exists
 

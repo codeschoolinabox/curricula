@@ -8,10 +8,11 @@
 
 // Phase 3 migration remnant: the @study-lenses/tracing dependency has
 // not been vendored or added to package.json. The entire semantics/
-// tree is excluded from typecheck/lint/test per Step B7 (see
-// EMBODY-ROADMAP.md), so the dangling import doesn't block CI.
+// tree is excluded from typecheck/lint/test pending the trace-semantics
+// rebuild (see the study-lenses ROADMAP.md — trace semantics land in the
+// language-level kernel), so the dangling import doesn't block CI.
 // Resolve this — either by inlining the wrapper or adding the package —
-// as part of Step B7.
+// as part of that rebuild.
 import tracing from '@study-lenses/tracing';
 import type { RecordFunction } from '@study-lenses/tracing';
 
