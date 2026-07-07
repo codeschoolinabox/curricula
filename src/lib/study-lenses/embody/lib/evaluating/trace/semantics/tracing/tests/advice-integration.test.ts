@@ -387,17 +387,63 @@ describe('advice integration', () => {
 			expect(iterEvents.length).toBeGreaterThan(0);
 		});
 
-		it.skip('while-loop test event should classify as loop (blocked on I-5 expression-pointcut loopKind stamping)', () => {
+		describe('while-loop test event', () => {
+			it('classified as loop', () => {
+				const events = traceInNode(
+					'let i = 0;\nwhile (i < 2) {\n  i = i + 1;\n}\n',
+					ALL_ENABLED,
+				);
+				const whileTest = events.find(
+					(e) =>
+						e.category === 'loop' &&
+						(e as Record<string, unknown>).event === 'test',
+				);
+				expect(whileTest).toBeDefined();
+			});
+
+			it('kind is while', () => {
+				const events = traceInNode(
+					'let i = 0;\nwhile (i < 2) {\n  i = i + 1;\n}\n',
+					ALL_ENABLED,
+				);
+				const whileTest = events.find(
+					(e) =>
+						e.category === 'loop' &&
+						(e as Record<string, unknown>).event === 'test',
+				) as Record<string, unknown>;
+				expect(whileTest.kind).toBe('while');
+			});
+
+			it('gated by loops.while, not conditionals', () => {
+				const events = traceInNode(
+					'let i = 0;\nwhile (i < 2) {\n  i = i + 1;\n}\n',
+					{
+						controlFlow: {
+							kind: { conditionals: false, loops: { while: true } },
+							events: { test: true },
+						},
+					},
+				);
+				const whileTest = events.find(
+					(e) =>
+						e.category === 'loop' &&
+						(e as Record<string, unknown>).event === 'test',
+				);
+				expect(whileTest).toBeDefined();
+			});
+		});
+
+		it('for-loop test event kind is for (not mislabeled while)', () => {
 			const events = traceInNode(
-				'let i = 0;\nwhile (i < 2) {\n  i = i + 1;\n}\n',
+				'for (let i = 0; i < 3; i = i + 1) {\n  let x = i;\n}\n',
 				ALL_ENABLED,
 			);
-			const whileTest = events.find(
+			const forTest = events.find(
 				(e) =>
 					e.category === 'loop' &&
 					(e as Record<string, unknown>).event === 'test',
-			);
-			expect(whileTest).toBeDefined();
+			) as Record<string, unknown>;
+			expect(forTest.kind).toBe('for');
 		});
 
 		it('for loop produces test + iteration events', () => {

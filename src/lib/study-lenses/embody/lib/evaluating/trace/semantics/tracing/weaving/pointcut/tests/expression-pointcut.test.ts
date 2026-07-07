@@ -161,18 +161,28 @@ describe('createExpressionPointcut', () => {
 			expect(result![0]).toBe('test');
 		});
 
-		it('matches expression in WhileStatement test position', () => {
+		it('while test node (no loopKind — real pipeline shape) → while via parent.type', () => {
+			const pointcut = createExpressionPointcut({
+				controlFlow: { events: { test: true } },
+			});
+			const node = { type: 'ReadExpression', tag: makeTag(), variable: 'cond' };
+			const parent = { type: 'WhileStatement', test: node };
+			const result = pointcut(node, parent, null);
+			expect(result).toEqual(['test', 'while', node.tag]);
+		});
+
+		it('desugared loop test node keeps its stamped loopKind (checked before parent)', () => {
 			const pointcut = createExpressionPointcut({
 				controlFlow: { events: { test: true } },
 			});
 			const node = {
 				type: 'ReadExpression',
-				tag: makeTag({ loopKind: 'while' }),
+				tag: makeTag({ loopKind: 'for' }),
 				variable: 'cond',
 			};
 			const parent = { type: 'WhileStatement', test: node };
 			const result = pointcut(node, parent, null);
-			expect(result).toEqual(['test', 'while', node.tag]);
+			expect(result).toEqual(['test', 'for', node.tag]);
 		});
 
 		it('uses conditional as default testSource', () => {

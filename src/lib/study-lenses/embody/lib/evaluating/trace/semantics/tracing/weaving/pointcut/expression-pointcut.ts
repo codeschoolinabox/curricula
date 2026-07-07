@@ -49,7 +49,13 @@ export default function createExpressionPointcut(
 	): unknown[] | null {
 		// Test position detection (checked first — any expression type can be in test position)
 		if (isInTestPosition(node, parent) && controlFlowEvents.test) {
-			const testSource = node.tag.loopKind ?? 'conditional';
+			// A genuine `while`'s test child never inherits `loopKind` (instrument
+			// stamps it on the loop STATEMENT node; for/forOf/doWhile survive via
+			// Aran's desugaring reusing that tag). When it's absent, the parent
+			// type is the discriminant: WhileStatement → 'while', else IfStatement.
+			const testSource =
+				node.tag.loopKind ??
+				(parent.type === 'WhileStatement' ? 'while' : 'conditional');
 			return ['test', testSource, node.tag];
 		}
 
