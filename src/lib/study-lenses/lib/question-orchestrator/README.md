@@ -207,8 +207,9 @@ only item will show that cell as a gap. If you want maximum coverage, cap loosel
 | `report-coverage.ts` | Spanned-cells + gaps over the delivered items (`CoverageReport`) |
 | `tests/` | Unit and integration tests |
 
-Only `README.md`, `types.ts`, `DOCS.md` exist today; the entry, adapters, and
-pass files are specified but not yet built. (The empty
+The `sources/` adapters and their registry are built; `ladder.ts`,
+`report-coverage.ts`, and `compose-questions.ts` land in the remaining
+increments. (The empty
 [`../../orchestrate/lib/recommender/`](../../orchestrate/lib/recommender/) folder
 is a thin precedent for a lib registered before it is built.)
 
