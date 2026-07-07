@@ -251,4 +251,72 @@ describe('spliceLoopGuards', () => {
 			);
 		});
 	});
+
+	describe('loc value (loop-statement span)', () => {
+		it('spans the loop keyword through the loop end, not the body block', () => {
+			const result = spliceLoopGuards(
+				'for (\n\tlet i = 0;\n\ti < 3;\n\ti++\n) {\n\tuse(i);\n}\n',
+				hooks,
+			);
+			expect(result.code).toBe(
+				'for (\n\tlet i = 0;\n\ti < 3;\n\ti++\n) {G1[1:0:7:1]\n\tuse(i);\n}R1\n',
+			);
+		});
+
+		it('reports columns as 0-based characters, not tab-expanded widths', () => {
+			const result = spliceLoopGuards(
+				'\twhile (x < 10) {\n\t\tx++;\n\t}\n',
+				hooks,
+			);
+			expect(result.code).toBe('\twhile (x < 10) {G1[1:1:3:2]\n\t\tx++;\n\t}R1\n');
+		});
+	});
+
+	describe('golden parity with the oracle (executable)', () => {
+		function runGuardedIterations(
+			loopSource: string,
+			maxIterations: number,
+		): number {
+			const oracleHooks = {
+				makeGuard: (index: number) =>
+					`if (++loop${index} > ${maxIterations}) throw new RangeError("Loop ${index} exceeded ${maxIterations} iterations.");`,
+				makeReset: (index: number) => `loop${index} = 0;`,
+			};
+			const { code, loopCount } = spliceLoopGuards(loopSource, oracleHooks);
+			const declarations = Array.from(
+				{ length: loopCount },
+				(_, slot) => `loop${slot + 1} = 0`,
+			).join(', ');
+			// eslint-disable-next-line @typescript-eslint/no-implied-eval, sonarjs/code-eval -- executing the guarded output verifies acorn-splice parity with the recast oracle
+			const evaluate = new Function(
+				`var ${declarations}; let count = 0; try { ${code} } catch {} return count;`,
+			);
+			return evaluate() as number;
+		}
+
+		it.each([
+			[-1, 0],
+			[0, 0],
+			[1, 1],
+			[3, 3],
+		])('while loop runs the body %i times before max %i trips', (max, runs) => {
+			expect(runGuardedIterations('while (true) {\n\tcount++;\n}\n', max)).toBe(
+				runs,
+			);
+		});
+
+		it.each([
+			[-1, 0],
+			[0, 0],
+			[1, 1],
+			[3, 3],
+		])(
+			'do-while (ASI) runs the body %i times before max %i trips',
+			(max, runs) => {
+				expect(
+					runGuardedIterations('do {\n\tcount++;\n} while (true)\n', max),
+				).toBe(runs);
+			},
+		);
+	});
 });
