@@ -67,16 +67,16 @@ flowchart TD
     VER["level verdicts<br/>(violations · type admission · undetermined?)"]
     SUR["rendered study surface<br/>(editor · phases · lenses · level UI · mask)"]
     EVT["evaluation event stream"]
-    SNP -->|"embody, pure<br/>(failures become tagged stages)"| EMB
+    SNP -->|"embody, pure — failures become tagged stages"| EMB
     CFG -->|"supplies the lens roster"| EMB
-    EMB -->|"validate over the parse facts,<br/>memoized per settle + level"| VER
+    EMB -->|"validate over the parse facts, memoized per settle + level"| VER
     CFG -->|"names the selected level"| VER
     EMB -->|"render, mechanical"| SUR
-    VER -->|"mark · annotate;<br/>× strict posture → mask"| SUR
+    VER -->|"mark · annotate; × strict posture → mask"| SUR
     CFG -->|"posture + per-lens configs"| SUR
-    SUR -->|"source edits + type toggle,<br/>debounced to the next settle"| SNP
+    SUR -->|"source edits + type toggle, debounced to the next settle"| SNP
     SUR -->|"level · posture · config tweaks"| CFG
-    SUR -->|"evaluation lenses drive evaluators<br/>async, refusal-as-data"| EVT
+    SUR -->|"evaluation lenses drive evaluators — async, refusal-as-data"| EVT
     EVT -->|"rendered per audience"| SUR
 ```
 

@@ -11,37 +11,51 @@ controls.
 
 ## The story
 
-[Welcome to Frogramming](../../../spiralearn/frogramming-and-vibetoading/README.md)
-teaches **JEJ** — this package's first **language level**: a curated slice of
-JavaScript small enough that every admitted program runs on a precise, bounded
-**notional machine** (NM). Twinning that machine — building a faithful working
-copy of it in your own head — is the learning objective of the course.
+A program is more than its output: it has a text, a spelling, a grammar, a
+lifecycle, a machine underneath. Study Lenses treats **any JavaScript** as
+something worth studying — written, pasted, or generated — and makes each of
+those layers a visible place to explore.
 
 **Code is the UI.** The source text is the panel through which a programmer
 operates the machine. Writing code yourself is one way to work that panel;
 describing intent to an agent is another. Either way, the machine underneath is
-the thing being learned — and the machine-facing lenses let you look at it
-directly instead of inferring it from output.
+the thing being learned — and a level's machine-facing lenses let you look at
+its machine directly instead of inferring it from output.
+
+**Language levels are configurable.** A level is a curated slice of JavaScript
+small enough that every admitted program runs on a precise, bounded **notional
+machine** (NM) — a machine a learner can twin: build a faithful working copy of
+it in their own head. Embedding sites register whichever levels serve their
+learners; **JEJ (Just Enough JavaScript)** ships as the first. With no level
+selected, the environment is simply a JavaScript study bench.
 
 ```mermaid
 flowchart LR
-    course["Welcome to Frogramming<br/>(the course)"]
-    jej["JEJ 🧭<br/>the first language level"]
-    nm["its notional machine<br/>(the learning objective)"]
-    study["level-aware lenses<br/>make the machine visible"]
-    env["the study environment<br/>(this package)"]
-    course -->|teaches| jej
-    jej -->|"models — docs +<br/>semantic-model builders"| nm
+    js["any JavaScript<br/>(written · pasted · generated)"]
+    env["the study environment<br/>(lifecycle phases + lenses)"]
+    levels["configurable language levels 🧭<br/>(JEJ ships first)"]
+    nm["each level's<br/>notional machine"]
+    study["level-aware lenses<br/>(make the machine visible)"]
+    js -->|"studied in"| env
+    levels -->|"model"| nm
     nm -->|"studied through"| study
-    study -->|"part of the learner's kit,<br/>inside"| env
+    study -->|"inside"| env
 ```
 
-The environment itself serves **any JavaScript**, with or without a level
-selected. JEJ gets nothing special from the architecture — it is simply the
-first level registered, and the course's reason this package exists. The
-built-in machine-facing lenses consult JEJ because their authors wrote them
-against it; an injected level powers the selector, editor support, and
-enforcement identically — machine-facing lenses for it come from its own author.
+| Layer            | What it is                                                    | More                                                  |
+| ---------------- | ------------------------------------------------------------- | ----------------------------------------------------- |
+| snippet          | the raw program passed in — any JavaScript                    | [The model](#the-model)                               |
+| embodiment       | the frozen study data rebuilt at every settle                 | [The model](#the-model)                               |
+| lifecycle phases | the six-step journey; the interaction model itself            | [The six phases](#the-six-phases)                     |
+| study lenses     | pedagogical views, offered where they fit                     | [Why lenses?](#why-lenses)                            |
+| language levels  | configurable curated slices, each modeling a notional machine | [Guardrails, not cages](#guardrails-not-cages)        |
+| the orchestrator | the one mounted component that renders it all                 | [The shape of the package](#the-shape-of-the-package) |
+
+No level gets anything special from the architecture — JEJ is simply the first
+one registered. The built-in machine-facing lenses consult JEJ because their
+authors wrote them against it; an injected level powers the selector, editor
+support, and enforcement identically — machine-facing lenses for it come from
+its own author.
 
 ## Why lenses?
 
@@ -71,9 +85,9 @@ flowchart LR
     phases["the program's lifecycle<br/>source · realm · tokens · ast<br/>environment · evaluation"]
     study["🔬 study lenses<br/>read · annotate · exercise · run"]
     levels["🧭 language levels — opt-in guides<br/>JEJ is the first"]
-    write -->|"each settle:<br/>embodied"| phases
-    phases -->|"each phase offers<br/>the lenses that fit"| study
-    levels -.->|"consulted for fit marks,<br/>docs, guardrails"| phases
+    write -->|"each settle: embodied"| phases
+    phases -->|"offers the lenses that fit"| study
+    levels -.->|"consulted"| phases
 ```
 
 There is no top-level Run button: **the phases are the interaction model**. Each
@@ -199,8 +213,8 @@ Three principles from the paper are load-bearing:
 
 **In** — from the embedding site: the program source; its initial snippet type;
 an optional initial-focus lens request (a focus request, never a bypass: a
-phase-declaring lens is honored when its phase is accessible, and a
-panel-excluded lens is honored by running its applicability at mount — the
+phase-declaring lens is honored when it is attached to an accessible phase, and
+a panel-excluded lens is honored by running its applicability at mount — the
 enforcement mask applies to a focus-mounted lens identically; the run-first
 posture for curated examples is this request naming the run lens); configuration
 (the top layer of a cascade the orchestrator resolves per lens by name, with the
@@ -376,8 +390,9 @@ flowchart TD
     orch -->|"embodies per settle"| emb
     emb -.->|"attaches what fits"| lenses
     lenses -->|"drive"| evaluators
-    lenses & evaluators -.->|"consult"| levels
-    orch -.->|"consults for selector ·<br/>gutter · mask"| levels
+    lenses -.->|"consult"| levels
+    evaluators -.->|"consult"| levels
+    orch -.->|"consults"| levels
 ```
 
 | Region                    | What it is                                                                                                                          |
@@ -394,3 +409,5 @@ flowchart TD
 - Parent: [`src/lib/`](../README.md)
 - [`DOCS.md`](./DOCS.md) — the package-level architectural sketch: execution
   phases, data flow, structural constraints.
+- [`WORKFLOWS.md`](./WORKFLOWS.md) — the model in motion: an author curating a
+  snippet, a learner studying pasted code.
