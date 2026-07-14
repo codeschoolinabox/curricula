@@ -1,505 +1,312 @@
+<!-- cspell:ignore Explorotron Koli consultable Yoshi -->
+
 # study-lenses
 
-An interactive JavaScript study environment + its first curated **language
-level** (JEJ) for introductory programming education. JEJ programs are the
-learning vehicle for the Welcome to Frogramming curriculum; the study tooling
-serves any JavaScript a learner explores.
+An interactive JavaScript study environment. One program at a time is embodied
+as structured study data and rendered through **pedagogical lenses** arranged
+over the program's own lifecycle. Learners read, predict, probe, and run code
+where they write it; educators and embedding sites shape the study environment
+through configuration without ever locking the learner out of their own
+controls.
 
-## The story (the conceptual chain)
+## Why lenses?
 
-Welcome to Frogramming teaches **JEJ** (just-enough JavaScript) — this package's
-first **language level**: a slice of JavaScript curated so that every admitted
-program runs on a precise, bounded **notional machine** (NM): the conceptual
-model of how JEJ evaluates. Twinning the NM in your own mind is the **learning
-objective** of the course. The NM is the [mechanical instrument][metaphor] of
-the syllabus's metaphor — what the 🔬 Frogrammer grounds their predictions in.
+Understanding code is not one skill but many: predicting what the machine will
+do, spotting the grammar of the language, tracing values, explaining a program's
+purpose to another person. A **study lens** makes one of those perspectives
+tangible — think of a kit of magnifying glasses 🔬, each lens revealing a
+different aspect of the same program. Some lenses turn a program into an
+exercise (fill in the blanks, reorder the lines), some annotate or visualize it,
+some run it and let you interrogate what happened.
 
-**Code is the UI.** The JS source text is the _control panel_ through which a
-programmer operates the NM. Authoring code is one way to operate that panel;
-describing intent to an LLM is another (Chapter 3). Either way, the NM is the
-thing the panel controls — and you can also observe it directly through visual
-debuggers / embody / lenses, bypassing the panel entirely.
+The learner carries the kit with them. Any JavaScript they meet — pasted from
+anywhere, not just curriculum content — can be studied here. That is the
+package's central pedagogical bet: the study skills, not the curated content,
+are what learners take with them.
 
-The NM doesn't only live in prose. It is **embodied** by the
-[`embody/`](./embody/) factory: a JS-generic core reads any source text (tokens,
-AST), and the language level plugs in the NM's semantic models — realm,
-creation, evaluation — behind an **admission gate** that guarantees those models
-never lie about the programs they admit. Every admitted JEJ snippet becomes a
-frozen-data + event-stream object whose every field corresponds to a concept in
-the NM. **Study lenses** then offer different perspectives — think of them as
-the kit of magnifying glasses 🔬 the Frogrammer carries: each lens highlights a
-different aspect of the same machine. Source-level lenses serve any JavaScript,
-admitted or not.
+## How a program is studied
+
+The learner writes in the editor. Every time typing settles, the program is
+re-embodied — parsed and analyzed into study data — and laid out along its
+**lifecycle**: the six-phase journey the language specification itself
+describes, from raw text to a running program.
 
 ```mermaid
 flowchart LR
-    JEJ["JEJ<br/>(language level: admission gate<br/>+ semantic models)"]
-    NM["Notional Machine<br/>(this is what learners twin)"]
-    embody["embody/<br/>(operational data + event streams)"]
-    lenses["lenses/<br/>(pedagogical perspectives)"]
-    orchestrate["orchestrate/<br/>(StudyLenses orchestrator)"]
-    JEJ --> NM --> embody --> lenses --> orchestrate
+    write["✍️ any JavaScript<br/>written or pasted"]
+    phases["the program's lifecycle<br/>source · realm · tokens · ast<br/>environment · evaluation"]
+    study["🔬 study lenses<br/>read · annotate · exercise · run"]
+    levels["🧭 language levels — opt-in guides<br/>JEJ is the first"]
+    write -->|"each settle:<br/>embodied"| phases
+    phases -->|"each phase offers<br/>the lenses that fit"| study
+    levels -.->|"consulted for fit marks,<br/>docs, guardrails"| phases
 ```
 
-| Layer            | What it is                                                                                         | File / dir                                                                                   |
-| ---------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| **JEJ**          | The first language level (what learners write; admission gate + semantic models)                   | [`reference.md`](./embody/language-levels/just-enough-javascript/reference.md)               |
-| **NM**           | The conceptual evaluation model (the learning objective)                                           | [`notional-machine.md`](./embody/language-levels/just-enough-javascript/notional-machine.md) |
-| **embody**       | The operational embodiment of the NM (frozen data + event streams)                                 | [`embody/`](./embody/)                                                                       |
-| **study lenses** | Pedagogical perspectives on the embodied NM                                                        | [`lenses/`](./lenses/)                                                                       |
-| **orchestrate**  | `<StudyLenses>` orchestrator + analysis helpers — the single-writer editor and the NM phases panel | [`orchestrate/`](./orchestrate/)                                                             |
+There is no top-level Run button: **the phases are the interaction model**. Each
+phase offers the lenses that fit the current code, and running a program is
+itself a lens — opened inside the `evaluation` phase, where output renders per
+audience. When code doesn't parse, the `tokens` and `ast` phases speak the
+parser's own voice: their lenses show the real error together with a
+learner-worded explanation — spelling mistakes in `tokens`, grammar mistakes in
+`ast`. The machine's implicit judgments become explicit, visible places to
+study.
 
-Get the NM right and embody / lenses / orchestrate / curriculum follow. This
-package's internal directory structure mirrors the chain.
+## Guardrails, not cages
 
-[metaphor]: ../../../spiralearn/frogramming-and-vibetoading/README.md
+A **language level** is a curated slice of JavaScript — small enough that a
+learner can hold a precise model of the machine in their head. **JEJ (Just
+Enough JavaScript)**, the first level, is just enough to write imperative,
+text-and-number interactive programs on a bounded, learnable notional machine.
 
-## Four audiences of code
+Levels are guides, never gatekeepers. Selecting one gets you: fit marks in the
+level selector (does my code fit this level?), violation markers in the editor
+gutter, documentation on hover, and — only if you opt into **strict** — a
+guardrail that masks the study surfaces until the code returns to the level. The
+default posture is **warn**: nothing is ever blocked, warnings simply appear
+where you edit. Even under strict, the editor and every control that could
+restore conformance stay alive, and a typo never reads as a level violation —
+while code doesn't parse, the level honestly says it cannot judge.
 
-A JEJ program addresses four audiences simultaneously:
+The point is guardrail-up, not scaffolding-down: keeping code inside a level
+keeps that level's lenses available, and the boundary is always explained,
+always learner-liftable.
 
-1. 🧑‍💻 **Other developers** read your code through comments, names, and
-   structure. `console.*` is your tool for talking to them.
-2. 💻 **The computer** parses and evaluates your code — but for our purposes,
-   "understanding the computer" means **twinning the notional machine**. The NM
-   _is_ the computer at our level of abstraction. The Frogrammer hat is about
-   twinning this audience.
-3. 👤 **Users** never see the code; they experience the program's effects via
-   `prompt`, `confirm`, `alert`. Their correctness is behavioral.
-4. 🤖 **Agents** (LLMs) collaborate with you on code as authoring partners.
+## Two hats, four audiences
 
-The Notional Machine is the lens through which we address audience #2. The
-course's [syllabus][metaphor] casts the NM as the _mechanical instrument_ of the
-metaphor — composer / virtuoso / instrument / score / audience.
+- 🔬 **The Frogrammer** studies the machine: predict what a phase will do, open
+  its lenses, compare. The lifecycle phases are their instrument panel.
+- 🎨 **The Vibetoader** studies outcomes: run first, observe, iterate. The same
+  environment serves them — a run-first initial focus drops the learner straight
+  into the evaluation phase's run lens.
 
-## Two hats: 🔬 Frogrammer & 🎨 Vibetoader
+Neither hat is better; they are a spectrum, and the environment never forces
+one. When a program runs, its output speaks to **four audiences** — the
+learner-as-user (dialog interactions), the developer (the console), the machine,
+and the reader — and run output renders per audience, so learners see whom each
+line of their program is talking to.
 
-The two hats correspond to which audience you twin:
+## Pedagogical grounding
 
-- 🔬 **The Frogrammer** twins **the NM**. They predict what the machine will do,
-  evaluate output against that prediction, apply craft practices intentionally.
-  Frogramming = twinning the NM.
-- 🎨 **The Vibetoader** twins **the User**. They iterate on user-visible
-  behavior: does the button work? does the test pass? does the page render?
-  Vibetoading = twinning the User audience.
-
-Neither hat is better; they're a spectrum. This package centers the Frogrammer
-skill (NM-grounded prediction). Study lenses are the Frogrammer's **kit of
-magnifying glasses** for examining the embodied NM from different angles — each
-lens reveals one aspect of the same machine.
-
-See the [syllabus][metaphor] for the full hats / metaphor / audiences framing.
-
-## Pedagogical first principles
-
-> **This package implements the middle layers.** Progress modelling (system-wide
-> learner state) and monitored learning (grade reports, LMS integration,
-> cheating detection) belong to the embedding LMS. `<StudyLenses>` renders one
-> stepping stone in a learning path; the embedding LMS chooses which stones, in
-> what order, with what configs.
-
-The architecture implements the framework described in:
-
-> Yoshi Malaise and Beat Signer (2023). _Explorotron: An IDE Extension for
-> Guided and Independent Code Exploration and Learning._ Proc. of Koli Calling
-> '23.
-> [PDF](https://wise.vub.ac.be/sites/default/files/publications/Malaise_KoliCalling2023.pdf)
-
-### The two-axis grid + the layered pyramid
+This package implements the middle layers of the framework described in Yoshi
+Malaise and Beat Signer (2023), _Explorotron: An IDE Extension for Guided and
+Independent Code Exploration and Learning_, Proc. of Koli Calling '23
+([PDF](https://wise.vub.ac.be/sites/default/files/publications/Malaise_KoliCalling2023.pdf)).
 
 ![Figure 2 from Malaise & Signer (2023): (a) Quadrants of learning along curated/uncurated × guided/unguided axes; (b) Layered pyramid of learning tools, from progress modelling at the base to monitored learning at the top.](./explorotron-quadrants-and-pyramid.png)
 
-_Figure 2 from Malaise & Signer (2023): **(a)** Quadrants of learning along
-curated/uncurated × guided/unguided axes; **(b)** Layered pyramid of learning
-tools, from progress modelling at the base to monitored learning at the top._
-
-### How `<StudyLenses>` realizes the framework
-
-The framework's quadrants apply at **two scopes** — snippet scope (one
-`<StudyLenses>` instance) and curricular scope (the embedding LMS arranging
-instances). We own the snippet scope; the LMS owns the curricular scope. The
-curriculum's
-[`pedagogy.md` §7](../../../spiralearn/frogramming-and-vibetoading/pedagogy.md)
-is the curriculum-scope treatment of the same two axes.
-
-| Pyramid layer                      | Snippet scope (us)                                                                                                                                                                                                           | Curricular scope (LMS)                                   |
-| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| Base — Progress modelling          | _(n/a)_                                                                                                                                                                                                                      | Learner state / knowledge graph / ZPD positioning        |
-| Layer I — Lenses & defaults        | Recommender ranks lenses by snippet-fit (ranking lib exists; surfaced via the picker — recommendations-panel UI is deferred backlog)                                                                                         | _(subsumed)_                                             |
-| Layer II — Path generation         | Auto-generated lens path on one snippet (open spec — Block-model × NM in draft)                                                                                                                                              | Sequence of `<StudyLenses>` instances across snippets    |
-| Layer III — Manual recommendations | `lens` prop: "open in this lens first" (per-fence `js:trace?…` or directory `lenses.json` cascade)                                                                                                                           | LMS picks the curated snippet to render                  |
-| Layer IV — Manually crafted paths  | **Deferred** — Q-IV at snippet scope is owned by the LMS; auto-recommended Q-II tours suffice for in-snippet guidance. Future shape (new prop / meta-key in `configs` / directory-level setting) is intentionally undecided. | Full curriculum (sequence of curated snippets + configs) |
-| Top — Monitored learning           | _(n/a)_                                                                                                                                                                                                                      | Grade reports, LMS integration, cheating detection       |
-
-A free-form lens dropdown is **always** available within `<StudyLenses>` — the
-learner can override any recommendation or config at any time. This is Quadrant
-I at the snippet scope and underwrites the lifelong-learning autonomy framing
-below.
-
-### Concrete examples (snippet-scope quadrants)
-
-The locked public API is three props:
-
-```tsx
-<StudyLenses snippet={…} lens={…}? configs={…}? />
-```
-
-`lens` is the optional default-mount; `configs` is the cascade bundle (keyed by
-lens name under `configs.lenses`) the picker uses when the learner opens any
-lens. There is no separate per-default `config` prop — the per-fence / sibling
-override is folded into `configs.lenses[lens]` at plugin emission time. See
-[`orchestrate/README.md` § Public API](./orchestrate/README.md#public-api-studylenses)
-and [`orchestrate/types.ts`](./orchestrate/types.ts) (`StudyLensesProps`) for
-the full spec + resolution chain.
-
-- **Q1 — uncurated/unguided.** A learner pastes random JS into the editor, opens
-  `<StudyLenses>`, sees default lens recommendations ranked by snippet-fit,
-  picks one. Works on any code, not just curriculum content.
-- **Q2 — uncurated/guided.** Same starting point; the learner asks for an
-  auto-generated path through the recommended lenses. Strategy is an open spec
-  (a 3D framework based on the Block model × the NM is in draft).
-- **Q3 — curated/unguided.** Curriculum author renders
-  `<StudyLenses snippet={X} lens="trace" />`. The trace lens opens by default;
-  the learner can switch via the dropdown. With a per-fence override (folded
-  into the cascade):
-  `<StudyLenses snippet={X} lens="trace" configs={{ lenses: { trace: { stepDelay: 500 } } }} />`.
-- **Q4 — curated/guided.** Deferred at snippet scope. The LMS arranges curated
-  sequences across multiple `<StudyLenses>` instances at the curricular scope;
-  auto-recommended Q-II tours cover the in-snippet case.
-
-These quadrants describe **studying** a snippet that already exists. Its
-generative twin — _producing_ the snippet there is to study — is the
-[**aithor**](./embody/language-levels/just-enough-javascript/aithor/README.md)
-(_AI + author_), the **generative arm** of the same quad: it spans the same four
-quadrants along the same two axes (`validate` reads the curated/uncurated axis;
-who supplies the config reads the guided/unguided one).
-
-### Why this architecture
-
-> Revision ratified — the language-levels inversion adds a learner/author
-> **desired-level dial** as the scaffolding-fade control alongside the automatic
-> code-driven appearance described below; target in
-> [ARCHITECTURE.md](./ARCHITECTURE.md), campaign map in
-> [ROADMAP.md](./ROADMAP.md) § Revised decisions.
-
-Three load-bearing principles from the paper:
-
-- **Skill transfer** (Chiaburu & Marinova, 2005) — learn skills in environments
-  close to where they'll be used. Lenses live in the same editor learners use
-  for real work, not a separate "school" tool.
-- **Expertise reversal** (Sweller et al., 2003) — scaffolding helps beginners
-  but hurts experts. Lenses are designed to peel away support based on context.
-  This package operationalizes the principle structurally — **low floor, high
-  ceiling**: a learner can type ANY JavaScript; source-level study tools and
-  run/debug affordances serve all of it, and the NM scaffolding (the phases
-  panel's language-level stations, NM-instrumented evaluation) appears exactly
-  when the code sits inside the language level's semantic models — withdrawing,
-  never blocking, when the learner writes beyond them.
-- **Lifelong-learning autonomy** — Quadrant I (uncurated/unguided) isn't a
-  fallback; it's the central pedagogical bet. Students take their learning
-  skills with them, applied to any code they encounter long after graduation.
-  The 🔬 Frogrammer's magnifying-glass kit is the embodied form: the learner
-  carries the lens kit and uses it on code from anywhere.
-
-The Begel & Ko (2019) question — should technology "structure learning for
-learners" or should learners "be taught how to structure their own independent
-learning" — gets a **both-yes** answer:
-
-- Quadrants I + II support learners structuring their own.
-- Quadrants III + IV support educators structuring it for them.
-
-Both reach the same `<StudyLenses>` component; the difference is which configs
-the embedding system passes (and which the learner overrides).
-
-## Directory structure
-
-The folder layout mirrors the conceptual chain:
-
-| Path                                                                                         | Purpose                                                                                            |
-| -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `README.md` (this)                                                                           | Orientation — front door                                                                           |
-| [`reference.md`](./embody/language-levels/just-enough-javascript/reference.md)               | Allowed language features (syntax / controls)                                                      |
-| [`notional-machine.md`](./embody/language-levels/just-enough-javascript/notional-machine.md) | How the NM controlled by our language level works                                                  |
-| [`embody/`](./embody/)                                                                       | Programmatic embodiment of the NM                                                                  |
-| [`embody/language-levels/`](./embody/language-levels/)                                       | Language-level plugins (semantic models + admission gates); `just-enough-javascript/` is the first |
-| [`lenses/`](./lenses/)                                                                       | Pedagogical views on the embodied NM                                                               |
-| [`orchestrate/`](./orchestrate/)                                                             | `<StudyLenses>` orchestrator + analysis helpers                                                    |
-| [`lib/`](./lib/)                                                                             | JeJ-aware shared adapters (peer-independent)                                                       |
-| `sandbox-programs/`                                                                          | Test fixtures (may be moved later)                                                                 |
-
-## Why a language level?
-
-JEJ is _just enough_ JavaScript to write imperative programs that interact with
-users through text and numbers. Every program fits on a single printed page —
-the entire program is visible on screen at once, traceable step-by-step.
-
-The language level is designed around a specific balance: **meaningful
-computational exploration** within a **manageable notional machine** — which is
-why we've defined the NM explicitly in
-[notional-machine.md](./embody/language-levels/just-enough-javascript/notional-machine.md).
-The NM is the learning objective.
-
-### A language level is semantic, not syntactic
-
-> Revision ratified — the language-levels inversion generalizes this definition
-> vacuously for the identity level ("Full JavaScript"): an always-true validator
-> with an empty set of models — "never lie about admitted programs" holds
-> trivially; target in [ARCHITECTURE.md](./ARCHITECTURE.md), campaign map in
-> [ROADMAP.md](./ROADMAP.md) § Revised decisions.
-
-In this package a **language level** is defined by the semantics it models, not
-by the syntax it includes — a deliberate divergence from the syntax-subset
-language levels common in computing-education research (e.g. DrRacket's student
-languages). A language level provides two things: the **semantic models** for
-the NM's realm, creation, and evaluation phases, and a **validator as admission
-gate** that guarantees those models never lie about the programs they admit. The
-syntax restriction _derives_ from semantic modelability: a feature is excluded
-exactly when admitting it would demand an NM component the level doesn't model —
-which is precisely what the exclusion table below shows.
-
-### Few options, many possibilities
-
-JEJ programs have a consistent shape: read input → perform computations →
-produce output. Within this shape:
-
-**The structural tools** for writing programs are: variables (`let`, `const`),
-conditionals, loops (while, do-while, for, for-of), break, continue, and block
-scope.
-
-**The computational toolkits** that widen what learners can explore are: all
-String methods, all Math methods and constants, regular expressions, number
-helpers, type conversion (`Number()`, `String()`, `Boolean()`), character
-encoding (`String.fromCharCode`, `String.fromCodePoint`), timestamps
-(`Date.now()`), and date objects (`new Date()` — the sole `new` exception in
-JEJ, whose methods all return primitives).
-
-More operators and methods expand what learners can compute — string
-manipulation, math, pattern matching, bitwise logic, comparison — without
-complicating the notional machine. They're all expressions that resolve to
-values through the same mechanisms.
-
-### What learners can do with JEJ
-
-- Read code as communication between four audiences
-- Trace exactly how the NM interprets each line (Frogrammer hat)
-- Explore creativity within the shape of imperative programs
-- Explore style and readability tradeoffs to find your own voice
-- Discuss a program's _behavior_, _strategy_, and _implementation_
-- Explore different approaches to problem solving
-- Explore concepts through code — text processing, geometry, pattern matching,
-  randomness, number crunching — within interactive I/O programs
-- Prepare for functions, data structures, and algorithms
-- Build the foundations you need for whatever comes next
-
-### What's excluded and why
-
-Each excluded feature would add a new notional machine component that isn't
-needed for introductory programming:
-
-| Excluded feature               | NM component it would add                                                  |
-| ------------------------------ | -------------------------------------------------------------------------- |
-| User-defined functions         | Call stack depth, closures, hoisting of function declarations              |
-| Arrays and objects as literals | Heap allocation, reference vs value identity, mutation through references  |
-| Classes                        | Prototype chains on user objects, constructor semantics, `this` binding    |
-| `try`/`catch`                  | Exception propagation model, control flow branching at error sites         |
-| `async`/`await`                | Event loop, microtask queue, Promise state machine                         |
-| `var`                          | Function-scoped hoisting (confusing alongside `let`/`const` block scoping) |
-| Destructuring, spread/rest     | Pattern matching on data structures (needs arrays/objects)                 |
-
-The result: the notional machine has a fixed set of components that learners can
-master, while the computational toolkits provide enough depth for genuine
-exploration and creativity.
-
-## Language level documentation
-
-| Document                                                                                   | Purpose                                                         |
-| ------------------------------------------------------------------------------------------ | --------------------------------------------------------------- |
-| [reference.md](./embody/language-levels/just-enough-javascript/reference.md)               | Learner-facing cheat sheet — every allowed syntax with examples |
-| [notional-machine.md](./embody/language-levels/just-enough-javascript/notional-machine.md) | The conceptual evaluation model JEJ programs run on             |
-| [embody/](./embody/)                                                                       | Operational embodiment of the NM (data + event streams)         |
-| [embody/types.ts](./embody/types.ts)                                                       | Canonical TypeScript contract                                   |
-| [embody/DOCS.md](./embody/DOCS.md)                                                         | embody architecture + data flow                                 |
-| [embody/lib/evaluating/trace/syntax/](./embody/lib/evaluating/trace/syntax/)               | Syntax tracer — NM-step-category implementation (README + DOCS) |
-| [embody/lib/evaluating/trace/semantics/](./embody/lib/evaluating/trace/semantics/)         | Semantic tracer — finer-grained instrumentation (README + DOCS) |
-
-## Tooling
-
-Validates learner JavaScript against the language level and evaluates it in
-sandboxed environments. Provides validation, formatting, parsing, and evaluation
-modes — exposed as named function exports (there is no default export; the
-package's primary surface is the `<StudyLenses>` orchestrator).
-
-## Study lenses: research translation platform
-
-The study-lenses system is a research translation platform (TCER Phase 4) built
-on top of JEJ's tooling. **embody** captures the notional machine as data; the
-**study-lenses** system turns that data — and any JS snippet — into interactive
-learning exercises. Each lens embodies a computing education research-backed
-pedagogical intervention: blanks (fill-in-the-blank), parsons (line ordering),
-trace tables (predict-then-compare), and more.
-
-The architecture provides lenses (code-to-component, e.g., editor, parsons,
-blanks) that consume frozen embodiments built by the embody factory. A
-recommender (ranking lib built; its 3D Block Model grid — comprehension level ×
-scope × NM components — and recommendations UI are deferred backlog) analyzes
-each snippet against the JEJ notional machine to suggest relevant exercises.
-This enables rapid iteration on exercise design — researchers prototype new
-interventions by composing existing lenses, curriculum authors embed them in
-code fences, and learners choose their own path through the available lenses.
-
-See [`lenses/README.md`](./lenses/README.md) for the full architecture, module
-contracts, and directory layout.
-
-## Public API: `<StudyLenses>`
-
-The package's primary public interface is the **`<StudyLenses>`** React
-component, exported by `index.ts`. The locked three-prop surface:
-
-```ts
-import { StudyLenses } from './index.js';
-
-// Minimal:
-<StudyLenses snippet={`let x = 5; console.log(x + 1);`} />
-
-// Curated default-mount lens (Q-III):
-<StudyLenses snippet={`let x = 5;`} lens="trace" />
-
-// With cascade bundle (per-fence / sibling overrides fold into configs.lenses):
-<StudyLenses
-  snippet={`let x = 5;`}
-  lens="trace"
-  configs={{ lenses: { trace: { stepDelay: 500 }, annotate: { defaultView: 'code' } } }}
-/>
-```
-
-- **`snippet`** — code string. Orchestrator builds the embodiment internally.
-- **`lens`** — optional default-mount lens name (Q-III seam).
-- **`configs`** — optional cascade bundle; the orchestrator reads
-  `configs.lenses[lensName]` when opening any lens. There is no separate
-  per-default `config` prop — the per-fence / sibling override is deep-merged
-  into `configs.lenses[lens]` at plugin emission time.
-
-The Docusaurus plugin parses URL-style fence info-strings
-(`js:trace?stepDelay=500`) and folds the resulting `{ stepDelay: '500' }` into
-`configs.lenses["trace"]`; the directory-wide `lenses.json` cascade supplies the
-rest of `configs`. So the plugin emits two props — `lens` + `configs` — with the
-cascade as the single merged truth. See
-[`orchestrate/README.md` § Public API](./orchestrate/README.md#public-api-studylenses)
-and [`orchestrate/types.ts`](./orchestrate/types.ts) (`StudyLensesProps`) for
-the full resolution chain.
-
-`<StudyLenses>` is the orchestrator: it ingests the snippet, builds the
-embodiment via `embody()` (whose JEJ admission gate runs on module-type snippets
-once they parse, surfacing violations and format-compliance via
-`Snippet.validation.*` — JEJ-subset violations as a list, format compliance as a
-boolean; script-type snippets skip the gate), surfaces the registered lenses
-through the picker (recommender-based snippet-fit ranking is deferred backlog),
-mounts them, and manages all state — including the learner's script/module
-**source-type** selection that decides whether the gate applies. Formatting is
-the learner's responsibility — the orchestrator does not pre-format snippets.
-Consumers get one component to mount; everything else is internal.
-
-`embody`, lens plugins, and `orchestrate/lib/*` analysis helpers are **not**
-part of the public API. They are internal building blocks that `<StudyLenses>`
-orchestrates. Lens authors ship plugins that the orchestrator mounts; lens
-plugins receive `embodiment` as a prop. Curriculum authors embed `<StudyLenses>`
-in code fences.
-
-### Legacy named exports
-
-`index.ts` also re-exports the legacy tooling and evaluation functions (`run`,
-`trace`, `validate`, `parse`, `format`, `checkFormat`) for existing callers.
-
-```ts
-import {
-	run,
-	trace,
-	debug,
-	validate,
-	parse,
-	isJej,
-	format,
-	checkFormat,
-} from './index.js';
-```
-
-> The package has no default export. The previous `createJejProgram` code-object
-> factory was removed as YAGNI bloat — superseded by `<StudyLenses>`.
-
-### Tooling functions
-
-| Function            | Returns         | What it does                                                 |
-| ------------------- | --------------- | ------------------------------------------------------------ |
-| `format(code)`      | `string`        | Formats source code to JEJ conventions                       |
-| `checkFormat(code)` | `{ formatted }` | Check if code matches JEJ conventions                        |
-| `validate(code)`    | `BaseResult`    | Returns an array with any JEJ language constraint violations |
-| `isJej(code)`       | `boolean`       | Convenience: is this valid JeJ?                              |
-
-### Evaluation functions
-
-| Function              | Returns                                      | Engine                             |
-| --------------------- | -------------------------------------------- | ---------------------------------- |
-| `run(code, config)`   | `Execution<InterceptEvent, InterceptResult>` | Web Worker                         |
-| `trace(code, config)` | `Execution<AranStep, TraceResult>`           | Web Worker w/ Aran instrumentation |
-| `debug(code, config)` | `Execution<DebugEvent, DebugResult>`         | iframe                             |
-
-## Internal lib structure
-
-The package is partitioned across three peers — `embody/`, `lenses/`,
-`orchestrate/` — plus the JEJ-aware adapter `lib/` peer that sits between them.
-Each peer's `lib/` subdirectory has its own README listing its inhabitants:
-
-| Path                                       | Inhabitants                                                                                            |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
-| [`./lib/`](./lib/)                         | JEJ-aware editor adapters: `completing/`, `documenting/`, `formatting-editor/`, `linting/`             |
-| [`./embody/lib/`](./embody/lib/)           | Embodiment-pipeline internals: `ast/`, `parse/`, `validating/`, `formatting/`, `evaluating/`, `scope/` |
-| [`./orchestrate/lib/`](./orchestrate/lib/) | Orchestrator-internal helpers: `editing/`, `error-interpreting/`, `recommender/`, `socratizing/`       |
-
-Top-level (not under any `lib/`):
-
-| Path          | Purpose                                                                                                                                          |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `components/` | UI components (V2 lens components, migration source)                                                                                             |
-| `index.ts`    | Package entry — exports the `<StudyLenses>` orchestrator component (primary surface) + legacy named functions                                    |
-| `api/`        | Legacy directory; trace/run/debug-related types remain here pending parallel migration. The validate/parse/format/default migration is complete. |
-
-For the migration rationale (why each `lib/*` module ended up at its current
-peer rather than at top-level), see
-[`DOCS.md` § Categorization rationale](./DOCS.md).
-
-## Result shape
-
-All evaluation results share a common base:
-
-```ts
-type Result<TEvent> = {
-	readonly ok: boolean;
-	readonly error?: ResultError;
-	readonly rejections?: readonly Violation[];
-	readonly logs?: readonly TEvent[];
-};
-```
+The framework's curated/uncurated × guided/unguided axes apply at two scopes:
+this package owns the **snippet scope** (one mounted instance), the embedding
+LMS owns the **curricular scope** (which snippets, in what order, with what
+configuration).
+
+| Pyramid layer          | Snippet scope (this package)                | Curricular scope (the LMS)      |
+| ---------------------- | ------------------------------------------- | ------------------------------- |
+| Progress modelling     | —                                           | learner state, knowledge graph  |
+| Lenses & defaults      | the lens kit; recommendations ranked by fit | _(subsumed)_                    |
+| Path generation        | —                                           | sequencing snippets into a path |
+| Manual recommendations | the initial-focus lens request              | the LMS picks the snippet       |
+| Crafted paths          | —                                           | the full curriculum             |
+| Monitored learning     | —                                           | grading, reports, integrity     |
+
+Three principles from the paper are load-bearing:
+
+- **Skill transfer** — learn where you'll work. Lenses live in the same editing
+  environment learners use for real code, not a separate school tool.
+- **Learner autonomy is structural.** Every lens the orchestrator offers is
+  learner-reachable regardless of what the host curated; recommendations and
+  initial-focus requests suggest, never confine. Educators structure learning
+  _for_ learners and learners structure their own — both through the same
+  component, differing only in configuration.
+- **The fade is pull, not push.** Nothing is imposed, so support withdraws by
+  not being opened: as mastery grows, learners stop reaching for the early
+  phases' lenses. Level scaffolding follows the same grain — in warn posture
+  nothing is ever blocked; strict is a visible, learner-liftable guardrail that
+  keeps code where the level's lenses can serve it.
+
+## What this package does not own
+
+- **Progress modelling and learner state** — knowledge graphs, learner profiles,
+  ZPD positioning. The package never knows who the learner is.
+- **Curricular sequencing** — which snippet comes next. This package renders one
+  stepping stone; the embedding LMS arranges the path.
+- **Monitored learning** — grading, reporting, LMS integration, cheating
+  detection.
+- **Executing code that does not parse** — by design, the parser is the study
+  environment's execution ceiling. Execution is reached through the lifecycle's
+  parse phases, whose lenses explain the parser's own errors; source-phase study
+  serves any text.
+
+## What crosses the boundary
+
+**In** — from the embedding site: the program source; its initial snippet type;
+an optional initial-focus lens request (a focus request, never a bypass: a
+phase-declaring lens is honored when its phase is accessible, and a
+panel-excluded lens is honored by running its applicability at mount — the
+enforcement mask applies to a focus-mounted lens identically; the run-first
+posture for curated examples is this request naming the run lens); configuration
+(the top layer of a cascade the orchestrator resolves per lens by name, with the
+learner's own tweaks always the final layer); additional lenses; additional
+language levels; an initially selected level; an initial enforcement posture.
+Injection is **append-only** — name and key collisions fail loudly, and
+replacing or shadowing built-ins is out of scope. Every initial choice is a
+default, not a lock: the learner can override level, strictness, snippet type,
+lens choice, and configuration for their session.
+
+**Out** — a rendered study environment: one mounted component, everything else
+internal.
+
+The public, versioned surface is the host boundary above, the lens contract, and
+the language-level interface. The evaluator contract is internal.
+
+## The model
+
+> The sections above tell the story; the sections from here down state the
+> domain model precisely. They are the naming contract for contributors and
+> agents working in this package.
+
+### One envelope, kinds by their main operation
+
+Every study utility — whatever its kind — declares the same envelope: a name, an
+applicability predicate, a main operation — and, for the lens kind, optional
+configuration, lifecycle phase(s), and recommendations. Kinds differ in the
+shared shape of the main operation. There are two kinds: **lenses** (components
+that render views of the embodiment) and **evaluators** (headless generators
+that execute code and emit events). Kind contracts carry no level fields — a
+utility's level affinity, if any, lives privately inside its applicability and
+main operation.
+
+### The embodiment: facts + fit + accessibility, level-blind
+
+Embodying a program derives its Facts as tagged stages, derives each lifecycle
+phase's accessibility from those stages, runs every phase-declaring lens's
+applicability over the Facts, attaches the fitting lenses to their phases, and
+freezes the result. The embodiment is **level-blind**: it contains no language
+level knowledge — level logic runs only inside individual utilities' own
+internals. The frozen embodiment owns its structure, not the attached lens
+modules; those remain owned by where they were defined.
+
+### The lifecycle is the interaction model
+
+Learners interact with a program only through its lifecycle phases. Each phase
+presents the lenses that fit it. A barred phase renders as barred, with its
+cause; within an accessible phase, lenses that don't fit simply don't appear.
+Evaluation-phase lenses drive evaluators behind refusal-as-data.
+
+### Language levels: consulted, never in charge
+
+Level validation is memoized per settle and per level. The selected level's
+verdict feeds the editor gutter (selected level only), the enforcement mask, and
+the selector's closed face; the selector's open list shows per-level fit marks —
+the same consultation run for each registered level. The selector is permanent
+whenever levels are registered — it is the discovery and self-assessment
+channel, with fit marks and documentation on hover. Whether a level admits the
+current snippet type is checked the same way as code conformance.
+
+Enforcement is **mask, not filter**: fit computation never changes when a level
+is active — under strict, the mask covers what fit produced. Editor surfaces
+always stay alive, and so does every control whose change can itself restore
+conformance (the selector, the strict toggle, the snippet-type toggle, the
+guide). While the code doesn't parse, the level's verdict is undetermined: the
+mask never names a violation it can't know, and the parse phases' supports stay
+available.
+
+### The orchestrator
+
+The orchestrator is the one component the host mounts. It renders: the editor —
+the single writer of the program's source, from which everything re-derives per
+settle — the six-phase study panel, the permanent level selector, the
+selected-level gutter, the strict toggle, the snippet-type toggle, and an
+embedded guide. It is also the composition root: it owns a default roster of
+lenses and appends whatever the host injects.
+
+## Glossary — the ubiquitous language
+
+These terms are the naming contract for the whole package: functions, types,
+documents, and UI copy use them consistently.
+
+- **embodiment** — the frozen study object produced when a program's source is
+  embodied: facts + fit + accessibility. The canonical name every lens receives
+  it under.
+- **snippet** — the program under study: the source text a learner or host
+  brings, together with its snippet type.
+- **Facts** — the synchronous fact slice of the embodiment: the source text, its
+  tokens, its syntax tree, the entwined source⇄tree binding, and the snippet
+  type. Each is a **fact stage**: a tagged result holding either its value or a
+  structured cause of failure. A stage's own failure renders inside the
+  lifecycle phase that owns it.
+- **lifecycle** — the six flat phases every program moves through:
+  `source → realm → tokens → ast → environment → evaluation`. The phases are
+  peers, matching the language specification's own shape; the split between
+  `tokens` (spelling) and `ast` (grammar) follows the parser's practical
+  behavior. Phase names are data; learner-facing display labels are
+  presentation, owned by the orchestrator's UI.
+- **phase accessibility** — a property of each lifecycle phase on the
+  embodiment: a phase is **barred** when an upstream fact stage failed, and it
+  carries that cause. Distinct from a lens simply not applying.
+- **applicability** — the gating predicate every study utility declares: a pure,
+  synchronous function of the utility's input domain answering "does this
+  utility apply to this input?". Its internals are the utility's own business —
+  no consumer knows or cares how it decides. For lenses the input is the Facts.
+- **fit** — the outcome of running a lens's applicability over the Facts;
+  fitting lenses are attached to their declared phases. Not the same thing as
+  the level selector's **fit marks**, which are a language-level verdict about
+  the code: fits / doesn't fit / not applicable for this snippet type /
+  undetermined while unparsed.
+- **study utility** — anything sharing the one utility envelope: a name, an
+  applicability predicate, a main operation — and, for the lens kind only,
+  optional configuration, declared lifecycle phase(s), and recommendations. A
+  **kind** of utility is defined by the shared shape of its main operation.
+- **composed study configuration** — the session-living result of composition:
+  the lens and level rosters joined once at mount (collisions loud), plus the
+  configuration cascade resolved per lens name — with the learner's session
+  choices and tweaks always the final layer, re-resolved as they change.
+- **lens** — the component kind of study utility: its main operation renders a
+  pedagogical view of the embodiment. Lenses are read-only views — they never
+  mutate the embodiment. A lens that declares no phase is panel-excluded: it
+  mounts only by explicit request.
+- **evaluator** — the headless generator kind of study utility: its main
+  operation executes code and emits events. Evaluators are consumed by lenses
+  and never rendered themselves; a lens is never an evaluator.
+- **refusal-as-data** — the main-operation convention: on input it cannot serve,
+  a utility returns a structured refusal result, never a throw. The refusal
+  shape is part of each kind's shared contract.
+- **language level** — a curated slice of JavaScript packaged as a passive,
+  consultable library: a validator over the parse facts (the tokens/ast portion
+  of the Facts), the snippet types the level admits, reference and
+  notional-machine documentation, editor support, and semantic-model builders. A
+  level answers when consulted — it is never a plugin and never an actor — and
+  levels never ship lenses.
+- **notional machine (NM)** — a language level's semantic model of how
+  JavaScript executes: the bounded conceptual machine a learner can hold in
+  their head. NM content lives with its level.
+- **JEJ (Just Enough JavaScript)** — the first language level: just enough
+  JavaScript to write imperative, text-and-number interactive programs on a
+  precise, bounded notional machine.
+- **none-state** — the reserved empty level key meaning "no constraining level
+  is selected". Its selector entry is a label, not a level; generic JavaScript
+  editing applies.
+- **settle** — the debounced moment after typing pauses when the editor buffer
+  is re-embodied; **per-settle** means once per re-embodiment.
+- **snippet type** — whether the program is treated as a script or a module. The
+  host chooses the initial type; the learner can toggle it for the session.
+- **strict / warn** — the two enforcement postures for a selected language
+  level. Warn (the default) blocks nothing: warnings surface on the editor's
+  surfaces and the study panel is untouched. Strict masks the study surfaces
+  until the code conforms to the level.
+- **enforcement mask** — the strict-posture overlay across the maskable
+  surfaces. Its trigger is the selected level's verdict; what it covers is what
+  lens fit produced — it never edits fit or accessibility.
+- **four-audiences pedagogy** — a program's run output speaks to distinct
+  audiences: the learner-as-user (dialog interactions), the developer (the
+  console), the machine, and the reader. Run output renders per audience.
 
 ## Navigation
 
-- [ARCHITECTURE.md](./ARCHITECTURE.md) — newcomer orientation: layer map, core
-  concepts, extension points
-- [ROADMAP.md](./ROADMAP.md) — the language-levels inversion campaign map
-  (deletable; removed when the campaign completes)
-- [reference.md](./embody/language-levels/just-enough-javascript/reference.md) —
-  learner-facing language reference
-- [notional-machine.md](./embody/language-levels/just-enough-javascript/notional-machine.md)
-  — the NM (conceptual evaluation model)
-- [embody/README.md](./embody/README.md) — embody factory
-- [embody/DOCS.md](./embody/DOCS.md) — embody architecture + data flow
-- [embody/types.ts](./embody/types.ts) — canonical types
-- [lenses/README.md](./lenses/README.md) — lens system
-- [embody/lib/parse-old/README.md](./embody/lib/parse-old/README.md) —
-  `parse(code)` + parse primitives
-- [embody/lib/validating/README.md](./embody/lib/validating/README.md) —
-  `validate(code)` + validation pipeline
-- [embody/lib/formatting/README.md](./embody/lib/formatting/README.md) —
-  `format(code)` / `checkFormat(code)`
-- [embody/lib/evaluating/README.md](./embody/lib/evaluating/README.md) —
-  evaluation engines
-- [DOCS.md](./DOCS.md) — architecture decisions and design rationale
+- Parent: [`src/lib/`](../README.md)
+- The package decomposes into six regions, each documenting itself in its own
+  README and DOCS: the **orchestrator** (the mounted component: editor, panel,
+  level UI, composition root), **lenses**, **evaluators**, **language levels**,
+  the **embodiment factory**, and **shared leaf libraries** (parsing, engine,
+  configuration merging).
+- [`DOCS.md`](./DOCS.md) — the package-level architectural sketch: execution
+  phases, data flow, structural constraints.
