@@ -9,6 +9,40 @@ where they write it; educators and embedding sites shape the study environment
 through configuration without ever locking the learner out of their own
 controls.
 
+## The story
+
+[Welcome to Frogramming](../../../spiralearn/frogramming-and-vibetoading/README.md)
+teaches **JEJ** — this package's first **language level**: a curated slice of
+JavaScript small enough that every admitted program runs on a precise, bounded
+**notional machine** (NM). Twinning that machine — building a faithful working
+copy of it in your own head — is the learning objective of the course.
+
+**Code is the UI.** The source text is the panel through which a programmer
+operates the machine. Writing code yourself is one way to work that panel;
+describing intent to an agent is another. Either way, the machine underneath is
+the thing being learned — and the machine-facing lenses let you look at it
+directly instead of inferring it from output.
+
+```mermaid
+flowchart LR
+    course["Welcome to Frogramming<br/>(the course)"]
+    jej["JEJ 🧭<br/>the first language level"]
+    nm["its notional machine<br/>(the learning objective)"]
+    study["level-aware lenses<br/>make the machine visible"]
+    env["the study environment<br/>(this package)"]
+    course -->|teaches| jej
+    jej -->|"models — docs +<br/>semantic-model builders"| nm
+    nm -->|"studied through"| study
+    study -->|"part of the learner's kit,<br/>inside"| env
+```
+
+The environment itself serves **any JavaScript**, with or without a level
+selected. JEJ gets nothing special from the architecture — it is simply the
+first level registered, and the course's reason this package exists. The
+built-in machine-facing lenses consult JEJ because their authors wrote them
+against it; an injected level powers the selector, editor support, and
+enforcement identically — machine-facing lenses for it come from its own author.
+
 ## Why lenses?
 
 Understanding code is not one skill but many: predicting what the machine will
@@ -50,6 +84,31 @@ parser's own voice: their lenses show the real error together with a
 learner-worded explanation — spelling mistakes in `tokens`, grammar mistakes in
 `ast`. The machine's implicit judgments become explicit, visible places to
 study.
+
+### The six phases
+
+Every phase is a step the language specification itself names — nothing is
+invented. Each one is a place to stop and look:
+
+```mermaid
+flowchart LR
+    source["source<br/>the text itself"]
+    realm["realm<br/>the ready-made world"]
+    tokens["tokens<br/>spelling"]
+    ast["ast<br/>grammar"]
+    environment["environment<br/>names come to be"]
+    evaluation["evaluation<br/>the program runs"]
+    source --> realm --> tokens --> ast --> environment --> evaluation
+```
+
+| Phase         | The machine's step                                     | Studying there                                                                                                                     |
+| ------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `source`      | the raw text, before the machine reads anything        | annotate it, fill in blanks, reorder lines, quiz yourself — the phase serves any text, even broken; each lens appears when it fits |
+| `realm`       | the built-in world a program wakes up into             | what already exists before your first line runs                                                                                    |
+| `tokens`      | the text is spelled out into the language's words      | the parser's spelling errors, explained                                                                                            |
+| `ast`         | the words resolve into grammar                         | the parser's grammar errors, explained                                                                                             |
+| `environment` | declarations come into being, before anything executes | how names are born, and what hoisting really means                                                                                 |
+| `evaluation`  | the program runs                                       | the run lens — output per audience, dialogs, cancellation — and step-by-step traces                                                |
 
 ## Guardrails, not cages
 
@@ -227,8 +286,8 @@ documents, and UI copy use them consistently.
 - **embodiment** — the frozen study object produced when a program's source is
   embodied: facts + fit + accessibility. The canonical name every lens receives
   it under.
-- **snippet** — the program under study: the source text a learner or host
-  brings, together with its snippet type.
+- **snippet** — the raw program passed in for study: the source text a learner
+  or host brings, together with its snippet type.
 - **Facts** — the synchronous fact slice of the embodiment: the source text, its
   tokens, its syntax tree, the entwined source⇄tree binding, and the snippet
   type. Each is a **fact stage**: a tagged result holding either its value or a
@@ -300,13 +359,38 @@ documents, and UI copy use them consistently.
   audiences: the learner-as-user (dialog interactions), the developer (the
   console), the machine, and the reader. Run output renders per audience.
 
+## The shape of the package
+
+Six regions, mirroring the story above. Each region documents itself in its own
+README and DOCS. (Solid arrows: builds or drives; dotted: consults.)
+
+```mermaid
+flowchart TD
+    host["the embedding site"]
+    orch["orchestrator — renders everything:<br/>editor · phase panel · level UI"]
+    emb["embodiment factory —<br/>facts + fit + accessibility"]
+    lenses["lenses 🔬 — pedagogical views,<br/>offered per phase"]
+    evaluators["evaluators — headless generators"]
+    levels["language levels 🧭 —<br/>passive libraries, JEJ first"]
+    host -->|"snippet + configuration"| orch
+    orch -->|"embodies per settle"| emb
+    emb -.->|"attaches what fits"| lenses
+    lenses -->|"drive"| evaluators
+    lenses & evaluators -.->|"consult"| levels
+    orch -.->|"consults for selector ·<br/>gutter · mask"| levels
+```
+
+| Region                    | What it is                                                                                                                          |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| **orchestrator**          | the one mounted component: the editor (single writer of source), the six-phase panel, the level UI, the guide; the composition root |
+| **lenses**                | the component kind of study utility — views attached to phases by fit                                                               |
+| **evaluators**            | the generator kind — headless program execution, driven by evaluation-phase lenses                                                  |
+| **language levels**       | passive consultable libraries — validator, docs, editor support, model builders; JEJ is the first                                   |
+| **embodiment factory**    | turns a snippet into the frozen embodiment, level-blind                                                                             |
+| **shared leaf libraries** | parsing, the execution engine, configuration merging                                                                                |
+
 ## Navigation
 
 - Parent: [`src/lib/`](../README.md)
-- The package decomposes into six regions, each documenting itself in its own
-  README and DOCS: the **orchestrator** (the mounted component: editor, panel,
-  level UI, composition root), **lenses**, **evaluators**, **language levels**,
-  the **embodiment factory**, and **shared leaf libraries** (parsing, engine,
-  configuration merging).
 - [`DOCS.md`](./DOCS.md) — the package-level architectural sketch: execution
   phases, data flow, structural constraints.
