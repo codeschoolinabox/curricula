@@ -1,222 +1,167 @@
+<!-- cspell:ignore Gateable -->
+
 # lenses
 
-Lens-module implementations for the `<StudyLenses>` orchestrator. Each
-subdirectory is one lens — a stateful "mini web app" plugin that takes a frozen
-[`embodiment`](../embody/types.ts) (`Snippet`) plus an optional
-[`LensConfig`](./types.ts) and renders a learning exercise.
+The component kind of study utility. A lens renders one pedagogical view of the
+embodiment — an exercise, an annotation surface, a visualization, a way to run
+the program and interrogate what happened. This region owns the lens kind's
+contract and the lenses themselves: every lens lives in its own directory here
+and satisfies the same contract.
 
-> **🚧 MIGRATION IN PROGRESS** — this directory holds the target contract docs
-> (this README, `DOCS.md`, `types.ts`), the in-progress WS4 trial lens
-> [`./annotate/`](./annotate/) (Phase 0 in flight; migrated from the
-> pre-refactor `HighlightLens.jsx` and renamed because the lens does
-> annotation-on-top-of-display, not token highlighting — see
-> [`./annotate/README.md`](./annotate/README.md) +
-> [`./annotate/DOCS.md`](./annotate/DOCS.md)), and the first concrete lens
-> implementation against the new contract: [`./debug-props/`](./debug-props/), a
-> meta-lens that renders received `LensProps` for sandbox-harness verification.
-> The remaining pedagogical lenses migrate in via WS4
-> ([`../.planning-handoffs/04-lens-migration.md`](../.planning-handoffs/04-lens-migration.md)).
-> The pre-refactor package source tree (which lived alongside this module under
-> the `study-lenses/` name, not the still-extant Docusaurus plugin at
-> `src/plugins/study-lenses/`) was deleted in commit `5d6fc54`; the editor was
-> promoted to [`../orchestrate/editor/`](../orchestrate/editor/) as the
-> orchestrator home base. This banner is removed once WS4 lands.
+The package [README](../README.md) owns what lens, fit, and phase mean; this
+document owns the kind contract's mechanics.
 
 ## What lives here
 
 ```text
 lenses/
-  README.md              (this — orientation + navigation)
-  DOCS.md                architectural sketch + Mermaid data flow
-  types.ts               LensModule contract + LensProps + LensConfig
-  debug-props/           meta-lens: renders received LensProps as panels
-  annotate/              annotation surface over code or generated flowchart
-  …                      (additional lenses land per `.planning-handoffs/04-lens-migration.md`)
+  README.md       this file — the kind's mechanics + navigation
+  DOCS.md         the region's architectural sketch
+  types.ts        the lens-kind contract
+  <name>/         one directory per lens — annotate/, blanks/, quiz/, …
 ```
 
-The editor is **not a lens** — it lives at
-[`../orchestrate/editor/`](../orchestrate/editor/) as the orchestrator's home
-base, the only writer of snippet state.
+The editor is not a lens — it belongs to the orchestrator, the single writer of
+the program's source.
 
-## Pyramid placement
+## The kind contract
 
-`lenses/` ships **Layer I (Lenses & defaults)** of the Explorotron pyramid (per
-[`../README.md` § Pedagogical first principles](../README.md#pedagogical-first-principles)).
-Each lens is a pedagogical intervention — parsons (line ordering), blanks
-(fill-in), trace-table (predict-then-compare), etc. — that the orchestrator's
-picker (Q-I) and recommendations panel (Q-II/Q-III) can surface for any
-embodiment. Lenses themselves are scope-agnostic; they don't know about
-quadrants or pedagogical context, just about turning an embodiment into an
-exercise.
+Every lens extends the structural contract embody gates on — a name, an
+applicability over the Facts, optionally declared phase(s) — with the component
+kind's fields:
 
-## How to add a lens
+- **main** — the React component. It receives exactly two things: the frozen
+  embodiment and the lens's own resolved configuration. Everything the lens
+  shows derives from those two inputs.
+- **config** (optional) — a pure factory: given the merged overrides the
+  composition root resolved from the cascade, it returns the lens's complete
+  configuration, defaults included. A lens without a factory gets the shared
+  merge applied to the cascade directly.
+- **recommend** (optional) — given the embodiment, propose next study steps:
+  which lens (usually a self-reference), with what configuration, how relevant,
+  under what label. Proposing is the lens's; ranking and rendering the proposals
+  is the orchestrator's, and rendering passes through the enforcement mask.
 
-Each lens is a **two-layer module** at `lenses/<name>/`:
+A lens's name is its identity within the kind — two lenses with the same name is
+a loud composition error, never a silent override.
 
-1. **Pure-TS core** (e.g. `core.ts`) — display derivation, validation, scoring.
-   Imports from `orchestrate/lib/*` (analysis utilities), `@-utils` (freeze,
-   etc.), and the lens's own local files. Testable in vitest **without**
-   `jsdom`.
-2. **Light React wrapper** (e.g. `index.tsx`) — exports the `Component` field of
-   the lens's `LensModule`. Takes [`LensProps`](./types.ts) (`embodiment` plus
-   optional `config`) as props, instantiates the core, renders UI. Testable with
-   `jsdom` and `@testing-library/react`.
+The shape, compactly (the full contract with its doc-comments is
+[`types.ts`](./types.ts)):
 
-The split keeps the core's tests fast (no DOM stub) and makes the React boundary
-explicit.
+```ts
+type Lens = Gateable & {
+	main: ComponentType<LensProperties>; // { embodiment, config }
+	config?: (overrides?: Partial<LensConfig>) => LensConfig;
+	recommend?: (embodiment: Embodiment) => ReadonlyArray<Recommendation>;
+};
+```
 
-A lens's directory layout (template):
+## Anatomy of a lens
+
+Each lens directory exports a single `Lens` object — the object is the lens's
+identity: the composition root imports it by reference and keys it by `name`.
+Inside, every lens is a two-layer module:
+
+1. **The pure core** — display derivation, validation, scoring: pure functions
+   of the facts and the configuration, narrowing the tagged fact stages they
+   read. Testable without a DOM.
+2. **The thin component** — the `main` wrapper: it calls the core, renders what
+   the core derived, and holds the lens's local working state. Tested with a
+   DOM.
+
+A lens directory's shape:
 
 ```text
 lenses/<name>/
-  README.md                  what this lens is + navigation
-  DOCS.md                    why-this-lens + Mermaid + decisions
-  index.tsx                  default export — LensModule with React Component
-  core.ts                    pure-TS core (display derivation, validation)
-  types.ts                   per-lens types (config, internal state)
-  tests/
-    core.test.ts             vitest, no jsdom
-    component.test.tsx       vitest + jsdom + @testing-library/react
+  README.md      what this lens is, for whom
+  DOCS.md        why this lens — decisions + its own data flow
+  index.tsx      the Lens object (default export)
+  core.ts        the pure core
+  types.ts       per-lens types — its config shape, its internal state
+  tests/         core tests (no DOM) · component tests (DOM)
 ```
 
-## LensModule signature
+**Purity rule:** a lens never imports runtime values from embody or from the
+orchestrator — the embodiment arrives via props, and embody is a type-only
+import. Among the package's regions, language levels and evaluators are the only
+sanctioned runtime imports, and both stay lens-internal; shared leaf libraries
+and external dependencies are ordinary imports.
 
-Every lens's default export satisfies the `LensModule` type at
-[`./types.ts`](./types.ts):
+## Totality — the gate is the refusal
 
-```ts
-type LensModule = Readonly<{
-	name: string; // registry identity
-	Component: ComponentType<LensProps>; // React wrapper around the TS core
-	config: (overrides?: Partial<LensConfig>) => LensConfig;
-	applicableTo: (embodiment: Snippet) => boolean; // recommender's applicability filter
-	recommend: (embodiment: Snippet) => ReadonlyArray<Recommendation>;
-	phase?: Station | readonly Station[]; // phases-panel station(s); absent = panel-excluded
-}>;
+A lens's applicability is its whole refusal channel: a lens that cannot serve
+the current facts is simply never offered. Once mounted, main may assume its
+gate held — mounting a lens whose applicability did not hold is a consumer bug,
+not a case main defends against. For the component kind, refusal-as-data is
+realized at the gate, before any component exists.
 
-type LensProps = Readonly<{
-	embodiment: Snippet;
-	config?: LensConfig;
-}>;
-```
+## What a phase declaration means
 
-`applicableTo` is the cheap O(1) gate; `recommend` is the richer relevance
-computation that runs only on already-applicable lenses. Both take the frozen
-`Snippet` directly — analysis is internal to `orchestrate/lib/recommender/`, not
-a separate hand-off type.
+A declared phase is the pedagogical target — which lifecycle phase the lens
+teaches understanding of — not which facts the lens reads: a source-phase
+exercise may well consume the syntax tree. Declaring a phase also subjects the
+lens to that phase's accessibility: an evaluation-phase lens is simply absent
+while its phase is barred. A multi-phase lens declares an array; the
+error-interpreting lens declares both parse phases. Absent means panel-excluded:
+the lens mounts only by explicit request.
 
-See [`./types.ts`](./types.ts) for the full doc-comments and adaptation notes
-(this contract reshapes the pre-refactor `study-lenses/types.ts:99-120`
-LensModule).
+Neither main nor applicability receives a phase discriminator: a multi-phase
+lens attaches to every declared accessible phase uniformly and derives what to
+show from the facts alone. Whether any lens needs a column-aware seam is a
+question owned by the orchestrator's mounting contract and that lens's own
+design — not by the kind contract here.
 
-## Three-tier classification
+## Rules every lens obeys
 
-Each lens belongs to one of three tiers based on what it needs from the
-embodiment. The tier determines what `applicableTo` returns.
+- **Read-only views.** A lens never mutates the embodiment or its configuration
+  — both arrive frozen. A lens's working state (an answer in progress) is local
+  and disposable: nothing persists across mount cycles.
+- **Gates are cheap and pure.** Applicability is synchronous and budgeted to the
+  Facts it reads — no derived-model construction inside a gate. Heavy derivation
+  belongs in the lens core, at render, from the facts and the configuration.
+- **Consultation is private.** A lens may import a language level's validator,
+  documentation, or model builders; evaluation-phase lenses import and drive
+  evaluators behind refusal-as-data. Both stay internal — no contract field
+  names a level or an evaluator.
+- **The module surface is synchronous.** Async setup lives inside the component;
+  teardown is unmounting — no dispose anywhere. An unmount cancels whatever the
+  lens was driving.
+- **Configuration stays flat.** Primitives and primitive arrays only —
+  deterministic hashes, no schema drift, no functions smuggled through config.
 
-| Tier | What it needs                          | `applicableTo` returns      |
-| ---- | -------------------------------------- | --------------------------- |
-| 1    | Text only — no parse needed            | always `true`               |
-| 2    | Valid AST (no execution)               | `embodiment.status.parsed`  |
-| 3    | Valid parse AND evaluable script-scope | `embodiment.status.created` |
+## The roster
 
-Tier 1 lenses (parsons line-shuffling, copy-type, annotate) work even on
-syntactically-broken snippets. Tier 2 lenses (blanks, variables/scope, ask) need
-a valid AST — they ignore the JEJ-validity question and operate on the AST
-regardless. A Tier-2 lens that also wants JEJ-subset compliance gates on
-`embodiment.status.validated` instead (until embody wires the validate stage
-into real composition, `status.validated` is stubbed `false` for real snippets,
-so such a lens bridges through the re-pointable admission seam
-[`../lib/admitting/`](../lib/admitting/) — `quiz` is the first). Tier 3 lenses
-(trace-table and other NM-replay lenses) need the snippet to be evaluable — i.e.
-all four gates passed (per [`../embody/types.ts`](../embody/types.ts) §Status
-booleans), which includes the validate gate; `embodiment.status.created` is the
-load-bearing flag since it implies validate passed.
+Lenses such as annotate, blanks, parsons, writeme, and quiz serve the `source`
+phase; the error-interpreting lens speaks the parser's voice across both parse
+phases; the run lens staffs the `evaluation` phase, driving the evaluators. Each
+lens documents itself in its own directory.
 
-The `status` chain is monotonic by construction: `created` implies `validated`
-implies `parsed` implies `tokenized`. Lens-author logic only checks the field it
-cares about; the chain handles itself. The tier gates are also
-source-type-agnostic: script-type snippets (no language level active) simply
-never reach `validated`/`created`, so Tier-1/Tier-2 lenses serve them and Tier-3
-lenses never apply — no tier ever branches on `snippet.type`.
+## Glossary — region terms
 
-See
-[`../.planning-handoffs/04-lens-migration.md`](../.planning-handoffs/04-lens-migration.md)
-for per-lens tier assignments and the full migration roadmap.
+The package glossary owns the shared meanings; these entries add the mechanics
+this region owns.
 
-## Conventions
-
-Inherits all conventions from [`../README.md`](../README.md) and the top-level
-`AGENTS.md`. Subdirectory-specific rules:
-
-- **Lens purity**. Lens modules MUST NOT import **runtime values** from
-  `embody/` (top) or `orchestrate/` (top). Receive `embodiment` via props.
-  **Type-only imports** from `embody/types.ts` (e.g.
-  `import type { Snippet } from '../../embody/types.js'`) are OK. May also
-  import (runtime + type) from `lib/*` (JEJ-peer shared adapters — see
-  [`../lib/README.md`](../lib/README.md)), `orchestrate/lib/*`, and `@-utils`.
-  (Per [`../DOCS.md` § Dependency rules](../DOCS.md).)
-- **Disposable practice**. Lens-internal UI state (parsons shuffle, blanks
-  fills) is per-mount only. When the snippet changes, React unmounts the lens;
-  in-progress UI state is gone. Never reach for `localStorage`, refs across
-  mounts, or other persistence mechanisms. The LMS owns cross-edit state — this
-  is per
-  [`../README.md` § Pedagogical first principles](../README.md#pedagogical-first-principles)
-  implication 5.
-- **Single-writer state**. Lenses are read-only views; they CANNOT mutate the
-  snippet. Editing happens only in
-  [`orchestrate/editor/`](../orchestrate/editor/).
-- **No consumer-side branching on `embodiment.source.code`.** `embody(code)`
-  recognizes 11 named scenario keywords (`"OK"`, `"FAIL_AT_PARSE"`, …) and
-  dispatches a canned `Snippet` shape for each (see
-  [`../embody/README.md` § Named scenarios](../embody/README.md)). Lens code
-  MUST NOT use `embodiment.source.code` as a branching key — branch on the
-  **shape** of the returned `Snippet` (e.g.
-  `embodiment.status.parsed === false`, `embodiment.validation.isJeJ`). Lenses
-  MAY _render_ `source.code` (a source-display lens is legitimate); using it as
-  a discriminator is what the rule forbids.
-- **Transforms are a lens-internal concern, not a peer concept.** Round-2
-  deleted the pre-refactor `transforms/` peer module. There is no shared
-  "transform pipeline" between lenses + the orchestrator; each lens decides what
-  visual / pre-eval transformations to apply to the snippet it received
-  (formatting toolbar buttons, the `loopGuard` rewrite a tracing lens applies
-  before evaluation, the `parsons` lens's line shuffler — all live inside the
-  lens that uses them). The `<StudyLenses>` plugin must NOT emit a `transforms`
-  attribute (see
-  [`../../../plugins/study-lenses/README.md` § Plugin alignment](../../../plugins/study-lenses/README.md)).
-- **`Validation` gate vs. metadata.** The validate gate is the language level's
-  admission gate; its criterion is `validation.isJeJ` (i.e.,
-  `violations.length === 0`). Gate failure means no `creation` phase and no
-  NM-instrumented evaluate events (`intercept`, `trace.*`); the plain `run()`
-  tier still serves anything that parsed (runnability is tiered — see
-  [`../embody/README.md` § Events](../embody/README.md)). The fields
-  `validation.isDeterministic` and `validation.doesPause` are **derived** from
-  raw analyses (`isDeterministic = !any(nonDeterminism)`,
-  `doesPause = hasIo.user.total > 0`) and are **informational metadata, NOT gate
-  criteria** — a non-deterministic or pausing program is still a valid JEJ
-  subset and passes the gate. `Snippet.validation` is `null` before the gate
-  runs (tokenize-fail / parse-fail leaves) and always `null` on script-type
-  snippets. Pinned in [`../embody/types.ts`](../embody/types.ts) JSDoc; lens
-  authors reading these fields treat them as read-only summaries.
-- **`embodiment` parameter name** wherever a function takes a Snippet instance.
-- One default export per file (named function/const, then `export default`).
-  `.js` extensions in imports.
-- Tests in `tests/` subdirectory. `.test.ts` for pure-TS core; `.test.tsx` for
-  React component tests.
+- **lens core** — the pure functions behind a lens's component, taking the facts
+  and the configuration and narrowing the tagged fact stages they read; the
+  component is a thin wrapper around them.
+- **LensConfig** — the flat, serializable configuration record a lens receives:
+  primitives and primitive arrays only.
+- **resolved config** — what a mounted lens actually gets: the cascade's merged
+  overrides passed through the lens's own factory, or through the shared merge
+  when it declares none. One word, two roles: the envelope's `config` is the
+  factory; the props' `config` is that factory's resolved output.
+- **Recommendation** — a lens's proposal of a next study step: the lens (usually
+  a self-reference), configuration overrides the proposal opens with (they enter
+  the target's cascade — the learner's tweaks stay the final layer), a relevance
+  normalized to the 0–1 range (higher ranks first — the shared scale that makes
+  cross-lens ranking meaningful), and a label (the proposal's own display copy).
+  Proposed here, ranked and rendered by the orchestrator.
 
 ## Navigation
 
-- **Parent**: [`../README.md`](../README.md) — the package overview +
-  Pedagogical first principles (quadrant + pyramid frame).
-- **Architectural sketch**: [`./DOCS.md`](./DOCS.md).
-- **Type contract**: [`./types.ts`](./types.ts).
-- **Embodiment contract**: [`../embody/types.ts`](../embody/types.ts) — the
-  `Snippet` type lenses receive via props.
-- **Orchestrator that mounts these lenses**:
-  [`../orchestrate/README.md`](../orchestrate/README.md).
-- **Recommender that ranks these lenses**:
-  [`../orchestrate/lib/README.md`](../orchestrate/lib/README.md) — contract in
-  [`../DOCS.md` § Recommender](../DOCS.md#recommender--applicability-filter--ranking-engine),
-  campaign phase in [`../ROADMAP.md`](../ROADMAP.md) § P5b.
-- **First lens against the current contract**: `debug-props/` — the reference
-  implementation of the `LensModule` contract.
+- Package root: [`../README.md`](../README.md) — the domain model and the
+  package glossary.
+- [`DOCS.md`](./DOCS.md) — this region's architectural sketch.
+- [`types.ts`](./types.ts) — the lens-kind contract: `Lens`, `LensProperties`,
+  `LensConfig`, `Recommendation`.
+- Each lens's own directory documents that lens.
