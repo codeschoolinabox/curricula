@@ -11,6 +11,27 @@ level is.
 The package [README](../README.md) owns what these words mean; this document
 owns how the embodiment is built and where this region's boundary lies.
 
+## What lives here
+
+```text
+embody/
+  README.md      this file — the region's domain model + navigation
+  DOCS.md        the architectural sketch
+  types.ts       the keystone contracts — Snippet · Facts · Gateable · Embodiment
+  lib/           the factory's internal machinery — documents itself
+```
+
+The contract, compactly (the full doc-commented version is
+[`types.ts`](./types.ts)):
+
+```ts
+type Embodiment = {
+	facts: Facts; // source · tokens · ast · entwined · type — tagged stages
+	lifecycle: Readonly<Record<LifecyclePhaseName, LifecyclePhase>>; // { accessible, cause?, lenses }
+};
+// the factory's boundary: embody(code, { type, lenses }) → frozen Embodiment
+```
+
 ## The boundary
 
 **In** — a snippet (the raw program: source text plus its snippet type) and the
@@ -82,6 +103,21 @@ the failure also raises a loud development-mode report:
   learner.** Entwining failure raises a loud development-mode report and also
   bars downstream phases like any failed stage; a throwing applicability gate is
   degraded to not-applicable and loudly reported.
+
+## Reading the embodiment
+
+Consumers meet two shapes — tagged stages and phase payloads — and one seam
+rule:
+
+- **A fact stage narrows on `ok`.** Read `facts.ast.ok` before
+  `facts.ast.value`. The given stages — `source` and `type` — type as
+  success-only, so their values read directly; only `tokens`, `ast`, and
+  `entwined` carry a failure arm.
+- **A phase payload narrows on `accessible`.** A barred phase adds its `cause` —
+  whose `stage` field names the true origin; both arms list the lenses that fit.
+- **The parse facts are values, not envelopes.** What a language level's
+  validator consumes is `facts.tokens.value` and `facts.ast.value` — never this
+  region's stage envelope.
 
 ## Glossary — region terms
 
