@@ -81,8 +81,15 @@ migrating the level-specific facts out of the old `src/lib/embody/` tree.
   nothing to wait: **nothing reads level docs yet** — no selector, no hover, no
   registry, no consumer of any kind. **The NM rewrite is its own later
   deliverable**; the defects above are listed so its author starts informed
-  instead of rediscovering them. `reference.md` is **verified clean** (0 banned
-  terms) and is yours.
+  instead of rediscovering them. `reference.md` **passes the banned-term grep (0
+  hits) — but that is ALL that was verified about it.** It was never audited
+  against the ratified model, and it fails: `reference.md:216` says _"Your
+  programs run as **strict mode scripts** … automatically adds `"use strict"`"_
+  — a posture the ratified model has no stage for, and the direct opposite of
+  the in-progress `jej/README.md:35` (_"JEJ programs are **modules** … no
+  prologue is injected"_). **That contradiction IS OQ-1; do not resolve OQ-1
+  from `reference.md`, because `reference.md` is one of the things in
+  conflict.**
 
 - **aithor** — `src/lib/embody/language-levels/just-enough-javascript/aithor/`
   (~1,914 src + ~2,538 test lines). It sits _inside_ the old JEJ level
@@ -120,11 +127,21 @@ POINT**, never in the docs.
 
 ## This is a NEW module — you owe a FULL Phase 0
 
-`jej/` does not exist. The committed `language-levels/{README,DOCS,types}` is
-the **region's** Phase 0 (the spine) — it is not yours. Invariant 2 applies at
-full strength, and DEV.md § Phase 0 warns that agents skip it exactly when work
-feels like "just a migration". **This is not just a migration:** the `validate`
-contract inverts (§ The big reshape).
+> ⚠️ **CORRECTION (2026-07-15, after this brief was committed): `jej/` EXISTS
+> and is NOT empty.** An agent is already executing this brief. At `6ef5458` the
+> directory holds committed `reference.md`, `notional-machine.md`, and
+> `notional-machine.svg`, plus an **untracked, in-progress `README.md`** that is
+> **in no commit and no stash — irrecoverable if overwritten.** **Step 0.2 below
+> therefore reads "review and revise the existing `jej/README.md`", NEVER
+> "write" it.** Check `git status`/`git log` per file before touching anything
+> here. See `src/lib/study-lenses/language-levels/jej/REVIEW-NOTES.md` for the
+> live state and three further corrections to this brief.
+
+The committed `language-levels/{README,DOCS,types}` is the **region's** Phase 0
+(the spine) — it is not `jej/`'s. Invariant 2 applies at full strength, and
+DEV.md § Phase 0 warns that agents skip it exactly when work feels like "just a
+migration". **This is not just a migration:** the `validate` contract inverts (§
+The big reshape).
 
 **Do not write a line of implementation until step 0.7's human gate clears.**
 
@@ -132,8 +149,10 @@ contract inverts (§ The big reshape).
       package glossary. Do **not** coin synonyms for words it already owns
       (embodiment, Facts, fit, applicability, level, NM, violation). Resolve:
       what is an "allowlist"? a "node rule"? a "scope analysis"?
-- [ ] **0.2 — Write `jej/README.md`** — what this level curates, for whom, on
-      what notional machine; its boundary (what it owns, what it does not).
+- [ ] **0.2 — Review and revise the EXISTING `jej/README.md`** — it is untracked
+      and irrecoverable; **never `Write` over it** (see the correction above) —
+      what this level curates, for whom, on what notional machine; its boundary
+      (what it owns, what it does not).
 - [ ] **0.3 — Run `ar-1`** (Design Challenge), by registered name. Give it the
       README, the committed spine, and the open questions below.
 - [ ] **0.4 — Write `jej/types.ts`** — the level's own model types, folding in
@@ -253,9 +272,14 @@ flowchart TD
   dependency order — `create-violation` (**9**) → `collect-violations` (**22**)
   → `check-undeclared-globals` (**33**) → the JEJ allowlist's node rules
   (`just-enough-js`, **109** — shard further by rule family; this is the big
-  one) → `validate` (**19 + 23**) → `integration` (**65**) last. `is-jej` (6) is
-  not migrating. **286 total, 280 excluding `is-jej`.** Never port a test whose
-  behavior this increment does not implement.
+  one) → `validate-program` (**19**) → `integration` (**65**) last. **286 total,
+  but the migrating budget is 257** — subtract `is-jej` (6) **and
+  `validate.test.ts` (23)**, because the quarry table below marks **both
+  `is-jej.ts` and `validate.ts` DO-NOT-MIGRATE**. Porting tests for a module you
+  are not migrating would violate the very next sentence: **never port a test
+  whose behavior this increment does not implement.** If any of
+  `validate.test.ts`'s 23 cases assert behavior worth keeping, name them and say
+  which increment adopts them; otherwise they die with `validate.ts`.
 
 > ⚠️ **Count tests by RUNNING them, never by grepping `it(`.** An earlier draft
 > of this brief said 245, from a static grep. The real number is **286**:
