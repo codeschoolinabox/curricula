@@ -36,16 +36,17 @@
 import Layout from '@theme/Layout';
 import React from 'react';
 
-import embody from '@site/src/lib/study-lenses/embody/index.js';
+import embody from '@site/src/lib/embody/index.js';
 import type {
 	Snippet,
 	TraceVariableLifecycleOptions,
 	VariablesTraceEvent,
 	VariablesTraceHandle,
-} from '@site/src/lib/study-lenses/embody/types.js';
-import traceDebuggingLens from '@site/src/lib/study-lenses/lenses/trace-debugging/index.js';
+} from '@site/src/lib/embody/types.js';
+import traceDebuggingLens from '@site/src/lib/study-lenses--deprecated-architecture/lenses/trace-debugging/index.jsx';
 
-const SAMPLE = 'let total = 0;\nfor (let i = 0; i < 5; i++) {\n\ttotal += i;\n}';
+const SAMPLE =
+	'let total = 0;\nfor (let i = 0; i < 5; i++) {\n\ttotal += i;\n}';
 
 /**
  * Tees each streamed event (and the terminal settlement) to the console as the
@@ -92,9 +93,7 @@ function embodyWithLogging(code: string): Snippet {
 				traceVariableLifecycle: (
 					options?: TraceVariableLifecycleOptions,
 				): VariablesTraceHandle =>
-					loggingHandle(
-						real.evaluation.events.traceVariableLifecycle(options),
-					),
+					loggingHandle(real.evaluation.events.traceVariableLifecycle(options)),
 			},
 		},
 	} as Snippet;
@@ -114,12 +113,13 @@ export default function TraceDebuggingSmoke(): React.JSX.Element {
 					Mounts the lens with a <strong>real</strong> <code>embody(code)</code>{' '}
 					— the variables tracer runs in a Web Worker over a SharedArrayBuffer,
 					which needs a <strong>cross-origin-isolated</strong> page (COOP/COEP).
-					Confirm <code>crossOriginIsolated === true</code> in the console first.
-					Edit the JEJ source, set a seconds budget, and click Run: the streamed
-					lifecycle events fill the events dump, then the terminal settlement
-					appears. Stop a runaway loop to settle <code>cancelled</code>; a
-					non-JEJ source shows the admission-error dump; a low seconds budget on{' '}
-					<code>while (true) {'{}'}</code> settles <code>timed-out</code>.
+					Confirm <code>crossOriginIsolated === true</code> in the console
+					first. Edit the JEJ source, set a seconds budget, and click Run: the
+					streamed lifecycle events fill the events dump, then the terminal
+					settlement appears. Stop a runaway loop to settle{' '}
+					<code>cancelled</code>; a non-JEJ source shows the admission-error
+					dump; a low seconds budget on <code>while (true) {'{}'}</code> settles{' '}
+					<code>timed-out</code>.
 				</p>
 				<p>
 					<strong>Open the console:</strong> every raw{' '}

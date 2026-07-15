@@ -25,7 +25,7 @@ its exercises without AI.
 Remember: AI can _write_ code for you, but it can't _understand_ a program
 **for** you.
 
-## LLMs are not perfect
+## LLMs are not perfect!
 
 LLMs are useful but they also cause harm. This doesn't meet you should never use
 LLMs - it just means you should use them responsibly and be aware of the risks

@@ -22,8 +22,8 @@
 import Layout from '@theme/Layout';
 import React from 'react';
 
-import embody from '@site/src/lib/study-lenses/embody/index.js';
-import blanksLens from '@site/src/lib/study-lenses/lenses/blanks/index.js';
+import embody from '@site/src/lib/embody/index.js';
+import blanksLens from '@site/src/lib/study-lenses--deprecated-architecture/lenses/blanks/index.jsx';
 
 const SAMPLE =
 	'function classify(n) {\n\tif (n > 0) {\n\t\treturn "positive";\n\t}\n\treturn "non-positive";\n}';

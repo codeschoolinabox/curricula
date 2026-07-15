@@ -21,13 +21,14 @@ literacy) to _programming to learn_ (applying your literacy to explore new
 concepts and skills). Underneath the JavaScript, what it teaches is the
 **affordance-discovery cycle** — the turn-taking rhythm by which software gets
 made: someone proposes an experience worth having; someone discovers what the
-machine affords that can realize it; and each turn reshapes the next. JavaScript
-is the medium; the cycle is the subject — the most transferable,
-career-preparing skill this course can give you in an ever-changing tech
-landscape. Each step of the way you will ground your skills in the world around
-you, learning to consider who you're building for and what you hope to achieve.
-Ultimately you will build the confidence to write your own programs, and the
-awareness to write the _right_ programs.
+machine affords that can realize it; this deeper understanding of the machine
+inspires new use-cases; and each turn reshapes the next. JavaScript is the
+medium; the cycle is the subject — the most transferable, career-preparing skill
+this course can give you in an ever-changing tech landscape. Each step of the
+way you will ground your skills in the world around you, learning to consider
+who you're building for and what you hope to achieve. Ultimately you will build
+the confidence to write your own programs, and the awareness to write the
+_right_ programs.
 
 ---
 

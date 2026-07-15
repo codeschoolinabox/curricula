@@ -36,7 +36,7 @@
 import Layout from '@theme/Layout';
 import React from 'react';
 
-import { StudyLenses } from '@site/src/lib/study-lenses/index.js';
+import { StudyLenses } from '@site/src/lib/study-lenses--deprecated-architecture/index.js';
 
 const SCENARIOS = [
 	'OK',
@@ -49,22 +49,24 @@ const SCENARIOS = [
 export default function StudyLensesSmoke(): React.JSX.Element {
 	const [snippet, setSnippet] = React.useState<string>('OK');
 	return (
-		<Layout title="study-lenses smoke" description="StudyLenses sandbox harness">
+		<Layout
+			title="study-lenses smoke"
+			description="StudyLenses sandbox harness"
+		>
 			<main style={{ maxWidth: 720, margin: '2rem auto', padding: '0 1rem' }}>
 				<h1>study-lenses smoke</h1>
 				<p>
 					Sandbox harness for <code>&lt;StudyLenses&gt;</code> (mounted
 					directly, bypassing the plugin). Type broken JS —{' '}
-					<code>let x = ;</code> — and hover the red gutter marker after a
-					beat: the friendly interpreted explanation supersedes the terse
-					parse message. Fix the line and it clears. <code>var x = 1</code>{' '}
-					shows the structural JEJ marker but no interpretation yet (embody's
-					validating slice is pending — expected).
+					<code>let x = ;</code> — and hover the red gutter marker after a beat:
+					the friendly interpreted explanation supersedes the terse parse
+					message. Fix the line and it clears. <code>var x = 1</code> shows the
+					structural JEJ marker but no interpretation yet (embody's validating
+					slice is pending — expected).
 				</p>
 				<p>
 					<strong>Current sentinel:</strong> <code>{snippet}</code> (buttons
-					remount the orchestrator — <code>snippet</code> is initial-value
-					only)
+					remount the orchestrator — <code>snippet</code> is initial-value only)
 				</p>
 				<div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
 					{SCENARIOS.map(function renderButton(name) {

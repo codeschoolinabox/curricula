@@ -38,7 +38,7 @@
 import Layout from '@theme/Layout';
 import React from 'react';
 
-import EditorComponent from '@site/src/lib/study-lenses/orchestrate/editor/index.js';
+import EditorComponent from '@site/src/lib/study-lenses--deprecated-architecture/orchestrate/editor/index.jsx';
 
 export default function EditorSmoke(): React.JSX.Element {
 	const [snippet, setSnippet] = React.useState<string>('');

@@ -21,8 +21,8 @@
 import Layout from '@theme/Layout';
 import React from 'react';
 
-import embody from '@site/src/lib/study-lenses/embody/index.js';
-import quizLens from '@site/src/lib/study-lenses/lenses/quiz/index.js';
+import embody from '@site/src/lib/embody/index.js';
+import quizLens from '@site/src/lib/study-lenses--deprecated-architecture/lenses/quiz/index.jsx';
 
 const SAMPLE =
 	'let count = 0;\nfunction inc(n) {\n\treturn n + 1;\n}\ncount = inc(count);';

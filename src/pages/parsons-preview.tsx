@@ -25,8 +25,8 @@
 import Layout from '@theme/Layout';
 import React from 'react';
 
-import embody from '@site/src/lib/study-lenses/embody/index.js';
-import parsonsLens from '@site/src/lib/study-lenses/lenses/parsons/index.js';
+import embody from '@site/src/lib/embody/index.js';
+import parsonsLens from '@site/src/lib/study-lenses--deprecated-architecture/lenses/parsons/index.jsx';
 
 const SAMPLE =
 	'/* Read each line and think about the order before you drag. */\nfunction classify(n) {\n\tif (n > 0) {\n\t\treturn "positive";\n\t}\n\treturn "non-positive";\n}\nconsole.log("unused"); // distractor\n/* parsons-collapse: Big picture\nGuard the positive case first, then fall through to the rest. */';
@@ -42,22 +42,24 @@ export default function ParsonsPreview(): React.JSX.Element {
 					A full Parsons exercise: the snippet is parsed into{' '}
 					<strong>shuffled</strong> draggable lines (plus any{' '}
 					<code>// distractor</code> lines). Drag lines from the pool into the
-					solution column, reorder them, indent/outdent, then <strong>Check</strong>{' '}
-					for per-line feedback + a score; <strong>Reset</strong> re-shuffles and{' '}
-					<strong>Show solution</strong> reveals the model order. Feedback uses a{' '}
-					<strong>colour-blind-safe palette</strong> (blue = right place, vermilion =
-					wrong, with solid/dashed/dotted borders so it never relies on hue).
+					solution column, reorder them, indent/outdent, then{' '}
+					<strong>Check</strong> for per-line feedback + a score;{' '}
+					<strong>Reset</strong> re-shuffles and <strong>Show solution</strong>{' '}
+					reveals the model order. Feedback uses a{' '}
+					<strong>colour-blind-safe palette</strong> (blue = right place,
+					vermilion = wrong, with solid/dashed/dotted borders so it never relies
+					on hue).
 				</p>
 				<p>
-					<strong>Inc 10</strong> — the info panel above the board: a collapsible{' '}
-					<strong>feedback legend</strong>, a collapsed{' '}
-					<strong>distractor-count</strong> hint (the number stays hidden until you
-					expand it), and educator <strong>hint blocks</strong> from{' '}
-					<code>{'/* … */'}</code> comments (each a collapsible{' '}
-					<em>Hint</em> by default; <code>parsons-collapse: Label</code> customizes the
-					label). <strong>Inc 11</strong> — <strong>Review attempts</strong> opens a
-					modal logging every Check (score, pass/fail, a frozen snapshot); it persists
-					across Reset and closes on Escape.
+					<strong>Inc 10</strong> — the info panel above the board: a
+					collapsible <strong>feedback legend</strong>, a collapsed{' '}
+					<strong>distractor-count</strong> hint (the number stays hidden until
+					you expand it), and educator <strong>hint blocks</strong> from{' '}
+					<code>{'/* … */'}</code> comments (each a collapsible <em>Hint</em> by
+					default; <code>parsons-collapse: Label</code> customizes the label).{' '}
+					<strong>Inc 11</strong> — <strong>Review attempts</strong> opens a
+					modal logging every Check (score, pass/fail, a frozen snapshot); it
+					persists across Reset and closes on Escape.
 				</p>
 
 				<label style={{ display: 'block', marginBottom: 8 }}>

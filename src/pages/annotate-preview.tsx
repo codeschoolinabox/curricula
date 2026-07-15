@@ -21,9 +21,9 @@
 import Layout from '@theme/Layout';
 import React from 'react';
 
-import embody from '@site/src/lib/study-lenses/embody/index.js';
-import annotateLens from '@site/src/lib/study-lenses/lenses/annotate/index.js';
-import type { ViewMode } from '@site/src/lib/study-lenses/lenses/annotate/types.js';
+import embody from '@site/src/lib/embody/index.js';
+import annotateLens from '@site/src/lib/study-lenses--deprecated-architecture/lenses/annotate/index.jsx';
+import type { ViewMode } from '@site/src/lib/study-lenses--deprecated-architecture/lenses/annotate/types.js';
 
 const SAMPLE =
 	'function classify(n) {\n\tif (n > 0) {\n\t\treturn "positive";\n\t}\n\treturn "non-positive";\n}';

@@ -35,7 +35,7 @@
 import Layout from '@theme/Layout';
 import React from 'react';
 
-import { StudyLenses } from '@site/src/lib/study-lenses/index.js';
+import { StudyLenses } from '@site/src/lib/study-lenses--deprecated-architecture/index.js';
 
 export default function L1Picker(): React.JSX.Element {
 	return (

@@ -57,7 +57,7 @@ AI changes the role of each
 
   </details>
 
-1. <details>
+2. <details>
    <summary>A Program + Generative AI</summary>
 
    ![a program](../../rhetorics-of-programming/a-program.png)

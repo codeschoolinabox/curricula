@@ -1,40 +1,40 @@
 {
-  "extends": "@docusaurus/tsconfig",
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@utils/*": ["src/lib/utils/*"],
-      "@site": ["."],
-      "@site/*": ["./*"]
-    },
-    "lib": ["ESNext", "DOM"],
-    "noEmit": true,
-    "allowJs": false,
-    "moduleResolution": "node",
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "exactOptionalPropertyTypes": true,
-    "noImplicitOverride": true,
-    "noFallthroughCasesInSwitch": true,
-    "forceConsistentCasingInFileNames": true,
-    "isolatedModules": true,
-    "resolveJsonModule": true
-  },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": [
-    "node_modules",
-    "build",
-    ".docusaurus",
-    "**/legacy-aran-trace/**",
-    "src/lib/study-lenses/embody/lib/evaluating/trace/semantics/**",
-    "src/lib/study-lenses/embody/lib/evaluating/trace/syntax/**",
-    "src/lib/study-lenses/embody/lib/evaluating/intercept/**",
-    "src/lib/study-lenses/embody/lib/evaluating/run/**",
-    "src/lib/study-lenses/embody/lib/evaluating/shared/**",
-    "src/lib/study-lenses/embody/lib/parse-old/**",
-    "src/lib/study-lenses/embody/.legacy/**",
-    "src/lib/study-lenses/lenses/blanks/lib/**"
-  ]
+	"extends": "@docusaurus/tsconfig",
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"@utils/*": ["src/lib/utils/*"],
+			"@site": ["."],
+			"@site/*": ["./*"]
+		},
+		"lib": ["ESNext", "DOM"],
+		"noEmit": true,
+		"allowJs": false,
+		"moduleResolution": "node",
+		"strict": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noImplicitReturns": true,
+		"exactOptionalPropertyTypes": true,
+		"noImplicitOverride": true,
+		"noFallthroughCasesInSwitch": true,
+		"forceConsistentCasingInFileNames": true,
+		"isolatedModules": true,
+		"resolveJsonModule": true
+	},
+	"include": ["src/**/*.ts", "src/**/*.tsx"],
+	"exclude": [
+		"node_modules",
+		"build",
+		".docusaurus",
+		"**/legacy-aran-trace/**",
+		"src/lib/embody/lib/evaluating/trace/semantics/**",
+		"src/lib/embody/lib/evaluating/trace/syntax/**",
+		"src/lib/embody/lib/evaluating/intercept/**",
+		"src/lib/embody/lib/evaluating/run/**",
+		"src/lib/embody/lib/evaluating/shared/**",
+		"src/lib/embody/lib/parse-old/**",
+		"src/lib/embody/.legacy/**",
+		"src/lib/study-lenses--deprecated-architecture/lenses/blanks/lib/**"
+	]
 }
