@@ -1,326 +1,337 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1480 1100"
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1460"
      font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
      role="img"
-     aria-label="JEJ Notional Machine — Machine at a Glance. Source code at top feeds a scope chain (realm → script → block). The realm splits into ECMA intrinsics and host bindings. Two chain lookups: scope chain finds variables; prototype chain finds methods. I/O routes through host bindings to dev console and user dialogs.">
-  <title>JEJ Notional Machine — Machine at a Glance</title>
+     aria-label="JEJ Notional Machine, organized around the program's lifecycle as two acts. Act 1 SETUP is syntactic (source, tokens, ast) and derives the static environment: the initial scope tree with every binding reserved in the temporal dead zone. Then RUN: the derived environment enters the world and comes alive. Act 2 RUNTIME is evaluation inside the realm; the realm (ECMA intrinsics and host bindings) is the world the program runs in and the top of the scope chain (block to module to realm). Evaluation has three interlinked cells: code (what the code says), nm (the semantics: the dynamic environment, scope and prototype chains, values, coercion), and host (the I/O buckets: dev console and user dialogs). The arrows between cells are the observable trace events resolve, coerce, emit, and return.">
+  <title>JEJ Notional Machine — the program's lifecycle</title>
 
   <style>
-    .title       { font-size: 22px; font-weight: 700; fill: #111; }
+    .title       { font-size: 23px; font-weight: 700; fill: #111; }
     .subtitle    { font-size: 13px; fill: #555; }
-    .frame-label { font-size: 13px; font-weight: 600; fill: #111; letter-spacing: 0.3px; }
-    .pillar      { font-size: 11px; font-weight: 600; fill: #444; letter-spacing: 0.5px; text-transform: uppercase; }
+    .act-label   { font-size: 15px; font-weight: 700; fill: #111; letter-spacing: 0.3px; }
+    .act-note    { font-size: 12px; fill: #777; font-style: italic; }
+    .frame-label { font-size: 13px; font-weight: 600; fill: #111; letter-spacing: 0.2px; }
+    .cell-title  { font-size: 14px; font-weight: 700; fill: #111; }
+    .phase-tag   { font-size: 12px; font-weight: 700; fill: #2a5a8a; letter-spacing: 0.5px; text-transform: uppercase; }
     .text        { font-size: 12px; fill: #222; }
     .text-bold   { font-size: 12px; font-weight: 600; fill: #111; }
     .small       { font-size: 10.5px; fill: #555; }
     .caption     { font-size: 11px; fill: #666; font-style: italic; }
     .annotation  { font-size: 10.5px; fill: #888; font-style: italic; }
-    .mono        { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; fill: #222; }
+    .mono        { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11.5px; fill: #222; }
     .mono-small  { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 10px; fill: #444; }
     .key         { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11.5px; font-weight: 600; fill: #111; }
+    .egg         { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11.5px; font-weight: 600; fill: #7a5a20; }
 
-    .frame       { fill: #fff; stroke: #222; stroke-width: 1.5; }
-    .frame-soft  { fill: none; stroke: #aaa; stroke-width: 1; stroke-dasharray: 4 3; }
-    .frame-realm   { fill: #f4f3f8; stroke: #4a3a78; stroke-width: 1.5; }
-    .frame-intrinsics { fill: #faf8ff; stroke: #6a5aa0; stroke-width: 1; }
-    .frame-host    { fill: #f8f5e8; stroke: #a07a3a; stroke-width: 1; }
-    .frame-script  { fill: #f8f6ed; stroke: #8a6a2a; stroke-width: 1.5; }
-    .frame-block   { fill: #eef4ee; stroke: #4a7a4a; stroke-width: 1.5; }
-    .frame-source  { fill: #fafafa; stroke: #555; stroke-width: 1; }
-    .frame-io      { fill: #eef3f5; stroke: #3a6a8a; stroke-width: 1.5; }
-    .frame-errors  { fill: #faf0ee; stroke: #8a3a3a; stroke-width: 1.5; }
+    .bg          { fill: #ffffff; }
+    .frame       { fill: #fff; stroke: #333; stroke-width: 1.3; }
+    .frame-phase { fill: #f7fafc; stroke: #3a6a8a; stroke-width: 1.3; }
+    .frame-source{ fill: #fafafa; stroke: #555; stroke-width: 1.2; }
+    .frame-env   { fill: #eef4ee; stroke: #4a7a4a; stroke-width: 1.4; }
+    .frame-realm { fill: #f6f5fb; stroke: #4a3a78; stroke-width: 2; }
+    .frame-intr  { fill: #faf8ff; stroke: #6a5aa0; stroke-width: 1.1; }
+    .frame-host  { fill: #f8f5e8; stroke: #a07a3a; stroke-width: 1.1; }
+    .frame-code  { fill: #fdfdf6; stroke: #8a6a2a; stroke-width: 1.4; }
+    .frame-nm    { fill: #eef4ee; stroke: #4a7a4a; stroke-width: 1.6; }
+    .frame-io    { fill: #eef3f5; stroke: #3a6a8a; stroke-width: 1.4; }
+    .frame-err   { fill: #faf0ee; stroke: #8a3a3a; stroke-width: 1.2; }
 
-    .scope-chain { fill: none; stroke: #2255a0; stroke-width: 2; }
+    .flow-arrow  { fill: none; stroke: #3a6a8a; stroke-width: 2.4; }
+    .run-arrow   { fill: none; stroke: #4a7a4a; stroke-width: 3; }
+    .scope-chain { fill: none; stroke: #2255a0; stroke-width: 2.2; }
     .proto-chain { fill: none; stroke: #a04055; stroke-width: 2; stroke-dasharray: 4 3; }
-    .io-line     { fill: none; stroke: #2a8866; stroke-width: 1.5; }
-    .arrow-text  { font-size: 10.5px; fill: #444; font-weight: 600; }
+    .trace-arrow { fill: none; stroke: #2a8866; stroke-width: 2; }
+    .arrow-text  { font-size: 11px; fill: #2a8866; font-weight: 700; }
+    .chain-text  { font-size: 10.5px; font-weight: 700; }
   </style>
 
   <defs>
-    <marker id="arrow-scope" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
-      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2255a0" />
-    </marker>
-    <marker id="arrow-proto" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
-      <path d="M 0 0 L 10 5 L 0 10 z" fill="#a04055" />
-    </marker>
-    <marker id="arrow-io" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2a8866" />
-    </marker>
-    <marker id="arrow-io-back" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-      <path d="M 10 0 L 0 5 L 10 10 z" fill="#2a8866" />
-    </marker>
+    <marker id="a-flow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#3a6a8a"/></marker>
+    <marker id="a-run" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4a7a4a"/></marker>
+    <marker id="a-scope" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#2255a0"/></marker>
+    <marker id="a-proto" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a04055"/></marker>
+    <marker id="a-trace" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#2a8866"/></marker>
+    <marker id="a-trace-b" viewBox="0 0 10 10" refX="2" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M10 0L0 5L10 10z" fill="#2a8866"/></marker>
   </defs>
 
-  <!-- =========== TITLE =========== -->
-  <text x="740" y="34" class="title" text-anchor="middle">JEJ Notional Machine — Machine at a Glance</text>
-  <text x="740" y="56" class="subtitle" text-anchor="middle">source → behind-the-scenes evaluation model → host I/O channels</text>
+  <rect class="bg" x="0" y="0" width="1500" height="1460"/>
 
-  <!-- =========== SOURCE CODE BOX (top, spans across) =========== -->
-  <g transform="translate(40, 80)">
-    <rect class="frame-source" x="0" y="0" width="1400" height="86" rx="4" />
-    <text x="12" y="18" class="pillar">Program source code</text>
-    <text x="12" y="40" class="mono">let greeting = 'hello';</text>
-    <text x="12" y="56" class="mono">let shout = greeting.toUpperCase() + '!';</text>
-    <text x="12" y="72" class="mono">if (shout.length &gt; 3) { alert(shout); }</text>
-    <text x="1388" y="42" class="caption" text-anchor="end">A string. Three audiences read it differently:</text>
-    <text x="1388" y="58" class="small" text-anchor="end">developers (intent) · the NM (parses + evaluates) · users (experience effects)</text>
-    <text x="1388" y="74" class="annotation" text-anchor="end">Agents (LLMs) collaborate on it — see syllabus / README for the four-audience model.</text>
+  <!-- ============ TITLE ============ -->
+  <text x="750" y="36" class="title" text-anchor="middle">JEJ Notional Machine — the program's lifecycle</text>
+  <text x="750" y="58" class="subtitle" text-anchor="middle">Two acts, like a debugger: ① SETUP — parse, then derive the static environment (paused) · ② RUNTIME — evaluation inside the realm (stepping)</text>
+
+  <!-- ============ SOURCE ============ -->
+  <g transform="translate(30,74)">
+    <rect class="frame-source" x="0" y="0" width="1440" height="94" rx="4"/>
+    <text x="14" y="22" class="phase-tag">source · the text itself</text>
+    <text x="14" y="46" class="mono">let greeting = 'hello';</text>
+    <text x="14" y="64" class="mono">let shout = greeting.toUpperCase() + '!';</text>
+    <text x="14" y="82" class="mono">if (shout.length &gt; 3) { alert(shout); }</text>
+    <text x="1426" y="26" class="caption" text-anchor="end">One program, four audiences read it:</text>
+    <text x="1426" y="46" class="small" text-anchor="end">the learner-as-user (dialogs) · the developer (the console)</text>
+    <text x="1426" y="62" class="small" text-anchor="end">the machine (parses &amp; evaluates) · the reader (names &amp; structure)</text>
+    <text x="1426" y="82" class="annotation" text-anchor="end">agents collaborate across all four — see the package README.</text>
   </g>
 
-  <!-- =========== PILLAR LABELS =========== -->
-  <text x="160"  y="195" class="pillar" text-anchor="middle">Visual-syntax level — what the code says</text>
-  <text x="700"  y="195" class="pillar" text-anchor="middle">Behind-the-scenes — what the NM does invisibly</text>
-  <text x="1280" y="195" class="pillar" text-anchor="middle">Host I/O channels</text>
+  <!-- ============ ACT 1: SETUP ============ -->
+  <text x="30"   y="198" class="act-label">① SETUP</text>
+  <text x="132"  y="198" class="act-note">— syntactic; the realm isn't engaged yet · parse the text, then derive the static environment</text>
 
-  <!-- =========== LEFT PILLAR: Visual-syntax level =========== -->
-  <g transform="translate(40, 220)">
-    <!-- Expressions -->
-    <rect class="frame" x="0" y="0" width="240" height="270" rx="4" />
-    <text x="12" y="20" class="frame-label">Expressions</text>
-    <text x="12" y="36" class="caption">syntax → value</text>
-    <text x="12" y="60"  class="text">operators: + − * / % ** &lt; &gt; === &amp;&amp; || ?? !</text>
-    <text x="12" y="78"  class="text">literals: 5, 'hi', true, null, /pat/g</text>
-    <text x="12" y="96"  class="text">identifiers: x, Math, console</text>
-    <text x="12" y="114" class="text">calls: alert(...), Math.max(...)</text>
-    <text x="12" y="132" class="text">templates: `${x} + ${y}`</text>
-    <text x="12" y="150" class="text">property: str.length, obj.prop</text>
-    <text x="12" y="168" class="text">optional: obj?.prop, obj?.[k]</text>
-    <text x="12" y="186" class="text">assignment: x = ..., x ??= ...</text>
-    <text x="12" y="204" class="text">update: ++x, x++, --x, x--</text>
-    <text x="12" y="222" class="text">ternary: cond ? a : b</text>
-    <text x="12" y="252" class="caption">↘ resolve bridges to behind-the-scenes</text>
-
-    <!-- Statements -->
-    <rect class="frame" x="0" y="290" width="240" height="180" rx="4" />
-    <text x="12" y="310" class="frame-label">Statements</text>
-    <text x="12" y="326" class="caption">syntax → control flow</text>
-    <text x="12" y="350" class="text">declarations: let, const</text>
-    <text x="12" y="368" class="text">if / else</text>
-    <text x="12" y="386" class="text">while, do-while</text>
-    <text x="12" y="404" class="text">for, for-of (strings only in JEJ)</text>
-    <text x="12" y="422" class="text">break, continue</text>
-    <text x="12" y="450" class="caption">exit reason: normal | break |</text>
-    <text x="12" y="464" class="caption">  continue | error | limit (JEJ)</text>
-
-    <!-- Bindings -->
-    <rect class="frame" x="0" y="490" width="240" height="170" rx="4" />
-    <text x="12" y="510" class="frame-label">Bindings</text>
-    <text x="12" y="526" class="caption">named slots holding values</text>
-    <text x="12" y="552" class="text">name · kind (let/const/global) · value</text>
-    <text x="12" y="572" class="text-bold">status: tdz → initialized → dead</text>
-    <text x="12" y="592" class="small">tdz = uninitialized (access throws)</text>
-    <text x="12" y="606" class="small">initialized = safe to read/update</text>
-    <text x="12" y="620" class="small">dead = block popped, unreachable</text>
-    <text x="12" y="644" class="caption">const: never updates → TypeError</text>
-
-    <!-- Errors -->
-    <rect class="frame-errors" x="0" y="680" width="240" height="170" rx="4" />
-    <text x="12" y="700" class="frame-label">Errors (no try/catch in JEJ)</text>
-    <text x="12" y="722" class="text-bold">SyntaxError</text>
-    <text x="12" y="736" class="small">parse — invalid grammar / Early Errors</text>
-    <text x="12" y="754" class="text-bold">ReferenceError</text>
-    <text x="12" y="768" class="small">evaluate —TDZ access; unresolvable name</text>
-    <text x="12" y="786" class="text-bold">TypeError</text>
-    <text x="12" y="800" class="small">evaluate —call non-callable; null/undef prop;</text>
-    <text x="12" y="814" class="small">const reassign; mixed bigint+number</text>
-    <text x="12" y="832" class="text-bold">RangeError</text>
-    <text x="12" y="846" class="small">evaluate —out of range; JEJ iter `limit`</text>
+  <!-- tokens -->
+  <g transform="translate(30,210)">
+    <rect class="frame-phase" x="0" y="0" width="250" height="268" rx="4"/>
+    <text x="14" y="22" class="phase-tag">tokens</text>
+    <text x="14" y="40" class="caption">spelling — the language's words</text>
+    <text x="14" y="64" class="text">source text → a stream of tokens</text>
+    <text x="14" y="88"  class="mono-small">let · greeting · = · 'hello' · ;</text>
+    <text x="14" y="106" class="mono-small">if · ( · shout · . · length · &gt; · 3 · )</text>
+    <text x="14" y="130" class="small">keywords · identifiers · literals ·</text>
+    <text x="14" y="144" class="small">operators · punctuation</text>
+    <rect class="frame-err" x="10" y="210" width="230" height="46" rx="3"/>
+    <text x="20" y="228" class="text-bold" fill="#8a3a3a">SyntaxError — spelling</text>
+    <text x="20" y="244" class="small">an invalid character sequence</text>
   </g>
 
-  <!-- =========== MIDDLE PILLAR: Behind-the-scenes =========== -->
-  <g transform="translate(310, 220)">
-    <!-- Outer "scope chain" frame -->
-    <rect class="frame-soft" x="0" y="0" width="780" height="830" rx="6" />
-    <text x="14" y="-5" class="caption">Scope chain — bindings live here, walked top → bottom by name resolution</text>
+  <!-- flow arrow tokens -> ast -->
+  <line class="flow-arrow" x1="284" y1="344" x2="306" y2="344" marker-end="url(#a-flow)"/>
 
-    <!-- ============== REALM (top of chain) ============== -->
-    <g transform="translate(15, 12)">
-      <rect class="frame-realm" x="0" y="0" width="750" height="370" rx="4" />
-      <text x="12" y="20" class="frame-label">🌍 Realm — global environment (top of scope chain)</text>
-      <text x="12" y="36" class="caption">"the world your script is born into" · static, host-installed before any user code runs</text>
+  <!-- ast -->
+  <g transform="translate(312,210)">
+    <rect class="frame-phase" x="0" y="0" width="612" height="268" rx="4"/>
+    <text x="14" y="22" class="phase-tag">ast</text>
+    <text x="14" y="40" class="caption">grammar — what the code says (the control panel)</text>
 
-      <!-- ECMA intrinsics -->
-      <rect class="frame-intrinsics" x="12" y="50" width="500" height="306" rx="3" />
-      <text x="22" y="68" class="frame-label">ECMA intrinsics  <tspan class="annotation">(SetDefaultGlobalBindings, §9.3.4)</tspan></text>
+    <text x="14"  y="66" class="text-bold">Expressions <tspan class="caption">— syntax → value</tspan></text>
+    <text x="14"  y="86"  class="small">operators: + − * / % ** &lt; &gt; === &amp;&amp; || ?? !</text>
+    <text x="14"  y="102" class="small">literals: 5, 'hi', true, null, /pat/g</text>
+    <text x="14"  y="118" class="small">identifiers · calls: Math.max(…), alert(…)</text>
+    <text x="14"  y="134" class="small">property: str.length · optional: obj?.prop</text>
+    <text x="14"  y="150" class="small">template: `${x}` · ternary: a ? b : c</text>
+    <text x="14"  y="166" class="small">assignment: =, +=, ??= · update: ++x, x++</text>
 
-      <!-- Math -->
-      <text x="22" y="90"  class="key">Math</text>
-      <text x="22" y="106" class="small">.abs .ceil .floor .round .max .min .pow .sqrt</text>
-      <text x="22" y="120" class="small">.random .trunc .sign .log .exp .PI .E …</text>
-      <!-- String -->
-      <text x="22" y="142" class="key">String</text>
-      <text x="22" y="158" class="small">ƒ String() · .fromCharCode · .fromCodePoint</text>
-      <text x="22" y="172" class="small">String.prototype: .toUpperCase .slice .trim</text>
-      <text x="22" y="184" class="small">  .includes .indexOf .replace .charAt .at …</text>
-      <!-- Number -->
-      <text x="22" y="206" class="key">Number</text>
-      <text x="22" y="222" class="small">ƒ Number() · .isNaN .isFinite .isInteger</text>
-      <text x="22" y="236" class="small">Number.prototype: .toString .toFixed</text>
-      <text x="22" y="248" class="small">  .toPrecision .toExponential .toLocaleString</text>
+    <text x="320" y="66" class="text-bold">Statements <tspan class="caption">— syntax → control flow</tspan></text>
+    <text x="320" y="86"  class="small">declarations: let, const</text>
+    <text x="320" y="102" class="small">if / else</text>
+    <text x="320" y="118" class="small">while · do-while</text>
+    <text x="320" y="134" class="small">for · for-of (strings only in JEJ)</text>
+    <text x="320" y="150" class="small">break · continue</text>
+    <text x="320" y="166" class="annotation">no functions, classes, arrays, var, try/catch</text>
 
-      <!-- Date -->
-      <text x="262" y="90"  class="key">Date</text>
-      <text x="262" y="106" class="small">static: .now .parse</text>
-      <text x="262" y="120" class="small">ctor: new Date()  ← sole `new` in JEJ</text>
-      <text x="262" y="134" class="small">instance: .getFullYear .getMonth .getDate</text>
-      <text x="262" y="148" class="small">  .getHours .getMinutes .getSeconds .getTime</text>
-      <text x="262" y="162" class="small">  .toLocaleDateString .toLocaleTimeString</text>
-      <text x="262" y="176" class="small">  .toISOString  (all return primitives)</text>
+    <rect class="frame-err" x="10" y="212" width="592" height="44" rx="3"/>
+    <text x="20" y="230" class="text-bold" fill="#8a3a3a">SyntaxError — grammar / Early Errors</text>
+    <text x="20" y="246" class="small">invalid grammar · e.g. break outside a loop · let redeclaration (detected statically, before anything runs)</text>
+  </g>
 
-      <!-- Boolean / functions -->
-      <text x="262" y="206" class="key">ƒ Boolean()</text>
-      <text x="262" y="220" class="small">explicit boolean conversion (truthiness)</text>
-      <text x="262" y="240" class="key">ƒ parseInt   ƒ parseFloat</text>
-      <text x="262" y="254" class="small">string → number parsing</text>
+  <!-- flow arrow ast -> environment -->
+  <line class="flow-arrow" x1="928" y1="344" x2="950" y2="344" marker-end="url(#a-flow)"/>
 
-      <!-- Constants row (full width) -->
-      <line x1="22" y1="270" x2="500" y2="270" stroke="#aaa" stroke-dasharray="2 2" />
-      <text x="22" y="290" class="frame-label">Constants</text>
-      <text x="22" y="308" class="key">Infinity   NaN   undefined</text>
-      <text x="22" y="326" class="annotation">Plus RegExp.prototype (.test) — found via proto chain on regex literals.</text>
-      <text x="22" y="342" class="annotation">No globalThis, no RegExp constructor, no isNaN/isFinite at top level — use Number.isNaN / Number.isFinite.</text>
+  <!-- environment (STATIC) -->
+  <g transform="translate(956,210)">
+    <rect class="frame-env" x="0" y="0" width="514" height="268" rx="4"/>
+    <text x="14" y="22" class="phase-tag" fill="#2a6a2a">environment · STATIC</text>
+    <text x="14" y="40" class="caption">declarations come to be — before anything runs</text>
+    <text x="14" y="62" class="small">the scope tree is derived; every let/const is</text>
+    <text x="14" y="76" class="small">reserved uninitialized · status: <tspan class="text-bold">tdz</tspan></text>
 
-      <!-- Host bindings -->
-      <rect class="frame-host" x="525" y="50" width="215" height="306" rx="3" />
-      <text x="535" y="68" class="frame-label">Host bindings</text>
-      <text x="535" y="84" class="caption">WHATWG / HTML — not ECMA-262</text>
-      <text x="535" y="98" class="annotation">(host hook in InitializeHostDefinedRealm, §9.6)</text>
+    <rect x="14" y="90" width="486" height="96" rx="3" fill="#fff" stroke="#4a7a4a" stroke-width="1"/>
+    <text x="24" y="108" class="text-bold">module scope <tspan class="caption">(the program's top scope)</tspan></text>
+    <text x="24" y="128" class="mono-small">greeting : let │ &lt;tdz&gt;</text>
+    <text x="24" y="144" class="mono-small">shout    : let │ &lt;tdz&gt;</text>
+    <text x="24" y="168" class="annotation">block scopes are derived here too, entered later</text>
 
-      <text x="535" y="124" class="key">console</text>
-      <text x="535" y="138" class="small">.log .debug .info .warn .error</text>
-      <text x="535" y="150" class="small">.assert .count .countReset</text>
-      <text x="535" y="162" class="small">.group .groupCollapsed .groupEnd</text>
-      <text x="535" y="174" class="small">.time .timeLog .timeEnd .clear</text>
+    <text x="14" y="208" class="text-bold">binding anatomy</text>
+    <text x="14" y="226" class="small">name · kind (let / const) · value · status</text>
+    <text x="14" y="244" class="small">tdz = uninitialized — reading it throws ReferenceError</text>
+    <text x="14" y="260" class="annotation">this is the debugger's "paused, about to run" scope view</text>
+  </g>
 
-      <text x="535" y="200" class="key">ƒ alert(msg)</text>
-      <text x="535" y="214" class="small">→ shows dialog · returns undefined</text>
+  <!-- ============ RUN crossing ============ -->
+  <g transform="translate(0,486)">
+    <line x1="30" y1="20" x2="1470" y2="20" stroke="#ccc" stroke-width="1" stroke-dasharray="3 3"/>
+    <rect x="560" y="4" width="380" height="30" rx="15" fill="#eaf3ea" stroke="#4a7a4a" stroke-width="1.4"/>
+    <line class="run-arrow" x1="750" y1="34" x2="750" y2="58" marker-end="url(#a-run)"/>
+    <text x="750" y="24" class="text-bold" text-anchor="middle" fill="#2a6a2a">▶ RUN — the derived environment enters the world and comes alive</text>
+  </g>
 
-      <text x="535" y="238" class="key">ƒ confirm(msg)</text>
-      <text x="535" y="252" class="small">→ dialog · returns boolean</text>
+  <!-- ============ ACT 2: RUNTIME ============ -->
+  <text x="30"  y="576" class="act-label">② RUNTIME</text>
+  <text x="152" y="576" class="act-note">— evaluation, inside the realm · the debugger's "stepping" view</text>
 
-      <text x="535" y="276" class="key">ƒ prompt(msg)</text>
-      <text x="535" y="290" class="small">→ dialog · returns string | null</text>
+  <!-- REALM frame wraps the runtime -->
+  <g transform="translate(30,586)">
+    <rect class="frame-realm" x="0" y="0" width="1440" height="848" rx="6"/>
+    <text x="16" y="26" class="frame-label" fill="#4a3a78">🌍 REALM — the world the program runs in · host-installed before any code · the top of the scope chain</text>
+    <text x="16" y="44" class="caption">a program wakes into a full JavaScript realm; JEJ teaches this slice of it — "what is mine to use?"</text>
 
-      <text x="535" y="320" class="annotation">alert / confirm / prompt</text>
-      <text x="535" y="334" class="annotation">PAUSE evaluation until user responds.</text>
+    <!-- ===== realm catalog: intrinsics ===== -->
+    <g transform="translate(14,56)">
+      <rect class="frame-intr" x="0" y="0" width="900" height="300" rx="4"/>
+      <text x="12" y="20" class="frame-label" fill="#4a3a78">ECMA intrinsics <tspan class="annotation">— the language's, always present (SetDefaultGlobalBindings §9.3.4)</tspan></text>
+
+      <!-- col A -->
+      <text x="12" y="46"  class="key">Math</text>
+      <text x="12" y="61"  class="small">.abs .ceil .floor .round .max .min .pow .sqrt</text>
+      <text x="12" y="74"  class="small">.random .trunc .sign .log .exp · PI · E …</text>
+      <text x="12" y="94"  class="key">String</text>
+      <text x="12" y="109" class="small">ƒ String() · .fromCharCode .fromCodePoint</text>
+      <text x="12" y="122" class="small">proto: .toUpperCase .toLowerCase .slice .trim</text>
+      <text x="12" y="135" class="small">  .includes .indexOf .replace .charAt .at …</text>
+      <text x="12" y="155" class="key">Number</text>
+      <text x="12" y="170" class="small">ƒ Number() · .isNaN .isFinite .isInteger</text>
+      <text x="12" y="183" class="small">proto: .toString .toFixed .toPrecision</text>
+      <text x="12" y="196" class="small">  .toExponential .toLocaleString</text>
+      <text x="12" y="216" class="key">RegExp</text>
+      <text x="12" y="231" class="small">name admitted · proto: .test</text>
+      <text x="12" y="244" class="small">(a regex literal /p/ finds .test here)</text>
+
+      <!-- col B -->
+      <text x="470" y="46"  class="key">Date</text>
+      <text x="470" y="61"  class="small">static: .now .parse · ctor: new Date()</text>
+      <text x="470" y="74"  class="small">  ← the sole `new` in JEJ</text>
+      <text x="470" y="87"  class="small">instance: .getFullYear .getMonth .getDate …</text>
+      <text x="470" y="100" class="small">  (all return primitives)</text>
+      <text x="470" y="122" class="key">ƒ Boolean()</text>
+      <text x="470" y="135" class="small">explicit boolean conversion (truthiness)</text>
+      <text x="470" y="155" class="key">ƒ BigInt()</text>
+      <text x="470" y="168" class="small">arbitrary-precision integer conversion</text>
+      <text x="470" y="188" class="key">ƒ parseInt   ƒ parseFloat</text>
+      <text x="470" y="201" class="small">string → number parsing</text>
+      <text x="470" y="221" class="egg">ƒ eval</text>
+      <text x="470" y="234" class="annotation">easter egg — admitted, untaught (not in reference.md)</text>
+
+      <line x1="12" y1="256" x2="888" y2="256" stroke="#bbb" stroke-dasharray="2 2"/>
+      <text x="12"  y="276" class="text-bold">Constants</text>
+      <text x="100" y="276" class="key">Infinity   NaN   undefined</text>
+      <text x="470" y="276" class="annotation">no globalThis · `new RegExp()` is refused (Date is the only `new`)</text>
+      <text x="12"  y="292" class="annotation">callable values are marked ƒ · object-registers (Math, String, Number, Date, RegExp) are boxes of methods with a prototype</text>
     </g>
 
-    <!-- Scope-chain arrow: realm → script -->
-    <line class="scope-chain" x1="180" y1="395" x2="180" y2="427" marker-end="url(#arrow-scope)" />
-    <text x="190" y="416" class="arrow-text">outer</text>
+    <!-- ===== realm catalog: host bindings ===== -->
+    <g transform="translate(928,56)">
+      <rect class="frame-host" x="0" y="0" width="498" height="300" rx="4"/>
+      <text x="12" y="20" class="frame-label" fill="#7a5a20">Host bindings <tspan class="annotation">— the browser's, not the language's</tspan></text>
+      <text x="12" y="36" class="caption">WHATWG / HTML host hook (InitializeHostDefinedRealm §9.6)</text>
 
-    <!-- ============== SCRIPT SCOPE ============== -->
-    <g transform="translate(15, 432)">
-      <rect class="frame-script" x="0" y="0" width="750" height="120" rx="4" />
-      <text x="12" y="20" class="frame-label">Script scope</text>
-      <text x="12" y="36" class="caption">top-level let/const · created by GlobalDeclarationInstantiation (§16.1.7)</text>
-      <text x="12" y="60" class="text">During creation: each binding is reserved with status='tdz'.</text>
-      <text x="12" y="78" class="text">During evaluation: each binding's declaration line transitions tdz → initialized.</text>
-      <text x="12" y="100" class="mono">greeting: let │ 'hello'        shout: let │ 'HELLO!'</text>
+      <text x="12" y="60" class="key">console</text>
+      <text x="12" y="75" class="small">.log .debug .info .warn .error · .assert</text>
+      <text x="12" y="88" class="small">.count .countReset · .group .groupEnd</text>
+      <text x="12" y="101" class="small">.time .timeLog .timeEnd · .clear</text>
+
+      <text x="12" y="128" class="key">ƒ alert(msg)</text>
+      <text x="12" y="141" class="small">→ dialog · returns undefined</text>
+      <text x="12" y="162" class="key">ƒ confirm(msg)</text>
+      <text x="12" y="175" class="small">→ dialog · returns boolean</text>
+      <text x="12" y="196" class="key">ƒ prompt(msg)</text>
+      <text x="12" y="209" class="small">→ dialog · returns string | null</text>
+
+      <rect x="10" y="228" width="478" height="60" rx="3" fill="#fff" stroke="#a07a3a" stroke-width="0.8"/>
+      <text x="20" y="246" class="text-bold" fill="#7a5a20">spec-distinct from intrinsics</text>
+      <text x="20" y="262" class="small">"this is JavaScript" vs "this is your browser"</text>
+      <text x="20" y="278" class="small">alert / confirm / prompt PAUSE evaluation until the user responds</text>
     </g>
 
-    <!-- Scope-chain arrow: script → block -->
-    <line class="scope-chain" x1="180" y1="557" x2="180" y2="587" marker-end="url(#arrow-scope)" />
-    <text x="190" y="576" class="arrow-text">outer</text>
+    <!-- scope-chain edge: realm is the top -->
+    <text x="16" y="378" class="chain-text" fill="#2255a0">▲ the scope chain's top is the realm — name resolution walks block → module → realm</text>
 
-    <!-- ============== BLOCK SCOPE ============== -->
-    <g transform="translate(15, 592)">
-      <rect class="frame-block" x="0" y="0" width="750" height="120" rx="4" />
-      <text x="12" y="20" class="frame-label">Block scope (lazy — pushed on entry, popped on exit)</text>
-      <text x="12" y="36" class="caption">created by BlockDeclarationInstantiation (§14.2.3) · only when the block has lexical decls</text>
-      <text x="12" y="60" class="text">scope:push event fires on entry · scope:pop event fires on exit (reason: normal/break/…)</text>
-      <text x="12" y="78" class="text">Empty / no-decl blocks elide their env per spec — no events fire.</text>
-      <text x="12" y="100" class="mono">if-body { } : (no bindings here, block elided)</text>
+    <!-- ===== evaluation triptych ===== -->
+    <text x="16" y="404" class="frame-label" fill="#2a6a2a">evaluation — the program runs · each arrow between cells is an observable trace event</text>
+
+    <!-- code cell -->
+    <g transform="translate(14,414)">
+      <rect class="frame-code" x="0" y="0" width="360" height="404" rx="4"/>
+      <text x="12" y="22" class="cell-title" fill="#7a5a20">code</text>
+      <text x="12" y="38" class="caption">what the code says — the live line</text>
+      <text x="12" y="62" class="small">the current expression / statement</text>
+      <text x="12" y="76" class="small">being evaluated (the debugger's</text>
+      <text x="12" y="90" class="small">highlighted line)</text>
+      <rect x="10" y="104" width="340" height="40" rx="3" fill="#fff" stroke="#8a6a2a" stroke-width="0.8"/>
+      <text x="18" y="122" class="mono-small">shout = greeting.toUpperCase()</text>
+      <text x="18" y="136" class="mono-small">              + '!'</text>
+      <text x="12" y="168" class="text-bold">compound expressions</text>
+      <text x="12" y="184" class="small">evaluate left → right, by precedence</text>
+      <text x="12" y="208" class="text-bold">a value is produced → resolve</text>
+      <text x="12" y="224" class="small">resolve bridges syntax to semantics —</text>
+      <text x="12" y="238" class="small">which value came from which syntax</text>
+      <text x="12" y="270" class="text-bold">statement exit reason</text>
+      <text x="12" y="286" class="small">normal · break · continue · error</text>
+      <text x="12" y="300" class="small">· limit (JEJ iteration guard)</text>
+      <text x="12" y="332" class="annotation">the code text is the control panel;</text>
+      <text x="12" y="346" class="annotation">the machine itself is next door (nm)</text>
     </g>
 
-    <!-- ============== TWO CHAINS CALLOUT ============== -->
-    <g transform="translate(15, 730)">
-      <rect class="frame" x="0" y="0" width="750" height="90" rx="4" />
-      <text x="12" y="20" class="frame-label">Two chain lookups, same shape</text>
-      <text x="12" y="42" class="text"><tspan class="text-bold" fill="#2255a0">Scope chain</tspan> — variable lookup: block → script → realm. Resolves identifier to a binding.</text>
-      <text x="12" y="60" class="text"><tspan class="text-bold" fill="#a04055">Prototype chain</tspan> — method lookup: value → Constructor.prototype. Resolves property to a method.</text>
-      <text x="12" y="78" class="annotation">Each chain step is observable as scopeChainWalk / protoChainWalk on resolve events. A miss-chain ending at the top → ReferenceError (scope) or undefined (proto).</text>
+    <!-- resolve arrow code -> nm -->
+    <line class="trace-arrow" x1="378" y1="520" x2="424" y2="520" marker-end="url(#a-trace)"/>
+    <text x="401" y="512" class="arrow-text" text-anchor="middle">resolve</text>
+
+    <!-- nm cell -->
+    <g transform="translate(430,414)">
+      <rect class="frame-nm" x="0" y="0" width="580" height="404" rx="4"/>
+      <text x="12" y="22" class="cell-title" fill="#2a6a2a">nm — the semantics</text>
+      <text x="12" y="38" class="caption">environment · DYNAMIC — the SAME scopes from setup, now live</text>
+
+      <text x="12" y="62"  class="text-bold">bindings come alive</text>
+      <text x="12" y="78"  class="small">status: tdz → initialized → dead · const: never updates → TypeError</text>
+
+      <text x="12" y="102" class="text-bold">scopes push / pop</text>
+      <text x="12" y="118" class="small">a block pushes an env on entry (only if it has let/const),</text>
+      <text x="12" y="132" class="small">pops on exit (reason: normal / break / continue / error / limit)</text>
+
+      <rect x="10" y="146" width="560" height="70" rx="3" fill="#fff" stroke="#2255a0" stroke-width="1"/>
+      <text x="20" y="164" class="text-bold" fill="#2255a0">scope chain — variable lookup</text>
+      <text x="20" y="182" class="mono-small">block → module → realm</text>
+      <text x="20" y="198" class="small">walk outward until the name is found; fall off the top → ReferenceError</text>
+      <text x="20" y="210" class="annotation">each step is observable — scopeChainWalk</text>
+
+      <rect x="10" y="224" width="560" height="64" rx="3" fill="#fff" stroke="#a04055" stroke-width="1"/>
+      <text x="20" y="242" class="text-bold" fill="#a04055">prototype chain — method lookup</text>
+      <text x="20" y="260" class="mono-small">'hi' → String.prototype · (255).toString → Number.prototype</text>
+      <text x="20" y="276" class="small">same shape as the scope chain — walk a chain to find a name · protoChainWalk</text>
+
+      <text x="12" y="310" class="text-bold">values <tspan class="small">— string · number · bigint · boolean · null · undefined</tspan></text>
+
+      <text x="12" y="334" class="text-bold">coercion <tspan class="small">— implicit, observable only in the trace</tspan></text>
+      <text x="12" y="350" class="small">ToBoolean · ToString · ToNumeric · ToPrimitive</text>
+      <text x="12" y="366" class="small">`+` is special: '5' + 1 → '51' (concat) · '5' − 1 → 4 (numeric)</text>
+      <text x="12" y="384" class="annotation">postfix x++ returns OLD · prefix ++x returns NEW · ??= skips PutValue when non-nullish</text>
+    </g>
+
+    <!-- emit / return arrows nm <-> host -->
+    <line class="trace-arrow" x1="1014" y1="500" x2="1060" y2="500" marker-end="url(#a-trace)"/>
+    <text x="1037" y="492" class="arrow-text" text-anchor="middle">emit</text>
+    <line class="trace-arrow" x1="1060" y1="540" x2="1014" y2="540" marker-end="url(#a-trace-b)"/>
+    <text x="1037" y="556" class="arrow-text" text-anchor="middle">return</text>
+
+    <!-- host cell -->
+    <g transform="translate(1066,414)">
+      <rect class="frame-io" x="0" y="0" width="360" height="404" rx="4"/>
+      <text x="12" y="22" class="cell-title" fill="#2a5a7a">host — I/O buckets</text>
+      <text x="12" y="38" class="caption">where the program's effects reach humans</text>
+
+      <rect x="10" y="50" width="340" height="120" rx="3" fill="#fff" stroke="#3a6a8a" stroke-width="0.9"/>
+      <text x="20" y="70" class="text-bold">💻 Dev Console <tspan class="caption">— the developer</tspan></text>
+      <text x="20" y="88" class="small">append-only stream · does NOT pause</text>
+      <text x="20" y="104" class="small">console.* writes here (method = intent):</text>
+      <text x="20" y="120" class="small">log/info/warn/error · assert · count</text>
+      <text x="20" y="134" class="small">group/groupEnd · time/timeEnd · clear</text>
+      <text x="20" y="156" class="annotation">trace event: emit · kind 'console'</text>
+
+      <rect x="10" y="182" width="340" height="200" rx="3" fill="#fff" stroke="#3a6a8a" stroke-width="0.9"/>
+      <text x="20" y="202" class="text-bold">👤 User Interface <tspan class="caption">— the learner-as-user</tspan></text>
+      <text x="20" y="218" class="small">synchronous dialogs · PAUSE evaluation</text>
+      <text x="20" y="240" class="key">alert(msg)</text>
+      <text x="20" y="254" class="small">message + OK → undefined · one-way →</text>
+      <text x="20" y="276" class="key">confirm(msg)</text>
+      <text x="20" y="290" class="small">OK / Cancel → boolean · two-way ←→</text>
+      <text x="20" y="312" class="key">prompt(msg)</text>
+      <text x="20" y="326" class="small">text field → string | null · two-way ←→</text>
+      <text x="20" y="352" class="annotation">trace event: emit · kind 'alert' /</text>
+      <text x="20" y="366" class="annotation">'confirm' / 'prompt' (return flows back to nm)</text>
     </g>
   </g>
 
-  <!-- =========== RIGHT PILLAR: Host I/O =========== -->
-  <g transform="translate(1110, 220)">
-    <!-- Dev console -->
-    <rect class="frame-io" x="0" y="0" width="330" height="180" rx="4" />
-    <text x="12" y="20" class="frame-label">💻 Dev Console</text>
-    <text x="12" y="36" class="caption">append-only stream · does NOT pause</text>
-    <text x="12" y="60" class="text">visible in browser devtools</text>
-    <text x="12" y="80" class="small">routed from console.* host bindings</text>
-    <text x="12" y="106" class="text-bold">Method signals intent:</text>
-    <text x="12" y="120" class="small">log/debug/info/warn/error · assert</text>
-    <text x="12" y="134" class="small">count/countReset · group/groupEnd</text>
-    <text x="12" y="148" class="small">time/timeLog/timeEnd · clear</text>
-    <text x="12" y="170" class="annotation">tracer event: emit · kind: 'console'</text>
-
-    <!-- User UI -->
-    <rect class="frame-io" x="0" y="200" width="330" height="280" rx="4" />
-    <text x="12" y="220" class="frame-label">👤 User Interface</text>
-    <text x="12" y="236" class="caption">synchronous dialogs · PAUSES evaluation</text>
-    <text x="12" y="262" class="key">alert(msg)</text>
-    <text x="12" y="276" class="small">user sees: message + OK</text>
-    <text x="12" y="290" class="small">program receives: undefined</text>
-    <text x="12" y="304" class="annotation">one-way →</text>
-    <text x="12" y="328" class="key">confirm(msg)</text>
-    <text x="12" y="342" class="small">user sees: message + OK / Cancel</text>
-    <text x="12" y="356" class="small">program receives: boolean</text>
-    <text x="12" y="370" class="annotation">two-way ←—→</text>
-    <text x="12" y="394" class="key">prompt(msg)</text>
-    <text x="12" y="408" class="small">user sees: message + text field + OK/Cancel</text>
-    <text x="12" y="422" class="small">program receives: string | null</text>
-    <text x="12" y="436" class="annotation">two-way ←—→</text>
-    <text x="12" y="464" class="annotation">tracer events: emit · kind: 'alert' /</text>
-    <text x="12" y="476" class="annotation">'confirm' / 'prompt'</text>
-
-    <!-- Lifecycle hint -->
-    <rect class="frame" x="0" y="500" width="330" height="170" rx="4" />
-    <text x="12" y="520" class="frame-label">Lifecycle (4 phases)</text>
-    <text x="12" y="540" class="text"><tspan class="text-bold">Realm</tspan> · static (host pre-populated)</text>
-    <text x="12" y="558" class="text"><tspan class="text-bold">Parse</tspan> · source → tokens → AST</text>
-    <text x="12" y="576" class="text"><tspan class="text-bold">Creation</tspan> · script-scope let/const</text>
-    <text x="12" y="588" class="small">  reserved as 'tdz' (§16.1.7)</text>
-    <text x="12" y="606" class="text"><tspan class="text-bold">Evaluation</tspan> · statements run · block</text>
-    <text x="12" y="618" class="small">  scopes push lazily · binding events</text>
-    <text x="12" y="630" class="small">  · resolve · coerce · emit · errors</text>
-    <text x="12" y="652" class="annotation">Spec umbrella: ScriptEvaluation (§16.1.6).</text>
-
-    <!-- Coercion hint -->
-    <rect class="frame" x="0" y="690" width="330" height="160" rx="4" />
-    <text x="12" y="710" class="frame-label">Coercion (between operands &amp; operator)</text>
-    <text x="12" y="732" class="small">ToBoolean · ToString · ToNumeric · ToPrimitive</text>
-    <text x="12" y="754" class="text-bold">+ is special (§13.15.3):</text>
-    <text x="12" y="770" class="small">ToPrimitive(L,'default') → ToPrimitive(R,'default')</text>
-    <text x="12" y="784" class="small">if either is String → ToString×2 → concat</text>
-    <text x="12" y="798" class="small">else → ToNumeric×2 → numeric add</text>
-    <text x="12" y="820" class="annotation">'5' + 1 → '51'   ·   '5' − 1 → 4</text>
-    <text x="12" y="836" class="annotation">postfix x++ returns OLD; prefix ++x returns NEW</text>
+  <!-- ============ RUNTIME ERRORS band ============ -->
+  <g transform="translate(30,1446)">
+    <text x="0" y="0" class="annotation">Runtime errors (no try/catch — all terminal): ReferenceError (TDZ access · unresolvable name) · TypeError (call non-callable · prop on null/undefined · const reassign · bigint+number) · RangeError (out of range · JEJ `limit`)</text>
+    <text x="1440" y="0" class="annotation" text-anchor="end">See notional-machine.md for the prose model &amp; ECMA-262 spec correspondence.</text>
   </g>
-
-  <!-- =========== I/O ROUTING ARROWS (host bindings → channels) =========== -->
-  <!-- console.* → Dev Console -->
-  <path class="io-line" d="M 1075 320 L 1108 280" marker-end="url(#arrow-io)" />
-  <text x="1080" y="307" class="arrow-text" fill="#2a8866">writes</text>
-
-  <!-- alert / confirm / prompt ↔ User UI -->
-  <path class="io-line" d="M 1075 460 L 1108 530" marker-end="url(#arrow-io)" />
-  <path class="io-line" d="M 1108 545 L 1075 475" marker-end="url(#arrow-io)" />
-  <text x="1080" y="500" class="arrow-text" fill="#2a8866">dialog</text>
-
-  <!-- =========== FOOTER LEGEND =========== -->
-  <g transform="translate(40, 1060)">
-    <text x="0" y="0" class="caption">
-      Legend:
-      <tspan class="text-bold" fill="#2255a0"> ━━ scope chain</tspan>  ·
-      <tspan class="text-bold" fill="#a04055"> - - proto chain</tspan>  ·
-      <tspan class="text-bold" fill="#2a8866"> ━━ I/O routing</tspan>  ·
-      <tspan class="key">key</tspan> = realm binding name  ·
-      ƒ = callable function value
-    </text>
-    <text x="1400" y="0" class="annotation" text-anchor="end">See notional-machine.md for prose model and spec correspondence (ECMA-262 §-numbers).</text>
-  </g>
-
 </svg>
