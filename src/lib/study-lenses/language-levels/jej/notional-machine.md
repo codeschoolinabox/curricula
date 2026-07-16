@@ -88,18 +88,21 @@ the [Spec correspondence appendix](#spec-correspondence-appendix).
 
 ## The machine at a glance
 
-The canonical poster — full NM at one zoom. Three pillars: visual-syntax level
-(what the code says) · behind-the-scenes (what the NM does invisibly) · host I/O
-channels.
+The canonical poster — the whole NM at one zoom, organized as **two acts** along
+the lifecycle: **setup** (parse the text, then derive the static environment)
+and **runtime** (evaluation inside the realm, as `code ⇄ nm ⇄ host`).
 
-![JEJ Notional Machine — Machine at a Glance: source code feeds a scope chain (realm → script → block); realm splits into ECMA intrinsics and host bindings; two chain lookups (scope chain finds variables, prototype chain finds methods); I/O routes through host bindings to the dev console and user dialogs.](./notional-machine.svg)
+![JEJ Notional Machine — the program's lifecycle in two acts. Setup is syntactic: source is spelled into tokens and parsed into an ast, deriving the static environment — the initial scope tree with every binding reserved in the temporal dead zone. Then the program runs inside the realm, the world of intrinsics and host bindings and the top of the scope chain. Evaluation has three interlinked cells: code (the live line), nm (the semantics — the dynamic environment, the block-to-module-to-realm scope chain, the prototype chain, values, coercion), and host (the I/O buckets — the developer console and the user dialogs). The arrows between cells are the observable trace events resolve, coerce, emit, and return.](./notional-machine.svg)
 
-The sections below unpack each piece of the poster in prose with smaller
+The sections below unpack each piece of the poster in prose, with smaller
 diagrams that reinforce specific aspects.
 
 ---
 
 ## Two viewing levels
+
+These are the poster's two runtime faces — the **code** cell and the **nm**
+cell, bridged by `resolve`.
 
 **Visual-syntax level** — anchored to code the learner sees:
 
@@ -111,7 +114,7 @@ diagrams that reinforce specific aspects.
 - **Values** — primitive data flowing through the program
 - **Bindings** — named memory slots that hold values
 - **Scopes** — containers for bindings, forming a chain
-- **Realm** — the world the script is born into (intrinsics + host bindings)
+- **Realm** — the world the program is born into (intrinsics + host bindings)
 - **Coercion** — implicit type transformations (invisible in code, observable
   only in the trace)
 
