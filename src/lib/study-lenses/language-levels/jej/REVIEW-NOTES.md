@@ -141,6 +141,41 @@ the quarry map, the Phase-0 ceremony and its human gate, and the remaining open
 questions. The `src/lib/embody/` -vs- `src/lib/study-lenses/embody/` -vs- "the
 embody stream" naming hazard is real — I am the third of those.
 
+## 5. 🔴 The `realm` PHASE is being removed — your realm TABLE is NOT
+
+**Maintainer ruling, 2026-07-15, after your work started.** The lifecycle loses
+`realm`. The reasoning is about _lensing_, not about the concept: every other
+phase's content is a function of the learner's source, and **the realm is the
+same world for every program forever** — so a realm lens would render
+identically every settle. That is a reference, not a lens. (The committed
+contracts had been whispering it: `realm` is the only phase with **no fact
+stage** and the only one that can never be barred, and the spine's own doc says
+_"a realm model needs no program at all."_)
+
+**Read this before you touch anything:** your realm table **survives, unchanged
+in purpose.** Your `types.ts` says it best — _"the level's one authored account
+of its world… `admittedGlobals` is derived, never authored"_ — and **that is
+exactly why it lives**: its consumer is **`validate`** (via `admittedGlobals`)
+and **`docs.reference`**, never a lifecycle lens. The phase is dying; the table
+is not. The maintainer's words for where realm content belongs — _"learners can
+just have a reference of what's available"_ — describe your table.
+
+**What this actually costs you:** likely nothing structural. Re-read any prose
+that frames the realm as a _lifecycle phase_ or promises a realm _lens_ (your
+`DOCS.md` and `README.md` carry the heaviest realm language — check them against
+the new model), and keep everything that frames it as the level's authored
+world. **If you find the table load-bearing in a way this ruling breaks, STOP
+and say so** — you know that design better than I do, and I would rather be
+corrected than have you quietly delete the source your allowlist derives from.
+
+Also coming (maintainer, same session): a **new `environment` fact stage** (a
+full-ECMAScript static scope structure via `eslint-scope`, which consumes
+acorn's AST directly), and a **`link` phase** for `type: 'module'` — snippets
+will be able to import didactic dependencies. **Neither is yours.** Both land
+through an embody Phase-0 amendment with its own human gate. They are named here
+only so a phase list that no longer matches your prose does not read as your
+error.
+
 ## The embody stream does not intersect you — you are autonomous
 
 **Ignore the embody stream. Do not wait on me, and do not route anything through
