@@ -5,13 +5,13 @@ mental model of how JEJ programs run.
 
 The NM is the **mechanical instrument** that Welcome to Frogramming centers on
 (per the [syllabus's mechanical-instrument metaphor][metaphor]): the machine the
-🔬 Frogrammer grounds their predictions in. It is one of four audiences a JEJ
-program addresses (developers, the NM, users, agents); twinning it is the focus
-of the Frogrammer hat.
+🔬 Frogrammer grounds their predictions in. The **machine** is one of the four
+audiences a running JEJ program speaks to — the learner-as-user, the developer,
+the machine, and the reader; twinning it is the focus of the Frogrammer hat.
 
 For the larger story — **JEJ → NM → embody → study lenses**, the four audiences,
-and the Frogrammer's predict-trace-verify practice — see
-[README.md](../../../README.md). This document is upstream of all of that: get
+and the Frogrammer's predict-trace-verify practice — see the
+[package README](../../README.md). This document is upstream of all of that: get
 the NM right and embody / lenses / curriculum follow.
 
 Covers exactly the language features in [reference.md](./reference.md).
@@ -26,31 +26,20 @@ lenses choose what to _teach_. The contract is accuracy.
 **Scope.** The NM is the conceptual model; embody is the per-snippet operational
 data form lenses consume. The system-wide learner state (the "Progress
 modelling" base layer of Malaise & Signer's Explorotron pyramid — see
-[README.md § Pedagogical first principles](../../../README.md#pedagogical-first-principles))
+[the package README § Pedagogical grounding](../../README.md#pedagogical-grounding))
 is the embedding LMS's responsibility, not the NM's or embody's scope.
 
 See also:
 
-- [README.md](../../../README.md) — JEJ overview, the conceptual chain,
+- [the package README](../../README.md) — the conceptual chain and the four
   audiences
-- [embody/](../../) — operational embodiment (data + event streams) of this NM
-- [embody/types.ts](../../types.ts) — canonical TypeScript contract
-- [embody/DOCS.md](../../DOCS.md) — embody architecture + data flow
-- [`lib/evaluating/trace/syntax/`](../../lib/evaluating/trace/syntax/) — syntax
-  tracer: README + DOCS for the NM-step-category implementation
-- [`lib/evaluating/trace/semantics/`](../../lib/evaluating/trace/semantics/) —
-  semantic tracer: README + DOCS for finer-grained instrumentation
+- [`./README.md`](./README.md) — what JEJ curates, and its glossary
+- [`./DOCS.md`](./DOCS.md) — this level's architecture and decisions
+- [`./types.ts`](./types.ts) — this level's own model types
+- [`./reference.md`](./reference.md) — the learner-facing reference: what the
+  level admits, in the learner's vocabulary
 
-[metaphor]: ../../../spiralearn/frogramming-and-vibetoading/README.md
-
-**Operational implementation.** The NM components described here are implemented
-as step categories in the **syntax tracer** at
-[`lib/evaluating/trace/syntax/`](../../lib/evaluating/trace/syntax/) and the
-**semantic tracer** at
-[`lib/evaluating/trace/semantics/`](../../lib/evaluating/trace/semantics/). Each
-NM component corresponds to one of the tracer's step categories (`expression`,
-`resolve`, `statement`, `scope`, `control-flow`, `initialization`, `for-init`,
-`write`, `coerce`, `emit`, `error`).
+[metaphor]: ../../../../../spiralearn/frogramming-and-vibetoading/README.md
 
 ---
 
