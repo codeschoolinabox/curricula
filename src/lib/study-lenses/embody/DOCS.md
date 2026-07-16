@@ -14,20 +14,22 @@ abstraction.
 
 ## Execution phases
 
-1. **Derive the fact stages** (sync, pure) — the five stages derive once, in
+1. **Derive the fact stages** (sync, pure) — the six stages derive once, in
    dependency order: source and type restated from the snippet; tokens — the
    token stream plus the set-aside comments — from the source; ast from the
-   tokens; entwined from ast, tokens, and source. Every result is tagged — a
+   tokens; entwined from ast, tokens, and source; environment — the static scope
+   structure — from the ast and the snippet type. Every result is tagged — a
    value or a structured cause — and a failure never stops the walk: a stage
    whose input is missing fails carrying the upstream cause, whose origin stays
    named inside it. Input: the snippet. Output: the Facts.
 
-2. **Derive phase accessibility** (sync, mechanical) — the six lifecycle phases
-   get their accessibility from the tagged stages by fixed rules: `source`,
-   `realm`, and `tokens` always accessible; `ast` barred by a tokens failure;
-   `environment` and `evaluation` barred by a tokens, ast, or entwine failure —
-   barred phases carry the upstream cause. A phase's own-stage error never bars
-   it. Input: the Facts. Output: the accessibility map.
+2. **Derive phase accessibility** (sync, mechanical) — the five lifecycle phases
+   get their accessibility from the tagged stages by fixed rules: `source` and
+   `tokens` always accessible; `ast` barred by a tokens failure; `environment`
+   and `evaluation` barred by a tokens, ast, or entwine failure — barred phases
+   carry the upstream cause. A phase's own-stage error never bars it: a grammar
+   error renders in `ast`, a scope-analysis defect renders in `environment`.
+   Input: the Facts. Output: the accessibility map.
 
 3. **Gate and attach** (sync, wrapped) — each phase-declaring lens in the roster
    has its applicability run exactly once over the Facts; a gate that throws
@@ -46,12 +48,12 @@ abstraction.
 flowchart TD
     SNP["snippet<br/>(source + type)"]
     ROS["lens roster<br/>(passed in by the composition root)"]
-    FCT["tagged fact stages<br/>(source · tokens · ast · entwined · type)"]
+    FCT["tagged fact stages<br/>(source · tokens · ast · entwined · environment · type)"]
     ACC["phase accessibility map<br/>(accessible | barred + carried cause)"]
     FIT["per-phase fitting-lens lists"]
     EMB["frozen embodiment<br/>(facts + fit + accessibility)"]
     SNP -->|"derive stages, pure — failures become tagged causes"| FCT
-    FCT -->|"map the six phases, mechanical"| ACC
+    FCT -->|"map the five phases, mechanical"| ACC
     FCT -->|"run each phase-declaring gate, wrapped — a throw degrades loudly"| FIT
     ROS -->|"supplies the gateables"| FIT
     FCT -->|"assemble + freeze, own structure only"| EMB
@@ -61,24 +63,50 @@ flowchart TD
 
 ## Structural constraints
 
+- **A phase is a function of the program.** A lifecycle phase is a step the
+  specification names AND a step whose content different programs reach
+  differently. A step every program meets identically is reference material, not
+  a phase — it has nothing to show that changes when the program changes. A step
+  whose content only narrows another phase's belongs to that phase, not beside
+  it. The lifecycle admits a phase on both counts.
 - **Level-blind.** No level knowledge in the region's data or pipeline; level
   logic runs only black-boxed inside individual gates.
+- **Truth, not permission.** This region states what is TRUE about the program;
+  a language level decides what is ALLOWED. No verdict, threshold, or policy is
+  derived here — level-related or not — a derivation wanted only in order to
+  enforce a rule belongs to whoever enforces the rule. The region hands over the
+  machine's own reading and nothing more.
 - **One derivation pass.** Stages derive once per snippet, in dependency order;
   nothing retries and nothing parses the same source twice. The tokens and ast
   stages are the parse facts every outside consumer reads.
-- **Loud versus graceful.** A learner program that does not parse is quiet data.
-  Defects in embody's own machinery are loud to the developer and graceful to
-  the learner: an entwine failure raises a development-mode report and bars
-  downstream phases like any failed stage; a throwing gate degrades to
-  not-applicable and is reported the same way.
-- **Freeze-what-you-own.** The freeze covers the structure this region built;
-  attached lens refs are attached as module objects — never pre-bound wrappers —
-  and are never recursed into.
+- **Facts index; they never copy, and never wall.** Each fact is a pre-indexed
+  way into a structure that already exists — its members are the very nodes and
+  scopes the tree is built from, not reproductions of them. Because nothing is
+  copied, tying a further derivation into the binding costs only its index, and
+  identity followed from one fact into another always lands on the same object.
+  Each fact exposes the whole structure it indexes: a consumer the indices do
+  not answer can always reach past them and walk it.
+- **Loud versus graceful.** A learner program that does not parse is quiet data;
+  a defect in embody's own machinery is loud — an entwine or scope-analysis
+  failure raises a development-mode report, and a throwing gate degrades to
+  not-applicable and is reported the same way. What a failure bars follows
+  dependency, not loudness: spelling, grammar, and the source⇄tree binding
+  underpin every later surface, so a tokens, ast, or entwine failure bars the
+  phases below it; the scope structure is terminal — no later phase reads it —
+  so an environment failure renders inside the `environment` phase alone,
+  leaving `evaluation` reachable.
+- **Freeze-what-you-own.** The freeze covers the structure this region built —
+  the wrappers and indices. Attached lens refs are attached as module objects,
+  never pre-bound wrappers, and are never recursed into. A fact's indexed
+  members carry only the immutability their own producer guarantees; the region
+  neither deepens nor weakens it.
 - **The embodiment knows no consumers.** Lens refs arrive as arguments, typed
   structurally; the region imports no component machinery, no evaluator, no
-  language level. The parser's types are the only foreign vocabulary — imported
-  type-only, so ownership of that vocabulary can move to the shared parse leaf
-  without touching callers.
+  language level. The parser's types are the only foreign vocabulary the region
+  imports — type-only, so ownership can move to the shared parse leaf without
+  touching callers. The scope structure is expressed in the region's own type
+  names, named against the parser's node type; its field vocabulary mirrors the
+  analyzer's, but the analyzer's own types never cross the boundary.
 - **Sync and pure throughout.** No I/O, no async, no shared mutable state: the
   same snippet and roster produce the same embodiment.
 
@@ -96,5 +124,11 @@ flowchart TD
   finished roster.
 - **The lens kind's full contract** — the lenses region extends `Gateable` with
   everything a component needs.
+- **Niche analytics** — a fact spares every consumer the same common, generic
+  traversal; anything niche a consumer derives itself from the structures the
+  facts already expose. As the "a phase is a function of the program" constraint
+  gates what earns a phase, this gates what earns a fact: a new fact must be
+  common, generic, and needed by a gate — or it stays a consumer's projection,
+  never this region's.
 - **Internal decomposition** — the factory's internal libraries document
   themselves at their own abstraction level.

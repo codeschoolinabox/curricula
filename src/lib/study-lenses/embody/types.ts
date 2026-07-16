@@ -38,11 +38,21 @@ export type Snippet = {
 // Fact stages
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** The five derivations the Facts hold, one tagged stage each. */
-export type FactStageName = 'source' | 'tokens' | 'ast' | 'entwined' | 'type';
+/** The six derivations the Facts hold, one tagged stage each. */
+export type FactStageName =
+	| 'source'
+	| 'tokens'
+	| 'ast'
+	| 'entwined'
+	| 'environment'
+	| 'type';
 
-/** The stages that can fail — derived, not given. */
-export type FailableStageName = 'tokens' | 'ast' | 'entwined';
+/**
+ * The stages that can fail — derived, not given. `tokens` and `ast` fail on an
+ * unparseable program; `entwined` and `environment` fail only as guarded embody
+ * defects, reported loudly. Each may originate a `StageCause`.
+ */
+export type FailableStageName = 'tokens' | 'ast' | 'entwined' | 'environment';
 
 /**
  * The structured cause a failed stage carries: which stage failed, in the
@@ -93,14 +103,16 @@ export type Tokens = {
  * `source` and `type` are the inputs restated as stages: they are given, not
  * derived, so their type carries no failure arm — consumers never narrow a
  * branch that cannot occur. `tokens` and `ast` fail when the program does
- * not parse (spelling, then grammar). `entwined` failing is an embody
- * defect, reported loudly in development.
+ * not parse (spelling, then grammar). `entwined` and `environment` fail only
+ * as embody defects, reported loudly in development — a valid syntax tree
+ * always binds and always scopes.
  */
 export type Facts = {
 	readonly source: StageSuccess<string>;
 	readonly tokens: FactStage<Tokens>;
 	readonly ast: FactStage<Program>;
 	readonly entwined: FactStage<Entwined>;
+	readonly environment: FactStage<Environment>;
 	readonly type: StageSuccess<SnippetType>;
 };
 
@@ -167,17 +179,95 @@ export type Entwined = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// The static scope structure
+// ─────────────────────────────────────────────────────────────────────────────
+
+// The scope vocabulary is embody's own structural view of the analysis its
+// scope leaf produces: named against acorn's node type, so the values are the
+// same tree nodes the rest of the Facts carry, and expressing only what
+// consumers read — the analyzer's internal bookkeeping stays off the contract.
+
+/**
+ * One definition of a name: what kind of declaration introduces it (`var`,
+ * `let`, function, parameter, class, import, …), the declared identifier, and
+ * the syntax-tree node that declares it.
+ */
+export type ScopeDefinition = {
+	readonly type: string;
+	readonly name: AcornNode;
+	readonly node: AcornNode;
+};
+
+/**
+ * One use of a name: the identifier node, the variable it resolves to — or
+ * `null` when it resolves to nothing (an undeclared global) — and the scope
+ * the use is made from. The `null` arm is the level-blind fact a level's
+ * undeclared-globals check reads.
+ */
+export type ScopeReference = {
+	readonly identifier: AcornNode;
+	readonly resolved: ScopeVariable | null;
+	readonly from: Scope;
+};
+
+/**
+ * One binding: the name, the identifier nodes that introduce it, the
+ * references that resolve to it, and its definitions. How a name comes to be.
+ */
+export type ScopeVariable = {
+	readonly name: string;
+	readonly identifiers: ReadonlyArray<AcornNode>;
+	readonly references: ReadonlyArray<ScopeReference>;
+	readonly defs: ReadonlyArray<ScopeDefinition>;
+};
+
+/**
+ * One lexical scope: its kind (`global`, `module`, `function`, `block`, `for`,
+ * `class`, `catch`, …), the syntax-tree node that introduces it, the names born
+ * in it, the references made in it, its nested scopes, its enclosing scope, and
+ * whether it is strict. `through` carries the references that resolve past this
+ * scope to nothing — populated on the global scope, it is what shows `var`/`let`
+ * born into different records.
+ */
+export type Scope = {
+	readonly type: string;
+	readonly block: AcornNode;
+	readonly variables: ReadonlyArray<ScopeVariable>;
+	readonly references: ReadonlyArray<ScopeReference>;
+	readonly childScopes: ReadonlyArray<Scope>;
+	readonly through: ReadonlyArray<ScopeReference>;
+	readonly isStrict: boolean;
+	/** `null` only at the root scope. */
+	readonly upper: Scope | null;
+};
+
+/**
+ * The static scope structure: one shared graph of lexical scopes, with a
+ * canonical entry point and a path index. Both hold the same scope objects the
+ * analysis built — entry points into the graph, never copies. The graph
+ * toggles on snippet type: a script's top-level names live on the global
+ * scope, a module's on its own module scope.
+ */
+export type Environment = {
+	readonly root: Scope;
+	/**
+	 * Every scope keyed by the `NodePath` of the node that introduces it —
+	 * O(1) resolution from a carried path string back to its scope.
+	 */
+	readonly byPath: Readonly<Record<NodePath, Scope>>;
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // The lifecycle
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * The six flat phases, in the specification's own order. The single
+ * The five flat phases, in the specification's own order. The single
  * compile-time truth of that order: the implementation's runtime order
  * constant `satisfies` this tuple.
  */
 export type LifecyclePhaseOrder = readonly [
 	'source',
-	'realm',
 	'tokens',
 	'ast',
 	'environment',
@@ -239,7 +329,7 @@ export type Gateable = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * The frozen study object: the Facts plus the six phase payloads.
+ * The frozen study object: the Facts plus the five phase payloads.
  *
  * @remarks
  * Freeze-what-you-own: the structure embody built is frozen; attached lens

@@ -46,7 +46,7 @@ flowchart LR
 | ---------------- | ------------------------------------------------------------- | ----------------------------------------------------- |
 | snippet          | the raw program passed in — any JavaScript                    | [The model](#the-model)                               |
 | embodiment       | the frozen study data rebuilt at every settle                 | [The model](#the-model)                               |
-| lifecycle phases | the six-step journey; the interaction model itself            | [The six phases](#the-six-phases)                     |
+| lifecycle phases | the five-step journey; the interaction model itself           | [The five phases](#the-five-phases)                   |
 | study lenses     | pedagogical views, offered where they fit                     | [Why lenses?](#why-lenses)                            |
 | language levels  | configurable curated slices, each modeling a notional machine | [Guardrails, not cages](#guardrails-not-cages)        |
 | the orchestrator | the one mounted component that renders it all                 | [The shape of the package](#the-shape-of-the-package) |
@@ -76,13 +76,13 @@ are what learners take with them.
 
 The learner writes in the editor. Every time typing settles, the program is
 re-embodied — parsed and analyzed into study data — and laid out along its
-**lifecycle**: the six-phase journey the language specification itself
+**lifecycle**: the five-phase journey the language specification itself
 describes, from raw text to a running program.
 
 ```mermaid
 flowchart LR
     write["✍️ any JavaScript<br/>written or pasted"]
-    phases["the program's lifecycle<br/>source · realm · tokens · ast<br/>environment · evaluation"]
+    phases["the program's lifecycle<br/>source · tokens · ast · environment · evaluation"]
     study["🔬 study lenses<br/>read · annotate · exercise · run"]
     levels["🧭 language levels — opt-in guides<br/>JEJ is the first"]
     write -->|"each settle: embodied"| phases
@@ -99,7 +99,7 @@ learner-worded explanation — spelling mistakes in `tokens`, grammar mistakes i
 `ast`. The machine's implicit judgments become explicit, visible places to
 study.
 
-### The six phases
+### The five phases
 
 Every phase is a step the language specification itself names — nothing is
 invented. Each one is a place to stop and look:
@@ -107,18 +107,16 @@ invented. Each one is a place to stop and look:
 ```mermaid
 flowchart LR
     source["source<br/>the text itself"]
-    realm["realm<br/>the ready-made world"]
     tokens["tokens<br/>spelling"]
     ast["ast<br/>grammar"]
     environment["environment<br/>names come to be"]
     evaluation["evaluation<br/>the program runs"]
-    source --> realm --> tokens --> ast --> environment --> evaluation
+    source --> tokens --> ast --> environment --> evaluation
 ```
 
 | Phase         | The machine's step                                     | Studying there                                                                                                                     |
 | ------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
 | `source`      | the raw text, before the machine reads anything        | annotate it, fill in blanks, reorder lines, quiz yourself — the phase serves any text, even broken; each lens appears when it fits |
-| `realm`       | the built-in world a program wakes up into             | what already exists before your first line runs                                                                                    |
 | `tokens`      | the text is spelled out into the language's words      | the parser's spelling errors, explained                                                                                            |
 | `ast`         | the words resolve into grammar                         | the parser's grammar errors, explained                                                                                             |
 | `environment` | declarations come into being, before anything executes | how names are born, and what hoisting really means                                                                                 |
@@ -287,7 +285,7 @@ available.
 
 The orchestrator is the one component the host mounts. It renders: the editor —
 the single writer of the program's source, from which everything re-derives per
-settle — the six-phase study panel, the permanent level selector, the
+settle — the five-phase study panel, the permanent level selector, the
 selected-level gutter, the strict toggle, the snippet-type toggle, and an
 embedded guide. It is also the composition root: it owns a default roster of
 lenses and appends whatever the host injects.
@@ -303,16 +301,20 @@ documents, and UI copy use them consistently.
 - **snippet** — the raw program passed in for study: the source text a learner
   or host brings, together with its snippet type.
 - **Facts** — the synchronous fact slice of the embodiment: the source text, its
-  tokens, its syntax tree, the entwined source⇄tree binding, and the snippet
-  type. Each is a **fact stage**: a tagged result holding either its value or a
-  structured cause of failure. A stage's own failure renders inside the
-  lifecycle phase that owns it.
-- **lifecycle** — the six flat phases every program moves through:
-  `source → realm → tokens → ast → environment → evaluation`. The phases are
-  peers, matching the language specification's own shape; the split between
-  `tokens` (spelling) and `ast` (grammar) follows the parser's practical
-  behavior. Phase names are data; learner-facing display labels are
-  presentation, owned by the orchestrator's UI.
+  tokens, its syntax tree, the entwined source⇄tree binding, its static scope
+  structure, and the snippet type. Each is a **fact stage**: a tagged result
+  holding either its value or a structured cause of failure. A stage's own
+  failure renders inside the lifecycle phase that owns it.
+- **lifecycle** — the five flat phases every program moves through:
+  `source → tokens → ast → environment → evaluation`. The phases are peers,
+  matching the language specification's own shape; the split between `tokens`
+  (spelling) and `ast` (grammar) follows the parser's practical behavior. Four
+  phase names — `source`, `tokens`, `ast`, and `environment` — each name a
+  **fact stage** as well as a phase: the phase is where that stage is studied.
+  Bare use names the phase, and "the … stage" names the fact (the way "the level
+  selector's **fit marks**" is kept distinct from lens **fit**). Phase names are
+  data; learner-facing display labels are presentation, owned by the
+  orchestrator's UI.
 - **phase accessibility** — a property of each lifecycle phase on the
   embodiment: a phase is **barred** when an upstream fact stage failed, and it
   carries that cause. Distinct from a lens simply not applying.
@@ -395,14 +397,14 @@ flowchart TD
     orch -.->|"consults"| levels
 ```
 
-| Region                    | What it is                                                                                                                          |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| **orchestrator**          | the one mounted component: the editor (single writer of source), the six-phase panel, the level UI, the guide; the composition root |
-| **lenses**                | the component kind of study utility — views attached to phases by fit                                                               |
-| **evaluators**            | the generator kind — headless program execution, driven by evaluation-phase lenses                                                  |
-| **language levels**       | passive consultable libraries — validator, docs, editor support, model builders; JEJ is the first                                   |
-| **embodiment factory**    | turns a snippet into the frozen embodiment, level-blind                                                                             |
-| **shared leaf libraries** | parsing, the execution engine, configuration merging                                                                                |
+| Region                    | What it is                                                                                                                           |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **orchestrator**          | the one mounted component: the editor (single writer of source), the five-phase panel, the level UI, the guide; the composition root |
+| **lenses**                | the component kind of study utility — views attached to phases by fit                                                                |
+| **evaluators**            | the generator kind — headless program execution, driven by evaluation-phase lenses                                                   |
+| **language levels**       | passive consultable libraries — validator, docs, editor support, model builders; JEJ is the first                                    |
+| **embodiment factory**    | turns a snippet into the frozen embodiment, level-blind                                                                              |
+| **shared leaf libraries** | parsing, the execution engine, configuration merging                                                                                 |
 
 ## Navigation
 

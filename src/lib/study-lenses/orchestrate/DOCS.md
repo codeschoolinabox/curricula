@@ -31,7 +31,7 @@ abstraction; each rendered surface and derivation library zooms in below.
    settled snippet + the composed study configuration. Output: the frozen
    embodiment + the level verdicts + the fit marks.
 
-3. **Render** (mechanical) — the six-phase panel renders the embodiment; the
+3. **Render** (mechanical) — the five-phase panel renders the embodiment; the
    level UI renders the verdicts and marks; the mask derives here, from the
    selected level's verdict crossed with the strict posture, classifying
    surfaces into the three classes; an initial-focus request mounts here,
@@ -89,7 +89,7 @@ flowchart TD
 - **The undetermined carve-out wins.** While the code does not parse, the mask
   names no violation and the parse phases' supports stay uncovered — regardless
   of type admission.
-- **Display labels live here.** The six phases' learner-facing labels and the
+- **Display labels live here.** The five phases' learner-facing labels and the
   none-state's display string are this region's presentation concern; the data
   names are the other regions'.
 

@@ -2,7 +2,7 @@
 
 The orchestrator — the one component the host mounts. It renders the study
 environment the package [README](../README.md) describes: the editor, the
-six-phase study panel, the level UI, the embedded guide. And it is the
+five-phase study panel, the level UI, the embedded guide. And it is the
 composition root: the default rosters joined with whatever the host injects, the
 configuration cascade resolved per lens name, and everything re-derived per
 settle.
@@ -67,7 +67,7 @@ merge when the lens declares none.
   state re-derives from its settles. It consumes the selected level's
   editor-support data — completion, hover, format — through the adapter that
   lives with the editor's own surface.
-- **The six-phase study panel** — the mechanical render of the embodiment: a
+- **The five-phase study panel** — the mechanical render of the embodiment: a
   barred phase renders barred with its cause; an accessible phase lists its
   fitting lenses. The phases' learner-facing display labels are this region's UI
   concern — their data names live in embody.

@@ -26,7 +26,7 @@ The contract, compactly (the full doc-commented version is
 
 ```ts
 type Embodiment = {
-	facts: Facts; // source · tokens · ast · entwined · type — tagged stages
+	facts: Facts; // source · tokens · ast · entwined · environment · type — tagged stages
 	lifecycle: Readonly<Record<LifecyclePhaseName, LifecyclePhase>>; // { accessible, cause?, lenses }
 };
 // the factory's boundary: embody(code, { type, lenses }) → frozen Embodiment
@@ -54,18 +54,19 @@ orchestrator's UI).
 
 Five steps, in order; each step's output is the next step's input.
 
-1. **Derive the fact stages.** Each of the five Facts — source, tokens, ast,
-   entwined, type — is derived as a tagged stage: its value, or a structured
-   cause of failure. The tokens stage carries the token stream together with the
-   comments the tokenizer sets aside. A failed stage is data, not an exception;
-   its failure renders inside the lifecycle phase that owns the stage.
-2. **Derive phase accessibility.** From the tagged stages, each of the six
-   lifecycle phases gets its accessibility: `source`, `realm`, and `tokens` are
-   always accessible — a tokens-stage failure renders inside the `tokens` phase
-   itself; `ast` is barred only when the tokens stage failed — an ast-stage
-   grammar error leaves the `ast` phase accessible and renders there;
-   `environment` and `evaluation` are barred when tokens, ast, or entwining
-   failed. A barred phase carries the upstream cause with it.
+1. **Derive the fact stages.** Each of the six Facts — source, tokens, ast,
+   entwined, environment, type — is derived as a tagged stage: its value, or a
+   structured cause of failure. The tokens stage carries the token stream
+   together with the comments the tokenizer sets aside. A failed stage is data,
+   not an exception; its failure renders inside the lifecycle phase that owns
+   the stage.
+2. **Derive phase accessibility.** From the tagged stages, each of the five
+   lifecycle phases gets its accessibility: `source` and `tokens` are always
+   accessible — a tokens-stage failure renders inside the `tokens` phase itself;
+   `ast` is barred only when the tokens stage failed — an ast-stage grammar
+   error leaves the `ast` phase accessible and renders there; `environment` and
+   `evaluation` are barred when tokens, ast, or entwining failed. A barred phase
+   carries the upstream cause with it.
 3. **Gate the phase-declaring lenses.** Every roster lens that declares a
    lifecycle phase has its applicability run over the Facts — wrapped: a gate
    that throws is treated as not-applicable, with a loud development-mode
@@ -100,9 +101,13 @@ the failure also raises a loud development-mode report:
   with it, and nothing is reported loudly — a broken program is a normal state
   worth studying.
 - **A defect in embody's own machinery is loud to the developer, graceful to the
-  learner.** Entwining failure raises a loud development-mode report and also
-  bars downstream phases like any failed stage; a throwing applicability gate is
-  degraded to not-applicable and loudly reported.
+  learner.** An entwining or scope-analysis failure raises a loud
+  development-mode report; a throwing applicability gate is degraded to
+  not-applicable and reported the same way. What a failure bars follows
+  dependency: the source⇄tree binding underpins every later surface, so an
+  entwining failure bars the phases below it; the scope structure is terminal —
+  no later phase reads it — so an environment failure renders inside the
+  `environment` phase alone, leaving `evaluation` reachable.
 
 ## Reading the embodiment
 
@@ -111,8 +116,8 @@ rule:
 
 - **A fact stage narrows on `ok`.** Read `facts.ast.ok` before
   `facts.ast.value`. The given stages — `source` and `type` — type as
-  success-only, so their values read directly; only `tokens`, `ast`, and
-  `entwined` carry a failure arm.
+  success-only, so their values read directly; only `tokens`, `ast`, `entwined`,
+  and `environment` carry a failure arm.
 - **A phase payload narrows on `accessible`.** A barred phase adds its `cause` —
   whose `stage` field names the true origin; both arms list the lenses that fit.
 - **The parse facts are values, not envelopes.** What a language level's
@@ -130,6 +135,10 @@ this region owns.
 - **entwining / entwined** — the derived source⇄tree binding: the stage tying
   each syntax-tree node to its exact place in the source text. Built at
   embodiment time, in this region.
+- **environment** — the derived static scope structure, pre-execution: the stage
+  resolving how each name is bound across the program's nested scopes, toggled
+  for scripts or modules. Built at embodiment time, in this region, from the
+  syntax tree and the snippet type.
 - **phase accessibility** — the derived per-phase map: accessible, or barred
   with the carried upstream cause. (The package glossary owns its distinction
   from lens fit.)
@@ -143,7 +152,7 @@ this region owns.
   refs sit outside embody's immutability contract — whatever guarantees they
   carry are their defining module's business.
 - **Snippet** — the raw program passed in: source text plus snippet type.
-- **Embodiment** — the frozen output: the Facts plus the six phase payloads.
+- **Embodiment** — the frozen output: the Facts plus the five phase payloads.
 
 ## Navigation
 

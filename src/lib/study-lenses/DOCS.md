@@ -36,7 +36,7 @@ document constrains only the package-level shape.
      Input: the embodiment's parse facts + the registered levels. Output: level
      verdicts (violations · type admission · undetermined while unparsed).
 
-3. **Render** (mechanical) — the six lifecycle phases render from the
+3. **Render** (mechanical) — the five lifecycle phases render from the
    embodiment: barred phases visibly barred with their cause; accessible phases
    list their fitting lenses. Level surfaces render from the verdicts. The
    enforcement mask derives here, from the selected level's verdict crossed with
