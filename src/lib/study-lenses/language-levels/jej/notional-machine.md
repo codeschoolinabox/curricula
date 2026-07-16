@@ -81,8 +81,8 @@ flowchart LR
 
 Realm setup — the host installing intrinsics and host bindings — precedes all
 five; it is the backdrop the runtime resolves names against, not a phase (see
-[§ Realm](#realm)). The precise ECMA-262 op and §-number for each phase is in
-the [Spec correspondence appendix](#spec-correspondence-appendix).
+[§ Realm](#realm)). Each phase's ECMA-262 operation is in the
+[Spec correspondence appendix](#spec-correspondence-appendix).
 
 ---
 
@@ -747,55 +747,57 @@ introduction to reference types.
 
 ### Phase mapping
 
-| JEJ name                      | ECMA-262 op                               | Section     |
-| ----------------------------- | ----------------------------------------- | ----------- |
-| Realm setup (intrinsics)      | `SetDefaultGlobalBindings`                | §9.3.4      |
-| Realm setup (host bindings)   | Host hook in `InitializeHostDefinedRealm` | §9.6 + HTML |
-| Parse (tokenize + AST-build)  | `ParseScript`                             | §16.1.5     |
-| Creation: script-scope        | `GlobalDeclarationInstantiation`          | §16.1.7     |
-| Evaluation: script body       | `ScriptEvaluation` (after creation)       | §16.1.6     |
-| Evaluation: block scope push  | `BlockDeclarationInstantiation`           | §14.2.3     |
-| Evaluation: per-iteration env | `CreatePerIterationEnvironment`           | §14.7.4.4   |
+| JEJ phase                     | ECMA-262 operation                                                 | Section          |
+| ----------------------------- | ------------------------------------------------------------------ | ---------------- |
+| Realm setup (intrinsics)      | `SetDefaultGlobalBindings`                                         | §9.3.4           |
+| Realm setup (host bindings)   | host hook in `InitializeHostDefinedRealm`                          | §9.6 + HTML      |
+| tokens + ast (parse)          | `ParseModule`                                                      | module semantics |
+| environment                   | the module's environment record is instantiated, before evaluation | module semantics |
+| evaluation                    | the module's body is evaluated (`ExecuteModule`)                   | module semantics |
+| evaluation: block scope push  | `BlockDeclarationInstantiation`                                    | §14.2.3          |
+| evaluation: per-iteration env | `CreatePerIterationEnvironment`                                    | §14.7.4.4        |
+
+The realm-setup, block, and per-iteration operations carry their exact ES2024
+§-numbers. The three module-semantics operations — `ParseModule`, the
+environment instantiation, and evaluation — are cited by name; their precise
+clauses live among ECMA-262's clauses on module semantics.
 
 ### Glossary bridges
 
 When learners encounter our terms vs. what they'll see elsewhere (MDN / Stack
 Overflow / their next course):
 
-| JEJ term                   | What learners may see elsewhere                                                                                                                                                                                                                                                                            |
-| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| "creation phase"           | "hoisting" — same idea, less precise                                                                                                                                                                                                                                                                       |
-| "script scope"             | "global scope" (MDN's typical term)                                                                                                                                                                                                                                                                        |
-| "realm"                    | "the globals" (informal)                                                                                                                                                                                                                                                                                   |
-| `BindingStatus = 'tdz'`    | spec term: "uninitialized binding"; learner-facing nickname: "TDZ" — TDZ is the _access-time consequence_ of being uninitialized                                                                                                                                                                           |
-| "intercept"                | JEJ-internal name; learners won't see it elsewhere                                                                                                                                                                                                                                                         |
-| `scope:push` / `scope:pop` | The spec's `Push`/`Pop` of the LexicalEnvironment chain on the running execution context                                                                                                                                                                                                                   |
-| "evaluation phase"         | Spec's `ScriptEvaluation` body. Distinct from "execution context" (§9.4) — that's a separate spec term for the object containing the LexicalEnvironment chain. We use "evaluation" for the JEJ phase to avoid the harshness of "execution"; we keep "execution context" as the spec term where it appears. |
+| JEJ term                   | What learners may see elsewhere                                                                                                                                                                              |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| "environment phase"        | "hoisting" — same idea, less precise                                                                                                                                                                         |
+| "program scope" (module)   | "module scope" / "top-level scope" — not MDN's "global scope", which is the realm, the module's outer                                                                                                        |
+| "realm"                    | "the globals" (informal)                                                                                                                                                                                     |
+| `BindingStatus = 'tdz'`    | spec term: "uninitialized binding"; learner-facing nickname: "TDZ" — TDZ is the _access-time consequence_ of being uninitialized                                                                             |
+| "intercept"                | JEJ-internal name; learners won't see it elsewhere                                                                                                                                                           |
+| `scope:push` / `scope:pop` | The spec's `Push`/`Pop` of the LexicalEnvironment chain on the running execution context                                                                                                                     |
+| "evaluation phase"         | the module's evaluation. Distinct from "execution context" (§9.4) — a separate spec term for the object holding the LexicalEnvironment chain; we keep "execution context" as the spec term where it appears. |
 
 ### JEJ-pedagogical splits
 
 Some splits in our model are pedagogical, not spec-defined. We make these
 explicit so learners aren't misled when they read the actual spec:
 
-- **Tokenize vs. AST-build**: The spec defines a single op `ParseScript`
-  (§16.1.5). Lexing is folded into the grammar via on-demand `InputElementDiv` /
-  `InputElementRegExp` goal symbols (§12). Our separation is for stepping
-  through, not because the spec runs lexing as a separate phase.
-- **"Creation" vs. "evaluation"**: Both happen inside the umbrella op
-  `ScriptEvaluation` (§16.1.6). Creation = the `GlobalDeclarationInstantiation`
-  step; evaluation = the subsequent evaluation of the `StatementList` (the spec
-  calls this "Evaluation" too). Spec doesn't name them as separate phases.
+- **Tokenize vs. AST-build**: The spec defines a single parse operation
+  (`ParseModule`). Lexing is folded into the grammar via on-demand
+  `InputElementDiv` / `InputElementRegExp` goal symbols (§12). Our separation of
+  `tokens` from `ast` is for stepping through, not because the spec runs lexing
+  as a separate phase.
 - **Realm setup before parse**: Strictly true (the realm exists before any user
-  script runs). But parsing is purely syntactic and does not depend on the realm
-  being initialized — it's an ordering pedagogy chooses, not a strict
+  program runs). But parsing is purely syntactic and does not depend on the
+  realm being initialized — it's an ordering pedagogy chooses, not a strict
   dependency.
 
 ### Variable Environment vs Lexical Environment
 
 The execution context (§9.4) carries two distinct fields: **LexicalEnvironment**
 (used for `let`/`const`/`function` resolution) and **VariableEnvironment** (used
-for `var`). For JEJ-without-functions and without `var`, these coincide at
-script level — we flatten in the NM body and present a single chain. The
+for `var`). For JEJ-without-functions and without `var`, these coincide at the
+module's top level — we flatten in the NM body and present a single chain. The
 distinction matters in full JS but doesn't in JEJ.
 
 ### Empty blocks and the `BlockDeclarationInstantiation` optimization
