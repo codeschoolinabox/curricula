@@ -174,9 +174,9 @@ Named memory slots that hold values. Each binding has:
 Lifecycle:
 
 1. **declare** — the binding is created in its scope with `status: 'tdz'`. For
-   script-scope bindings this fires during creation phase
-   (`GlobalDeclarationInstantiation`); for block-scope bindings it fires on
-   block entry (`BlockDeclarationInstantiation`).
+   top-level (program-scope) bindings this fires in the `environment` phase,
+   when the module's environment record is instantiated; for block-scope
+   bindings it fires on block entry, during `evaluation`.
    - Spec uses the term _uninitialized_; **TDZ** ("Temporal Dead Zone") is the
      access-time consequence — reading an uninitialized binding throws
      `ReferenceError`.
@@ -202,15 +202,22 @@ property-key identifiers it's `proto-check` (property resolution).
 Containers for bindings. Scopes form a chain — inner scopes can see bindings in
 outer scopes via name resolution.
 
-Kinds:
+The program opens three kinds of scope (the level's `ScopeKind`); the realm sits
+above them all as the backdrop:
 
-- **global environment** — outermost scope. Realm intrinsics + host bindings.
-  Always present. Top of the scope chain.
-- **script scope** — top-level scope of the program. Created by
-  `GlobalDeclarationInstantiation` during the creation phase.
-- **block scope** — created by each `{ }` block (if-bodies, loop bodies, bare
-  blocks) **that has lexical declarations**. See
+- **program** — the program's single top-level scope. At runtime it is the
+  **module's environment record**, whose outer is the global environment (the
+  realm); all top-level `let`/`const` live here. Created in the `environment`
+  phase.
+- **block** — created by each `{ }` block (if-bodies, loop bodies, bare blocks)
+  **that has lexical declarations**. See
   [Empty blocks don't push](#empty-blocks-dont-push).
+- **for-of** — the scope of a `for…of` head: a fresh binding for the loop
+  variable each iteration (JEJ iterates strings only).
+- _(backdrop)_ **global environment / realm** — the world every program shares:
+  realm intrinsics + host bindings, always present, the top of the scope chain.
+  Not a scope the program opens — a reference it resolves against (see
+  [§ Realm](#realm)).
 
 Lifecycle (per ECMA-262, modelled as `push`/`pop` events on the
 LexicalEnvironment chain):
@@ -225,7 +232,8 @@ Scope pop reasons: `'normal' | 'break' | 'continue' | 'error' | 'limit'`.
 On `scope:push` for a non-empty block (one with lexical declarations), all
 `binding:declare` events for the block's `let`/`const` bindings fire
 immediately, in source order, **before** the first statement event inside the
-block. This mirrors `GlobalDeclarationInstantiation` for script scope.
+block. This mirrors how the program (module) scope is set up in the
+`environment` phase.
 
 ```text
 scope:push (kind: 'block')
@@ -234,9 +242,9 @@ scope:push (kind: 'block')
 statement:enter ...                             ← first body statement
 ```
 
-The same micro-ordering applies to the `streams.create` stream for script-scope:
-the stream opens with one `scope:push` event for the script scope, followed by a
-`binding:declare` event for each script-level `let`/ `const` in source order.
+The same micro-ordering opens the program scope: one `scope:push` event for the
+module scope, followed by a `binding:declare` event for each top-level `let`/
+`const` in source order.
 
 `limit` is JEJ-specific (iteration/time guard) — not ECMAScript, but a real
 reason scopes exit in our runtime. Internally implemented via thrown
@@ -263,23 +271,23 @@ event with `kind: 'identifier'` as the `scopeChainWalk` array.
 flowchart LR
     id(["identifier<br/>e.g. greeting"])
     block["block scope<br/>{ y, z }"]
-    script["script scope<br/>{ greeting, shout }"]
+    mod["module scope<br/>{ greeting, shout }"]
     realm["realm<br/>{ Math, console, … }"]
     found(["✓ found"])
     err(["✗ ReferenceError"])
     id --> block
-    block -- miss --> script
-    script -- hit --> found
-    script -. miss .-> realm
+    block -- miss --> mod
+    mod -- hit --> found
+    mod -. miss .-> realm
     realm -. miss .-> err
 ```
 
 ```text
 scopeChainWalk: [
   { scope: <block>,  hit: false },   // ['y', 'z'] — miss
-  { scope: <script>, hit: true  },   // ['greeting', 'shout'] — hit on greeting
+  { scope: <module>, hit: true  },   // ['greeting', 'shout'] — hit on greeting
 ]
-→ found greeting in script scope
+→ found greeting in module scope
 ```
 
 Failed lookup = chain of misses ending in `ReferenceError`:
@@ -287,8 +295,8 @@ Failed lookup = chain of misses ending in `ReferenceError`:
 ```text
 scopeChainWalk: [
   { scope: <block>,  hit: false },
-  { scope: <script>, hit: false },
-  { scope: <global>, hit: false },
+  { scope: <module>, hit: false },
+  { scope: <realm>,  hit: false },
 ]
 → ReferenceError: undeclaredVar is not defined
 ```
@@ -670,7 +678,7 @@ interact simultaneously:
 
 | Moment                            | Visual-syntax             | Behind-the-scenes                                                                                                                                                                                                                                              |
 | --------------------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `let x = 5;`                      | statement enter/exit      | binding `declare` (creation if script-scope, or block entry) → `initialize`                                                                                                                                                                                    |
+| `let x = 5;`                      | statement enter/exit      | binding `declare` (environment if top-level, or block entry) → `initialize`                                                                                                                                                                                    |
 | `x` in expression                 | `expression: identifier`  | scope chain walk → `binding:access` → `resolve(identifier)`                                                                                                                                                                                                    |
 | `x = x + 1`                       | expression (= and +)      | scope walk → `binding:access` → coerce(+) → `binding:update` → `resolve(assignment)`                                                                                                                                                                           |
 | `'5' + 1`                         | expression (+)            | resolve operands → `coerce ToPrimitive×2` → `coerce ToString×2` → expression `'+'` (string concat, result `'51'`)                                                                                                                                              |
