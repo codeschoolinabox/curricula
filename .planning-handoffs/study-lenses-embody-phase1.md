@@ -221,17 +221,15 @@ recommendations, and a cold reader caught it.
 - **OPEN-6 — how do you draw a five-phase lifecycle?** The root README's chain
   and `embody/DOCS.md`'s `## Data flow` both change. Rule: `<br/>` in **NODE
   labels only, never edge labels**.
-- **OPEN-7 — does `ParseFacts` get REPLACED by `Facts`, or EXTENDED with
-  entwined facts?** _Not your call, and not settled — but read § Coordination
-  critically, because it overstates this._ Ruling 4 ("levels stop deriving")
-  requires levels to **receive** scope facts; it does **not** entail killing the
-  mirror. Replace and extend both satisfy it. The no-type-edge rule is bought by
-  **mirroring** — cheap for three fields, expensive for a whole entwined graph;
-  at some point the mirror **is** the thing. **But the JEJ stream's own notes
-  frame it as "does `ParseFacts` gain entwined facts?" (extend), and §
-  Coordination below says "killing `ParseFacts`" (replace) as though decided. It
-  is not.** The decision is the maintainer's; the work is the JEJ stream's;
-  **flag the discrepancy at your gate rather than inheriting either reading.**
+- **~~OPEN-7~~ — RULED (maintainer, 2026-07-15): `ParseFacts` is KEPT and
+  EXTENDED with entwined facts, NOT replaced. JEJ loses its scope building.**
+  Recorded so nobody re-opens it. **Consequence that matters to you: the level
+  spine stays a MIRROR, so "no type edge runs from levels into embody" SURVIVES
+  intact** — `ParseFacts` will mirror eslint-scope's vocabulary the way it
+  already mirrors acorn's, and the caller (orchestrate) assembles it from your
+  Facts. **None of that work is yours**; it is the JEJ stream's amendment, in
+  its file. ⚠️ **§ Coordination below is written in the superseded "replace"
+  reading — read it with this correction.**
 
 ## Ripples the amendment must carry (measured, 2026-07-15)
 
@@ -294,21 +292,20 @@ AR cycle).
 
 Earlier guidance said the streams do not intersect. **That is now wrong, and the
 JEJ agent has been told.** Ruling 4 requires levels to **receive** facts rather
-than derive them — `validate(facts: Facts)` — which means:
+than derive them — which means:
 
-> ⚠️ **Whether that REPLACES `ParseFacts` or EXTENDS it is OPEN-7, not
-> settled.** This section is written in the replace reading; the JEJ stream's
-> own notes are written in the extend reading. **Both satisfy ruling 4.** Treat
-> the consequence list below as _the replace reading's_ consequences, not as
-> fact.
-
-- **A type edge levels→embody appears** (type-only, the same shape lenses
-  already have). It replaces a mirror that no longer scales.
-- **`validate` takes `Facts`, NOT `Embodiment`** — deliberate.
+- **RULED 2026-07-15: `ParseFacts` is KEPT and EXTENDED with entwined facts; JEJ
+  loses its scope building.** **So NO type edge appears** — the level spine
+  stays a **mirror** (it will mirror eslint-scope's vocabulary as it already
+  mirrors acorn's), and **"no type edge runs from levels into embody" survives
+  intact.** The caller (orchestrate) assembles `ParseFacts` from your Facts, as
+  it already does. _(An earlier draft argued the mirror should die and a type
+  edge appear. The maintainer ruled the conservative way. Do not re-litigate
+  it.)_
+- **Whatever a level receives, it is NOT `Embodiment`** — deliberate.
   `Embodiment = {facts, lifecycle}`, and handing a level the lifecycle hands it
   the **attached lens roster**, which is exactly what _"levels never ship
-  lenses"_ and _"no kernel→lens channel — YAGNI"_ prevent. `Facts` gives the
-  same ergonomics with a bounded surface.
+  lenses"_ and _"no kernel→lens channel — YAGNI"_ prevent.
 - **That amendment is the JEJ stream's work, entirely in its files.** Measured:
   **11 `ParseFacts` occurrences across 5 files — 5 of 5 are theirs, ZERO are
   yours.** (An earlier draft said "4 of 5 occurrences", implying a touchpoint in

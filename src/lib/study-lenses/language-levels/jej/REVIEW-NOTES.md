@@ -1,4 +1,4 @@
-<!-- cspell:ignore oneline noiw empts Entwinement -->
+<!-- cspell:ignore oneline noiw empts Entwinement parsefacts -->
 
 # jej — review notes from the embody stream
 
@@ -235,15 +235,35 @@ _policy_ is unchanged and `just-enough-js.ts` is still the heart. **If your
 current Phase-0 commits you to a derivation architecture, say so at your 0.7
 gate rather than building it.**
 
-**One genuinely undecided thing that lands on YOUR file:** if levels stop
-deriving, `validate(facts: ParseFacts)` needs scope — and
-`ParseFacts = {tokens, comments, ast}` has no slot. **Does `ParseFacts` gain
-entwined facts?** That is a **level-spine amendment**, in the file you own, and
-it is the **first real intersection between our streams** (my earlier "we do not
-intersect" was true then and is now wrong). **Take it to the maintainer; do not
-settle it alone.** Honest caveat: `ParseFacts` buys "no type edge into embody"
-by _mirroring_ — cheap for three fields, expensive for a whole entwined graph.
-At some point the mirror **is** the thing. That question is now live.
+### 6c. ✅ RULED — `ParseFacts` is KEPT and EXTENDED. **The scope building is what you drop.**
+
+**Maintainer, 2026-07-15.** I asked whether `ParseFacts` gets replaced by
+embody's `Facts` or extended with entwined facts. **Ruling: extended.**
+Verbatim: _"keep/extend parsefacts, jej loses its scope building."_
+
+**What this means for your file — and it is the good outcome:**
+
+- **`ParseFacts` survives**, gaining entwined/scope facts. It will mirror
+  `eslint-scope`'s vocabulary the way it already mirrors acorn's.
+- **"No type edge runs from levels into embody" SURVIVES INTACT.** That property
+  is yours and the ruling protects it. The caller (orchestrate) assembles
+  `ParseFacts` from the embodiment's stage values, exactly as it already does.
+  **Nothing about your region's independence changes.**
+- **What you drop is the DERIVING**: `scope/build-scope.ts` (401+87) does not
+  come with you, and most of `check-undeclared-globals.ts` (475) collapses into
+  a set test over a fact. **`just-enough-js.ts` (599) is untouched — it IS the
+  level.**
+- **`validate` never receives `Embodiment`** — only facts. Handing a level the
+  embodiment would hand it the attached lens roster, which _"levels never ship
+  lenses"_ forbids.
+
+**So 6b's pause is now half-lifted:** the _shape_ is settled (extend, consume,
+don't derive). **Still do not port `build-scope.ts` or
+`check-undeclared-globals.ts` as-is** — they are the derivation this ruling
+deletes. The `ParseFacts` extension itself is **your amendment, in your file**,
+with **ar-1 + ar-2** and the human gate. It depends on the embody stream's
+`environment` fact being specified, so **raise the sequencing at your 0.7
+gate.**
 
 ## The embody stream does not intersect you — you are autonomous
 
