@@ -566,13 +566,19 @@ JEJ has no `try`/`catch` — every runtime error is unhandled.
 
 Error type to phase mapping:
 
-| Error                           | Phase        | Cause                                                                                                                                                                            | Spec             |
-| ------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
-| `SyntaxError`                   | tokens / ast | Invalid character sequence (`tokens`); invalid grammar or Early Errors — `break` outside a loop, `let` redeclaration (`ast`)                                                     | §13.7.3          |
-| `ReferenceError` (TDZ)          | evaluation   | Access of binding declared but not yet initialized                                                                                                                               | §9.1.1.1.1       |
-| `ReferenceError` (unresolvable) | evaluation   | Identifier not in any scope on the chain                                                                                                                                         | §9.1.1.1.7       |
-| `TypeError`                     | evaluation   | Call non-callable, property on null/undefined, **const reassignment**, mixing `bigint` with `number` in arithmetic, `for-of` on a non-string (JEJ restricts `for-of` to strings) | §13.6.1, §10.1.1 |
-| `RangeError`                    | evaluation   | Numeric out of range; JEJ iteration-guard `limit`                                                                                                                                | §6.2.5           |
+| Error                           | Phase        | Cause                                                                                                                                                                            | Spec       |
+| ------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| `SyntaxError`                   | tokens / ast | Invalid character sequence (`tokens`); invalid grammar or Early Errors — `break` outside a loop, `let` redeclaration (`ast`)                                                     | —          |
+| `ReferenceError` (TDZ)          | evaluation   | Access of binding declared but not yet initialized                                                                                                                               | §9.1.1.1.6 |
+| `ReferenceError` (unresolvable) | evaluation   | Identifier not in any scope on the chain                                                                                                                                         | §6.2.5.5   |
+| `TypeError`                     | evaluation   | Call non-callable, property on null/undefined, **const reassignment**, mixing `bigint` with `number` in arithmetic, `for-of` on a non-string (JEJ restricts `for-of` to strings) | —          |
+| `RangeError`                    | evaluation   | Numeric out of range; JEJ iteration-guard `limit`                                                                                                                                | —          |
+
+`—` in the Spec column marks an error thrown from many clauses, with no single
+throw-site section. The `NativeError` types themselves are defined under §20.5.5
+— `RangeError` §20.5.5.2, `SyntaxError` §20.5.5.4, `TypeError` §20.5.5.5. The
+JEJ iteration-guard `limit` is JEJ-specific, not ECMAScript, so no ECMA-262
+clause applies.
 
 Const reassignment is `TypeError`, **not** `SyntaxError` — common misconception
 worth flagging.
