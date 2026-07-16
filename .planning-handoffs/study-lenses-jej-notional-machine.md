@@ -49,10 +49,22 @@ _"documentary… not an ordered sequence of installation events."_ The old prose
 was right and the ratification was wrong. **Keep that claim; it is no longer a
 defect.**
 
-**2. A `link` phase IS coming — and it is NOT yours.** For `type: 'module'`,
-snippets will be able to import didactic dependencies. **JEJ admits no imports,
-so it changes nothing here: do not model it.** It lands through an embody
-Phase-0 amendment with its own human gate.
+**2. ~~A `link` phase IS coming~~ — RETRACTED 2026-07-15. There is NO link
+phase.** The maintainer considered and **rejected** it. This entry existed
+because the embody stream told the JEJ agent link was coming; that was true when
+written and is now false. **Do not model it, do not mention it, do not re-add
+it.**
+
+_Why rejected, so nobody revives it:_ link's data is a **filter of
+environment**, not a new fact (`defs[0].type === 'ImportBinding'` sorts imports
+from locals in the same analysis), and the genuinely link-shaped content — _did
+it resolve? what's the graph? cycles?_ — is exactly what embody cannot see from
+one `code: string`. The record already maps **`environment` = `Link()` for
+modules**.
+
+**The final lifecycle is FIVE flat phases, identical for scripts and modules:**
+`source → tokens → ast → environment → evaluation`. Realm is gone (see 1). If
+your rewrite names a phase list, that is the list.
 
 **3. A new `environment` fact stage is coming — also NOT yours**, and it may
 touch your work: embody is building a **full-ECMAScript static scope structure

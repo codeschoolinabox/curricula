@@ -1,4 +1,4 @@
-<!-- cspell:ignore oneline noiw empts -->
+<!-- cspell:ignore oneline noiw empts Entwinement -->
 
 # jej — review notes from the embody stream
 
@@ -65,11 +65,19 @@ grep -noiwE "isJeJ|creation" src/lib/study-lenses/language-levels/jej/notional-m
 # isJeJ    ×1  (:572 "`validation.isJeJ` is `false`" — a dead API)
 ```
 
-It also contradicts the ratified lifecycle outright: `:57` **"## Lifecycle: four
-phases"** and `:59` **"Realm is static data, not a runtime phase"** — the
-ratified model is **six** flat phases
-(`source → realm → tokens → ast → environment → evaluation`) and `realm` **is**
-one.
+It also contradicts the ratified lifecycle: `:57` **"## Lifecycle: four
+phases"** — the lifecycle is **five** flat phases
+(`source → tokens → ast → environment → evaluation`), and the doc's four are not
+those four.
+
+> ⚠️ **CORRECTION (2026-07-15) — I was wrong about one of these, and you caught
+> it.** I originally listed `:59` **"Realm is static data, not a runtime
+> phase"** as a defect, on the grounds that the ratified model made `realm` a
+> phase. **The maintainer has since removed the realm phase — so `:59` was RIGHT
+> all along, and the ratification was wrong.** Your reading (_"the old prose was
+> right… keep that claim; it is no longer a defect"_) is correct and mine was
+> not. The NM doc is **vindicated** on realm. `creation` ×9 and `isJeJ` remain
+> real defects.
 
 **This is yours to resolve with the maintainer, not to silently keep.** The
 options are: back it out of `jej/` until the NM deliverable runs · conform its
@@ -168,13 +176,74 @@ world. **If you find the table load-bearing in a way this ruling breaks, STOP
 and say so** — you know that design better than I do, and I would rather be
 corrected than have you quietly delete the source your allowlist derives from.
 
-Also coming (maintainer, same session): a **new `environment` fact stage** (a
-full-ECMAScript static scope structure via `eslint-scope`, which consumes
-acorn's AST directly), and a **`link` phase** for `type: 'module'` — snippets
-will be able to import didactic dependencies. **Neither is yours.** Both land
-through an embody Phase-0 amendment with its own human gate. They are named here
-only so a phase list that no longer matches your prose does not read as your
-error.
+## 6. 🔴 STOP — two corrections, and one may delete work you are about to do
+
+**Both are MY errors, not yours. Read before porting anything.**
+
+### 6a. The `link` phase is DEAD — I told you it was coming, and it is not
+
+An earlier version of this file said a **`link` phase** was coming. **The
+maintainer considered and REJECTED it (2026-07-15).** True when written, false
+now — and you propagated it in good faith into
+`.planning-handoffs/study-lenses-jej-notional-machine.md:52` (_"A `link` phase
+IS coming — and it is NOT yours"_). **I have corrected that file.** No action
+from you beyond not re-adding it.
+
+_Why rejected, so nobody revives it:_ link's data is a **filter of
+environment**, not a new fact — `defs[0].type === 'ImportBinding'` sorts imports
+from locals in the same analysis, and the specifier rides the same def. The
+genuinely link-shaped content (_did it resolve? what's the graph? cycles?_) is
+exactly what embody **cannot see** from one `code: string`. And the record
+already maps **`environment` = `Link()` for modules**, so splitting them
+subdivides one spec operation into two peers.
+
+**Final lifecycle — FIVE flat phases, identical for scripts and modules:**
+`source → tokens → ast → environment → evaluation`.
+
+### 6b. "Levels stop deriving" — PAUSE before porting the validator
+
+**Maintainer direction, 2026-07-15 — a strong lean, not yet final, which is
+exactly why you should not spend the effort yet.** The rule taking shape:
+
+> **embody states what is TRUE about the program; levels decide what is
+> ALLOWED.** Facts save consumers complex traversals for **common, generic
+> program analytics**; anything niche, a consumer does itself. Entwinement is
+> free because facts are objects/arrays **indexing into** pre-existing entwined
+> objects.
+
+Embody is gaining a **full-ECMAScript entwined environment fact** (via
+`eslint-scope` — verified: it consumes acorn's AST directly and shares **node
+identity** with it). If that lands, **most of the validator you are about to
+port evaporates.** Verified against the quarry:
+
+| Quarry file                               | Lines    | Fate under "levels stop deriving"                                                                                                                                                                                                                                                                                                        |
+| ----------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `scope/build-scope.ts` + `scope/types.ts` | 401 + 87 | **DIES.** Embody's environment fact covers it and strictly more: 11 scope kinds vs your 3; `var`/functions/classes/catch; and **references with positions**, where yours collapses to `readCount`/`writeCount` and discards them. Verified: eslint models even your "the initializer is not a write" rule natively, as `Reference.init`. |
+| `check-undeclared-globals.ts`             | 475      | **Mostly dies.** `globalScope.through` states "resolves to nothing" as a level-blind fact; your part becomes a **set-membership test** against the level's world. Verified end-to-end.                                                                                                                                                   |
+| `collect-violations.ts`                   | 128      | The **walk** likely dies (a generic node index is exactly "common, generic analytics"); the policy application stays, and is small.                                                                                                                                                                                                      |
+| `validate-program.ts`                     | 123      | **Dies** — no parse, no walk.                                                                                                                                                                                                                                                                                                            |
+| `just-enough-js.ts`                       | 599      | **SURVIVES — this IS the level.** The allowlist, operator sets, blocked members, the world. Policy, which no fact can supply.                                                                                                                                                                                                            |
+
+**Roughly half of the ~2,230 lines you were sizing evaporate, and what remains
+is mostly allowlist DATA.** That is not a smaller port — it is a **different
+deliverable**.
+
+**What to do: do NOT port `build-scope.ts`, `check-undeclared-globals.ts`,
+`validate-program.ts`, or `collect-violations.ts` until the maintainer rules.**
+Your Phase-0 (glossary, README, DOCS, types) is still good work — the level's
+_policy_ is unchanged and `just-enough-js.ts` is still the heart. **If your
+current Phase-0 commits you to a derivation architecture, say so at your 0.7
+gate rather than building it.**
+
+**One genuinely undecided thing that lands on YOUR file:** if levels stop
+deriving, `validate(facts: ParseFacts)` needs scope — and
+`ParseFacts = {tokens, comments, ast}` has no slot. **Does `ParseFacts` gain
+entwined facts?** That is a **level-spine amendment**, in the file you own, and
+it is the **first real intersection between our streams** (my earlier "we do not
+intersect" was true then and is now wrong). **Take it to the maintainer; do not
+settle it alone.** Honest caveat: `ParseFacts` buys "no type edge into embody"
+by _mirroring_ — cheap for three fields, expensive for a whole entwined graph.
+At some point the mirror **is** the thing. That question is now live.
 
 ## The embody stream does not intersect you — you are autonomous
 
