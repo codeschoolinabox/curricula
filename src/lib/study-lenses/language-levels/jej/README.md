@@ -167,10 +167,10 @@ own, it says so — the level speaks the word, it does not define the thing.
   is shaped by what JEJ admits. Distinct from the package's `environment`
   **phase** — this is a model the phase's lenses read, not the phase itself.
 - **realm model** — the level's model of the world it teaches: the admitted
-  intrinsics and host bindings, each by the form it takes. Needs no program.
-  Distinct from the package's `realm` **phase**, which is the world that
-  actually exists before the first line runs — this model is the level's slice
-  of it.
+  intrinsics and host bindings, each by the form it takes. Needs no program —
+  which is why it is a reference a learner consults, not a step their code
+  passes through. Distinct from the realm itself, the full JavaScript world that
+  exists before the first line runs: this model is the level's slice of it.
 
 ## Navigation
 
