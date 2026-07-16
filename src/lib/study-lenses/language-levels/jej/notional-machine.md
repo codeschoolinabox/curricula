@@ -566,13 +566,13 @@ JEJ has no `try`/`catch` — every runtime error is unhandled.
 
 Error type to phase mapping:
 
-| Error                           | Phase             | Cause                                                                                                                                                                            | Spec             |
-| ------------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
-| `SyntaxError`                   | parse (AST-build) | Invalid grammar; Early Errors (e.g. `break` outside loop, `let` redeclaration)                                                                                                   | §16.1.5, §13.7.3 |
-| `ReferenceError` (TDZ)          | evaluation        | Access of binding declared but not yet initialized                                                                                                                               | §9.1.1.1.1       |
-| `ReferenceError` (unresolvable) | evaluation        | Identifier not in any scope on the chain                                                                                                                                         | §9.1.1.1.7       |
-| `TypeError`                     | evaluation        | Call non-callable, property on null/undefined, **const reassignment**, mixing `bigint` with `number` in arithmetic, `for-of` on a non-string (JEJ restricts `for-of` to strings) | §13.6.1, §10.1.1 |
-| `RangeError`                    | evaluation        | Numeric out of range; JEJ iteration-guard `limit`                                                                                                                                | §6.2.5           |
+| Error                           | Phase        | Cause                                                                                                                                                                            | Spec             |
+| ------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| `SyntaxError`                   | tokens / ast | Invalid character sequence (`tokens`); invalid grammar or Early Errors — `break` outside a loop, `let` redeclaration (`ast`)                                                     | §13.7.3          |
+| `ReferenceError` (TDZ)          | evaluation   | Access of binding declared but not yet initialized                                                                                                                               | §9.1.1.1.1       |
+| `ReferenceError` (unresolvable) | evaluation   | Identifier not in any scope on the chain                                                                                                                                         | §9.1.1.1.7       |
+| `TypeError`                     | evaluation   | Call non-callable, property on null/undefined, **const reassignment**, mixing `bigint` with `number` in arithmetic, `for-of` on a non-string (JEJ restricts `for-of` to strings) | §13.6.1, §10.1.1 |
+| `RangeError`                    | evaluation   | Numeric out of range; JEJ iteration-guard `limit`                                                                                                                                | §6.2.5           |
 
 Const reassignment is `TypeError`, **not** `SyntaxError` — common misconception
 worth flagging.
@@ -580,12 +580,14 @@ worth flagging.
 **Validation rejection** — distinct from JS errors. The JEJ learning environment
 rejects valid JavaScript that uses features outside the JEJ subset (user-defined
 functions, arrays, `var`, etc.). This is a **learning constraint**, not a
-JavaScript error. Surfaced as `validation.violations` on the embody object, not
-as a runtime error.
+JavaScript error. Surfaced as the level's **violations** (what its `validate`
+returns), not as a runtime error.
 
-Validation requires a successful AST. If parse fails (tokenize or AST-build
-error), there is no AST to walk: `validation.isJeJ` is `false` and
-`validation.violations` is `[]`. The parse error itself is in `embody.errors`.
+Validation requires a successful parse. A program that does not parse — a
+`tokens` (spelling) or `ast` (grammar) failure — is never handed to the level at
+all: the parse facts cannot be built, so there are no violations to report, and
+the verdict is undetermined. The parse error surfaces in the `tokens` or `ast`
+phase, where its lens explains it.
 
 |             | SyntaxError        | Validation rejection                 |
 | ----------- | ------------------ | ------------------------------------ |
