@@ -747,20 +747,21 @@ introduction to reference types.
 
 ### Phase mapping
 
-| JEJ phase                     | ECMA-262 operation                                                 | Section          |
-| ----------------------------- | ------------------------------------------------------------------ | ---------------- |
-| Realm setup (intrinsics)      | `SetDefaultGlobalBindings`                                         | §9.3.4           |
-| Realm setup (host bindings)   | host hook in `InitializeHostDefinedRealm`                          | §9.6 + HTML      |
-| tokens + ast (parse)          | `ParseModule`                                                      | module semantics |
-| environment                   | the module's environment record is instantiated, before evaluation | module semantics |
-| evaluation                    | the module's body is evaluated (`ExecuteModule`)                   | module semantics |
-| evaluation: block scope push  | `BlockDeclarationInstantiation`                                    | §14.2.3          |
-| evaluation: per-iteration env | `CreatePerIterationEnvironment`                                    | §14.7.4.4        |
+| JEJ phase                     | ECMA-262 operation                                                                           | Section     |
+| ----------------------------- | -------------------------------------------------------------------------------------------- | ----------- |
+| Realm setup (intrinsics)      | `SetDefaultGlobalBindings`                                                                   | §9.3.4      |
+| Realm setup (host bindings)   | host hook in `InitializeHostDefinedRealm`                                                    | §9.6 + HTML |
+| tokens + ast (parse)          | `ParseModule`                                                                                | §16.2.1.6.1 |
+| environment                   | the module's environment record is instantiated (`InitializeEnvironment`), before evaluation | §16.2.1.6.4 |
+| evaluation                    | the module's body is evaluated (`ExecuteModule`)                                             | §16.2.1.6.5 |
+| evaluation: block scope push  | `BlockDeclarationInstantiation`                                                              | §14.2.3     |
+| evaluation: per-iteration env | `CreatePerIterationEnvironment`                                                              | §14.7.4.4   |
 
-The realm-setup, block, and per-iteration operations carry their exact ES2024
-§-numbers. The three module-semantics operations — `ParseModule`, the
-environment-record instantiation, and `ExecuteModule` — carry no §-number here;
-their precise clauses live among ECMA-262's clauses on module semantics.
+Every operation now carries its exact ES2024 §-number. The three
+module-semantics operations — `ParseModule` (§16.2.1.6.1),
+`InitializeEnvironment` (§16.2.1.6.4), and `ExecuteModule` (§16.2.1.6.5) — are
+the concrete methods of a Source Text Module Record (§16.2.1.6), under Module
+Semantics (§16.2.1).
 
 ### Glossary bridges
 
