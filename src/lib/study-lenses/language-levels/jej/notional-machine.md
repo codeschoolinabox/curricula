@@ -329,45 +329,48 @@ for resolution events — both walks observable as arrays of step records.
 
 ### Realm
 
-The realm is "the world your script is born into." It contains everything
-JavaScript provides that the learner didn't create. Spec-wise, the realm has
-**two distinct populations** (annotates the SVG poster's realm box):
+The realm is "the world your program is born into." It contains everything
+JavaScript provides that the learner didn't create. This section is the level's
+**one canonical account of that world**: every name below is an admitted global,
+and the realm has **two distinct populations**.
 
 ```mermaid
 flowchart TB
     realm[("Realm<br/>(global environment)")]
-    intrinsics["ECMA intrinsics<br/>SetDefaultGlobalBindings (§9.3.4)<br/><br/>Math · Date · Number · String · Boolean<br/>parseInt · parseFloat<br/>Infinity · NaN · undefined"]
-    host["Host bindings<br/>HTML host hook in InitializeHostDefinedRealm (§9.6)<br/><br/>console · alert · prompt · confirm"]
+    intrinsics["ECMA intrinsics — SetDefaultGlobalBindings (§9.3.4)<br/><br/>object-register: Math · String · Number · Date · RegExp<br/>function: Boolean · BigInt · parseInt · parseFloat · eval<br/>constant: Infinity · NaN · undefined<br/><br/>(eval is an easter egg — admitted, untaught)"]
+    host["Host bindings — HTML host hook, InitializeHostDefinedRealm (§9.6)<br/><br/>object-register: console<br/>function: alert · confirm · prompt"]
     realm --> intrinsics
     realm --> host
 ```
 
-Realm bindings are categorized by visual form (used by lenses to render
-differently):
+Every binding is described two ways — a **form** (how a lens draws it) and a
+**population** (which mechanism installed it):
 
-- **`object-register`** — boxes with methods + a prototype. E.g. `Math`,
-  `String`, `Number`, `Date`, `console`.
-- **`function`** — callable values (notated with the `ƒ` prefix in diagrams).
-  E.g. `ƒ alert`, `ƒ parseInt`, `ƒ Boolean`.
-- **`constant`** — bare primitive values. E.g. `Infinity`, `NaN`, `undefined`.
+- **form** is one of `object-register` (a box of methods with a prototype — e.g.
+  `Math`, `console`), `function` (a callable value, notated with the `ƒ` prefix
+  in diagrams — e.g. `ƒ alert`, `ƒ parseInt`, `ƒ Boolean`), or `constant` (a
+  bare primitive — `Infinity`, `NaN`, `undefined`).
+- **population** is `intrinsic` (the language's, always present) or `host` (the
+  browser's). They stay distinct: collapsing them would conflate "this is
+  JavaScript" with "this is your browser."
 
 The `ƒ` notation is internal to JEJ visualizations — learners won't see it in
 their code or on MDN. It's a typographic cue: "this is callable."
 
 #### ECMA-262 intrinsics
 
-Set by `SetDefaultGlobalBindings` (§9.3.4), called from
+Population `intrinsic`. Set by `SetDefaultGlobalBindings` (§9.3.4), called from
 `InitializeHostDefinedRealm` (§9.6). These are always present, regardless of
-host environment:
+host environment.
 
-**Object registers** (boxes with methods + prototype):
+**Object registers** (boxes of methods with a prototype):
 
 - **Math**: `max`, `min`, `abs`, `floor`, `ceil`, `round`, `random`, `PI`, `E`,
   `sqrt`, `pow`, …
-- **String**: `f String()` (conversion), `fromCharCode`, `fromCodePoint`.
+- **String**: `ƒ String()` (conversion), `fromCharCode`, `fromCodePoint`.
   Prototype: `toUpperCase`, `toLowerCase`, `slice`, `trim`, `includes`,
   `indexOf`, `replace`, `charAt`, `charCodeAt`, `at`, …
-- **Number**: `f Number()` (conversion), `isNaN`, `isFinite`, `isInteger`.
+- **Number**: `ƒ Number()` (conversion), `isNaN`, `isFinite`, `isInteger`.
   Prototype: `toString`, `toFixed`, `toPrecision`, `toExponential`,
   `toLocaleString`.
 - **Date**: static: `now`, `parse`. Constructor: `new Date()` (the sole `new`
@@ -375,30 +378,40 @@ host environment:
   `getHours`, `getMinutes`, `getSeconds`, `getTime`, `toLocaleDateString`,
   `toLocaleTimeString`, `toISOString`. Date methods return primitives — no
   mutation, gentle intro to reference types.
+- **RegExp**: the **name** is admitted — a reference to `RegExp` is not flagged
+  as an unknown global — and its prototype carries `test`, so a regex literal
+  (`/pattern/flags`) resolves `.test()` via `RegExp.prototype`. Constructing one
+  with `new RegExp(...)` is **refused separately**, by the same node rule that
+  makes `new Date()` the sole `new`. Two independent mechanisms: the realm
+  admits the _name_; a node rule refuses the _`new`_. (A regex literal's methods
+  resolve on the intrinsic `RegExp.prototype` regardless — admitting the name is
+  what keeps a bare reference to `RegExp` from reading as a typo.)
 
-**Standalone functions** (marked `f`):
+**Functions** (callable, marked `ƒ`):
 
-- `f parseInt`, `f parseFloat` — string-to-number parsing
-- `f Boolean()` — explicit boolean conversion (teaches truthiness)
+- `ƒ parseInt`, `ƒ parseFloat` — string-to-number parsing.
+- `ƒ Boolean()` — explicit boolean conversion (teaches truthiness).
+- `ƒ BigInt()` — conversion to arbitrary-precision integers.
+- `ƒ eval` — an **easter egg**: admitted but untaught, and absent from
+  [reference.md](./reference.md) by design (eggs are for the learner who goes
+  looking).
 
-**Constants**: `Infinity`, `NaN`, `undefined`.
-
-Regex literals (`/pattern/flags`) create RegExp instances; `.test()` is found
-via `RegExp.prototype`. No `RegExp` constructor in JEJ.
+**Constants** (bare primitives): `Infinity`, `NaN`, `undefined`.
 
 `globalThis` is an ECMA intrinsic but **not in JEJ scope**.
 
 #### Host bindings (HTML)
 
-Set by the host hook inside `InitializeHostDefinedRealm`. These are WHATWG/HTML
-APIs — **not** part of ECMA-262:
+Population `host`. Set by the host hook inside `InitializeHostDefinedRealm`.
+These are WHATWG/HTML APIs — **not** part of ECMA-262:
 
-- `console` — output by intent: `debug`, `log`, `info`, `warn`, `error`;
-  asserting: `assert`; counting: `count`, `countReset`; grouping: `group`,
-  `groupCollapsed`, `groupEnd`; timing: `time`, `timeLog`, `timeEnd`; utility:
-  `clear`. Routes to the [Developer Console](#developer-console).
-- `alert`, `confirm`, `prompt` — synchronous UI dialogs. Route to the
-  [User Interface](#user-interface).
+- **console** (object-register) — output by intent: `debug`, `log`, `info`,
+  `warn`, `error`; asserting: `assert`; counting: `count`, `countReset`;
+  grouping: `group`, `groupCollapsed`, `groupEnd`; timing: `time`, `timeLog`,
+  `timeEnd`; utility: `clear`. Routes to the
+  [Developer Console](#developer-console).
+- `ƒ alert`, `ƒ confirm`, `ƒ prompt` (functions) — synchronous UI dialogs. Route
+  to the [User Interface](#user-interface).
 
 Treating host bindings and ECMA intrinsics as a single population conflates
 spec-distinct concepts. Lenses can mark them differently to teach the
