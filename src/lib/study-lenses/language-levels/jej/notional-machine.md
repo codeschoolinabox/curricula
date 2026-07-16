@@ -54,44 +54,46 @@ NM component corresponds to one of the tracer's step categories (`expression`,
 
 ---
 
-## Lifecycle: four phases
+## Lifecycle: five phases
 
 **Realm is static data, not a runtime phase.** The realm exists before any user
-script runs (host-installed). Strictly, realm setup _precedes_ parse, but parse
-does not depend on it — parsing is purely syntactic. The `streams.realm`
-generator on embody is **documentary**: it iterates the already-installed realm
-bindings (alphabetically) for "what's available in the world?" lenses. It is not
-an ordered sequence of installation events.
+program runs (host-installed). Strictly, realm setup _precedes_ parse, but parse
+does not depend on it — parsing is purely syntactic. The realm is a **reference
+a learner consults, not a step code passes through**: its bindings are the same
+for every program, enumerated by the level's realm model rather than produced by
+running one (see [§ Realm](#realm)).
 
-Three temporally ordered phases follow: **parse → creation → evaluation**.
+The lifecycle is **five flat phases**: **source → tokens → ast → environment →
+evaluation**. Realm setup is the backdrop they resolve names against, not one of
+them.
 
 ```mermaid
 flowchart LR
-    R0["realm setup<br/>(host pre-populates<br/>intrinsics + host APIs)"]
-    P1["parse<br/>(tokenize → AST)"]
-    C2["creation<br/>(script-scope<br/>let/const TDZ)"]
-    E3["evaluation<br/>(statements run;<br/>block scopes push lazily)"]
+    S["source<br/>the text"]
+    T["tokens<br/>spelling"]
+    A["ast<br/>grammar"]
+    E["environment<br/>declarations<br/>come to be"]
+    V["evaluation<br/>the program runs"]
 
-    R0 --> P1 --> C2 --> E3
+    S --> T --> A --> E --> V
 
-    R0 -.->|host hook| R0a[("console, alert,<br/>prompt, confirm")]
-    R0 -.->|ECMA-262| R0b[("Math, Date, Number,<br/>String, Boolean,<br/>parseInt, parseFloat,<br/>Infinity, NaN, undefined")]
+    realm[("realm backdrop<br/>host-installed<br/>intrinsics + host bindings<br/>(see § Realm)")]
+    realm -.->|the world names resolve against| E
+    realm -.->|the world names resolve against| V
 ```
 
-| JEJ name                         | ES2024 op                                                                                                                                                            | What fires                                                                                                                                                                                                                                                                                    | Errors possible                                                                                                                                                                                              |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Realm setup: ECMA intrinsics** | `SetDefaultGlobalBindings` (§9.3.4) called from `InitializeHostDefinedRealm` (§9.6)                                                                                  | The host installs ECMA-262 intrinsic bindings: `Math`, `Date`, `Number`, `String`, `Boolean`, `parseInt`, `parseFloat`, `Infinity`, `NaN`, `undefined`. (`RegExp.prototype` exists for regex literal `.test()` proto-lookup; `RegExp` constructor itself is not in JEJ scope.)                | None (host does this before any code runs)                                                                                                                                                                   |
-| **Realm setup: host bindings**   | Host hook inside `InitializeHostDefinedRealm` (HTML "initialise the global object")                                                                                  | The host installs WHATWG/HTML APIs: `console`, `alert`, `prompt`, `confirm`. **Spec-distinct from ECMA intrinsics.**                                                                                                                                                                          | None                                                                                                                                                                                                         |
-| **Parse**                        | `ParseScript` (§16.1.5)                                                                                                                                              | Source string → token stream → AST. JEJ pedagogically splits this into tokenize → AST-build for stepping; the spec defines a single op (lexing is folded into the grammar via on-demand `InputElementDiv`/`InputElementRegExp` goal symbols).                                                 | `SyntaxError` — invalid character sequences (tokenize), invalid grammar (AST-build), Early Errors like `break` outside a loop.                                                                               |
-| **Creation: script-scope**       | `GlobalDeclarationInstantiation` (§16.1.7)                                                                                                                           | One AST walk. Reserves all script-level `let`/`const` bindings as **uninitialized** (TDZ is the access-time consequence, not the state name). Block scopes are NOT created.                                                                                                                   | `SyntaxError` — duplicate `let`/`const` at script scope. (Statically detectable; no evaluation needed.)                                                                                                      |
-| **Evaluation**                   | `ScriptEvaluation` body (§16.1.6) + per-Block `BlockDeclarationInstantiation` (§14.2.3) + per-iteration `CreatePerIterationEnvironment` (§14.7.4.4) for `for(let …)` | Statements run in source order. Block scopes push lazily on Block entry (only when they have lexical decls — see [§14.2.2 note](#empty-blocks-dont-push)). Bindings transition `tdz → initialized` when their declaration evaluates. `for (let i …)` creates a fresh env each iteration body. | `ReferenceError` (TDZ access, unresolvable identifier), `TypeError` (call non-callable, property on null/undefined, const reassignment), `RangeError` (numeric out of range or JEJ iteration-guard `limit`). |
+| Phase           | What the machine does (module semantics)                                                                                                                                                                                                                                                                      | Errors possible                                                                                                                                                                                                                    |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **source**      | the raw source text, before the machine reads anything                                                                                                                                                                                                                                                        | none                                                                                                                                                                                                                               |
+| **tokens**      | the text is spelled into the language's words — lexing                                                                                                                                                                                                                                                        | `SyntaxError` — an invalid character sequence                                                                                                                                                                                      |
+| **ast**         | the words resolve into the syntax tree — the module is parsed (`ParseModule`). JEJ splits parse into `tokens` (spelling) and `ast` (grammar) for stepping; the spec runs one op (lexing is folded into the grammar via on-demand `InputElementDiv`/`InputElementRegExp` goal symbols)                         | `SyntaxError` — invalid grammar; Early Errors (`break` outside a loop, `let` redeclaration), detected statically before anything runs                                                                                              |
+| **environment** | the module's environment is instantiated before evaluation: one walk reserves every top-level `let`/`const` uninitialized (`tdz` is the access-time consequence, not the state name). Block scopes are **not** created here — they push lazily during evaluation                                              | `SyntaxError` — duplicate `let`/`const` (statically detectable; no evaluation needed)                                                                                                                                              |
+| **evaluation**  | the module body is evaluated: statements run in source order; bindings transition `tdz → initialized` when their declaration evaluates; block scopes push and pop lazily (only when they have lexical decls — see [Empty blocks don't push](#empty-blocks-dont-push)); values flow, coercions fire, I/O emits | `ReferenceError` (TDZ access, unresolvable name), `TypeError` (call non-callable, property on null/undefined, const reassignment, mixing `bigint` with `number`), `RangeError` (numeric out of range, JEJ iteration-guard `limit`) |
 
-`ScriptEvaluation` (§16.1.6) is the umbrella containing creation + evaluation +
-execution-context push/pop bookends. (Note: "execution context" is a precise
-ECMA-262 term — the spec object containing the LexicalEnvironment chain — and
-stays as the spec term even though the JEJ phase is named "evaluation".) JEJ has
-no functions, so the execution-context stack only ever has one frame — the
-bookends become the first and last events of the evaluate stream.
+Realm setup — the host installing intrinsics and host bindings — precedes all
+five; it is the backdrop the runtime resolves names against, not a phase (see
+[§ Realm](#realm)). The precise ECMA-262 op and §-number for each phase is in
+the [Spec correspondence appendix](#spec-correspondence-appendix).
 
 ---
 
