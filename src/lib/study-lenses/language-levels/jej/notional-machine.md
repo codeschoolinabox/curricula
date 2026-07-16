@@ -642,24 +642,27 @@ and (for confirm/prompt) the return value.
 
 ---
 
-## Environment is derivable, not an event
+## The memory picture is derivable, not an event
 
-The environment is **where** events take place, not an event itself. There is no
-`category: 'environment'` event type. Instead, the environment at any point in
-evaluation is derivable from:
+The full picture of scopes and bindings at any point in `evaluation` is not a
+separate event type — there is no `category: 'environment'` event. It is
+**derivable** from:
 
-1. `static.initialScope` — post-creation, pre-first-statement frozen snapshot
-   (intrinsics + host bindings + script-scope `let`/`const` in TDZ).
-2. `category: 'scope'` events — push/pop frames as block scopes enter/exit.
+1. the **initial scope snapshot** — the frozen state the `environment` phase
+   produces before the first statement runs: the realm (intrinsics + host
+   bindings) as the backdrop, plus the program's top-level `let`/`const` in TDZ.
+2. `category: 'scope'` events — push/pop frames as block scopes enter and exit.
 3. `category: 'binding'` events — declare → initialize → access → update.
 
-Lenses building "memory diagram at step N" fold scope and binding events from
-`static.initialScope` up to step N. State is fully queryable through pure data —
-no event needs to encode "the whole environment now," because the deltas already
-do.
+Lenses building a "memory diagram at step N" fold the scope and binding events
+from that initial snapshot up to step N. The state is fully queryable through
+pure data — no event needs to encode "the whole picture now," because the deltas
+already do.
 
-This is more parsimonious than diff events: the environment isn't a thing that
-_happens_, it's the substrate that other things happen in.
+This is more parsimonious than diff events: the running memory picture is not a
+separate thing that _happens_ — it is the substrate the other events happen in.
+The `environment` phase is where that substrate is first built; this section is
+about reading its state at any later step, during `evaluation`.
 
 ---
 
