@@ -244,9 +244,13 @@ loop-guards; learners never see the throw, only the `limit` pop reason.
 
 #### Empty blocks don't push
 
-Per ECMA-262 §14.2.2, a `Block` only creates a new declarative environment
-record if it contains lexical declarations (`let`/`const`). A block like
-`{ console.log(1); }` does not push an env — the engine elides the scope.
+Per ECMA-262 §14.2.2, a non-empty `Block` always creates a new declarative
+environment record — `NewDeclarativeEnvironment` runs unconditionally — and
+`BlockDeclarationInstantiation` (§14.2.3) is then a no-op when the block has no
+`let`/`const`. That environment is unobservable, so engines elide it: a block
+like `{ console.log(1); }` never pushes an observable env. (A truly empty `{ }`
+is a separate production that creates nothing at all.) JEJ models that
+observable behavior — no `scope:push` for a variable-less block.
 
 This is a real case of **syntax behaving differently based on context**: the
 `{ }` looks scope-shaped to a reader but the engine optimizes away the unused
@@ -809,12 +813,14 @@ distinction matters in full JS but doesn't in JEJ.
 
 ### Empty blocks and the `BlockDeclarationInstantiation` optimization
 
-Per §14.2.2, `Block : { StatementList }` only invokes
-`BlockDeclarationInstantiation` (§14.2.3) when the block contains lexical
-declarations. Empty blocks, or blocks with only expression/statement content, do
-not push a new declarative environment record. JEJ honors this: no `scope:push`
-event for variable-less blocks. Surface this as a teaching moment about when
-syntax has semantic effect.
+Per §14.2.2, the production `Block : { StatementList }` always runs
+`NewDeclarativeEnvironment` and always calls `BlockDeclarationInstantiation`
+(§14.2.3); that operation is a no-op when the block declares no `let`/`const`,
+so the new environment holds no bindings. The empty production `Block : { }` is
+separate — it returns `empty` and creates no environment. Either way the frame
+is unobservable, and engines elide it. JEJ models that observable behavior: no
+`scope:push` event for a variable-less block. Surface this as a teaching moment
+about when syntax has semantic effect.
 
 ### `for (let i …)` and per-iteration environments
 
