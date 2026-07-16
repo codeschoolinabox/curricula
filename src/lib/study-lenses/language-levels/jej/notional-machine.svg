@@ -129,6 +129,7 @@
   <g transform="translate(956,210)">
     <rect class="frame-env" x="0" y="0" width="514" height="268" rx="4"/>
     <text x="14" y="22" class="phase-tag" fill="#2a6a2a">environment · STATIC</text>
+    <text x="500" y="22" class="small" fill="#4a7a4a" text-anchor="end" font-weight="600">one object · two modes ▼</text>
     <text x="14" y="40" class="caption">declarations come to be — before anything runs</text>
     <text x="14" y="62" class="small">the scope tree is derived; every let/const is</text>
     <text x="14" y="76" class="small">reserved uninitialized · status: <tspan class="text-bold">tdz</tspan></text>
@@ -267,7 +268,8 @@
     <g transform="translate(430,414)">
       <rect class="frame-nm" x="0" y="0" width="580" height="404" rx="4"/>
       <text x="12" y="22" class="cell-title" fill="#2a6a2a">nm — the semantics</text>
-      <text x="12" y="38" class="caption">environment · DYNAMIC — the SAME scopes from setup, now live</text>
+      <text x="568" y="22" class="small" fill="#4a7a4a" text-anchor="end" font-weight="600">one object · two modes ▲</text>
+      <text x="12" y="38" class="phase-tag" fill="#2a6a2a">environment · DYNAMIC <tspan class="caption" letter-spacing="0">— the SAME scopes from setup, now live</tspan></text>
 
       <text x="12" y="62"  class="text-bold">bindings come alive</text>
       <text x="12" y="78"  class="small">status: tdz → initialized → dead · const: never updates → TypeError</text>
