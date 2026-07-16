@@ -96,10 +96,12 @@ flowchart TD
   so an environment failure renders inside the `environment` phase alone,
   leaving `evaluation` reachable.
 - **Freeze-what-you-own.** The freeze covers the structure this region built —
-  the wrappers and indices. Attached lens refs are attached as module objects,
-  never pre-bound wrappers, and are never recursed into. A fact's indexed
-  members carry only the immutability their own producer guarantees; the region
-  neither deepens nor weakens it.
+  the wrappers and indices — and reaches deeply into the syntax and scope
+  objects the facts index: allocated fresh per derivation and held by nobody
+  else, they are the region's to freeze deeply. Only objects it did not allocate
+  stay outside — attached lens refs (foreign module objects, never recursed
+  into) and any process-global singletons the derivation borrowed. Ownership
+  here is sole reference, not authorship.
 - **The embodiment knows no consumers.** Lens refs arrive as arguments, typed
   structurally; the region imports no component machinery, no evaluator, no
   language level. The parser's types are the only foreign vocabulary the region
