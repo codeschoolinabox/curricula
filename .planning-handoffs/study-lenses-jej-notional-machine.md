@@ -49,10 +49,26 @@ _"documentary… not an ordered sequence of installation events."_ The old prose
 was right and the ratification was wrong. **Keep that claim; it is no longer a
 defect.**
 
-**2. A `link` phase is NOT being added.** It was considered (module lifecycle is
-Parse → Link → Evaluate as spec peers) and ruled out for JEJ: embody may
-implement it, but **JEJ admits no imports, so it changes nothing here.** Do not
-model it.
+**2. A `link` phase IS coming — and it is NOT yours.** For `type: 'module'`,
+snippets will be able to import didactic dependencies. **JEJ admits no imports,
+so it changes nothing here: do not model it.** It lands through an embody
+Phase-0 amendment with its own human gate.
+
+**3. A new `environment` fact stage is coming — also NOT yours**, and it may
+touch your work: embody is building a **full-ECMAScript static scope structure
+via `eslint-scope`** (consuming acorn's AST directly). This is the
+maintainer-ruled counterpart to JEJ owning its own hoisting model — _"jej owns
+this one, embody can build a full scope analysis of its own; later we reconcile
+them into something shared and narrowed."_ **Consequence for you:** the
+`environment` phase's meaning is being defined **outside this document**. Before
+you rewrite the `environment` section, check whether that stage has landed — if
+your prose would define `environment` ahead of the region that owns it, **stop
+and raise it at your gate.**
+
+⚠️ **These are named so that a phase list which no longer matches your prose
+does not read as your error.** The realm ruling above is independently recorded
+at `jej/REVIEW-NOTES.md` § 5 by the embody stream — the two agree; if they ever
+diverge, the maintainer decides, not this file.
 
 ⚠️ **Removing `realm` from the package's phase list is NOT your deliverable.**
 It lives in `src/lib/study-lenses/README.md` (the only non-`jej/` file defining
