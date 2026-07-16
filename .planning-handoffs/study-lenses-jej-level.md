@@ -611,9 +611,21 @@ The **embody** stream is running in parallel. The two are independent by design:
 importing it — "no type edge runs from levels into embody"). Both import only
 acorn.
 
-**Two known collision points — route through the maintainer, do not resolve
-unilaterally:** OQ-2b (the shared traversal primitives) and OQ-6
-(`locations: true` — the embody stream plans to drop it).
+> ⚠️ **CORRECTION (2026-07-15): ignore the embody stream. You are autonomous.**
+> This section originally named two collision points and told you to route them
+> through the maintainer. That is out of date:
+>
+> - **OQ-6 is RESOLVED** — the `SourceRange` → character-offsets change
+>   dissolves it; nobody needs `locations: true`. (It edits a **committed
+>   contract**, so it still owes the maintainer an approval at your 0.7 gate —
+>   that is governance, not cross-stream coordination.)
+> - **OQ-2b is not a blocker** — embody needs a bespoke walk regardless and uses
+>   the traversal primitives as reference, not as a dependency. Worst case each
+>   stream carries its own until `lib/parse` (P3a) absorbs both: duplication,
+>   not incoherence. **Decide it yourself.**
+>
+> Embody is level-blind and will not touch `jej/`. Do not wait on it. See
+> `src/lib/study-lenses/language-levels/jej/REVIEW-NOTES.md`.
 
 ## Before you hand off to the next agent
 

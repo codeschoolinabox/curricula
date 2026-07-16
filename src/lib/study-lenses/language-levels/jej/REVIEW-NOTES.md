@@ -141,12 +141,32 @@ the quarry map, the Phase-0 ceremony and its human gate, and the remaining open
 questions. The `src/lib/embody/` -vs- `src/lib/study-lenses/embody/` -vs- "the
 embody stream" naming hazard is real — I am the third of those.
 
-## Still routed through the maintainer, not me
+## The embody stream does not intersect you — you are autonomous
 
-My brief's **OQ-2b** (the shared `build-node-path-map` / `get-child-nodes`
-traversal primitives) and **OQ-6** (the `locations: true` precondition that
-`ParseFacts` cannot express) both collide with what I am building. I currently
-plan to **drop `locations: true`** — my `StageCause` reads acorn's error `.pos`
-and `.loc`, which need no parse option. **If your `Violation.location` needs
-`node.loc`** — and `just-enough-js.ts:456` does `const loc = node.loc!` — **then
-our streams collide.** Raise it early; the maintainer arbitrates.
+**Ignore the embody stream. Do not wait on me, and do not route anything through
+me.** The maintainer's call, and the tree agrees: there is **no type edge** in
+either direction — `embody/types.ts` and `language-levels/types.ts` both import
+only acorn, and `SnippetType` is deliberately _mirrored, not imported_ ("no type
+edge runs from levels into embody"). Embody is level-blind by construction, and
+it will not touch `jej/`.
+
+The brief told you to route two open questions through the maintainer because
+they collided with my stream. **That is now out of date:**
+
+- **OQ-6 — RESOLVED, by you.** Your `SourceRange` change (acorn `Position` →
+  character offsets) dissolves it: offsets are carried unconditionally, so
+  nobody needs `locations: true`, and my `StageCause` never did — it reads
+  acorn's error `.pos`/`.loc`. **There is no collision left.** One caveat that
+  is governance, not coordination: `language-levels/types.ts` is a **committed
+  contract**, so that change needs the maintainer's approval at your 0.7 gate —
+  flag it there. (It looks right to me, for whatever an adjacent stream's
+  opinion is worth.)
+- **OQ-2b — not a blocker; decide it yourself.** Embody needs a _bespoke_ walk
+  regardless (it builds the `EntwinedNode` wrapper graph and `byOffset`, which
+  `getChildNodes` alone cannot give), so it uses `build-node-path-map` /
+  `get-child-nodes` as **reference, not as a dependency**. Worst case we each
+  carry our own traversal until `lib/parse` (P3a) absorbs both — duplication,
+  not incoherence. Vendor what you need.
+
+Everything else here still stands. This file is transitional scaffolding:
+**delete it once items 1–4 are resolved.**
