@@ -14,7 +14,7 @@
  * package glossary (../README.md) owns the shared vocabulary.
  */
 
-import type { Comment, Position, Program, Token } from 'acorn';
+import type { Comment, Program, Token } from 'acorn';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Foreign vocabulary, mirrored
@@ -54,12 +54,19 @@ export type ParseFacts = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Start and end positions of a source range, per acorn's `loc` convention:
+ * Where something sits in the source, as the parser's own character offsets:
  * `start` is the first character; `end` is exclusive — one past the last.
+ *
+ * @remarks
+ * Offsets, not line/column. Every parsed node carries them unconditionally,
+ * so a violation's range is always constructible from the parse facts — a
+ * line/column range would instead depend on a parser option the facts cannot
+ * express, and no level controls the parse. Editor surfaces take offsets
+ * directly; a level never converts, having no source text to count lines in.
  */
 export type SourceRange = {
-	readonly start: Position;
-	readonly end: Position;
+	readonly start: number;
+	readonly end: number;
 };
 
 /**
