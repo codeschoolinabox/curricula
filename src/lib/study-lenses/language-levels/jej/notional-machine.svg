@@ -269,7 +269,7 @@
       <rect class="frame-nm" x="0" y="0" width="580" height="404" rx="4"/>
       <text x="12" y="22" class="cell-title" fill="#2a6a2a">nm — the semantics</text>
       <text x="568" y="22" class="small" fill="#4a7a4a" text-anchor="end" font-weight="600">one object · two modes ▲</text>
-      <text x="12" y="38" class="phase-tag" fill="#2a6a2a">environment · DYNAMIC <tspan class="caption" letter-spacing="0">— the SAME scopes from setup, now live</tspan></text>
+      <text x="12" y="38" class="phase-tag" fill="#2a6a2a">environment · DYNAMIC <tspan class="caption" letter-spacing="0" style="text-transform: none; font-weight: 400">— the SAME scopes from setup, now live</tspan></text>
 
       <text x="12" y="62"  class="text-bold">bindings come alive</text>
       <text x="12" y="78"  class="small">status: tdz → initialized → dead · const: never updates → TypeError</text>
