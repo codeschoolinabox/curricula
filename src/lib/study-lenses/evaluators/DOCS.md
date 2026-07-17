@@ -11,10 +11,11 @@ abstraction. Each evaluator's own directory zooms into that evaluator.
 > document — not what the code does, but what shape it takes.
 
 **Inbound contract.** A run begins with a lens-built evaluation spec: the
-consuming lens mapped the snippet type onto the execution axis and chose any
-iteration cap. The code inside the spec is parse-valid — the evaluation phase
-gates upstream, and acorn is the run ceiling. Nothing reaches an evaluator
-except through a lens driving it.
+consuming lens hands the studied program's Facts by reference, maps the snippet
+type onto the execution axis, and chooses any iteration cap. The facts arrive
+gate-guaranteed — an evaluator is driven only in the `evaluation` phase, which
+bars unless parsing and entwining succeeded, and acorn is the run ceiling.
+Nothing reaches an evaluator except through a lens driving it.
 
 ## Execution phases
 
@@ -40,7 +41,7 @@ except through a lens driving it.
 
 ```mermaid
 flowchart TD
-    SPEC["lens-built evaluation spec<br/>(code · execution axis · iteration cap?)"]
+    SPEC["lens-built evaluation spec<br/>(facts · execution axis · iteration cap?)"]
     VRD["applicability verdict<br/>(the consumer's options list)"]
     REF["structured refusal"]
     EVT["evaluation event stream<br/>(the evaluator's own union over the open envelope)"]
@@ -58,11 +59,20 @@ flowchart TD
 
 - **Headless.** No rendered view, no component, no DOM ownership; danger's real
   window is execution substrate the run lens zones.
-- **Self-contained types.** The kind's contract imports nothing; every evaluator
-  publishes its own event union structurally over the open envelope, and foreign
-  shapes are mirrored, never imported.
-- **Parse-valid input.** No evaluator defends against code that does not parse;
-  the lifecycle's phase-gating is the guarantee.
+- **Self-contained types, save one edge.** The kind's contract imports exactly
+  one foreign type — embody's `Facts` — but that edge is wide: through it
+  embody's fact-graph vocabulary and acorn's node shapes arrive transitively,
+  un-mirrored. Every evaluator publishes its own event union structurally over
+  the open envelope; the only foreign shape the kind still mirrors rather than
+  receives through `Facts` is the execution engine's axis.
+- **Gate-guaranteed facts.** An evaluator runs only when the `evaluation` phase
+  is accessible, which embody bars unless the parse and entwine stages succeeded
+  — so `source`, `tokens`, `ast`, and `entwined` are sound at drive time. "No
+  unparseable-input defense" is semantic — no evaluator re-validates that the
+  program parses — not a license to skip narrowing: an evaluator still narrows
+  each derived stage's `ok` once at the read site, and a gate-guaranteed failure
+  arm, being unreachable, takes the loud dev-mode embody-defect path
+  `environment` does, never a learner condition and never an unsafe assertion.
 - **Refusal-as-data at main.** A spec an evaluator cannot serve is answered with
   a structured refusal, never a throw at the learner.
 - **Laziness is the consumer's.** Nothing executes until the stream is pulled;
@@ -70,17 +80,23 @@ flowchart TD
   mount that started them.
 - **Settlement resolves exactly once.** Whatever ends a run — clean exit, error,
   forced stop, cancellation — the companion promise resolves, and only once.
-- **The kind knows no consumers.** No evaluator imports a lens, embody, or the
-  orchestrator; the execution engine is shared leaf machinery the
-  implementations drive, owned elsewhere.
+- **The kind knows no consumers.** No evaluator imports a lens or the
+  orchestrator; the one edge it does hold — embody's `Facts` — is upstream, not
+  a consumer, and one-way (embody never imports an evaluator). The execution
+  engine is shared leaf machinery the implementations drive, owned elsewhere.
 
 ## Decisions
 
-- **Why a parallel kind, not a shared supertype.** The evaluator's applicability
-  runs over the spec — a different input domain than the lens kind's Facts — and
-  no type edge from evaluators into embody is sanctioned. Per-kind contracts
-  realize the envelope convention; nothing structural is shared, so nothing
-  couples.
+- **Why a parallel kind, not a shared supertype.** The two kinds now share more
+  than before — both carry `name` + `applicability`, and both read embody's
+  Facts (though their inputs still differ: the lens gates over `Facts` directly,
+  an evaluator over the spec that wraps them). The separation rests on what
+  diverges most: the **output** domains (a lens renders a `ComponentType`; an
+  evaluator returns an `EvaluationStream` or a structured refusal) and the
+  **refusal models** (a lens refuses by not attaching; an imperatively-called
+  evaluator must answer with data). Per-kind contracts realize the envelope
+  convention over those divergent surfaces; sharing no supertype, nothing
+  structural couples.
 - **Why the settlement is a companion promise.** `for await` consumers never see
   a generator's return value, and a settlement-as-final-event would be
   unenforceable convention — an evaluator could forget it or emit it twice. The
@@ -115,6 +131,10 @@ flowchart TD
 - **Per-evaluator event payloads and settlement details** — each evaluator's own
   directory.
 - **Wire protocols and clone-safety** — implementation seams inside each
-  evaluator, invisible at the kind boundary.
+  evaluator, invisible at the kind boundary. The kind's inputs and events are
+  live main-thread objects — the `Facts` graph a spec carries, a pending
+  interaction's `respond` — never wire messages; an evaluator that drives a
+  worker mints its own clone-safe slice across that private seam, and never
+  posts embody's cyclic graph.
 - **Language-level content** — an evaluator may consult a level privately; the
   level's content is its own region's.

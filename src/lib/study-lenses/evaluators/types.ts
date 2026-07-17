@@ -3,12 +3,16 @@
  * `evaluators/<name>/` exports. An evaluator is the generator kind of study
  * utility — headless, consumed by lenses, never rendered.
  *
- * This module imports nothing: the kind is self-contained. Foreign shapes it
- * must speak (the execution engine's axis) are mirrored structurally, never
- * imported. Region docs: ./README.md (kind mechanics) · ./DOCS.md
+ * This module imports exactly one foreign type — embody's `Facts`, the studied
+ * program an evaluator runs over; a wide edge, through which embody's
+ * fact-graph and acorn's node shapes arrive transitively. The execution
+ * engine's axis it must speak is the one foreign shape mirrored structurally
+ * rather than received; the edge to embody is one-way and type-only. Region docs: ./README.md (kind mechanics) · ./DOCS.md
  * (architecture). The package glossary (../README.md) owns the shared
  * vocabulary.
  */
+
+import type { Facts } from '../embody/types.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // The evaluation spec
@@ -16,16 +20,31 @@
 
 /**
  * What a consuming lens builds and hands to an evaluator — the kind's whole
- * input domain. The code arrives parse-valid: the evaluation phase gates
- * upstream, so no evaluator defends against unparseable input.
+ * input domain: the studied program's Facts, plus how the lens poses them for
+ * execution. The facts arrive gate-guaranteed — an evaluator is driven only in
+ * the `evaluation` phase, which embody bars unless parsing and entwining
+ * succeeded — so no evaluator re-checks whether the learner's program parses.
  */
 export type EvaluationSpec = {
-	readonly code: string;
 	/**
-	 * The execution axis — the consuming lens maps the snippet type onto
-	 * it. Structurally mirrors the execution engine's own axis. Deliberate
-	 * collapse: script strict-versus-sloppy is not carried; the axis names
-	 * how the code is posed, nothing more.
+	 * The studied program's derivations, handed in by reference: the source
+	 * every run reads, and the ast / entwined / scope structure a tracer
+	 * resolves its events against. `source`, `tokens`, `ast`, and `entwined`
+	 * are gate-guaranteed at drive time — the evaluation phase bars otherwise;
+	 * narrow each derived stage's `ok` once, treating its unreachable failure
+	 * arm (and any `environment` failure) as a loud dev-mode embody defect,
+	 * never a learner condition and never an unsafe cast. This is embody's
+	 * frozen main-thread graph — an evaluator running off-thread projects its
+	 * own clone-safe slice, never posting it.
+	 */
+	readonly facts: Facts;
+	/**
+	 * The execution axis — the consuming lens maps the snippet type onto it,
+	 * and it is authoritative for how the run is posed. Distinct from the
+	 * snippet type the facts carry (`facts.type`: `'script' | 'module'`, the
+	 * static parse goal); deliberate collapse — script strict-versus-sloppy is
+	 * not carried, the axis names how the program is posed, nothing more. An
+	 * applicability may assume the lens supplied a coherent pairing.
 	 */
 	readonly execution: 'function' | 'module';
 	/**
@@ -144,7 +163,7 @@ export type EvaluatorRefusal = {
 /**
  * The generator kind of study utility. The kind stands parallel to the lens
  * kind: same envelope convention — name, applicability, main — over its own
- * input domain, with no dependency on any other region's types.
+ * input domain, whose one cross-region dependency is embody's `Facts`.
  *
  * @remarks
  * The object itself is an evaluator's identity: consumers import it

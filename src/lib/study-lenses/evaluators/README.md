@@ -25,9 +25,10 @@ evaluators/
 
 An evaluator declares the envelope's universal fields — a name and an
 applicability — plus the generator kind's main. Its applicability runs over the
-same domain its main serves: the **evaluation spec**, never the Facts — the
-evaluator kind stands parallel to the lens kind, with its own input domain and
-no dependency on any other region's types.
+same domain its main serves: the **evaluation spec** — the studied program's
+Facts plus how they are posed for execution — the evaluator kind stands parallel
+to the lens kind, with its own input domain and a single sanctioned import from
+embody (`Facts`), no other region's types.
 
 - **name** — a stable label. The object itself is the evaluator's identity:
   consumers import it directly, and a consumer that keys an options list by name
@@ -85,10 +86,12 @@ Three evaluators plus a family:
 ## Anatomy of an evaluator
 
 Each evaluator directory exports a single `Evaluator` object — the object is its
-identity. Every evaluator is **self-contained**: it publishes its own typed
-event union extending the kind's event envelope structurally, in its own types,
-importing nothing from other regions — foreign shapes it must speak (the
-engine's, embody's geometry) are mirrored structurally, never imported.
+identity. Every evaluator is **self-contained** save one edge: it publishes its
+own typed event union extending the kind's event envelope structurally, in its
+own types, importing from other regions only embody's `Facts` (the studied
+program its spec carries — a wide edge, through which embody's fact-graph and
+acorn's node shapes arrive transitively). The execution engine's geometry it
+must speak is the one foreign shape mirrored structurally, never imported.
 
 ```text
 evaluators/<name>/
@@ -103,9 +106,17 @@ evaluators/<name>/
 
 - **Headless.** No rendered view, no component, no DOM ownership — danger's
   window is substrate the run lens zones, not a view this region draws.
-- **The code arrives parse-valid.** The evaluation phase gates upstream — acorn
-  is the run ceiling — so an evaluator assumes its spec's code parses and
-  carries no unparseable-input defenses.
+- **The facts arrive gate-guaranteed.** An evaluator is driven only in the
+  `evaluation` phase, which embody bars unless the `tokens`, `ast`, and
+  `entwined` stages succeeded — so those stages, and the given `facts.source` /
+  `facts.type`, are sound at drive time. A failed `facts.environment` is the one
+  derived stage that can accompany a reachable `evaluation` phase, and only as a
+  loud dev-mode embody defect — never a learner condition. "No unparseable-input
+  defenses" is semantic — no evaluator re-validates that the learner's program
+  parses — not a license to skip the type's narrowing: an evaluator still
+  narrows each derived stage's `ok` once at the read site, and a gate-guaranteed
+  failure arm, being unreachable, takes the same loud dev-mode-defect path as
+  `facts.environment`, never an unsafe assertion.
 - **Refusal-as-data at main.** A spec an evaluator cannot serve gets a
   structured refusal, never a throw at the learner.
 - **The surface is synchronous; the stream is where async lives.** name,
@@ -116,9 +127,16 @@ evaluators/<name>/
   the cancellation.
 - **Consultation is private.** An evaluator may consult a language level
   internally; no contract field names one.
-- **No handles ride the embodiment.** Evaluation-phase lenses build specs from
-  the embodiment's facts and import their evaluators directly; embody carries no
-  execution knowledge.
+- **The spec carries the facts; the edge is one-way.** Evaluation-phase lenses
+  build specs from the embodiment's facts — handing the `Facts` to the evaluator
+  by reference — and import their evaluators directly; the embodiment itself
+  still carries no execution handles, and embody imports no evaluator.
+- **The facts are a main-thread reference.** `spec.facts` is embody's frozen,
+  cyclic, main-thread graph — never a wire message. An evaluator whose backend
+  runs off the main thread mints its own clone-safe projection from it and posts
+  that, never the graph — the inbound mirror of the
+  clone-safe-versus-main-thread split the pending-interaction respond channel
+  already draws.
 - **Package-internal, lens-facing.** The contract is exported to the lenses that
   consume it and is not part of the package's public surface.
 
@@ -128,9 +146,11 @@ The package glossary owns the shared meanings; these entries add the mechanics
 this region owns.
 
 - **evaluation spec** — what a consuming lens builds and hands to an evaluator:
-  the program's code, the execution axis the lens mapped from the snippet type,
-  and optionally the iteration cap the runaway-loop guard enforces (the
-  machinery's own defaults apply when absent). The kind's whole input domain.
+  the studied program's Facts — its source, and, for a tracer, the ast and
+  static scope structure (`facts.environment`) — the execution axis the lens
+  mapped from the snippet type, and optionally the iteration cap the
+  runaway-loop guard enforces (the machinery's own defaults apply when absent).
+  The kind's whole input domain.
 - **evaluation event stream** — what main returns: an async iterable of events
   plus a companion `settled` promise. Events are pulled; the settlement is
   awaited; cancellation is ceasing to pull.
@@ -154,8 +174,16 @@ this region owns.
 - **refusal** — the kind's refusal-as-data shape: returned by main instead of a
   stream, with the reason in the evaluator's own words.
 - **execution axis** — the spec's `'function' | 'module'` field; the consuming
-  lens maps the snippet type onto it. Structurally mirrors the execution
-  engine's own axis.
+  lens maps the snippet type onto it, and it is authoritative for how the run is
+  posed — distinct from the snippet type the facts carry (`facts.type`:
+  `'script' | 'module'`, the static parse goal). Structurally mirrors the
+  execution engine's own axis. An evaluator's applicability may assume the lens
+  supplied a coherent pairing of the two axes; the kind does not re-validate it.
+- **gate-guaranteed** — a derived fact stage an evaluator may read as sound
+  because the `evaluation` phase — which alone drives evaluators — is barred
+  unless that stage succeeded (`tokens`, `ast`, `entwined`). The stage is still
+  narrowed once; its unreachable failure arm is a loud dev-mode embody defect,
+  never a learner condition.
 
 ## Navigation
 
