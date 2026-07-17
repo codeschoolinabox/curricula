@@ -29,27 +29,28 @@ Detailed conventions and module boundaries are documented in sections below.
 
 ### Conventions Summary
 
-| Situation                      | Convention                                                                                                                           |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
-| Non-trivial function           | Named `function` declaration                                                                                                         |
-| Inline callback (trivial)      | Arrow OK: `user => user.id`, `n => n > 0`                                                                                            |
-| Arrow assigned to variable     | **Not allowed** — use named `function` declaration                                                                                   |
-| Arrow with body block `{}`     | **Not allowed** — use named `function` declaration                                                                                   |
-| Callback (non-trivial)         | Extract as named `function`, pass by name                                                                                            |
-| Hoisting below call site       | Encouraged for readability                                                                                                           |
-| `this` keyword                 | **Banned** (functional codebase)                                                                                                     |
-| Classes                        | **Banned** (exception: error classes in `/errors`)                                                                                   |
-| Error handling                 | Use base error class for catch-all                                                                                                   |
-| Mutable closures               | **Banned**                                                                                                                           |
-| Immutable closures             | OK (e.g. currying over cached config)                                                                                                |
-| Method shorthand in objects    | Allowed (`{ process() {} }`)                                                                                                         |
-| Variable bindings              | Prefer `const`; `let` only when reassignment needed                                                                                  |
-| Export                         | Function files: inline `export default function` at top. Constant files: define first, `export default` at bottom (file-kind signal) |
-| Import paths                   | Always include `.js` extension                                                                                                       |
-| Multiple things from one file  | Split into separate files                                                                                                            |
-| Destructured object params     | Default empty object: `{ ... } = {}`                                                                                                 |
-| Boolean functions              | Prefix with `is`/`has`/`can`/`should`                                                                                                |
-| Return values (objects/arrays) | Deep freeze (clone+freeze for external, freeze-in-place for own)                                                                     |
+| Situation                       | Convention                                                                                                                           |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Non-trivial function            | Named `function` declaration                                                                                                         |
+| Inline callback (trivial)       | Arrow OK: `user => user.id`, `n => n > 0`                                                                                            |
+| Arrow assigned to variable      | **Not allowed** — use named `function` declaration                                                                                   |
+| Arrow with body block `{}`      | **Not allowed** — use named `function` declaration                                                                                   |
+| Callback (non-trivial)          | Extract as named `function`, pass by name                                                                                            |
+| Hoisting below call site        | Encouraged for readability                                                                                                           |
+| `this` keyword                  | **Banned** (functional codebase)                                                                                                     |
+| Classes                         | **Banned** (exception: error classes in `/errors`)                                                                                   |
+| Error handling                  | Use base error class for catch-all                                                                                                   |
+| Mutable closures                | **Banned**                                                                                                                           |
+| Immutable closures              | OK (e.g. currying over cached config)                                                                                                |
+| Method shorthand in objects     | Allowed (`{ process() {} }`)                                                                                                         |
+| Variable bindings               | Prefer `const`; `let` only when reassignment needed                                                                                  |
+| Export                          | Function files: inline `export default function` at top. Constant files: define first, `export default` at bottom (file-kind signal) |
+| Import paths                    | Always include `.js` extension                                                                                                       |
+| Multiple things from one file   | Split into separate files                                                                                                            |
+| Destructured object params      | Default empty object: `{ ... } = {}`                                                                                                 |
+| Boolean functions               | Prefix with `is`/`has`/`can`/`should`                                                                                                |
+| Return values (objects/arrays)  | Deep freeze (clone+freeze for external, freeze-in-place for own)                                                                     |
+| Shape of frozen/serialized data | Plain object (`Record`, string keys) + arrays — never `Map`/`Set`/`Date` (§ 13)                                                      |
 
 ### 1. Export Conventions
 
@@ -699,6 +700,50 @@ the caller's data.
 - Constants and shared defaults
 - Module-level data structures
 
+<strong>Shape frozen data as plain objects and arrays — not
+`Map`/`Set`.</strong>
+
+`Object.freeze` **cannot** make a `Map` or `Set` immutable: their entries live
+in internal slots, not ordinary properties, so `Object.freeze(map)` freezes the
+container object while `map.set(…)` / `set.add(…)` / `.delete()` / `.clear()`
+still succeed (`Date` setters have the same trap). A "frozen" `Map`/`Set` is
+therefore a **false immutability guarantee**. Two more strikes at the
+serialization boundary: `Map`/`Set` are **silently lossy under
+`JSON.stringify`** (`JSON.stringify(new Map([['a', 1]]))` → `'{}'`), and
+although they _do_ survive `structuredClone`/`postMessage`, they clone back **as
+a `Map`/`Set`** — not the plain-`Record`/array shape this package standardizes
+on. Plain objects and arrays freeze hard, `JSON` round-trip, and clone to a
+stable shape.
+
+**The rule:** any value that will be **deep-frozen or serialized** (a return
+value, a fact, anything that crosses a `postMessage` boundary) uses a
+`Record`/plain object (string keys) and arrays — never a `Map`/`Set`. Index by a
+stable string key (a path, an id) instead of by object identity. Store
+timestamps as epoch numbers or ISO strings, not `Date` (same frozen-slot
+mutability, and it does not `JSON` round-trip back to a `Date`). When you hold a
+foreign object whose own shape uses `Map`/`Set` (a parser's or analyzer's
+internal node), **project the fields you expose into your own plain objects**
+rather than holding the foreign object by reference — the projection is what
+your freeze can actually guarantee, and it keeps the library's private
+bookkeeping off your contract. (Canonical example: `embody`'s
+`Entwined`/`Environment` facts expose `byPath` / `byOffset` as frozen
+`Record`/array projections keyed by a node path — never the analyzer's `Map`s.)
+
+`Map`/`Set` remain the right tool for **transient, internal computation** that
+is never frozen and never serialized — e.g. a build-time `Map<Node, string>`
+keyed by object identity, used and discarded within one pass. There,
+object-identity keys are a genuine need a `Record` cannot serve, and
+immutability is not claimed. (`WeakMap`/`WeakSet` are transient-only by
+construction — not enumerable, not serializable — so they never reach a frozen
+surface anyway, and they are the natural choice when this case needs
+object-identity keys without iteration.) If a `Map`/`Set` ever does end up
+inside owned-then-frozen data, document the limitation at that site (the freeze
+does not reach its entries). A compile-time `ReadonlyMap` type is **not** a
+substitute for projection: it binds only well-typed callers, whereas this freeze
+is a runtime guarantee against the untyped LLM consumer § 13 exists to protect —
+a type annotation cannot enforce it, and it does nothing for `JSON`
+serialization.
+
 **Exception:** Performance-critical hot paths where profiling shows freeze
 overhead is unacceptable. Document with a `// perf: skip freeze — [reason]`
 comment.
@@ -804,27 +849,28 @@ Mermaid flowchart depicting the **data's journey** through the module:
   owning no derivation of its own (e.g. `orchestrate/phases-panel/`,
   `orchestrate/dock/`) — MAY instead draw its `## Data flow` as a
   **component/prop-flow** diagram. In this mode the rules above are **suspended
-  for this diagram**: the "nodes are data states / never filenames or identifiers
-  / wrappers invisible" rules AND the architectural-sketch ban on function and
-  variable names do not apply here. Nodes are the **owning orchestrator**, **this
-  component**, its **rendered sub-regions**, and any **external surface it routes
-  intent toward** (an engine, a library) drawn as a boundary node via a dotted
-  edge; edges are props-down and callbacks-up, and their labels MAY name the
-  actual props and callbacks — for a wiring diagram those names are the content.
-  (The relaxation covers only this diagram's nodes and edge labels; prose phases
-  and every other diagram keep the rules above.) A data-state diagram for a pure
-  render component would be near-contentless, which is why this mode exists.
-- **The qualifying test is ownership of derivation, not absence of reshaping.** A
-  module qualifies for the exception only if every non-trivial shape it renders
-  was derived by an upstream owner and handed in as a prop, and the module itself
-  does only **render-local formatting** (mapping a roster to columns, formatting
-  a label, assembling an options bag it hands straight onward). If it _computes_
-  a shape that **downstream consumers depend on** — a derivation, a parse, an
-  accumulation that outlives the render — it is **data-transforming** and the
-  data-state rules apply, wherever it sits in the tree. (The `derive-*.ts`
-  siblings of these components are the contrast class: they own derivation, so
-  they get data-state diagrams.) When in doubt: "does this module own a shape
-  something downstream reads?" — if yes, data-state.
+  for this diagram**: the "nodes are data states / never filenames or
+  identifiers / wrappers invisible" rules AND the architectural-sketch ban on
+  function and variable names do not apply here. Nodes are the **owning
+  orchestrator**, **this component**, its **rendered sub-regions**, and any
+  **external surface it routes intent toward** (an engine, a library) drawn as a
+  boundary node via a dotted edge; edges are props-down and callbacks-up, and
+  their labels MAY name the actual props and callbacks — for a wiring diagram
+  those names are the content. (The relaxation covers only this diagram's nodes
+  and edge labels; prose phases and every other diagram keep the rules above.) A
+  data-state diagram for a pure render component would be near-contentless,
+  which is why this mode exists.
+- **The qualifying test is ownership of derivation, not absence of reshaping.**
+  A module qualifies for the exception only if every non-trivial shape it
+  renders was derived by an upstream owner and handed in as a prop, and the
+  module itself does only **render-local formatting** (mapping a roster to
+  columns, formatting a label, assembling an options bag it hands straight
+  onward). If it _computes_ a shape that **downstream consumers depend on** — a
+  derivation, a parse, an accumulation that outlives the render — it is
+  **data-transforming** and the data-state rules apply, wherever it sits in the
+  tree. (The `derive-*.ts` siblings of these components are the contrast class:
+  they own derivation, so they get data-state diagrams.) When in doubt: "does
+  this module own a shape something downstream reads?" — if yes, data-state.
 
 The same Mermaid syntax handles linear, branching, and joining flows. Use
 whatever topology the actual data flow requires; there is no separate choice of
