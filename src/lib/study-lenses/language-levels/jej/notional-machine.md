@@ -520,7 +520,7 @@ expression. Same shape applies to `&&=` and `||=`.
 
 #### Postfix update event ordering
 
-Per ECMA-262 §13.4.3 `UpdateExpression`, postfix and prefix differ only in which
+Per ECMA-262 §13.4 `UpdateExpression`, postfix and prefix differ only in which
 value is returned by the expression. The event sequences:
 
 **Postfix `x++`:**
