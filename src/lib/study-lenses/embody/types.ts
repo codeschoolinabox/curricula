@@ -2,8 +2,8 @@
 
 /**
  * The embody region's keystone contracts: the snippet that comes in, the
- * Facts and lifecycle the factory derives, the structural view it has of a
- * lens (`Gateable`), and the frozen `Embodiment` that comes out.
+ * Facts and per-phase study payloads the factory derives, the structural view
+ * it has of a lens (`Gateable`), and the frozen `Embodiment` that comes out.
  *
  * Region docs: ./README.md (domain model) · ./DOCS.md (architecture).
  * The package glossary (../README.md) owns the shared vocabulary.
@@ -182,10 +182,13 @@ export type Entwined = {
 // The static scope structure
 // ─────────────────────────────────────────────────────────────────────────────
 
-// The scope vocabulary is embody's own structural view of the analysis its
-// scope leaf produces: named against acorn's node type, so the values are the
-// same tree nodes the rest of the Facts carry, and expressing only what
-// consumers read — the analyzer's internal bookkeeping stays off the contract.
+// The scope vocabulary is embody's own projection of the analysis its scope
+// leaf produces: plain objects embody allocates, named against acorn's node
+// type and holding the same tree nodes the rest of the Facts carry (by
+// reference), expressing only what consumers read. The analyzer's own objects
+// never cross the boundary — its internal bookkeeping, and the `Map`s it keeps
+// it in, stay off the contract — so the projection is plain data embody's
+// freeze can actually reach (a frozen `Map` is not immutable; see DEV.md § 13).
 
 /**
  * One definition of a name: what kind of declaration introduces it (`var`,
@@ -243,10 +246,12 @@ export type Scope = {
 
 /**
  * The static scope structure: one shared graph of lexical scopes, with a
- * canonical entry point and a path index. Both hold the same scope objects the
- * analysis built — entry points into the graph, never copies. The graph
- * toggles on snippet type: a script's top-level names live on the global
- * scope, a module's on its own module scope.
+ * canonical entry point and a path index. Both hold the same embody scope
+ * objects — one graph embody projects from the analysis, holding the source's
+ * own AST nodes by reference; root and byPath are two entry points into that
+ * one graph, never separate copies. The graph toggles on snippet type: a
+ * script's top-level names live on the global scope, a module's on its own
+ * module scope.
  */
 export type Environment = {
 	readonly root: Scope;
@@ -329,9 +334,16 @@ export type Gateable = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * The frozen study object: the Facts plus the five phase payloads.
+ * The frozen study object: the Facts plus the study layer.
  *
  * @remarks
+ * `facts` is what is TRUE about the program (the six derivations); `study` is
+ * how it is studied — each lifecycle phase's payload, keyed by phase name:
+ * whether the phase is accessible (or barred, with cause) and the lenses that
+ * fit it. The field is named `study`, not `lifecycle`, because `facts` already
+ * carries the phase-named stages — the study layer is what a phase adds beyond
+ * its fact value.
+ *
  * Freeze-what-you-own: the structure embody built is frozen; attached lens
  * refs sit outside this immutability contract, owned by their defining
  * modules. The embodiment is level-blind — no field of it knows what a
@@ -339,7 +351,7 @@ export type Gateable = {
  */
 export type Embodiment = {
 	readonly facts: Facts;
-	readonly lifecycle: Readonly<Record<LifecyclePhaseName, LifecyclePhase>>;
+	readonly study: Readonly<Record<LifecyclePhaseName, LifecyclePhase>>;
 };
 
 /**

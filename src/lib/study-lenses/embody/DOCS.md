@@ -79,13 +79,17 @@ flowchart TD
 - **One derivation pass.** Stages derive once per snippet, in dependency order;
   nothing retries and nothing parses the same source twice. The tokens and ast
   stages are the parse facts every outside consumer reads.
-- **Facts index; they never copy, and never wall.** Each fact is a pre-indexed
-  way into a structure that already exists — its members are the very nodes and
-  scopes the tree is built from, not reproductions of them. Because nothing is
-  copied, tying a further derivation into the binding costs only its index, and
-  identity followed from one fact into another always lands on the same object.
-  Each fact exposes the whole structure it indexes: a consumer the indices do
-  not answer can always reach past them and walk it.
+- **Facts index; they never copy the tree, and never wall it.** Each fact is a
+  pre-indexed way into the syntax tree that already exists — its nodes are the
+  very nodes the parse built, held by reference, never reproduced. The derived
+  graphs that tie further structure onto those nodes — the source⇄tree binding
+  and the scope projection — are the region's own lightweight wrappers around
+  the same nodes, built once and shared, so identity followed from one fact into
+  another always lands on the same node. Each fact exposes the whole structure
+  it indexes: a consumer the indices do not answer can always reach past them
+  and walk it — the region's own structure is never walled; only a foreign
+  library's private objects are left off the contract rather than held and
+  exposed.
 - **Loud versus graceful.** A learner program that does not parse is quiet data;
   a defect in embody's own machinery is loud — an entwine or scope-analysis
   failure raises a development-mode report, and a throwing gate degrades to
@@ -108,7 +112,10 @@ flowchart TD
   imports — type-only, so ownership can move to the shared parse leaf without
   touching callers. The scope structure is expressed in the region's own type
   names, named against the parser's node type; its field vocabulary mirrors the
-  analyzer's, but the analyzer's own types never cross the boundary.
+  analyzer's, but the analyzer's own types and objects never cross the boundary
+  — the region projects the fields it exposes into its own plain objects (a
+  frozen `Map` is not immutable, so a borrowed analyzer object could not be
+  honestly frozen; see DEV.md § 13).
 - **Sync and pure throughout.** No I/O, no async, no shared mutable state: the
   same snippet and roster produce the same embodiment.
 

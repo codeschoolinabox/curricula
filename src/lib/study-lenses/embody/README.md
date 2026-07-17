@@ -27,7 +27,7 @@ The contract, compactly (the full doc-commented version is
 ```ts
 type Embodiment = {
 	facts: Facts; // source · tokens · ast · entwined · environment · type — tagged stages
-	lifecycle: Readonly<Record<LifecyclePhaseName, LifecyclePhase>>; // { accessible, cause?, lenses }
+	study: Readonly<Record<LifecyclePhaseName, LifecyclePhase>>; // per phase: { accessible, cause?, lenses }
 };
 // the factory's boundary: embody(code, { type, lenses }) → frozen Embodiment
 ```

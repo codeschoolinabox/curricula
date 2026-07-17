@@ -296,8 +296,9 @@ These terms are the naming contract for the whole package: functions, types,
 documents, and UI copy use them consistently.
 
 - **embodiment** — the frozen study object produced when a program's source is
-  embodied: facts + fit + accessibility. The canonical name every lens receives
-  it under.
+  embodied: facts + fit + accessibility. Its two fields are `facts` (the six
+  derivations) and `study` (the **study layer** — each lifecycle phase's fit and
+  accessibility). The canonical name every lens receives it under.
 - **snippet** — the raw program passed in for study: the source text a learner
   or host brings, together with its snippet type.
 - **Facts** — the synchronous fact slice of the embodiment: the source text, its
