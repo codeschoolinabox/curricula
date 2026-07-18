@@ -30,3 +30,18 @@ export type EditorInstance = {
 	readonly setContent: (source: string) => void;
 	readonly destroy: () => void;
 };
+
+/**
+ * What the async editor factory takes. `onEdit` is the learner-edit callback it
+ * wires (see {@link EditorCallbacks}); `parent` is the host element the
+ * CodeMirror surface mounts into.
+ *
+ * @remarks
+ * When `parent` is omitted the factory builds a detached element — enough for
+ * standalone construction; the mounting component always supplies its own. No
+ * CodeMirror type appears here: the factory's whole configuration crosses the
+ * boundary as plain data and a plain callback.
+ */
+export type EditorOptions = EditorCallbacks & {
+	readonly parent?: HTMLElement;
+};
