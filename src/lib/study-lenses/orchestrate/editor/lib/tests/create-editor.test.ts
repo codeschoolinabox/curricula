@@ -205,4 +205,23 @@ describe('createEditor', () => {
 			);
 		});
 	});
+
+	describe('a failing grammar load (Exceptions)', () => {
+		it('rejects the factory promise', async () => {
+			vi.resetModules();
+			vi.doMock('@codemirror/lang-javascript', () => {
+				throw new Error('chunk load failed');
+			});
+			try {
+				const { default: freshCreateEditor } =
+					await import('../create-editor.js');
+				await expect(
+					freshCreateEditor('', { onEdit: vi.fn() }),
+				).rejects.toThrow();
+			} finally {
+				vi.doUnmock('@codemirror/lang-javascript');
+				vi.resetModules();
+			}
+		});
+	});
 });
