@@ -632,3 +632,14 @@ prompt). Report DONE | BLOCKED | FLAG.
 ```
 
 <!-- cspell:enable -->
+
+## Campaign log (appended per the maintainer's 2026-07-18 mandate)
+
+- 2026-07-18 — Wave 0 closed: `c9452c5` (region decomposition + wave-1/2
+  sub-Phase-0s; AR-1 CONSIDER ×11 fixed, AR-2 CONSIDER ×11 fixed; notable
+  resolutions: marking owns the one per-level classification, cascade gains the
+  `opened` layer, honoring catches throwing applicability). Human gate waived by
+  maintainer override; Q1–Q6 defaults adopted, ratification items reported in
+  session. FLAGs open: F1 (embody runtime order constant), F4 (ParseFacts
+  extension pre-W3-V1). Carried to Wave-4 Phase-0: the `opened` layer's
+  lifecycle; package-DOCS verdicts-node label amendment (maintainer).
