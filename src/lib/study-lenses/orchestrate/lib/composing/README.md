@@ -16,8 +16,9 @@ built-in level roster joins the injected levels. Joining is **append-only** —
 nothing replaces or shadows a built-in — and collisions are **loud**: a
 duplicate lens name or level key throws, naming the offender, at the author's
 desk. The empty level key `''` is reserved for the none-state and cannot be
-injected. Joined rosters are session-fixed and frozen — structure frozen, lens
-refs excepted, because the refs stay owned by their defining modules.
+injected; injecting it throws its own error, checked before the duplicate scan.
+Joined rosters are session-fixed and frozen — structure frozen, lens refs
+excepted, because the refs stay owned by their defining modules.
 
 The **built-in rosters** live here as constant files — the append-base every
 join extends. The scaffolding level is never among them: it reaches a session
