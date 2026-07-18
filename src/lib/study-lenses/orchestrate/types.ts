@@ -1,7 +1,7 @@
 /**
  * The orchestrator's contract: the package's public host surface, plus the
- * one value space this region derives for the level UI. Everything else in
- * this region is internal.
+ * region-internal fit-mark vocabulary the level surfaces share. Everything
+ * else in this region is internal.
  *
  * Region docs: ./README.md (host surface + mechanics) · ./DOCS.md
  * (architecture). The package glossary (../README.md) owns the shared
@@ -28,7 +28,11 @@ export type StudyLensesProperties = {
 	 * glossary's snippet is this prop together with `type`.
 	 */
 	readonly snippet: string;
-	/** The initial snippet type; the learner's toggle overrides it. */
+	/**
+	 * The initial snippet type; the learner's toggle overrides it. Defaults
+	 * to `'module'`, resolved once at the top component — every consumer
+	 * downstream receives a concrete type, never an absent one.
+	 */
 	readonly type?: SnippetType;
 	/**
 	 * An initial-focus request naming a lens — honored, never obeyed: a
@@ -63,9 +67,12 @@ export type StudyLensesProperties = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * The selector's per-level verdict about the current code, derived per
- * settle in this region from the shared memoized validate, the level's
- * admitted snippet types, the current type, and the parse-stage status.
+ * The per-level classification of the current code, derived once per settle
+ * and per level in this region from the shared memoized validate, the
+ * level's admitted snippet types, the current type, and the parse-stage
+ * status. Region-internal shared vocabulary — the selector renders every
+ * level's mark and the mask projects the selected one; it is not part of
+ * the host surface.
  *
  * @remarks
  * While the code does not parse the mark is `undetermined`, and that
