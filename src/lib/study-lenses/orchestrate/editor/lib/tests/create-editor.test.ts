@@ -1,7 +1,21 @@
 // @vitest-environment jsdom
-import { describe, expect, it, vi } from 'vitest';
+import { EditorView } from '@codemirror/view';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import createEditor from '../create-editor.js';
+
+function findView(parent: HTMLElement): EditorView {
+	const view = EditorView.findFromDOM(parent);
+	if (!view) throw new Error('no live EditorView under the given parent');
+	return view;
+}
+
+function typeSource(parent: HTMLElement, source: string): void {
+	const view = findView(parent);
+	view.dispatch({
+		changes: { from: 0, to: view.state.doc.length, insert: source },
+	});
+}
 
 describe('createEditor', () => {
 	describe('opening a buffer (Zero)', () => {
@@ -67,6 +81,128 @@ describe('createEditor', () => {
 			editor.destroy();
 			editor.setContent('const y = 2;');
 			expect(editor.getContent()).toBe('');
+		});
+	});
+
+	describe('edit relay', () => {
+		describe('one learner edit (One)', () => {
+			it('relays a learner edit as exactly one edit event', async () => {
+				const parent = document.createElement('section');
+				const onEdit = vi.fn();
+				await createEditor('const x = 1;', { onEdit, parent });
+				typeSource(parent, 'const x = 12;');
+				expect(onEdit).toHaveBeenCalledTimes(1);
+			});
+
+			it('carries the full new source on the edit event', async () => {
+				const parent = document.createElement('section');
+				const onEdit = vi.fn();
+				await createEditor('const x = 1;', { onEdit, parent });
+				typeSource(parent, 'const x = 12;');
+				expect(onEdit).toHaveBeenCalledWith('const x = 12;');
+			});
+		});
+
+		describe('successive learner edits (Many)', () => {
+			it('relays three learner edits as three events in order', async () => {
+				const parent = document.createElement('section');
+				const onEdit = vi.fn();
+				await createEditor('const x = 1;', { onEdit, parent });
+				typeSource(parent, 'const a = 1;');
+				typeSource(parent, 'const b = 2;');
+				typeSource(parent, 'const c = 3;');
+				expect(onEdit.mock.calls.map((call) => call[0])).toEqual([
+					'const a = 1;',
+					'const b = 2;',
+					'const c = 3;',
+				]);
+			});
+		});
+
+		describe('own-write echo suppression (Boundaries)', () => {
+			it('does not echo a setContent write as an edit event', async () => {
+				const parent = document.createElement('section');
+				const onEdit = vi.fn();
+				const editor = await createEditor('const x = 1;', { onEdit, parent });
+				editor.setContent('const y = 2;');
+				expect(onEdit).not.toHaveBeenCalled();
+			});
+
+			it('still relays a learner edit after an own-write', async () => {
+				const parent = document.createElement('section');
+				const onEdit = vi.fn();
+				const editor = await createEditor('const x = 1;', { onEdit, parent });
+				editor.setContent('const y = 2;');
+				typeSource(parent, 'const z = 3;');
+				expect(onEdit.mock.calls.map((call) => call[0])).toEqual([
+					'const z = 3;',
+				]);
+			});
+		});
+
+		describe('an emptied buffer (Boundaries)', () => {
+			it('relays clearing the buffer as an edit event with the empty string', async () => {
+				const parent = document.createElement('section');
+				const onEdit = vi.fn();
+				await createEditor('const x = 1;', { onEdit, parent });
+				typeSource(parent, '');
+				expect(onEdit).toHaveBeenCalledWith('');
+			});
+		});
+
+		describe('a throwing edit consumer (Exceptions)', () => {
+			afterEach(() => {
+				vi.restoreAllMocks();
+			});
+
+			it('is caught and warned, never thrown', async () => {
+				const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+				const parent = document.createElement('section');
+				await createEditor('const x = 1;', {
+					onEdit: () => {
+						throw new Error('consumer failed');
+					},
+					parent,
+				});
+				typeSource(parent, 'const x = 2;');
+				expect(warnSpy).toHaveBeenCalled();
+			});
+
+			it('does not warn when the consumer succeeds', async () => {
+				const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+				const parent = document.createElement('section');
+				await createEditor('const x = 1;', { onEdit: vi.fn(), parent });
+				typeSource(parent, 'const x = 2;');
+				expect(warnSpy).not.toHaveBeenCalled();
+			});
+
+			it('leaves the buffer editable after the consumer throws', async () => {
+				vi.spyOn(console, 'warn').mockImplementation(() => {});
+				const parent = document.createElement('section');
+				const editor = await createEditor('const x = 1;', {
+					onEdit: () => {
+						throw new Error('consumer failed');
+					},
+					parent,
+				});
+				typeSource(parent, 'const x = 2;');
+				typeSource(parent, 'const x = 3;');
+				expect(editor.getContent()).toBe('const x = 3;');
+			});
+		});
+	});
+
+	describe('the rendered document (Interfaces)', () => {
+		it('renders a setContent write into the visible document text', async () => {
+			const parent = document.createElement('section');
+			const editor = await createEditor('const x = 1;', {
+				onEdit: vi.fn(),
+				parent,
+			});
+			editor.setContent('const y = 42;');
+			expect(parent.querySelector('.cm-content')?.textContent).toContain(
+				'const y = 42;',
+			);
 		});
 	});
 });
