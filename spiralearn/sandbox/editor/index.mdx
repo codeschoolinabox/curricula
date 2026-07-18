@@ -1,0 +1,40 @@
+---
+sidebar_position: 2
+---
+
+import React from 'react';
+import BrowserOnly from '@docusaurus/BrowserOnly';
+
+# Editor — checkpoint
+
+Type into the editor and paste a multi-line snippet. Expected: keystrokes
+render; exactly one editor mounts; the relay line below counts every edit; the
+browser console stays clean; and no completion popup appears while typing
+(completion arrives only through the level adapter, which v1 does not ship).
+
+export function EditorHarness() {
+	const [edits, setEdits] = React.useState(0);
+	const [length, setLength] = React.useState(null);
+	const Editor =
+		require('@site/src/lib/study-lenses/orchestrate/editor/index.tsx').default;
+	return (
+		<div>
+			<Editor
+				snippet={'const greeting = "hello";\nconsole.log(greeting);'}
+				onEdit={(source) => {
+					setEdits((count) => count + 1);
+					setLength(source.length);
+				}}
+			/>
+			<p data-editor-checkpoint-relay>
+				{length === null
+					? 'no edits relayed yet'
+					: `${edits} edits relayed — latest source is ${length} characters`}
+			</p>
+		</div>
+	);
+}
+
+<BrowserOnly fallback={<p>loading the editor…</p>}>
+	{() => <EditorHarness />}
+</BrowserOnly>

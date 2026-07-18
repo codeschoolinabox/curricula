@@ -56,6 +56,10 @@ flowchart TD
   debounce is the top component's.
 - **One live surface** — cancellation on unmount and on superseded mounts; never
   two editors for one component.
+- **Data attributes are the selector contract** — the mounted host carries
+  `data-editor-host`; the construction-failure fallback carries
+  `data-editor-host` and `data-editor-error` together. Tests and consumers
+  anchor on these, never on markup shape.
 - **Always alive** — surface class 1; no posture masks the editor.
 
 ## Out of scope

@@ -45,3 +45,13 @@ export type EditorInstance = {
 export type EditorOptions = EditorCallbacks & {
 	readonly parent?: HTMLElement;
 };
+
+/**
+ * What the Editor component receives. `snippet` seeds the surface and is the
+ * external-sync source: a later `snippet` change writes into the live document
+ * as an own-write — it never echoes an edit event. `onEdit` relays learner
+ * edits upward, one per document change.
+ */
+export type EditorProperties = EditorCallbacks & {
+	readonly snippet: string;
+};
