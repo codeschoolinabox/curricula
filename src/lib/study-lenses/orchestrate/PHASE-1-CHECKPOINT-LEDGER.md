@@ -12,4 +12,4 @@ Replay setup: `npm start`, then visit the page each entry names.
 | Increment | Commit | Page | Named action | Expected observation |
 | --------- | ------ | ---- | ------------ | -------------------- |
 
-_(Entries append as 🔍-bearing increments land. Wave 0 carried no 🔍.)_
+Entries append as 🔍-bearing increments land. Wave 0 carried no 🔍.
