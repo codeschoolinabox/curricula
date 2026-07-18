@@ -21,8 +21,8 @@ document constrains only this library.
 
 2. **Resolve** (continuous, pure) — the cascade's three layers merge per lens
    name, weakest first, learner last — through the lens's own configuration
-   factory when it declares one, else the shared deep-merge. Input: the cascade
-   layers + a lens name. Output: that lens's resolved configuration.
+   factory when it declares one, else the shared deep-merge. Input: the lens +
+   the cascade layers. Output: that lens's resolved configuration.
 
 3. **Recover** (per render, pure) — a phase's attached refs filter the joined
    lens roster by reference identity into the renderable lenses; a ref missing
