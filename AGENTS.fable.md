@@ -1,3 +1,5 @@
+<!-- cspell:ignore reflog worktree pathspec frontmatter -->
+
 # AI Agent Context — Fable Generation
 
 Governance for **Fable-generation agents** working in this repository
