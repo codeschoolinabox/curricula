@@ -643,3 +643,13 @@ prompt). Report DONE | BLOCKED | FLAG.
   session. FLAGs open: F1 (embody runtime order constant), F4 (ParseFacts
   extension pre-W3-V1). Carried to Wave-4 Phase-0: the `opened` layer's
   lifecycle; package-DOCS verdicts-node label amendment (maintainer).
+- 2026-07-18 — Waves 1+2 closed: W1 = `cee7937` `e630406` `6dd5221` `be6e6e0`
+  `5dab0c9` (editor factory + edit events + component, PhasesPanel; checkpoint
+  pages at `/sandbox/editor` and `/sandbox/phases-panel`, 🔍 deferred to the
+  ledger); W2 = `379c47e` `2987c55` `f54c010` `93c1971` `f121d9a` `13e7734`
+  `cb968f2` (recommending, event-bus, composing ×4, honoring). 168 tests green
+  across the region at wave close. Six AR PAUSEs maintainer-resolved in-flight;
+  governance addendum landed (`87b9ac6` `6b26e5b` `412d68f`) + editor-DOCS
+  supersession pin (`e1fb236`). F4 re-checked at wave close: ParseFacts still
+  `{tokens, comments, ast}` → NOT landed → **W3-V1/V2 FLAG-HELD** for the
+  jej/maintainer commit; Wave 3 proceeds with Phase-0 + D1 + M1 + K1 + L1.
