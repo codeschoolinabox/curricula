@@ -10,10 +10,11 @@
 
 /**
  * One phase as the panel renders it. `name` is the phase's data name — the
- * data-attribute identity tests anchor on; `label` is its learner-facing
- * display copy. An accessible phase lists its lens names in render order
- * (empty = present-but-empty); a barred phase carries its cause as display
- * copy in place of a lens list.
+ * data-attribute identity tests anchor on, expected unique within one phases
+ * list (the panel neither enforces nor dedupes it); `label` is its
+ * learner-facing display copy. An accessible phase lists its lens names in
+ * render order (empty = present-but-empty); a barred phase carries its cause
+ * as display copy in place of a lens list.
  */
 export type PhaseEntry =
 	| {

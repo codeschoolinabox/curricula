@@ -1,0 +1,94 @@
+---
+sidebar_position: 3
+---
+
+import React from 'react';
+import BrowserOnly from '@docusaurus/BrowserOnly';
+
+# PhasesPanel — checkpoint
+
+Two hand-built phase lists at the panel's production contract (scaffolding data
+only — never a production-dispatch fixture). Expected: the first panel shows all
+five phases in spec order with their display labels, and clicking a lens echoes
+its intent below; the second panel bars everything downstream of `tokens` with
+the parser's cause, in place of any lens list.
+
+export function PanelHarness() {
+	const [intent, setIntent] = React.useState(null);
+	const PhasesPanel =
+		require('@site/src/lib/study-lenses/orchestrate/phases-panel/index.tsx').default;
+	const parsing = [
+		{
+			accessible: true,
+			label: 'Source',
+			lenses: ['annotate', 'blanks'],
+			name: 'source',
+		},
+		{
+			accessible: true,
+			label: 'Tokens · spelling',
+			lenses: [],
+			name: 'tokens',
+		},
+		{ accessible: true, label: 'AST · grammar', lenses: ['quiz'], name: 'ast' },
+		{
+			accessible: true,
+			label: 'Environment · names',
+			lenses: [],
+			name: 'environment',
+		},
+		{
+			accessible: true,
+			label: 'Evaluation · run',
+			lenses: ['run'],
+			name: 'evaluation',
+		},
+	];
+	const tokensFailure = [
+		{ accessible: true, label: 'Source', lenses: ['annotate'], name: 'source' },
+		{
+			accessible: true,
+			label: 'Tokens · spelling',
+			lenses: ['error-explainer'],
+			name: 'tokens',
+		},
+		{
+			accessible: false,
+			cause: 'Unexpected character "@" (1:4)',
+			label: 'AST · grammar',
+			name: 'ast',
+		},
+		{
+			accessible: false,
+			cause: 'Unexpected character "@" (1:4)',
+			label: 'Environment · names',
+			name: 'environment',
+		},
+		{
+			accessible: false,
+			cause: 'Unexpected character "@" (1:4)',
+			label: 'Evaluation · run',
+			name: 'evaluation',
+		},
+	];
+	return (
+		<div>
+			<h2>A parsing program</h2>
+			<PhasesPanel phases={parsing} onOpenLens={(next) => setIntent(next)} />
+			<h2>A tokens-failure program</h2>
+			<PhasesPanel
+				phases={tokensFailure}
+				onOpenLens={(next) => setIntent(next)}
+			/>
+			<p data-panel-checkpoint-intent>
+				{intent === null
+					? 'no lens intent raised yet'
+					: `intent: open "${intent.lens}" in the ${intent.phase} phase`}
+			</p>
+		</div>
+	);
+}
+
+<BrowserOnly fallback={<p>loading the panel…</p>}>
+	{() => <PanelHarness />}
+</BrowserOnly>

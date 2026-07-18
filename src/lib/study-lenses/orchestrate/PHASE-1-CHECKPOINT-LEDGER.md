@@ -9,8 +9,9 @@ replay at the end.
 
 Replay setup: `npm start`, then visit the page each entry names.
 
-| Increment | Commit              | Page              | Named action                                     | Expected observation                                                                                                                                                       |
-| --------- | ------------------- | ----------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| W1-E3     | (this row's commit) | `/sandbox/editor` | type into the editor; paste a multi-line snippet | keystrokes render; exactly one editor on the page; the relay line counts every edit and reports the latest length; browser console clean; NO completion popup while typing |
+| Increment | Commit              | Page                    | Named action                                      | Expected observation                                                                                                                                                                                                                                 |
+| --------- | ------------------- | ----------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| W1-E3     | (this row's commit) | `/sandbox/editor`       | type into the editor; paste a multi-line snippet  | keystrokes render; exactly one editor on the page; the relay line counts every edit and reports the latest length; browser console clean; NO completion popup while typing                                                                           |
+| W1-P1     | (this row's commit) | `/sandbox/phases-panel` | read both panels; click a lens name in each panel | first panel: five sections in spec order with display labels; second panel: ast/environment/evaluation barred, each naming the parser's cause, no lens buttons on barred sections; every click updates the intent line with the right lens AND phase |
 
 Entries append as 🔍-bearing increments land. Wave 0 carried no 🔍.
