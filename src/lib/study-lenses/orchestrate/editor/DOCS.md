@@ -55,7 +55,9 @@ flowchart TD
 - **No settling here** — edit events fire per document change; the settle
   debounce is the top component's.
 - **One live surface** — cancellation on unmount and on superseded mounts; never
-  two editors for one component.
+  two editors for one component. The component owns this policing entirely: the
+  factory builds wherever it is pointed and never distinguishes a legitimate
+  second editor from a stale superseded mount.
 - **Data attributes are the selector contract** — the mounted host carries
   `data-editor-host`; the construction-failure fallback carries
   `data-editor-host` and `data-editor-error` together. Tests and consumers
