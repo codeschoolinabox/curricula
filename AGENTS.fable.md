@@ -571,6 +571,17 @@ session.
   update the in-repo ledgers (strongest durability), the campaign memory, and
   the plan file's RESUMPTION POINT. Session interruptions are survivable exactly
   to the extent these artifacts are current.
+- **Usage-window awareness.** No live usage meter is visible, and sibling
+  sessions draw invisibly from the same window — limit management is
+  risk-shifting, never control. Track the burn you can see (completed subagents
+  report their token usage; note observed reset times), check the clock before
+  every heavy launch, and late in a window launch nothing heavy: let in-flight
+  agents drain, relay verdicts, and park at a clean committed boundary with
+  continuity written. Right-size anything that must launch anyway (diff-scoped
+  verifies, single increments, never whole clusters) so an interruption costs a
+  small resume. Interrupted subagents resume from their transcripts — the real
+  loss is post-resume re-verification, minimized by committing green work early
+  and often.
 - **Ceremony is uniform — no agent-side lightening.** No increment is classified
   "mechanical" by its implementer to skip or thin its reviews: in practice the
   catch distribution is flat across mechanical-looking and novel increments, and
