@@ -86,11 +86,11 @@ encouragement. They cannot be overridden by momentum.
     subagents. Do not substitute in-context self-review for either.
     Current-generation agents under-reach for subagents by default; this line is
     the counterweight.
-12. **Validate every handoff with a context-free agent** — before handing off
-    at any increment-cluster or phase boundary (and before any deliberate
-    cold-start), spawn a fresh subagent with NO session context, give
-    it the RESUMPTION POINT plus the launch/handoff prompt, and have it report
-    whether it could orient and execute the next step and exactly where it would
+12. **Validate every handoff with a context-free agent** — before handing off at
+    any increment-cluster or phase boundary (and before any deliberate
+    cold-start), spawn a fresh subagent with NO session context, give it the
+    RESUMPTION POINT plus the launch/handoff prompt, and have it report whether
+    it could orient and execute the next step and exactly where it would
     stumble. Apply its must-fix findings before the handoff is final. The author
     holds all the context the next agent lacks and is therefore structurally
     blind to their own gaps — this is the same bias-correction the ARs apply to
@@ -496,41 +496,85 @@ resuming.
 Development defaults to **delegation fan-out** (distinct from the broad _read_
 fan-out that goes to Explore subagents): the
 [§ Context Discipline](#context-discipline) cold-start handoff rotated
-**temporal → spatial**. Instead of one agent handing off to a future agent across
-time, an **orchestrator** session hands off to fresh **worker** subagents across
-the dependency graph — automatic because the graph is **type-defined**. After
-Phase 0, absent explicit human prompting, a session fans out; dispatch is
-mechanical (read from the type-defined DAG the human locked at the
-Phase-0 → Phase-1 gate, not the agent's judgment about what is independent). The
-human may override to synchronous.
+**temporal → spatial**. Instead of one agent handing off to a future agent
+across time, an **orchestrator** session hands off to fresh **worker** subagents
+across the dependency graph — automatic because the graph is **type-defined**.
+After Phase 0, absent explicit human prompting, a session fans out; dispatch is
+mechanical (read from the type-defined DAG the human locked at the Phase-0 →
+Phase-1 gate, not the agent's judgment about what is independent). The human may
+override to synchronous.
 
 - **The guard.** A type edge ⇒ serialize. The _absence_ of one does NOT license
   parallel — serialize is the default, parallel the earned exception.
   Affirmatively clear every non-type coupling first (environment colocation,
-  frozen-singleton /
-  registration order, semantic protocol — not an exhaustive list); when in doubt,
-  serialize. A hidden dependency the types can't see is a `types.ts` modeling gap
-  to enrich, not paper over.
+  frozen-singleton / registration order, semantic protocol — not an exhaustive
+  list); when in doubt, serialize. A hidden dependency the types can't see is a
+  `types.ts` modeling gap to enrich, not paper over.
 - **A worker** is a fresh subagent owning one complete triangulated unit (a
   function + its ZOMBIES cluster), running the full cycle (ZOMBIES → `ar-3` →
   implement → refactor → `ar-4`) and committing green — full ceremony, never
   split mid-triangulation. Parallelize only committed-and-covered subtrees that
   pass the guard, bottom-up
-  ([§ Dependency-order coverage](./DEV.md#dependency-order-coverage)). Each worker
-  is a mini cold-start; validate the **decomposition** before each fan-out wave.
+  ([§ Dependency-order coverage](./DEV.md#dependency-order-coverage)). Each
+  worker is a mini cold-start; validate the **decomposition** before each
+  fan-out wave.
 - **The orchestrator** holds the spine — `types.ts`, the DOCS `## Data flow`
   diagram, the plan/gate ledger — and reads committed contracts at DAG joins to
-  catch seam-slop (Always Works™ at the seam can't be delegated). Lean ≠ blind: it
-  writes no per-worker churn and serializes its own spine edits.
+  catch seam-slop (Always Works™ at the seam can't be delegated). Lean ≠ blind:
+  it writes no per-worker churn and serializes its own spine edits.
 
-**Workers report DONE | BLOCKED | FLAG — no fourth channel.** DONE = verified and
-committed (no "green but unverified" — that is BLOCKED, or out of scope and
+**Workers report DONE | BLOCKED | FLAG — no fourth channel.** DONE = verified
+and committed (no "green but unverified" — that is BLOCKED, or out of scope and
 already on the DAG; coverage a node test can't reach → move the test). BLOCKED =
-can't finish; the orchestrator pivots. FLAG = an inter-file contract boundary (the
-[two-tier rule](#two-tier-autonomy), delegated; `types.ts`/DOCS changes still need
-human approval) **or** a suspected cross-subtree coupling the orchestrator then
-checks at the seam. Gates are unchanged; the win is a permanently lean, coherent
-orchestrator — not throughput.
+can't finish; the orchestrator pivots. FLAG = an inter-file contract boundary
+(the [two-tier rule](#two-tier-autonomy), delegated; `types.ts`/DOCS changes
+still need human approval) **or** a suspected cross-subtree coupling the
+orchestrator then checks at the seam. Gates are unchanged; the win is a
+permanently lean, coherent orchestrator — not throughput.
+
+### Execution mechanics
+
+Field-proven rules for running the fan-out; they bind every orchestrated
+session.
+
+- **Concurrent commits share one worktree — commit with a pathspec.** Stage and
+  commit in ONE shell invocation: `git add <explicit paths>` →
+  `git diff --staged --stat` (the staged diff must be exclusively yours) →
+  `git commit -m "…" -- <your paths>`. The pathspec keeps a peer's
+  concurrently-staged files out of your commit. On an `index.lock` collision,
+  wait briefly and retry. The pre-commit hook's lint-staged stash cycle runs per
+  commit — expect transient stash entries, never clean them up.
+- **Honest quality gates in a shared tree.** Before fan-out, the orchestrator
+  captures the repo's foreign-debt baselines (typecheck error count and
+  locations; failing test files) and bakes the numbers into every worker brief.
+  A worker's bar: its own directory's test run fully green (show the three
+  vitest summary lines), and zero NEW failures outside the named baseline paths.
+  Whole-repo green is not the gate — peers hold deliberately-red tests
+  mid-increment.
+- **Validate every fan-out decomposition context-free** (invariant 12 applied to
+  launches, not just handoffs): before launching a wave of workers, a fresh
+  agent holding only the launch prompts plus repo access reports where each
+  worker would stumble, guess, or block. Apply must-fix findings first.
+- **PAUSE bubbles, the pipeline continues.** A worker's AR PAUSE stops that
+  worker; the orchestrator presents it to the human with the reviewer's proposed
+  resolution and keeps every independent thread moving. CONSIDER is resolved by
+  the implementing agent with documented responses, per DEV.md.
+- **AR-dispatch fallback.** A worker that cannot spawn the registered reviewers
+  pauses at the trigger and reports the reviewer's input paths; the orchestrator
+  dispatches the registered agent and resumes the worker with the verdict. The
+  frontmatter model pins govern either way.
+- **🔍-bearing increments never fan out.** User-observable work runs in the
+  orchestrator, where checkpoint continuity lives.
+- **Continuity at every wave boundary, and proactively before context fills:**
+  update the in-repo ledgers (strongest durability), the campaign memory, and
+  the plan file's RESUMPTION POINT. Session interruptions are survivable exactly
+  to the extent these artifacts are current.
+- **Ceremony is uniform — no agent-side lightening.** No increment is classified
+  "mechanical" by its implementer to skip or thin its reviews: in practice the
+  catch distribution is flat across mechanical-looking and novel increments, and
+  self-classification fails precisely where review is needed (the
+  skip-resistance rule). Only the human grants exceptions, per increment or per
+  campaign.
 
 ---
 
