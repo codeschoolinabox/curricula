@@ -7,6 +7,7 @@
  */
 
 import type { SnippetType, Violation } from '../../../language-levels/types.js';
+import type { FitMark } from '../../types.js';
 
 /**
  * One level's classification of the current code, with the cause its mark
@@ -31,3 +32,15 @@ export type LevelAssessment =
  * callers branch on the none-state before indexing.
  */
 export type AssessmentsByLevel = Readonly<Record<string, LevelAssessment>>;
+
+// Compile-time pin: the assessment's mark vocabulary is exactly the region's
+// FitMark — a divergence in either direction fails `npm run typecheck` (the
+// test runner does not type-check; this line is the enforcement).
+type Expect<T extends true> = T;
+export type _AssessmentMarkIsExactlyFitMark = Expect<
+	[LevelAssessment['mark']] extends [FitMark]
+		? [FitMark] extends [LevelAssessment['mark']]
+			? true
+			: false
+		: false
+>;

@@ -32,7 +32,7 @@ flowchart TD
     NA["not-applicable-for-type<br/>+ the admitted types"]
     DNF["does-not-fit<br/>+ the violations"]
     F["fits"]
-    OUT["assessments by level<br/>(one per registered level, frozen)"]
+    OUT["that level's assessment<br/>(mark + cause, frozen)"]
     IN --> P
     P -->|no| U
     P -->|yes| T
