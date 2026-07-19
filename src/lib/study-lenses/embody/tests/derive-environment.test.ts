@@ -711,7 +711,7 @@ describe('deriveEnvironment', () => {
 				const ast = deriveAst(snippet, tokens);
 				const entwined = deriveEntwined(snippet.source, tokens, ast);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
-				expect(stage !== (ast as unknown)).toBe(true);
+				expect(stage !== ast).toBe(true);
 			});
 
 			it('reports nothing to console.error when carrying an ast failure', () => {

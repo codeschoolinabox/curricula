@@ -1109,6 +1109,20 @@ describe('deriveEntwined', () => {
 				expect(!stage.ok && stage.cause === cause).toBe(true);
 			});
 
+			it('the tokens guard checks first — two distinct fabricated failures', () => {
+				const tokensCause = {
+					stage: 'tokens',
+					message: 'sentinel A',
+				} as const;
+				const astCause = { stage: 'ast', message: 'sentinel B' } as const;
+				const stage = deriveEntwined(
+					'let x = 1',
+					{ ok: false, cause: tokensCause },
+					{ ok: false, cause: astCause },
+				);
+				expect(!stage.ok && stage.cause === tokensCause).toBe(true);
+			});
+
 			it('reports nothing to console.error when carrying', () => {
 				const errorSpy = vi
 					.spyOn(console, 'error')
