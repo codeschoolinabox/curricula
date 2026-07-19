@@ -36,10 +36,8 @@ export default function Editor({
 	// first-render values; the refs carry the latest prop and callback so a
 	// resolving mount and every relayed edit read current state.
 	const snippetReference = React.useRef(snippet);
-	// eslint-disable-next-line functional/immutable-data -- React ref semantics require assignment
 	snippetReference.current = snippet;
 	const onEditReference = React.useRef(onEdit);
-	// eslint-disable-next-line functional/immutable-data -- React ref semantics require assignment
 	onEditReference.current = onEdit;
 
 	// 2. Edit relay — lives entirely in the factory; this component only
@@ -71,7 +69,6 @@ export default function Editor({
 							instance.destroy();
 							return;
 						}
-						// eslint-disable-next-line functional/immutable-data -- React ref semantics require assignment
 						editorReference.current = instance;
 						// Race recovery: a snippet prop change during the
 						// in-flight mount already re-rendered; the sync effect
@@ -90,11 +87,9 @@ export default function Editor({
 			// 4. Teardown — supersession and unmount share one path: flag the
 			//    in-flight mount cancelled, destroy whatever already resolved.
 			return function cancelMount() {
-				// eslint-disable-next-line functional/immutable-data -- the cancellation flag is the mount race's backing state
 				cancelled.current = true;
 				if (editorReference.current) {
 					editorReference.current.destroy();
-					// eslint-disable-next-line functional/immutable-data -- React ref semantics require assignment
 					editorReference.current = null;
 				}
 			};

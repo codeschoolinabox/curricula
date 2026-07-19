@@ -13,7 +13,9 @@ import type { Entwined, EntwinedNode, FactStage, NodePath } from './types.js';
  * one shared graph, two entry points. Paths are `$`-rooted and dot-delimited
  * with bare array indices (`$.body.0.declarations.0`), preserving source
  * positions across array holes — the canonical node identity across the
- * package. The graph ties nodes only: the offset index and the per-node
+ * package. `byOffset` maps every source offset (a UTF-16 code unit) to the
+ * deepest node whose span covers it — never a hole: the Program spans the
+ * whole source, so every offset resolves at least to the root. The per-node
  * token and comment ties are empty.
  */
 export default function deriveEntwined(ast: Program): FactStage<Entwined> {

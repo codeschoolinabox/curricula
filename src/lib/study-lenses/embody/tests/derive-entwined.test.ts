@@ -183,6 +183,15 @@ describe('deriveEntwined', () => {
 			});
 		});
 
+		describe('byOffset', () => {
+			it('covers every source offset', () => {
+				const snippet = { source: 'let x = 1', type: 'script' } as const;
+				const ast = deriveAst(snippet, deriveTokens(snippet));
+				const stage = ast.ok && deriveEntwined(ast.value);
+				expect(stage && stage.ok && stage.value.byOffset).toHaveLength(9);
+			});
+		});
+
 		describe('array hole', () => {
 			it('a surviving element keeps its source index in the path', () => {
 				const snippet = { source: '[,1]', type: 'script' } as const;

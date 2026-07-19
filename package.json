@@ -77,6 +77,7 @@
 	},
 	"devDependencies": {
 		"@docusaurus/tsconfig": "^3.9.2",
+		"@eslint-community/eslint-plugin-eslint-comments": "^4.7.2",
 		"@ls-lint/ls-lint": "^2.3.1",
 		"@testing-library/react": "^16.3.2",
 		"@testing-library/user-event": "^14.6.1",

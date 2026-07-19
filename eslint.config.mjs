@@ -5,6 +5,7 @@ import eslintPluginImport from 'eslint-plugin-import';
 import * as mdx from 'eslint-plugin-mdx';
 import eslintPluginSecurity from 'eslint-plugin-security';
 import eslintPluginSonarJS from 'eslint-plugin-sonarjs';
+import eslintComments from '@eslint-community/eslint-plugin-eslint-comments';
 import eslintPluginUnicorn from 'eslint-plugin-unicorn';
 import tseslint from 'typescript-eslint';
 
@@ -440,8 +441,22 @@ export default tseslint.config(
 	// → consts → helpers.
 	{
 		files: ['src/lib/study-lenses/**/*.ts', 'src/lib/study-lenses/**/*.tsx'],
-		plugins: { local: { rules: { 'newspaper-order': newspaperOrder } } },
+		plugins: {
+			local: { rules: { 'newspaper-order': newspaperOrder } },
+			'@eslint-community/eslint-comments': eslintComments,
+		},
+		// Flag eslint-disable directives that outlived their violation, so stale
+		// suppressions don't rot. Scoped to the clean study-lenses/ tree (its
+		// disables are all current) → lands green as a real gate; WIP trees stay
+		// lenient, same principle as Zone 2b/2c.
+		linterOptions: { reportUnusedDisableDirectives: 'error' },
 		rules: {
+			// Every eslint-disable must carry a `-- reason`. The tree already
+			// follows this by convention; enforce it so it can't quietly lapse.
+			'@eslint-community/eslint-comments/require-description': [
+				'error',
+				{ ignore: [] },
+			],
 			'@typescript-eslint/no-explicit-any': 'error',
 			'@typescript-eslint/no-unsafe-assignment': 'error',
 			'@typescript-eslint/no-unsafe-call': 'error',
@@ -451,6 +466,19 @@ export default tseslint.config(
 			'@typescript-eslint/no-non-null-assertion': 'error',
 			'local/newspaper-order': 'error',
 		},
+	},
+
+	// =========================================================================
+	// Zone 2e: React component files (.tsx) — allow ref/state mutation
+	// =========================================================================
+	// `functional/immutable-data` fires on idiomatic `ref.current = x` and the
+	// mutable backing state React components legitimately need. Turn it off for
+	// .tsx wholesale rather than sprinkling per-line disables — which then rot,
+	// and which Zone 2d's reportUnusedDisableDirectives would flag as unused once
+	// the rule is off here anyway. The rule stays on for .ts (non-component) code.
+	{
+		files: ['src/**/*.tsx'],
+		rules: { 'functional/immutable-data': 'off' },
 	},
 
 	// =========================================================================
