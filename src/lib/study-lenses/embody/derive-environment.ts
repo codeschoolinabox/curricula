@@ -5,8 +5,10 @@ import { analyze } from 'eslint-scope';
 
 import ECMA_VERSION from './ecma-version.js';
 import type {
+	Entwined,
 	Environment,
 	FactStage,
+	NodePath,
 	ScopeDefinition,
 	SnippetType,
 } from './types.js';
@@ -26,6 +28,7 @@ import type {
 export default function deriveEnvironment(
 	type: SnippetType,
 	ast: Program,
+	entwined: Entwined,
 ): FactStage<Environment> {
 	const manager = analyze(ast, {
 		sourceType: type,
@@ -36,8 +39,48 @@ export default function deriveEnvironment(
 	// own structural view instead: one documented untyped-library boundary read
 	const foreignRoot = manager.globalScope as unknown as ForeignScope;
 	const root = projectScope(foreignRoot, newInterner());
+	const byPath = indexByPath(root, entwined);
 
-	return { ok: true, value: { root, byPath: {} } };
+	return { ok: true, value: { root, byPath } };
+}
+
+/**
+ * Every scope keyed by the path of the node that introduces it. The global
+ * and module scopes share the Program node, so `$` resolves innermost-wins:
+ * parents write before children and the deepest writer stands (the byOffset
+ * precedent). Paths come from the entwined graph — the one place the package
+ * derives them — through a transient node→path reversal (DEV.md § 13).
+ */
+function indexByPath(
+	root: BuildingScope,
+	entwined: Entwined,
+): Record<NodePath, BuildingScope> {
+	const pathOf = new Map<Node, NodePath>();
+	for (const tied of Object.values(entwined.byPath)) {
+		pathOf.set(tied.node, tied.path);
+	}
+
+	const byPath: Record<NodePath, BuildingScope> = {};
+	fillByPath(root, pathOf, byPath);
+	return byPath;
+}
+
+// parent-before-child keeps the innermost scope the last writer at a shared
+// key. A scope's block is always a node of the very tree the entwining
+// indexed, so the lookup cannot miss on a valid tree — the guard only
+// narrows the Map's undefined arm.
+function fillByPath(
+	scope: BuildingScope,
+	pathOf: Map<Node, NodePath>,
+	byPath: Record<NodePath, BuildingScope>,
+): void {
+	const path = pathOf.get(scope.block);
+	if (path !== undefined) {
+		byPath[path] = scope;
+	}
+	for (const child of scope.childScopes) {
+		fillByPath(child, pathOf, byPath);
+	}
 }
 
 // the analyzer's runtime shapes, described structurally — only the fields
