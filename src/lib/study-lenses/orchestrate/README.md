@@ -103,12 +103,12 @@ lives inside a React component.
 - **One memoized validate per settle and per level**, shared by the selector,
   the gutter, and the mask. The parse facts a level consumes are assembled here,
   once, from the embodiment's stage values.
-- **Fit marks**, per settle: from the memoized validate, the level's admitted
-  snippet types, the current type, and the parse-stage status — fits · does not
-  fit · not applicable for this snippet type · undetermined while unparsed. A
-  typo never reads as a level violation.
-- **The mask**, at render: the selected level's fit mark — carrying its cause —
-  crossed with the strict posture.
+- **Fit marks**, per settle: from the memoized validate's verdict, the level's
+  admitted snippet types, and the current type — fits · does not fit · not
+  applicable for this snippet type · undetermined while unparsed (the verdict
+  itself encodes the parse status). A typo never reads as a level violation.
+- **The mask**, at render: the selected level's assessment — its mark with its
+  cause — crossed with the strict posture.
 - **Name-keyed config resolution** — the cascade, per lens name.
 
 ## Enforcement — the mask
@@ -120,13 +120,13 @@ under strict while the code is out of level. The mask is an inert overlay —
 mounted lenses keep their state beneath it — and the blocked state names the
 level and the first violation, or the type-admission cause. The full class-3
 block applies while the selected level's fit mark is does-not-fit or
-not-applicable-for-this-snippet-type — once the code parses. While it does not
-parse, the mark is undetermined and that carve-out wins regardless of type
-admission: the mask names no violation, and the parse phases' panel nodes and
-their error lenses stay uncovered — the supports a broken program needs are
-never the price of a wrong toggle. Under warn, nothing is blocked anywhere.
-Enforcement is mask, not filter — it never edits fit or accessibility — and
-recommendation rendering passes through the same mask.
+not-applicable-for-type — once the code parses. While it does not parse, the
+mark is undetermined and that carve-out wins regardless of type admission: the
+mask names no violation, and the parse phases' panel nodes and their error
+lenses stay uncovered — the supports a broken program needs are never the price
+of a wrong toggle. Under warn, nothing is blocked anywhere. Enforcement is mask,
+not filter — it never edits fit or accessibility — and recommendation rendering
+passes through the same mask.
 
 ## Honor rules
 
@@ -157,25 +157,30 @@ learner identity, progress, and grading (the embedding LMS's).
 The package glossary owns the shared meanings; these entries add the mechanics
 this region owns.
 
-- **fit mark** — the per-level classification of the current code: fits · does
-  not fit · not applicable for this snippet type · undetermined while unparsed.
-  Derived once per settle and per level in the marking library — from the shared
-  memoized validate, the level's admitted snippet types, the current type, and
-  the parse-stage status — and it travels with its cause (the violations, or the
-  type-admission cause). Two surfaces project the one classification: the
-  selector renders every level's mark; the mask crosses the selected level's
-  mark with the strict posture.
+- **fit mark** — the four-valued mark vocabulary for a level's classification of
+  the current code: fits · does not fit · not applicable for this snippet type ·
+  undetermined while unparsed. The mark is the label alone; its cause rides the
+  **assessment**.
+- **assessment** — one level's classification carrying its fit mark AND the
+  cause that mark needs downstream (the violations, or the admitted types).
+  Derived once per settle and per level in the marking library — from the
+  level's verdict, its admitted snippet types, and the current type; the
+  undetermined carve-out reads off the verdict itself, which already encodes the
+  parse status. Two surfaces project the one classification: the selector
+  renders every level's mark; the mask crosses the selected level's assessment
+  with the strict posture.
 - **level verdict** — what one memoized validate produces for one level over the
   settled code: undetermined while the code does not parse, else validated,
   carrying the level's violations (possibly none). The shared truth the
   selector, the gutter, and the mask all project. Three near-homonyms, three
   owners — keep them apart: the **level verdict** is the validator's answer
-  about the code; a **fit mark** is the marking library's four-valued
-  classification derived from that verdict plus type admission and parse status,
-  projected by the selector and the mask; lens **fit** is embody's applicability
-  outcome for a lens, and no level is involved in it. (The package sketch's
-  verdicts node compresses verdict and type admission into one label; this
-  region splits them — the verdict is the validator's alone.)
+  about the code; a **fit mark** is the four-valued label an **assessment**
+  carries, derived in the marking library from that verdict plus type admission
+  (the verdict itself encodes the parse status), projected by the selector and
+  the mask; lens **fit** is embody's applicability outcome for a lens, and no
+  level is involved in it. (The package sketch's verdicts node compresses
+  verdict and type admission into one label; this region splits them — the
+  verdict is the validator's alone.)
 - **settle loop** — the region's edit-to-derivation cycle: the editor emits one
   edit event per document change; the top component debounces them
   trailing-edge; when typing settles, the snippet is re-embodied and every

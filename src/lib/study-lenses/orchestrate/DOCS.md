@@ -27,18 +27,18 @@ abstraction; each rendered surface and derivation library zooms in below.
    the joined roster; the parse facts a level consumes are assembled once from
    the embodiment's stage values; one memoized validate runs per registered
    level; the fit marks derive from those verdicts, the levels' admitted snippet
-   types, the current type, and the parse-stage status. All of it in pure
-   functions — level logic never lives inside a React component. Input: the
-   settled snippet + the composed study configuration. Output: the frozen
-   embodiment + the level verdicts + the fit marks.
+   types, and the current type (the verdict itself encodes the parse status).
+   All of it in pure functions — level logic never lives inside a React
+   component. Input: the settled snippet + the composed study configuration.
+   Output: the frozen embodiment + the level verdicts + the assessments.
 
 3. **Render** (mechanical) — the five-phase panel renders the embodiment; the
    level UI renders the verdicts and marks; the mask derives here, from the
-   selected level's fit mark — carrying its cause — crossed with the strict
-   posture, classifying surfaces into the three classes; an initial-focus
+   selected level's assessment — its mark with its cause — crossed with the
+   strict posture, classifying surfaces into the three classes; an initial-focus
    request mounts here, through its honor path; recommendations render here,
-   ranked, through the mask. Input: embodiment + verdicts + composed study
-   configuration. Output: the rendered study environment.
+   ranked, through the mask. Input: embodiment + verdicts + assessments +
+   composed study configuration. Output: the rendered study environment.
 
 4. **Interact** (async at the edges) — each control re-enters its own phase:
    source edits re-enter Derive at the next settle; the snippet-type toggle
@@ -57,7 +57,7 @@ flowchart TD
     SNP["snippet<br/>(source + type, as last settled)"]
     EMB["frozen embodiment"]
     VER["level verdicts<br/>(one memoized validate per settle + level)"]
-    MARKS["fit marks, each with its cause<br/>(per level, per settle)"]
+    MARKS["assessments by level<br/>(mark + cause, per settle)"]
     SUR["rendered study environment<br/>(editor · panel · level UI · mask)"]
     PROPS -->|"join rosters at mount, loud collisions"| CFG
     PROPS -->|"initial snippet + type, seeds the editor"| SNP
@@ -66,10 +66,10 @@ flowchart TD
     CFG -->|"supplies the joined roster"| EMB
     EMB -->|"assemble parse facts once, validate per level, memoized"| VER
     CFG -->|"supplies the registered levels, names the selected one"| VER
-    VER -->|"mark: × admitted types × current type × parse status"| MARKS
+    VER -->|"classify: × admitted types × current type"| MARKS
     EMB -->|"render, mechanical"| SUR
     VER -->|"annotate the editor's gutter, selected level only"| SUR
-    MARKS -->|"selector marks · mask = selected mark × strict posture"| SUR
+    MARKS -->|"selector marks · mask = selected assessment × strict posture"| SUR
     CFG -->|"posture + resolved configs"| SUR
     SUR -->|"edits + type toggle, debounced to the settle"| SNP
     SUR -->|"level · posture · config · lens choice, session-scoped"| CFG

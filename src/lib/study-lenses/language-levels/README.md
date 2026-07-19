@@ -20,6 +20,7 @@ language-levels/
   DOCS.md         the region's architectural sketch
   types.ts        the level spine — the contract every level satisfies
   <key>/          one directory per level — jej/ is the first
+  scaffold/       the injected-only exemplar level — never on the built-in roster
 ```
 
 ## The level spine
@@ -112,10 +113,10 @@ A level ships no lenses — its machine-facing lenses come from you, its author,
 importing your level directly.
 
 Embedding sites inject levels through the language-levels prop — append-only,
-key collision loud, no replacement or shadowing of built-ins. The test-fixture
-level exercising that injection path is the recipe's executable exemplar; it is
-an injected, test-scoped artifact — never a built-in directory, so it can never
-enter a production selector.
+key collision loud, no replacement or shadowing of built-ins. The scaffolding
+level ([`scaffold/`](./scaffold/README.md)) exercising that injection path is
+the recipe's executable exemplar; it is an injected-only artifact — never on the
+built-in roster, so it can never enter a production selector.
 
 ## Glossary — region terms
 

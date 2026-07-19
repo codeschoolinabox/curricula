@@ -67,12 +67,12 @@ export type StudyLensesProperties = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * The per-level classification of the current code, derived once per settle
- * and per level in this region from the shared memoized validate, the
- * level's admitted snippet types, the current type, and the parse-stage
- * status. Region-internal shared vocabulary — the selector renders every
- * level's mark and the mask projects the selected one; it is not part of
- * the host surface.
+ * The four-valued mark vocabulary a level's assessment carries — derived
+ * once per settle and per level in this region's marking library, from the
+ * level's verdict, its admitted snippet types, and the current type (the
+ * verdict itself encodes the parse status). Region-internal shared
+ * vocabulary — the selector renders every level's mark and the mask
+ * projects the selected assessment; it is not part of the host surface.
  *
  * @remarks
  * While the code does not parse the mark is `undetermined`, and that
