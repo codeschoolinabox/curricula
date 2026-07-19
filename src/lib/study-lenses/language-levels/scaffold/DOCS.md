@@ -36,6 +36,9 @@ flowchart TD
   placeholder data.
 - **Injected-only** — never on the built-in roster; reaches a session through
   props alone.
+- **Frozen spine** — the exported level object is deeply frozen at definition (a
+  shared module-level constant); each validate call freezes the violations it
+  returns.
 
 ## Decisions
 
