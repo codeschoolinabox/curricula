@@ -549,6 +549,139 @@ describe('deriveEntwined', () => {
 			});
 		});
 
+		describe('comment ties', () => {
+			it('an empty program ties no comments', () => {
+				const snippet = { source: '', type: 'script' } as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				expect(stage && stage.ok && stage.value.root.comments).toHaveLength(0);
+			});
+
+			it('a comment-free program ties no comments', () => {
+				const snippet = { source: 'let x = 1', type: 'script' } as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				expect(stage && stage.ok && stage.value.root.comments).toHaveLength(0);
+			});
+
+			it('the root ties every comment', () => {
+				const snippet = {
+					source: 'let a = 1; // one\nlet b = 2; /* two */',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				expect(stage && stage.ok && stage.value.root.comments).toHaveLength(2);
+			});
+
+			it('a between-statement comment ties to no statement', () => {
+				const snippet = {
+					source: 'let a = 1; // one\nlet b = 2; /* two */',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				expect(
+					stage && stage.ok && stage.value.byPath['$.body.0']?.comments,
+				).toHaveLength(0);
+			});
+
+			it('root comments keep source order', () => {
+				const snippet = {
+					source: 'let a = 1; // one\nlet b = 2; /* two */',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				expect(
+					stage && stage.ok && stage.value.root.comments[0]?.comment.start,
+				).toBe(11);
+			});
+
+			it('an interior comment ties to its enclosing declarator', () => {
+				const snippet = {
+					source: 'let x = /* c */ 1',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				expect(
+					stage &&
+						stage.ok &&
+						stage.value.byPath['$.body.0.declarations.0']?.comments,
+				).toHaveLength(1);
+			});
+
+			it('an interior comment does not tie to the literal beside it', () => {
+				const snippet = {
+					source: 'let x = /* c */ 1',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				expect(
+					stage &&
+						stage.ok &&
+						stage.value.byPath['$.body.0.declarations.0.init']?.comments,
+				).toHaveLength(0);
+			});
+
+			it('one wrapper per comment, shared across nodes — never copies', () => {
+				const snippet = {
+					source: 'let x = /* c */ 1',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined &&
+						entwined.root.comments[0] ===
+							entwined.byPath['$.body.0.declarations.0']?.comments[0],
+				).toBe(true);
+			});
+
+			it('a leading comment resolves to the root', () => {
+				const snippet = {
+					source: '/* header */let x = 1',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				expect(stage && stage.ok && stage.value.root.comments).toHaveLength(1);
+			});
+
+			it('a trailing comment resolves to the root', () => {
+				const snippet = {
+					source: 'let x = 1 // tail',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				expect(stage && stage.ok && stage.value.root.comments).toHaveLength(1);
+			});
+		});
+
 		describe('token chain', () => {
 			it.each([
 				[0, 1],

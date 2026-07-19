@@ -1,12 +1,6 @@
-import type { Node, Program, Token } from 'acorn';
+import type { Comment, Node, Program, Token } from 'acorn';
 
-import type {
-	Entwined,
-	EntwinedComment,
-	FactStage,
-	NodePath,
-	Tokens,
-} from './types.js';
+import type { Entwined, FactStage, NodePath, Tokens } from './types.js';
 
 /**
  * Derive the entwined fact stage from the syntax tree and the token stream:
@@ -24,7 +18,9 @@ import type {
  * whole source, so every offset resolves at least to the root. Each node ties
  * the tokens within its span, in stream order, through one shared wrapper per
  * token — chained stream-wide (`previous`/`next`, null at both ends) and
- * carrying each token's innermost node. The per-node comment ties are empty.
+ * carrying each token's innermost node. Each node likewise ties the comments
+ * within its span, in source order, through one shared wrapper per comment;
+ * the comment wrappers' token-neighbor ties are empty.
  */
 export default function deriveEntwined(
 	ast: Program,
@@ -34,6 +30,7 @@ export default function deriveEntwined(
 	const root = entwineNode(ast, '$', null, byPath);
 	const byOffset = indexByOffset(root);
 	tieTokens(tokens.tokens, byOffset);
+	tieComments(tokens.comments, byOffset);
 
 	return { ok: true, value: { root, byPath, byOffset } };
 }
@@ -47,7 +44,7 @@ type BuildingNode = {
 	parent: BuildingNode | null;
 	children: BuildingNode[];
 	tokens: BuildingToken[];
-	comments: EntwinedComment[];
+	comments: BuildingComment[];
 };
 
 function entwineNode(
@@ -142,6 +139,42 @@ function tieTokens(
 		let node: BuildingNode | null = innermost;
 		while (node !== null) {
 			node.tokens.push(tied);
+			node = node.parent;
+		}
+	}
+}
+
+// the comment wrappers' token-neighbor ties wire in a later pass — the same
+// marked local mutation as the token chain; only the readonly view leaves
+type BuildingComment = {
+	comment: Comment;
+	innermostNode: BuildingNode | null;
+	previous: BuildingToken | null;
+	next: BuildingToken | null;
+};
+
+/**
+ * Tie every comment to each node whose span contains it — one wrapper per
+ * comment, shared across its containing nodes: one graph, never copies.
+ * Iterating in source order keeps every per-node list in source order.
+ */
+function tieComments(
+	comments: ReadonlyArray<Comment>,
+	byOffset: ReadonlyArray<BuildingNode>,
+): void {
+	for (const comment of comments) {
+		const tied: BuildingComment = {
+			comment,
+			innermostNode: null,
+			previous: null,
+			next: null,
+		};
+		// comments are trivia between token boundaries, and node boundaries ARE
+		// token boundaries — so the node at a comment's start contains the whole
+		// comment, and its ancestor chain is exactly the set of containing nodes
+		let node: BuildingNode | null = byOffset[comment.start];
+		while (node !== null) {
+			node.comments.push(tied);
 			node = node.parent;
 		}
 	}
