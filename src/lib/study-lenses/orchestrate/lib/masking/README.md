@@ -26,7 +26,9 @@ The mask state carries the level's label and the blocked cause **structurally**
 — the first violation, or the admitted types. The top component formats the
 blocked sentence, exactly as it formats the barred-phase cause: learner-facing
 prose has one author, and the structure stays available for richer overlays
-without a contract change.
+without a contract change. The mask assumes the assessment honors its own
+contract — a does-not-fit assessment carries at least one violation — and never
+validates or repairs it (no re-derivation, in either direction).
 
 ## The three surface classes
 

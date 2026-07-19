@@ -24,14 +24,14 @@ document constrains only this library.
 ```mermaid
 flowchart TD
     IN["selected level's assessment ·<br/>posture · level label"]
-    W{"strict?"}
+    W{"strict, and a level selected?"}
     M{"mark: does-not-fit or<br/>not-applicable-for-type?"}
     UN["unmasked"]
     MK["masked<br/>+ level label + structural blocked cause"]
     IN --> W
-    W -->|"no — warn blocks nothing"| UN
+    W -->|"no — warn blocks nothing,<br/>the none-state has nothing to enforce"| UN
     W -->|yes| M
-    M -->|"no (fits · undetermined · none-state)"| UN
+    M -->|"no (fits · undetermined)"| UN
     M -->|yes| MK
 ```
 
