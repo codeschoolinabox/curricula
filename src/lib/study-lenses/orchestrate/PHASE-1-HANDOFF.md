@@ -665,3 +665,21 @@ prompt). Report DONE | BLOCKED | FLAG.
   tree, not an output. F4 sweep list when the ParseFacts extension lands:
   validating/README, scaffold/DOCS parse-facts node, language-levels/README
   (spine + glossary), language-levels/types.ts.
+- 2026-07-19 — Wave 3 closed (leaves): D1 = `50cf9b2` (scaffold level spine +
+  debugger-statement validate), M1 = `b48c142` (`deriveAssessments`), K1 =
+  `547bfe0` (`deriveMask`), freeze-utility normalization `17db8e1`
+  (deep-freeze-in-place → canonical freeze-in-place), L1 = `60018a4`
+  (LevelSelector + `/sandbox/level-ui` checkpoint page wiring the REAL
+  deriveAssessments + scaffold level; 🔍 deferred to the ledger). L1's AR-4
+  returned CONSIDER ×5, all batch-fixed in-session (toggle-close +
+  close-on-select decided/pinned/documented; plain-text-hover/F6 made
+  discoverable from types.ts + README; sketch names the open/close toggle;
+  `aria-expanded` added). 248 tests green across orchestrate + scaffold at wave
+  close; typecheck at the 2-error foreign baseline. **NEW FLAG F6**: the
+  rendered-markdown hover surface for level docs — v1 ships the native
+  plain-text `title`; the rich hover (and full disclosure-widget ARIA: roles,
+  `aria-haspopup`) is a maintainer-routed follow-on. W3-V1/V2 remain FLAG-HELD
+  on F4 (ParseFacts still `{tokens, comments, ast}` at close). Carried to Wave-4
+  Phase-0: the `opened` layer's lifecycle; package-DOCS verdicts-node label;
+  package-README pre-split vocabulary; the h3-ancestor heading check for the top
+  component.
