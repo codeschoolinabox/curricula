@@ -40,10 +40,10 @@ ORCHESTRATOR.
   foreign failures outside campaign paths — path-scoped green is the bar.
 - Node: prefix npm/npx with
   `export PATH="$HOME/.nvm/versions/node/v22.11.0/bin:$PATH" &&`
-- NEVER stage: AGENTS.md, DEV.md, src/lib/study-lenses/embody/_,
-  language-levels/jej/types.ts, .planning-handoffs/_. Commit with pathspec
-  (`git commit -m "…" -- <paths>`); lint-staged leaves MM index residue —
-  reconcile only byte-identical rows via `git add`, never `git reset`.
+- NEVER stage: `AGENTS.md`, `DEV.md`, `src/lib/study-lenses/embody/` (all of
+  it), `language-levels/jej/types.ts`, `.planning-handoffs/` (all of it). Commit
+  with pathspec (`git commit -m "…" -- <paths>`); lint-staged leaves MM index
+  residue — reconcile only byte-identical rows via `git add`, never `git reset`.
 
 ## Next steps, in order
 
@@ -88,19 +88,59 @@ ORCHESTRATOR.
    list (F1 embody order constant, F3 gutter follow-on, F4 ParseFacts + its
    sweep list in the log, F5 governance edits), and the commit ledger.
 5. **Phase 2** (only after Wave 4): npm run validate (report foreign debt, don't
-   fix) → AR-5 with baseline `aaa4d0d93d6cdc786c1ace1c68bd4e33917a7d62`
-   - path scope orchestrate/** + language-levels/scaffold/** +
-     spiralearn/sandbox/\*\* → final commit → "ready to push" (the push is the
-     maintainer's).
+   fix) → AR-5 with baseline `aaa4d0d93d6cdc786c1ace1c68bd4e33917a7d62` and the
+   explicit path scope (`orchestrate/`, `language-levels/scaffold/`,
+   `spiralearn/sandbox/` — all recursive) → final commit → "ready to push" (the
+   push is the maintainer's).
+
+## The maintainer's mandate (verbatim authority for the incoming session)
+
+Granted 2026-07-18, still in force — the incoming session operates under ALL of
+it without re-asking:
+
+1. **FULL RUN.** Continue as campaign orchestrator through Waves 1–3 per §
+   Orchestrated delegation: opus subagent workers for non-🔍 clusters, the
+   🔍-bearing increments run in the orchestrator, seam-reads at joins,
+   context-free validation of every fan-out decomposition before launch. If a
+   worker cannot spawn its own ar-3/ar-4: worker pauses at the trigger and
+   reports paths; the orchestrator dispatches and continues it.
+2. **WAVE 4.** Verify the HARD entry gate yourself (embody() exported +
+   committed + covered; embody's runtime phase-order constant exists; W1–W3
+   committed). Satisfied → proceed through Wave 4 and Phase 2 (AR-5, baseline
+   `aaa4d0d93d6cdc786c1ace1c68bd4e33917a7d62`, path-scoped). Not → PARK and
+   check in. **Never waive this gate** — it is another stream's landing, not the
+   maintainer's approval.
+3. **LEDGERS.** Maintain PHASE-1-CHECKPOINT-LEDGER.md (every deferred 🔍:
+   increment, named action, expected observation, commit) and append a dated
+   campaign-log line to PHASE-1-HANDOFF.md as each wave closes.
+4. **CONTINUITY** at every wave boundary AND proactively before context fills —
+   the memory file, its MEMORY.md line, the plan RESUMPTION POINT (paths below);
+   in-repo commits are the strongest continuity.
+5. **STILL BLOCKING, always:** AR PAUSE verdicts stop for the maintainer; the
+   push is the maintainer's; cross-stream FLAGs (F1 phase-order → embody, F4
+   ParseFacts → jej) are routed by the maintainer — report, never act on another
+   stream's files. Phase-0 human gates for waves are waived: present each gate's
+   agenda and resolutions in the report, adopt the brief's proposals as
+   defaults, CONTINUE without waiting.
+6. **DONE** = W0–W3 committed green with ledgers up to date, plus W4+Phase 2 if
+   its gate was satisfied. Then check in leading with: the checkpoint ledger to
+   replay, the FLAG list, and the commit ledger.
+7. **Later grants, also in force:** governance edits to AGENTS.fable.md are
+   maintainer-delegated to the orchestrator's judgment ("make the changes when
+   you think safest"); the usage-window policy is codified there and binds;
+   ceremony is UNIFORM — no agent-side lightening, only the human grants
+   exceptions; all six AR PAUSEs to date were maintainer-approved with their
+   reviewers' resolutions ("ok on all counts" / "approved. proceed with all 3")
+   — those resolutions are law for the affected increments.
 
 ## Standing maintainer rules (unchanged)
 
 AR PAUSE verdicts stop for the maintainer; the push is theirs; cross-stream
 FLAGs are routed by them; 🔍 checkpoints deferred to the ledger with commit-body
 notes; all other gates waived with resolutions reported. Continuity: update this
-file, the campaign memory
-(`~/.claude/projects/-Users-master-Documents-0-teach-code-0-spiralearn-0--home/memory/project_orchestrate_campaign.md`
-
-- MEMORY.md line), and the plan RESUMPTION POINT
-  (`~/.claude/plans/read-0-curricula-agents-md-and-0-curricu-tingly-flask.md`)
-  at every wave boundary and before heavy launches late in a usage window.
+file, the campaign memory file `project_orchestrate_campaign.md` (plus its
+MEMORY.md index line) under
+`~/.claude/projects/-Users-master-Documents-0-teach-code-0-spiralearn-0--home/memory/`,
+and the plan RESUMPTION POINT at
+`~/.claude/plans/read-0-curricula-agents-md-and-0-curricu-tingly-flask.md` — at
+every wave boundary and before heavy launches late in a usage window.
