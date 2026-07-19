@@ -21,8 +21,36 @@ import type { Entwined, EntwinedNode, FactStage, NodePath } from './types.js';
 export default function deriveEntwined(ast: Program): FactStage<Entwined> {
 	const byPath: Record<NodePath, EntwinedNode> = {};
 	const root = entwineNode(ast, '$', null, byPath);
+	const byOffset = indexByOffset(root);
 
-	return { ok: true, value: { root, byPath, byOffset: [] } };
+	return { ok: true, value: { root, byPath, byOffset } };
+}
+
+/**
+ * Every source offset mapped to the deepest node whose span covers it.
+ * No hole is possible: acorn extends the Program span over leading and
+ * trailing trivia, so the root's own fill reaches every slot. The fill leans
+ * only on `root.node.end` — deliberately never on `root.node.start === 0`.
+ */
+function indexByOffset(root: EntwinedNode): ReadonlyArray<EntwinedNode> {
+	const byOffset = Array.from({ length: root.node.end }, () => root);
+	for (const child of root.children) {
+		fillSpans(child, byOffset);
+	}
+	return byOffset;
+}
+
+// parents write before children (depth-first), so the deepest covering node
+// is the last writer. Spans are half-open — a node's `end` offset belongs to
+// its parent — and a zero-width span writes nothing. Identical-span siblings
+// tie-break by enumeration order (the later-enumerated wins; pinned by test).
+function fillSpans(entwined: EntwinedNode, byOffset: EntwinedNode[]): void {
+	for (let offset = entwined.node.start; offset < entwined.node.end; offset++) {
+		byOffset[offset] = entwined;
+	}
+	for (const child of entwined.children) {
+		fillSpans(child, byOffset);
+	}
 }
 
 // the parent↔children graph is cyclic, so nodes build by local mutation and

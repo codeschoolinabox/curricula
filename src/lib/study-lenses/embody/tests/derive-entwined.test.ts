@@ -1,3 +1,5 @@
+// cspell:ignore quasis
+
 import { describe, expect, it } from 'vitest';
 
 import deriveAst from '../derive-ast.js';
@@ -35,6 +37,13 @@ describe('deriveEntwined', () => {
 				expect(
 					stage && stage.ok && Object.keys(stage.value.byPath),
 				).toHaveLength(1);
+			});
+
+			it('byOffset is empty', () => {
+				const snippet = { source: '', type: 'script' } as const;
+				const ast = deriveAst(snippet, deriveTokens(snippet));
+				const stage = ast.ok && deriveEntwined(ast.value);
+				expect(stage && stage.ok && stage.value.byOffset).toHaveLength(0);
 			});
 		});
 
@@ -189,6 +198,148 @@ describe('deriveEntwined', () => {
 				const ast = deriveAst(snippet, deriveTokens(snippet));
 				const stage = ast.ok && deriveEntwined(ast.value);
 				expect(stage && stage.ok && stage.value.byOffset).toHaveLength(9);
+			});
+
+			it('leaves no holes', () => {
+				const snippet = { source: 'let x = 1', type: 'script' } as const;
+				const ast = deriveAst(snippet, deriveTokens(snippet));
+				const stage = ast.ok && deriveEntwined(ast.value);
+				expect(
+					stage && stage.ok && stage.value.byOffset.filter(Boolean),
+				).toHaveLength(9);
+			});
+
+			it('the keyword resolves to the declaration, not the program', () => {
+				const snippet = { source: 'let x = 1', type: 'script' } as const;
+				const ast = deriveAst(snippet, deriveTokens(snippet));
+				const stage = ast.ok && deriveEntwined(ast.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined && entwined.byOffset[0] === entwined.byPath['$.body.0'],
+				).toBe(true);
+			});
+
+			it('the identifier resolves to its own node', () => {
+				const snippet = { source: 'let x = 1', type: 'script' } as const;
+				const ast = deriveAst(snippet, deriveTokens(snippet));
+				const stage = ast.ok && deriveEntwined(ast.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined &&
+						entwined.byOffset[4] ===
+							entwined.byPath['$.body.0.declarations.0.id'],
+				).toBe(true);
+			});
+
+			it('the literal resolves to its own node', () => {
+				const snippet = { source: 'let x = 1', type: 'script' } as const;
+				const ast = deriveAst(snippet, deriveTokens(snippet));
+				const stage = ast.ok && deriveEntwined(ast.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined &&
+						entwined.byOffset[8] ===
+							entwined.byPath['$.body.0.declarations.0.init'],
+				).toBe(true);
+			});
+
+			it('an inter-token gap resolves to its enclosing declaration', () => {
+				const snippet = { source: 'let x = 1', type: 'script' } as const;
+				const ast = deriveAst(snippet, deriveTokens(snippet));
+				const stage = ast.ok && deriveEntwined(ast.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined && entwined.byOffset[3] === entwined.byPath['$.body.0'],
+				).toBe(true);
+			});
+
+			it("a node's end is exclusive — the offset after it belongs to the parent", () => {
+				const snippet = { source: 'let x = 1', type: 'script' } as const;
+				const ast = deriveAst(snippet, deriveTokens(snippet));
+				const stage = ast.ok && deriveEntwined(ast.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined &&
+						entwined.byOffset[5] === entwined.byPath['$.body.0.declarations.0'],
+				).toBe(true);
+			});
+
+			it('leading trivia resolves to the root', () => {
+				const snippet = { source: '   let x = 1', type: 'script' } as const;
+				const ast = deriveAst(snippet, deriveTokens(snippet));
+				const stage = ast.ok && deriveEntwined(ast.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(entwined && entwined.byOffset[0] === entwined.root).toBe(true);
+			});
+
+			it("a second statement's offsets resolve into it", () => {
+				const snippet = {
+					source: 'let a = 1; let b = 2;',
+					type: 'script',
+				} as const;
+				const ast = deriveAst(snippet, deriveTokens(snippet));
+				const stage = ast.ok && deriveEntwined(ast.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined &&
+						entwined.byOffset[15] ===
+							entwined.byPath['$.body.1.declarations.0.id'],
+				).toBe(true);
+			});
+
+			it('a zero-width quasi covers no offset — its ancestor stands', () => {
+				const snippet = { source: '`${x}`', type: 'script' } as const;
+				const ast = deriveAst(snippet, deriveTokens(snippet));
+				const stage = ast.ok && deriveEntwined(ast.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined &&
+						entwined.byOffset[1] === entwined.byPath['$.body.0.expression'],
+				).toBe(true);
+			});
+
+			it('a zero-width quasi is still reachable via byPath', () => {
+				const snippet = { source: '`${x}`', type: 'script' } as const;
+				const ast = deriveAst(snippet, deriveTokens(snippet));
+				const stage = ast.ok && deriveEntwined(ast.value);
+				expect(
+					stage &&
+						stage.ok &&
+						stage.value.byPath['$.body.0.expression.quasis.0']?.node.type,
+				).toBe('TemplateElement');
+			});
+
+			it('identical-span siblings: the later-enumerated value wins', () => {
+				const snippet = { source: 'const o = {x}', type: 'script' } as const;
+				const ast = deriveAst(snippet, deriveTokens(snippet));
+				const stage = ast.ok && deriveEntwined(ast.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined &&
+						entwined.byOffset[11] ===
+							entwined.byPath[
+								'$.body.0.declarations.0.init.properties.0.value'
+							],
+				).toBe(true);
+			});
+
+			it('offsets count UTF-16 code units — an emoji spans two', () => {
+				const snippet = { source: 'const a="😀"', type: 'script' } as const;
+				const ast = deriveAst(snippet, deriveTokens(snippet));
+				const stage = ast.ok && deriveEntwined(ast.value);
+				expect(stage && stage.ok && stage.value.byOffset).toHaveLength(12);
+			});
+
+			it("a surrogate's second unit resolves into the string literal", () => {
+				const snippet = { source: 'const a="😀"', type: 'script' } as const;
+				const ast = deriveAst(snippet, deriveTokens(snippet));
+				const stage = ast.ok && deriveEntwined(ast.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined &&
+						entwined.byOffset[10] ===
+							entwined.byPath['$.body.0.declarations.0.init'],
+				).toBe(true);
 			});
 		});
 
