@@ -46,7 +46,7 @@ function entwineNode(
 	};
 	byPath[path] = entwined;
 
-	for (const { child, segment } of segmentedChildren(node)) {
+	for (const { child, segment } of directChildren(node)) {
 		entwined.children.push(
 			entwineNode(child, `${path}.${segment}`, entwined, byPath),
 		);
@@ -68,12 +68,13 @@ type ChildWithSegment = {
 };
 
 /**
- * The direct children one node contributes, each tagged with its path
- * segment: a bare `key` for an object-valued property, `key.index` per node
- * element of an array-valued one — the index is the source position, kept
- * across array holes so later siblings' paths stay stable.
+ * A node's direct children, each tagged with its path segment: a bare `key`
+ * for an object-valued property, `key.index` per node element of an
+ * array-valued one — the index is the source position, kept across array
+ * holes so later siblings' paths stay stable. The returned array is
+ * transient: read immediately and discarded, never frozen.
  */
-function segmentedChildren(node: Node): readonly ChildWithSegment[] {
+function directChildren(node: Node): readonly ChildWithSegment[] {
 	const properties = node as unknown as Record<string, unknown>;
 
 	return Object.keys(properties)

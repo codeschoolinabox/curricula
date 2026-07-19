@@ -98,6 +98,41 @@ describe('deriveEntwined', () => {
 			});
 		});
 
+		describe('sibling object children', () => {
+			it('a declarator ties both its id and its init', () => {
+				const snippet = { source: 'let x = 1', type: 'script' } as const;
+				const ast = deriveAst(snippet, deriveTokens(snippet));
+				const stage = ast.ok && deriveEntwined(ast.value);
+				expect(
+					stage &&
+						stage.ok &&
+						stage.value.byPath['$.body.0.declarations.0']?.children,
+				).toHaveLength(2);
+			});
+
+			it('the id comes first', () => {
+				const snippet = { source: 'let x = 1', type: 'script' } as const;
+				const ast = deriveAst(snippet, deriveTokens(snippet));
+				const stage = ast.ok && deriveEntwined(ast.value);
+				expect(
+					stage &&
+						stage.ok &&
+						stage.value.byPath['$.body.0.declarations.0']?.children[0].path,
+				).toBe('$.body.0.declarations.0.id');
+			});
+
+			it('the init comes second', () => {
+				const snippet = { source: 'let x = 1', type: 'script' } as const;
+				const ast = deriveAst(snippet, deriveTokens(snippet));
+				const stage = ast.ok && deriveEntwined(ast.value);
+				expect(
+					stage &&
+						stage.ok &&
+						stage.value.byPath['$.body.0.declarations.0']?.children[1].path,
+				).toBe('$.body.0.declarations.0.init');
+			});
+		});
+
 		describe('nested statements', () => {
 			it('a deep path resolves', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
