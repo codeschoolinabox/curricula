@@ -4,6 +4,7 @@ import type { Node, Program } from 'acorn';
 import { analyze } from 'eslint-scope';
 
 import ECMA_VERSION from './ecma-version.js';
+import toStageCause from './to-stage-cause.js';
 import type {
 	Entwined,
 	Environment,
@@ -14,34 +15,62 @@ import type {
 } from './types.js';
 
 /**
- * Derive the environment fact stage from the syntax tree and the snippet
- * type: the static scope structure, projected into embody's own plain scope
- * objects — one graph, holding the source's own tree nodes by reference.
+ * Derive the environment fact stage from the syntax tree, the snippet type,
+ * and the entwined binding: the static scope structure, projected into
+ * embody's own plain scope objects — one graph, holding the source's own
+ * tree nodes by reference — indexed by the entwined graph's node paths.
  *
  * @remarks
  * The graph toggles on the snippet type: a script's top-level names live on
  * the global scope, a module's on its own module scope. The analyzer's
  * objects never cross the boundary — embody projects the fields its contract
  * exposes into plain objects its freeze can actually reach; the analyzer's
- * private bookkeeping stays off the contract.
+ * private bookkeeping stays off the contract. A failed upstream stage
+ * short-circuits, carrying its cause unchanged — the origin stays named. A
+ * throw inside the analysis or the projection is an embody defect, not
+ * learner data: loud to the developer, a tagged `environment` cause to the
+ * learner — never a throw.
  */
 export default function deriveEnvironment(
 	type: SnippetType,
-	ast: Program,
-	entwined: Entwined,
+	ast: FactStage<Program>,
+	entwined: FactStage<Entwined>,
 ): FactStage<Environment> {
-	const manager = analyze(ast, {
-		sourceType: type,
-		ecmaVersion: ECMA_VERSION,
-	});
-	// the analyzer's published types are stale (@types/eslint-scope omits
-	// fields and types nodes as estree) — embody reads the manager through its
-	// own structural view instead: one documented untyped-library boundary read
-	const foreignRoot = manager.globalScope as unknown as ForeignScope;
-	const root = projectScope(foreignRoot, newInterner());
-	const byPath = indexByPath(root, entwined);
+	// the first upstream failure's cause carries, its origin still named —
+	// ast's cause already carries a tokens origin, entwined's carries both
+	if (!ast.ok) {
+		return { ok: false, cause: ast.cause };
+	}
+	if (!entwined.ok) {
+		return { ok: false, cause: entwined.cause };
+	}
 
-	return { ok: true, value: { root, byPath } };
+	try {
+		const manager = analyze(ast.value, {
+			sourceType: type,
+			ecmaVersion: ECMA_VERSION,
+		});
+		// the analyzer's published types are stale (@types/eslint-scope omits
+		// fields and types nodes as estree) — embody reads the manager through
+		// its own structural view: one documented untyped-library boundary read
+		const foreignRoot = manager.globalScope as unknown as ForeignScope;
+		const root = projectScope(foreignRoot, newInterner());
+		// ast and entwined must be co-derived from one snippet: byPath reads
+		// paths for the very nodes this tree holds
+		const byPath = indexByPath(root, entwined.value);
+
+		return { ok: true, value: { root, byPath } };
+	} catch (error) {
+		// a throw here is an embody-integration defect (the analysis or the
+		// projection over a valid tree) — loud to the developer, graceful data
+		// to the learner
+		console.error(
+			`deriveEnvironment: the scope analysis threw over a valid tree — broken embody invariant (${
+				error instanceof Error ? error.message : String(error)
+			})`,
+		);
+		return { ok: false, cause: toStageCause(error, 'environment') };
+	}
 }
 
 /**
