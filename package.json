@@ -15,6 +15,7 @@
 		"lint:mdx": "eslint \"**/*.mdx\"",
 		"lint:names": "ls-lint",
 		"lint:spelling": "cspell \"**/*.{md,mdx,js,mjs,ts,tsx,py,json}\" --no-progress",
+		"lint:fix:study-lenses": "node scripts/lint-fix-study-lenses.mjs",
 		"format": "npm run format:js && npm run format:md && npm run format:mdx",
 		"format:js": "prettier --write \"**/*.{js,mjs,jsx,ts,tsx}\"",
 		"format:md": "prettier --write \"**/*.md\"",
