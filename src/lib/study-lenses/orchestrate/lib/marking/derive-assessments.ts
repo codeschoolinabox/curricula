@@ -1,5 +1,5 @@
 import deepFreezeExcept from '@utils/deep-freeze-except.js';
-import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
+import freezeInPlace from '@utils/freeze-in-place.js';
 
 import type { SnippetType } from '../../../language-levels/types.js';
 import type { LevelVerdict } from '../validating/types.js';
@@ -40,7 +40,7 @@ export default function deriveAssessments(
 ): LevelAssessment {
 	// 1. The undetermined carve-out wins, regardless of type admission.
 	if (verdict.kind === 'undetermined') {
-		return deepFreezeInPlace({ mark: 'undetermined' });
+		return freezeInPlace({ mark: 'undetermined' });
 	}
 
 	// 2. Type admission — not applicable carries the admitted types.
@@ -59,5 +59,5 @@ export default function deriveAssessments(
 		);
 	}
 
-	return deepFreezeInPlace({ mark: 'fits' });
+	return freezeInPlace({ mark: 'fits' });
 }

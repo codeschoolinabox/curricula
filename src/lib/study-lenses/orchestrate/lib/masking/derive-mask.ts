@@ -1,5 +1,5 @@
 import deepFreezeExcept from '@utils/deep-freeze-except.js';
-import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
+import freezeInPlace from '@utils/freeze-in-place.js';
 
 import type { LevelAssessment } from '../marking/types.js';
 
@@ -40,7 +40,7 @@ export default function deriveMask({
 }): MaskState {
 	// 1. Warn blocks nothing; the none-state has nothing to enforce.
 	if (!strict || assessment === null) {
-		return deepFreezeInPlace({ masked: false });
+		return freezeInPlace({ masked: false });
 	}
 
 	// 2. Project the masked arms — the cause wrapper is owned, its payload
@@ -64,5 +64,5 @@ export default function deriveMask({
 	}
 
 	// 3. fits and the undetermined carve-out stay unmasked.
-	return deepFreezeInPlace({ masked: false });
+	return freezeInPlace({ masked: false });
 }
