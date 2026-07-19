@@ -1,11 +1,18 @@
-import type { Node, Program } from 'acorn';
+import type { Node, Program, Token } from 'acorn';
 
-import type { Entwined, EntwinedNode, FactStage, NodePath } from './types.js';
+import type {
+	Entwined,
+	EntwinedComment,
+	EntwinedToken,
+	FactStage,
+	NodePath,
+	Tokens,
+} from './types.js';
 
 /**
- * Derive the entwined fact stage from the syntax tree: the source⇄tree
- * binding, tying each node to its family and indexing the graph for O(1)
- * resolution from a carried path.
+ * Derive the entwined fact stage from the syntax tree and the token stream:
+ * the source⇄tree binding, tying each node to its family, its place, and its
+ * tokens, indexed for O(1) resolution from a carried path or offset.
  *
  * @remarks
  * Every entwined node holds the very node the parse built, by reference —
@@ -15,57 +22,40 @@ import type { Entwined, EntwinedNode, FactStage, NodePath } from './types.js';
  * positions across array holes — the canonical node identity across the
  * package. `byOffset` maps every source offset (a UTF-16 code unit) to the
  * deepest node whose span covers it — never a hole: the Program spans the
- * whole source, so every offset resolves at least to the root. The per-node
- * token and comment ties are empty.
+ * whole source, so every offset resolves at least to the root. Each node ties
+ * the tokens within its span, in stream order, through one shared wrapper per
+ * token. The wrappers' chain ties and the per-node comment ties are empty.
  */
-export default function deriveEntwined(ast: Program): FactStage<Entwined> {
-	const byPath: Record<NodePath, EntwinedNode> = {};
+export default function deriveEntwined(
+	ast: Program,
+	tokens: Tokens,
+): FactStage<Entwined> {
+	const byPath: Record<NodePath, BuildingNode> = {};
 	const root = entwineNode(ast, '$', null, byPath);
 	const byOffset = indexByOffset(root);
+	tieTokens(tokens.tokens, byOffset);
 
 	return { ok: true, value: { root, byPath, byOffset } };
-}
-
-/**
- * Every source offset mapped to the deepest node whose span covers it.
- * No hole is possible: acorn extends the Program span over leading and
- * trailing trivia, so the root's own fill reaches every slot. The fill leans
- * only on `root.node.end` — deliberately never on `root.node.start === 0`.
- */
-function indexByOffset(root: EntwinedNode): ReadonlyArray<EntwinedNode> {
-	const byOffset = Array.from({ length: root.node.end }, () => root);
-	for (const child of root.children) {
-		fillSpans(child, byOffset);
-	}
-	return byOffset;
-}
-
-// parents write before children (depth-first), so the deepest covering node
-// is the last writer. Spans are half-open — a node's `end` offset belongs to
-// its parent — and a zero-width span writes nothing. Identical-span siblings
-// tie-break by enumeration order (the later-enumerated wins; pinned by test).
-function fillSpans(entwined: EntwinedNode, byOffset: EntwinedNode[]): void {
-	for (let offset = entwined.node.start; offset < entwined.node.end; offset++) {
-		byOffset[offset] = entwined;
-	}
-	for (const child of entwined.children) {
-		fillSpans(child, byOffset);
-	}
 }
 
 // the parent↔children graph is cyclic, so nodes build by local mutation and
 // only their readonly view leaves this file (precedent: guard-loops.ts) —
 // no half-wired wrapper ever escapes mid-build
-type BuildingNode = Omit<EntwinedNode, 'children'> & {
-	children: EntwinedNode[];
+type BuildingNode = {
+	node: Node;
+	path: NodePath;
+	parent: BuildingNode | null;
+	children: BuildingNode[];
+	tokens: EntwinedToken[];
+	comments: EntwinedComment[];
 };
 
 function entwineNode(
 	node: Node,
 	path: NodePath,
-	parent: EntwinedNode | null,
-	byPath: Record<NodePath, EntwinedNode>,
-): EntwinedNode {
+	parent: BuildingNode | null,
+	byPath: Record<NodePath, BuildingNode>,
+): BuildingNode {
 	const entwined: BuildingNode = {
 		node,
 		path,
@@ -83,6 +73,60 @@ function entwineNode(
 	}
 
 	return entwined;
+}
+
+/**
+ * Every source offset mapped to the deepest node whose span covers it.
+ * No hole is possible: acorn extends the Program span over leading and
+ * trailing trivia, so the root's own fill reaches every slot. The fill leans
+ * only on `root.node.end` — deliberately never on `root.node.start === 0`.
+ */
+function indexByOffset(root: BuildingNode): ReadonlyArray<BuildingNode> {
+	const byOffset = Array.from({ length: root.node.end }, () => root);
+	for (const child of root.children) {
+		fillSpans(child, byOffset);
+	}
+	return byOffset;
+}
+
+// parents write before children (depth-first), so the deepest covering node
+// is the last writer. Spans are half-open — a node's `end` offset belongs to
+// its parent — and a zero-width span writes nothing. Identical-span siblings
+// tie-break by enumeration order (the later-enumerated wins; pinned by test).
+function fillSpans(entwined: BuildingNode, byOffset: BuildingNode[]): void {
+	for (let offset = entwined.node.start; offset < entwined.node.end; offset++) {
+		byOffset[offset] = entwined;
+	}
+	for (const child of entwined.children) {
+		fillSpans(child, byOffset);
+	}
+}
+
+/**
+ * Tie every token to each node whose span contains it — one wrapper per
+ * token, shared across its containing nodes: one graph, never copies.
+ * Iterating the stream in order keeps every per-node list in stream order.
+ */
+function tieTokens(
+	tokens: ReadonlyArray<Token>,
+	byOffset: ReadonlyArray<BuildingNode>,
+): void {
+	for (const token of tokens) {
+		const tied: EntwinedToken = {
+			token,
+			innermostNode: null,
+			previous: null,
+			next: null,
+		};
+		// nodes align to token boundaries — a node covering the token's start
+		// contains the whole token, so the ancestor chain from the deepest node
+		// there is exactly the set of containing nodes
+		let node: BuildingNode | null = byOffset[token.start];
+		while (node !== null) {
+			node.tokens.push(tied);
+			node = node.parent;
+		}
+	}
 }
 
 /** The keys present on every acorn node that are never children. */
