@@ -653,3 +653,15 @@ prompt). Report DONE | BLOCKED | FLAG.
   supersession pin (`e1fb236`). F4 re-checked at wave close: ParseFacts still
   `{tokens, comments, ast}` → NOT landed → **W3-V1/V2 FLAG-HELD** for the
   jej/maintainer commit; Wave 3 proceeds with Phase-0 + D1 + M1 + K1 + L1.
+- 2026-07-18 — Wave-3 entry Phase-0 closed: `12f5e23` (validating, marking,
+  masking, level-ui contracts; scaffold level docs; canon amendment). RULED at
+  the (waived) gate — BINDING on Wave-3 executors: **the committed Phase-0
+  contracts supersede this brief's § WAVE 3 increment input lists and names.**
+  Specifically: W3-M1 is `deriveAssessments` (supersedes `deriveFitMarks`, incl.
+  its W3-L1 mention), taking (verdict, admitted types, current type) — no
+  parse-status input, the verdict encodes it; W3-K1's `deriveMask` takes (the
+  selected level's assessment or none, posture, level label) — NO type-admission
+  check in masking, and surface classification is a static fact of the render
+  tree, not an output. F4 sweep list when the ParseFacts extension lands:
+  validating/README, scaffold/DOCS parse-facts node, language-levels/README
+  (spine + glossary), language-levels/types.ts.
