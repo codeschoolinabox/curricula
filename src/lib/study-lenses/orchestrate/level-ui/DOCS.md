@@ -17,16 +17,18 @@ constrains only this surface.
 
 2. **Open-list render** (sync, mechanical) — one entry per given option, in the
    given order, plus the none-state entry; each level entry carries its label,
-   its mark as a data-attribute value, and its docs on hover. Input: the
-   options + the none-state label. Output: the option entries.
+   its mark as a data-attribute value, and its docs on hover. The list mounts
+   only while the component-local open flag holds: a face click toggles it, and
+   the face reflects it (`aria-expanded`). Input: the options + the none-state
+   label + the open flag. Output: the option entries.
 
 3. **Posture render** (sync, mechanical) — the strict toggle reflects the given
    posture. Input: the posture. Output: the toggle.
 
 4. **Intent routing** (sync) — selecting an entry raises the select intent with
-   the entry's key (the none-state raises `''`); flipping the toggle raises the
-   posture intent. Nothing commits here. Input: a click. Output: one intent
-   callback.
+   the entry's key (the none-state raises `''`) and closes the list; flipping
+   the toggle raises the posture intent. Nothing commits here. Input: a click.
+   Output: one intent callback (plus the local close on select).
 
 ## Data flow
 
@@ -61,3 +63,10 @@ flowchart TD
 - Session-choice state (the top component commits; this surface only asks).
 - The editor gutter (the editor's surface, fed by the shared validate).
 - Hover timing and visual treatment (checkpoint-observed, not test-pinned).
+- Full disclosure-widget ARIA (roles, `aria-haspopup`) — rides the flagged
+  rendered-hover follow-on; v1 carries `aria-expanded` on the face and
+  `aria-pressed` on the toggle.
+- Validating `selectedKey` — the caller guarantees it is `''` or a given
+  option's key; zero derivation includes zero defense.
+- A zero-option render — the selector mounts only when levels are registered;
+  preventing the empty mount is the top component's.

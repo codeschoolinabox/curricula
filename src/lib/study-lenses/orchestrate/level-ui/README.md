@@ -17,12 +17,16 @@ document owns the rendered contract.
 - **The open list** shows one entry per registered level, in the given order,
   each with its display label and its fit mark — plus the none-state entry, a
   label and not a level. Hovering a level entry surfaces its documentation — the
-  level's reference docs, collapsed upstream to the one hover string;
-  notional-machine prose is level-aware lens territory.
+  level's reference docs, collapsed upstream to the one hover string (v1: plain
+  text via the native tooltip; the rendered-markdown hover surface is a flagged
+  follow-on); notional-machine prose is level-aware lens territory.
 - **The strict toggle** shows and flips the enforcement posture.
 
 Whether the list is open or closed is component-local ephemeral UI state — not a
 session choice; it neither reaches the top component nor survives the component.
+A face click toggles the list; selecting any entry (a level or the none-state)
+closes it — the face then shows the selection, so an open list has nothing left
+to say.
 
 Every option arrives computed: keys, labels, marks, and docs come in as props;
 selection and posture changes go up as intent callbacks. The component derives

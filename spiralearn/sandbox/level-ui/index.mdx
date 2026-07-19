@@ -1,0 +1,101 @@
+---
+sidebar_position: 4
+---
+
+import React from 'react';
+import BrowserOnly from '@docusaurus/BrowserOnly';
+
+# LevelSelector — checkpoint
+
+The harness injects the real scaffold level and wires the real
+`deriveAssessments` over four prepared programs, so every fit mark is reachable.
+Expected: picking each program cycles the Scaffold entry's mark (fits ·
+does-not-fit · not-applicable-for-type · undetermined); hovering the entry shows
+the level's reference docs; the closed face tracks selection — including back to
+the none-state; the strict toggle reflects and flips the posture; every intent
+echoes below.
+
+export function LevelUiHarness() {
+	const { parse } = require('acorn');
+	const scaffoldLevel =
+		require('@site/src/lib/study-lenses/language-levels/scaffold/index.ts').default;
+	const deriveAssessments =
+		require('@site/src/lib/study-lenses/orchestrate/lib/marking/derive-assessments.ts').default;
+	const LevelSelector =
+		require('@site/src/lib/study-lenses/orchestrate/level-ui/index.tsx').default;
+	const programs = [
+		{ name: 'a fitting module', source: 'const x = 1;', type: 'module' },
+		{ name: 'a debugger statement', source: 'debugger;', type: 'module' },
+		{ name: 'the script type', source: 'const x = 1;', type: 'script' },
+		{ name: 'a broken parse', source: 'const @@@', type: 'module' },
+	];
+	const [programIndex, setProgramIndex] = React.useState(0);
+	const [selectedKey, setSelectedKey] = React.useState('scaffold');
+	const [strict, setStrict] = React.useState(false);
+	const [echo, setEcho] = React.useState('no intent raised yet');
+	const program = programs[programIndex];
+	let verdict;
+	try {
+		const tokens = [];
+		const comments = [];
+		const ast = parse(program.source, {
+			ecmaVersion: 'latest',
+			onComment: comments,
+			onToken: tokens,
+			sourceType: program.type,
+		});
+		verdict = {
+			kind: 'validated',
+			violations: scaffoldLevel.validate({ ast, comments, tokens }),
+		};
+	} catch {
+		verdict = { kind: 'undetermined' };
+	}
+	const assessment = deriveAssessments(
+		verdict,
+		scaffoldLevel.snippetTypes,
+		program.type,
+	);
+	return (
+		<div>
+			<p>
+				{programs.map((candidate, index) => (
+					<button
+						key={candidate.name}
+						onClick={() => setProgramIndex(index)}
+						style={{ fontWeight: index === programIndex ? 'bold' : 'normal' }}
+						type="button"
+					>
+						{candidate.name}
+					</button>
+				))}
+			</p>
+			<LevelSelector
+				noneLabel="plain JavaScript"
+				onSelectLevel={(key) => {
+					setSelectedKey(key);
+					setEcho(`select: "${key === '' ? 'the none-state' : key}"`);
+				}}
+				onToggleStrict={(next) => {
+					setStrict(next);
+					setEcho(`posture: ${next ? 'strict' : 'warn'}`);
+				}}
+				options={[
+					{
+						docs: scaffoldLevel.docs.reference,
+						key: scaffoldLevel.key,
+						label: scaffoldLevel.label,
+						mark: assessment.mark,
+					},
+				]}
+				selectedKey={selectedKey}
+				strict={strict}
+			/>
+			<p data-level-ui-checkpoint-echo>{echo}</p>
+		</div>
+	);
+}
+
+<BrowserOnly fallback={<p>loading the level surfaces…</p>}>
+	{() => <LevelUiHarness />}
+</BrowserOnly>
