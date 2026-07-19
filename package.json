@@ -8,7 +8,7 @@
 		"build": "docusaurus build",
 		"serve": "docusaurus serve",
 		"clear": "docusaurus clear",
-		"lint": "npm run lint:js && npm run lint:md && npm run lint:mdx && npm run lint:names && npm run lint:spelling",
+		"lint": "node scripts/lint-all.mjs",
 		"typecheck": "tsc --noEmit",
 		"lint:js": "eslint \"**/*.{js,mjs,jsx,ts,tsx}\"",
 		"lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\"",
@@ -28,7 +28,7 @@
 		"test:browser:shard3": "vitest run --project browser --shard=3/3",
 		"test:browser:parallel": "npm run test:browser:shard1 & npm run test:browser:shard2 & npm run test:browser:shard3 & wait",
 		"test:watch": "vitest",
-		"validate": "npm run typecheck && npm run format:check && npm run lint && npm run test",
+		"validate": "npm run typecheck &&  npm run lint && npm run format:check && npm run test",
 		"prepare": "husky"
 	},
 	"lint-staged": {

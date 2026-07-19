@@ -309,24 +309,29 @@ function formatUserSummary(user) {
 
 #### File Anatomy: Newspaper Order
 
-Files read top-down like a newspaper: **imports → main → hoisted helpers**. The
-main function is the first thing after imports — for function files it carries
-the inline `export default`, so the export marker and the main marker are the
-same line. Helpers are supporting details, defined below. This is safe because
-`function` declarations hoist (and arrows assigned to variables are banned, so
-there is nothing in the file that doesn't).
+Files read top-down like a newspaper: **imports → main → consts → hoisted
+helpers**. The main function is the first thing after imports — for function
+files it carries the inline `export default`, so the export marker and the main
+marker are the same line. Helpers are supporting details, defined below. This is
+safe because `function` declarations hoist (and arrows assigned to variables are
+banned, so there is nothing in the file that doesn't).
 
-Module-level constants also live below main, with the helpers. This is safe
-because nothing executes at module load (guaranteed by the no-side-effects
-style) — constants only need to be ordered among themselves.
+Module-level constants live directly below `main`, above the helpers (imports →
+main → consts → helpers). This is safe because a `const` is read only inside a
+function body, which runs at call time, after the module has fully evaluated;
+`function` declarations hoist, so main and the helpers can read any const
+regardless of source position. Consts that reference each other must still be
+ordered among themselves.
 
 ```javascript
-// ✅ — main flow reads top-down, details defined below
+// ✅ — main flow reads top-down, then consts, then helpers below
 export default function processCode(config, code) {
 	const pipeline = buildPipeline(config);
 	const result = executePipeline(pipeline, code);
 	return formatOutput(result);
 }
+
+const DEFAULT_STAGES = ['parse', 'lint', 'emit'];
 
 function buildPipeline(config) { ... }
 function executePipeline(pipeline, code) { ... }
@@ -1454,6 +1459,19 @@ For each behavioral increment:
    acceptable here for the first test** — returning a hardcoded value to confirm
    the test harness and stub are wired correctly is a legitimate TDD move. It is
    not a shortcut; it is the move. It expires when the next test is written.
+
+   > **7b. Patch-or-reroll check** — before lint/refactor, classify how step 7
+   > went. If green came from expected roughness (a Fake It hardcode, an
+   > unrefined but correctly-shaped implementation), proceed to step 8 as
+   > normal — that's what Refactor is for. If it came from guessing,
+   > backtracking, or touching more surface than the stub implied, discard the
+   > implementation — the test is untouched and still valid — and re-implement
+   > fresh, naming the specific confusion for the retry. Patching a
+   > wrongly-shaped attempt into shape typically costs more than a clean second
+   > attempt, and nothing is committed yet to lose. This is not Refactor's job:
+   > Refactor improves a correctly-shaped implementation; this check catches a
+   > wrongly-shaped one before Refactor has to work around it.
+
 8. **Lint checkpoint 3** — `npx eslint <impl-file>`. Fix violations.
 9. **Refactor** — address structural quality while behavioral correctness holds.
 
@@ -1664,6 +1682,15 @@ Every adversarial review prompt follows this structure:
 - PROCEED: continue immediately
 - CONSIDER: document your response to each concern, then continue
 - PAUSE: present concerns to human, wait for decision before continuing
+- **PAUSE default for AR-4, pre-commit**: when an AR-4 Implementation Audit
+  returns PAUSE and the increment is not yet committed, the default
+  _proposal_ to the human is discard-and-retry, not patch-in-place — name the
+  specific confusion, and re-implement once the human confirms. Nothing is
+  lost by discarding since nothing is committed, and patching a wrongly-shaped
+  implementation into shape typically costs more than a clean second attempt.
+  This sets the default proposal only — it changes nothing about "present
+  concerns to human, wait for decision"; the human can still choose to patch
+  instead.
 - Never skip a PAUSE verdict — it exists to protect the codebase
 
 ### Sub-model dispatch

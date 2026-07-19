@@ -178,7 +178,7 @@ export type ScopeInfo = {
 	readonly kind: ScopeKind;
 	readonly node: Node;
 	readonly parent: ScopeInfo | null;
-	readonly declarations: ReadonlyMap<string, DeclarationInfo>;
+	readonly declarations: Readonly<Record<string, DeclarationInfo>>;
 	readonly children: ReadonlyArray<ScopeInfo>;
 };
 

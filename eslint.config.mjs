@@ -8,6 +8,17 @@ import eslintPluginSonarJS from 'eslint-plugin-sonarjs';
 import eslintPluginUnicorn from 'eslint-plugin-unicorn';
 import tseslint from 'typescript-eslint';
 
+import newspaperOrder from './eslint-rules/newspaper-order.mjs';
+
+const STUDY_LENSES_SUBSYSTEMS = [
+	'embody',
+	'evaluators',
+	'language-levels',
+	'lenses',
+	'orchestrate',
+	'translations',
+];
+
 export default tseslint.config(
 	// =========================================================================
 	// Global ignores
@@ -23,39 +34,25 @@ export default tseslint.config(
 			'src/lib/sl-trace-js-aran-legacy/src/record/legacy-aran-trace/**',
 			// Test snippet JS files — exercise inputs, not source code
 			'src/lib/sl-trace-js-aran-legacy/src/record/tests/test-snippets/**',
-			// Blanks lens internals still pending an idiomatic-V2 lint pass:
-			// `no-paste-extension.ts` is vendored; `evaluate-correctness.ts` is a
-			// follow-up. (`blankenate.ts` is now linted — thin lib/classifying
-			// glue; see lenses/blanks/DOCS.md § "lib/ is eslint-ignored".)
-			'src/lib/study-lenses/lenses/blanks/lib/no-paste-extension.ts',
-			'src/lib/study-lenses/lenses/blanks/lib/evaluate-correctness.ts',
-			// Vendored parsons lens internals (lis, parse-parsons) — JS→TS
-			// mechanical converts of the legacy JSParsons implementation;
-			// idiomatic V2 style is a follow-up. Tests/ extends the
-			// exclusion to this session's WIP test files during the redo —
-			// re-include when the parsons lens refactor stabilizes.
-			'src/lib/study-lenses/lenses/parsons/lib/**',
-			'src/lib/study-lenses/lenses/parsons/tests/**',
-			// Writeme lens internals — vendored no-paste-extension + ported
-			// comment-skeleton / generate-hints (JS→TS converts of the legacy
-			// implementation) plus the new diff-lines; idiomatic V2 style is a
-			// follow-up. Tests/ extends the exclusion to this session's WIP test
-			// files during the redo — re-include when the writeme lens stabilizes.
-			'src/lib/study-lenses/lenses/writeme/lib/**',
-			'src/lib/study-lenses/lenses/writeme/tests/**',
-			// WIP tracer engine — mid-refactor subtrees where lint rules don't
-			// yet apply cleanly; re-included directory-by-directory as each lands.
-			// trace/variables is now in CI; trace/semantics (engine-consumer
-			// rebuild — see src/lib/study-lenses/ROADMAP.md) and the trace/syntax design stub
-			// remain excluded. Vitest still runs the un-excluded suites.
-			'src/lib/study-lenses/embody/lib/evaluating/trace/semantics/**',
-			'src/lib/study-lenses/embody/lib/evaluating/trace/syntax/**',
-			'src/lib/study-lenses/embody/lib/evaluating/intercept/**',
-			'src/lib/study-lenses/embody/lib/evaluating/run/**',
-			'src/lib/study-lenses/embody/lib/evaluating/shared/**',
+			// Deprecated architecture tree (pre-greenfield-rewrite reference
+			// copy) — kept on disk during the study-lenses migration, but not
+			// held to current lint standard. Ignored wholesale rather than
+			// per-lens; nothing in here is meant to gate.
+			'src/lib/study-lenses--deprecated-architecture/**',
+			// WIP tracer engine (top-level src/lib/embody/) — mid-refactor
+			// subtrees where lint rules don't yet apply cleanly; re-included
+			// directory-by-directory as each lands. trace/variables is now in
+			// CI; trace/semantics (engine-consumer rebuild — see
+			// src/lib/study-lenses/ROADMAP.md) and the trace/syntax design
+			// stub remain excluded. Vitest still runs the un-excluded suites.
+			'src/lib/embody/lib/evaluating/trace/semantics/**',
+			'src/lib/embody/lib/evaluating/trace/syntax/**',
+			'src/lib/embody/lib/evaluating/intercept/**',
+			'src/lib/embody/lib/evaluating/run/**',
+			'src/lib/embody/lib/evaluating/shared/**',
 			// Legacy / pre-redesign holdouts (explicit subdir names).
-			'src/lib/study-lenses/embody/lib/parse-old/**',
-			'src/lib/study-lenses/embody/.legacy/**',
+			'src/lib/embody/lib/parse-old/**',
+			'src/lib/embody/.legacy/**',
 			// Test fixtures are intentional inputs (some malformed, some
 			// using legacy syntax) — ESLint rules don't apply to them.
 			'**/tests/fixtures/**',
@@ -390,6 +387,69 @@ export default tseslint.config(
 					ignoreStrings: true,
 				},
 			],
+		},
+	},
+
+	// =========================================================================
+	// Zone 2c: study-lenses subsystem boundaries
+	// =========================================================================
+	// A subsystem may depend on a sibling's public surface (index.ts/types.ts)
+	// but never reach into its lib/ internals — the one architectural rule
+	// this codebase currently tracks by hand (handoffs, AR review) rather than
+	// by tooling. Scoped to study-lenses/ only; narrow by design — this is the
+	// pattern already in use, not a speculative full dependency graph for a
+	// migration still in flight.
+	{
+		files: ['src/lib/study-lenses/**/*.ts', 'src/lib/study-lenses/**/*.tsx'],
+		plugins: { import: eslintPluginImport },
+		settings: {
+			'import/resolver': {
+				typescript: {
+					alwaysTryTypes: true,
+				},
+			},
+		},
+		rules: {
+			'import/no-restricted-paths': [
+				'error',
+				{
+					zones: STUDY_LENSES_SUBSYSTEMS.flatMap((target) =>
+						STUDY_LENSES_SUBSYSTEMS.filter((from) => from !== target).map(
+							(from) => ({
+								target: `./src/lib/study-lenses/${target}/**/*`,
+								from: `./src/lib/study-lenses/${from}/lib/**/*`,
+								message: `Import ${from}'s public surface (index.ts/types.ts), not its lib/ internals, from ${target}/.`,
+							}),
+						),
+					),
+				},
+			],
+		},
+	},
+
+	// =========================================================================
+	// Zone 2d: study-lenses type-safety gate + newspaper-order convention
+	// =========================================================================
+	// The type-safety rules are `warn` globally in Zone 2b so the WIP embody/ and
+	// snippetry/ trees stay visible-but-non-blocking during their rebuild. The
+	// clean study-lenses/ tree already satisfies all of them (0 violations), so
+	// promoting to `error` here lands green and makes them a real blocking gate
+	// for the greenfield code — the same scoping principle as Zone 2c. As WIP
+	// trees migrate into study-lenses/ they inherit the gate. `newspaper-order`
+	// (local rule) mechanically enforces the DEV.md file anatomy: imports → main
+	// → consts → helpers.
+	{
+		files: ['src/lib/study-lenses/**/*.ts', 'src/lib/study-lenses/**/*.tsx'],
+		plugins: { local: { rules: { 'newspaper-order': newspaperOrder } } },
+		rules: {
+			'@typescript-eslint/no-explicit-any': 'error',
+			'@typescript-eslint/no-unsafe-assignment': 'error',
+			'@typescript-eslint/no-unsafe-call': 'error',
+			'@typescript-eslint/no-unsafe-member-access': 'error',
+			'@typescript-eslint/no-unsafe-return': 'error',
+			'@typescript-eslint/restrict-template-expressions': 'error',
+			'@typescript-eslint/no-non-null-assertion': 'error',
+			'local/newspaper-order': 'error',
 		},
 	},
 

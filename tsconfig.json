@@ -35,6 +35,6 @@
 		"src/lib/embody/lib/evaluating/shared/**",
 		"src/lib/embody/lib/parse-old/**",
 		"src/lib/embody/.legacy/**",
-		"src/lib/study-lenses--deprecated-architecture/lenses/blanks/lib/**"
+		"src/lib/study-lenses--deprecated-architecture/**"
 	]
 }

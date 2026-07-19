@@ -27,7 +27,12 @@ export default defineWorkspace([
 		resolve: { alias },
 		test: {
 			name: 'unit',
-			include: ['src/{lib,plugins}/**/*.test.{ts,tsx}'],
+			include: [
+				'src/{lib,plugins}/**/*.test.{ts,tsx}',
+				// Local ESLint rules (tooling) live outside src/; their
+				// RuleTester suites run in the unit project too.
+				'eslint-rules/**/*.test.ts',
+			],
 			exclude: ['src/lib/**/*.browser.test.ts'],
 			environment: 'node',
 			// WHY server.deps.inline for CM packages: CodeMirror 6 uses

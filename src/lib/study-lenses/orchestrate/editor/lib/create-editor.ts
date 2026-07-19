@@ -32,12 +32,6 @@ import freezeInPlace from '@utils/freeze-in-place.js';
 
 import type { EditorInstance, EditorOptions } from '../types.js';
 
-// The own-write tag: setContent's programmatic dispatch carries it so the
-// edit relay can tell a learner edit from the component writing back.
-// Transaction-scoped by design — no suppression state outlives the dispatch
-// it tags, so a learner edit right after an own-write always relays.
-const ownWrite = Annotation.define<boolean>();
-
 /**
  * Build a CodeMirror editor over the given source.
  *
@@ -125,3 +119,9 @@ export default async function createEditor(
 		},
 	});
 }
+
+// The own-write tag: setContent's programmatic dispatch carries it so the
+// edit relay can tell a learner edit from the component writing back.
+// Transaction-scoped by design — no suppression state outlives the dispatch
+// it tags, so a learner edit right after an own-write always relays.
+const ownWrite = Annotation.define<boolean>();

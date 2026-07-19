@@ -74,13 +74,19 @@ const config: Config = {
 				},
 			};
 		},
-		// --- .js → .ts/.tsx extension resolution for webpack ---
+		// --- .js/.jsx → .ts/.tsx extension resolution for webpack ---
 		// The `lib/editing/` and `api/` modules use the Node ESM convention
 		// of writing `.js` extension specifiers that resolve to `.ts` source
 		// files (e.g. `import x from './foo.js'` where the actual file is
 		// `foo.ts`). Vite/vitest handle this natively; webpack does not.
 		// Now that V2 study-lens components import these modules, they're
 		// pulled into the webpack bundle for the first time.
+		//
+		// The `.jsx` entry covers the same drift inside
+		// `src/lib/study-lenses--deprecated-architecture/`: that tree's own
+		// imports (and its page-level consumers) still use `.jsx`
+		// specifiers left over from before its 2026-07-15 migration, but
+		// every file there is actually `.tsx`.
 		function extensionAliasPlugin() {
 			return {
 				name: 'resolve-ts-extension-alias',
@@ -89,6 +95,7 @@ const config: Config = {
 						resolve: {
 							extensionAlias: {
 								'.js': ['.ts', '.tsx', '.js'],
+								'.jsx': ['.tsx', '.jsx'],
 							},
 							alias: {
 								// Match the vitest.workspace.ts `@utils` alias

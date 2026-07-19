@@ -313,6 +313,14 @@ steps are incomplete. "See AGENTS.md for the workflow" is not a valid substitute
   After the first test, ask: _could this be passed by returning a hardcoded
   value?_ If yes, the second test must make that impossible before you
   implement.
+- **Patch-or-reroll check (step 7b)**: after the first green, before lint
+  checkpoint 3. If green came from expected roughness (Fake It, unrefined but
+  correctly-shaped code), proceed normally. If it came from guessing,
+  backtracking, or touching more than the stub implied, discard the
+  implementation and re-implement fresh naming the specific confusion — the
+  test is untouched and still valid, nothing is committed yet to lose, and
+  patching a wrongly-shaped attempt typically costs more than a clean second
+  try.
 - At step 9 (refactor): check the implementation against the DOCS.md
   architectural sketch. Green tests mean behavioral correctness is achieved.
   Structural quality is addressed here — named phases, separated concerns, no
@@ -574,6 +582,15 @@ Work stops immediately if:
   removed from the flow; file's input/output shape changes; phase annotation
   changes). See § Incremental TDD Workflow step 9 for the full two-tier autonomy
   rule.
+
+**Resolution default**: if the brake fires before this increment is
+committed, default to _proposing_ discard-and-retry over patch-in-place —
+name the specific issue and re-attempt once the human confirms. Nothing is
+lost by discarding since nothing is committed. This sets the default
+proposal, not an exception to human sign-off — the human can still choose to
+patch instead. If the brake fires after a commit already exists, discarding
+means reverting committed history, which stays a human-gated git action
+(§ Git: Additive Actions Only) — never a unilateral agent choice.
 
 #### Intellectual Honesty
 
