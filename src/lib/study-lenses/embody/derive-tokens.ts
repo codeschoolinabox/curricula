@@ -1,8 +1,9 @@
 import { tokenizer } from 'acorn';
-import type { Comment, Position } from 'acorn';
+import type { Comment } from 'acorn';
 
 import ECMA_VERSION from './ecma-version.js';
-import type { FactStage, Snippet, StageCause, Tokens } from './types.js';
+import toStageCause from './to-stage-cause.js';
+import type { FactStage, Snippet, Tokens } from './types.js';
 
 /**
  * Derive the tokens fact stage from a snippet: the token stream together with
@@ -31,33 +32,6 @@ export default function deriveTokens(snippet: Snippet): FactStage<Tokens> {
 
 		return { ok: true, value: { tokens, comments } };
 	} catch (error) {
-		return { ok: false, cause: toTokensCause(error) };
+		return { ok: false, cause: toStageCause(error, 'tokens') };
 	}
-}
-
-// acorn throws SyntaxError decorated with `pos` (source offset) and `loc`
-// (line/column) — neither typed on the error: an untyped-library boundary read.
-function toTokensCause(error: unknown): StageCause {
-	const acornError = error as SyntaxError & { pos?: number; loc?: Position };
-	return {
-		stage: 'tokens',
-		// the cast cannot make a non-Error throw carry `.message` — read it only
-		// from a real Error, else stringify (the contract requires a string)
-		message: error instanceof Error ? error.message : String(error),
-		// compared to `undefined`, not truthiness — a truthy spread would drop
-		// offset 0, which the tokenizer reports whenever the failure opens the
-		// source.
-		...(acornError.pos === undefined ? {} : { offset: acornError.pos }),
-		// project loc to a plain pair — acorn's Position instance carries an
-		// `offset()` method the contract does not declare; expose the fields the
-		// contract owns, never the foreign instance.
-		...(acornError.loc
-			? {
-					position: {
-						line: acornError.loc.line,
-						column: acornError.loc.column,
-					},
-				}
-			: {}),
-	};
 }
