@@ -3,7 +3,6 @@ import type { Node, Program, Token } from 'acorn';
 import type {
 	Entwined,
 	EntwinedComment,
-	EntwinedToken,
 	FactStage,
 	NodePath,
 	Tokens,
@@ -24,7 +23,8 @@ import type {
  * deepest node whose span covers it — never a hole: the Program spans the
  * whole source, so every offset resolves at least to the root. Each node ties
  * the tokens within its span, in stream order, through one shared wrapper per
- * token. The wrappers' chain ties and the per-node comment ties are empty.
+ * token — chained stream-wide (`previous`/`next`, null at both ends) and
+ * carrying each token's innermost node. The per-node comment ties are empty.
  */
 export default function deriveEntwined(
 	ast: Program,
@@ -46,7 +46,7 @@ type BuildingNode = {
 	path: NodePath;
 	parent: BuildingNode | null;
 	children: BuildingNode[];
-	tokens: EntwinedToken[];
+	tokens: BuildingToken[];
 	comments: EntwinedComment[];
 };
 
@@ -102,26 +102,44 @@ function fillSpans(entwined: BuildingNode, byOffset: BuildingNode[]): void {
 	}
 }
 
+// the stream-wide chain wires wrapper to wrapper as they build — the same
+// marked local mutation as the node graph; only the readonly view leaves
+type BuildingToken = {
+	token: Token;
+	innermostNode: BuildingNode | null;
+	previous: BuildingToken | null;
+	next: BuildingToken | null;
+};
+
 /**
  * Tie every token to each node whose span contains it — one wrapper per
  * token, shared across its containing nodes: one graph, never copies.
- * Iterating the stream in order keeps every per-node list in stream order.
+ * Iterating the stream in order keeps every per-node list in stream order,
+ * chains the wrappers stream-wide (`previous`/`next`, null at both ends),
+ * and hands each its innermost node — the deepest node at its start offset.
  */
 function tieTokens(
 	tokens: ReadonlyArray<Token>,
 	byOffset: ReadonlyArray<BuildingNode>,
 ): void {
+	let previous: BuildingToken | null = null;
 	for (const token of tokens) {
-		const tied: EntwinedToken = {
+		const innermost = byOffset[token.start];
+		const tied: BuildingToken = {
 			token,
-			innermostNode: null,
-			previous: null,
+			innermostNode: innermost,
+			previous,
 			next: null,
 		};
+		if (previous !== null) {
+			previous.next = tied;
+		}
+		previous = tied;
+
 		// nodes align to token boundaries — a node covering the token's start
 		// contains the whole token, so the ancestor chain from the deepest node
 		// there is exactly the set of containing nodes
-		let node: BuildingNode | null = byOffset[token.start];
+		let node: BuildingNode | null = innermost;
 		while (node !== null) {
 			node.tokens.push(tied);
 			node = node.parent;

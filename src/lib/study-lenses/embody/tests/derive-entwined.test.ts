@@ -549,6 +549,127 @@ describe('deriveEntwined', () => {
 			});
 		});
 
+		describe('token chain', () => {
+			it.each([
+				[0, 1],
+				[1, 2],
+				[2, 3],
+			])('token %i chains forward to token %i', (index, nextIndex) => {
+				const snippet = { source: 'let x = 1', type: 'script' } as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined &&
+						entwined.root.tokens[index].next ===
+							entwined.root.tokens[nextIndex],
+				).toBe(true);
+			});
+
+			it.each([
+				[1, 0],
+				[2, 1],
+				[3, 2],
+			])('token %i chains backward to token %i', (index, previousIndex) => {
+				const snippet = { source: 'let x = 1', type: 'script' } as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined &&
+						entwined.root.tokens[index].previous ===
+							entwined.root.tokens[previousIndex],
+				).toBe(true);
+			});
+
+			it("the first token's previous is null", () => {
+				const snippet = { source: 'let x = 1', type: 'script' } as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				expect(stage && stage.ok && stage.value.root.tokens[0]?.previous).toBe(
+					null,
+				);
+			});
+
+			it("the last token's next is null", () => {
+				const snippet = { source: 'let x = 1', type: 'script' } as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				expect(stage && stage.ok && stage.value.root.tokens[3]?.next).toBe(
+					null,
+				);
+			});
+
+			it('the chain crosses statement boundaries — stream-wide, not per-node', () => {
+				const snippet = {
+					source: 'let a = 1; let b = 2;',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined &&
+						entwined.byPath['$.body.0']?.tokens[4]?.next ===
+							entwined.byPath['$.body.1']?.tokens[0],
+				).toBe(true);
+			});
+
+			it("a per-node list's first wrapper still chains to a token the node excludes", () => {
+				const snippet = { source: 'let x = 1', type: 'script' } as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined &&
+						entwined.byPath['$.body.0.declarations.0']?.tokens[0]?.previous ===
+							entwined.root.tokens[0],
+				).toBe(true);
+			});
+		});
+
+		describe('innermostNode', () => {
+			it("a token's innermostNode is the deepest node at its start offset", () => {
+				const snippet = { source: 'let x = 1', type: 'script' } as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined &&
+						entwined.root.tokens[3].innermostNode ===
+							entwined.byPath['$.body.0.declarations.0.init'],
+				).toBe(true);
+			});
+
+			it("an ancestor-only token's innermostNode is the ancestor, not the root", () => {
+				const snippet = { source: 'let x = 1', type: 'script' } as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined &&
+						entwined.root.tokens[0].innermostNode ===
+							entwined.byPath['$.body.0'],
+				).toBe(true);
+			});
+		});
+
 		describe('array hole', () => {
 			it('a surviving element keeps its source index in the path', () => {
 				const snippet = { source: '[,1]', type: 'script' } as const;
