@@ -1,10 +1,14 @@
 // cspell:ignore quasis
 
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import deriveAst from '../derive-ast.js';
 import deriveEntwined from '../derive-entwined.js';
 import deriveTokens from '../derive-tokens.js';
+
+afterEach(() => {
+	vi.restoreAllMocks();
+});
 
 describe('deriveEntwined', () => {
 	describe('success arm', () => {
@@ -13,8 +17,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: '', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(stage && stage.ok && stage.value.root.path).toBe('$');
 			});
 
@@ -22,8 +25,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: '', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(stage && stage.ok && stage.value.root.parent).toBe(null);
 			});
 
@@ -31,8 +33,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: '', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(stage && stage.ok && stage.value.root.children).toHaveLength(0);
 			});
 
@@ -40,8 +41,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: '', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(
 					stage && stage.ok && Object.keys(stage.value.byPath),
 				).toHaveLength(1);
@@ -51,8 +51,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: '', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(stage && stage.ok && stage.value.byOffset).toHaveLength(0);
 			});
 
@@ -60,8 +59,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: '', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(stage && stage.ok && stage.value.root.tokens).toHaveLength(0);
 			});
 		});
@@ -71,8 +69,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(stage && stage.ok && stage.value.root.children).toHaveLength(1);
 			});
 
@@ -80,8 +77,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(stage && stage.ok && stage.value.byPath['$.body.0']?.path).toBe(
 					'$.body.0',
 				);
@@ -91,8 +87,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined && entwined.root.children[0].parent === entwined.root,
@@ -103,8 +98,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined && entwined.byPath['$.body.0'] === entwined.root.children[0],
@@ -115,8 +109,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(ast.ok && entwined && entwined.root.node === ast.value).toBe(
 					true,
@@ -127,8 +120,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					ast.ok &&
@@ -143,8 +135,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(
 					stage &&
 						stage.ok &&
@@ -156,8 +147,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(
 					stage &&
 						stage.ok &&
@@ -169,8 +159,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(
 					stage &&
 						stage.ok &&
@@ -184,8 +173,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(
 					stage &&
 						stage.ok &&
@@ -197,8 +185,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(
 					stage &&
 						stage.ok &&
@@ -215,8 +202,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(stage && stage.ok && stage.value.root.children[0].path).toBe(
 					'$.body.0',
 				);
@@ -229,8 +215,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(stage && stage.ok && stage.value.root.children[1].path).toBe(
 					'$.body.1',
 				);
@@ -242,8 +227,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(stage && stage.ok && stage.value.byOffset).toHaveLength(9);
 			});
 
@@ -251,8 +235,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(
 					stage && stage.ok && stage.value.byOffset.filter(Boolean),
 				).toHaveLength(9);
@@ -262,8 +245,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined && entwined.byOffset[0] === entwined.byPath['$.body.0'],
@@ -274,8 +256,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined &&
@@ -288,8 +269,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined &&
@@ -302,8 +282,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined && entwined.byOffset[3] === entwined.byPath['$.body.0'],
@@ -314,8 +293,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined &&
@@ -327,8 +305,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: '   let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(entwined && entwined.byOffset[0] === entwined.root).toBe(true);
 			});
@@ -340,8 +317,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined &&
@@ -354,8 +330,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: '`${x}`', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined &&
@@ -367,8 +342,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: '`${x}`', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(
 					stage &&
 						stage.ok &&
@@ -380,8 +354,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'const o = {x}', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined &&
@@ -396,8 +369,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'const a="😀"', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(stage && stage.ok && stage.value.byOffset).toHaveLength(12);
 			});
 
@@ -405,8 +377,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'const a="😀"', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined &&
@@ -421,8 +392,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(stage && stage.ok && stage.value.root.tokens).toHaveLength(4);
 			});
 
@@ -430,8 +400,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(
 					stage &&
 						stage.ok &&
@@ -443,8 +412,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(
 					stage &&
 						stage.ok &&
@@ -457,8 +425,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(
 					stage &&
 						stage.ok &&
@@ -470,8 +437,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(
 					stage &&
 						stage.ok &&
@@ -484,8 +450,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined &&
@@ -498,8 +463,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(
 					stage && stage.ok && stage.value.root.tokens[0]?.token.start,
 				).toBe(0);
@@ -512,8 +476,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(
 					stage && stage.ok && stage.value.byPath['$.body.0']?.tokens,
 				).toHaveLength(5);
@@ -526,8 +489,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(
 					stage &&
 						stage.ok &&
@@ -539,8 +501,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: '`${x}`', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(
 					stage &&
 						stage.ok &&
@@ -554,8 +515,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: '', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(stage && stage.ok && stage.value.root.comments).toHaveLength(0);
 			});
 
@@ -563,8 +523,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(stage && stage.ok && stage.value.root.comments).toHaveLength(0);
 			});
 
@@ -575,8 +534,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(stage && stage.ok && stage.value.root.comments).toHaveLength(2);
 			});
 
@@ -587,8 +545,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(
 					stage && stage.ok && stage.value.byPath['$.body.0']?.comments,
 				).toHaveLength(0);
@@ -601,8 +558,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(
 					stage && stage.ok && stage.value.root.comments[0]?.comment.start,
 				).toBe(11);
@@ -615,8 +571,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(
 					stage &&
 						stage.ok &&
@@ -631,8 +586,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(
 					stage &&
 						stage.ok &&
@@ -647,8 +601,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined &&
@@ -664,8 +617,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(stage && stage.ok && stage.value.root.comments).toHaveLength(1);
 			});
 
@@ -676,8 +628,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(stage && stage.ok && stage.value.root.comments).toHaveLength(1);
 			});
 		});
@@ -690,8 +641,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined &&
@@ -707,8 +657,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined &&
@@ -723,8 +672,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined &&
@@ -739,8 +687,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(
 					stage && stage.ok && stage.value.root.comments[0]?.previous,
 				).toBe(null);
@@ -753,8 +700,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined &&
@@ -769,8 +715,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined && entwined.root.comments[0].innermostNode === entwined.root,
@@ -784,8 +729,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(stage && stage.ok && stage.value.root.comments[0]?.next).toBe(
 					null,
 				);
@@ -798,8 +742,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined &&
@@ -814,8 +757,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined && entwined.root.comments[0].innermostNode === entwined.root,
@@ -826,8 +768,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: '// just this', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(
 					stage && stage.ok && stage.value.root.comments[0]?.previous,
 				).toBe(null);
@@ -837,8 +778,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: '// just this', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(stage && stage.ok && stage.value.root.comments[0]?.next).toBe(
 					null,
 				);
@@ -848,8 +788,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: '// just this', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined && entwined.root.comments[0].innermostNode === entwined.root,
@@ -860,8 +799,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: '// one\n// two', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(
 					stage && stage.ok && stage.value.root.comments[1]?.previous,
 				).toBe(null);
@@ -871,8 +809,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: '// one\n// two', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(stage && stage.ok && stage.value.root.comments[1]?.next).toBe(
 					null,
 				);
@@ -885,8 +822,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined &&
@@ -901,8 +837,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined &&
@@ -917,8 +852,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined && entwined.root.tokens[4].next === entwined.root.tokens[5],
@@ -932,8 +866,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined &&
@@ -948,8 +881,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined &&
@@ -964,8 +896,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined &&
@@ -980,8 +911,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined &&
@@ -996,8 +926,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(stage && stage.ok && stage.value.root.comments[0]?.next).toBe(
 					null,
 				);
@@ -1010,8 +939,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined &&
@@ -1029,8 +957,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined &&
@@ -1047,8 +974,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined &&
@@ -1061,8 +987,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(stage && stage.ok && stage.value.root.tokens[0]?.previous).toBe(
 					null,
 				);
@@ -1072,8 +997,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(stage && stage.ok && stage.value.root.tokens[3]?.next).toBe(
 					null,
 				);
@@ -1086,8 +1010,7 @@ describe('deriveEntwined', () => {
 				} as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined &&
@@ -1100,8 +1023,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined &&
@@ -1116,8 +1038,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined &&
@@ -1130,8 +1051,7 @@ describe('deriveEntwined', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				const entwined = stage && stage.ok && stage.value;
 				expect(
 					entwined &&
@@ -1146,13 +1066,193 @@ describe('deriveEntwined', () => {
 				const snippet = { source: '[,1]', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
 				const ast = deriveAst(snippet, tokens);
-				const stage =
-					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
 				expect(
 					stage &&
 						stage.ok &&
 						stage.value.byPath['$.body.0.expression.elements.1']?.node.type,
 				).toBe('Literal');
+			});
+		});
+	});
+
+	describe('failure arm', () => {
+		describe('a failed upstream stage short-circuits', () => {
+			it('carries the ast cause by identity — a rebuilt equal cause must not pass', () => {
+				const snippet = { source: 'const', type: 'script' } as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
+				expect(!ast.ok && !stage.ok && stage.cause === ast.cause).toBe(true);
+			});
+
+			it('carries a tokens-origin cause by identity', () => {
+				const snippet = { source: '01', type: 'module' } as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
+				expect(!tokens.ok && !stage.ok && stage.cause === tokens.cause).toBe(
+					true,
+				);
+			});
+
+			it('checks the tokens stage first — a rebuilt equal cause must not pass', () => {
+				const cause = {
+					stage: 'tokens',
+					message: 'sentinel — no parser says this',
+					offset: 99,
+				} as const;
+				const snippet = { source: 'let x = 1', type: 'script' } as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage = deriveEntwined(snippet.source, { ok: false, cause }, ast);
+				expect(!stage.ok && stage.cause === cause).toBe(true);
+			});
+
+			it('reports nothing to console.error when carrying', () => {
+				const errorSpy = vi
+					.spyOn(console, 'error')
+					.mockImplementation(() => {});
+				const snippet = { source: 'const', type: 'script' } as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				deriveEntwined(snippet.source, tokens, ast);
+				expect(errorSpy).toHaveBeenCalledTimes(0);
+			});
+
+			it('reports nothing to console.warn when carrying', () => {
+				const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+				const snippet = { source: 'const', type: 'script' } as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				deriveEntwined(snippet.source, tokens, ast);
+				expect(warnSpy).toHaveBeenCalledTimes(0);
+			});
+
+			it('reports nothing to console.error when carrying a tokens failure', () => {
+				const errorSpy = vi
+					.spyOn(console, 'error')
+					.mockImplementation(() => {});
+				const snippet = { source: '01', type: 'module' } as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				deriveEntwined(snippet.source, tokens, ast);
+				expect(errorSpy).toHaveBeenCalledTimes(0);
+			});
+
+			it('reports nothing to console.warn when carrying a tokens failure', () => {
+				const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+				const snippet = { source: '01', type: 'module' } as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				deriveEntwined(snippet.source, tokens, ast);
+				expect(warnSpy).toHaveBeenCalledTimes(0);
+			});
+		});
+
+		describe('a tree that does not span its source is an embody defect', () => {
+			it('a doctored end originates an entwined cause', () => {
+				vi.spyOn(console, 'error').mockImplementation(() => {});
+				const snippet = { source: 'let x = 1', type: 'script' } as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok &&
+					deriveEntwined(snippet.source, tokens, {
+						ok: true,
+						value: { ...ast.value, end: 999 },
+					});
+				expect(stage && !stage.ok && stage.cause.stage).toBe('entwined');
+			});
+
+			it('a doctored start originates an entwined cause', () => {
+				vi.spyOn(console, 'error').mockImplementation(() => {});
+				const snippet = { source: 'let x = 1', type: 'script' } as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok &&
+					deriveEntwined(snippet.source, tokens, {
+						ok: true,
+						value: { ...ast.value, start: 5 },
+					});
+				expect(stage && !stage.ok && stage.cause.stage).toBe('entwined');
+			});
+
+			it('the defect is loud — reported once', () => {
+				const errorSpy = vi
+					.spyOn(console, 'error')
+					.mockImplementation(() => {});
+				const snippet = { source: 'let x = 1', type: 'script' } as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const doctored =
+					ast.ok &&
+					deriveEntwined(snippet.source, tokens, {
+						ok: true,
+						value: { ...ast.value, end: 999 },
+					});
+				expect(doctored !== false && errorSpy).toHaveBeenCalledTimes(1);
+			});
+
+			it('the report names the deriver', () => {
+				const errorSpy = vi
+					.spyOn(console, 'error')
+					.mockImplementation(() => {});
+				const snippet = { source: 'let x = 1', type: 'script' } as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const doctored =
+					ast.ok &&
+					deriveEntwined(snippet.source, tokens, {
+						ok: true,
+						value: { ...ast.value, end: 999 },
+					});
+				expect(doctored !== false && errorSpy).toHaveBeenCalledWith(
+					expect.stringContaining('deriveEntwined'),
+				);
+			});
+
+			it('the cause speaks in embody terms', () => {
+				vi.spyOn(console, 'error').mockImplementation(() => {});
+				const snippet = { source: 'let x = 1', type: 'script' } as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok &&
+					deriveEntwined(snippet.source, tokens, {
+						ok: true,
+						value: { ...ast.value, end: 999 },
+					});
+				expect(stage && !stage.ok && stage.cause.message).toContain('span');
+			});
+
+			it('the cause carries no offset', () => {
+				vi.spyOn(console, 'error').mockImplementation(() => {});
+				const snippet = { source: 'let x = 1', type: 'script' } as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok &&
+					deriveEntwined(snippet.source, tokens, {
+						ok: true,
+						value: { ...ast.value, end: 999 },
+					});
+				expect(stage && !stage.ok && 'offset' in stage.cause).toBe(false);
+			});
+
+			it('the cause carries no position', () => {
+				vi.spyOn(console, 'error').mockImplementation(() => {});
+				const snippet = { source: 'let x = 1', type: 'script' } as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok &&
+					deriveEntwined(snippet.source, tokens, {
+						ok: true,
+						value: { ...ast.value, start: 5 },
+					});
+				expect(stage && !stage.ok && 'position' in stage.cause).toBe(false);
 			});
 		});
 	});

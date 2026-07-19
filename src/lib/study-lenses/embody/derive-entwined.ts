@@ -3,11 +3,18 @@ import type { Comment, Node, Program, Token } from 'acorn';
 import type { Entwined, FactStage, NodePath, Tokens } from './types.js';
 
 /**
- * Derive the entwined fact stage from the syntax tree and the token stream:
- * the source⇄tree binding, tying each node to its family, its place, and its
- * tokens, indexed for O(1) resolution from a carried path or offset.
+ * Derive the entwined fact stage from the source, the tokens stage, and the
+ * ast stage: the source⇄tree binding, tying each node to its family, its
+ * place, and its tokens, indexed for O(1) resolution from a carried path or
+ * offset.
  *
  * @remarks
+ * A failed upstream stage short-circuits: the entwined stage carries the
+ * first upstream failure's cause unchanged — spelling precedes grammar, and
+ * the origin stays named. A tree that does not span its whole source is an
+ * embody defect, not learner data: loud to the developer, a tagged
+ * `entwined` cause to the learner — never a throw.
+ *
  * Every entwined node holds the very node the parse built, by reference —
  * never a copy — and `byPath` holds the same entwined objects the walk wired:
  * one shared graph, two entry points. Paths are `$`-rooted and dot-delimited
@@ -25,14 +32,40 @@ import type { Entwined, FactStage, NodePath, Tokens } from './types.js';
  * never threads through a comment.
  */
 export default function deriveEntwined(
-	ast: Program,
-	tokens: Tokens,
+	source: string,
+	tokens: FactStage<Tokens>,
+	ast: FactStage<Program>,
 ): FactStage<Entwined> {
+	// spelling precedes grammar — the first upstream failure's cause carries,
+	// its origin still named; nothing derives past it
+	if (!tokens.ok) {
+		return { ok: false, cause: tokens.cause };
+	}
+	if (!ast.ok) {
+		return { ok: false, cause: ast.cause };
+	}
+
+	// a valid tree spans its whole source — byOffset's no-hole guarantee rests
+	// on it. A violation is an embody defect: loud to the developer, graceful
+	// data to the learner.
+	if (ast.value.start !== 0 || ast.value.end !== source.length) {
+		console.error(
+			`deriveEntwined: the tree spans [${ast.value.start}, ${ast.value.end}) over a source ${source.length} long — broken embody invariant`,
+		);
+		return {
+			ok: false,
+			cause: {
+				stage: 'entwined',
+				message: 'the syntax tree does not span its source',
+			},
+		};
+	}
+
 	const byPath: Record<NodePath, BuildingNode> = {};
-	const root = entwineNode(ast, '$', null, byPath);
+	const root = entwineNode(ast.value, '$', null, byPath);
 	const byOffset = indexByOffset(root);
-	const tokenTies = tieTokens(tokens.tokens, byOffset);
-	const commentTies = tieComments(tokens.comments, byOffset);
+	const tokenTies = tieTokens(tokens.value.tokens, byOffset);
+	const commentTies = tieComments(tokens.value.comments, byOffset);
 	wireCommentNeighbors(commentTies, tokenTies);
 
 	return { ok: true, value: { root, byPath, byOffset } };
