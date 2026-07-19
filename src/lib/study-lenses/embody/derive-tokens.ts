@@ -1,6 +1,7 @@
 import { tokenizer } from 'acorn';
 import type { Comment, Position } from 'acorn';
 
+import ECMA_VERSION from './ecma-version.js';
 import type { FactStage, Snippet, StageCause, Tokens } from './types.js';
 
 /**
@@ -23,10 +24,7 @@ export default function deriveTokens(snippet: Snippet): FactStage<Tokens> {
 		const tokens = [
 			...tokenizer(snippet.source, {
 				sourceType: snippet.type,
-				// Numeric, not 'latest' — the environment stage shares this parse goal
-				// with eslint-scope, whose ES6 gate is `ecmaVersion >= 6`: a string
-				// fails that comparison and silently degrades every scope to ES5.
-				ecmaVersion: 2024,
+				ecmaVersion: ECMA_VERSION,
 				onComment: comments,
 			}),
 		];
