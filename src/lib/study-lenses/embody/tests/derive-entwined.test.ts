@@ -682,6 +682,344 @@ describe('deriveEntwined', () => {
 			});
 		});
 
+		describe('comment neighbors', () => {
+			it("an interior comment's innermostNode is its enclosing declarator", () => {
+				const snippet = {
+					source: 'let x = /* c */ 1',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined &&
+						entwined.root.comments[0].innermostNode ===
+							entwined.byPath['$.body.0.declarations.0'],
+				).toBe(true);
+			});
+
+			it("an interior comment's previous is the token before it", () => {
+				const snippet = {
+					source: 'let x = /* c */ 1',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined &&
+						entwined.root.comments[0].previous === entwined.root.tokens[2],
+				).toBe(true);
+			});
+
+			it("an interior comment's next is the token after it", () => {
+				const snippet = {
+					source: 'let x = /* c */ 1',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined &&
+						entwined.root.comments[0].next === entwined.root.tokens[3],
+				).toBe(true);
+			});
+
+			it("a leading comment's previous is null", () => {
+				const snippet = {
+					source: '/* header */let x = 1',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				expect(
+					stage && stage.ok && stage.value.root.comments[0]?.previous,
+				).toBe(null);
+			});
+
+			it("a leading comment's next is the first token", () => {
+				const snippet = {
+					source: '/* header */let x = 1',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined &&
+						entwined.root.comments[0].next === entwined.root.tokens[0],
+				).toBe(true);
+			});
+
+			it("a leading comment's innermostNode is the root", () => {
+				const snippet = {
+					source: '/* header */let x = 1',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined && entwined.root.comments[0].innermostNode === entwined.root,
+				).toBe(true);
+			});
+
+			it("a trailing comment's next is null", () => {
+				const snippet = {
+					source: 'let x = 1 // tail',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				expect(stage && stage.ok && stage.value.root.comments[0]?.next).toBe(
+					null,
+				);
+			});
+
+			it("a trailing comment's previous is the last token", () => {
+				const snippet = {
+					source: 'let x = 1 // tail',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined &&
+						entwined.root.comments[0].previous === entwined.root.tokens[3],
+				).toBe(true);
+			});
+
+			it("a trailing comment's innermostNode is the root", () => {
+				const snippet = {
+					source: 'let x = 1 // tail',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined && entwined.root.comments[0].innermostNode === entwined.root,
+				).toBe(true);
+			});
+
+			it("a comment-only program's comment has no previous", () => {
+				const snippet = { source: '// just this', type: 'script' } as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				expect(
+					stage && stage.ok && stage.value.root.comments[0]?.previous,
+				).toBe(null);
+			});
+
+			it("a comment-only program's comment has no next", () => {
+				const snippet = { source: '// just this', type: 'script' } as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				expect(stage && stage.ok && stage.value.root.comments[0]?.next).toBe(
+					null,
+				);
+			});
+
+			it("a comment-only program's comment sits in the root", () => {
+				const snippet = { source: '// just this', type: 'script' } as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined && entwined.root.comments[0].innermostNode === entwined.root,
+				).toBe(true);
+			});
+
+			it('two comments with no tokens both float free — second previous', () => {
+				const snippet = { source: '// one\n// two', type: 'script' } as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				expect(
+					stage && stage.ok && stage.value.root.comments[1]?.previous,
+				).toBe(null);
+			});
+
+			it('two comments with no tokens both float free — second next', () => {
+				const snippet = { source: '// one\n// two', type: 'script' } as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				expect(stage && stage.ok && stage.value.root.comments[1]?.next).toBe(
+					null,
+				);
+			});
+
+			it("a between-statement comment's previous is the semicolon", () => {
+				const snippet = {
+					source: 'let a = 1; // one\nlet b = 2; /* two */',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined &&
+						entwined.root.comments[0].previous === entwined.root.tokens[4],
+				).toBe(true);
+			});
+
+			it("a between-statement comment's next is the following let", () => {
+				const snippet = {
+					source: 'let a = 1; // one\nlet b = 2; /* two */',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined &&
+						entwined.root.comments[0].next === entwined.root.tokens[5],
+				).toBe(true);
+			});
+
+			it('the token chain never threads through a comment — forward', () => {
+				const snippet = {
+					source: 'let a = 1; // one\nlet b = 2; /* two */',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined && entwined.root.tokens[4].next === entwined.root.tokens[5],
+				).toBe(true);
+			});
+
+			it('the token chain never threads through a comment — backward', () => {
+				const snippet = {
+					source: 'let a = 1; // one\nlet b = 2; /* two */',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined &&
+						entwined.root.tokens[5].previous === entwined.root.tokens[4],
+				).toBe(true);
+			});
+
+			it("adjacent comments: the second's previous skips to the semicolon", () => {
+				const snippet = {
+					source: 'let a = 1; // one\n// uno\nlet b = 2;',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined &&
+						entwined.root.comments[1].previous === entwined.root.tokens[4],
+				).toBe(true);
+			});
+
+			it("adjacent comments: the first's next skips to the following let", () => {
+				const snippet = {
+					source: 'let a = 1; // one\n// uno\nlet b = 2;',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined &&
+						entwined.root.comments[0].next === entwined.root.tokens[5],
+				).toBe(true);
+			});
+
+			it('a zero-gap comment still follows its token', () => {
+				const snippet = {
+					source: 'let x = 1;// tight',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined &&
+						entwined.root.comments[0].previous === entwined.root.tokens[4],
+				).toBe(true);
+			});
+
+			it("a zero-gap trailing comment's next is null", () => {
+				const snippet = {
+					source: 'let x = 1;// tight',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				expect(stage && stage.ok && stage.value.root.comments[0]?.next).toBe(
+					null,
+				);
+			});
+
+			it('zero-gap adjacent comments still reach past each other to the semicolon', () => {
+				const snippet = {
+					source: 'let a=1;/* x *//* y */let b=2;',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage =
+					ast.ok && tokens.ok && deriveEntwined(ast.value, tokens.value);
+				const entwined = stage && stage.ok && stage.value;
+				expect(
+					entwined &&
+						entwined.root.comments[1].previous === entwined.root.tokens[4],
+				).toBe(true);
+			});
+		});
+
 		describe('token chain', () => {
 			it.each([
 				[0, 1],

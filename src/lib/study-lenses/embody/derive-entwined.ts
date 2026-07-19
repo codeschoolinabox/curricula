@@ -20,7 +20,9 @@ import type { Entwined, FactStage, NodePath, Tokens } from './types.js';
  * token — chained stream-wide (`previous`/`next`, null at both ends) and
  * carrying each token's innermost node. Each node likewise ties the comments
  * within its span, in source order, through one shared wrapper per comment;
- * the comment wrappers' token-neighbor ties are empty.
+ * a comment carries its innermost node and its nearest token neighbors —
+ * tokens, never comments, null past either end — and the token chain itself
+ * never threads through a comment.
  */
 export default function deriveEntwined(
 	ast: Program,
@@ -29,8 +31,9 @@ export default function deriveEntwined(
 	const byPath: Record<NodePath, BuildingNode> = {};
 	const root = entwineNode(ast, '$', null, byPath);
 	const byOffset = indexByOffset(root);
-	tieTokens(tokens.tokens, byOffset);
-	tieComments(tokens.comments, byOffset);
+	const tokenTies = tieTokens(tokens.tokens, byOffset);
+	const commentTies = tieComments(tokens.comments, byOffset);
+	wireCommentNeighbors(commentTies, tokenTies);
 
 	return { ok: true, value: { root, byPath, byOffset } };
 }
@@ -118,7 +121,8 @@ type BuildingToken = {
 function tieTokens(
 	tokens: ReadonlyArray<Token>,
 	byOffset: ReadonlyArray<BuildingNode>,
-): void {
+): readonly BuildingToken[] {
+	const ties: BuildingToken[] = [];
 	let previous: BuildingToken | null = null;
 	for (const token of tokens) {
 		const innermost = byOffset[token.start];
@@ -132,6 +136,7 @@ function tieTokens(
 			previous.next = tied;
 		}
 		previous = tied;
+		ties.push(tied);
 
 		// nodes align to token boundaries — a node covering the token's start
 		// contains the whole token, so the ancestor chain from the deepest node
@@ -142,10 +147,12 @@ function tieTokens(
 			node = node.parent;
 		}
 	}
+	return ties;
 }
 
-// the comment wrappers' token-neighbor ties wire in a later pass — the same
-// marked local mutation as the token chain; only the readonly view leaves
+// the comment wrappers' token-neighbor ties wire after the per-node walk —
+// the same marked local mutation as the token chain; only the readonly view
+// leaves this file
 type BuildingComment = {
 	comment: Comment;
 	innermostNode: BuildingNode | null;
@@ -156,27 +163,57 @@ type BuildingComment = {
 /**
  * Tie every comment to each node whose span contains it — one wrapper per
  * comment, shared across its containing nodes: one graph, never copies.
- * Iterating in source order keeps every per-node list in source order.
+ * Iterating in source order keeps every per-node list in source order, and
+ * hands each wrapper its innermost node — the deepest node at its start.
  */
 function tieComments(
 	comments: ReadonlyArray<Comment>,
 	byOffset: ReadonlyArray<BuildingNode>,
-): void {
+): readonly BuildingComment[] {
+	const ties: BuildingComment[] = [];
 	for (const comment of comments) {
+		const innermost = byOffset[comment.start];
 		const tied: BuildingComment = {
 			comment,
-			innermostNode: null,
+			innermostNode: innermost,
 			previous: null,
 			next: null,
 		};
+		ties.push(tied);
 		// comments are trivia between token boundaries, and node boundaries ARE
 		// token boundaries — so the node at a comment's start contains the whole
 		// comment, and its ancestor chain is exactly the set of containing nodes
-		let node: BuildingNode | null = byOffset[comment.start];
+		let node: BuildingNode | null = innermost;
 		while (node !== null) {
 			node.comments.push(tied);
 			node = node.parent;
 		}
+	}
+	return ties;
+}
+
+/**
+ * Hand every comment its nearest token neighbors — tokens, never comments:
+ * `previous` is the last token ending at or before the comment opens, `next`
+ * the first token past that — the same token that starts at or after the
+ * comment closes, because tokens and comments never overlap. The token chain
+ * itself is never touched. Both inputs arrive in source order, so one cursor
+ * serves every comment; comments sharing a gap share neighbors.
+ */
+function wireCommentNeighbors(
+	commentTies: readonly BuildingComment[],
+	tokenTies: readonly BuildingToken[],
+): void {
+	let cursor = 0;
+	for (const tied of commentTies) {
+		while (
+			cursor < tokenTies.length &&
+			tokenTies[cursor].token.end <= tied.comment.start
+		) {
+			cursor++;
+		}
+		tied.previous = cursor > 0 ? tokenTies[cursor - 1] : null;
+		tied.next = cursor < tokenTies.length ? tokenTies[cursor] : null;
 	}
 }
 
