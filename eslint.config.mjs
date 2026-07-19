@@ -211,7 +211,10 @@ export default tseslint.config(
 			'functional/no-classes': 'error',
 			'functional/immutable-data': [
 				'warn',
-				{ ignoreAccessorPattern: ['module.exports'] },
+				// `**.current` exempts React ref (and ref-like) writes —
+				// `ref.current = x` is idiomatic and unavoidable — while the rule
+				// still catches every other mutation, in .ts and .tsx alike.
+				{ ignoreAccessorPattern: ['module.exports', '**.current'] },
 			],
 			// OFF, not warn: this rule's autofixer adds `readonly` /
 			// `ReadonlyArray` / `ReadonlyMap` to mutated locals, which breaks
@@ -466,19 +469,6 @@ export default tseslint.config(
 			'@typescript-eslint/no-non-null-assertion': 'error',
 			'local/newspaper-order': 'error',
 		},
-	},
-
-	// =========================================================================
-	// Zone 2e: React component files (.tsx) — allow ref/state mutation
-	// =========================================================================
-	// `functional/immutable-data` fires on idiomatic `ref.current = x` and the
-	// mutable backing state React components legitimately need. Turn it off for
-	// .tsx wholesale rather than sprinkling per-line disables — which then rot,
-	// and which Zone 2d's reportUnusedDisableDirectives would flag as unused once
-	// the rule is off here anyway. The rule stays on for .ts (non-component) code.
-	{
-		files: ['src/**/*.tsx'],
-		rules: { 'functional/immutable-data': 'off' },
 	},
 
 	// =========================================================================
