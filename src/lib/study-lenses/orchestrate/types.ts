@@ -1,16 +1,25 @@
 /**
  * The orchestrator's contract: the package's public host surface, plus the
- * region-internal fit-mark vocabulary the level surfaces share. Everything
- * else in this region is internal.
+ * region-internal shared vocabulary — the fit marks the level surfaces
+ * share, and the settle/derivation shapes the top component threads.
+ * Everything else in this region is internal.
  *
  * Region docs: ./README.md (host surface + mechanics) · ./DOCS.md
  * (architecture). The package glossary (../README.md) owns the shared
  * vocabulary.
  */
 
-import type { SnippetType } from '../embody/types.js';
+import type { Embodiment, SnippetType } from '../embody/types.js';
 import type { LanguageLevel } from '../language-levels/types.js';
 import type { Lens, LensConfig } from '../lenses/types.js';
+
+// A deliberate TYPE-ONLY cycle: marking/types.ts imports FitMark from this
+// file. Erased at emit, accepted by tsc strict — safe exactly as long as
+// both edges stay `import type`; never add a runtime import either way.
+import type { EventPayloadMap } from './event-bus/types.js';
+import type { AssessmentsByLevel } from './lib/marking/types.js';
+import type { RankedRecommendations } from './lib/recommending/types.js';
+import type { VerdictsByLevel } from './lib/validating/types.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // The host surface
@@ -84,3 +93,49 @@ export type FitMark =
 	| 'does-not-fit'
 	| 'not-applicable-for-type'
 	| 'undetermined';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// The settle loop's shapes
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * The settled snippet: the source and type one derivation ran over — the
+ * staleness identity of everything derived from it. Edit events fire per
+ * keystroke; a settle is the debounce's trailing edge (or a type toggle's
+ * immediate re-derive). Matches the bus's `settled` payload shape.
+ */
+export type SettledSnippet = {
+	readonly source: string;
+	readonly type: SnippetType;
+};
+
+// Compile-time pin: the bus's `settled` payload is exactly the settled
+// snippet — a divergence in either direction fails `npm run typecheck` (the
+// test runner does not type-check; this line is the enforcement).
+type Expect<T extends true> = T;
+export type _SettledPayloadIsExactlySettledSnippet = Expect<
+	[EventPayloadMap['settled']] extends [SettledSnippet]
+		? [SettledSnippet] extends [EventPayloadMap['settled']]
+			? true
+			: false
+		: false
+>;
+
+/**
+ * What one derive pass produces for one settled snippet: the frozen
+ * embodiment, every registered level's verdict, every level's assessment,
+ * and the fitting lenses' proposals, ranked. Region-internal — the top
+ * component holds one and the rendered surfaces project from it.
+ *
+ * @remarks
+ * Derivation-anchored name, deliberately not "study state": the package's
+ * study layer is `embodiment.study` (embody's per-phase payloads), and this
+ * bundle CONTAINS an embodiment — naming it after the derive pass keeps the
+ * two apart. The region glossary pins the distinction.
+ */
+export type StudyDerivation = {
+	readonly embodiment: Embodiment;
+	readonly verdicts: VerdictsByLevel;
+	readonly assessments: AssessmentsByLevel;
+	readonly recommendations: RankedRecommendations;
+};

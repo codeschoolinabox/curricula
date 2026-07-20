@@ -22,7 +22,10 @@ living in presentation code.
 - **An accessible phase** shows its display label and its lens names, each an
   affordance that raises an open-lens intent — the intent carries the phase and
   lens names; mounting the opened lens is the top component's work, not the
-  panel's.
+  panel's. Phase display labels render as `h3` headings — part of the rendered
+  contract, like the data attributes: the region's embedding constraint (mount
+  the instrument below an `h2`-level context) depends on it, so the level is
+  never an implementation's choice.
 - **A barred phase** renders barred, with its cause — the phase stays present
   and visibly named, and the cause is shown in place of a lens list. The cause
   arrives as display copy, formatted upstream from the embodiment's structured

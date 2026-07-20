@@ -18,6 +18,9 @@ orchestrate/
   DOCS.md         the region's architectural sketch
   types.ts        the host surface, plus region-internal shared vocabulary
   index.tsx       the top component — the composition root the host mounts
+  use-settled-snippet.ts   the settle hook — debounced edits, immediate type toggle
+  derive-study-state.ts    the one derive composition per settle
+  display-labels.ts        the phases' display labels, keyed by phase name
   editor/         the editing surface — the single writer of the source
   phases-panel/   the five-phase study panel — the study layer, rendered
   level-ui/       the level selector and the strict toggle
@@ -45,7 +48,7 @@ choice, and configuration for their session.
 ```ts
 type StudyLensesProperties = {
 	snippet: string; // the program source
-	type?: SnippetType; // initial snippet type
+	type?: SnippetType; // initial snippet type; defaults to 'module'
 	lens?: string; // an initial-focus request — never a bypass
 	configs?: Readonly<Record<string, Partial<LensConfig>>>; // cascade top layer
 	lenses?: ReadonlyArray<Lens>; // append-only injection
@@ -57,6 +60,12 @@ type StudyLensesProperties = {
 
 One disambiguation the surface owes the glossary: the `snippet` prop is the
 source text alone — the glossary's _snippet_ is this prop together with `type`.
+
+One embedding constraint: the instrument renders its section headings at `h3`
+(the study panel's phase headings), so the embedding site should mount it below
+an `h2`-level context. The constraint is documentation, not a runtime check — a
+DOM-ancestor heading probe would be fragile and SSR-hostile for what is an
+authoring concern.
 
 The full doc-commented surface is [`types.ts`](./types.ts). This — with the lens
 contract and the level spine — is the package's public, versioned surface;
@@ -186,7 +195,14 @@ this region owns.
   trailing-edge; when typing settles, the snippet is re-embodied and every
   derived state re-derives. An edit event is not a settle — edit events fire per
   keystroke, derivation runs per settle. The snippet-type toggle re-derives
-  immediately, cancelling any pending settle.
+  immediately, absorbing any pending settle — its settle carries the editor's
+  live source, so pending keystrokes are settled early, never discarded.
+- **study derivation** — what one derive pass produces for one settled snippet:
+  the frozen embodiment, the verdicts, the assessments, and the ranked
+  recommendations — the bundle the top component holds and the rendered surfaces
+  project from. Deliberately not "study state": the package's **study layer** is
+  `embodiment.study` (embody's per-phase payloads), and the derivation contains
+  an embodiment — the derive-anchored name keeps the two apart.
 - **session choices** — the learner's session-scoped selections: the selected
   level key, the enforcement posture, the snippet type, the open lens, and
   configuration tweaks. The top component is their single owner: surfaces raise

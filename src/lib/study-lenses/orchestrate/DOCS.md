@@ -27,17 +27,19 @@ abstraction; each rendered surface and derivation library zooms in below.
    the joined roster; the parse facts a level consumes are assembled once from
    the embodiment's stage values; one memoized validate runs per registered
    level; the fit marks derive from those verdicts, the levels' admitted snippet
-   types, and the current type (the verdict itself encodes the parse status).
-   All of it in pure functions — level logic never lives inside a React
-   component. Input: the settled snippet + the composed study configuration.
-   Output: the frozen embodiment + the level verdicts + the assessments.
+   types, and the current type (the verdict itself encodes the parse status);
+   the fitting lenses' proposals are collected and ranked. All of it in pure
+   functions — level logic never lives inside a React component. Input: the
+   settled snippet + the composed study configuration. Output: the study
+   derivation — the frozen embodiment, the level verdicts, the assessments, and
+   the ranked recommendations.
 
 3. **Render** (mechanical) — the five-phase panel renders the embodiment; the
    level UI renders the verdicts and marks; the mask derives here, from the
    selected level's assessment — its mark with its cause — crossed with the
    strict posture, classifying surfaces into the three classes; an initial-focus
-   request mounts here, through its honor path; recommendations render here,
-   ranked, through the mask. Input: embodiment + verdicts + assessments +
+   request mounts here, through its honor path; the study derivation's ranked
+   recommendations render here, through the mask. Input: the study derivation +
    composed study configuration. Output: the rendered study environment.
 
 4. **Interact** (async at the edges) — each control re-enters its own phase:
@@ -67,6 +69,7 @@ flowchart TD
     EMB -->|"assemble parse facts once, validate per level, memoized"| VER
     CFG -->|"supplies the registered levels, names the selected one"| VER
     VER -->|"classify: × admitted types × current type"| MARKS
+    SNP -->|"the current type"| MARKS
     EMB -->|"render, mechanical"| SUR
     VER -->|"annotate the editor's gutter, selected level only"| SUR
     MARKS -->|"selector marks · mask = selected assessment × strict posture"| SUR
@@ -89,14 +92,90 @@ flowchart TD
   re-derives per settle.
 - **Append-only composition, loud collisions.** Built-ins are never replaced or
   shadowed; failure happens at mount, at the author's desk.
-- **Class-2 controls never mask.** Any control whose change can restore
-  conformance — and the guide — stays alive under every posture.
+- **Class-2 controls never mask.** Any control whose availability restores what
+  the learner needs stays alive under every posture: conformance for the
+  selector and both toggles, orientation for the guide.
 - **The undetermined carve-out wins.** While the code does not parse, the mask
   names no violation and the parse phases' supports stay uncovered — regardless
   of type admission.
 - **Display labels live here.** The five phases' learner-facing labels and the
   none-state's display string are this region's presentation concern; the data
   names are the other regions'.
+
+## The top component — state and the settle loop
+
+The region-root zoom-in. The four execution phases above are the abstraction;
+this section pins where their state lives and how a settle happens. (The region
+README's tree names the files these shapes live in.)
+
+### State residency
+
+The top component is the single owner of everything session-scoped; every other
+holder is ephemeral or derived.
+
+| State                                                                  | Holder                                                                                      |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Session choices (level key, posture, type, open lens, config tweaks)   | the top component                                                                           |
+| The opened layer's overrides (a recommendation-opened lens's proposal) | the top component — set at a recommendation-opened mount, cleared with the open-lens choice |
+| The settled snippet (`SettledSnippet`)                                 | the top component, written only by the settle loop                                          |
+| The study derivation (`StudyDerivation`)                               | the top component, recomputed per settle                                                    |
+| The validate memo                                                      | inside the per-instance memoized validate the top component holds                           |
+| Joined rosters, the bus instance                                       | the top component, created once at mount                                                    |
+| Open/closed flags (level list, guide reveal)                           | each surface, ephemeral                                                                     |
+
+### The settle loop
+
+One settle hook owns the edit-to-settle mechanics: edit events arrive per
+keystroke; the region's shared trailing-edge debounce holds them; its trailing
+edge writes the settled snippet. The type toggle absorbs any pending settle and
+re-derives immediately — a toggle is a settle of its own, never debounced, and
+its settle carries the editor's **live** source: pending keystrokes are settled
+early, never discarded. The debounce's cancellation runs in the always-returned
+effect cleanup (idle-safe — the cleanup is returned whether or not a settle is
+pending). Staleness is keyed by the settled snippet identity: derived state
+belongs to exactly one settled source-and-type pair, and a re-derive replaces it
+wholesale.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Idle
+    Idle --> Pending: edit event (keystroke)
+    Pending --> Pending: further edits (debounce restarts)
+    Pending --> Settling: trailing edge fires
+    Idle --> Settling: type toggle (immediate, no debounce)
+    Pending --> Settling: type toggle (absorbs the pending settle, live source)
+    Settling --> Idle: settled snippet written · derive runs · bus announces settled
+```
+
+### Per settle
+
+One pure derive composition runs per settle: the embodiment factory over the
+settled source and type with the joined lens roster, then the validating
+library's assembly and memoized validates, then the marking library's
+assessments, then the recommendation walk — the fitting lenses' proposals
+collected and ranked by the recommending library — into one frozen
+`StudyDerivation`. The top component calls the composition with the settled
+snippet, the joined levels, the joined lens roster, and the per-instance
+memoized validate it holds; nothing else derives. The memo's remaining work —
+`StudyDerivation` already holds each settle's verdicts — is idempotence:
+StrictMode's double invoke and any same-identity re-entry return the held
+verdicts without consulting a level twice.
+
+### The render projection
+
+- The five phases' display labels live in one record keyed by phase name, zipped
+  against embody's runtime order constant at the point of use; never a
+  positional list.
+- The panel receives its ordered phase list built from that constant plus the
+  labels; the embodiment's study payloads attach per phase. The panel's phase
+  headings are the instrument's shallowest (the region README's embedding
+  constraint); the guide renders after the panel in DOM order, so its deeper
+  topic headings never precede them in the outline.
+- The mask projects the masking library's state — the selected level's
+  assessment crossed with the posture; the blocked overlay is part of the top
+  component's render (in-file until a second call site exists).
+- The honor resolution runs once at mount; the study derivation's ranked
+  recommendations render through the mask.
 
 ## Decisions
 
