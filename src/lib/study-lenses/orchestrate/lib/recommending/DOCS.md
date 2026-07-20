@@ -36,5 +36,5 @@ flowchart TD
 ## Out of scope
 
 - Producing proposals (each lens's `recommend`).
-- Collecting them across the fitting lenses (the top component's walk).
+- Collecting them across the fitting lenses (the derive composition's walk).
 - Rendering the ranked list, through the mask (the top component's render).

@@ -4,7 +4,7 @@ import embody from '../../embody/index.js';
 import scaffoldLevel from '../../language-levels/scaffold/index.js';
 import type { LanguageLevel } from '../../language-levels/types.js';
 import type { Lens } from '../../lenses/types.js';
-import deriveStudyState from '../derive-study-state.js';
+import deriveStudy from '../derive-study.js';
 import createMemoizedValidate from '../lib/validating/create-memoized-validate.js';
 
 function buildLevel(
@@ -121,10 +121,10 @@ describe('embody conformance — the seam earlier waves assumed', () => {
 	});
 });
 
-describe('deriveStudyState', () => {
+describe('deriveStudy', () => {
 	describe('the empty session (Zero)', () => {
 		it('derives an embodiment with empty verdicts, assessments, and recommendations', () => {
-			const derivation = deriveStudyState(
+			const derivation = deriveStudy(
 				{ source: '', type: 'module' },
 				[],
 				[],
@@ -140,7 +140,7 @@ describe('deriveStudyState', () => {
 
 	describe('one level over one settle (One)', () => {
 		it('marks a fitting module fits for the scaffold level', () => {
-			const derivation = deriveStudyState(
+			const derivation = deriveStudy(
 				{ source: 'const x = 1;', type: 'module' },
 				[scaffoldLevel],
 				[],
@@ -150,7 +150,7 @@ describe('deriveStudyState', () => {
 		});
 
 		it('carries the validated verdict', () => {
-			const derivation = deriveStudyState(
+			const derivation = deriveStudy(
 				{ source: 'const x = 1;', type: 'module' },
 				[scaffoldLevel],
 				[],
@@ -160,7 +160,7 @@ describe('deriveStudyState', () => {
 		});
 
 		it('rides the settled source into the embodiment', () => {
-			const derivation = deriveStudyState(
+			const derivation = deriveStudy(
 				{ source: 'const x = 1;', type: 'module' },
 				[scaffoldLevel],
 				[],
@@ -170,7 +170,7 @@ describe('deriveStudyState', () => {
 		});
 
 		it('marks a debugger statement does-not-fit with the violations carried', () => {
-			const derivation = deriveStudyState(
+			const derivation = deriveStudy(
 				{ source: 'debugger;', type: 'module' },
 				[scaffoldLevel],
 				[],
@@ -187,7 +187,7 @@ describe('deriveStudyState', () => {
 
 	describe('two levels over one settle (Many)', () => {
 		it('keys both verdicts and assessments by each level', () => {
-			const derivation = deriveStudyState(
+			const derivation = deriveStudy(
 				{ source: 'const x = 1;', type: 'module' },
 				[scaffoldLevel, buildLevel('other', () => [])],
 				[],
@@ -207,7 +207,7 @@ describe('deriveStudyState', () => {
 
 	describe('the snippet type (Boundaries)', () => {
 		it('marks a script not-applicable for the module-only scaffold', () => {
-			const derivation = deriveStudyState(
+			const derivation = deriveStudy(
 				{ source: 'const x = 1;', type: 'script' },
 				[scaffoldLevel],
 				[],
@@ -219,13 +219,13 @@ describe('deriveStudyState', () => {
 		});
 
 		it('carries the settled type into the embodiment parse goal', () => {
-			const asModule = deriveStudyState(
+			const asModule = deriveStudy(
 				{ source: 'import "x";', type: 'module' },
 				[],
 				[],
 				createMemoizedValidate(),
 			);
-			const asScript = deriveStudyState(
+			const asScript = deriveStudy(
 				{ source: 'import "x";', type: 'script' },
 				[],
 				[],
@@ -243,13 +243,13 @@ describe('deriveStudyState', () => {
 			const spy = vi.fn(() => []);
 			const level = buildLevel('spied', spy);
 			const memoizedValidate = createMemoizedValidate();
-			deriveStudyState(
+			deriveStudy(
 				{ source: 'const x = 1;', type: 'module' },
 				[level],
 				[],
 				memoizedValidate,
 			);
-			deriveStudyState(
+			deriveStudy(
 				{ source: 'const x = 1;', type: 'module' },
 				[level],
 				[],
@@ -261,7 +261,7 @@ describe('deriveStudyState', () => {
 
 	describe('the frozen derivation (Interfaces)', () => {
 		it('freezes the derivation envelope', () => {
-			const derivation = deriveStudyState(
+			const derivation = deriveStudy(
 				{ source: 'const x = 1;', type: 'module' },
 				[scaffoldLevel],
 				[],
@@ -271,7 +271,7 @@ describe('deriveStudyState', () => {
 		});
 
 		it('freezes the assessments record', () => {
-			const derivation = deriveStudyState(
+			const derivation = deriveStudy(
 				{ source: 'const x = 1;', type: 'module' },
 				[scaffoldLevel],
 				[],
@@ -282,7 +282,7 @@ describe('deriveStudyState', () => {
 
 		it('leaves attached lenses mutable through the full composition', () => {
 			const lens = buildLens('poker') as Lens & { poked?: boolean };
-			const derivation = deriveStudyState(
+			const derivation = deriveStudy(
 				{ source: 'const x = 1;', type: 'module' },
 				[],
 				[lens],
@@ -303,7 +303,7 @@ describe('deriveStudyState', () => {
 					{ lens: proposer, config: {}, relevance: 0.5, label: 'next' },
 				],
 			});
-			const derivation = deriveStudyState(
+			const derivation = deriveStudy(
 				{ source: 'const x = 1;', type: 'module' },
 				[],
 				[recommending, proposer],
@@ -324,7 +324,7 @@ describe('deriveStudyState', () => {
 					{ lens: target, config: {}, relevance: 0.9, label: 'high' },
 				],
 			});
-			const derivation = deriveStudyState(
+			const derivation = deriveStudy(
 				{ source: 'const x = 1;', type: 'module' },
 				[],
 				[low, high, target],
@@ -342,7 +342,7 @@ describe('deriveStudyState', () => {
 				phase: ['source', 'tokens'],
 				recommend,
 			});
-			deriveStudyState(
+			deriveStudy(
 				{ source: 'const x = 1;', type: 'module' },
 				[],
 				[multi],
@@ -357,7 +357,7 @@ describe('deriveStudyState', () => {
 				applicability: () => false,
 				recommend,
 			});
-			deriveStudyState(
+			deriveStudy(
 				{ source: 'const x = 1;', type: 'module' },
 				[],
 				[unfitting],
@@ -373,7 +373,7 @@ describe('deriveStudyState', () => {
 				phase: 'environment',
 				recommend,
 			});
-			deriveStudyState(
+			deriveStudy(
 				{ source: '1 +', type: 'module' },
 				[],
 				[barredButAttached],
@@ -395,7 +395,7 @@ describe('deriveStudyState', () => {
 					{ lens: target, config: {}, relevance: 0.4, label: 'still lands' },
 				],
 			});
-			const derivation = deriveStudyState(
+			const derivation = deriveStudy(
 				{ source: 'const x = 1;', type: 'module' },
 				[],
 				[throwing, fine, target],
@@ -412,7 +412,7 @@ describe('deriveStudyState', () => {
 
 	describe('the unparsable settle (Exceptions)', () => {
 		it('marks every level undetermined while unparsed', () => {
-			const derivation = deriveStudyState(
+			const derivation = deriveStudy(
 				{ source: '1 +', type: 'module' },
 				[scaffoldLevel, buildLevel('other', () => [])],
 				[],
@@ -425,7 +425,7 @@ describe('deriveStudyState', () => {
 		});
 
 		it('carries the barred phases alongside the undetermined marks', () => {
-			const derivation = deriveStudyState(
+			const derivation = deriveStudy(
 				{ source: '1 +', type: 'module' },
 				[scaffoldLevel],
 				[],

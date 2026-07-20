@@ -1,3 +1,5 @@
+// cspell:ignore frameless
+
 /**
  * The async editor factory: wraps CodeMirror 6 entirely behind the callback
  * boundary and resolves to an {@link EditorInstance}. It opens a source buffer

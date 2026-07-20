@@ -28,7 +28,7 @@ import type {
 } from '../embody/types.js';
 import type { Lens, Recommendation } from '../lenses/types.js';
 
-import deriveStudyState from './derive-study-state.js';
+import deriveStudy from './derive-study.js';
 import DISPLAY_LABELS from './display-labels.js';
 import Editor from './editor/index.jsx';
 import createEventBus from './event-bus/create-event-bus.js';
@@ -63,11 +63,15 @@ export default function StudyLenses({
 }: StudyLensesProperties): React.JSX.Element {
 	// 1. Compose at mount — joins loud at the author's desk; one bus and one
 	// memoized validate per instance, held for the component's lifetime.
+	// The snippet is mount-time-only on the host surface: capturing it here
+	// keeps the editor seed and the settle loop on ONE source even if the
+	// prop later changes (the settle hook already ignores such a change).
 	const [session] = React.useState(() =>
 		freezeInPlace({
 			bus: createEventBus(),
 			lenses: joinLensRoster(injectedLenses),
 			levels: joinLevelRoster(injectedLevels),
+			snippet,
 			validate: createMemoizedValidate(),
 		}),
 	);
@@ -81,17 +85,12 @@ export default function StudyLenses({
 
 	// 3. The settle loop and the one derivation per settle.
 	const { settled, onEdit } = useSettledSnippet({
-		initialSource: snippet,
+		initialSource: session.snippet,
 		type,
 	});
 	const derivation = React.useMemo(
 		() =>
-			deriveStudyState(
-				settled,
-				session.levels,
-				session.lenses,
-				session.validate,
-			),
+			deriveStudy(settled, session.levels, session.lenses, session.validate),
 		[session, settled],
 	);
 
@@ -188,8 +187,13 @@ export default function StudyLenses({
 
 	return (
 		<div data-study-lenses>
-			<Editor onEdit={onEdit} snippet={snippet} />
-			<button data-type-toggle onClick={commitType} type="button">
+			<Editor onEdit={onEdit} snippet={session.snippet} />
+			<button
+				aria-label={`snippet type: ${type} — switch to ${type === 'module' ? 'script' : 'module'}`}
+				data-type-toggle
+				onClick={commitType}
+				type="button"
+			>
 				{type}
 			</button>
 			{session.levels.length > 0 ? (
@@ -249,7 +253,9 @@ export default function StudyLenses({
 							position: 'absolute',
 						}}
 					>
-						<p data-enforcement-cause>{formatBlockedSentence(mask)}</p>
+						<p data-enforcement-cause role="status">
+							{formatBlockedSentence(mask)}
+						</p>
 					</div>
 				) : null}
 			</div>

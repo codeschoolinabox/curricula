@@ -8,8 +8,10 @@
 import type { SnippetType, Violation } from '../../../language-levels/types.js';
 
 /**
- * The mask's three-way split of rendered surfaces. A surface's class is a
- * static fact of what it IS: editor-based surfaces are always alive;
+ * The mask's three-way split of rendered surfaces — VOCABULARY ONLY: the
+ * classification is a static fact of the render tree (containment decides,
+ * no runtime consumer types against this). A surface's class is a static
+ * fact of what it IS: editor-based surfaces are always alive;
  * meta-level controls (the selector, both toggles, the guide) are never
  * masked; everything else is maskable under strict.
  */

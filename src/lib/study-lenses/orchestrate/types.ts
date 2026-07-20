@@ -34,7 +34,9 @@ import type { VerdictsByLevel } from './lib/validating/types.js';
 export type StudyLensesProperties = {
 	/**
 	 * The program source. This prop is the source text alone — the
-	 * glossary's snippet is this prop together with `type`.
+	 * glossary's snippet is this prop together with `type`. Mount-time
+	 * only: the instrument seeds from it once, and a later change is
+	 * ignored — the editor is the single writer thereafter.
 	 */
 	readonly snippet: string;
 	/**

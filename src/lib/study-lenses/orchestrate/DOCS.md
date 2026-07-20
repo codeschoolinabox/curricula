@@ -156,9 +156,9 @@ One pure derive composition runs per settle: the embodiment factory over the
 settled source and type with the joined lens roster, then the validating
 library's assembly and memoized validates, then the marking library's
 assessments, then the recommendation walk — the fitting lenses' proposals
-collected and ranked by the recommending library — into one frozen
-`StudyDerivation`. The top component calls the composition with the settled
-snippet, the joined levels, the joined lens roster, and the per-instance
+collected by the composition and ranked by the recommending library — into one
+frozen `StudyDerivation`. The top component calls the composition with the
+settled snippet, the joined levels, the joined lens roster, and the per-instance
 memoized validate it holds; nothing else derives. The memo's remaining work —
 `StudyDerivation` already holds each settle's verdicts — is idempotence:
 StrictMode's double invoke and any same-identity re-entry return the held

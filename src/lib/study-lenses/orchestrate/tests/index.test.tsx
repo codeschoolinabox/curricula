@@ -1050,6 +1050,44 @@ describe('StudyLenses', () => {
 		});
 	});
 
+	describe('the mount-time snippet (Boundaries)', () => {
+		it('ignores a changed snippet prop after mount', async () => {
+			const { container, rerender } = render(
+				<React.StrictMode>
+					<StudyLenses snippet="const x = 1;" />
+				</React.StrictMode>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-editor')).not.toBeNull();
+			});
+			rerender(
+				<React.StrictMode>
+					<StudyLenses snippet="entirely different" />
+				</React.StrictMode>,
+			);
+			expect(container.querySelector('.cm-content')?.textContent).toContain(
+				'const x = 1;',
+			);
+		});
+	});
+
+	describe('the announce ordering (Interfaces)', () => {
+		it('announces the toggled type before its settle', async () => {
+			const dispatches = recordDispatches();
+			const container = await mountInstrument(
+				<StudyLenses snippet="const x = 1;" />,
+			);
+			const toggle = container.querySelector<HTMLElement>('[data-type-toggle]');
+			if (!toggle) throw new Error('missing the type toggle');
+			fireEvent.click(toggle);
+			const names = dispatches.map(([name]) => name);
+			expect([
+				names.indexOf('type-toggled') < names.indexOf('settled'),
+				dispatches.find(([name]) => name === 'settled')?.[1],
+			]).toEqual([true, { source: 'const x = 1;', type: 'script' }]);
+		});
+	});
+
 	describe('the document order (Interfaces)', () => {
 		it('renders the guide after the study panel', async () => {
 			const container = await mountInstrument(

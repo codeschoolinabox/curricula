@@ -60,7 +60,7 @@ const GUIDE_TOPICS: ReadonlyArray<GuideTopic> = freezeInPlace([
 	{
 		key: 'posture',
 		title: 'Warn and strict',
-		body: 'Out of the box you are only ever notified — markers show up as you type, and nothing is taken away. Turning on strict makes the selected level binding: the study surfaces pause while your code steps outside it, and the editor and every control keep working the whole time.',
+		body: 'Out of the box you are only ever notified — the selected level’s mark updates as you type, and nothing is taken away. Turning on strict makes the selected level binding: the study surfaces pause while your code steps outside it, and the editor and every control keep working the whole time.',
 	},
 	{
 		key: 'snippet-type',

@@ -40,7 +40,7 @@ import type { SettledSnippet, StudyDerivation } from './types.js';
  * @param memoizedValidate - This instance's memoized validate.
  * @returns The frozen study derivation for this settle.
  */
-export default function deriveStudyState(
+export default function deriveStudy(
 	settled: SettledSnippet,
 	levels: JoinedLevelRoster,
 	lenses: JoinedLensRoster,

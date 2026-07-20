@@ -21,9 +21,9 @@ One pure function: collected proposals in, a ranked list out.
   repair.
 
 Nothing else is owned here: producing proposals is each lens's `recommend`;
-collecting them from the fitting lenses is the top component's walk; rendering
-the ranked list — through the mask — is the top component's render. This library
-never inspects an embodiment, a level, or a posture.
+collecting them across the fitting lenses is the derive composition's walk;
+rendering the ranked list — through the mask — is the top component's render.
+This library never inspects an embodiment, a level, or a posture.
 
 ## Navigation
 

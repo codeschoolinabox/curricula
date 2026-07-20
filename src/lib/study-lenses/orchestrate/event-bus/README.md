@@ -32,13 +32,13 @@ event taxonomy.
 Five events — four announce committed session choices, and `settled` announces a
 completed derivation:
 
-| Event             | Announces                                                 |
-| ----------------- | --------------------------------------------------------- |
-| `level-selected`  | the selected level key changed (`''` = none-state)        |
-| `posture-toggled` | the enforcement posture changed (strict on or off)        |
-| `type-toggled`    | the snippet type changed                                  |
-| `lens-opened`     | the open-lens choice changed (a name, `null` when closed) |
-| `settled`         | a settle completed; derived state is fresh                |
+| Event             | Announces                                                                                             |
+| ----------------- | ----------------------------------------------------------------------------------------------------- |
+| `level-selected`  | the selected level key changed (`''` = none-state)                                                    |
+| `posture-toggled` | the enforcement posture changed (strict on or off)                                                    |
+| `type-toggled`    | the snippet type changed                                                                              |
+| `lens-opened`     | the open-lens choice changed (a name, `null` when closed — reserved; no close affordance ships in v1) |
+| `settled`         | a settle completed; derived state is fresh                                                            |
 
 Configuration tweaks are the one session choice with no event: a tweak reaches
 its lens as fresh props through the cascade, and no other surface reacts to it.

@@ -19,7 +19,7 @@ orchestrate/
   types.ts        the host surface, plus region-internal shared vocabulary
   index.tsx       the top component — the composition root the host mounts
   use-settled-snippet.ts   the settle hook — debounced edits, immediate type toggle
-  derive-study-state.ts    the one derive composition per settle
+  derive-study.ts          the one derive composition per settle
   display-labels.ts        the phases' display labels, keyed by phase name
   editor/         the editing surface — the single writer of the source
   phases-panel/   the five-phase study panel — the study layer, rendered
@@ -60,6 +60,8 @@ type StudyLensesProperties = {
 
 One disambiguation the surface owes the glossary: the `snippet` prop is the
 source text alone — the glossary's _snippet_ is this prop together with `type`.
+The prop is mount-time only: the instrument seeds from it once, and a later
+change is ignored — after mount the editor is the single writer.
 
 One embedding constraint: the instrument renders its section headings at `h3`
 (the study panel's phase headings), so the embedding site should mount it below
