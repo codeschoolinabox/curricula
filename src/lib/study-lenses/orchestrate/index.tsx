@@ -39,6 +39,7 @@ import joinLevelRoster from './lib/composing/join-level-roster.js';
 import recoverRenderableLenses from './lib/composing/recover-renderable-lenses.js';
 import resolveLensConfig from './lib/composing/resolve-lens-config.js';
 import type { JoinedLensRoster } from './lib/composing/types.js';
+import honorFocusRequest from './lib/honoring/honor-focus-request.js';
 import deriveMask from './lib/masking/derive-mask.js';
 import type { MaskState } from './lib/masking/types.js';
 import createMemoizedValidate from './lib/validating/create-memoized-validate.js';
@@ -50,6 +51,7 @@ import useSettledSnippet from './use-settled-snippet.js';
 export default function StudyLenses({
 	snippet,
 	type: initialType = 'module',
+	lens,
 	configs = {},
 	lenses: injectedLenses = [],
 	languageLevels: injectedLevels = [],
@@ -73,7 +75,6 @@ export default function StudyLenses({
 		React.useState(activeLanguageLevel);
 	const [strict, setStrict] = React.useState(strictLanguageLevels);
 	const [type, setType] = React.useState(initialType);
-	const [openLensName, setOpenLensName] = React.useState<string | null>(null);
 
 	// 3. The settle loop and the one derivation per settle.
 	const { settled, onEdit } = useSettledSnippet({
@@ -91,7 +92,25 @@ export default function StudyLenses({
 		[session, settled],
 	);
 
-	// 4. Announce the settle AFTER the derived state commits — once per
+	// 4. The honor resolution — once, at mount (the lazy initializer): the
+	// focus request resolves through fit and accessibility against the
+	// first derivation. An honored mount is initial state, never a
+	// committed session choice — nothing announces, and the learner
+	// overrides it through the same commit path as any open. StrictMode
+	// double-invokes this initializer in dev, so a THROWING applicability
+	// reports twice there — dev-only, accepted.
+	const [openLensName, setOpenLensName] = React.useState<string | null>(
+		function resolveHonoredFocus() {
+			const decision = honorFocusRequest({
+				embodiment: derivation.embodiment,
+				roster: session.lenses,
+				...(lens === undefined ? {} : { request: lens }),
+			});
+			return decision.kind === 'fallback' ? null : decision.lens.name;
+		},
+	);
+
+	// 5. Announce the settle AFTER the derived state commits — once per
 	// settle (the ref guard absorbs StrictMode's double-run). Seeded with
 	// the INITIAL settled pair: the diagram's only announce edge is
 	// Settling → Idle, and a mount-time derivation has no subscribers to
@@ -128,7 +147,7 @@ export default function StudyLenses({
 		session.bus.dispatch('lens-opened', { lens: lensName });
 	}
 
-	// 5. The render projection — phases zipped against embody's runtime
+	// 6. The render projection — phases zipped against embody's runtime
 	// order constant; the selector mounts only when levels are registered;
 	// the mask projects the SELECTED level's assessment crossed with the
 	// posture over the class-3 surfaces (an inert overlay — everything
@@ -140,7 +159,8 @@ export default function StudyLenses({
 	const openLens =
 		openLensName === null
 			? null
-			: (session.lenses.find((lens) => lens.name === openLensName) ?? null);
+			: (session.lenses.find((candidate) => candidate.name === openLensName) ??
+				null);
 	const selectedLevel =
 		session.levels.find((level) => level.key === selectedLevelKey) ?? null;
 	const mask = deriveMask({

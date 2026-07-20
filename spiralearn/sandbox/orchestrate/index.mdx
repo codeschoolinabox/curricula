@@ -6,21 +6,38 @@ import BrowserOnly from '@docusaurus/BrowserOnly';
 
 # StudyLenses — checkpoint
 
-The full instrument, live, with the scaffolding level injected. Expected: the
-editor mounts with the seed program; typing until the debounce settles
-re-renders the phases; breaking the parse bars the downstream phases with the
-parser's cause and fixing it reopens them; the type toggle re-derives
-immediately; the level selector shows the scaffold's live fit mark; the guide
-reveals its topics after the panel.
+The full instrument, live, with the scaffolding level and one page-injected
+demonstration lens ("notes", named as the initial focus). Expected: the editor
+mounts with the seed program and the notes lens opens at load, honored, without
+a click; typing until the debounce settles re-renders the phases; breaking the
+parse bars the downstream phases with the parser's cause and fixing it reopens
+them; the type toggle re-derives immediately; the level selector shows the
+scaffold's live fit mark; under strict with a `debugger;` the masked overlay
+covers the panel AND the notes lens identically; the guide reveals its topics
+after the panel.
 
 export function InstrumentHarness() {
+	const React = require('react');
 	const StudyLenses =
 		require('@site/src/lib/study-lenses/orchestrate/index.tsx').default;
 	const scaffoldLevel =
 		require('@site/src/lib/study-lenses/language-levels/scaffold/index.ts').default;
+	const notesLens = {
+		name: 'notes',
+		applicability: () => true,
+		phase: 'source',
+		main: ({ embodiment }) => (
+			<p data-notes-lens>
+				notes — this program is {embodiment.facts.source.value.length}{' '}
+				characters of source
+			</p>
+		),
+	};
 	return (
 		<StudyLenses
 			languageLevels={[scaffoldLevel]}
+			lens="notes"
+			lenses={[notesLens]}
 			snippet={'const greeting = "hello";\nconsole.log(greeting);\n'}
 		/>
 	);

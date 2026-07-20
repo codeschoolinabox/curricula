@@ -82,6 +82,18 @@ function buildLens(name: string, extras: Partial<Lens> = {}): Lens {
 	};
 }
 
+function buildPanelExcludedLens(
+	name: string,
+	extras: Partial<Lens> = {},
+): Lens {
+	return {
+		name,
+		applicability: () => true,
+		main: () => null,
+		...extras,
+	};
+}
+
 describe('StudyLenses', () => {
 	describe('snippet alone (Zero)', () => {
 		it('mounts the whole instrument with defaults', async () => {
@@ -651,6 +663,156 @@ describe('StudyLenses', () => {
 				vi.useRealTimers();
 			}
 			expect(container.querySelector('[data-enforcement-mask]')).toBeNull();
+		});
+	});
+
+	describe('the initial focus (Boundaries)', () => {
+		it('mounts an honored phase-declaring lens at load, without a click', async () => {
+			const probe = buildLens('focused', {
+				main: () => <div data-focused-probe>mounted</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses lens="focused" lenses={[probe]} snippet="const x = 1;" />,
+			);
+			expect(container.querySelector('[data-focused-probe]')).not.toBeNull();
+		});
+
+		it('falls back to normal rendering on an unknown lens name', async () => {
+			const container = await mountInstrument(
+				<StudyLenses lens="nonexistent" snippet="const x = 1;" />,
+			);
+			expect(container.querySelector('[data-phases-panel]')).not.toBeNull();
+		});
+
+		it('mounts nothing without a focus request', async () => {
+			const probe = buildLens('idle', {
+				main: () => <div data-focused-probe>mounted</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses lenses={[probe]} snippet="const x = 1;" />,
+			);
+			expect(container.querySelector('[data-focused-probe]')).toBeNull();
+		});
+
+		it('honors a panel-excluded lens through its applicability', async () => {
+			const probe = buildPanelExcludedLens('excluded', {
+				main: () => <div data-focused-probe>mounted</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses lens="excluded" lenses={[probe]} snippet="const x = 1;" />,
+			);
+			expect(container.querySelector('[data-focused-probe]')).not.toBeNull();
+		});
+
+		it('falls back when a panel-excluded applicability refuses', async () => {
+			const probe = buildPanelExcludedLens('excluded', {
+				applicability: () => false,
+				main: () => <div data-focused-probe>mounted</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses lens="excluded" lenses={[probe]} snippet="const x = 1;" />,
+			);
+			expect(container.querySelector('[data-focused-probe]')).toBeNull();
+		});
+
+		it('falls back when the focused lens declares only a barred phase', async () => {
+			const probe = buildLens('focused', {
+				phase: 'environment',
+				main: () => <div data-focused-probe>mounted</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses lens="focused" lenses={[probe]} snippet="1 +" />,
+			);
+			expect(container.querySelector('[data-focused-probe]')).toBeNull();
+		});
+
+		it('falls back when the focused lens was never attached to its accessible phase', async () => {
+			const probe = buildLens('focused', {
+				applicability: () => false,
+				main: () => <div data-focused-probe>mounted</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses lens="focused" lenses={[probe]} snippet="const x = 1;" />,
+			);
+			expect(container.querySelector('[data-focused-probe]')).toBeNull();
+		});
+
+		it('resolves the honor once — no re-run on an unrelated re-render', async () => {
+			const applicability = vi.fn(() => true);
+			const probe = buildPanelExcludedLens('excluded', {
+				applicability,
+				main: () => <div data-focused-probe>mounted</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses lens="excluded" lenses={[probe]} snippet="const x = 1;" />,
+			);
+			const callsAtMount = applicability.mock.calls.length;
+			const toggle = container.querySelector<HTMLElement>('[data-type-toggle]');
+			if (!toggle) throw new Error('missing the type toggle');
+			fireEvent.click(toggle);
+			expect(applicability.mock.calls.length).toBe(callsAtMount);
+		});
+
+		it('masks a focus-mounted lens identically', async () => {
+			const probe = buildLens('focused', {
+				main: () => <div data-focused-probe>mounted</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses
+					activeLanguageLevel="scaffold"
+					languageLevels={[scaffoldLevel]}
+					lens="focused"
+					lenses={[probe]}
+					snippet="debugger;"
+					strictLanguageLevels={true}
+				/>,
+			);
+			expect([
+				container.querySelector('[data-enforcement-mask]') !== null,
+				container
+					.querySelector('[data-maskable] [data-focused-probe]')
+					?.closest('[data-maskable]')
+					?.hasAttribute('inert'),
+			]).toEqual([true, true]);
+		});
+
+		it('announces nothing on the bus for an honored mount', async () => {
+			const dispatches = recordDispatches();
+			const probe = buildLens('focused', {
+				main: () => <div data-focused-probe>mounted</div>,
+			});
+			await mountInstrument(
+				<StudyLenses lens="focused" lenses={[probe]} snippet="const x = 1;" />,
+			);
+			expect(
+				dispatches.filter(([name]) => name === 'lens-opened'),
+			).toHaveLength(0);
+		});
+
+		it('lets the learner commit over the honored default, announcing normally', async () => {
+			const dispatches = recordDispatches();
+			const focused = buildLens('focused', {
+				main: () => <div data-focused-probe>mounted</div>,
+			});
+			const other = buildLens('other', {
+				main: () => <div data-other-probe>other</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses
+					lens="focused"
+					lenses={[focused, other]}
+					snippet="const x = 1;"
+				/>,
+			);
+			const affordance = container.querySelector<HTMLElement>(
+				'[data-phase-lens="other"]',
+			);
+			if (!affordance) throw new Error('missing the other affordance');
+			fireEvent.click(affordance);
+			expect([
+				container.querySelector('[data-other-probe]') !== null,
+				dispatches.filter(([name]) => name === 'lens-opened').length,
+			]).toEqual([true, 1]);
 		});
 	});
 
