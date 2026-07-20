@@ -24,7 +24,8 @@ levels. The **guide** is this concrete surface; a level is never "the guide".
   short orientation topics, each with a stable key (the data-attribute
   identity), a title, and a plain-text body, rendered in array order. They
   describe the instrument, never the learner's program — program explanation is
-  lens work, and level documentation is each level's own.
+  lens work, and level documentation is each level's own. The v1 topics, by key:
+  `phases` · `levels` · `posture` · `snippet-type`.
 
 The guide renders no heading element of its own: the reveal is a button-labeled
 disclosure (`aria-expanded` on the control), and topic titles render at `h4`
