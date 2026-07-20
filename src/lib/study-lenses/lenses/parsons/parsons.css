@@ -1,0 +1,334 @@
+/* cspell:ignore colour colours distractor distractors */
+
+/*
+ * Visual styling for the `parsons` lens. Scoped to `[data-lens='parsons']` so it
+ * cannot leak into Docusaurus's global code blocks or other lenses' surfaces.
+ *
+ * Layers: the two-column board (available pool + solution column) and the
+ * draggable line chips, with per-line indent guides and per-line correctness
+ * coloring keyed off the `data-indent` / `data-correctness` hooks.
+ */
+
+[data-lens='parsons'] [data-parsons-board] {
+	display: flex;
+	gap: 1rem;
+	align-items: flex-start;
+}
+
+[data-lens='parsons'] [data-parsons-pool],
+[data-lens='parsons'] [data-parsons-solution] {
+	flex: 1 1 0;
+	min-height: 4rem;
+	margin: 0;
+	padding: 0.5rem;
+	list-style: none;
+	border: 1px solid var(--ifm-color-emphasis-300, #cccccc);
+	border-radius: 4px;
+	background: var(--ifm-background-surface-color, #ffffff);
+}
+
+[data-lens='parsons'] [data-parsons-pool] > li,
+[data-lens='parsons'] [data-parsons-solution] > li {
+	padding: 0.25rem 0.5rem;
+	margin: 0.25rem 0;
+	border: 1px solid var(--ifm-color-emphasis-200, #e0e0e0);
+	border-radius: 3px;
+	background: var(--ifm-color-emphasis-100, #f5f5f5);
+	font-family: var(--ifm-font-family-monospace, monospace);
+	white-space: pre;
+	cursor: grab;
+}
+
+[data-lens='parsons'] [data-parsons-pool] > li:active,
+[data-lens='parsons'] [data-parsons-solution] > li:active {
+	cursor: grabbing;
+}
+
+/* Solution lines lay out as a row: indent guide steps + code on the left, the
+   indent controls pushed to the right so the code's left origin stays fixed
+   (equal indent depths then line up under the same guides). */
+[data-lens='parsons'] [data-parsons-solution] > li {
+	display: flex;
+	align-items: center;
+	gap: 0.25rem;
+}
+
+/* One faint vertical rule per indent level. A COMPACT fixed width (a relative
+   nesting cue — deliberately NOT literal `indentSize` spaces, so a deep nest
+   does not consume horizontal space; `indentSize` drives the literal complete
+   view). The left border is the alignment guide. */
+[data-lens='parsons'] [data-parsons-indent-step] {
+	flex: 0 0 auto;
+	width: 1.5ch;
+	align-self: stretch;
+	border-left: 1px solid var(--ifm-color-emphasis-300, #cccccc);
+}
+
+[data-lens='parsons'] [data-parsons-pool] > li > code,
+[data-lens='parsons'] [data-parsons-solution] > li > code {
+	background: none;
+	border: none;
+	padding: 0;
+	/* Inherit the <li>'s `white-space: pre` so an aggressive host
+	   `code { white-space: normal }` cannot collapse code spacing. */
+	white-space: inherit;
+}
+
+/*
+ * Indent / outdent controls. Kept LIGHTLY visible at rest (dimmed) so a
+ * learner always knows indentation is part of the task — discoverability matters
+ * for a novice exercise where indent is graded — then brought to full opacity on
+ * hover OR keyboard focus (`:focus-within`). The buttons are always in the DOM
+ * and always clickable; only opacity changes (never `display`), so they stay
+ * keyboard- and screen-reader-reachable. The outdent button is omitted entirely
+ * at level 0 (see index.tsx), so a flush-left line shows only the indent control.
+ */
+[data-lens='parsons'] [data-parsons-indent-controls] {
+	display: inline-flex;
+	gap: 0.125rem;
+	margin-left: auto; /* push to the right edge; keeps the code origin fixed */
+	opacity: 0.4;
+	transition: opacity 0.1s ease;
+}
+
+[data-lens='parsons'] [data-parsons-line]:hover [data-parsons-indent-controls],
+[data-lens='parsons']
+	[data-parsons-line]:focus-within
+	[data-parsons-indent-controls] {
+	opacity: 1;
+}
+
+[data-lens='parsons'] [data-parsons-indent-controls] > button {
+	cursor: pointer;
+	padding: 0 0.35rem;
+	line-height: 1.4;
+	border: 1px solid var(--ifm-color-emphasis-300, #cccccc);
+	border-radius: 3px;
+	background: var(--ifm-background-surface-color, #ffffff);
+}
+
+/*
+ * Per-line feedback after Check. Keyed by `data-correctness` on placed SOLUTION
+ * lines only (pool lines get no feedback — see below). Selectors include the `> li`
+ * so they out-specify the base line rule above (0,3,1 vs 0,2,1).
+ *
+ * Colorblind-safe palette — Wong (Nature Methods 2011), mirroring `blanks`: blue
+ * #0072B2 for correct, vermilion #D55E00 for errors, NO red/green. The signal does
+ * NOT rely on hue alone — the BORDER STYLE carries it too, so the states are
+ * distinguishable under total colour blindness:
+ *   - correct      → blue,      SOLID border
+ *   - wrong-order  → vermilion, DASHED border  ("wrong place")
+ *   - wrong-indent → vermilion, DOTTED border
+ * `distractor` is FOLDED into the wrong-order look (identical) so the feedback never
+ * reveals which lines are distractors. There is NO pool-line feedback: flagging a
+ * missing solution line in the pool would identify the distractors by elimination
+ * (missing lines lower the score instead).
+ */
+[data-lens='parsons'] [data-parsons-solution] > li[data-correctness='correct'] {
+	background: rgba(0, 114, 178, 0.15);
+	border: 2px solid rgba(0, 114, 178, 0.7);
+}
+[data-lens='parsons']
+	[data-parsons-solution]
+	> li[data-correctness='wrong-order'],
+[data-lens='parsons']
+	[data-parsons-solution]
+	> li[data-correctness='distractor'] {
+	background: rgba(213, 94, 0, 0.15);
+	border: 2px dashed rgba(213, 94, 0, 0.8);
+}
+[data-lens='parsons']
+	[data-parsons-solution]
+	> li[data-correctness='wrong-indent'] {
+	background: rgba(213, 94, 0, 0.15);
+	border: 2px dotted rgba(213, 94, 0, 0.8);
+}
+
+/* Dark mode: bump the tint alpha so the Wong colours stay perceptible on a dark
+   surface (mirrors the blanks dark-mode bump). The border-style distinction carries
+   the signal in both modes; this only keeps the hue readable. */
+@media (prefers-color-scheme: dark) {
+	[data-lens='parsons']
+		[data-parsons-solution]
+		> li[data-correctness='correct'] {
+		background: rgba(0, 114, 178, 0.4);
+	}
+	[data-lens='parsons']
+		[data-parsons-solution]
+		> li[data-correctness='wrong-order'],
+	[data-lens='parsons']
+		[data-parsons-solution]
+		> li[data-correctness='distractor'],
+	[data-lens='parsons']
+		[data-parsons-solution]
+		> li[data-correctness='wrong-indent'] {
+		background: rgba(213, 94, 0, 0.4);
+	}
+}
+
+/*
+ * Info panel: the feedback legend, the distractor-count hint, and the
+ * educator hint blocks, stacked above the board. Each is a collapsed <details>.
+ * Light spacing keeps the panel compact; the <summary> cursor signals expandable.
+ */
+[data-lens='parsons'] [data-parsons-legend],
+[data-lens='parsons'] [data-parsons-distractor-count],
+[data-lens='parsons'] [data-parsons-hints] {
+	margin-bottom: 0.5rem;
+	font-size: 0.9em;
+}
+
+[data-lens='parsons'] [data-parsons-legend] > summary,
+[data-lens='parsons'] [data-parsons-distractor-count] > summary {
+	cursor: pointer;
+}
+
+/* Legend rows: a colour swatch + the meaning, one per feedback state. The swatch
+   reuses the per-line feedback palette (above) keyed by the row's
+   `data-legend-state`, so the key matches what a learner sees on a checked line. */
+[data-lens='parsons'] [data-parsons-legend] ul {
+	margin: 0.25rem 0 0;
+	padding-left: 0;
+	list-style: none;
+}
+
+[data-lens='parsons'] [data-parsons-legend] li {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin: 0.15rem 0;
+}
+
+[data-lens='parsons'] [data-legend-swatch] {
+	flex: 0 0 auto;
+	width: 1rem;
+	height: 1rem;
+	border: 1px solid var(--ifm-color-emphasis-300, #cccccc);
+	border-radius: 3px;
+}
+
+/* Swatches mirror the per-line feedback exactly: same Wong hues + the same
+   border-style cue (solid / dashed / dotted), so the key looks like what a learner
+   sees on a checked line — including under colour blindness. No `distractor` row:
+   feedback never reveals distractors (they read as wrong-order). */
+[data-lens='parsons'] [data-legend-state='correct'] [data-legend-swatch] {
+	background: rgba(0, 114, 178, 0.15);
+	border: 2px solid rgba(0, 114, 178, 0.7);
+}
+[data-lens='parsons'] [data-legend-state='wrong-order'] [data-legend-swatch] {
+	background: rgba(213, 94, 0, 0.15);
+	border: 2px dashed rgba(213, 94, 0, 0.8);
+}
+[data-lens='parsons'] [data-legend-state='wrong-indent'] [data-legend-swatch] {
+	background: rgba(213, 94, 0, 0.15);
+	border: 2px dotted rgba(213, 94, 0, 0.8);
+}
+
+/* Hint blocks: the extracted educator <details> guidance. A subtle left rule sets
+   them apart from the orderable code without shouting. */
+[data-lens='parsons'] [data-parsons-hints] > details {
+	margin: 0.25rem 0;
+	padding: 0.25rem 0.5rem;
+	border-left: 3px solid var(--ifm-color-emphasis-300, #cccccc);
+	background: var(--ifm-color-emphasis-100, #f5f5f5);
+}
+
+[data-lens='parsons'] [data-parsons-hints] > details > summary {
+	cursor: pointer;
+}
+
+[data-lens='parsons'] [data-parsons-hints] pre {
+	margin: 0;
+	white-space: pre-wrap;
+}
+
+/*
+ * Attempt-history modal. A centred fixed panel. Read-only review of past
+ * Checks; React-state-driven (NOT :target). A dimmed backdrop, click-outside-to-close,
+ * and a focus trap are deferred to the a11y pass (the panel has role="dialog" +
+ * aria-modal + Escape-to-close in v1).
+ */
+[data-lens='parsons'] [data-parsons-history-modal] {
+	position: fixed;
+	inset: 0;
+	z-index: 1000;
+	display: flex;
+	flex-direction: column;
+	max-width: 640px;
+	max-height: 80vh;
+	margin: auto;
+	padding: 1rem;
+	overflow: auto;
+	background: var(--ifm-background-surface-color, #ffffff);
+	border: 1px solid var(--ifm-color-emphasis-300, #cccccc);
+	border-radius: 6px;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+[data-lens='parsons'] [data-parsons-history-header] {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-bottom: 0.5rem;
+	border-bottom: 1px solid var(--ifm-color-emphasis-200, #e0e0e0);
+	padding-bottom: 0.5rem;
+}
+
+[data-lens='parsons'] [data-parsons-attempt-list] {
+	margin: 0;
+	padding-left: 1.25rem;
+}
+
+[data-lens='parsons'] [data-parsons-attempt] {
+	margin-bottom: 0.75rem;
+}
+
+[data-lens='parsons'] [data-parsons-attempt-summary] {
+	font-weight: 600;
+}
+
+[data-lens='parsons'] [data-parsons-attempt-snapshot] {
+	margin: 0.25rem 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+[data-lens='parsons'] [data-snapshot-line] {
+	padding: 0.1rem 0.4rem;
+	margin: 0.1rem 0;
+	border: 2px solid transparent;
+	border-radius: 3px;
+	font-family: var(--ifm-font-family-monospace, monospace);
+	white-space: pre;
+}
+
+/* The snapshot reuses the per-line Wong palette + border-style cue exactly (so the
+   review matches what the learner saw); `distractor` folds into the wrong-order look
+   — the modal never reveals which lines were distractors. */
+[data-lens='parsons'] [data-snapshot-line][data-correctness='correct'] {
+	background: rgba(0, 114, 178, 0.15);
+	border: 2px solid rgba(0, 114, 178, 0.7);
+}
+[data-lens='parsons'] [data-snapshot-line][data-correctness='wrong-order'],
+[data-lens='parsons'] [data-snapshot-line][data-correctness='distractor'] {
+	background: rgba(213, 94, 0, 0.15);
+	border: 2px dashed rgba(213, 94, 0, 0.8);
+}
+[data-lens='parsons'] [data-snapshot-line][data-correctness='wrong-indent'] {
+	background: rgba(213, 94, 0, 0.15);
+	border: 2px dotted rgba(213, 94, 0, 0.8);
+}
+
+/* Dark mode: bump the snapshot tint alpha to match the board's dark-mode block, so
+   the modal review is not washed-out relative to the board. */
+@media (prefers-color-scheme: dark) {
+	[data-lens='parsons'] [data-snapshot-line][data-correctness='correct'] {
+		background: rgba(0, 114, 178, 0.4);
+	}
+	[data-lens='parsons'] [data-snapshot-line][data-correctness='wrong-order'],
+	[data-lens='parsons'] [data-snapshot-line][data-correctness='distractor'],
+	[data-lens='parsons'] [data-snapshot-line][data-correctness='wrong-indent'] {
+		background: rgba(213, 94, 0, 0.4);
+	}
+}
