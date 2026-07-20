@@ -23,3 +23,17 @@ Replay setup: `npm start`, then visit the page each entry names.
 | GATE      | (this row's commit) | `/sandbox/orchestrate`                                                                                             | the WORKFLOWS learner walkthrough, live: paste broken JS; fix it; select Scaffold + strict with a `debugger;`; toggle the type; open lenses; reveal the guide   | broken JS is explained where it breaks and the later phases wait; fixing reopens them; strict masks only while out of level and never the editor, selector, toggles, or guide; the type toggle re-derives immediately (the not-applicable path reachable); every control alive throughout                                                     |
 
 Entries append as 🔍-bearing increments land. Wave 0 carried no 🔍.
+
+## Machine replay — 2026-07-20 (maintainer-delegated)
+
+The maintainer ruled the replays delegated ("no time for replays — do your best
+with browser and code review"). All nine rows were replayed headless —
+Playwright driving real Chromium against `npm start`, exercising every named
+action above through the real DOM (typing, pasting, clicking, toggling, masking,
+tabbing): **43/43 named observations verified, browser console clean across
+every page and the whole GATE walkthrough.** The one class of observation a
+machine cannot judge — subjective visual quality — was reviewed via screenshot:
+the editor's affordance frame, the masked overlay's legibility (the study region
+ghosted beneath the centered blocked sentence while the editor, selector,
+toggles, and guide stay fully alive), and the type-admission blocked state. No
+behavioral defect found; no cosmetic redirect raised.
