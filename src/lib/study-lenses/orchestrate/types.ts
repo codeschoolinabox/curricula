@@ -122,6 +122,25 @@ export type _SettledPayloadIsExactlySettledSnippet = Expect<
 >;
 
 /**
+ * What the settle hook consumes: the initial source (the `snippet` prop) and
+ * the current snippet type (a session choice — its change is an immediate
+ * settle of its own).
+ */
+export type UseSettledSnippetInput = {
+	readonly initialSource: string;
+	readonly type: SnippetType;
+};
+
+/**
+ * What the settle hook yields: the settled snippet every derivation keys on,
+ * and the per-keystroke edit intake the editor's edit events feed.
+ */
+export type UseSettledSnippetResult = {
+	readonly settled: SettledSnippet;
+	readonly onEdit: (source: string) => void;
+};
+
+/**
  * What one derive pass produces for one settled snippet: the frozen
  * embodiment, every registered level's verdict, every level's assessment,
  * and the fitting lenses' proposals, ranked. Region-internal — the top
