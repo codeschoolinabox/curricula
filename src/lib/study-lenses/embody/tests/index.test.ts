@@ -208,5 +208,29 @@ describe('embody', () => {
 					facts.ast.cause === facts.entwined.cause,
 			).toBe(true);
 		});
+
+		it('a flat data-heavy program embodies frozen without throwing', () => {
+			// ~24k tokens: the entwined stream chains every token wrapper
+			// through `next`, so the freeze walk must not spend call-stack
+			// depth per object (a learner pasting a data file hits this)
+			const embodiment = embody(`const data = [${'0,'.repeat(12_000)}]`);
+			expect(
+				embodiment.facts.ast.ok && Object.isFrozen(embodiment.facts.ast.value),
+			).toBe(true);
+		});
+
+		it('a fact-carried global regex still matches after the freeze', () => {
+			const { facts } = embody('const pattern = /a/g');
+			const statement = facts.ast.ok ? facts.ast.value.body[0] : undefined;
+			const initializer =
+				statement?.type === 'VariableDeclaration'
+					? statement.declarations[0]?.init
+					: undefined;
+			const regex =
+				initializer?.type === 'Literal' ? initializer.value : undefined;
+			const firstMatch = regex instanceof RegExp && regex.test('aa');
+			const secondMatch = regex instanceof RegExp && regex.test('aa');
+			expect(firstMatch && secondMatch).toBe(true);
+		});
 	});
 });
