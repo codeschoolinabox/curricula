@@ -1,3 +1,4 @@
+import { tokTypes } from 'acorn';
 import { describe, expect, it } from 'vitest';
 
 import embody from '../index.js';
@@ -87,6 +88,124 @@ describe('embody', () => {
 				Object.values(study).every((phase) =>
 					phase.lenses.every((lens) => lens !== scratch),
 				),
+			).toBe(true);
+		});
+	});
+
+	describe('the freeze', () => {
+		it('freezes the embodiment structure', () => {
+			const embodiment = embody('let x = 1');
+			expect(
+				Object.isFrozen(embodiment) &&
+					Object.isFrozen(embodiment.facts) &&
+					Object.isFrozen(embodiment.study),
+			).toBe(true);
+		});
+
+		it('freezes a token object but not its process-global type', () => {
+			// the element is embody-owned and freezes; its `.type` is acorn's
+			// shared singleton and must not (freeze-what-you-own)
+			const { facts } = embody('let x = 1');
+			expect(
+				facts.tokens.ok &&
+					Object.isFrozen(facts.tokens.value.tokens[0]) &&
+					!Object.isFrozen(facts.tokens.value.tokens[0].type),
+			).toBe(true);
+		});
+
+		it('leaves a second token kind unfrozen too — the whole stream maps', () => {
+			const { facts } = embody('let x = 1');
+			expect(
+				facts.tokens.ok && !Object.isFrozen(facts.tokens.value.tokens[2].type),
+			).toBe(true);
+		});
+
+		it('freezes the ast program node', () => {
+			const { facts } = embody('let x = 1');
+			expect(facts.ast.ok && Object.isFrozen(facts.ast.value)).toBe(true);
+		});
+
+		it('freezes the entwined root wrapper', () => {
+			const { facts } = embody('let x = 1');
+			expect(
+				facts.entwined.ok && Object.isFrozen(facts.entwined.value.root),
+			).toBe(true);
+		});
+
+		it('freezes the cyclic scope graph without hanging', () => {
+			// real production cycles — upper and childScopes, resolved and
+			// references, the ast reached via three paths — completing at all
+			// proves the walk terminates
+			const { facts } = embody('function f() { let x = 1; return x; }\nf();');
+			expect(
+				facts.environment.ok &&
+					Object.isFrozen(facts.environment.value.root) &&
+					Object.isFrozen(facts.environment.value.root.childScopes[0]),
+			).toBe(true);
+		});
+
+		it('freezes a study phase and its lens list', () => {
+			const { study } = embody('let x = 1');
+			expect(
+				Object.isFrozen(study.ast) && Object.isFrozen(study.ast.lenses),
+			).toBe(true);
+		});
+
+		it('does not freeze an attached lens ref, and keeps its identity', () => {
+			const spotlight = {
+				name: 'spotlight',
+				applicability: () => true,
+				phase: 'source',
+			} as const;
+			const { study } = embody('let x = 1', { lenses: [spotlight] });
+			expect(
+				study.source.lenses[0] === spotlight && !Object.isFrozen(spotlight),
+			).toBe(true);
+		});
+
+		it("leaves acorn's process-global token types untouched", () => {
+			// depends on vitest's default per-file module isolation: this
+			// file's acorn IS the instance embody's derivers use
+			embody('let x = 1');
+			expect(Object.isFrozen(tokTypes.name)).toBe(false);
+		});
+
+		it('preserves cross-path ast identity — frozen once, never cloned', () => {
+			const { facts } = embody('let x = 1');
+			expect(
+				facts.ast.ok &&
+					facts.entwined.ok &&
+					facts.ast.value === facts.entwined.value.root.node,
+			).toBe(true);
+		});
+
+		it('a failed embodiment freezes too, cause included', () => {
+			const embodiment = embody("'unterminated");
+			expect(
+				Object.isFrozen(embodiment) &&
+					!embodiment.facts.tokens.ok &&
+					Object.isFrozen(embodiment.facts.tokens.cause),
+			).toBe(true);
+		});
+
+		it('a grammar failure keeps token types unfrozen while its cause freezes', () => {
+			// tokens ok + ast fail in ONE embodiment: the except set builds
+			// from the real token stream even when a later stage fails
+			const { facts } = embody('1 +');
+			expect(
+				facts.tokens.ok &&
+					!facts.ast.ok &&
+					!Object.isFrozen(facts.tokens.value.tokens[0].type) &&
+					Object.isFrozen(facts.ast.cause),
+			).toBe(true);
+		});
+
+		it('a carried cause stays one object across the stages', () => {
+			const { facts } = embody('1 +');
+			expect(
+				!facts.ast.ok &&
+					!facts.entwined.ok &&
+					facts.ast.cause === facts.entwined.cause,
 			).toBe(true);
 		});
 	});
