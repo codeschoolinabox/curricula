@@ -138,6 +138,39 @@ describe('deepFreezeExcept', () => {
 		});
 	});
 
+	describe('regular expressions', () => {
+		it('leaves a RegExp unfrozen', () => {
+			const object = { pattern: /find me/g };
+			deepFreezeExcept(object);
+			expect(Object.isFrozen(object.pattern)).toBe(false);
+		});
+
+		it('a global regex still matches after the freeze — lastIndex writes', () => {
+			const object = { pattern: /a/g };
+			deepFreezeExcept(object);
+			const firstMatch = object.pattern.test('aa');
+			const secondMatch = object.pattern.test('aa');
+			expect(firstMatch && secondMatch).toBe(true);
+		});
+	});
+
+	describe('a long flat reference chain', () => {
+		it('freezes fifty thousand chained objects without overflowing', () => {
+			// the walk must not spend call-stack depth per object — a token
+			// stream chains this shape through `next`
+			type Link = { next?: Link };
+			const head: Link = {};
+			let tail = head;
+			for (let index = 0; index < 50_000; index += 1) {
+				const link: Link = {};
+				tail.next = link;
+				tail = link;
+			}
+			deepFreezeExcept(head);
+			expect(Object.isFrozen(tail)).toBe(true);
+		});
+	});
+
 	describe('prevents mutation', () => {
 		it('throws when a frozen property is reassigned', () => {
 			const object = deepFreezeExcept({ value: 1 });
