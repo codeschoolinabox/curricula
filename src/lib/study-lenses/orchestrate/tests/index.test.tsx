@@ -395,6 +395,265 @@ describe('StudyLenses', () => {
 		});
 	});
 
+	describe('the enforcement mask (Boundaries)', () => {
+		it('masks nothing under warn', async () => {
+			const container = await mountInstrument(
+				<StudyLenses
+					activeLanguageLevel="scaffold"
+					languageLevels={[scaffoldLevel]}
+					snippet="debugger;"
+				/>,
+			);
+			expect(container.querySelector('[data-enforcement-mask]')).toBeNull();
+		});
+
+		it('masks the study surfaces under strict while out of level', async () => {
+			const container = await mountInstrument(
+				<StudyLenses
+					activeLanguageLevel="scaffold"
+					languageLevels={[scaffoldLevel]}
+					snippet="debugger;"
+					strictLanguageLevels={true}
+				/>,
+			);
+			expect(container.querySelector('[data-enforcement-mask]')).not.toBeNull();
+		});
+
+		it('names the SELECTED level and its first violation, never a fixture', async () => {
+			const custom = buildLevel('custom', () => [
+				{
+					nodeType: 'ConditionalExpression',
+					message: 'no ternaries allowed',
+					location: { start: 0, end: 1 },
+					nodePath: '$.body.0',
+				},
+			]);
+			const container = await mountInstrument(
+				<StudyLenses
+					activeLanguageLevel="custom"
+					languageLevels={[scaffoldLevel, custom]}
+					snippet="const x = 1;"
+					strictLanguageLevels={true}
+				/>,
+			);
+			const cause = container.querySelector('[data-enforcement-cause]');
+			expect([
+				cause?.textContent?.includes('custom'),
+				cause?.textContent?.includes('no ternaries allowed'),
+			]).toEqual([true, true]);
+		});
+
+		it('unmasks when a conforming level is selected while masked', async () => {
+			const custom = buildLevel('custom', () => [
+				{
+					nodeType: 'ConditionalExpression',
+					message: 'no ternaries allowed',
+					location: { start: 0, end: 1 },
+					nodePath: '$.body.0',
+				},
+			]);
+			const container = await mountInstrument(
+				<StudyLenses
+					activeLanguageLevel="custom"
+					languageLevels={[scaffoldLevel, custom]}
+					snippet="const x = 1;"
+					strictLanguageLevels={true}
+				/>,
+			);
+			const face = container.querySelector<HTMLElement>('[data-level-face]');
+			if (!face) throw new Error('missing the selector face');
+			fireEvent.click(face);
+			const option = container.querySelector<HTMLElement>(
+				'[data-level-option="scaffold"]',
+			);
+			if (!option) throw new Error('missing the scaffold option');
+			fireEvent.click(option);
+			expect(container.querySelector('[data-enforcement-mask]')).toBeNull();
+		});
+
+		it('masks nothing while the code does not parse — the carve-out wins', async () => {
+			const container = await mountInstrument(
+				<StudyLenses
+					activeLanguageLevel="scaffold"
+					languageLevels={[scaffoldLevel]}
+					snippet="1 +"
+					strictLanguageLevels={true}
+				/>,
+			);
+			expect(container.querySelector('[data-enforcement-mask]')).toBeNull();
+		});
+
+		it('masks with the type-admission cause under an inadmissible type', async () => {
+			const container = await mountInstrument(
+				<StudyLenses
+					activeLanguageLevel="scaffold"
+					languageLevels={[scaffoldLevel]}
+					snippet="const x = 1;"
+					strictLanguageLevels={true}
+				/>,
+			);
+			const toggle = container.querySelector<HTMLElement>('[data-type-toggle]');
+			if (!toggle) throw new Error('missing the type toggle');
+			fireEvent.click(toggle);
+			expect(
+				container
+					.querySelector('[data-enforcement-cause]')
+					?.textContent?.includes('module'),
+			).toBe(true);
+		});
+
+		it('masks nothing under the none-state', async () => {
+			const container = await mountInstrument(
+				<StudyLenses
+					languageLevels={[scaffoldLevel]}
+					snippet="debugger;"
+					strictLanguageLevels={true}
+				/>,
+			);
+			expect(container.querySelector('[data-enforcement-mask]')).toBeNull();
+		});
+
+		it('marks the covered surfaces inert while masked — keyboard and pointer both', async () => {
+			const container = await mountInstrument(
+				<StudyLenses
+					activeLanguageLevel="scaffold"
+					languageLevels={[scaffoldLevel]}
+					snippet="debugger;"
+					strictLanguageLevels={true}
+				/>,
+			);
+			expect(
+				container.querySelector('[data-maskable]')?.hasAttribute('inert'),
+			).toBe(true);
+		});
+
+		it('lifts the inert marking with the mask', async () => {
+			const container = await mountInstrument(
+				<StudyLenses
+					activeLanguageLevel="scaffold"
+					languageLevels={[scaffoldLevel]}
+					snippet="const x = 1;"
+					strictLanguageLevels={true}
+				/>,
+			);
+			expect(
+				container.querySelector('[data-maskable]')?.hasAttribute('inert'),
+			).toBe(false);
+		});
+
+		it('keeps the study panel mounted beneath the mask', async () => {
+			const container = await mountInstrument(
+				<StudyLenses
+					activeLanguageLevel="scaffold"
+					languageLevels={[scaffoldLevel]}
+					snippet="debugger;"
+					strictLanguageLevels={true}
+				/>,
+			);
+			expect(container.querySelector('[data-phases-panel]')).not.toBeNull();
+		});
+
+		it('keeps a mounted lens state beneath the mask', async () => {
+			function CounterMain(): React.JSX.Element {
+				const [count, setCount] = React.useState(0);
+				return (
+					<button
+						data-counter
+						onClick={() => setCount((current) => current + 1)}
+						type="button"
+					>
+						{count}
+					</button>
+				);
+			}
+			const container = await mountInstrument(
+				<StudyLenses
+					activeLanguageLevel="scaffold"
+					languageLevels={[scaffoldLevel]}
+					lenses={[buildLens('counter', { main: CounterMain })]}
+					snippet="const x = 1;"
+					strictLanguageLevels={true}
+				/>,
+			);
+			const affordance = container.querySelector<HTMLElement>(
+				'[data-phase-lens="counter"]',
+			);
+			if (!affordance) throw new Error('missing the counter affordance');
+			fireEvent.click(affordance);
+			const counter = container.querySelector<HTMLElement>('[data-counter]');
+			if (!counter) throw new Error('missing the counter');
+			fireEvent.click(counter);
+			vi.useFakeTimers();
+			try {
+				editLiveSource(container, 'debugger;');
+				act(() => {
+					vi.advanceTimersByTime(250);
+				});
+			} finally {
+				vi.useRealTimers();
+			}
+			expect([
+				container.querySelector('[data-enforcement-mask]') !== null,
+				container.querySelector('[data-counter]')?.textContent,
+			]).toEqual([true, '1']);
+		});
+
+		it('keeps the strict toggle alive while masked — flipping it unmasks', async () => {
+			const container = await mountInstrument(
+				<StudyLenses
+					activeLanguageLevel="scaffold"
+					languageLevels={[scaffoldLevel]}
+					snippet="debugger;"
+					strictLanguageLevels={true}
+				/>,
+			);
+			const toggle = container.querySelector<HTMLElement>(
+				'[data-strict-toggle]',
+			);
+			if (!toggle) throw new Error('missing the strict toggle');
+			fireEvent.click(toggle);
+			expect(container.querySelector('[data-enforcement-mask]')).toBeNull();
+		});
+
+		it('keeps the guide alive while masked', async () => {
+			const container = await mountInstrument(
+				<StudyLenses
+					activeLanguageLevel="scaffold"
+					languageLevels={[scaffoldLevel]}
+					snippet="debugger;"
+					strictLanguageLevels={true}
+				/>,
+			);
+			const reveal = container.querySelector<HTMLElement>(
+				'[data-guide-reveal]',
+			);
+			if (!reveal) throw new Error('missing the guide reveal');
+			fireEvent.click(reveal);
+			expect(container.querySelector('[data-guide-topic]')).not.toBeNull();
+		});
+
+		it('unmasks when conformance is restored by an edit', async () => {
+			const container = await mountInstrument(
+				<StudyLenses
+					activeLanguageLevel="scaffold"
+					languageLevels={[scaffoldLevel]}
+					snippet="debugger;"
+					strictLanguageLevels={true}
+				/>,
+			);
+			vi.useFakeTimers();
+			try {
+				editLiveSource(container, 'const x = 1;');
+				act(() => {
+					vi.advanceTimersByTime(250);
+				});
+			} finally {
+				vi.useRealTimers();
+			}
+			expect(container.querySelector('[data-enforcement-mask]')).toBeNull();
+		});
+	});
+
 	describe('the document order (Interfaces)', () => {
 		it('renders the guide after the study panel', async () => {
 			const container = await mountInstrument(

@@ -39,6 +39,8 @@ import joinLevelRoster from './lib/composing/join-level-roster.js';
 import recoverRenderableLenses from './lib/composing/recover-renderable-lenses.js';
 import resolveLensConfig from './lib/composing/resolve-lens-config.js';
 import type { JoinedLensRoster } from './lib/composing/types.js';
+import deriveMask from './lib/masking/derive-mask.js';
+import type { MaskState } from './lib/masking/types.js';
 import createMemoizedValidate from './lib/validating/create-memoized-validate.js';
 import PhasesPanel from './phases-panel/index.jsx';
 import type { PhaseEntry } from './phases-panel/types.js';
@@ -127,7 +129,11 @@ export default function StudyLenses({
 	}
 
 	// 5. The render projection — phases zipped against embody's runtime
-	// order constant; the selector mounts only when levels are registered.
+	// order constant; the selector mounts only when levels are registered;
+	// the mask projects the SELECTED level's assessment crossed with the
+	// posture over the class-3 surfaces (an inert overlay — everything
+	// beneath stays mounted; the class-1 editor and class-2 controls sit
+	// outside the maskable container).
 	const phases = LIFECYCLE_PHASE_ORDER.map((name) =>
 		toPhaseEntry(name, derivation.embodiment.study[name], session.lenses),
 	);
@@ -135,6 +141,15 @@ export default function StudyLenses({
 		openLensName === null
 			? null
 			: (session.lenses.find((lens) => lens.name === openLensName) ?? null);
+	const selectedLevel =
+		session.levels.find((level) => level.key === selectedLevelKey) ?? null;
+	const mask = deriveMask({
+		assessment: selectedLevel
+			? derivation.assessments[selectedLevel.key]
+			: null,
+		levelLabel: selectedLevel?.label ?? '',
+		strict,
+	});
 
 	return (
 		<div data-study-lenses>
@@ -157,20 +172,53 @@ export default function StudyLenses({
 					strict={strict}
 				/>
 			) : null}
-			<PhasesPanel
-				onOpenLens={(intent) => commitOpenLens(intent.lens)}
-				phases={phases}
-			/>
-			{openLens ? (
-				<MountedLens
-					configs={configs}
-					embodiment={derivation.embodiment}
-					lens={openLens}
-				/>
-			) : null}
+			<div style={{ position: 'relative' }}>
+				<div data-maskable inert={mask.masked || undefined}>
+					<PhasesPanel
+						onOpenLens={(intent) => commitOpenLens(intent.lens)}
+						phases={phases}
+					/>
+					{openLens ? (
+						<MountedLens
+							configs={configs}
+							embodiment={derivation.embodiment}
+							lens={openLens}
+						/>
+					) : null}
+				</div>
+				{mask.masked ? (
+					<div
+						data-enforcement-mask
+						style={{
+							alignItems: 'center',
+							backgroundColor: 'var(--ifm-background-surface-color, #fff)',
+							display: 'flex',
+							inset: 0,
+							justifyContent: 'center',
+							opacity: 0.92,
+							position: 'absolute',
+						}}
+					>
+						<p data-enforcement-cause>{formatBlockedSentence(mask)}</p>
+					</div>
+				) : null}
+			</div>
 			<Guide />
 		</div>
 	);
+}
+
+// The blocked state's single upstream author: the level's label plus the
+// first violation in the machine's own words, or the admitted types the
+// level applies to — structural cause in, one learner-facing sentence out.
+function formatBlockedSentence(
+	masked: Extract<MaskState, { masked: true }>,
+): string {
+	if (masked.cause.kind === 'violation') {
+		return `${masked.levelLabel}: ${masked.cause.violation.message}`;
+	}
+
+	return `${masked.levelLabel} applies to ${masked.cause.admitted.join(' / ')} programs — toggle the type or pick another level`;
 }
 
 // The opened lens, mounted with the frozen embodiment and its resolved
