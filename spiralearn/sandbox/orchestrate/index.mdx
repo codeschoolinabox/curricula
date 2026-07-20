@@ -1,0 +1,31 @@
+---
+sidebar_position: 5
+---
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+
+# StudyLenses — checkpoint
+
+The full instrument, live, with the scaffolding level injected. Expected: the
+editor mounts with the seed program; typing until the debounce settles
+re-renders the phases; breaking the parse bars the downstream phases with the
+parser's cause and fixing it reopens them; the type toggle re-derives
+immediately; the level selector shows the scaffold's live fit mark; the guide
+reveals its topics after the panel.
+
+export function InstrumentHarness() {
+	const StudyLenses =
+		require('@site/src/lib/study-lenses/orchestrate/index.tsx').default;
+	const scaffoldLevel =
+		require('@site/src/lib/study-lenses/language-levels/scaffold/index.ts').default;
+	return (
+		<StudyLenses
+			languageLevels={[scaffoldLevel]}
+			snippet={'const greeting = "hello";\nconsole.log(greeting);\n'}
+		/>
+	);
+}
+
+<BrowserOnly fallback={<p>loading the instrument…</p>}>
+	{() => <InstrumentHarness />}
+</BrowserOnly>
