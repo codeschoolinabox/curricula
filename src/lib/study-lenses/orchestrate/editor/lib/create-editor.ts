@@ -74,12 +74,13 @@ export default async function createEditor(
 	}
 
 	// v1-trimmed surface: minimalSetup + line numbers + bracket matching + JS
-	// syntax highlighting, and nothing more. NOT basicSetup — it bundles
-	// autocompletion, whose popup would reach the learner outside the
-	// adapter-only completion rule (completion arrives exclusively through the
-	// level adapter; see ../README.md § The level-adapter seam). CodeMirror's
-	// tokenizer highlights; it never judges — diagnostics arrive
-	// orchestrator-supplied (DOCS.md § Structural constraints).
+	// syntax highlighting + the editing affordance, and nothing more. NOT
+	// basicSetup — it bundles autocompletion, whose popup would reach the
+	// learner outside the adapter-only completion rule (completion arrives
+	// exclusively through the level adapter; see ../README.md § The
+	// level-adapter seam). CodeMirror's tokenizer highlights; it never judges
+	// — diagnostics arrive orchestrator-supplied (DOCS.md § Structural
+	// constraints).
 	const view = new EditorView({
 		doc: initialCode,
 		parent: element,
@@ -88,6 +89,7 @@ export default async function createEditor(
 			lineNumbers(),
 			bracketMatching(),
 			javascript(),
+			editingAffordance,
 			EditorView.updateListener.of(relayEdit),
 		],
 	});
@@ -125,3 +127,23 @@ export default async function createEditor(
 // Transaction-scoped by design — no suppression state outlives the dispatch
 // it tags, so a learner edit right after an own-write always relays.
 const ownWrite = Annotation.define<boolean>();
+
+// The editing affordance — a visible frame, a minimum height, and a focus
+// ring, so the buffer never reads as a static code block (a frameless
+// editor is indistinguishable from rendered documentation, and nothing
+// invites the click). Styling only — no behavior channel joins the
+// v1-trimmed surface. The custom properties resolve in the host page
+// (Docusaurus's --ifm-* set here); the fallbacks carry any other host.
+const editingAffordance = EditorView.theme({
+	'&': {
+		backgroundColor: 'var(--ifm-background-surface-color, #fff)',
+		border: '1px solid var(--ifm-color-emphasis-300, #ccc)',
+		borderRadius: 'var(--ifm-global-radius, 0.4rem)',
+	},
+	'&.cm-focused': {
+		outline: '2px solid var(--ifm-color-primary, #3578e5)',
+	},
+	'.cm-content': {
+		minHeight: '6rem',
+	},
+});
