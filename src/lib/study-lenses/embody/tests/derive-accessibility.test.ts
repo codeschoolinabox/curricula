@@ -2,12 +2,20 @@ import { describe, expect, it } from 'vitest';
 
 import deriveAccessibility from '../derive-accessibility.js';
 import deriveFacts from '../derive-facts.js';
+import LIFECYCLE_PHASE_ORDER from '../lifecycle-phase-order.js';
 
 describe('deriveAccessibility', () => {
 	describe('a clean program', () => {
 		it('the source phase is accessible', () => {
 			const facts = deriveFacts({ source: 'let x = 1', type: 'script' });
 			expect(deriveAccessibility(facts).source.accessible).toBe(true);
+		});
+
+		it('keys the record in the lifecycle order', () => {
+			const facts = deriveFacts({ source: 'let x = 1', type: 'script' });
+			expect(Object.keys(deriveAccessibility(facts))).toEqual([
+				...LIFECYCLE_PHASE_ORDER,
+			]);
 		});
 
 		it('the tokens phase is accessible', () => {

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import deriveAccessibility from '../derive-accessibility.js';
 import deriveFacts from '../derive-facts.js';
 import joinStudy from '../join-study.js';
+import LIFECYCLE_PHASE_ORDER from '../lifecycle-phase-order.js';
 
 // hand-built fixtures — the join is structural, so no parse pipeline is
 // needed; sentinel causes prove identity (no derivation says these)
@@ -50,6 +51,11 @@ describe('joinStudy', () => {
 			expect(Object.keys(study).toSorted((a, b) => a.localeCompare(b))).toEqual(
 				['ast', 'environment', 'evaluation', 'source', 'tokens'],
 			);
+		});
+
+		it('keys the record in the lifecycle order', () => {
+			const study = joinStudy(allAccessible, nothingAttached);
+			expect(Object.keys(study)).toEqual([...LIFECYCLE_PHASE_ORDER]);
 		});
 
 		it('carries no cause key on an accessible phase', () => {

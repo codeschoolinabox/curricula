@@ -1,12 +1,17 @@
 import { describe, expect, it } from 'vitest';
 
 import attachLenses from '../attach-lenses.js';
+import LIFECYCLE_PHASE_ORDER from '../lifecycle-phase-order.js';
 
 describe('attachLenses', () => {
 	describe('an empty fitting list', () => {
 		it('attaches nothing anywhere', () => {
 			const attached = attachLenses([]);
 			expect(attached.evaluation).toEqual([]);
+		});
+
+		it('keys the record in the lifecycle order', () => {
+			expect(Object.keys(attachLenses([]))).toEqual([...LIFECYCLE_PHASE_ORDER]);
 		});
 	});
 
