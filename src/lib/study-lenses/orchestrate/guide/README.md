@@ -29,10 +29,8 @@ levels. The **guide** is this concrete surface; a level is never "the guide".
 
 The guide renders no heading element of its own: the reveal is a button-labeled
 disclosure (`aria-expanded` on the control), and topic titles render at `h4`
-inside the revealed region — the study panel's `h3` phase headings stay the
-instrument's shallowest headings, keeping the region README's embedding
-constraint true. The guide renders after the study panel in DOM order, so its
-deeper topic headings never precede the panel's in the document outline.
+inside the revealed region — the instrument's only headings, keeping the region
+README's embedding constraint true. The guide renders last in DOM order.
 
 The guide takes no props and derives nothing. Its topics are its own content,
 like a level's docs are the level's own — the top component mounts it, and

@@ -152,13 +152,44 @@ export default function StudyLenses({
 	function commitOpenLens(lensName: string): void {
 		setOpenLensName(lensName);
 		setOpenedOverrides({});
-		session.bus.dispatch('lens-opened', { lens: lensName });
+		session.bus.dispatch(LENS_OPENED, { lens: lensName });
 	}
+
+	function commitCloseLens(): void {
+		setOpenLensName(null);
+		setOpenedOverrides({});
+		session.bus.dispatch(LENS_OPENED, { lens: null });
+	}
+
+	// A strip-opened lens whose every phase barred (or whose fit lapsed) has
+	// no select left signaling it — close it rather than leave it orphaned
+	// below. A panel-excluded lens has no strip presence and stays: its own
+	// applicability gated it at mount.
+	React.useEffect(
+		function closeOrphanedOpenLens() {
+			if (openLensName === null) return;
+			const open = session.lenses.find(
+				(candidate) => candidate.name === openLensName,
+			);
+			if (open?.phase === undefined) return;
+			const reachable = Object.values(derivation.embodiment.study).some(
+				(phase) =>
+					phase.accessible &&
+					phase.lenses.some((attached) => attached.name === openLensName),
+			);
+			if (!reachable) {
+				setOpenLensName(null);
+				setOpenedOverrides({});
+				session.bus.dispatch(LENS_OPENED, { lens: null });
+			}
+		},
+		[derivation, openLensName, session],
+	);
 
 	function commitOpenRecommended(proposal: Recommendation): void {
 		setOpenLensName(proposal.lens.name);
 		setOpenedOverrides({ [proposal.lens.name]: proposal.config });
-		session.bus.dispatch('lens-opened', { lens: proposal.lens.name });
+		session.bus.dispatch(LENS_OPENED, { lens: proposal.lens.name });
 	}
 
 	// 6. The render projection — phases zipped against embody's runtime
@@ -187,36 +218,58 @@ export default function StudyLenses({
 
 	return (
 		<div data-study-lenses>
-			<Editor onEdit={onEdit} snippet={session.snippet} />
-			<button
-				aria-label={`snippet type: ${type} — switch to ${type === 'module' ? 'script' : 'module'}`}
-				data-type-toggle
-				onClick={commitType}
-				type="button"
+			<div
+				data-control-row
+				style={{
+					alignItems: 'center',
+					display: 'flex',
+					flexWrap: 'wrap',
+					gap: '0.75rem',
+					marginBottom: '0.5rem',
+				}}
 			>
-				{type}
-			</button>
-			{session.levels.length > 0 ? (
-				<LevelSelector
-					noneLabel="plain JavaScript"
-					onSelectLevel={commitLevel}
-					onToggleStrict={commitPosture}
-					options={session.levels.map((level) => ({
-						docs: level.docs.reference,
-						key: level.key,
-						label: level.label,
-						mark: derivation.assessments[level.key].mark,
-					}))}
-					selectedKey={selectedLevelKey}
-					strict={strict}
+				<button
+					aria-label={`snippet type: ${type} — switch to ${type === 'module' ? 'script' : 'module'}`}
+					data-type-toggle
+					onClick={commitType}
+					type="button"
+				>
+					{type}
+				</button>
+				{session.levels.length > 0 ? (
+					<LevelSelector
+						noneLabel="plain JavaScript"
+						onSelectLevel={commitLevel}
+						onToggleStrict={commitPosture}
+						options={session.levels.map((level) => ({
+							docs: level.docs.reference,
+							key: level.key,
+							label: level.label,
+							mark: derivation.assessments[level.key].mark,
+						}))}
+						selectedKey={selectedLevelKey}
+						strict={strict}
+					/>
+				) : null}
+			</div>
+			<div
+				data-maskable
+				inert={mask.masked || undefined}
+				style={{
+					marginBottom: '0.5rem',
+					opacity: mask.masked ? 0.4 : 1,
+				}}
+			>
+				<PhasesPanel
+					onCloseLens={commitCloseLens}
+					onOpenLens={(intent) => commitOpenLens(intent.lens)}
+					openLensName={openLensName}
+					phases={phases}
 				/>
-			) : null}
+			</div>
+			<Editor onEdit={onEdit} snippet={session.snippet} />
 			<div style={{ position: 'relative' }}>
 				<div data-maskable inert={mask.masked || undefined}>
-					<PhasesPanel
-						onOpenLens={(intent) => commitOpenLens(intent.lens)}
-						phases={phases}
-					/>
 					{openLens ? (
 						<MountedLens
 							configs={configs}
@@ -263,6 +316,9 @@ export default function StudyLenses({
 		</div>
 	);
 }
+
+// The one bus event three commit paths share.
+const LENS_OPENED = 'lens-opened';
 
 // The blocked state's single upstream author: the level's label plus the
 // first violation in the machine's own words, or the admitted types the

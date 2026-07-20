@@ -24,6 +24,18 @@ afterEach(() => {
 	vi.useRealTimers();
 });
 
+function openLensThroughStrip(
+	container: HTMLElement,
+	phase: string,
+	lens: string,
+): void {
+	const select = container.querySelector<HTMLSelectElement>(
+		`[data-phase="${phase}"] select`,
+	);
+	if (!select) throw new Error(`missing the ${phase} select`);
+	fireEvent.change(select, { target: { value: lens } });
+}
+
 async function mountInstrument(ui: React.ReactElement): Promise<HTMLElement> {
 	const { container } = render(<React.StrictMode>{ui}</React.StrictMode>);
 	await waitFor(() => {
@@ -144,21 +156,24 @@ describe('StudyLenses', () => {
 			]);
 		});
 
-		it('heads each phase with its display label', async () => {
+		it('labels each phase in the strip, without headings', async () => {
 			const container = await mountInstrument(
 				<StudyLenses snippet="const x = 1;" />,
 			);
-			const labels = Array.from(
-				container.querySelectorAll('[data-phase] h3'),
-				(heading) => heading.textContent,
+			const texts = Array.from(
+				container.querySelectorAll<HTMLElement>('[data-phase]'),
+				(entry) => entry.textContent ?? '',
 			);
-			expect(labels).toEqual([
-				'Source',
-				'Tokens · spelling',
-				'AST · grammar',
-				'Environment · names',
-				'Evaluation · run',
-			]);
+			expect([
+				[
+					'Source',
+					'Tokens · spelling',
+					'AST · grammar',
+					'Environment · names',
+					'Evaluation · run',
+				].every((label, index) => texts[index]?.includes(label)),
+				container.querySelector('[data-phases-panel] h3') === null,
+			]).toEqual([true, true]);
 		});
 
 		it('bars the downstream phases under a grammar failure', async () => {
@@ -302,11 +317,7 @@ describe('StudyLenses', () => {
 					snippet="const x = 1;"
 				/>,
 			);
-			const affordance = container.querySelector<HTMLElement>(
-				'[data-phase="source"] [data-phase-lens="probe"]',
-			);
-			if (!affordance) throw new Error('missing the probe affordance');
-			fireEvent.click(affordance);
+			openLensThroughStrip(container, 'source', 'probe');
 			expect(container.querySelector('[data-probe]')?.textContent).toBe(
 				'from-host',
 			);
@@ -362,11 +373,7 @@ describe('StudyLenses', () => {
 			const container = await mountInstrument(
 				<StudyLenses lenses={[buildLens('viewer')]} snippet="const x = 1;" />,
 			);
-			const affordance = container.querySelector<HTMLElement>(
-				'[data-phase-lens="viewer"]',
-			);
-			if (!affordance) throw new Error('missing the viewer affordance');
-			fireEvent.click(affordance);
+			openLensThroughStrip(container, 'source', 'viewer');
 			expect(dispatches).toContainEqual(['lens-opened', { lens: 'viewer' }]);
 		});
 
@@ -588,11 +595,7 @@ describe('StudyLenses', () => {
 					strictLanguageLevels={true}
 				/>,
 			);
-			const affordance = container.querySelector<HTMLElement>(
-				'[data-phase-lens="counter"]',
-			);
-			if (!affordance) throw new Error('missing the counter affordance');
-			fireEvent.click(affordance);
+			openLensThroughStrip(container, 'source', 'counter');
 			const counter = container.querySelector<HTMLElement>('[data-counter]');
 			if (!counter) throw new Error('missing the counter');
 			fireEvent.click(counter);
@@ -805,11 +808,7 @@ describe('StudyLenses', () => {
 					snippet="const x = 1;"
 				/>,
 			);
-			const affordance = container.querySelector<HTMLElement>(
-				'[data-phase-lens="other"]',
-			);
-			if (!affordance) throw new Error('missing the other affordance');
-			fireEvent.click(affordance);
+			openLensThroughStrip(container, 'source', 'other');
 			expect([
 				container.querySelector('[data-other-probe]') !== null,
 				dispatches.filter(([name]) => name === 'lens-opened').length,
@@ -999,11 +998,7 @@ describe('StudyLenses', () => {
 			);
 			if (!affordance) throw new Error('missing the recommendation');
 			fireEvent.click(affordance);
-			const panelAffordance = container.querySelector<HTMLElement>(
-				'[data-phase-lens="target"]',
-			);
-			if (!panelAffordance) throw new Error('missing the panel affordance');
-			fireEvent.click(panelAffordance);
+			openLensThroughStrip(container, 'source', 'target');
 			expect(container.querySelector('[data-target-probe]')?.textContent).toBe(
 				'from-host',
 			);
@@ -1047,6 +1042,148 @@ describe('StudyLenses', () => {
 			if (!affordance) throw new Error('missing the recommendation');
 			fireEvent.click(affordance);
 			expect(dispatches).toContainEqual(['lens-opened', { lens: 'target' }]);
+		});
+	});
+
+	describe('closing the open lens (Boundaries)', () => {
+		it('closes the mounted lens when the none entry is chosen', async () => {
+			const probe = buildLens('probe', {
+				main: () => <div data-probe>open</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses lenses={[probe]} snippet="const x = 1;" />,
+			);
+			openLensThroughStrip(container, 'source', 'probe');
+			openLensThroughStrip(container, 'source', '');
+			expect(container.querySelector('[data-probe]')).toBeNull();
+		});
+
+		it('announces the close as lens-opened null', async () => {
+			const dispatches = recordDispatches();
+			const probe = buildLens('probe', {
+				main: () => <div data-probe>open</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses lenses={[probe]} snippet="const x = 1;" />,
+			);
+			openLensThroughStrip(container, 'source', 'probe');
+			openLensThroughStrip(container, 'source', '');
+			expect(dispatches).toContainEqual(['lens-opened', { lens: null }]);
+		});
+
+		it('shows the open lens as the strip select value until closed', async () => {
+			const probe = buildLens('probe', {
+				main: () => <div data-probe>open</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses lenses={[probe]} snippet="const x = 1;" />,
+			);
+			openLensThroughStrip(container, 'source', 'probe');
+			const value = container.querySelector<HTMLSelectElement>(
+				'[data-phase="source"] select',
+			)?.value;
+			openLensThroughStrip(container, 'source', '');
+			expect([
+				value,
+				container.querySelector<HTMLSelectElement>(
+					'[data-phase="source"] select',
+				)?.value,
+			]).toEqual(['probe', '']);
+		});
+	});
+
+	describe('the orphaned open lens (Boundaries)', () => {
+		it('closes a strip-opened lens when its only phase bars, announcing null', async () => {
+			const dispatches = recordDispatches();
+			const probe = buildLens('env-viewer', {
+				applicability: (facts) => facts.source.ok,
+				phase: 'environment',
+				main: () => <div data-env-probe>open</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses lenses={[probe]} snippet="const x = 1;" />,
+			);
+			openLensThroughStrip(container, 'environment', 'env-viewer');
+			vi.useFakeTimers();
+			try {
+				editLiveSource(container, '1 +');
+				act(() => {
+					vi.advanceTimersByTime(250);
+				});
+			} finally {
+				vi.useRealTimers();
+			}
+			expect([
+				container.querySelector('[data-env-probe]') === null,
+				dispatches.filter(
+					([name, payload]) =>
+						name === 'lens-opened' &&
+						(payload as { lens: string | null }).lens === null,
+				).length,
+			]).toEqual([true, 1]);
+		});
+
+		it('keeps a focus-honored panel-excluded lens open across settles', async () => {
+			const probe = buildPanelExcludedLens('excluded', {
+				main: () => <div data-focused-probe>mounted</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses lens="excluded" lenses={[probe]} snippet="const x = 1;" />,
+			);
+			vi.useFakeTimers();
+			try {
+				editLiveSource(container, '1 +');
+				act(() => {
+					vi.advanceTimersByTime(250);
+				});
+			} finally {
+				vi.useRealTimers();
+			}
+			expect(container.querySelector('[data-focused-probe]')).not.toBeNull();
+		});
+	});
+
+	describe('the redesign contract (Interfaces)', () => {
+		it('marks BOTH maskable regions inert while masked', async () => {
+			const container = await mountInstrument(
+				<StudyLenses
+					activeLanguageLevel="scaffold"
+					languageLevels={[scaffoldLevel]}
+					snippet="debugger;"
+					strictLanguageLevels={true}
+				/>,
+			);
+			const regions = Array.from(
+				container.querySelectorAll('[data-maskable]'),
+				(region) => region.hasAttribute('inert'),
+			);
+			expect(regions).toEqual([true, true]);
+		});
+
+		it('anchors every phase select by its data attribute', async () => {
+			const container = await mountInstrument(
+				<StudyLenses snippet="const x = 1;" />,
+			);
+			expect(
+				container.querySelectorAll('[data-phases-panel] [data-phase-select]'),
+			).toHaveLength(5);
+		});
+
+		it('orders the control row, the strip, and the editor top to bottom', async () => {
+			const container = await mountInstrument(
+				<StudyLenses snippet="const x = 1;" />,
+			);
+			const follows = (a: Element | null, b: Element | null): boolean =>
+				a !== null &&
+				b !== null &&
+				(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
+			const row = container.querySelector('[data-control-row]');
+			const strip = container.querySelector('[data-phases-panel]');
+			const editor = container.querySelector('.cm-editor');
+			expect([follows(row, strip), follows(strip, editor)]).toEqual([
+				true,
+				true,
+			]);
 		});
 	});
 

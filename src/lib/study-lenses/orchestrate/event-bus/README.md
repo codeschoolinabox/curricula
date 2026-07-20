@@ -37,7 +37,7 @@ completed derivation:
 | `level-selected`  | the selected level key changed (`''` = none-state)                                                    |
 | `posture-toggled` | the enforcement posture changed (strict on or off)                                                    |
 | `type-toggled`    | the snippet type changed                                                                              |
-| `lens-opened`     | the open-lens choice changed (a name, `null` when closed — reserved; no close affordance ships in v1) |
+| `lens-opened`     | the open-lens choice changed (a name, `null` when closed (the strip's none entry over the open lens)) |
 | `settled`         | a settle completed; derived state is fresh                                                            |
 
 Configuration tweaks are the one session choice with no event: a tweak reaches

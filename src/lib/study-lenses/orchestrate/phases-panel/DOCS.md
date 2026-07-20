@@ -13,22 +13,26 @@ constrains only this surface.
 
 ## Execution phases
 
-1. **Section layout** (sync, mechanical) — one section per given entry, in
-   exactly the given order, headed by the entry's display label and anchored by
-   a data attribute carrying the entry's data name. Input: the ordered entries.
-   Output: the sectioned panel.
+1. **Strip layout** (sync, mechanical) — one labeled entry per given phase, in
+   exactly the given order, laid out as one horizontal strip; each entry
+   anchored by a data attribute carrying the phase's data name and showing its
+   display label as inline text (never a heading — the strip leaves the document
+   outline untouched). Input: the ordered entries. Output: the strip.
 
-2. **Accessible render** (sync) — an accessible entry lists its lens names as
-   open-intent affordances; an empty list renders the section present-but-empty.
-   Input: an accessible entry. Output: its affordances.
+2. **Accessible render** (sync) — an accessible entry renders a select of its
+   lens names headed by a none entry; the select's value tracks the given open
+   lens, so the strip signals what is open and where. An empty lens list renders
+   the select disabled with only the none entry — present-but-empty. Input: an
+   accessible entry + the open lens. Output: its select.
 
-3. **Barred render** (sync) — a barred entry renders visibly barred with its
-   cause in place of a lens list; the section stays present and named. Input: a
-   barred entry. Output: the barred section.
+3. **Barred render** (sync) — a barred entry renders a disabled select whose
+   only entry is the cause (also the native tooltip); the entry stays present
+   and named. Input: a barred entry. Output: the barred select.
 
-4. **Intent routing** (sync) — an affordance click raises the open-lens intent,
-   carrying the phase and lens names. Nothing mounts here. Input: a click.
-   Output: one intent callback.
+4. **Intent routing** (sync) — choosing a lens raises the open-lens intent,
+   carrying the phase and lens names; choosing the none entry over the open lens
+   raises the close intent. Nothing mounts or closes here — the top component
+   commits both. Input: a selection change. Output: one intent callback.
 
 ## Data flow
 
@@ -39,9 +43,9 @@ diagram (the documented exception; prop and callback names are the content).
 flowchart TD
     ORCH["top component"]
     PP["PhasesPanel"]
-    SEC["phase sections<br/>(rendered in the given order)"]
-    ORCH -->|"phases: ordered entries<br/>(name · label · accessibility + cause · lens names)"| PP
-    PP -->|"onOpenLens({ phase, lens })"| ORCH
+    SEC["the lifecycle strip<br/>(labeled selects in the given order)"]
+    ORCH -->|"phases: ordered entries<br/>(name · label · accessibility + cause · lens names)<br/>+ openLensName"| PP
+    PP -->|"onOpenLens({ phase, lens }) · onCloseLens()"| ORCH
     PP --> SEC
 ```
 
@@ -53,11 +57,14 @@ flowchart TD
   computed; the panel formats nothing but layout.
 - **Data-attribute selectors** — every section and affordance is anchored by
   attribute + value; label text is never a test anchor.
-- **Present-but-empty** — a zero-lens accessible phase renders its section;
-  absence of lenses is not absence of the phase.
+- **Present-but-empty** — a zero-lens accessible phase renders its disabled
+  select; absence of lenses is not absence of the phase.
+- **No headings** — the labels are inline text; the strip contributes nothing to
+  the document outline.
 
 ## Out of scope
 
-- Mounting an opened lens, and masking it (the top component's).
+- Mounting an opened lens, closing it, and masking it (the top component
+  commits; the strip only asks).
 - Deriving anything (embody's and the derivation libraries').
 - The display labels' values (passed in with each entry).

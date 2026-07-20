@@ -1,330 +1,288 @@
 // @vitest-environment jsdom
-// cspell:ignore affordances
 
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import PhasesPanel from '../index.jsx';
+import type { PhaseEntry } from '../types.js';
 
 afterEach(cleanup);
 
-function phaseNames(container: HTMLElement): (string | undefined)[] {
-	return Array.from(
-		container.querySelectorAll<HTMLElement>('[data-phase]'),
-		(section) => section.dataset.phase,
+function fivePhases(): ReadonlyArray<PhaseEntry> {
+	return [
+		{
+			accessible: true,
+			label: 'Source',
+			lenses: ['annotate', 'blanks'],
+			name: 'source',
+		},
+		{
+			accessible: true,
+			label: 'Tokens · spelling',
+			lenses: [],
+			name: 'tokens',
+		},
+		{ accessible: true, label: 'AST · grammar', lenses: ['quiz'], name: 'ast' },
+		{
+			accessible: true,
+			label: 'Environment · names',
+			lenses: [],
+			name: 'environment',
+		},
+		{
+			accessible: true,
+			label: 'Evaluation · run',
+			lenses: ['run'],
+			name: 'evaluation',
+		},
+	];
+}
+
+function barredTail(): ReadonlyArray<PhaseEntry> {
+	return [
+		{ accessible: true, label: 'Source', lenses: ['annotate'], name: 'source' },
+		{
+			accessible: true,
+			label: 'Tokens · spelling',
+			lenses: [],
+			name: 'tokens',
+		},
+		{
+			accessible: false,
+			cause: 'Unexpected token (1:4)',
+			label: 'AST · grammar',
+			name: 'ast',
+		},
+		{
+			accessible: false,
+			cause: 'Unexpected token (1:4)',
+			label: 'Environment · names',
+			name: 'environment',
+		},
+		{
+			accessible: false,
+			cause: 'Unexpected token (1:4)',
+			label: 'Evaluation · run',
+			name: 'evaluation',
+		},
+	];
+}
+
+function mountPanel(
+	phases: ReadonlyArray<PhaseEntry>,
+	overrides: Partial<React.ComponentProps<typeof PhasesPanel>> = {},
+): HTMLElement {
+	const { container } = render(
+		<React.StrictMode>
+			<PhasesPanel
+				onCloseLens={vi.fn()}
+				onOpenLens={vi.fn()}
+				openLensName={null}
+				phases={phases}
+				{...overrides}
+			/>
+		</React.StrictMode>,
 	);
+	return container;
 }
 
 describe('PhasesPanel', () => {
-	describe('five accessible phases with no lenses (Zero)', () => {
-		it('renders one section per entry, in the given order', () => {
-			const { container } = render(
-				<React.StrictMode>
-					<PhasesPanel
-						onOpenLens={vi.fn()}
-						phases={[
-							{
-								accessible: true,
-								label: 'Evaluation · run',
-								lenses: [],
-								name: 'evaluation',
-							},
-							{ accessible: true, label: 'Source', lenses: [], name: 'source' },
-							{
-								accessible: true,
-								label: 'Environment · names',
-								lenses: [],
-								name: 'environment',
-							},
-							{
-								accessible: true,
-								label: 'AST · grammar',
-								lenses: [],
-								name: 'ast',
-							},
-							{
-								accessible: true,
-								label: 'Tokens · spelling',
-								lenses: [],
-								name: 'tokens',
-							},
-						]}
-					/>
-				</React.StrictMode>,
+	describe('the strip (Zero)', () => {
+		it('renders the strip root with its data attribute', () => {
+			const container = mountPanel(fivePhases());
+			expect(container.querySelector('[data-phases-panel]')).not.toBeNull();
+		});
+
+		it('renders one entry per phase in the given order', () => {
+			const container = mountPanel(fivePhases());
+			const names = Array.from(
+				container.querySelectorAll<HTMLElement>('[data-phase]'),
+				(entry) => entry.dataset['phase'],
 			);
-			expect(phaseNames(container)).toEqual([
-				'evaluation',
+			expect(names).toEqual([
 				'source',
-				'environment',
-				'ast',
 				'tokens',
+				'ast',
+				'environment',
+				'evaluation',
 			]);
 		});
 
-		it('renders the panel root with its data attribute', () => {
-			const { container } = render(
-				<React.StrictMode>
-					<PhasesPanel
-						onOpenLens={vi.fn()}
-						phases={[
-							{ accessible: true, label: 'Source', lenses: [], name: 'source' },
-						]}
-					/>
-				</React.StrictMode>,
+		it('shows each display label as inline text', () => {
+			const container = mountPanel(fivePhases());
+			const texts = Array.from(
+				container.querySelectorAll<HTMLElement>('[data-phase]'),
+				(entry) => entry.textContent ?? '',
 			);
-			expect(container.querySelector('[data-phases-panel]')).not.toBeNull();
+			expect(
+				[
+					'Source',
+					'Tokens · spelling',
+					'AST · grammar',
+					'Environment · names',
+					'Evaluation · run',
+				].map((label, index) => texts[index]?.includes(label)),
+			).toEqual([true, true, true, true, true]);
+		});
+
+		it('renders no heading elements', () => {
+			const container = mountPanel(fivePhases());
+			expect(
+				container.querySelector(
+					'[data-phases-panel] h1, [data-phases-panel] h2, [data-phases-panel] h3, [data-phases-panel] h4, [data-phases-panel] h5, [data-phases-panel] h6',
+				),
+			).toBeNull();
 		});
 	});
 
-	describe('one lens on an accessible phase (One)', () => {
-		it('renders the lens affordance under its phase', () => {
-			const { container } = render(
-				<React.StrictMode>
-					<PhasesPanel
-						onOpenLens={vi.fn()}
-						phases={[
-							{
-								accessible: true,
-								label: 'Source',
-								lenses: ['annotate'],
-								name: 'source',
-							},
-						]}
-					/>
-				</React.StrictMode>,
+	describe('an accessible phase (One / Many)', () => {
+		it('renders a select of the lens names headed by the none entry', () => {
+			const container = mountPanel(fivePhases());
+			const options = Array.from(
+				container.querySelectorAll<HTMLOptionElement>(
+					'[data-phase="source"] option',
+				),
+				(option) => option.value,
 			);
+			expect(options).toEqual(['', 'annotate', 'blanks']);
+		});
+
+		it('anchors each lens option by its data attribute', () => {
+			const container = mountPanel(fivePhases());
 			expect(
 				container.querySelector(
-					'[data-phase="source"] [data-phase-lens="annotate"]',
+					'[data-phase="source"] option[data-phase-lens="blanks"]',
 				),
 			).not.toBeNull();
 		});
-	});
 
-	describe('three lenses on one phase (Many)', () => {
-		it('renders the affordances in the given order', () => {
-			const { container } = render(
-				<React.StrictMode>
-					<PhasesPanel
-						onOpenLens={vi.fn()}
-						phases={[
-							{
-								accessible: true,
-								label: 'Source',
-								lenses: ['annotate', 'blanks', 'quiz'],
-								name: 'source',
-							},
-						]}
-					/>
-				</React.StrictMode>,
+		it('disables a zero-lens select, present-but-empty', () => {
+			const container = mountPanel(fivePhases());
+			const select = container.querySelector<HTMLSelectElement>(
+				'[data-phase="tokens"] select',
 			);
-			const lenses = Array.from(
-				container.querySelectorAll<HTMLElement>('[data-phase-lens]'),
-				(affordance) => affordance.dataset.phaseLens,
-			);
-			expect(lenses).toEqual(['annotate', 'blanks', 'quiz']);
-		});
-	});
-
-	describe('a mixed accessible-and-barred list (Many)', () => {
-		it('preserves the given order across both arms', () => {
-			const { container } = render(
-				<React.StrictMode>
-					<PhasesPanel
-						onOpenLens={vi.fn()}
-						phases={[
-							{
-								accessible: false,
-								cause: 'unexpected token',
-								label: 'AST · grammar',
-								name: 'ast',
-							},
-							{ accessible: true, label: 'Source', lenses: [], name: 'source' },
-							{
-								accessible: false,
-								cause: 'unexpected token',
-								label: 'Evaluation · run',
-								name: 'evaluation',
-							},
-						]}
-					/>
-				</React.StrictMode>,
-			);
-			expect(phaseNames(container)).toEqual(['ast', 'source', 'evaluation']);
+			expect([select?.disabled, select?.options.length]).toEqual([true, 1]);
 		});
 	});
 
 	describe('a barred phase (Boundaries)', () => {
-		it('marks the section barred', () => {
-			const { container } = render(
-				<React.StrictMode>
-					<PhasesPanel
-						onOpenLens={vi.fn()}
-						phases={[
-							{
-								accessible: false,
-								cause: 'unexpected token at line 1',
-								label: 'AST · grammar',
-								name: 'ast',
-							},
-						]}
-					/>
-				</React.StrictMode>,
+		it('marks the entry barred', () => {
+			const container = mountPanel(barredTail());
+			const barred = Array.from(
+				container.querySelectorAll<HTMLElement>('[data-phase-barred]'),
+				(entry) => entry.dataset['phase'],
 			);
+			expect(barred).toEqual(['ast', 'environment', 'evaluation']);
+		});
+
+		it('disables the barred select and shows the cause as its only entry', () => {
+			const container = mountPanel(barredTail());
+			const select = container.querySelector<HTMLSelectElement>(
+				'[data-phase="ast"] [data-phase-cause]',
+			);
+			expect([
+				select?.disabled,
+				select?.options.length,
+				select?.textContent?.includes('Unexpected token (1:4)'),
+			]).toEqual([true, 1, true]);
+		});
+
+		it('carries the cause as the native tooltip', () => {
+			const container = mountPanel(barredTail());
 			expect(
-				container.querySelector('[data-phase="ast"][data-phase-barred]'),
-			).not.toBeNull();
+				container
+					.querySelector('[data-phase="ast"] [data-phase-cause]')
+					?.getAttribute('title'),
+			).toBe('Unexpected token (1:4)');
 		});
 
-		it('shows the cause as display copy', () => {
-			const { container } = render(
-				<React.StrictMode>
-					<PhasesPanel
-						onOpenLens={vi.fn()}
-						phases={[
-							{
-								accessible: false,
-								cause: 'unexpected token at line 1',
-								label: 'AST · grammar',
-								name: 'ast',
-							},
-						]}
-					/>
-				</React.StrictMode>,
-			);
-			expect(container.querySelector('[data-phase-cause]')?.textContent).toBe(
-				'unexpected token at line 1',
-			);
+		it('exposes the barred cause to assistive tech via an aria-label', () => {
+			const container = mountPanel(barredTail());
+			const ariaLabel = container
+				.querySelector('[data-phase="ast"] [data-phase-cause]')
+				?.getAttribute('aria-label');
+			expect([
+				ariaLabel?.includes('AST · grammar'),
+				ariaLabel?.includes('Unexpected token (1:4)'),
+			]).toEqual([true, true]);
 		});
 
-		it('renders no lens affordances', () => {
-			const { container } = render(
-				<React.StrictMode>
-					<PhasesPanel
-						onOpenLens={vi.fn()}
-						phases={[
-							{
-								accessible: false,
-								cause: 'unexpected token at line 1',
-								label: 'AST · grammar',
-								name: 'ast',
-							},
-						]}
-					/>
-				</React.StrictMode>,
-			);
-			expect(container.querySelector('[data-phase-lens]')).toBeNull();
+		it('offers no lens options on a barred phase', () => {
+			const container = mountPanel(barredTail());
+			expect(
+				container.querySelector('[data-phase-barred] option[data-phase-lens]'),
+			).toBeNull();
 		});
 	});
 
-	describe('a zero-lens accessible phase (Boundaries)', () => {
-		it('renders present-but-empty, never barred', () => {
-			const { container } = render(
-				<React.StrictMode>
-					<PhasesPanel
-						onOpenLens={vi.fn()}
-						phases={[
-							{
-								accessible: true,
-								label: 'Environment · names',
-								lenses: [],
-								name: 'environment',
-							},
-						]}
-					/>
-				</React.StrictMode>,
-			);
+	describe('the open lens signal (Interfaces)', () => {
+		it('tracks the given open lens as the select value', () => {
+			const container = mountPanel(fivePhases(), { openLensName: 'blanks' });
 			expect(
-				container.querySelector(
-					'[data-phase="environment"]:not([data-phase-barred])',
-				),
-			).not.toBeNull();
+				container.querySelector<HTMLSelectElement>(
+					'[data-phase="source"] select',
+				)?.value,
+			).toBe('blanks');
+		});
+
+		it('rests at the none entry when nothing is open', () => {
+			const container = mountPanel(fivePhases());
+			expect(
+				container.querySelector<HTMLSelectElement>(
+					'[data-phase="source"] select',
+				)?.value,
+			).toBe('');
+		});
+
+		it('rests when the open lens belongs to another phase', () => {
+			const container = mountPanel(fivePhases(), { openLensName: 'quiz' });
+			expect(
+				container.querySelector<HTMLSelectElement>(
+					'[data-phase="source"] select',
+				)?.value,
+			).toBe('');
 		});
 	});
 
-	describe('the open-lens intent (Interfaces)', () => {
-		it('reports the clicked non-first affordance', () => {
+	describe('the intents (Interfaces)', () => {
+		it('raises the open intent with the phase and lens names', () => {
 			const onOpenLens = vi.fn();
-			const { container } = render(
-				<React.StrictMode>
-					<PhasesPanel
-						onOpenLens={onOpenLens}
-						phases={[
-							{
-								accessible: true,
-								label: 'Source',
-								lenses: ['annotate', 'blanks', 'quiz'],
-								name: 'source',
-							},
-						]}
-					/>
-				</React.StrictMode>,
+			const container = mountPanel(fivePhases(), { onOpenLens });
+			const select = container.querySelector<HTMLSelectElement>(
+				'[data-phase="ast"] select',
 			);
-			const blanks = container.querySelector<HTMLElement>(
-				'[data-phase="source"] [data-phase-lens="blanks"]',
-			);
-			if (!blanks) throw new Error('missing the blanks affordance');
-			fireEvent.click(blanks);
-			expect(onOpenLens.mock.calls).toEqual([
-				[{ lens: 'blanks', phase: 'source' }],
-			]);
+			if (!select) throw new Error('missing the ast select');
+			fireEvent.change(select, { target: { value: 'quiz' } });
+			expect(onOpenLens.mock.calls).toEqual([[{ lens: 'quiz', phase: 'ast' }]]);
 		});
 
-		it('reports the clicked phase for a lens name shared across phases', () => {
+		it('raises the close intent when the none entry is chosen over the open lens', () => {
+			const onCloseLens = vi.fn();
+			const container = mountPanel(fivePhases(), {
+				onCloseLens,
+				openLensName: 'quiz',
+			});
+			const select = container.querySelector<HTMLSelectElement>(
+				'[data-phase="ast"] select',
+			);
+			if (!select) throw new Error('missing the ast select');
+			fireEvent.change(select, { target: { value: '' } });
+			expect(onCloseLens).toHaveBeenCalledTimes(1);
+		});
+
+		it('raises no open intent on the close selection', () => {
 			const onOpenLens = vi.fn();
-			const { container } = render(
-				<React.StrictMode>
-					<PhasesPanel
-						onOpenLens={onOpenLens}
-						phases={[
-							{
-								accessible: true,
-								label: 'Source',
-								lenses: ['annotate'],
-								name: 'source',
-							},
-							{
-								accessible: true,
-								label: 'AST · grammar',
-								lenses: ['annotate'],
-								name: 'ast',
-							},
-						]}
-					/>
-				</React.StrictMode>,
+			const container = mountPanel(fivePhases(), {
+				onOpenLens,
+				openLensName: 'quiz',
+			});
+			const select = container.querySelector<HTMLSelectElement>(
+				'[data-phase="ast"] select',
 			);
-			const second = container.querySelector<HTMLElement>(
-				'[data-phase="ast"] [data-phase-lens="annotate"]',
-			);
-			if (!second) throw new Error('missing the ast-phase affordance');
-			fireEvent.click(second);
-			expect(onOpenLens.mock.calls).toEqual([
-				[{ lens: 'annotate', phase: 'ast' }],
-			]);
-		});
-	});
-
-	describe('display labels (Simple)', () => {
-		it('heads the section with the given label', () => {
-			const { container } = render(
-				<React.StrictMode>
-					<PhasesPanel
-						onOpenLens={vi.fn()}
-						phases={[
-							{
-								accessible: true,
-								label: 'Tokens · spelling',
-								lenses: [],
-								name: 'tokens',
-							},
-						]}
-					/>
-				</React.StrictMode>,
-			);
-			expect(
-				container.querySelector('[data-phase="tokens"]')?.textContent,
-			).toContain('Tokens · spelling');
+			if (!select) throw new Error('missing the ast select');
+			fireEvent.change(select, { target: { value: '' } });
+			expect(onOpenLens).not.toHaveBeenCalled();
 		});
 	});
 });

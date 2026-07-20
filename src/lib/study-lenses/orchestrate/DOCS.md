@@ -170,10 +170,14 @@ verdicts without consulting a level twice.
   against embody's runtime order constant at the point of use; never a
   positional list.
 - The panel receives its ordered phase list built from that constant plus the
-  labels; the embodiment's study payloads attach per phase. The panel's phase
-  headings are the instrument's shallowest (the region README's embedding
-  constraint); the guide renders after the panel in DOM order, so its deeper
-  topic headings never precede them in the outline.
+  labels, and renders it as the horizontal lifecycle strip ABOVE the editor,
+  beside the control row (the type toggle and the level surfaces) — controls and
+  lifecycle in one band, the buffer beneath, the opened lens and recommendations
+  below it. The strip renders no headings; the guide's `h4` topic titles are the
+  instrument's only headings, and the guide renders last in DOM order.
+- The strip's selects track the committed open lens; the none entry over the
+  open lens is the close affordance — the close commits at the top component and
+  announces `lens-opened: null` (the bus arm shipped reserved, now real).
 - The mask projects the masking library's state — the selected level's
   assessment crossed with the posture; the blocked overlay is part of the top
   component's render (in-file until a second call site exists).

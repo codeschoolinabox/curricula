@@ -48,8 +48,8 @@ flowchart TD
 - **Data-attribute selectors** — `data-guide`, `data-guide-reveal`,
   `data-guide-topic="<key>"`; title and body text are never test anchors.
 - **Never masked** — surface class 2; alive under every posture.
-- **No headings above `h4`** — the region's embedding constraint (the panel's
-  `h3` phase headings are the instrument's shallowest) stays true.
+- **No headings above `h4`** — the topic titles are the instrument's only
+  heading elements; the region's embedding constraint depends on it.
 - **Orientation-only content** — topic bodies never restate single-sourced canon
   (display-label strings, glossary definitions, level docs).
 

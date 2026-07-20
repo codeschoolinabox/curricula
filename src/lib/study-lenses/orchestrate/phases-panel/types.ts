@@ -30,17 +30,23 @@ export type PhaseEntry =
 			readonly cause: string;
 	  };
 
-/** The intent a lens-name affordance raises — mounting is the caller's. */
+/** The intent a lens selection raises — mounting is the caller's. */
 export type OpenLensIntent = {
 	readonly phase: string;
 	readonly lens: string;
 };
 
 /**
- * What the panel receives. Sections render in exactly the given order —
- * the panel never sorts, never inserts, never knows the canonical five.
+ * What the panel receives. Entries render in exactly the given order — the
+ * panel never sorts, never inserts, never knows the canonical five.
+ * `openLensName` is the committed open lens the selects' values track
+ * (`null` = nothing open); choosing a lens raises `onOpenLens`, choosing
+ * the none entry over the open lens raises `onCloseLens` — the top
+ * component commits both, the strip holds nothing.
  */
 export type PhasesPanelProperties = {
 	readonly phases: ReadonlyArray<PhaseEntry>;
+	readonly openLensName: string | null;
 	readonly onOpenLens: (intent: OpenLensIntent) => void;
+	readonly onCloseLens: () => void;
 };

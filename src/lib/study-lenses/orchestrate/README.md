@@ -63,11 +63,11 @@ source text alone — the glossary's _snippet_ is this prop together with `type`
 The prop is mount-time only: the instrument seeds from it once, and a later
 change is ignored — after mount the editor is the single writer.
 
-One embedding constraint: the instrument renders its section headings at `h3`
-(the study panel's phase headings), so the embedding site should mount it below
-an `h2`-level context. The constraint is documentation, not a runtime check — a
-DOM-ancestor heading probe would be fragile and SSR-hostile for what is an
-authoring concern.
+One embedding constraint: the instrument's only heading elements are the guide's
+`h4` topic titles (the lifecycle strip and every control label are inline text),
+so the embedding site may mount it below any `h3`-or-shallower context. The
+constraint is documentation, not a runtime check — a DOM-ancestor heading probe
+would be fragile and SSR-hostile for what is an authoring concern.
 
 The full doc-commented surface is [`types.ts`](./types.ts). This — with the lens
 contract and the level spine — is the package's public, versioned surface;
