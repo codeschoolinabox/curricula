@@ -25,7 +25,9 @@ Three surfaces project one truth — the selector's marks, the editor's gutter,
 the enforcement mask — so validation runs **once per settle and per level**,
 keyed by the settled snippet identity (source and type) and the level key.
 Repeated reads within a settle return the same verdict without consulting the
-level again. A verdict is `undetermined` while the code does not parse, else
+level again. The memo holds exactly one settle — its record keys by level, the
+session-fixed roster never joins the identity — and a new settle replaces it
+wholesale. A verdict is `undetermined` while the code does not parse, else
 `validated`, carrying the level's violations — possibly none.
 
 A throwing `validate` is caught, reported loudly as a defect, and yields the

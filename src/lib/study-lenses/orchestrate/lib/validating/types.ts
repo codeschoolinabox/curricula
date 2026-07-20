@@ -7,7 +7,12 @@
  * near-homonyms (fit mark, lens fit).
  */
 
-import type { ParseFacts, Violation } from '../../../language-levels/types.js';
+import type {
+	LanguageLevel,
+	ParseFacts,
+	Violation,
+} from '../../../language-levels/types.js';
+import type { SettledSnippet } from '../../types.js';
 
 /**
  * The assembly's result: the parse facts a level consumes, or `null` — the
@@ -35,3 +40,17 @@ export type LevelVerdict =
  * callers branch on the none-state before indexing.
  */
 export type VerdictsByLevel = Readonly<Record<string, LevelVerdict>>;
+
+/**
+ * The library's one memoization boundary, held per mounted instance by the
+ * top component: every registered level's verdict for the settled snippet.
+ * Within one settle identity (source and type), repeated calls return the
+ * same frozen record without consulting any level again; a new identity
+ * validates fresh and replaces the held record wholesale. The levels are
+ * the session-fixed joined roster — the identity never keys on them.
+ */
+export type MemoizedValidate = (
+	settled: SettledSnippet,
+	assembled: AssembledParseFacts,
+	levels: ReadonlyArray<LanguageLevel>,
+) => VerdictsByLevel;

@@ -55,7 +55,11 @@ flowchart TD
   by this library's caller-side logic, never by asking a level.
 - **One validate per settle and per level** — the memo key is the settled
   snippet identity (source and type) plus the level key; nothing validates
-  twice, and no consumer holds its own copy of the truth.
+  twice, and no consumer holds its own copy of the truth. Realized as ONE held
+  settle whose record keys by level: the roster is session-fixed, so the
+  identity never keys on the levels, and a new settle replaces the held record
+  wholesale — nothing accumulates across an editing session (ruled with the
+  Wave-4 test package, 2026-07-20).
 - **No second parse** — the assembly reads the embodiment's stage values;
   nothing here parses source text.
 - **Frozen outputs** — the assembled facts and every verdict leave this library
