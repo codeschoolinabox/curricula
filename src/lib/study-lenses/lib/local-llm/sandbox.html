@@ -1,0 +1,878 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>local-llm sandbox — device-local LLM runtime</title>
+		<style>
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+			body {
+				font-family: monospace;
+				padding: 1.5rem;
+				max-width: 880px;
+				margin: 0 auto;
+				font-size: 13px;
+				color: #222;
+			}
+			h1 {
+				font-size: 1.1rem;
+				margin-bottom: 0.4rem;
+			}
+			h2 {
+				font-size: 0.9rem;
+				margin-top: 1rem;
+				margin-bottom: 0.5rem;
+			}
+			p.note {
+				color: #666;
+				margin-bottom: 1rem;
+				line-height: 1.4;
+			}
+			fieldset {
+				border: 2px solid #333;
+				padding: 0.75rem;
+				margin-top: 0.85rem;
+			}
+			legend {
+				font-weight: bold;
+				padding: 0 0.4rem;
+			}
+			.row {
+				display: flex;
+				gap: 0.6rem;
+				align-items: center;
+				flex-wrap: wrap;
+				margin-bottom: 0.5rem;
+			}
+			.row > label {
+				min-width: 96px;
+			}
+			.row.top {
+				align-items: flex-start;
+			}
+			label {
+				font-size: 12px;
+			}
+			select,
+			input[type='text'],
+			input[type='number'] {
+				font-family: monospace;
+				font-size: 13px;
+				padding: 0.25rem 0.3rem;
+				border: 1px solid #555;
+			}
+			select#sel-model {
+				min-width: 360px;
+			}
+			input#sel-model-override {
+				min-width: 320px;
+			}
+			input[type='number'] {
+				width: 5em;
+			}
+			textarea {
+				width: 100%;
+				height: 110px;
+				font-family: monospace;
+				font-size: 13px;
+				padding: 0.5rem;
+				tab-size: 2;
+				border: 2px solid #333;
+				resize: vertical;
+			}
+			.verbs {
+				margin-top: 0.85rem;
+				display: flex;
+				gap: 0.6rem;
+				flex-wrap: wrap;
+			}
+			button {
+				padding: 0.4rem 1rem;
+				font-family: monospace;
+				font-size: 13px;
+				cursor: pointer;
+				border: 2px solid #333;
+				background: #eee;
+			}
+			button:disabled {
+				opacity: 0.45;
+				cursor: not-allowed;
+			}
+			#progress {
+				margin-top: 0.75rem;
+				font-size: 12px;
+				color: #555;
+				min-height: 1.2em;
+				padding: 0.35rem 0.5rem;
+				border-left: 3px solid #07a;
+				background: #f1f7fb;
+				white-space: pre-wrap;
+			}
+			#render {
+				margin-top: 0.75rem;
+				padding: 0.6rem;
+				border: 2px solid #333;
+				background: #fafafa;
+				min-height: 2em;
+			}
+			#render .summary-row {
+				white-space: pre-wrap;
+				line-height: 1.45;
+			}
+			#render .fail {
+				color: #a30000;
+				font-weight: bold;
+			}
+			#render .ok {
+				color: #0a6b00;
+				font-weight: bold;
+			}
+			#render .throw {
+				color: #840;
+				font-weight: bold;
+			}
+			pre.code {
+				border: 2px solid #333;
+				background: #fff;
+				padding: 0.5rem;
+				margin-top: 0.4rem;
+				overflow: auto;
+				white-space: pre-wrap;
+				max-height: 320px;
+			}
+			details {
+				margin-top: 0.5rem;
+			}
+			details > summary {
+				cursor: pointer;
+				color: #555;
+			}
+			details pre {
+				border: 1px dashed #999;
+				background: #fff;
+				padding: 0.5rem;
+				margin-top: 0.35rem;
+				overflow: auto;
+				white-space: pre-wrap;
+				max-height: 280px;
+			}
+			#log {
+				margin-top: 0.75rem;
+				max-height: 240px;
+				overflow: auto;
+				white-space: pre-wrap;
+				border: 1px dashed #999;
+				background: #1d1f21;
+				color: #c5c8c6;
+				padding: 0.5rem;
+				font-size: 11px;
+				line-height: 1.4;
+			}
+			.help {
+				margin-top: 1rem;
+				font-size: 12px;
+			}
+			.help table {
+				border-collapse: collapse;
+				margin-top: 0.5rem;
+				width: 100%;
+			}
+			.help th,
+			.help td {
+				border: 1px solid #999;
+				padding: 0.3rem 0.45rem;
+				text-align: left;
+				vertical-align: top;
+			}
+			.help code {
+				background: #eee;
+				padding: 0 0.2rem;
+			}
+			.muted {
+				color: #888;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>local-llm sandbox</h1>
+		<p class="note">
+			Eyeball-tests the device-local LLM runtime end-to-end in this browser.
+			Generation is <strong>local-only</strong>: a model&rsquo;s weights are
+			fetched once from the HuggingFace CDN (hundreds of MB&ndash;GBs), cached,
+			and reused offline thereafter. Nothing you type leaves the device.
+			WebGPU is required for the real download/run path &mdash; if you have no
+			GPU, use <em>fake caps</em> below to exercise the pure selection core
+			with zero network. See the
+			<a href="#coep-help">troubleshooting table</a> at the bottom if a
+			download is blocked.
+		</p>
+
+		<!-- ── Config: the full Selection surface + prompt ───────────────── -->
+		<fieldset>
+			<legend>config &mdash; selection</legend>
+			<div class="row">
+				<label for="sel-model">model</label>
+				<select id="sel-model" title="catalog model id">
+					<!-- populated at runtime from catalog.ts -->
+				</select>
+			</div>
+			<div class="row">
+				<label for="sel-model-override">override</label>
+				<input
+					id="sel-model-override"
+					type="text"
+					placeholder="(optional) free-text model id — wins over the dropdown"
+					title="Non-empty overrides the dropdown. A bogus id makes load() THROW (unknown-name path)."
+				/>
+			</div>
+			<div class="row">
+				<label for="sel-size">sizeClass</label>
+				<select id="sel-size" title="size-class ceiling">
+					<option value="">(none)</option>
+					<option value="tiny">tiny</option>
+					<option value="small">small</option>
+					<option value="mid">mid</option>
+					<option value="strong">strong</option>
+				</select>
+				<label for="sel-prefer">prefer</label>
+				<select id="sel-prefer" title="prefer policy">
+					<option value="">(none)</option>
+					<option value="default">default</option>
+					<option value="max">max</option>
+					<option value="min">min</option>
+				</select>
+			</div>
+			<div class="row top">
+				<label for="prompt">prompt</label>
+				<textarea id="prompt">
+Write a JavaScript function that returns the nth Fibonacci number.</textarea
+				>
+			</div>
+		</fieldset>
+
+		<!-- ── Capabilities source: real probe vs hand-built fake caps ───── -->
+		<fieldset>
+			<legend>capabilities source (for feasibleModels / recommendedModel)</legend>
+			<div class="row">
+				<label
+					><input
+						type="radio"
+						name="capsrc"
+						value="real"
+						checked
+					/>
+					real probe</label
+				>
+				<label
+					><input type="radio" name="capsrc" value="fake" /> fake caps</label
+				>
+				<span class="muted"
+					>load() always uses the real probe; fake caps only steer the two pure
+					sync verbs.</span
+				>
+			</div>
+			<div class="row">
+				<label
+					><input id="fake-webgpu" type="checkbox" checked /> webgpu</label
+				>
+				<label
+					><input id="fake-shaderf16" type="checkbox" /> shader-f16</label
+				>
+				<label
+					>deviceMemoryGB
+					<input id="fake-memgb" type="number" value="8" min="0" step="1"
+				/></label>
+				<label
+					>bindingLimit
+					<select
+						id="fake-binding"
+						title="maxStorageBufferBindingBytes — a probed WebGPU buffer limit, DIAGNOSTIC only (surfaced in canRun / a load failure's detail; it does NOT gate feasibility). Mirrored into maxBufferBytes."
+					>
+						<option value="">(unreported &rarr; admit)</option>
+						<option value="134217728">128 MiB &mdash; limited (Firefox/Android)</option>
+						<option value="1073741824">1 GiB &mdash; desktop</option>
+						<option value="2147483648">2 GiB &mdash; high-end</option>
+					</select>
+				></label>
+				<span id="budget-readout" class="muted"></span>
+			</div>
+		</fieldset>
+
+		<!-- ── Verbs ─────────────────────────────────────────────────────── -->
+		<div class="verbs">
+			<button type="button" id="btn-canrun">[canRun]</button>
+			<button type="button" id="btn-feasible">[feasibleModels]</button>
+			<button type="button" id="btn-recommend">[recommendedModel]</button>
+			<button type="button" id="btn-load">[load]</button>
+			<button type="button" id="btn-generate" disabled>[generate]</button>
+			<button type="button" id="btn-clearlog" title="clear the log pane">
+				[clear log]
+			</button>
+		</div>
+
+		<div id="progress" class="muted">idle.</div>
+		<h2>render</h2>
+		<div id="render"><span class="muted">return values render here.</span></div>
+		<h2>log</h2>
+		<pre id="log"></pre>
+
+		<details class="help" id="coep-help">
+			<summary>troubleshooting — WebGPU / COOP-COEP / downloads</summary>
+			<table>
+				<thead>
+					<tr>
+						<th>Symptom (console / Network tab)</th>
+						<th>Meaning</th>
+						<th>Fix</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>
+							<code>ERR_BLOCKED_BY_RESPONSE…Coep</code> on a
+							<code>huggingface.co</code> request
+						</td>
+						<td>COEP blocked the cross-origin weight fetch</td>
+						<td>
+							keep <code>CROSS_ORIGIN_ISOLATED = false</code> in
+							vite.sandbox.config.ts (the default), restart Vite
+						</td>
+					</tr>
+					<tr>
+						<td><code>SharedArrayBuffer is not defined</code> during load</td>
+						<td>
+							a path needs SAB (only a future threaded-WASM adapter, not
+							webllm)
+						</td>
+						<td>
+							set <code>CROSS_ORIGIN_ISOLATED = true</code>, restart Vite
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<code>canRun()</code> reports <code>webgpu:false</code> /
+							<code>requestAdapter</code> null
+						</td>
+						<td>no GPU / flag off / headless</td>
+						<td>
+							not a header issue — enable WebGPU in the browser, or use fake
+							caps for the pure core
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<code>Access to fetch … blocked by CORS policy</code> (ACAO)
+						</td>
+						<td>upstream HF / network / proxy</td>
+						<td>header toggle won&rsquo;t help; check network</td>
+					</tr>
+				</tbody>
+			</table>
+		</details>
+
+		<script type="module">
+			import makeLocalLlm from './make-local-llm.ts';
+			import makeWebllmAdapter from './webllm-adapter.ts';
+			import CATALOG from './catalog.ts';
+
+			// ─── Construct the runtime once (the only real adapter is webllm) ───
+			let lastBringUpError = null;
+			const webllmAdapter = makeWebllmAdapter();
+			// Capture the REAL bring-up error before make-local-llm's catch swallows it
+			// as a bare fetch-failed (a live preview of M2's honest-taxonomy behavior).
+			const capturingAdapter = async (load, fetchUrl, onProgress) => {
+				try {
+					return await webllmAdapter(load, fetchUrl, onProgress);
+				} catch (err) {
+					lastBringUpError = err;
+					throw err;
+				}
+			};
+			const llm = makeLocalLlm({ adapters: { webllm: capturingAdapter } });
+			let loadedModel = null; // captured LoadSuccess.model; gates [generate]
+
+			// ─── Element refs ───────────────────────────────────────────────────
+			const $ = (id) => document.getElementById(id);
+			const selModel = $('sel-model');
+			const selOverride = $('sel-model-override');
+			const selSize = $('sel-size');
+			const selPrefer = $('sel-prefer');
+			const promptEl = $('prompt');
+			const fakeWebgpu = $('fake-webgpu');
+			const fakeShaderF16 = $('fake-shaderf16');
+			const fakeMemGB = $('fake-memgb');
+			const fakeBinding = $('fake-binding');
+			const budgetReadout = $('budget-readout');
+			const btnCanRun = $('btn-canrun');
+			const btnFeasible = $('btn-feasible');
+			const btnRecommend = $('btn-recommend');
+			const btnLoad = $('btn-load');
+			const btnGenerate = $('btn-generate');
+			const btnClearLog = $('btn-clearlog');
+			const progressEl = $('progress');
+			const renderEl = $('render');
+			const logEl = $('log');
+
+			// ─── Populate the model dropdown from the catalog ───────────────────
+			{
+				const letItPick = document.createElement('option');
+				letItPick.value = '';
+				letItPick.textContent = '(let it pick — cost-aware default)';
+				selModel.append(letItPick);
+				for (const entry of CATALOG) {
+					const opt = document.createElement('option');
+					opt.value = entry.id;
+					opt.textContent = `${entry.id}  ·  ${entry.sizeClass}/${entry.params}`;
+					selModel.append(opt);
+				}
+			}
+
+			// ─── Helpers ────────────────────────────────────────────────────────
+			function log(label, payload) {
+				const t = new Date().toISOString().slice(11, 23); // HH:MM:SS.mmm
+				let body = '';
+				if (payload !== undefined) {
+					try {
+						body = ' ' + JSON.stringify(payload);
+					} catch {
+						body = ' ' + String(payload);
+					}
+				}
+				logEl.textContent += `[${t}] ${label}${body}\n`;
+				logEl.scrollTop = logEl.scrollHeight;
+			}
+
+			function escapeHtml(value) {
+				return String(value)
+					.replaceAll('&', '&amp;')
+					.replaceAll('<', '&lt;')
+					.replaceAll('>', '&gt;');
+			}
+
+			// Mirrors feasibility.ts: HALF * (deviceMemoryGB ?? DEFAULT_MEMORY_GB) *
+			// MB_PER_GB. The webllm VRAM ceiling — a model whose vramRequiredMB
+			// exceeds it is refused. Undefined/0 deviceMemory falls back to 4 GB.
+			function vramBudgetMB(deviceMemoryGB) {
+				const gb =
+					Number.isFinite(deviceMemoryGB) && deviceMemoryGB > 0
+						? deviceMemoryGB
+						: 4;
+				return 0.5 * gb * 1024;
+			}
+
+			function updateBudgetReadout() {
+				if (!fakeWebgpu.checked) {
+					budgetReadout.textContent =
+						'→ webgpu off: no webllm model is feasible';
+					return;
+				}
+				const mem = Number(fakeMemGB.value);
+				const binding = Number(fakeBinding.value);
+				const bindingNote =
+					Number.isFinite(binding) && binding > 0
+						? `; binding limit ${Math.round(
+							binding / 1048576,
+						)} MiB (diagnostic only — does NOT gate feasibility; a binding-limited device is caught at bring-up by the chain)`
+						: '';
+				budgetReadout.textContent = `→ VRAM budget ${vramBudgetMB(
+					mem,
+				)} MB (a model needing more is refused)${bindingNote}`;
+			}
+
+			function buildSelection() {
+				const selection = {};
+				const model = selOverride.value.trim() || selModel.value;
+				if (model) selection.model = model;
+				if (selSize.value) selection.sizeClass = selSize.value;
+				if (selPrefer.value) selection.prefer = selPrefer.value;
+				return Object.keys(selection).length > 0 ? selection : undefined;
+			}
+
+			function capsSourceIsFake() {
+				const checked = document.querySelector(
+					'input[name="capsrc"]:checked',
+				);
+				return checked?.value === 'fake';
+			}
+
+			function buildFakeCaps() {
+				const caps = {
+					webgpu: fakeWebgpu.checked,
+					wasm: { threads: false, simd: true },
+				};
+				if (fakeWebgpu.checked) {
+					caps.webgpuFeatures = fakeShaderF16.checked ? ['shader-f16'] : [];
+					const binding = Number(fakeBinding.value);
+					if (Number.isFinite(binding) && binding > 0) {
+						// A storage binding can't exceed its buffer, so mirror both probed limits.
+						caps.maxStorageBufferBindingBytes = binding;
+						caps.maxBufferBytes = binding;
+					}
+				}
+				const mem = Number(fakeMemGB.value);
+				if (Number.isFinite(mem) && mem > 0) caps.deviceMemoryGB = mem;
+				return caps;
+			}
+
+			async function resolveCaps() {
+				if (capsSourceIsFake()) {
+					const caps = buildFakeCaps();
+					log('caps:fake', caps);
+					return caps;
+				}
+				log('canRun: call');
+				const caps = await llm.canRun();
+				log('canRun: return', caps);
+				return caps;
+			}
+
+			function renderProgress(p) {
+				const pct =
+					typeof p.ratio === 'number'
+						? ` — ${Math.round(p.ratio * 100)}%`
+						: '';
+				progressEl.classList.remove('muted');
+				progressEl.textContent = `phase: ${p.phase}${pct} — ${p.text}`;
+			}
+
+			// ─── The structured render pane ─────────────────────────────────────
+			function render(kind, value) {
+				if (kind === 'caps') return renderCaps(value);
+				if (kind === 'feasible') return renderFeasible(value);
+				if (kind === 'recommend') return renderRecommend(value);
+				if (kind === 'loadResult') return renderLoadResult(value);
+				if (kind === 'generation') return renderGeneration(value);
+				if (kind === 'throw') return renderThrow(value);
+				renderEl.innerHTML = `<pre class="code">${escapeHtml(
+					JSON.stringify(value, null, 2),
+				)}</pre>`;
+			}
+
+			function renderCaps(caps) {
+				const memNote =
+					caps.deviceMemoryGB === undefined ? ' (unreported → assumes 4 GB)' : '';
+				const lines = [
+					`webgpuFeatures: [${(caps.webgpuFeatures ?? []).join(', ')}]`,
+					`deviceMemoryGB: ${caps.deviceMemoryGB ?? '(unreported)'}${memNote}`,
+					`VRAM budget (feasibility): ${vramBudgetMB(caps.deviceMemoryGB)} MB`,
+					`maxBufferBytes: ${caps.maxBufferBytes ?? '(unreported)'}`,
+					`maxStorageBufferBindingBytes: ${
+						caps.maxStorageBufferBindingBytes ?? '(unreported)'
+					}`,
+					`storageQuotaBytes: ${caps.storageQuotaBytes ?? '(unreported)'}`,
+					`wasm: { threads: ${caps.wasm?.threads}, simd: ${caps.wasm?.simd} }`,
+				];
+				// webgpu is the load-bearing gate — make false impossible to miss.
+				const webgpuLine = caps.webgpu
+					? '<span class="ok">webgpu: true</span>'
+					: '<span class="fail">webgpu: false — no webllm model can load. Check chrome://gpu, enable hardware acceleration, or use a WebGPU browser.</span>';
+				renderEl.innerHTML = `<div class="summary-row">device capabilities (conservative heuristic)\n${webgpuLine}\n${escapeHtml(
+					lines.join('\n'),
+				)}</div>`;
+			}
+
+			function renderFeasible(entries) {
+				if (!entries || entries.length === 0) {
+					renderEl.innerHTML =
+						'<div class="summary-row"><span class="fail">(none feasible)</span></div>';
+					return;
+				}
+				const rows = entries
+					.map(
+						(e) =>
+							`  ${e.id}  —  ${e.sizeClass}/${e.params}  —  ${e.license}  —  code:${e.codeSpecialized}`,
+					)
+					.join('\n');
+				renderEl.innerHTML = `<div class="summary-row"><span class="ok">${entries.length} feasible</span>\n${escapeHtml(
+					rows,
+				)}</div>`;
+			}
+
+			function renderRecommend(entry) {
+				if (entry === null) {
+					renderEl.innerHTML =
+						'<div class="summary-row"><span class="fail">(null — nothing recommended)</span></div>';
+					return;
+				}
+				renderEl.innerHTML = `<div class="summary-row"><span class="ok">recommended</span>\n${escapeHtml(
+					`  ${entry.id}\n  ${entry.sizeClass}/${entry.params}  —  ${entry.license}  —  code:${entry.codeSpecialized}`,
+				)}</div>`;
+			}
+
+			function renderLoadResult(result) {
+				if (result.ok) {
+					renderEl.innerHTML = `<div class="summary-row"><span class="ok">loaded ✓</span>\n${escapeHtml(
+						`  resolvedId: ${result.resolvedId}\n  resolvedRuntime: ${result.resolvedRuntime}`,
+					)}</div>`;
+					return;
+				}
+				const detail = result.detail ? `\n  detail: ${result.detail}` : '';
+				renderEl.innerHTML = `<div class="summary-row"><span class="fail">LOAD FAILED — cause: ${escapeHtml(
+					result.cause,
+				)}</span>${escapeHtml(detail)}</div>`;
+			}
+
+			function renderGeneration(gen) {
+				let html = `<div class="summary-row"><span class="ok">generation result</span></div>`;
+				html += `<pre class="code">${escapeHtml(gen.code)}</pre>`;
+				html += `<details><summary>raw (byte-exact, unmodified)</summary><pre>${escapeHtml(
+					gen.raw,
+				)}</pre></details>`;
+				if (gen.thinkTrace !== undefined) {
+					html += `<details><summary>thinkTrace</summary><pre>${escapeHtml(
+						gen.thinkTrace,
+					)}</pre></details>`;
+				}
+				renderEl.innerHTML = html;
+			}
+
+			function renderThrow(err) {
+				const message = err && err.message ? err.message : String(err);
+				renderEl.innerHTML = `<div class="summary-row"><span class="throw">THROW: ${escapeHtml(
+					message,
+				)}</span>\n<span class="muted">(a programmer error / rejected promise — distinct from a returned LoadFailure)</span></div>`;
+			}
+
+			// On a no-feasible-model refusal, re-probe the real device and append a
+			// plain-language diagnosis to the render pane (which gate likely failed:
+			// the webgpu presence gate, the VRAM budget, or a required-feature gate).
+			async function explainNoFeasible(selection) {
+				let caps;
+				try {
+					caps = await llm.canRun();
+				} catch {
+					return;
+				}
+				log('load:diagnostic canRun', caps);
+				const reasons = [];
+				if (!caps.webgpu) {
+					reasons.push(
+						'webgpu is FALSE — no webllm model can load on this device. ' +
+							'Open chrome://gpu (WebGPU row), enable hardware acceleration ' +
+							'(chrome://settings/system), or use a WebGPU-capable browser.',
+					);
+				} else {
+					reasons.push(
+						`webgpu is true. VRAM budget = ${vramBudgetMB(
+							caps.deviceMemoryGB,
+						)} MB (from deviceMemoryGB ${
+							caps.deviceMemoryGB ?? '(unreported → 4)'
+						}); a model needing more is refused.`,
+					);
+					reasons.push(
+						`advertised webgpuFeatures: [${(caps.webgpuFeatures ?? []).join(
+							', ',
+						)}] — a model requiring a feature you lack (e.g. shader-f16) is refused.`,
+					);
+					reasons.push(
+						`maxStorageBufferBindingBytes: ${
+							caps.maxStorageBufferBindingBytes ?? '(unreported → admit)'
+						} — DIAGNOSTIC only; the probed buffer limit does NOT gate feasibility. A binding-limited device (e.g. Firefox/Android 128 MiB) is caught at bring-up by the chain, which descends to a smaller model or a CPU/WASM runtime. The per-entry reason above is the honest pre-flight verdict.`,
+					);
+					if (selection?.model) {
+						reasons.push(
+							`you named "${selection.model}" — it failed one of the gates above (named-but-infeasible → no-feasible-model).`,
+						);
+					}
+				}
+				renderEl.innerHTML += `<div class="summary-row"><span class="muted">why no-feasible-model?</span>\n${escapeHtml(
+					reasons.map((r) => '  • ' + r).join('\n'),
+				)}</div>`;
+			}
+
+			// fetch-failed is the impure-seam failure: the one-time weight fetch
+			// rejected and the runtime swallows the underlying error. Surface the
+			// storage estimate (the usual culprit) + where to find the real error.
+			async function explainFetchFailed() {
+				let est;
+				try {
+					est = await navigator.storage?.estimate?.();
+				} catch {
+					/* ignore */
+				}
+				const mb = (n) =>
+					typeof n === 'number' ? `${Math.round(n / 1048576)} MB` : '?';
+				const lines = [
+					'the one-time weight fetch rejected. The runtime returns a bare ' +
+						'fetch-failed and swallows the cause — open DevTools → Console + ' +
+						'Network for the REAL error (look for a red huggingface.co request).',
+				];
+				if (est) {
+					const near =
+						typeof est.usage === 'number' &&
+						typeof est.quota === 'number' &&
+						est.usage > est.quota * 0.85;
+					lines.push(
+						`storage: usage ${mb(est.usage)} / quota ${mb(est.quota)}${
+							near ? '  ← usage is near quota → a cache write likely failed' : ''
+						}.`,
+					);
+				}
+				lines.push(
+					'common causes: an Incognito/private window (tiny quota), low free ' +
+						'disk, a poisoned partial cache from an interrupted download, or a ' +
+						'transient network/CDN error.',
+				);
+				lines.push(
+					'fix: DevTools → Application → Storage → Clear site data; use a ' +
+						'normal (non-Incognito) window; free up disk; then retry [load] ' +
+						'(the failed bring-up is evicted, so a retry re-fetches).',
+				);
+				renderEl.innerHTML += `<div class="summary-row"><span class="muted">why fetch-failed?</span>\n${escapeHtml(
+					lines.map((r) => '  • ' + r).join('\n'),
+				)}</div>`;
+			}
+
+			// ─── Verb handlers ──────────────────────────────────────────────────
+			btnCanRun.addEventListener('click', async () => {
+				btnCanRun.disabled = true;
+				try {
+					log('canRun: call');
+					const caps = await llm.canRun();
+					log('canRun: return', caps);
+					render('caps', caps);
+				} catch (err) {
+					log('canRun: THROW', { message: err?.message ?? String(err) });
+					render('throw', err);
+				} finally {
+					btnCanRun.disabled = false;
+				}
+			});
+
+			btnFeasible.addEventListener('click', async () => {
+				btnFeasible.disabled = true;
+				try {
+					const caps = await resolveCaps();
+					const feasible = llm.feasibleModels(caps);
+					log(
+						'feasibleModels: return',
+						feasible.map((e) => e.id),
+					);
+					render('feasible', feasible);
+				} catch (err) {
+					log('feasibleModels: THROW', {
+						message: err?.message ?? String(err),
+					});
+					render('throw', err);
+				} finally {
+					btnFeasible.disabled = false;
+				}
+			});
+
+			btnRecommend.addEventListener('click', async () => {
+				btnRecommend.disabled = true;
+				try {
+					const caps = await resolveCaps();
+					const selection = buildSelection();
+					log('recommendedModel: call', { selection: selection ?? null });
+					const entry = llm.recommendedModel(caps, selection);
+					log('recommendedModel: return', { id: entry?.id ?? null });
+					render('recommend', entry);
+				} catch (err) {
+					log('recommendedModel: THROW', {
+						message: err?.message ?? String(err),
+					});
+					render('throw', err);
+				} finally {
+					btnRecommend.disabled = false;
+				}
+			});
+
+			btnLoad.addEventListener('click', async () => {
+				btnLoad.disabled = true;
+				loadedModel = null;
+				btnGenerate.disabled = true;
+				const selection = buildSelection();
+				log('load: call', { selection: selection ?? null });
+				progressEl.classList.remove('muted');
+				progressEl.textContent = 'load: starting…';
+				lastBringUpError = null;
+				try {
+					const result = await llm.load(selection, (p) => {
+						log('load: progress', p);
+						renderProgress(p);
+					});
+					log('load: return', {
+						ok: result.ok,
+						...(result.ok
+							? {
+									resolvedId: result.resolvedId,
+									resolvedRuntime: result.resolvedRuntime,
+								}
+							: { cause: result.cause, detail: result.detail }),
+					});
+					render('loadResult', result);
+					if (result.ok) {
+						loadedModel = result.model;
+						btnGenerate.disabled = false;
+						progressEl.textContent = 'loaded — ready to generate.';
+					} else {
+						progressEl.textContent = `load failed: ${result.cause}`;
+						if (result.cause === 'no-feasible-model') {
+							await explainNoFeasible(selection);
+						} else if (result.cause === 'fetch-failed') {
+							if (lastBringUpError) {
+								log('load: REAL ERROR (un-swallowed)', {
+									name: lastBringUpError?.name,
+									message: lastBringUpError?.message,
+								});
+								renderEl.innerHTML += `<div class="summary-row"><span class="throw">REAL bring-up error (the loader hides it behind "fetch-failed" — M2 surfaces it honestly):</span>\n${escapeHtml(
+									lastBringUpError?.stack || lastBringUpError?.message || String(lastBringUpError),
+								)}</div>`;
+							}
+							await explainFetchFailed();
+						}
+					}
+				} catch (err) {
+					// Unknown model id (programmer error) lands here — a rejected
+					// promise, deliberately distinct from a returned LoadFailure.
+					log('load: THROW', { message: err?.message ?? String(err) });
+					render('throw', err);
+					progressEl.textContent = 'load threw (see render pane).';
+				} finally {
+					btnLoad.disabled = false;
+				}
+			});
+
+			btnGenerate.addEventListener('click', async () => {
+				if (!loadedModel) return;
+				btnGenerate.disabled = true;
+				const prompt = promptEl.value;
+				log('generate: call', { promptChars: prompt.length });
+				progressEl.classList.remove('muted');
+				progressEl.textContent = 'generating…';
+				try {
+					const gen = await loadedModel.generate(prompt);
+					log('generate: return', {
+						rawChars: gen.raw.length,
+						codeChars: gen.code.length,
+						hasThinkTrace: gen.thinkTrace !== undefined,
+					});
+					render('generation', gen);
+					progressEl.textContent = 'generation complete.';
+				} catch (err) {
+					log('generate: THROW', { message: err?.message ?? String(err) });
+					render('throw', err);
+					progressEl.textContent = 'generate threw (see render pane).';
+				} finally {
+					btnGenerate.disabled = !loadedModel;
+				}
+			});
+
+			btnClearLog.addEventListener('click', () => {
+				logEl.textContent = '';
+			});
+
+			fakeWebgpu.addEventListener('change', updateBudgetReadout);
+			fakeMemGB.addEventListener('input', updateBudgetReadout);
+			fakeBinding.addEventListener('change', updateBudgetReadout);
+			updateBudgetReadout();
+
+			log('sandbox: ready', { catalogModels: CATALOG.length });
+		</script>
+	</body>
+</html>
