@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+// cspell:ignore affordances
 
 import { EditorView } from '@codemirror/view';
 import {
@@ -813,6 +814,239 @@ describe('StudyLenses', () => {
 				container.querySelector('[data-other-probe]') !== null,
 				dispatches.filter(([name]) => name === 'lens-opened').length,
 			]).toEqual([true, 1]);
+		});
+	});
+
+	describe('the recommendations (Boundaries)', () => {
+		it('renders the ranked proposals as affordances', async () => {
+			const target = buildLens('target');
+			const proposer = buildLens('proposer', {
+				recommend: () => [
+					{ lens: target, config: {}, relevance: 0.7, label: 'study next' },
+				],
+			});
+			const container = await mountInstrument(
+				<StudyLenses lenses={[proposer, target]} snippet="const x = 1;" />,
+			);
+			expect(
+				container.querySelector('[data-recommendations]')?.textContent,
+			).toContain('study next');
+		});
+
+		it('renders no recommendation surface without proposals', async () => {
+			const container = await mountInstrument(
+				<StudyLenses lenses={[buildLens('quiet')]} snippet="const x = 1;" />,
+			);
+			expect(container.querySelector('[data-recommendations]')).toBeNull();
+		});
+
+		it('orders the affordances by relevance, descending', async () => {
+			const target = buildLens('target');
+			const low = buildLens('low', {
+				recommend: () => [
+					{ lens: target, config: {}, relevance: 0.2, label: 'later' },
+				],
+			});
+			const high = buildLens('high', {
+				recommend: () => [
+					{ lens: target, config: {}, relevance: 0.9, label: 'first' },
+				],
+			});
+			const container = await mountInstrument(
+				<StudyLenses lenses={[low, high, target]} snippet="const x = 1;" />,
+			);
+			const labels = Array.from(
+				container.querySelectorAll('[data-recommendation]'),
+				(affordance) => affordance.textContent,
+			);
+			expect(labels).toEqual(['first', 'later']);
+		});
+
+		it('keys duplicate-target proposals safely', async () => {
+			const warned = vi.spyOn(console, 'error').mockImplementation(() => {});
+			const target = buildLens('target');
+			const proposer = buildLens('proposer', {
+				recommend: () => [
+					{ lens: target, config: {}, relevance: 0.9, label: 'one way' },
+					{ lens: target, config: {}, relevance: 0.4, label: 'another way' },
+				],
+			});
+			const container = await mountInstrument(
+				<StudyLenses lenses={[proposer, target]} snippet="const x = 1;" />,
+			);
+			expect([
+				container.querySelectorAll('[data-recommendation]').length,
+				warned.mock.calls.length,
+			]).toEqual([2, 0]);
+		});
+
+		it('opens the proposed lens on a click', async () => {
+			const target = buildLens('target', {
+				main: () => <div data-target-probe>opened</div>,
+			});
+			const proposer = buildLens('proposer', {
+				recommend: () => [
+					{ lens: target, config: {}, relevance: 0.7, label: 'study next' },
+				],
+			});
+			const container = await mountInstrument(
+				<StudyLenses lenses={[proposer, target]} snippet="const x = 1;" />,
+			);
+			const affordance = container.querySelector<HTMLElement>(
+				'[data-recommendation="target"]',
+			);
+			if (!affordance) throw new Error('missing the recommendation');
+			fireEvent.click(affordance);
+			expect(container.querySelector('[data-target-probe]')).not.toBeNull();
+		});
+
+		it('carries the proposal overrides into the cascade above the host layer', async () => {
+			const target = buildLens('target', {
+				main: ({ config }) => (
+					<div data-target-probe>{String(config['note'] ?? 'missing')}</div>
+				),
+			});
+			const proposer = buildLens('proposer', {
+				recommend: () => [
+					{
+						lens: target,
+						config: { note: 'from-proposal' },
+						relevance: 0.7,
+						label: 'study next',
+					},
+				],
+			});
+			const container = await mountInstrument(
+				<StudyLenses
+					configs={{ target: { note: 'from-host' } }}
+					lenses={[proposer, target]}
+					snippet="const x = 1;"
+				/>,
+			);
+			const affordance = container.querySelector<HTMLElement>(
+				'[data-recommendation="target"]',
+			);
+			if (!affordance) throw new Error('missing the recommendation');
+			fireEvent.click(affordance);
+			expect(container.querySelector('[data-target-probe]')?.textContent).toBe(
+				'from-proposal',
+			);
+		});
+
+		it('keeps the opened overrides through a settle', async () => {
+			const target = buildLens('target', {
+				main: ({ config }) => (
+					<div data-target-probe>{String(config['note'] ?? 'missing')}</div>
+				),
+			});
+			const proposer = buildLens('proposer', {
+				recommend: () => [
+					{
+						lens: target,
+						config: { note: 'from-proposal' },
+						relevance: 0.7,
+						label: 'study next',
+					},
+				],
+			});
+			const container = await mountInstrument(
+				<StudyLenses lenses={[proposer, target]} snippet="const x = 1;" />,
+			);
+			const affordance = container.querySelector<HTMLElement>(
+				'[data-recommendation="target"]',
+			);
+			if (!affordance) throw new Error('missing the recommendation');
+			fireEvent.click(affordance);
+			vi.useFakeTimers();
+			try {
+				editLiveSource(container, 'let y = 2;');
+				act(() => {
+					vi.advanceTimersByTime(250);
+				});
+			} finally {
+				vi.useRealTimers();
+			}
+			expect(container.querySelector('[data-target-probe]')?.textContent).toBe(
+				'from-proposal',
+			);
+		});
+
+		it('clears the opened overrides with the open-lens choice', async () => {
+			const target = buildLens('target', {
+				main: ({ config }) => (
+					<div data-target-probe>{String(config['note'] ?? 'missing')}</div>
+				),
+			});
+			const proposer = buildLens('proposer', {
+				recommend: () => [
+					{
+						lens: target,
+						config: { note: 'from-proposal' },
+						relevance: 0.7,
+						label: 'study next',
+					},
+				],
+			});
+			const container = await mountInstrument(
+				<StudyLenses
+					configs={{ target: { note: 'from-host' } }}
+					lenses={[proposer, target]}
+					snippet="const x = 1;"
+				/>,
+			);
+			const affordance = container.querySelector<HTMLElement>(
+				'[data-recommendation="target"]',
+			);
+			if (!affordance) throw new Error('missing the recommendation');
+			fireEvent.click(affordance);
+			const panelAffordance = container.querySelector<HTMLElement>(
+				'[data-phase-lens="target"]',
+			);
+			if (!panelAffordance) throw new Error('missing the panel affordance');
+			fireEvent.click(panelAffordance);
+			expect(container.querySelector('[data-target-probe]')?.textContent).toBe(
+				'from-host',
+			);
+		});
+
+		it('renders the recommendations through the mask', async () => {
+			const target = buildLens('target');
+			const proposer = buildLens('proposer', {
+				recommend: () => [
+					{ lens: target, config: {}, relevance: 0.7, label: 'study next' },
+				],
+			});
+			const container = await mountInstrument(
+				<StudyLenses
+					activeLanguageLevel="scaffold"
+					languageLevels={[scaffoldLevel]}
+					lenses={[proposer, target]}
+					snippet="debugger;"
+					strictLanguageLevels={true}
+				/>,
+			);
+			expect(
+				container.querySelector('[data-maskable] [data-recommendations]'),
+			).not.toBeNull();
+		});
+
+		it('announces a recommendation open on the bus', async () => {
+			const dispatches = recordDispatches();
+			const target = buildLens('target');
+			const proposer = buildLens('proposer', {
+				recommend: () => [
+					{ lens: target, config: {}, relevance: 0.7, label: 'study next' },
+				],
+			});
+			const container = await mountInstrument(
+				<StudyLenses lenses={[proposer, target]} snippet="const x = 1;" />,
+			);
+			const affordance = container.querySelector<HTMLElement>(
+				'[data-recommendation="target"]',
+			);
+			if (!affordance) throw new Error('missing the recommendation');
+			fireEvent.click(affordance);
+			expect(dispatches).toContainEqual(['lens-opened', { lens: 'target' }]);
 		});
 	});
 

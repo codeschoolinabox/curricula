@@ -60,6 +60,7 @@ flowchart TD
     EMB["frozen embodiment"]
     VER["level verdicts<br/>(one memoized validate per settle + level)"]
     MARKS["assessments by level<br/>(mark + cause, per settle)"]
+    RECS["ranked recommendations<br/>(fitting lenses' proposals, per settle)"]
     SUR["rendered study environment<br/>(editor · panel · level UI · mask)"]
     PROPS -->|"join rosters at mount, loud collisions"| CFG
     PROPS -->|"initial snippet + type, seeds the editor"| SNP
@@ -73,6 +74,8 @@ flowchart TD
     EMB -->|"render, mechanical"| SUR
     VER -->|"annotate the editor's gutter, selected level only"| SUR
     MARKS -->|"selector marks · mask = selected assessment × strict posture"| SUR
+    EMB -->|"the fitting lenses' proposals, collected + ranked"| RECS
+    RECS -->|"rendered through the mask; opening carries the proposal's overrides into the cascade"| SUR
     CFG -->|"posture + resolved configs"| SUR
     SUR -->|"edits + type toggle, debounced to the settle"| SNP
     SUR -->|"level · posture · config · lens choice, session-scoped"| CFG

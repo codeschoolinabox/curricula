@@ -5,8 +5,8 @@
  * composition root: the mount-time joins (loud), the session choices'
  * single owner, the per-instance bus and memoized validate, the settle
  * loop, one study derivation per settle, and the render projection over
- * the editor, the study panel, the level UI, the type toggle, and the
- * guide.
+ * the editor, the study panel, the level UI, the type toggle, the ranked
+ * recommendations, and the guide.
  *
  * @remarks
  * Selector contract: `data-study-lenses` on the root;
@@ -26,7 +26,7 @@ import type {
 	LifecyclePhase,
 	LifecyclePhaseName,
 } from '../embody/types.js';
-import type { Lens } from '../lenses/types.js';
+import type { Lens, Recommendation } from '../lenses/types.js';
 
 import deriveStudyState from './derive-study-state.js';
 import DISPLAY_LABELS from './display-labels.js';
@@ -38,7 +38,10 @@ import joinLensRoster from './lib/composing/join-lens-roster.js';
 import joinLevelRoster from './lib/composing/join-level-roster.js';
 import recoverRenderableLenses from './lib/composing/recover-renderable-lenses.js';
 import resolveLensConfig from './lib/composing/resolve-lens-config.js';
-import type { JoinedLensRoster } from './lib/composing/types.js';
+import type {
+	ConfigOverridesByLens,
+	JoinedLensRoster,
+} from './lib/composing/types.js';
 import honorFocusRequest from './lib/honoring/honor-focus-request.js';
 import deriveMask from './lib/masking/derive-mask.js';
 import type { MaskState } from './lib/masking/types.js';
@@ -142,9 +145,21 @@ export default function StudyLenses({
 		session.bus.dispatch('type-toggled', { type: next });
 	}
 
+	// The opened cascade layer — set at a recommendation-opened mount,
+	// cleared with the open-lens choice; nothing else touches it.
+	const [openedOverrides, setOpenedOverrides] =
+		React.useState<ConfigOverridesByLens>({});
+
 	function commitOpenLens(lensName: string): void {
 		setOpenLensName(lensName);
+		setOpenedOverrides({});
 		session.bus.dispatch('lens-opened', { lens: lensName });
+	}
+
+	function commitOpenRecommended(proposal: Recommendation): void {
+		setOpenLensName(proposal.lens.name);
+		setOpenedOverrides({ [proposal.lens.name]: proposal.config });
+		session.bus.dispatch('lens-opened', { lens: proposal.lens.name });
 	}
 
 	// 6. The render projection — phases zipped against embody's runtime
@@ -203,7 +218,22 @@ export default function StudyLenses({
 							configs={configs}
 							embodiment={derivation.embodiment}
 							lens={openLens}
+							opened={openedOverrides}
 						/>
+					) : null}
+					{derivation.recommendations.length > 0 ? (
+						<section data-recommendations>
+							{derivation.recommendations.map((proposal, index) => (
+								<button
+									data-recommendation={proposal.lens.name}
+									key={`${proposal.label}·${index}`}
+									onClick={() => commitOpenRecommended(proposal)}
+									type="button"
+								>
+									{proposal.label}
+								</button>
+							))}
+						</section>
 					) : null}
 				</div>
 				{mask.masked ? (
@@ -242,21 +272,24 @@ function formatBlockedSentence(
 }
 
 // The opened lens, mounted with the frozen embodiment and its resolved
-// configuration. The opened and learner cascade layers are empty until
-// their producers exist (a recommendation-opened mount; learner tweaks).
+// configuration — the host layer from the configs prop, the opened layer
+// from a recommendation-opened mount. The learner layer is empty until its
+// producer exists (session tweaks have no UI yet).
 function MountedLens({
 	lens,
 	embodiment,
 	configs,
+	opened,
 }: {
 	readonly lens: Lens;
 	readonly embodiment: Embodiment;
 	readonly configs: NonNullable<StudyLensesProperties['configs']>;
+	readonly opened: ConfigOverridesByLens;
 }): React.JSX.Element {
 	const Main = lens.main;
 	const config = resolveLensConfig(lens, {
 		host: configs,
-		opened: {},
+		opened,
 		learner: {},
 	});
 	return <Main config={config} embodiment={embodiment} />;

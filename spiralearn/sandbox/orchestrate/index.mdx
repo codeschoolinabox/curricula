@@ -26,13 +26,21 @@ export function InstrumentHarness() {
 		name: 'notes',
 		applicability: () => true,
 		phase: 'source',
-		main: ({ embodiment }) => (
+		main: ({ embodiment, config }) => (
 			<p data-notes-lens>
-				notes — this program is {embodiment.facts.source.value.length}{' '}
-				characters of source
+				notes (opened via {String(config.origin ?? 'the panel')}) — this program
+				is {embodiment.facts.source.value.length} characters of source
 			</p>
 		),
 	};
+	notesLens.recommend = () => [
+		{
+			lens: notesLens,
+			config: { origin: 'a recommendation' },
+			relevance: 0.8,
+			label: 'study the source',
+		},
+	];
 	return (
 		<StudyLenses
 			languageLevels={[scaffoldLevel]}
