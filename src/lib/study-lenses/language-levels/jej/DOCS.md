@@ -140,7 +140,11 @@ nothing and appear on no path; consumers read them where they ship.
   gated because the level admits guarded dynamic dispatch and a purely syntactic
   check cannot tell that from an escape. The policy protects the taught surface;
   it is not a sandbox. The blocked names are the level's own datum — no
-  machinery reads them, so they live with the check that does.
+  machinery reads them, so they live with the check that does. A second residual
+  hole is accepted and named alongside it: an update expression (`obj.prop++`)
+  is not constrained on its target the way an assignment is — a member target
+  updates without a violation. The same taught-surface-not-sandbox posture
+  applies.
 - **Why an unknown identifier is not a violation.** The alternative is accusing
   a learner's typo of being a level violation — the one lie the level must never
   tell. Deferring to the runtime costs a name the level could have caught and

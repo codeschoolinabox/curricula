@@ -144,9 +144,12 @@ export type RealmModel = {
  * @remarks
  * The whole list, and it is short by construction: with no functions, classes,
  * or catch clauses admitted, nothing else opens a scope. A function scope is
- * not missing — it is unreachable.
+ * not missing — it is unreachable. Each loop head — `for` and `for…of` — opens
+ * the loop's own scope holding its head declarations; the body block nests
+ * inside it as an ordinary `block` child, so a body-level shadow of a head
+ * name is two scopes, honestly modeled.
  */
-export type ScopeKind = 'program' | 'block' | 'for-of';
+export type ScopeKind = 'program' | 'block' | 'for' | 'for-of';
 
 /**
  * One name, and where it came to be.
