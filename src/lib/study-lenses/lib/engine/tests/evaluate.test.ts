@@ -202,10 +202,9 @@ describe('evaluate', () => {
 	});
 
 	// The real-transport hop (TransportInit.execution → the posted
-	// ExecuteMessage.execution) is unverified here — proven once E2's
-	// bootstrap branches on it (real transport) and E3's agnostic
-	// conformance rows exercise both transports, mirroring the strict
-	// rows in tests/conformance/agnostic/settlement.ts.
+	// ExecuteMessage.execution) is unverified here — proven end-to-end
+	// by tests/conformance/transport/module-execution.browser.test.ts
+	// (real-transport-only: the fake cannot instantiate an ES module).
 
 	describe('in-flight call discard (transport seam)', () => {
 		it('never writes the response back after a stop wins mid-call', async () => {

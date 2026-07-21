@@ -9,10 +9,15 @@
  * serviced SYNCHRONOUSLY (a thenable onCall return is a loud failure);
  * the payload ceiling, Atomics blocking, and timer fidelity are
  * real-transport-only evidence. A green fake proves logic, never
- * transport fidelity. (The reference fixture's mutateGlobalsAfterSetup
- * directive is inert here by construction: the fake's whole run is
- * synchronous, so a queued microtask can never precede the snapshot —
- * the snapshot race is bootstrap.browser territory.)
+ * transport fidelity. The execution axis is likewise real-only: the
+ * fake runs the `'function'` path regardless of `init.execution` (it
+ * cannot instantiate a genuine ES module same-thread), so module
+ * conformance lives in tests/conformance/transport/, never here.
+ *
+ * (The reference fixture's mutateGlobalsAfterSetup directive is inert
+ * here by construction: the fake's whole run is synchronous, so a
+ * queued microtask can never precede the snapshot — the snapshot race
+ * is bootstrap.browser territory.)
  *
  * The fake NEVER throws into the program (the engine does not
  * interfere with program execution): an unserviceable call queues the

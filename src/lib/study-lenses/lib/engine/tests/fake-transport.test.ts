@@ -240,4 +240,15 @@ describe('createFakeTransport', () => {
 			expect(items).toEqual([Math.PI]);
 		});
 	});
+
+	describe('execution axis (function-path only)', () => {
+		it('ignores execution module and injects globals as parameters', async () => {
+			const handle = fakeRun('emit(typeof globalThis.emit);', {
+				execution: 'module',
+			});
+			const { items } = await handle.result;
+
+			expect(items).toEqual(['undefined']);
+		});
+	});
 });

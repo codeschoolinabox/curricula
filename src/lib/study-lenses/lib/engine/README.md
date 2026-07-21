@@ -262,7 +262,9 @@ Two tiers, scoped honestly:
   drop-vs-yield logic, call servicing, refinement, settlement classification.
 - `tests/conformance/transport/` runs against the real transport ONLY — Atomics
   blocking, pause ordering, the call payload ceiling, timer and yield-charge
-  behavior, COOP/COEP-dependent setup.
+  behavior, COOP/COEP-dependent setup, and the module execution axis (globalThis
+  delivery, `import.meta`, top-level await — the fake runs the function path
+  regardless of the axis and cannot reproduce these).
 
 A green fake run is NOT evidence for any transport-fidelity invariant; the fake
 exists so consumer logic is Node-testable, not to certify the transport.

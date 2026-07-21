@@ -130,5 +130,12 @@ export default function registerSettlement(runner: AgnosticRunner): void {
 	});
 }
 
+// The module execution axis is deliberately absent from this tier: the
+// fake runs same-thread via `new Function` and cannot reproduce genuine
+// ES-module semantics (import.meta, real top-level await), so there is
+// no second transport to hold module behavior in sync against. Module
+// conformance is real-transport-only — see
+// tests/conformance/transport/module-execution.browser.test.ts.
+
 const LIMIT_THROW_CODE =
 	"const e = new Error('limit hit'); e.name = 'ReferenceLimitError'; throw e;";
