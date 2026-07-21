@@ -191,7 +191,9 @@ type Rate = {
  * Plain data — a frozen partial record, never a `Map` — so the freeze reaches
  * its entries and it survives `JSON` untruncated.
  */
-type Histogram<K extends string | number> = Readonly<Partial<Record<K, number>>>;
+type Histogram<K extends string | number> = Readonly<
+	Partial<Record<K, number>>
+>;
 
 /**
  * The per-case roll-up of {@link Outcome}s into rates and histograms.

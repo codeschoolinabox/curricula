@@ -91,8 +91,8 @@ flowchart TD
   exhaustiveness rests on `Meta` being absent on a refusal; it would break if
   `attempts` were ever added to a refusal's meta.
 - **`Histogram` is plain data.** A frozen partial record over its closed key
-  set, read by the formatter; a key absent counted zero. Shaped as a `Record`
-  — never a `Map` — so the freeze reaches its entries and it survives `JSON`
+  set, read by the formatter; a key absent counted zero. Shaped as a `Record` —
+  never a `Map` — so the freeze reaches its entries and it survives `JSON`
   untruncated (the package-wide frozen-surface rule).
 - **`quadrant` is a derived label, trusted not re-derived.** It is
   `config.validate` × empty-`program`; the fold reads it for grouping and does
