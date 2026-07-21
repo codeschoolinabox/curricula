@@ -31,7 +31,7 @@
 
 import type { Program } from 'acorn';
 
-import type { LoadedModel } from '../../../../study-lenses--deprecated-architecture/lib/local-llm/types.js';
+import type { LoadedModel } from '../../../../study-lenses/lib/local-llm/types.js';
 import type { SourceRange } from '../../../lib/validating/types.js';
 
 // ─── Feature subset (permitted constructs + operators) ────────────────

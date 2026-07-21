@@ -5,7 +5,7 @@ import type {
 	LoadResult,
 	ModelCatalog,
 	Selection,
-} from '../../../../../study-lenses--deprecated-architecture/lib/local-llm/types.js';
+} from '../../../../../study-lenses/lib/local-llm/types.js';
 import makeLoadModel from '../load-model.js';
 import type { NextStep, Refusal } from '../types.js';
 

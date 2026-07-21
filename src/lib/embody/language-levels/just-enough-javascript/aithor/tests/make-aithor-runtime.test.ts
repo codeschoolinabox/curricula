@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
 
-import DEFAULT_CATALOG from '../../../../../study-lenses--deprecated-architecture/lib/local-llm/catalog.js';
+import DEFAULT_CATALOG from '../../../../../study-lenses/lib/local-llm/catalog.js';
 import {
 	webllmEntry,
 	fakeProbe,
 	countedAdapter,
-} from '../../../../../study-lenses--deprecated-architecture/lib/local-llm/tests/fakes.js';
+} from '../../../../../study-lenses/lib/local-llm/tests/fakes.js';
 import makeAithorRuntime from '../make-aithor-runtime.js';
 
 // Increment 2 — make-aithor-runtime: the default-runtime factory (thin wiring).

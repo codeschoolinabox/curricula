@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 import type {
 	GenerationResult,
 	LoadedModel,
-} from '../../../../../study-lenses--deprecated-architecture/lib/local-llm/types.js';
+} from '../../../../../study-lenses/lib/local-llm/types.js';
 import aithor from '../aithor.js';
 import conform from '../conform.js';
 import type { AithorRuntime, RefusalCause } from '../types.js';

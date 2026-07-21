@@ -19,14 +19,14 @@
  * constructs local-llm, which has no remote path. The value-not-throw re-mapping
  * lives in {@link makeLoadModel}; this file is wiring only.
  */
-import DEFAULT_CATALOG from '../../../../study-lenses--deprecated-architecture/lib/local-llm/catalog.js';
-import makeLocalLlm from '../../../../study-lenses--deprecated-architecture/lib/local-llm/make-local-llm.js';
+import DEFAULT_CATALOG from '../../../../study-lenses/lib/local-llm/catalog.js';
+import makeLocalLlm from '../../../../study-lenses/lib/local-llm/make-local-llm.js';
 import type {
 	AdapterMap,
 	CapabilityProbe,
 	ModelCatalog,
 	RuntimeKind,
-} from '../../../../study-lenses--deprecated-architecture/lib/local-llm/types.js';
+} from '../../../../study-lenses/lib/local-llm/types.js';
 
 import makeLoadModel from './load-model.js';
 import type { AithorRuntime } from './types.js';

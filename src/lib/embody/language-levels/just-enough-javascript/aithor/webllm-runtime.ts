@@ -15,7 +15,7 @@
  * lazily on first load. aithor's core (loader, factory, orchestrator) stays
  * backend-agnostic; this is the one module a host opts into for WebLLM.
  */
-import makeWebllmAdapter from '../../../../study-lenses--deprecated-architecture/lib/local-llm/webllm-adapter.js';
+import makeWebllmAdapter from '../../../../study-lenses/lib/local-llm/webllm-adapter.js';
 
 import makeAithorRuntime from './make-aithor-runtime.js';
 import type { AithorRuntime } from './types.js';

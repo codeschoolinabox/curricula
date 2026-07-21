@@ -34,7 +34,7 @@ import type {
 	LocalLlm,
 	ModelCatalog,
 	Selection,
-} from '../../../../study-lenses--deprecated-architecture/lib/local-llm/types.js';
+} from '../../../../study-lenses/lib/local-llm/types.js';
 
 import type { ModelLoader, NextStep } from './types.js';
 
