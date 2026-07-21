@@ -127,18 +127,11 @@ async function startWorker(
 		return;
 	}
 
-	// WHY a second error listener: listenUntilReady's resolver is spent
-	// after the handshake; a post-ready crash would otherwise hang the
-	// pump until the time budget fires. The bootstrap try/catches every
-	// consumer path, so this is boundary defense, not a reachable suite
-	// row.
-	worker.addEventListener('error', function onPostReadyError(event) {
-		enqueue(state, {
-			kind: 'failure',
-			name: 'EngineWorkerError',
-			message: event.message || 'the worker crashed after load',
-		});
-	});
+	// WHY no second error listener: listenUntilReady's error listener is
+	// never detached, and its enqueue covers post-ready crashes too —
+	// only its resolve(false) is spent (a harmless no-op on a settled
+	// promise). A duplicate listener here would enqueue one crash twice
+	// (pinned by conformance/transport/post-ready-crash.browser.test.ts).
 
 	const sharedBuffer = new SharedArrayBuffer(PROTOCOL.BUFFER_SIZE);
 	state.views = createBufferViews(sharedBuffer);
