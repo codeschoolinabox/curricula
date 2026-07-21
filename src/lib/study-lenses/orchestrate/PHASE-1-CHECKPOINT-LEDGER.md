@@ -25,7 +25,7 @@ Replay setup: `npm start`, then visit the page each entry names.
 | EDIT-3    | (this row's commit) | `/sandbox/orchestrate`                                                                                             | load the page (notes lens honored open); click the Edit code button in the control row; then select Scaffold + strict, type `debugger;`, open parsons, click Edit code again | while a lens is open an Edit code button leads the control row and clicking it returns the editor with edits intact; in editor mode the button is absent; while MASKED with a lens open the button stays clickable — the strip is inert and the button is the guaranteed way home                                                                                                                                                                                                                                |
 | DISP-4    | (this row's commit) | `/sandbox/orchestrate`                                                                                             | close the honored notes lens; open parsons; click the type toggle                                                                                                            | the toggle closes parsons FIRST and lands you back in the editor under the new type (a derivation-context change never happens beneath an open lens); toggling with no lens open behaves as before                                                                                                                                                                                                                                                                                                               |
 | DISP-5    | (this row's commit) | `/sandbox/orchestrate`                                                                                             | close the notes lens; open parsons; pick a level from the selector; open parsons again; flip strict                                                                          | each derivation-context commit closes the open lens FIRST and lands you in the live editor — no change ever happens beneath a mount. The masked-honored variant (strict + violation at load over a focus lens) is NOT constructible on this page without a harness prop edit (activeLanguageLevel + strictLanguageLevels + a `debugger;` seed); it is pinned by the jsdom tests "disposes an honored lens and unmasks in the same posture commit" and "disposes an honored lens on a type toggle under the mask" |
-| FLUSH-6   | (this row's commit) | `/sandbox/orchestrate`                                                                                             | close the notes lens; type a fresh line and IMMEDIATELY (before the debounce lands) open parsons; close it; also type `1 +` and immediately open parsons                     | the lens opens over the code exactly as typed — pending keystrokes are absorbed at the open, never discarded; opening over just-typed broken code closes itself right back to the editor (the offer was made against the pre-flush parse; nothing ever mounts against facts that reject it)                                                                                                                                                                                                                      |
+| FLUSH-6   | (this row's commit) | `/sandbox/orchestrate`                                                                                             | close the notes lens; type a fresh line and IMMEDIATELY (before the debounce lands) open parsons; click Edit code                                                            | the lens opens over the code exactly as typed — pending keystrokes are absorbed at the open, never discarded — and Edit code returns the editor holding them. (Parsons is text-tier, so it stays open over broken code; the self-close of a lens whose applicability needs the parse is pinned by the jsdom gate test "never mounts a lens the flushed facts reject".)                                                                                                                                           |
 
 Entries append as 🔍-bearing increments land. Wave 0 carried no 🔍.
 
@@ -37,6 +37,20 @@ Entries append as 🔍-bearing increments land. Wave 0 carried no 🔍.
 > is what stays operable); W4-T3's "clicking another lens replaces it" now
 > replaces the EDITOR too; GATE's "never the editor" masking claim reads "never
 > the editor while mounted".
+
+## Machine replay — 2026-07-21 (the swap rows, maintainer-delegated)
+
+The five swap-era rows (SWAP-2 · EDIT-3 · DISP-4 · DISP-5 · FLUSH-6) plus the
+mask-geometry check were replayed headless — Playwright driving real Chromium
+against `npm start`, through the real DOM: **14/14 named observations verified,
+browser console clean throughout.** Live finding folded back into FLUSH-6's
+wording: parsons (text-tier) STAYS open over broken code — the reachability
+self-close belongs to parse-gated lenses, which the jsdom gate test pins.
+Screenshots reviewed: the honored load (notes occupies the pane, no editor, Edit
+code leads the control row) and the masked editor mode (the overlay names the
+violation over the content region only; the strip dims inert; the editor stays
+alive and framed). DISP-5's masked-honored variant remains jsdom-pinned per its
+row note (needs a harness prop edit to replay live).
 
 ## Machine replay — 2026-07-20 (maintainer-delegated)
 
