@@ -150,7 +150,12 @@ async function startWorker(
 		worker.terminate();
 		return;
 	}
-	worker.postMessage({ kind: 'execute', code: init.code, strict: init.strict });
+	worker.postMessage({
+		kind: 'execute',
+		code: init.code,
+		strict: init.strict,
+		execution: init.execution,
+	});
 }
 
 /**

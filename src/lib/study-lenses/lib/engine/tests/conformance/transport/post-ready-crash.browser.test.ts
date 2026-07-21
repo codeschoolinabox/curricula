@@ -28,6 +28,7 @@ describe('post-ready crash (real transport)', () => {
 				),
 			workerConfig: {},
 			strict: true,
+			execution: 'function',
 		});
 		const first = (await transport.next()) as { kind: string };
 		const second = (await transport.next()) as { kind: string; name?: string };

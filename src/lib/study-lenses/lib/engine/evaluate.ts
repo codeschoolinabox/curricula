@@ -182,6 +182,7 @@ async function runToSettlement(
 			workerFactory: state.spec.workerFactory,
 			workerConfig: state.spec.workerConfig,
 			strict: state.spec.strict ?? true,
+			execution: state.spec.execution ?? 'function',
 		});
 		state.budget?.resume();
 		await pump(state, transport);

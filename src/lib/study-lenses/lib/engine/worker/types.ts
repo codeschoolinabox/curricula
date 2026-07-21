@@ -26,11 +26,12 @@ type SetupMessage = {
 	readonly workerConfig: unknown;
 };
 
-/** Delivers the program and its strict-mode preference; starts the run. */
+/** Delivers the program, its strict preference, and its execution axis. */
 type ExecuteMessage = {
 	readonly kind: 'execute';
 	readonly code: string;
 	readonly strict: boolean;
+	readonly execution: 'function' | 'module';
 };
 
 type ToWorkerMessage = SetupMessage | ExecuteMessage;
@@ -97,6 +98,12 @@ type TransportInit = {
 	readonly workerFactory: () => Worker;
 	readonly workerConfig: unknown;
 	readonly strict: boolean;
+	/**
+	 * The execution axis, already defaulted by the factory (`evaluate`
+	 * resolves the spec's optional field to `'function'`) — required
+	 * here so no transport re-defaults it.
+	 */
+	readonly execution: 'function' | 'module';
 };
 
 /**

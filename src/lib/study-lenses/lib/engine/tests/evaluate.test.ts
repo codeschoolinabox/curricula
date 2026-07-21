@@ -16,7 +16,11 @@ import { describe, expect, it, vi } from 'vitest';
 
 import evaluate from '../evaluate.js';
 import type { EngineHandle } from '../types.js';
-import type { Transport, TransportEvent } from '../worker/types.js';
+import type {
+	Transport,
+	TransportEvent,
+	TransportInit,
+} from '../worker/types.js';
 
 function lazyHandle(): EngineHandle {
 	return evaluate({
@@ -127,6 +131,81 @@ describe('evaluate', () => {
 			});
 		});
 	});
+
+	describe('execution axis rides the spec to the transport', () => {
+		it('defaults the execution axis to function', async () => {
+			const seen = { init: null as TransportInit | null };
+			const stubTransport: Transport = Object.freeze({
+				start: (init: TransportInit) => {
+					seen.init = init;
+					return Promise.resolve();
+				},
+				next: (): Promise<TransportEvent> =>
+					Promise.resolve({
+						kind: 'halt',
+						haltKind: 'natural-end',
+						payload: {},
+					}),
+				hasPendingEvent: () => false,
+				resume: () => {},
+				respond: () => {},
+				terminate: () => {},
+			});
+			const handle = evaluate(
+				{
+					code: '',
+					workerFactory: () => {
+						throw new Error('unused — stub transport never spawns');
+					},
+					threadLogic: { onMessage: (message) => message },
+				},
+				() => stubTransport,
+			);
+			await handle.result;
+
+			expect(seen.init?.execution).toBe('function');
+		});
+
+		it('passes the module axis through to the transport', async () => {
+			const seen = { init: null as TransportInit | null };
+			const stubTransport: Transport = Object.freeze({
+				start: (init: TransportInit) => {
+					seen.init = init;
+					return Promise.resolve();
+				},
+				next: (): Promise<TransportEvent> =>
+					Promise.resolve({
+						kind: 'halt',
+						haltKind: 'natural-end',
+						payload: {},
+					}),
+				hasPendingEvent: () => false,
+				resume: () => {},
+				respond: () => {},
+				terminate: () => {},
+			});
+			const handle = evaluate(
+				{
+					code: '',
+					workerFactory: () => {
+						throw new Error('unused — stub transport never spawns');
+					},
+					threadLogic: { onMessage: (message) => message },
+					execution: 'module',
+				},
+				() => stubTransport,
+			);
+			await handle.result;
+
+			expect(seen.init?.execution).toBe('module');
+		});
+	});
+
+	// The real-transport hop (TransportInit.execution → the posted
+	// ExecuteMessage.execution) is unverified here — proven once E2's
+	// bootstrap branches on it (real transport) and E3's agnostic
+	// conformance rows exercise both transports, mirroring the strict
+	// rows in tests/conformance/agnostic/settlement.ts.
 
 	describe('in-flight call discard (transport seam)', () => {
 		it('never writes the response back after a stop wins mid-call', async () => {
