@@ -1030,7 +1030,7 @@ describe('StudyLenses', () => {
 			);
 		});
 
-		it('keeps the opened overrides through a settle', async () => {
+		it('keeps the opened overrides through the absorbed settle', async () => {
 			const target = buildLens('target', {
 				main: ({ config }) => (
 					<div data-target-probe>{String(config['note'] ?? 'missing')}</div>
@@ -1057,9 +1057,6 @@ describe('StudyLenses', () => {
 				);
 				if (!affordance) throw new Error('missing the recommendation');
 				fireEvent.click(affordance);
-				act(() => {
-					vi.advanceTimersByTime(250);
-				});
 			} finally {
 				vi.useRealTimers();
 			}
@@ -1229,10 +1226,13 @@ describe('StudyLenses', () => {
 			});
 		});
 
-		it('keeps the unsettled live edit through a dispose', async () => {
-			// The seed must be the LIVE buffer, not the last settle: edit, do
-			// NOT let the debounce land, take the excursion, return — the
-			// remounted editor holds the unsettled text.
+		it('keeps the just-typed edit through a dispose', async () => {
+			// Since the flush-at-open, the edit is absorbed AT the open —
+			// nothing stays unsettled across an excursion, so this test can no
+			// longer distinguish a live-source seed from a settled-source seed
+			// (the seed choice is mutation-checked instead; see the Increment 6
+			// commit body). Kept: it still pins that the typed text survives
+			// the whole round trip.
 			const probe = buildLens('probe', {
 				main: () => <div data-probe>open</div>,
 			});
@@ -1270,20 +1270,28 @@ describe('StudyLenses', () => {
 			try {
 				editLiveSource(container, '1 +');
 				openLensThroughStrip(container, 'environment', 'env-viewer');
-				act(() => {
-					vi.advanceTimersByTime(250);
-				});
 			} finally {
 				vi.useRealTimers();
 			}
-			expect([
-				container.querySelector('[data-env-probe]') === null,
-				dispatches.filter(
-					([name, payload]) =>
-						name === 'lens-opened' &&
-						(payload as { lens: string | null }).lens === null,
-				).length,
-			]).toEqual([true, 1]);
+			// The DOCS-pinned LEGAL sequence: the open, the explaining settle
+			// (the flush absorbed the breaking edit at open), then the orphan
+			// defense's close — settled BETWEEN the name and the null, riding
+			// the pinned effect registration order.
+			const relevant = dispatches
+				.map(([name, payload]) =>
+					name === 'lens-opened'
+						? `lens-opened:${String((payload as { lens: string | null }).lens)}`
+						: name,
+				)
+				.filter((name) =>
+					['lens-opened:env-viewer', 'lens-opened:null', 'settled'].includes(
+						name,
+					),
+				);
+			expect([container.querySelector('[data-env-probe]'), relevant]).toEqual([
+				null,
+				['lens-opened:env-viewer', 'settled', 'lens-opened:null'],
+			]);
 		});
 
 		it('mounts a focus-honored panel-excluded lens as the pane occupant', async () => {
@@ -1350,6 +1358,125 @@ describe('StudyLenses', () => {
 			expect([follows(row, strip), follows(strip, editor)]).toEqual([
 				true,
 				true,
+			]);
+		});
+	});
+
+	describe('the flush at open (Boundaries)', () => {
+		it('mounts the opened lens on the exact live buffer, pending keystrokes absorbed', async () => {
+			const mirror = buildLens('mirror', {
+				main: ({ embodiment }) => (
+					<div data-mirror>{embodiment.facts.source.value}</div>
+				),
+			});
+			const container = await mountInstrument(
+				<StudyLenses lenses={[mirror]} snippet="const x = 1;" />,
+			);
+			vi.useFakeTimers();
+			try {
+				editLiveSource(container, 'let pending = 9;');
+				openLensThroughStrip(container, 'source', 'mirror');
+			} finally {
+				vi.useRealTimers();
+			}
+			expect(container.querySelector('[data-mirror]')?.textContent).toBe(
+				'let pending = 9;',
+			);
+		});
+
+		it('announces the absorbed settle once, after the open — and never again', async () => {
+			const dispatches = recordDispatches();
+			const probe = buildLens('probe', {
+				main: () => <div data-probe>open</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses lenses={[probe]} snippet="const x = 1;" />,
+			);
+			vi.useFakeTimers();
+			try {
+				editLiveSource(container, 'let pending = 9;');
+				openLensThroughStrip(container, 'source', 'probe');
+				act(() => {
+					vi.advanceTimersByTime(2000);
+				});
+			} finally {
+				vi.useRealTimers();
+			}
+			const names = dispatches
+				.map(([name]) => name)
+				.filter((name) => ['lens-opened', 'settled'].includes(name));
+			expect(names).toEqual(['lens-opened', 'settled']);
+		});
+
+		it('announces no settle on an editless open', async () => {
+			const dispatches = recordDispatches();
+			const probe = buildLens('probe', {
+				main: () => <div data-probe>open</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses lenses={[probe]} snippet="const x = 1;" />,
+			);
+			openLensThroughStrip(container, 'source', 'probe');
+			expect(dispatches.filter(([name]) => name === 'settled')).toHaveLength(0);
+		});
+
+		it('never mounts a lens the flushed facts reject — the gate before the defense', async () => {
+			// A mount-effect spy distinguishes "never committed" from
+			// "committed one frame, then torn down" — the one-frame totality
+			// violation the render gate exists to prevent.
+			const mounted = vi.fn();
+			function NeverMain(): React.JSX.Element {
+				React.useEffect(function reportMount() {
+					mounted();
+				}, []);
+				return <div data-never-probe>never</div>;
+			}
+			const excluded = buildPanelExcludedLens('excluded', {
+				applicability: (facts) => facts.ast.ok,
+				main: NeverMain,
+			});
+			const proposer = buildLens('proposer', {
+				recommend: () => [
+					{ lens: excluded, config: {}, relevance: 0.9, label: 'go deeper' },
+				],
+			});
+			const dispatches = recordDispatches();
+			const container = await mountInstrument(
+				<StudyLenses lenses={[proposer, excluded]} snippet="const x = 1;" />,
+			);
+			vi.useFakeTimers();
+			try {
+				editLiveSource(container, '1 +');
+				const affordance = container.querySelector<HTMLElement>(
+					'[data-recommendation="excluded"]',
+				);
+				if (!affordance) throw new Error('missing the recommendation');
+				fireEvent.click(affordance);
+			} finally {
+				vi.useRealTimers();
+			}
+			await waitFor(() => {
+				expect(container.querySelector('.cm-editor')).not.toBeNull();
+			});
+			const relevant = dispatches
+				.map(([name, payload]) =>
+					name === 'lens-opened'
+						? `lens-opened:${String((payload as { lens: string | null }).lens)}`
+						: name,
+				)
+				.filter((name) =>
+					['lens-opened:excluded', 'lens-opened:null', 'settled'].includes(
+						name,
+					),
+				);
+			expect([
+				mounted.mock.calls.length,
+				container.querySelector('[data-never-probe]'),
+				relevant,
+			]).toEqual([
+				0,
+				null,
+				['lens-opened:excluded', 'settled', 'lens-opened:null'],
 			]);
 		});
 	});

@@ -154,13 +154,14 @@ covered surface keeps its state beneath it — and the blocked state names the
 level and the first violation, or the type-admission cause. Every mask input —
 source, type, level, posture — is frozen while a lens is open (each commit
 disposes the lens first), so enforcement arises in editor mode, where the masked
-strip bars opening lenses; the one path that mounts a lens under an active mask
-is the honored focus, and there the mask applies to the focus-mounted lens
-identically. The full class-3 block applies while the selected level's fit mark
-is does-not-fit or not-applicable-for-type — once the code parses. While it does
-not parse, the mark is undetermined and that carve-out wins regardless of type
-admission: the mask names no violation, and the parse phases' panel nodes and
-their error lenses stay uncovered — the supports a broken program needs are
+strip bars opening lenses. Two paths can mount a lens under an active mask: the
+honored focus, and a flush-at-open whose absorbed keystrokes settle out-of-level
+code (the strip was live when clicked); on both, the mask applies to the mounted
+lens identically. The full class-3 block applies while the selected level's fit
+mark is does-not-fit or not-applicable-for-type — once the code parses. While it
+does not parse, the mark is undetermined and that carve-out wins regardless of
+type admission: the mask names no violation, and the parse phases' panel nodes
+and their error lenses stay uncovered — the supports a broken program needs are
 never the price of a wrong toggle. Under warn, nothing is blocked anywhere.
 Enforcement is mask, not filter — it never edits fit or accessibility — and
 recommendation rendering passes through the same mask.

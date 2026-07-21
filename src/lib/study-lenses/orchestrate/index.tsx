@@ -45,6 +45,7 @@ import type {
 	JoinedLensRoster,
 } from './lib/composing/types.js';
 import honorFocusRequest from './lib/honoring/honor-focus-request.js';
+import isOpenLensReachable from './lib/honoring/is-open-lens-reachable.js';
 import deriveMask from './lib/masking/derive-mask.js';
 import type { MaskState } from './lib/masking/types.js';
 import createMemoizedValidate from './lib/validating/create-memoized-validate.js';
@@ -89,9 +90,8 @@ export default function StudyLenses({
 	const [strict, setStrict] = React.useState(strictLanguageLevels);
 	const [type, setType] = React.useState(initialType);
 
-	// 3. The settle loop and the one derivation per settle. (The hook's
-	// immediate flush joins the destructure when the flush-at-open lands.)
-	const { settled, onEdit, readLiveSource } = useSettledSnippet({
+	// 3. The settle loop and the one derivation per settle.
+	const { settled, onEdit, readLiveSource, settleNow } = useSettledSnippet({
 		initialSource: session.snippet,
 		type,
 	});
@@ -177,18 +177,24 @@ export default function StudyLenses({
 
 	// The two pane transitions every open and close path routes through.
 	// The occupant ref is written EAGERLY (before the state commit) so the
-	// guards stay correct within one synchronous batch. Opening carries the
-	// CURRENT settled pair as the mount's coherence anchor; the opened
+	// guards stay correct within one synchronous batch. The opened
 	// overrides live on the lens arm, so they cannot outlive the choice.
 	function openLensSurface(
 		lensName: string,
 		opened: ConfigOverridesByLens,
 	): void {
+		// The flush-at-open: absorb any pending settle so the lens mounts on
+		// the EXACT buffer (identity retained when nothing was pending — no
+		// re-derivation, no re-announce). The coherence anchor is built from
+		// the SAME live values the flush settles with — both commit in one
+		// batch, so the render invariants' field-equality holds; anchoring
+		// `settled` here instead would capture the stale pre-flush closure.
+		settleNow();
 		occupantReference.current = freezeInPlace({
 			mode: 'lens',
 			openLensName: lensName,
 			opened,
-			openedAt: settled,
+			openedAt: freezeInPlace({ source: readLiveSource(), type }),
 		});
 		setOccupant(occupantReference.current);
 		session.bus.dispatch(LENS_OPENED, { lens: lensName });
@@ -222,24 +228,26 @@ export default function StudyLenses({
 		});
 	}
 
-	// A strip-opened lens whose every phase barred (or whose fit lapsed) has
-	// no select left signaling it — dispose it rather than leave it orphaned
-	// in the pane. A panel-excluded lens has no strip presence and stays:
-	// its own applicability gated it at mount.
+	// The orphan defense — the reachability judgment's SECOND projection
+	// (the render gate below is the first; one judgment, two projections,
+	// per DOCS § Structural constraints). An open lens the CURRENT
+	// derivation rejects — a phase-declared lens with every attaching phase
+	// barred, or a panel-excluded lens whose applicability lapsed over the
+	// flushed facts — is disposed rather than left orphaned in the pane.
+	// Reachability can lapse mid-mount only through the flush-at-open (the
+	// loop is frozen otherwise), so this fires in the same effect pass as
+	// the flush's settled announce — AFTER it, by the pinned registration
+	// order.
 	React.useEffect(
 		function closeOrphanedOpenLens() {
 			if (occupant.mode !== 'lens') return;
-			const openName = occupant.openLensName;
 			const open = session.lenses.find(
-				(candidate) => candidate.name === openName,
+				(candidate) => candidate.name === occupant.openLensName,
 			);
-			if (open?.phase === undefined) return;
-			const reachable = Object.values(derivation.embodiment.study).some(
-				(phase) =>
-					phase.accessible &&
-					phase.lenses.some((attached) => attached.name === openName),
-			);
-			if (!reachable) disposeToEditor();
+			if (!open) return;
+			if (!isOpenLensReachable(open, derivation.embodiment)) {
+				disposeToEditor();
+			}
 		},
 		// disposeToEditor and the hook's live-source read are per-render by
 		// contract (never deps); both read only refs plus the stable
@@ -265,6 +273,20 @@ export default function StudyLenses({
 					(candidate) => candidate.name === occupant.openLensName,
 				) ?? null)
 			: null;
+
+	if (occupant.mode === 'lens') {
+		assertPaneCoherence(occupant, settled, openLens);
+	}
+
+	// The reachability judgment's FIRST projection: when the current
+	// derivation rejects the open lens (a flush-at-open can do this — the
+	// offer was made against pre-flush facts), the pane renders nothing
+	// this frame and the orphan defense disposes post-commit. A lens's
+	// main never mounts against an embodiment its applicability rejected.
+	const openLensReachable =
+		occupant.mode === 'lens' && openLens !== null
+			? isOpenLensReachable(openLens, derivation.embodiment)
+			: false;
 	const selectedLevel =
 		session.levels.find((level) => level.key === selectedLevelKey) ?? null;
 	const mask = deriveMask({
@@ -336,7 +358,7 @@ export default function StudyLenses({
 			) : null}
 			<div style={{ position: 'relative' }}>
 				<div data-maskable inert={mask.masked || undefined}>
-					{occupant.mode === 'lens' && openLens ? (
+					{occupant.mode === 'lens' && openLens && openLensReachable ? (
 						<MountedLens
 							configs={configs}
 							embodiment={derivation.embodiment}
@@ -385,6 +407,35 @@ export default function StudyLenses({
 
 // The one bus event three commit paths share.
 const LENS_OPENED = 'lens-opened';
+
+// The pane's coherence invariants — loud in dev AND prod. Unreachable
+// through the public surface by construction (the flush anchors every open,
+// every derivation-context commit disposes first, and proposals are vetted
+// at collection); reachable only by a future regression, which must crash,
+// never drift.
+function assertPaneCoherence(
+	occupant: Extract<PaneOccupant, { mode: 'lens' }>,
+	settled: SettledSnippet,
+	openLens: Lens | null,
+): void {
+	if (settled.source !== occupant.openedAt.source) {
+		throw new Error(
+			'orchestrator invariant violated: the open lens must render against its open-time source',
+		);
+	}
+
+	if (settled.type !== occupant.openedAt.type) {
+		throw new Error(
+			'orchestrator invariant violated: the open lens must render against its open-time type',
+		);
+	}
+
+	if (openLens === null) {
+		throw new Error(
+			`orchestrator invariant violated: open lens "${occupant.openLensName}" is not on the mount roster`,
+		);
+	}
+}
 
 // The blocked state's single upstream author: the level's label plus the
 // first violation in the machine's own words, or the admitted types the

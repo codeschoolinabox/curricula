@@ -64,9 +64,14 @@ export default function deriveStudy(
 		]),
 	);
 
-	// 4. Recommend — the fitting lenses' proposals, collected and ranked.
+	// 4. Recommend — the fitting lenses' proposals, collected, vetted, and
+	// ranked. Vetting happens at collection, before ranking: a proposal
+	// whose target lens is off the joined roster is dropped with a loud
+	// report at the author's desk, so every surviving proposal names a
+	// roster lens the pane's reachability judgment can classify (the
+	// ranking itself alters nothing — its no-alteration contract holds).
 	const recommendations = rankRecommendations(
-		collectProposals(embodiment, lenses),
+		vetProposals(collectProposals(embodiment, lenses), lenses),
 	);
 
 	// 5. The frozen derivation — the envelope and the assessments record are
@@ -98,6 +103,25 @@ function collectProposals(
 	);
 	const renderable = recoverRenderableLenses(lenses, attachedUnion);
 	return renderable.flatMap((lens) => askRecommend(lens, embodiment));
+}
+
+// Collection-time vetting: a lens may propose another lens it imports, so a
+// proposal's target can be OFF the joined roster — un-openable, and (under
+// the pane swap) a blank-pane hazard. Dropped here, gracefully, with a loud
+// report at the author's desk; roster-targeted proposals pass untouched.
+function vetProposals(
+	proposals: ReadonlyArray<Recommendation>,
+	lenses: JoinedLensRoster,
+): ReadonlyArray<Recommendation> {
+	return proposals.filter(function keepRosterTargets(proposal) {
+		const onRoster = lenses.some((lens) => lens.name === proposal.lens.name);
+		if (!onRoster) {
+			console.error(
+				`recommendation dropped — target lens "${proposal.lens.name}" is not on the joined roster`,
+			);
+		}
+		return onRoster;
+	});
 }
 
 // A throwing recommend is caught, reported loudly, and proposes nothing —

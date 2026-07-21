@@ -101,16 +101,17 @@ flowchart TD
   shadowed; failure happens at mount, at the author's desk.
 - **Class-2 controls never mask.** Any control whose availability restores what
   the learner needs stays alive under every posture: conformance for the
-  selector and both toggles, orientation for the guide.
+  selector and both toggles, orientation for the guide, the way home for the
+  Edit code button.
 - **The undetermined carve-out wins.** While the code does not parse, the mask
   names no violation and the parse phases' supports stay uncovered — regardless
   of type admission.
 - **Proposals are vetted at collection.** A recommendation whose target lens
-  does not resolve on the mount roster is dropped at the ranking step —
-  gracefully, with a development-mode warning at the author's desk. Every open
-  path is therefore vetted before the pane: the strip offers only attached
-  lenses, the honor path runs applicability at mount, and a surviving proposal
-  names a roster lens the reachability judgment can classify.
+  does not resolve on the mount roster is dropped at collection, before ranking
+  — gracefully, with a loud report at the author's desk. Every open path is
+  therefore vetted before the pane: the strip offers only attached lenses, the
+  honor path runs applicability at mount, and a surviving proposal names a
+  roster lens the reachability judgment can classify.
 - **One reachability judgment, two projections.** The pane's render gate and the
   orphan defense project a single classification of the open lens over the
   CURRENT derivation — phase-declared: attached to an accessible phase;
@@ -203,12 +204,13 @@ verdicts without consulting a level twice.
   positional list.
 - The panel receives its ordered phase list built from that constant plus the
   labels, and renders it as the horizontal lifecycle strip ABOVE the surface
-  pane, beside the control row (the type toggle, the level surfaces, and — while
-  a lens is open — the Edit code button) — controls and lifecycle in one band,
-  the surface pane beneath: the editor when no lens is open, the open lens in
-  its place. Recommendations render below the pane in both modes. The strip
-  renders no headings; the guide's `h4` topic titles are the instrument's only
-  headings, and the guide renders last in DOM order.
+  pane, beside the control row (the Edit code button — leading, while a lens is
+  open — then the type toggle and the level surfaces; sibling order within the
+  row is presentation, not contract) — controls and lifecycle in one band, the
+  surface pane beneath: the editor when no lens is open, the open lens in its
+  place. Recommendations render below the pane in both modes. The strip renders
+  no headings; the guide's `h4` topic titles are the instrument's only headings,
+  and the guide renders last in DOM order.
 - ONE VISUAL PANE, TWO DOM SLOTS — the mask-membership rule: the editor renders
   OUTSIDE both maskable regions (class 1, never masked while mounted); the
   mounted lens renders INSIDE the maskable content region (class 3). The pane is
@@ -237,7 +239,9 @@ verdicts without consulting a level twice.
   assessment crossed with the posture; the blocked overlay is part of the top
   component's render (in-file until a second call site exists). Every mask input
   is frozen during an excursion (the dispose rule), so mask state is fixed per
-  mount; the honored-focus mount is the one path that can begin masked.
+  mount; a mount can begin masked two ways — the honored focus, or a
+  flush-at-open that settles out-of-level code the strip offered against the
+  pre-flush facts.
 - The honor resolution runs once at mount, mapping fallback → the editor arm and
   honored → the lens arm (`openedAt` = the initial settled pair); the lazy
   initializer stays side-effect-free — no dispatch ever fires from it. The study

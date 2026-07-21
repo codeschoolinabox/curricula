@@ -351,6 +351,28 @@ describe('deriveStudy', () => {
 			expect(recommend).toHaveBeenCalledTimes(1);
 		});
 
+		it('drops an off-roster proposal target at collection, reporting it', () => {
+			const report = vi.spyOn(console, 'error').mockImplementation(() => {});
+			const stranger = buildLens('stranger');
+			const target = buildLens('target');
+			const proposer = buildLens('proposer', {
+				recommend: () => [
+					{ lens: stranger, config: {}, relevance: 0.9, label: 'off roster' },
+					{ lens: target, config: {}, relevance: 0.4, label: 'on roster' },
+				],
+			});
+			const derivation = deriveStudy(
+				{ source: 'const x = 1;', type: 'module' },
+				[],
+				[proposer, target],
+				createMemoizedValidate(),
+			);
+			expect([
+				derivation.recommendations.map((proposal) => proposal.label),
+				report.mock.calls.length,
+			]).toEqual([['on roster'], 1]);
+		});
+
 		it('never asks a non-fitting roster lens', () => {
 			const recommend = vi.fn(() => []);
 			const unfitting = buildLens('unfitting', {

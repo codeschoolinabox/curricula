@@ -1,7 +1,12 @@
 # honoring
 
 The focus-request honor path: how the `lens` prop becomes — or gracefully does
-not become — a mounted lens. One pure decision, taken at mount.
+not become — a mounted lens. One pure decision, taken at mount. This library
+also owns the OPEN lens's live counterpart: the one reachability judgment
+(phase-declared — attached to an accessible phase; panel-excluded — its own
+applicability over the current facts, throw-caught and loudly reported) that the
+pane's render gate and the orphan defense both project — one judgment, two
+projections, per the region DOCS' structural constraints.
 
 The region [README](../../README.md) owns the honor rules' meaning; this
 document owns the decision's mechanics.
