@@ -29,7 +29,8 @@ import type { CreateTransport, Transport } from './worker/types.js';
  *
  * @param spec - The whole coupling surface (README.md § Public API):
  *   code, worker factory, clone-safe worker config, thread logic,
- *   seconds (default 5), strict (default true).
+ *   seconds (default 5), strict (default true), execution axis
+ *   (default 'function').
  * @param createTransport - Engine-internal conformance seam: the
  *   transport factory the run will use. Defaults to the real worker
  *   transport; the engine's own conformance runners inject the fake.

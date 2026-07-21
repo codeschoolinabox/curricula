@@ -13,7 +13,7 @@ import evaluate from '../../../evaluate.js';
 import REFERENCE_THREAD_LOGIC from '../../../testing/reference-thread-logic.js';
 import type { EvaluateSpec } from '../../../types.js';
 
-function moduleRun(code: string) {
+function moduleRun(code: string, overrides: Partial<EvaluateSpec> = {}) {
 	const spec: EvaluateSpec = {
 		code,
 		// Inline `new Worker(new URL(...))` — keep the adjacency webpack needs.
@@ -24,6 +24,7 @@ function moduleRun(code: string) {
 			),
 		threadLogic: REFERENCE_THREAD_LOGIC,
 		execution: 'module',
+		...overrides,
 	};
 	return evaluate(spec);
 }
@@ -46,5 +47,17 @@ describe('module execution (real transport)', () => {
 			settlement.outcome,
 			(settlement.halt as { name: string }).name,
 		]).toEqual(['errored', 'TypeError']);
+	});
+
+	it('settles worker-error, never hangs, when a global cannot install on globalThis', async () => {
+		const handle = moduleRun('', {
+			workerConfig: { invalidGlobalKey: 'undefined' },
+		});
+		const { settlement } = await handle.result;
+
+		expect([settlement.outcome, settlement.error?.cause]).toEqual([
+			'errored',
+			'worker-error',
+		]);
 	});
 });

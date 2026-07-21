@@ -187,17 +187,31 @@ async function executeModule(
 	code: string,
 ): Promise<void> {
 	for (const name of Object.keys(globals)) {
-		// WHY defineProperty, not bracket assignment: an own-property
-		// write bypasses inherited accessor setters, so a global named
-		// `__proto__` installs a real binding instead of repointing
-		// globalThis's prototype. The keys are already identifier-valid.
-		// eslint-disable-next-line functional/immutable-data -- globalThis installation IS the module path's delivery channel
-		Object.defineProperty(globalThis, name, {
-			value: globals[name],
-			writable: true,
-			configurable: true,
-			enumerable: true,
-		});
+		try {
+			// WHY defineProperty, not bracket assignment: an own-property
+			// write bypasses inherited accessor setters, so a global named
+			// `__proto__` installs a real binding instead of repointing
+			// globalThis's prototype. The keys are already identifier-valid.
+			// eslint-disable-next-line functional/immutable-data -- globalThis installation IS the module path's delivery channel
+			Object.defineProperty(globalThis, name, {
+				value: globals[name],
+				writable: true,
+				configurable: true,
+				enumerable: true,
+			});
+		} catch (error) {
+			// A key that is a valid identifier yet a non-configurable own
+			// property of globalThis (`undefined`, `NaN`, `Infinity`) cannot
+			// be redefined — a consumer setup failure. Settle loudly, the way
+			// the function path's parameter shadowing never has to: the engine
+			// never hangs and never throws.
+			post({
+				kind: 'failure',
+				name: 'EngineSetupError',
+				message: `global "${name}" cannot be installed on globalThis: ${describeError(error)}`,
+			});
+			return;
+		}
 	}
 
 	const url = URL.createObjectURL(
