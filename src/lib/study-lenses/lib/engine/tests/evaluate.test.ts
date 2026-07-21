@@ -12,10 +12,11 @@
  * evaluate.browser.test.ts and tests/conformance/transport/.
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import evaluate from '../evaluate.js';
 import type { EngineHandle } from '../types.js';
+import type { Transport, TransportEvent } from '../worker/types.js';
 
 function lazyHandle(): EngineHandle {
 	return evaluate({
@@ -124,6 +125,53 @@ describe('evaluate', () => {
 				cause: 'worker-error',
 				name: 'EngineEnvironmentError',
 			});
+		});
+	});
+
+	describe('in-flight call discard (transport seam)', () => {
+		it('never writes the response back after a stop wins mid-call', async () => {
+			const respond = vi.fn();
+			const delivery = { queue: ['call'] as string[] };
+			const stubTransport: Transport = Object.freeze({
+				start: () => Promise.resolve(),
+				next: (): Promise<TransportEvent> =>
+					delivery.queue.shift() === 'call'
+						? Promise.resolve({ kind: 'call', request: 'ping' })
+						: new Promise<never>(() => {}),
+				hasPendingEvent: () => false,
+				resume: () => {},
+				respond,
+				terminate: () => {},
+			});
+			const gate = { release: () => {} };
+			const handle = evaluate(
+				{
+					code: '',
+					workerFactory: () => {
+						throw new Error('unused — stub transport never spawns');
+					},
+					threadLogic: {
+						onMessage: (message) => message,
+						onCall: () =>
+							new Promise((resolve) => {
+								gate.release = () => resolve('late');
+							}),
+					},
+				},
+				() => stubTransport,
+			);
+			const resultPromise = handle.result;
+			await new Promise((resolve) => {
+				setTimeout(resolve, 0);
+			});
+			handle.cancel();
+			gate.release();
+			const { settlement } = await resultPromise;
+
+			expect([settlement.outcome, respond.mock.calls]).toEqual([
+				'cancelled',
+				[],
+			]);
 		});
 	});
 
