@@ -115,6 +115,38 @@ const config: Config = {
 				},
 			};
 		},
+		// --- markdown `?raw` imports → the file's text ---
+		// Language levels ship their learner-facing docs as raw markdown
+		// strings (`import reference from './reference.md?raw'` in
+		// `src/lib/study-lenses/language-levels/*/index.ts`). Vite/vitest
+		// support the `?raw` query natively; webpack needs this rule.
+		// `asset/source` exports the file's text as the module's default
+		// export. Triple-scoped so the rule owns its own safety: `.md`
+		// files only, under `src/lib` only (Docusaurus's MDX rules are
+		// include-scoped to the content roots, so no resource can match
+		// both), and only the exact `?raw` query (webpack passes the query
+		// with its leading `?`, hence the anchor's escaped form). The
+		// matching TypeScript side is the `*.md?raw` module declaration in
+		// `src/types.d.ts`.
+		function rawMarkdownTextPlugin() {
+			return {
+				name: 'raw-markdown-text',
+				configureWebpack() {
+					return {
+						module: {
+							rules: [
+								{
+									test: /\.md$/,
+									include: path.resolve('src/lib'),
+									resourceQuery: /^\?raw$/,
+									type: 'asset/source',
+								},
+							],
+						},
+					};
+				},
+			};
+		},
 		// --- study-lenses lifecycle plugin (watched-path globs) ---
 		[
 			createStudyLensesPlugin,
