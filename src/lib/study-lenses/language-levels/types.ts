@@ -14,7 +14,7 @@
  * package glossary (../README.md) owns the shared vocabulary.
  */
 
-import type { Comment, Node, Program, Token } from 'acorn';
+import type { Comment, Identifier, Program, Token } from 'acorn';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Foreign vocabulary, mirrored
@@ -40,11 +40,14 @@ export type SnippetType = 'script' | 'module';
  * A level-blind fact with level-owned meaning: whether an unresolved name
  * is the realm's, the runtime's, or a violation is each level's own
  * vocabulary ruling — the projection says only "no program scope resolves
- * this".
+ * this". The three fields carry one job each: `name` is the ruling's datum,
+ * `node` the violation's anchor (offsets and node type, borrowed — never
+ * frozen by a level), `nodePath` the canonical identity a violation
+ * carries.
  */
 export type UnresolvedReference = {
 	readonly name: string;
-	readonly node: Node;
+	readonly node: Identifier;
 	readonly nodePath: string;
 };
 
@@ -58,7 +61,7 @@ export type UnresolvedReference = {
  * but this region's own reprojection of what the parse and scope-analysis
  * stages carry. All fields are present: a validator is never consulted
  * about a program that does not parse or whose scope analysis did not
- * complete (a failed tokens, ast, or environment stage leaves this shape
+ * complete (a failed parse or scope-analysis stage leaves this shape
  * unconstructible), so the undetermined verdict is the caller's, produced
  * without consulting any level. The one scope analysis lives upstream; a
  * level never derives scopes of its own.
@@ -134,8 +137,8 @@ export type EditorSupport = Readonly<
 
 /**
  * A pure function deriving one semantic model. Input and output are the
- * level's own — a hoisting model derives from the parse facts, a realm
- * model needs no program at all — so the spine pins neither; consumers know
+ * level's own — a realm model needs no program at all, a trace
+ * interpretation reads execution — so the spine pins neither; consumers know
  * the concrete shapes by importing the level directly. A spine-holder never
  * invokes a builder: a zero-argument call type-checks to `unknown` but is
  * meaningless — invocation is sound only through a concrete level import.

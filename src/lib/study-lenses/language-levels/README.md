@@ -32,10 +32,11 @@ Every level exports one object satisfying the spine:
   it. Injection is append-only; a key collision is a loud composition error.
 - **label** — the level's display name in the selector.
 - **validate** — pure and synchronous: the parse facts in, violations out. It
-  never parses — one parse truth — and it is never consulted about a program
-  that does not parse (a failed tokens or ast stage leaves the parse facts
-  unconstructible): the undetermined verdict is the caller's, produced without
-  consulting any level.
+  never parses and never derives scopes — one parse truth, one scope analysis —
+  and it is never consulted about a program that does not parse or whose scope
+  analysis did not complete (a failed parse or scope-analysis stage leaves the
+  parse facts unconstructible): the undetermined verdict is the caller's,
+  produced without consulting any level.
 - **snippetTypes** — the snippet types the level admits, spoken in a local
   `'script' | 'module'` vocabulary that structurally mirrors the package's —
   never imported from embody. Whether the current type is admitted is the
@@ -50,9 +51,9 @@ Every level exports one object satisfying the spine:
 - **models** — semantic-model builders, one exported builder per model: per-use
   construction, single algorithmic truth. Each builder's input and output belong
   to the level — the spine keys the record; the shapes are known to the lenses
-  and evaluators that import the level directly. (A hoisting model derives from
-  the parse facts; a realm model needs no program at all; a trace interpretation
-  reads execution — one input type fits none of them.)
+  and evaluators that import the level directly. (A realm model needs no program
+  at all; a trace interpretation reads execution; a scope narrowing reads the
+  embodiment's environment fact — one input type fits none of them.)
 
 The shape, compactly (the full contract with its doc-comments is
 [`types.ts`](./types.ts)):
@@ -89,12 +90,13 @@ architecture; JEJ is simply the first one registered.
 ## One parse truth
 
 validate consumes the **parsed values** — the token stream, the set-aside
-comments, and the syntax tree the embodiment's parse stages carry — never any
-stage envelope, and never a second parse. `ParseFacts` is not a slice of the
+comments, the syntax tree, and the escape list the embodiment's parse and
+scope-analysis stages carry — never any stage envelope, never a second parse,
+and never a second scope analysis. `ParseFacts` is not a slice of the
 embodiment's Facts: it is this region's own reprojection of those values, so no
 type edge runs from levels into embody. The parse-facts vocabulary a level types
-against is the parser's own; its ownership can move to the shared parse leaf
-without touching any level.
+against is the parser's own; the escape list is the one scope resolution's,
+projected.
 
 ## Adding a level
 
@@ -126,7 +128,12 @@ this region owns.
 - **level key** — the registry identity; `''` is the reserved none-state key, a
   label and not a level.
 - **ParseFacts** — the parsed values a validator consumes: the token stream, the
-  set-aside comments, and the syntax tree. Values, never envelopes.
+  set-aside comments, the syntax tree, and the escape list. Values, never
+  envelopes.
+- **escape list** — the scope resolution's unresolved references: every name no
+  program scope declares, each carried with its name, its identifier node, and
+  its canonical path. The one scope input a validator reads; levels derive no
+  scopes of their own.
 - **Violation** — one place the program steps outside the level: the node type,
   the machine-worded message, the source range, and the node's path. A violation
   carries no severity: it never blocks execution — enforcement posture is global

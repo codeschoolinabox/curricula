@@ -207,9 +207,10 @@ const BLOCKED_MEMBER_NAMES: ReadonlySet<string> = new Set([
  * Admits `let` and `const` declarations; refuses `var`.
  *
  * @remarks
- * Legacy `var` scoping is a machine this level does not model — the hoisting
- * model has no arm for it. Multi-declarator statements (`let a = 1, b = 2`) are
- * admitted: learners can weigh the expressiveness trade-off themselves.
+ * Legacy `var` scoping is a machine this level does not teach — its notional
+ * machine models only `let` and `const`. Multi-declarator statements
+ * (`let a = 1, b = 2`) are admitted: learners can weigh the expressiveness
+ * trade-off themselves.
  */
 function checkVariableDeclaration(node: Node): true | string {
 	const { kind } = node as VariableDeclaration;

@@ -14,10 +14,10 @@ abstraction. Each level's own directory zooms into that level.
 
 **Inbound contract.** Every consultation arrives with what it needs: validate
 receives the parsed values (the caller — who memoizes one validate per settle
-and per level — never consults a level about a program that does not parse); the
-editor adapter reads the support data of the selected level; a consumer building
-a semantic model calls that model's exported builder itself. A level initiates
-nothing.
+and per level — never consults a level about a program that does not parse or
+whose scope analysis did not complete); the editor adapter reads the support
+data of the selected level; a consumer building a semantic model calls that
+model's exported builder itself. A level initiates nothing.
 
 ## Execution phases
 
@@ -39,7 +39,7 @@ data read by outside consumers, not an execution phase.
 
 ```mermaid
 flowchart TD
-    PF["parsed values<br/>(tokens · comments · syntax tree)"]
+    PF["parsed values<br/>(tokens · comments · syntax tree ·<br/>the escape list)"]
     VIO["violations<br/>(node type · message · range · path)"]
     SMB["semantic-model builders<br/>(one keyed builder per model)"]
     MOD["one built semantic model<br/>(the level's own shape, per use)"]
@@ -57,9 +57,10 @@ ship.
   nothing, registers nothing, and never acts.
 - **Stateless and pure.** Same inputs, same answers; callers own all memoization
   (one validate per settle and per level, orchestrator-side).
-- **One parse truth.** validate consumes parsed values and never parses; nothing
-  in a level touches the embodiment's stage envelope — no type edge runs from
-  levels into embody.
+- **One parse truth, one scope analysis.** validate consumes parsed,
+  scope-resolved values and never parses or derives scopes; nothing in a level
+  touches the embodiment's stage envelope — no type edge runs from levels into
+  embody.
 - **Single home for level facts.** Everything a level knows lives in its own
   directory — no copies elsewhere to drift.
 - **Lint is an adapter.** Editor diagnostics derive from the same validate
@@ -79,10 +80,11 @@ ship.
   algorithmic truth and no stale caches; each consumer builds exactly the model
   it needs, when it needs it.
 - **Why builder signatures stay the level's own.** The named model families
-  disagree about inputs — a hoisting model derives from the parse facts, a realm
-  model needs no program, a trace interpretation reads execution — and no
-  generic caller ever invokes a builder: consumers import the level directly and
-  know the concrete shapes. Pinning one input type would fit none of them.
+  disagree about inputs — a realm model needs no program, a trace interpretation
+  reads execution, a scope narrowing reads the embodiment's environment fact —
+  and no generic caller ever invokes a builder: consumers import the level
+  directly and know the concrete shapes. Pinning one input type would fit none
+  of them.
 - **Why editor-support shapes belong to the adapter.** The three channels are
   named here; their inner shapes are the generic adapter's contract — the
   consumer of the data owns what the data must look like.

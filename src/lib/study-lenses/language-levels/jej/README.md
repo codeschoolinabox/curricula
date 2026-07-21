@@ -51,24 +51,18 @@ JEJ describes its machine in two registers, and ships both:
 Prose is _about_ the machine; the models _are_ the machine. Both are the
 level's, and they describe one thing.
 
-Two model builders:
+One model builder:
 
 - **the realm model** — the world this level teaches: which intrinsics and host
   bindings JEJ admits, and in what form. It needs no program at all. It is
   deliberately narrower than the world a program actually wakes into — a JEJ
   program runs in a full JavaScript realm — so it answers "what is mine to
   use?", never "what exists?".
-- **the hoisting model** — where names come to be: the tree of scopes and every
-  declaration in it. It is small by construction, because what can occur in it
-  is a consequence of what this level admits: with no functions, classes, or
-  catch clauses, the only scope boundaries are the program, a block, and a
-  `for…of` head, and every declaration is a `let` or a `const`.
 
-Both are sound only over a program this level admits. Nothing else would be
-honest: a model of a program beyond the level would describe a machine the level
-does not claim — and this one could not even try, since a `var` is a declaration
-it cannot represent. The lens gate is what enforces that — a lens rendering
-these models gates itself on this level's `validate`.
+Where names come to be — the program's scope structure — is not a second model
+here: the embodiment's environment fact is the general account of JavaScript
+scoping, and this level neither derives nor duplicates it. A lens rendering the
+level's machine gates itself on this level's `validate`.
 
 ## What JEJ answers
 
@@ -93,7 +87,7 @@ Two limits are deliberate, and named so they are not mistaken for defects:
 - **The member policy governs dot access only.** It is allow-all-except: any
   property name passes but the blocked ones. Computed access (`x['split']`) is
   not gated — the level admits guarded dynamic dispatch (`Math[method]()`), and
-  a purely syntactic check cannot tell that from an escape. The policy protects
+  a purely syntactic check cannot tell that from a breakout. The policy protects
   the taught surface; it is not a sandbox.
 - **Easter eggs are admitted but untaught.** A few constructs the level admits
   appear nowhere in `reference.md`. They are for the learner who goes looking.
@@ -102,9 +96,9 @@ Two limits are deliberate, and named so they are not mistaken for defects:
 
 **Owns** — the level's policy and its own machine: the **allowlist as data**
 (the node-rule table, the admitted globals, the blocked member names) · the
-JEJ-specific constraint checks · the realm and hoisting models · its reference
-and notional-machine prose · the admitted snippet types · editor-support data ·
-its registry identity and display name.
+JEJ-specific constraint checks · the realm model · its reference and
+notional-machine prose · the admitted snippet types · editor-support data · its
+registry identity and display name.
 
 **Does not own** — the mechanism the policy is read by, and the surfaces that
 project the answer:
@@ -114,9 +108,10 @@ project the answer:
   it reads; no level owns it, and the level contract sees only the resulting
   function.
 - **a general account of JavaScript scoping** — one that models functions,
-  classes, catch clauses, and `var`. JEJ's hoisting model is not that and does
-  not pretend to be: it models what this level admits. A consumer needing the
-  general case builds the general case.
+  classes, catch clauses, and `var`. That account is the embodiment's
+  environment fact, upstream; the level reads only the slice its validator needs
+  — the references no program scope resolves, carried in the parse facts — and
+  derives no scopes of its own.
 - **known-JavaScript globals** — the names JavaScript is known to provide. This
   is JavaScript-generic knowledge, not JEJ policy; JEJ's policy is the far
   smaller set of globals it admits.
@@ -162,10 +157,10 @@ own, it says so — the level speaks the word, it does not define the thing.
 - **blocked member name** — a property name refused in dot access.
 - **easter egg** — a construct the level admits that `reference.md` does not
   teach.
-- **hoisting model** — the level's model of where names come to be: the tree of
-  scopes and every declaration in it. The region names this model family; JEJ's
-  is shaped by what JEJ admits. Distinct from the package's `environment`
-  **phase** — this is a model the phase's lenses read, not the phase itself.
+- **escape list** _(the region's term — see the [region README](../README.md);
+  JEJ adds only its reading)_ — the whole scope input this level's vocabulary
+  resolution reads: each escaped name is ruled the realm's, outside the level,
+  or the runtime's. The level derives no scopes of its own.
 - **realm model** — the level's model of the world it teaches: the admitted
   intrinsics and host bindings, each by the form it takes. Needs no program —
   which is why it is a reference a learner consults, not a step their code

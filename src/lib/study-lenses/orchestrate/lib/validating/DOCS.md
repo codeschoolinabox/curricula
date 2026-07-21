@@ -11,11 +11,13 @@ document constrains only this library.
 
 ## Execution phases
 
-1. **Assemble** (per settle, pure) — the embodiment's parse stages yield the
-   parsed values a level consumes, once. Both parse stages succeeded: the
-   assembled parse facts. Either failed: the undetermined signal — nothing is
-   assembled and no level is ever consulted about it. Input: the embodiment's
-   facts. Output: the assembled parse facts, or the undetermined signal.
+1. **Assemble** (per settle, pure) — the embodiment's parse and scope-analysis
+   stages yield the parsed values a level consumes, once — the token stream, the
+   set-aside comments, the syntax tree, and the scope resolution's escape list.
+   All stages succeeded: the assembled parse facts. Any failed: the undetermined
+   signal — nothing is assembled and no level is ever consulted about it. Input:
+   the embodiment's facts. Output: the assembled parse facts, or the
+   undetermined signal.
 
 2. **Validate, memoized** (per settle and per level, pure behind the memo) — a
    level's validator answers over the assembled facts; the answer is held keyed
@@ -31,8 +33,8 @@ document constrains only this library.
 
 ```mermaid
 flowchart TD
-    EMB["the embodiment's parse stages<br/>(tagged: value or cause)"]
-    APF{"both parse stages ok?"}
+    EMB["the embodiment's parse and<br/>scope-analysis stages<br/>(tagged: value or cause)"]
+    APF{"parse and scope analysis complete?"}
     PF["assembled parse facts<br/>(values, never envelopes)"]
     UND["the undetermined signal<br/>(no level consulted)"]
     LVL["a registered level"]

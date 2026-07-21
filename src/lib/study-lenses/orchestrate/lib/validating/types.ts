@@ -24,8 +24,8 @@ export type AssembledParseFacts = ParseFacts | null;
 
 /**
  * What one memoized validate produces for one level over the settled code:
- * undetermined while the code does not parse, else validated, carrying the
- * level's violations — possibly none.
+ * undetermined while the code does not parse or its scope analysis did not
+ * complete, else validated, carrying the level's violations — possibly none.
  */
 export type LevelVerdict =
 	| { readonly kind: 'undetermined' }

@@ -11,11 +11,13 @@ document constrains only what is inside this level.
 > Written Phase 0, before implementation. The Refactor step is held against this
 > document — not what the code does, but what shape it takes.
 
-**Inbound contract.** A consultation arrives with a program already parsed. The
-level reads the syntax tree and nothing else — not the token stream, not the
-comments, not the source text, none of which it has an opinion about. A consumer
-wanting a semantic model calls that model's builder itself. The level initiates
-nothing and answers only when asked.
+**Inbound contract.** A consultation arrives with a program already parsed and
+scope-resolved. The level reads the syntax tree and the scope resolution's
+escape list — the references no program scope resolves — and nothing else: not
+the token stream, not the comments, not the source text, none of which it has an
+opinion about. The one scope analysis lives upstream; the level derives no
+scopes of its own. A consumer wanting a semantic model calls that model's
+builder itself. The level initiates nothing and answers only when asked.
 
 ## Execution phases
 
@@ -25,47 +27,45 @@ nothing and answers only when asked.
    check, which answers legality only. Input: the syntax tree + the allowlist.
    Output: where the grammar leaves the level.
 
-2. **Resolve the vocabulary** (sync, pure) — the program's scopes and
-   declarations are derived, then every identifier is met against them in turn:
-   a name the program declared is its own; a name the level admits is the
+2. **Resolve the vocabulary** (sync, pure) — every reference the program's
+   scopes leave unresolved — carried in the parse facts as the scope
+   resolution's escape list — is met in turn: a name the level admits is the
    realm's; a name JavaScript is known to provide but the level does not admit
-   is outside the level; anything else is left to the runtime. Input: the syntax
-   tree + the allowlist's admitted globals. Output: where the vocabulary leaves
-   the level.
+   is outside the level; anything else is left to the runtime. Input: the escape
+   list + the allowlist's admitted globals + the known-JavaScript names (the
+   machinery's generic datum, not the level's policy). Output: where the
+   vocabulary leaves the level.
 
-The answer is the two outputs together — their union, ordered and frozen. That
-is not a third phase: it is what the level returns.
+The answer is the two outputs together — their union, ordered by source position
+and frozen, so a gutter renders every finding in reading order. That is not a
+third phase: it is what the level returns.
 
-Two further computations are **not** phases of the answer — they are the level's
-models, built only when a consumer asks:
+One further computation is **not** a phase of the answer — it is the level's
+model, built only when a consumer asks:
 
 - **Build the realm model** (sync, pure, per use) — from the realm table, with
   no program involved.
-- **Build the hoisting model** (sync, pure, per use) — the same scope analysis
-  phase 2 derives, read by a different consumer at a different time.
 
 ## Data flow
 
 ```mermaid
 flowchart TD
-    PF["parse facts<br/>(tokens · comments · syntax tree)"]
+    PF["parse facts<br/>(tokens · comments · syntax tree ·<br/>the escape list)"]
     TREE["the program's syntax tree"]
     SLICE["the level's allowlist, as data<br/>(node rules · the realm table)"]
     GRAM["where the grammar<br/>leaves the level"]
-    SCOPES["the program's scopes<br/>and declarations"]
+    ESC["the escape list<br/>(the references no program<br/>scope resolves)"]
     VOCAB["where the vocabulary<br/>leaves the level"]
     VIO["violations<br/>(node type · message · range · path)"]
-    HOIST["the hoisting model"]
     REALM["the realm model<br/>(admitted bindings, each by form)"]
-    PF -->|"read the tree; no other fact is consulted"| TREE
+    PF -->|"read the tree"| TREE
+    PF -->|"read the escape list — the one<br/>scope analysis lives upstream"| ESC
     TREE --> GRAM
     SLICE -->|"screen against the node rules, pure — absence is refusal"| GRAM
-    TREE -->|"derive the scopes, pure"| SCOPES
-    SCOPES --> VOCAB
-    SLICE -->|"the realm table's names are the admitted globals; resolve every name, pure — unrecognized names are the runtime's"| VOCAB
+    ESC --> VOCAB
+    SLICE -->|"the realm table's names are the admitted globals; resolve every escaped name against them and the known-JavaScript names, pure — unrecognized names are the runtime's"| VOCAB
     GRAM -->|"joined, frozen"| VIO
     VOCAB -->|"joined, frozen"| VIO
-    SCOPES -->|"read, pure, per use"| HOIST
     SLICE -->|"read the realm table, pure, per use"| REALM
 ```
 
@@ -75,9 +75,10 @@ nothing and appear on no path; consumers read them where they ship.
 
 ## Structural constraints
 
-- **The level never parses.** It is handed parsed values and consults the tree.
-  It is never asked about a program that does not parse — a failed parse leaves
-  the parse facts **unconstructible**, so the question cannot be posed.
+- **The level never parses.** It is handed parsed, scope-resolved values and
+  consults them. It is never asked about a program that does not parse or whose
+  scope analysis did not complete — either failure leaves the parse facts
+  **unconstructible**, so the question cannot be posed.
 - **Default-deny.** A node type the allowlist does not name is outside the
   level. New JavaScript is outside by default rather than by oversight.
 - **The admitted-node universe is closed over the caller's parse settings, which
@@ -98,17 +99,15 @@ nothing and appear on no path; consumers read them where they ship.
 - **Legality is the check's; position is the walk's.** A check answers what is
   wrong, never where. One place reads a node's range and its path, so a range
   cannot be read two ways.
-- **One scope analysis, two readers.** The vocabulary phase and the hoisting
-  model derive scopes the same way, through one shared analysis — invoked once
-  per answer and once per model build. A second **implementation** would be a
-  second truth; a second invocation is not.
-- **The models are sound only over a program the level admits.** A model of a
-  program beyond the level would describe a machine the level does not claim.
-  The level does not enforce this — the lens gate does; the models simply cannot
-  represent what they would have to lie about.
-- **The level freezes only what it built.** The scopes are its own; the syntax
-  nodes they carry are the caller's, and the scope tree is cyclic — so freezing
-  recurses into neither.
+- **The one scope analysis lives upstream.** The level derives no scopes: the
+  parse facts carry the scope resolution's escape list, and the level's whole
+  scope opinion is a vocabulary ruling over it. A level-side derivation would be
+  a second truth beside the general account the embodiment already holds.
+- **The model is sound over the level's world by construction.** The realm model
+  needs no program at all, so no program beyond the level can reach it.
+- **The level freezes only what it built.** Its violations and its model are its
+  own; the syntax nodes the parse facts carry are the caller's, and freezing
+  never recurses into them.
 - **Violations never block execution**, and carry no severity: the parser is the
   run ceiling and enforcement posture is global, orchestrator-side.
 
@@ -138,24 +137,29 @@ nothing and appear on no path; consumers read them where they ship.
   reference's own framing and cannot drift the same way. The residual hole is
   accepted and named: the policy governs dot access, and computed access is not
   gated because the level admits guarded dynamic dispatch and a purely syntactic
-  check cannot tell that from an escape. The policy protects the taught surface;
-  it is not a sandbox. The blocked names are the level's own datum — no
+  check cannot tell that from a breakout. The policy protects the taught
+  surface; it is not a sandbox. The blocked names are the level's own datum — no
   machinery reads them, so they live with the check that does. A second residual
   hole is accepted and named alongside it: an update expression (`obj.prop++`)
   is not constrained on its target the way an assignment is — a member target
-  updates without a violation. The same taught-surface-not-sandbox posture
-  applies.
+  updates without a violation. A third is accepted and named too: the escape
+  list is read/write-blind, so a write to an admitted global (`alert = 5;`)
+  passes both phases silently — the assignment check admits an identifier
+  target, and the vocabulary ruling sees only an admitted name. Widening the
+  projection with a read/write flag was weighed and declined: it would ripple
+  through the upstream projection for a hole this posture accepts. The same
+  taught-surface-not-sandbox posture applies to all three.
 - **Why an unknown identifier is not a violation.** The alternative is accusing
   a learner's typo of being a level violation — the one lie the level must never
   tell. Deferring to the runtime costs a name the level could have caught and
   buys a boundary the learner can trust.
-- **Why the hoisting model is the level's own.** What can occur in it is a
-  consequence of what this level admits — three scope boundaries and two
-  declaration forms, because nothing else is admitted. It is not a projection of
-  some general account of JavaScript scoping: no such account exists here, and
-  claiming one would make the model a transformation that changes nothing. A
-  consumer needing the general case builds the general case; when both exist,
-  they reconcile into something shared and narrowed.
+- **Why the level derives no scopes.** The general account of JavaScript scoping
+  exists upstream — the embodiment's environment fact — and the parse facts hand
+  the level the one slice of it a validator needs: the references no program
+  scope resolves. A level-side scope walk would duplicate that account and drift
+  from it; a level-vocabulary scope model, if a machine-facing lens ever wants
+  one, is a narrowing projection over the upstream fact — never a second
+  analysis.
 - **Why the realm model teaches rather than describes.** A program wakes into a
   full JavaScript realm; the level's world is a slice of it. The model answers
   "what is mine to use?", and says so, because a lens rendering it as "what
@@ -177,8 +181,9 @@ nothing and appear on no path; consumers read them where they ship.
 - **Known-JavaScript globals** — which names JavaScript provides is generic
   knowledge, not this level's policy.
 - **A general account of JavaScript scoping** — one that models functions,
-  classes, catch clauses, and `var`. A consumer needing it builds it; this level
-  models only what it admits.
+  classes, catch clauses, and `var`. That account is the embodiment's
+  environment fact, upstream; a consumer needing it reads it there. This level
+  models none of it.
 - **The parse, and the options that fix the node-type universe** — the caller's,
   done once where the answer is memoized. The caller **owes** a parse
   configuration fixed to the node-type universe the allowlist was authored

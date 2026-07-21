@@ -14,10 +14,11 @@ near-homonyms; this document owns the mechanics.
 The embodiment carries its parse derivations as tagged stages; a level's
 validator consumes **values, never envelopes**. This library assembles the
 `ParseFacts` a level consumes exactly once per settle, from the embodiment's
-stage values — the token stream, the set-aside comments, the syntax tree. When
-the tokens or ast stage failed, there is nothing to assemble: the assembly
-yields the undetermined signal instead, and **no level is consulted** — the
-undetermined verdict is the caller's own, never a level's answer.
+stage values — the token stream, the set-aside comments, the syntax tree, and
+the scope resolution's escape list. When a parse or scope-analysis stage failed,
+there is nothing to assemble: the assembly yields the undetermined signal
+instead, and **no level is consulted** — the undetermined verdict is the
+caller's own, never a level's answer.
 
 ## One memoized validate
 
