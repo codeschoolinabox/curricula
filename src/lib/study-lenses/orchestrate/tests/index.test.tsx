@@ -36,10 +36,16 @@ function openLensThroughStrip(
 	fireEvent.change(select, { target: { value: lens } });
 }
 
-async function mountInstrument(ui: React.ReactElement): Promise<HTMLElement> {
+// `ready` defaults to the live editor (the editor-mode mount); an honored
+// mount opens its lens from the FIRST render — the editor never exists — so
+// those tests pass their lens probe's selector instead.
+async function mountInstrument(
+	ui: React.ReactElement,
+	ready = '.cm-editor',
+): Promise<HTMLElement> {
 	const { container } = render(<React.StrictMode>{ui}</React.StrictMode>);
 	await waitFor(() => {
-		expect(container.querySelector('.cm-editor')).not.toBeNull();
+		expect(container.querySelector(ready)).not.toBeNull();
 	});
 	return container;
 }
@@ -304,6 +310,20 @@ describe('StudyLenses', () => {
 	});
 
 	describe('the opened lens (Interfaces)', () => {
+		it('replaces the editor with the opened lens', async () => {
+			const probe = buildLens('probe', {
+				main: () => <div data-probe>open</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses lenses={[probe]} snippet="const x = 1;" />,
+			);
+			openLensThroughStrip(container, 'source', 'probe');
+			expect([
+				container.querySelector('[data-probe]') !== null,
+				container.querySelectorAll('.cm-editor').length,
+			]).toEqual([true, 0]);
+		});
+
 		it('mounts an opened lens with the host-layer config', async () => {
 			const probe = buildLens('probe', {
 				main: ({ config }) => (
@@ -321,6 +341,69 @@ describe('StudyLenses', () => {
 			expect(container.querySelector('[data-probe]')?.textContent).toBe(
 				'from-host',
 			);
+		});
+
+		it('mounts the opened lens inside the maskable content region', async () => {
+			const probe = buildLens('probe', {
+				main: () => <div data-probe>open</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses lenses={[probe]} snippet="const x = 1;" />,
+			);
+			openLensThroughStrip(container, 'source', 'probe');
+			expect(
+				container.querySelector('[data-probe]')?.closest('[data-maskable]'),
+			).not.toBeNull();
+		});
+
+		it('switches lens to lens from the strip — one open each, no close between', async () => {
+			const dispatches = recordDispatches();
+			const first = buildLens('first-lens', {
+				main: () => <div data-first-probe>first</div>,
+			});
+			const second = buildLens('second-lens', {
+				main: () => <div data-second-probe>second</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses lenses={[first, second]} snippet="const x = 1;" />,
+			);
+			openLensThroughStrip(container, 'source', 'first-lens');
+			openLensThroughStrip(container, 'source', 'second-lens');
+			expect([
+				container.querySelector('[data-second-probe]') !== null,
+				container.querySelector('[data-first-probe]'),
+				container.querySelectorAll('.cm-editor').length,
+				dispatches.filter(([name]) => name === 'lens-opened'),
+			]).toEqual([
+				true,
+				null,
+				0,
+				[
+					['lens-opened', { lens: 'first-lens' }],
+					['lens-opened', { lens: 'second-lens' }],
+				],
+			]);
+		});
+
+		it('validates once across an editless open, close, and reopen', async () => {
+			const spy = vi.fn(() => []);
+			const probe = buildLens('probe', {
+				main: () => <div data-probe>open</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses
+					languageLevels={[buildLevel('spied', spy)]}
+					lenses={[probe]}
+					snippet="const x = 1;"
+				/>,
+			);
+			openLensThroughStrip(container, 'source', 'probe');
+			openLensThroughStrip(container, 'source', '');
+			await waitFor(() => {
+				expect(container.querySelector('.cm-editor')).not.toBeNull();
+			});
+			openLensThroughStrip(container, 'source', 'probe');
+			expect(spy).toHaveBeenCalledTimes(1);
 		});
 	});
 
@@ -595,13 +678,13 @@ describe('StudyLenses', () => {
 					strictLanguageLevels={true}
 				/>,
 			);
-			openLensThroughStrip(container, 'source', 'counter');
-			const counter = container.querySelector<HTMLElement>('[data-counter]');
-			if (!counter) throw new Error('missing the counter');
-			fireEvent.click(counter);
 			vi.useFakeTimers();
 			try {
 				editLiveSource(container, 'debugger;');
+				openLensThroughStrip(container, 'source', 'counter');
+				const counter = container.querySelector<HTMLElement>('[data-counter]');
+				if (!counter) throw new Error('missing the counter');
+				fireEvent.click(counter);
 				act(() => {
 					vi.advanceTimersByTime(250);
 				});
@@ -611,7 +694,10 @@ describe('StudyLenses', () => {
 			expect([
 				container.querySelector('[data-enforcement-mask]') !== null,
 				container.querySelector('[data-counter]')?.textContent,
-			]).toEqual([true, '1']);
+				container
+					.querySelector('[data-counter]')
+					?.closest('[data-maskable]') !== null,
+			]).toEqual([true, '1', true]);
 		});
 
 		it('keeps the strict toggle alive while masked — flipping it unmasks', async () => {
@@ -671,14 +757,18 @@ describe('StudyLenses', () => {
 	});
 
 	describe('the initial focus (Boundaries)', () => {
-		it('mounts an honored phase-declaring lens at load, without a click', async () => {
+		it('mounts an honored phase-declaring lens at load, without a click — no editor', async () => {
 			const probe = buildLens('focused', {
 				main: () => <div data-focused-probe>mounted</div>,
 			});
 			const container = await mountInstrument(
 				<StudyLenses lens="focused" lenses={[probe]} snippet="const x = 1;" />,
+				'[data-focused-probe]',
 			);
-			expect(container.querySelector('[data-focused-probe]')).not.toBeNull();
+			expect([
+				container.querySelector('[data-focused-probe]') !== null,
+				container.querySelectorAll('.cm-editor').length,
+			]).toEqual([true, 0]);
 		});
 
 		it('falls back to normal rendering on an unknown lens name', async () => {
@@ -704,6 +794,7 @@ describe('StudyLenses', () => {
 			});
 			const container = await mountInstrument(
 				<StudyLenses lens="excluded" lenses={[probe]} snippet="const x = 1;" />,
+				'[data-focused-probe]',
 			);
 			expect(container.querySelector('[data-focused-probe]')).not.toBeNull();
 		});
@@ -749,6 +840,7 @@ describe('StudyLenses', () => {
 			});
 			const container = await mountInstrument(
 				<StudyLenses lens="excluded" lenses={[probe]} snippet="const x = 1;" />,
+				'[data-focused-probe]',
 			);
 			const callsAtMount = applicability.mock.calls.length;
 			const toggle = container.querySelector<HTMLElement>('[data-type-toggle]');
@@ -770,6 +862,7 @@ describe('StudyLenses', () => {
 					snippet="debugger;"
 					strictLanguageLevels={true}
 				/>,
+				'[data-focused-probe]',
 			);
 			expect([
 				container.querySelector('[data-enforcement-mask]') !== null,
@@ -787,6 +880,7 @@ describe('StudyLenses', () => {
 			});
 			await mountInstrument(
 				<StudyLenses lens="focused" lenses={[probe]} snippet="const x = 1;" />,
+				'[data-focused-probe]',
 			);
 			expect(
 				dispatches.filter(([name]) => name === 'lens-opened'),
@@ -807,6 +901,7 @@ describe('StudyLenses', () => {
 					lenses={[focused, other]}
 					snippet="const x = 1;"
 				/>,
+				'[data-focused-probe]',
 			);
 			openLensThroughStrip(container, 'source', 'other');
 			expect([
@@ -951,14 +1046,14 @@ describe('StudyLenses', () => {
 			const container = await mountInstrument(
 				<StudyLenses lenses={[proposer, target]} snippet="const x = 1;" />,
 			);
-			const affordance = container.querySelector<HTMLElement>(
-				'[data-recommendation="target"]',
-			);
-			if (!affordance) throw new Error('missing the recommendation');
-			fireEvent.click(affordance);
 			vi.useFakeTimers();
 			try {
 				editLiveSource(container, 'let y = 2;');
+				const affordance = container.querySelector<HTMLElement>(
+					'[data-recommendation="target"]',
+				);
+				if (!affordance) throw new Error('missing the recommendation');
+				fireEvent.click(affordance);
 				act(() => {
 					vi.advanceTimersByTime(250);
 				});
@@ -1090,6 +1185,71 @@ describe('StudyLenses', () => {
 				)?.value,
 			]).toEqual(['probe', '']);
 		});
+
+		it('remounts the editor when the open lens closes', async () => {
+			const probe = buildLens('probe', {
+				main: () => <div data-probe>open</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses lenses={[probe]} snippet="const x = 1;" />,
+			);
+			openLensThroughStrip(container, 'source', 'probe');
+			openLensThroughStrip(container, 'source', '');
+			await waitFor(() => {
+				expect(container.querySelector('.cm-editor')).not.toBeNull();
+			});
+			expect(container.querySelector('[data-probe]')).toBeNull();
+		});
+
+		it('keeps the settled source through a lens excursion', async () => {
+			const probe = buildLens('probe', {
+				main: () => <div data-probe>open</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses lenses={[probe]} snippet="const x = 1;" />,
+			);
+			vi.useFakeTimers();
+			try {
+				editLiveSource(container, 'let settledEdit = 2;');
+				act(() => {
+					vi.advanceTimersByTime(250);
+				});
+			} finally {
+				vi.useRealTimers();
+			}
+			openLensThroughStrip(container, 'source', 'probe');
+			openLensThroughStrip(container, 'source', '');
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')?.textContent).toContain(
+					'let settledEdit = 2;',
+				);
+			});
+		});
+
+		it('keeps the unsettled live edit through a dispose', async () => {
+			// The seed must be the LIVE buffer, not the last settle: edit, do
+			// NOT let the debounce land, take the excursion, return — the
+			// remounted editor holds the unsettled text.
+			const probe = buildLens('probe', {
+				main: () => <div data-probe>open</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses lenses={[probe]} snippet="const x = 1;" />,
+			);
+			vi.useFakeTimers();
+			try {
+				editLiveSource(container, 'let unsettled = 9;');
+				openLensThroughStrip(container, 'source', 'probe');
+				openLensThroughStrip(container, 'source', '');
+			} finally {
+				vi.useRealTimers();
+			}
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')?.textContent).toContain(
+					'let unsettled = 9;',
+				);
+			});
+		});
 	});
 
 	describe('the orphaned open lens (Boundaries)', () => {
@@ -1103,10 +1263,10 @@ describe('StudyLenses', () => {
 			const container = await mountInstrument(
 				<StudyLenses lenses={[probe]} snippet="const x = 1;" />,
 			);
-			openLensThroughStrip(container, 'environment', 'env-viewer');
 			vi.useFakeTimers();
 			try {
 				editLiveSource(container, '1 +');
+				openLensThroughStrip(container, 'environment', 'env-viewer');
 				act(() => {
 					vi.advanceTimersByTime(250);
 				});
@@ -1123,23 +1283,27 @@ describe('StudyLenses', () => {
 			]).toEqual([true, 1]);
 		});
 
-		it('keeps a focus-honored panel-excluded lens open across settles', async () => {
+		it('mounts a focus-honored panel-excluded lens as the pane occupant', async () => {
+			// The old pin (open across settles) is unreachable under swap: the
+			// editor is absent while a lens is open, so no edit can settle. What
+			// IS true: the honored excluded lens occupies the pane (no editor)
+			// and no strip select signals it. The edit-return re-entrancy pin
+			// lands with the Edit code button.
 			const probe = buildPanelExcludedLens('excluded', {
 				main: () => <div data-focused-probe>mounted</div>,
 			});
 			const container = await mountInstrument(
 				<StudyLenses lens="excluded" lenses={[probe]} snippet="const x = 1;" />,
+				'[data-focused-probe]',
 			);
-			vi.useFakeTimers();
-			try {
-				editLiveSource(container, '1 +');
-				act(() => {
-					vi.advanceTimersByTime(250);
-				});
-			} finally {
-				vi.useRealTimers();
-			}
-			expect(container.querySelector('[data-focused-probe]')).not.toBeNull();
+			expect([
+				container.querySelector('[data-focused-probe]') !== null,
+				container.querySelectorAll('.cm-editor').length,
+				Array.from(
+					container.querySelectorAll<HTMLSelectElement>('select'),
+					(select) => select.value,
+				).every((value) => value === ''),
+			]).toEqual([true, 0, true]);
 		});
 	});
 

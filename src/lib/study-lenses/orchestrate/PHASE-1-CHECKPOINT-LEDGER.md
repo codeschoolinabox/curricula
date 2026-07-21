@@ -21,8 +21,18 @@ Replay setup: `npm start`, then visit the page each entry names.
 | W4-G1     | (this row's commit) | `/sandbox/orchestrate` (rides the full-instrument gate — no standalone page; the guide takes no props to exercise) | click the guide reveal; read the topics; click the reveal again                                                                                                 | collapsed by default; opening lists the four orientation topics (phases · levels · posture · snippet-type) each titled below the panel's phase headings, after the panel in DOM order; closing hides them; the guide stays operable under strict                                                                                              |
 | W4-T4     | (this row's commit) | `/sandbox/orchestrate`                                                                                             | click the "study the source" recommendation the notes lens raises; then open the notes lens from the panel                                                      | the recommendation affordance lists under the phases; clicking it opens the proposed lens carrying the proposal's config (the note names its origin); opening from the panel afterwards clears the proposal's overrides; under strict + violation the recommendation surface sits beneath the mask                                            |
 | GATE      | (this row's commit) | `/sandbox/orchestrate`                                                                                             | the WORKFLOWS learner walkthrough, live: paste broken JS; fix it; select Scaffold + strict with a `debugger;`; toggle the type; open lenses; reveal the guide   | broken JS is explained where it breaks and the later phases wait; fixing reopens them; strict masks only while out of level and never the editor, selector, toggles, or guide; the type toggle re-derives immediately (the not-applicable path reachable); every control alive throughout                                                     |
+| SWAP-2    | (this row's commit) | `/sandbox/orchestrate`                                                                                             | load the page; close the honored notes lens (the `—` none entry in the Source select); type an edit; open parsons; close it                                     | at load the notes lens OCCUPIES the pane and no editor is visible; closing it mounts the editor with the seed; an opened lens REPLACES the editor (never below it); closing returns the editor holding your edits intact                                                                                                                      |
 
 Entries append as 🔍-bearing increments land. Wave 0 carried no 🔍.
+
+> **Swap supersession note (the c65e0c7 re-spec).** Three earlier rows pinned
+> coexist-era observations; the rows stay verbatim for historical replay, but
+> replay them against the swap semantics: W4-T2's "the editor … stay[s]
+> operable" holds while the editor is MOUNTED (it is structurally absent during
+> a lens excursion; the way back — the none entry, later the Edit code button —
+> is what stays operable); W4-T3's "clicking another lens replaces it" now
+> replaces the EDITOR too; GATE's "never the editor" masking claim reads "never
+> the editor while mounted".
 
 ## Machine replay — 2026-07-20 (maintainer-delegated)
 

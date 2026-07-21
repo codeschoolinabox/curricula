@@ -9,13 +9,17 @@ import BrowserOnly from '@docusaurus/BrowserOnly';
 The full instrument, live, with the scaffolding level, the three ported lenses
 (parsons and writeme in the Source select; debug-props is panel-excluded —
 reachable only as a focus request), and one page-injected demonstration lens
-("notes", named as the initial focus). Expected: the editor mounts with the seed
-program and the notes lens opens at load, honored, without a click; typing until
-the debounce settles re-renders the phases; breaking the parse bars the
-downstream phases with the parser's cause and fixing it reopens them; the type
-toggle re-derives immediately; the level selector shows the scaffold's live fit
-mark; under strict with a `debugger;` the masked overlay covers the panel AND
-the notes lens identically; the guide reveals its topics after the panel.
+("notes", named as the initial focus). Expected — the SWAP model: the notes lens
+opens at load, honored, without a click, and OCCUPIES the surface pane (no
+editor is visible until it closes — pick the `—` none entry in the Source
+select); the editor then mounts holding the seed program; an opened lens always
+replaces the editor and closing it brings the editor back with your edits
+intact; typing until the debounce settles re-renders the phases; breaking the
+parse bars the downstream phases with the parser's cause and fixing it reopens
+them; the type toggle re-derives immediately; the level selector shows the
+scaffold's live fit mark; under strict with a `debugger;` the masked overlay
+covers the content region and the strip goes inert and dim — the editor stays
+alive; the guide reveals its topics after the panel.
 
 export function InstrumentHarness() {
 	const React = require('react');

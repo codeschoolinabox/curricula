@@ -5,8 +5,9 @@
  * composition root: the mount-time joins (loud), the session choices'
  * single owner, the per-instance bus and memoized validate, the settle
  * loop, one study derivation per settle, and the render projection over
- * the editor, the study panel, the level UI, the type toggle, the ranked
- * recommendations, and the guide.
+ * the surface pane (the editor home base XOR the open lens), the study
+ * panel, the level UI, the type toggle, the ranked recommendations, and
+ * the guide.
  *
  * @remarks
  * Selector contract: `data-study-lenses` on the root;
@@ -48,7 +49,11 @@ import type { MaskState } from './lib/masking/types.js';
 import createMemoizedValidate from './lib/validating/create-memoized-validate.js';
 import PhasesPanel from './phases-panel/index.jsx';
 import type { PhaseEntry } from './phases-panel/types.js';
-import type { SettledSnippet, StudyLensesProperties } from './types.js';
+import type {
+	PaneOccupant,
+	SettledSnippet,
+	StudyLensesProperties,
+} from './types.js';
 import useSettledSnippet from './use-settled-snippet.js';
 
 export default function StudyLenses({
@@ -83,8 +88,9 @@ export default function StudyLenses({
 	const [strict, setStrict] = React.useState(strictLanguageLevels);
 	const [type, setType] = React.useState(initialType);
 
-	// 3. The settle loop and the one derivation per settle.
-	const { settled, onEdit } = useSettledSnippet({
+	// 3. The settle loop and the one derivation per settle. (The hook's
+	// immediate flush joins the destructure when the flush-at-open lands.)
+	const { settled, onEdit, readLiveSource } = useSettledSnippet({
 		initialSource: session.snippet,
 		type,
 	});
@@ -94,23 +100,39 @@ export default function StudyLenses({
 		[session, settled],
 	);
 
-	// 4. The honor resolution — once, at mount (the lazy initializer): the
-	// focus request resolves through fit and accessibility against the
-	// first derivation. An honored mount is initial state, never a
-	// committed session choice — nothing announces, and the learner
-	// overrides it through the same commit path as any open. StrictMode
-	// double-invokes this initializer in dev, so a THROWING applicability
-	// reports twice there — dev-only, accepted.
-	const [openLensName, setOpenLensName] = React.useState<string | null>(
-		function resolveHonoredFocus() {
+	// 4. The pane occupant — the honor resolution maps its decision straight
+	// onto the surface arm, once, at mount (the lazy initializer): fallback
+	// → the editor home base, honored → the lens arm over the initial
+	// settled pair. An honored mount is initial state, never a committed
+	// session choice — nothing announces (the initializer stays
+	// side-effect-free), and the learner overrides it through the same
+	// commit paths as any open. StrictMode double-invokes this initializer
+	// in dev, so a THROWING applicability reports twice there — dev-only,
+	// accepted.
+	const [occupant, setOccupant] = React.useState<PaneOccupant>(
+		function resolveHonoredFocus(): PaneOccupant {
 			const decision = honorFocusRequest({
 				embodiment: derivation.embodiment,
 				roster: session.lenses,
 				...(lens === undefined ? {} : { request: lens }),
 			});
-			return decision.kind === 'fallback' ? null : decision.lens.name;
+			return decision.kind === 'fallback'
+				? freezeInPlace({ editorSeed: session.snippet, mode: 'editor' })
+				: freezeInPlace({
+						mode: 'lens',
+						openLensName: decision.lens.name,
+						opened: {},
+						openedAt: settled,
+					});
 		},
 	);
+
+	// An eagerly-written mirror of the occupant: the open/dispose guards
+	// read it, so a same-batch double-commit can neither double-dispatch a
+	// close nor miss a dispose (the render-closure value could be stale
+	// there).
+	const occupantReference = React.useRef(occupant);
+	occupantReference.current = occupant;
 
 	// 5. Announce the settle AFTER the derived state commits — once per
 	// settle (the ref guard absorbs StrictMode's double-run). Seeded with
@@ -144,68 +166,96 @@ export default function StudyLenses({
 		session.bus.dispatch('type-toggled', { type: next });
 	}
 
-	// The opened cascade layer — set at a recommendation-opened mount,
-	// cleared with the open-lens choice; nothing else touches it.
-	const [openedOverrides, setOpenedOverrides] =
-		React.useState<ConfigOverridesByLens>({});
-
-	function commitOpenLens(lensName: string): void {
-		setOpenLensName(lensName);
-		setOpenedOverrides({});
+	// The two pane transitions every open and close path routes through.
+	// The occupant ref is written EAGERLY (before the state commit) so the
+	// guards stay correct within one synchronous batch. Opening carries the
+	// CURRENT settled pair as the mount's coherence anchor; the opened
+	// overrides live on the lens arm, so they cannot outlive the choice.
+	function openLensSurface(
+		lensName: string,
+		opened: ConfigOverridesByLens,
+	): void {
+		occupantReference.current = freezeInPlace({
+			mode: 'lens',
+			openLensName: lensName,
+			opened,
+			openedAt: settled,
+		});
+		setOccupant(occupantReference.current);
 		session.bus.dispatch(LENS_OPENED, { lens: lensName });
 	}
 
-	function commitCloseLens(): void {
-		setOpenLensName(null);
-		setOpenedOverrides({});
+	// Idle-safe: a dispose with nothing open commits nothing and announces
+	// nothing (the bus contract's "dispose with nothing open is silent").
+	// The editor arm's seed is the LIVE buffer — edits survive the
+	// excursion in the settle hook's slot, and the remount reads it here.
+	function disposeToEditor(): void {
+		if (occupantReference.current.mode !== 'lens') return;
+		occupantReference.current = freezeInPlace({
+			editorSeed: readLiveSource(),
+			mode: 'editor',
+		});
+		setOccupant(occupantReference.current);
 		session.bus.dispatch(LENS_OPENED, { lens: null });
 	}
 
+	function commitOpenLens(lensName: string): void {
+		openLensSurface(lensName, {});
+	}
+
+	function commitCloseLens(): void {
+		disposeToEditor();
+	}
+
+	function commitOpenRecommended(proposal: Recommendation): void {
+		openLensSurface(proposal.lens.name, {
+			[proposal.lens.name]: proposal.config,
+		});
+	}
+
 	// A strip-opened lens whose every phase barred (or whose fit lapsed) has
-	// no select left signaling it — close it rather than leave it orphaned
-	// below. A panel-excluded lens has no strip presence and stays: its own
-	// applicability gated it at mount.
+	// no select left signaling it — dispose it rather than leave it orphaned
+	// in the pane. A panel-excluded lens has no strip presence and stays:
+	// its own applicability gated it at mount.
 	React.useEffect(
 		function closeOrphanedOpenLens() {
-			if (openLensName === null) return;
+			if (occupant.mode !== 'lens') return;
+			const openName = occupant.openLensName;
 			const open = session.lenses.find(
-				(candidate) => candidate.name === openLensName,
+				(candidate) => candidate.name === openName,
 			);
 			if (open?.phase === undefined) return;
 			const reachable = Object.values(derivation.embodiment.study).some(
 				(phase) =>
 					phase.accessible &&
-					phase.lenses.some((attached) => attached.name === openLensName),
+					phase.lenses.some((attached) => attached.name === openName),
 			);
-			if (!reachable) {
-				setOpenLensName(null);
-				setOpenedOverrides({});
-				session.bus.dispatch(LENS_OPENED, { lens: null });
-			}
+			if (!reachable) disposeToEditor();
 		},
-		[derivation, openLensName, session],
+		// disposeToEditor and the hook's live-source read are per-render by
+		// contract (never deps); both read only refs plus the stable
+		// session, so the closure cannot go stale in a way that matters.
+		[derivation, occupant, session],
 	);
-
-	function commitOpenRecommended(proposal: Recommendation): void {
-		setOpenLensName(proposal.lens.name);
-		setOpenedOverrides({ [proposal.lens.name]: proposal.config });
-		session.bus.dispatch(LENS_OPENED, { lens: proposal.lens.name });
-	}
 
 	// 6. The render projection — phases zipped against embody's runtime
 	// order constant; the selector mounts only when levels are registered;
 	// the mask projects the SELECTED level's assessment crossed with the
 	// posture over the class-3 surfaces (an inert overlay — everything
-	// beneath stays mounted; the class-1 editor and class-2 controls sit
-	// outside the maskable container).
+	// beneath stays mounted). ONE VISUAL PANE, TWO DOM SLOTS: the class-1
+	// editor renders in its own slot OUTSIDE both maskable containers; the
+	// open lens renders INSIDE the maskable content region (class 3) — the
+	// pane swap must never merge the two slots, or one class assignment
+	// breaks.
 	const phases = LIFECYCLE_PHASE_ORDER.map((name) =>
 		toPhaseEntry(name, derivation.embodiment.study[name], session.lenses),
 	);
 	const openLens =
-		openLensName === null
-			? null
-			: (session.lenses.find((candidate) => candidate.name === openLensName) ??
-				null);
+		occupant.mode === 'lens'
+			? (session.lenses.find(
+					(candidate) => candidate.name === occupant.openLensName,
+				) ?? null)
+			: null;
 	const selectedLevel =
 		session.levels.find((level) => level.key === selectedLevelKey) ?? null;
 	const mask = deriveMask({
@@ -263,19 +313,21 @@ export default function StudyLenses({
 				<PhasesPanel
 					onCloseLens={commitCloseLens}
 					onOpenLens={(intent) => commitOpenLens(intent.lens)}
-					openLensName={openLensName}
+					openLensName={occupant.mode === 'lens' ? occupant.openLensName : null}
 					phases={phases}
 				/>
 			</div>
-			<Editor onEdit={onEdit} snippet={session.snippet} />
+			{occupant.mode === 'editor' ? (
+				<Editor onEdit={onEdit} snippet={occupant.editorSeed} />
+			) : null}
 			<div style={{ position: 'relative' }}>
 				<div data-maskable inert={mask.masked || undefined}>
-					{openLens ? (
+					{occupant.mode === 'lens' && openLens ? (
 						<MountedLens
 							configs={configs}
 							embodiment={derivation.embodiment}
 							lens={openLens}
-							opened={openedOverrides}
+							opened={occupant.opened}
 						/>
 					) : null}
 					{derivation.recommendations.length > 0 ? (
