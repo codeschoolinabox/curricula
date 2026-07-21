@@ -14,7 +14,7 @@
  * package glossary (../README.md) owns the shared vocabulary.
  */
 
-import type { Comment, Program, Token } from 'acorn';
+import type { Comment, Node, Program, Token } from 'acorn';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Foreign vocabulary, mirrored
@@ -32,21 +32,42 @@ export type SnippetType = 'script' | 'module';
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
+ * One name the program uses that no program scope declares — one entry of
+ * the scope resolution's escape list: the name, the referencing identifier
+ * node, and that node's canonical dot-delimited path.
+ *
+ * @remarks
+ * A level-blind fact with level-owned meaning: whether an unresolved name
+ * is the realm's, the runtime's, or a violation is each level's own
+ * vocabulary ruling — the projection says only "no program scope resolves
+ * this".
+ */
+export type UnresolvedReference = {
+	readonly name: string;
+	readonly node: Node;
+	readonly nodePath: string;
+};
+
+/**
  * The parsed values a level's validator consumes: the token stream, the
- * set-aside comments, and the syntax tree.
+ * set-aside comments, the syntax tree, and the scope resolution's escape
+ * list — the references no program scope resolves.
  *
  * @remarks
  * Values, never envelopes — this is not a slice of the embodiment's Facts
- * but this region's own reprojection of what the parse stages carry. All
- * three fields are present: a validator is never consulted about a program
- * that does not parse (a failed tokens or ast stage leaves this shape
+ * but this region's own reprojection of what the parse and scope-analysis
+ * stages carry. All fields are present: a validator is never consulted
+ * about a program that does not parse or whose scope analysis did not
+ * complete (a failed tokens, ast, or environment stage leaves this shape
  * unconstructible), so the undetermined verdict is the caller's, produced
- * without consulting any level.
+ * without consulting any level. The one scope analysis lives upstream; a
+ * level never derives scopes of its own.
  */
 export type ParseFacts = {
 	readonly tokens: ReadonlyArray<Token>;
 	readonly comments: ReadonlyArray<Comment>;
 	readonly ast: Program;
+	readonly unresolvedReferences: ReadonlyArray<UnresolvedReference>;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

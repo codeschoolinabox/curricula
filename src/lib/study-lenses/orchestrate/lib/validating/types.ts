@@ -16,9 +16,9 @@ import type { SettledSnippet } from '../../types.js';
 
 /**
  * The assembly's result: the parse facts a level consumes, or `null` — the
- * undetermined signal — when the tokens or ast stage failed. On `null`, no
- * level is consulted; every verdict for that settle is undetermined by the
- * caller's own hand.
+ * undetermined signal — when a parse or scope-analysis stage failed. On
+ * `null`, no level is consulted; every verdict for that settle is
+ * undetermined by the caller's own hand.
  */
 export type AssembledParseFacts = ParseFacts | null;
 

@@ -14,7 +14,7 @@ function parseFacts(source: string): ParseFacts {
 		onToken: tokens,
 		sourceType: 'module',
 	});
-	return { ast, comments, tokens };
+	return { ast, comments, tokens, unresolvedReferences: [] };
 }
 
 describe('scaffoldLevel', () => {
