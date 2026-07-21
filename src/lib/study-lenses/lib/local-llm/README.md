@@ -14,8 +14,8 @@ pedagogy. Unlike the fully domain-free sandbox [`engine/`][engine] beside it, it
 _assumes its models emit code_; like the engine, it leaves what that output
 **means** to its consumers. The generator returns code; it never judges it.
 
-[aithor]:
-	../../../embody/language-levels/just-enough-javascript/aithor/README.md
+<!-- prettier-ignore -->
+[aithor]: ../../../embody/language-levels/just-enough-javascript/aithor/README.md
 [engine]: ../engine/README.md
 
 ## Where this sits
