@@ -15,7 +15,10 @@ import type {
  * them; its trailing edge writes the settled snippet. A snippet-type change
  * is a settle of its own, never debounced: it absorbs any pending settle and
  * settles immediately with the editor's LIVE source — pending keystrokes are
- * settled early, never discarded.
+ * settled early, never discarded. The swap model adds two seams: the
+ * live-source read (the buffer survives editor unmounts here, not in the
+ * editor) and the immediate flush a lens-open absorbs pending keystrokes
+ * with (identity-retained when the buffer already equals the settled pair).
  *
  * @remarks
  * The settled snippet is the staleness identity of everything derived from
@@ -62,6 +65,38 @@ export default function useSettledSnippet({
 		[settle],
 	);
 
+	// The live buffer, readable across editor unmounts — the swap model's
+	// source-survival seam (a lens excursion unmounts the editor; the buffer
+	// lives here). Fresh per render, like the result wrapper: never a dep.
+	function readLiveSource(): string {
+		return liveSource.current;
+	}
+
+	// The flush-at-open: absorb any pending settle NOW. The cancel is
+	// unconditional — even a retained-identity flush must kill the pending
+	// timer, or it fires 200ms later and mints an equal-content NEW pair
+	// (breaking the retained-identity contract downstream derivation keys
+	// on). Content equality is the retained-identity discriminant (the
+	// debounce exposes no pending-query); a retained identity re-derives and
+	// re-announces nothing. Fresh per render: never a dep.
+	function settleNow(): void {
+		settle.cancel();
+		setSettled(function reuseOrReplace(previous) {
+			// `type` is compared too: the toggle effect keeps settled.type in
+			// sync before any caller can reach this branch today, but the
+			// field-equality over the WHOLE pair is the documented contract.
+			const isCurrent =
+				previous.source === liveSource.current &&
+				previous.type === typeReference.current;
+			return isCurrent
+				? previous
+				: freezeInPlace({
+						source: liveSource.current,
+						type: typeReference.current,
+					});
+		});
+	}
+
 	// A type change is a settle of its own: absorb any pending settle and
 	// settle NOW with the live source — pending keystrokes are settled
 	// early, never discarded. The cleanup is always returned (idle-safe), so
@@ -86,7 +121,7 @@ export default function useSettledSnippet({
 	// The wrapper is fresh-per-render React plumbing, never held past the
 	// render that produced it — the DEV § 13 freeze applies to the settled
 	// pair (frozen at construction), not this container.
-	return { settled, onEdit };
+	return { onEdit, readLiveSource, settled, settleNow };
 }
 
 /**

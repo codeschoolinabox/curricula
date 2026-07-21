@@ -39,6 +39,14 @@ describe('useSettledSnippet', () => {
 			});
 			expect(result.current.settled).toBe(before);
 		});
+
+		it('reads the initial source as the live buffer before any edit', () => {
+			const { result } = mountHook({
+				initialSource: 'const x = 1;',
+				type: 'module',
+			});
+			expect(result.current.readLiveSource()).toBe('const x = 1;');
+		});
 	});
 
 	describe('one edit (One)', () => {
@@ -217,6 +225,98 @@ describe('useSettledSnippet', () => {
 			const before = result.current.settled;
 			rerender({ initialSource: 'entirely different', type: 'module' });
 			expect(result.current.settled).toBe(before);
+		});
+	});
+
+	describe('the immediate flush (Interfaces)', () => {
+		it('settles immediately with the live source while a settle is pending', () => {
+			const { result } = mountHook({
+				initialSource: 'const x = 1;',
+				type: 'module',
+			});
+			act(() => {
+				result.current.onEdit('pending edit');
+				result.current.settleNow();
+			});
+			expect(result.current.settled).toEqual({
+				source: 'pending edit',
+				type: 'module',
+			});
+		});
+
+		it('retains the settled identity when the buffer equals the settled pair', () => {
+			const { result } = mountHook({
+				initialSource: 'const x = 1;',
+				type: 'module',
+			});
+			const before = result.current.settled;
+			act(() => {
+				result.current.settleNow();
+			});
+			expect(result.current.settled).toBe(before);
+		});
+
+		it('cancels the pending debounce even on a retained-identity flush', () => {
+			const { result } = mountHook({
+				initialSource: 'const x = 1;',
+				type: 'module',
+			});
+			const before = result.current.settled;
+			act(() => {
+				result.current.onEdit('x');
+				result.current.onEdit('const x = 1;');
+				result.current.settleNow();
+			});
+			act(() => {
+				vi.advanceTimersByTime(2000);
+			});
+			expect(result.current.settled).toBe(before);
+		});
+
+		it('lands no late settle after an absorbing flush', () => {
+			const { result } = mountHook({
+				initialSource: 'const x = 1;',
+				type: 'module',
+			});
+			act(() => {
+				result.current.onEdit('pending edit');
+				result.current.settleNow();
+			});
+			const absorbed = result.current.settled;
+			act(() => {
+				vi.advanceTimersByTime(2000);
+			});
+			expect(result.current.settled).toBe(absorbed);
+		});
+
+		it('retains the first flush’s pair on a second flush with no edit between', () => {
+			const { result } = mountHook({
+				initialSource: 'const x = 1;',
+				type: 'module',
+			});
+			act(() => {
+				result.current.onEdit('minted once');
+				result.current.settleNow();
+			});
+			const minted = result.current.settled;
+			act(() => {
+				result.current.settleNow();
+			});
+			expect(result.current.settled).toBe(minted);
+		});
+
+		it('reads the un-settled live buffer mid-debounce', () => {
+			const { result } = mountHook({
+				initialSource: 'const x = 1;',
+				type: 'module',
+			});
+			act(() => {
+				result.current.onEdit('pending edit');
+			});
+			expect([
+				result.current.readLiveSource(),
+				result.current.settled.source,
+			]).toEqual(['pending edit', 'const x = 1;']);
 		});
 	});
 

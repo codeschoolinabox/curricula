@@ -136,17 +136,27 @@ export type UseSettledSnippetInput = {
 
 /**
  * What the settle hook yields: the settled snippet every derivation keys on,
- * and the per-keystroke edit intake the editor's edit events feed.
- *
- * @remarks
- * The swap re-spec (./DOCS.md § The settle loop) adds a live-source read and
- * an immediate flush to this result; that widening lands together with its
- * implementation, so this contract never advertises members the hook does
- * not yet return.
+ * the per-keystroke edit intake the editor's edit events feed, and the swap
+ * model's two seams — the live-source read (the buffer survives editor
+ * unmounts in the hook, not the editor) and the immediate flush a lens-open
+ * absorbs pending keystrokes with.
  */
 export type UseSettledSnippetResult = {
 	readonly settled: SettledSnippet;
 	readonly onEdit: (source: string) => void;
+	/**
+	 * The live buffer as of the last edit event — survives editor unmounts.
+	 * Fresh function identity per render: never an effect or memo dep.
+	 */
+	readonly readLiveSource: () => string;
+	/**
+	 * Absorb any pending settle NOW. Retains the settled identity when the
+	 * live buffer field-equals the settled pair (no re-derivation, no
+	 * re-announce — the round-trip guarantee); else settles the live source
+	 * immediately. Fresh function identity per render: never an effect or
+	 * memo dep.
+	 */
+	readonly settleNow: () => void;
 };
 
 /**
