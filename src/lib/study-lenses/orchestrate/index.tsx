@@ -12,8 +12,9 @@
  * @remarks
  * Selector contract: `data-study-lenses` on the root;
  * `data-type-toggle` on the snippet-type toggle (its text is the CURRENT
- * type; clicking commits the other one); the mounted surfaces carry their
- * own documented attributes. Session choices commit here and announce on
+ * type; clicking commits the other one); `data-edit-return` on the
+ * lens-mode-only Edit code button (class 2 — the guaranteed way home);
+ * the mounted surfaces carry their own documented attributes. Session choices commit here and announce on
  * the bus; surfaces raise intent upward and hold none.
  */
 
@@ -278,6 +279,11 @@ export default function StudyLenses({
 					marginBottom: '0.5rem',
 				}}
 			>
+				{occupant.mode === 'lens' ? (
+					<button data-edit-return onClick={commitCloseLens} type="button">
+						Edit code
+					</button>
+				) : null}
 				<button
 					aria-label={`snippet type: ${type} — switch to ${type === 'module' ? 'script' : 'module'}`}
 					data-type-toggle

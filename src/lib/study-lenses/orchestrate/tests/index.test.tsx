@@ -1351,6 +1351,129 @@ describe('StudyLenses', () => {
 		});
 	});
 
+	describe('the Edit code return (Interfaces)', () => {
+		it('shows the Edit code affordance only while a lens is open', async () => {
+			const probe = buildLens('probe', {
+				main: () => <div data-probe>open</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses lenses={[probe]} snippet="const x = 1;" />,
+			);
+			const before = container.querySelector('[data-edit-return]');
+			openLensThroughStrip(container, 'source', 'probe');
+			expect([
+				before,
+				container.querySelector('[data-control-row] [data-edit-return]') !==
+					null,
+			]).toEqual([null, true]);
+		});
+
+		it('disposes to the editor on click, announcing the close', async () => {
+			const dispatches = recordDispatches();
+			const probe = buildLens('probe', {
+				main: () => <div data-probe>open</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses lenses={[probe]} snippet="const x = 1;" />,
+			);
+			openLensThroughStrip(container, 'source', 'probe');
+			const back = container.querySelector<HTMLElement>('[data-edit-return]');
+			if (!back) throw new Error('missing the Edit code button');
+			fireEvent.click(back);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-editor')).not.toBeNull();
+			});
+			expect([
+				container.querySelector('[data-probe]'),
+				container.querySelector('[data-edit-return]'),
+				dispatches.filter(
+					([name, payload]) =>
+						name === 'lens-opened' &&
+						(payload as { lens: string | null }).lens === null,
+				).length,
+			]).toEqual([null, null, 1]);
+		});
+
+		it('reopens a lens after an Edit code return', async () => {
+			const dispatches = recordDispatches();
+			const probe = buildLens('probe', {
+				main: () => <div data-probe>open</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses lenses={[probe]} snippet="const x = 1;" />,
+			);
+			openLensThroughStrip(container, 'source', 'probe');
+			const back = container.querySelector<HTMLElement>('[data-edit-return]');
+			if (!back) throw new Error('missing the Edit code button');
+			fireEvent.click(back);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-editor')).not.toBeNull();
+			});
+			openLensThroughStrip(container, 'source', 'probe');
+			expect([
+				container.querySelector('[data-probe]') !== null,
+				dispatches.filter(([name]) => name === 'lens-opened'),
+			]).toEqual([
+				true,
+				[
+					['lens-opened', { lens: 'probe' }],
+					['lens-opened', { lens: null }],
+					['lens-opened', { lens: 'probe' }],
+				],
+			]);
+		});
+
+		it('stays alive outside the mask — the guaranteed way home', async () => {
+			const probe = buildLens('focused', {
+				main: () => <div data-focused-probe>mounted</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses
+					activeLanguageLevel="scaffold"
+					languageLevels={[scaffoldLevel]}
+					lens="focused"
+					lenses={[probe]}
+					snippet="debugger;"
+					strictLanguageLevels={true}
+				/>,
+				'[data-focused-probe]',
+			);
+			const back = container.querySelector<HTMLElement>('[data-edit-return]');
+			if (!back) throw new Error('missing the Edit code button');
+			// jsdom enforces neither inert nor disabled — the structural checks
+			// (outside every maskable region, no disabled guard) are the real
+			// assertions; the click proves no JS-level mask guard no-ops it.
+			expect([
+				back.closest('[data-maskable]'),
+				back.hasAttribute('disabled'),
+			]).toEqual([null, false]);
+			fireEvent.click(back);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-editor')).not.toBeNull();
+			});
+			expect(container.querySelector('[data-focused-probe]')).toBeNull();
+		});
+
+		it('returns a focus-honored panel-excluded lens to the editor', async () => {
+			const probe = buildPanelExcludedLens('excluded', {
+				main: () => <div data-focused-probe>mounted</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses lens="excluded" lenses={[probe]} snippet="const x = 1;" />,
+				'[data-focused-probe]',
+			);
+			const back = container.querySelector<HTMLElement>('[data-edit-return]');
+			if (!back) throw new Error('missing the Edit code button');
+			fireEvent.click(back);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')?.textContent).toContain(
+					'const x = 1;',
+				);
+			});
+			expect(container.querySelectorAll('.cm-editor')).toHaveLength(1);
+		});
+	});
+
 	describe('the mount-time snippet (Boundaries)', () => {
 		it('ignores a changed snippet prop after mount', async () => {
 			const { container, rerender } = render(
