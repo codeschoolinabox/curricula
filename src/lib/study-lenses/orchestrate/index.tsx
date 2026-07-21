@@ -152,11 +152,15 @@ export default function StudyLenses({
 	);
 
 	function commitLevel(key: string): void {
+		// The uniform dispose rule (see commitType): close first, then commit.
+		disposeToEditor();
 		setSelectedLevelKey(key);
 		session.bus.dispatch('level-selected', { key });
 	}
 
 	function commitPosture(next: boolean): void {
+		// The uniform dispose rule (see commitType): close first, then commit.
+		disposeToEditor();
 		setStrict(next);
 		session.bus.dispatch('posture-toggled', { strict: next });
 	}

@@ -1390,6 +1390,50 @@ describe('StudyLenses', () => {
 			]);
 		});
 
+		it('closes the open lens before a level selection commits', async () => {
+			const dispatches = recordDispatches();
+			const probe = buildLens('probe', {
+				main: () => <div data-probe>open</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses
+					languageLevels={[scaffoldLevel]}
+					lenses={[probe]}
+					snippet="const x = 1;"
+				/>,
+			);
+			openLensThroughStrip(container, 'source', 'probe');
+			const face = container.querySelector<HTMLElement>('[data-level-face]');
+			if (!face) throw new Error('missing the selector face');
+			fireEvent.click(face);
+			const option = container.querySelector<HTMLElement>(
+				'[data-level-option="scaffold"]',
+			);
+			if (!option) throw new Error('missing the scaffold option');
+			fireEvent.click(option);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-editor')).not.toBeNull();
+			});
+			// The filter is load-bearing here: the selector's own open/close and
+			// the level UI can ride other events; only the pinned three matter,
+			// and a duplicate among them still fails toEqual on length.
+			const relevant = dispatches
+				.map(([name, payload]) =>
+					name === 'lens-opened'
+						? `lens-opened:${String((payload as { lens: string | null }).lens)}`
+						: name,
+				)
+				.filter((name) =>
+					['lens-opened:null', 'lens-opened:probe', 'level-selected'].includes(
+						name,
+					),
+				);
+			expect([container.querySelector('[data-probe]'), relevant]).toEqual([
+				null,
+				['lens-opened:probe', 'lens-opened:null', 'level-selected'],
+			]);
+		});
+
 		it('dispatches no close when the type toggles with nothing open', async () => {
 			const dispatches = recordDispatches();
 			const container = await mountInstrument(
@@ -1401,6 +1445,139 @@ describe('StudyLenses', () => {
 			expect(
 				dispatches.filter(([name]) => name === 'lens-opened'),
 			).toHaveLength(0);
+		});
+
+		it('dispatches no close when a level selection commits with nothing open', async () => {
+			const dispatches = recordDispatches();
+			const container = await mountInstrument(
+				<StudyLenses languageLevels={[scaffoldLevel]} snippet="const x = 1;" />,
+			);
+			const face = container.querySelector<HTMLElement>('[data-level-face]');
+			if (!face) throw new Error('missing the selector face');
+			fireEvent.click(face);
+			const option = container.querySelector<HTMLElement>(
+				'[data-level-option="scaffold"]',
+			);
+			if (!option) throw new Error('missing the scaffold option');
+			fireEvent.click(option);
+			expect([
+				dispatches.filter(([name]) => name === 'lens-opened'),
+				dispatches.filter(([name]) => name === 'settled'),
+			]).toEqual([[], []]);
+		});
+
+		it('closes the open lens before the posture commits', async () => {
+			const dispatches = recordDispatches();
+			const probe = buildLens('probe', {
+				main: () => <div data-probe>open</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses
+					languageLevels={[scaffoldLevel]}
+					lenses={[probe]}
+					snippet="const x = 1;"
+				/>,
+			);
+			openLensThroughStrip(container, 'source', 'probe');
+			const toggle = container.querySelector<HTMLElement>(
+				'[data-strict-toggle]',
+			);
+			if (!toggle) throw new Error('missing the strict toggle');
+			fireEvent.click(toggle);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-editor')).not.toBeNull();
+			});
+			const relevant = dispatches
+				.map(([name, payload]) =>
+					name === 'lens-opened'
+						? `lens-opened:${String((payload as { lens: string | null }).lens)}`
+						: name,
+				)
+				.filter((name) =>
+					['lens-opened:null', 'lens-opened:probe', 'posture-toggled'].includes(
+						name,
+					),
+				);
+			expect([container.querySelector('[data-probe]'), relevant]).toEqual([
+				null,
+				['lens-opened:probe', 'lens-opened:null', 'posture-toggled'],
+			]);
+		});
+
+		it('dispatches no close when the posture commits with nothing open', async () => {
+			const dispatches = recordDispatches();
+			const container = await mountInstrument(
+				<StudyLenses languageLevels={[scaffoldLevel]} snippet="const x = 1;" />,
+			);
+			const toggle = container.querySelector<HTMLElement>(
+				'[data-strict-toggle]',
+			);
+			if (!toggle) throw new Error('missing the strict toggle');
+			fireEvent.click(toggle);
+			expect([
+				dispatches.filter(([name]) => name === 'lens-opened'),
+				dispatches.filter(([name]) => name === 'settled'),
+			]).toEqual([[], []]);
+		});
+
+		it('disposes an honored lens on a type toggle under the mask', async () => {
+			// The type-vector analog of the posture test below — added here so
+			// the three dispose vectors carry symmetric masked-honored coverage
+			// (the type vector landed one increment earlier without it).
+			const probe = buildLens('focused', {
+				main: () => <div data-focused-probe>mounted</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses
+					activeLanguageLevel="scaffold"
+					languageLevels={[scaffoldLevel]}
+					lens="focused"
+					lenses={[probe]}
+					snippet="debugger;"
+					strictLanguageLevels={true}
+				/>,
+				'[data-focused-probe]',
+			);
+			const toggle = container.querySelector<HTMLElement>('[data-type-toggle]');
+			if (!toggle) throw new Error('missing the type toggle');
+			fireEvent.click(toggle);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-editor')).not.toBeNull();
+			});
+			expect(container.querySelector('[data-focused-probe]')).toBeNull();
+		});
+
+		it('disposes an honored lens and unmasks in the same posture commit', async () => {
+			// The frozen-mask-input payoff, at its ONE reachable instance: the
+			// honored mount is the only masked-open state, and the class-2
+			// strict toggle is clickable over it — the commit must dispose the
+			// lens AND lift the mask together.
+			const probe = buildLens('focused', {
+				main: () => <div data-focused-probe>mounted</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses
+					activeLanguageLevel="scaffold"
+					languageLevels={[scaffoldLevel]}
+					lens="focused"
+					lenses={[probe]}
+					snippet="debugger;"
+					strictLanguageLevels={true}
+				/>,
+				'[data-focused-probe]',
+			);
+			const toggle = container.querySelector<HTMLElement>(
+				'[data-strict-toggle]',
+			);
+			if (!toggle) throw new Error('missing the strict toggle');
+			fireEvent.click(toggle);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-editor')).not.toBeNull();
+			});
+			expect([
+				container.querySelector('[data-enforcement-mask]'),
+				container.querySelector('[data-focused-probe]'),
+			]).toEqual([null, null]);
 		});
 	});
 
