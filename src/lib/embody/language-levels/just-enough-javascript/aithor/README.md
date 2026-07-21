@@ -22,7 +22,7 @@ The pedagogy is below; the contract follows it.
 
 ## Where this sits in the quad
 
-![Figure 2 from Malaise & Signer (2023): (a) Quadrants of learning along curated/uncurated × guided/unguided axes; (b) Layered pyramid of learning tools, from progress modelling at the base to monitored learning at the top.](../../../../explorotron-quadrants-and-pyramid.png)
+![Figure 2 from Malaise & Signer (2023): (a) Quadrants of learning along curated/uncurated × guided/unguided axes; (b) Layered pyramid of learning tools, from progress modelling at the base to monitored learning at the top.](../../../../study-lenses/explorotron-quadrants-and-pyramid.png)
 
 _Figure 2 from Malaise & Signer (2023): **(a)** Quadrants of learning along
 curated/uncurated × guided/unguided axes; **(b)** Layered pyramid of learning
@@ -332,7 +332,7 @@ naming the model that ran), by design, and the rawness is the lesson, not a defe
   honest device-limit cause underlies them) — its absence is the signal that there is
   no actionable category beyond the bare refusal.
 - **Model handle** — a **`LoadedModel`** from the injected local-llm runtime
-  ([`lib/local-llm/`](../../../../lib/local-llm/README.md)), always a **local**
+  ([`lib/local-llm/`](../../../../study-lenses/lib/local-llm/README.md)), always a **local**
   one: it runs on the learner's own device, never a remote service. The config
   selects it by **name** from local-llm's **open set** of models along a
   **size/capability spectrum** — smaller downloads less and runs faster but writes
