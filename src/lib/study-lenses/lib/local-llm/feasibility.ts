@@ -135,6 +135,32 @@ export default function selectFeasible(
 	});
 }
 
+const DEFAULT_PREFERENCE: readonly RuntimeKind[] = [
+	'webllm',
+	'transformers-js',
+	'wllama',
+	'mediapipe',
+	'node-llama-cpp',
+	'ollama',
+];
+// The runtimes the chain tries before CPU/WASM ones. Kept in lockstep with which
+// runtimes `isLoadFeasible` actually WebGPU-gates: today only webllm. transformers-js
+// and mediapipe are WebGPU too, but until they're feasibility-gated (+ ship adapters)
+// classifying them GPU-first would wrongly sort an un-gated candidate ahead of the
+// CPU rescue — so they join this set only when their gate lands.
+const WEBGPU_RUNTIMES: ReadonlySet<RuntimeKind> = new Set(['webllm']);
+const SIZE_RANK: Record<SizeClass, number> = {
+	tiny: 0,
+	small: 1,
+	mid: 2,
+	strong: 3,
+};
+const MAX_CPU_SIZE_CLASS: SizeClass = 'small';
+const HALF = 0.5;
+const MB_PER_GB = 1024;
+const DEFAULT_MEMORY_GB = 4;
+const DEFAULT_VRAM_CEILING_MB = 2048;
+
 /** The ordered fallback chain load() descends: the cost-aware default first, then the remaining WebGPU candidates descending in size, then CPU/WASM. A named pin is a single-candidate chain (artifact-precise, no descent). */
 function buildChain(
 	picks: readonly Pick[],
@@ -461,29 +487,3 @@ function vramOf(pick: Pick): number {
 	}
 	return 0;
 }
-
-const DEFAULT_PREFERENCE: readonly RuntimeKind[] = [
-	'webllm',
-	'transformers-js',
-	'wllama',
-	'mediapipe',
-	'node-llama-cpp',
-	'ollama',
-];
-// The runtimes the chain tries before CPU/WASM ones. Kept in lockstep with which
-// runtimes `isLoadFeasible` actually WebGPU-gates: today only webllm. transformers-js
-// and mediapipe are WebGPU too, but until they're feasibility-gated (+ ship adapters)
-// classifying them GPU-first would wrongly sort an un-gated candidate ahead of the
-// CPU rescue — so they join this set only when their gate lands.
-const WEBGPU_RUNTIMES: ReadonlySet<RuntimeKind> = new Set(['webllm']);
-const SIZE_RANK: Record<SizeClass, number> = {
-	tiny: 0,
-	small: 1,
-	mid: 2,
-	strong: 3,
-};
-const MAX_CPU_SIZE_CLASS: SizeClass = 'small';
-const HALF = 0.5;
-const MB_PER_GB = 1024;
-const DEFAULT_MEMORY_GB = 4;
-const DEFAULT_VRAM_CEILING_MB = 2048;

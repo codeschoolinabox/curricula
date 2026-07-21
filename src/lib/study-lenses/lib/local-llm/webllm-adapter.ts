@@ -75,6 +75,21 @@ export default function makeWebllmAdapter({
 	};
 }
 
+// Code generation wants determinism + headroom; everything else takes the
+// general-purpose fallback. Seed a family only when its defaults differ (so the
+// `?? GLOBAL_SAMPLING` is the load-bearing fallback for every other family).
+const FAMILY_SAMPLING: Partial<Record<'coder' | 'default', Sampling>> =
+	freezeInPlace({ coder: { temperature: 0.2, max_tokens: 1024 } });
+const GLOBAL_SAMPLING: Sampling = freezeInPlace({
+	temperature: 0.4,
+	max_tokens: 512,
+});
+const FETCH_HINTS: readonly string[] = freezeInPlace([
+	'fetch',
+	'download',
+	'cache',
+]);
+
 /** Throws if the modelId is not in the app config's model list (a programmer error, not a refusal). */
 function assertModelExists(
 	modelId: string,
@@ -105,18 +120,3 @@ function inferPhase(text: string): LoadProgress['phase'] {
 	const lower = text.toLowerCase();
 	return FETCH_HINTS.some((hint) => lower.includes(hint)) ? 'fetch' : 'load';
 }
-
-// Code generation wants determinism + headroom; everything else takes the
-// general-purpose fallback. Seed a family only when its defaults differ (so the
-// `?? GLOBAL_SAMPLING` is the load-bearing fallback for every other family).
-const FAMILY_SAMPLING: Partial<Record<'coder' | 'default', Sampling>> =
-	freezeInPlace({ coder: { temperature: 0.2, max_tokens: 1024 } });
-const GLOBAL_SAMPLING: Sampling = freezeInPlace({
-	temperature: 0.4,
-	max_tokens: 512,
-});
-const FETCH_HINTS: readonly string[] = freezeInPlace([
-	'fetch',
-	'download',
-	'cache',
-]);

@@ -450,7 +450,9 @@ describe('selectFeasible', () => {
 			expect(result.rejections).toEqual([
 				{
 					id: 'huge',
-					reasons: [{ kind: 'vram-too-large', requiredMB: 2000, budgetMB: 1024 }],
+					reasons: [
+						{ kind: 'vram-too-large', requiredMB: 2000, budgetMB: 1024 },
+					],
 				},
 			]);
 		});
@@ -717,9 +719,21 @@ describe('selectFeasible', () => {
 		it('orders WebGPU candidates descending in size, then CPU/WASM', () => {
 			const result = selectFeasible({
 				catalog: [
-					webllmEntry({ id: 'gpu-mid', sizeClass: 'mid', vramRequiredMB: 1500 }),
-					webllmEntry({ id: 'gpu-small', sizeClass: 'small', vramRequiredMB: 1000 }),
-					webllmEntry({ id: 'gpu-tiny', sizeClass: 'tiny', vramRequiredMB: 500 }),
+					webllmEntry({
+						id: 'gpu-mid',
+						sizeClass: 'mid',
+						vramRequiredMB: 1500,
+					}),
+					webllmEntry({
+						id: 'gpu-small',
+						sizeClass: 'small',
+						vramRequiredMB: 1000,
+					}),
+					webllmEntry({
+						id: 'gpu-tiny',
+						sizeClass: 'tiny',
+						vramRequiredMB: 500,
+					}),
 					wllamaEntry({ id: 'cpu-tiny', sizeClass: 'tiny' }),
 				],
 				capabilities: fakeCaps(),
@@ -738,8 +752,16 @@ describe('selectFeasible', () => {
 			// so the single-element result proves the pin suppresses the descent.
 			const result = selectFeasible({
 				catalog: [
-					webllmEntry({ id: 'pinned', sizeClass: 'small', vramRequiredMB: 1000 }),
-					webllmEntry({ id: 'smaller', sizeClass: 'tiny', vramRequiredMB: 500 }),
+					webllmEntry({
+						id: 'pinned',
+						sizeClass: 'small',
+						vramRequiredMB: 1000,
+					}),
+					webllmEntry({
+						id: 'smaller',
+						sizeClass: 'tiny',
+						vramRequiredMB: 500,
+					}),
 				],
 				capabilities: fakeCaps(),
 				adapters: { webllm: registeredAdapter },
@@ -753,7 +775,11 @@ describe('selectFeasible', () => {
 		it('a feasible model heavier than the default is excluded (descent only, never ascent)', () => {
 			const result = selectFeasible({
 				catalog: [
-					webllmEntry({ id: 'small', sizeClass: 'small', vramRequiredMB: 1000 }),
+					webllmEntry({
+						id: 'small',
+						sizeClass: 'small',
+						vramRequiredMB: 1000,
+					}),
 					webllmEntry({
 						id: 'strong',
 						sizeClass: 'strong',
@@ -772,9 +798,17 @@ describe('selectFeasible', () => {
 		it('excludes heavier-than-default candidates even in a multi-element chain', () => {
 			const result = selectFeasible({
 				catalog: [
-					webllmEntry({ id: 'strong', sizeClass: 'strong', vramRequiredMB: 3000 }),
+					webllmEntry({
+						id: 'strong',
+						sizeClass: 'strong',
+						vramRequiredMB: 3000,
+					}),
 					webllmEntry({ id: 'mid', sizeClass: 'mid', vramRequiredMB: 1500 }),
-					webllmEntry({ id: 'small', sizeClass: 'small', vramRequiredMB: 1000 }),
+					webllmEntry({
+						id: 'small',
+						sizeClass: 'small',
+						vramRequiredMB: 1000,
+					}),
 					webllmEntry({ id: 'tiny', sizeClass: 'tiny', vramRequiredMB: 500 }),
 				],
 				capabilities: fakeCaps({ deviceMemoryGB: 16 }), // budget 8192, all feasible
@@ -808,8 +842,16 @@ describe('selectFeasible', () => {
 		it("prefer:'max' makes chain[0] the largest and descends from it", () => {
 			const result = selectFeasible({
 				catalog: [
-					webllmEntry({ id: 'small', sizeClass: 'small', vramRequiredMB: 1000 }),
-					webllmEntry({ id: 'strong', sizeClass: 'strong', vramRequiredMB: 3000 }),
+					webllmEntry({
+						id: 'small',
+						sizeClass: 'small',
+						vramRequiredMB: 1000,
+					}),
+					webllmEntry({
+						id: 'strong',
+						sizeClass: 'strong',
+						vramRequiredMB: 3000,
+					}),
 				],
 				capabilities: fakeCaps({ deviceMemoryGB: 16 }), // both feasible
 				adapters: { webllm: registeredAdapter },
@@ -835,13 +877,19 @@ describe('selectFeasible', () => {
 			const result = selectFeasible({
 				catalog: [
 					webllmEntry({ id: 'mid', sizeClass: 'mid', vramRequiredMB: 3000 }),
-					webllmEntry({ id: 'strong', sizeClass: 'strong', vramRequiredMB: 6000 }),
+					webllmEntry({
+						id: 'strong',
+						sizeClass: 'strong',
+						vramRequiredMB: 6000,
+					}),
 				],
 				capabilities: fakeCaps({ deviceMemoryGB: 16 }), // budget 8192; neither ≤ 2048
 				adapters: { webllm: registeredAdapter },
 			});
 			// chain[0] = cheapest feasible; 'strong' is heavier than it → still excluded.
-			expect(result.chain.map((candidate) => candidate.entry.id)).toEqual(['mid']);
+			expect(result.chain.map((candidate) => candidate.entry.id)).toEqual([
+				'mid',
+			]);
 		});
 
 		it('orders the chain tail by code-specialization before id', () => {

@@ -76,7 +76,14 @@
 		"Español",
 		"Français",
 		"Deutsch",
-		"العربية"
+		"العربية",
+		"coep",
+		"misdescribe",
+		"opfs",
+		"refetched",
+		"retriable",
+		"surfaceable",
+		"undiscriminated"
 	],
 	"ignorePaths": [
 		"node_modules",

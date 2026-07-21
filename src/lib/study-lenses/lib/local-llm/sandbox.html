@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- cspell:ignore acao canrun capsrc clearlog huggingface memgb shaderf -->
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
@@ -203,12 +204,11 @@
 			Eyeball-tests the device-local LLM runtime end-to-end in this browser.
 			Generation is <strong>local-only</strong>: a model&rsquo;s weights are
 			fetched once from the HuggingFace CDN (hundreds of MB&ndash;GBs), cached,
-			and reused offline thereafter. Nothing you type leaves the device.
-			WebGPU is required for the real download/run path &mdash; if you have no
-			GPU, use <em>fake caps</em> below to exercise the pure selection core
-			with zero network. See the
-			<a href="#coep-help">troubleshooting table</a> at the bottom if a
-			download is blocked.
+			and reused offline thereafter. Nothing you type leaves the device. WebGPU
+			is required for the real download/run path &mdash; if you have no GPU, use
+			<em>fake caps</em> below to exercise the pure selection core with zero
+			network. See the <a href="#coep-help">troubleshooting table</a> at the
+			bottom if a download is blocked.
 		</p>
 
 		<!-- ── Config: the full Selection surface + prompt ───────────────── -->
@@ -256,16 +256,13 @@ Write a JavaScript function that returns the nth Fibonacci number.</textarea
 
 		<!-- ── Capabilities source: real probe vs hand-built fake caps ───── -->
 		<fieldset>
-			<legend>capabilities source (for feasibleModels / recommendedModel)</legend>
+			<legend>
+				capabilities source (for feasibleModels / recommendedModel)
+			</legend>
 			<div class="row">
 				<label
-					><input
-						type="radio"
-						name="capsrc"
-						value="real"
-						checked
-					/>
-					real probe</label
+					><input type="radio" name="capsrc" value="real" checked /> real
+					probe</label
 				>
 				<label
 					><input type="radio" name="capsrc" value="fake" /> fake caps</label
@@ -276,12 +273,8 @@ Write a JavaScript function that returns the nth Fibonacci number.</textarea
 				>
 			</div>
 			<div class="row">
-				<label
-					><input id="fake-webgpu" type="checkbox" checked /> webgpu</label
-				>
-				<label
-					><input id="fake-shaderf16" type="checkbox" /> shader-f16</label
-				>
+				<label><input id="fake-webgpu" type="checkbox" checked /> webgpu</label>
+				<label><input id="fake-shaderf16" type="checkbox" /> shader-f16</label>
 				<label
 					>deviceMemoryGB
 					<input id="fake-memgb" type="number" value="8" min="0" step="1"
@@ -293,11 +286,14 @@ Write a JavaScript function that returns the nth Fibonacci number.</textarea
 						title="maxStorageBufferBindingBytes — a probed WebGPU buffer limit, DIAGNOSTIC only (surfaced in canRun / a load failure's detail; it does NOT gate feasibility). Mirrored into maxBufferBytes."
 					>
 						<option value="">(unreported &rarr; admit)</option>
-						<option value="134217728">128 MiB &mdash; limited (Firefox/Android)</option>
+						<option value="134217728">
+							128 MiB &mdash; limited (Firefox/Android)
+						</option>
 						<option value="1073741824">1 GiB &mdash; desktop</option>
 						<option value="2147483648">2 GiB &mdash; high-end</option>
 					</select>
-				></label>
+					></label
+				>
 				<span id="budget-readout" class="muted"></span>
 			</div>
 		</fieldset>
@@ -345,12 +341,9 @@ Write a JavaScript function that returns the nth Fibonacci number.</textarea
 					<tr>
 						<td><code>SharedArrayBuffer is not defined</code> during load</td>
 						<td>
-							a path needs SAB (only a future threaded-WASM adapter, not
-							webllm)
+							a path needs SAB (only a future threaded-WASM adapter, not webllm)
 						</td>
-						<td>
-							set <code>CROSS_ORIGIN_ISOLATED = true</code>, restart Vite
-						</td>
+						<td>set <code>CROSS_ORIGIN_ISOLATED = true</code>, restart Vite</td>
 					</tr>
 					<tr>
 						<td>
@@ -475,8 +468,8 @@ Write a JavaScript function that returns the nth Fibonacci number.</textarea
 				const bindingNote =
 					Number.isFinite(binding) && binding > 0
 						? `; binding limit ${Math.round(
-							binding / 1048576,
-						)} MiB (diagnostic only — does NOT gate feasibility; a binding-limited device is caught at bring-up by the chain)`
+								binding / 1048576,
+							)} MiB (diagnostic only — does NOT gate feasibility; a binding-limited device is caught at bring-up by the chain)`
 						: '';
 				budgetReadout.textContent = `→ VRAM budget ${vramBudgetMB(
 					mem,
@@ -493,9 +486,7 @@ Write a JavaScript function that returns the nth Fibonacci number.</textarea
 			}
 
 			function capsSourceIsFake() {
-				const checked = document.querySelector(
-					'input[name="capsrc"]:checked',
-				);
+				const checked = document.querySelector('input[name="capsrc"]:checked');
 				return checked?.value === 'fake';
 			}
 
@@ -532,9 +523,7 @@ Write a JavaScript function that returns the nth Fibonacci number.</textarea
 
 			function renderProgress(p) {
 				const pct =
-					typeof p.ratio === 'number'
-						? ` — ${Math.round(p.ratio * 100)}%`
-						: '';
+					typeof p.ratio === 'number' ? ` — ${Math.round(p.ratio * 100)}%` : '';
 				progressEl.classList.remove('muted');
 				progressEl.textContent = `phase: ${p.phase}${pct} — ${p.text}`;
 			}
@@ -554,7 +543,9 @@ Write a JavaScript function that returns the nth Fibonacci number.</textarea
 
 			function renderCaps(caps) {
 				const memNote =
-					caps.deviceMemoryGB === undefined ? ' (unreported → assumes 4 GB)' : '';
+					caps.deviceMemoryGB === undefined
+						? ' (unreported → assumes 4 GB)'
+						: '';
 				const lines = [
 					`webgpuFeatures: [${(caps.webgpuFeatures ?? []).join(', ')}]`,
 					`deviceMemoryGB: ${caps.deviceMemoryGB ?? '(unreported)'}${memNote}`,
@@ -708,7 +699,9 @@ Write a JavaScript function that returns the nth Fibonacci number.</textarea
 						est.usage > est.quota * 0.85;
 					lines.push(
 						`storage: usage ${mb(est.usage)} / quota ${mb(est.quota)}${
-							near ? '  ← usage is near quota → a cache write likely failed' : ''
+							near
+								? '  ← usage is near quota → a cache write likely failed'
+								: ''
 						}.`,
 					);
 				}
@@ -821,7 +814,9 @@ Write a JavaScript function that returns the nth Fibonacci number.</textarea
 									message: lastBringUpError?.message,
 								});
 								renderEl.innerHTML += `<div class="summary-row"><span class="throw">REAL bring-up error (the loader hides it behind "fetch-failed" — M2 surfaces it honestly):</span>\n${escapeHtml(
-									lastBringUpError?.stack || lastBringUpError?.message || String(lastBringUpError),
+									lastBringUpError?.stack ||
+										lastBringUpError?.message ||
+										String(lastBringUpError),
 								)}</div>`;
 							}
 							await explainFetchFailed();

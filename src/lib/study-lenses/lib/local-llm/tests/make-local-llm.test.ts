@@ -1,3 +1,4 @@
+// cspell:ignore exclud -- regex alternation matching exclude/excluded/excluding
 import { describe, expect, it, vi } from 'vitest';
 
 import makeLocalLlm from '../make-local-llm.js';

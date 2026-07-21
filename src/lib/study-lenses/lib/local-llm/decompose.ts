@@ -40,6 +40,11 @@ export default function decompose(raw: string): GenerationResult {
 	return freezeInPlace({ raw, code, thinkTrace });
 }
 
+const FENCE = '```';
+const FENCE_LINE = '\n```';
+const THINK_OPEN = '<think>';
+const THINK_CLOSE = '</think>';
+
 /**
  * The first fenced block's inner content, byte-exact (separation, never
  * cleaning); the trimmed `raw` on a fence-miss or unterminated fence.
@@ -63,8 +68,3 @@ function extractFencedCode(raw: string): string {
 
 	return raw.slice(lineEnd + 1, close + 1);
 }
-
-const FENCE = '```';
-const FENCE_LINE = '\n```';
-const THINK_OPEN = '<think>';
-const THINK_CLOSE = '</think>';

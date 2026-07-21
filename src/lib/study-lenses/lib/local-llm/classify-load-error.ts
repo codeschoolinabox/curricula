@@ -33,6 +33,9 @@ export default function classifyLoadError(error: unknown): ClassifiedError {
 	return detail === undefined ? { cause } : { cause, detail };
 }
 
+const HTTP_ERROR_FLOOR = 400;
+const DETAIL_MAX = 500;
+
 /** Most-specific-first; an undiscriminated error degrades to 'unknown' (the precedence engine folds it into all-candidates-exhausted). */
 function classifyCause(error: unknown): AttemptCause {
 	if (isQuotaError(error)) return 'storage-quota';
@@ -115,6 +118,3 @@ function errorDetail(error: unknown): string | undefined {
 function truncate(text: string): string {
 	return text.length > DETAIL_MAX ? `${text.slice(0, DETAIL_MAX)}…` : text;
 }
-
-const HTTP_ERROR_FLOOR = 400;
-const DETAIL_MAX = 500;

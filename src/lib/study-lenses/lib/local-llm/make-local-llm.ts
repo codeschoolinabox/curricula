@@ -172,6 +172,11 @@ export default function makeLocalLlm(config: LocalLlmConfig): LocalLlm {
 	});
 }
 
+// The single learner-facing progress label across the whole descent — candidate-
+// and runtime-agnostic by design (the fallback is silent). The trailing
+// character is a real ellipsis (…), not periods.
+const SETUP_NARRATIVE = 'Setting up your local AI…';
+
 // The per-entry rejection diagnosis surfaced by selectFeasible (internal to
 // feasibility.ts — derived here rather than imported, keeping that file's
 // default-only export). Used only to compose the no-feasible `detail` string.
@@ -240,9 +245,3 @@ function relabelProgress(
 	if (onProgress === undefined) return undefined;
 	return (progress) => onProgress({ ...progress, text: SETUP_NARRATIVE });
 }
-
-// The single learner-facing progress label across the whole descent — candidate-
-// and runtime-agnostic by design (the fallback is silent). Declared below its use in
-// relabelProgress but read only at call time (an adapter call is reached after module
-// init, never in the TDZ). The trailing character is a real ellipsis (…), not periods.
-const SETUP_NARRATIVE = 'Setting up your local AI…';
