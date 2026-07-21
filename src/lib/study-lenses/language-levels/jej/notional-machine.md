@@ -395,9 +395,9 @@ host environment.
 
 **Functions** (callable, marked `ƒ`):
 
-- `ƒ parseInt`, `ƒ parseFloat` — string-to-number parsing.
 - `ƒ Boolean()` — explicit boolean conversion (teaches truthiness).
 - `ƒ BigInt()` — conversion to arbitrary-precision integers.
+- `ƒ parseInt`, `ƒ parseFloat` — string-to-number parsing.
 - `ƒ eval` — an **easter egg**: admitted but untaught, and absent from
   [reference.md](./reference.md) by design (eggs are for the learner who goes
   looking).
@@ -749,7 +749,7 @@ Exception: `new Date()` is permitted despite using `new` — Date instance metho
 return only primitives, involve no mutation, and provide a controlled
 introduction to reference types.
 
-**Easter eggs**: `void` operator, comma/sequence operator, `with` statement.
+**Easter eggs**: `void` operator, comma/sequence operator, labeled statements.
 
 ---
 
