@@ -23,6 +23,7 @@ import PROTOCOL from './protocol.js';
 import readCallResponse from './read-call-response.js';
 import type {
 	BufferViews,
+	ExecuteMessage,
 	FromWorkerMessage,
 	ToWorkerMessage,
 } from './types.js';
@@ -37,8 +38,12 @@ import type {
  * returned global key as a JavaScript identifier (ASCII form —
  * collision avoidance and naming are consumer-owned) — a consumer
  * failure here posts a structured `failure`, never throws. On
- * `execute`: injects the globals as `new Function` parameters around
- * the code (`"use strict"` prefix unless disabled), runs it, and posts
+ * `execute`: runs the code via the path the execution axis selects —
+ * the `'function'` path injects the globals as `new Function`
+ * parameters (`"use strict"` prefix unless disabled) and ends
+ * synchronously; the `'module'` path installs the globals on
+ * `globalThis` and runs the code as a genuine ES module (always
+ * strict) whose natural end is asynchronous. Either way it posts
  * exactly one `halt` authored by the consumer's `serializeHalt` (or
  * the engine default) — on natural end AND on throw. A throwing
  * serializer posts `failure` (worker crash). An `execute` arriving
@@ -57,7 +62,7 @@ export default function bootstrap(setup: WorkerSetup): void {
 		if (message.kind === 'setup') {
 			handleSetup(state, setup, message.sharedBuffer, message.workerConfig);
 		} else {
-			handleExecute(state, message.code, message.strict);
+			handleExecute(state, message);
 		}
 	});
 
@@ -120,8 +125,8 @@ function handleSetup(
 	}
 }
 
-/** Runs the program and posts exactly one halt (or a failure). */
-function handleExecute(state: RunState, code: string, strict: boolean): void {
+/** Guards the execute message once, then runs the selected path. */
+function handleExecute(state: RunState, message: ExecuteMessage): void {
 	if (state.views === null || state.globals === null) {
 		// NOTE: when the thread posts setup and execute back-to-back (the
 		// normal pattern), a FAILED setup leaves this guard armed — the run
@@ -135,7 +140,20 @@ function handleExecute(state: RunState, code: string, strict: boolean): void {
 		return;
 	}
 
-	const { globals } = state;
+	if (message.execution === 'module') {
+		void executeModule(state, state.globals, message.code);
+		return;
+	}
+	executeFunction(state, state.globals, message.code, message.strict);
+}
+
+/** The `'function'` path: inject as parameters, run, author the halt. */
+function executeFunction(
+	state: RunState,
+	globals: Record<string, unknown>,
+	code: string,
+	strict: boolean,
+): void {
 	const names = Object.keys(globals);
 	const values = names.map(function valueFor(name) {
 		return globals[name];
@@ -150,6 +168,48 @@ function handleExecute(state: RunState, code: string, strict: boolean): void {
 	} catch (error) {
 		postHalt(state, 'throw', error);
 		return;
+	}
+
+	postHalt(state, NATURAL_END);
+}
+
+/**
+ * The `'module'` path: globals install on `globalThis` (a module takes
+ * no parameters), the code runs as a genuine ES module via a blob-URL
+ * dynamic import, and the natural end is ASYNCHRONOUS — the halt posts
+ * when the module-evaluation promise fulfills; a rejection reaches the
+ * halt author as a throw, exactly like a function-path throw. `strict`
+ * is inert here: modules are always strict.
+ */
+async function executeModule(
+	state: RunState,
+	globals: Record<string, unknown>,
+	code: string,
+): Promise<void> {
+	for (const name of Object.keys(globals)) {
+		// WHY defineProperty, not bracket assignment: an own-property
+		// write bypasses inherited accessor setters, so a global named
+		// `__proto__` installs a real binding instead of repointing
+		// globalThis's prototype. The keys are already identifier-valid.
+		// eslint-disable-next-line functional/immutable-data -- globalThis installation IS the module path's delivery channel
+		Object.defineProperty(globalThis, name, {
+			value: globals[name],
+			writable: true,
+			configurable: true,
+			enumerable: true,
+		});
+	}
+
+	const url = URL.createObjectURL(
+		new Blob([code], { type: 'text/javascript' }),
+	);
+	try {
+		await import(/* webpackIgnore: true */ /* @vite-ignore */ url);
+	} catch (error) {
+		postHalt(state, 'throw', error);
+		return;
+	} finally {
+		URL.revokeObjectURL(url);
 	}
 
 	postHalt(state, NATURAL_END);

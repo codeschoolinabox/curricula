@@ -48,6 +48,7 @@ async function startRun(
 	workerConfig: unknown,
 	code: string,
 	strict = true,
+	execution: 'function' | 'module' = 'function',
 ): Promise<{ worker: Worker; views: BufferViews; next: Inbox }> {
 	const { worker, next } = spawnReferenceWorker();
 	await next();
@@ -57,7 +58,7 @@ async function startRun(
 		sharedBuffer: views.control.buffer,
 		workerConfig,
 	});
-	worker.postMessage({ kind: 'execute', code, strict });
+	worker.postMessage({ kind: 'execute', code, strict, execution });
 	return { worker, views, next };
 }
 
@@ -269,6 +270,116 @@ describe('bootstrap', () => {
 			worker.terminate();
 
 			expect(first).toEqual({ kind: 'message', message: 'installed' });
+		});
+	});
+
+	describe('module execution path', () => {
+		it('delivers globals on globalThis, not as parameters', async () => {
+			const { worker, next } = await startRun(
+				{},
+				'emit(typeof globalThis.emit);',
+				true,
+				'module',
+			);
+			const first = await next();
+			worker.terminate();
+
+			expect(first).toEqual({ kind: 'message', message: 'function' });
+		});
+
+		it('keeps function-path globals off globalThis (parameters only)', async () => {
+			const { worker, next } = await startRun(
+				{},
+				'emit(typeof globalThis.getConfig);',
+			);
+			const first = await next();
+			worker.terminate();
+
+			expect(first).toEqual({ kind: 'message', message: 'undefined' });
+		});
+
+		it('runs the code as a genuine ES module (import.meta resolves)', async () => {
+			const { worker, next } = await startRun(
+				{},
+				'emit(typeof import.meta);',
+				true,
+				'module',
+			);
+			const first = await next();
+			worker.terminate();
+
+			expect(first).toEqual({ kind: 'message', message: 'object' });
+		});
+
+		it('runs top-level await to an async natural end', async () => {
+			const { worker, views, next } = await startRun(
+				{},
+				"await Promise.resolve(); emit('after-await');",
+				true,
+				'module',
+			);
+			const first = await next();
+			resumeWorker(views);
+			const halt = (await next()) as { kind: string; haltKind: string };
+			worker.terminate();
+
+			expect([first, halt.kind, halt.haltKind]).toEqual([
+				{ kind: 'message', message: 'after-await' },
+				'halt',
+				'natural-end',
+			]);
+		});
+
+		it('ignores strict false — a module is always strict', async () => {
+			const { worker, next } = await startRun(
+				{},
+				'with (Math) { emit(PI); }',
+				false,
+				'module',
+			);
+			const halt = (await next()) as {
+				haltKind: string;
+				payload: { name: string };
+			};
+			worker.terminate();
+
+			expect([halt.haltKind, halt.payload.name]).toEqual([
+				'throw',
+				'SyntaxError',
+			]);
+		});
+
+		it('reaches serializeHalt as a throw when the module evaluation rejects', async () => {
+			const { worker, next } = await startRun(
+				{},
+				"await Promise.reject(new TypeError('boom'));",
+				true,
+				'module',
+			);
+			const halt = (await next()) as {
+				haltKind: string;
+				payload: { name: string };
+			};
+			worker.terminate();
+
+			expect([halt.haltKind, halt.payload.name]).toEqual([
+				'throw',
+				'TypeError',
+			]);
+		});
+
+		it('halts with a SyntaxError for invalid module grammar', async () => {
+			const { worker, next } = await startRun({}, 'const = 5;', true, 'module');
+			const halt = (await next()) as {
+				haltKind: string;
+				payload: { name: string };
+			};
+			worker.terminate();
+
+			expect([halt.haltKind, halt.payload.name]).toEqual([
+				'throw',
+				'SyntaxError',
+			]);
 		});
 	});
 
