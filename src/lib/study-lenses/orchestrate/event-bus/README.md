@@ -65,6 +65,10 @@ evaluation run's `Settlement`, the evaluators' own word for how a run ended.
   post-commit. The orphan sequence `lens-opened` (name) → `settled` →
   `lens-opened` (null) is legal — subscribers must tolerate an open immediately
   followed by its close, with the explaining settle between.
+- **A same-name re-open is a legal re-commit.** Explicitly re-opening the
+  already-open lens dispatches `lens-opened` with the same name — the choice
+  re-committed (its opened overrides re-resolved), never suppressed as a no-op.
+  Subscribers must not assume consecutive `lens-opened` names differ.
 - **Listeners never force a render flush.** No listener may call `flushSync`:
   the pane flip's one-commit batching guarantee depends on dispatches never
   flushing React mid-handler.

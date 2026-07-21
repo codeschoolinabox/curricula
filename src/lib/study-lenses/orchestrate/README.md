@@ -109,11 +109,14 @@ maskable content region, so the class-1/class-3 split survives the swap.
   mounted lens. It consumes the selected level's editor-support data —
   completion, hover, format — through the adapter that lives with the editor's
   own surface.
-- **The open lens** — mounted as the pane's occupant with the frozen embodiment
-  and its resolved configuration, both fixed for the whole mount: every control
-  that could change the derivation (the snippet-type toggle, the level selector,
-  the strict toggle) disposes the lens back to the editor first. Disposable
-  practice is structural, not policed.
+- **The open lens** — mounted as the pane's occupant with the frozen embodiment,
+  fixed for the whole mount: every control that could change the derivation (the
+  snippet-type toggle, the level selector, the strict toggle) disposes the lens
+  back to the editor first. Disposable practice is structural, not policed. Its
+  resolved configuration is fixed too, with one deliberate edge: explicitly
+  re-opening the SAME lens (a recommendation may target the open lens)
+  re-resolves the configuration in place and announces as a fresh open — the
+  embodiment never moves.
 - **The five-phase study panel** — the mechanical render of the embodiment: a
   barred phase renders barred with its cause; an accessible phase lists its
   fitting lenses. The phases' learner-facing display labels are this region's UI

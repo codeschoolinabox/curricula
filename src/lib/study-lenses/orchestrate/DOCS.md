@@ -260,9 +260,11 @@ verdicts without consulting a level twice.
 - **The event mapping (taxonomy kept).** `lens-opened{name}` covers the
   reference's mode-changed(editor→lens) + lens-switched; `lens-opened{null}`
   covers mode-changed(lens→editor); a lens→lens switch is one
-  `lens-opened{next}` with no null between. On dispose paths the close dispatch
-  precedes the change event (`lens-opened{null}` before `type-toggled` / the
-  level or posture announce); a flush-at-open's `settled` announce follows
+  `lens-opened{next}` with no null between; a same-name re-open is one
+  `lens-opened{name}` re-announcing the re-committed choice (its overrides
+  re-resolved in place — the embodiment never moves). On dispose paths the close
+  dispatch precedes the change event (`lens-opened{null}` before `type-toggled`
+  / the level or posture announce); a flush-at-open's `settled` announce follows
   `lens-opened{name}` post-commit. The orphan sequence `lens-opened{name}` →
   `settled` → `lens-opened{null}` is LEGAL — subscribers must tolerate an open
   immediately followed by its close, with the explaining settle between. A

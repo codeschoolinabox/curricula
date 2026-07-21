@@ -131,7 +131,10 @@ export default function StudyLenses({
 	// An eagerly-written mirror of the occupant: the open/dispose guards
 	// read it, so a same-batch double-commit can neither double-dispatch a
 	// close nor miss a dispose (the render-closure value could be stale
-	// there).
+	// there). The render-phase sync below is safe today; if this region
+	// ever adopts concurrent rendering, a discarded render could
+	// transiently desync the mirror (state self-heals it next render) —
+	// revisit then.
 	const occupantReference = React.useRef(occupant);
 	occupantReference.current = occupant;
 
