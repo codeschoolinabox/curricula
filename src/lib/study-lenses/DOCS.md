@@ -40,22 +40,26 @@ document constrains only the package-level shape.
    embodiment: barred phases visibly barred with their cause; accessible phases
    list their fitting lenses. Level surfaces render from the verdicts. The
    enforcement mask derives here, from the selected level's verdict crossed with
-   the strict posture — an inert overlay; mounted lenses keep their state
-   beneath it. An initial-focus request also mounts here: a phase-declaring lens
-   when its phase is accessible, a panel-excluded lens after its applicability
-   runs at mount; recommendation rendering passes through the mask. Input:
-   embodiment + verdicts + composed study configuration. Output: the rendered
-   study surface.
+   the strict posture — an inert overlay; a covered surface keeps its state
+   beneath it. The surface pane holds the editor or the one open lens, never
+   both — the open lens rides the embodiment frozen at its open, and returning
+   remounts the editor over the live source. An initial-focus request also
+   mounts here: a phase-declaring lens when its phase is accessible, a
+   panel-excluded lens after its applicability runs at mount; recommendation
+   rendering passes through the mask. Input: embodiment + verdicts + composed
+   study configuration. Output: the rendered study surface.
 
 4. **Interact** (async at the edges) — the learner opens lenses, edits, and
    toggles; each control re-enters its own phase. Source edits re-enter Derive
-   at the next settle; the snippet-type toggle re-enters Derive immediately;
-   level selection, posture, and configuration tweaks re-enter through the
-   composed study configuration with no re-parse. Evaluation-phase lenses drive
+   at the next settle (in editor mode — the editor is absent while a lens is
+   open); opening a lens settles the live buffer immediately and replaces the
+   editor; the snippet-type toggle, level selection, and the posture toggle each
+   dispose an open lens first, then re-enter (the type toggle re-enters Derive
+   immediately; level, posture, and configuration tweaks re-enter through the
+   composed study configuration with no re-parse). Evaluation-phase lenses drive
    evaluators, which execute the program and emit events rendered per audience;
-   a settle that unmounts an evaluation lens cancels its in-flight evaluation.
-   Input: the rendered surface + learner intent. Output: a new settle or a
-   re-render.
+   disposing the lens cancels its in-flight evaluation. Input: the rendered
+   surface + learner intent. Output: a new settle or a re-render.
 
 ## Data flow
 
@@ -100,14 +104,17 @@ flowchart TD
 - **One immutability boundary.** The embodiment freezes what it built and only
   what it built; attached lens refs remain owned by their defining modules and
   are attached as refs, never as pre-bound wrappers.
-- **Loud versus graceful.** Loud: injection collisions, and any failure of the
-  embodiment's own machinery. Graceful: a lens that doesn't fit is silently
-  absent; a fact stage's failure renders inside its owning phase; a utility
-  given input it cannot serve returns a structured refusal — nothing in the
-  study surface ever throws at the learner.
-- **Single writer, settle-bounded life.** Only the editor mutates the program
+- **Loud versus graceful.** Loud: injection collisions, any failure of the
+  embodiment's own machinery, and the orchestrator's pane-coherence invariants
+  (unreachable by construction). Graceful: a lens that doesn't fit is silently
+  absent; a recommendation whose target is off the roster is dropped at
+  collection, dev-warned; a fact stage's failure renders inside its owning
+  phase; a utility given input it cannot serve returns a structured refusal —
+  nothing in the study surface ever throws at the learner.
+- **Single writer, mount-bounded life.** Only the editor mutates the program
   source; every derived state re-derives per settle, and no evaluation event
-  stream outlives the settle that unmounts its lens.
+  stream outlives its lens's mount — disposing the lens cancels whatever it was
+  driving.
 - **The embodiment knows no consumers.** Lens refs arrive as arguments;
   evaluators are imported by the lenses that drive them. Nothing in the
   embodiment reaches toward components or execution.

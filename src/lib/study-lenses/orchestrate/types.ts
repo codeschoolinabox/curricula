@@ -17,6 +17,7 @@ import type { Lens, LensConfig } from '../lenses/types.js';
 // file. Erased at emit, accepted by tsc strict — safe exactly as long as
 // both edges stay `import type`; never add a runtime import either way.
 import type { EventPayloadMap } from './event-bus/types.js';
+import type { ConfigOverridesByLens } from './lib/composing/types.js';
 import type { AssessmentsByLevel } from './lib/marking/types.js';
 import type { RankedRecommendations } from './lib/recommending/types.js';
 import type { VerdictsByLevel } from './lib/validating/types.js';
@@ -136,6 +137,12 @@ export type UseSettledSnippetInput = {
 /**
  * What the settle hook yields: the settled snippet every derivation keys on,
  * and the per-keystroke edit intake the editor's edit events feed.
+ *
+ * @remarks
+ * The swap re-spec (./DOCS.md § The settle loop) adds a live-source read and
+ * an immediate flush to this result; that widening lands together with its
+ * implementation, so this contract never advertises members the hook does
+ * not yet return.
  */
 export type UseSettledSnippetResult = {
 	readonly settled: SettledSnippet;
@@ -160,3 +167,36 @@ export type StudyDerivation = {
 	readonly assessments: AssessmentsByLevel;
 	readonly recommendations: RankedRecommendations;
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// The surface pane's occupant
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * What occupies the surface pane — the editor home base XOR one open lens,
+ * never both. The editor arm carries its remount seed (captured at dispose —
+ * the mount fallback seeds from the snippet prop — and value-stable for that
+ * mount; the buffer itself lives in the settle hook's live-source slot). The lens arm carries everything a mount needs frozen
+ * for its lifetime: the open lens's name, the settled pair it opened over
+ * (the coherence anchor the render invariants compare against), and the
+ * opened layer's overrides (a recommendation-opened mount's proposal).
+ *
+ * @remarks
+ * Deliberately not named "Surface" — that word belongs to the mask's surface
+ * classes. Folding the open-lens name, the open-time snapshot, and the
+ * opened overrides into one union makes "a lens without its snapshot" and
+ * "overrides outliving the open choice" unrepresentable. The region glossary
+ * pins the pane-occupant term; ./DOCS.md § The render projection pins the
+ * two-DOM-slot rule the one visual pane abstracts over.
+ */
+export type PaneOccupant =
+	| {
+			readonly mode: 'editor';
+			readonly editorSeed: string;
+	  }
+	| {
+			readonly mode: 'lens';
+			readonly openLensName: string;
+			readonly openedAt: SettledSnippet;
+			readonly opened: ConfigOverridesByLens;
+	  };

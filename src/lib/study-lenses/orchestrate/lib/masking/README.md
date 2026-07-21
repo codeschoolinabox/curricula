@@ -32,13 +32,15 @@ validates or repairs it (no re-derivation, in either direction).
 
 ## The three surface classes
 
-Class 1, editor-based: always alive. Class 2, meta-level controls — the
-selector, the strict toggle, the snippet-type toggle, the guide: never masked,
-because each can itself restore conformance (and help is never withheld). Class
-3, everything else — the study panel and its lenses: covered under strict while
-the code is out of level, as an inert overlay; mounted lenses keep their state
-beneath it. The class of a surface is a static fact of what the surface IS —
-nothing derives it at runtime.
+Class 1, editor-based: never masked while mounted — and structurally absent
+during a lens excursion, when the ways back to it are class 2. Class 2,
+meta-level controls — the selector, the strict toggle, the snippet-type toggle,
+the guide, the edit-return button: never masked, because each can itself restore
+conformance or the path to it (and help is never withheld). Class 3, everything
+else — the study panel and its lenses: covered under strict while the code is
+out of level, as an inert overlay; a covered surface keeps its state beneath it.
+The class of a surface is a static fact of what the surface IS — nothing derives
+it at runtime.
 
 ## Navigation
 

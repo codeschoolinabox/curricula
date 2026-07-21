@@ -61,8 +61,9 @@ sequenceDiagram
     E->>S: settle — phases open, each listing the lenses that fit
     L->>S: selects a level · toggles strict
     S->>L: fit marks · gutter · mask only while out of level
-    L->>S: opens the run lens
+    L->>S: opens the run lens (it replaces the editor)
     S->>L: output per audience · cancel available
+    L->>S: Edit code — the editor returns, edits intact
 ```
 
 1. **The broken text is already worth studying.** The `source` phase serves any
@@ -84,8 +85,11 @@ sequenceDiagram
    alive, and the toggle lifts the guardrail at any time.
 5. **Running is studying.** The run lens lives in the `evaluation` phase: output
    renders per audience — dialogs speak to the learner-as-user, the console to
-   the developer — and a run can be canceled. An edit that settles unmounts the
-   lens and cancels the in-flight run: every settle is a fresh program.
+   the developer — and a run can be canceled. Opening the lens replaced the
+   editor and fixed the program for the excursion; returning to edit — the Edit
+   code button, or the strip's none entry — disposes the lens and cancels the
+   in-flight run, and the next open mounts fresh against the code as edited:
+   every excursion is a fresh program.
 6. **The kit leaves with the learner.** Nothing above depended on the snippet
    being curated — the same environment, phases, and lenses serve whatever code
    they meet next.

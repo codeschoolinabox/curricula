@@ -134,9 +134,11 @@ level selector (does my code fit this level?), violation markers in the editor
 gutter, documentation on hover, and — only if you opt into **strict** — a
 guardrail that masks the study surfaces until the code returns to the level. The
 default posture is **warn**: nothing is ever blocked, warnings simply appear
-where you edit. Even under strict, the editor and every control that could
-restore conformance stay alive, and a typo never reads as a level violation —
-while code doesn't parse, the level honestly says it cannot judge.
+where you edit. Even under strict, the path to conformance stays alive: the
+editor while it is mounted, the never-masked way back to it during a lens
+excursion, and every control whose change can itself restore conformance. And a
+typo never reads as a level violation — while code doesn't parse, the level
+honestly says it cannot judge.
 
 The point is guardrail-up, not scaffolding-down: keeping code inside a level
 keeps that level's lenses available, and the boundary is always explained,
@@ -274,21 +276,23 @@ channel, with fit marks and documentation on hover. Whether a level admits the
 current snippet type is checked the same way as code conformance.
 
 Enforcement is **mask, not filter**: fit computation never changes when a level
-is active — under strict, the mask covers what fit produced. Editor surfaces
-always stay alive, and so does every control whose change can itself restore
-conformance (the selector, the strict toggle, the snippet-type toggle, the
-guide). While the code doesn't parse, the level's verdict is undetermined: the
-mask never names a violation it can't know, and the parse phases' supports stay
-available.
+is active — under strict, the mask covers what fit produced. The editor is never
+masked while mounted — during a lens excursion the way back to it stays alive
+instead — and so does every control whose change can itself restore conformance
+(the selector, the strict toggle, the snippet-type toggle, the guide, the Edit
+code button). While the code doesn't parse, the level's verdict is undetermined:
+the mask never names a violation it can't know, and the parse phases' supports
+stay available.
 
 ### The orchestrator
 
-The orchestrator is the one component the host mounts. It renders: the editor —
-the single writer of the program's source, from which everything re-derives per
-settle — the five-phase study panel, the permanent level selector, the
-selected-level gutter, the strict toggle, the snippet-type toggle, and an
-embedded guide. It is also the composition root: it owns a default roster of
-lenses and appends whatever the host injects.
+The orchestrator is the one component the host mounts. It renders: one surface
+pane holding the editor — the home base, the single writer of the program's
+source, from which everything re-derives per settle — or the one open lens in
+its place; and above the pane, the five-phase study panel, the permanent level
+selector, the selected-level gutter, the strict toggle, the snippet-type toggle,
+and an embedded guide. It is also the composition root: it owns a default roster
+of lenses and appends whatever the host injects.
 
 ## Glossary — the ubiquitous language
 
@@ -361,8 +365,9 @@ documents, and UI copy use them consistently.
 - **none-state** — the reserved empty level key meaning "no constraining level
   is selected". Its selector entry is a label, not a level; generic JavaScript
   editing applies.
-- **settle** — the debounced moment after typing pauses when the editor buffer
-  is re-embodied; **per-settle** means once per re-embodiment.
+- **settle** — the moment the buffer is re-embodied: the debounced pause after
+  typing, or a type toggle's or lens-open's immediate absorb; **per-settle**
+  means once per re-embodiment.
 - **snippet type** — whether the program is treated as a script or a module. The
   host chooses the initial type; the learner can toggle it for the session.
 - **strict / warn** — the two enforcement postures for a selected language

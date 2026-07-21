@@ -32,13 +32,13 @@ event taxonomy.
 Five events — four announce committed session choices, and `settled` announces a
 completed derivation:
 
-| Event             | Announces                                                                                             |
-| ----------------- | ----------------------------------------------------------------------------------------------------- |
-| `level-selected`  | the selected level key changed (`''` = none-state)                                                    |
-| `posture-toggled` | the enforcement posture changed (strict on or off)                                                    |
-| `type-toggled`    | the snippet type changed                                                                              |
-| `lens-opened`     | the open-lens choice changed (a name, `null` when closed (the strip's none entry over the open lens)) |
-| `settled`         | a settle completed; derived state is fresh                                                            |
+| Event             | Announces                                                                                                                                                              |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `level-selected`  | the selected level key changed (`''` = none-state)                                                                                                                     |
+| `posture-toggled` | the enforcement posture changed (strict on or off)                                                                                                                     |
+| `type-toggled`    | the snippet type changed                                                                                                                                               |
+| `lens-opened`     | the open-lens choice changed (a name; `null` when closed — the strip's none entry, the Edit code button, a derivation-context commit's dispose, or the orphan defense) |
+| `settled`         | a settle completed; derived state is fresh                                                                                                                             |
 
 Configuration tweaks are the one session choice with no event: a tweak reaches
 its lens as fresh props through the cascade, and no other surface reacts to it.
@@ -55,6 +55,19 @@ evaluation run's `Settlement`, the evaluators' own word for how a run ended.
   re-derivation's `settled`.
 - **One `settled` per settle**, after the new derived state commits — never
   mid-derivation.
+- **A dispose precedes the change that caused it.** A derivation-context commit
+  (type, level, posture) over an open lens disposes the lens first:
+  `lens-opened: null` dispatches before the change's own event, which precedes
+  any settle it causes. With no lens open, dispose is silent — no
+  `lens-opened: null` fires.
+- **The flush-at-open order.** Opening over pending edits dispatches
+  `lens-opened` with the name first; the absorbed settle's `settled` follows
+  post-commit. The orphan sequence `lens-opened` (name) → `settled` →
+  `lens-opened` (null) is legal — subscribers must tolerate an open immediately
+  followed by its close, with the explaining settle between.
+- **Listeners never force a render flush.** No listener may call `flushSync`:
+  the pane flip's one-commit batching guarantee depends on dispatches never
+  flushing React mid-handler.
 
 ## Navigation
 

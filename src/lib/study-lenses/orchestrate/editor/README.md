@@ -42,12 +42,18 @@ the region's one memoized validate. This is the double-parse guard: nothing in
 the editor parses the program for judgment; CodeMirror's own tokenizer
 highlights syntax and does nothing more.
 
-## Always alive
+## Home base — always reachable
 
-The editor is surface class 1: alive under every enforcement posture, because
-editing is how conformance is restored. A mount failure never takes the page
-down — the component renders a fallback carrying a data attribute in place of
-the surface.
+The editor is surface class 1: never masked while mounted, because editing is
+how conformance is restored — and it is the home base, not a permanent fixture.
+A lens excursion unmounts this surface entirely (CodeMirror is destroyed); edits
+survive every excursion because the buffer lives in the region's live-source
+slot, not in this component, and each mount seeds from it. What the postures
+must keep alive is the PATH back — and the guaranteed way home is the Edit code
+button: class 2, alive under every posture. The strip's none entry closes too,
+but the strip is class 3 and inert while masked — which is exactly why the
+class-2 button exists. A mount failure never takes the page down — the component
+renders a fallback carrying a data attribute in place of the surface.
 
 ## Navigation
 
