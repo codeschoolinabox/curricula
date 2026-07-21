@@ -121,7 +121,13 @@ type TransportEvent =
 type Transport = {
 	/** Spawns the sandbox, completes the handshake, delivers setup + code. */
 	readonly start: (init: TransportInit) => Promise<void>;
-	/** Resolves with the next worker event in post order. */
+	/**
+	 * Resolves with the next worker event in post order. Caller
+	 * obligation: at most ONE next() may be pending at a time — a second
+	 * concurrent call would silently displace the first caller's
+	 * resolver (the pump's serial await loop satisfies this by
+	 * construction).
+	 */
 	readonly next: () => Promise<TransportEvent>;
 	/** Whether an emission is awaiting thread-side disposal (timer consult). */
 	readonly hasPendingEvent: () => boolean;
