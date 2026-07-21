@@ -90,10 +90,10 @@ flowchart TD
   curated path carries neither and is excluded from both denominators. The
   exhaustiveness rests on `Meta` being absent on a refusal; it would break if
   `attempts` were ever added to a refusal's meta.
-- **`Histogram` is in-memory only.** It is a `ReadonlyMap`, reached **only** by
-  the formatter (→ string); it never hits `JSON.stringify` (a `Map` serializes
-  to `{}` — silent data loss). If a JSON report is ever wanted, the histogram is
-  converted to entries at that boundary, not stored as a Map.
+- **`Histogram` is plain data.** A frozen partial record over its closed key
+  set, read by the formatter; a key absent counted zero. Shaped as a `Record`
+  — never a `Map` — so the freeze reaches its entries and it survives `JSON`
+  untruncated (the package-wide frozen-surface rule).
 - **`quadrant` is a derived label, trusted not re-derived.** It is
   `config.validate` × empty-`program`; the fold reads it for grouping and does
   not recompute it, so a hand-authored fixture must keep `quadrant` consistent

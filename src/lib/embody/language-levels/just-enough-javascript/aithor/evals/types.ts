@@ -187,9 +187,11 @@ type Rate = {
  * @remarks
  * Named `Histogram` (not `Distribution`) to avoid collision with the level's
  * exported `Distribution` (`embody/types.ts` — a min/max/mean/median stats
- * summary), an unrelated concept. A key absent from the map counted zero.
+ * summary), an unrelated concept. A key absent from the record counted zero.
+ * Plain data — a frozen partial record, never a `Map` — so the freeze reaches
+ * its entries and it survives `JSON` untruncated.
  */
-type Histogram<K> = ReadonlyMap<K, number>;
+type Histogram<K extends string | number> = Readonly<Partial<Record<K, number>>>;
 
 /**
  * The per-case roll-up of {@link Outcome}s into rates and histograms.
