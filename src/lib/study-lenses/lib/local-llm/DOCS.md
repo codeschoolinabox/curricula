@@ -250,7 +250,7 @@ constraints).
 - [`../engine/DOCS.md`](../engine/DOCS.md) — the sibling stateful `lib/`
   resource and the dependency-direction template (own your contract; consumers
   re-map).
-- [`../../embody/language-levels/just-enough-javascript/aithor/DOCS.md`](../../embody/language-levels/just-enough-javascript/aithor/DOCS.md)
+- [`../../../embody/language-levels/just-enough-javascript/aithor/DOCS.md`](../../../embody/language-levels/just-enough-javascript/aithor/DOCS.md)
   — the primary consumer; aithor injects this as its model runtime and re-maps
   the load failure into its own `no-model-available` refusal.
 - [`../README.md`](../README.md) — the package-level shared `lib/` (what belongs

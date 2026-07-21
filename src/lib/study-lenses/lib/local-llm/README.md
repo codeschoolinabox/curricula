@@ -14,7 +14,7 @@ pedagogy. Unlike the fully domain-free sandbox [`engine/`][engine] beside it, it
 _assumes its models emit code_; like the engine, it leaves what that output
 **means** to its consumers. The generator returns code; it never judges it.
 
-[aithor]: ../../embody/language-levels/just-enough-javascript/aithor/README.md
+[aithor]: ../../../embody/language-levels/just-enough-javascript/aithor/README.md
 [engine]: ../engine/README.md
 
 ## Where this sits
@@ -361,7 +361,7 @@ the test boundary.
 - Primary consumer: [`aithor`][aithor] — the JeJ generative arm that injects
   this as its model runtime.
 - Future consumer:
-  [`../../lenses/agent-lenses.concept.md`](../../lenses/agent-lenses.concept.md)
+  [`../../../study-lenses--deprecated-architecture/lenses/agent-lenses.concept.md`](../../../study-lenses--deprecated-architecture/lenses/agent-lenses.concept.md)
   — agent-lenses, which name this runtime as a prerequisite. (That note calls it
   `llm-client`; this module is the same thing, **renamed `local-llm`** to encode
   the local-only invariant — "client" wrongly implies a remote service.)
