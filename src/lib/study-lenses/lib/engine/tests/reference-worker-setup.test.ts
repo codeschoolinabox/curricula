@@ -145,6 +145,34 @@ describe('referenceWorkerSetup', () => {
 			).toBe('installed');
 		});
 
+		it('freezes the returned globals when no mutation is directed', () => {
+			const quietApi: WorkerApi = {
+				emit() {},
+				call() {
+					return null;
+				},
+			};
+
+			const result = referenceWorkerSetup(quietApi, {});
+
+			expect(Object.isFrozen(result.globals)).toBe(true);
+		});
+
+		it('returns a live globals record when directed to mutate after setup', () => {
+			const quietApi: WorkerApi = {
+				emit() {},
+				call() {
+					return null;
+				},
+			};
+
+			const result = referenceWorkerSetup(quietApi, {
+				mutateGlobalsAfterSetup: { name: 'later', value: 1 },
+			});
+
+			expect(Object.isFrozen(result.globals)).toBe(false);
+		});
+
 		it('installs a different directed value on globalThis', () => {
 			const quietApi: WorkerApi = {
 				emit() {},

@@ -26,6 +26,9 @@ import type { SerializeHalt, WorkerApi, WorkerSetupResult } from '../types.js';
  * - `throwInSerializeHalt` — the serializer throws (worker crash)
  * - `installWorkerGlobal: { name, value }` — install state on
  *   `globalThis` (the lookup channel, distinct from param injection)
+ * - `mutateGlobalsAfterSetup: { name, value }` — mutate the returned
+ *   globals record on a microtask AFTER setup returns (exercises the
+ *   engine's snapshot-copy defense)
  */
 export default function referenceWorkerSetup(
 	api: WorkerApi,
@@ -56,11 +59,24 @@ export default function referenceWorkerSetup(
 			: { [config.invalidGlobalKey]: true }),
 	};
 
+	const mutation = config.mutateGlobalsAfterSetup;
+	if (mutation) {
+		queueMicrotask(function mutateAfterReturn() {
+			// eslint-disable-next-line functional/immutable-data -- post-return mutation IS the defense under test
+			globals[mutation.name] = mutation.value;
+		});
+	}
+
+	// WHY conditional freeze: a consumer that mutates its record after
+	// setup returns is by definition one that did not freeze it — the
+	// mutating directive models that consumer, so its record stays live.
+	const returnedGlobals = mutation ? globals : Object.freeze(globals);
+
 	if (config.omitSerializeHalt) {
-		return Object.freeze({ globals: Object.freeze(globals) });
+		return Object.freeze({ globals: returnedGlobals });
 	}
 	return Object.freeze({
-		globals: Object.freeze(globals),
+		globals: returnedGlobals,
 		serializeHalt: buildReferenceSerializer(config),
 	});
 }
@@ -71,6 +87,10 @@ type ReferenceConfig = {
 	readonly omitSerializeHalt?: boolean;
 	readonly throwInSerializeHalt?: boolean;
 	readonly installWorkerGlobal?: {
+		readonly name: string;
+		readonly value: unknown;
+	};
+	readonly mutateGlobalsAfterSetup?: {
 		readonly name: string;
 		readonly value: unknown;
 	};
