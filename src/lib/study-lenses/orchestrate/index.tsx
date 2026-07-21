@@ -162,6 +162,10 @@ export default function StudyLenses({
 	}
 
 	function commitType(): void {
+		// The uniform dispose rule: a derivation-context change closes the
+		// open lens FIRST (silent with nothing open), so the close dispatch
+		// precedes the change event and no mount ever sees its context move.
+		disposeToEditor();
 		const next = type === 'module' ? 'script' : 'module';
 		setType(next);
 		session.bus.dispatch('type-toggled', { type: next });

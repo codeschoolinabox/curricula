@@ -846,7 +846,10 @@ describe('StudyLenses', () => {
 			const toggle = container.querySelector<HTMLElement>('[data-type-toggle]');
 			if (!toggle) throw new Error('missing the type toggle');
 			fireEvent.click(toggle);
-			expect(applicability.mock.calls.length).toBe(callsAtMount);
+			expect([
+				applicability.mock.calls.length,
+				container.querySelector('[data-focused-probe]'),
+			]).toEqual([callsAtMount, null]);
 		});
 
 		it('masks a focus-mounted lens identically', async () => {
@@ -1348,6 +1351,56 @@ describe('StudyLenses', () => {
 				true,
 				true,
 			]);
+		});
+	});
+
+	describe('the dispose rule (Boundaries)', () => {
+		it('closes the open lens before the type toggles', async () => {
+			const dispatches = recordDispatches();
+			const probe = buildLens('probe', {
+				main: () => <div data-probe>open</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses lenses={[probe]} snippet="const x = 1;" />,
+			);
+			openLensThroughStrip(container, 'source', 'probe');
+			const toggle = container.querySelector<HTMLElement>('[data-type-toggle]');
+			if (!toggle) throw new Error('missing the type toggle');
+			fireEvent.click(toggle);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-editor')).not.toBeNull();
+			});
+			const relevant = dispatches
+				.map(([name, payload]) =>
+					name === 'lens-opened'
+						? `lens-opened:${String((payload as { lens: string | null }).lens)}`
+						: name,
+				)
+				.filter((name) =>
+					[
+						'lens-opened:null',
+						'lens-opened:probe',
+						'settled',
+						'type-toggled',
+					].includes(name),
+				);
+			expect([container.querySelector('[data-probe]'), relevant]).toEqual([
+				null,
+				['lens-opened:probe', 'lens-opened:null', 'type-toggled', 'settled'],
+			]);
+		});
+
+		it('dispatches no close when the type toggles with nothing open', async () => {
+			const dispatches = recordDispatches();
+			const container = await mountInstrument(
+				<StudyLenses snippet="const x = 1;" />,
+			);
+			const toggle = container.querySelector<HTMLElement>('[data-type-toggle]');
+			if (!toggle) throw new Error('missing the type toggle');
+			fireEvent.click(toggle);
+			expect(
+				dispatches.filter(([name]) => name === 'lens-opened'),
+			).toHaveLength(0);
 		});
 	});
 
