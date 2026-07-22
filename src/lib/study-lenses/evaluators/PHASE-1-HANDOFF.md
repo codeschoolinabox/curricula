@@ -10,6 +10,13 @@
 > 2026-07-17 at the close of the kind-contract re-spec; validated against a
 > context-free reader.
 
+**⚠️ SUPERSEDED for the danger sub-effort (2026-07-22).** This doc frames the
+*first* concrete evaluator as a **tracer**. A later human pivot made **danger**
+the first concrete evaluator: its Phase-0 DDD is committed (`09045cb4`) and its
+Phase-1 handoff is `danger/PHASE-1-HANDOFF.md`. The "no implementation exists"
+and tracer-first framing below is **pre-danger** — still valid as the eventual
+*tracer* Phase 1, but do NOT follow it to build a tracer ahead of danger.
+
 ## Where Phase 0 left things
 
 - Phase 0 re-spec'd the **kind contract only** — `README.md` / `DOCS.md` /
