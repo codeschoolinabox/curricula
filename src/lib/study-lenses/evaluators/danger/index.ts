@@ -66,6 +66,7 @@ function main(spec: EvaluationSpec): DangerStream | EvaluatorRefusal {
 
 	// Lazy: the backend run does not start in `main`; the first pull starts it.
 	let handle: DangerRunHandle | undefined;
+	let torndown = false;
 	function start(): void {
 		if (handle !== undefined) {
 			return;
@@ -77,12 +78,17 @@ function main(spec: EvaluationSpec): DangerStream | EvaluatorRefusal {
 	const done = { done: true as const, value: undefined };
 	const iterator: AsyncIterator<never, undefined> = {
 		next() {
-			start();
+			// A pull after teardown (a misbehaving consumer — `.next()` after
+			// `.return()`) must not start a fresh run; the stream has already settled.
+			if (!torndown) {
+				start();
+			}
 			return settled.then(() => done);
 		},
 		return() {
 			// Cancel: tear the backend down out of band. If it was never pulled, the run
-			// never started — settle canceled directly.
+			// never started — settle canceled directly. A later pull is inert (above).
+			torndown = true;
 			if (handle === undefined) {
 				resolveSettled(freezeInPlace<DangerSettlement>({ ended: 'canceled' }));
 			} else {

@@ -108,6 +108,18 @@ describe('danger evaluator (browser)', () => {
 		expect(document.querySelectorAll('iframe').length).toBe(before);
 	});
 
+	it('a pull after cancel does not start a fresh run (torndown latch)', async () => {
+		const before = document.querySelectorAll('iframe').length;
+		const stream = streamFor(specFor('1 + 1;'));
+		const iterator = stream[Symbol.asyncIterator]();
+		await iterator.return?.(); // cancel before any pull
+		const late = iterator.next(); // a misbehaving late pull
+		// Synchronously after the late pull: no fresh run started (no iframe created).
+		expect(document.querySelectorAll('iframe').length).toBe(before);
+		expect(await stream.settled).toStrictEqual({ ended: 'canceled' });
+		await late;
+	});
+
 	it('canceling a LIVE run via manual iteration settles canceled promptly', async () => {
 		// The load-bearing hand-rolled-iterator behavior: .next() (unawaited) starts the
 		// run; .return() while it is in flight cancels OUT OF BAND (an async generator's
