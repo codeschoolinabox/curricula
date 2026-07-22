@@ -144,6 +144,25 @@ describe('embody', () => {
 			).toBe(true);
 		});
 
+		it('freezes a scope reference carrying the enriched fields', () => {
+			// the enriched reference (access/init/writeExpr/usedBeforeBound/path)
+			// must ride the deep-freeze walk — the walk has to reach it. A script
+			// keeps the declaration on root; a module would sink it to childScopes[0]
+			const { facts } = embody('let x = 1; x = 2;', { type: 'script' });
+			const reference =
+				facts.environment.ok &&
+				facts.environment.value.root.variables[0]?.references[0];
+			expect(reference && Object.isFrozen(reference)).toBe(true);
+		});
+
+		it('freezes a scope definition carrying kind, parent, and index', () => {
+			const { facts } = embody('let x = 1;', { type: 'script' });
+			const definition =
+				facts.environment.ok &&
+				facts.environment.value.root.variables[0]?.defs[0];
+			expect(definition && Object.isFrozen(definition)).toBe(true);
+		});
+
 		it('freezes a study phase and its lens list', () => {
 			const { study } = embody('let x = 1');
 			expect(

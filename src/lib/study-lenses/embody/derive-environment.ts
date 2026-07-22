@@ -10,7 +10,7 @@ import type {
 	Environment,
 	FactStage,
 	NodePath,
-	ScopeDefinition,
+	ScopeAccess,
 	SnippetType,
 } from './types.js';
 
@@ -54,10 +54,23 @@ export default function deriveEnvironment(
 		// fields and types nodes as estree) — embody reads the manager through
 		// its own structural view: one documented untyped-library boundary read
 		const foreignRoot = manager.globalScope as unknown as ForeignScope;
-		const root = projectScope(foreignRoot, newInterner());
+		const intern = newInterner();
+		const root = projectScope(foreignRoot, intern);
+
 		// ast and entwined must be co-derived from one snippet: byPath reads
-		// paths for the very nodes this tree holds
-		const byPath = indexByPath(root, entwined.value);
+		// paths for the very nodes this tree holds. Build the node→path reversal
+		// once and share it between the cross-link stamp and the scope index.
+		const pathOf = new Map<Node, NodePath>();
+		for (const tied of Object.values(entwined.value.byPath)) {
+			pathOf.set(tied.node, tied.path);
+		}
+
+		// second pass over the interned records — every reference is resolved by
+		// now: stamp each identifier's path and derive usedBeforeBound
+		stampReferences(intern, pathOf);
+		stampDefinitions(intern, pathOf);
+
+		const byPath = indexByPath(root, pathOf);
 
 		return { ok: true, value: { root, byPath } };
 	} catch (error) {
@@ -77,18 +90,14 @@ export default function deriveEnvironment(
  * Every scope keyed by the path of the node that introduces it. The global
  * and module scopes share the Program node, so `$` resolves innermost-wins:
  * parents write before children and the deepest writer stands (the byOffset
- * precedent). Paths come from the entwined graph — the one place the package
- * derives them — through a transient node→path reversal (DEV.md § 13).
+ * precedent). The node→path reversal is built once by the caller — the one
+ * place the package derives paths — and shared with the cross-link stamp
+ * (DEV.md § 13).
  */
 function indexByPath(
 	root: BuildingScope,
-	entwined: Entwined,
+	pathOf: Map<Node, NodePath>,
 ): Record<NodePath, BuildingScope> {
-	const pathOf = new Map<Node, NodePath>();
-	for (const tied of Object.values(entwined.byPath)) {
-		pathOf.set(tied.node, tied.path);
-	}
-
 	const byPath: Record<NodePath, BuildingScope> = {};
 	fillByPath(root, pathOf, byPath);
 	return byPath;
@@ -109,6 +118,30 @@ function fillByPath(
 	}
 	for (const child of scope.childScopes) {
 		fillByPath(child, pathOf, byPath);
+	}
+}
+
+// guard-and-omit: a node absent from byPath simply carries no path — never
+// assign undefined. The reference stamp also derives usedBeforeBound here, now
+// that every reference is resolved.
+function stampReferences(intern: Interner, pathOf: Map<Node, NodePath>): void {
+	for (const reference of intern.references.values()) {
+		const path = pathOf.get(reference.identifier);
+		if (path !== undefined) {
+			reference.path = path;
+		}
+		reference.usedBeforeBound = usedBeforeBound(reference);
+	}
+}
+
+function stampDefinitions(intern: Interner, pathOf: Map<Node, NodePath>): void {
+	for (const variable of intern.variables.values()) {
+		for (const definition of variable.defs) {
+			const path = pathOf.get(definition.name);
+			if (path !== undefined) {
+				definition.path = path;
+			}
+		}
 	}
 }
 
@@ -136,12 +169,23 @@ type ForeignReference = {
 	identifier: Node;
 	resolved: ForeignVariable | null;
 	from: ForeignScope;
+	// the analyzer's public read/write predicates and its write-side fields —
+	// `init`/`writeExpr` exist only when the reference writes (undefined on reads)
+	isRead(): boolean;
+	isWrite(): boolean;
+	init?: boolean;
+	writeExpr?: Node | null;
 };
 
 type ForeignDefinition = {
 	type: string;
 	name: Node;
 	node: Node;
+	// `let`/`const`/`var` only for variable declarations; `null` for parameters/
+	// imports/functions/classes/catch, `undefined` for the inner class binding
+	kind?: string | null;
+	parent?: Node | null;
+	index?: number | null;
 };
 
 // the scope graph is cyclic (upper↔childScopes, resolved↔references), so the
@@ -162,13 +206,30 @@ type BuildingVariable = {
 	name: string;
 	identifiers: Node[];
 	references: BuildingReference[];
-	defs: ScopeDefinition[];
+	defs: BuildingDefinition[];
+};
+
+// mutable during the build so the post-projection pass can stamp `path`; the
+// frozen readonly ScopeDefinition view leaves only at the Scope boundary
+type BuildingDefinition = {
+	type: string;
+	name: Node;
+	node: Node;
+	kind?: 'let' | 'const' | 'var';
+	parent: Node | null;
+	index: number | null;
+	path?: NodePath;
 };
 
 type BuildingReference = {
 	identifier: Node;
 	resolved: BuildingVariable | null;
 	from: BuildingScope;
+	access: ScopeAccess;
+	init: boolean;
+	usedBeforeBound: boolean;
+	writeExpr?: Node | null;
+	path?: NodePath;
 };
 
 // transient build-time interning, keyed by the analyzer's object identities —
@@ -266,10 +327,19 @@ function projectVariable(
 	variable.references = foreign.references.map((reference) =>
 		projectReference(reference, intern),
 	);
+	// index uses `?? null` (0 is a valid position); kind is allowlisted so a
+	// non-variable binding gets no `kind` own-property at all (absent, not null)
 	variable.defs = foreign.defs.map((definition) => ({
 		type: definition.type,
 		name: definition.name,
 		node: definition.node,
+		parent: definition.parent ?? null,
+		index: definition.index ?? null,
+		...(definition.kind === 'var' ||
+		definition.kind === 'let' ||
+		definition.kind === 'const'
+			? { kind: definition.kind }
+			: {}),
 	}));
 
 	return variable;
@@ -291,6 +361,14 @@ function projectReference(
 		identifier: foreign.identifier,
 		resolved: null,
 		from: scopeShell(foreign.from, intern),
+		access: accessOf(foreign),
+		init: foreign.init ?? false,
+		// bootstrap — the real value is stamped in the post-projection pass, once
+		// every reference is resolved (usedBeforeBound reads the resolved binding)
+		usedBeforeBound: false,
+		// present exactly when the use writes: null for an update (x++/--x), the
+		// RHS node otherwise. Absent on reads, so `'writeExpr' in ref` ⟺ isWrite
+		...(foreign.isWrite() ? { writeExpr: foreign.writeExpr ?? null } : {}),
 	};
 	intern.references.set(foreign, reference);
 
@@ -300,4 +378,34 @@ function projectReference(
 			: projectVariable(foreign.resolved, intern);
 
 	return reference;
+}
+
+// read/write/readwrite from the analyzer's public predicates, never its
+// @private flag bitfield. 'readwrite' is spelled to contain both 'read' and
+// 'write' so a consumer can test membership by substring — the pinned contract.
+function accessOf(foreign: ForeignReference): ScopeAccess {
+	if (!foreign.isWrite()) {
+		return 'read';
+	}
+	return foreign.isRead() ? 'readwrite' : 'write';
+}
+
+// a static over-approximation of a temporal-dead-zone access: true when the use
+// sits, in source order, before its resolved let/const binding is initialized.
+// The boundary is the binding's declarator end (its own `node`, the
+// VariableDeclarator — never `parent`, the whole declaration). Bindings with no
+// let/const kind (var/parameter/function/class/import/catch) never flag; the
+// binding's own initializer write is excluded by `init`. Over-approximates
+// closures on purpose — a consumer needing soundness owns that analysis.
+function usedBeforeBound(reference: BuildingReference): boolean {
+	if (reference.resolved === null || reference.init) {
+		return false;
+	}
+	const binding = reference.resolved.defs.find(
+		(definition) => definition.kind === 'let' || definition.kind === 'const',
+	);
+	if (binding === undefined) {
+		return false;
+	}
+	return reference.identifier.start < binding.node.end;
 }
