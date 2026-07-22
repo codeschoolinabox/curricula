@@ -1,0 +1,229 @@
+# lib/classifying — Architecture & Decisions
+
+## Why this module exists
+
+The blanks lens needs token classification to decide what is blankable; the quiz
+lens's question generator (`lib/quizzing`) needs the same classification as
+quiz-anchor ground truth. Classification and selection are distinct concerns — a
+walk that rolled probabilities during classification, skipped config-excluded
+tokens, or mutated AST nodes en route could not be shared. This module is the
+pure, exhaustive, selection-free classification both consumers draw from. See
+[`./README.md`](./README.md) for the taxonomy, the public API, and the bounded
+context ("classifying describes; consumers select").
+
+## Architectural sketch
+
+> Written Phase 0, before implementation. The Refactor step is held against this
+> document — not what the code does, but what shape it takes.
+
+### Execution phases
+
+`classify-tokens.ts` is the single public export; phases 2–4 are hoisted in-file
+helpers (newspaper anatomy: export first, helpers below).
+
+1. **Validate inputs** (sync, throws) — `code` must be a string, `tokens` a
+   non-null array, `ast` a non-null node. Throws `TypeError` otherwise; this is
+   the module's only throw site (boundary validation only — see README § Public
+   API for why the module throws rather than degrading: it sits behind a
+   successful-parse gate, not inside an editor render loop).
+
+2. **Token-stream classification** (pure) — one pass over `tokens`. Skip `eof`
+   and zero-length tokens; the element list is FIXED at the end of this pass.
+   Assign each token its **semantic category** from the classification table
+   (README § The taxonomy) and its **token-derivable role seed**: literal kinds
+   from the token type; `statement-end` for `;`; `member-access` for `.` / `?.`;
+   `template-delimiter` for backticks; `template-expression` for `${`;
+   everything else seeds `'other'` (or `null` for identifier/keyword tokens).
+   `text` comes from `code.slice(start, end)` — source-slice authority.
+   **Totality of both category and role holds from the end of this phase; every
+   later phase only refines.**
+
+3. **AST role refinement** (pure, one AST traversal) — categories are already
+   settled by the semantic classification table in phase 2 (reserved words
+   categorized by what they do); this phase refines AST-context roles and
+   performs the one sanctioned home-category change. A single descent collects
+   every `BlockStatement` start offset, every paren-owner claim, every
+   operator-owner claim (a role plus the source range that locates the
+   operator), and every generator-star range. A block `{` sits at its node's
+   start offset, but a paren / operator / generator `*` is at no node's start,
+   so each claim is snapped to the first matching token (paren opener / operator
+   / `*` operator) at/after its anchor. Closer roles are phase 4's job.
+   - **Block brace role**: an open `{` at a `BlockStatement` start → `block`
+     (object-literal, switch, and other braces keep their `'other'` seed).
+   - **Paren roles**: `call-arguments` (call / `new` argument lists),
+     `control-head` (`if` / `while` / `for` / `switch` heads, the `do…while`
+     tail, `catch (e)`), and `grouping` (any paren no owner claims — see
+     Structural constraints § Grouping by elimination). Function / arrow /
+     method parameter lists are claimed `'other'` (no finer JEJ role) so they
+     are excluded from grouping.
+   - **Operator role refinement**: `=` in a `VariableDeclarator` →
+     `declarator-init` vs in an `AssignmentExpression` → `assignment` (compound
+     `+=` included); `binary` / `logical` / `unary` (incl. `typeof` / `void` /
+     `delete`) / `update` from the owning expression node. Operators no
+     expression node claims — the `in` of a `for (… in …)` head, a default-value
+     `=` (`AssignmentPattern`) — keep their `'other'` seed.
+   - **Generator `*` re-bin**: a `*` in function / method / property generator
+     position moves `operator` → `delimiter` with role `generator` — the single
+     sanctioned home-category change. The `*` of `yield*` delegation and of
+     `import * as ns` stays an `operator`.
+   - **Contextual-keyword re-categorization** — out of JEJ scope: a contextual
+     `of`/`as`/… used as a plain variable name stays `keyword`; distinguishing
+     it from for-of `of` needs AST context.
+
+4. **Pair + closer inheritance** (pure) — a stack walk over the paired-delimiter
+   tokens (`(`/`)`, `[`/`]`, `{`/`}`, backticks, `${`/`}`) links each pair with
+   mutual `partner` indices; then every closer inherits its opener's now-final
+   role across that link — a block `}` becomes `block`, a closing backtick
+   inherits `template-delimiter`, a `)` inherits its `(`'s role. Backtick
+   open/close share one form — the stack disambiguates: a backtick closes iff
+   the stack top is a pending backtick, otherwise it opens (sound because
+   templates nest only through `${…}`). This is also what tells a `}` closing a
+   block from one closing a `${`. Runs last so opener roles are final.
+
+5. **Assemble + freeze** (pure, shape finalization ONLY) — emit the
+   source-ordered `readonly ClassifiedToken[]`, deep-frozen via
+   `deepFreezeInPlace` (`@utils/deep-freeze-in-place.js` — objects this module
+   just built). This phase never adds, drops, or reorders elements — `partner`
+   indices assigned in phase 4 must stay valid.
+
+### Data flow
+
+```mermaid
+flowchart TD
+    In["ClassifyInput<br/>{ code, tokens, ast }"]
+    Shaped["shape-confirmed input"]
+    Seeded["totally categorized tokens<br/>(semantic category + role seed;<br/>partner null)"]
+    Refined["AST-refined tokens<br/>(block + paren + operator roles;<br/>generator * re-binned)"]
+    Paired["paired tokens<br/>(partner links + closers<br/>inherit opener role)"]
+    Out["frozen ClassifiedToken[]<br/>(source-ordered, total)"]
+
+    In -->|"validate — throws TypeError<br/>on null/missing"| Shaped
+    Shaped -->|"classify by token type<br/>(pure; element list fixed here)"| Seeded
+    Seeded -->|"one AST traversal:<br/>block + paren + operator roles +<br/>generator * re-bin (pure)"| Refined
+    Refined -->|"stack pairing +<br/>closer inheritance (pure)"| Paired
+    Paired -->|"assemble + freeze<br/>(shape finalization only)"| Out
+```
+
+### Structural constraints
+
+- **Token-stream-first.** Categories and role seeds come from token types; the
+  AST contributes only role refinement (opener and operator roles) and the
+  generator re-bin. Locating operators by token type rather than by walking
+  expression nodes and searching source between child spans eliminates the
+  string-arithmetic fragility class entirely and makes totality provable from
+  the classification table instead of asserted.
+- **Categories are semantic.** A token's category is what it does in the NM, not
+  how Acorn's lexer flags it: the reserved-word operators (`typeof`/`in`/
+  `instanceof`/`void`/`delete`) and literals (`null`/`true`/`false`) are
+  operators/literals despite their `.keyword` flag, so the operator and literal
+  token-type checks precede the keyword check.
+- **Totality from phase 2 — categories AND roles.** Every non-empty token has a
+  home category and a role seed before the AST is consulted; a parse-anomalous
+  AST can leave roles at their seeds but can never drop a token.
+- **Grouping by elimination is sound only if the claim list is exhaustive.**
+  `grouping` is assigned to parens no other owner claims, so every other paren
+  owner MUST claim its tokens: call/`new` argument lists, control heads (`if` /
+  `while` / `for` / `switch` and the `do…while` tail), `catch (e)`, and
+  function/arrow/method parameter lists. Owned-but-unclaimed parens degrade to
+  `'other'`, never to a wrong confident role. (Dynamic `import(...)` is
+  deliberately outside the claim list — its `(` falls to `grouping`; JEJ
+  snippets do not use dynamic import.)
+- **Owner parens are located by first-paren-at/after-anchor.** Each owner claims
+  the first paren-opener token at or after an anchor — the callee end for
+  call/`new`, the statement start for control heads (the body end for
+  `do…while`), the node start for parameter lists. This is sound because no
+  non-owned paren can lexically precede the owned paren within an owner's range:
+  the head/param paren is syntactically first after its keyword, and the call
+  anchor sits past any parenthesized callee's own grouping paren (`(a.b)()`).
+  Paren-opener tokens are identified by delimiter category, so a template chunk
+  whose text is `(` is never mistaken for one.
+- **Operators and generator stars are located by the same first-token rule.** An
+  operator owner claims the first operator token between its operands (from the
+  left operand's end to the right operand's start, or from the node start to the
+  argument start for prefix unary/update), sound because only closing delimiters
+  — never operators — sit between an operand's end and its operator. A generator
+  owner claims the first `*` operator token in its header range; the
+  `function`-rule bound stops before the params, so a default-value `*`
+  (`function* g(a = b * c) {}`) keeps its `binary` role and only the leading `*`
+  re-bins. `yield*` and `import *` stars own no generator node and stay
+  operators.
+- **Pure on frozen inputs.** No mutation of `tokens`, `ast`, or any node — the
+  module writes no synthetic fields onto AST nodes; it must run unchanged on
+  deep-frozen embodiment data.
+- **One AST traversal.** The role-refinement phase walks the AST exactly once
+  (collecting `BlockStatement` start offsets, paren-owner claims, operator-owner
+  claims, and generator-star ranges in a single descent, then snapping each
+  claim to its token); it never re-walks. JEJ's page-size invariant bounds the
+  cost; no caching.
+- **Semantic precedence.** Operator and literal token-type checks precede the
+  keyword check so the reserved-word operators/literals land in their semantic
+  category; the keyword check precedes the identifier check so contextual
+  keywords (bare `name` tokens) are not mistaken for identifiers.
+- **Pairing never reaches outside delimiters.** The stack walk sees only
+  paired-delimiter tokens; mismatched pairs (impossible in a parsed snippet)
+  would leave `partner: null`, never throw.
+- **Phase 5 is shape finalization only.** Length and order are fixed by phase 2;
+  `partner` indices depend on it.
+
+### Out of scope
+
+- **Selection.** Probability rolls, content-type filtering, blank generation —
+  the blanks lens.
+- **Question generation, grading, grouping.** `lib/quizzing`.
+- **Scope analysis / identifier usage** (read vs assign, binding resolution) —
+  scope-aware consumer work.
+- **Comments.** Not tokens; they travel on the parse's comment channel, not the
+  token stream.
+- **Configuration.** The classifier has none; it is a deterministic function of
+  the parse.
+- **Parsing.** The caller parses; the classifier consumes the resulting tokens
+  and AST and never re-derives them (regex-vs-division disambiguation, comment
+  attachment, and the like are settled before it is called).
+- **Input coherence.** The three input values must come from one parse of one
+  source; the classifier validates shape, not provenance — mismatched inputs are
+  a caller bug.
+
+## Decisions
+
+- **Token-stream-first classification.** Operator tokens already carry exact
+  spans in the token stream, so classifying by token type and consulting the AST
+  only for refinement is strictly simpler than locating operators by walking
+  expression nodes and searching the source between child spans. It removes the
+  string-arithmetic fragility and gives exotic tokens (namespace-import `*`,
+  `yield*` delegation) a provable home rather than silently skipping them.
+- **Role seeds live in the classification pass.** Half the role union is
+  token-derivable; seeding it with the home category keeps the AST refinement
+  pass to genuinely AST-only work and extends the totality invariant to roles.
+- **Semantic categories.** A category is what the element does in the NM, not
+  Acorn's lexer flag: the reserved-word operators (`typeof`/`in`/`instanceof`/
+  `void`/`delete`) are operators and the reserved-word literals (`null`/`true`/
+  `false`) are literals — not keywords. Whether any token is ever genuinely
+  multi-category (the `categories` array having length > 1) is left unspecified
+  — the array shape permits widening without a contract change; every token is
+  single-category under the current taxonomy.
+- **Role refines the token's category.** One role slot per token; `LiteralRole`
+  includes `boolean`/`null` for the reserved-word literals.
+- **Flat `role` union and positional `partner` are deliberate.** `role` is a
+  flat `Role | null`, not discriminated on `categories`, so the type alone does
+  not encode category↔role coherence (a `delimiter` token type-checks with an
+  operator role) — the README's per-category role map is that coherence
+  contract. Both consumers coordinated on the flat shape, and widening the union
+  later (a cross-consumer event) is easier from a flat union than a
+  discriminated one. Likewise `partner` is an index into the returned array,
+  valid only against the full unfiltered result; a consumer that filters or
+  reorders the array must not follow `partner` links across the reshaping.
+- **`ClassifyInput` in acorn terms.** The classifier walks acorn shapes, so the
+  contract says so; a consumer projects the three narrow values from its facts
+  at the boundary in one cast. Tests build inputs with a bare `acorn.parse`.
+- **Throws on invalid input.** Classifying sits behind a parse gate, not inside
+  an editor render loop, so a null input is a caller bug to surface rather than
+  a runtime state to absorb (README § Public API).
+- **Roles trimmed to live-consumer needs.** The unions in `types.ts` cover
+  blanks (none needed), the quiz catalog's first clusters, and the pairing
+  disambiguation; finer roles (`switch-body`, ternary positions, separator
+  splits) land with the catalog clusters that need them. Widening the union is a
+  cross-consumer contract event.
+- **One public file, in-file helpers.** The five phases live in
+  `classify-tokens.ts` as hoisted helpers until a second call site or
+  readability forces extraction (house extraction rule). The phase names above
+  are the refactor target, not a file map.
