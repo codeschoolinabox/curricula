@@ -191,26 +191,76 @@ export type Entwined = {
 // freeze can actually reach (a frozen `Map` is not immutable; see DEV.md § 13).
 
 /**
- * One definition of a name: what kind of declaration introduces it (`var`,
- * `let`, function, parameter, class, import, …), the declared identifier, and
- * the syntax-tree node that declares it.
+ * One definition of a name, projected faithfully from the scope analysis. Two
+ * axes describe the declaration and they are distinct: `type` is the binding
+ * *category* — `Variable`, `Parameter`, `ImportBinding`, `FunctionName`,
+ * `ClassName`, `CatchClause`, … — while `kind` is the `let`/`const`/`var`
+ * *keyword*, carried only when a variable declaration introduces the name.
+ * `parent` and `index` place the declaration in its enclosing statement. Every
+ * field here is the analyzer's own reading — nothing embody derives.
  */
 export type ScopeDefinition = {
+	/** The binding category (`Variable`, `Parameter`, `ImportBinding`, … — never a `let`/`const`/`var` keyword; that is `kind`). */
 	readonly type: string;
+	/** The declared identifier node. */
 	readonly name: AcornNode;
+	/** The syntax-tree node that declares the name. */
 	readonly node: AcornNode;
+	/** The declaration keyword — only for a variable declaration; omitted for parameters, imports, functions, classes, and catch clauses. */
+	readonly kind?: 'let' | 'const' | 'var';
+	/** The enclosing statement (`VariableDeclaration`/`ImportDeclaration`), or `null` when the analyzer records none (functions, classes, parameters, catch clauses). */
+	readonly parent: AcornNode | null;
+	/** The declarator's or parameter's 0-based position among its siblings; `null` for functions, classes, imports, and catch clauses. */
+	readonly index: number | null;
+	/** The `NodePath` of `name` in the source⇄tree binding — resolve via `entwined.byPath` for the identifier's neighbors and children. */
+	readonly path?: NodePath;
 };
 
 /**
- * One use of a name: the identifier node, the variable it resolves to — or
- * `null` when it resolves to nothing (an undeclared global) — and the scope
- * the use is made from. The `null` arm is the level-blind fact a level's
- * undeclared-globals check reads.
+ * How a use touches its binding: read-only, write-only, or both. A single
+ * string discriminant — `'readwrite'` is spelled to contain both `'read'` and
+ * `'write'` so a consumer can test membership by substring; do not respell it.
+ */
+export type ScopeAccess = 'read' | 'write' | 'readwrite';
+
+/**
+ * One use of a name. Every field but the last is projected faithfully from the
+ * scope analysis: the identifier node, the variable it resolves to — or `null`
+ * when it resolves to nothing (an undeclared global) — the scope the use is
+ * made from, how the use touches the binding (`access`), whether that touch is
+ * the binding's own initialization (`init`), and the written expression
+ * (`writeExpr`). The `null` `resolved` arm is the level-blind fact a level's
+ * undeclared-globals check reads; it is not itself an error verdict — a level
+ * cross-checks its realm to tell an intrinsic (`Math`) from an unbound name.
+ *
+ * `usedBeforeBound` is the exception: embody *derives* it from the scope graph
+ * and source positions — a heuristic carrying embody's own judgment, not the
+ * analyzer's authority. See its note.
  */
 export type ScopeReference = {
 	readonly identifier: AcornNode;
 	readonly resolved: ScopeVariable | null;
 	readonly from: Scope;
+	/** How the use touches the binding. See {@link ScopeAccess}. */
+	readonly access: ScopeAccess;
+	/** Whether this write is the binding's own initialization — meaningful only for writes, `false` for reads. Not the AST `VariableDeclarator.init` (the initializer node) nor the `.init` path segment: the analyzer's write-of-initialization flag, coerced from its read-only `undefined` to a clean `false`. */
+	readonly init: boolean;
+	/** The written expression on a write: the RHS node, or `null` for an update (`x++`/`--x`, which writes with no RHS). Absent on reads — its presence is exactly the write predicate (`'writeExpr' in ref` ⟺ the use writes). */
+	readonly writeExpr?: AcornNode | null;
+	/** The `NodePath` of `identifier` in the source⇄tree binding — resolve via `entwined.byPath` for the identifier's neighbors and children. */
+	readonly path?: NodePath;
+	/**
+	 * DERIVED, not the analyzer's reading: `true` when this use's identifier is
+	 * positioned, in source order, before its resolved `let`/`const` binding is
+	 * initialized — `identifier.start` precedes the binding's declarator end,
+	 * computed from character offsets (`.start`/`.end`, never `.loc`). A static
+	 * over-approximation of a temporal-dead-zone access: a use inside a function
+	 * that runs *after* the declaration (a closure) is still flagged though it
+	 * will not throw — a consumer needing soundness applies its own reachability
+	 * analysis. `false` for `var`/parameter/function/class/import/catch bindings
+	 * (no dead zone), unresolved uses, and the binding's own initializer write.
+	 */
+	readonly usedBeforeBound: boolean;
 };
 
 /**
@@ -225,8 +275,8 @@ export type ScopeVariable = {
 };
 
 /**
- * One lexical scope: its kind (`global`, `module`, `function`, `block`, `for`,
- * `class`, `catch`, …), the syntax-tree node that introduces it, the names born
+ * One lexical scope: its category (`global`, `module`, `function`, `block`,
+ * `for`, `class`, `catch`, …), the syntax-tree node that introduces it, the names born
  * in it, the references made in it, its nested scopes, its enclosing scope, and
  * whether it is strict. `through` carries the references that resolve past this
  * scope to nothing — populated on the global scope, it is what shows `var`/`let`

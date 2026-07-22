@@ -72,10 +72,12 @@ flowchart TD
 - **Level-blind.** No level knowledge in the region's data or pipeline; level
   logic runs only black-boxed inside individual gates.
 - **Truth, not permission.** This region states what is TRUE about the program;
-  a language level decides what is ALLOWED. No verdict, threshold, or policy is
-  derived here — level-related or not — a derivation wanted only in order to
-  enforce a rule belongs to whoever enforces the rule. The region hands over the
-  machine's own reading and nothing more.
+  a language level decides what is ALLOWED. No verdict, threshold, or policy —
+  an allow-or-deny, a rule to enforce — is derived here, level-related or not: a
+  derivation wanted only in order to enforce a rule belongs to whoever enforces
+  the rule. The region hands over the machine's own reading, plus at most the
+  decidable structural truths it computes from that reading itself — never a
+  permission judgment.
 - **One derivation pass.** Stages derive once per snippet, in dependency order;
   nothing retries and nothing parses the same source twice. The tokens and ast
   stages are the parse facts every outside consumer reads.
@@ -89,7 +91,11 @@ flowchart TD
   it indexes: a consumer the indices do not answer can always reach past them
   and walk it — the region's own structure is never walled; only a foreign
   library's private objects are left off the contract rather than held and
-  exposed.
+  exposed. The scope structure carries this one step further: each of its
+  references and definitions holds the `NodePath` of its identifier, so a
+  consumer follows that key into the source⇄tree binding and reaches the name's
+  place, neighbors, and children — one more expression of the shared identity,
+  not a second copy of it.
 - **Loud versus graceful.** A learner program that does not parse is quiet data;
   a defect in embody's own machinery is loud — an entwine or scope-analysis
   failure raises a development-mode report, and a throwing gate degrades to
@@ -136,8 +142,21 @@ flowchart TD
 - **Niche analytics** — a fact spares every consumer the same common, generic
   traversal; anything niche a consumer derives itself from the structures the
   facts already expose. As the "a phase is a function of the program" constraint
-  gates what earns a phase, this gates what earns a fact: a new fact must be
-  common, generic, and needed by a gate — or it stays a consumer's projection,
-  never this region's.
+  gates what earns a phase, this gates what earns a fact: a fact must be common,
+  generic, and needed across consumers — or it stays a consumer's projection,
+  never this region's. Beyond that shared bar, two tiers differ in what they
+  additionally carry. A fact **projected faithfully** from an analyzer — the
+  scope vocabulary's reading of `eslint-scope` — carries that analyzer's
+  authority; the region still selects which of its fields are common enough to
+  expose, leaving niche ones off the contract. A fact the region **derives
+  itself** carries embody's own judgment, not the analyzer's, and enters only
+  when ALL hold: (a) it is computed solely from structures the facts already
+  hold; (b) it is a cross-cutting truth that multiple kinds of consumer would
+  independently want by its nature — not one lens's bespoke need; and (c) its
+  approximations are documented at the field. A derived analytic failing any of
+  these stays a consumer's projection. The scope structure's `usedBeforeBound`
+  is the one admitted derived enrichment — a positional truth (a use precedes
+  its `let`/`const` binding's initialization), never a runtime verdict, so a
+  consumer owns any reachability judgment built on it.
 - **Internal decomposition** — the factory's internal libraries document
   themselves at their own abstraction level.
