@@ -13,9 +13,9 @@
  * earlier than a macrotask, latch the first settle (first-write-wins), and tear the
  * iframe down. See DOCS.md § Execution phases.
  *
- * DEFERRED (loud, not silent): `io` mocks (`DangerRunOptions.io`) are wired in a
- * following increment; `type: 'module'` and the `seconds` timeout land with the
- * module branch. This increment is the `script`-mode path only — native output.
+ * DEFERRED (loud, not silent): `type: 'module'` and the `seconds` wall-clock
+ * timeout land with the module branch. Provided `io` mocks (`DangerRunOptions.io`)
+ * are installed on the iframe window before inject; unmocked verbs stay native.
  */
 
 import spliceLoopGuards from '../../../lib/loop-guard/splice-loop-guards.js';
@@ -39,10 +39,11 @@ export default function run(
 	code: string,
 	options: DangerRunOptions,
 ): DangerRunHandle {
-	const { iterations, debuggerEnabled } = options;
-	// This increment is the `script`-mode path only. `io` mocks are wired in a
-	// following increment; `type: 'module'` and the `seconds` wall-clock timeout
-	// land with the module branch. `buildDangerScript` always emits `"use strict";`.
+	const { iterations, debuggerEnabled, io } = options;
+	// This increment is the `script`-mode path only: `type: 'module'` and the
+	// `seconds` wall-clock timeout land with the module branch. `buildDangerScript`
+	// always emits `"use strict";`. The synchronous `io` mocks are installed on the
+	// iframe window before inject (below).
 
 	let settled = false;
 	let resolveResult!: (result: DangerResult) => void;
@@ -145,6 +146,31 @@ export default function run(
 				event.preventDefault();
 			},
 		);
+
+		// Install the provided synchronous io mocks on the iframe window BEFORE inject
+		// (the same before-inject window as the bridge). ONLY provided verbs are
+		// assigned — unmocked verbs stay native; `console` MERGES per-method, so an
+		// unmocked method stays native too. The mocks must be sync: a real synchronous
+		// `<script>` cannot await, and a promise would coerce to `[object Promise]`.
+		if (io !== undefined) {
+			if (io.alert !== undefined) {
+				frameWindow.alert = io.alert;
+			}
+			if (io.confirm !== undefined) {
+				frameWindow.confirm = io.confirm;
+			}
+			if (io.prompt !== undefined) {
+				frameWindow.prompt = io.prompt;
+			}
+			if (io.console !== undefined) {
+				// `console` is not on the DOM `Window` type (it is a global), so reach it
+				// through the same cast pattern the `__danger` bridge uses above.
+				Object.assign(
+					(frameWindow as unknown as { console: object }).console,
+					io.console,
+				);
+			}
+		}
 
 		const scriptElement = frameDocument.createElement('script');
 		scriptElement.textContent = script;

@@ -182,3 +182,111 @@ describe('run — iframe core (browser)', () => {
 		expect(result.outcome).toBe('completed');
 	});
 });
+
+describe('run — io mocks (browser)', () => {
+	// The mocks are installed on the iframe window BEFORE inject (the same
+	// before-inject window as the __danger bridge). They MUST be synchronous: a real
+	// synchronous <script> cannot await. danger emits no events, so a mock is
+	// observed either through the settlement its return value drives (confirm /
+	// prompt) or through a parent-realm closure the mock writes to (alert / console).
+
+	it('routes a mocked confirm into control flow (true → throw → errored), forwarding the message', async () => {
+		let received: string | undefined;
+		const result = await run(
+			"if (confirm('go?')) { throw new Error('confirmed'); }",
+			{
+				io: {
+					confirm: (message) => {
+						received = message;
+						return true;
+					},
+				},
+			},
+		).result;
+		expect(result.outcome).toBe('errored');
+		expect(result.error).toEqual({ name: 'Error', message: 'confirmed' });
+		expect(received).toBe('go?');
+	});
+
+	it('a mocked confirm returning false takes the other branch → completed', async () => {
+		const result = await run(
+			"if (confirm('go?')) { throw new Error('confirmed'); } 1 + 1;",
+			{ io: { confirm: () => false } },
+		).result;
+		expect(result.outcome).toBe('completed');
+	});
+
+	it('routes a mocked prompt scripted answer into control flow', async () => {
+		const result = await run(
+			"if (prompt('name?') === 'danger') { throw new Error('prompted'); }",
+			{ io: { prompt: () => 'danger' } },
+		).result;
+		expect(result.outcome).toBe('errored');
+		expect(result.error).toEqual({ name: 'Error', message: 'prompted' });
+	});
+
+	it('a mocked prompt returning a non-matching answer takes the other branch → completed', async () => {
+		const result = await run(
+			"if (prompt('name?') === 'danger') { throw new Error('prompted'); } 1 + 1;",
+			{ io: { prompt: () => null } },
+		).result;
+		expect(result.outcome).toBe('completed');
+	});
+
+	it('routes mocked alert calls to the mock (a parent-realm closure), not native', async () => {
+		const seen: string[] = [];
+		const result = await run("alert('hi'); alert('bye');", {
+			io: {
+				alert: (message) => {
+					seen.push(String(message));
+				},
+			},
+		}).result;
+		expect(result.outcome).toBe('completed');
+		expect(seen).toEqual(['hi', 'bye']);
+	});
+
+	it('routes mocked console methods to the mock', async () => {
+		const logged: unknown[][] = [];
+		const result = await run("console.log('a', 1); console.log('b');", {
+			io: {
+				console: {
+					log: (...data) => {
+						logged.push(data);
+					},
+				},
+			},
+		}).result;
+		expect(result.outcome).toBe('completed');
+		expect(logged).toEqual([['a', 1], ['b']]);
+	});
+
+	it('leaves unmocked verbs native/callable when only one verb is mocked', async () => {
+		// Only provided verbs are installed. A destructure-and-assign impl that clobbered
+		// the rest to undefined would throw a TypeError here. (The harness auto-dismisses
+		// native dialogs, so we assert callability — not a return value.)
+		const result = await run(
+			"if (typeof confirm !== 'function' || typeof alert !== 'function' || typeof prompt !== 'function') { throw new Error('clobbered'); }",
+			{ io: { console: { log: () => {} } } },
+		).result;
+		expect(result.outcome).toBe('completed');
+	});
+
+	it('merges console (an unmocked method stays native), not replace', async () => {
+		const logged: unknown[][] = [];
+		const result = await run(
+			"if (typeof console.error !== 'function') { throw new Error('clobbered'); } console.log('x');",
+			{
+				io: {
+					console: {
+						log: (...data) => {
+							logged.push(data);
+						},
+					},
+				},
+			},
+		).result;
+		expect(result.outcome).toBe('completed');
+		expect(logged).toEqual([['x']]);
+	});
+});
