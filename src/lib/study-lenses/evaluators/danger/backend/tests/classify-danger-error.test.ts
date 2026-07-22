@@ -27,16 +27,22 @@ describe('classifyDangerError', () => {
 	});
 
 	describe('One / Many — a recognised guard trip is limit-exceeded', () => {
-		it('the canonical single-loop trip', () => {
+		it('the canonical single-loop trip, carrying the machine error', () => {
 			expect(
 				classifyDangerError('RangeError', GUARD_MESSAGE, 100),
-			).toStrictEqual({ outcome: 'limit-exceeded' });
+			).toStrictEqual({
+				outcome: 'limit-exceeded',
+				error: { name: 'RangeError', message: GUARD_MESSAGE },
+			});
 		});
 
 		it('a higher loop id + different cap (not hardcoded to loop 1 / 100)', () => {
 			expect(
 				classifyDangerError('RangeError', 'Loop 3 exceeded 50 iterations.', 50),
-			).toStrictEqual({ outcome: 'limit-exceeded' });
+			).toStrictEqual({
+				outcome: 'limit-exceeded',
+				error: { name: 'RangeError', message: 'Loop 3 exceeded 50 iterations.' },
+			});
 		});
 	});
 
@@ -57,21 +63,35 @@ describe('classifyDangerError', () => {
 			expect(classifyDangerError('RangeError', GUARD_MESSAGE, 0)).toStrictEqual(
 				{
 					outcome: 'limit-exceeded',
+					error: { name: 'RangeError', message: GUARD_MESSAGE },
 				},
 			);
 		});
 	});
 
 	describe('Interfaces — the result shape', () => {
-		it('a limit-exceeded result omits the error key entirely', () => {
-			// exactOptionalPropertyTypes: never `error: undefined`, the key is absent.
-			// Distinct fixture from the canonical trip so this adds real coverage.
-			const result = classifyDangerError(
+		it('carries the same { name, message } error floor an errored result does', () => {
+			// The kind's error floor is UNIFORM across non-clean outcomes
+			// (backend/types.ts): a loop-cap trip is not a bare `{ outcome }` — it
+			// carries the machine's words like any throw, so a consumer reads the floor
+			// identically whichever way the run ended. New fixture (loop 7 / cap 1000)
+			// so this pins the shape symmetry, not a value another test already covers.
+			const tripped = classifyDangerError(
 				'RangeError',
-				'Loop 3 exceeded 50 iterations.',
-				50,
+				'Loop 7 exceeded 1000 iterations.',
+				1000,
 			);
-			expect(result).not.toHaveProperty('error');
+			const thrown = classifyDangerError('TypeError', 'x is not a function', 1000);
+			expect(tripped).toStrictEqual({
+				outcome: 'limit-exceeded',
+				error: {
+					name: 'RangeError',
+					message: 'Loop 7 exceeded 1000 iterations.',
+				},
+			});
+			expect(Object.keys(tripped.error ?? {})).toStrictEqual(
+				Object.keys(thrown.error ?? {}),
+			);
 		});
 
 		it('an errored result carries { name, message } and nothing else', () => {
@@ -98,7 +118,13 @@ describe('classifyDangerError', () => {
 					'budget exceeded after many iterations',
 					100,
 				),
-			).toStrictEqual({ outcome: 'limit-exceeded' });
+			).toStrictEqual({
+				outcome: 'limit-exceeded',
+				error: {
+					name: 'RangeError',
+					message: 'budget exceeded after many iterations',
+				},
+			});
 		});
 
 		it("a RangeError with 'exceeded' but NOT 'iterations' is errored", () => {

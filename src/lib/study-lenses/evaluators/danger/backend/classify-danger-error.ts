@@ -24,16 +24,18 @@ import type { DangerResult } from './types.js';
  * (`name === 'RangeError'` AND `iterations` set AND the message `includes` both
  * `'exceeded'` and `'iterations'`) and mapped to the PUBLIC `limit-exceeded`
  * literal (embody's internal `iteration-limit` is remapped upstream, not copied
- * here). Every other throw is `errored`, carrying the `{ name, message }`
- * primitives.
+ * here). Every other throw is `errored`. Both non-clean outcomes carry the
+ * machine's `{ name, message }` — the kind's error floor rides `limit-exceeded`
+ * too (`backend/types.ts`), the two distinguished only by `outcome`.
  *
  * @param name - The thrown value's `name`, read in-realm (e.g. `'RangeError'`).
  * @param message - The thrown value's `message`, read in-realm.
  * @param iterations - The run's loop-guard cap; omitted/`undefined` when no guard
  *   was applied. The predicate gates on this: an unguarded `RangeError` is the
  *   learner's own error (`errored`), never a limit trip.
- * @returns `{ outcome: 'limit-exceeded' }` on a recognised guard trip, else
- *   `{ outcome: 'errored', error: { name, message } }`.
+ * @returns `{ outcome: 'limit-exceeded', error: { name, message } }` on a
+ *   recognised guard trip, else `{ outcome: 'errored', error: { name, message } }`
+ *   — the `{ name, message }` floor rides both.
  */
 export default function classifyDangerError(
 	name: string,
@@ -43,14 +45,15 @@ export default function classifyDangerError(
 	// The guard trip: a RangeError, only when a cap was applied, whose message
 	// carries both marker substrings. `iterations !== undefined` (NOT a truthy
 	// check) so a cap of 0 still gates. Mirrors embody's intercept.ts predicate;
-	// emits the PUBLIC `limit-exceeded` literal directly.
+	// emits the PUBLIC `limit-exceeded` literal, carrying the machine's own
+	// `{ name, message }` (the guard's RangeError) like every non-clean outcome.
 	if (
 		name === 'RangeError' &&
 		iterations !== undefined &&
 		message.includes('exceeded') &&
 		message.includes('iterations')
 	) {
-		return { outcome: 'limit-exceeded' };
+		return { outcome: 'limit-exceeded', error: { name, message } };
 	}
 	return { outcome: 'errored', error: { name, message } };
 }
