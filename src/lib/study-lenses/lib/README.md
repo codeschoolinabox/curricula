@@ -13,5 +13,9 @@ its own directory.
 - [local-llm/](./local-llm/README.md) — the device-local LLM runtime: brings a
   small model up on the learner's own machine and turns a prompt into generated
   code, or refuses with a typed cause.
+- [loop-guard/](./loop-guard/README.md) — line-preserving loop-guard splicer:
+  finds each guarded loop and splices caller-supplied guard/reset call text into
+  it without moving a line, returning the rewritten source and a count of loops
+  guarded.
 
 Package root: [../README.md](../README.md).
