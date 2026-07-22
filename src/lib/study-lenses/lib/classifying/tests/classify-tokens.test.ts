@@ -148,6 +148,36 @@ describe('classifyTokens', () => {
 			expect(result[1]?.categories).toEqual(['delimiter']);
 		});
 
+		it('classifies a ternary question mark as delimiter', () => {
+			const result = classifyTokens(parse('a ? b : c'));
+			expect(result[1]?.categories).toEqual(['delimiter']);
+		});
+
+		it('classifies a ternary colon as delimiter', () => {
+			const result = classifyTokens(parse('a ? b : c'));
+			expect(result[3]?.categories).toEqual(['delimiter']);
+		});
+
+		it('classifies an argument-list comma as delimiter', () => {
+			const result = classifyTokens(parse('f(a, b)'));
+			expect(result[3]?.categories).toEqual(['delimiter']);
+		});
+
+		it('classifies a spread ellipsis as delimiter', () => {
+			const result = classifyTokens(parse('[...a]'));
+			expect(result[1]?.categories).toEqual(['delimiter']);
+		});
+
+		it('classifies an arrow as delimiter', () => {
+			const result = classifyTokens(parse('(x) => x'));
+			expect(result[3]?.categories).toEqual(['delimiter']);
+		});
+
+		it('classifies an optional-chaining operator as delimiter', () => {
+			const result = classifyTokens(parse('a?.b'));
+			expect(result[1]?.categories).toEqual(['delimiter']);
+		});
+
 		it('classifies an invalid-escape template chunk as literal', () => {
 			const result = classifyTokens(parse('x`\\u`'));
 			expect(result[2]?.categories).toEqual(['literal']);
