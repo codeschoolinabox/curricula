@@ -24,9 +24,9 @@ import buildCounters from './build-counters.js';
  *   debugger wrap — both line-preserving, so `code`'s line numbers are the
  *   learner's.
  * @param loopCount - The number of loops the guard instrumented (its returned
- *   `loopCount`). The runner emits `var loop1 = 0, …, loop{loopCount} = 0;` because
- *   `guardLoops` references those counters but does not declare them; `0` emits no
- *   declaration. NEVER hardcoded.
+ *   `loopCount`). `buildCounters` emits `var loop1 = 0, …, loop{loopCount} = 0;`
+ *   because the loop-guard's spliced `++loopN` reference those counters but do not
+ *   declare them; `0` emits no declaration. NEVER hardcoded.
  * @returns One script string: `"use strict";` + the counter globals + `try { ` +
  *   `code` + the `__danger.done()` / `catch → __danger.fail(...)` bridge, adding no
  *   newline above the user code (zero line shift).

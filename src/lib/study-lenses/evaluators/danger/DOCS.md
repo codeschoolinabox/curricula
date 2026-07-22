@@ -46,8 +46,8 @@ only how the run ended. It emits no events; its output is the settlement.
    error carrying the machine's `{ name, message }` and danger's `reason`
    (`threw` / `loop-cap` / `timeout` respectively — a `SyntaxError` is a `threw`,
    reachable only as an assembler defect since facts are gate-guaranteed parsed);
-   a cancel → canceled. Teardown of the window is **cross-phase, two-timed** (see
-   the Teardown constraint), not a single post-classify step. Input: the latched
+   a cancel → canceled. Teardown removes the window **synchronously on this
+   settle**, whatever latched (see the Teardown constraint). Input: the latched
    outcome. Output: the settlement.
 
 **Laziness wraps all four.** `main` returns a stream that runs nothing until the

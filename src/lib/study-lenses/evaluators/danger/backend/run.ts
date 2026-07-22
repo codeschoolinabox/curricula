@@ -4,7 +4,7 @@
  * iframe on the MAIN thread — bypassing embody's parse → validate → create →
  * Web-Worker sandbox — and reports how it ended. It drops the sandbox (off-thread
  * isolation + external terminate); an on-thread hang can freeze the host page. That
- * is the gated, named danger (README.md § Security posture).
+ * is the gated, named danger (README.md § Rules danger obeys).
  *
  * Composes `spliceLoopGuards` (`lib/loop-guard/`) → `wrapWithDebugger` →
  * `buildDangerScript` (script mode) or `buildDangerModule` (module mode), then owns
