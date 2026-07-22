@@ -290,3 +290,164 @@ describe('run — io mocks (browser)', () => {
 		expect(logged).toEqual([['x']]);
 	});
 });
+
+describe('run — module mode (browser)', () => {
+	// module mode injects an inline `<script type="module">`: deferred + async, top
+	// level is module-scoped, and it may use `import` / top-level `await`. It cannot
+	// use script mode's try/catch bridge (import/export must stay top-level), so it
+	// reports through four channels: the done() sentinel (natural end), the window
+	// `error` event (a sync module-eval throw incl. the loop-guard RangeError), the
+	// window `unhandledrejection` event (a rejected top-level await), and the
+	// wall-clock timeout (a never-settling run).
+
+	it('a natural completion settles completed', async () => {
+		const result = await run('1 + 1;', { type: 'module' }).result;
+		expect(result.outcome).toBe('completed');
+		expect(result).not.toHaveProperty('error');
+	});
+
+	it('a synchronous module-eval throw settles errored (via the window error event)', async () => {
+		const result = await run("throw new Error('sync module throw');", {
+			type: 'module',
+		}).result;
+		expect(result.outcome).toBe('errored');
+		expect(result.error).toEqual({
+			name: 'Error',
+			message: 'sync module throw',
+		});
+	});
+
+	it('a resolved top-level await settles completed', async () => {
+		const result = await run('await Promise.resolve(1);', {
+			type: 'module',
+		}).result;
+		expect(result.outcome).toBe('completed');
+	});
+
+	it('a rejected top-level await settles errored (via unhandledrejection, NOT a timeout)', async () => {
+		const result = await run(
+			"await Promise.reject(new Error('rejected TLA'));",
+			{ type: 'module', seconds: 1 },
+		).result;
+		expect(result.outcome).toBe('errored');
+		expect(result.error).toEqual({ name: 'Error', message: 'rejected TLA' });
+	});
+
+	it('routes a rejection AFTER an import through unhandledrejection (import cannot hide in a try/catch cheat)', async () => {
+		// Channel-identity: `import` is illegal inside a try block, so a run.ts that
+		// "cheated" by wrapping the tail in try/catch (instead of wiring the window
+		// error/unhandledrejection listeners) could not even compile this. n === 42
+		// proves the import ran; the rejection must then route via the window event.
+		const result = await run(
+			"import n from 'data:text/javascript,export default 42';\nawait Promise.reject(new Error('after import ' + n));",
+			{ type: 'module', seconds: 1 },
+		).result;
+		expect(result.outcome).toBe('errored');
+		expect(result.error).toEqual({ name: 'Error', message: 'after import 42' });
+	});
+
+	it('a bounded loop exceeding its cap settles limit-exceeded (guard trips during module eval)', async () => {
+		const result = await run(
+			'for (let i = 0; i < 5; i = i + 1) { let x = i; }',
+			{ type: 'module', iterations: 3 },
+		).result;
+		expect(result.outcome).toBe('limit-exceeded');
+		expect(result.error).toEqual({
+			name: 'RangeError',
+			message: 'Loop 1 exceeded 3 iterations.',
+		});
+	});
+
+	it('a never-settling top-level await settles timed-out (the wall-clock rescue)', async () => {
+		// A module hung on a never-settling await leaves the THREAD free, so the timer
+		// fires. `seconds: 0.1` keeps the test fast. timed-out carries an error floor.
+		const result = await run('await new Promise(() => {});', {
+			type: 'module',
+			seconds: 0.1,
+		}).result;
+		expect(result.outcome).toBe('timed-out');
+		expect(result.error).toBeDefined();
+		expect(typeof result.error?.name).toBe('string');
+		expect((result.error?.message ?? '').length).toBeGreaterThan(0);
+	});
+
+	it('cancel() during a LIVE suspended top-level await settles canceled (tears the realm down)', async () => {
+		const before = document.querySelectorAll('iframe').length;
+		const handle = run('await new Promise(() => {});', {
+			type: 'module',
+			seconds: 5,
+		});
+		// Yield past the injection macrotask so the module has actually started and is
+		// genuinely suspended on the never-resolving await — not merely pre-injection.
+		await new Promise((resolve) => setTimeout(resolve, 0));
+		handle.cancel();
+		const result = await handle.result;
+		expect(result.outcome).toBe('cancelled');
+		expect(document.querySelectorAll('iframe').length).toBe(before);
+	});
+
+	it('resolves a full-URL (data:) import and runs the imported value', async () => {
+		// A full-URL specifier resolves without a base; `data:` is hermetic (no served
+		// fixture, no cross-origin/COEP surface). Proves module mode actually imports.
+		const result = await run(
+			"import n from 'data:text/javascript,export default 42';\nif (n !== 42) { throw new Error('bad import'); }",
+			{ type: 'module' },
+		).result;
+		expect(result.outcome).toBe('completed');
+	});
+
+	it('injects a real <base> so the module base is not about:blank (relative imports can resolve)', async () => {
+		// A srcless iframe's base is about:blank, so relative specifiers cannot resolve.
+		// run.ts injects a real <base href>; probe it via a throw so the value rides the
+		// settlement. (A full relative-import test needs a served fixture — deferred.)
+		const result = await run('throw new Error(document.baseURI);', {
+			type: 'module',
+		}).result;
+		expect(result.outcome).toBe('errored');
+		expect(result.error?.message).not.toBe('about:blank');
+		expect((result.error?.message ?? '').startsWith('http')).toBe(true);
+	});
+
+	it('debuggerEnabled: true still parses, runs, and completes through the module assembler', async () => {
+		// Pins wrapWithDebugger's true-branch composed with buildDangerModule (a
+		// different template than buildDangerScript); a mis-wire that broke the module
+		// prefix would fail to parse and settle errored.
+		const result = await run('1 + 1;', {
+			type: 'module',
+			debuggerEnabled: true,
+		}).result;
+		expect(result.outcome).toBe('completed');
+	});
+
+	it('the wall-clock timer is inert after a normal settle (no spurious re-settle)', async () => {
+		// A run completing well within the budget must not later flip to timed-out: the
+		// timer is cleared on settle, and the latch makes any late firing inert.
+		const handle = run('1 + 1;', { type: 'module', seconds: 0.1 });
+		const first = await handle.result;
+		expect(first.outcome).toBe('completed');
+		await new Promise((resolve) => setTimeout(resolve, 250));
+		const again = await handle.result;
+		expect(again).toBe(first);
+		expect(again.outcome).toBe('completed');
+	});
+
+	it('settles on a macrotask — not synchronously (module mode paints running first)', async () => {
+		const handle = run('1 + 1;', { type: 'module' });
+		let settled = false;
+		void handle.result.then(() => {
+			settled = true;
+		});
+		await Promise.resolve();
+		await Promise.resolve();
+		await Promise.resolve();
+		expect(settled).toBe(false);
+		const settledResult = await handle.result;
+		expect(settledResult.outcome).toBe('completed');
+	});
+
+	it('tears the iframe down on settle (no leaked iframe elements)', async () => {
+		const before = document.querySelectorAll('iframe').length;
+		await run('1 + 1;', { type: 'module' }).result;
+		expect(document.querySelectorAll('iframe').length).toBe(before);
+	});
+});

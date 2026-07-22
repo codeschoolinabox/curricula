@@ -7,19 +7,21 @@
  * is the gated, named danger (README.md § Security posture).
  *
  * Composes `spliceLoopGuards` (`lib/loop-guard/`) → `wrapWithDebugger` →
- * `buildDangerScript`, then owns the impure iframe lifecycle:
- * assign the `__danger = { done, fail }` bridge onto the iframe's `window` BEFORE
- * injecting the script, defer the injection a macrotask so `result` settles no
- * earlier than a macrotask, latch the first settle (first-write-wins), and tear the
- * iframe down. See DOCS.md § Execution phases.
+ * `buildDangerScript` (script mode) or `buildDangerModule` (module mode), then owns
+ * the impure iframe lifecycle: assign the `__danger` bridge onto the iframe's
+ * `window` BEFORE injecting, wire the window `error` / `unhandledrejection` nets and
+ * (module mode) a real `<base href>`, defer the injection a macrotask so `result`
+ * settles no earlier than a macrotask, arm the wall-clock timeout, latch the first
+ * settle (first-write-wins), and tear the iframe down. See DOCS.md § Execution phases.
  *
- * DEFERRED (loud, not silent): `type: 'module'` and the `seconds` wall-clock
- * timeout land with the module branch. Provided `io` mocks (`DangerRunOptions.io`)
- * are installed on the iframe window before inject; unmocked verbs stay native.
+ * Provided `io` mocks (`DangerRunOptions.io`) are installed on the iframe window
+ * before inject; unmocked verbs stay native. A synchronous freeze (unbraced
+ * `for(;;)`, deep recursion) is irreducible — no timer preempts a frozen main thread.
  */
 
 import spliceLoopGuards from '../../../lib/loop-guard/splice-loop-guards.js';
 
+import buildDangerModule from './build-danger-module.js';
 import buildDangerScript from './build-danger-script.js';
 import classifyDangerError from './classify-danger-error.js';
 import type {
@@ -40,10 +42,11 @@ export default function run(
 	options: DangerRunOptions,
 ): DangerRunHandle {
 	const { iterations, debuggerEnabled, io } = options;
-	// This increment is the `script`-mode path only: `type: 'module'` and the
-	// `seconds` wall-clock timeout land with the module branch. `buildDangerScript`
-	// always emits `"use strict";`. The synchronous `io` mocks are installed on the
-	// iframe window before inject (below).
+	const type = options.type ?? 'script';
+	const seconds = options.seconds ?? 5;
+	// `type` selects the program assembler and the module-only report channels;
+	// `seconds` bounds the wall-clock timeout. The synchronous `io` mocks are
+	// installed on the iframe window before inject (below).
 
 	let settled = false;
 	let resolveResult!: (result: DangerResult) => void;
@@ -52,8 +55,13 @@ export default function run(
 	);
 
 	let iframe: HTMLIFrameElement | null = null;
+	let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
 	function teardown(): void {
+		if (timeoutId !== undefined) {
+			clearTimeout(timeoutId);
+			timeoutId = undefined;
+		}
 		if (iframe !== null) {
 			iframe.remove();
 			iframe = null;
@@ -96,10 +104,11 @@ export default function run(
 		setTimeout(() => settle(classifyDangerError(name, message, iterations)), 0);
 		return { result, cancel };
 	}
-	const script = buildDangerScript(
-		wrapWithDebugger(built.code, debuggerEnabled ?? false),
-		built.loopCount,
-	);
+	const wrapped = wrapWithDebugger(built.code, debuggerEnabled ?? false);
+	const source =
+		type === 'module'
+			? buildDangerModule(wrapped, built.loopCount)
+			: buildDangerScript(wrapped, built.loopCount);
 
 	// A permissive, same-origin, NO-`sandbox`-attr iframe. It must be CONNECTED for
 	// the script (and native dialogs / `debugger;`) to run; keep it visually hidden.
@@ -107,6 +116,22 @@ export default function run(
 	iframe.setAttribute('aria-hidden', 'true');
 	iframe.style.display = 'none';
 	document.body.append(iframe);
+
+	// Wall-clock timeout: bounds an otherwise-endless async run (a never-settling
+	// top-level await leaves the thread free, so this fires). Cleared on any settle
+	// (teardown). It CANNOT preempt a synchronous freeze — no timer runs on a frozen
+	// main thread; only the loop-guard breaks that.
+	timeoutId = setTimeout(
+		() =>
+			settle({
+				outcome: 'timed-out',
+				error: {
+					name: 'Error',
+					message: `danger run exceeded its ${seconds}s wall-clock budget`,
+				},
+			}),
+		seconds * 1000,
+	);
 
 	// Defer injection a MACROTASK so result settles no earlier than a task (the
 	// orchestrator's running→settled transition can paint; an io mirror won't race
@@ -146,6 +171,19 @@ export default function run(
 				event.preventDefault();
 			},
 		);
+		// module mode: a rejected top-level `await` surfaces as an unhandled rejection,
+		// NOT the `error` event — without this net it falls through to the timeout and
+		// mis-reports a real error as "timed out". Fail loud on the rejection.
+		if (type === 'module') {
+			frameWindow.addEventListener(
+				'unhandledrejection',
+				function onRejection(event: PromiseRejectionEvent) {
+					const { name, message } = readErrorPrimitives(event.reason);
+					settle(classifyDangerError(name, message, iterations));
+					event.preventDefault();
+				},
+			);
+		}
 
 		// Install the provided synchronous io mocks on the iframe window BEFORE inject
 		// (the same before-inject window as the bridge). ONLY provided verbs are
@@ -172,8 +210,20 @@ export default function run(
 			}
 		}
 
+		// module mode: give the srcless iframe a real base URL (its default is
+		// about:blank) so relative import specifiers resolve; full-URL specifiers work
+		// without it. Injected before the module script runs.
+		if (type === 'module') {
+			const base = frameDocument.createElement('base');
+			base.href = globalThis.location.href;
+			(frameDocument.head ?? frameDocument.documentElement).append(base);
+		}
+
 		const scriptElement = frameDocument.createElement('script');
-		scriptElement.textContent = script;
+		if (type === 'module') {
+			scriptElement.type = 'module';
+		}
+		scriptElement.textContent = source;
 		(frameDocument.body ?? frameDocument.documentElement).append(scriptElement);
 	}, 0);
 
