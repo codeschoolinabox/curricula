@@ -53,9 +53,21 @@
   `LOOP-GUARD-READY.md` carries the exact `guardLoops → spliceLoopGuards` swap
   checklist + hook text.
 - The working tree is shared with **concurrent streams** (aithor evals, jej,
-  orchestrate/generator, telemetry, and a dirty `lib/README.md`). **Stage only
-  your own files, by explicit path**; verify `git diff --cached --name-only` before
-  every commit.
+  orchestrate/generator, telemetry, and at times a dirty `lib/README.md`). **Stage
+  only your own files, by explicit path**; verify `git diff --cached --name-only`
+  before every commit. The stage-only rule holds whether or not a given file is
+  currently dirty.
+
+## Environment notes (verified in a cold-start pass)
+
+- A PreToolUse **code-map** hook makes the first Read of any `.ts` return a
+  STRUCTURAL summary (symbols + doc-comments, no bodies) — and it can **elide
+  fields** (it dropped `debuggerEnabled` from `DangerRunOptions`). The types are
+  the load-bearing spec: re-Read each `.ts` with `offset=1`/`limit=<lines>` to see
+  the raw source before trusting it.
+- **Count tests by running, not grepping.** The loop-guard suite is ~53 runtime
+  cases but only 37 static `it()` (the rest are `it.each` rows) — a grep of 37 is
+  not a failure.
 
 ## Supersedes the region handoff
 
