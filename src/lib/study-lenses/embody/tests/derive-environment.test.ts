@@ -840,11 +840,12 @@ describe('deriveEnvironment', () => {
 						(variable) => variable.name === 'x',
 					);
 				const definition = binding && binding.defs[0];
+				const importDeclaration = ast.ok && ast.value.body[0];
 				expect(
-					ast.ok &&
-						definition &&
+					definition &&
 						!('kind' in definition) &&
-						definition.parent === ast.value.body[0],
+						definition.parent === importDeclaration &&
+						definition.index === null,
 				).toBe(true);
 			});
 
@@ -902,7 +903,10 @@ describe('deriveEnvironment', () => {
 					catchScope.variables.find((variable) => variable.name === 'e');
 				const definition = caught && caught.defs[0];
 				expect(
-					definition && !('kind' in definition) && definition.parent === null,
+					definition &&
+						!('kind' in definition) &&
+						definition.parent === null &&
+						definition.index === null,
 				).toBe(true);
 			});
 		});
@@ -1102,6 +1106,21 @@ describe('deriveEnvironment', () => {
 					cls &&
 					cls.references.find((reference) => reference.access === 'read');
 				expect(read && read.usedBeforeBound === false).toBe(true);
+			});
+
+			it('an unresolved reference is never flagged — no binding to precede', () => {
+				const snippet = { source: 'foo; let x = 1;', type: 'script' } as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const unresolved =
+					stage &&
+					stage.ok &&
+					stage.value.root.references.find(
+						(reference) => reference.resolved === null,
+					);
+				expect(unresolved && unresolved.usedBeforeBound === false).toBe(true);
 			});
 		});
 
