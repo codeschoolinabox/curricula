@@ -123,11 +123,16 @@ flowchart TD
   reads the given source directly (no clone-safe projection); it narrows any
   derived fact stage it reads once, treating an unreachable failure as a loud
   dev-mode defect.
-- **Teardown is cross-phase and two-timed.** A cancel tears the window down
-  **synchronously on the consumer's stack** (during the hand-rolled pull-teardown,
-  before Settle maps anything); a natural or error settle **defers teardown one
-  tick** after Settle, so the window is never detached from inside its own realm's
-  callback. Teardown is therefore not a single Settle-owned action.
+- **Teardown is synchronous, on every settle.** The runner removes the window the
+  instant the outcome latches — a cancel, a natural end, an error, or the timeout
+  alike. The Phase-0 sketch proposed a *two-timed* teardown (deferring the
+  non-cancel removal one tick, lest the window be detached from inside its own
+  realm's callback); real-browser evidence (the runner's `*.browser.test.ts` in
+  Chromium) superseded that precaution — the reporting call (the module's `done()`
+  sentinel, or the throw itself) is always the program's terminal statement, so no
+  code runs in the torn-down realm after removal, and synchronous teardown is safe.
+  The consumer-side cancel (a lens unmount breaking the pull) drives teardown by
+  calling the backend's `cancel()`.
 
 ## Out of scope
 
