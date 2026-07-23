@@ -17,6 +17,13 @@ import type { CodeQuestion, ProgramAnalyzerEntry } from '../types.js';
 import collectNodes from './collect-nodes.js';
 import getRecord from './get-record.js';
 
+const EQUALITY_OPERATORS: ReadonlySet<string> = new Set([
+	'===',
+	'!==',
+	'==',
+	'!=',
+]);
+
 // ─── 1. mixed-declaration-style ────────────────────────────
 
 /**
@@ -203,36 +210,52 @@ function mixedEquality(
 function mixedConditionStyle(
 	ast: Node,
 	_scope: ScopeUsage,
-	_source: string,
+	source: string,
 ): readonly CodeQuestion[] {
 	const conditionalNodes = collectNodes(
 		ast,
 		new Set(['IfStatement', 'WhileStatement']),
 	);
 
-	const hasTruthyCheck = conditionalNodes.some((node) => isTruthyTest(node));
-	const hasExplicitCheck = conditionalNodes.some((node) =>
-		isExplicitComparisonTest(node),
+	// Fire only when the SAME condition subject (the source text of the value a
+	// condition tests) is checked BOTH truthily and by equality — a genuine
+	// inconsistency. Two DIFFERENT subjects each in its idiomatic style (a boolean
+	// flag checked truthily, a value checked by equality) is correct, not mixed.
+	const truthySubjects = new Set(
+		conditionalNodes
+			.map((node) => truthinessSubject(getRecord(node).test as Node, source))
+			.filter((subject): subject is string => subject !== null),
 	);
+	const hasMixedSubject = conditionalNodes
+		.flatMap((node) => comparedSubjects(getRecord(node).test as Node, source))
+		.some((subject) => truthySubjects.has(subject));
 
-	function isTruthyTest(node: Node): boolean {
-		const test = getRecord(node).test as Node;
-		return (
-			test.type === 'Identifier' ||
-			(test.type === 'UnaryExpression' &&
-				getRecord(test).operator === '!' &&
-				(getRecord(test).argument as Node).type === 'Identifier')
-		);
+	function truthinessSubject(test: Node, code: string): string | null {
+		if (test.type === 'Identifier' || test.type === 'MemberExpression') {
+			return code.slice(test.start, test.end);
+		}
+		if (test.type === 'UnaryExpression' && getRecord(test).operator === '!') {
+			return truthinessSubject(getRecord(test).argument as Node, code);
+		}
+		return null;
 	}
 
-	function isExplicitComparisonTest(node: Node): boolean {
-		const test = getRecord(node).test as Node;
-		if (test.type !== 'BinaryExpression') return false;
-		const op = getRecord(test).operator as string;
-		return op === '===' || op === '!==' || op === '==' || op === '!=';
+	function comparedSubjects(test: Node, code: string): readonly string[] {
+		if (
+			test.type !== 'BinaryExpression' ||
+			!EQUALITY_OPERATORS.has(getRecord(test).operator as string)
+		) {
+			return [];
+		}
+		const left = getRecord(test).left as Node;
+		const right = getRecord(test).right as Node;
+		return [
+			code.slice(left.start, left.end),
+			code.slice(right.start, right.end),
+		];
 	}
 
-	if (!hasTruthyCheck || !hasExplicitCheck) {
+	if (!hasMixedSubject) {
 		return [];
 	}
 
@@ -246,8 +269,8 @@ function mixedConditionStyle(
 			location: extractLocation(ast),
 			nodeType: 'Program',
 			context:
-				`This program uses both truthy/falsy checks and explicit comparisons. ` +
-				`Mixing condition styles is an **implementation** consistency choice for **developers**.`,
+				`The same value is tested both with a truthy/falsy check and with an explicit comparison. ` +
+				`Mixing condition styles for one value is an **implementation** consistency choice for **developers**.`,
 			questions: [
 				{
 					register: 'open',

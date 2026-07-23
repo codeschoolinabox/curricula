@@ -159,5 +159,23 @@ describe('consistency analyzers', () => {
 			);
 			expect(results).toHaveLength(0);
 		});
+
+		it('does not fire when different subjects each use their idiomatic style', () => {
+			// A boolean flag checked truthily and a DIFFERENT value checked by
+			// equality is correct, not mixed — this must not fire (the harmful case).
+			const results = analyzeProgram(
+				'if (isLoggedIn) {\n  showDashboard();\n}\nif (role === "admin") {\n  showAdmin();\n}',
+				analyze,
+			);
+			expect(results).toHaveLength(0);
+		});
+
+		it('fires when the SAME subject is checked both ways (incl. member expressions)', () => {
+			const results = analyzeProgram(
+				'if (user.active) {\n  render();\n}\nif (user.active === true) {\n  audit();\n}',
+				analyze,
+			);
+			expect(results).toHaveLength(1);
+		});
 	});
 });
