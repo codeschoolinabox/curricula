@@ -42,8 +42,9 @@ helpers below are its implementation.
 4. **Filter** (pure) — post-generation, apply the config: AND across groups, OR
    within a group; prune registers within a question (dropping a question whose
    registers are all pruned); keep questions whose offset `location` overlaps
-   the range; sort by offset; cap at `count`. Input: all questions and the
-   config. Output: the selected questions.
+   the range (half-open `[start, end)`); sort by ascending start offset,
+   tie-broken by ascending end offset; cap at `count`. Input: all questions and
+   the config. Output: the selected questions.
 
 5. **Freeze** (pure) — deep-freeze the result envelope. Input: selected
    questions (+ any analyzer errors). Output: a frozen `MicroDecisionResult`.
