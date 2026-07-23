@@ -1,6 +1,6 @@
 // cspell:ignore Interner
 
-import type { Node, Program } from 'acorn';
+import type { AnyNode, Node, Program } from 'acorn';
 import { analyze } from 'eslint-scope';
 
 import ECMA_VERSION from './ecma-version.js';
@@ -394,13 +394,13 @@ function accessOf(foreign: ForeignReference): ScopeAccess {
 // sits, in source order, before its resolved let/const/class binding is
 // initialized. The boundary is the binding node's end (its own `node`: the
 // VariableDeclarator for let/const, the class node for a class — never the whole
-// declaration). var/parameter/function/import/catch bindings have no dead zone
-// and never flag; the binding's own initializer write is excluded by `init`.
-// Over-approximates closures on purpose (a use in a method or later-called
-// function is flagged though it will not throw) — a consumer needing soundness
-// owns that analysis. Default-parameter TDZ (`(a = b, b) => …`) is out of scope:
-// a Parameter def's node is the whole function, not the parameter's own
-// position, so the positional model cannot express it.
+// declaration), with one construct exception below. var/parameter/function/
+// import/catch bindings have no dead zone and never flag; the binding's own
+// initializer write is excluded by `init`. Over-approximates closures on purpose
+// (a use in a method or later-called function is flagged though it will not
+// throw) — a consumer needing soundness owns that analysis. Default-parameter
+// TDZ (`(a = b, b) => …`) is out of scope: a Parameter def's node is the whole
+// function, not the parameter's own position, so the model cannot express it.
 function usedBeforeBound(reference: BuildingReference): boolean {
 	if (reference.resolved === null || reference.init) {
 		return false;
@@ -414,5 +414,39 @@ function usedBeforeBound(reference: BuildingReference): boolean {
 	if (binding === undefined) {
 		return false;
 	}
-	return reference.identifier.start < binding.node.end;
+	if (reference.identifier.start < binding.node.end) {
+		return true;
+	}
+	return usedInLoopHead(reference, reference.resolved);
+}
+
+// a for-of/for-in loop variable is initialized per iteration, only AFTER its
+// iterable is evaluated — so a use of that variable positioned inside the
+// iterable is in the dead zone even though it sits after the declarator the
+// positional check measures (`for (const x of [x])` throws). Walk enclosing
+// scopes so a closure the iterable builds is covered too, matching the field's
+// closure over-approximation. Only the loop's OWN variable has this dead zone —
+// an outer name used in the iterable is already bound (`for (const x of [y])`).
+function usedInLoopHead(
+	reference: BuildingReference,
+	variable: BuildingVariable,
+): boolean {
+	const use = reference.identifier.start;
+	for (
+		let scope: BuildingScope | null = reference.from;
+		scope !== null;
+		scope = scope.upper
+	) {
+		if (scope.type !== 'for' || !scope.variables.includes(variable)) {
+			continue;
+		}
+		const loop = scope.block as AnyNode;
+		if (loop.type !== 'ForOfStatement' && loop.type !== 'ForInStatement') {
+			continue;
+		}
+		if (loop.right.start <= use && use < loop.right.end) {
+			return true;
+		}
+	}
+	return false;
 }

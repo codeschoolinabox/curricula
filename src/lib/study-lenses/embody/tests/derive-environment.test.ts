@@ -1198,6 +1198,308 @@ describe('deriveEnvironment', () => {
 					);
 				expect(unresolved && unresolved.usedBeforeBound === false).toBe(true);
 			});
+
+			it('a for-of loop variable used in its own iterable is flagged — the iterable runs in the dead zone', () => {
+				const snippet = {
+					source: 'for (const x of [x]) {}',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const loopScope =
+					stage &&
+					stage.ok &&
+					stage.value.root.childScopes.find((scope) => scope.type === 'for');
+				const loopVariable =
+					loopScope &&
+					loopScope.variables.find((variable) => variable.name === 'x');
+				const read =
+					loopVariable &&
+					loopVariable.references.find(
+						(reference) => reference.access === 'read',
+					);
+				expect(read && read.usedBeforeBound === true).toBe(true);
+			});
+
+			it('a for-in loop variable used in its own object expression is flagged', () => {
+				const snippet = {
+					source: 'for (const k in { a: k }) {}',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const loopScope =
+					stage &&
+					stage.ok &&
+					stage.value.root.childScopes.find((scope) => scope.type === 'for');
+				const loopVariable =
+					loopScope &&
+					loopScope.variables.find((variable) => variable.name === 'k');
+				const read =
+					loopVariable &&
+					loopVariable.references.find(
+						(reference) => reference.access === 'read',
+					);
+				expect(read && read.usedBeforeBound === true).toBe(true);
+			});
+
+			it('an already-bound outer name used in a loop iterable is not flagged', () => {
+				const snippet = {
+					source: 'const y = 1; for (const x of [y]) {}',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const outer =
+					stage &&
+					stage.ok &&
+					stage.value.root.variables.find((variable) => variable.name === 'y');
+				const read =
+					outer &&
+					outer.references.find((reference) => reference.access === 'read');
+				expect(read && read.usedBeforeBound === false).toBe(true);
+			});
+
+			it('a loop variable used in the body is not flagged — bound by then', () => {
+				const snippet = {
+					source: 'for (const x of []) { x; }',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const loopScope =
+					stage &&
+					stage.ok &&
+					stage.value.root.childScopes.find((scope) => scope.type === 'for');
+				const loopVariable =
+					loopScope &&
+					loopScope.variables.find((variable) => variable.name === 'x');
+				const read =
+					loopVariable &&
+					loopVariable.references.find(
+						(reference) => reference.access === 'read',
+					);
+				expect(read && read.usedBeforeBound === false).toBe(true);
+			});
+
+			it('a C-style for initializer self-reference stays flagged — the positional path', () => {
+				const snippet = {
+					source: 'for (let i = i; i < 1; i++) {}',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const loopScope =
+					stage &&
+					stage.ok &&
+					stage.value.root.childScopes.find((scope) => scope.type === 'for');
+				const loopVariable =
+					loopScope &&
+					loopScope.variables.find((variable) => variable.name === 'i');
+				const read =
+					loopVariable &&
+					loopVariable.references.find(
+						(reference) => reference.access === 'read',
+					);
+				expect(read && read.usedBeforeBound === true).toBe(true);
+			});
+
+			it('a bare-identifier iterable is flagged — the reference spans the whole iterable, start-inclusive', () => {
+				const snippet = {
+					source: 'for (const x of x) {}',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const loopScope =
+					stage &&
+					stage.ok &&
+					stage.value.root.childScopes.find((scope) => scope.type === 'for');
+				const loopVariable =
+					loopScope &&
+					loopScope.variables.find((variable) => variable.name === 'x');
+				const read =
+					loopVariable &&
+					loopVariable.references.find(
+						(reference) => reference.access === 'read',
+					);
+				expect(read && read.usedBeforeBound === true).toBe(true);
+			});
+
+			it('an outer loop variable referenced in an inner loop iterable is not flagged — bound by the inner loop', () => {
+				const snippet = {
+					source:
+						'const outer = []; for (const x of outer) for (const y of [x]) {}',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const outerLoop =
+					stage &&
+					stage.ok &&
+					stage.value.root.childScopes.find((scope) => scope.type === 'for');
+				const outerVariable =
+					outerLoop &&
+					outerLoop.variables.find((variable) => variable.name === 'x');
+				const read =
+					outerVariable &&
+					outerVariable.references.find(
+						(reference) => reference.access === 'read',
+					);
+				expect(read && read.usedBeforeBound === false).toBe(true);
+			});
+
+			it('a destructuring loop variable used in its own iterable is flagged', () => {
+				const snippet = {
+					source: 'for (const [a] of [a]) {}',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const loopScope =
+					stage &&
+					stage.ok &&
+					stage.value.root.childScopes.find((scope) => scope.type === 'for');
+				const loopVariable =
+					loopScope &&
+					loopScope.variables.find((variable) => variable.name === 'a');
+				const read =
+					loopVariable &&
+					loopVariable.references.find(
+						(reference) => reference.access === 'read',
+					);
+				expect(read && read.usedBeforeBound === true).toBe(true);
+			});
+
+			it('a destructuring default self-reference in the loop head is flagged — the positional path', () => {
+				const snippet = {
+					source: 'for (const { a = a } of [{}]) {}',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const loopScope =
+					stage &&
+					stage.ok &&
+					stage.value.root.childScopes.find((scope) => scope.type === 'for');
+				const loopVariable =
+					loopScope &&
+					loopScope.variables.find((variable) => variable.name === 'a');
+				const read =
+					loopVariable &&
+					loopVariable.references.find(
+						(reference) => reference.access === 'read',
+					);
+				expect(read && read.usedBeforeBound === true).toBe(true);
+			});
+
+			it('a for-await-of loop variable used in its own iterable is flagged', () => {
+				const snippet = {
+					source: 'async function f() { for await (const x of [x]) {} }',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const loopScope =
+					stage &&
+					stage.ok &&
+					stage.value.root.childScopes[0]?.childScopes.find(
+						(scope) => scope.type === 'for',
+					);
+				const loopVariable =
+					loopScope &&
+					loopScope.variables.find((variable) => variable.name === 'x');
+				const read =
+					loopVariable &&
+					loopVariable.references.find(
+						(reference) => reference.access === 'read',
+					);
+				expect(read && read.usedBeforeBound === true).toBe(true);
+			});
+
+			it('a loop variable used in a closure the iterable builds is flagged — the closure over-approximation', () => {
+				const snippet = {
+					source: 'for (const x of [].filter(() => x)) {}',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const loopScope =
+					stage &&
+					stage.ok &&
+					stage.value.root.childScopes.find((scope) => scope.type === 'for');
+				const loopVariable =
+					loopScope &&
+					loopScope.variables.find((variable) => variable.name === 'x');
+				const read =
+					loopVariable &&
+					loopVariable.references.find(
+						(reference) => reference.access === 'read',
+					);
+				expect(read && read.usedBeforeBound === true).toBe(true);
+			});
+
+			it('an outer name used in a closure the iterable builds is not flagged — still already bound', () => {
+				const snippet = {
+					source: 'const y = 1; for (const x of [].filter(() => y)) {}',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const outer =
+					stage &&
+					stage.ok &&
+					stage.value.root.variables.find((variable) => variable.name === 'y');
+				const read =
+					outer &&
+					outer.references.find((reference) => reference.access === 'read');
+				expect(read && read.usedBeforeBound === false).toBe(true);
+			});
+
+			it('a var loop variable used in its iterable is not flagged — var has no dead zone', () => {
+				const snippet = {
+					source: 'for (var x of [x]) {}',
+					type: 'module',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const variable =
+					stage &&
+					stage.ok &&
+					stage.value.root.childScopes[0]?.variables.find(
+						(candidate) => candidate.name === 'x',
+					);
+				const read =
+					variable &&
+					variable.references.find((reference) => reference.access === 'read');
+				expect(read && read.usedBeforeBound === false).toBe(true);
+			});
 		});
 
 		describe('byPath', () => {
