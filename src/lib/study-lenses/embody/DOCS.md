@@ -157,8 +157,8 @@ flowchart TD
   these stays a consumer's projection. The scope structure's `usedBeforeBound`
   is the one admitted derived enrichment — a static pre-initialization fact (how
   a use relates to its `let`/`const`/`class` binding when it precedes
-  initialization: evaluated `eager` at a fixed point, or `deferred` in a
-  function or instance field initializer), never a runtime verdict, so a
-  consumer owns any reachability judgment built on it.
+  initialization: evaluated `eager` at a fixed point, or `deferred` to a later
+  context), never a runtime verdict, so a consumer owns any reachability
+  judgment built on it.
 - **Internal decomposition** — the factory's internal libraries document
   themselves at their own abstraction level.

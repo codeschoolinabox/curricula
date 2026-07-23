@@ -229,12 +229,13 @@ export type ScopeAccess = 'read' | 'write' | 'readwrite';
  *
  * - `'eager'` — read before initialization in a context evaluated unconditionally
  *   when reached: an initializer or `for-of`/`for-in` iterable, a class `extends`
- *   expression or computed member key, a static field or static block, or a
- *   preceding statement. A guaranteed evaluation in the dead zone.
+ *   expression or computed member key, a static field or static block, a
+ *   preceding statement, or a synchronous immediately-invoked function (its body
+ *   runs in place). A guaranteed evaluation in the dead zone.
  * - `'deferred'` — read before initialization in a context that runs later:
- *   inside a function or an instance field initializer — so whether the read
- *   truly lands in the dead zone is a reachability question the consumer owns (it
- *   may never happen).
+ *   inside a function (one not invoked in place, or an async or generator one) or
+ *   an instance field initializer — so whether the read truly lands in the dead
+ *   zone is a reachability question the consumer owns (it may never happen).
  * - `false` — the use is at or after initialization, or the binding has no dead
  *   zone at all.
  *
@@ -287,13 +288,15 @@ export type ScopeReference = {
 	 * class-name uses in those bodies are not before initialization. The tier is
 	 * `'eager'` when that use is evaluated unconditionally at a fixed point and
 	 * `'deferred'` when it runs later — inside a function or an instance field
-	 * initializer (a static field or static block runs eagerly, at class
-	 * definition). The split is a structural fact — whether the path from the use
-	 * to its binding crosses a deferred-execution scope — never a reachability
-	 * judgment: a `'deferred'` read lands in the dead zone only if its context runs
-	 * there, which a consumer needing soundness decides, whereas `'eager'` is a
-	 * guaranteed dead-zone evaluation. Positions are character offsets
-	 * (`.start`/`.end`, never `.loc`).
+	 * initializer (a static field or static block runs eagerly at class
+	 * definition; a synchronous function invoked in place also runs eagerly, so
+	 * its body is not a deferral boundary — an async or generator one is). The
+	 * split is a structural fact — whether the path from the use to its binding
+	 * crosses a deferred-execution scope — never a reachability judgment: a
+	 * `'deferred'` read lands in the dead zone only if its context runs there,
+	 * which a consumer needing soundness decides, whereas `'eager'` is a guaranteed
+	 * dead-zone evaluation. Positions are character offsets (`.start`/`.end`, never
+	 * `.loc`).
 	 *
 	 * `false` for uses at or after initialization, unresolved uses, the binding's
 	 * own initializer write, and `var`/function/import/catch bindings (no dead

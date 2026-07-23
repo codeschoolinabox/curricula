@@ -1643,7 +1643,7 @@ describe('deriveEnvironment', () => {
 				expect(read && read.usedBeforeBound === 'deferred').toBe(true);
 			});
 
-			it('a class name in a closure inside its own heritage is deferred — recognized through the nesting', () => {
+			it('a class name in an immediately-invoked closure in its own heritage is eager — the IIFE runs in the dead zone', () => {
 				const snippet = {
 					source: 'class C extends (() => C)() {}',
 					type: 'script',
@@ -1662,7 +1662,7 @@ describe('deriveEnvironment', () => {
 				const read =
 					self &&
 					self.references.find((reference) => reference.access === 'read');
-				expect(read && read.usedBeforeBound === 'deferred').toBe(true);
+				expect(read && read.usedBeforeBound === 'eager').toBe(true);
 			});
 
 			it('a class self-referenced in a computed member key is eager — computed keys evaluate eagerly', () => {
@@ -1708,7 +1708,7 @@ describe('deriveEnvironment', () => {
 				expect(read && read.usedBeforeBound === false).toBe(true);
 			});
 
-			it('a class name in a closure inside a computed key is deferred', () => {
+			it('a class name in an immediately-invoked closure in a computed key is eager', () => {
 				const snippet = {
 					source: 'class C { [(() => C)()] = 1; }',
 					type: 'script',
@@ -1727,7 +1727,7 @@ describe('deriveEnvironment', () => {
 				const read =
 					self &&
 					self.references.find((reference) => reference.access === 'read');
-				expect(read && read.usedBeforeBound === 'deferred').toBe(true);
+				expect(read && read.usedBeforeBound === 'eager').toBe(true);
 			});
 
 			it('an outer binding used in a static method body is deferred', () => {
@@ -1746,6 +1746,60 @@ describe('deriveEnvironment', () => {
 				const read =
 					outer &&
 					outer.references.find((reference) => reference.access === 'read');
+				expect(read && read.usedBeforeBound === 'deferred').toBe(true);
+			});
+
+			it('a use in a synchronous immediately-invoked function is eager — it runs in place', () => {
+				const snippet = {
+					source: 'let x = (() => x)();',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const read =
+					stage &&
+					stage.ok &&
+					stage.value.root.variables[0]?.references.find(
+						(reference) => reference.access === 'read',
+					);
+				expect(read && read.usedBeforeBound === 'eager').toBe(true);
+			});
+
+			it('a use in an async immediately-invoked function is deferred — the throw is asynchronous', () => {
+				const snippet = {
+					source: 'let x = (async () => x)();',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const read =
+					stage &&
+					stage.ok &&
+					stage.value.root.variables[0]?.references.find(
+						(reference) => reference.access === 'read',
+					);
+				expect(read && read.usedBeforeBound === 'deferred').toBe(true);
+			});
+
+			it('a use in an immediately-invoked generator is deferred — its body runs on demand', () => {
+				const snippet = {
+					source: 'let x = (function* () { yield x; })();',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const read =
+					stage &&
+					stage.ok &&
+					stage.value.root.variables[0]?.references.find(
+						(reference) => reference.access === 'read',
+					);
 				expect(read && read.usedBeforeBound === 'deferred').toBe(true);
 			});
 		});

@@ -149,9 +149,9 @@ this region owns.
   identifier's place, neighbors, and children through the entwined index. One
   signal is embody's own rather than the analyzer's: how a use relates to its
   `let`/`const`/`class` binding when it precedes initialization — evaluated
-  `eager` (at a fixed point) or `deferred` (in a function or field initializer)
-  — a static fact, offered as a convenience, from which a consumer draws any
-  runtime inference, never embody.
+  `eager` (at a fixed point) or `deferred` (later, in a function or instance
+  field initializer) — a static fact, offered as a convenience, from which a
+  consumer draws any runtime inference, never embody.
 - **phase accessibility** — the derived per-phase map: accessible, or barred
   with the carried upstream cause. (The package glossary owns its distinction
   from lens fit.)

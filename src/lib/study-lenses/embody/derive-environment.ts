@@ -62,13 +62,15 @@ export default function deriveEnvironment(
 		// paths for the very nodes this tree holds. Build the node→path reversal
 		// once and share it between the cross-link stamp and the scope index.
 		const pathOf = new Map<Node, NodePath>();
+		const eagerlyInvoked = new Set<Node>();
 		for (const tied of Object.values(entwined.value.byPath)) {
 			pathOf.set(tied.node, tied.path);
+			collectEagerInvocation(tied.node, eagerlyInvoked);
 		}
 
 		// second pass over the interned records — every reference is resolved by
 		// now: stamp each identifier's path and derive usedBeforeBound
-		stampReferences(intern, pathOf);
+		stampReferences(intern, pathOf, eagerlyInvoked);
 		stampDefinitions(intern, pathOf);
 
 		const byPath = indexByPath(root, pathOf);
@@ -125,13 +127,35 @@ function fillByPath(
 // guard-and-omit: a node absent from byPath simply carries no path — never
 // assign undefined. The reference stamp also derives usedBeforeBound here, now
 // that every reference is resolved.
-function stampReferences(intern: Interner, pathOf: Map<Node, NodePath>): void {
+function stampReferences(
+	intern: Interner,
+	pathOf: Map<Node, NodePath>,
+	eagerlyInvoked: ReadonlySet<Node>,
+): void {
 	for (const reference of intern.references.values()) {
 		const path = pathOf.get(reference.identifier);
 		if (path !== undefined) {
 			reference.path = path;
 		}
-		reference.usedBeforeBound = usedBeforeBound(reference);
+		reference.usedBeforeBound = usedBeforeBound(reference, eagerlyInvoked);
+	}
+}
+
+// a synchronous, non-generator function called in place — its body runs eagerly
+// when the call is evaluated, so a dead-zone read inside it is eager, not deferred
+function collectEagerInvocation(node: Node, eagerlyInvoked: Set<Node>): void {
+	const call = node as AnyNode;
+	if (call.type !== 'CallExpression') {
+		return;
+	}
+	const { callee } = call;
+	if (
+		(callee.type === 'ArrowFunctionExpression' ||
+			callee.type === 'FunctionExpression') &&
+		!callee.async &&
+		!callee.generator
+	) {
+		eagerlyInvoked.add(callee);
 	}
 }
 
@@ -399,7 +423,10 @@ function accessOf(foreign: ForeignReference): ScopeAccess {
 // binding's own initializer write is excluded by `init`. Default-parameter TDZ
 // (`(a = b, b) => …`) is out of scope — a Parameter def's node is the whole
 // function, so the model cannot express the parameter's own position.
-function usedBeforeBound(reference: BuildingReference): UsedBeforeBound {
+function usedBeforeBound(
+	reference: BuildingReference,
+	eagerlyInvoked: ReadonlySet<Node>,
+): UsedBeforeBound {
 	const variable = reference.resolved;
 	if (variable === null || reference.init) {
 		return false;
@@ -416,7 +443,9 @@ function usedBeforeBound(reference: BuildingReference): UsedBeforeBound {
 	) {
 		return false;
 	}
-	return evaluatedEagerly(reference, variable) ? 'eager' : 'deferred';
+	return evaluatedEagerly(reference, variable, eagerlyInvoked)
+		? 'eager'
+		: 'deferred';
 }
 
 // a use precedes its binding's initialization. For let/const the boundary is the
@@ -470,12 +499,14 @@ function within(
 }
 
 // eager unless deferred: walking from the use to its binding's scope crosses a
-// function or an instance field initializer (a static field or static block runs
-// eagerly at class definition; only an instance field runs later, at
-// construction) — this also covers a closure the dead-zone region builds.
+// deferred-execution scope — a function (unless it is a synchronous, non-generator
+// function called in place, whose body runs eagerly) or an instance field
+// initializer (a static field or static block runs eagerly at class definition;
+// only an instance field runs later, at construction).
 function evaluatedEagerly(
 	reference: BuildingReference,
 	variable: BuildingVariable,
+	eagerlyInvoked: ReadonlySet<Node>,
 ): boolean {
 	for (
 		let scope: BuildingScope | null = reference.from;
@@ -485,16 +516,19 @@ function evaluatedEagerly(
 		if (scope.variables.includes(variable)) {
 			return true;
 		}
-		if (isDeferredScope(scope)) {
+		if (isDeferredScope(scope, eagerlyInvoked)) {
 			return false;
 		}
 	}
 	return true;
 }
 
-function isDeferredScope(scope: BuildingScope): boolean {
+function isDeferredScope(
+	scope: BuildingScope,
+	eagerlyInvoked: ReadonlySet<Node>,
+): boolean {
 	if (scope.type === 'function') {
-		return true;
+		return !eagerlyInvoked.has(scope.block);
 	}
 	return scope.type === 'class-field-initializer' && !isStaticField(scope);
 }
@@ -520,9 +554,9 @@ function isStaticField(scope: BuildingScope): boolean {
 // iterable is evaluated — so a use of that variable positioned inside the
 // iterable is in the dead zone even though it sits after the declarator the
 // positional check measures (`for (const x of [x])` throws). Walk enclosing
-// scopes so a closure the iterable builds is covered too, matching the field's
-// closure over-approximation. Only the loop's OWN variable has this dead zone —
-// an outer name used in the iterable is already bound (`for (const x of [y])`).
+// scopes so a closure the iterable builds is recognized too — the tier of such a
+// use is then decided by evaluatedEagerly. Only the loop's OWN variable has this
+// dead zone — an outer name used in the iterable is already bound.
 function usedInLoopHead(
 	reference: BuildingReference,
 	variable: BuildingVariable,
