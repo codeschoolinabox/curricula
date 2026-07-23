@@ -255,6 +255,21 @@ describe('filterQuestions', () => {
 			expect(result).toHaveLength(1);
 			expect(result[0].questions).toHaveLength(2);
 		});
+
+		it('returns the same question reference when nothing is pruned', () => {
+			const q = makeQuestion({
+				questions: [
+					{ register: 'open', text: 'open question?' },
+					{ register: 'pointed', text: 'pointed question?' },
+				],
+			});
+
+			const result = filterQuestions([q], {
+				register: { open: true, pointed: true },
+			});
+			expect(result).toHaveLength(1);
+			expect(result[0]).toBe(q);
+		});
 	});
 
 	// ─── Count cap ──────────────────────────────────────────

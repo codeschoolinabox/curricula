@@ -11,6 +11,8 @@
 
 import type { Node } from 'acorn';
 
+import freezeInPlace from '@utils/freeze-in-place.js';
+
 /**
  * Extracts the start/end character offsets of an acorn node.
  *
@@ -21,5 +23,5 @@ export default function extractLocation(node: Node): {
 	readonly start: number;
 	readonly end: number;
 } {
-	return Object.freeze({ start: node.start, end: node.end });
+	return freezeInPlace({ start: node.start, end: node.end });
 }

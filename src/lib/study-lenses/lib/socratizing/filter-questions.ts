@@ -15,6 +15,8 @@
  * - Sort is by ascending start offset, tie-broken by ascending end offset
  */
 
+import freezeInPlace from '@utils/freeze-in-place.js';
+
 import type { CodeQuestion, MicroDecisionConfig, Question } from './types.js';
 
 /**
@@ -47,7 +49,7 @@ export default function filterQuestions(
 			? sorted.slice(0, config.count)
 			: sorted;
 
-	return Object.freeze(capped);
+	return freezeInPlace(capped);
 }
 
 // ─── Config key mappings ───────────────────────────────────
@@ -124,9 +126,9 @@ function applyRegisterFilter(
 	if (filteredQuestions === question.questions) {
 		return question;
 	}
-	return Object.freeze({
+	return freezeInPlace({
 		...question,
-		questions: Object.freeze(filteredQuestions),
+		questions: filteredQuestions,
 	});
 }
 
@@ -194,5 +196,11 @@ function filterByRegister(
 	const filtered = questions.filter(
 		(q) => registerConfig[q.register] !== false,
 	);
-	return filtered.length > 0 ? filtered : null;
+	if (filtered.length === 0) {
+		return null;
+	}
+	// Preserve the original reference when nothing was pruned, so the caller's
+	// fast-path (filteredQuestions === question.questions) leaves the question
+	// object untouched instead of rebuilding an identical one.
+	return filtered.length === questions.length ? questions : filtered;
 }
