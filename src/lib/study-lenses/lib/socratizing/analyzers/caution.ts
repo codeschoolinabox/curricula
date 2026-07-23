@@ -15,6 +15,28 @@ import type { AnalyzerEntry, CodeQuestion } from '../types.js';
 
 import getRecord from './get-record.js';
 
+// ─── Helpers ───────────────────────────────────────────────
+
+/** Expression-statement expressions that run for a side effect — not "unused". */
+const SIDE_EFFECT_EXPRESSIONS: ReadonlySet<string> = new Set([
+	'CallExpression',
+	'NewExpression',
+	'TaggedTemplateExpression',
+	'AssignmentExpression',
+	'UpdateExpression',
+]);
+
+/** Whether an expression runs for a side effect (its discarded result is intended). */
+function hasSideEffect(expression: Node): boolean {
+	if (SIDE_EFFECT_EXPRESSIONS.has(expression.type)) {
+		return true;
+	}
+	return (
+		expression.type === 'UnaryExpression' &&
+		getRecord(expression).operator === 'delete'
+	);
+}
+
 // ─── 1. assignment-in-condition ────────────────────────────
 
 function assignmentInCondition(
@@ -115,14 +137,22 @@ function unusedExpression(
 		return null;
 	}
 
-	const expression = getRecord(node).expression as Node;
+	// A directive prologue ("use strict") is an ExpressionStatement but not a
+	// value-producing expression — it switches execution mode, so its result
+	// being "unused" is not a smell.
+	if (getRecord(node).directive !== undefined) {
+		return null;
+	}
 
-	// These expression types have side effects — not unused
-	if (
-		expression.type === 'CallExpression' ||
-		expression.type === 'AssignmentExpression' ||
-		expression.type === 'UpdateExpression'
-	) {
+	const rawExpression = getRecord(node).expression as Node;
+	// Optional chaining wraps its inner expression: `obj?.method()` parses as a
+	// ChainExpression around the CallExpression — unwrap before classifying.
+	const expression =
+		rawExpression.type === 'ChainExpression'
+			? (getRecord(rawExpression).expression as Node)
+			: rawExpression;
+
+	if (hasSideEffect(expression)) {
 		return null;
 	}
 

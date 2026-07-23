@@ -97,6 +97,23 @@ describe('caution analyzers', () => {
 			const results = analyzeAll('let x = 1;\nx = 2;', analyze);
 			expect(results).toHaveLength(0);
 		});
+
+		it('does not fire on an optional-chained call (side effect)', () => {
+			// `user?.save()` parses as a ChainExpression around a CallExpression;
+			// it runs for a side effect and must not be flagged unused.
+			const results = analyzeAll('user?.save();', analyze);
+			expect(results).toHaveLength(0);
+		});
+
+		it('does not fire on a directive prologue', () => {
+			const results = analyzeAll('"use strict";', analyze);
+			expect(results).toHaveLength(0);
+		});
+
+		it('does not fire on a constructor call (new)', () => {
+			const results = analyzeAll('new Widget();', analyze);
+			expect(results).toHaveLength(0);
+		});
 	});
 
 	describe('unused-variable', () => {
