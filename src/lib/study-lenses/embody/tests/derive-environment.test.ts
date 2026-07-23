@@ -1767,6 +1767,24 @@ describe('deriveEnvironment', () => {
 				expect(read && read.usedBeforeBound === 'eager').toBe(true);
 			});
 
+			it('a use in an immediately-invoked function expression is eager too', () => {
+				const snippet = {
+					source: 'let x = (function () { return x; })();',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const read =
+					stage &&
+					stage.ok &&
+					stage.value.root.variables[0]?.references.find(
+						(reference) => reference.access === 'read',
+					);
+				expect(read && read.usedBeforeBound === 'eager').toBe(true);
+			});
+
 			it('a use in an async immediately-invoked function is deferred — the throw is asynchronous', () => {
 				const snippet = {
 					source: 'let x = (async () => x)();',

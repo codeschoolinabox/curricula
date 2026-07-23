@@ -232,10 +232,11 @@ export type ScopeAccess = 'read' | 'write' | 'readwrite';
  *   expression or computed member key, a static field or static block, a
  *   preceding statement, or a synchronous immediately-invoked function (its body
  *   runs in place). A guaranteed evaluation in the dead zone.
- * - `'deferred'` — read before initialization in a context that runs later:
- *   inside a function (one not invoked in place, or an async or generator one) or
- *   an instance field initializer — so whether the read truly lands in the dead
- *   zone is a reachability question the consumer owns (it may never happen).
+ * - `'deferred'` — read before initialization in a context the consumer must
+ *   reason about: a function not invoked in place (it may never run), an instance
+ *   field initializer (runs at construction), or an invoked function that is a
+ *   generator (its body runs on demand) or async (its body runs, but a dead-zone
+ *   error surfaces as a rejection, not a synchronous throw).
  * - `false` — the use is at or after initialization, or the binding has no dead
  *   zone at all.
  *
