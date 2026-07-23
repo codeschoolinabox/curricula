@@ -155,8 +155,8 @@ flowchart TD
   independently want by its nature — not one lens's bespoke need; and (c) its
   approximations are documented at the field. A derived analytic failing any of
   these stays a consumer's projection. The scope structure's `usedBeforeBound`
-  is the one admitted derived enrichment — a positional truth (a use precedes
-  its `let`/`const`/`class` binding's initialization), never a runtime verdict,
-  so a consumer owns any reachability judgment built on it.
+  is the one admitted derived enrichment — a static pre-initialization truth (a
+  use precedes its `let`/`const`/`class` binding's initialization), never a
+  runtime verdict, so a consumer owns any reachability judgment built on it.
 - **Internal decomposition** — the factory's internal libraries document
   themselves at their own abstraction level.
