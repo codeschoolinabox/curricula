@@ -88,12 +88,21 @@ describe('analyzeMicroDecisions — integration', () => {
 			expect(result.ok).toBe(true);
 		});
 
-		it('questions is an array', () => {
+		it('returns well-formed questions on the ok:true branch', () => {
+			// `x` is a 1-char name → naming-descriptiveness fires, so this is a real
+			// non-empty result, not a vacuous Array.isArray check.
 			const result = analyzeMicroDecisions(embody('const x = 1;'));
 			if (!result.ok) {
 				throw new Error('expected ok:true');
 			}
-			expect(Array.isArray(result.questions)).toBe(true);
+			expect(result.questions.length).toBeGreaterThan(0);
+			expect(
+				result.questions.every(
+					(question) =>
+						typeof question.id === 'string' &&
+						typeof question.location.start === 'number',
+				),
+			).toBe(true);
 		});
 
 		it('produces real questions for analyzer-triggering source', () => {

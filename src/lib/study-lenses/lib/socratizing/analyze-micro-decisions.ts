@@ -67,10 +67,7 @@ export default function analyzeMicroDecisions(
 
 	const scope = deriveScopeUsage(environment.value);
 
-	const walked = walkAndAnalyze(ast.value, scope, source.value);
-	const program = runProgramAnalyzers(ast.value, scope, source.value);
-	const questions = [...walked.questions, ...program.questions];
-	const errors = [...walked.errors, ...program.errors];
+	const { questions, errors } = collectAnalysis(ast.value, scope, source.value);
 
 	const filtered = filterQuestions(questions, config);
 
@@ -106,76 +103,60 @@ const PROGRAM_ANALYZERS: readonly ProgramAnalyzerEntry[] = [
 	...voiceProfileAnalyzers,
 ];
 
-// ─── Walk + run (functional; questions and errors accumulate as data) ──
+// ─── Walk + run ────────────────────────────────────────────
 
 type AnalysisResult = {
 	readonly questions: readonly CodeQuestion[];
 	readonly errors: readonly AnalyzerError[];
 };
 
-/** Runs every point analyzer on `node`, then recurses its children (pre-order). */
-function walkAndAnalyze(
-	node: Node,
-	scope: ScopeUsage,
-	source: string,
-): AnalysisResult {
-	const here = POINT_ANALYZERS.map((entry) =>
-		runPointAnalyzer(node, scope, source, entry),
-	);
-	const children = getChildNodes(node).map((child) =>
-		walkAndAnalyze(child, scope, source),
-	);
-	return mergeResults([...here, ...children]);
-}
-
-/** Runs every program analyzer once on the whole AST. */
-function runProgramAnalyzers(
+/**
+ * Runs every point analyzer over every node (pre-order) and every program
+ * analyzer once, accumulating questions and errors.
+ *
+ * @remarks Flattening a tree in one pass needs a single shared accumulator:
+ * this owns two private buffers, appends as it walks, and lets only the readonly
+ * `AnalysisResult` escape — a deliberate, contained departure from the "return
+ * new objects" default to keep the walk O(n) in the node count (the immutable
+ * per-level `flatMap`-merge it replaced was O(n²) on deep/linear ASTs). An
+ * analyzer that throws is degraded into an `AnalyzerError`, never propagated.
+ */
+function collectAnalysis(
 	ast: Node,
 	scope: ScopeUsage,
 	source: string,
 ): AnalysisResult {
-	return mergeResults(
-		PROGRAM_ANALYZERS.map((entry) =>
-			runProgramAnalyzer(ast, scope, source, entry),
-		),
-	);
-}
+	const questions: CodeQuestion[] = [];
+	const errors: AnalyzerError[] = [];
 
-/** A point analyzer's outcome: at most one question, or a collected error. */
-function runPointAnalyzer(
-	node: Node,
-	scope: ScopeUsage,
-	source: string,
-	entry: AnalyzerEntry,
-): AnalysisResult {
-	try {
-		const question = entry.analyze(node, scope, source);
-		return { questions: question === null ? [] : [question], errors: [] };
-	} catch (error: unknown) {
-		return { questions: [], errors: [analyzerError(entry.id, error)] };
+	function walkPoints(node: Node): void {
+		for (const entry of POINT_ANALYZERS) {
+			try {
+				const question = entry.analyze(node, scope, source);
+				if (question !== null) {
+					questions.push(question);
+				}
+			} catch (error: unknown) {
+				errors.push(analyzerError(entry.id, error));
+			}
+		}
+		for (const child of getChildNodes(node)) {
+			walkPoints(child);
+		}
 	}
-}
+	walkPoints(ast);
 
-/** A program analyzer's outcome: zero or more questions, or a collected error. */
-function runProgramAnalyzer(
-	ast: Node,
-	scope: ScopeUsage,
-	source: string,
-	entry: ProgramAnalyzerEntry,
-): AnalysisResult {
-	try {
-		return { questions: entry.analyze(ast, scope, source), errors: [] };
-	} catch (error: unknown) {
-		return { questions: [], errors: [analyzerError(entry.id, error)] };
+	for (const entry of PROGRAM_ANALYZERS) {
+		try {
+			for (const question of entry.analyze(ast, scope, source)) {
+				questions.push(question);
+			}
+		} catch (error: unknown) {
+			errors.push(analyzerError(entry.id, error));
+		}
 	}
-}
 
-/** Concatenates a list of analysis results into one. */
-function mergeResults(results: readonly AnalysisResult[]): AnalysisResult {
-	return {
-		questions: results.flatMap((result) => result.questions),
-		errors: results.flatMap((result) => result.errors),
-	};
+	return { questions, errors };
 }
 
 /** Builds a degraded-analyzer record from a thrown value. */
