@@ -127,6 +127,12 @@ Behavior:
 - **Frozen.** The returned `ScopeUsage` and its `allDeclarations` list and every
   `VariableUsage` are deeply frozen.
 - **Deterministic.** Same environment, same output. No config, no randomness.
+- **Source-ordered.** `allDeclarations` follows the scope walk: every scope's
+  own declarations in source (declaration) order, scopes visited outer-first
+  (pre-order DFS: a scope before its nested scopes). So same-scope declarations
+  keep source order, and an outer binding precedes a nested same-name shadow — a
+  contract consumers may rely on (and a reason they must still match a specific
+  binding by `node` identity, never by name).
 
 ## Edge cases
 

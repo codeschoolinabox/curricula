@@ -57,10 +57,11 @@ function enumerateScopes(scope: Scope): readonly Scope[] {
 // ─── Select + Fold ─────────────────────────────────────────
 
 /**
- * Keeps only `let`/`const` bindings (the `kind` field is absent for var /
- * function / parameter / class / import / catch bindings) and folds one into a
- * `VariableUsage`: name / kind / node from its declaration, read/write counts
- * tallied from its references.
+ * Keeps only `let`/`const` bindings — `var` carries `kind: 'var'` (present but
+ * filtered out here), while function / parameter / class / import / catch
+ * bindings carry no `kind` at all — and folds one into a `VariableUsage`:
+ * name / kind / node from its declaration, read/write counts tallied from its
+ * references.
  */
 function toVariableUsage(variable: ScopeVariable): VariableUsage | null {
 	const declaration = variable.defs.find(

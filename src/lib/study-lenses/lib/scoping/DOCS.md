@@ -106,11 +106,12 @@ flowchart TD
 - **Depends on an enriched `ScopeReference` (sequenced ahead of
   implementation).** Read/write tallies require embody to project eslint-scope's
   access classification onto its contract: `ScopeReference.access`
-  (`'read'`/`'write'`/`'read-write'`) and `ScopeReference.init` (was this the
-  declaration's own initializer). embody today drops both at projection, so this
-  leaf's counts are **unbuildable until that enrichment lands** — it is a hard
-  prerequisite, delivered by a separate embody session, not part of this leaf.
-  These field names are the authoritative contract this leaf consumes.
+  (`'read'`/`'write'`/`'readwrite'` — one token, no hyphen) and
+  `ScopeReference.init` (was this the declaration's own initializer). embody
+  today drops both at projection, so this leaf's counts are **unbuildable until
+  that enrichment lands** — it is a hard prerequisite, delivered by a separate
+  embody session, not part of this leaf. These field names are the authoritative
+  contract this leaf consumes.
 
 - **The fold rule follows eslint-scope, and diverges from legacy
   `build-scope`.** eslint-scope is the oracle. Three intended divergences from
