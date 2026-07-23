@@ -89,6 +89,11 @@ describe('comprehension variable analyzers', () => {
 			expect(results).toHaveLength(0);
 		});
 
+		it('does not fire on a negative-literal or empty-template initializer', () => {
+			expect(analyzeAll('const temp = -5;', analyze)).toHaveLength(0);
+			expect(analyzeAll('const greeting = `hello`;', analyze)).toHaveLength(0);
+		});
+
 		it('has correct metadata', () => {
 			const results = analyzeAll('const x = 5;\nconst y = x + 1;', analyze);
 			expect(results[0].id).toBe('what-value-stored');

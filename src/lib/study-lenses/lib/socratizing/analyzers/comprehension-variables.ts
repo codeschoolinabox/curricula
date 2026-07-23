@@ -15,6 +15,24 @@ import type { AnalyzerEntry, CodeQuestion } from '../types.js';
 import getIdentifierName from './get-identifier-name.js';
 import getRecord from './get-record.js';
 
+/**
+ * Whether an initializer is effectively a plain literal value — a bare literal,
+ * a unary operator on a literal (`-5`, `!true`, `void 0`), or a template literal
+ * with no `${...}` substitutions — so it does not read as "an expression".
+ */
+function isTrivialInitializer(init: Node): boolean {
+	if (init.type === 'Literal') {
+		return true;
+	}
+	if (init.type === 'UnaryExpression') {
+		return (getRecord(init).argument as Node).type === 'Literal';
+	}
+	if (init.type === 'TemplateLiteral') {
+		return (getRecord(init).expressions as readonly Node[]).length === 0;
+	}
+	return false;
+}
+
 // ─── 1. what-is-declared ───────────────────────────────────
 
 function whatIsDeclared(
@@ -83,8 +101,9 @@ function whatValueStored(
 			continue;
 		}
 
-		// Only fire on non-trivial init (not just a literal)
-		if (init.type === 'Literal') {
+		// Only fire on a non-trivial initializer (an actual expression, not a
+		// literal / negated literal / substitution-free template).
+		if (isTrivialInitializer(init)) {
 			continue;
 		}
 
