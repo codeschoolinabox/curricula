@@ -55,12 +55,13 @@ const statementTypes: ReadonlySet<string> = new Set([
  * nesting depth found under `node`.
  */
 function computeMaxNesting(node: Node, depth: number): number {
-	const currentDepth = node.type === 'BlockStatement' ? depth : 0;
-	const nextDepth = node.type === 'BlockStatement' ? depth + 1 : depth;
+	// 1-indexed: the outermost BlockStatement is depth 1, so `>= 2` means a block
+	// nested inside another block (two levels of structure), not three.
+	const currentDepth = node.type === 'BlockStatement' ? depth + 1 : depth;
 
 	let max = currentDepth;
 	for (const child of getChildNodes(node)) {
-		max = Math.max(max, computeMaxNesting(child, nextDepth));
+		max = Math.max(max, computeMaxNesting(child, currentDepth));
 	}
 	return max;
 }

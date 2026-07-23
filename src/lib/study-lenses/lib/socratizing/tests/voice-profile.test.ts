@@ -114,9 +114,11 @@ describe('voice-profile analyzer', () => {
 			expect(results[0].context).toContain('modern idioms');
 		});
 
-		it('reports structured control flow for deep block nesting', () => {
+		it('reports structured control flow for two levels of block nesting', () => {
+			// A block nested inside another block (maxNestingDepth 2, 1-indexed) is
+			// enough — the old 0-indexed count needed three levels.
 			const results = analyzeProgram(
-				'if (true) {\n  if (true) {\n    if (true) {\n      console.log(1);\n    }\n  }\n}',
+				'if (true) {\n  if (true) {\n    console.log(1);\n  }\n}',
 				analyze,
 			);
 			expect(results[0].context).toContain('structured control flow');
