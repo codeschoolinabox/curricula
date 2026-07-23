@@ -251,14 +251,15 @@ export type ScopeReference = {
 	readonly path?: NodePath;
 	/**
 	 * DERIVED, not the analyzer's reading: `true` when this use's identifier is
-	 * positioned, in source order, before its resolved `let`/`const` binding is
-	 * initialized — `identifier.start` precedes the binding's declarator end,
-	 * computed from character offsets (`.start`/`.end`, never `.loc`). A static
+	 * positioned, in source order, before its resolved `let`/`const`/`class`
+	 * binding is initialized — `identifier.start` precedes the binding node's end
+	 * (the declarator for `let`/`const`, the class node for a `class`), computed
+	 * from character offsets (`.start`/`.end`, never `.loc`). A static
 	 * over-approximation of a temporal-dead-zone access: a use inside a function
 	 * that runs *after* the declaration (a closure) is still flagged though it
 	 * will not throw — a consumer needing soundness applies its own reachability
-	 * analysis. `false` for `var`/parameter/function/class/import/catch bindings
-	 * (no dead zone), unresolved uses, and the binding's own initializer write.
+	 * analysis. `false` for `var`/parameter/function/import/catch bindings (no
+	 * dead zone), unresolved uses, and the binding's own initializer write.
 	 */
 	readonly usedBeforeBound: boolean;
 };

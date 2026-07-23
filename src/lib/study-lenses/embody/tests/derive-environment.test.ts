@@ -1086,10 +1086,7 @@ describe('deriveEnvironment', () => {
 				expect(read && read.usedBeforeBound === false).toBe(true);
 			});
 
-			it('a class used before its binding is not flagged — the heuristic covers let and const only', () => {
-				// classes DO have a real temporal dead zone, but usedBeforeBound keys
-				// on kind (let/const), which a class binding never carries — a known,
-				// deliberate gap pinned here rather than left silent
+			it('a class used before its binding is flagged — classes have a temporal dead zone', () => {
 				const snippet = {
 					source: 'new C(); class C {}',
 					type: 'script',
@@ -1105,7 +1102,86 @@ describe('deriveEnvironment', () => {
 				const read =
 					cls &&
 					cls.references.find((reference) => reference.access === 'read');
+				expect(read && read.usedBeforeBound === true).toBe(true);
+			});
+
+			it('a class used after its declaration is not flagged', () => {
+				const snippet = {
+					source: 'class C {} new C();',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const cls =
+					stage &&
+					stage.ok &&
+					stage.value.root.variables.find((variable) => variable.name === 'C');
+				const read =
+					cls &&
+					cls.references.find((reference) => reference.access === 'read');
 				expect(read && read.usedBeforeBound === false).toBe(true);
+			});
+
+			it('a class self-referenced in its heritage clause is flagged — extends runs inside the TDZ', () => {
+				const snippet = {
+					source: 'class C extends C {}',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const classScope =
+					stage &&
+					stage.ok &&
+					stage.value.root.childScopes.find((scope) => scope.type === 'class');
+				const self =
+					classScope &&
+					classScope.variables.find((variable) => variable.name === 'C');
+				const read =
+					self &&
+					self.references.find((reference) => reference.access === 'read');
+				expect(read && read.usedBeforeBound === true).toBe(true);
+			});
+
+			it('a use immediately abutting the class end is not flagged — the class has finished evaluating', () => {
+				const snippet = { source: 'class C{}C', type: 'script' } as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const cls =
+					stage &&
+					stage.ok &&
+					stage.value.root.variables.find((variable) => variable.name === 'C');
+				const read =
+					cls &&
+					cls.references.find((reference) => reference.access === 'read');
+				expect(read && read.usedBeforeBound === false).toBe(true);
+			});
+
+			it('a class self-referenced in a method body is still flagged — the deliberate closure over-approximation', () => {
+				const snippet = {
+					source: 'const D = class Named { m() { return Named; } };',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const classScope =
+					stage &&
+					stage.ok &&
+					stage.value.root.childScopes.find((scope) => scope.type === 'class');
+				const self =
+					classScope &&
+					classScope.variables.find((variable) => variable.name === 'Named');
+				const read =
+					self &&
+					self.references.find((reference) => reference.access === 'read');
+				expect(read && read.usedBeforeBound === true).toBe(true);
 			});
 
 			it('an unresolved reference is never flagged — no binding to precede', () => {

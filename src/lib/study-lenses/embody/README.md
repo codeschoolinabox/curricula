@@ -148,8 +148,9 @@ this region owns.
   its node path into the source⇄tree binding, so a consumer reaches the
   identifier's place, neighbors, and children through the entwined index. One
   signal is embody's own rather than the analyzer's: whether a use falls before
-  its `let`/`const` binding is initialized — a static over-approximation of a
-  temporal-dead-zone access, offered as a convenience, never a runtime verdict.
+  its `let`/`const`/`class` binding is initialized — a static over-approximation
+  of a temporal-dead-zone access, offered as a convenience, never a runtime
+  verdict.
 - **phase accessibility** — the derived per-phase map: accessible, or barred
   with the carried upstream cause. (The package glossary owns its distinction
   from lens fit.)

@@ -391,18 +391,25 @@ function accessOf(foreign: ForeignReference): ScopeAccess {
 }
 
 // a static over-approximation of a temporal-dead-zone access: true when the use
-// sits, in source order, before its resolved let/const binding is initialized.
-// The boundary is the binding's declarator end (its own `node`, the
-// VariableDeclarator — never `parent`, the whole declaration). Bindings with no
-// let/const kind (var/parameter/function/class/import/catch) never flag; the
-// binding's own initializer write is excluded by `init`. Over-approximates
-// closures on purpose — a consumer needing soundness owns that analysis.
+// sits, in source order, before its resolved let/const/class binding is
+// initialized. The boundary is the binding node's end (its own `node`: the
+// VariableDeclarator for let/const, the class node for a class — never the whole
+// declaration). var/parameter/function/import/catch bindings have no dead zone
+// and never flag; the binding's own initializer write is excluded by `init`.
+// Over-approximates closures on purpose (a use in a method or later-called
+// function is flagged though it will not throw) — a consumer needing soundness
+// owns that analysis. Default-parameter TDZ (`(a = b, b) => …`) is out of scope:
+// a Parameter def's node is the whole function, not the parameter's own
+// position, so the positional model cannot express it.
 function usedBeforeBound(reference: BuildingReference): boolean {
 	if (reference.resolved === null || reference.init) {
 		return false;
 	}
 	const binding = reference.resolved.defs.find(
-		(definition) => definition.kind === 'let' || definition.kind === 'const',
+		(definition) =>
+			definition.kind === 'let' ||
+			definition.kind === 'const' ||
+			definition.type === 'ClassName',
 	);
 	if (binding === undefined) {
 		return false;
