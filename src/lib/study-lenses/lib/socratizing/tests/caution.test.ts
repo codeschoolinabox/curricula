@@ -59,6 +59,11 @@ describe('caution analyzers', () => {
 			);
 			expect(results).toHaveLength(0);
 		});
+
+		it('fires on assignment in a for-loop condition', () => {
+			const results = analyzeAll('for (; x = next(); ) { work(); }', analyze);
+			expect(results).toHaveLength(1);
+		});
 	});
 
 	describe('empty-block', () => {
@@ -69,8 +74,18 @@ describe('caution analyzers', () => {
 			expect(results).toHaveLength(1);
 		});
 
+		it('fires on an empty loop body', () => {
+			const results = analyzeAll('while (waiting) { }', analyze);
+			expect(results).toHaveLength(1);
+		});
+
 		it('does not fire on block with statements', () => {
 			const results = analyzeAll('if (true) { console.log("hi"); }', analyze);
+			expect(results).toHaveLength(0);
+		});
+
+		it('does not fire on an empty function body (an intentional stub)', () => {
+			const results = analyzeAll('function noop() {}', analyze);
 			expect(results).toHaveLength(0);
 		});
 	});

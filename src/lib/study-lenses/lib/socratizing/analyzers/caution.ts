@@ -37,6 +37,33 @@ function hasSideEffect(expression: Node): boolean {
 	);
 }
 
+const LOOP_STATEMENTS: ReadonlySet<string> = new Set([
+	'WhileStatement',
+	'DoWhileStatement',
+	'ForStatement',
+	'ForInStatement',
+	'ForOfStatement',
+]);
+
+/** Statements with a `.test` condition that an assignment could hide in. */
+const CONDITION_STATEMENTS: ReadonlySet<string> = new Set([
+	'IfStatement',
+	'WhileStatement',
+	'DoWhileStatement',
+	'ForStatement',
+]);
+
+/** The block-bodied clause of a control-flow statement, or null for anything else. */
+function controlFlowClause(node: Node): Node | null {
+	if (node.type === 'IfStatement') {
+		return getRecord(node).consequent as Node;
+	}
+	if (LOOP_STATEMENTS.has(node.type)) {
+		return getRecord(node).body as Node;
+	}
+	return null;
+}
+
 // ─── 1. assignment-in-condition ────────────────────────────
 
 function assignmentInCondition(
@@ -44,12 +71,12 @@ function assignmentInCondition(
 	_scope: ScopeUsage,
 	_source: string,
 ): CodeQuestion | null {
-	if (node.type !== 'IfStatement' && node.type !== 'WhileStatement') {
+	if (!CONDITION_STATEMENTS.has(node.type)) {
 		return null;
 	}
 
-	const test = getRecord(node).test as Node;
-	if (test.type !== 'AssignmentExpression') {
+	const test = getRecord(node).test as Node | null;
+	if (test?.type !== 'AssignmentExpression') {
 		return null;
 	}
 
@@ -90,12 +117,14 @@ function emptyBlock(
 	_scope: ScopeUsage,
 	_source: string,
 ): CodeQuestion | null {
-	if (node.type !== 'BlockStatement') {
+	// Only an empty CONTROL-FLOW body (if/loop) may signal missing code. A
+	// standalone `{}` or an empty function/arrow body is commonly an intentional
+	// stub — flagging those was noise, and mis-tagged as `controlFlow`.
+	const clause = controlFlowClause(node);
+	if (clause?.type !== 'BlockStatement') {
 		return null;
 	}
-
-	const body = getRecord(node).body as readonly Node[];
-	if (body.length > 0) {
+	if ((getRecord(clause).body as readonly Node[]).length > 0) {
 		return null;
 	}
 
@@ -105,8 +134,8 @@ function emptyBlock(
 		category: 'caution',
 		feature: 'controlFlow',
 		levels: ['syntax'],
-		location: extractLocation(node),
-		nodeType: node.type,
+		location: extractLocation(clause),
+		nodeType: clause.type,
 		context:
 			`This block is empty — it contains no statements. ` +
 			`An empty block may indicate missing **implementation** or intentional no-op.`,
