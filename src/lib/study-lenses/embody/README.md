@@ -147,10 +147,11 @@ this region owns.
   declaration — the `let`/`const`/`var` keyword. Every scope identifier carries
   its node path into the source⇄tree binding, so a consumer reaches the
   identifier's place, neighbors, and children through the entwined index. One
-  signal is embody's own rather than the analyzer's: whether a use falls before
-  its `let`/`const`/`class` binding is initialized — a static over-approximation
-  of a temporal-dead-zone access, offered as a convenience, never a runtime
-  verdict.
+  signal is embody's own rather than the analyzer's: how a use relates to its
+  `let`/`const`/`class` binding when it precedes initialization — evaluated
+  `eager` (at a fixed point) or `deferred` (in a function or field initializer)
+  — a static fact, offered as a convenience, from which a consumer draws any
+  runtime inference, never embody.
 - **phase accessibility** — the derived per-phase map: accessible, or barred
   with the carried upstream cause. (The package glossary owns its distinction
   from lens fit.)

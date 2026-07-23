@@ -224,6 +224,28 @@ export type ScopeDefinition = {
 export type ScopeAccess = 'read' | 'write' | 'readwrite';
 
 /**
+ * How a use of a name relates to its `let`/`const`/`class` binding when the use
+ * precedes the binding's initialization — the fact, never a throw verdict:
+ *
+ * - `'eager'` — read before initialization in a context evaluated unconditionally
+ *   when reached: an initializer or `for-of`/`for-in` iterable, a class `extends`
+ *   expression or computed member key, a static field or static block, or a
+ *   preceding statement. A guaranteed evaluation in the dead zone.
+ * - `'deferred'` — read before initialization in a context that runs later:
+ *   inside a function or an instance field initializer — so whether the read
+ *   truly lands in the dead zone is a reachability question the consumer owns (it
+ *   may never happen).
+ * - `false` — the use is at or after initialization, or the binding has no dead
+ *   zone at all.
+ *
+ * Both `'eager'` and `'deferred'` are truthy and `false` is falsy: `if
+ * (usedBeforeBound)` tests "is there any pre-initialization relationship." A
+ * consumer draws any "this throws" inference; embody only states the fact. See
+ * {@link ScopeReference.usedBeforeBound}.
+ */
+export type UsedBeforeBound = 'eager' | 'deferred' | false;
+
+/**
  * One use of a name. Every field but the last is projected faithfully from the
  * scope analysis: the identifier node, the variable it resolves to — or `null`
  * when it resolves to nothing (an undeclared global) — the scope the use is
@@ -250,21 +272,35 @@ export type ScopeReference = {
 	/** The `NodePath` of `identifier` in the source⇄tree binding — resolve via `entwined.byPath` for the identifier's neighbors and children. */
 	readonly path?: NodePath;
 	/**
-	 * DERIVED, not the analyzer's reading: `true` when this use's identifier is
-	 * positioned, in source order, before its resolved `let`/`const`/`class`
-	 * binding is initialized — `identifier.start` precedes the binding node's end
-	 * (the declarator for `let`/`const`, the class node for a `class`), computed
-	 * from character offsets (`.start`/`.end`, never `.loc`). A for-of/for-in loop
-	 * variable is also flagged when used inside its own iterable — that expression
-	 * is evaluated before the per-iteration binding, so it too runs in the dead
-	 * zone. A static over-approximation of a temporal-dead-zone access: a use
-	 * inside a function that runs *after* the declaration (a closure) is still
-	 * flagged though it will not throw — a consumer needing soundness applies its
-	 * own reachability analysis. `false` for `var`/parameter/function/import/catch
-	 * bindings (no dead zone), unresolved uses, and the binding's own initializer
-	 * write.
+	 * DERIVED, not the analyzer's reading: how this use relates to its resolved
+	 * `let`/`const`/`class` binding when the use precedes that binding's
+	 * initialization — a fact embody derives from the scope graph and source
+	 * positions, from which a consumer draws any "this throws" inference. See
+	 * {@link UsedBeforeBound}.
+	 *
+	 * A use precedes initialization when, for `let`/`const`, `identifier.start`
+	 * precedes the declarator's end, or the use sits in a `for-of`/`for-in`
+	 * iterable (evaluated before the per-iteration binding); and, for a `class`,
+	 * when the use precedes the `class` keyword or sits anywhere within the class's
+	 * own `extends` expression or a computed member key — the class binding
+	 * initializes after those, before any method, field, or static block runs, so
+	 * class-name uses in those bodies are not before initialization. The tier is
+	 * `'eager'` when that use is evaluated unconditionally at a fixed point and
+	 * `'deferred'` when it runs later — inside a function or an instance field
+	 * initializer (a static field or static block runs eagerly, at class
+	 * definition). The split is a structural fact — whether the path from the use
+	 * to its binding crosses a deferred-execution scope — never a reachability
+	 * judgment: a `'deferred'` read lands in the dead zone only if its context runs
+	 * there, which a consumer needing soundness decides, whereas `'eager'` is a
+	 * guaranteed dead-zone evaluation. Positions are character offsets
+	 * (`.start`/`.end`, never `.loc`).
+	 *
+	 * `false` for uses at or after initialization, unresolved uses, the binding's
+	 * own initializer write, and `var`/function/import/catch bindings (no dead
+	 * zone) — and parameters, whose inter-default-parameter TDZ embody does not
+	 * model.
 	 */
-	readonly usedBeforeBound: boolean;
+	readonly usedBeforeBound: UsedBeforeBound;
 };
 
 /**

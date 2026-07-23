@@ -12,6 +12,7 @@ import type {
 	NodePath,
 	ScopeAccess,
 	SnippetType,
+	UsedBeforeBound,
 } from './types.js';
 
 /**
@@ -227,7 +228,7 @@ type BuildingReference = {
 	from: BuildingScope;
 	access: ScopeAccess;
 	init: boolean;
-	usedBeforeBound: boolean;
+	usedBeforeBound: UsedBeforeBound;
 	writeExpr?: Node | null;
 	path?: NodePath;
 };
@@ -390,34 +391,129 @@ function accessOf(foreign: ForeignReference): ScopeAccess {
 	return foreign.isRead() ? 'readwrite' : 'write';
 }
 
-// a static over-approximation of a temporal-dead-zone access: true when the use
-// sits, in source order, before its resolved let/const/class binding is
-// initialized. The boundary is the binding node's end (its own `node`: the
-// VariableDeclarator for let/const, the class node for a class — never the whole
-// declaration), with one construct exception below. var/parameter/function/
-// import/catch bindings have no dead zone and never flag; the binding's own
-// initializer write is excluded by `init`. Over-approximates closures on purpose
-// (a use in a method or later-called function is flagged though it will not
-// throw) — a consumer needing soundness owns that analysis. Default-parameter
-// TDZ (`(a = b, b) => …`) is out of scope: a Parameter def's node is the whole
-// function, not the parameter's own position, so the model cannot express it.
-function usedBeforeBound(reference: BuildingReference): boolean {
-	if (reference.resolved === null || reference.init) {
+// how a use relates to its resolved let/const/class binding when the use precedes
+// the binding's initialization: `'eager'` (read at a fixed point), `'deferred'`
+// (run later — inside a function or an instance field initializer), or `false`.
+// A derived fact, not the analyzer's reading; a consumer draws any throw
+// inference. var/parameter/function/import/catch bindings have no dead zone; the
+// binding's own initializer write is excluded by `init`. Default-parameter TDZ
+// (`(a = b, b) => …`) is out of scope — a Parameter def's node is the whole
+// function, so the model cannot express the parameter's own position.
+function usedBeforeBound(reference: BuildingReference): UsedBeforeBound {
+	const variable = reference.resolved;
+	if (variable === null || reference.init) {
 		return false;
 	}
-	const binding = reference.resolved.defs.find(
+	const binding = variable.defs.find(
 		(definition) =>
 			definition.kind === 'let' ||
 			definition.kind === 'const' ||
 			definition.type === 'ClassName',
 	);
-	if (binding === undefined) {
+	if (
+		binding === undefined ||
+		!beforeInitialization(reference, binding, variable)
+	) {
 		return false;
 	}
-	if (reference.identifier.start < binding.node.end) {
+	return evaluatedEagerly(reference, variable) ? 'eager' : 'deferred';
+}
+
+// a use precedes its binding's initialization. For let/const the boundary is the
+// declarator's end (a for-of/for-in loop variable is initialized after its
+// iterable, so a use inside that iterable counts too). A class binding
+// initializes after its heritage and computed keys, before any method, field, or
+// static block runs — so a class-name use counts only before the `class` keyword
+// or inside the class's own extends expression or a computed key (recognized
+// positionally, so a closure nested there still counts).
+function beforeInitialization(
+	reference: BuildingReference,
+	binding: BuildingDefinition,
+	variable: BuildingVariable,
+): boolean {
+	const use = reference.identifier.start;
+	if (binding.type === 'ClassName') {
+		const cls = binding.node as AnyNode;
+		return use < cls.start || inClassDeadZone(use, cls);
+	}
+	return use < binding.node.end || usedInLoopHead(reference, variable);
+}
+
+// the heritage expression and every computed member key of a class run before the
+// class binding is initialized
+function inClassDeadZone(use: number, cls: AnyNode): boolean {
+	if (cls.type !== 'ClassDeclaration' && cls.type !== 'ClassExpression') {
+		return false;
+	}
+	if (within(use, cls.superClass)) {
 		return true;
 	}
-	return usedInLoopHead(reference, reference.resolved);
+	return cls.body.body.some(
+		(member) =>
+			(member.type === 'PropertyDefinition' ||
+				member.type === 'MethodDefinition') &&
+			member.computed &&
+			within(use, member.key),
+	);
+}
+
+function within(
+	offset: number,
+	node: { start: number; end: number } | null | undefined,
+): boolean {
+	return (
+		node !== null &&
+		node !== undefined &&
+		node.start <= offset &&
+		offset < node.end
+	);
+}
+
+// eager unless deferred: walking from the use to its binding's scope crosses a
+// function or an instance field initializer (a static field or static block runs
+// eagerly at class definition; only an instance field runs later, at
+// construction) — this also covers a closure the dead-zone region builds.
+function evaluatedEagerly(
+	reference: BuildingReference,
+	variable: BuildingVariable,
+): boolean {
+	for (
+		let scope: BuildingScope | null = reference.from;
+		scope !== null;
+		scope = scope.upper
+	) {
+		if (scope.variables.includes(variable)) {
+			return true;
+		}
+		if (isDeferredScope(scope)) {
+			return false;
+		}
+	}
+	return true;
+}
+
+function isDeferredScope(scope: BuildingScope): boolean {
+	if (scope.type === 'function') {
+		return true;
+	}
+	return scope.type === 'class-field-initializer' && !isStaticField(scope);
+}
+
+// a class-field-initializer scope's `block` sits inside its PropertyDefinition,
+// found by range within the enclosing class body; only a static field is eager
+function isStaticField(scope: BuildingScope): boolean {
+	const cls = scope.upper === null ? null : (scope.upper.block as AnyNode);
+	if (
+		cls === null ||
+		(cls.type !== 'ClassDeclaration' && cls.type !== 'ClassExpression')
+	) {
+		return false;
+	}
+	const field = cls.body.body.find(
+		(member) =>
+			member.start <= scope.block.start && scope.block.end <= member.end,
+	);
+	return field?.type === 'PropertyDefinition' && field.static;
 }
 
 // a for-of/for-in loop variable is initialized per iteration, only AFTER its

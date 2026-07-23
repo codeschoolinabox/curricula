@@ -962,7 +962,7 @@ describe('deriveEnvironment', () => {
 					stage.value.root.variables[0]?.references.find(
 						(reference) => reference.access === 'read',
 					);
-				expect(read && read.usedBeforeBound === true).toBe(true);
+				expect(read && read.usedBeforeBound === 'eager').toBe(true);
 			});
 
 			it('the initializer write itself is never flagged', () => {
@@ -992,7 +992,7 @@ describe('deriveEnvironment', () => {
 					stage.value.root.variables[0]?.references.find(
 						(reference) => reference.access === 'read',
 					);
-				expect(read && read.usedBeforeBound === true).toBe(true);
+				expect(read && read.usedBeforeBound === 'eager').toBe(true);
 			});
 
 			it('a later declarator reading an earlier binding is not flagged', () => {
@@ -1030,7 +1030,7 @@ describe('deriveEnvironment', () => {
 				expect(read && read.usedBeforeBound === false).toBe(true);
 			});
 
-			it('a closure use after the declaration is still flagged — the deliberate over-approximation', () => {
+			it('a closure use after the declaration is deferred — it runs when the function does', () => {
 				const snippet = {
 					source: 'function f() { return x; } let x = 1;',
 					type: 'script',
@@ -1045,7 +1045,7 @@ describe('deriveEnvironment', () => {
 					stage.value.root.variables.find((variable) => variable.name === 'x');
 				const read =
 					x && x.references.find((reference) => reference.access === 'read');
-				expect(read && read.usedBeforeBound === true).toBe(true);
+				expect(read && read.usedBeforeBound === 'deferred').toBe(true);
 			});
 
 			it('a read after the declaration is not flagged', () => {
@@ -1102,7 +1102,7 @@ describe('deriveEnvironment', () => {
 				const read =
 					cls &&
 					cls.references.find((reference) => reference.access === 'read');
-				expect(read && read.usedBeforeBound === true).toBe(true);
+				expect(read && read.usedBeforeBound === 'eager').toBe(true);
 			});
 
 			it('a class used after its declaration is not flagged', () => {
@@ -1143,7 +1143,7 @@ describe('deriveEnvironment', () => {
 				const read =
 					self &&
 					self.references.find((reference) => reference.access === 'read');
-				expect(read && read.usedBeforeBound === true).toBe(true);
+				expect(read && read.usedBeforeBound === 'eager').toBe(true);
 			});
 
 			it('a use immediately abutting the class end is not flagged — the class has finished evaluating', () => {
@@ -1162,7 +1162,7 @@ describe('deriveEnvironment', () => {
 				expect(read && read.usedBeforeBound === false).toBe(true);
 			});
 
-			it('a class self-referenced in a method body is still flagged — the deliberate closure over-approximation', () => {
+			it('a class self-referenced in a method body is not flagged — the class is bound before any method runs', () => {
 				const snippet = {
 					source: 'const D = class Named { m() { return Named; } };',
 					type: 'script',
@@ -1181,7 +1181,7 @@ describe('deriveEnvironment', () => {
 				const read =
 					self &&
 					self.references.find((reference) => reference.access === 'read');
-				expect(read && read.usedBeforeBound === true).toBe(true);
+				expect(read && read.usedBeforeBound === false).toBe(true);
 			});
 
 			it('an unresolved reference is never flagged — no binding to precede', () => {
@@ -1220,7 +1220,7 @@ describe('deriveEnvironment', () => {
 					loopVariable.references.find(
 						(reference) => reference.access === 'read',
 					);
-				expect(read && read.usedBeforeBound === true).toBe(true);
+				expect(read && read.usedBeforeBound === 'eager').toBe(true);
 			});
 
 			it('a for-in loop variable used in its own object expression is flagged', () => {
@@ -1244,7 +1244,7 @@ describe('deriveEnvironment', () => {
 					loopVariable.references.find(
 						(reference) => reference.access === 'read',
 					);
-				expect(read && read.usedBeforeBound === true).toBe(true);
+				expect(read && read.usedBeforeBound === 'eager').toBe(true);
 			});
 
 			it('an already-bound outer name used in a loop iterable is not flagged', () => {
@@ -1311,7 +1311,7 @@ describe('deriveEnvironment', () => {
 					loopVariable.references.find(
 						(reference) => reference.access === 'read',
 					);
-				expect(read && read.usedBeforeBound === true).toBe(true);
+				expect(read && read.usedBeforeBound === 'eager').toBe(true);
 			});
 
 			it('a bare-identifier iterable is flagged — the reference spans the whole iterable, start-inclusive', () => {
@@ -1335,7 +1335,7 @@ describe('deriveEnvironment', () => {
 					loopVariable.references.find(
 						(reference) => reference.access === 'read',
 					);
-				expect(read && read.usedBeforeBound === true).toBe(true);
+				expect(read && read.usedBeforeBound === 'eager').toBe(true);
 			});
 
 			it('an outer loop variable referenced in an inner loop iterable is not flagged — bound by the inner loop', () => {
@@ -1384,7 +1384,7 @@ describe('deriveEnvironment', () => {
 					loopVariable.references.find(
 						(reference) => reference.access === 'read',
 					);
-				expect(read && read.usedBeforeBound === true).toBe(true);
+				expect(read && read.usedBeforeBound === 'eager').toBe(true);
 			});
 
 			it('a destructuring default self-reference in the loop head is flagged — the positional path', () => {
@@ -1408,7 +1408,7 @@ describe('deriveEnvironment', () => {
 					loopVariable.references.find(
 						(reference) => reference.access === 'read',
 					);
-				expect(read && read.usedBeforeBound === true).toBe(true);
+				expect(read && read.usedBeforeBound === 'eager').toBe(true);
 			});
 
 			it('a for-await-of loop variable used in its own iterable is flagged', () => {
@@ -1434,10 +1434,10 @@ describe('deriveEnvironment', () => {
 					loopVariable.references.find(
 						(reference) => reference.access === 'read',
 					);
-				expect(read && read.usedBeforeBound === true).toBe(true);
+				expect(read && read.usedBeforeBound === 'eager').toBe(true);
 			});
 
-			it('a loop variable used in a closure the iterable builds is flagged — the closure over-approximation', () => {
+			it('a loop variable used in a closure the iterable builds is deferred', () => {
 				const snippet = {
 					source: 'for (const x of [].filter(() => x)) {}',
 					type: 'script',
@@ -1458,7 +1458,7 @@ describe('deriveEnvironment', () => {
 					loopVariable.references.find(
 						(reference) => reference.access === 'read',
 					);
-				expect(read && read.usedBeforeBound === true).toBe(true);
+				expect(read && read.usedBeforeBound === 'deferred').toBe(true);
 			});
 
 			it('an outer name used in a closure the iterable builds is not flagged — still already bound', () => {
@@ -1499,6 +1499,254 @@ describe('deriveEnvironment', () => {
 					variable &&
 					variable.references.find((reference) => reference.access === 'read');
 				expect(read && read.usedBeforeBound === false).toBe(true);
+			});
+
+			it('a class name in an instance field initializer is not flagged — the class is bound at construction', () => {
+				const snippet = {
+					source: 'class C { x = C; }',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const classScope =
+					stage &&
+					stage.ok &&
+					stage.value.root.childScopes.find((scope) => scope.type === 'class');
+				const self =
+					classScope &&
+					classScope.variables.find((variable) => variable.name === 'C');
+				const read =
+					self &&
+					self.references.find((reference) => reference.access === 'read');
+				expect(read && read.usedBeforeBound === false).toBe(true);
+			});
+
+			it('a class name in a static field is not flagged — static runs after the binding is bound', () => {
+				const snippet = {
+					source: 'class C { static x = C; }',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const classScope =
+					stage &&
+					stage.ok &&
+					stage.value.root.childScopes.find((scope) => scope.type === 'class');
+				const self =
+					classScope &&
+					classScope.variables.find((variable) => variable.name === 'C');
+				const read =
+					self &&
+					self.references.find((reference) => reference.access === 'read');
+				expect(read && read.usedBeforeBound === false).toBe(true);
+			});
+
+			it('a class name in a static block is not flagged — the binding is bound before it runs', () => {
+				const snippet = {
+					source: 'class C { static { C; } }',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const classScope =
+					stage &&
+					stage.ok &&
+					stage.value.root.childScopes.find((scope) => scope.type === 'class');
+				const self =
+					classScope &&
+					classScope.variables.find((variable) => variable.name === 'C');
+				const read =
+					self &&
+					self.references.find((reference) => reference.access === 'read');
+				expect(read && read.usedBeforeBound === false).toBe(true);
+			});
+
+			it('an outer binding used in a static field is eager — static fields run at class definition', () => {
+				const snippet = {
+					source: 'class C { static x = z; } let z = 1;',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const outer =
+					stage &&
+					stage.ok &&
+					stage.value.root.variables.find((variable) => variable.name === 'z');
+				const read =
+					outer &&
+					outer.references.find((reference) => reference.access === 'read');
+				expect(read && read.usedBeforeBound === 'eager').toBe(true);
+			});
+
+			it('an outer binding used in a static block is eager', () => {
+				const snippet = {
+					source: 'class C { static { z; } } let z = 1;',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const outer =
+					stage &&
+					stage.ok &&
+					stage.value.root.variables.find((variable) => variable.name === 'z');
+				const read =
+					outer &&
+					outer.references.find((reference) => reference.access === 'read');
+				expect(read && read.usedBeforeBound === 'eager').toBe(true);
+			});
+
+			it('an outer binding used in an instance field initializer is deferred — reachability-owned, here it never throws', () => {
+				const snippet = {
+					source: 'class C { x = z; } let z = 1; new C();',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const outer =
+					stage &&
+					stage.ok &&
+					stage.value.root.variables.find((variable) => variable.name === 'z');
+				const read =
+					outer &&
+					outer.references.find((reference) => reference.access === 'read');
+				expect(read && read.usedBeforeBound === 'deferred').toBe(true);
+			});
+
+			it('an outer binding used in a method body is deferred', () => {
+				const snippet = {
+					source: 'class C { m() { return z; } } let z = 1;',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const outer =
+					stage &&
+					stage.ok &&
+					stage.value.root.variables.find((variable) => variable.name === 'z');
+				const read =
+					outer &&
+					outer.references.find((reference) => reference.access === 'read');
+				expect(read && read.usedBeforeBound === 'deferred').toBe(true);
+			});
+
+			it('a class name in a closure inside its own heritage is deferred — recognized through the nesting', () => {
+				const snippet = {
+					source: 'class C extends (() => C)() {}',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const classScope =
+					stage &&
+					stage.ok &&
+					stage.value.root.childScopes.find((scope) => scope.type === 'class');
+				const self =
+					classScope &&
+					classScope.variables.find((variable) => variable.name === 'C');
+				const read =
+					self &&
+					self.references.find((reference) => reference.access === 'read');
+				expect(read && read.usedBeforeBound === 'deferred').toBe(true);
+			});
+
+			it('a class self-referenced in a computed member key is eager — computed keys evaluate eagerly', () => {
+				const snippet = {
+					source: 'class C { [C] = 1; }',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const classScope =
+					stage &&
+					stage.ok &&
+					stage.value.root.childScopes.find((scope) => scope.type === 'class');
+				const self =
+					classScope &&
+					classScope.variables.find((variable) => variable.name === 'C');
+				const read =
+					self &&
+					self.references.find((reference) => reference.access === 'read');
+				expect(read && read.usedBeforeBound === 'eager').toBe(true);
+			});
+
+			it('a default parameter self-reference is not flagged — inter-parameter TDZ is out of scope', () => {
+				const snippet = {
+					source: 'function f(a = a) {}',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const parameter =
+					stage &&
+					stage.ok &&
+					stage.value.root.childScopes[0]?.variables.find(
+						(variable) => variable.name === 'a',
+					);
+				const read =
+					parameter &&
+					parameter.references.find((reference) => reference.access === 'read');
+				expect(read && read.usedBeforeBound === false).toBe(true);
+			});
+
+			it('a class name in a closure inside a computed key is deferred', () => {
+				const snippet = {
+					source: 'class C { [(() => C)()] = 1; }',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const classScope =
+					stage &&
+					stage.ok &&
+					stage.value.root.childScopes.find((scope) => scope.type === 'class');
+				const self =
+					classScope &&
+					classScope.variables.find((variable) => variable.name === 'C');
+				const read =
+					self &&
+					self.references.find((reference) => reference.access === 'read');
+				expect(read && read.usedBeforeBound === 'deferred').toBe(true);
+			});
+
+			it('an outer binding used in a static method body is deferred', () => {
+				const snippet = {
+					source: 'class C { static m() { return z; } } let z = 1;',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const outer =
+					stage &&
+					stage.ok &&
+					stage.value.root.variables.find((variable) => variable.name === 'z');
+				const read =
+					outer &&
+					outer.references.find((reference) => reference.access === 'read');
+				expect(read && read.usedBeforeBound === 'deferred').toBe(true);
 			});
 		});
 
