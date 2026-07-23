@@ -40,7 +40,14 @@ const statementTypes: ReadonlySet<string> = new Set([
 	'VariableDeclaration',
 	'IfStatement',
 	'WhileStatement',
+	'DoWhileStatement',
+	'ForStatement',
+	'ForInStatement',
 	'ForOfStatement',
+	'SwitchStatement',
+	'TryStatement',
+	'ReturnStatement',
+	'ThrowStatement',
 ]);
 
 /**

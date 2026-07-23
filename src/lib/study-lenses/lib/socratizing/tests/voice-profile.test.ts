@@ -49,6 +49,22 @@ describe('voice-profile analyzer', () => {
 			const results = analyzeProgram('const a = 1;\nconst b = 2;', analyze);
 			expect(results).toHaveLength(0);
 		});
+
+		it('counts classic loop/switch statements toward the threshold', () => {
+			// A for-loop program (ForStatement + let init + body call = 3) must
+			// fire; before the statementTypes fix, for/switch/try were uncounted
+			// and the whole voice-profile question was silently suppressed.
+			const forProgram = analyzeProgram(
+				'for (let i = 0; i < 3; i = i + 1) {\n  console.log(i);\n}',
+				analyze,
+			);
+			expect(forProgram).toHaveLength(1);
+			const switchProgram = analyzeProgram(
+				'switch (n) {\n  case 1:\n    a();\n    break;\n  case 2:\n    b();\n    break;\n}',
+				analyze,
+			);
+			expect(switchProgram).toHaveLength(1);
+		});
 	});
 
 	describe('traits — the scope-derived naming metric', () => {
