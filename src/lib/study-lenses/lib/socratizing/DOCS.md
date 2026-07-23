@@ -1,64 +1,339 @@
 # lib/socratizing — Architecture & Decisions
 
-## Why this module exists
+## Why questions, not corrections
 
-Traditional linting says what is wrong and how to fix it; this engine asks a
-question instead. Learning gain is highest at low-information levels (the
-Feedback Ladder, EDM 2024), and a question — unlike a hint — cannot be clicked
-through for the answer (hint-abuse resistance). Reframing "let vs const" from
-right/wrong to "you made a choice here, did you notice?" is the curriculum's
-stance: comprehension before production, where most content is programs learners
-study, not programs they write. This leaf is the pure question source; a
-consuming lens handles escalation, fading, and any grading. See
-[`./README.md`](./README.md) for the catalog, registers, and framework tags.
+Traditional linting tells you what's wrong and how to fix it. This module asks
+questions instead. The research basis:
 
-## Pedagogical grounding
+- **Feedback Ladder** (EDM 2024): Learning gain diminishes as more information
+  is revealed. Questions operate at low-information levels where learning is
+  highest.
+- **Reasoning Trajectories** (Al-Hossami 2025): Socratic questions lead to
+  cognitive dissonance — a contradiction between what the learner assumes and
+  what the code does — which is the mechanism for belief updating.
+- **Hint abuse resistance**: Students can click through traditional hints to get
+  answers without thinking. Questions require active engagement.
 
-> Restored from the pre-migration architecture docs — the research and design
-> intent behind the analyzer categories and the voice profile. The engine's
-> shape changed (offset-native, realm-free, facts-based); this rationale did
-> not.
+The test for every question: does it make the reader think, or does it give them
+the answer? "Could you combine these checks with `&&`?" fails — it names the
+fix. "How many different paths can this nested structure produce?" passes — it
+invites tracing.
 
-- **Why questions, not corrections — the mechanism.** Learning gain is highest
-  at low-information levels of the **Feedback Ladder** (EDM 2024), and a
-  question, unlike a hint, cannot be clicked through for the answer (hint-abuse
-  resistance). The deeper mechanism is **Reasoning Trajectories** (Al-Hossami
-  2025): a Socratic question induces _cognitive dissonance_ — a contradiction
-  between what the learner assumes and what the code actually does — which is
-  the lever for belief updating. And **expertise reversal** (Kalyuga et al.
-  2003): scaffolding becomes actively _harmful_ for advancing learners, so each
-  question's stable `id` lets a learning environment track engaged categories
-  and suppress the ones a learner has already mastered.
+## Why micro-decisions, not just "hints"
 
-- **The category spectrum (why six categories, grouped three ways).** The
-  categories run from pure style to almost-certainly-wrong, in three pairs:
-  **voice** and **easter-egg** are about _expression_ (finding your voice,
-  exploring the language); **clarity** and **consistency** are about
-  _communication_ (readable, coherent code); **caution** and **trap** are about
-  _correctness_ (patterns that are likely mistakes). Easter-eggs get their own
-  category rather than folding into voice because they involve undocumented
-  features — though most (labels, `void`, the comma operator) are fundamentally
-  voice choices. `eval` is the exception: creative voice or dangerous mistake
-  depending on intent.
+A hint implies something is wrong. A micro-decision implies a choice was made.
+Many micro-decisions are between equally valid alternatives — `let` vs `const`
+when a variable is never reassigned, a ternary vs an if/else for a simple
+conditional. Neither is wrong. The question is whether the choice was
+intentional.
 
-- **The voice profile — five dimensions, and the research behind them.** The
-  program-level `voice-profile` analyzer characterizes a program's overall
-  "personality" along five dimensions: **Verbose ↔ Terse** (naming, line
-  length), **Modern ↔ Traditional** (idiom adoption — template literals, `??`,
-  `?.`), **Linear ↔ Structured** (control-flow depth), **Consistent ↔ Eclectic**
-  (variation across choices), **Expressive ↔ Mechanical** (communication
-  intent). Research basis: **Caliskan-Islam et al. (2015)** — even solving the
-  same problem, programmers' code is stylistically distinguishable via AST
-  features, naming, and control-flow preferences; **Stegeman et al.
-  (2014/2016)** — a code quality rubric (decomposition, expression, naming,
-  layout, flow, idiom) that maps directly to voice; **Buse & Weimer (2010)** —
-  naming, expression structure, and organization predict readability, and those
-  are the features measured.
+This reframes coding from "right/wrong" to "you made a choice here, did you
+notice?" — which is the pedagogical stance of the Welcome to Programming
+curriculum.
 
-- **JeJ adaptation.** The catalog deliberately omits question classes JeJ never
-  produces — function-declaration/parameter/arrow questions, `switch`/`case`,
-  `do…while`, `for…in`, and array/object-literal questions — because the
-  language level does not admit those constructs.
+## Why two kinds of questions share one type
+
+Micro-decision and comprehension questions serve different skill stages but are
+deliberately the same `CodeQuestion` type. The reasons:
+
+1. **Same pedagogical contract** — both are Socratic (questions, not
+   corrections), both carry BLOCK/PBSI/audience metadata, both are frozen
+   immutable values.
+2. **Same filtering** — consumers filter by `kind` just like any other config
+   dimension; the filtering logic has no special cases.
+3. **Shared infrastructure** — same factory (`create-code-question.ts`), same
+   freeze, same result type.
+4. **Unified display** — a learning environment can render both kinds in a
+   single panel, interleaved by source location.
+
+The `kind` field is the only distinction. It's primarily a filtering handle —
+the questions themselves are what matter.
+
+## Why study mode is the larger use case
+
+The curriculum follows a comprehension-before-production pedagogy: Read → Trace
+→ Describe → Modify → Write. Most of the content consists of programs learners
+study, not programs they write. Questions on study programs help learners
+understand program voice before developing their own.
+
+This also applies to Chapter 4's AI integration: when AI writes code for a
+learner, questions become the tool for taking ownership of code you didn't write
+yourself.
+
+All questions use observational framing ("What effect does this choice have…")
+rather than authorial-intent framing ("What made you choose…") to work in both
+modes.
+
+## The three pedagogical framework tags
+
+### BLOCK model
+
+Each question is tagged with one or more BLOCK cells (Schulte 2008). This serves
+two purposes:
+
+1. **For the learning environment**: Filter questions by BLOCK cell to target
+   specific comprehension areas. If a learner struggles with `atom × execution`
+   (what single statements do at runtime), show more questions from that cell.
+2. **For the curriculum team**: Audit question coverage across all 12 cells.
+   Gaps indicate areas where the tool doesn't yet support comprehension.
+
+The consumer-facing `levels` field linearizes the 12-cell matrix into five named
+levels: `syntax`, `semantics`, `connections`, `goals`, `userExperience`. The raw
+`block` cells are retained in each question for auditing. Consumers filter by
+`levels`; the curriculum team audits by `block`.
+
+### PBSI vocabulary
+
+Context strings use Purpose, Behavior, Strategy, and Implementation naturally.
+This is not labeling — it's vocabulary practice. When a learner reads "This
+**implementation** choice affects how other developers read the code," they're
+reinforcing their understanding of what "implementation" means in the PBSI
+framework.
+
+The distinction matters most for strategy-level micro-decisions like input
+validation approaches (while-head vs boolean-flag vs while-true-break), where
+the question explicitly names the strategy level.
+
+### Rhetorical audiences
+
+Tagging each question with affected audiences (developers, computer, users)
+reinforces the curriculum's core framework: source code communicates with three
+audiences simultaneously.
+
+Questions reference audiences where natural: "Does this log communicate
+something to the **user**, or is it for **developers** debugging?" This
+distinction helps learners see that the same line of code can serve different
+audiences.
+
+## Category design
+
+The six categories form a spectrum:
+
+```text
+voice --- clarity --- consistency --- caution --- trap --- easter-egg
+  |                                                           |
+  pure style                                          exploration
+```
+
+**voice** and **easter-egg** are about expression — finding your voice,
+exploring the language. **clarity** and **consistency** are about communication
+— making code readable and coherent. **caution** and **trap** are about
+correctness — patterns that are likely mistakes.
+
+Easter eggs get their own category rather than being folded into voice because
+they involve undocumented features. The learner is exploring territory not
+covered by the JeJ reference, which is qualitatively different from choosing
+between two documented alternatives. However, most easter eggs (labels, void,
+comma operator) are fundamentally voice choices — they offer unique expressive
+possibilities. `eval` is the exception: it can be creative voice or dangerous
+mistake depending on intent.
+
+## Voice profile
+
+The voice profile is a program-level analyzer that characterizes the overall
+"personality" of a program along five dimensions:
+
+1. **Verbose ↔ Terse** — naming, line length, expression complexity
+2. **Modern ↔ Traditional** — JavaScript idiom adoption (template literals,
+   `??`, `?.`)
+3. **Linear ↔ Structured** — control flow organization (nesting depth)
+4. **Consistent ↔ Eclectic** — variation across choices
+5. **Expressive ↔ Mechanical** — communication intent
+
+Research basis: Caliskan-Islam et al. (2015) showed that even when programmers
+solve the same problem, their code is stylistically distinguishable via AST
+features, naming patterns, and control flow preferences. Stegeman et al.
+(2014/2016) developed a code quality rubric with dimensions (decomposition,
+expression, naming, layout, flow, idiom) that map directly to voice. Buse &
+Weimer (2010) showed that identifier naming, expression structure, and program
+organization predict readability — these are the features we measure.
+
+The voice profile produces a macro-level question with `kind: 'micro-decision'`
+and questions like "Reading this program as a whole, what words would you use to
+describe its character?" This invites reflection on the aggregate effect of many
+small choices.
+
+## Analyzer architecture
+
+### Point analyzers vs program analyzers
+
+**Point analyzers** fire on individual AST nodes during the tree walk. They
+detect single-node or small-cluster patterns: a `let` that's never reassigned, a
+ternary expression, an assignment in a condition. They receive the current node,
+the scope declaration view, and the source text.
+
+**Program analyzers** fire once after the walk completes. They detect
+whole-program patterns: inconsistency in declaration style, mixed string
+construction methods, the voice profile. They receive the full AST, the scope
+declaration view, and source text.
+
+Both return the same `CodeQuestion` type. The entry combines their results into
+a single flat array.
+
+### Error isolation
+
+Each analyzer is called inside a try-catch. If one analyzer throws, it's skipped
+and its error is collected into the `analyzerErrors` field of the result. The
+remaining analyzers continue. This keeps the function pure — no `console.warn`
+side effects — while giving consumers visibility into what failed when needed.
+
+`analyzerErrors` appears only on the `{ ok: true }` branch, never on
+`{ ok: false }`. Refusals occur before any analyzers run, so there are no
+analyzer errors to collect in that case.
+
+### Why one file per category
+
+Related analyzers share detection logic (e.g., all voice analyzers need to
+inspect declaration kinds, all caution analyzers check specific AST patterns).
+Grouping them by category keeps related code together while maintaining a
+manageable number of files. Each file exports the category's analyzers as named
+functions with a single default export that returns the combined array.
+
+## Prior art integration
+
+The comprehension and micro-decision analyzers descend from three earlier
+codebases; recording the lineage keeps the JeJ adaptation rationale legible.
+
+### From `ask/` (open-ended questions)
+
+The `ask/` module provided the config pattern (feature + level boolean toggles),
+the levels 1–5 system (mapped to `syntax`/`semantics`/`connections`/`goals`/
+`userExperience`), and ~50 comprehension question templates. The comprehension
+analyzers here are adapted from those templates.
+
+Key adaptations for JeJ:
+
+- **Dropped**: all function-declaration questions (JeJ has no function
+  declarations, parameters, or arrow functions), switch/case, do-while, for-in,
+  array/object literals.
+- **Adapted**: function-call questions → method-call questions
+  (`.toLowerCase()`, `.includes()`, `console.log()` etc.).
+- **Kept**: variable questions, operator questions, if/while/for-of questions,
+  data literal questions, user interaction questions.
+
+Level mapping from `ask/` to this module:
+
+- Level 0 (some variable questions) → `syntax`
+- Level 1 → `syntax`
+- Level 2 → `semantics`
+- Level 3 → `connections`
+- Level 4 → `goals`
+- Level 5 → `userExperience`
+
+### From `qlcjs`
+
+The `qlcjs` MCQ generator demonstrated the prepare/generate architecture and the
+pattern of question preparers returning lazy generators. This module uses a
+simpler eager model (analyzers return results directly), but the
+category-as-file-grouping pattern and the type discipline around question shapes
+are inherited from qlcjs.
+
+### From `hinting--prior-art-for-inspiration/`
+
+The prior warning collector flagged beginner mistakes. Every detection from the
+prior art appears here as a caution, trap, or easter-egg question, reframed as a
+question rather than a warning. The AST walking pattern and the node-type
+dispatch approach are adapted from `collect-warnings.ts`.
+
+## Filtering architecture
+
+Filtering runs post-generation. All analyzers run on the full AST/scope first,
+then `filterQuestions(questions, config)` applies the config.
+
+The reason: some questions about specific spans need context from outside those
+spans. For example, the `let-vs-const` question asks "is this `let` ever
+reassigned?" — which requires seeing the full scope, not just the declaration
+line. Filtering at walk time would deny analyzers the context they need.
+
+### Filtering logic in `filterQuestions`
+
+`CodeQuestion` fields fall into two categories for filtering:
+
+**Single-value fields** (`kind`, `feature`, `category`): the question's single
+value must appear in the enabled set. Example: if `features.controlFlow` is
+`true` and `features.variables` is `false`, only questions whose `feature` is
+`'controlFlow'` (or any other enabled feature) pass.
+
+**Multi-value fields** (`levels`, `audiences`): the question's array must
+_intersect_ the enabled set — at least one of the question's values must match
+an enabled toggle.
+
+```text
+For each CodeQuestion:
+  1. kind filter (single-value):
+     question.kind must be enabled in config.kind
+  2. feature filter (single-value):
+     question.feature must be enabled in config.features
+  3. levels filter (multi-value):
+     question.levels must intersect at least one enabled level in config.levels
+  4. audiences filter (multi-value):
+     question.audiences must intersect at least one enabled audience in config.audiences
+  5. categories filter (single-value):
+     question.category must be enabled in config.categories
+     NOTE: map question.category 'easter-egg' -> config.categories.easterEgg
+  6. range filter:
+     question.location must overlap the configured offset range
+     (half-open [start, end); any overlap, not full containment)
+     NOTE: program-level questions (e.g. voice profile) span the full source and will
+     overlap any range — this is intentional. Use feature filtering to exclude them.
+  7. register filter (prunes individual entries within a CodeQuestion):
+     remove entries from question.questions whose register is disabled
+     -> if ALL entries are pruned, remove the entire CodeQuestion
+
+After filtering:
+  8. Sort by source location (ascending start offset, tie-broken by ascending end offset)
+  9. Cap at config.count if config.count > 0
+```
+
+**AND between groups**: all applicable filters must pass independently. **OR
+within groups**: within a multi-value field, any match is sufficient.
+
+**All-false group**: if a consumer explicitly disables all toggles in a group
+(e.g., `features: { variables: false, data: false, … }`), NO questions pass that
+group — the result is an empty array. This is different from _omitting_ the
+group entirely (which means "no filter, include all"). An all-false group is a
+valid way to request zero questions.
+
+**Omitted group**: if a config key is absent (e.g., `config.levels` is
+`undefined`), that filter is skipped entirely — all questions pass it.
+Individual omitted toggles within a group default to `true`.
+
+## Facts and the refusal arm (the Stage-2 change)
+
+The entry reads source, AST, and scope from the embodiment's **facts** — it
+never parses or re-derives scope. This replaced the prior architecture's
+`embodiment.status.parsed` / `embodiment.parse.ast.acornNode` reads and the
+vendored `buildScope(ast)`; `parse-source.ts` (and its `Parse*` result types)
+are gone with it — a latent double-parse removed.
+
+```text
+facts.source.value                          — the source string for analyzers
+facts.ast    (narrow .ok → .value)          — the acorn Program for the walk
+facts.environment (narrow .ok → .value)     — the scope environment
+  -> deriveScopeUsage(environment.value)     — lib/scoping's declaration view
+```
+
+**Two required stages, one refusal arm.** Both `facts.ast` and
+`facts.environment` must succeed. If **either** failed — an unparseable program
+(`ast`), or a guarded embody defect on an otherwise-parsed program
+(`environment`) — the result is `{ ok: false, error: { message, offset? } }`
+drawn from whichever stage's `StageCause` (message, plus the parser's source
+offset when it reports one). The environment-defect branch is rare (a valid AST
+almost always scopes) but typed, not swallowed. This is the honest contract the
+old single-`ast === null` trigger could not express.
+
+**The offset flip.** The prior architecture anchored `location` to a 1-based
+line/column range and threaded `source` into `extractLocation`. Greenfield
+parses with offsets but not `.loc`, so `location` is now `node.start`/`node.end`
+zero-indexed half-open `[start, end)` offsets, `extractLocation` needs only the
+node, and `MicroDecisionConfig.range` is an offset span. Sorting is by start
+offset, tie-broken by end offset (was start line then start column).
+
+**`string-construction` fires twice.** One registered `voice` analyzer emits the
+same question `id` from a `TemplateLiteral` branch and a `+` `BinaryExpression`
+branch. A consumer that tracks reveal/mastery state must key on the per-mount
+item index, not the question `id` — the id is constant-per-analyzer, not
+per-occurrence.
 
 ## Architectural sketch
 
@@ -68,42 +343,25 @@ consuming lens handles escalation, fading, and any grading. See
 ### Execution phases
 
 `analyze-micro-decisions.ts` is the single public export; the analyzer files and
-helpers below are its implementation.
+helpers are its implementation.
 
-1. **Read the facts** (sync) — take the source string, narrow the AST stage and
-   the scope-environment stage, and build the declaration view (`lib/scoping`'s
-   `deriveScopeUsage`) up front. If **either** required stage failed, return a
-   refusal carrying that stage's message (and the parser's source offset when it
-   reports one). Input: an embodiment. Output: the source, the AST, and the
-   declaration view — or a typed refusal.
-
+1. **Read the facts** (sync) — take the source string, narrow the AST and
+   scope-environment stages, and build the declaration view (`deriveScopeUsage`)
+   up front. If either required stage failed, return a typed refusal.
 2. **Walk the point analyzers** (pure) — one depth-first pass over the AST
    (child nodes from a pure-acorn walker); at each node every point analyzer
-   runs, returning at most one question. Input: the AST, the declaration view,
-   and source. Output: the point questions.
-
+   runs, returning at most one question.
 3. **Run the program analyzers** (pure) — each fires once on the whole AST for
-   whole-program patterns (mixed declaration style, the voice profile). Input:
-   the AST, the declaration view, and source. Output: the program questions,
-   merged with the point questions into one flat list.
+   whole-program patterns (mixed declaration style, the voice profile), merged
+   with the point questions into one flat list.
+4. **Filter** (pure) — post-generation, apply the config (see § Filtering
+   architecture).
+5. **Freeze** (pure) — deep-freeze the result envelope into a frozen
+   `MicroDecisionResult`.
 
-4. **Filter** (pure) — post-generation, apply the config: AND across groups, OR
-   within a group; prune registers within a question (dropping a question whose
-   registers are all pruned); keep questions whose offset `location` overlaps
-   the range (half-open `[start, end)`); sort by ascending start offset,
-   tie-broken by ascending end offset; cap at `count`. Input: all questions and
-   the config. Output: the selected questions.
-
-   > **Omitted vs all-false.** Omitting a config group means "no filter —
-   > include all"; a group with every toggle set `false` means "nothing passes
-   > this group" and yields an empty result. They are not the same: an all-false
-   > group is a valid way to request zero questions. Single-value fields
-   > (`kind`, `features`, `categories`) pass when the question's value is
-   > enabled; multi-value fields (`levels`, `audiences`) pass on any
-   > intersection with the enabled set.
-
-5. **Freeze** (pure) — deep-freeze the result envelope. Input: selected
-   questions (+ any analyzer errors). Output: a frozen `MicroDecisionResult`.
+The walk builds its questions/errors in two private accumulators that only leave
+as the readonly result — an O(n) tree flatten rather than an O(n²) per-level
+merge.
 
 ### Data flow
 
@@ -132,72 +390,15 @@ flowchart TD
     ENV -.->|"environment.ok = false"| FAIL
 ```
 
-### Structural constraints
+## What this module deliberately does NOT do
 
-- **Reads facts, never parses.** Source, AST, and scope come from the
-  embodiment; the engine never re-parses or re-derives scope.
-- **Two required stages, one refusal arm.** Both `facts.ast` and
-  `facts.environment` must succeed (scope is built up front because filtering is
-  post-generation). If either failed, the result is `ok: false` with that
-  stage's cause — the environment-defect branch is rare (a valid AST almost
-  always scopes) but typed, not swallowed.
-- **Error isolation.** Every analyzer runs inside a try/catch; a thrower is
-  skipped and recorded in `analyzerErrors` (present only on the `ok: true`
-  branch). No `console.warn`, no crash — one bad analyzer never sinks the run.
-- **Post-generation filtering.** All analyzers see the full AST and scope before
-  any filter applies — a walk-time filter would deny `let-vs-const` the
-  whole-scope context it needs to know a `let` is never reassigned.
-- **Offset-native locations.** A question's `location` is `[start, end)`
-  character offsets from `node.start`/`node.end`; there is no line/column
-  anchoring, and `location` inlines its shape (no range-type name).
-- **Pure on frozen inputs.** Analyzers walk raw acorn nodes and write no
-  synthetic fields; the whole engine runs on deep-frozen facts and returns a
-  frozen result.
-
-### Out of scope
-
-- **Validation** — the caller confirms the facts; this engine assumes a parsed
-  JeJ program.
-- **Grading / mastery / verdicts** — a consuming lens's job; this engine only
-  asks.
-- **Formatting and execution** — static analysis only.
-- **Fix suggestions** — it asks questions, never names the change.
-- **State** — pure function; the environment manages fading and escalation.
-
-## Decisions
-
-- **Questions, not corrections.** The test for every prompt: does it make the
-  reader think, or hand them the answer? "Could you combine these with `&&`?"
-  fails (it names the fix); "How many paths can this structure produce?" passes.
-  A micro-decision also implies a _choice was made_ — many are between equally
-  valid alternatives — reframing code from right/wrong to intentional/unnoticed.
-
-- **Two kinds share one `CodeQuestion` type.** `micro-decision` and
-  `comprehension` serve different skill stages but are one frozen type: same
-  Socratic contract, same BLOCK/PBSI/audience metadata, same factory and freeze,
-  and one filtering path (`kind` is just another config dimension). A lens can
-  interleave both in one panel by source order.
-
-- **The offset flip (the Stage-2 change).** The prior architecture anchored
-  `location` to a line/column range and threaded `source` into
-  `extractLocation`. Greenfield parses with offsets but not `.loc`, so
-  `location` is now `node.start`/`node.end` offsets, `extractLocation` needs
-  only the node, and `MicroDecisionConfig.range` is an offset span (a half-open
-  `[start, end)`, not 1-based inclusive lines) — a documented contract shift
-  with no live consumer yet.
-
-- **Scope via `lib/scoping`.** The five scope-reading analyzers consume
-  `ScopeUsage.allDeclarations` from `deriveScopeUsage(facts.environment.value)`
-  instead of the old vendored `buildScope(ast)`. One scope truth, computed once
-  by embody; the engine carries no scope machinery. (Depends on the scoping
-  leaf's enriched-`ScopeReference` prerequisite — see `../scoping/DOCS.md`.)
-
-- **`parse-source.ts` is gone.** The entry reads `facts.ast`/`facts.source`
-  rather than parsing, so the standalone Acorn parse helper (and its self-test,
-  and the `Parse*` result types) are dropped — a latent double-parse removed.
-
-- **The `string-construction` id fires twice.** One registered `voice` analyzer
-  emits the same question `id` from a `TemplateLiteral` branch and a `+`
-  `BinaryExpression` branch. A consumer that tracks reveal/mastery state must
-  key on the per-mount item index, not the question `id` — the id is
-  constant-per-analyzer, not per-occurrence.
+- **No validation** — the caller confirms the facts; this module assumes valid
+  JeJ.
+- **No formatting** — static analysis only.
+- **No execution** — this is static analysis only.
+- **No fix suggestions** — it asks questions, never tells the learner what to
+  change.
+- **No side effects** — refusals return `{ ok: false }`, analyzer errors go into
+  `analyzerErrors`, no `console.warn`.
+- **No state** — pure function, no tracking of past interactions. The learning
+  environment manages fading and escalation.
