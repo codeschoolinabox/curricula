@@ -114,6 +114,36 @@ describe('analyzeMicroDecisions — integration', () => {
 			expect(result.analyzerErrors).toBeUndefined();
 		});
 
+		it('degrades gracefully: a throwing analyzer becomes an analyzerError, not a crash', () => {
+			// A malformed-but-typed VariableDeclaration node (no `declarations`)
+			// makes the variable analyzers throw when they iterate it — the run
+			// must survive and collect the error, not propagate it.
+			const base = embody('const x = 1;');
+			if (!base.facts.ast.ok) {
+				throw new Error('setup: ast did not derive');
+			}
+			const malformed: Embodiment = {
+				...base,
+				facts: {
+					...base.facts,
+					ast: {
+						ok: true,
+						value: {
+							...base.facts.ast.value,
+							body: [{ type: 'VariableDeclaration', start: 0, end: 5 }],
+						} as typeof base.facts.ast.value,
+					},
+				},
+			};
+			const result = analyzeMicroDecisions(malformed);
+			expect(result.ok).toBe(true);
+			if (!result.ok) {
+				throw new Error('expected ok:true');
+			}
+			expect(result.analyzerErrors).toBeDefined();
+			expect(result.analyzerErrors?.length ?? 0).toBeGreaterThan(0);
+		});
+
 		it('runs program analyzers (voice-profile on a 3-statement program)', () => {
 			// Exercises the AST → program-analyzer arrow, which every point-only
 			// fixture leaves unwitnessed.
