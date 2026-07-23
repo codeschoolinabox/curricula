@@ -126,6 +126,7 @@ describe('let-vs-const analyzer', () => {
 
 		it('question is frozen', () => {
 			const results = analyzeAll('let x = 5;');
+			expect(results).toHaveLength(1); // guard: Object.isFrozen(undefined) is true
 			expect(Object.isFrozen(results[0])).toBe(true);
 		});
 	});
@@ -150,6 +151,24 @@ describe('let-vs-const analyzer', () => {
 			// The let in for-of is never reassigned — should fire
 			expect(results).toHaveLength(1);
 			expect(results[0].context).toContain('item');
+		});
+
+		it('fires only on the outer let under same-name shadowing (identity, not name)', () => {
+			// The inner `x` IS reassigned (x = 20), so it must NOT be flagged
+			// const-eligible; only the never-reassigned outer `x` fires. A name-only
+			// resolver wrongly fired on the inner too and advised `const x = 10; x =
+			// 20;` — a runtime TypeError. Regression for the grievous bug.
+			const results = analyzeAll('let x = 5;\n{\n  let x = 10;\n  x = 20;\n}');
+			expect(results).toHaveLength(1);
+			expect(results[0].location.start).toBe(0); // the OUTER declaration
+		});
+
+		it('fires on the inner never-reassigned let, not the outer reassigned one', () => {
+			// Reciprocal: outer `x` is reassigned, inner `x` is not — only the inner
+			// fires. A name-only resolver emitted nothing (found the outer, w>0).
+			const results = analyzeAll('let x = 1;\nx = 2;\n{\n  let x = 3;\n}');
+			expect(results).toHaveLength(1);
+			expect(results[0].location.start).toBeGreaterThan(0); // the INNER declaration
 		});
 	});
 });

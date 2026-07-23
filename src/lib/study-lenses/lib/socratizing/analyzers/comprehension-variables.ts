@@ -132,6 +132,12 @@ function howVariableChanges(
 		return null;
 	}
 
+	// LIMITATION (contract-bounded, surfaced to maintainers): `left` is a USE of
+	// the variable, but the flat ScopeUsage only carries declaration nodes — it
+	// cannot resolve a use to its binding. So this matches by name alone and can
+	// mis-attribute under shadowing / fire on an undeclared-global assignment
+	// that shares a name. A correct fix needs ScopeUsage to expose reference
+	// resolution (an enhancement that also serves the Stage-3 quizzing engine).
 	const decl = scope.allDeclarations.find((d) => d.name === name);
 	if (!decl) {
 		return null;
@@ -175,14 +181,21 @@ function variableRole(
 
 	const declarators = getRecord(node).declarations as readonly Node[];
 	for (const declarator of declarators) {
-		const name = getIdentifierName(getRecord(declarator).id as Node);
+		const id = getRecord(declarator).id as Node;
+		const name = getIdentifierName(id);
 		if (!name) {
 			continue;
 		}
 
-		const decl = scope.allDeclarations.find((d) => d.name === name);
+		// Match by node identity, not name: a shadowing inner binding must not
+		// inherit an outer same-name binding's write count (which would frame a
+		// never-reassigned variable as a mutating "role"). `continue` (not
+		// `return`) so a later declarator in `let a, b` is still considered.
+		const decl = scope.allDeclarations.find(
+			(d) => d.name === name && d.node === id,
+		);
 		if (!decl || decl.writeCount === 0) {
-			return null;
+			continue;
 		}
 
 		return createCodeQuestion({

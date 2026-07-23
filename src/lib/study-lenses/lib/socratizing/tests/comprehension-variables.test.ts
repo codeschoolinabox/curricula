@@ -150,5 +150,26 @@ describe('comprehension variable analyzers', () => {
 			expect(results[0].category).toBe('clarity');
 			expect(results[0].feature).toBe('variables');
 		});
+
+		it('reports a reassigned later declarator in a multi-declarator statement', () => {
+			// `a` is never reassigned; `b` is. The old `return null` on `a` aborted
+			// the whole statement and missed `b`'s role — `continue` reaches it.
+			const results = analyzeAll('let a = 1, b = 2;\nb = 3;', analyze);
+			expect(results).toHaveLength(1);
+			expect(results[0].context).toContain('b');
+		});
+
+		it('does not frame a shadowed never-reassigned binding as a mutating role (identity, not name)', () => {
+			// Outer `count` is reassigned; the inner shadow is a constant 99. A
+			// name-only resolver fired on the inner too, telling the learner the
+			// fixed value "is reassigned ... plays a specific role". Only the outer
+			// fires. Regression for the grievous shadowing bug.
+			const results = analyzeAll(
+				'let count = 0;\ncount = count + 1;\n{\n  let count = 99;\n}',
+				analyze,
+			);
+			expect(results).toHaveLength(1);
+			expect(results[0].location.start).toBe(0); // the OUTER declaration
+		});
 	});
 });

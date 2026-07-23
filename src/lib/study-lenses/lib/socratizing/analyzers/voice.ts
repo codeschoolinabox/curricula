@@ -64,8 +64,12 @@ function letVsConst(
 			continue;
 		}
 
+		// Match the binding at THIS declaration site by node identity, not by
+		// name: a shadowing inner `let x` must not resolve to an outer `x`'s
+		// write count. Suggesting `const` for a reassigned shadowed `let` would
+		// make the learner's code throw at runtime.
 		const declInfo = scope.allDeclarations.find(
-			(d) => d.name === name && d.kind === 'let',
+			(d) => d.name === name && d.node === id && d.kind === 'let',
 		);
 
 		if (!declInfo || declInfo.writeCount > 0) {
