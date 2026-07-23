@@ -12,6 +12,54 @@ study, not programs they write. This leaf is the pure question source; a
 consuming lens handles escalation, fading, and any grading. See
 [`./README.md`](./README.md) for the catalog, registers, and framework tags.
 
+## Pedagogical grounding
+
+> Restored from the pre-migration architecture docs — the research and design
+> intent behind the analyzer categories and the voice profile. The engine's
+> shape changed (offset-native, realm-free, facts-based); this rationale did
+> not.
+
+- **Why questions, not corrections — the mechanism.** Learning gain is highest
+  at low-information levels of the **Feedback Ladder** (EDM 2024), and a
+  question, unlike a hint, cannot be clicked through for the answer (hint-abuse
+  resistance). The deeper mechanism is **Reasoning Trajectories** (Al-Hossami
+  2025): a Socratic question induces _cognitive dissonance_ — a contradiction
+  between what the learner assumes and what the code actually does — which is
+  the lever for belief updating. And **expertise reversal** (Kalyuga et al.
+  2003): scaffolding becomes actively _harmful_ for advancing learners, so each
+  question's stable `id` lets a learning environment track engaged categories
+  and suppress the ones a learner has already mastered.
+
+- **The category spectrum (why six categories, grouped three ways).** The
+  categories run from pure style to almost-certainly-wrong, in three pairs:
+  **voice** and **easter-egg** are about _expression_ (finding your voice,
+  exploring the language); **clarity** and **consistency** are about
+  _communication_ (readable, coherent code); **caution** and **trap** are about
+  _correctness_ (patterns that are likely mistakes). Easter-eggs get their own
+  category rather than folding into voice because they involve undocumented
+  features — though most (labels, `void`, the comma operator) are fundamentally
+  voice choices. `eval` is the exception: creative voice or dangerous mistake
+  depending on intent.
+
+- **The voice profile — five dimensions, and the research behind them.** The
+  program-level `voice-profile` analyzer characterizes a program's overall
+  "personality" along five dimensions: **Verbose ↔ Terse** (naming, line
+  length), **Modern ↔ Traditional** (idiom adoption — template literals, `??`,
+  `?.`), **Linear ↔ Structured** (control-flow depth), **Consistent ↔ Eclectic**
+  (variation across choices), **Expressive ↔ Mechanical** (communication
+  intent). Research basis: **Caliskan-Islam et al. (2015)** — even solving the
+  same problem, programmers' code is stylistically distinguishable via AST
+  features, naming, and control-flow preferences; **Stegeman et al.
+  (2014/2016)** — a code quality rubric (decomposition, expression, naming,
+  layout, flow, idiom) that maps directly to voice; **Buse & Weimer (2010)** —
+  naming, expression structure, and organization predict readability, and those
+  are the features measured.
+
+- **JeJ adaptation.** The catalog deliberately omits question classes JeJ never
+  produces — function-declaration/parameter/arrow questions, `switch`/`case`,
+  `do…while`, `for…in`, and array/object-literal questions — because the
+  language level does not admit those constructs.
+
 ## Architectural sketch
 
 > Written Phase 0, before implementation. The Refactor step is held against this
@@ -45,6 +93,14 @@ helpers below are its implementation.
    the range (half-open `[start, end)`); sort by ascending start offset,
    tie-broken by ascending end offset; cap at `count`. Input: all questions and
    the config. Output: the selected questions.
+
+   > **Omitted vs all-false.** Omitting a config group means "no filter —
+   > include all"; a group with every toggle set `false` means "nothing passes
+   > this group" and yields an empty result. They are not the same: an all-false
+   > group is a valid way to request zero questions. Single-value fields
+   > (`kind`, `features`, `categories`) pass when the question's value is
+   > enabled; multi-value fields (`levels`, `audiences`) pass on any
+   > intersection with the enabled set.
 
 5. **Freeze** (pure) — deep-freeze the result envelope. Input: selected
    questions (+ any analyzer errors). Output: a frozen `MicroDecisionResult`.
