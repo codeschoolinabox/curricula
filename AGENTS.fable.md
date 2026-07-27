@@ -491,6 +491,46 @@ After a mid-task summarization: read the plan file's RESUMPTION POINT, re-read
 the relevant module docs, and verify understanding with the user before
 resuming.
 
+### Handoff agency — the agent owns the call
+
+A cold-start handoff is not something the human must remember to request: **the
+agent watches for the boundary and calls it.** You are always allowed to prepare
+a handoff and request a fresh session when your context has become unhelpfully
+cluttered. Prepare the handoff, validate it context-free (invariant 12), then
+say plainly: "it's time to hand off — `/clear` (or a fresh session) and launch
+with this file." An agent cannot clear its own session; making the swap two
+keystrokes for the human is the agent's job. The fan-out already gives every
+worker a fresh context — this rule governs the orchestrator's own lifetime.
+
+**Reassess at each of these moments** (one ledger line each):
+
+- a wave or increment-cluster closes;
+- a discussion/decision round changes a contract — each mid-flight
+  reconciliation adds a standing ruling the context must carry from then on;
+- a phase boundary coincides with a human gate — the human is already paying
+  attention there, so a handoff costs them nothing extra. Prefer these points.
+
+**The tests — hand off when any fires:**
+
+- **Design ahead → always fresh.** A Phase-0/DDD unit surfacing mid-execution
+  goes to a fresh session unconditionally: the author of the current shape is
+  structurally anchored to it, and design wants the widest, cleanest attention —
+  the same bias-correction the ARs apply to code.
+- **Two-to-three absorbed reconciliations → hand off at the next gate.** Held
+  rulings accumulate linearly; reliability does not.
+- **A learned lesson repeats as an error → hand off at the next clean
+  boundary.** Same-mistake-twice is the context-past-optimum tell (observed in
+  the field: a gate-ordering slip recurring hours after its lesson was adopted).
+- Session-limit interruptions and mounting summarization risk weigh the same
+  direction.
+
+**A handoff carries its own operating instructions**, not just state: which
+model runs the next phase (design tracks the strongest available tier; post-gate
+TDD is proven on a cheaper one), which phase it opens in, which gates the human
+will hold, and the specific things to watch for. A handoff replaces the
+orchestrator, never the workers — same-campaign execution waves keep riding
+fresh worker subagents.
+
 ---
 
 ## Orchestrated delegation
