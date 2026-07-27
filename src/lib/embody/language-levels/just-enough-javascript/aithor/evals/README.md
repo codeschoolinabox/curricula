@@ -134,11 +134,11 @@ The contract is [`./types.ts`](./types.ts); this is the vocabulary.
   **tight** variant (small `include`, low `lines`/`complexity` — where
   attempt-bound load shows) and a **loose** variant (empty `include` = full JEJ,
   no bounds) → ~6–8 base CaseSpecs, plus curated-seeded **vary** cases (the
-  hard-tier holds over a seed — vary is exclusive with raw constraint fields
-  and yields the same curated-path metrics; the soft tier is never measured).
-  At least one tight curated case is `expectedSatisfiable: false`, so the
-  report can separate "refused something satisfiable" (a signal) from "refused
-  the unsatisfiable" (a contract **pass**).
+  hard-tier holds over a seed — vary is exclusive with raw constraint fields and
+  yields the same curated-path metrics; the soft tier is never measured). At
+  least one tight curated case is `expectedSatisfiable: false`, so the report
+  can separate "refused something satisfiable" (a signal) from "refused the
+  unsatisfiable" (a contract **pass**).
 - **Samples** — `SAMPLES_PER_CASE = 5` for v1. Generation is non-reproducible,
   so a rate needs replication; 5 keeps a full GPU run to single-digit minutes.
 - **Aggregation** — rates report raw `n/d`; the harness prints **no** confidence
