@@ -185,8 +185,8 @@ flowchart TD
 
 - **Cross-mount persistence** of the arrangement, feedback, or history.
 - **URL state** — orchestrator domain, not a per-lens surface.
-- **Program mutation** — the lens is a read-only view; the single writer is the
-  editor.
+- **Program mutation** — the lens is a read-only view; the source changes only
+  through the orchestrator's one edit intake.
 - **Code execution** — other lenses' work.
 - **Seeded reproducible shuffles, live feedback, keyboard reordering, touch
   drag** — see README § Future direction.

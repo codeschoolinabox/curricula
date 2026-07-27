@@ -66,6 +66,7 @@ of levels, verdicts, or postures.
   region's mechanics.
 - [`DOCS.md`](./DOCS.md) — this surface's architectural sketch.
 - [`types.ts`](./types.ts) — the ordered-entry and intent contracts.
-- Siblings: [`../editor/`](../editor/README.md) is the single writer the study
-  layer re-derives from; [`../lib/honoring/`](../lib/honoring/README.md) decides
-  how a focus request mounts.
+- Siblings: [`../editor/`](../editor/README.md) is where the source the study
+  layer re-derives from is authored;
+  [`../lib/honoring/`](../lib/honoring/README.md) decides how a focus request
+  mounts.

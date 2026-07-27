@@ -33,14 +33,17 @@ validates or repairs it (no re-derivation, in either direction).
 ## The three surface classes
 
 Class 1, editor-based: never masked while mounted — and structurally absent
-during a lens excursion, when the ways back to it are class 2. Class 2,
-meta-level controls — the selector, the strict toggle, the snippet-type toggle,
-the guide, the edit-return button: never masked, because each can itself restore
+during any excursion, when the ways back to it are class 2. Class 2, meta-level
+controls — the selector, the strict toggle, the snippet-type toggle, the guide,
+the edit-return button: never masked, because each can itself restore
 conformance or the path to it (and help is never withheld). Class 3, everything
-else — the study panel and its lenses: covered under strict while the code is
-out of level, as an inert overlay; a covered surface keeps its state beneath it.
-The class of a surface is a static fact of what the surface IS — nothing derives
-it at runtime.
+else — the study panel and its lenses, and the generator view together with the
+button that opens it: covered under strict while the code is out of level, as an
+inert overlay; a covered surface keeps its state beneath it. The class of a
+surface is a static fact of what the surface IS — nothing derives it at runtime,
+and it does not follow from which container the surface renders in: the Generate
+code button sits outside every maskable container and still carries class 3 at
+its own element.
 
 ## Navigation
 

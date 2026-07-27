@@ -63,13 +63,13 @@ flowchart TD
   `data-editor-host` and `data-editor-error` together. Tests and consumers
   anchor on these, never on markup shape.
 - **Never masked, not always mounted** — surface class 1 while mounted: no
-  posture masks the editor, and a lens excursion unmounts it entirely. The
-  region owns the live source that re-seeds the next mount, and the snippet prop
-  (the seed) is value-stable for a mount's lifetime — the external-write channel
-  exists for mount-race recovery, never routine content pushes (a per-render
-  live prop would let the sync effect clobber a keystroke landing in the
-  commit-to-effect window, and the own-write would never echo — a silent
-  divergence).
+  posture masks the editor, and any excursion — a lens, or the generator —
+  unmounts it entirely. The region owns the live source that re-seeds the next
+  mount, and the snippet prop (the seed) is value-stable for a mount's lifetime
+  — the external-write channel exists for mount-race recovery, never routine
+  content pushes (a per-render live prop would let the sync effect clobber a
+  keystroke landing in the commit-to-effect window, and the own-write would
+  never echo — a silent divergence).
 
 ## Out of scope
 

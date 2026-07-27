@@ -135,7 +135,7 @@ gutter, documentation on hover, and — only if you opt into **strict** — a
 guardrail that masks the study surfaces until the code returns to the level. The
 default posture is **warn**: nothing is ever blocked, warnings simply appear
 where you edit. Even under strict, the path to conformance stays alive: the
-editor while it is mounted, the never-masked way back to it during a lens
+editor while it is mounted, the never-masked way back to it during any
 excursion, and every control whose change can itself restore conformance. And a
 typo never reads as a level violation — while code doesn't parse, the level
 honestly says it cannot judge.
@@ -243,8 +243,8 @@ Every study utility — whatever its kind — declares the same envelope: a name
 applicability predicate, a main operation — and, for the lens kind, optional
 configuration, lifecycle phase(s), and recommendations. Kinds differ in the
 shared shape of the main operation. There are two kinds: **lenses** (components
-that render views of the embodiment) and **evaluators** (headless generators
-that execute code and emit events). Kind contracts carry no level fields — a
+that render views of the embodiment) and **evaluators** (headless runners that
+execute code and emit events). Kind contracts carry no level fields — a
 utility's level affinity, if any, lives privately inside its applicability and
 main operation.
 
@@ -277,7 +277,7 @@ current snippet type is checked the same way as code conformance.
 
 Enforcement is **mask, not filter**: fit computation never changes when a level
 is active — under strict, the mask covers what fit produced. The editor is never
-masked while mounted — during a lens excursion the way back to it stays alive
+masked while mounted — during an excursion the way back to it stays alive
 instead — and so does every control whose change can itself restore conformance
 (the selector, the strict toggle, the snippet-type toggle, the guide, the Edit
 code button). While the code doesn't parse, the level's verdict is undetermined:
@@ -287,12 +287,14 @@ stay available.
 ### The orchestrator
 
 The orchestrator is the one component the host mounts. It renders: one surface
-pane holding the editor — the home base, the single writer of the program's
-source, from which everything re-derives per settle — or the one open lens in
-its place; and above the pane, the five-phase study panel, the permanent level
-selector, the selected-level gutter, the strict toggle, the snippet-type toggle,
-and an embedded guide. It is also the composition root: it owns a default roster
-of lenses and appends whatever the host injects.
+pane holding the editor — the home base, where the program's source is authored
+and from which everything re-derives per settle — or, in its place, one
+excursion: the open lens, or the generator, an AI-authoring view whose accepted
+program lands back through the region's own edit intake; and above the pane, the
+five-phase study panel, the permanent level selector, the selected-level gutter,
+the strict toggle, the snippet-type toggle, and an embedded guide. It is also
+the composition root: it owns a default roster of lenses and appends whatever
+the host injects.
 
 ## Glossary — the ubiquitous language
 
@@ -344,9 +346,12 @@ documents, and UI copy use them consistently.
   pedagogical view of the embodiment. Lenses are read-only views — they never
   mutate the embodiment. A lens that declares no phase is panel-excluded: it
   mounts only by explicit request.
-- **evaluator** — the headless generator kind of study utility: its main
-  operation executes code and emits events. Evaluators are consumed by lenses
-  and never rendered themselves; a lens is never an evaluator.
+- **evaluator** — the headless runner kind of study utility: its main operation
+  executes code and emits events. Evaluators are consumed by lenses and never
+  rendered themselves; a lens is never an evaluator. (Deliberately not "the
+  generator kind": **generator** names the orchestrator's AI-authoring pane
+  occupant, and one word for two unrelated things is the homonym this glossary
+  exists to prevent.)
 - **refusal-as-data** — the main-operation convention: on input it cannot serve,
   a utility returns a structured refusal result, never a throw. The refusal
   shape is part of each kind's shared contract.
@@ -366,8 +371,16 @@ documents, and UI copy use them consistently.
   is selected". Its selector entry is a label, not a level; generic JavaScript
   editing applies.
 - **settle** — the moment the buffer is re-embodied: the debounced pause after
-  typing, or a type toggle's or lens-open's immediate absorb; **per-settle**
-  means once per re-embodiment.
+  typing, or an immediate absorb — a type toggle's, an excursion-open's, or an
+  accepted generated program's; **per-settle** means once per re-embodiment.
+- **excursion** — the span from opening a surface over the editor (a lens, or
+  the generator) to returning to it. The program, its type, the level, and the
+  posture are frozen for the excursion; whatever the surface started dies with
+  its mount.
+- **edit intake** — the one seam through which the program's source changes. The
+  editor raises into it per keystroke, and an accepted generated program reaches
+  it too — raised as intent, committed by the orchestrator. No surface writes
+  the source itself.
 - **snippet type** — whether the program is treated as a script or a module. The
   host chooses the initial type; the learner can toggle it for the session.
 - **strict / warn** — the two enforcement postures for a selected language
@@ -392,7 +405,7 @@ flowchart TD
     orch["orchestrator — renders everything:<br/>editor · phase panel · level UI"]
     emb["embodiment factory —<br/>facts + fit + accessibility"]
     lenses["lenses 🔬 — pedagogical views,<br/>offered per phase"]
-    evaluators["evaluators — headless generators"]
+    evaluators["evaluators — headless runners"]
     levels["language levels 🧭 —<br/>passive libraries, JEJ first"]
     host -->|"snippet + configuration"| orch
     orch -->|"embodies per settle"| emb
@@ -403,14 +416,14 @@ flowchart TD
     orch -.->|"consults"| levels
 ```
 
-| Region                    | What it is                                                                                                                           |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| **orchestrator**          | the one mounted component: the editor (single writer of source), the five-phase panel, the level UI, the guide; the composition root |
-| **lenses**                | the component kind of study utility — views attached to phases by fit                                                                |
-| **evaluators**            | the generator kind — headless program execution, driven by evaluation-phase lenses                                                   |
-| **language levels**       | passive consultable libraries — validator, docs, editor support, model builders; JEJ is the first                                    |
-| **embodiment factory**    | turns a snippet into the frozen embodiment, level-blind                                                                              |
-| **shared leaf libraries** | parsing, the execution engine, configuration merging                                                                                 |
+| Region                    | What it is                                                                                                                                |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| **orchestrator**          | the one mounted component: the editor (where the source is authored), the five-phase panel, the level UI, the guide; the composition root |
+| **lenses**                | the component kind of study utility — views attached to phases by fit                                                                     |
+| **evaluators**            | the runner kind — headless program execution, driven by evaluation-phase lenses                                                           |
+| **language levels**       | passive consultable libraries — validator, docs, editor support, model builders; JEJ is the first                                         |
+| **embodiment factory**    | turns a snippet into the frozen embodiment, level-blind                                                                                   |
+| **shared leaf libraries** | parsing, the execution engine, configuration merging                                                                                      |
 
 ## Navigation
 

@@ -62,6 +62,7 @@ export default function createEventBus(): EventBus {
 		'posture-toggled': Set<EventListener<'posture-toggled'>>;
 		'type-toggled': Set<EventListener<'type-toggled'>>;
 		'lens-opened': Set<EventListener<'lens-opened'>>;
+		'generator-opened': Set<EventListener<'generator-opened'>>;
 		settled: Set<EventListener<'settled'>>;
 	};
 	const listenersByEvent: ListenerStore = {
@@ -69,12 +70,13 @@ export default function createEventBus(): EventBus {
 		'posture-toggled': new Set(),
 		'type-toggled': new Set(),
 		'lens-opened': new Set(),
+		'generator-opened': new Set(),
 		settled: new Set(),
 	};
 
 	// WHY the `as Set<EventListener<Name>>` casts below: tsc cannot relate the
 	// generic `Name` to the store's indexed access — it widens the lookup to
-	// the union over all five events and rejects the call (TS2769/TS2345).
+	// the union over every event and rejects the call (TS2769/TS2345).
 	// The cast restores the per-event association the ListenerStore shape
 	// guarantees by construction.
 	const bus: EventBus = {
@@ -126,7 +128,7 @@ export default function createEventBus(): EventBus {
 		},
 		// Clear phase — every listener drops; a test-isolation affordance.
 		// Sweeping the store's values (not a hand-kept list) keeps the
-		// taxonomy's one source of truth: a sixth event would clear for free
+		// taxonomy's one source of truth: a newly added event clears for free
 		// instead of compiling while silently leaking its listeners.
 		clear(): void {
 			for (const listeners of Object.values(listenersByEvent)) {

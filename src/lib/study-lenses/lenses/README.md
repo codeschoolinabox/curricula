@@ -21,8 +21,8 @@ lenses/
   <name>/         one directory per lens — annotate/, blanks/, quiz/, …
 ```
 
-The editor is not a lens — it belongs to the orchestrator, the single writer of
-the program's source.
+The editor is not a lens — it belongs to the orchestrator, which owns the one
+edit intake the program's source changes through.
 
 ## The kind contract
 

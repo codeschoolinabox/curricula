@@ -1,3 +1,5 @@
+// cspell:ignore unrepresentable
+
 /**
  * The orchestrator's contract: the package's public host surface, plus the
  * region-internal shared vocabulary — the fit marks the level surfaces
@@ -37,7 +39,7 @@ export type StudyLensesProperties = {
 	 * The program source. This prop is the source text alone — the
 	 * glossary's snippet is this prop together with `type`. Mount-time
 	 * only: the instrument seeds from it once, and a later change is
-	 * ignored — the editor is the single writer thereafter.
+	 * ignored — the region's own edit intake is the only writer thereafter.
 	 */
 	readonly snippet: string;
 	/**
@@ -138,8 +140,8 @@ export type UseSettledSnippetInput = {
  * What the settle hook yields: the settled snippet every derivation keys on,
  * the per-keystroke edit intake the editor's edit events feed, and the swap
  * model's two seams — the live-source read (the buffer survives editor
- * unmounts in the hook, not the editor) and the immediate flush a lens-open
- * absorbs pending keystrokes with.
+ * unmounts in the hook, not the editor) and the immediate flush an opening
+ * excursion absorbs pending keystrokes with.
  */
 export type UseSettledSnippetResult = {
 	readonly settled: SettledSnippet;
@@ -183,13 +185,16 @@ export type StudyDerivation = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * What occupies the surface pane — the editor home base XOR one open lens,
- * never both. The editor arm carries its remount seed (captured at dispose —
+ * What occupies the surface pane — the editor home base XOR one excursion,
+ * never two. The editor arm carries its remount seed (captured at dispose —
  * the mount fallback seeds from the snippet prop — and value-stable for that
- * mount; the buffer itself lives in the settle hook's live-source slot). The lens arm carries everything a mount needs frozen
- * for its lifetime: the open lens's name, the settled pair it opened over
- * (the coherence anchor the render invariants compare against), and the
- * opened layer's overrides (a recommendation-opened mount's proposal).
+ * mount; the buffer itself lives in the settle hook's live-source slot). The
+ * lens arm carries everything a mount needs frozen for its lifetime: the open
+ * lens's name, the settled pair it opened over (the coherence anchor the
+ * render invariants compare against), and the opened layer's overrides (a
+ * recommendation-opened mount's proposal). The generator arm carries only the
+ * settled pair it opened over — one field doing the same two jobs as the lens
+ * arm's: the seed the view remixes, and the coherence anchor.
  *
  * @remarks
  * Deliberately not named "Surface" — that word belongs to the mask's surface
@@ -198,6 +203,11 @@ export type StudyDerivation = {
  * "overrides outliving the open choice" unrepresentable. The region glossary
  * pins the pane-occupant term; ./DOCS.md § The render projection pins the
  * two-DOM-slot rule the one visual pane abstracts over.
+ *
+ * `openedAt` carries the same name on both excursion arms deliberately: it is
+ * the same fact, and the pane's coherence assert reads it through
+ * `Extract<PaneOccupant, { mode: 'lens' | 'generator' }>` — which only
+ * type-checks while the field name is shared.
  */
 export type PaneOccupant =
 	| {
@@ -209,4 +219,8 @@ export type PaneOccupant =
 			readonly openLensName: string;
 			readonly openedAt: SettledSnippet;
 			readonly opened: ConfigOverridesByLens;
+	  }
+	| {
+			readonly mode: 'generator';
+			readonly openedAt: SettledSnippet;
 	  };

@@ -1,4 +1,4 @@
-<!-- cspell:ignore renderable affordances -->
+<!-- cspell:ignore renderable affordances unrepresentable keyspace -->
 
 # orchestrate — Architecture & Decisions
 
@@ -42,17 +42,25 @@ abstraction; each rendered surface and derivation library zooms in below.
    recommendations render here, through the mask. Input: the study derivation +
    composed study configuration. Output: the rendered study environment.
 
-4. **Interact** (async at the edges) — each control re-enters its own phase:
-   source edits re-enter Derive at the next settle (editor mode only — the
-   editor is absent during a lens excursion); opening a lens flushes any pending
-   settle and replaces the editor with the lens over the frozen embodiment and
-   its resolved config; closing — the strip's none entry, the Edit code button,
-   or the orphan defense — remounts the editor seeded from the live source; the
-   snippet-type toggle, level selection, and the posture toggle each dispose the
-   open lens first, then re-enter their own phase (the type toggle re-enters
-   Derive immediately; level, posture, and configuration tweaks re-enter through
-   the composed study configuration with no re-parse). Input: the rendered
-   environment + learner intent. Output: a new settle or a re-render.
+4. **Interact** (async at the edges) — each control re-enters its own phase.
+   Input: the rendered environment + learner intent. Output: a new settle or a
+   re-render.
+   - **Editing** — source edits re-enter Derive at the next settle. Editor mode
+     only: the editor is absent during any excursion.
+   - **Opening an excursion** — a lens or the generator flushes any pending
+     settle and replaces the editor; the lens mounts over the frozen embodiment
+     and its resolved config, the generator over the same frozen pair as its
+     seed.
+   - **Closing one** — the strip's none entry, the Edit code button, the orphan
+     defense, or the generator's own accept and discard remount the editor,
+     seeded from the live source.
+   - **Accepting a candidate** — re-enters Derive immediately through the edit
+     intake, batched with the dispose that ends its excursion.
+   - **Committing derivation context** — the snippet-type toggle, level
+     selection, and the posture toggle each dispose the open excursion first,
+     then re-enter their own phase: the type toggle re-enters Derive
+     immediately; level, posture, and configuration tweaks re-enter through the
+     composed study configuration with no re-parse.
 
 ## Data flow
 
@@ -65,7 +73,8 @@ flowchart TD
     VER["level verdicts<br/>(one memoized validate per settle + level)"]
     MARKS["assessments by level<br/>(mark + cause, per settle)"]
     RECS["ranked recommendations<br/>(fitting lenses' proposals, per settle)"]
-    SUR["rendered study environment<br/>(surface pane: editor XOR open lens · panel · level UI · mask)"]
+    SUR["rendered study environment<br/>(surface pane: editor XOR one excursion — open lens or generator ·<br/>panel · level UI · mask)"]
+    CANDIDATE["candidate program<br/>(the accept-eligible arm of one generative ask)"]
     PROPS -->|"join rosters at mount, loud collisions"| CFG
     PROPS -->|"initial snippet + type, seeds the editor"| SNP
     PROPS -->|"initial-focus request, honored at mount"| SUR
@@ -81,8 +90,10 @@ flowchart TD
     EMB -->|"the fitting lenses' proposals, collected + ranked"| RECS
     RECS -->|"rendered through the mask; opening carries the proposal's overrides into the cascade"| SUR
     CFG -->|"posture + resolved configs"| SUR
-    SUR -->|"edits debounced to the settle · type toggle and lens-open settle immediately"| SNP
-    SUR -->|"level · posture · config tweaks, session-scoped (the open-lens choice lives in the pane occupant)"| CFG
+    SUR -->|"edits debounced to the settle · type toggle and excursion-open settle immediately"| SNP
+    SUR -->|"level · posture · config tweaks, session-scoped (the open excursion lives in the pane occupant)"| CFG
+    SUR -->|"one generative ask: the frozen seed + the learner's prompt, across the socket —<br/>async; refusal-as-data, so a refusal never leaves the view"| CANDIDATE
+    CANDIDATE -->|"accepted: enters the one edit intake, settling immediately"| SNP
 ```
 
 ## Structural constraints
@@ -95,8 +106,10 @@ flowchart TD
   pure functions; components render their outputs.
 - **One memoized validate per settle and per level** — the selector, the gutter,
   and the mask share it; nothing validates twice.
-- **The single writer.** Only the editor mutates the source; every derived state
-  re-derives per settle.
+- **One edit intake.** The source changes only through the top component's edit
+  intake: the editor raises it per keystroke, and an accepted generated program
+  reaches the same seam — raised as intent, committed by the owner. No surface
+  writes. Every derived state re-derives per settle.
 - **Append-only composition, loud collisions.** Built-ins are never replaced or
   shadowed; failure happens at mount, at the author's desk.
 - **Class-2 controls never mask.** Any control whose availability restores what
@@ -133,16 +146,17 @@ README's tree names the files these shapes live in.)
 The top component is the single owner of everything session-scoped; every other
 holder is ephemeral or derived.
 
-| State                                                                                                                                                                     | Holder                                                                                                                                                                                                      |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Session choices (level key, posture, type, config tweaks — the open-lens choice lives in the pane occupant)                                                               | the top component                                                                                                                                                                                           |
-| The pane occupant (`PaneOccupant`: the editor arm with its remount seed, or the lens arm with the open lens's name, its open-time settled pair, and the opened overrides) | the top component — one discriminated slot; the union makes "a lens without its snapshot" and "overrides outliving the open choice" unrepresentable                                                         |
-| The live source (the buffer as last edited — survives editor unmounts)                                                                                                    | the settle hook's ref, owned by the top component's hook instance; the hook exposes a live-source read and an immediate flush (the contract widening lands with its implementation — see the types.ts note) |
-| The settled snippet (`SettledSnippet`)                                                                                                                                    | the top component, written only by the settle loop                                                                                                                                                          |
-| The study derivation (`StudyDerivation`)                                                                                                                                  | the top component, recomputed per settle                                                                                                                                                                    |
-| The validate memo                                                                                                                                                         | inside the per-instance memoized validate the top component holds                                                                                                                                           |
-| Joined rosters, the bus instance                                                                                                                                          | the top component, created once at mount                                                                                                                                                                    |
-| Open/closed flags (level list, guide reveal)                                                                                                                              | each surface, ephemeral                                                                                                                                                                                     |
+| State                                                                                                                                                                                                                       | Holder                                                                                                                                              |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Session choices (level key, posture, type, config tweaks — the open-lens choice lives in the pane occupant)                                                                                                                 | the top component                                                                                                                                   |
+| The pane occupant (`PaneOccupant`: the editor arm with its remount seed, the lens arm with the open lens's name, its open-time settled pair and the opened overrides, or the generator arm with its open-time settled pair) | the top component — one discriminated slot; the union makes "a lens without its snapshot" and "overrides outliving the open choice" unrepresentable |
+| The live source (the buffer as last edited — survives editor unmounts)                                                                                                                                                      | the settle hook's ref, owned by the top component's hook instance; the hook exposes a live-source read and an immediate flush                       |
+| The settled snippet (`SettledSnippet`)                                                                                                                                                                                      | the top component, written only by the settle loop                                                                                                  |
+| The study derivation (`StudyDerivation`)                                                                                                                                                                                    | the top component, recomputed per settle                                                                                                            |
+| The validate memo                                                                                                                                                                                                           | inside the per-instance memoized validate the top component holds                                                                                   |
+| Joined rosters, the bus instance, the generator socket                                                                                                                                                                      | the top component, created once at mount — the socket's mount-stability is what the generator's abort-and-retire mechanics key on                   |
+| Open/closed flags (level list, guide reveal)                                                                                                                                                                                | each surface, ephemeral                                                                                                                             |
+| The generation job (idle → loading → generating → preview \| refused)                                                                                                                                                       | the generator view, ephemeral per mount — never a session choice; dispose-as-unmount is the cancellation                                            |
 
 ### The settle loop
 
@@ -157,15 +171,28 @@ pending). Staleness is keyed by the settled snippet identity: derived state
 belongs to exactly one settled source-and-type pair, and a re-derive replaces it
 wholesale.
 
-While a lens is open the loop is FROZEN: the editor is unmounted, so no edit
-event can fire. Opening a lens is itself an absorb-settle — the hook's immediate
-flush cancels any pending debounce, then RETAINS the settled identity when the
-live buffer field-equals the settled pair (which also absorbs an
-edit-undone-to-identical window: no re-derivation, no re-announce — the
-round-trip guarantee), else settles the live source immediately. The
-retained-identity discriminant is content equality, not pending-ness — the
-debounce exposes no pending-query. A type toggle during an excursion disposes
-the lens first; its immediate settle then runs in editor mode.
+During an excursion the loop is FROZEN AGAINST TYPING: the editor is unmounted,
+so no keystroke can raise an edit event. Opening an excursion is itself an
+absorb-settle — the hook's immediate flush cancels any pending debounce, then
+RETAINS the settled identity when the live buffer field-equals the settled pair
+(which also absorbs an edit-undone-to-identical window: no re-derivation, no
+re-announce — the round-trip guarantee), else settles the live source
+immediately. The retained-identity discriminant is content equality, not
+pending-ness — the debounce exposes no pending-query. A type toggle during an
+excursion disposes it first; its immediate settle then runs in editor mode.
+
+One edit DOES fire from inside an excursion: an accepted candidate. It takes the
+same immediate absorb-settle as a type toggle, and it is batched with the
+dispose that ends the excursion — one commit, not two. The batching is
+load-bearing rather than tidy: the coherence invariants require the settled pair
+to field-equal the generator arm's open-time pair, so a settle that committed in
+a different frame from the return home would render one frame of a generator arm
+against a moved settle and throw. Within that batch the order is fixed too: the
+candidate reaches the edit intake BEFORE the dispose, because the dispose seeds
+the remounting editor from the live source — reversed, the editor would remount
+on the pre-accept buffer and the accepted program would be lost. Accepting a
+candidate field-equal to the seed retains the settled identity and announces
+nothing, exactly as the round-trip guarantee says.
 
 ```mermaid
 stateDiagram-v2
@@ -176,11 +203,14 @@ stateDiagram-v2
     Idle --> Settling: type toggle (immediate, no debounce)
     Pending --> Settling: type toggle (absorbs the pending settle, live source)
     Settling --> Idle: settled snippet written · derive runs · bus announces settled
-    Idle --> Excursion: lens opened (buffer equals the settled pair —<br/>identity retained, nothing derives)
-    Pending --> Excursion: lens opened (the flush absorbs the live source —<br/>settles · derives · announces)
+    Idle --> Excursion: lens or generator opened (buffer equals the settled pair —<br/>identity retained, nothing derives)
+    Pending --> Excursion: lens or generator opened (the flush absorbs the live source —<br/>settles · derives · announces)
     Excursion --> Excursion: lens→lens switch (same settled pair —<br/>one lens-opened, no null between)
-    Excursion --> Idle: dispose — none entry · Edit code ·<br/>type/level/posture commit · orphan defense
-    note right of Excursion: the loop is frozen —<br/>the editor is absent,<br/>no edit event can fire
+    Excursion --> Excursion: lens over the generator (same settled pair —<br/>generator-opened false, THEN lens-opened name)
+    Excursion --> Settling: generator accept (the candidate enters the edit intake —<br/>immediate absorb-settle, batched with the dispose)
+    Excursion --> Idle: generator accept, candidate equals the seed —<br/>identity retained, nothing derives
+    Excursion --> Idle: dispose — none entry (lens) · Edit code · generator discard ·<br/>type/level/posture commit · orphan defense (lens)
+    note right of Excursion: frozen against TYPING —<br/>the editor is absent, so no<br/>keystroke can raise an edit
 ```
 
 ### Per settle
@@ -204,26 +234,37 @@ verdicts without consulting a level twice.
   positional list.
 - The panel receives its ordered phase list built from that constant plus the
   labels, and renders it as the horizontal lifecycle strip ABOVE the surface
-  pane, beside the control row (the Edit code button — leading, while a lens is
-  open — then the type toggle and the level surfaces; sibling order within the
-  row is presentation, not contract) — controls and lifecycle in one band, the
-  surface pane beneath: the editor when no lens is open, the open lens in its
-  place. Recommendations render below the pane in both modes. The strip renders
-  no headings; the guide's `h4` topic titles are the instrument's only headings,
+  pane, beside the control row (the Edit code button — leading, while an
+  excursion is open — then the Generate code button, the type toggle and the
+  level surfaces; sibling order within the row is presentation, not contract) —
+  controls and lifecycle in one band, the surface pane beneath: the editor when
+  no excursion is open, the open lens or the generator in its place.
+  Recommendations render below the pane in every mode. The strip renders no
+  headings; the guide's `h4` topic titles are the instrument's only headings,
   and the guide renders last in DOM order.
 - ONE VISUAL PANE, TWO DOM SLOTS — the mask-membership rule: the editor renders
   OUTSIDE both maskable regions (class 1, never masked while mounted); the
-  mounted lens renders INSIDE the maskable content region (class 3). The pane is
-  the learner-facing abstraction over both; building it as one shared slot would
-  break one of the two class assignments.
+  mounted lens and the generator view both render INSIDE the maskable content
+  region (class 3). The pane is the learner-facing abstraction over both;
+  building it as one shared slot would break one of the two class assignments.
+- The Generate code button's geometry is deliberate and easily "simplified"
+  away: it renders in the control row, OUTSIDE both maskable containers, and
+  still carries class 3 — inert and dimmed at its OWN element while the mask is
+  up, like the strip's selects. A surface's class is a fact about what the
+  surface is, never about which container it happens to render in; the button
+  opens a class-3 study surface, so it takes that class with it. It renders in
+  editor mode only, and as a button rather than a select, so the strip's
+  every-select assertions keep their meaning.
 - The strip's selects track the committed open lens; the none entry over the
   open lens is a close affordance — the close commits at the top component and
   announces `lens-opened: null` (the bus arm shipped reserved, now real). The
   class-2 Edit code button is the GUARANTEED way home: the strip is class 3 and
   inert under a mask.
-- Coherence invariants at the lens-arm render, loud in dev AND prod: the settled
-  pair must field-equal the occupant's `openedAt` (source and type), and the
-  open lens must resolve on the mount roster. The embodiment-matches-snapshot
+- Coherence invariants at EVERY excursion-arm render, loud in dev AND prod: the
+  settled pair must field-equal the occupant's `openedAt` (source and type) —
+  the generator arm included, since its anchor does the same job as the lens
+  arm's. The roster check stays lens-only: it asks whether the open lens
+  resolves, and a generator names none. The embodiment-matches-snapshot
   guarantee follows transitively — the derivation memo is keyed on settled
   identity, and the derive composition is pure in (settled, mount-frozen
   session).
@@ -240,8 +281,8 @@ verdicts without consulting a level twice.
   component's render (in-file until a second call site exists). Every mask input
   is frozen during an excursion (the dispose rule), so mask state is fixed per
   mount; a mount can begin masked two ways — the honored focus, or a
-  flush-at-open that settles out-of-level code the strip offered against the
-  pre-flush facts.
+  flush-at-open that settles out-of-level code the strip or the Generate code
+  button offered against the pre-flush facts.
 - The honor resolution runs once at mount, mapping fallback → the editor arm and
   honored → the lens arm (`openedAt` = the initial settled pair); the lazy
   initializer stays side-effect-free — no dispatch ever fires from it. The study
@@ -249,14 +290,54 @@ verdicts without consulting a level twice.
 
 ## Decisions
 
-- **Why the pane swaps (editor XOR lens).** Inherited from the retired reference
-  architecture's two-mode machine, on the maintainer's ruling: in editor mode
-  the learner is AUTHORING; in lens mode they are EXERCISING a disposable
-  practice surface over a fixed program. Disposability is structural, not
-  policed — the editor is absent, and every derivation-context commit (type,
-  level, posture) disposes the lens first — so a mounted lens's embodiment
+- **Why the pane swaps (editor XOR one excursion).** Inherited from the retired
+  reference architecture's two-mode machine, on the maintainer's ruling: in
+  editor mode the learner is AUTHORING; in lens mode they are EXERCISING a
+  disposable practice surface over a fixed program. Disposability is structural,
+  not policed — the editor is absent, and every derivation-context commit (type,
+  level, posture) disposes the excursion first — so a mounted lens's embodiment
   cannot change, by construction. The cost is deliberate: the learner cannot
   type WHILE a lens reacts; switching is an explicit pedagogical commitment.
+- **Why the generator is a pane occupant, not a pop-up.** It is the same kind of
+  thing a lens is — a surface over the program exactly as it stood at the open,
+  disposable, returning home — so it inherits exclusivity, the return
+  affordance, and the frozen derivation context for free rather than growing a
+  parallel mechanism beside them. The pedagogy is the same argument from the
+  other side: human authoring stays the center of study precisely because
+  generation is an EXCURSION from the home base, never a second surface sharing
+  the pane with it.
+- **What the generator arm carries, and what it does not.** One field: the
+  settled pair it opened over, doing both jobs the lens arm's does — the seed
+  the view remixes and the coherence anchor the render invariants compare
+  against. No name, no config, no honored-focus arm. The flush-at-open is what
+  makes the anchor equal the live buffer, which is why remix-first needs no
+  separate seed channel.
+- **Why the generation job never rides the occupant.** The occupant is frozen
+  for the excursion; a stage that changes several times per ask cannot live
+  there. Held in the view, the job also gets its cancellation for free: every
+  path that closes the excursion unmounts the view, and the unmount cleanup
+  aborts and retires the in-flight ask. "A commit cancels the job" is therefore
+  structural — nothing polices it, and no dispose path can forget it.
+- **Why dispose generalizes rather than special-casing the generator.** The
+  dispose path is one function reached by every close, so it reads the occupant
+  it is about to replace and announces per arm. It early-returns only in editor
+  mode; anything else is an excursion and closes. Leaving it lens-shaped would
+  make every dispose during a generator excursion a silent no-op — an accept
+  that settles but never returns home, and derivation-context commits landing
+  under a mounted generator. The same reading applies where one surface opens
+  over another: opening a lens over the generator announces the generator's
+  close before the lens's open, because the two facts ride two events.
+- **No public-surface change.** The generator adds no host prop and no reserved
+  configuration key: the socket is composition-root-internal, held in
+  mount-frozen session state, and the view receives it as a prop for its own
+  suite. A host-facing knob would have to be designed before anyone has used the
+  thing, and the keyspace collision is avoided entirely by not opening one.
+- **Why the result vocabulary is transcribed rather than imported.** The
+  generative core lives in another tree. A transcription costs one file and
+  keeps this region's compile independent of that tree; an import would bind the
+  build to code this region does not own. The request type is not a
+  transcription at all — it is the consumer's own shape, narrower than the
+  core's config by construction and this region's to define.
 - **The event mapping (taxonomy kept).** `lens-opened{name}` covers the
   reference's mode-changed(editor→lens) + lens-switched; `lens-opened{null}`
   covers mode-changed(lens→editor); a lens→lens switch is one
@@ -269,7 +350,14 @@ verdicts without consulting a level twice.
   `settled` → `lens-opened{null}` is LEGAL — subscribers must tolerate an open
   immediately followed by its close, with the explaining settle between. A
   derivation-context commit with no lens open has nothing to dispose and
-  announces no `lens-opened{null}` — dispose with nothing open is silent.
+  announces no `lens-opened{null}` — dispose with nothing open is silent. The
+  generator's own arm never reuses this event: `lens-opened`'s payload NAMES a
+  lens, so a boolean `generator-opened` carries the generator's open and close
+  instead. Its orderings mirror the lens's — open then the absorbed settle;
+  `{open: false}` before the change event on a derivation-context commit;
+  `{open: false}` then `lens-opened{name}` when a lens opens over it; on accept,
+  `{open: false}` and then the accepted program's `settled`, or no settle at all
+  when the program field-equals the seed.
 - **Bus and effect contract rules.** Listeners must never call `flushSync` — the
   one-commit batching argument for the pane flip depends on it. The effect
   registration order — the settled announce BEFORE the orphan defense — is a
@@ -296,6 +384,11 @@ verdicts without consulting a level twice.
 - **Fit and accessibility** — embody's derivation, rendered here untouched.
 - **Lens and evaluator internals** — a mounted lens owns its view; evaluators
   are its own imports; this region never touches an evaluator.
+- **The generator view's internals and its generation job** — the view's own
+  ([`./generator/DOCS.md`](./generator/DOCS.md)); this region owns only where it
+  sits in the pane, when it disposes, and what its accept lands through.
+- **The model runtime and the generative core behind the socket** — another
+  tree's; this region reaches them through one seam and knows nothing further.
 - **Level content** — validators, docs, support data, and models belong to their
   levels; this region consults and projects.
 - **Level-UI rendering and bus wiring** — how the selector and toggles render

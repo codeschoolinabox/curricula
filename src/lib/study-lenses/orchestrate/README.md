@@ -21,7 +21,8 @@ orchestrate/
   use-settled-snippet.ts   the settle hook — debounced edits, immediate type toggle
   derive-study.ts          the one derive composition per settle
   display-labels.ts        the phases' display labels, keyed by phase name
-  editor/         the editing surface — the single writer of the source
+  editor/         the editing surface — where the learner authors the source
+  generator/      the AI-authoring view — the pane's third occupant
   phases-panel/   the five-phase study panel — the study layer, rendered
   level-ui/       the level selector and the strict toggle
   guide/          the embedded guide — help never withheld
@@ -61,7 +62,7 @@ type StudyLensesProperties = {
 One disambiguation the surface owes the glossary: the `snippet` prop is the
 source text alone — the glossary's _snippet_ is this prop together with `type`.
 The prop is mount-time only: the instrument seeds from it once, and a later
-change is ignored — after mount the editor is the single writer.
+change is ignored — after mount the region's own edit intake is the only writer.
 
 One embedding constraint: the instrument's only heading elements are the guide's
 `h4` topic titles (the lifecycle strip and every control label are inline text),
@@ -91,24 +92,26 @@ declares none.
 ## What renders
 
 One band of controls and lifecycle sits above ONE surface pane. The pane holds
-the editor or the open lens — never both. The editor is the home base: the
-learner authors there, and opening a lens replaces it with a disposable practice
-surface over the program exactly as it stood at the open. Returning remounts the
-editor seeded from the live source — edits survive every lens excursion. The
-Edit code button (rendered only while a lens is open, never masked) is the
-guaranteed way home; the strip's none entry closes too whenever the strip itself
-is not masked. During an excursion the band, the strip, the level UI, the guide,
-and the recommendations all stay rendered — frozen, like every derivation input
-— only the pane's occupant changes. And the one visual pane is two DOM slots:
-the editor renders in its own never-masked slot, the open lens within the
-maskable content region, so the class-1/class-3 split survives the swap.
+the editor, the open lens, or the generator — exactly one. The editor is the
+home base: the learner authors there; opening a lens replaces it with a
+disposable practice surface over the program exactly as it stood at the open;
+opening the generator replaces it with the AI-authoring view over the same
+frozen seed. Returning remounts the editor seeded from the live source — edits
+survive every excursion. The Edit code button (rendered whenever the editor is
+away, never masked) is the guaranteed way home; the strip's none entry closes an
+open lens too whenever the strip itself is not masked. During any excursion the
+band, the strip, the level UI, the guide, and the recommendations all stay
+rendered — frozen, like every derivation input — only the pane's occupant
+changes. And the one visual pane is two DOM slots: the editor renders in its own
+never-masked slot; the open lens and the generator render within the maskable
+content region, so the class-1/class-3 split survives the swap.
 
-- **The editor (home base)** — the single writer of the program's source; every
-  derived state re-derives from its settles. Mounted whenever no lens is open;
-  structurally absent during a lens excursion, so nothing can edit beneath a
-  mounted lens. It consumes the selected level's editor-support data —
-  completion, hover, format — through the adapter that lives with the editor's
-  own surface.
+- **The editor (home base)** — the surface the learner authors in, and the only
+  place typing enters the program's source; every derived state re-derives from
+  its settles. Mounted whenever the pane holds no excursion; structurally absent
+  while a lens or the generator is open, so nothing can edit beneath either. It
+  consumes the selected level's editor-support data — completion, hover, format
+  — through the adapter that lives with the editor's own surface.
 - **The open lens** — mounted as the pane's occupant with the frozen embodiment,
   fixed for the whole mount: every control that could change the derivation (the
   snippet-type toggle, the level selector, the strict toggle) disposes the lens
@@ -117,6 +120,14 @@ maskable content region, so the class-1/class-3 split survives the swap.
   re-opening the SAME lens (a recommendation may target the open lens)
   re-resolves the configuration in place and announces as a fresh open — the
   embodiment never moves.
+- **The generator** — the AI-authoring view, opened from editor mode by the
+  Generate code button: the live buffer as a read-only seed (remix-first), a
+  prompt, a takes-time warning, a preview, Accept or Discard. Accept lands the
+  candidate through the region's one edit intake — an immediate absorb-settle,
+  batched with the dispose, and everything re-derives from it; every other exit
+  returns the buffer untouched, and the unmount retires any in-flight ask.
+  Generation is an excursion from the home base, never a co-equal surface; the
+  view documents itself in [`./generator/`](./generator/README.md).
 - **The five-phase study panel** — the mechanical render of the embodiment: a
   barred phase renders barred with its cause; an accessible phase lists its
   fitting lenses. The phases' learner-facing display labels are this region's UI
@@ -148,26 +159,36 @@ lives inside a React component.
 ## Enforcement — the mask
 
 Three surface classes: the editor is class 1 — never masked while mounted, and
-structurally absent during a lens excursion; meta-level controls — the selector,
+structurally absent during any excursion; meta-level controls — the selector,
 the strict toggle, the snippet-type toggle, the guide, and the Edit code button
 — are class 2, never masked, so the way back to the editor is alive under every
-posture; everything else (the study panel and its lenses) is class 3, covered
-under strict while the code is out of level. The mask is an inert overlay — a
-covered surface keeps its state beneath it — and the blocked state names the
-level and the first violation, or the type-admission cause. Every mask input —
-source, type, level, posture — is frozen while a lens is open (each commit
-disposes the lens first), so enforcement arises in editor mode, where the masked
-strip bars opening lenses. Two paths can mount a lens under an active mask: the
-honored focus, and a flush-at-open whose absorbed keystrokes settle out-of-level
-code (the strip was live when clicked); on both, the mask applies to the mounted
-lens identically. The full class-3 block applies while the selected level's fit
-mark is does-not-fit or not-applicable-for-type — once the code parses. While it
-does not parse, the mark is undetermined and that carve-out wins regardless of
-type admission: the mask names no violation, and the parse phases' panel nodes
-and their error lenses stay uncovered — the supports a broken program needs are
-never the price of a wrong toggle. Under warn, nothing is blocked anywhere.
+posture; everything else — the study panel and its lenses, and the generator
+view with its opening button — is class 3, covered under strict while the code
+is out of level. The mask is an inert overlay — a covered surface keeps its
+state beneath it — and the blocked state names the level and the first
+violation, or the type-admission cause. Every mask input — source, type, level,
+posture — is frozen during an excursion (each commit disposes it first), so
+enforcement arises in editor mode, where the masked strip bars opening lenses.
+Two paths can mount a lens under an active mask: the honored focus, and a
+flush-at-open whose absorbed keystrokes settle out-of-level code (the strip was
+live when clicked); on both, the mask applies to the mounted lens identically.
+The full class-3 block applies while the selected level's fit mark is
+does-not-fit or not-applicable-for-type — once the code parses. While it does
+not parse, the mark is undetermined and that carve-out wins regardless of type
+admission: the mask names no violation, and the parse phases' panel nodes and
+their error lenses stay uncovered — the supports a broken program needs are
+never the price of a wrong toggle. Under warn, nothing is blocked anywhere —
+which is also what lets the generator open freely over out-of-level code.
 Enforcement is mask, not filter — it never edits fit or accessibility — and
 recommendation rendering passes through the same mask.
+
+The generator carries its class-3 membership at two elements, because those
+elements sit in different containers. The view renders inside the maskable
+content region and can begin masked through the same flush path as a lens. The
+Generate code button renders in the control row, OUTSIDE both maskable
+containers, so it takes the class-3 treatment at its own element — inert and
+dimmed while masked, like the strip's selects: a study surface's opening
+affordance, not a restoring control.
 
 ## Honor rules
 
@@ -228,34 +249,75 @@ this region owns.
   derived state re-derives. An edit event is not a settle — edit events fire per
   keystroke, derivation runs per settle. The snippet-type toggle re-derives
   immediately, absorbing any pending settle — its settle carries the editor's
-  live source, so pending keystrokes are settled early, never discarded. While a
-  lens is open the loop is frozen: the editor is absent, so no edit event can
-  fire; opening a lens is itself an absorb-settle (the flush-at-open), and a
-  type toggle's immediate settle runs only after its dispose.
+  live source, so pending keystrokes are settled early, never discarded. During
+  an excursion the loop is frozen against TYPING: the editor is absent, so no
+  keystroke can raise an edit event; opening an excursion is itself an
+  absorb-settle (the flush-at-open), and a type toggle's immediate settle runs
+  only after its dispose. The one edit that fires from an excursion is an
+  accepted program — an immediate absorb-settle, batched with the dispose that
+  ends the excursion.
 - **home base** — the editor's role in the surface pane: mounted whenever no
-  lens is open, the single writer of the source, the place every lens excursion
-  returns to.
+  excursion is open, the surface the learner authors in, the place every
+  excursion returns to.
 - **lens excursion** — the span from opening a lens (which replaces the editor)
   to returning (which remounts the editor, seeded from the live source). The
   program, its type, the level, and the posture are all frozen for the
   excursion; lens-internal state is per-mount and disposable.
 - **pane occupant** — the one discriminated state slot naming what occupies the
-  surface pane: the editor arm carrying its remount seed, or the lens arm
-  carrying the open lens's name, the settled pair it opened over, and the opened
-  layer's overrides. Editor or lens, never both — the region's `PaneOccupant`
-  type. Deliberately not named "surface": that word belongs to the mask's
-  surface classes.
-- **flush-at-open** — opening a lens absorbs any pending settle with the live
-  buffer first, so the lens mounts over the code exactly as typed; when the live
-  buffer already field-equals the settled pair (including an edit undone back to
-  identical text), the settled identity is retained and nothing re-derives.
-- **dispose** — closing the open lens back to editor mode. Raised by the strip's
-  none entry, the Edit code button, every derivation-context commit (type,
-  level, posture — the close precedes the change event on the bus), and the
-  orphan defense. A commit with no lens open disposes nothing and announces
-  nothing.
+  surface pane: the editor arm carrying its remount seed; the lens arm carrying
+  the open lens's name, the settled pair it opened over, and the opened layer's
+  overrides; or the generator arm carrying its open-time settled pair (the seed
+  and coherence anchor). Exactly one — the region's `PaneOccupant` type.
+  Deliberately not named "surface": that word belongs to the mask's surface
+  classes.
+- **flush-at-open** — opening an excursion absorbs any pending settle with the
+  live buffer first, so the surface mounts over the code exactly as typed; when
+  the live buffer already field-equals the settled pair (including an edit
+  undone back to identical text), the settled identity is retained and nothing
+  re-derives.
+- **dispose** — closing the pane's open excursion (a lens or the generator) back
+  to editor mode. Raised by the strip's none entry (lens only), the Edit code
+  button, the generator's own accept and discard, every derivation-context
+  commit (type, level, posture — the close precedes the change event on the
+  bus), opening one surface over another, and the orphan defense (lens only).
+  The close announces per arm: `lens-opened: null` for a lens,
+  `generator-opened {open: false}` for the generator — and a generator dispose
+  also cancels its in-flight job via the unmount. A commit with nothing open
+  disposes nothing and announces nothing. The strip's none entry is a lens
+  affordance in fact as well as in name: during a generator excursion every
+  strip select already sits at its none entry, so there is nothing left to
+  select and the affordance cannot fire. The generator's ways home are the Edit
+  code button, Accept, Discard, and any derivation-context commit.
 - **edit-return** — the distinguished way home: the Edit code button, rendered
-  only while a lens is open, class 2 (never masked).
+  whenever the editor is away (a lens or the generator open), class 2 (never
+  masked).
+- **generator** — the pane's third occupant: the AI-authoring view (a read-only
+  seed · a prompt · a preview · accept/discard), opened from editor mode by the
+  Generate code button. Its own contract lives in
+  [`./generator/`](./generator/README.md).
+- **generator excursion** — like a lens excursion: the derivation context is
+  frozen (the editor is absent; every derivation-context commit disposes first),
+  and the job the view carries dies with its unmount.
+- **generator socket** — the consumer-side seam the view calls: the committed
+  aithor signature behind one `generate` function, held fixed for the mount.
+  Refusal-as-data is total across it — it resolves, always.
+- **generation job** — the view-local machine idle → loading → generating →
+  preview | refused: per-mount, ephemeral, cancel-at-any-stage. Cancel retires
+  the ask and returns the job to idle without leaving the view;
+  dispose-as-unmount retires it and aborts the work underneath.
+- **candidate** — what one generative ask returned, awaiting the learner's
+  judgment. Deliberately not "proposal": a **proposal** is a lens's
+  recommendation of a next study step, and the two travel through the same
+  region.
+- **ask** — one in-flight generation, from the moment the learner asks to the
+  moment it answers or is retired. One at a time per mount; cancelling retires
+  the current one, and a retired ask's answer changes nothing.
+- **preview / accept / discard** — the candidate's three fates: rendered for
+  judgment; committed by the OWNER through the edit intake (an immediate
+  absorb-settle); or dropped with the buffer untouched.
+- **placeholder socket** — the default generator socket: scripted stages, a
+  marked remix of the seed, a `refuse:` demo path. It labels itself honestly and
+  never pretends a model ran.
 - **study derivation** — what one derive pass produces for one settled snippet:
   the frozen embodiment, the verdicts, the assessments, and the ranked
   recommendations — the bundle the top component holds and the rendered surfaces
@@ -263,12 +325,13 @@ this region owns.
   `embodiment.study` (embody's per-phase payloads), and the derivation contains
   an embodiment — the derive-anchored name keeps the two apart.
 - **session choices** — the learner's session-scoped selections: the selected
-  level key, the enforcement posture, the snippet type, the open lens (the pane
-  occupant's lens arm), and configuration tweaks. The top component is their
-  single owner: surfaces raise intent upward through callbacks, the owner
-  commits the change, and the event bus announces the committed changes other
-  surfaces react to — configuration tweaks reach their lens as fresh props and
-  announce nothing. No other component holds a session choice.
+  level key, the enforcement posture, the snippet type, the pane occupant's
+  non-editor arms (the open lens, or the generator), and configuration tweaks.
+  The top component is their single owner: surfaces raise intent upward through
+  callbacks, the owner commits the change, and the event bus announces the
+  committed changes other surfaces react to — configuration tweaks reach their
+  lens as fresh props and announce nothing. No other component holds a session
+  choice.
 - **blocked state** — the learner-facing face of a masked surface under strict:
   an inert overlay naming the level and the first violation — or the
   type-admission cause — while the covered surface keeps its state beneath.
@@ -281,9 +344,10 @@ this region owns.
   validator flags `debugger` statements and it admits only modules, so all four
   fit marks are reachable. Injected-only — never on the built-in roster.
 - **surface classes** — the mask's three-way split: class 1 = editor-based
-  (never masked while mounted; absent during a lens excursion) · class 2 =
+  (never masked while mounted; absent during an excursion) · class 2 =
   meta-level controls including the Edit code button (never masked) · class 3 =
-  everything else (covered under strict while out of level).
+  everything else, the generator view and its Generate code button included
+  (covered under strict while out of level).
 - **focus request** — the `lens` prop: a request honored through fit and
   accessibility, never a bypass.
 - **display labels** — the five phases' learner-facing labels and the

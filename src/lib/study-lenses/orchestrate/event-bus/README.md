@@ -29,16 +29,17 @@ event taxonomy.
 
 ## The taxonomy
 
-Five events — four announce committed session choices, and `settled` announces a
+Six events — five announce committed session choices, and `settled` announces a
 completed derivation:
 
-| Event             | Announces                                                                                                                                                              |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `level-selected`  | the selected level key changed (`''` = none-state)                                                                                                                     |
-| `posture-toggled` | the enforcement posture changed (strict on or off)                                                                                                                     |
-| `type-toggled`    | the snippet type changed                                                                                                                                               |
-| `lens-opened`     | the open-lens choice changed (a name; `null` when closed — the strip's none entry, the Edit code button, a derivation-context commit's dispose, or the orphan defense) |
-| `settled`         | a settle completed; derived state is fresh                                                                                                                             |
+| Event              | Announces                                                                                                                                                                                                |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `level-selected`   | the selected level key changed (`''` = none-state)                                                                                                                                                       |
+| `posture-toggled`  | the enforcement posture changed (strict on or off)                                                                                                                                                       |
+| `type-toggled`     | the snippet type changed                                                                                                                                                                                 |
+| `lens-opened`      | the open-lens choice changed (a name; `null` when closed — the strip's none entry, the Edit code button, a derivation-context commit's dispose, or the orphan defense)                                   |
+| `generator-opened` | the generator excursion opened or closed (`{ open: boolean }`) — open by the Generate code button; close by accept, discard, Edit code, a derivation-context commit's dispose, or a lens opening over it |
+| `settled`          | a settle completed; derived state is fresh                                                                                                                                                               |
 
 Configuration tweaks are the one session choice with no event: a tweak reaches
 its lens as fresh props through the cascade, and no other surface reacts to it.
@@ -69,6 +70,17 @@ evaluation run's `Settlement`, the evaluators' own word for how a run ended.
   already-open lens dispatches `lens-opened` with the same name — the choice
   re-committed (its opened overrides re-resolved), never suppressed as a no-op.
   Subscribers must not assume consecutive `lens-opened` names differ.
+- **The generator's orderings mirror the lens's, with its own event.** The close
+  event is per-arm — a generator dispose announces
+  `generator-opened { open: false }`, never `lens-opened: null`. Open =
+  `generator-opened { open: true }`, then the absorbed settle's `settled`
+  (post-commit) iff the flush absorbed pending keystrokes. Accept =
+  `generator-opened { open: false }`, then the accepted program's `settled`
+  (post-commit; a program field-equal to the seed settles nothing). Discard =
+  `generator-opened { open: false }` alone. A derivation-context commit over the
+  generator closes it first (`{ open: false }` before the change's own event); a
+  lens opening over the generator announces `{ open: false }` before
+  `lens-opened` with the name — two facts, two events.
 - **Listeners never force a render flush.** No listener may call `flushSync`:
   the pane flip's one-commit batching guarantee depends on dispatches never
   flushing React mid-handler.

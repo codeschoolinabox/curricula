@@ -41,20 +41,22 @@ document constrains only the package-level shape.
    list their fitting lenses. Level surfaces render from the verdicts. The
    enforcement mask derives here, from the selected level's verdict crossed with
    the strict posture — an inert overlay; a covered surface keeps its state
-   beneath it. The surface pane holds the editor or the one open lens, never
-   both — the open lens rides the embodiment frozen at its open, and returning
-   remounts the editor over the live source. An initial-focus request also
-   mounts here: a phase-declaring lens when its phase is accessible, a
-   panel-excluded lens after its applicability runs at mount; recommendation
-   rendering passes through the mask. Input: embodiment + verdicts + composed
-   study configuration. Output: the rendered study surface.
+   beneath it. The surface pane holds the editor or one excursion — the open
+   lens, or the generator — never two: an excursion rides the embodiment frozen
+   at its open, and returning remounts the editor over the live source. An
+   initial-focus request also mounts here: a phase-declaring lens when its phase
+   is accessible, a panel-excluded lens after its applicability runs at mount;
+   recommendation rendering passes through the mask. Input: embodiment +
+   verdicts + composed study configuration. Output: the rendered study surface.
 
-4. **Interact** (async at the edges) — the learner opens lenses, edits, and
-   toggles; each control re-enters its own phase. Source edits re-enter Derive
-   at the next settle (in editor mode — the editor is absent while a lens is
-   open); opening a lens settles the live buffer immediately and replaces the
-   editor; the snippet-type toggle, level selection, and the posture toggle each
-   dispose an open lens first, then re-enter (the type toggle re-enters Derive
+4. **Interact** (async at the edges) — the learner opens lenses, generates,
+   edits, and toggles; each control re-enters its own phase. Source edits
+   re-enter Derive at the next settle (in editor mode — the editor is absent
+   during any excursion); opening a lens or the generator settles the live
+   buffer immediately and replaces the editor, and an accepted generated program
+   re-enters Derive through the same edit intake the editor raises into; the
+   snippet-type toggle, level selection, and the posture toggle each dispose an
+   open excursion first, then re-enter (the type toggle re-enters Derive
    immediately; level, posture, and configuration tweaks re-enter through the
    composed study configuration with no re-parse). Evaluation-phase lenses drive
    evaluators, which execute the program and emit events rendered per audience;
@@ -111,10 +113,12 @@ flowchart TD
   collection, dev-warned; a fact stage's failure renders inside its owning
   phase; a utility given input it cannot serve returns a structured refusal —
   nothing in the study surface ever throws at the learner.
-- **Single writer, mount-bounded life.** Only the editor mutates the program
-  source; every derived state re-derives per settle, and no evaluation event
-  stream outlives its lens's mount — disposing the lens cancels whatever it was
-  driving.
+- **One edit intake, mount-bounded life.** The program source changes only
+  through the orchestrator's edit intake — the editor raises it per keystroke,
+  an accepted generated program reaches the same seam, and no surface writes.
+  Every derived state re-derives per settle, and nothing an excursion started
+  outlives its mount: disposing it cancels whatever it was driving, an
+  evaluation or a generation alike.
 - **The embodiment knows no consumers.** Lens refs arrive as arguments;
   evaluators are imported by the lenses that drive them. Nothing in the
   embodiment reaches toward components or execution.

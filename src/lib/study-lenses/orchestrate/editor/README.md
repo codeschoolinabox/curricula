@@ -1,19 +1,21 @@
 # editor
 
-The editing surface — the single writer of the program's source. A thin React
-component over an async CodeMirror factory; every derived state in the region
-re-derives from what is written here.
+The editing surface — where the learner authors the program's source. A thin
+React component over an async CodeMirror factory; every derived state in the
+region re-derives from what is written here.
 
 The region [README](../README.md) owns what the orchestrator renders and the
 [region glossary](../README.md#glossary--region-terms) owns the shared terms;
 this document owns the editing surface's own contract.
 
-## The single writer
+## The one intake
 
-Only this surface mutates the program's source. It emits one **edit event** per
-document change — per keystroke, carrying the full source — and nothing else:
-the settle debounce is the top component's, never the editor's. The editor does
-not know what a settle is.
+The source changes through the region's one edit intake, and this surface is the
+only place typing reaches it. It emits one **edit event** per document change —
+per keystroke, carrying the full source — and nothing else: the settle debounce
+is the top component's, never the editor's. The editor does not know what a
+settle is. (An accepted generated program reaches the same intake, raised by the
+top component rather than typed here — one intake, no second writer.)
 
 Writes flow one way per channel: a learner's typing raises edit events upward; a
 programmatic write (the top component setting content) replaces the document
@@ -46,14 +48,15 @@ highlights syntax and does nothing more.
 
 The editor is surface class 1: never masked while mounted, because editing is
 how conformance is restored — and it is the home base, not a permanent fixture.
-A lens excursion unmounts this surface entirely (CodeMirror is destroyed); edits
-survive every excursion because the buffer lives in the region's live-source
-slot, not in this component, and each mount seeds from it. What the postures
-must keep alive is the PATH back — and the guaranteed way home is the Edit code
-button: class 2, alive under every posture. The strip's none entry closes too,
-but the strip is class 3 and inert while masked — which is exactly why the
-class-2 button exists. A mount failure never takes the page down — the component
-renders a fallback carrying a data attribute in place of the surface.
+Any excursion — a lens, or the generator — unmounts this surface entirely
+(CodeMirror is destroyed); edits survive every excursion because the buffer
+lives in the region's live-source slot, not in this component, and each mount
+seeds from it. What the postures must keep alive is the PATH back — and the
+guaranteed way home is the Edit code button: class 2, alive under every posture.
+The strip's none entry closes an open lens too, but the strip is class 3 and
+inert while masked — which is exactly why the class-2 button exists. A mount
+failure never takes the page down — the component renders a fallback carrying a
+data attribute in place of the surface.
 
 ## Navigation
 

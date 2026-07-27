@@ -49,6 +49,11 @@ flowchart TD
 - **Ordering** — binds the dispatching owner, recorded here as part of the
   taxonomy's contract: a choice announcement precedes the settle announcement it
   causes; one settle announcement per settle, after derived state commits.
+- **A close rides its own arm's event** — the pane holds one of several
+  occupants, and each announces its own close: the lens arm's close is its own
+  event carrying no name, the generator's is its own boolean. No arm ever
+  announces another's close, so a subscriber that cares about one occupant never
+  has to disambiguate a shared event.
 - **Internal only** — the bus never appears on the host surface.
 
 ## Decisions
@@ -63,6 +68,14 @@ flowchart TD
 - **Why snapshot-at-dispatch.** A listener mutating registration mid-dispatch
   must not affect the in-flight delivery; each dispatch owns its snapshot, so
   re-entrancy is depth-first per call rather than interleaved.
+- **Why an occupant change is more than one event.** The lens arm's announcement
+  carries a lens NAME, so there is no honest payload on it for an occupant that
+  is not a lens: a `null` there would mean "no lens open", which is true of an
+  open generator and says nothing about it. A second event with a boolean
+  payload keeps the taxonomy's shape — one fact per event — and makes "the
+  generator opened over a lens" two announcements rather than one overloaded
+  value. The cost is that subscribers watching the pane subscribe twice; the
+  alternative cost was a payload that lies.
 
 ## Out of scope
 

@@ -11,17 +11,23 @@
 import type { SnippetType } from '../../embody/types.js';
 
 /**
- * The taxonomy: four events announcing committed session choices, and
+ * The taxonomy: five events announcing committed session choices, and
  * `settled` announcing a completed derivation. `settled` is the settle
  * loop's completion — distinct from an evaluation run's `Settlement`, the
  * evaluators' own word. Configuration tweaks announce nothing: a tweak
  * reaches its lens as fresh props through the cascade.
+ *
+ * A close announcement rides its own arm's event: a lens closes as
+ * `lens-opened: null`, the generator as `generator-opened { open: false }`.
+ * `lens-opened`'s payload NAMES a lens, so an occupant change that is not a
+ * lens has no honest payload to ride there.
  */
 export type EventPayloadMap = {
 	readonly 'level-selected': { readonly key: string };
 	readonly 'posture-toggled': { readonly strict: boolean };
 	readonly 'type-toggled': { readonly type: SnippetType };
 	readonly 'lens-opened': { readonly lens: string | null };
+	readonly 'generator-opened': { readonly open: boolean };
 	readonly settled: { readonly source: string; readonly type: SnippetType };
 };
 
