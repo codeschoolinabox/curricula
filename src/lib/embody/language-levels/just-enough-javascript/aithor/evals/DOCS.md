@@ -50,7 +50,7 @@ pure-core boundary: everything below it is Node-fake-testable.
 
 ```mermaid
 flowchart TD
-    cases[("CaseSpec[]<br/>(quadrants × tight/loose,<br/>expectedSatisfiable)")]
+    cases[("CaseSpec[]<br/>(quadrants × tight/loose + vary holds,<br/>expectedSatisfiable)")]
     cases -->|"sample N fresh per case<br/>(IMPURE · WebGPU · browser-only · manual)"| result[("AithorResult<br/>(one per sample)")]
     result ==>|"lift: variant by spec.config.validate,<br/>then result.ok sub-selects; PURE<br/>(folds in isJej / conform reads)"| outcome[("per-sample distillate (a Sample)<br/>uncurated | curated-success | refusal")]
     outcome -->|"fold per case, PURE"| metricSet[("per-case roll-up<br/>path-gated rates + frequency counts")]
