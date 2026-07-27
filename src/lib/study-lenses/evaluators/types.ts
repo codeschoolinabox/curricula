@@ -50,8 +50,10 @@ export type EvaluationSpec = {
 	/**
 	 * The runaway-loop cap the iteration guard enforces — a loop that never
 	 * yields cannot be stopped by ceasing to pull, so the guard lives inside
-	 * the machinery and its cap rides the spec. The machinery's own default
-	 * applies when absent; the seconds budget stays the engine's own.
+	 * the machinery and its cap rides the spec. Absent, no iteration cap
+	 * applies — the guard still counts, and the machinery's default backstop
+	 * is the engine's wall-clock budget; the seconds budget stays the
+	 * engine's own.
 	 */
 	readonly iterations?: number;
 };

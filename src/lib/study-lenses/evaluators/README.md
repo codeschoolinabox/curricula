@@ -15,6 +15,7 @@ evaluators/
   README.md       this file — the kind's mechanics + navigation
   DOCS.md         the region's architectural sketch
   types.ts        the evaluator-kind contract
+  lib/            region-internal machinery shared by more than one evaluator
   run/            the baseline evaluator
   intercept/      run + the program's own I/O as events
   tracers/        the introspective family — one sub-directory per tracer
@@ -149,8 +150,9 @@ this region owns.
   the studied program's Facts — its source, and, for a tracer, the ast and
   static scope structure (`facts.environment`) — the execution axis the lens
   mapped from the snippet type, and optionally the iteration cap the
-  runaway-loop guard enforces (the machinery's own defaults apply when absent).
-  The kind's whole input domain.
+  runaway-loop guard enforces (absent → the guard still counts but no cap
+  applies; the engine's wall-clock budget is the only backstop). The kind's
+  whole input domain.
 - **evaluation event stream** — what main returns: an async iterable of events
   plus a companion `settled` promise. Events are pulled; the settlement is
   awaited; cancellation is ceasing to pull.
