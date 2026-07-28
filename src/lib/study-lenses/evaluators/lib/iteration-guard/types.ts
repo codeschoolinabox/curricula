@@ -105,7 +105,9 @@ type CreateIterationGuard = (cap?: number) => IterationGuard;
  * Deep-frozen at construction (record, span, and both positions).
  * Well-formed means this full depth: a finite-number `loopIndex` and four
  * finite line/column positions — the classification's acceptance
- * predicate, and the only shape `__$il` ever builds.
+ * predicate, and the only shape `__$il` ever builds. The type is
+ * structural: a well-formed forgery is also typed `LimitTrip`, unfrozen —
+ * see {@link ReadLimitTrip}.
  */
 type LimitTrip = {
 	readonly loopIndex: number;
@@ -119,6 +121,10 @@ type LimitTrip = {
  * marker (the full {@link LimitTrip} depth, all numbers finite), else
  * `null` — `null` IS the "not a trip" answer, so recognition needs no
  * second predicate and no consumer ever touches the throw's properties.
+ * The record is returned BY REFERENCE — the stamped object itself, never
+ * a copy, never re-frozen — so the halt author holds exactly the object
+ * the classification found: frozen when the guard built it, as-given
+ * when a well-formed forgery brought it (shape, never provenance).
  * Total by construction: the WHOLE body rides one throw-guard —
  * accessor-safety (presence checked without invoking getters) narrows
  * what the guard must catch, it is not the guard's boundary, so a

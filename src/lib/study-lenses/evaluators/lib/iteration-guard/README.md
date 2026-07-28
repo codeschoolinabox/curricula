@@ -150,11 +150,12 @@ encoding — so the whole call text is authored in one place.
   trip record when the value carries a well-formed marker, `null` otherwise —
   `null` **is** the "not a trip" answer, so a consumer that only needs
   recognition checks for `null` and never touches the throw's properties itself.
-  Total over `unknown` and never throws: marker presence is checked without
-  invoking accessors, the payload read rides a try/catch, and a malformed
-  payload (a forged marker with garbage) is `null`, not an exception — a throw
-  escaping the halt serializer would be a worker crash, which classification
-  must never cause.
+  The record comes back **by reference** — the stamped object, never a copy,
+  never re-frozen. Total over `unknown` and never throws: marker presence is
+  checked without invoking accessors, the payload read rides a try/catch, and a
+  malformed payload (a forged marker with garbage) is `null`, not an exception —
+  a throw escaping the halt serializer would be a worker crash, which
+  classification must never cause.
 
 ## Owns vs. excludes
 
@@ -295,9 +296,9 @@ encoding — so the whole call text is authored in one place.
 
 Pure and synchronous throughout ⇒ **node tests only**. Call text is asserted
 through the splice verb's exact-output pins (statement forms, loc-string
-encoding) — the factories are non-surface (§ Design commitments), so the verb
-is the only observable window onto them; loop-guard's own three gates already
-pin placement, so placement is not re-covered here beyond one representative
+encoding) — the factories are non-surface (§ Design commitments), so the verb is
+the only observable window onto them; loop-guard's own three gates already pin
+placement, so placement is not re-covered here beyond one representative
 pass-through. The guard state is driven directly as functions: counter
 arithmetic, cap edges (`0`, negative, `Infinity`, `NaN`, absent), reset
 isolation between loop indices, run-total monotonicity and its includes-the-trip
