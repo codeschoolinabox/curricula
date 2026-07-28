@@ -37,16 +37,15 @@ describe('spliceIterationGuards', () => {
 		});
 
 		it('counts the guarded loop', () => {
-			expect(
-				spliceIterationGuards('while (x) {\n\tstep();\n}\n').loopCount,
-			).toBe(1);
+			expect(spliceIterationGuards('while (x) {\n\tstep();\n}\n').loopCount).toBe(
+				1,
+			);
 		});
 	});
 
 	describe('many — nested loops in reading order', () => {
 		it('assigns dense 1-based indices outer-first, each guard carrying its own loop span', () => {
-			const source =
-				'while (a) {\n\tfor (const x of xs) {\n\t\tf(x);\n\t}\n}\n';
+			const source = 'while (a) {\n\tfor (const x of xs) {\n\t\tf(x);\n\t}\n}\n';
 
 			expect(spliceIterationGuards(source).code).toBe(
 				"while (a) {__$il(1, '1:0:5:1');\n\tfor (const x of xs) {__$il(2, '2:1:4:2');\n\t\tf(x);\n\t}__$ir(2);\n}__$ir(1);\n",
@@ -54,8 +53,7 @@ describe('spliceIterationGuards', () => {
 		});
 
 		it('counts both guarded loops', () => {
-			const source =
-				'while (a) {\n\tfor (const x of xs) {\n\t\tf(x);\n\t}\n}\n';
+			const source = 'while (a) {\n\tfor (const x of xs) {\n\t\tf(x);\n\t}\n}\n';
 
 			expect(spliceIterationGuards(source).loopCount).toBe(2);
 		});
@@ -83,8 +81,8 @@ describe('spliceIterationGuards', () => {
 	describe('interface — the pass-through result shape', () => {
 		it('returns exactly the code and loopCount pair', () => {
 			expect(
-				Object.keys(spliceIterationGuards('while (x) {\n}\n')).toSorted(
-					(a, b) => a.localeCompare(b),
+				Object.keys(spliceIterationGuards('while (x) {\n}\n')).toSorted((a, b) =>
+					a.localeCompare(b),
 				),
 			).toEqual(['code', 'loopCount']);
 		});

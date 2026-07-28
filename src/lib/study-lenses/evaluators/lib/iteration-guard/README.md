@@ -295,9 +295,9 @@ encoding — so the whole call text is authored in one place.
 
 Pure and synchronous throughout ⇒ **node tests only**. Call text is asserted
 through the splice verb's exact-output pins (statement forms, loc-string
-encoding) — the factories are non-surface (§ Design commitments), so the verb is
-the only observable window onto them; loop-guard's own three gates already pin
-placement, so placement is not re-covered here beyond one representative
+encoding) — the factories are non-surface (§ Design commitments), so the verb
+is the only observable window onto them; loop-guard's own three gates already
+pin placement, so placement is not re-covered here beyond one representative
 pass-through. The guard state is driven directly as functions: counter
 arithmetic, cap edges (`0`, negative, `Infinity`, `NaN`, absent), reset
 isolation between loop indices, run-total monotonicity and its includes-the-trip

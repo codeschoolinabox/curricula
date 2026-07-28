@@ -298,13 +298,10 @@ valid way to request zero questions.
 `undefined`), that filter is skipped entirely — all questions pass it.
 Individual omitted toggles within a group default to `true`.
 
-## Facts and the refusal arm (the Stage-2 change)
+## Facts and the refusal arm
 
 The entry reads source, AST, and scope from the embodiment's **facts** — it
-never parses or re-derives scope. This replaced the prior architecture's
-`embodiment.status.parsed` / `embodiment.parse.ast.acornNode` reads and the
-vendored `buildScope(ast)`; `parse-source.ts` (and its `Parse*` result types)
-are gone with it — a latent double-parse removed.
+never parses or re-derives scope.
 
 ```text
 facts.source.value                          — the source string for analyzers
@@ -319,15 +316,12 @@ facts.environment (narrow .ok → .value)     — the scope environment
 (`environment`) — the result is `{ ok: false, error: { message, offset? } }`
 drawn from whichever stage's `StageCause` (message, plus the parser's source
 offset when it reports one). The environment-defect branch is rare (a valid AST
-almost always scopes) but typed, not swallowed. This is the honest contract the
-old single-`ast === null` trigger could not express.
+almost always scopes) but typed, not swallowed.
 
-**The offset flip.** The prior architecture anchored `location` to a 1-based
-line/column range and threaded `source` into `extractLocation`. Greenfield
-parses with offsets but not `.loc`, so `location` is now `node.start`/`node.end`
-zero-indexed half-open `[start, end)` offsets, `extractLocation` needs only the
+**Offset-native locations.** A question's `location` is `node.start`/`node.end`
+zero-indexed half-open `[start, end)` offsets; `extractLocation` needs only the
 node, and `MicroDecisionConfig.range` is an offset span. Sorting is by start
-offset, tie-broken by end offset (was start line then start column).
+offset, tie-broken by end offset.
 
 **`string-construction` fires twice.** One registered `voice` analyzer emits the
 same question `id` from a `TemplateLiteral` branch and a `+` `BinaryExpression`
@@ -360,8 +354,7 @@ helpers are its implementation.
    `MicroDecisionResult`.
 
 The walk builds its questions/errors in two private accumulators that only leave
-as the readonly result — an O(n) tree flatten rather than an O(n²) per-level
-merge.
+as the readonly result — an O(n) tree flatten.
 
 ### Data flow
 
