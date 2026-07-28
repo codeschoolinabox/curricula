@@ -15,7 +15,7 @@ import type { NodeRule, SyntaxAllowlist } from './types.js';
  *
  * @remarks
  * Reshaped generic validating machinery (not policy this level owns), colocated
- * here per the Wave-0 plan until a shared leaf exists: the walk is
+ * here until a shared leaf exists: the walk is
  * level-agnostic and reads only the node-rule table it is handed. Default-deny
  * — a node type the table does not name is outside the level; `true` admits
  * outright; a constraint check answers legality only, and its message becomes a

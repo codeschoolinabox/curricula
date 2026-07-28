@@ -206,6 +206,12 @@ here:
 - **block** — created by each `{ }` block (if-bodies, loop bodies, bare blocks)
   **that has lexical declarations**. See
   [Empty blocks don't push](#empty-blocks-dont-push).
+- **for** — the scope of a classic `for` head: the head's own declarations live
+  here, not in the enclosing scope, and each iteration gets a fresh copy of them
+  (`CreatePerIterationEnvironment` — see
+  [`for (let i …)` and per-iteration environments](#for-let-i--and-per-iteration-environments)).
+  The body block nests inside it as an ordinary `block` child, so a body-level
+  shadow of a head name is two scopes, honestly modelled.
 - **for-of** — the scope of a `for…of` head: a fresh binding for the loop
   variable each iteration (JEJ iterates strings only).
 - _(backdrop)_ **global environment / realm** — the world every program shares:

@@ -60,8 +60,8 @@ flowchart TD
   twice, and no consumer holds its own copy of the truth. Realized as ONE held
   settle whose record keys by level: the roster is session-fixed, so the
   identity never keys on the levels, and a new settle replaces the held record
-  wholesale — nothing accumulates across an editing session (ruled with the
-  Wave-4 test package, 2026-07-20).
+  wholesale — nothing accumulates across an editing session (ruled with the test
+  package that ruled it).
 - **No second parse** — the assembly reads the embodiment's stage values;
   nothing here parses source text.
 - **Frozen outputs** — the assembled facts and every verdict leave this library

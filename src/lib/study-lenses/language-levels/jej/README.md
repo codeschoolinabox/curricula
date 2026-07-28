@@ -112,9 +112,9 @@ project the answer:
   environment fact, upstream; the level reads only the slice its validator needs
   — the references no program scope resolves, carried in the parse facts — and
   derives no scopes of its own.
-- **known-JavaScript globals** — the names JavaScript is known to provide. This
-  is JavaScript-generic knowledge, not JEJ policy; JEJ's policy is the far
-  smaller set of globals it admits.
+- **known-runtime globals** — the names the runtime is known to provide, the
+  language's own and the browser's alike. This is JavaScript-generic knowledge,
+  not JEJ policy; JEJ's policy is the far smaller set of globals it admits.
 - **the parse options that fix the node-type universe** — the caller's. The
   allowlist is total over the node types the package's one parse emits, not over
   the whole grammar.

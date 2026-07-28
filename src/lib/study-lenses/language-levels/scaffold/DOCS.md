@@ -21,7 +21,7 @@ this document constrains only this level.
 
 ```mermaid
 flowchart TD
-    PF["parse facts<br/>(tokens · comments · syntax tree)"]
+    PF["parse facts<br/>(tokens · comments · syntax tree · the escape list)"]
     V["violations<br/>(one per debugger statement, in source order, frozen)"]
     PF -->|"validate, pure — walk the tree"| V
 ```

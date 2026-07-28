@@ -12,8 +12,9 @@ import type { Node } from 'acorn';
  * siblings' indices unshifted. `null`, primitives, and non-node objects (a
  * `Literal.regex`) never satisfy the node check, so they contribute no segment.
  *
- * A path-map builder joins a parent path with each `segment` to form a full
- * Program-rooted node path (e.g. `'$.body.0.declarations.0'`).
+ * The caller's walk joins its parent path with each `segment` to form a full
+ * Program-rooted node path (e.g. `'$.body.0.declarations.0'`) as it descends —
+ * paths are carried inline, never built into a separate map.
  *
  * The returned array is not frozen: it is read immediately and discarded, so it
  * is transient.
@@ -36,9 +37,9 @@ export default function getChildNodesWithPath(
  * A direct child paired with the path segment that reaches it from its parent.
  *
  * Kept local rather than in `./types.ts`: this is vendored-machinery vocabulary,
- * not a level model, and promoting it would route every parallel Wave-0 sibling
- * increment through one shared types file. A path-map builder infers this shape
- * structurally from the return type — no import needed.
+ * not a level model, and promoting it would route sibling increments through one
+ * shared types file for no gain. The consuming walk (`collect-violations.ts`)
+ * destructures it, inferring the shape structurally — no import needed.
  */
 type ChildWithPath = {
 	readonly child: Node;

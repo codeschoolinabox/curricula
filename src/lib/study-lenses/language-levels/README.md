@@ -85,7 +85,9 @@ A registered level powers the level selector, the editor's support, and
 enforcement — identically whether it is built-in or injected. **Levels never
 ship lenses**: a level's machine-facing lenses come from that level's own
 author, importing the level directly. No level gets anything special from the
-architecture; JEJ is simply the first one registered.
+architecture; JEJ is simply the first one written. (Written, not registered —
+the built-in roster is still empty, and the first level to ship in it also owes
+the built-ins-first ordering and collision tests `join-level-roster.ts` names.)
 
 ## One parse truth
 

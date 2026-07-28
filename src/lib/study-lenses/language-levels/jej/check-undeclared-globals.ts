@@ -39,8 +39,15 @@ export default function checkUndeclaredGlobals(
 
 // vendored: relocates to a shared leaf when one exists
 /**
- * Known JavaScript built-in globals — the machinery's generic datum, never
- * the level's policy. A known name the level does not admit is a violation;
+ * Names the JavaScript **runtime** is known to provide — the language's own and
+ * the browser's alike (see the sections below: the set deliberately spans both,
+ * because the question here is "does this name exist out there", not "is this
+ * JavaScript"). Deciding which of them a learner may meet is the level's policy
+ * and lives in the realm model, not here — that is the distinction the level
+ * exists to teach, and this set must not be read as collapsing it.
+ *
+ * The machinery's generic datum, never the level's policy. A known name the
+ * level does not admit is a violation;
  * a name absent here is the runtime's, so the set need not be exhaustive —
  * missing entries safely pass to the runtime.
  *

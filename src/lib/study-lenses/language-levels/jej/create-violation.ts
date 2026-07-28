@@ -8,7 +8,7 @@ import type { SourceRange, Violation } from '../types.js';
  *
  * @remarks
  * Reshaped generic validating machinery (not policy this level owns), colocated
- * here per the Wave-0 plan until a shared leaf exists. It is meant to be the one
+ * here until a shared leaf exists. It is meant to be the one
  * site that turns a node's range and path into a violation, so a range is never
  * read two ways. `cloneAndFreeze` deep-copies before freezing, so the caller's
  * `location` object is neither retained nor frozen.

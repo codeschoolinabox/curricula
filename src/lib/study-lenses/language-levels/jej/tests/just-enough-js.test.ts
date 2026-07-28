@@ -176,7 +176,7 @@ describe('justEnoughJs', () => {
 			expect(check(expressionOf(source))).toBe(true);
 		});
 
-		it('admits x.y++ — the target is not constrained, matching the quarry', () => {
+		it('admits x.y++ — the target is not constrained', () => {
 			expect(check(expressionOf('x.y++;'))).toBe(true);
 		});
 
