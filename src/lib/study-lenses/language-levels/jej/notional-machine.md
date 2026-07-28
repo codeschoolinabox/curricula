@@ -194,8 +194,10 @@ property-key identifiers it's `proto-check` (property resolution).
 Containers for bindings. Scopes form a chain — inner scopes can see bindings in
 outer scopes via name resolution.
 
-The program opens three kinds of scope (the level's `ScopeKind`); the realm sits
-above them all as the backdrop:
+The program opens the kinds of scope below; the realm sits above them all as the
+backdrop. Which scopes a given program actually opens is read off the
+embodiment's environment fact — the one scope analysis, upstream — not derived
+here:
 
 - **program** — the program's single top-level scope. At runtime it is the
   **module's environment record**, whose outer is the global environment (the
