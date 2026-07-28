@@ -360,7 +360,7 @@ as the readonly result — an O(n) tree flatten.
 
 ```mermaid
 flowchart TD
-    subgraph facts["Embodiment (greenfield Facts)"]
+    subgraph facts["Embodiment · Facts"]
         SRC["source.value : string"]
         AST["ast.value : acorn Program"]
         ENV["environment.value : Environment"]
