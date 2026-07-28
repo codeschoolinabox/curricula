@@ -77,6 +77,76 @@ describe('trap analyzers', () => {
 			);
 			expect(results).toHaveLength(0);
 		});
+
+		it('does not fire on a while loop with a variable condition', () => {
+			const results = analyzeAll(
+				'let flag = true;\nwhile (flag) { run(); }',
+				analyze,
+			);
+			expect(results).toHaveLength(0);
+		});
+
+		it('fires on do-while (true)', () => {
+			const results = analyzeAll('do { run(); } while (true);', analyze);
+			expect(results).toHaveLength(1);
+		});
+
+		it('does not fire on a do-while loop with a variable condition', () => {
+			const results = analyzeAll(
+				'let x = false;\ndo { run(); } while (x);',
+				analyze,
+			);
+			expect(results).toHaveLength(0);
+		});
+
+		it('fires on a for loop with a literal test', () => {
+			const results = analyzeAll(
+				'for (let i = 0; true; i++) { run(); }',
+				analyze,
+			);
+			expect(results).toHaveLength(1);
+		});
+
+		it('does not fire on a for loop with a variable condition', () => {
+			const results = analyzeAll(
+				'for (let i = 0; i < 3; i++) { run(); }',
+				analyze,
+			);
+			expect(results).toHaveLength(0);
+		});
+
+		it('does not fire on an endless for loop, which states no condition', () => {
+			const results = analyzeAll('for (;;) { run(); }', analyze);
+			expect(results).toHaveLength(0);
+		});
+
+		it('does not fire on a for-of loop, which tests nothing', () => {
+			const results = analyzeAll(
+				'const xs = [];\nfor (const x of xs) { run(); }',
+				analyze,
+			);
+			expect(results).toHaveLength(0);
+		});
+
+		it('does not fire on a for-in loop, which tests nothing', () => {
+			const results = analyzeAll(
+				'const o = {};\nfor (const k in o) { run(); }',
+				analyze,
+			);
+			expect(results).toHaveLength(0);
+		});
+
+		it.each([
+			['if (true) { run(); }', 'if'],
+			['while (true) { run(); }', 'while'],
+			['do { run(); } while (true);', 'do...while'],
+			['for (let i = 0; true; i++) { run(); }', 'for'],
+		])('names %s as %s', (source, label) => {
+			const results = analyzeAll(source, analyze);
+			expect(results.map((result) => result.context)).toEqual([
+				expect.stringContaining(`condition in this ${label} is`),
+			]);
+		});
 	});
 
 	describe('accidental-semicolon', () => {

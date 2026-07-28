@@ -18,6 +18,19 @@ import getRecord from './get-record.js';
 // ─── Helpers ───────────────────────────────────────────────
 
 /**
+ * Every statement that states a condition, named as a learner would say it.
+ * Membership doubles as the type gate. Deliberately narrower than
+ * `STATEMENT_LABELS`: `for...of` and `for...in` iterate rather than test, so they
+ * carry no condition that could be constant.
+ */
+const CONDITION_LABELS: Readonly<Record<string, string>> = {
+	IfStatement: 'if',
+	WhileStatement: 'while',
+	DoWhileStatement: 'do...while',
+	ForStatement: 'for',
+};
+
+/**
  * Every statement whose body a stray semicolon can empty, named as a learner would
  * say it. Membership doubles as the type gate: a statement absent from this table
  * has no body a semicolon could swallow. `for...in` is admitted defensively, exactly
@@ -40,16 +53,18 @@ function constantCondition(
 	_scope: ScopeUsage,
 	_source: string,
 ): CodeQuestion | null {
-	if (node.type !== 'IfStatement' && node.type !== 'WhileStatement') {
+	// Load-bearing despite the type: `noUncheckedIndexedAccess` is off, so this
+	// lookup is typed `string` and the compiler cannot see the miss.
+	const statementType = CONDITION_LABELS[node.type];
+	if (statementType === undefined) {
 		return null;
 	}
 
-	const test = getRecord(node).test as Node;
-	if (test.type !== 'Literal') {
+	// `for (;;)` states no condition at all — `test` is null, not a node.
+	const test = getRecord(node).test as Node | null;
+	if (test?.type !== 'Literal') {
 		return null;
 	}
-
-	const statementType = node.type === 'IfStatement' ? 'if' : 'while';
 
 	return createCodeQuestion({
 		id: 'constant-condition',
