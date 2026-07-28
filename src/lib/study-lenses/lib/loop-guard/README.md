@@ -15,11 +15,13 @@ the load-bearing invariant, not a nicety.
 ## Where this sits
 
 A **peer-independent** module under [`lib/`][lib], a sibling of
-[`engine/`][engine] and [`danger-runner/`][danger]. Two runners consume it:
+[`engine/`][engine]. The evaluators region consumes it two ways:
 
-- **intercept** (under [`embody/lib/evaluating/`][evaluating]) — the sandbox
-  runner ([Seam 4][interceptseam]).
-- **danger** ([`danger-runner/`][danger]) — the same-origin iframe runner.
+- **danger** ([`evaluators/danger/`][danger]) — the same-origin iframe runner —
+  imports it directly from its [backend runner][dangerrun].
+- **the engine-backed evaluators** (run, intercept) — through the region's
+  shared iteration-guard (`evaluators/lib/iteration-guard/`), the
+  closure-counter form [Seam 4][interceptseam] pins.
 
 ### Why this module exists
 
@@ -37,23 +39,22 @@ parameterized** (and, along the way, migrated recast→acorn — see
 
 **2 — The oracle lives in the tsconfig-excluded legacy zone.** The oracle sits
 under `embody/lib/evaluating/shared/**`, which `tsconfig.json` **excludes** from
-type-checking. Danger currently reaches sideways into that excluded file
-([`danger-run.ts`][dangerrun] imports it read-only — permitted by
-[`lib/README.md`][lib], but a dependency on unchecked legacy code). Promoting a
-single, **type-checked** splicer to `lib/` gives both runners one maintained
-source of truth to import **down** into, and lets danger drop its dependency on
-the excluded oracle.
+type-checking; danger's runner once reached sideways into that excluded file.
+Promoting a single, **type-checked** splicer to `lib/` gives every runner one
+maintained source of truth to import **down** into — and danger has dropped its
+oracle dependency: [its backend runner][dangerrun] imports this module.
 
 > **Not** a dependency-direction _permission_ fix. `lib/ → embody/lib/*` imports
-> are allowed ([`lib/README.md`][lib]), and danger already imports the oracle.
-> The fix is **contract** (parameterized calls the oracle can't provide) and
-> **maintainability** (off the excluded legacy zone) — not "danger cannot import
-> from embody."
+> are allowed ([`lib/README.md`][lib]), and danger then imported the oracle
+> directly. The fix is **contract** (parameterized calls the oracle can't
+> provide) and **maintainability** (off the excluded legacy zone) — not "danger
+> cannot import from embody."
 
 ### Scope of migration
 
-This module's consumers are **intercept and danger** only. The oracle's other
-current callers — [`run/run.ts`][run] and the separate
+This module's consumers are the evaluators region's runners — **danger**
+directly, **run and intercept** through the region's iteration-guard. The
+oracle's other callers — the legacy [`run/run.ts`][run] engine and the separate
 [`snippetry/debug`][snippetrydebug] package (its own while-only splicer) — are
 **out of scope** and stay on their existing implementations. The legacy
 `guardLoops` verb therefore coexists with this module's `spliceLoopGuards` for
@@ -61,13 +62,12 @@ now; that coexistence is deliberate, not an oversight.
 
 [lib]: ../README.md
 [engine]: ../engine/README.md
-[danger]: ../danger-runner/README.md
-[evaluating]: ../../embody/lib/evaluating/README.md
-[interceptseam]: ../../embody/lib/evaluating/evaluators/intercept/types.ts
-[oracle]: ../../embody/lib/evaluating/shared/guard-loops/guard-loops.ts
+[danger]: ../../evaluators/danger/README.md
+[interceptseam]: ../../../embody/lib/evaluating/evaluators/intercept/types.ts
+[oracle]: ../../../embody/lib/evaluating/shared/guard-loops/guard-loops.ts
 [docs]: ./DOCS.md
-[dangerrun]: ../danger-runner/danger-run.ts
-[run]: ../../embody/lib/evaluating/run/run.ts
+[dangerrun]: ../../evaluators/danger/backend/run.ts
+[run]: ../../../embody/lib/evaluating/run/run.ts
 [snippetrydebug]: ../../../snippetry/debug/guard-loops/guard-loops.ts
 
 ## Type ownership & dependency direction
@@ -120,16 +120,15 @@ _signature_ is locked here.
     `` `if (++loop${n} > ${M}) throw new RangeError("Loop ${n} exceeded ${M} iterations.");` ``
   - `makeReset(n)` → `` `loop${n} = 0;` `` (assignment to the `var` global)
   - danger **uses** `loopCount` to emit `var loop1 = 0, …, loop{loopCount} = 0`
-    ([`build-danger-script.ts`][dangerbuild], "never hardcoded").
+    ([`build-counters.ts`][dangerbuild], "never hardcoded").
 
 The guard-vs-reset **and** the intercept-vs-danger asymmetry (closure calls vs.
 `var` assignment; `loopCount` used vs. ignored) is exactly why **both** hooks
-are parameterized. Adopting this module is a **companion migration** for the
-already-shipped `danger-runner`: its oracle import, its call site, and its
-README/DOCS/types migrate off the oracle onto these hooks (a separate, WP4-gated
-change — not done here).
+are parameterized. danger's adoption has landed — its runner passes these hooks
+directly ([`run.ts`][dangerrun]); the closure-counter form arrives with the
+evaluators region's iteration-guard.
 
-[dangerbuild]: ../danger-runner/build-danger-script.ts
+[dangerbuild]: ../../evaluators/danger/backend/build-counters.ts
 
 ## Ubiquitous language
 
@@ -306,7 +305,7 @@ throws a typed `LoopGuardError` on a malformed source (both parse modes failed �
 - **`loc` is the loop statement's own span**, not the body's — a limit trip is
   attributed to the loop, so the consumer receives the loop's location.
 
-[interceptorder]: ../../embody/lib/evaluating/intercept/intercept.ts
+[interceptorder]: ../../../embody/lib/evaluating/intercept/intercept.ts
 
 ## Testing posture
 
@@ -335,9 +334,9 @@ check placement _and_ the no-newline invariant at once. Three gates pin fidelity
   (peer-independence rules).
 - Behavior oracle (re-authored, **not** imported — tsconfig-excluded):
   [`guard-loops.ts`][oracle] and its
-  [`DOCS.md`](../../embody/lib/evaluating/shared/guard-loops/DOCS.md).
+  [`DOCS.md`](../../../embody/lib/evaluating/shared/guard-loops/DOCS.md).
 - Structural template:
-  [`instrument-variables.ts`](../../embody/lib/evaluating/trace/variables/instrument-variables.ts)
+  [`instrument-variables.ts`](../../../embody/lib/evaluating/trace/variables/instrument-variables.ts)
   — the acorn `.start`/`.end` string-splice pattern.
 - The locked consumer contract this serves: [intercept Seam 4][interceptseam].
 - [`./DOCS.md`](./DOCS.md) — the architectural sketch and `## Data flow`.
