@@ -246,7 +246,12 @@ type MetricSet = {
  * @remarks
  * - `generatedAt` — ISO timestamp; **provenance only**, never a reproducibility
  *   claim (generation is non-reproducible — a re-run yields different programs).
- * - `model` — the default model these cases targeted (a size-sweep changes this).
+ * - `model` — provenance, **measured not requested**: the model id the run
+ *   actually resolved, read off the samples rather than off the request. An
+ *   unpinned selection descends its fallback chain silently, so a run can span
+ *   more than one artifact; the stamp names every id that resolved, and says so
+ *   plainly when none did. A size-sweep changes what resolves, and the stamp
+ *   follows.
  * - `smokeOk` — the ONLY floor: every case produced its full `samples` count of
  *   **well-formed** Outcomes (success _or_ refusal), proving the harness ran and
  *   `aithor` returned structured values end-to-end. **Not** "≥1 success" — a
