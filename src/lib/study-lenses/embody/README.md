@@ -138,9 +138,10 @@ this region owns.
 - **environment** — the derived static scope structure, pre-execution: the stage
   resolving how each name is bound across the program's nested scopes, toggled
   for scripts or modules. Built at embodiment time, in this region, from the
-  syntax tree and the snippet type. It reports the analyzer's reading in full:
-  each **use** of a name records how it touches the binding — read, written, or
-  both — and, for a write, whether it is the binding's own initialization (the
+  syntax tree, the source⇄tree binding, and the snippet type. It reports the
+  analyzer's reading, every field of it common enough to expose: each **use** of
+  a name records how it touches the binding — read, written, or both — and, for
+  a write, whether it is the binding's own initialization (the
   write-of-initialization flag, not the syntactic initializer node) and, when
   the write carries one, the expression written; each **definition** records the
   enclosing statement, the declarator's position, and — for a variable

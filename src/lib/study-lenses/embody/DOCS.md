@@ -18,10 +18,11 @@ abstraction.
    dependency order: source and type restated from the snippet; tokens — the
    token stream plus the set-aside comments — from the source; ast from the
    tokens; entwined from ast, tokens, and source; environment — the static scope
-   structure — from the ast and the snippet type. Every result is tagged — a
-   value or a structured cause — and a failure never stops the walk: a stage
-   whose input is missing fails carrying the upstream cause, whose origin stays
-   named inside it. Input: the snippet. Output: the Facts.
+   structure — from the ast, the source⇄tree binding, and the snippet type.
+   Every result is tagged — a value or a structured cause — and a failure never
+   stops the walk: a stage whose input is missing fails carrying the upstream
+   cause, whose origin stays named inside it. Input: the snippet. Output: the
+   Facts.
 
 2. **Derive phase accessibility** (sync, mechanical) — the five lifecycle phases
    get their accessibility from the tagged stages by fixed rules: `source` and
@@ -153,19 +154,29 @@ flowchart TD
   when ALL hold: (a) it is computed solely from structures the facts already
   hold; (b) it is a cross-cutting truth that multiple kinds of consumer would
   independently want by its nature — not one lens's bespoke need; and (c) its
-  approximations are documented at the field. A derived analytic failing any of
-  these stays a consumer's projection. The scope structure carries the two
+  approximations — and any deliberate departure from the specification — are
+  documented at the field. A derived enrichment failing any of these stays a
+  consumer's projection. A cross-index key is not one of these: a `path` carries
+  a name back into the source⇄tree binding and answers to the indexing
+  constraint above, not to this test. The scope structure carries the two
   admitted derived enrichments. `usedBeforeBound` is a static pre-initialization
   fact (how a use relates to its `let`/`const`/`class` binding when it precedes
   initialization: evaluated `eager` at a fixed point, or `deferred` to a later
   context), never a runtime verdict, so a consumer owns any reachability
   judgment built on it. `exportedNames` is a binding's contribution to its
   module's export interface, read from the export declarations the facts already
-  hold — the analyzer models no export status — and wanted by every consumer
-  that reasons about the module boundary rather than one lens alone: a name
-  leaving the module is read from outside it, so an unused-binding check, a
-  public-API reading, and a refactoring check each need it. It approximates
-  nothing (an exact reading of the ExportEntries that name a local binding), and
-  it states what IS exported, never whether exporting is allowed.
+  hold — the analyzer carries no export status, though it does record an export
+  specifier as a read of the local binding — and wanted by every consumer that
+  asks whether a name leaves the module rather than by one lens alone: a name
+  that leaves is read from outside, so an unused-binding check, a rename or
+  refactor check, and any "is this local name public" reading each need it. It
+  is a per-binding fact, so an export entry whose local name is not a binding
+  the program names is not recorded — a re-export, and a default export of an
+  expression or an anonymous declaration, whose local name the specification
+  writes `*default*`; a whole-interface reading would be a separate
+  module-scoped fact. Its one departure from the specification's letter,
+  attributing `export default x` to `x` though that entry is a value snapshot
+  bound as `*default*`, is documented at the field. Both state what IS, never
+  what is allowed.
 - **Internal decomposition** — the factory's internal libraries document
   themselves at their own abstraction level.

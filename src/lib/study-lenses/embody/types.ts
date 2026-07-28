@@ -197,7 +197,8 @@ export type Entwined = {
  * `ClassName`, `CatchClause`, … — while `kind` is the `let`/`const`/`var`
  * *keyword*, carried only when a variable declaration introduces the name.
  * `parent` and `index` place the declaration in its enclosing statement. Every
- * field here is the analyzer's own reading — nothing embody derives.
+ * field here is the analyzer's own reading but `path`, which embody derives from
+ * the entwined index.
  */
 export type ScopeDefinition = {
 	/** The binding category (`Variable`, `Parameter`, `ImportBinding`, … — never a `let`/`const`/`var` keyword; that is `kind`). */
@@ -248,8 +249,9 @@ export type ScopeAccess = 'read' | 'write' | 'readwrite';
 export type UsedBeforeBound = 'eager' | 'deferred' | false;
 
 /**
- * One use of a name. Every field but the last is projected faithfully from the
- * scope analysis: the identifier node, the variable it resolves to — or `null`
+ * One use of a name. Every field is projected faithfully from the scope analysis
+ * but `path` and `usedBeforeBound`, which embody derives: the identifier node,
+ * the variable it resolves to — or `null`
  * when it resolves to nothing (an undeclared global) — the scope the use is
  * made from, how the use touches the binding (`access`), whether that touch is
  * the binding's own initialization (`init`), and the written expression
@@ -265,7 +267,7 @@ export type ScopeReference = {
 	readonly identifier: AcornNode;
 	readonly resolved: ScopeVariable | null;
 	readonly from: Scope;
-	/** How the use touches the binding. See {@link ScopeAccess}. */
+	/** How the use touches the binding. See {@link ScopeAccess}. One analyzer artifact rides here: an export specifier (`export { x }`) is recorded as a `'read'` of the local binding, though exporting evaluates no read — it links a binding. A consumer counting reads sees that link as one. */
 	readonly access: ScopeAccess;
 	/** Whether this write is the binding's own initialization — meaningful only for writes, `false` for reads. Not the AST `VariableDeclarator.init` (the initializer node) nor the `.init` path segment: the analyzer's write-of-initialization flag, coerced from its read-only `undefined` to a clean `false`. */
 	readonly init: boolean;
@@ -319,22 +321,32 @@ export type ScopeVariable = {
 	readonly defs: ReadonlyArray<ScopeDefinition>;
 	/**
 	 * DERIVED, not the analyzer's reading (eslint-scope models no export status) —
-	 * but an exact, complete reading of the module's export declarations, not a
-	 * heuristic. The external names this binding contributes to the module's export
-	 * interface (the ECMAScript ExportEntries whose local name is this binding). A
-	 * declaration export (`export const x`, `export function f`, `export class C`)
-	 * or a bare named specifier (`export { x }`) exports under the binding's own
-	 * name; `export { x as y }` records `y`, and `export { x as "s" }` the string
-	 * `s` (ES2022 string export names); a default export of the binding
-	 * (`export default function f`, `export default x`, `export { x as default }`)
-	 * records `'default'`; one binding may carry several (`export { x, x as y }` →
-	 * `['x', 'y']`, source order). Empty when the binding is not exported — and
-	 * always empty outside a `module` scope (a script has no exports). Re-exports
-	 * (`export … from …`, `export * …`) bind no local name and are not recorded, so
-	 * iterating bindings does not reconstruct re-exported names. The array is always
-	 * present: a consumer's unused-binding check skips a binding whose
-	 * `exportedNames.length > 0` (an empty array is truthy, so test the length, not
-	 * the array) — it is public API, read from outside the module.
+	 * read from the module's export declarations themselves, not inferred. The
+	 * external names this binding contributes to the module's export interface (the
+	 * ECMAScript ExportEntries whose local name is this binding). A declaration
+	 * export (`export const x`, `export function f`, `export class C`) or a bare
+	 * named specifier (`export { x }`) exports under the binding's own name;
+	 * `export { x as y }` records `y`, and `export { x as "s" }` the string `s`
+	 * (ES2022 string export names); `export default function f`, `export default
+	 * class C`, and `export { x as default }` record `'default'`; one binding may
+	 * carry several (`export { x, x as y }` → `['x', 'y']`, source order). Empty
+	 * when the binding is not exported — and always empty outside a `module` scope
+	 * (a script has no exports).
+	 *
+	 * Two boundaries, both deliberate. Re-exports (`export … from …`, `export * …`)
+	 * bind no local name and are not recorded, so iterating bindings does not
+	 * reconstruct a module's whole export interface — this is a per-binding fact,
+	 * and a complete interface reading would be a separate module-scoped one. And
+	 * `export default x` is recorded on `x` though the specification names that
+	 * entry's local binding `*default*`: the export is a value snapshot, not a live
+	 * binding to `x` (reassigning `x` afterwards does not change what importers
+	 * see). Embody attributes it to `x` anyway, because a consumer asking whether
+	 * this name leaves the module wants a yes — the one place this reading extends
+	 * past the specification's letter.
+	 *
+	 * The array is always present, so test its length — an empty array is truthy.
+	 * A name that leaves the module is read from outside it, whatever a consumer
+	 * makes of that.
 	 */
 	readonly exportedNames: ReadonlyArray<string>;
 };

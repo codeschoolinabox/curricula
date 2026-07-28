@@ -1822,7 +1822,7 @@ describe('deriveEnvironment', () => {
 			});
 		});
 
-		describe('exports', () => {
+		describe('exportedNames (derived)', () => {
 			it('a script binding is never exported', () => {
 				const snippet = {
 					source: 'const local = 1;',
@@ -2224,6 +2224,158 @@ describe('deriveEnvironment', () => {
 					moduleScope &&
 					moduleScope.variables.find((variable) => variable.name === 'local');
 				expect(binding && binding.exportedNames).toEqual([]);
+			});
+
+			it('an array-pattern export exports its first binding', () => {
+				const snippet = {
+					source: 'export const [first, ...rest] = arr;',
+					type: 'module',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const moduleScope =
+					stage &&
+					stage.ok &&
+					stage.value.root.childScopes.find((scope) => scope.type === 'module');
+				const binding =
+					moduleScope &&
+					moduleScope.variables.find((variable) => variable.name === 'first');
+				expect(binding && binding.exportedNames).toEqual(['first']);
+			});
+
+			it('an array-pattern rest element is exported under its own name', () => {
+				const snippet = {
+					source: 'export const [first, ...rest] = arr;',
+					type: 'module',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const moduleScope =
+					stage &&
+					stage.ok &&
+					stage.value.root.childScopes.find((scope) => scope.type === 'module');
+				const binding =
+					moduleScope &&
+					moduleScope.variables.find((variable) => variable.name === 'rest');
+				expect(binding && binding.exportedNames).toEqual(['rest']);
+			});
+
+			it('a renamed destructuring export binds the local name, not the key', () => {
+				const snippet = {
+					source: 'export const { a: renamed = 1, ...others } = obj;',
+					type: 'module',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const moduleScope =
+					stage &&
+					stage.ok &&
+					stage.value.root.childScopes.find((scope) => scope.type === 'module');
+				const binding =
+					moduleScope &&
+					moduleScope.variables.find((variable) => variable.name === 'renamed');
+				expect(binding && binding.exportedNames).toEqual(['renamed']);
+			});
+
+			it('an object-pattern rest element is exported under its own name', () => {
+				const snippet = {
+					source: 'export const { a: renamed = 1, ...others } = obj;',
+					type: 'module',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const moduleScope =
+					stage &&
+					stage.ok &&
+					stage.value.root.childScopes.find((scope) => scope.type === 'module');
+				const binding =
+					moduleScope &&
+					moduleScope.variables.find((variable) => variable.name === 'others');
+				expect(binding && binding.exportedNames).toEqual(['others']);
+			});
+
+			it('a hole in an array-pattern export does not disturb the later binding', () => {
+				const snippet = {
+					source: 'export const [, second] = arr;',
+					type: 'module',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const moduleScope =
+					stage &&
+					stage.ok &&
+					stage.value.root.childScopes.find((scope) => scope.type === 'module');
+				const binding =
+					moduleScope &&
+					moduleScope.variables.find((variable) => variable.name === 'second');
+				expect(binding && binding.exportedNames).toEqual(['second']);
+			});
+
+			it('a default export of a value names no binding', () => {
+				const snippet = {
+					source: 'const x = 1; export default 42;',
+					type: 'module',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const moduleScope =
+					stage &&
+					stage.ok &&
+					stage.value.root.childScopes.find((scope) => scope.type === 'module');
+				const binding =
+					moduleScope &&
+					moduleScope.variables.find((variable) => variable.name === 'x');
+				expect(binding && binding.exportedNames).toEqual([]);
+			});
+
+			it('an exported let records the binding name', () => {
+				const snippet = {
+					source: 'export let mutable = 1;',
+					type: 'module',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const moduleScope =
+					stage &&
+					stage.ok &&
+					stage.value.root.childScopes.find((scope) => scope.type === 'module');
+				const binding =
+					moduleScope &&
+					moduleScope.variables.find((variable) => variable.name === 'mutable');
+				expect(binding && binding.exportedNames).toEqual(['mutable']);
+			});
+
+			it('an exported var records the binding name', () => {
+				const snippet = {
+					source: 'export var legacy = 1;',
+					type: 'module',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const moduleScope =
+					stage &&
+					stage.ok &&
+					stage.value.root.childScopes.find((scope) => scope.type === 'module');
+				const binding =
+					moduleScope &&
+					moduleScope.variables.find((variable) => variable.name === 'legacy');
+				expect(binding && binding.exportedNames).toEqual(['legacy']);
 			});
 		});
 
