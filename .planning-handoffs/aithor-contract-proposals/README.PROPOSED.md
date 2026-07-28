@@ -1,4 +1,4 @@
-<!-- cspell:ignore aithor Explorotron Malaise Signer Begel unparseable ungated unrenderable unioned -->
+<!-- cspell:ignore aithor Explorotron Malaise Signer Begel unparseable ungated unrenderable unioned hrefs -->
 
 # aithor — PROPOSED README (design dossier, pre-ratification)
 
