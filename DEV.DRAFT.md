@@ -1,5 +1,8 @@
 # Developer Guide
 
+> **DRAFT — not canonical.** Do not follow this file directly. Canonical
+> governance is routed by `CLAUDE.md`.
+
 Internal architecture, conventions, and implementation details for contributors.
 This file has one companion reference file,
 [DEV-READABILITY-PATTERNS.md](./DEV-READABILITY-PATTERNS.md) — it is part of
@@ -39,7 +42,7 @@ otherwise.
 - [Module Boundaries](#module-boundaries) — (reference: consult when adding an
   architectural layer or import-boundary rule)
 - [Code Quality Anti-Patterns](#code-quality-anti-patterns) — (pointer only —
-  canonical copy lives in AGENTS.md/AGENTS.fable.md)
+  canonical copy lives in AGENTS.md/AGENTS.principal.md)
 - [VS Code Setup](#vs-code-setup) — (reference — one-time editor setup)
 
 ## Architecture Overview
@@ -789,7 +792,7 @@ function createConfig(options: UserOptions = {}): ResolvedConfig { ... }
 
 **Scope.** This rule governs **package/module documentation** — `README.md`,
 `DOCS.md`, `types.ts` files inside source directories. **Governance docs**
-(`AGENTS.md`, `AGENTS.fable.md`, `CLAUDE.md`, `HUMANS.md`, this file,
+(`AGENTS.md`, `AGENTS.principal.md`, `CLAUDE.md`, `HUMANS.md`, this file,
 `CONTRIBUTING.md`, `CODE-OF-CONDUCT.md`) describe process AS their end-state
 contract — workflow rules, AR ceremony, plan discipline — and are out of scope.
 
@@ -1803,7 +1806,7 @@ Not documented elsewhere — kept here:
 
 - No classes (use factory functions)
 - No parameter reassignment (create new bindings) — also stated in
-  `AGENTS.md`/`AGENTS.fable.md`'s Non-Negotiable Invariants
+  `AGENTS.md`/`AGENTS.principal.md`'s Non-Negotiable Invariants
 - Immutable data / no mutations (`functional/immutable-data`, warn —
   `**.current` exempted for React refs, `eslint.config.mjs:212-217`; see also
   [§4](#4-pure-functional-approach) for the design principle)
@@ -1885,10 +1888,10 @@ The self-review anti-pattern table and pre-proposal checklist live in the agent
 governance files, where they fire at step 12 of every increment — one canonical
 copy per audience, not duplicated here:
 
-- Pre-fable agents:
+- Agents on AGENTS.md:
   [AGENTS.md § LLM Anti-Patterns](./AGENTS.md#llm-anti-patterns-resist-these-tendencies)
-- Fable-generation agents:
-  [AGENTS.fable.md § Self-Review Checklists](./AGENTS.fable.md#self-review-checklists)
+- Agents on AGENTS.principal.md:
+  [AGENTS.principal.md § Self-Review Checklists](./AGENTS.principal.md#self-review-checklists)
 
 ## VS Code Setup
 

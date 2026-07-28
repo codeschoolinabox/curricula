@@ -1,16 +1,38 @@
 <!-- cspell:ignore reflog worktree pathspec frontmatter -->
 
-# AI Agent Context — Fable Generation
+# AI Agent Context — Principal
 
-Governance for **Fable-generation agents** working in this repository
-(spiralearn / `@codeschoolinabox/spiralearn`). Pre-fable agents and other tools
-use [AGENTS.md](./AGENTS.md). Both files carry the same policy gates; this one
-assumes a current-generation harness (plan mode, registered subagents, automatic
-context summarization) and states each rule once.
+> **DRAFT — not canonical.** Do not follow this file directly. Canonical
+> governance is routed by `CLAUDE.md`.
 
-This file is written against the following loading model: fable sessions load
-AGENTS.fable.md explicitly; AGENTS.md remains the default auto-load for
-everything else.
+Governance for **principal agents** working in this repository (spiralearn /
+`@codeschoolinabox/spiralearn`) — models with the capacity to manage context
+effectively across long sessions, reason strategically and architecturally about
+a codebase, and delegate work to subagents effectively. `CLAUDE.md`'s router
+points here when an agent's model id matches its qualifying list. Agents and
+tools that don't match use [AGENTS.md](./AGENTS.md). Both files carry the same
+policy gates; the capacities above are the selection criterion, not the whole
+difference — `AGENTS.md` additionally carries § Safety Guardrails' mandatory
+risk-class warnings (multi-file/refactor/deployment/architectural changes),
+which this file assumes are internalized rather than prompted. This one assumes
+a current-generation harness (plan mode, registered subagents, automatic context
+summarization) and states each rule once.
+
+"Principal" here is a capability classification — a property of the model —
+distinct from "orchestrator" (a _session role_: whichever session is currently
+fanning work out to worker subagents, which any agent can occupy for a small
+fan-out, and unrelated to this codebase's `orchestrate/` product module). The
+two correlate but aren't the same thing.
+
+This file is written against the following loading model: neither AGENTS file is
+guaranteed to auto-load. `CLAUDE.md`'s router text is intended to reach every
+session and subagent; two independent observations this session found it absent
+from a spawned subagent's own context, and zero observations of it present in
+one. Assume it reaches a top-level session and does NOT reliably reach a spawned
+subagent. The reading agent checks its own model id against `CLAUDE.md`'s
+qualifying list and explicitly reads whichever of `AGENTS.md` /
+`AGENTS.principal.md` matches — that explicit read, not auto-load, is what §
+Orchestrated delegation's worker launch prompts rely on.
 
 - [Non-Negotiable Invariants](#non-negotiable-invariants)
 - [Session Start](#session-start)
@@ -63,11 +85,12 @@ encouragement. They cannot be overridden by momentum.
 6. **Plans are execution checklists, not references** — every plan document
    explicitly lists every required workflow step: Phase 0 DDD steps, AR trigger
    points (AR-1 through AR-5), sandbox checkpoints, commit steps, and quality
-   checks. "Follow AGENTS.fable.md" is not a plan step — an always-loaded rule
-   is not a substitute for an explicit step written where the work happens.
-   Plans must also include at least one **Mermaid data-flow diagram** (or
-   sequence/state diagram) for any change touching multiple modules or layers,
-   making the before/after data path visually obvious.
+   checks. "Follow AGENTS.principal.md" is not a plan step — an
+   assumed-in-context rule is not a substitute for an explicit step written
+   where the work happens. Plans must also include at least one **Mermaid
+   data-flow diagram** (or sequence/state diagram) for any change touching
+   multiple modules or layers, making the before/after data path visually
+   obvious.
 7. **Stop at the emergency brake** — the conditions in
    [§ Emergency Brake](#emergency-brake-and-redirects) stop work immediately and
    surface to the human.
@@ -119,8 +142,10 @@ Before writing any code:
       building the wrong thing
 - [ ] **Enter plan mode** — unless trivial or the user said "skip plan mode"
 
-(This file is loaded automatically; honoring it is the step, re-reading it is
-not.)
+(This file is not guaranteed to auto-load — `CLAUDE.md`'s router text is
+intended to, but this repo cannot verify that for every subagent spawn path.
+Reading THIS file is the explicit step the router directs you to take; once
+honored, re-reading it mid-session is not required again.)
 
 ---
 
@@ -558,8 +583,14 @@ override to synchronous.
   split mid-triangulation. Parallelize only committed-and-covered subtrees that
   pass the guard, bottom-up
   ([§ Dependency-order coverage](./DEV.md#dependency-order-coverage)). Each
-  worker is a mini cold-start; validate the **decomposition** before each
-  fan-out wave.
+  worker is a mini cold-start — its launch prompt spells out DEV.md's
+  conventions, the module README/DOCS/types, its cluster contract, AND an
+  explicit instruction to read its own governance file per the repo-root
+  `CLAUDE.md` router before starting — a deliberate backstop, not decoration:
+  whether a harness auto-loads `CLAUDE.md`'s router text into a given worker's
+  context isn't something this repo controls or can verify, so the launch prompt
+  names the step rather than assuming it. Validate the **decomposition** before
+  each fan-out wave.
 - **The orchestrator** holds the spine — `types.ts`, the DOCS `## Data flow`
   diagram, the plan/gate ledger — and reads committed contracts at DAG joins to
   catch seam-slop (Always Works™ at the seam can't be delegated). Lean ≠ blind:
@@ -724,6 +755,7 @@ skipping ceremony on its own assessment.
 ## References
 
 - [DEV.md](./DEV.md) — conventions, testing strategy, AR protocol, linting
-- [AGENTS.md](./AGENTS.md) — governance for pre-fable agents and other tools
+- [AGENTS.md](./AGENTS.md) — governance for agents and tools not on CLAUDE.md's
+  qualifying list
 - `src/` directory READMEs — module-specific context
 - API documentation generated to `docs/` via `npm run docs`

@@ -1,5 +1,8 @@
 # AI Agent Context
 
+> **DRAFT — not canonical.** Do not follow this file directly. Canonical
+> governance is routed by `CLAUDE.md`.
+
 This file provides specific context for AI assistants working with this
 repository (spiralearn / `@codeschoolinabox/spiralearn`).
 
@@ -717,11 +720,15 @@ parallelize only across subtrees already committed-and-covered that pass the
 guard.
 
 **A worker is also a mini cold-start**, so its launch prompt is a cold-start
-launch prompt (AGENTS/DEV + the module README/DOCS/types + its cluster
-contract). The orchestrator's decomposition and launch prompts are themselves a
-handoff their author is blind to — so the mandatory context-free validation pass
-checks the **decomposition before each fan-out wave** (the right grain; not a
-per-worker regress).
+launch prompt: `DEV.md`'s conventions, the module README/DOCS/types, its cluster
+contract, and an explicit instruction to read its own governance file per the
+repo-root `CLAUDE.md` router before starting — a deliberate backstop: whether a
+harness auto-loads `CLAUDE.md`'s router text into a given worker's context isn't
+something this repo controls or can verify, so the launch prompt names the step
+rather than assuming it happens automatically. The orchestrator's decomposition
+and launch prompts are themselves a handoff their author is blind to — so the
+mandatory context-free validation pass checks the **decomposition before each
+fan-out wave** (the right grain; not a per-worker regress).
 
 **The orchestrator holds the coherence spine** and nothing else: `types.ts`, the
 DOCS `## Data flow` diagram, the plan/DAG/gate ledger, and the **seam reads** at
