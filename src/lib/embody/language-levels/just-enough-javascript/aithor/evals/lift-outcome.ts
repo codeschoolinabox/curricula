@@ -5,8 +5,8 @@ import type { AithorResult, Meta } from '../types.js';
 
 import type {
 	CaseSpec,
-	ConformVerdict,
 	Outcome,
+	Reads,
 	RefusalOutcome,
 	UncuratedOutcome,
 } from './types.js';
@@ -51,10 +51,7 @@ import type {
 export default function liftOutcome(
 	spec: CaseSpec,
 	result: AithorResult,
-	reads: {
-		readonly admitted: boolean;
-		readonly conform: ConformVerdict;
-	},
+	reads: Reads,
 ): Outcome {
 	// The parent contract's resolution: an absent validate defaults to curated.
 	const curated = spec.config.validate !== false;

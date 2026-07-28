@@ -24,6 +24,7 @@ import type {
 	EvalReport,
 	MetricSet,
 	Outcome,
+	Reads,
 } from '../types.js';
 
 // Increment 5 — the impure driver (evals/DOCS.md "Sample" phase, plus the tail
@@ -82,12 +83,6 @@ const NO_MODEL_RESOLVED = '(none resolved)';
 
 /** Joins the ids of a run that spanned more than one resolved artifact. */
 const STAMP_SEPARATOR = ' + ';
-
-/** The driver's `isJej` / `conform` reads, as `liftOutcome` consumes them. */
-type Reads = {
-	readonly admitted: boolean;
-	readonly conform: ConformVerdict;
-};
 
 /**
  * The witness passed where `liftOutcome` provably never reads it — the curated
@@ -170,7 +165,7 @@ describe('the aithor eval driver', () => {
 		// The arm that makes the sweep falsifiable: with the pin OFF this is
 		// indistinguishable from a driver that never calls pinnedSpec at all, so
 		// the mechanism could otherwise ship as dead code and fail first on a real
-		// thirty-minute GPU run.
+		// hour-long GPU run.
 		it('a set pin sweeps every "pick for me" case and spares the explicit one', async () => {
 			const recorder = recordingRuntime(SCRIPTED_MODEL_ID, SCRIPTED_REPLY);
 			await runProtocol(recorder.runtime, ignoreCase, 'swept-id');
@@ -311,6 +306,35 @@ describe('the aithor eval driver', () => {
 				metricSetOf(report, 'uncurated-scratch-tight').conformanceRate
 					?.numerator,
 			).toBe(0);
+		});
+
+		// The curated half of the fold: a loose curated case admits and conforms on
+		// the first attempt, so a real curated-success flows lift -> fold -> format
+		// on every scripted run. smokeOk counts WELL-FORMED outcomes and cannot
+		// tell a success from a refusal, so without this the whole curated path
+		// could regress green.
+		it('the loose curated case succeeds on its first attempt', async () => {
+			const report = await runProtocol(
+				scriptedRuntime(SCRIPTED_MODEL_ID, SCRIPTED_REPLY),
+				ignoreCase,
+			);
+
+			expect(
+				metricSetOf(report, 'curated-scratch-loose').attemptDistribution,
+			).toEqual({ 1: SAMPLES_PER_CASE });
+		});
+
+		// Presence IS the path claim: a curated case measures no admission,
+		// because a curated success is admitted by construction.
+		it('a curated case carries no admission rate at all', async () => {
+			const report = await runProtocol(
+				scriptedRuntime(SCRIPTED_MODEL_ID, SCRIPTED_REPLY),
+				ignoreCase,
+			);
+
+			expect(
+				'admissionRate' in metricSetOf(report, 'curated-scratch-loose'),
+			).toBe(false);
 		});
 
 		it('the rendered report carries a section for every case', async () => {
@@ -519,7 +543,8 @@ describe('the aithor eval driver', () => {
 	// retry is pinned to 0, which does not contradict the browser project's
 	// retry: 2 — that setting's own WHY scopes it to "browser tests spawn Workers
 	// with SharedArrayBuffer pause protocol", and this driver spawns no Worker.
-	// Retrying here would burn 90 minutes and ~285 real inferences on one failure.
+	// Retrying here would burn three hours and up to ~330 real inferences on one
+	// failure.
 	describe('the real GPU run', () => {
 		it.skipIf(!gpuAvailable)(
 			'prints the eval report and meets the smoke floor',
@@ -776,11 +801,11 @@ function alternatingRuntime(
 	program: string,
 ): AithorRuntime {
 	const ids = [firstId, secondId];
-	const calls = { count: 0 };
+	let call = 0;
 	return {
 		loadModel: () => {
-			const resolvedId = ids[calls.count % ids.length] ?? firstId;
-			calls.count += 1;
+			const resolvedId = ids[call % ids.length] ?? firstId;
+			call += 1;
 			return Promise.resolve({
 				model: {
 					generate: () => Promise.resolve({ raw: program, code: program }),
@@ -868,7 +893,7 @@ function ignoreCase(): void {
 	return undefined;
 }
 
-/** The GPU arm's trail — a thirty-minute it must say where it got to. */
+/** The GPU arm's trail — an hour-long it must say where it got to. */
 function logCase(metricSet: MetricSet): void {
 	console.log(
 		`[eval] ${metricSet.caseId}: ${metricSet.samples} samples collected`,

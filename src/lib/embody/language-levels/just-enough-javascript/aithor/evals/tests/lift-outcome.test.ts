@@ -2,9 +2,17 @@ import { describe, it, expect } from 'vitest';
 
 import type { AithorResult, RefusalCause } from '../../types.js';
 import liftOutcome from '../lift-outcome.js';
-import type { CaseSpec, ConformVerdict, UncuratedOutcome } from '../types.js';
+import type {
+	CaseSpec,
+	ConformVerdict,
+	Reads,
+	UncuratedOutcome,
+} from '../types.js';
 
 // Increment 3 — the boundary lift (evals/DOCS.md "Lift" phase).
+// Exceptions: boundary honesty is fail-fast — an ok result with no meta, a
+// refused result with no refusal, and a curated success whose attempts falls
+// outside 1|2|3 all throw, since trusting them would silently poison the fold.
 // Triangulation for the first test: drifted reads (pass-through by value, not
 // a hardcoded clean verdict) and curated ok (variant selection by validate).
 
@@ -268,14 +276,14 @@ function refusalResult(cause: RefusalCause): AithorResult {
 	return { ok: false, refusal: { cause } };
 }
 
-function cleanReads(): { admitted: boolean; conform: ConformVerdict } {
+function cleanReads(): Reads {
 	return {
 		admitted: true,
 		conform: { ok: true, featureViolations: [], sizeViolations: [] },
 	};
 }
 
-function driftedReads(): { admitted: boolean; conform: ConformVerdict } {
+function driftedReads(): Reads {
 	return {
 		admitted: false,
 		conform: {
@@ -286,7 +294,7 @@ function driftedReads(): { admitted: boolean; conform: ConformVerdict } {
 	};
 }
 
-function poisonedReads(): { admitted: boolean; conform: ConformVerdict } {
+function poisonedReads(): Reads {
 	return {
 		get admitted(): boolean {
 			throw new Error('reads.admitted must not be read on this path');

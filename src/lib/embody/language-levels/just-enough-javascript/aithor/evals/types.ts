@@ -152,17 +152,29 @@ type RefusalOutcome = {
 };
 
 /**
- * The mechanically-readable distillate of one Sample — produced by the impure
+ * The mechanically-readable distillate of one sample — produced by the impure
  * driver (which ran `aithor` + `isJej` + `conform`), consumed by the pure core.
  * A discriminated union (on `kind`) over the three terminal shapes `aithor` can
  * reach. Plain data only: no runtime handle, no `AithorResult`, no AST.
  */
 type Outcome = UncuratedOutcome | CuratedSuccessOutcome | RefusalOutcome;
 
-/** One execution of a CaseSpec against the real model — a fresh, non-reproducible draw. */
-type Sample = {
-	readonly caseId: string;
-	readonly outcome: Outcome;
+/**
+ * The driver's externally-computed reads, as the Lift phase consumes them —
+ * the one value that crosses the pure/impure boundary alongside the
+ * `AithorResult` ([`./DOCS.md`](./DOCS.md) § Execution phases, "Lift").
+ *
+ * @remarks
+ * Named here rather than inline at the lift's signature because it is a
+ * boundary contract with two sides: the driver produces it (running `isJej`
+ * and `conform`), the lift consumes it. It is read on the uncurated-ok branch
+ * ONLY — a curated success is admitted and conformant by construction, and a
+ * refusal has no program to read — so the driver passes a deliberately
+ * pessimistic witness on the other branches rather than a fabricated clean one.
+ */
+type Reads = {
+	readonly admitted: boolean;
+	readonly conform: ConformVerdict;
 };
 
 // ─── Metrics (the pure-core roll-up) ──────────────────────────────────
@@ -276,7 +288,7 @@ export type {
 	CuratedSuccessOutcome,
 	RefusalOutcome,
 	Outcome,
-	Sample,
+	Reads,
 	Rate,
 	Histogram,
 	MetricSet,
