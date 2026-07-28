@@ -167,6 +167,15 @@ describe('caution analyzers', () => {
 			expect(results[0].context).toContain('scratch');
 		});
 
+		it('fires on an unused shadow of an exported name — the shadow is its own declaration', () => {
+			const results = analyzeAll(
+				'export const x = 1;\nfunction f() {\n  const x = 2;\n  return 3;\n}\nf();',
+				analyze,
+			);
+			expect(results).toHaveLength(1);
+			expect(results[0].context).toContain('x');
+		});
+
 		it('fires on the correct shadowed declaration, matched by node identity not name', () => {
 			// Outer `x` is read; the shadowing inner `x` is unused. A name-only
 			// match would resolve the inner declaration to the read outer entry and

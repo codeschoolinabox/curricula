@@ -150,12 +150,13 @@ this region owns.
   identifier's place, neighbors, and children through the entwined index. Two
   signals are embody's own rather than the analyzer's. The external names a
   **binding** is exported under — its contribution to the module's export
-  interface, read exactly from the export declarations (eslint-scope models no
-  export status), empty for a script or a purely local binding. And how a use
-  relates to its `let`/`const`/`class` binding when it precedes initialization —
-  evaluated `eager` (at a fixed point) or `deferred` (in a later-running
-  function or an instance field initializer) — a static fact, offered as a
-  convenience, from which a consumer draws any runtime inference, never embody.
+  interface, read from the export declarations themselves rather than inferred
+  (eslint-scope models no export status), empty for a script or a purely local
+  binding. And how a use relates to its `let`/`const`/`class` binding when it
+  precedes initialization — evaluated `eager` (at a fixed point) or `deferred`
+  (in a later-running function or an instance field initializer) — a static
+  fact, offered as a convenience, from which a consumer draws any runtime
+  inference, never embody.
 - **phase accessibility** — the derived per-phase map: accessible, or barred
   with the carried upstream cause. (The package glossary owns its distinction
   from lens fit.)

@@ -2377,6 +2377,47 @@ describe('deriveEnvironment', () => {
 					moduleScope.variables.find((variable) => variable.name === 'legacy');
 				expect(binding && binding.exportedNames).toEqual(['legacy']);
 			});
+
+			it('an anonymous default declaration names no binding', () => {
+				const snippet = {
+					source: 'const x = 1; export default function () {};',
+					type: 'module',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const moduleScope =
+					stage &&
+					stage.ok &&
+					stage.value.root.childScopes.find((scope) => scope.type === 'module');
+				const binding =
+					moduleScope &&
+					moduleScope.variables.find((variable) => variable.name === 'x');
+				expect(binding && binding.exportedNames).toEqual([]);
+			});
+
+			it('an export specifier is recorded as a read of its local binding', () => {
+				const snippet = {
+					source: 'const x = 1; export { x };',
+					type: 'module',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const moduleScope =
+					stage &&
+					stage.ok &&
+					stage.value.root.childScopes.find((scope) => scope.type === 'module');
+				const binding =
+					moduleScope &&
+					moduleScope.variables.find((variable) => variable.name === 'x');
+				expect(
+					binding &&
+						binding.references.some((reference) => reference.access === 'read'),
+				).toBe(true);
+			});
 		});
 
 		describe('byPath', () => {

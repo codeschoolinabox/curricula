@@ -312,7 +312,8 @@ export type ScopeReference = {
 /**
  * One binding: the name, the identifier nodes that introduce it, the
  * references that resolve to it, its definitions, and the external names it is
- * exported under. How a name comes to be, and how it leaves the module.
+ * exported under. How a name comes to be, and how it leaves the module. Every
+ * field is the analyzer's own reading but `exportedNames`, which embody derives.
  */
 export type ScopeVariable = {
 	readonly name: string;
@@ -333,11 +334,14 @@ export type ScopeVariable = {
 	 * when the binding is not exported — and always empty outside a `module` scope
 	 * (a script has no exports).
 	 *
-	 * Two boundaries, both deliberate. Re-exports (`export … from …`, `export * …`)
-	 * bind no local name and are not recorded, so iterating bindings does not
-	 * reconstruct a module's whole export interface — this is a per-binding fact,
-	 * and a complete interface reading would be a separate module-scoped one. And
-	 * `export default x` is recorded on `x` though the specification names that
+	 * The boundary, then the one departure. An export entry whose local name is not
+	 * a binding the program names is not recorded: a re-export (`export … from …`,
+	 * `export * …`), and a default export of an expression or an anonymous
+	 * declaration (`export default 42`, `export default function () {}`), whose
+	 * local name the specification writes `*default*`. So iterating bindings does
+	 * not reconstruct a module's whole export interface — this is a per-binding
+	 * fact, and a complete interface reading would be a separate module-scoped one.
+	 * The departure: `export default x` IS recorded on `x` though the specification names that
 	 * entry's local binding `*default*`: the export is a value snapshot, not a live
 	 * binding to `x` (reassigning `x` afterwards does not change what importers
 	 * see). Embody attributes it to `x` anyway, because a consumer asking whether

@@ -85,11 +85,12 @@ flowchart TD
   enrichment failing any of these stays a consumer's projection. Two
   corollaries. A cross-index key is not a derived enrichment: a `path` carries a
   name back into the source⇄tree binding and answers to the indexing constraint,
-  not to this test. And an admitted enrichment lives inside the stage that owns
-  its inputs — it never earns its own stage, never adds a bar to phase
-  accessibility, and so never changes the data flow above. The scope structure
-  carries two: `usedBeforeBound` and `exportedNames`, each documenting its own
-  boundaries and departures at its field.
+  not to this test. And an admitted enrichment lives on the stage whose
+  structure it enriches, computed from that stage's own inputs — it never earns
+  its own stage, never adds a bar to phase accessibility, and so never changes
+  the data flow above. The scope structure carries two: `usedBeforeBound` and
+  `exportedNames`, each documenting its own boundaries and departures at its
+  field.
 - **Level-blind.** No level knowledge in the region's data or pipeline; level
   logic runs only black-boxed inside individual gates.
 - **Truth, not permission.** This region states what is TRUE about the program;

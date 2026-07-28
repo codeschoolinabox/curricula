@@ -3,9 +3,9 @@
  *
  * The domain model in TypeScript: the flat, per-declaration usage view of a
  * program's variables that `deriveScopeUsage` produces. `VariableUsage` is one
- * `let`/`const` binding's usage (its kind, its post-declaration read/write
- * counts, and its declared identifier node); `ScopeUsage` gathers them across
- * every scope depth.
+ * `let`/`const` binding's usage (its name and kind, its post-declaration
+ * read/write counts, its declared identifier node, and whether it is exported);
+ * `ScopeUsage` gathers them across every scope depth.
  *
  * See `./README.md` for the fold rule (initializer never a write, read-write
  * counts both, member-target reads its object) and the bounded context

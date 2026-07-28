@@ -175,8 +175,8 @@ function stampDefinitions(intern: Interner, pathOf: Map<Node, NodePath>): void {
  * The module's export interface, stamped onto the bindings it names: each
  * binding records the external names it is exported under (the ECMAScript
  * ExportEntries whose local name is that binding). The analyzer models no export
- * status, so embody reads it from the export declarations themselves — an exact
- * reading, not a heuristic. Only a module exports, and an export declaration is
+ * status, so embody reads it from the export declarations themselves, not
+ * inferred. Only a module exports, and an export declaration is
  * only valid at a module's top level, so the program's own body is the whole
  * search; matching within the module scope alone keeps an exported class's inner
  * class-scope binding untouched (it shares the declaration's identifier node).

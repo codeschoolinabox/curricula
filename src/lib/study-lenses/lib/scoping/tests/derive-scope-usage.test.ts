@@ -235,6 +235,13 @@ describe('deriveScopeUsage', () => {
 			expect(usage.exported).toBe(true);
 		});
 
+		it('leaves a shadow of an exported name unexported — export is per binding', () => {
+			const shadow = scopeOf('export const x = 1;\n{ const x = 2; }')
+				.allDeclarations.filter((declaration) => declaration.name === 'x')
+				.map((declaration) => declaration.exported);
+			expect(shadow).toEqual([true, false]);
+		});
+
 		it('marks a binding exported by specifier as exported', () => {
 			const [usage] = scopeOf(
 				'const helper = 1; export { helper };',
