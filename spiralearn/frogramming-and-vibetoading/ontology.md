@@ -969,37 +969,26 @@ questions.
 
 #### The lenses
 
-Drawn linearly for legibility; the range is partially ordered. "Above" means
+Drawn as a ladder for legibility; the range is partially ordered. "Above" means
 _presupposes the lens below has crystallized into stable ground_, not _depends
 only on the immediately lower lens_. The categories are pedagogical handles, not
 metaphysical claims — arbitrary slices on a continuum, chosen for the minimal
 actionable mental model. We do not mark phase-changes between lenses.
 
-**Theory-side (most reductive) — F's natural reach extends through here
-ontologically; F&V defers practical work here to the field beyond this course:**
+The **Region** column carries the reach. Theory-side (most reductive) is F's
+natural reach ontologically; F&V defers practical work there to the field beyond
+this course. Domain-side (most holistic) is V's. The artifact-region between
+them holds the two lens-readings of the central artifact.
 
-- **(1) Platonic** — _Levin's Platonic Space._ The informational interpretation
-  of the physical world; the philosophical commitment that the material is
-  _legible_ at all. Manifesto territory; the curriculum gestures here only at L4
-  (Philosophy reading). Deferred entirely to follow-on courses ("third course"
-  frontier territory in Spiralearn's roadmap).
-- **(2) Physics / material** — atoms, transistors, energy gradients. The
-  physical substrate. Deferred entirely.
-- **(3) Computing infrastructure** — mathematics and formal systems made
-  operational: runtimes, OSs, networks, training/build/run support software.
-  Deferred to follow-on courses; named here so the student knows what sits
-  below.
-
-**Artifact-region — two lens-readings of the central artifact:**
-
-- **(4) Artifact-logic** — the F-anchor lens. What the artifact computes:
-  conventional algorithms, or a GenAI model. Same site, different substrate
-  types. When a Frogrammer says "twin the machine," the machine being twinned is
-  read through this lens: in conventional software, the algorithmic logic; in
-  AI-native software, the GenAI model. The stance is the same; the substrate is
-  different. §10 develops what changes when GenAI occupies this lens-position.
-- **(5) Artifact-surface** — the V-anchor lens. What the artifact presents
-  outward: UI, APIs, programmatic and human-perceivable surfaces.
+| #   | Lens                         | What it reads                                                                                                                          | Region                                | F&V scope                                                                                                                                                                             |
+| --- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Platonic**                 | _Levin's Platonic Space._ The informational interpretation of the physical world; the commitment that the material is _legible_ at all | Theory-side — F's ontological reach   | Manifesto territory; the curriculum gestures here only at L4 (Philosophy reading). Deferred entirely to follow-on courses — "third course" frontier territory in Spiralearn's roadmap |
+| 2   | **Physics / material**       | Atoms, transistors, energy gradients — the physical substrate                                                                          | Theory-side                           | Deferred entirely                                                                                                                                                                     |
+| 3   | **Computing infrastructure** | Mathematics and formal systems made operational: runtimes, OSs, networks, training/build/run support software                          | Theory-side                           | Deferred to follow-on courses; named here so the student knows what sits below                                                                                                        |
+| 4   | **Artifact-logic**           | What the artifact computes: conventional algorithms, or a GenAI model. Same site, different substrate types                            | Artifact-region — **F's anchor-lens** | Practiced; §10 develops what changes when GenAI occupies this lens-position                                                                                                           |
+| 5   | **Artifact-surface**         | What the artifact presents outward: UI, APIs, programmatic and human-perceivable surfaces                                              | Artifact-region — **V's anchor-lens** | Practiced                                                                                                                                                                             |
+| 6   | **Interaction dynamics**     | Human-system dynamics over time: dialogue, workflow, habituation, repair                                                               | Domain-side — V's natural reach       | Practiced                                                                                                                                                                             |
+| 7   | **Systemic impacts**         | Society and computing as a coupled system — what this kind of artifact does, in aggregate, to the world it participates in             | Domain-side                           | Practiced                                                                                                                                                                             |
 
 Artifact-logic and artifact-surface are two distinct lens-readings (an algorithm
 runs; a UI is painted) of §3's central chain-point — one artifact read through
@@ -1013,13 +1002,6 @@ two analytical lenses, each lens inviting its natural practitioner-stance.
 > perceiving; the two-lens reading is what the lenses surface. §4 stays the
 > canonical home for the practitioner-side; §9 stays the canonical home for the
 > lens-reading-side.
-
-**Domain-side (most holistic) — V's natural reach extends through here:**
-
-- **(6) Interaction dynamics** — human-system dynamics over time. Dialogue,
-  workflow, habituation, repair.
-- **(7) Systemic impacts** — society and computing as a coupled system. What
-  this kind of artifact does, in aggregate, to the world it participates in.
 
 #### V and F traverse lenses; each has a natural anchor-lens
 
