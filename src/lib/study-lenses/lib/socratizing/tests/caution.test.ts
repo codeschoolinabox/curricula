@@ -79,6 +79,14 @@ describe('caution analyzers', () => {
 			expect(results).toHaveLength(1);
 		});
 
+		it('names the empty block as a control-flow block', () => {
+			const results = analyzeAll('if (true) { }', analyze);
+			expect(results[0].questions.map((q) => q.text)).toEqual([
+				'What was the purpose of this block?',
+				'Was this control-flow block left empty intentionally, or is there missing code?',
+			]);
+		});
+
 		it('does not fire on block with statements', () => {
 			const results = analyzeAll('if (true) { console.log("hi"); }', analyze);
 			expect(results).toHaveLength(0);

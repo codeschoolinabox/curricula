@@ -274,11 +274,11 @@ function mixedConditionStyle(
 			questions: [
 				{
 					register: 'open',
-					text: 'Is the mix of implicit and explicit conditions deliberate?',
+					text: 'Is the mix of a truthy check and an explicit comparison on the same value deliberate?',
 				},
 				{
 					register: 'comparative',
-					text: 'How would the code read if all conditions used the same style?',
+					text: 'How would the code read if that value used one style?',
 				},
 			],
 			block: [{ dimension: 'text-surface', level: 'macro' }],

@@ -146,7 +146,7 @@ function emptyBlock(
 			},
 			{
 				register: 'pointed',
-				text: 'Was this block left empty intentionally, or is there missing code?',
+				text: 'Was this control-flow block left empty intentionally, or is there missing code?',
 			},
 		],
 		block: [{ dimension: 'text-surface', level: 'block' }],

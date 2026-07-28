@@ -224,6 +224,17 @@ describe('comprehension control flow analyzers', () => {
 			expect(results[0].context).not.toContain('line');
 		});
 
+		it('asks about statements, matching its offset-native anchoring', () => {
+			const results = analyzeAll(
+				'const x = true;\nif (x) { alert("yes"); }',
+				analyze,
+			);
+			expect(results[0].questions.map((q) => q.text)).toEqual([
+				'After this statement executes, which statement runs next?',
+				'Trace the execution path through this structure for a specific input.',
+			]);
+		});
+
 		it('does not fire on simple statements', () => {
 			const results = analyzeAll('const x = 5;', analyze);
 			expect(results).toHaveLength(0);

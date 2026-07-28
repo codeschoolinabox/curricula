@@ -160,6 +160,17 @@ describe('consistency analyzers', () => {
 			expect(results).toHaveLength(0);
 		});
 
+		it('asks about the one value checked both ways, not about every condition', () => {
+			const results = analyzeProgram(
+				'if (user.active) {\n  render();\n}\nif (user.active === true) {\n  audit();\n}',
+				analyze,
+			);
+			expect(results[0].questions.map((q) => q.text)).toEqual([
+				'Is the mix of a truthy check and an explicit comparison on the same value deliberate?',
+				'How would the code read if that value used one style?',
+			]);
+		});
+
 		it('does not fire when different subjects each use their idiomatic style', () => {
 			// A boolean flag checked truthily and a DIFFERENT value checked by
 			// equality is correct, not mixed — this must not fire (the harmful case).

@@ -287,7 +287,7 @@ function nextLines(
 		questions: [
 			{
 				register: 'pointed',
-				text: 'After this line executes, which line runs next?',
+				text: 'After this statement executes, which statement runs next?',
 			},
 			{
 				register: 'open',
