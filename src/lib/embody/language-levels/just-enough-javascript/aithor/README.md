@@ -712,3 +712,7 @@ sketch's concern.
 - [`./DOCS.md`](./DOCS.md) — this module's architecture sketch.
 - [`./types.ts`](./types.ts) — the contract in TypeScript (the `validate` flag,
   the `complexity` metric and threshold, the config shape).
+- [`./evals/`](./evals/README.md) — the eval harness: what a real local model
+  actually delivers against this module's constraints, measured as rates over
+  fresh samples. It measures constraint-fit only, and says there why content,
+  quality, and theme fidelity are deliberately left unmeasured.

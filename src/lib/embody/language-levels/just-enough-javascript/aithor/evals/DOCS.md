@@ -34,10 +34,12 @@ of one boundary-lift so the rest is data-in, data-out:
   `no-model-available`/`unknown-model` arise on either path). The impurity is
   the driver's, in _producing_ the reads; the lift itself just maps, so it is
   Node-testable.
-- **Fold** — input: the `Sample`s for one case; output: a `MetricSet`. **Pure,
-  sync.** Path-gated rates (`Rate { numerator, denominator, proportion }`) and
-  `Histogram`s — the uncurated drift gap, or the curated success/refusal/attempt
-  load.
+- **Fold** — input: one case's `Outcome`s plus its identity (`caseId`,
+  `quadrant`, `expectedSatisfiable`); output: a `MetricSet`. **Pure, sync.** The
+  case association is structural — the driver's per-case loop — not a field on
+  each outcome. Path-gated rates (`Rate { numerator, denominator, proportion }`)
+  and `Histogram`s — the uncurated drift gap, or the curated
+  success/refusal/attempt load.
 - **Report** — input: all `MetricSet`s; output: an `EvalReport`, then a string.
   **Pure.** The run-level roll-up plus the `smokeOk` floor, rendered to a
   markdown/console table.
@@ -52,10 +54,11 @@ pure-core boundary: everything below it is Node-fake-testable.
 flowchart TD
     cases[("CaseSpec[]<br/>(quadrants × tight/loose + vary holds,<br/>expectedSatisfiable)")]
     cases -->|"sample N fresh per case<br/>(IMPURE · WebGPU · browser-only · manual)"| result[("AithorResult<br/>(one per sample)")]
-    result ==>|"lift: variant by spec.config.validate,<br/>then result.ok sub-selects; PURE<br/>(folds in isJej / conform reads)"| outcome[("per-sample distillate (a Sample)<br/>uncurated | curated-success | refusal")]
+    result ==>|"lift: variant by spec.config.validate,<br/>then result.ok sub-selects; PURE<br/>(folds in the isJej / conform Reads)"| outcome[("Outcome — the per-sample distillate<br/>uncurated | curated-success | refusal")]
     outcome -->|"fold per case, PURE"| metricSet[("per-case roll-up<br/>path-gated rates + frequency counts")]
-    metricSet -->|"roll up + smoke floor, PURE"| report[("EvalReport<br/>(metricSets + smokeOk)")]
-    report -->|"format, PURE"| md[("markdown / console<br/>(committed sample-report.md)")]
+    outcome -.->|"the resolved ids, for provenance"| report
+    metricSet -->|"roll up + smoke floor, PURE"| report[("EvalReport<br/>(metricSets + smokeOk + the model stamp)")]
+    report -->|"format, PURE"| md[("markdown / console<br/>(committed as sample-report.md)")]
 ```
 
 ## Structural constraints
@@ -90,6 +93,22 @@ flowchart TD
   curated path carries neither and is excluded from both denominators. The
   exhaustiveness rests on `Meta` being absent on a refusal; it would break if
   `attempts` were ever added to a refusal's meta.
+- **Uncurated rates rest on the mirror-image assumption, unenforced.**
+  `uncuratedMetrics` uses the count of `uncurated` outcomes as its denominator,
+  which equals "non-bring-up uncurated samples" only because
+  `attempt-bound-exhausted` cannot arise off the curated path — the uncurated
+  path makes exactly one model call. Nothing polices it: the lift maps an
+  incoherent cause×path pairing rather than rejecting it. So an uncurated
+  exhaustion refusal, were one ever possible, would inflate `samples` while
+  vanishing from every uncurated rate — the same shape of breakage the curated
+  bullet above names, and the reason both assumptions are written down rather
+  than assumed.
+- **The report's provenance is measured, not requested.** `EvalReport.model`
+  names the ids that actually resolved, read back off the outcomes — the one
+  edge in the diagram that reaches the roll-up without passing through the fold,
+  because a `MetricSet` carries no model field. An unpinned selection descends
+  its fallback chain silently, so a run can span more than one artifact; naming
+  what resolved is what makes that visible rather than invisible.
 - **`Histogram` is plain data.** A frozen partial record over its closed key
   set, read by the formatter; a key absent counted zero. Shaped as a `Record` —
   never a `Map` — so the freeze reaches its entries and it survives `JSON`

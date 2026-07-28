@@ -1,6 +1,6 @@
 # aithor — Eval Harness
 
-> Phase-2 design spec. **Measured, not asserted.** This harness runs
+> **Measured, not asserted.** This harness runs
 > `aithor(program, config, realRuntime)` against a **real local model** over a
 > sample of requests and reports **statistical rates** — never golden-pair
 > assertions (generation is non-reproducible; evals sample fresh). The
@@ -10,21 +10,21 @@
 
 ## What this is, and the charter it honors
 
-The module's [`../README.md`](../README.md) § Testing posture commits to an eval
-it has not yet built:
+The module's [`../README.md`](../README.md) § Testing posture names the eval
+this harness is:
 
 > **Measured, not asserted.** Only the program's content, quality, and _theme_
 > fidelity are statistical rates over a real model (an eval). Feature and size
 > conformance are _asserted_ on the curated path — they are gated by `conform`,
 > not measured.
 
-Everything aithor built in Phase 1 is deterministic or faked (fake models, fake
-runtimes). Nothing measures real generation. This harness does — under the
-module's standing design commitments ([`../README.md`](../README.md) § Design
-commitments): generation is **not reproducible** ("the same request yields
-_different_ programs … Evals sample fresh; there are no golden pairs"), and a
-variation is **related, not faithful**. So an eval is a roll-up of **rates over
-fresh samples**, with provenance — not a fixture of expected outputs.
+This is the only thing in the module that measures real generation; everything
+else is deterministic or faked. It works under the module's standing design
+commitments ([`../README.md`](../README.md) § Design commitments): generation is
+**not reproducible** ("the same request yields _different_ programs … Evals
+sample fresh; there are no golden pairs"), and a variation is **related, not
+faithful**. So an eval is a roll-up of **rates over fresh samples**, with
+provenance — not a fixture of expected outputs.
 
 **What this harness actually measures: constraint-fit at the learner's technical
 level.** The README names three semantic targets — _content_, _quality_, _theme
@@ -41,10 +41,10 @@ judged for them, just not reliably):
   perfect practice.** Measuring (and chasing) content/quality/theme would trade
   the first for the second.
 
-So the README's "eval measures content / quality / theme" stands as a **future
-aspiration** — revisited when local models are lighter and stronger. This
-harness measures what is mechanically trustworthy now, and there is **no judge,
-no rating, and no theme score** anywhere in the contract.
+So the README's "eval measures content / quality / theme" describes a different,
+heavier harness than this one — worth building when local models are lighter and
+stronger. This one measures what is mechanically trustworthy, and there is **no
+judge, no rating, and no theme score** anywhere in the contract.
 
 ## Scope — the objective backbone
 
@@ -103,11 +103,15 @@ The contract is [`./types.ts`](./types.ts); this is the vocabulary.
   **unverified author assertion** (whether a subset × size × prose request is
   satisfiable is not mechanically decidable), so a "refused something
   satisfiable" signal is only as trustworthy as the label.
-- **Sample** — one execution of a CaseSpec against the real model:
-  `{ caseId, outcome }`. Non-reproducible — a fresh draw, no seed, no golden
-  pair. (Distinct from the level's `Metrics.samples`, a numeric-observation
-  count.)
-- **Outcome** — the mechanically-readable distillate of one Sample, produced by
+- **Sample** — one execution of a CaseSpec against the real model. A sample is
+  an event, not a record: it leaves behind an Outcome, and the case it belongs
+  to is carried by the driver's per-case loop rather than stamped on it.
+  Non-reproducible — a fresh draw, no seed, no golden pair. (Distinct from the
+  level's `Metrics.samples`, a numeric-observation count.)
+- **Reads** — `{ admitted, conform }`, the driver's externally-computed `isJej`
+  and `conform` verdicts. The one value that crosses the pure/impure boundary
+  beside the `AithorResult`, and read on the uncurated path only.
+- **Outcome** — the mechanically-readable distillate of one sample, produced by
   the impure driver and consumed by the pure core (so the core never touches a
   runtime). A discriminated union over the three terminal shapes aithor can
   reach: _uncurated_ (raw, with the admission/conformance **gap** read off it),
@@ -126,7 +130,8 @@ The contract is [`./types.ts`](./types.ts); this is the vocabulary.
   omission above).
 - **EvalReport** — the run-level roll-up:
   `{ generatedAt, model, totalSamples, metricSets, smokeOk }`. `generatedAt` is
-  provenance, **never** a reproducibility claim.
+  provenance, **never** a reproducibility claim; `model` is provenance too, and
+  names what the run actually resolved rather than what it requested (§ Models).
 
 ## Sample protocol
 
@@ -140,23 +145,38 @@ The contract is [`./types.ts`](./types.ts); this is the vocabulary.
   can separate "refused something satisfiable" (a signal) from "refused the
   unsatisfiable" (a contract **pass**).
 - **Samples** — `SAMPLES_PER_CASE = 5` for v1. Generation is non-reproducible,
-  so a rate needs replication; 5 keeps a full GPU run to single-digit minutes.
+  so a rate needs replication; 5 keeps a full GPU run inside an hour. The median
+  run is far shorter, but a curated case that exhausts its attempt bound on
+  every sample pays three model calls per draw, so the tail is tens of minutes,
+  not single digits.
 - **Aggregation** — rates report raw `n/d`; the harness prints **no** confidence
   interval at N=5 (false precision). v1 conclusions are **directional, not
-  significant**, and the report says so. No seeds, no golden pairs — each Sample
+  significant**, and the report says so. No seeds, no golden pairs — each sample
   is a fresh draw.
 
 ## Models
 
-Default `Qwen2.5-Coder-0.5B-Instruct-q4f16_1-MLC` — the smallest catalog coder,
-with no required GPU features (so an explicit pick never feasibility-refuses),
-and already proven through aithor's seam in
+**A run can span two artifacts, and the report says which.** Nine of the ten
+cases set `model: ''` — "pick for me" — which local-llm resolves cost-aware: the
+largest rung under its VRAM ceiling, code-specialization breaking the tie, which
+lands on `Qwen2.5-Coder-1.5B-Instruct-q4f16_1-MLC`. The tenth pins
+`Qwen2.5-Coder-0.5B-Instruct-q4f16_1-MLC` explicitly — the smallest catalog
+coder, with no required GPU features (so an explicit pick never
+feasibility-refuses), already proven through aithor's seam in
 [`../tests/aithor-webllm.browser.test.ts`](../tests/aithor-webllm.browser.test.ts).
-The harness is parameterized by a single `DEFAULT_MODEL` const so a
-**size-sweep** (→ 1.5B / 7B, to characterize the README's "smaller … weaker
-programs, larger the reverse") is a config edit, not a redesign. A sweep is
-confirmatory, not required for v1. A near-zero curated success-rate on a tight
-case is **the model, not the harness** — expected for the 0.5B.
+So a full run brings up two models, and `EvalReport.model` names **what
+resolved** rather than what was asked for — provenance measured, not claimed.
+
+The driver carries a single `DEFAULT_MODEL` const so a **size-sweep** (→ 7B, to
+characterize the module README's "smaller … weaker programs, larger the
+reverse") is a config edit, not a redesign: set it and every "pick for me" case
+runs that artifact instead. It deliberately spares the one explicit pick, whose
+being explicit is a fixture property in its own right. Shipped empty, it is a
+no-op and the corpus keeps the semantics above. A sweep is confirmatory, not
+required for v1.
+
+A near-zero curated success-rate on a tight case is **the model, not the
+harness** — expected at this size class.
 
 ## Report, not gate
 
@@ -171,11 +191,12 @@ a **smoke floor**:
   end-to-end, nothing about quality.
 
 Results are recorded two ways: the GPU driver **prints** the formatted table to
-the test console, and a real run is **committed** as
-[`./sample-report.md`](./sample-report.md) (added after the first GPU run) — the
+the test console, and a real run is **committed** as `./sample-report.md` — the
 manual attestation, mirroring the campaign's "commit a real GPU run" discipline
-(cf. the browser-fidelity tests). There is no quality floor-gate; a
-regression-watch threshold, if ever added, would be advisory only.
+(cf. the browser-fidelity tests). Committing it is a human step: the GPU lane is
+manual, so the attestation is only ever as current as the last real run. There
+is no quality floor-gate; a regression-watch threshold, if ever added, would be
+advisory only.
 
 ## Run environment
 
@@ -193,8 +214,8 @@ unrelated learner-trace engine `embody/lib/evaluating/`, and from JS `eval`).
   [`../README.md`](../README.md), [`../DOCS.md`](../DOCS.md) are not changed by
   the eval; a crux that seems to need a contract change is surfaced at the human
   gate, not edited silently. (The README's "eval measures content/quality/theme"
-  line is knowingly left as a future aspiration — see above.)
-- **The completed Phase-1 units** — `conform`, `build-prompt`, `load-model`,
+  line describes a heavier harness than this one — see above.)
+- **The module's own units** — `conform`, `build-prompt`, `load-model`,
   `make-aithor-runtime`, `aithor`, `webllm-runtime` and their tests are reused,
   not touched.
 - **Consumer wiring** — lenses/chapters calling `aithor()` belong to
