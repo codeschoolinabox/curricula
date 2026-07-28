@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import embody from '../../../../embody/index.js';
 import type { Facts } from '../../../../embody/types.js';
+import jejLevel from '../../../../language-levels/jej/index.js';
 import assembleParseFacts from '../assemble-parse-facts.js';
 
 describe('assembleParseFacts', () => {
@@ -162,4 +163,48 @@ describe('assembleParseFacts', () => {
 			expect(Object.isFrozen(assembleParseFacts(facts)?.tokens)).toBe(false);
 		});
 	});
+
+	// The seam a real level crosses: embody -> assembleParseFacts ->
+	// level.validate. Two independent algorithms stamp the node paths that land
+	// in ONE violation list — the vocabulary path is assembled here off embody's
+	// entwined graph, the grammar path is accumulated by the level's own walk as
+	// it descends. Nothing else forces them to agree, and a divergence would be
+	// silent: half the violations would carry a foreign dialect and every unit
+	// suite would stay green.
+	describe('a real level consuming the assembly (Interfaces)', () => {
+		it('the level reports both its grammar and its vocabulary violation', () => {
+			expect(jejViolations('var x = document;\n').length).toBe(2);
+		});
+
+		it('every violation is Program-rooted, whichever walk stamped it', () => {
+			expect(
+				jejViolations('var x = document;\n').every((violation) =>
+					violation.nodePath.startsWith('$'),
+				),
+			).toBe(true);
+		});
+
+		it('the assembled escape path survives into the level’s violation', () => {
+			const { facts } = embody('var x = document;\n');
+			const assembled = assembleParseFacts(facts)?.unresolvedReferences[0];
+
+			expect(jejViolations('var x = document;\n')).toContainEqual(
+				expect.objectContaining({ nodePath: assembled?.nodePath }),
+			);
+		});
+
+		it('an admitted program crosses the seam with nothing to report', () => {
+			expect(jejViolations('let count = 1;\n')).toEqual([]);
+		});
+	});
 });
+
+function jejViolations(source: string): ReturnType<typeof jejLevel.validate> {
+	const { facts } = embody(source);
+	const parseFacts = assembleParseFacts(facts);
+	if (parseFacts === null) {
+		throw new Error(`jejViolations: "${source}" did not assemble`);
+	}
+
+	return jejLevel.validate(parseFacts);
+}
