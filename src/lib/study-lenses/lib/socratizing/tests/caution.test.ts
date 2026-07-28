@@ -79,6 +79,34 @@ describe('caution analyzers', () => {
 			expect(results).toHaveLength(1);
 		});
 
+		it('fires on an empty else branch', () => {
+			const results = analyzeAll('if (ok) { run(); } else { }', analyze);
+			expect(results).toHaveLength(1);
+		});
+
+		it('fires on an empty if body when the else branch is non-empty', () => {
+			const results = analyzeAll('if (ok) { } else { run(); }', analyze);
+			expect(results).toHaveLength(1);
+		});
+
+		it('anchors the question to the else block, not the if block', () => {
+			const source = 'if (ok) { run(); } else { }';
+			const results = analyzeAll(source, analyze);
+			expect(
+				source.slice(results[0].location.start, results[0].location.end),
+			).toBe('{ }');
+		});
+
+		it('fires once when both the if and else bodies are empty', () => {
+			const results = analyzeAll('if (a) { } else { }', analyze);
+			expect(results).toHaveLength(1);
+		});
+
+		it('fires once for each empty if body in an else-if chain', () => {
+			const results = analyzeAll('if (a) { } else if (b) { }', analyze);
+			expect(results).toHaveLength(2);
+		});
+
 		it('names the empty block as a control-flow block', () => {
 			const results = analyzeAll('if (true) { }', analyze);
 			expect(results[0].questions.map((q) => q.text)).toEqual([

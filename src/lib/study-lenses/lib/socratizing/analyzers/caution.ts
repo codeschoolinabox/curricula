@@ -53,15 +53,38 @@ const CONDITION_STATEMENTS: ReadonlySet<string> = new Set([
 	'ForStatement',
 ]);
 
-/** The block-bodied clause of a control-flow statement, or null for anything else. */
-function controlFlowClause(node: Node): Node | null {
+/**
+ * The block-bodied clauses of a control-flow statement — empty for anything else.
+ *
+ * An `if` has two: both arms carry code the author meant to write, so an empty
+ * `else { }` signals missing code exactly as an empty `if` body does. An `else if`
+ * chains its `alternate` to another `IfStatement` rather than a block; that node is
+ * visited on its own by the walk, so it is not a clause of this one.
+ *
+ * One node raises at most one question, so when both arms of an `if` are empty only
+ * the first is named — in `if (a) { } else if (b) { } else { }` the trailing empty
+ * `else` goes unmentioned because the outer `if` already spent its question on its
+ * own empty body.
+ */
+function controlFlowClauses(node: Node): readonly Node[] {
 	if (node.type === 'IfStatement') {
-		return getRecord(node).consequent as Node;
+		const record = getRecord(node);
+		return [record.consequent as Node, record.alternate as Node | null].filter(
+			(clause): clause is Node => clause !== null,
+		);
 	}
 	if (LOOP_STATEMENTS.has(node.type)) {
-		return getRecord(node).body as Node;
+		return [getRecord(node).body as Node];
 	}
-	return null;
+	return [];
+}
+
+/** An empty `{ }` block — it holds no statements, so it does no work. */
+function isEmptyBlock(clause: Node): boolean {
+	return (
+		clause.type === 'BlockStatement' &&
+		(getRecord(clause).body as readonly Node[]).length === 0
+	);
 }
 
 // ─── 1. assignment-in-condition ────────────────────────────
@@ -120,11 +143,10 @@ function emptyBlock(
 	// Only an empty CONTROL-FLOW body (if/loop) may signal missing code. A
 	// standalone `{}` or an empty function/arrow body is commonly an intentional
 	// stub — flagging those was noise, and mis-tagged as `controlFlow`.
-	const clause = controlFlowClause(node);
-	if (clause?.type !== 'BlockStatement') {
-		return null;
-	}
-	if ((getRecord(clause).body as readonly Node[]).length > 0) {
+	const clause = controlFlowClauses(node).find((candidate) =>
+		isEmptyBlock(candidate),
+	);
+	if (!clause) {
 		return null;
 	}
 
