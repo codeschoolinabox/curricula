@@ -344,9 +344,11 @@ export type ScopeVariable = {
 	 * this name leaves the module wants a yes — the one place this reading extends
 	 * past the specification's letter.
 	 *
-	 * The array is always present, so test its length — an empty array is truthy.
-	 * A name that leaves the module is read from outside it, whatever a consumer
-	 * makes of that.
+	 * An exported name is a name, not a place: unlike a reference or a definition,
+	 * it carries no `path` back into the source⇄tree binding, so a consumer that
+	 * wants the export site itself reaches it through the `ast` fact. The array is
+	 * always present, so test its length — an empty array is truthy. A name that
+	 * leaves the module is read from outside it, whatever a consumer makes of that.
 	 */
 	readonly exportedNames: ReadonlyArray<string>;
 };

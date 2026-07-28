@@ -70,6 +70,26 @@ flowchart TD
   a phase — it has nothing to show that changes when the program changes. A step
   whose content only narrows another phase's belongs to that phase, not beside
   it. The lifecycle admits a phase on both counts.
+- **A fact is common, generic, and needed across consumers.** As the constraint
+  above gates what earns a phase, this gates what earns a fact: a fact spares
+  every consumer the same traversal, or it stays a consumer's own projection.
+  Beyond that shared bar the two tiers differ in what they carry. A fact
+  **projected faithfully** from an analyzer carries that analyzer's authority;
+  the region still selects which of its fields are common enough to expose. A
+  fact the region **derives itself** carries embody's own judgment, and enters
+  only when ALL hold: (a) it is computed solely from structures the facts
+  already hold; (b) it is a cross-cutting truth that consumers of different
+  kinds would independently want — differing in what they DO with it, not in how
+  they phrase the question; and (c) its approximations, and any deliberate
+  departure from the specification, are documented at the field. A derived
+  enrichment failing any of these stays a consumer's projection. Two
+  corollaries. A cross-index key is not a derived enrichment: a `path` carries a
+  name back into the source⇄tree binding and answers to the indexing constraint,
+  not to this test. And an admitted enrichment lives inside the stage that owns
+  its inputs — it never earns its own stage, never adds a bar to phase
+  accessibility, and so never changes the data flow above. The scope structure
+  carries two: `usedBeforeBound` and `exportedNames`, each documenting its own
+  boundaries and departures at its field.
 - **Level-blind.** No level knowledge in the region's data or pipeline; level
   logic runs only black-boxed inside individual gates.
 - **Truth, not permission.** This region states what is TRUE about the program;
@@ -142,41 +162,7 @@ flowchart TD
   everything a component needs.
 - **Niche analytics** — a fact spares every consumer the same common, generic
   traversal; anything niche a consumer derives itself from the structures the
-  facts already expose. As the "a phase is a function of the program" constraint
-  gates what earns a phase, this gates what earns a fact: a fact must be common,
-  generic, and needed across consumers — or it stays a consumer's projection,
-  never this region's. Beyond that shared bar, two tiers differ in what they
-  additionally carry. A fact **projected faithfully** from an analyzer — the
-  scope vocabulary's reading of `eslint-scope` — carries that analyzer's
-  authority; the region still selects which of its fields are common enough to
-  expose, leaving niche ones off the contract. A fact the region **derives
-  itself** carries embody's own judgment, not the analyzer's, and enters only
-  when ALL hold: (a) it is computed solely from structures the facts already
-  hold; (b) it is a cross-cutting truth that multiple kinds of consumer would
-  independently want by its nature — not one lens's bespoke need; and (c) its
-  approximations — and any deliberate departure from the specification — are
-  documented at the field. A derived enrichment failing any of these stays a
-  consumer's projection. A cross-index key is not one of these: a `path` carries
-  a name back into the source⇄tree binding and answers to the indexing
-  constraint above, not to this test. The scope structure carries the two
-  admitted derived enrichments. `usedBeforeBound` is a static pre-initialization
-  fact (how a use relates to its `let`/`const`/`class` binding when it precedes
-  initialization: evaluated `eager` at a fixed point, or `deferred` to a later
-  context), never a runtime verdict, so a consumer owns any reachability
-  judgment built on it. `exportedNames` is a binding's contribution to its
-  module's export interface, read from the export declarations the facts already
-  hold — the analyzer carries no export status, though it does record an export
-  specifier as a read of the local binding — and wanted by every consumer that
-  asks whether a name leaves the module rather than by one lens alone: a name
-  that leaves is read from outside, so an unused-binding check, a rename or
-  refactor check, and any "is this local name public" reading each need it. It
-  is a per-binding fact, so an export entry whose local name is not a binding
-  the program names is not recorded — a re-export, and a default export of an
-  expression or an anonymous declaration, whose local name the specification
-  writes `*default*`; a whole-interface reading would be a separate
-  module-scoped fact. Its one departure from the specification's letter,
-  attributing `export default x` to `x` though that entry is a value snapshot
-  bound as `*default*`, is documented at the field. Both state what IS, never
-  what is allowed.
+  facts already expose. What earns a fact is the fact-admission constraint
+  above.
 - **Internal decomposition** — the factory's internal libraries document
   themselves at their own abstraction level.
