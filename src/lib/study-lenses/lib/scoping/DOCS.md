@@ -128,9 +128,11 @@ flowchart TD
 - **Narrow output; renamed to avoid a homonym.** `ScopeUsage` carries only
   `allDeclarations` (no scope tree) and `VariableUsage` only the fields the
   scope-reading analyzers touch — the legacy `root`/`initNode`/`scopeDepth` are
-  dropped. The types are named for their differentiator (usage), not
-  `ScopeAnalysis`/`DeclarationInfo`, to avoid colliding with the still-live
-  legacy scope types in `embody/lib/scope` — whose `ScopeAnalysis`, `ScopeInfo`
-  and count-free `DeclarationInfo` the trace and validating leaves still import.
-  This leaf supersedes that walk without replacing it in place, so both
-  vocabularies have to coexist and must not share names.
+  dropped. The types are named for what they project (usage), not
+  `ScopeAnalysis`/`DeclarationInfo`, because two live `DeclarationInfo`s already
+  exist: the counting declaration-site shape in `embody/lib/scope/types.ts`
+  (whose `ScopeInfo`/`ScopeAnalysis` the trace and validating leaves import) and
+  the count-free one on embody's public contract (`embody/types.ts`). This leaf
+  supersedes the legacy walk without replacing it in place, so the vocabularies
+  have to coexist — and naming for the projection survives a fourth homonym in a
+  way naming for a differentiator would not.

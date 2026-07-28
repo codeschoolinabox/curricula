@@ -31,10 +31,14 @@ import type * as acorn from 'acorn';
  * API unused. The external names themselves stay on the environment fact, for a
  * consumer that needs them.
  *
- * Named `VariableUsage`, not `DeclarationInfo`, to avoid colliding with the
- * count-free declaration-site `DeclarationInfo` in embody's legacy scope walk
- * (`embody/lib/scope/types.ts`), which is still imported across the trace and
- * validating leaves. This one is named for its differentiator: it counts.
+ * Named `VariableUsage`, not `DeclarationInfo`, because two live
+ * `DeclarationInfo`s already exist and no single adjective separates this from
+ * both: the counting declaration-site shape in `embody/lib/scope/types.ts`
+ * (still produced by the legacy `build-scope`, whose `ScopeInfo` /
+ * `ScopeAnalysis` the trace and validating leaves import), and the count-free
+ * one on embody's public contract (`embody/types.ts`). So this type is named
+ * for what it PROJECTS — usage — rather than for a differentiator a third
+ * homonym could take away.
  */
 export type VariableUsage = {
 	readonly name: string;

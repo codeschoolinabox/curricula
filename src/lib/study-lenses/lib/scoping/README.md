@@ -34,9 +34,10 @@ module is read from outside it, where no count here can see. It is a
 deliberately narrow projection — the scope graph carries far more (the scope
 tree, parent pointers, resolved-binding links, the external names an export
 carries), but a declaration-level consumer reads only these six facts. (The name
-is `VariableUsage`, not `DeclarationInfo`, to avoid colliding with the
-declaration-site `DeclarationInfo` in embody's legacy scope walk — a different,
-count-free shape that the trace and validating leaves still import.)
+is `VariableUsage`, not `DeclarationInfo`, because two live `DeclarationInfo`s
+already exist — embody's legacy scope-walk shape and the one on embody's public
+contract — so this type is named for what it projects rather than for a
+differentiator a third homonym could take away.)
 
 **ScopeUsage** — the module's output: `{ allDeclarations }`, a flat list of
 every `VariableUsage` in the program regardless of scope depth. It is the
