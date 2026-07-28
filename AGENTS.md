@@ -9,7 +9,8 @@ repository (spiralearn / `@codeschoolinabox/spiralearn`).
 - [Key Technical Context](#key-technical-context)
   - [Architecture](#architecture)
   - [Critical Conventions](#critical-conventions) (→ DEV.md)
-  - [Readability Patterns](#readability-patterns) (→ DEV.md)
+  - [Readability Patterns](#readability-patterns) (→
+    DEV-READABILITY-PATTERNS.md)
   - [Documentation Convention](#documentation-convention) (→ DEV.md)
   - [Type System](#type-system)
   - [Testing Approach](#testing-approach) (→ DEV.md)
@@ -83,11 +84,11 @@ encouragement. They cannot be overridden by momentum.
     because the design feels tightly templated by existing patterns; the
     independent pass catches honesty, scope, and architecture gaps the
     implementing agent rationalizes away. Only the human can waive it.
-11. **Validate every handoff with a context-free agent** — before handing off
-    at any increment-cluster or phase boundary (and before any deliberate
-    cold-start), spawn a fresh subagent with NO session context, give
-    it the RESUMPTION POINT plus the launch/handoff prompt, and have it report
-    whether it could orient and execute the next step and exactly where it would
+11. **Validate every handoff with a context-free agent** — before handing off at
+    any increment-cluster or phase boundary (and before any deliberate
+    cold-start), spawn a fresh subagent with NO session context, give it the
+    RESUMPTION POINT plus the launch/handoff prompt, and have it report whether
+    it could orient and execute the next step and exactly where it would
     stumble. Apply its must-fix findings before the handoff is final. The author
     holds all the context the next agent lacks and is therefore structurally
     blind to their own gaps — this is the same bias-correction the ARs apply to
@@ -161,8 +162,9 @@ often:
 
 ### Readability Patterns
 
-See [DEV.md § Readability Patterns](./DEV.md#12-readability-patterns) for the
-full guide with examples. Headline patterns: guard-first/happy-path-last, named
+Full guide with worked before/after examples:
+[DEV-READABILITY-PATTERNS.md](./DEV-READABILITY-PATTERNS.md) (`DEV.md` § 12 now
+just points here). Headline patterns: guard-first/happy-path-last, named
 intermediate values, ternary for value selection only, within-file helpers for
 readability (single-use OK), WHY comments for non-obvious JS semantics, numbered
 step comments for multi-phase functions, blank lines as paragraph breaks.
@@ -317,10 +319,9 @@ steps are incomplete. "See AGENTS.md for the workflow" is not a valid substitute
   checkpoint 3. If green came from expected roughness (Fake It, unrefined but
   correctly-shaped code), proceed normally. If it came from guessing,
   backtracking, or touching more than the stub implied, discard the
-  implementation and re-implement fresh naming the specific confusion — the
-  test is untouched and still valid, nothing is committed yet to lose, and
-  patching a wrongly-shaped attempt typically costs more than a clean second
-  try.
+  implementation and re-implement fresh naming the specific confusion — the test
+  is untouched and still valid, nothing is committed yet to lose, and patching a
+  wrongly-shaped attempt typically costs more than a clean second try.
 - At step 9 (refactor): check the implementation against the DOCS.md
   architectural sketch. Green tests mean behavioral correctness is achieved.
   Structural quality is addressed here — named phases, separated concerns, no
@@ -583,14 +584,14 @@ Work stops immediately if:
   changes). See § Incremental TDD Workflow step 9 for the full two-tier autonomy
   rule.
 
-**Resolution default**: if the brake fires before this increment is
-committed, default to _proposing_ discard-and-retry over patch-in-place —
-name the specific issue and re-attempt once the human confirms. Nothing is
-lost by discarding since nothing is committed. This sets the default
-proposal, not an exception to human sign-off — the human can still choose to
-patch instead. If the brake fires after a commit already exists, discarding
-means reverting committed history, which stays a human-gated git action
-(§ Git: Additive Actions Only) — never a unilateral agent choice.
+**Resolution default**: if the brake fires before this increment is committed,
+default to _proposing_ discard-and-retry over patch-in-place — name the specific
+issue and re-attempt once the human confirms. Nothing is lost by discarding
+since nothing is committed. This sets the default proposal, not an exception to
+human sign-off — the human can still choose to patch instead. If the brake fires
+after a commit already exists, discarding means reverting committed history,
+which stays a human-gated git action (§ Git: Additive Actions Only) — never a
+unilateral agent choice.
 
 #### Intellectual Honesty
 
@@ -685,9 +686,9 @@ human-timed; this spatial rotation is automatic, because the graph is
 
 **Default, not opt-in.** After Phase 0, absent explicit human prompting, a
 session fans out. This is trustworthy by default because dispatch is
-_mechanical_ — read from the type-defined DAG the human locked at the
-Phase-0 → Phase-1 gate, not from the agent's judgment about what is independent.
-The human may override to synchronous at any time.
+_mechanical_ — read from the type-defined DAG the human locked at the Phase-0 →
+Phase-1 gate, not from the agent's judgment about what is independent. The human
+may override to synchronous at any time.
 
 - **The guard.** A type edge ⇒ **serialize** (mechanical and certain). The
   _absence_ of a type edge does **not** license parallelism — serialization is
@@ -695,9 +696,9 @@ The human may override to synchronous at any time.
   subtrees, the orchestrator must affirmatively clear every non-type coupling:
   among them **environment colocation** (node vs. browser / `Worker` +
   `SharedArrayBuffer`), **shared frozen-singleton / registration order**, and
-  **semantic-protocol** contracts — examples, not an exhaustive checklist. **When
-  in doubt, serialize**: a missed parallelization costs latency, a wrong one
-  costs coherence.
+  **semantic-protocol** contracts — examples, not an exhaustive checklist.
+  **When in doubt, serialize**: a missed parallelization costs latency, a wrong
+  one costs coherence.
 - **Enrichment over reliance.** A real ordering dependency the types cannot see
   is a `types.ts` _modeling gap_. Recurring hidden dependencies are a signal to
   enrich the contract until the type graph **is** the full DAG — not to lean
@@ -716,20 +717,24 @@ parallelize only across subtrees already committed-and-covered that pass the
 guard.
 
 **A worker is also a mini cold-start**, so its launch prompt is a cold-start
-launch prompt (AGENTS/DEV + the module README/DOCS/types + its cluster
-contract). The orchestrator's decomposition and launch prompts are themselves a
-handoff their author is blind to — so the mandatory context-free validation pass
-checks the **decomposition before each fan-out wave** (the right grain; not a
-per-worker regress).
+launch prompt: `DEV.md`'s conventions, the module README/DOCS/types, its cluster
+contract, and an explicit instruction to read its own governance file per the
+repo-root `CLAUDE.md` router before starting — a deliberate backstop: whether a
+harness auto-loads `CLAUDE.md`'s router text into a given worker's context isn't
+something this repo controls or can verify, so the launch prompt names the step
+rather than assuming it happens automatically. The orchestrator's decomposition
+and launch prompts are themselves a handoff their author is blind to — so the
+mandatory context-free validation pass checks the **decomposition before each
+fan-out wave** (the right grain; not a per-worker regress).
 
 **The orchestrator holds the coherence spine** and nothing else: `types.ts`, the
 DOCS `## Data flow` diagram, the plan/DAG/gate ledger, and the **seam reads** at
-DAG joins — **never** per-worker implementation churn. **Lean ≠ blind:** it reads
-the committed contracts where subtrees join to catch seam-slop (two
+DAG joins — **never** per-worker implementation churn. **Lean ≠ blind:** it
+reads the committed contracts where subtrees join to catch seam-slop (two
 individually-correct functions integrating wrong);
 [Always Works™](#always-works-reality-check) at the seam cannot be delegated. It
-**serializes its own spine edits** — only one `types.ts` reconciliation in flight
-at a time (invariant 4, re-applied to the orchestrator's own work).
+**serializes its own spine edits** — only one `types.ts` reconciliation in
+flight at a time (invariant 4, re-applied to the orchestrator's own work).
 
 **Workers report DONE | BLOCKED | FLAG — no fourth channel:**
 
@@ -738,12 +743,12 @@ at a time (invariant 4, re-applied to the orchestrator's own work).
   out of scope and already on the DAG. (Coverage a node test structurally can't
   reach → _move the test_, not ship a caveat.)
 - **BLOCKED** — can't finish this increment; report up, the orchestrator pivots.
-- **FLAG** — either (a) an inter-file contract boundary it can't cross alone (the
-  [two-tier "inter-file → check in" rule](#claude-specific-workflow-notes) —
-  triggers at [DEV.md step 9](./DEV.md#phase-1-tdd-implementation) — delegated:
-  the orchestrator is first responder and may resolve within the spine
-  it owns, but `types.ts`/DOCS changes still need human approval), or (b) a
-  _suspected_ cross-subtree coupling it can't confirm from inside its context,
+- **FLAG** — either (a) an inter-file contract boundary it can't cross alone
+  (the [two-tier "inter-file → check in" rule](#claude-specific-workflow-notes)
+  — triggers at [DEV.md step 9](./DEV.md#phase-1-tdd-implementation) —
+  delegated: the orchestrator is first responder and may resolve within the
+  spine it owns, but `types.ts`/DOCS changes still need human approval), or (b)
+  a _suspected_ cross-subtree coupling it can't confirm from inside its context,
   which the orchestrator then checks at the seam. FLAG-(b) is how the guard's
   blind spot reports from below.
 
@@ -848,6 +853,12 @@ work resumable across a compaction boundary:
 The full protocol — agent prompt structure, verdict definitions, resolution
 rules, and the focus areas for AR-1 through AR-5 — lives in
 [DEV.md § Adversarial Review Protocol](./DEV.md#adversarial-review-protocol).
+**You do not need to read each AR-N's focus-area bullet list yourself** — the
+registered `ar-1` through `ar-5` subagents fetch those directly from `DEV.md`
+when they run. You still own each AR-N's **Trigger** and **Provide to agent**
+lines — both live in `DEV.md`, one opening and one closing each `### AR-N`
+section (e.g. [DEV.md § AR-1](./DEV.md#ar-1-design-challenge)) — read just those
+two lines per gate, not the focus-area bullets sandwiched between them.
 
 Quick reference: ARs use a separate read-only agent that returns one of three
 verdicts:
@@ -855,6 +866,11 @@ verdicts:
 - **PROCEED**: continue immediately
 - **CONSIDER**: document your response to each concern, then continue
 - **PAUSE**: present to human, wait for decision
+
+**Pass file paths and the baseline SHA, never pasted contents.** Record
+`git rev-parse HEAD` at plan approval; AR-5 reviews `baseline..HEAD` and runs
+`git diff` itself. Reviewers have Read/Bash/Grep/Glob — let them pull their own
+inputs.
 
 ARs are mandatory. Only the human can skip; the implementing agent never skips
 on its own. Skip-resistance rule: when you catch yourself reasoning about why

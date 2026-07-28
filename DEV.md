@@ -1,20 +1,46 @@
 # Developer Guide
 
 Internal architecture, conventions, and implementation details for contributors.
+This file has one companion reference file,
+[DEV-READABILITY-PATTERNS.md](./DEV-READABILITY-PATTERNS.md) — it is part of
+DEV.md's canon ("DEV.md conventions," as referenced elsewhere in this governance
+chain, includes it). A section earns its own `DEV-*.md` companion only when it
+is ≥150 lines, dominated by worked before/after code examples (not a rules
+list), and already headline-summarized in every governance file that cites it
+(so no citation loses its target) — this is the only current example; don't
+split further without meeting that bar.
 
 ## Table of Contents
 
-- [Architecture Overview](#architecture-overview)
-- [Codebase Conventions](#codebase-conventions)
-- [Directory Structure](#directory-structure)
-- [Development Workflow](#development-workflow)
-- [Testing Strategy](#testing-strategy)
-- [Incremental Development Workflow](#incremental-development-workflow)
-- [Adversarial Review Protocol](#adversarial-review-protocol)
-- [Linting Conventions](#linting-conventions)
-- [Module Boundaries](#module-boundaries)
-- [Code Quality Anti-Patterns](#code-quality-anti-patterns)
-- [VS Code Setup](#vs-code-setup)
+Each entry is tagged for when it's needed. **(core)** — read whenever you touch
+this area; every phase. **(reference)** — consult only for the task named; skip
+otherwise.
+
+- [Architecture Overview](#architecture-overview) — (core)
+- [Codebase Conventions](#codebase-conventions) — (core)
+  - [12. Readability Patterns](#12-readability-patterns) — (reference: full
+    guide with worked examples is
+    [DEV-READABILITY-PATTERNS.md](./DEV-READABILITY-PATTERNS.md); consult when
+    writing or reviewing code style, not required reading up front)
+- [Directory Structure](#directory-structure) — (core)
+- [Development Workflow](#development-workflow) — (core)
+- [Testing Strategy](#testing-strategy) — (core)
+- [Incremental Development Workflow](#incremental-development-workflow) — (core
+  — the Phase 0-2 workflow skeleton)
+- [Adversarial Review Protocol](#adversarial-review-protocol) — (core mechanics:
+  how to run a review, verdicts, resolution rules, sub-model dispatch. The
+  **AR-1 through AR-5 focus-area checklists** below the mechanics are **`ar-N`
+  subagent-only** — the registered `ar-1`…`ar-5` subagents fetch those
+  themselves when they run. You do not need to read them.)
+- [Linting Conventions](#linting-conventions) — (core for the command reference;
+  Enforced/Manual Review Conventions are pointers back to § Codebase Conventions
+  and Teaching Moments for rules that have a home there, plus a short list of
+  rules that don't)
+- [Module Boundaries](#module-boundaries) — (reference: consult when adding an
+  architectural layer or import-boundary rule)
+- [Code Quality Anti-Patterns](#code-quality-anti-patterns) — (pointer only —
+  canonical copy lives in AGENTS.md/AGENTS.principal.md)
+- [VS Code Setup](#vs-code-setup) — (reference — one-time editor setup)
 
 ## Architecture Overview
 
@@ -467,208 +493,8 @@ for (const user of users.filter(isActive)) {
 
 These patterns shape how code reads, not just what it does. The goal: a reader
 should be able to follow a function without holding the whole thing in their
-head.
-
-#### Guard-first, happy-path-last
-
-Screen out bad/edge cases with early returns at the top. The happy path stays
-visible and uncluttered at the bottom. This also works with the linter: deep
-nesting triggers a `cognitive-complexity` violation, early returns avoid it.
-
-```typescript
-// ✅ — guards up top, happy path at the end
-function isPlainObject(thing: unknown): thing is Record<string, unknown> {
-	if (typeof thing !== 'object') return false; // screen: primitives
-	if (thing === null) return false; // screen: null
-	if (Array.isArray(thing)) return false; // screen: arrays
-
-	const proto = Object.getPrototypeOf(thing); // happy path: one clear check
-	return proto === Object.prototype;
-}
-```
-
-Real example: this function exists at `src/lib/utils/is-plain-object.ts`.
-
-#### Named intermediate variables
-
-When a sub-expression has a clear identity, capture it in a `const`. Name the
-thing, then use the name. Avoids repeating the same lookup expression
-(error-prone) and makes the intent visible at both the declaration and the use
-site.
-
-```typescript
-// ✅ — named at declaration; reader sees the type at a glance
-const tracerModule = tracers[tracer];
-if (!tracerModule) throw new TracerUnknownError(tracer, ...);
-const options = tracerModule.optionsSchema ? prepareConfig(...) : {};
-
-// ❌ — reader must parse tracers[tracer] twice; easy to introduce subtle bugs
-if (!tracers[tracer]) throw new TracerUnknownError(tracer, ...);
-const options = tracers[tracer].optionsSchema ? prepareConfig(...) : {};
-```
-
-Real example: `src/lib/utils/is-plain-object.ts` — the `proto` intermediate.
-
-#### Ternary: transparent value selection only
-
-OK when both branches compute "the same kind of thing" — a variable name can
-capture the identity regardless of which path executes. Not OK when branches do
-structurally different things; use `if-else` for those.
-
-```typescript
-// ✅ — both branches produce a [key, value] pair (same shape)
-const entry = condition ? [key, expandBoolean(value, schema)] : [key, value];
-
-// ❌ — branches do different things; ternary hides the divergence
-const result = condition ? executeSomething() : returnEarlyWithFallback();
-```
-
-Real example: `src/lib/snippetry/debug/guard-loops/guard-loops.ts` — the
-`typeof evalCode === 'object' ? evalCode : recast.parse(evalCode)` line; both
-branches produce a parsed AST.
-
-#### Within-file helpers for readability; separate file for reuse
-
-**The extraction rule, two parts:**
-
-- **Within a file**: extract helpers freely — no use-count limit — whenever it
-  makes the file and its export read better. The caller says WHAT without
-  explaining HOW inline. Single use is fine. Helpers are defined below main
-  (newspaper order). Trivial wrappers that name nothing (`const x = getX(o)`)
-  still get inlined — they fail the readability test, not a use-count test.
-- **Separate file**: only when the logic is used in 2+ places — and extraction
-  to a new domain-related file is an inter-file trigger under two-tier autonomy
-  (check in with the user).
-
-```typescript
-// ✅ — shouldExpand() and expandBoolean() are single-use but they name the concepts
-// expandShorthand() now reads like English prose
-
-function expandShorthand(options, schema) {
-  ...
-  return entries.map(([key, value]) =>
-    typeof value === 'boolean' && shouldExpand(schemaProperties[key])
-      ? [key, expandBoolean(value, schemaProperties[key])]
-      : [key, value],
-  );
-}
-
-// Helpers defined below (hoisting) — details after the main function
-function shouldExpand(fieldSchema) { ... }
-function expandBoolean(value, fieldSchema) { ... }
-```
-
-```typescript
-// ✅ — executeTrace() called from both embody() AND closure() → separate function justified
-function embody(input = {}) {
-  ...
-  if (allPresent) return executeTrace(tracer, code, config);  // call site 1
-  return createClosure(...);
-}
-
-function createClosure(state) {
-  function closure(remaining = {}) {
-    ...
-    if (allPresent) return executeTrace(tracer, code, config);  // call site 2
-    return createClosure(...);
-  }
-}
-```
-
-Real examples: `src/lib/snippetry/debug/guard-loops/guard-loops.ts` (single-use
-narrative helpers `generateLoopGuard` and `insertBlankLinesAfterGuards`);
-`src/lib/utils/deep-clone.ts` (extracted to its own file — imported by both
-`freeze.ts` and `deep-freeze.ts`).
-
-#### Numbered step comments for multi-phase functions
-
-When a function has distinct phases that aren't self-evident from the code,
-number them. Makes long functions skimmable — a reader can jump to the step they
-care about. Write the number and a short label; optionally add a key constraint
-in parens.
-
-```typescript
-// 1. Validate tracer type (sync)
-if (typeof tracer !== 'string' ...) throw ...;
-
-// 2. Check tracer exists (sync)
-const tracerModule = tracers[tracer];
-if (!tracerModule) throw ...;
-
-// 3. Prepare config (sync)
-const meta = prepareConfig(...);
-
-// 4. Record (async) — returns steps directly
-return tracerModule.record(code, { meta, options });
-```
-
-Real example: `src/lib/study-lenses/embody/lib/validating/validate.ts` (three
-numbered phases: parse error / rejections / valid).
-
-#### WHY comments for non-obvious JS semantics
-
-When code relies on language mechanics that aren't universally known, add a
-short comment explaining WHY this approach is required — not WHAT the code does
-(the code already shows that).
-
-```typescript
-// typeof null === 'object' in JS — must explicitly exclude null after the typeof check
-if (thing === null) return false;
-
-// Object.getPrototypeOf(null) throws — the null check above is a prerequisite
-const proto = Object.getPrototypeOf(thing);
-```
-
-Candidates: prototype chain operations, `typeof null`, coercion edge cases,
-WeakMap/WeakSet patterns, async ordering constraints.
-
-#### Blank lines as paragraph breaks
-
-Separate distinct phases of logic with a blank line. One blank line = end of one
-thought, start of the next. Group related statements; don't break every line
-individually.
-
-```typescript
-// ✅ — guards form one paragraph; result forms another
-if (typeof thing !== 'object') return false;
-if (thing === null) return false;
-if (Array.isArray(thing)) return false;
-
-const proto = Object.getPrototypeOf(thing);
-return proto === Object.prototype;
-
-// ❌ — no visual structure; every line isolated
-if (typeof thing !== 'object') return false;
-
-if (thing === null) return false;
-
-if (Array.isArray(thing)) return false;
-
-const proto = Object.getPrototypeOf(thing);
-
-return proto === Object.prototype;
-```
-
-#### Linting connections
-
-Some patterns are partially enforced; others are code-review only.
-
-- **Guard-first** — `sonarjs/cognitive-complexity` (warn) penalizes deep
-  nesting; early returns keep the score down. `sonarjs/nested-control-flow`
-  (error) flags nested loops and conditions directly.
-- **Named intermediates** — `prefer-const` (error) ensures named values stay
-  immutable; the discipline of naming is manual but the linter enforces the
-  `const`.
-- **Ternary** — `arrow-body-style: never` (error) requires implicit returns in
-  arrow callbacks, which signals "pure value calculation" — same intent as the
-  ternary rule.
-- **Within-file helpers** — `sonarjs/cognitive-complexity` flags overly long
-  functions (extract to reduce); `sonarjs/no-identical-functions` (error)
-  catches duplicate logic across call sites.
-- **WHY comments** — `spaced-comment` (error) enforces comment formatting;
-  comment _content_ quality is a code-review concern only.
-- **Blank lines** — Prettier handles structural whitespace; semantic phase
-  breaks (paragraph rhythm) are a manual judgment call.
+head. Full guide with worked before/after examples:
+[DEV-READABILITY-PATTERNS.md](./DEV-READABILITY-PATTERNS.md).
 
 ### 13. Deep Freeze Return Values
 
@@ -963,9 +789,9 @@ function createConfig(options: UserOptions = {}): ResolvedConfig { ... }
 
 **Scope.** This rule governs **package/module documentation** — `README.md`,
 `DOCS.md`, `types.ts` files inside source directories. **Governance docs**
-(`AGENTS.md`, `CLAUDE.md`, `HUMANS.md`, this file, `CONTRIBUTING.md`,
-`CODE-OF-CONDUCT.md`) describe process AS their end-state contract — workflow
-rules, AR ceremony, plan discipline — and are out of scope.
+(`AGENTS.md`, `AGENTS.principal.md`, `CLAUDE.md`, `HUMANS.md`, this file,
+`CONTRIBUTING.md`, `CODE-OF-CONDUCT.md`) describe process AS their end-state
+contract — workflow rules, AR ceremony, plan discipline — and are out of scope.
 
 Within scope, four kinds of documentation, with strict separation:
 
@@ -1094,8 +920,9 @@ npm run validate  # typecheck + format check + lint + test
 
 ### Test Organization Convention
 
-All unit tests live in a `tests/` subdirectory co-located with the source they
-test.
+Tests live in a `tests/` subdirectory co-located with the source they test —
+full convention (directory tree, file-suffix rule, root `/tests/` distinction):
+[Directory Structure → Test Organization](#test-organization).
 
 ### Unit Tests
 
@@ -1462,15 +1289,15 @@ For each behavioral increment:
 
    > **7b. Patch-or-reroll check** — before lint/refactor, classify how step 7
    > went. If green came from expected roughness (a Fake It hardcode, an
-   > unrefined but correctly-shaped implementation), proceed to step 8 as
-   > normal — that's what Refactor is for. If it came from guessing,
-   > backtracking, or touching more surface than the stub implied, discard the
-   > implementation — the test is untouched and still valid — and re-implement
-   > fresh, naming the specific confusion for the retry. Patching a
-   > wrongly-shaped attempt into shape typically costs more than a clean second
-   > attempt, and nothing is committed yet to lose. This is not Refactor's job:
-   > Refactor improves a correctly-shaped implementation; this check catches a
-   > wrongly-shaped one before Refactor has to work around it.
+   > unrefined but correctly-shaped implementation), proceed to step 8 as normal
+   > — that's what Refactor is for. If it came from guessing, backtracking, or
+   > touching more surface than the stub implied, discard the implementation —
+   > the test is untouched and still valid — and re-implement fresh, naming the
+   > specific confusion for the retry. Patching a wrongly-shaped attempt into
+   > shape typically costs more than a clean second attempt, and nothing is
+   > committed yet to lose. This is not Refactor's job: Refactor improves a
+   > correctly-shaped implementation; this check catches a wrongly-shaped one
+   > before Refactor has to work around it.
 
 8. **Lint checkpoint 3** — `npx eslint <impl-file>`. Fix violations.
 9. **Refactor** — address structural quality while behavioral correctness holds.
@@ -1683,10 +1510,10 @@ Every adversarial review prompt follows this structure:
 - CONSIDER: document your response to each concern, then continue
 - PAUSE: present concerns to human, wait for decision before continuing
 - **PAUSE default for AR-4, pre-commit**: when an AR-4 Implementation Audit
-  returns PAUSE and the increment is not yet committed, the default
-  _proposal_ to the human is discard-and-retry, not patch-in-place — name the
-  specific confusion, and re-implement once the human confirms. Nothing is
-  lost by discarding since nothing is committed, and patching a wrongly-shaped
+  returns PAUSE and the increment is not yet committed, the default _proposal_
+  to the human is discard-and-retry, not patch-in-place — name the specific
+  confusion, and re-implement once the human confirms. Nothing is lost by
+  discarding since nothing is committed, and patching a wrongly-shaped
   implementation into shape typically costs more than a clean second attempt.
   This sets the default proposal only — it changes nothing about "present
   concerns to human, wait for decision"; the human can still choose to patch
@@ -1946,34 +1773,46 @@ checkpoints and `npm run validate`, never by the hook.
 
 ### Enforced Conventions
 
-See [eslint.config.mjs](./eslint.config.mjs) for full configuration.
+ESLint auto-enforces these; see [eslint.config.mjs](./eslint.config.mjs) for the
+exact rule-to-convention mapping. One canonical copy per rule that has another
+home — not duplicated here:
 
-#### Functional Programming Core
+- No `this` keyword: [§7](#7-no-this-keyword)
+- Named functions, implicit-return arrows: [§6](#6-function-conventions) (the
+  `func-names`/`arrow-body-style` rule names and rationale are in
+  [Teaching Moments](#teaching-moments-for-linting-errors))
+- `for-of` for side effects, `.map()`/`.filter()` for transforms, and template
+  literals over string concatenation: rule names and rationale in
+  [Teaching Moments](#teaching-moments-for-linting-errors)
+- `type` over `interface`: [§11](#11-imports-types-comments)
+  (`@typescript-eslint/consistent-type-definitions`)
+- No named exports except the package's public entry point (`src/index.ts`) and
+  each module's `types.ts`: [§1](#1-export-conventions)
+- `kebab-case` filenames (`unicorn/filename-case`):
+  [Directory Structure](#directory-structure)
+- `const` by default: [§9](#9-method-shorthand-default-empty-object-const)
 
-- No `this` keyword (use closures over parameters)
+Convention, not lint-enforced (`import/extensions` is off in
+[eslint.config.mjs](./eslint.config.mjs), despite the rule name suggesting
+otherwise) — kept here since it has no other home:
+
+- Always include the `.js` extension in imports:
+  [§11](#11-imports-types-comments)
+
+Not documented elsewhere — kept here:
+
 - No classes (use factory functions)
-- No parameter reassignment (create new bindings)
-- Immutable data encouraged (warn on mutations)
-
-#### Functions and Naming
-
-- All functions must have names (`func-names: error`)
-- Arrow functions must use implicit returns — no body blocks
-  (`arrow-body-style: never`)
-- `for-of` loops for side effects, `.map()`/`.filter()` for transformations
-
-#### Imports and Exports
-
-- Always include `.js` extension in imports
-- No named exports (except `src/index.ts` and `types.ts`)
-- Imports ordered: builtin → external → internal, alphabetized within groups
-
-#### Style
-
-- `kebab-case` filenames (`unicorn/filename-case`)
-- `const` by default; `let` only when reassigned
-- Template literals for string concatenation (`prefer-template`)
-- `type` over `interface` (`@typescript-eslint/consistent-type-definitions`)
+- No parameter reassignment (create new bindings) — also stated in
+  `AGENTS.md`/`AGENTS.principal.md`'s Non-Negotiable Invariants
+- Immutable data / no mutations (`functional/immutable-data`, warn —
+  `**.current` exempted for React refs, `eslint.config.mjs:212-217`; see also
+  [§4](#4-pure-functional-approach) for the design principle)
+- Imports ordered `builtin → external → internal → parent → sibling → index`,
+  alphabetized within groups (the real `import/order` config,
+  `eslint.config.mjs:191-205`). **DOCS-FLAG**:
+  [§11](#11-imports-types-comments)'s own example shows a different, older
+  3-group scheme with no alphabetization — that example has drifted from the
+  real config; needs its own future fix, out of scope here.
 
 ### TypeScript Strict Mode
 
@@ -1981,14 +1820,20 @@ All TypeScript strict checks are enabled. Run `npm run typecheck` to verify.
 
 ### Manual Review Conventions
 
-These conventions can't be automated and must be checked during code review:
+The conventions ESLint cannot auto-check are the same ones already stated in
+full above — one canonical copy per rule, not duplicated here:
 
-- Default empty object for destructured parameters
-- Verb-first function naming
-- One concept per file
-- Comments explain "why" not "what"
-- No mutable closures
-- `README.md` updated in every modified directory
+- Default `{}` for destructured params:
+  [§9](#9-method-shorthand-default-empty-object-const)
+- Verb-first naming: [§10](#10-naming)
+- One concept per file: [Directory Structure](#directory-structure)
+- No mutable closures: [§8](#8-no-mutable-closures)
+- Comments explain why not what: [§11](#11-imports-types-comments)
+- `README.md` updated in every modified directory:
+  [Conventions Checklist](#3-conventions-checklist)
+
+This section exists only to flag that these particular rules require human code
+review — ESLint cannot check them.
 
 ### Teaching Moments for Linting Errors
 
@@ -2007,67 +1852,32 @@ and WHY, not just how to fix.
 
 ## Module Boundaries
 
-Import boundaries are enforced via `eslint-plugin-boundaries`. This catches
-architectural violations at lint time.
+Import boundaries are enforced via `eslint-plugin-import`'s
+`import/no-restricted-paths` rule, scoped to
+`src/lib/study-lenses/**/*.{ts,tsx}` — the one architectural boundary this
+codebase currently tracks by tooling. Narrow by design: this is the pattern
+already in use, not a speculative full dependency graph.
 
-### Template: Single Layer (`src`)
+Note: `eslint-plugin-boundaries` is imported and registered in
+`eslint.config.mjs` but has no configured `boundaries/*` rules — it is not the
+active enforcement mechanism. Adding a `boundaries/elements` config will not do
+anything unless a matching rule is added too.
 
-The template ships with one layer: all source files under `src/**` can import
-from each other. As your package grows, add more specific layers to enforce
-architectural boundaries.
+### The one tracked rule: study-lenses subsystem boundaries
 
-```javascript
-// eslint.config.js — current template setup
-'boundaries/elements': [
-  { type: 'src', pattern: 'src/**', mode: 'file' },
-],
-'boundaries/element-types': [
-  'error',
-  {
-    default: 'disallow',
-    rules: [
-      { from: 'src', allow: ['src'] },
-    ],
-  },
-],
-```
+A subsystem may depend on a sibling's public surface (`index.ts`/`types.ts`) but
+never reach into its `lib/` internals. Configured as a generated
+`import/no-restricted-paths` zone list — one entry per (from, target) pair
+across the `STUDY_LENSES_SUBSYSTEMS` array in `eslint.config.mjs`.
 
-### Expanding for Your Package
+### Updating boundaries
 
-When your package grows internal layers (e.g., `api/`, `configuring/`,
-`errors/`), add elements with more specific patterns (listed before the `src`
-catch-all) and matching `element-types` rules:
+When the subsystem list changes:
 
-```javascript
-// Example: multi-layer package
-'boundaries/elements': [
-  { type: 'entry', pattern: 'src/index.ts', mode: 'file' },
-  { type: 'core',  pattern: 'src/core/*',   mode: 'file' },
-  { type: 'error', pattern: 'src/errors/*', mode: 'file' },
-],
-// In rules:
-'boundaries/element-types': ['error', {
-  default: 'disallow',
-  rules: [
-    { from: 'entry', allow: ['core'] },
-    { from: 'core',  allow: ['error'] },
-    { from: 'error', allow: [] },
-  ],
-}],
-```
-
-More specific patterns are listed first so they match before the broader
-catch-all. See the embody package's eslint config (external repo) for a full
-multi-layer example.
-
-### Updating Boundaries
-
-When the architecture evolves:
-
-1. Update `boundaries/elements` patterns in `eslint.config.js`
-2. Update `boundaries/element-types` rules for new allowed imports
-3. Update this section of DEV.md
-4. Run `npm run lint` to verify no violations
+1. Add/remove the subsystem in the `STUDY_LENSES_SUBSYSTEMS` array
+   (`eslint.config.mjs`) — that array is the source of truth, not restated here
+2. Run `npm run lint` to verify no new violations
+3. Update this section only if the _rule mechanism itself_ changes
 
 ## Code Quality Anti-Patterns
 
@@ -2075,10 +1885,10 @@ The self-review anti-pattern table and pre-proposal checklist live in the agent
 governance files, where they fire at step 12 of every increment — one canonical
 copy per audience, not duplicated here:
 
-- Pre-fable agents:
+- Agents on AGENTS.md:
   [AGENTS.md § LLM Anti-Patterns](./AGENTS.md#llm-anti-patterns-resist-these-tendencies)
-- Fable-generation agents:
-  [AGENTS.fable.md § Self-Review Checklists](./AGENTS.fable.md#self-review-checklists)
+- Agents on AGENTS.principal.md:
+  [AGENTS.principal.md § Self-Review Checklists](./AGENTS.principal.md#self-review-checklists)
 
 ## VS Code Setup
 

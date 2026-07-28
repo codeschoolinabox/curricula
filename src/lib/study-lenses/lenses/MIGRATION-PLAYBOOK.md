@@ -2,9 +2,6 @@
 
 # Lens Migration Playbook
 
-> **DRAFT — not canonical.** Do not follow this file directly. Canonical
-> governance is routed by `CLAUDE.md`.
-
 **This is your control panel for the week.** It's written to _you_ — the person
 sequencing the work and dispatching agents — not to the agents. Each work item
 below carries a goal, the exact source files to quarry, its Definition of Done,

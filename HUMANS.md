@@ -1,19 +1,25 @@
 # HUMANS.md — Operating Manual for the Human in the Loop
 
 > **Audience: you, the human collaborator.** This file is your protocol; the
-> agent's is in `AGENTS.md` (pre-fable agents) and `AGENTS.fable.md`
-> (Fable-generation agents); your style across all projects is in
-> `~/.claude/CLAUDE.md`; the contributor conventions are in `DEV.md`. Three
-> doors out, one door in: this is your door. It captures _your end of the
-> bargain_ — protocols you follow, when to /clear, when to commit, how to coach
-> the agent, and how to override its safety rails when you need to.
+> agent's is in `AGENTS.md` (agents and tools not on the principal-agent list)
+> and `AGENTS.principal.md` (principal agents — models with the capacity to
+> manage context over long sessions, reason strategically/architecturally, and
+> delegate effectively; see `CLAUDE.md` for the qualifying list); your style
+> across all projects is in `~/.claude/CLAUDE.md`; the contributor conventions
+> are in `DEV.md`. Three doors out, one door in: this is your door. It captures
+> _your end of the bargain_ — protocols you follow, when to /clear, when to
+> commit, how to coach the agent, and how to override its safety rails when you
+> need to.
 
 ## Why this file exists
 
 The 5-hour Opus limit ran out faster than expected. Long sessions accumulate
 context cruft (rejected alternatives in plan files, stale handoff folders, agent
-self-reports of relevance that aren't reliable signals). Subagent spawns reload
-the same governance docs as fresh context per spawn. Opus on max for everything
+self-reports of relevance that aren't reliable signals). Subagent spawns are
+intended to reload the matching governance doc as fresh context per spawn, but a
+harness reliably doing so for every spawn path isn't something this repo can
+verify — see AGENTS.md/AGENTS.principal.md § Orchestrated delegation for the
+explicit-read backstop that doesn't depend on it. Opus on max for everything
 (including AR-3/AR-4 reviewers that don't need it) burns tokens that Sonnet
 would handle indistinguishably.
 
@@ -109,11 +115,12 @@ quality cliff is small or absent.
 
 **Sub-model dispatch when spawning subagents:**
 
-The default Agent tool spawn inherits the parent's model (Opus). When you spawn
-an AR-3 / AR-4 / Explore agent, override with `model='sonnet'` to avoid burning
-Opus on impl correctness. The curricula AGENTS.md now has this instruction in
-the Sub-model dispatch table — the agent should follow it without prompting, but
-if it doesn't, remind it: _"AR-3 and AR-4 spawn on Sonnet per AGENTS.md."_
+AR-1/AR-3/AR-4 pin their model via the registered `ar-N` agent definitions'
+frontmatter (opus/sonnet/sonnet); AR-2/AR-5 inherit the spawning session's
+model. Never pass a `model` parameter when spawning an AR — it would silently
+override the configured roster. The authoritative table lives in
+[DEV.md § Sub-model dispatch](./DEV.md#sub-model-dispatch); if the agent doesn't
+follow it without prompting, point it there.
 
 You can also set per-agent default models in `~/.claude/agents/<name>.md`
 frontmatter (`model: sonnet`) for any reusable agent definition.
@@ -207,7 +214,7 @@ considered choice:
 - **"skip plan mode"** — proceed directly to execution. Agent confirms it heard
   you and proceeds.
 - **"skip alignment check"** — bypass the Belgian-flavored alignment checkpoint
-  from CLAUDE.md.
+  from `~/.claude/CLAUDE.md`.
 - **"skip AR-3 this increment, my call"** (or AR-1/2/4/5) — override a specific
   AR. Agent notes the override in the commit/conversation. ARs default to
   mandatory; this is the only legitimate way to skip.
@@ -246,8 +253,10 @@ Quick reference for the tools you can fire (or that I can fire on your behalf).
 - **`/security-review`** — built-in skill. Reviews pending changes for security
   issues. Useful before any commit that touches auth, validation, or network
   code.
-- **Local AR-5 via Agent tool** — what the AGENTS.md AR Protocol describes.
-  Spawn with `model='opus'` for AR-1/2/5 and `model='sonnet'` for AR-3/4.
+- **Local AR-5 via Agent tool** — what the AR Protocol describes
+  ([DEV.md § Sub-model dispatch](./DEV.md#sub-model-dispatch)). AR-1/3/4 pin
+  opus/sonnet/sonnet via their agent definitions; AR-2/5 inherit. Never pass a
+  `model` parameter.
 
 **Remote tools (don't burn 5-hour limit, run in cloud):**
 
@@ -322,14 +331,14 @@ agent claims things are done; you verify they actually are.
   subtree by subtree. If commits from different subtrees are interleaved, or a
   worker reported only "cluster done" without per-commit SHAs, the audit channel
   collapsed — push back.
-- **The safe revert unit is the subtree, not the individual commit.** Cross-worker
-  commits within a subtree can depend on one another; backing one out
-  mid-history is human-only surgery (the agent is barred from it). To drop a
+- **The safe revert unit is the subtree, not the individual commit.**
+  Cross-worker commits within a subtree can depend on one another; backing one
+  out mid-history is human-only surgery (the agent is barred from it). To drop a
   subtree, revert its commit range yourself.
-- Spot-check a **seam**: pick a DAG join where one subtree's output feeds another
-  and read the committed contract on both sides. Two individually-green functions
-  can integrate wrong — that's what the orchestrator's seam reads guard, and what
-  you're double-checking.
+- Spot-check a **seam**: pick a DAG join where one subtree's output feeds
+  another and read the committed contract on both sides. Two individually-green
+  functions can integrate wrong — that's what the orchestrator's seam reads
+  guard, and what you're double-checking.
 
 ---
 
@@ -354,7 +363,8 @@ your current commit and stop — starting a new increment under that timer means
 rushing into compaction.
 
 **Onboarding sequence (future-self or new collaborator).** Read this file first;
-then `AGENTS.md`; then `DEV.md` for code-level conventions.
+then your governance file per `CLAUDE.md`'s router (`AGENTS.md` or
+`AGENTS.principal.md`); then `DEV.md` for code-level conventions.
 `~/.claude/CLAUDE.md` is personal — don't assume a new collaborator has your
 style preferences.
 
@@ -400,15 +410,17 @@ Some things are yours to do. Don't outsource these:
   tradeoffs; you pick. Don't ask "which is better?" — ask "what are the
   implications of A vs B?" then decide.
 - **Approving the `types.ts` contract at the Phase-0 gate — it _is_ the DAG.**
-  Under default [orchestrated delegation](./AGENTS.md#orchestrated-delegation) the
-  agent fans workers out across the _type-defined_ dependency graph
-  automatically, so `types.ts` approval at the Phase-0 → Phase-1 gate is where
-  your architectural control is **front-loaded**: it defines what gets
-  parallelized. That makes it your _primary_ control surface, **not your only
-  one** — the multi-module decision right above persists _during_ execution (a
-  worker FLAGs any inter-file / `types.ts` / `DOCS.md` change up to you; the
-  emergency brake still fires). Approve the DAG deliberately; don't wave
-  `types.ts` through as "just types."
+  Under default [orchestrated delegation](./AGENTS.md#orchestrated-delegation)
+  (or the fuller mechanics under
+  [AGENTS.principal.md § Orchestrated delegation](./AGENTS.principal.md#orchestrated-delegation)
+  when on the qualifying list) the agent fans workers out across the
+  _type-defined_ dependency graph automatically, so `types.ts` approval at the
+  Phase-0 → Phase-1 gate is where your architectural control is
+  **front-loaded**: it defines what gets parallelized. That makes it your
+  _primary_ control surface, **not your only one** — the multi-module decision
+  right above persists _during_ execution (a worker FLAGs any inter-file /
+  `types.ts` / `DOCS.md` change up to you; the emergency brake still fires).
+  Approve the DAG deliberately; don't wave `types.ts` through as "just types."
 - **The merge of `*.DRAFT.md` files for governance docs.** The drafts-only
   pattern exists because multi-file governance refactors are where the agent has
   historically broken things. Verify the diff yourself before merging (or asking
@@ -441,4 +453,7 @@ Some things are yours to do. Don't outsource these:
 ## Update triggers
 
 New override phrase, retired tool, new AR type, recurring coaching pattern (3+
-sessions in a row), new collaborator joining. Audit at ~400 lines.
+sessions in a row), new collaborator joining, a new model qualifies for
+principal governance (append its model-id substring to CLAUDE.md's qualifying
+list — the list only, never rename `AGENTS.principal.md` itself). Audit at ~400
+lines.
