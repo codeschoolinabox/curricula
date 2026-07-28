@@ -126,6 +126,11 @@ Opus on impl correctness. The curricula AGENTS.md now has this instruction in
 the Sub-model dispatch table — the agent should follow it without prompting, but
 if it doesn't, remind it: _"AR-3 and AR-4 spawn on Sonnet per AGENTS.md."_
 
+> **FLAG (pre-existing, out of scope for the AGENTS.principal rename):** this
+> contradicts `DEV.md` § Sub-model dispatch's actual rule — never pass a `model`
+> parameter, and the table lives in `DEV.md`, not `AGENTS.md`. Scheduled for a
+> separate fix.
+
 You can also set per-agent default models in `~/.claude/agents/<name>.md`
 frontmatter (`model: sonnet`) for any reusable agent definition.
 
@@ -259,6 +264,10 @@ Quick reference for the tools you can fire (or that I can fire on your behalf).
   code.
 - **Local AR-5 via Agent tool** — what the AGENTS.md AR Protocol describes.
   Spawn with `model='opus'` for AR-1/2/5 and `model='sonnet'` for AR-3/4.
+  > **FLAG (pre-existing, out of scope for the AGENTS.principal rename):** AR-2
+  > and AR-5 actually inherit the parent model rather than pinning opus, and no
+  > dispatch ever passes a `model` parameter — see `DEV.md` § Sub-model dispatch
+  > for the authoritative rule. Scheduled for a separate fix.
 
 **Remote tools (don't burn 5-hour limit, run in cloud):**
 

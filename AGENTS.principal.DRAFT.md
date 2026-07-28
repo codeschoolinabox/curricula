@@ -26,9 +26,10 @@ two correlate but aren't the same thing.
 
 This file is written against the following loading model: neither AGENTS file is
 guaranteed to auto-load. `CLAUDE.md`'s router text is intended to reach every
-session and subagent; two independent observations this session found it absent
-from a spawned subagent's own context, and zero observations of it present in
-one. Assume it reaches a top-level session and does NOT reliably reach a spawned
+session and subagent, but this repo cannot verify that for every subagent spawn
+path — observed evidence during this file's most recent revision found it absent
+from a spawned subagent's own context, with no observation of it present in one.
+Assume it reaches a top-level session and does NOT reliably reach a spawned
 subagent. The reading agent checks its own model id against `CLAUDE.md`'s
 qualifying list and explicitly reads whichever of `AGENTS.md` /
 `AGENTS.principal.md` matches — that explicit read, not auto-load, is what §
