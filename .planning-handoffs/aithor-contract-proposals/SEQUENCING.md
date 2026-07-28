@@ -37,6 +37,20 @@ region's `Violation` — moved per AR-1 #14 option (a), with the region
 re-exporting it so every existing consumer keeps its import. jej repoints its
 own imports to the leaf.
 
+Source homes today: the vendored types sit in
+`src/lib/study-lenses/language-levels/jej/types.ts` (the vendored banner marks
+the section); the walk is `jej/collect-violations.ts` (+ its traversal helpers
+`get-child-nodes-with-path.ts` / `create-violation.ts`); `Violation` is
+`src/lib/study-lenses/language-levels/types.ts`. The structural floor does not
+exist yet — it is authored at extraction. **Parse-settings caution:** the walk
+takes a pre-parsed `Program` "as the caller parsed it," so the settings live
+with callers — the instrument's one parse is
+`src/lib/study-lenses/embody/derive-ast.ts`, and the project memory records a
+live embody-vs-jej `preserveParens` divergence; the leaf's paired parse must be
+pinned against the settings the DATASETS are authored for (JEJ admits
+`ParenthesizedExpression`, i.e. `preserveParens` ON), not blindly copied from
+either caller.
+
 - **Cross-territory obligation (maintainer flag):** this wave writes in the jej
   tree (import repoints) and the levels region's `types.ts` (the re-export). The
   jej level's own policy data does not change.
@@ -135,6 +149,12 @@ steering) and the `steering` slot is the descriptor's designed hook.
   cancel stands on its own.
 
 ## Gate items (the maintainer rules at the Phase-0 → Phase-1 gate)
+
+**Where the ruling lands:** the gate's rulings — ratifications, amendments,
+strikes — are recorded as a new `## The gate ruling` section in `./AR-LOG.md`
+(the dossier's established ruling ledger) and mirrored into the charter memory's
+addendum. A post-gate session verifies the ruling THERE before opening any wave;
+an absent section means the gate has not ruled.
 
 1. **The rawness fate** — `raw: true` amends ratified P2's letter (argued:
    Chapter-4 pedagogy and drift telemetry need the surface; always-curated holds

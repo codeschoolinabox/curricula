@@ -5,6 +5,12 @@
 Verdicts and resolutions for the dossier's adversarial reviews, per DEV.md §
 Adversarial Review Protocol. Baseline at plan approval: `3dbf99d1`.
 
+> **The gate ruling lands HERE.** When the maintainer rules at the Phase-0 →
+> Phase-1 gate, the ruling — ratifications, amendments, strikes, per
+> `SEQUENCING.md` § Gate items — is recorded as a `## The gate ruling` section
+> at the bottom of this file (and mirrored into the charter memory's addendum).
+> Until that section exists, the gate has not ruled and no wave may open.
+
 ## AR-1 (Design Challenge) — verdict: PAUSE → resolved with the human
 
 Subject: `README.PROPOSED.md` (first draft). Three blockers, ten important,

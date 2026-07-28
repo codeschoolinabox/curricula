@@ -32,8 +32,8 @@
  *   {@link ResolvedAithorConfig}.
  */
 
-import type { SyntaxAllowlist } from '../lib/allowlisting/types.js'; // Wave-1 leaf — path TBD at extraction
-import type { SourceRange } from '../lib/allowlisting/types.js'; // offset-based { start, end }; moves with `Violation` (AR-1 #14, option a)
+import type { SyntaxAllowlist } from '../allowlisting/types.js'; // Wave-1 leaf — name/path TBD at extraction; sibling leaf from the Wave-3 seat
+import type { SourceRange } from '../allowlisting/types.js'; // offset-based { start, end }; moves with `Violation` (AR-1 #14, option a)
 import type { LoadedModel } from '../local-llm/types.js';
 
 // ─── Findings (the gate's refusal vocabulary; repair fuel) ────────────

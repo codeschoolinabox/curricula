@@ -4,12 +4,15 @@
 
 > **Dossier artifact — not the live contract.** This is the full proposed
 > `README.md` for the aithor module after all seven maintainer-ratified contract
-> proposals land (charter: memory `project_aithor_contract_proposals.md`; wave
-> map: `./SEQUENCING.md`; AR trail: `./AR-LOG.md`). The committed
+> proposals land (charter: memory `project_aithor_contract_proposals.md` under
+> `~/.claude/projects/-Users-master-Documents-0-teach-code-0-spiralearn-0--home/memory/`;
+> wave map: `./SEQUENCING.md`; AR trail: `./AR-LOG.md`). The committed
 > `src/lib/embody/language-levels/just-enough-javascript/aithor/README.md` is
-> untouched until the maintainer ratifies this dossier. Relative links below are
-> written for the CURRENT seat; Wave 3 (the move to
-> `src/lib/study-lenses/lib/aithor/`) re-homes them mechanically.
+> untouched until the maintainer ratifies this dossier. Link note: the TARGETS
+> named below are the current seat's neighbors, but the hrefs are written
+> relative to THIS dossier directory so they resolve while reviewing — whoever
+> lands this file re-bases every relative href for the landing seat (Wave 2: the
+> current seat; Wave 3 re-homes them again).
 
 ---
 
