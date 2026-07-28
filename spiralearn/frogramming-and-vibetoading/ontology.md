@@ -635,6 +635,10 @@ meta-pattern.
   Peña prior work; the 2-D precursor the §11 human–AI slider distills into a
   per-task 1-D reading. The companion POC tool attributes its framework to both
   this quick-read and F&V.
+- **4-level AI-adoption model** (physical / conceptual / "cognitive" /
+  behavioral) — Evan Cole / Janet Tilstra / Joslenne Peña prior work; the
+  AI-specific precursor §9's seven lenses generalize, and the root inspiration
+  for Ch4's shape. See §9's AI reading.
 - **Bakhtiar Mikhak — engineering × physics co-evolution** — the deeper pattern
   V/F instantiates. Faraday/Maxwell-style mutual constitution: engineering
   practice and theoretical practice shape each other; neither is downstream of
@@ -1027,6 +1031,17 @@ they are for any system — scope-discipline, not blindness.
 The phenomena above are **named, not developed**. `chapters.md` Ch4 carries the
 developed treatment; §10 carries the artifact-side consequences of the substrate
 at lens 4; §11 carries the three roles AI can hold at lens 6.
+
+> **Lineage and attribution.** The AI reading above descends from a **4-level
+> AI-adoption model** — physical, conceptual, "cognitive", behavioral —
+> developed by **Evan Cole** with collaborators **Janet Tilstra** and **Joslenne
+> Peña**, and it is the root inspiration for Ch4's shape. §9 generalizes that
+> model in two directions: the ladder widens from AI to any system, and it gains
+> the lens-positions the original did not need — the Platonic floor (1), the
+> artifact's outward surface (5) where V anchors, and systemic impacts (7). The
+> original's two working levels survive as lenses 4 and 6, and its organizing
+> line survives with them: _you twin what the model is (artifact-logic) in order
+> to operate where the collaboration happens (interaction dynamics)._
 
 #### V and F traverse lenses; each has a natural anchor-lens
 
