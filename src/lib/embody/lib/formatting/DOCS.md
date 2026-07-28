@@ -4,8 +4,8 @@
 
 Prettier is the canonical JavaScript formatter and preserves blank lines between
 statements (Prettier collapses 1+ consecutive blank lines to 1). This matches
-the "blank lines as paragraph breaks" convention documented in `DEV.md §12` and
-used throughout this codebase.
+the "blank lines as paragraph breaks" convention documented in
+`DEV-READABILITY-PATTERNS.md` and used throughout this codebase.
 
 The tradeoff: `prettier/standalone` is async-only (`Promise<string>`). This
 makes `format()`, `checkFormat()`, and `isJej()` async too. Since the
