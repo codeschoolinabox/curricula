@@ -48,10 +48,9 @@ not fork that vocabulary — it reads each axis off the config.
   returned program is validated-to-spec JEJ within the requested subset and size
   — or a structured refusal. An **uncurated** call (`validate: false`) returns
   the model's program as-is — possible drift, possible hallucination, no gate
-  (with meta naming which model ran). Same word, same axis; the control just moves
-  from the author's hand to the
-  validation loop. The rhyme is deliberate: curated still means _controlled_,
-  uncurated still means _raw_.
+  (with meta naming which model ran). Same word, same axis; the control just
+  moves from the author's hand to the validation loop. The rhyme is deliberate:
+  curated still means _controlled_, uncurated still means _raw_.
 - **The guided/unguided axis is who fills the config.** Canonically, _guided_
   means who structures the path. Here it means **who fills `config`** — its
   `prompt` and its constraints. **Guided**: the environment or lens fills them
@@ -161,8 +160,9 @@ within the requested complexity and length). A repair loop closes the gap when
 either fails. The model supplies _plausibility and meaning_ (and, from a
 non-empty input, the kinship to it); the gates supply the guarantees. Neither
 alone is the curated aithor — the loop between them is. Under `validate: false`
-there is no loop and no gates — the model's program is returned as-is (beside meta
-naming the model that ran), by design, and the rawness is the lesson, not a defect.
+there is no loop and no gates — the model's program is returned as-is (beside
+meta naming the model that ran), by design, and the rawness is the lesson, not a
+defect.
 
 ## Ubiquitous language
 
@@ -171,11 +171,12 @@ naming the model that ran), by design, and the rawness is the lesson, not a defe
 - **Input program** (`program`) — the program a request shapes from. Empty means
   _compose from scratch_; non-empty means _produce a variation_ of it. The input
   is a **seed, not a constraint**: read for intent and shape, and _not_ required
-  to be admitted JEJ — only a curated output is gated. Even under `vary` (see _Vary_)
-  the input stays a seed: a `vary` **hard hold** reads it as a **contextual source** to
-  _infer_ the request's feature subset or size — a convenience that spares the consumer
-  hand-typing constraints the seed already implies. The inferred constraint describes the
-  output exactly as a hand-set one would; the seed is its **source, not a diff target**.
+  to be admitted JEJ — only a curated output is gated. Even under `vary` (see
+  _Vary_) the input stays a seed: a `vary` **hard hold** reads it as a
+  **contextual source** to _infer_ the request's feature subset or size — a
+  convenience that spares the consumer hand-typing constraints the seed already
+  implies. The inferred constraint describes the output exactly as a hand-set
+  one would; the seed is its **source, not a diff target**.
 - **Config** — everything the call carries besides the input program: which
   **model** to use, a **prompt**, the request's **constraints** (a feature
   subset and size bounds), and the **validate** flag. Distinct from the model's
@@ -223,10 +224,10 @@ naming the model that ran), by design, and the rawness is the lesson, not a defe
   non-empty **seed** program (see _Variation_) constrains its very shape — the
   tightest constraint of all. A seeded curated request is **hyper-curated**:
   composing from an empty seed is curated, varying a seed is curated _harder_.
-  Seeding is another dimension of curation, not a separate axis. `vary` (see _Vary_)
-  is the **knob on that dimension**: a held **hard** aspect _infers_ a feature subset or
-  size bound from the seed — sourcing a normal constraint from it, not making the seed a
-  diff target.
+  Seeding is another dimension of curation, not a separate axis. `vary` (see
+  _Vary_) is the **knob on that dimension**: a held **hard** aspect _infers_ a
+  feature subset or size bound from the seed — sourcing a normal constraint from
+  it, not making the seed a diff target.
 - **Guided / unguided** — the guided/unguided axis read off **who fills
   `config`**. **Guided**: the environment or lens fills the prompt and
   constraints (educator-structured). **Unguided**: the learner fills them
@@ -240,29 +241,31 @@ naming the model that ran), by design, and the rawness is the lesson, not a defe
   how far it departs from the input is the model's call, not a guaranteed
   faithfulness.
 - **Vary** (`vary`) — the optional, **pedagogy-facing control over the next
-  Variation**: a per-**aspect** declaration of what stays like the seed and what may
-  drift, for endless targeted practice. It **compiles down** to the constraints above
-  (a feature subset, size bounds, or a prompt instruction) and adds no new gate, and is
-  **mutually exclusive** with a raw `include` / `exclude` / `lines` / `complexity`. See
-  the _Vary_ section.
+  Variation**: a per-**aspect** declaration of what stays like the seed and what
+  may drift, for endless targeted practice. It **compiles down** to the
+  constraints above (a feature subset, size bounds, or a prompt instruction) and
+  adds no new gate, and is **mutually exclusive** with a raw `include` /
+  `exclude` / `lines` / `complexity`. See the _Vary_ section.
 - **Aspect** — one of `vary`'s five dimensions. The **hard** (gateable) aspects:
-  `languageLevel` (the seed's language features) and `size` (its length and nesting
-  depth). The **soft** (semantic) aspects: `behavior` (the program's outwardly visible
-  behavior — UI and console output), `strategy` (the abstract algorithm), and
-  `implementation` (the actual lines of code). One behavior has many strategies has many
-  implementations, but each aspect is an independent boolean.
-- **Held / freed** — an aspect's two states. **Held** (`false`) pins it to the seed;
-  **freed** (`true`, and the default for any **unset** aspect) lets it depart. The caller
-  declares _holds_; `vary: {}` frees everything.
-- **Feature inventory** — the gateable features a seed actually uses, read off its AST
-  with the **same** node→feature map `conform` gates by — the detector is **shared**
-  between the gate and `vary`, not re-implemented. It is
-  the mechanism of a held `languageLevel`: the inventory becomes the output's feature
-  subset, so a curated variation stays at the seed's technical level. An **empty**
-  inventory (a seed of plain statements) held means "simple statements only," not
-  "anything goes" — a feature-less seed _is_ the simplest level, and holding it keeps a
-  beginner's variations at that level rather than letting the model reach for loops or
-  operators the seed never used (permit-none, not permit-all).
+  `languageLevel` (the seed's language features) and `size` (its length and
+  nesting depth). The **soft** (semantic) aspects: `behavior` (the program's
+  outwardly visible behavior — UI and console output), `strategy` (the abstract
+  algorithm), and `implementation` (the actual lines of code). One behavior has
+  many strategies has many implementations, but each aspect is an independent
+  boolean.
+- **Held / freed** — an aspect's two states. **Held** (`false`) pins it to the
+  seed; **freed** (`true`, and the default for any **unset** aspect) lets it
+  depart. The caller declares _holds_; `vary: {}` frees everything.
+- **Feature inventory** — the gateable features a seed actually uses, read off
+  its AST with the **same** node→feature map `conform` gates by — the detector
+  is **shared** between the gate and `vary`, not re-implemented. It is the
+  mechanism of a held `languageLevel`: the inventory becomes the output's
+  feature subset, so a curated variation stays at the seed's technical level. An
+  **empty** inventory (a seed of plain statements) held means "simple statements
+  only," not "anything goes" — a feature-less seed _is_ the simplest level, and
+  holding it keeps a beginner's variations at that level rather than letting the
+  model reach for loops or operators the seed never used (permit-none, not
+  permit-all).
 - **Candidate** — one program the model proposes for a request, taken from the
   decomposed `GenerationResult`: the extracted `code` on the curated path, the
   byte-exact `raw` on the uncurated one. Under `validate: true` the candidate
@@ -296,150 +299,159 @@ naming the model that ran), by design, and the rawness is the lesson, not a defe
   curated-only (no loop, no bound), while **no model available** and **unknown
   model** are bring-up-time and so arise under either `validate` value (model
   bring-up precedes the curated/uncurated fork). Under `validate: true`: any of
-  the three. Under `validate: false`: **no model available** or **unknown model**
-  — with no loop there is no attempt-bound refusal. _No model available_ means the
-  device cannot bring up a model it otherwise knows: no model it can run, or the
-  requested model is neither cached nor reachable to fetch — all of local-llm's
-  terminal load-failure causes (_no-feasible-model_, _all-candidates-exhausted_,
-  _fetch-failed_, _storage-quota_, _cache-evicted_) collapse to this one aithor
-  cause, and so does a rejected device-capability probe or any other infrastructure
-  fault raised during bring-up (the runtime propagates those rather than returning a
-  load failure; the aithor seam catches them into this same cause). A _no model
-  available_ that came from a structured load failure carries an optional **next
-  step** (see _Next step_) — a product-neutral category derived from that underlying
-  cause; the infrastructure-fault path carries none. _Unknown model_ is a different layer: a **non-empty**
-  requested `model` name is absent from the runtime's catalog altogether (a typo,
-  or a name from a newer catalog) — kept distinct so a misnamed model never
-  masquerades as "your device can't run it." (An **empty** `model` is never an
-  _unknown model_ refusal — it asks the runtime to pick its cost-aware default; if
-  the device can run nothing it still refuses as _no model available_.) Because
-  every model is local, when
-  the device cannot bring one up the aithor refuses rather than reaching for a
-  remote one. A curated request whose spec no program can satisfy refuses for the
-  bound, expectedly.
-- **Next step** (`nextStep`) — an optional, **actionable** category on a _no model
-  available_ refusal that came from a structured load failure: a product-neutral
-  value — _retry_ (a transient fetch failure), _free-space_ (device storage is
-  full), _reconnect_ (a cached model was evicted, so a refetch needs the network),
-  or _use-native-app_ (this device cannot bring up any model in the browser) —
-  mapped from local-llm's terminal cause. It is the **category only**: aithor names
-  what _kind_ of next step is honest, never a product, a vendor, or a URL — the value
-  carries no message and no link, so there is no slot a product name could occupy.
-  The **render surface** — the copy, the download link, naming a desktop app — is the
-  consumer's: local-llm calls this the cause→**guidance** mapping, and it is the
-  lens's, downstream of this category (the lens renders a `nextStep` into that
-  guidance). _Unknown model_ and infrastructure-fault refusals carry no `nextStep` (no
-  honest device-limit cause underlies them) — its absence is the signal that there is
+  the three. Under `validate: false`: **no model available** or **unknown
+  model** — with no loop there is no attempt-bound refusal. _No model available_
+  means the device cannot bring up a model it otherwise knows: no model it can
+  run, or the requested model is neither cached nor reachable to fetch — all of
+  local-llm's terminal load-failure causes (_no-feasible-model_,
+  _all-candidates-exhausted_, _fetch-failed_, _storage-quota_, _cache-evicted_)
+  collapse to this one aithor cause, and so does a rejected device-capability
+  probe or any other infrastructure fault raised during bring-up (the runtime
+  propagates those rather than returning a load failure; the aithor seam catches
+  them into this same cause). A _no model available_ that came from a structured
+  load failure carries an optional **next step** (see _Next step_) — a
+  product-neutral category derived from that underlying cause; the
+  infrastructure-fault path carries none. _Unknown model_ is a different layer:
+  a **non-empty** requested `model` name is absent from the runtime's catalog
+  altogether (a typo, or a name from a newer catalog) — kept distinct so a
+  misnamed model never masquerades as "your device can't run it." (An **empty**
+  `model` is never an _unknown model_ refusal — it asks the runtime to pick its
+  cost-aware default; if the device can run nothing it still refuses as _no
+  model available_.) Because every model is local, when the device cannot bring
+  one up the aithor refuses rather than reaching for a remote one. A curated
+  request whose spec no program can satisfy refuses for the bound, expectedly.
+- **Next step** (`nextStep`) — an optional, **actionable** category on a _no
+  model available_ refusal that came from a structured load failure: a
+  product-neutral value — _retry_ (a transient fetch failure), _free-space_
+  (device storage is full), _reconnect_ (a cached model was evicted, so a
+  refetch needs the network), or _use-native-app_ (this device cannot bring up
+  any model in the browser) — mapped from local-llm's terminal cause. It is the
+  **category only**: aithor names what _kind_ of next step is honest, never a
+  product, a vendor, or a URL — the value carries no message and no link, so
+  there is no slot a product name could occupy. The **render surface** — the
+  copy, the download link, naming a desktop app — is the consumer's: local-llm
+  calls this the cause→**guidance** mapping, and it is the lens's, downstream of
+  this category (the lens renders a `nextStep` into that guidance). _Unknown
+  model_ and infrastructure-fault refusals carry no `nextStep` (no honest
+  device-limit cause underlies them) — its absence is the signal that there is
   no actionable category beyond the bare refusal.
 - **Model handle** — a **`LoadedModel`** from the injected local-llm runtime
-  ([`lib/local-llm/`](../../../../study-lenses/lib/local-llm/README.md)), always a **local**
-  one: it runs on the learner's own device, never a remote service. The config
-  selects it by **name** from local-llm's **open set** of models along a
-  **size/capability spectrum** — smaller downloads less and runs faster but writes
-  weaker programs, larger the reverse — and the set **grows as small portable
-  models improve**. aithor passes that name straight through to the runtime
-  (`load({ model })`); it does **not** choose a size class or device-tier
-  preference. The **empty string is the "pick for me" request** — it lets the
-  runtime choose its **cost-aware default**; a **non-empty** name absent from the
-  runtime's catalog refuses as **unknown model**, pre-checked before bring-up
-  against the **same catalog instance** aithor injects into the runtime at
-  construction (local-llm exposes no membership predicate, so the pre-check and
-  the runtime agree by construction). The check is gated on a non-empty name —
-  mirroring the runtime's own — so an empty name passes straight through as a
-  model-less default-pick request. On a successful bring-up the loader also yields
-  **which model was resolved**, so a result's meta names the model that actually
-  ran — on either path — even when the request let the runtime choose. The named model is **fetched once and
-  cached on the device**, then **brought into memory on first use** and reused
+  ([`lib/local-llm/`](../../../../study-lenses/lib/local-llm/README.md)), always
+  a **local** one: it runs on the learner's own device, never a remote service.
+  The config selects it by **name** from local-llm's **open set** of models
+  along a **size/capability spectrum** — smaller downloads less and runs faster
+  but writes weaker programs, larger the reverse — and the set **grows as small
+  portable models improve**. aithor passes that name straight through to the
+  runtime (`load({ model })`); it does **not** choose a size class or
+  device-tier preference. The **empty string is the "pick for me" request** — it
+  lets the runtime choose its **cost-aware default**; a **non-empty** name
+  absent from the runtime's catalog refuses as **unknown model**, pre-checked
+  before bring-up against the **same catalog instance** aithor injects into the
+  runtime at construction (local-llm exposes no membership predicate, so the
+  pre-check and the runtime agree by construction). The check is gated on a
+  non-empty name — mirroring the runtime's own — so an empty name passes
+  straight through as a model-less default-pick request. On a successful
+  bring-up the loader also yields **which model was resolved**, so a result's
+  meta names the model that actually ran — on either path — even when the
+  request let the runtime choose. The named model is **fetched once and cached
+  on the device**, then **brought into memory on first use** and reused
   thereafter — a fetch-once, load-once-reuse lifecycle the **runtime** owns;
-  aithor names _which_ model and drives _when_, not _how_. The network is touched
-  only for that one-time fetch; every later load is from the cache, offline. Its
-  `generate` resolves to a decomposed `GenerationResult` (`raw` byte-exact,
-  `code` the extracted program); aithor conforms `.code` and returns `.raw` per
-  quadrant. The runtime also offers a one-time-fetch progress callback, which
-  aithor does not surface — by the pure-seeming commitment below. The model
-  _runtime_ — how a model executes, and **which on-device backend** runs it (the
-  host registers that with the runtime; aithor ships no backend and takes no
-  backend dependency) — is outside this module.
+  aithor names _which_ model and drives _when_, not _how_. The network is
+  touched only for that one-time fetch; every later load is from the cache,
+  offline. Its `generate` resolves to a decomposed `GenerationResult` (`raw`
+  byte-exact, `code` the extracted program); aithor conforms `.code` and returns
+  `.raw` per quadrant. The runtime also offers a one-time-fetch progress
+  callback, which aithor does not surface — by the pure-seeming commitment
+  below. The model _runtime_ — how a model executes, and **which on-device
+  backend** runs it (the host registers that with the runtime; aithor ships no
+  backend and takes no backend dependency) — is outside this module.
 
 ## Vary
 
-`vary` turns a learner's **current program** — the seed — into **endless targeted
-practice**. Rather than hand-set a feature subset and size bounds, the caller declares,
-per **aspect**, what should stay like the seed (**held**) and what is free to drift
-(**freed**); `vary` compiles that into the request's constraints. Hold the technical
-level and free the rest, and the learner drills the _same constructs_ across new
-programs; hold the problem and free the solution, and they meet _different solutions to
-the same problem_. The motivating consumer is an editor "vary this" affordance — outside
-this module; `vary` is pure and testable on its own.
+`vary` turns a learner's **current program** — the seed — into **endless
+targeted practice**. Rather than hand-set a feature subset and size bounds, the
+caller declares, per **aspect**, what should stay like the seed (**held**) and
+what is free to drift (**freed**); `vary` compiles that into the request's
+constraints. Hold the technical level and free the rest, and the learner drills
+the _same constructs_ across new programs; hold the problem and free the
+solution, and they meet _different solutions to the same problem_. The
+motivating consumer is an editor "vary this" affordance — outside this module;
+`vary` is pure and testable on its own.
 
 ### The five aspects, two tiers
 
 Two **hard** (enforced) aspects and three **soft** (requested) ones — the same
-gateable vs. semantic split the rest of the module draws. Held, each pins the output
-to the seed:
+gateable vs. semantic split the rest of the module draws. Held, each pins the
+output to the seed:
 
-- **`languageLevel`** (hard) — uses only the seed's **feature inventory**; compiles to
-  a feature subset the conformance gate checks.
-- **`size`** (hard) — stays within the seed's **length and nesting depth**; compiles to
-  the `lines` / `complexity` bounds, as `≤` maxima.
-- **`behavior`** (soft) — the same **outwardly visible behavior** (UI and console
-  output); a prompt instruction only.
-- **`strategy`** (soft) — the same **abstract algorithm**; a prompt instruction only.
-- **`implementation`** (soft) — the same **actual lines of code**; a prompt instruction
+- **`languageLevel`** (hard) — uses only the seed's **feature inventory**;
+  compiles to a feature subset the conformance gate checks.
+- **`size`** (hard) — stays within the seed's **length and nesting depth**;
+  compiles to the `lines` / `complexity` bounds, as `≤` maxima.
+- **`behavior`** (soft) — the same **outwardly visible behavior** (UI and
+  console output); a prompt instruction only.
+- **`strategy`** (soft) — the same **abstract algorithm**; a prompt instruction
   only.
+- **`implementation`** (soft) — the same **actual lines of code**; a prompt
+  instruction only.
 
-The three soft aspects are **independent dials**: one behavior has many strategies has
-many implementations, but each is toggled on its own, and an unusual combination — hold
-the code, free the behavior — is just an unusual prompt the model is left to reconcile,
-never a validated error (a soft aspect has nothing to gate).
+The three soft aspects are **independent dials**: one behavior has many
+strategies has many implementations, but each is toggled on its own, and an
+unusual combination — hold the code, free the behavior — is just an unusual
+prompt the model is left to reconcile, never a validated error (a soft aspect
+has nothing to gate).
 
 ### Held, freed, and the default
 
-Each aspect is an **optional boolean**: **`false` holds**, **`true` frees**, and an
-**unset** aspect is **freed by default**. The caller declares _holds_, so the common
-request is short — `vary: { languageLevel: false }` holds the level and frees everything
-else; `vary: {}` frees everything, a fresh variation with nothing pinned (equivalent to
-no `vary` at all).
+Each aspect is an **optional boolean**: **`false` holds**, **`true` frees**, and
+an **unset** aspect is **freed by default**. The caller declares _holds_, so the
+common request is short — `vary: { languageLevel: false }` holds the level and
+frees everything else; `vary: {}` frees everything, a fresh variation with
+nothing pinned (equivalent to no `vary` at all).
 
 ### It compiles down — no new gate
 
-`vary` is a **higher-level layer over the existing primitives**, not a new enforcement
-path. A held **hard** aspect resolves to exactly the primitive it shadows — `languageLevel`
-to a feature subset (the seed's inventory), `size` to the `lines` / `complexity` bounds —
-and rides the **existing** admit-and-conform loop and prompt unchanged. A held **soft**
-aspect resolves to a prompt instruction referencing the seed. Because it compiles to the
-existing constraints it **inherits their enforcement split**: a held hard aspect is
-enforced under `validate: true` and prompt-shaping under `validate: false`, exactly as a
-hand-set subset or bound would be; the soft aspects are soft either way, like theme.
-`conform`, the loop, and the result type are untouched — `vary` is enforced _only_ through
-what it compiles to. Which aspects a request _guaranteed_ versus merely _asked for_ is
-therefore read off this static tier split and `validate`; nothing records it.
+`vary` is a **higher-level layer over the existing primitives**, not a new
+enforcement path. A held **hard** aspect resolves to exactly the primitive it
+shadows — `languageLevel` to a feature subset (the seed's inventory), `size` to
+the `lines` / `complexity` bounds — and rides the **existing** admit-and-conform
+loop and prompt unchanged. A held **soft** aspect resolves to a prompt
+instruction referencing the seed. Because it compiles to the existing
+constraints it **inherits their enforcement split**: a held hard aspect is
+enforced under `validate: true` and prompt-shaping under `validate: false`,
+exactly as a hand-set subset or bound would be; the soft aspects are soft either
+way, like theme. `conform`, the loop, and the result type are untouched — `vary`
+is enforced _only_ through what it compiles to. Which aspects a request
+_guaranteed_ versus merely _asked for_ is therefore read off this static tier
+split and `validate`; nothing records it.
 
-Holding `languageLevel` reads the seed's **feature inventory** off its AST with the same
-node→feature map `conform` gates by — so a held variation conforms to its own seed by
-construction. A seed of plain statements has an **empty** inventory; held, that is
-"**simple statements only**," not "anything goes."
+Holding `languageLevel` reads the seed's **feature inventory** off its AST with
+the same node→feature map `conform` gates by — so a held variation conforms to
+its own seed by construction. A seed of plain statements has an **empty**
+inventory; held, that is "**simple statements only**," not "anything goes."
 
 ### A request mistake throws; a tight request refuses
 
-A `vary` that **declares any aspect** is **mutually exclusive** with a raw `include` /
-`exclude` / `lines` / `complexity`: it _is_ the higher-level way to set those, so setting
-both is a contradiction — it **throws**, never a silent override. (`vary: {}` declares
-nothing: it is inert, equivalent to no `vary`, and never conflicts.) And a **hard hold
-needs a seed to read off**: a held
-`languageLevel` or `size` on an **empty or unparseable** seed **throws** — you cannot
-inventory or measure a seed that is not there. A **soft** hold, by contrast, **never
-throws**: it is a prompt instruction, and the soft tier is never a validated error — a soft
-hold with no seed to reference is a vacuous instruction the model ignores, not a mistake.
-These throws are request errors knowable before the model runs — the layer a malformed
-`FeatureName` lives at, distinct from the value-not-throw _outcome_ boundary (where a model
-or runtime failure is a refusal, never an exception). `vary: {}` on an empty seed is **not**
-a mistake: with nothing held it is the from-scratch base case.
+A `vary` that **declares any aspect** is **mutually exclusive** with a raw
+`include` / `exclude` / `lines` / `complexity`: it _is_ the higher-level way to
+set those, so setting both is a contradiction — it **throws**, never a silent
+override. (`vary: {}` declares nothing: it is inert, equivalent to no `vary`,
+and never conflicts.) And a **hard hold needs a seed to read off**: a held
+`languageLevel` or `size` on an **empty or unparseable** seed **throws** — you
+cannot inventory or measure a seed that is not there. A **soft** hold, by
+contrast, **never throws**: it is a prompt instruction, and the soft tier is
+never a validated error — a soft hold with no seed to reference is a vacuous
+instruction the model ignores, not a mistake. These throws are request errors
+knowable before the model runs — the layer a malformed `FeatureName` lives at,
+distinct from the value-not-throw _outcome_ boundary (where a model or runtime
+failure is a refusal, never an exception). `vary: {}` on an empty seed is
+**not** a mistake: with nothing held it is the from-scratch base case.
 
-A well-formed but **too-tight** request — hold the level, free the behavior, and no program
-at that level expresses what the model reaches for — is not a precondition error: it runs,
-and if the loop cannot satisfy it the **existing** _attempt-bound-exhausted_ refusal is the
-honest outcome. Tightening trades coverage for focus, here as everywhere.
+A well-formed but **too-tight** request — hold the level, free the behavior, and
+no program at that level expresses what the model reaches for — is not a
+precondition error: it runs, and if the loop cannot satisfy it the **existing**
+_attempt-bound-exhausted_ refusal is the honest outcome. Tightening trades
+coverage for focus, here as everywhere.
 
 ## What it produces (the boundary)
 
@@ -450,15 +462,15 @@ The boundary splits on `validate`.
   the `validate` flag).
 - **Out, curated (`validate: true`):** either a **result** — an admitted,
   conformant program (composed if the input was empty, a variation otherwise)
-  plus the meta a caller needs (which model actually ran, how many attempts), or a
-  **structured refusal**. The aithor never returns a program that fails either
+  plus the meta a caller needs (which model actually ran, how many attempts), or
+  a **structured refusal**. The aithor never returns a program that fails either
   gate. The boundary holds.
 - **Out, uncurated (`validate: false`):** the model's program **as-is** —
   possibly invalid, possibly drifting past the requested subset or size — **by
   design**, plus the meta naming **which model ran** (a single call; the program
-  itself is unmodified). The constraints shaped the prompt; nothing
-  enforced them, so the gap between asked-for and got is real and intentional. The
-  only refusals here are **no model available** and **unknown model** (both
+  itself is unmodified). The constraints shaped the prompt; nothing enforced
+  them, so the gap between asked-for and got is real and intentional. The only
+  refusals here are **no model available** and **unknown model** (both
   bring-up-time); with no loop, there is no attempt-bound refusal.
 
 Generation is **asynchronous**: a caller `await`s the result (the model call
@@ -490,10 +502,10 @@ model.
   use — driving _which_ model and _when_, not the fetch, cache, or run
   mechanics, which are the runtime's (see _Excludes_).
 - The **catalog-membership pre-check**: turning a **non-empty** `model` name
-  absent from the injected catalog into an **unknown model** refusal _before_ the
-  runtime's `load` is called, so the runtime's unknown-name throw is never reached
-  — the aithor seam stays uniformly value-not-throw. (An empty `model` is not
-  pre-checked; it passes through to the runtime's default pick.)
+  absent from the injected catalog into an **unknown model** refusal _before_
+  the runtime's `load` is called, so the runtime's unknown-name throw is never
+  reached — the aithor seam stays uniformly value-not-throw. (An empty `model`
+  is not pre-checked; it passes through to the runtime's default pick.)
 
 ### Excludes
 
@@ -509,9 +521,9 @@ model.
   the on-device inference backend: local-llm takes the backends it runs as a
   host-supplied adapter map (the host registers only what it ships), and aithor
   consumes whatever local backend the host wired rather than bundling one of its
-  own. Excluding the mechanism does not weaken the commitment that every model is
-  local: the aithor relies on that property exactly as it relies on the level's
-  admission gate, without implementing either.
+  own. Excluding the mechanism does not weaken the commitment that every model
+  is local: the aithor relies on that property exactly as it relies on the
+  level's admission gate, without implementing either.
 - **Embodiment, lenses, execution** — once a program exists it is an ordinary
   JEJ source string; embody / orchestrate / engine handle it from there.
 - **Authoring _for its own sake_** — a learner or author writing a finished
@@ -529,16 +541,18 @@ These are present-tense decisions the module honours.
 - **Generation is the empty-input case of variation.** One operation, not two:
   empty `program` composes, non-empty `program` varies. The empty program is a
   real admitted JEJ program, so this is a principled base case, not a sentinel.
-- **The config describes the output, not a diff.** The same config means the same target
-  whether `program` is empty or full; the input is a seed, not a constraint the output
-  must respect, and need not be JEJ. `vary` does not change this: a held **hard** aspect
-  (`languageLevel` / `size`) reads the seed only to _infer_ the request's feature subset or
-  size — a convenience that sources a normal constraint the consumer would otherwise
-  hand-type. The inferred constraint describes the output as any constraint does; the seed
-  is its **source, never a diff target**. A non-JEJ seed is still accepted; only its
-  JEJ-gateable features define a held level — non-gateable constructs are not inventoried,
-  so holding `languageLevel` on above-JEJ code yields a variation at or below the seed's
-  level, never above (the held level _lowers_ to JEJ, by construction).
+- **The config describes the output, not a diff.** The same config means the
+  same target whether `program` is empty or full; the input is a seed, not a
+  constraint the output must respect, and need not be JEJ. `vary` does not
+  change this: a held **hard** aspect (`languageLevel` / `size`) reads the seed
+  only to _infer_ the request's feature subset or size — a convenience that
+  sources a normal constraint the consumer would otherwise hand-type. The
+  inferred constraint describes the output as any constraint does; the seed is
+  its **source, never a diff target**. A non-JEJ seed is still accepted; only
+  its JEJ-gateable features define a held level — non-gateable constructs are
+  not inventoried, so holding `languageLevel` on above-JEJ code yields a
+  variation at or below the seed's level, never above (the held level _lowers_
+  to JEJ, by construction).
 - **`validate` is the curated/uncurated axis — and rawness is the lesson, by
   design.** A curated call (`validate: true`) runs the loop and returns
   validated-to-spec JEJ or a structured refusal. An uncurated call
@@ -584,27 +598,29 @@ These are present-tense decisions the module honours.
   decides how far the result departs; the hard guarantees (under
   `validate: true`) are only admission and conformance. A caller needing an
   exact, rule-based transformation will not find it here.
-- **`vary` compiles down; it adds no gate.** `vary` is a pedagogy-facing layer over
-  the existing primitives: a held **hard** aspect (`languageLevel` / `size`) resolves to
-  a feature subset or size bound, a held **soft** aspect (`behavior` / `strategy` /
-  `implementation`) to a prompt instruction. `conform`, the two gates, the repair loop, and
-  the result type (`AithorResult` / `Refusal` / `Meta`) are **unchanged**; what `vary` adds
-  is additive — the request resolver gains a vary→primitives step, and the prompt builder
-  gains a held-soft-aspect render. `vary` is enforced _only_ through what it compiles to, so
-  a held hard aspect is enforced under `validate: true` and prompt-shaping under
-  `validate: false`, exactly as a hand-set subset or bound would be, while the three soft
-  aspects are always soft, like theme. The soft aspects are **independent dials**, never
-  cross-validated; the only request that fails before the model is a self-contradiction
-  (see below).
-- **Config-shape errors throw; outcomes are values.** aithor's value-not-throw invariant
-  governs _outcomes_ — a model or runtime failure is a structured refusal, never an
-  exception. A malformed _request_ is a different layer: a `vary` declaring any aspect set
-  alongside a raw `include` / `exclude` / `lines` / `complexity`, or a **hard** hold
-  (`languageLevel` / `size`) with no seed to read off (an empty or unparseable one), is a
-  caller mistake
-  knowable before the model runs, and it **throws** — where a malformed `FeatureName` would
-  be a type error, not a refusal. A **soft** hold never throws (it is never a validated
-  error); `vary: {}` on an empty seed is the from-scratch base case, not a mistake.
+- **`vary` compiles down; it adds no gate.** `vary` is a pedagogy-facing layer
+  over the existing primitives: a held **hard** aspect (`languageLevel` /
+  `size`) resolves to a feature subset or size bound, a held **soft** aspect
+  (`behavior` / `strategy` / `implementation`) to a prompt instruction.
+  `conform`, the two gates, the repair loop, and the result type (`AithorResult`
+  / `Refusal` / `Meta`) are **unchanged**; what `vary` adds is additive — the
+  request resolver gains a vary→primitives step, and the prompt builder gains a
+  held-soft-aspect render. `vary` is enforced _only_ through what it compiles
+  to, so a held hard aspect is enforced under `validate: true` and
+  prompt-shaping under `validate: false`, exactly as a hand-set subset or bound
+  would be, while the three soft aspects are always soft, like theme. The soft
+  aspects are **independent dials**, never cross-validated; the only request
+  that fails before the model is a self-contradiction (see below).
+- **Config-shape errors throw; outcomes are values.** aithor's value-not-throw
+  invariant governs _outcomes_ — a model or runtime failure is a structured
+  refusal, never an exception. A malformed _request_ is a different layer: a
+  `vary` declaring any aspect set alongside a raw `include` / `exclude` /
+  `lines` / `complexity`, or a **hard** hold (`languageLevel` / `size`) with no
+  seed to read off (an empty or unparseable one), is a caller mistake knowable
+  before the model runs, and it **throws** — where a malformed `FeatureName`
+  would be a type error, not a refusal. A **soft** hold never throws (it is
+  never a validated error); `vary: {}` on an empty seed is the from-scratch base
+  case, not a mistake.
 - **Local models only — and four properties follow.** The aithor drives _only_
   local models, run on the learner's own device; it never calls a remote model
   service. This is the invariant the module's value rests on, not a default to
@@ -617,12 +633,11 @@ These are present-tense decisions the module honours.
   none, by design. aithor's own default-runtime factory is a thin construction
   over the local-llm runtime, which has no remote path — so once a host wires a
   backend adapter, the local-only guarantee is anchored in code on that default
-  path, not merely asserted in prose (a host that injects its own runtime owns the
-  invariant for that runtime). This is what the **Chapter-4 uncurated use is built
-  on**:
-  AI-co-authoring practice that is offline, account-free, private, and cost-free
-  is only practicable for every learner because the model is local — the
-  local-only invariant is what that use is _for_.
+  path, not merely asserted in prose (a host that injects its own runtime owns
+  the invariant for that runtime). This is what the **Chapter-4 uncurated use is
+  built on**: AI-co-authoring practice that is offline, account-free, private,
+  and cost-free is only practicable for every learner because the model is local
+  — the local-only invariant is what that use is _for_.
 - **Offline after acquisition, not zero-footprint.** "Offline" is scoped to
   _generation_: a model is fetched once and cached, and from then on runs with
   no network at all. That one-time fetch is the same kind of one-time online
@@ -633,20 +648,21 @@ These are present-tense decisions the module honours.
   _which_ model is requested to whatever host serves the weights — "cost-free"
   means no per-call billing and no account, not zero bytes. Where no model the
   device can run is available, the aithor returns a structured refusal (_no
-  model available_; a name absent from the catalog refuses separately as _unknown
-  model_) under either `validate` value; there is no remote or lower-fidelity
-  fallback.
-- **A refusal is actionable, and aithor names no product.** A _no model available_
-  refusal that came from a structured load failure carries a **`nextStep`** — the
-  category of next step (_retry_ / _free-space_ / _reconnect_ / _use-native-app_),
-  mapped from local-llm's honest terminal cause — so a learner who cannot bring up a
-  model meets a real next step, never an opaque dead end. But aithor names only the
-  category: it never names a product, a vendor, a store, or a URL, and local-llm
-  names none either — the value has no message or link slot one could occupy.
-  Delivery — the copy, the links, the "download the desktop app" affordance — is the
-  consumer's to render from the category (local-llm calls this the cause→guidance
-  mapping, and it is the lens's). The burden of a failed bring-up never lands on the
-  learner; it lands on the lens, as an actionable category.
+  model available_; a name absent from the catalog refuses separately as
+  _unknown model_) under either `validate` value; there is no remote or
+  lower-fidelity fallback.
+- **A refusal is actionable, and aithor names no product.** A _no model
+  available_ refusal that came from a structured load failure carries a
+  **`nextStep`** — the category of next step (_retry_ / _free-space_ /
+  _reconnect_ / _use-native-app_), mapped from local-llm's honest terminal cause
+  — so a learner who cannot bring up a model meets a real next step, never an
+  opaque dead end. But aithor names only the category: it never names a product,
+  a vendor, a store, or a URL, and local-llm names none either — the value has
+  no message or link slot one could occupy. Delivery — the copy, the links, the
+  "download the desktop app" affordance — is the consumer's to render from the
+  category (local-llm calls this the cause→guidance mapping, and it is the
+  lens's). The burden of a failed bring-up never lands on the learner; it lands
+  on the lens, as an actionable category.
 
 ## Testing posture
 
@@ -655,8 +671,8 @@ interaction, including the one-time lazy load, is hidden behind the `await`.
 Internally the only impure dependencies are the **non-deterministic model call**
 and the **stateful model loader** (the load-once bring-up of the handle — the
 runtime's fetch and cache sit below this seam); everything else — including the
-whole **conformance check** — is pure. Tests pass a fake model (canned
-results) and a counted loader (to assert load-once, with no real fetch).
+whole **conformance check** — is pure. Tests pass a fake model (canned results)
+and a counted loader (to assert load-once, with no real fetch).
 
 - **Conformance is a pure unit.** `conform(code, subset, size)` takes only data
   and returns a verdict + violations — the richest unit-test surface here,
@@ -672,8 +688,8 @@ results) and a counted loader (to assert load-once, with no real fetch).
   returns the model's candidate **unmodified** — no admission, no conformance,
   no repair. The rawness is itself a property, gated _out_ on purpose; a test
   that saw the output cleaned up would be catching a bug. (The result still
-  carries `meta` naming which model ran — the _program_ is raw, the provenance is
-  reported; a test asserts both.)
+  carries `meta` naming which model ran — the _program_ is raw, the provenance
+  is reported; a test asserts both.)
 - **Deterministic around the seams.** Prompt construction (config → prompt,
   empty vs. non-empty routing, the constraints stringified into the prompt under
   either `validate`, repair carrying the specific failure), the `validate`
@@ -682,8 +698,8 @@ results) and a counted loader (to assert load-once, with no real fetch).
   mocks — ordinary ZOMBIES units. The loader boundary is itself a unit: a fake
   whose underlying runtime throws an unknown-name error, returns a load failure,
   or rejects its probe must surface as a value — `unknown-model` for the first,
-  `no-model-available` for the other two — never a thrown exception, since aithor
-  is uniformly value-not-throw.
+  `no-model-available` for the other two — never a thrown exception, since
+  aithor is uniformly value-not-throw.
 - **Measured, not asserted.** Only the program's content, quality, and _theme_
   fidelity are statistical rates over a real model (an eval). Feature and size
   conformance are _asserted_ on the curated path — they are gated by `conform`,
