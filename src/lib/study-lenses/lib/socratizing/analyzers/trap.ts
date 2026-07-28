@@ -15,6 +15,24 @@ import type { AnalyzerEntry, CodeQuestion } from '../types.js';
 
 import getRecord from './get-record.js';
 
+// ─── Helpers ───────────────────────────────────────────────
+
+/**
+ * Every statement whose body a stray semicolon can empty, named as a learner would
+ * say it. Membership doubles as the type gate: a statement absent from this table
+ * has no body a semicolon could swallow. `for...in` is admitted defensively, exactly
+ * as `caution.ts`'s `LOOP_STATEMENTS` and `voice-profile.ts`'s loop set admit it —
+ * the engine analyzes whatever parsed, not only what the JeJ level admits.
+ */
+const STATEMENT_LABELS: Readonly<Record<string, string>> = {
+	IfStatement: 'if',
+	WhileStatement: 'while',
+	DoWhileStatement: 'do...while',
+	ForStatement: 'for',
+	ForOfStatement: 'for...of',
+	ForInStatement: 'for...in',
+};
+
 // ─── 1. constant-condition ─────────────────────────────────
 
 function constantCondition(
@@ -67,11 +85,11 @@ function accidentalSemicolon(
 	_scope: ScopeUsage,
 	_source: string,
 ): CodeQuestion | null {
-	if (
-		node.type !== 'IfStatement' &&
-		node.type !== 'WhileStatement' &&
-		node.type !== 'ForOfStatement'
-	) {
+	// Load-bearing despite the type: `noUncheckedIndexedAccess` is off, so this
+	// lookup is typed `string` and the compiler cannot see the miss. Without the
+	// check every node type would fall through to a body that is not there.
+	const statementType = STATEMENT_LABELS[node.type];
+	if (statementType === undefined) {
 		return null;
 	}
 
@@ -84,13 +102,6 @@ function accidentalSemicolon(
 	if (body.type !== 'EmptyStatement') {
 		return null;
 	}
-
-	const statementLabels: Record<string, string> = {
-		IfStatement: 'if',
-		WhileStatement: 'while',
-		ForOfStatement: 'for...of',
-	};
-	const statementType = statementLabels[node.type] ?? 'for...of';
 
 	return createCodeQuestion({
 		id: 'accidental-semicolon',

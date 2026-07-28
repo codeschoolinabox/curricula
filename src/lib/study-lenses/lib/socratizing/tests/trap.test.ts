@@ -97,9 +97,61 @@ describe('trap analyzers', () => {
 			expect(results).toHaveLength(1);
 		});
 
+		it('fires on a do-while loop with an empty body', () => {
+			const results = analyzeAll('let x = false;\ndo; while (x);', analyze);
+			expect(results).toHaveLength(1);
+		});
+
+		it('fires on a classic for loop with an empty body', () => {
+			const results = analyzeAll('for (let i = 0; i < 3; i++);', analyze);
+			expect(results).toHaveLength(1);
+		});
+
+		it('fires on an endless for loop with an empty body', () => {
+			const results = analyzeAll('for (;;);', analyze);
+			expect(results).toHaveLength(1);
+		});
+
+		it('fires on a for-of loop with an empty body', () => {
+			const results = analyzeAll('const xs = [];\nfor (const x of xs);', analyze);
+			expect(results).toHaveLength(1);
+		});
+
+		it('fires on a for-in loop with an empty body', () => {
+			const results = analyzeAll('const o = {};\nfor (const k in o);', analyze);
+			expect(results).toHaveLength(1);
+		});
+
 		it('does not fire on normal if with block body', () => {
 			const results = analyzeAll('if (true) { console.log("ok"); }', analyze);
 			expect(results).toHaveLength(0);
+		});
+
+		it('does not fire on a classic for loop with a block body', () => {
+			const results = analyzeAll(
+				'for (let i = 0; i < 3; i++) { run(); }',
+				analyze,
+			);
+			expect(results).toHaveLength(0);
+		});
+
+		it('does not fire on a do-while loop with a block body', () => {
+			const results = analyzeAll('let x = false;\ndo { run(); } while (x);', analyze);
+			expect(results).toHaveLength(0);
+		});
+
+		it.each([
+			['if (true);', 'if'],
+			['let x = true;\nwhile (x);', 'while'],
+			['let x = false;\ndo; while (x);', 'do...while'],
+			['for (let i = 0; i < 3; i++);', 'for'],
+			['const xs = [];\nfor (const x of xs);', 'for...of'],
+			['const o = {};\nfor (const k in o);', 'for...in'],
+		])('names %s as %s', (source, label) => {
+			const results = analyzeAll(source, analyze);
+			expect(results.map((result) => result.context)).toEqual([
+				expect.stringContaining(`after this ${label},`),
+			]);
 		});
 	});
 });
