@@ -153,6 +153,20 @@ describe('caution analyzers', () => {
 			expect(results).toHaveLength(1);
 		});
 
+		it('does not fire on an exported declaration — it is read from outside the module', () => {
+			const results = analyzeAll('export const config = 42;', analyze);
+			expect(results).toHaveLength(0);
+		});
+
+		it('still fires on an unread local beside an exported binding', () => {
+			const results = analyzeAll(
+				'export const config = 42;\nconst scratch = 1;',
+				analyze,
+			);
+			expect(results).toHaveLength(1);
+			expect(results[0].context).toContain('scratch');
+		});
+
 		it('fires on the correct shadowed declaration, matched by node identity not name', () => {
 			// Outer `x` is read; the shadowing inner `x` is unused. A name-only
 			// match would resolve the inner declaration to the read outer entry and

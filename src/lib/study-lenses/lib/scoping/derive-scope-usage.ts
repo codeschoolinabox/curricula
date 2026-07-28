@@ -76,6 +76,8 @@ function toVariableUsage(variable: ScopeVariable): VariableUsage | null {
 		readCount: countReads(variable),
 		writeCount: countWrites(variable),
 		node: declaration.name,
+		// test the length: an empty array is truthy
+		exported: variable.exportedNames.length > 0,
 	};
 }
 

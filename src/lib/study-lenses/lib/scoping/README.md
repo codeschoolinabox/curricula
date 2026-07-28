@@ -4,8 +4,9 @@ A flat, per-declaration **usage** view of a program's variables. Given a
 snippet's **scope environment** (embody's static scope graph), produces one
 frozen `VariableUsage` per `let`/`const` binding: the declared name, whether it
 is `let` or `const`, how many times it is **read** and **written** after
-declaration, and the identifier node that declares it — gathered into a single
-`ScopeUsage` whose `allDeclarations` list crosses every scope depth.
+declaration, the identifier node that declares it, and whether it is
+**exported** — gathered into a single `ScopeUsage` whose `allDeclarations` list
+crosses every scope depth.
 
 Scoping **projects**; it never judges. It tells a consumer that `x` is a `let`
 read three times and written zero times — it never concludes "that should be a
@@ -27,11 +28,13 @@ recompute them.
 
 **VariableUsage** — everything a scope-aware consumer reads about one variable
 declaration's usage: its `name`, its `kind` (`'let'` or `'const'`), its
-post-declaration `readCount` and `writeCount`, and the `node` (the declared
-identifier). It is a deliberately narrow projection — the scope graph carries
-far more (the scope tree, parent pointers, resolved-binding links), but a
-declaration-level consumer reads only these five facts. (The name is
-`VariableUsage`, not `DeclarationInfo`, to avoid colliding with the
+post-declaration `readCount` and `writeCount`, the `node` (the declared
+identifier), and whether it is `exported` — because a binding that leaves the
+module is read from outside it, where no count here can see. It is a
+deliberately narrow projection — the scope graph carries far more (the scope
+tree, parent pointers, resolved-binding links, the external names an export
+carries), but a declaration-level consumer reads only these six facts. (The name
+is `VariableUsage`, not `DeclarationInfo`, to avoid colliding with the
 declaration-site `DeclarationInfo` in `language-levels/jej` — a different,
 count-free shape.)
 
@@ -83,6 +86,9 @@ each `let`/`const` variable, folding its declaration and references into one
 - **Read count** = references classified read (or read-write) by embody.
 - **Write count** = references classified write (or read-write) by embody, minus
   the initializer write (the declaration's own binding is not a reassignment).
+- **Exported** = the binding carries at least one external name in embody's
+  export interface. A count-based reading cannot see a use outside the module,
+  so a consumer asking "is this unused?" must consult this first.
 
 Because embody computes the scope graph once — eslint-scope resolves every
 reference and classifies it read / write / read-write, and embody carries that
@@ -212,8 +218,8 @@ rules:
   re-deriving it.
 - **No AST mutation.** The environment and its nodes may be deep-frozen; the
   module must run unchanged on frozen data.
-- **`VariableUsage` shape is a cross-consumer contract.** Its five fields are
-  the intersection of what the scope-aware engines read; widening it is an
+- **`VariableUsage` shape is a cross-consumer contract.** Its six fields are the
+  intersection of what the scope-aware engines read; widening it is an
   inter-module contract change, not a local edit.
 
 ## Navigation

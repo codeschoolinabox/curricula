@@ -33,11 +33,13 @@ pure pass over the environment, hoisted in-file as helpers if readability asks.
    all variables. Output: the declarations this leaf reports.
 
 3. **Fold** (pure) — for each kept variable, read `name` / `kind` / `node` from
-   its declaration (`node` = the declared identifier), and tally `readCount` /
+   its declaration (`node` = the declared identifier), tally `readCount` /
    `writeCount` from its references using embody's per-reference access
    classification — counting read-write references toward both, and **excluding
-   the initializer write**. Input: a `let`/`const` variable and its references.
-   Output: one `VariableUsage`.
+   the initializer write** — and reduce its export names to `exported`, the
+   question this leaf's consumers ask of the module boundary. Input: a
+   `let`/`const` variable, its references, and its export names. Output: one
+   `VariableUsage`.
 
 4. **Assemble + freeze** (pure) — gather the `VariableUsage`s into
    `{ allDeclarations }` and deep-freeze. Input: the folded usages. Output: a
@@ -50,12 +52,12 @@ flowchart TD
     Env["scope environment<br/>lexical-scope tree; each ref carries<br/>access·init; each def carries kind"]
     Vars["every declared variable<br/>(all scope depths)"]
     Decls["let / const variables only"]
-    Usage["VariableUsage per binding<br/>name · kind · readCount · writeCount · node"]
+    Usage["VariableUsage per binding<br/>name · kind · readCount · writeCount · node · exported"]
     Out["frozen ScopeUsage<br/>{ allDeclarations }"]
 
     Env -->|"enumerate scopes, pure"| Vars
     Vars -->|"keep let/const, pure"| Decls
-    Decls -->|"fold references: tally read/write<br/>(read-write counts both; init excluded), pure"| Usage
+    Decls -->|"fold references: tally read/write<br/>(read-write counts both; init excluded)<br/>reduce export names to exported, pure"| Usage
     Usage -->|"collect + deep-freeze"| Out
 ```
 
@@ -124,7 +126,7 @@ flowchart TD
   re-baseline to eslint-scope values where a test encoded the old behaviour.
 
 - **Narrow output; renamed to avoid a homonym.** `ScopeUsage` carries only
-  `allDeclarations` (no scope tree) and `VariableUsage` only the five fields the
+  `allDeclarations` (no scope tree) and `VariableUsage` only the fields the
   scope-reading analyzers touch — the legacy `root`/`initNode`/`scopeDepth` are
   dropped. The types are named for their differentiator (usage), not
   `ScopeAnalysis`/`DeclarationInfo`, to avoid colliding with the still-live

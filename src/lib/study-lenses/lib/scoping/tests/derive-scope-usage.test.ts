@@ -30,6 +30,10 @@ describe('deriveScopeUsage', () => {
 			expect(scopeOf('var x = 1;').allDeclarations).toEqual([]);
 		});
 
+		it('omits an exported var — exported or not, the leaf reports let and const', () => {
+			expect(declarationNames('export var v = 1;')).toEqual([]);
+		});
+
 		it('omits function and parameter bindings', () => {
 			expect(scopeOf('function f(a) { return a; }').allDeclarations).toEqual(
 				[],
@@ -191,6 +195,63 @@ describe('deriveScopeUsage', () => {
 			const declaredIdentifier = declaration.declarations[0].id;
 			const [usage] = deriveScopeUsage(environmentStage.value).allDeclarations;
 			expect(usage.node).toBe(declaredIdentifier);
+		});
+	});
+
+	describe('Exported — the module boundary', () => {
+		it('leaves a purely local binding unexported', () => {
+			const [usage] = scopeOf('const local = 1;').allDeclarations;
+			expect(usage.exported).toBe(false);
+		});
+
+		it('marks a declaration export as exported', () => {
+			const [usage] = scopeOf('export const config = 42;').allDeclarations;
+			expect(usage.exported).toBe(true);
+		});
+
+		it('leaves a local binding unexported when a same-named re-export is present', () => {
+			const [usage] = scopeOf(
+				"const config = 1; export { config } from './m.js';",
+			).allDeclarations;
+			expect(usage.exported).toBe(false);
+		});
+
+		it('marks only the exported binding when a local one sits beside it', () => {
+			const exported = scopeOf(
+				'export const config = 42;\nconst scratch = 1;',
+			).allDeclarations.find((declaration) => declaration.name === 'config');
+			expect(exported?.exported).toBe(true);
+		});
+
+		it('leaves the local binding beside an exported one unexported', () => {
+			const local = scopeOf(
+				'export const config = 42;\nconst scratch = 1;',
+			).allDeclarations.find((declaration) => declaration.name === 'scratch');
+			expect(local?.exported).toBe(false);
+		});
+
+		it('marks an exported let as exported — the reduction is kind-blind', () => {
+			const [usage] = scopeOf('export let mutable = 1;').allDeclarations;
+			expect(usage.exported).toBe(true);
+		});
+
+		it('marks a binding exported by specifier as exported', () => {
+			const [usage] = scopeOf(
+				'const helper = 1; export { helper };',
+			).allDeclarations;
+			expect(usage.exported).toBe(true);
+		});
+
+		it('marks a renamed export as exported', () => {
+			const [usage] = scopeOf(
+				'const x = 1; export { x as y };',
+			).allDeclarations;
+			expect(usage.exported).toBe(true);
+		});
+
+		it('marks a default-exported binding as exported', () => {
+			const [usage] = scopeOf('const x = 1; export default x;').allDeclarations;
+			expect(usage.exported).toBe(true);
 		});
 	});
 

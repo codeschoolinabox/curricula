@@ -235,7 +235,9 @@ function unusedVariable(
 			(d) => d.name === name && d.node === id,
 		);
 
-		if (!declInfo || declInfo.readCount > 0) {
+		// an exported binding is read from outside the module, so no local read
+		// count can tell whether it is used — never call a module's API unused
+		if (!declInfo || declInfo.readCount > 0 || declInfo.exported) {
 			continue;
 		}
 

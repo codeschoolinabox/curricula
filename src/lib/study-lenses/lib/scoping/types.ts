@@ -25,6 +25,12 @@ import type * as acorn from 'acorn';
  * reference from the one shared parse so a consumer can match it by identity
  * (`===`), as `caution.ts`'s `unused-variable` check does.
  *
+ * `exported` reduces embody's `exportedNames` to the question this leaf's
+ * consumers ask: does this name leave the module? A binding that leaves is read
+ * from outside it, so a usage-count reading alone would call a module's public
+ * API unused. The external names themselves stay on the environment fact, for a
+ * consumer that needs them.
+ *
  * Named `VariableUsage`, not `DeclarationInfo`, to avoid colliding with the
  * count-free declaration-site `DeclarationInfo` in `language-levels/jej`.
  */
@@ -34,6 +40,7 @@ export type VariableUsage = {
 	readonly readCount: number;
 	readonly writeCount: number;
 	readonly node: acorn.Node;
+	readonly exported: boolean;
 };
 
 /**
