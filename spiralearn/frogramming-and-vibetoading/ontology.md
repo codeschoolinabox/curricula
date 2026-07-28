@@ -1003,6 +1003,31 @@ two analytical lenses, each lens inviting its natural practitioner-stance.
 > canonical home for the practitioner-side; §9 stays the canonical home for the
 > lens-reading-side.
 
+#### Reading an AI system through the lenses
+
+The lenses are general — they read any system. An AI system is one instance, and
+reading an LLM-shaped artifact through all seven is what "levels of abstraction
+for understanding AI" means in F&V vocabulary. The stance does not change with
+the substrate: when a Frogrammer says "twin the machine," the machine being
+twinned is read through the artifact-logic lens — in conventional software, the
+algorithmic logic; in AI-native software, the GenAI model. The stance is the
+same; the substrate is different. Lenses 1–3 stay deferred for AI exactly as
+they are for any system — scope-discipline, not blindness.
+
+| #   | Lens                         | In an LLM-shaped system                                                                                                                                                                                                                                                                                                                                                           |
+| --- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Platonic**                 | Whether a trained model _discovers_ structure or _invents_ it; the informational reading of intelligence itself. Manifesto territory, deferred                                                                                                                                                                                                                                    |
+| 2   | **Physics / material**       | Datacenters, GPUs and TPUs, the silicon a forward pass actually runs on; the energy and water a training run and a single query consume; hardware supply                                                                                                                                                                                                                          |
+| 3   | **Computing infrastructure** | The maths made operational: linear algebra and gradient descent, the transformer architecture, tokenization, embedding space, attention; pre-training, fine-tuning and RLHF pipelines; the serving stack — context window, batching, inference cost                                                                                                                               |
+| 4   | **Artifact-logic** (F)       | The model _as notional machine_: weights and learned features, next-token prediction sampling from a probability distribution, temperature. No episodic memory across conversations, no persistent goals, no embodiment, no metacognitive feedback during generation. What F twins — and what §10's substrate substitution is about                                               |
+| 5   | **Artifact-surface** (V)     | How the model is presented: the chat window and streaming token feed, the system prompt, the API contract, tool-call and function-calling protocols, attachment and context affordances, refusal and safety messaging                                                                                                                                                             |
+| 6   | **Interaction dynamics**     | The duet. Prompting as steering; the asymmetric duet — the model's generative model is frozen at training, so the human does all the adapting; small prompt changes producing wildly different outputs; the **jagged frontier**; **Gell-Mann amnesia**; automation bias, habituation, skill atrophy; repair after a bad turn. What V twins — and where §11's three roles play out |
+| 7   | **Systemic impacts**         | What this kind of artifact does in aggregate: the changing shape of junior work, erosion of the mental models software craft depends on, training-data provenance and consent, homogenization of output, dependency, and the energy cost of lens 2 at population scale                                                                                                            |
+
+The phenomena above are **named, not developed**. `chapters.md` Ch4 carries the
+developed treatment; §10 carries the artifact-side consequences of the substrate
+at lens 4; §11 carries the three roles AI can hold at lens 6.
+
 #### V and F traverse lenses; each has a natural anchor-lens
 
 V (Vibetoading) and F (Frogramming) are practitioner cognitive stances; both
