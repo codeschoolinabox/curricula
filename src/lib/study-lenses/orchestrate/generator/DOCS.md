@@ -91,7 +91,7 @@ stateDiagram-v2
     Loading --> Generating: the model drafts
     Generating --> Preview: a candidate came back
     Generating --> Refused: a refusal came back
-    Loading --> Refused: bring-up refused
+    Loading --> Refused: bring-up refused (a runtime-backed socket only —<br/>the placeholder always reaches Generating first)
     Loading --> Idle: cancel — the ask is retired
     Generating --> Idle: cancel — the ask is retired
     Preview --> Idle: cancel
@@ -151,9 +151,20 @@ stateDiagram-v2
   stages across a real, injectable delay, marks its own output as machine-free,
   names ITSELF as the producer in the meta slot, and reserves one prompt prefix
   as the refusal demonstration. It never simulates a model, and nothing it
-  returns pretends one ran. Its every learner-visible value is written down in
-  [README.md](./README.md) § The placeholder socket, because a value nobody
-  specified is a value someone invents.
+  returns pretends one ran. Its every learner-visible value is written down
+  VERBATIM in [README.md](./README.md) § The placeholder socket — the literal
+  marker comment, the producer id, the default delay, the refusal grammar —
+  because a value nobody specified is a value someone invents.
+- **A generated program is syntactically whole** — whatever a socket returns can
+  land in the learner's buffer on Accept and be parsed there, so anything a
+  socket composes around learner text has to survive that text. The placeholder
+  comments with line comments and normalizes the prompt's whitespace for exactly
+  this reason; a socket that interpolated a prompt into a block comment would
+  emit a broken program the first time a learner wrote `*/`.
+- **What a socket builds, it freezes** — the socket object and every result it
+  resolves with, on the region's usual terms. The contract's `readonly`
+  modifiers bind well-typed callers; the freeze is what holds against the
+  untyped one.
 - **Abort obliges the producer, not the promise** — an aborted signal stops the
   socket announcing and stops it scheduling; it never converts a resolution into
   a rejection, and a socket that never settles afterward is conformant. The

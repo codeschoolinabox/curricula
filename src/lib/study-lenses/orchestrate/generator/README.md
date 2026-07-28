@@ -88,39 +88,68 @@ ask for it.
 The default socket is a DETERMINISTIC PLACEHOLDER, and every value it returns is
 specified here, because every one of them is learner-visible.
 
-It announces `loading`, then `generating`, then answers. The two stages are
-separated by a real, injectable delay — the view's honest loading states exist
-to be seen, and a socket that answered within the same tick would render them
-unobservable. The factory takes that delay and nothing else; its default is the
-one the sandbox and the replay exercise.
+**The stages.** It announces `loading`, then `generating`, then answers — on
+BOTH paths, the scripted refusal included. Its refusal is scripted, not a real
+bring-up failure, so it never takes the refuse-out-of-loading edge a socket
+backed by an actual runtime can. The stages are separated by a real delay
+because the view's honest loading states exist to be seen, and a socket that
+answered within the same tick would make them unobservable. The factory takes
+that delay and nothing else, as a destructured option with a default:
+`stageDelay`, in milliseconds, **default `400`** — long enough to read, short
+enough not to punish.
 
-An ordinary ask answers with the seed followed by a marker comment carrying the
-prompt. The comment is the honest labelling, and it says so in the learner's own
-terms: no model produced this program, and the prompt it echoes is the one they
-wrote. An empty seed answers with the marker comment alone — there is always a
+**The candidate.** An ordinary ask answers with the seed, then one blank line,
+then a two-line marker comment:
+
+```text
+// No model ran — this came from the study environment's placeholder generator.
+// Your prompt: <the prompt>
+```
+
+The second line is present only when the prompt is non-empty. An empty seed
+answers with the comment alone and no leading blank line — there is always a
 program, never an empty one.
 
-`meta` names the placeholder ITSELF, not a model: `model` carries the
-placeholder's own id and `attempts` is `1`, one pass by the thing that actually
-produced the program. That is what "the resolved id" means at this seam — the
-producer, whatever it was — and it is why the meta line beside a candidate never
-lies. The `data-generator-meta` slot renders it, so a learner reading a
+`//` line comments are load-bearing, not a style choice: a block comment would
+break on a prompt containing `*/`, and the result is a program that lands in the
+learner's buffer on Accept and is then parsed. For the same reason the prompt is
+NORMALIZED into the comment — every run of whitespace, newlines included,
+collapses to one space — so no prompt can end the comment early. Nothing else
+about the prompt is altered or escaped.
+
+**The meta.** `meta` names the placeholder ITSELF, not a model: `model` is the
+literal string `'placeholder'` and `attempts` is `1`, one pass by the thing that
+actually produced the program. That is what "the resolved id" means at this seam
+— the producer, whatever it was — and it is why the meta line beside a candidate
+never lies. The `data-generator-meta` slot renders it, so a learner reading a
 placeholder program is told, in the same place they would be told a model's
 name, that no model ran.
 
-A prompt beginning `refuse:` — at index 0, case-sensitive, no leading space —
-answers with a scripted refusal instead, so refusal copy is demonstrable
-end-to-end. Two shapes are reachable, because a refusal with a next step and a
-refusal without one render differently: the bare prefix refuses as
-`no-model-available` carrying `use-native-app`, and `refuse:` followed by any
-`RefusalCause` name refuses as that cause with no next step. Nothing else in the
-prompt changes the answer.
+**The refusal.** A prompt beginning `refuse:` — at index 0, case-sensitive, no
+leading space — answers with a scripted refusal instead, so refusal copy is
+demonstrable end-to-end. Two shapes are reachable, because a refusal with a next
+step and one without render differently:
 
-A signal that aborts stops the placeholder announcing further stages and stops
-it scheduling further work; it never rejects and it is never required to answer.
-Whether a retired ask eventually resolves is immaterial by construction — the
-view retired it, so its answer is already unobservable. Abort is a courtesy to
-the machine, not a contract with the caller.
+- `refuse:` followed (after optional surrounding whitespace) by a
+  `GeneratorRefusalCause` name refuses as THAT cause, with no next step.
+- Anything else after the prefix — including nothing at all — refuses as
+  `no-model-available` carrying `use-native-app`. A learner typing
+  `refuse: please stop` gets the default shape, never an error.
+
+Nothing else in the prompt changes the answer, and `request.model` changes
+nothing at all: this socket holds no catalog, so it can never honestly report a
+name as unknown. It ignores the field.
+
+**The abort.** A signal that aborts stops the placeholder announcing further
+stages and stops it scheduling further work; it never rejects and it is never
+required to answer. Whether a retired ask eventually resolves is immaterial by
+construction — the view retired it, so its answer is already unobservable. Abort
+is a courtesy to the machine, not a contract with the caller.
+
+**The freeze.** Like every other leaf in this region, the socket freezes what it
+builds: the returned socket object, and every result it resolves with. The
+`readonly` modifiers in [`types.ts`](./types.ts) bind well-typed callers only;
+the freeze is what holds against the untyped one.
 
 The result vocabulary in [`types.ts`](./types.ts) is TRANSCRIBED from the
 committed contract, never imported: the aithor core lives in another tree, and a
