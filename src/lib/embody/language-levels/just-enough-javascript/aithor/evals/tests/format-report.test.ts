@@ -51,9 +51,9 @@ describe('formatReport', () => {
 			const uncurated = formatReport(reportOf([uncuratedSection()]));
 			const curated = formatReport(reportOf([curatedSection()]));
 
-			expect(uncurated).toContain('expected satisfiable: yes');
+			expect(uncurated).toContain("expected satisfiable (author's claim): yes");
 			expect(uncurated).toContain('- samples: 5');
-			expect(curated).toContain('expected satisfiable: no');
+			expect(curated).toContain("expected satisfiable (author's claim): no");
 			expect(curated).toContain('- samples: 4');
 		});
 	});

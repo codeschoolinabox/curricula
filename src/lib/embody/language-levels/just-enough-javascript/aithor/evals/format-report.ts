@@ -58,7 +58,11 @@ function renderSection(metricSet: MetricSet): string {
 	return [
 		`## ${metricSet.caseId} (${metricSet.quadrant})`,
 		'',
-		`- expected satisfiable: ${satisfiable}`,
+		// The hedge is rendered, not just typed: whether a request is satisfiable
+		// is not mechanically decidable, so this label is the fixture author's
+		// claim. The report is read outside this module, where the caveat that
+		// lives in types.ts would not travel with it.
+		`- expected satisfiable (author's claim): ${satisfiable}`,
 		`- samples: ${String(metricSet.samples)}`,
 		`- bring-up refusal rate: ${renderRate(metricSet.bringUpRefusalRate)}`,
 		...renderRateLine('admission rate', metricSet.admissionRate),
