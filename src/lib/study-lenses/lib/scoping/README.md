@@ -35,8 +35,8 @@ deliberately narrow projection — the scope graph carries far more (the scope
 tree, parent pointers, resolved-binding links, the external names an export
 carries), but a declaration-level consumer reads only these six facts. (The name
 is `VariableUsage`, not `DeclarationInfo`, to avoid colliding with the
-declaration-site `DeclarationInfo` in `language-levels/jej` — a different,
-count-free shape.)
+declaration-site `DeclarationInfo` in embody's legacy scope walk — a different,
+count-free shape that the trace and validating leaves still import.)
 
 **ScopeUsage** — the module's output: `{ allDeclarations }`, a flat list of
 every `VariableUsage` in the program regardless of scope depth. It is the

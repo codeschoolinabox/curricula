@@ -130,6 +130,7 @@ flowchart TD
   scope-reading analyzers touch — the legacy `root`/`initNode`/`scopeDepth` are
   dropped. The types are named for their differentiator (usage), not
   `ScopeAnalysis`/`DeclarationInfo`, to avoid colliding with the still-live
-  legacy scope types and the count-free `DeclarationInfo` in
-  `language-levels/jej` (which itself renamed its scope result to
-  `HoistingModel` for the same reason).
+  legacy scope types in `embody/lib/scope` — whose `ScopeAnalysis`, `ScopeInfo`
+  and count-free `DeclarationInfo` the trace and validating leaves still import.
+  This leaf supersedes that walk without replacing it in place, so both
+  vocabularies have to coexist and must not share names.

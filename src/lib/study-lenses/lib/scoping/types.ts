@@ -32,7 +32,9 @@ import type * as acorn from 'acorn';
  * consumer that needs them.
  *
  * Named `VariableUsage`, not `DeclarationInfo`, to avoid colliding with the
- * count-free declaration-site `DeclarationInfo` in `language-levels/jej`.
+ * count-free declaration-site `DeclarationInfo` in embody's legacy scope walk
+ * (`embody/lib/scope/types.ts`), which is still imported across the trace and
+ * validating leaves. This one is named for its differentiator: it counts.
  */
 export type VariableUsage = {
 	readonly name: string;
