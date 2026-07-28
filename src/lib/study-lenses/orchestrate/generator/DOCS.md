@@ -27,16 +27,19 @@ rules, and the mask classes; this document constrains only this view.
    program, a refusal, or a retired ask and an idle view.
 
 3. **Present** (sync) — a candidate renders in the output slot for the learner's
-   judgment, together with which model produced it and how many attempts it
-   took: the pick is never a black box. A refusal renders there instead, as one
-   learner-worded sentence for its cause plus its next-step line when one rides
-   along; the machine's own vocabulary never reaches the slot. Input: what came
-   back. Output: the rendered candidate or refusal.
+   judgment, together with what produced it and how many passes it took: the
+   producer is never a black box, and a placeholder that names itself is as
+   honest an answer as a model that names itself. A refusal renders there
+   instead, as one learner-worded sentence for its cause plus its next-step line
+   when one rides along; the machine's own vocabulary never reaches the slot.
+   Input: what came back. Output: the rendered candidate or refusal.
 
 4. **Resolve** (sync) — the learner's choice leaves the view. Accepting raises
    the candidate upward for the owner to commit; discarding raises the return
-   home. Exactly one intent leaves, and the mount ends with it. Input: the
-   choice. Output: one raised intent.
+   home; the reset control — one control, labelled for the stage it is offered
+   at — retires instead and hands the loop back to Ask. Exactly one intent
+   leaves the view, and the mount ends with it. Input: the choice. Output: one
+   raised intent.
 
 5. **Retire** (sync — on cancel and on unmount) — the shared retirement act both
    Ask and Resolve reach. Retiring an ask abandons it: neither its answer nor
@@ -145,9 +148,17 @@ stateDiagram-v2
 - **The view commits nothing** — accepting and discarding are intents raised
   upward; the owner writes, so the region keeps one edit intake.
 - **The default socket is scripted and self-labelling** — it announces both
-  stages, marks its own output as machine-free, and reserves one prompt prefix
+  stages across a real, injectable delay, marks its own output as machine-free,
+  names ITSELF as the producer in the meta slot, and reserves one prompt prefix
   as the refusal demonstration. It never simulates a model, and nothing it
-  returns pretends one ran.
+  returns pretends one ran. Its every learner-visible value is written down in
+  [README.md](./README.md) § The placeholder socket, because a value nobody
+  specified is a value someone invents.
+- **Abort obliges the producer, not the promise** — an aborted signal stops the
+  socket announcing and stops it scheduling; it never converts a resolution into
+  a rejection, and a socket that never settles afterward is conformant. The
+  guarantee the view depends on is retirement, which it owns; abort is the
+  courtesy that stops the machine working for nothing.
 
 ## Decisions
 

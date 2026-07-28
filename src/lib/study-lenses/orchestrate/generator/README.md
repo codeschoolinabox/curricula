@@ -43,7 +43,8 @@ live — and three separate things end one. The view keeps them apart:
   ask's answer changes nothing, and neither does any stage it announces
   afterward, so an abandoned ask can never resurrect a preview over the next
   one. Cancel is live at every stage, the rendered preview and the rendered
-  refusal included.
+  refusal included; its one control reads "Stop" while an ask is in flight and
+  "Start over" once an answer is on screen.
 - **Discard** raises `onDiscard()`. The excursion ends and the buffer is
   untouched.
 - **Dispose-as-unmount** is the standing guarantee underneath both: every path
@@ -82,11 +83,44 @@ model picker, and the copy for a model the generator does not know exists
 because the socket can still produce that cause, never because anything here can
 ask for it.
 
-The default socket is a DETERMINISTIC PLACEHOLDER: it scripts the
-loading→generating stages, then returns the seed extended with a marker comment
-carrying the prompt — and a prompt beginning `refuse:` returns a scripted
-refusal, so refusal copy is demonstrable end-to-end. The placeholder labels
-itself honestly in its output; nothing pretends a model ran.
+## The placeholder socket
+
+The default socket is a DETERMINISTIC PLACEHOLDER, and every value it returns is
+specified here, because every one of them is learner-visible.
+
+It announces `loading`, then `generating`, then answers. The two stages are
+separated by a real, injectable delay — the view's honest loading states exist
+to be seen, and a socket that answered within the same tick would render them
+unobservable. The factory takes that delay and nothing else; its default is the
+one the sandbox and the replay exercise.
+
+An ordinary ask answers with the seed followed by a marker comment carrying the
+prompt. The comment is the honest labelling, and it says so in the learner's own
+terms: no model produced this program, and the prompt it echoes is the one they
+wrote. An empty seed answers with the marker comment alone — there is always a
+program, never an empty one.
+
+`meta` names the placeholder ITSELF, not a model: `model` carries the
+placeholder's own id and `attempts` is `1`, one pass by the thing that actually
+produced the program. That is what "the resolved id" means at this seam — the
+producer, whatever it was — and it is why the meta line beside a candidate never
+lies. The `data-generator-meta` slot renders it, so a learner reading a
+placeholder program is told, in the same place they would be told a model's
+name, that no model ran.
+
+A prompt beginning `refuse:` — at index 0, case-sensitive, no leading space —
+answers with a scripted refusal instead, so refusal copy is demonstrable
+end-to-end. Two shapes are reachable, because a refusal with a next step and a
+refusal without one render differently: the bare prefix refuses as
+`no-model-available` carrying `use-native-app`, and `refuse:` followed by any
+`RefusalCause` name refuses as that cause with no next step. Nothing else in the
+prompt changes the answer.
+
+A signal that aborts stops the placeholder announcing further stages and stops
+it scheduling further work; it never rejects and it is never required to answer.
+Whether a retired ask eventually resolves is immaterial by construction — the
+view retired it, so its answer is already unobservable. Abort is a courtesy to
+the machine, not a contract with the caller.
 
 The result vocabulary in [`types.ts`](./types.ts) is TRANSCRIBED from the
 committed contract, never imported: the aithor core lives in another tree, and a
@@ -123,16 +157,19 @@ transcription learns it.
 
 `data-generator` on the view root; `data-generator-seed`,
 `data-generator-prompt`, `data-generator-generate` ("Generate"),
-`data-generator-cancel` ("Cancel"), `data-generator-output` (holding the stage
-report, then either `data-generator-preview` — with `data-generator-meta` naming
-the model that ran and its attempt count — or `data-generator-refusal`),
-`data-generator-accept` ("Accept"), `data-generator-discard` ("Discard"). The
-ask's attribute says `generate` and not `run` deliberately: `Evaluation · run`
-is the lifecycle strip's own display label, and one word naming two unrelated
-acts is exactly the collision this vocabulary keeps out. The opening affordance
-lives in the region's control row as `data-generator-open` ("Generate code"),
-rendered in editor mode only — its mask treatment is the region README's
-concern.
+`data-generator-cancel`, `data-generator-output` (holding the stage report, then
+either `data-generator-preview` — with `data-generator-meta` naming the producer
+and its attempt count — or `data-generator-refusal`), `data-generator-accept`
+("Accept"), `data-generator-discard` ("Discard"). One reset control, two labels:
+it reads "Stop" while an ask is in flight and "Start over" once a candidate or a
+refusal is on screen. One control because it is one act — retire the ask, keep
+the prompt — and two labels because stopping something running and starting
+again from a finished answer are not the same sentence to a learner. The ask's
+attribute says `generate` and not `run` deliberately: `Evaluation · run` is the
+lifecycle strip's own display label, and one word naming two unrelated acts is
+exactly the collision this vocabulary keeps out. The opening affordance lives in
+the region's control row as `data-generator-open` ("Generate code"), rendered in
+editor mode only — its mask treatment is the region README's concern.
 
 ## Out of scope
 

@@ -86,15 +86,21 @@ export type GeneratorRefusal = {
 };
 
 /**
- * Which model produced a program and how many model calls it took. Present on
- * every success, absent on every refusal.
+ * What produced a program and how many passes it took. Present on every
+ * success, absent on every refusal.
  *
  * @remarks
- * `model` is the RESOLVED id of the model that actually ran, never the
- * requested name — for a pick-for-me ask the two differ, and the pick is never
- * a black box. It renders beside the candidate for exactly that reason: a
- * learner judging a generated program is told which model produced it and how
- * many attempts it took.
+ * `model` is the RESOLVED id of the PRODUCER, never the requested name — for a
+ * pick-for-me ask the two differ, and the pick is never a black box. "Producer"
+ * is deliberate: a socket backed by a real model reports the model that ran, and
+ * the placeholder socket reports ITSELF. Both are honest at the same slot, which
+ * is what lets the meta line render unconditionally beside a candidate; a
+ * learner reading a placeholder program is told no model ran, in the same place
+ * they would otherwise be told a model's name.
+ *
+ * `attempts` counts the producer's passes — one for a single-shot answer,
+ * initial-plus-repairs for a curated loop. Never zero on a success: something
+ * produced the program.
  */
 export type GeneratorMeta = {
 	readonly model: string;
@@ -129,8 +135,14 @@ export type GeneratorPhase = 'loading' | 'generating';
  *
  * @remarks
  * `onPhase` and `signal` are CONSUMER-side affordances the socket provides —
- * the real socket constructs the runtime, so it can observe bring-up and abort
+ * the socket constructs the runtime, so it can observe bring-up and abort
  * best-effort; the aithor contract itself carries neither.
+ *
+ * An aborted `signal` obliges the socket to stop announcing stages and to stop
+ * scheduling further work. It obliges nothing about the promise: aborting never
+ * turns a resolution into a rejection, and a socket that simply never settles
+ * after an abort is conformant. Whether a retired ask resolves is immaterial —
+ * the view retired it, so the answer is already unobservable.
  *
  * Refusal-as-data is TOTAL across this seam, and a well-formed answer is the
  * socket's to guarantee: `generate` RESOLVES, always, which is why
