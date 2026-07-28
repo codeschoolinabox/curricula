@@ -1,6 +1,6 @@
 // cspell:ignore Interner
 
-import type { AnyNode, Node, Program } from 'acorn';
+import type { AnyNode, Identifier, Literal, Node, Program } from 'acorn';
 import { analyze } from 'eslint-scope';
 
 import ECMA_VERSION from './ecma-version.js';
@@ -72,6 +72,7 @@ export default function deriveEnvironment(
 		// now: stamp each identifier's path and derive usedBeforeBound
 		stampReferences(intern, pathOf, eagerlyInvoked);
 		stampDefinitions(intern, pathOf);
+		stampExports(root, ast.value, type);
 
 		const byPath = indexByPath(root, pathOf);
 
@@ -170,6 +171,136 @@ function stampDefinitions(intern: Interner, pathOf: Map<Node, NodePath>): void {
 	}
 }
 
+/**
+ * The module's export interface, stamped onto the bindings it names: each
+ * binding records the external names it is exported under (the ECMAScript
+ * ExportEntries whose local name is that binding). The analyzer models no export
+ * status, so embody reads it from the export declarations themselves — an exact
+ * reading, not a heuristic. Only a module exports, and an export declaration is
+ * only valid at a module's top level, so the program's own body is the whole
+ * search; matching within the module scope alone keeps an exported class's inner
+ * class-scope binding untouched (it shares the declaration's identifier node).
+ */
+function stampExports(
+	root: BuildingScope,
+	program: Program,
+	type: SnippetType,
+): void {
+	if (type !== 'module') {
+		return;
+	}
+	const moduleScope = root.childScopes.find((scope) => scope.type === 'module');
+	if (moduleScope === undefined) {
+		return;
+	}
+	for (const statement of program.body) {
+		for (const [local, exported] of exportEntriesOf(statement)) {
+			const variable = moduleScope.variables.find(
+				(candidate) => candidate.name === local,
+			);
+			if (variable !== undefined) {
+				variable.exportedNames.push(exported);
+			}
+		}
+	}
+}
+
+// one statement's export entries as [local binding name, external name]. A
+// re-export (`… from '…'`) and `export *` bind no local name, so they yield none.
+function exportEntriesOf(statement: AnyNode): Array<[string, string]> {
+	if (statement.type === 'ExportDefaultDeclaration') {
+		const local = defaultExportLocalName(statement.declaration);
+		return local === null ? [] : [[local, 'default']];
+	}
+	if (
+		statement.type !== 'ExportNamedDeclaration' ||
+		statement.source !== null
+	) {
+		return [];
+	}
+	const { declaration, specifiers } = statement;
+	if (declaration !== null && declaration !== undefined) {
+		return declaredNames(declaration).map((name) => [name, name]);
+	}
+	return specifiers.map((specifier) => [
+		moduleExportName(specifier.local),
+		moduleExportName(specifier.exported),
+	]);
+}
+
+// an export name is an identifier or, since ES2022, a string literal
+function moduleExportName(node: Identifier | Literal): string {
+	return node.type === 'Literal' ? String(node.value) : node.name;
+}
+
+// a default-exported binding: a named function or class declaration, or a bare
+// reference to a binding. An anonymous declaration or any other expression
+// exports a value, not a binding, and names nothing local.
+function defaultExportLocalName(declaration: AnyNode): string | null {
+	if (declaration.type === 'Identifier') {
+		return declaration.name;
+	}
+	if (
+		declaration.type === 'FunctionDeclaration' ||
+		declaration.type === 'ClassDeclaration'
+	) {
+		return declaration.id === null ? null : declaration.id.name;
+	}
+	return null;
+}
+
+// every binding a declaration export introduces — a declaration binds several
+// names when its declarator ids are patterns (`export const { a, b } = …`)
+function declaredNames(declaration: AnyNode): string[] {
+	if (declaration.type === 'VariableDeclaration') {
+		const names: string[] = [];
+		for (const declarator of declaration.declarations) {
+			collectPatternNames(declarator.id, names);
+		}
+		return names;
+	}
+	if (
+		declaration.type === 'FunctionDeclaration' ||
+		declaration.type === 'ClassDeclaration'
+	) {
+		return declaration.id === null ? [] : [declaration.id.name];
+	}
+	return [];
+}
+
+// the names a binding pattern introduces, in source order — the pattern's own
+// identifiers, never the object keys it reads (`{ a: c }` binds `c`)
+function collectPatternNames(pattern: AnyNode, names: string[]): void {
+	if (pattern.type === 'Identifier') {
+		names.push(pattern.name);
+		return;
+	}
+	if (pattern.type === 'ObjectPattern') {
+		for (const property of pattern.properties) {
+			collectPatternNames(
+				property.type === 'RestElement' ? property.argument : property.value,
+				names,
+			);
+		}
+		return;
+	}
+	if (pattern.type === 'ArrayPattern') {
+		for (const element of pattern.elements) {
+			if (element !== null) {
+				collectPatternNames(element, names);
+			}
+		}
+		return;
+	}
+	if (pattern.type === 'AssignmentPattern') {
+		collectPatternNames(pattern.left, names);
+		return;
+	}
+	if (pattern.type === 'RestElement') {
+		collectPatternNames(pattern.argument, names);
+	}
+}
+
 // the analyzer's runtime shapes, described structurally — only the fields
 // embody reads; nothing here types the contract surface
 type ForeignScope = {
@@ -232,6 +363,7 @@ type BuildingVariable = {
 	identifiers: Node[];
 	references: BuildingReference[];
 	defs: BuildingDefinition[];
+	exportedNames: string[];
 };
 
 // mutable during the build so the post-projection pass can stamp `path`; the
@@ -346,6 +478,9 @@ function projectVariable(
 		identifiers: [...foreign.identifiers],
 		references: [],
 		defs: [],
+		// the export interface is stamped after projection, from the module's own
+		// export declarations — the analyzer models no export status
+		exportedNames: [],
 	};
 	intern.variables.set(foreign, variable);
 

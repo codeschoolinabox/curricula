@@ -154,11 +154,18 @@ flowchart TD
   hold; (b) it is a cross-cutting truth that multiple kinds of consumer would
   independently want by its nature — not one lens's bespoke need; and (c) its
   approximations are documented at the field. A derived analytic failing any of
-  these stays a consumer's projection. The scope structure's `usedBeforeBound`
-  is the one admitted derived enrichment — a static pre-initialization fact (how
-  a use relates to its `let`/`const`/`class` binding when it precedes
+  these stays a consumer's projection. The scope structure carries the two
+  admitted derived enrichments. `usedBeforeBound` is a static pre-initialization
+  fact (how a use relates to its `let`/`const`/`class` binding when it precedes
   initialization: evaluated `eager` at a fixed point, or `deferred` to a later
   context), never a runtime verdict, so a consumer owns any reachability
-  judgment built on it.
+  judgment built on it. `exportedNames` is a binding's contribution to its
+  module's export interface, read from the export declarations the facts already
+  hold — the analyzer models no export status — and wanted by every consumer
+  that reasons about the module boundary rather than one lens alone: a name
+  leaving the module is read from outside it, so an unused-binding check, a
+  public-API reading, and a refactoring check each need it. It approximates
+  nothing (an exact reading of the ExportEntries that name a local binding), and
+  it states what IS exported, never whether exporting is allowed.
 - **Internal decomposition** — the factory's internal libraries document
   themselves at their own abstraction level.

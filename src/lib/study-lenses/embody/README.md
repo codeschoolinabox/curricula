@@ -146,12 +146,15 @@ this region owns.
   enclosing statement, the declarator's position, and — for a variable
   declaration — the `let`/`const`/`var` keyword. Every scope identifier carries
   its node path into the source⇄tree binding, so a consumer reaches the
-  identifier's place, neighbors, and children through the entwined index. One
-  signal is embody's own rather than the analyzer's: how a use relates to its
-  `let`/`const`/`class` binding when it precedes initialization — evaluated
-  `eager` (at a fixed point) or `deferred` (in a later-running function or an
-  instance field initializer) — a static fact, offered as a convenience, from
-  which a consumer draws any runtime inference, never embody.
+  identifier's place, neighbors, and children through the entwined index. Two
+  signals are embody's own rather than the analyzer's. The external names a
+  **binding** is exported under — its contribution to the module's export
+  interface, read exactly from the export declarations (eslint-scope models no
+  export status), empty for a script or a purely local binding. And how a use
+  relates to its `let`/`const`/`class` binding when it precedes initialization —
+  evaluated `eager` (at a fixed point) or `deferred` (in a later-running
+  function or an instance field initializer) — a static fact, offered as a
+  convenience, from which a consumer draws any runtime inference, never embody.
 - **phase accessibility** — the derived per-phase map: accessible, or barred
   with the carried upstream cause. (The package glossary owns its distinction
   from lens fit.)

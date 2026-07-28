@@ -309,13 +309,34 @@ export type ScopeReference = {
 
 /**
  * One binding: the name, the identifier nodes that introduce it, the
- * references that resolve to it, and its definitions. How a name comes to be.
+ * references that resolve to it, its definitions, and the external names it is
+ * exported under. How a name comes to be, and how it leaves the module.
  */
 export type ScopeVariable = {
 	readonly name: string;
 	readonly identifiers: ReadonlyArray<AcornNode>;
 	readonly references: ReadonlyArray<ScopeReference>;
 	readonly defs: ReadonlyArray<ScopeDefinition>;
+	/**
+	 * DERIVED, not the analyzer's reading (eslint-scope models no export status) —
+	 * but an exact, complete reading of the module's export declarations, not a
+	 * heuristic. The external names this binding contributes to the module's export
+	 * interface (the ECMAScript ExportEntries whose local name is this binding). A
+	 * declaration export (`export const x`, `export function f`, `export class C`)
+	 * or a bare named specifier (`export { x }`) exports under the binding's own
+	 * name; `export { x as y }` records `y`, and `export { x as "s" }` the string
+	 * `s` (ES2022 string export names); a default export of the binding
+	 * (`export default function f`, `export default x`, `export { x as default }`)
+	 * records `'default'`; one binding may carry several (`export { x, x as y }` →
+	 * `['x', 'y']`, source order). Empty when the binding is not exported — and
+	 * always empty outside a `module` scope (a script has no exports). Re-exports
+	 * (`export … from …`, `export * …`) bind no local name and are not recorded, so
+	 * iterating bindings does not reconstruct re-exported names. The array is always
+	 * present: a consumer's unused-binding check skips a binding whose
+	 * `exportedNames.length > 0` (an empty array is truthy, so test the length, not
+	 * the array) — it is public API, read from outside the module.
+	 */
+	readonly exportedNames: ReadonlyArray<string>;
 };
 
 /**
