@@ -1105,6 +1105,21 @@ the composer/virtuoso/mechanism metaphor (`metaphor.md`) operationalize this
 reading. Listed here as a cross-frame; the lenses and the practitioner-traversal
 framing remain first-class on their own terms.
 
+> **Speculative frame — the ladder as a ring.** Systemic impacts are lens-2
+> changes at population scale: chips fabricated, grids and datacenters built,
+> land and water committed. Matter at that scale is what carries and constrains
+> information, so a change there is a change in what can be computed, stored and
+> searched at all. Under Levin's reading that does not move the Platonic space —
+> nothing does — but it moves the **aperture** onto it: which regions get
+> reached, which patterns get instantiated. Read that way, §9's opening claim —
+> each pole resolving into MU through enough levels of its opposite — describes
+> a loop rather than a flourish, and the coupling is Mikhak's engineering ×
+> physics co-evolution (§4 Lineage) run across the whole range instead of one
+> lens-pair. The relation is a **coupling, not a precedence**: it adds no rung
+> and does not disturb the partial order above. Per §14, the frame carries the
+> _shape_, not the mechanism. §9 stands without it, and it is deliberately
+> absent from learner-facing copy.
+
 #### Bridge to §10 and §11
 
 §10 develops what changes at the _artifact_-side when GenAI occupies the
