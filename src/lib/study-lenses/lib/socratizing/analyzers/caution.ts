@@ -26,8 +26,27 @@ const SIDE_EFFECT_EXPRESSIONS: ReadonlySet<string> = new Set([
 	'UpdateExpression',
 ]);
 
-/** Whether an expression runs for a side effect (its discarded result is intended). */
+/**
+ * Whether an expression runs for a side effect (its discarded result is intended).
+ *
+ * A comma sequence counts when ANY of its expressions does work, not merely its
+ * last. The value of `save(), x` is `x` and is discarded, but the statement still
+ * saved something — asking "what happens to the value this produces?" about a span
+ * that plainly does work reads as noise. The narrower question of which expression
+ * in a sequence supplies the final value is already asked, and better aimed, by the
+ * `comma-operator` easter egg.
+ */
 function hasSideEffect(expression: Node): boolean {
+	// Optional chaining wraps its inner expression: `obj?.method()` parses as a
+	// ChainExpression around the CallExpression — unwrap before classifying.
+	if (expression.type === 'ChainExpression') {
+		return hasSideEffect(getRecord(expression).expression as Node);
+	}
+	if (expression.type === 'SequenceExpression') {
+		return (getRecord(expression).expressions as readonly Node[]).some(
+			(inner) => hasSideEffect(inner),
+		);
+	}
 	if (SIDE_EFFECT_EXPRESSIONS.has(expression.type)) {
 		return true;
 	}
@@ -195,15 +214,7 @@ function unusedExpression(
 		return null;
 	}
 
-	const rawExpression = getRecord(node).expression as Node;
-	// Optional chaining wraps its inner expression: `obj?.method()` parses as a
-	// ChainExpression around the CallExpression — unwrap before classifying.
-	const expression =
-		rawExpression.type === 'ChainExpression'
-			? (getRecord(rawExpression).expression as Node)
-			: rawExpression;
-
-	if (hasSideEffect(expression)) {
+	if (hasSideEffect(getRecord(node).expression as Node)) {
 		return null;
 	}
 

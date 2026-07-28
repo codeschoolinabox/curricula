@@ -156,6 +156,49 @@ describe('caution analyzers', () => {
 			expect(results).toHaveLength(0);
 		});
 
+		it('does not fire on a comma sequence of calls', () => {
+			const results = analyzeAll('save(), notify();', analyze);
+			expect(results).toHaveLength(0);
+		});
+
+		it('fires on a comma sequence that only computes values', () => {
+			const results = analyzeAll('const x = 1;\nconst y = 2;\nx, y;', analyze);
+			expect(results).toHaveLength(1);
+		});
+
+		it('does not fire when the side effect sits between two values', () => {
+			const results = analyzeAll(
+				'const x = 1;\nconst y = 2;\nx, save(), y;',
+				analyze,
+			);
+			expect(results).toHaveLength(0);
+		});
+
+		it('does not fire on a comma sequence whose side effect is an assignment', () => {
+			const results = analyzeAll('let x = 0;\nx = 1, x;', analyze);
+			expect(results).toHaveLength(0);
+		});
+
+		it('does not fire on a comma sequence whose side effect is a construction', () => {
+			const results = analyzeAll('const x = 1;\nnew Widget(), x;', analyze);
+			expect(results).toHaveLength(0);
+		});
+
+		it('does not fire on a nested comma sequence holding a call', () => {
+			const results = analyzeAll('const c = 1;\n(save(), c), c;', analyze);
+			expect(results).toHaveLength(0);
+		});
+
+		it('does not fire on a comma sequence that mixes a call with a value', () => {
+			const results = analyzeAll('const x = 1;\nsave(), x;', analyze);
+			expect(results).toHaveLength(0);
+		});
+
+		it('does not fire on a comma sequence of optional-chained calls', () => {
+			const results = analyzeAll('user?.save(), user?.notify();', analyze);
+			expect(results).toHaveLength(0);
+		});
+
 		it('does not fire on a directive prologue', () => {
 			const results = analyzeAll('"use strict";', analyze);
 			expect(results).toHaveLength(0);
