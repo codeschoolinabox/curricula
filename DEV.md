@@ -610,8 +610,8 @@ Every source directory under `src/` has both a `README.md` and a `DOCS.md`:
 
 | Content                                             | Where                      | Audience     |
 | --------------------------------------------------- | -------------------------- | ------------ |
-| API reference (signatures, params, returns, throws) | JSDoc/TSDoc → `docs/`      | Consumers    |
-| Consumer-facing "why" context                       | TSDoc `@remarks` → `docs/` | Consumers    |
+| API reference (signatures, params, returns, throws) | JSDoc/TSDoc in source      | Consumers    |
+| Consumer-facing "why" context                       | TSDoc `@remarks` in source | Consumers    |
 | What this module does, how to navigate it           | `README.md` per directory  | Contributors |
 | Architecture, design decisions, why this approach   | `DOCS.md` per directory    | Developers   |
 | Non-obvious implementation detail                   | Inline `//` comment        | Code readers |
@@ -629,8 +629,8 @@ Every source directory under `src/` has both a `README.md` and a `DOCS.md`:
 - Tests directories (`tests/`) are exempt from needing `README.md`
 - `README.md` is cross-referenced: parent links down, child links up, siblings
   link to each other
-- Public functions have JSDoc/TSDoc in source; TypeDoc generates `docs/`
-  (gitignored, CI-only)
+- Public functions have JSDoc/TSDoc in source; no generated-docs pipeline is
+  currently wired
 
 **Architectural sketch format** (for DOCS.md, written prospectively in Phase 0):
 

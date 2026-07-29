@@ -756,4 +756,5 @@ skipping ceremony on its own assessment.
 - [AGENTS.md](./AGENTS.md) — governance for agents and tools not on CLAUDE.md's
   qualifying list
 - `src/` directory READMEs — module-specific context
-- API documentation generated to `docs/` via `npm run docs`
+- API contracts live as JSDoc/TSDoc in source; no generated-docs pipeline is
+  currently wired

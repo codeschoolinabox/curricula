@@ -905,4 +905,5 @@ not arise from the agent skipping ceremony on its own assessment.
 
 - See DEV.md for architecture and code conventions
 - See `src/` directory READMEs for module-specific context
-- API documentation generated to `docs/` via `npm run docs`
+- API contracts live as JSDoc/TSDoc in source; no generated-docs pipeline is
+  currently wired
