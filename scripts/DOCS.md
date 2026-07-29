@@ -85,8 +85,8 @@ flowchart TD
 
 - Checks are pure functions over parsed documents plus the snapshot — Load and
   Resolve (the entry) own all ground-truth access (fs, git, `package.json`,
-  `node_modules/.bin`); the snapshot is plain, serializable data, so fixtures
-  are literals and checks judge without looking anything up.
+  `node_modules/.bin`); the snapshot is plain data (no live resolvers), so
+  fixtures are literals and checks judge without looking anything up.
 - The claims recognition contract (which tokens are claims, how each class is
   classified, the named skip classes) lives in
   [README.md § Scope of each check](./README.md#scope-of-each-check) — the
@@ -110,13 +110,20 @@ flowchart TD
   map would silently pass everything. Its reviewer-only scope (`ar-*.md`) is a
   named skip class inside the check.
 - Zero silent suppressions: every skip class (http links, root-relative
-  Docusaurus routes, bare prose, content-tree advisory paths, claims in
-  `.claude/skills/**` documents, non-reviewer agent files in roster,
+  Docusaurus routes, non-path link targets, content-tree advisory paths, claims
+  in `.claude/skills/**` documents, non-reviewer agent files in roster,
   placeholder/home-path/matching-glob tokens) is named in the check that skips
   it.
+- `RepoSnapshot.existingPaths` is deliberately a `Set`: the snapshot is
+  single-process, never serialized across a boundary, and never frozen by helper
+  — "plain data" means no live resolvers, not JSON-primitives-only.
 - The slugger handles plain-text headings only — emphasis markers, inline links,
   and HTML inside heading text are out of reach (no corpus heading contains them
   today); a stated restriction, not a silent one.
+- Only backtick fences are tracked, with CommonMark run-length nesting (a
+  shorter fence inside a longer one is content); indented (4-space) code blocks
+  and tilde fences are out of reach (none exist in the corpus today) — a stated
+  restriction, not a silent one.
 - Severity is two-valued: `error` gates, `advisory` never does.
 - A finding's line is `null` only for whole-document findings (unreadable file,
   roster parse failure).
@@ -130,10 +137,12 @@ flowchart TD
 - Code conventions: `scripts/` follows DEV.md's functional conventions (named
   function declarations, no `this`, no mutable closures, validate at boundaries)
   with two stated exemptions — no deep-freeze helper (`@utils` is not reachable
-  from `scripts/`; outputs stay internal), and check files export their pure
-  helpers for direct testing (these are tooling scripts, not product modules, so
-  the test-through-the-public-export rule is deliberately relaxed — the plan of
-  record specifies exported pure functions).
+  from `scripts/`; outputs stay internal), and the shared pure modules (the
+  parse, the slugger, the term-extraction core) are exported and tested directly
+  rather than only through a consuming check (these are tooling scripts, not
+  product modules, so the test-through-the-public-export rule is deliberately
+  relaxed at module grain — a check's internal helpers still stay unexported and
+  are tested through the check).
 
 ### Out of scope
 

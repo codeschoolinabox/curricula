@@ -19,9 +19,9 @@
  * @property {ExtractedTerm[]} terms The term-extraction core's output for
  *   this document.
  *
- * @typedef {object} RepoSnapshot Plain, serializable data — the Resolve
- *   phase materializes it for exactly the targets Parse found; checks never
- *   touch fs/git/package.json.
+ * @typedef {object} RepoSnapshot Plain data (no live resolvers) — the
+ *   Resolve phase materializes it for exactly the targets Parse found;
+ *   checks never touch fs/git/package.json.
  * @property {string[]} npmScripts Script names from package.json.
  * @property {string[]} binTools Entries of node_modules/.bin.
  * @property {Set<string>} existingPaths Repo-relative referenced paths that

@@ -1,8 +1,9 @@
 # Scripts
 
 > Written Phase 0, before implementation: the checks below are the contract the
-> implementation is built to; the npm entry, the vitest include, and the
-> `typecheck:scripts` gate land with the first check.
+> implementation is built to; the vitest include and the `typecheck:scripts`
+> gate land with the first check, and the npm entry lands with the checker's
+> entry point.
 
 Repository tooling — standalone Node scripts that lint, verify, and measure this
 repo. Nothing here ships with the Docusaurus site build.
@@ -82,7 +83,9 @@ consistency, never intent or style.
   a style nudge (the corpus today contains none pointing into content trees). A
   backticked span is never a link: code spans are extracted before link parsing.
   Skips (named, deliberate): `http(s)` URLs, root-relative Docusaurus routes,
-  bare prose.
+  and non-path targets (a scheme other than `http(s)`, or a space in the
+  target). Prose that is not an inline link is the extractor's negative space,
+  not a skip class.
 - **roster** — `.claude/agents/ar-*.md` reviewer frontmatters against DEV.md's
   sub-model dispatch table: name/stem equality, bidirectional set equality,
   model parity, Trigger/Provide framing lines. Scoped to the reviewers on
