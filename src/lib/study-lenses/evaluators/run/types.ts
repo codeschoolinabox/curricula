@@ -115,7 +115,7 @@ export type RunSettlement =
 	| { readonly ended: 'canceled' };
 
 /**
- * What run's `main` returns: the kind's evaluation stream, specialised to
+ * What run's `main` returns: the kind's evaluation stream, specialized to
  * zero events (`AsyncIterable<never>`), existing to carry laziness (the
  * first pull starts the run — awaiting `settled` alone starts nothing),
  * cancellation (ceasing to pull tears the run down; a pull after teardown

@@ -81,16 +81,16 @@ orientation.
 flowchart TD
     SPEC["lens-built evaluation spec<br/>(facts · execution axis · iteration cap?)"] -->|"probe the environment —<br/>a missing engine prerequisite refuses, as data"| REF["structured refusal"]
     SPEC -->|"read the gate-guaranteed source, narrowed once —<br/>inside the start latch; nothing engine-side before it"| SRC["original learner source"]
-    SRC -->|"splice iteration guards —<br/>pure, line-preserving"| GSRC["guarded source"]
-    GSRC -->|"assemble — worker factory and<br/>thread logic attached"| ESPEC["engine spec"]
-    SPEC -->|"execution axis and iteration cap<br/>ride through unchanged"| ESPEC
+    SRC -->|"splice iteration guards —<br/>pure, line-preserving"| GS["guarded source"]
+    GS -->|"assemble — worker factory and<br/>thread logic attached"| ESP["engine spec"]
+    SPEC -->|"execution axis and iteration cap<br/>ride through unchanged"| ESP
     SRC -->|"assemble-time dev condition — short-circuits<br/>past the engine; same single settlement author"| STL
-    ESPEC -.->|"engine-owned: sandbox start —<br/>config delivered worker-side"| WCFG["delivered worker config<br/>(the cap)"]
-    WCFG -->|"worker setup — build one run's guard state;<br/>inject the helpers as the only globals;<br/>register the halt author"| PROG["running program<br/>(counting guards; no dialogs)"]
+    ESP -.->|"engine-owned: sandbox start —<br/>config delivered worker-side"| CFG["delivered worker config<br/>(the cap)"]
+    CFG -->|"worker setup — build one run's guard state;<br/>inject the helpers as the only globals;<br/>register the halt author"| PROG["running program<br/>(counting guards; no dialogs)"]
     PROG -.->|"engine-owned: the program<br/>runs to a stop"| STOP["worker-side stop —<br/>kind + raw thrown value"]
     STOP -->|"author the halt — classify structurally,<br/>read the run total"| HALT["clone-safe halt payload"]
     HALT -.->|"rides the engine settlement<br/>across the wire"| ES["engine settlement<br/>(five outcomes + carried data)"]
-    ESPEC -.->|"engine-owned: thread-side stop —<br/>cancel · time budget · machinery failure"| ES
+    ESP -.->|"engine-owned: thread-side stop —<br/>cancel · time budget · machinery failure"| ES
     ES -->|"narrow the halt once; map by precedence<br/>over carried data — pure, total"| STL["settlement<br/>(clean | error+richer | canceled)"]
 ```
 
