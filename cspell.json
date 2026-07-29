@@ -120,7 +120,10 @@
 		"rulesdir",
 		"pycache",
 		"EPERM",
-		"unledgered"
+		"unledgered",
+		"toolsets",
+		"unbackticked",
+		"frontmatters"
 	],
 	"ignorePaths": [
 		"node_modules",
