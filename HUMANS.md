@@ -89,9 +89,9 @@ quality cliff is small or absent.
 
 - Phase 0 design work (DDD, ubiquitous language establishment, architectural
   sketch authoring)
-- AR-1 (Design Challenge) — drift / cross-cutting
-- AR-2 (Architectural Sketch Challenge) — drift / cross-cutting
-- AR-5 (Pre-Merge Review) — drift, scope, cross-file consistency
+- AR-1 (Design Challenge) — drift / cross-cutting (the one pinned judgment
+  review; AR-2 and AR-5 are deliberately NOT pinned — they inherit the session's
+  model so they track the authoring tier, see Sub-model dispatch below)
 - Plan authoring, especially in plan mode
 - Hard refactors where the structural target is unclear
 - Cross-cutting changes that touch multiple modules
@@ -122,8 +122,10 @@ override the configured roster. The authoritative table lives in
 [DEV.md § Sub-model dispatch](./DEV.md#sub-model-dispatch); if the agent doesn't
 follow it without prompting, point it there.
 
-You can also set per-agent default models in `~/.claude/agents/<name>.md`
-frontmatter (`model: sonnet`) for any reusable agent definition.
+You can also set per-agent default models in `.claude/agents/<name>.md`
+frontmatter (`model: sonnet`) for any reusable agent definition — the registered
+reviewers live in this repo's `.claude/agents/`, not the global
+`~/.claude/agents/`.
 
 ---
 
