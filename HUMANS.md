@@ -165,9 +165,15 @@ You and the agent each have responsibilities. Yours, in priority order:
 **Push back when the agent is being lossy.** Multi-file refactors, cleanups,
 "simplifications", architectural changes — these are exactly the patterns where
 the agent has historically broken working systems. AGENTS.md has the warnings.
-When you read a "Mandatory user warning" from the agent, read it seriously. The
-fact that it fired means the agent is in the danger zone, not that it's being
-overcautious.
+For any commit that moves, restructures, or trims documentation, **demand the
+loss ledger**
+([DEV.md § Documentation migration discipline](./DEV.md#documentation-migration-discipline)):
+every omission, merge, or reword enumerated with its justification. "Cleaner" is
+not a justification, and an empty mechanical listing does not discharge the
+ledger — your refusal to accept unledgered loss is the enforcement half of that
+rule. When you read a "Mandatory user warning" from the agent, read it
+seriously. The fact that it fired means the agent is in the danger zone, not
+that it's being overcautious.
 
 **Insist on plan mode for non-trivial work.** Even when the agent is confident.
 Especially when the agent is confident. The plan mode discipline catches
@@ -280,6 +286,26 @@ Quick reference for the tools you can fire (or that I can fire on your behalf).
 - **`/update-config`** — Skill for `settings.json` edits via the harness. Use
   for hooks, permissions, env vars.
 
+**Tracked project guardrails (in-repo, reach every session and checkout):**
+
+- **`.claude/settings.json`** — shared permissions (read-only verification
+  allowlist, write-flag denies) and the tool-hook registrations.
+  `settings.local.json` stays personal and untracked. **Snapshot caveat:** a
+  session reads hooks and permissions at session start — after a tracked
+  settings or hook change lands, restart your session (and peers restart theirs)
+  before relying on it.
+- **`.claude/hooks/`** — the governance-guard (pathspec commits, autofix,
+  markdownlint form, write-flags). After ANY hook edit: `npm run test:hooks` —
+  the suite is the layer's only behavioral contract.
+- **`/btw` (`Cmd+;`)** — side-question overlay that does NOT enter the
+  conversation context; use it for questions that don't need to steer the
+  running task.
+- **Plugin choices (2026-07-29 survey):** LSP is native in the VS Code extension
+  (no plugin needed);
+  `claude plugin install security-guidance@claude-plugins-official` from a
+  terminal if wanted; keep MCP servers ≤3-4 and verify `/context` shows their
+  tools "deferred".
+
 **NOT a substitute for AR-5:**
 
 - `/review` — built-in skill, but **only for GitHub PRs**, not generic local
@@ -326,6 +352,15 @@ agent claims things are done; you verify they actually are.
   you'd see? If the agent said "tabs / single quotes / semicolons / 80-col wrap"
   and you see four-space indents, the test was wrong.
 
+**Standing accepted risks (your rulings, 2026-07-29 — re-decide any time):**
+
+- `~/.claude/settings.json` still auto-approves `git push`/`git rebase`/
+  `git pull`, held back only by a fail-open hook. You ruled the purge out of
+  scope; the repo-tracked guard covers commit shapes but cannot cover these.
+- `.vscode/settings.json` keeps `source.fixAll.eslint` armed on every human save
+  — the severity-blind autofix landmine (crater `0e05c5ac`). The
+  governance-guard closes only the agent/Bash path.
+
 **After an orchestrated fan-out:**
 
 - The orchestrator surfaces a **per-subtree ledger** — each worker's commits
@@ -363,6 +398,13 @@ Sonnet/Opus indicator switching unexpectedly (subagents inheriting the parent
 model when they shouldn't). If you see a 5-hour timer under 30 minutes, finish
 your current commit and stop — starting a new increment under that timer means
 rushing into compaction.
+
+**VSCode explorer suddenly empty + agent reporting EPERM in Documents.** That is
+a macOS TCC revocation, not data loss (metadata still stats; files are intact).
+Fix: System Settings → Privacy & Security → Files and Folders → Visual Studio
+Code → re-enable Documents Folder (or grant Full Disk Access), then FULLY quit
+(⌘Q) and relaunch VSCode — the grant applies at process launch. Diagnosed and
+paid for on 2026-07-29.
 
 **Onboarding sequence (future-self or new collaborator).** Read this file first;
 then your governance file per `CLAUDE.md`'s router (`AGENTS.md` or
@@ -457,5 +499,6 @@ Some things are yours to do. Don't outsource these:
 New override phrase, retired tool, new AR type, recurring coaching pattern (3+
 sessions in a row), new collaborator joining, a new model qualifies for
 principal governance (append its model-id substring to CLAUDE.md's qualifying
-list — the list only, never rename `AGENTS.principal.md` itself). Audit at ~400
-lines.
+list — the list only, never rename `AGENTS.principal.md` itself), a new tool
+hook or tracked-settings change lands (restart sessions, run its live-fire
+probes, `npm run test:hooks`). Audit at ~400 lines.

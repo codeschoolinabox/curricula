@@ -118,7 +118,9 @@
 		"oneline",
 		"orderfile",
 		"rulesdir",
-		"pycache"
+		"pycache",
+		"EPERM",
+		"unledgered"
 	],
 	"ignorePaths": [
 		"node_modules",
