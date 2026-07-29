@@ -87,7 +87,15 @@
 		"undiscriminated",
 		"burndown",
 		"unenumerated",
-		"backticked"
+		"backticked",
+		"shlex",
+		"pathspec",
+		"mechanise",
+		"pytest",
+		"lossiness",
+		"heredoc",
+		"heredocs",
+		"stdlib"
 	],
 	"ignorePaths": [
 		"node_modules",

@@ -19,6 +19,10 @@ creation (AGENTS.md § Git policy).
   2026-07-29: the vitest allow admits `--update` and first-run snapshot writes;
   the unit project contains zero snapshot tests today — re-evaluate the entry if
   snapshot tests ever land.
+- **`hooks/`** — project tool hooks (PreToolUse/PostToolUse guards), starting
+  with the governance-guard; roster, ubiquitous language, and protocol in
+  [hooks/README.md](./hooks/README.md), architecture in
+  [hooks/DOCS.md](./hooks/DOCS.md).
 - **`agents/`** — the registered adversarial reviewers (`ar-1`…`ar-5`), invoked
   by name per DEV.md § Adversarial Review Protocol.
 - **`skills/`** — repo skills, loadable from this repo root.
