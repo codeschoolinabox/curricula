@@ -849,6 +849,38 @@ cleanup pass. Process talk also expands the surface a careful reader has to
 mentally subtract when reasoning about the current contract. Keep the process
 out of the contract.
 
+#### Documentation migration discipline
+
+**Migration is transport, not authorship.** When moving, splitting, or
+restructuring documentation (or any authored artifact), content transports
+**verbatim by default**. Every omission, merge, or reword is enumerated in a
+**loss ledger** — in the commit body or the plan — with its justification.
+Silent loss (content present at baseline, absent in the result, unenumerated) is
+a defect of the same severity as a failing test, however clean the result reads.
+"Cleaner" is not a justification; the depth is the asset. The corollary covers
+updates: an edit that removes content from a `README.md`, `DOCS.md`, or
+`types.ts` follows the same enumeration.
+
+The ledger is built from the baseline diff by hand: diff the source at baseline
+against the destination set and account for every heading, term, constraint,
+example, and pointer that does not survive. Mechanical listers can surface
+candidate losses (headings, bold terms, backticked tokens, diagram node labels)
+but cannot see prose-level loss — plain constraint sentences, table cells,
+code-fence bodies, link targets, or semantic weakening ("must" → "should") — so
+**an empty mechanical listing never discharges the ledger**.
+
+Stale content is not an exception: "fix it or delete it if it goes stale" (§
+Directory Documentation Convention) licenses the fix-or-delete _decision_, not a
+silent deletion — a staleness deletion is enumerated in the loss ledger like any
+other removal.
+
+**Path citations.** Governance and docs cite content by stable alias
+(`@utils/`), by concept plus a discovery command (`git ls-files '<pattern>'`),
+or by machine-checked infrastructure path (`.claude/**`, `scripts/**`, root
+docs). Volatile source-tree paths in governance prose are rot by construction —
+they break every time the tree reorganizes, and the citation outlives the layout
+it named.
+
 ### Test Organization
 
 Unit tests live in a `tests/` subdirectory co-located with the source they test:
@@ -1680,7 +1712,12 @@ the human explicitly opts out.
   have been triangulated away? If the implementation returns a fixed value for
   any non-trivial input, triangulation was incomplete.
 - Is this the simplest solution? Could it be done in fewer lines?
-- Are there existing utilities being ignored (check src/utils/)?
+- Are there existing utilities being ignored (check the `@utils/` import alias —
+  tsconfig maps it to the shared utilities package)?
+- **Loss lens (doc changes)**: diff every touched `README.md`/`DOCS.md` against
+  the baseline; anything present at baseline, absent in the result, and missing
+  from the change's loss ledger is a finding — enumerate it BEFORE judging style
+  (§ Documentation migration discipline).
 - Does it follow the codebase's functional conventions (no this, no mutable
   closures)?
 - Are there subtle bugs (off-by-one, null handling, async footguns)?
@@ -1724,6 +1761,10 @@ prompt. **Skip:** Only when the human explicitly opts out.
 - Cross-increment coherence: do decisions made in increment 1 hold through
   increment N? Watch for naming drift, abstraction leakage, and inconsistencies
   that accumulate past increment-level review.
+- **Loss lens (doc changes)**: across the whole changeset, diff every touched
+  doc against the baseline and enumerate anything present at baseline, absent in
+  the result, and missing from the loss ledgers — BEFORE judging style (§
+  Documentation migration discipline).
 - Type contract integrity: is types.ts still the single source of truth? Flag
   casts, `any`s, or parallel type definitions added during increments. No-op for
   pure content/markdown increments.

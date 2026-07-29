@@ -210,6 +210,14 @@ hedging go in plan files, handoffs, or commit messages. See
 and
 [DEV.md § Directory Documentation Convention](./DEV.md#directory-documentation-convention).
 
+**Migration is transport, not authorship.** Moving, splitting, or restructuring
+documentation transports content verbatim by default; every omission, merge, or
+reword is enumerated with its justification in a **loss ledger** (commit body or
+plan) — silent loss is a defect of the same severity as a failing test. Cite
+content by stable alias or concept plus a discovery command, never by volatile
+source-tree path. Full rule:
+[DEV.md § Documentation migration discipline](./DEV.md#documentation-migration-discipline).
+
 ### Type System
 
 Full TypeScript strict mode. Types live with the code they document (`types.ts`
@@ -736,8 +744,7 @@ Project-specific requirements:
 
 ## Vibetoading and Frogramming — house terms
 
-Two house terms appear throughout this org's documentation, defined in
-`spiralearn/welcome-to-programming/syllabus.md` §0.3:
+Two house terms appear throughout this org's documentation:
 
 - **Frogramming** (🔬) — development grounded in the notional machine: the
   practitioner predicts what the machine will do, evaluates output against that

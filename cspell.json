@@ -84,7 +84,10 @@
 		"refetched",
 		"retriable",
 		"surfaceable",
-		"undiscriminated"
+		"undiscriminated",
+		"burndown",
+		"unenumerated",
+		"backticked"
 	],
 	"ignorePaths": [
 		"node_modules",

@@ -186,6 +186,14 @@ DEV.md, HUMANS.md, etc.) describe process as their end-state contract and are
 out of scope. See
 [DEV.md § What goes in docs vs. plans vs. handoffs](./DEV.md#what-goes-in-docs-vs-plans-vs-handoffs).
 
+**Migration is transport, not authorship.** Moving, splitting, or restructuring
+documentation transports content verbatim by default; every omission, merge, or
+reword is enumerated with its justification in a **loss ledger** (commit body or
+plan). Silent loss is a defect of the same severity as a failing test. Cite
+content by stable alias or concept plus a discovery command, never by volatile
+source-tree path. Full rule:
+[DEV.md § Documentation migration discipline](./DEV.md#documentation-migration-discipline).
+
 See
 [DEV.md § Directory Documentation Convention](./DEV.md#directory-documentation-convention)
 for the full format, the data flow diagram rules, and the architectural sketch
