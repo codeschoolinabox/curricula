@@ -28,3 +28,6 @@ Desktop.ini
 
 # Test Artifacts
 __screenshots__/
+
+# python bytecode from the hooks test suite
+__pycache__/

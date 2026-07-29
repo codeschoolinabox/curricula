@@ -10,8 +10,10 @@
 			"Bash(git ls-files:*)",
 			"Bash(npx tsc --noEmit)",
 			"Bash(npx cspell:*)",
+			"Bash(npx eslint:*)",
 			"Bash(npx markdownlint-cli2 --no-globs:*)",
-			"Bash(./node_modules/.bin/vitest run --project unit:*)"
+			"Bash(./node_modules/.bin/vitest run --project unit:*)",
+			"Bash(npm run test:hooks)"
 		],
 		"deny": [
 			"Bash(npx eslint --fix:*)",
@@ -19,6 +21,19 @@
 			"Bash(git log --output:*)",
 			"Bash(git show --output:*)",
 			"Bash(npx markdownlint-cli2 --no-globs --fix:*)"
+		]
+	},
+	"hooks": {
+		"PreToolUse": [
+			{
+				"matcher": "Bash",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/governance-guard.py"
+					}
+				]
+			}
 		]
 	}
 }

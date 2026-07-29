@@ -15,10 +15,14 @@ creation (AGENTS.md § Git policy).
   scoped path is `npm run lint:fix:study-lenses`), `git diff`/`log`/`show`
   `--output=` (an arbitrary-path write primitive on read commands), and
   `markdownlint-cli2 --fix`. These denies are leading-position prefix belts —
-  prefix matching cannot catch a flag in trailing position. Known gap, measured
-  2026-07-29: the vitest allow admits `--update` and first-run snapshot writes;
-  the unit project contains zero snapshot tests today — re-evaluate the entry if
-  snapshot tests ever land.
+  prefix matching cannot catch a flag in trailing position; the governance-guard
+  hook covers any position. The `Bash(npx eslint:*)` allow rides in the same
+  commit as that hook's registration: `--fix` at any position is guard-denied,
+  and the wider eslint flag surface (`--rulesdir`, `--plugin`, custom parsers —
+  all execute local JS) is accepted under the hooks' stated momentum-not-malice
+  threat model. Known gap, measured 2026-07-29: the vitest allow admits
+  `--update` and first-run snapshot writes; the unit project contains zero
+  snapshot tests today — re-evaluate the entry if snapshot tests ever land.
 - **`hooks/`** — project tool hooks (PreToolUse/PostToolUse guards), starting
   with the governance-guard; roster, ubiquitous language, and protocol in
   [hooks/README.md](./hooks/README.md), architecture in

@@ -116,7 +116,9 @@
 		"metacharacters",
 		"writeflag",
 		"oneline",
-		"orderfile"
+		"orderfile",
+		"rulesdir",
+		"pycache"
 	],
 	"ignorePaths": [
 		"node_modules",
