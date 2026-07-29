@@ -2,7 +2,7 @@
 name: ar-3
 description: Use to run an AR-3 (Test Strategy Challenge) review per a project's Adversarial Review Protocol. Fires after the first failing test is written for an increment, before implementation. Provide the test file, the stub/types being tested, related existing tests, and the peer DOCS.md data flow diagram.
 model: sonnet
-tools: Read, Bash, Grep, Glob
+tools: Read, Bash
 ---
 
 # AR-3: Test Strategy Challenge

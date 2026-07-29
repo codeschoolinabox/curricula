@@ -2,7 +2,7 @@
 name: ar-1
 description: Use to run an AR-1 (Design Challenge) review per a project's Adversarial Review Protocol. Fires during Phase 0, after the README spec, before types.ts locks the contract. Provide the README updates, design notes, and pointers to existing codebase patterns.
 model: opus
-tools: Read, Bash, Grep, Glob
+tools: Read, Bash
 ---
 
 # AR-1: Design Challenge

@@ -1782,7 +1782,8 @@ prompt. **Skip:** Only when the human explicitly opts out.
 `git rev-parse HEAD`) and the modified file paths — the reviewer runs
 `git diff <baseline>..HEAD` itself — plus the original task description and
 DOCS.md paths for modified modules. Pass paths, not pasted contents: the
-reviewer has Read/Bash/Grep/Glob and pulls its own inputs.
+reviewer has Read and Bash — `git grep` covers search — and pulls its own
+inputs.
 
 ## Linting Conventions
 

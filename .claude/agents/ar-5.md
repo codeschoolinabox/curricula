@@ -1,7 +1,7 @@
 ---
 name: ar-5
 description: Use to run an AR-5 (Pre-Merge Review) review per a project's Adversarial Review Protocol. Fires after all increments complete, before the commit prompt. Provide the baseline SHA (recorded at plan approval), the modified file paths, the original task description, and DOCS.md paths for modified modules — the reviewer pulls its own diff.
-tools: Read, Bash, Grep, Glob
+tools: Read, Bash
 ---
 
 # AR-5: Pre-Merge Review

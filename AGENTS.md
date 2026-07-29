@@ -731,13 +731,13 @@ guard.
 **A worker is also a mini cold-start**, so its launch prompt is a cold-start
 launch prompt: `DEV.md`'s conventions, the module README/DOCS/types, its cluster
 contract, and an explicit instruction to read its own governance file per the
-repo-root `CLAUDE.md` router before starting — a deliberate backstop: whether a
-harness auto-loads `CLAUDE.md`'s router text into a given worker's context isn't
-something this repo controls or can verify, so the launch prompt names the step
-rather than assuming it happens automatically. The orchestrator's decomposition
-and launch prompts are themselves a handoff their author is blind to — so the
-mandatory context-free validation pass checks the **decomposition before each
-fan-out wave** (the right grain; not a per-worker regress).
+repo-root `CLAUDE.md` router before starting — a deliberate backstop:
+router-text reach into a spawned worker's context has been observed both present
+(measured 2026-07-29) and absent (2026-07-28), so the launch prompt names the
+step rather than assuming it happens automatically. The orchestrator's
+decomposition and launch prompts are themselves a handoff their author is blind
+to — so the mandatory context-free validation pass checks the **decomposition
+before each fan-out wave** (the right grain; not a per-worker regress).
 
 **The orchestrator holds the coherence spine** and nothing else: `types.ts`, the
 DOCS `## Data flow` diagram, the plan/DAG/gate ledger, and the **seam reads** at
@@ -881,8 +881,8 @@ verdicts:
 
 **Pass file paths and the baseline SHA, never pasted contents.** Record
 `git rev-parse HEAD` at plan approval; AR-5 reviews `baseline..HEAD` and runs
-`git diff` itself. Reviewers have Read/Bash/Grep/Glob — let them pull their own
-inputs.
+`git diff` itself. Reviewers have Read and Bash — `git grep` covers search; let
+them pull their own inputs.
 
 ARs are mandatory. Only the human can skip; the implementing agent never skips
 on its own. Skip-resistance rule: when you catch yourself reasoning about why

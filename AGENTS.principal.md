@@ -23,12 +23,15 @@ two correlate but aren't the same thing.
 
 This file is written against the following loading model: neither AGENTS file is
 guaranteed to auto-load. `CLAUDE.md`'s router text is intended to reach every
-session and subagent, but this repo cannot verify that for every subagent spawn
-path — observed evidence during this file's most recent revision found it absent
-from a spawned subagent's own context, with no observation of it present in one.
-Assume it reaches a top-level session and does NOT reliably reach a spawned
-subagent. The reading agent checks its own model id against `CLAUDE.md`'s
-qualifying list and explicitly reads whichever of `AGENTS.md` /
+session and subagent; whether it does is a harness property, not a contract.
+Top-level sessions have consistently been observed receiving it (most recently
+2026-07-29); the spawned-subagent path is the variable one. Measured 2026-07-29
+(harness-probe run): the full router text WAS present in a spawned subagent's
+context before its first tool call — the reverse of the previous revision's
+observation (2026-07-28), which had found it absent. Subagent reach has now been
+observed in both directions one day apart — treat it as never guaranteed for a
+given spawn path. The reading agent checks its own model id against
+`CLAUDE.md`'s qualifying list and explicitly reads whichever of `AGENTS.md` /
 `AGENTS.principal.md` matches — that explicit read, not auto-load, is what §
 Orchestrated delegation's worker launch prompts rely on.
 
@@ -140,10 +143,11 @@ Before writing any code:
       building the wrong thing
 - [ ] **Enter plan mode** — unless trivial or the user said "skip plan mode"
 
-(This file is not guaranteed to auto-load — `CLAUDE.md`'s router text is
-intended to, but this repo cannot verify that for every subagent spawn path.
-Reading THIS file is the explicit step the router directs you to take; once
-honored, re-reading it mid-session is not required again.)
+(This file is not guaranteed to auto-load — `CLAUDE.md`'s router text reached a
+spawned subagent when last measured, 2026-07-29, but reach has varied across
+observations (absent 2026-07-28, present 2026-07-29) and is not guaranteed for
+every spawn path. Reading THIS file is the explicit step the router directs you
+to take; once honored, re-reading it mid-session is not required again.)
 
 ---
 
@@ -596,8 +600,8 @@ override to synchronous.
   conventions, the module README/DOCS/types, its cluster contract, AND an
   explicit instruction to read its own governance file per the repo-root
   `CLAUDE.md` router before starting — a deliberate backstop, not decoration:
-  whether a harness auto-loads `CLAUDE.md`'s router text into a given worker's
-  context isn't something this repo controls or can verify, so the launch prompt
+  router-text reach into a spawned worker's context has been observed both
+  present (measured 2026-07-29) and absent (2026-07-28), so the launch prompt
   names the step rather than assuming it. Validate the **decomposition** before
   each fan-out wave.
 - **The orchestrator** holds the spine — `types.ts`, the DOCS `## Data flow`
@@ -694,8 +698,8 @@ Quick reference:
   `ar-5` (pre-merge, after all increments).
 - **Pass file paths and the baseline SHA, never pasted contents.** Record
   `git rev-parse HEAD` at plan approval; AR-5 reviews `baseline..HEAD` and runs
-  `git diff` itself. Reviewers have Read/Bash/Grep/Glob — let them pull their
-  own inputs.
+  `git diff` itself. Reviewers have Read and Bash — `git grep` covers search;
+  let them pull their own inputs.
 - ARs are mandatory. Only the human can skip; the implementing agent never skips
   on its own. **Skip-resistance rule**: when you catch yourself reasoning about
   why this particular case doesn't need an AR, that reasoning is the signal it

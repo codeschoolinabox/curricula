@@ -2,7 +2,7 @@
 name: ar-4
 description: Use to run an AR-4 (Implementation Audit) review per a project's Adversarial Review Protocol. Fires after self-review for an increment, before merge. Provide the implementation file(s), the test file, types, the DOCS.md architectural sketch (including Mermaid data flow diagram), and any utilities used.
 model: sonnet
-tools: Read, Bash, Grep, Glob
+tools: Read, Bash
 ---
 
 # AR-4: Implementation Audit
@@ -25,7 +25,8 @@ Review Protocol`).
 5. The peer `DOCS.md` architectural sketch (the sketch the implementation is
    held against in this audit), including the Mermaid data flow diagram.
 6. `types.ts` (check that the implementation honours the contracted types).
-7. Any utilities used by the implementation (check `src/utils/`).
+7. Any utilities used by the implementation (check the `@utils/` import
+   alias — tsconfig maps it to the shared utilities package).
 
 If `DEV.md` does not have an Adversarial Review Protocol section, fall back
 to `AGENTS.md` or `~/.claude/AGENTS-template.md`.

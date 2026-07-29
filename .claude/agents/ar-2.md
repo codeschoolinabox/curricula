@@ -1,7 +1,7 @@
 ---
 name: ar-2
 description: Use to run an AR-2 (Architectural Sketch Challenge) review per a project's Adversarial Review Protocol. Fires after the architectural sketch is written in DOCS.md (Phase 0 step 0.6), before final review and implementation. Provide the DOCS.md sketch, README.md, and types.ts.
-tools: Read, Bash, Grep, Glob
+tools: Read, Bash
 ---
 
 # AR-2: Architectural Sketch Challenge
