@@ -220,6 +220,58 @@ ALLOW_MDLINT = [
 DENY += DENY_MDLINT
 ALLOW += ALLOW_MDLINT
 
+# --- write-flag-on-read-command rule ----------------------------------------
+
+DENY_WRITEFLAG = [
+    # --output turns a read command into an arbitrary-path write primitive
+    # (proven live during Wave 2's review); any token position
+    ("git diff --output=/tmp/x -- DEV.md", ("write-flag-on-read-command", "--output")),
+    ("git diff -- DEV.md --output=/tmp/x", "--output"),
+    ("git log --output=/tmp/x -3", "--output"),
+    ("git show HEAD --output /tmp/x", "--output"),
+    # git global options must not hide the subcommand from the scoping —
+    # the judge->git_subcommand wiring is new at this call site
+    ("git -C /tmp diff --output=/tmp/x -- DEV.md", "--output"),
+    # markdownlint --fix mutates files from a checkpoint command; with
+    # --no-globs present only this rule fires
+    (
+        "npx markdownlint-cli2 --no-globs --fix README.md",
+        ("write-flag-on-read-command", "--fix"),
+    ),
+    # without --no-globs BOTH rules fire — cross-rule aggregation
+    (
+        "npx markdownlint-cli2 --fix README.md",
+        ("write-flag-on-read-command", "markdownlint-globs"),
+    ),
+]
+
+ALLOW_WRITEFLAG = [
+    # the read commands themselves stay silent
+    "git diff -- DEV.md",
+    "git diff --stat -- src/",
+    "git log --oneline -5",
+    "git show HEAD:DEV.md",
+    # --output on a NON-read git subcommand is not this rule's business —
+    # as a REAL token (kills unscoped scanning; commit-pathspec stays silent
+    # because -m and the pathspec are present)
+    "git commit --output=/tmp/x -m 'x' -- src/lib/a.ts",
+    # a quoted mention is one token, not a flag
+    "git commit -m 'add --output support' -- src/lib/a.ts",
+    # a fourth subcommand pins the {diff,log,show} ALLOWLIST reading over a
+    # not-commit denylist reading
+    "git branch --output=/tmp/x",
+    # --output-indicator-new is a REAL, unrelated git-diff flag sharing the
+    # prefix — the git row matches exact-or-equals, never prefix
+    "git diff --output-indicator-new=X -- DEV.md",
+    # KNOWN SETTLED CALL, pinned: -O<orderfile> REORDERS diff output, it
+    # does not write a file — a naive reading of the flag name must not
+    # regress this into a deny
+    "git diff -O/dev/null -- DEV.md",
+]
+
+DENY += DENY_WRITEFLAG
+ALLOW += ALLOW_WRITEFLAG
+
 # --- protocol: fail-open on malformed or degenerate payloads ----------------
 
 MALFORMED = [
@@ -258,6 +310,22 @@ def payload_for(command):
 
 
 failures = []
+
+# static row-consistency check: subcommand scoping is only meaningful for git
+# rows (the judge's scoping branch is git-specific by design); a runtime
+# assert would violate fail-open, so the constraint lives here
+sys.path.insert(0, str(pathlib.Path(HOOK).parent))
+import importlib.util as _ilu
+
+_spec = _ilu.spec_from_file_location("governance_guard", HOOK)
+_gg = _ilu.module_from_spec(_spec)
+_spec.loader.exec_module(_gg)
+for _row in _gg.FLAG_ROWS:
+    if _row["subcommands"] is not None and _row["invocations"] != {"git"}:
+        failures.append(
+            f"row {_row['name']!r}: subcommands set on non-git invocations "
+            f"{_row['invocations']!r} — silently a no-op in the judge"
+        )
 
 for command, expected in DENY:
     substrings = (expected,) if isinstance(expected, str) else expected

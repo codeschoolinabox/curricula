@@ -113,7 +113,10 @@
 		"mdlint",
 		"metachars",
 		"metacharacter",
-		"metacharacters"
+		"metacharacters",
+		"writeflag",
+		"oneline",
+		"orderfile"
 	],
 	"ignorePaths": [
 		"node_modules",

@@ -254,12 +254,17 @@ def judge_commit_pathspec(tokens):
 
 
 # declarative flag rules (DOCS.md: a row is name, invocation basenames,
-# forbidden flag prefixes, reason; one judge shared by every row)
+# forbidden flags, reason; one judge shared by every row). `subcommands`
+# scopes a git row to specific subcommands; `prefix` picks the match mode —
+# True for a flag FAMILY (--fix, --fix-type, ...), False for exact-or-`=`
+# (--output vs the unrelated --output-indicator-* flags).
 FLAG_ROWS = [
     {
         "name": "eslint-autofix",
         "invocations": {"eslint"},
-        "flag_prefixes": ("--fix",),
+        "subcommands": None,
+        "flags": ("--fix",),
+        "prefix": True,
         "reason": (
             "eslint --fix is severity-blind autofix — the largest crater in "
             "this repo's history (0e05c5ac: 150 files reformatted). Use "
@@ -267,22 +272,59 @@ FLAG_ROWS = [
             "reviewed autofix) or fix by hand."
         ),
     },
+    {
+        "name": "write-flag-on-read-command",
+        "invocations": {"git"},
+        "subcommands": {"diff", "log", "show"},
+        "flags": ("--output",),
+        "prefix": False,
+        "reason": (
+            "--output writes a file from a read command — an arbitrary-path "
+            "write primitive riding the read-only allowlist. Run the read "
+            "without --output; use a shell redirection into the scratchpad "
+            "if a file is genuinely needed."
+        ),
+    },
+    {
+        "name": "write-flag-on-read-command",
+        "invocations": {"markdownlint-cli2"},
+        "subcommands": None,
+        "flags": ("--fix",),
+        "prefix": True,
+        "reason": (
+            "markdownlint-cli2 --fix mutates files from a checkpoint "
+            "command — checkpoints are read-only. Full sweep: "
+            "`npm run lint:md`; fixes by hand."
+        ),
+    },
 ]
 
 
+def flag_matches(arg, flag, prefix):
+    if prefix:
+        return arg.startswith(flag)
+    return arg == flag or arg.startswith(flag + "=")
+
+
 def judge_flag_rows(tokens):
-    """One judge for every declarative row: invocation basename equality +
-    forbidden flag prefix at ANY token position. The rule-name tag is derived
-    from the row — one source of truth for attribution."""
+    """One judge for every declarative row: invocation basename equality,
+    optional subcommand scoping, forbidden flag at ANY token position. The
+    rule-name tag derives from the row — one source of truth."""
     basename, args = invocation_of(tokens)
     reasons = []
     for row in FLAG_ROWS:
         if basename not in row["invocations"]:
             continue
+        scan = args
+        if row["subcommands"] is not None and basename == "git":
+            subcommand, rest = git_subcommand(args)
+            if subcommand not in row["subcommands"]:
+                continue
+            scan = rest
         if any(
-            arg.startswith(prefix)
-            for arg in args
-            for prefix in row["flag_prefixes"]
+            flag_matches(arg, flag, row["prefix"])
+            for arg in scan
+            for flag in row["flags"]
         ):
             reasons.append(f"[{row['name']}] {row['reason']}")
     return reasons

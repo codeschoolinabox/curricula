@@ -76,11 +76,15 @@ flowchart TD
   reproducible. Rule attribution in tests asserts each rule's named reason, and
   all-matched reporting removes any coupling between rule order and which
   correction an agent is taught.
-- **Rules are declarative rows where the shape allows** (name, invocation,
-  forbidden flag prefixes, reason) sharing one judging implementation. Two rules
-  are bespoke logic by necessity: `commit-pathspec` (multi-condition) and
-  `markdownlint-globs` (conditional on flag ABSENCE — a shape rows cannot
-  express). Adding a flag-shaped rule is a data edit, not a new predicate.
+- **Rules are declarative rows where the shape allows** (name, invocation
+  basenames, optional git-subcommand scope, forbidden flags with a per-row match
+  mode — prefix for a flag FAMILY, exact-or-`=` where an unrelated real flag
+  shares the prefix — and reason) sharing one judging implementation. Subcommand
+  scoping is meaningful only for git rows; the suite statically asserts that
+  constraint. Two rules are bespoke logic by necessity: `commit-pathspec`
+  (multi-condition) and `markdownlint-globs` (conditional on flag ABSENCE — a
+  shape rows cannot express). Adding a flag-shaped rule is a data edit, not a
+  new predicate.
 - **shlex before any matching**: no rule ever scans the raw command string — a
   commit message _about_ the pathspec rule legitimately contains `--`, and a
   naive scan would pass or deny on prose. The coarse fallback fires only on lex

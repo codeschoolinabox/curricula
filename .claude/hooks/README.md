@@ -86,8 +86,11 @@ a command tripping two rules teaches both corrections in one round-trip:
    `* ? [ ] { } ! # :`) without `--no-globs`; flag values (`--config x`) are not
    path arguments, and glob-intended arguments pass.
 4. **`write-flag-on-read-command`** — denies `--output` on
-   `git diff`/`log`/`show` and `--fix` on markdownlint-cli2, at any token
-   position (the settings denies are leading-position belts only).
+   `git diff`/`log`/`show` (subcommand-scoped through git's global options;
+   matched exact-or-`=`, never prefix — `--output-indicator-*` are unrelated
+   real flags, and `-O<orderfile>` reorders, it does not write) and `--fix` on
+   markdownlint-cli2, at any token position (the settings denies are
+   leading-position belts only).
 
 ## Protocol
 
