@@ -32,6 +32,9 @@ export default defineWorkspace([
 				// Local ESLint rules (tooling) live outside src/; their
 				// RuleTester suites run in the unit project too.
 				'eslint-rules/**/*.test.ts',
+				// Repo tooling scripts (governance checker etc.) — same
+				// tooling-outside-src precedent as eslint-rules.
+				'scripts/**/*.test.ts',
 			],
 			exclude: ['src/lib/**/*.browser.test.ts'],
 			environment: 'node',

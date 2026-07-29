@@ -1,0 +1,23 @@
+{
+	// Typedef enforcement for scripts/** (JSDoc contracts in .mjs files are
+	// load-bearing — see scripts/DOCS.md). Run via `npm run typecheck:scripts`;
+	// deliberately not part of `npm run validate` or lint-all.mjs.
+	"compilerOptions": {
+		"allowJs": true,
+		"checkJs": true,
+		"noEmit": true,
+		"strict": true,
+		"target": "ES2022",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"skipLibCheck": true,
+		"types": ["node", "vitest/globals"]
+	},
+	"include": ["scripts/**/*.mjs", "scripts/**/*.ts"],
+	"exclude": [
+		// lint-all.mjs predates checkJs and carries one implicit-any parameter;
+		// fixing a legacy script is outside the governance-mechanisation
+		// campaign's scope. Exclusion ledgered in the campaign plan (ruling R4).
+		"scripts/lint-all.mjs"
+	]
+}

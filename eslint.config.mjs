@@ -134,6 +134,13 @@ export default tseslint.config(
 		...config,
 		files: ['src/**/*.ts', 'src/**/*.tsx'],
 	})),
+	// Repo tooling tests (scripts/**) carry TS syntax espree cannot parse;
+	// non-type-checked TS parsing only — `npm run typecheck:scripts` owns the
+	// type gate for scripts/.
+	...tseslint.configs.recommended.map((config) => ({
+		...config,
+		files: ['scripts/**/*.ts'],
+	})),
 	...tseslint.configs.recommendedTypeChecked.map((config) => ({
 		...config,
 		files: ['src/**/*.ts', 'src/**/*.tsx'],
