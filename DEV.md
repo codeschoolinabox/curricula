@@ -1728,11 +1728,11 @@ reviewer has Read/Bash/Grep/Glob and pulls its own inputs.
 
 ## Linting Conventions
 
-Code quality runs through seven tools:
+Code quality runs through six tools:
 
-- **`npm run lint`** is a five-linter compound: **ESLint** (logic and patterns —
-  `.ts`/`.js` and `.mdx`), **markdownlint-cli2** (`.md`), **ls-lint** (file
-  names), **cspell** (spelling)
+- **`npm run lint`** is a five-step compound over four linters: **ESLint** (two
+  passes — logic and patterns on `.ts`/`.js`, and `.mdx`), **markdownlint-cli2**
+  (`.md`), **ls-lint** (file names), **cspell** (spelling)
 - **Prettier** — formatting (spaces, quotes, line length)
 - **TypeScript** — types via `tsc`
 
@@ -1754,11 +1754,11 @@ npm run validate       # typecheck + format check + lint + test
 Per-file checkpoints — the compound script does not forward file arguments, so
 use the underlying tools directly:
 
-| File type          | Command                          |
-| ------------------ | -------------------------------- |
-| `.ts` `.js` `.mdx` | `npx eslint <file>`              |
-| `.md`              | `npx markdownlint-cli2 "<file>"` |
-| spelling, any type | `npx cspell <file>`              |
+| File type          | Command                                     |
+| ------------------ | ------------------------------------------- |
+| `.ts` `.js` `.mdx` | `npx eslint <file>`                         |
+| `.md`              | `npx markdownlint-cli2 --no-globs "<file>"` |
+| spelling, any type | `npx cspell <file>`                         |
 
 ### Pre-commit Hooks
 

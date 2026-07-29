@@ -309,8 +309,10 @@ steps are incomplete. "See AGENTS.md for the workflow" is not a valid substitute
 **During TDD cycles:**
 
 - Run lint checkpoints on specific modified files, not the whole codebase:
-  `npx eslint <file>` for code and `.mdx`, `npx markdownlint-cli2 "<file>"` for
-  `.md` (the compound `npm run lint` does not forward file arguments)
+  `npx eslint <file>` for code and `.mdx`,
+  `npx markdownlint-cli2 --no-globs "<file>"` for `.md` (the compound
+  `npm run lint` does not forward file arguments, and markdownlint-cli2 treats a
+  bare file argument as a glob unless `--no-globs` is passed)
 - Write tests in ZOMBIES order (Zero → One → Many...) to force triangulation.
   After the first test, ask: _could this be passed by returning a hardcoded
   value?_ If yes, the second test must make that impossible before you

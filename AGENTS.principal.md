@@ -237,16 +237,17 @@ rules:
 
 Full details: [DEV.md § Linting Conventions](./DEV.md#linting-conventions).
 
-- `npm run lint` is a five-linter compound: eslint (code + `.mdx`),
-  markdownlint-cli2 (`.md`), ls-lint (file names), cspell (spelling). Plus
-  prettier (formatting) and tsc (types). `npm run validate` runs everything.
+- `npm run lint` is a five-step compound over four linters: eslint (two passes —
+  code, and `.mdx`), markdownlint-cli2 (`.md`), ls-lint (file names), cspell
+  (spelling). Plus prettier (formatting) and tsc (types). `npm run validate`
+  runs everything.
 - Per-file checkpoints (the compound script does not forward file args):
 
-  | File type          | Command                          |
-  | ------------------ | -------------------------------- |
-  | `.ts` `.js` `.mdx` | `npx eslint <file>`              |
-  | `.md`              | `npx markdownlint-cli2 "<file>"` |
-  | spelling, any type | `npx cspell <file>`              |
+  | File type          | Command                                     |
+  | ------------------ | ------------------------------------------- |
+  | `.ts` `.js` `.mdx` | `npx eslint <file>`                         |
+  | `.md`              | `npx markdownlint-cli2 --no-globs "<file>"` |
+  | spelling, any type | `npx cspell <file>`                         |
 
 - **Pre-commit runs prettier only** (husky → lint-staged → `prettier --write`).
   Linters do not run at commit time — auto-fix was deliberately removed because
