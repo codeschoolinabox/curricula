@@ -88,6 +88,11 @@ flowchart TD
   denied command can false-deny. Accepted: reasons are self-teaching, and file
   content belongs in the Write/Edit tools, not Bash heredocs. The first rule's
   tests pin this behavior explicitly.
+- **Known, accepted limitation — flag-vs-value**: the any-position flag scan
+  cannot tell a forbidden flag from a preceding flag's VALUE that happens to
+  start with the same characters. Accepted per the momentum threat model — real
+  path/glob values essentially never begin with a literal `--fix` — and pinned
+  by a documented test case.
 - **No hook reads test results or lint results as a gate**: the workflow
   mandates a failing test, a lint-red stub, and `any` placeholders; a guard
   firing on those fires on correct work. Quality-tool output reaches agents only

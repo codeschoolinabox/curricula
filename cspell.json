@@ -106,7 +106,10 @@
 		"neighbour",
 		"neighbours",
 		"uall",
-		"Sabc"
+		"Sabc",
+		"pnpx",
+		"bunx",
+		"basenames"
 	],
 	"ignorePaths": [
 		"node_modules",

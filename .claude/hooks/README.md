@@ -75,9 +75,12 @@ a command tripping two rules teaches both corrections in one round-trip:
    `--amend` — history rewrites are forbidden by governance, and covering them
    here keeps a fresh checkout guarded (the user-global destructive-git sibling
    also denies them where it exists; overlapping denies are harmless).
-2. **`eslint-autofix`** — denies any eslint invocation carrying `--fix` or
-   `--fix-type`. The sanctioned `npm run lint:fix:study-lenses` passes by
-   construction: its own command line carries no eslint invocation.
+2. **`eslint-autofix`** — denies any eslint invocation carrying any
+   `--fix`-prefixed flag (`--fix`, `--fix-dry-run`, `--fix-type`, …), at any
+   token position, across runner families (`npx` — version pins included —
+   `npm`/`pnpm`/`yarn` exec, direct paths). The sanctioned
+   `npm run lint:fix:study-lenses` passes by construction: its own command line
+   carries no eslint invocation.
 3. **`markdownlint-globs`** — denies a markdownlint-cli2 invocation with a
    non-flag, non-glob path argument and no `--no-globs`.
 4. **`write-flag-on-read-command`** — denies `--output` on

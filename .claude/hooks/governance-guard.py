@@ -18,7 +18,8 @@ import shlex
 import sys
 
 SEGMENT_OPERATORS = {"&&", "||", ";", "|", "&", "(", ")", "{", "}"}
-RUNNER_WORDS = {"sudo", "env", "npx", "nice", "nohup"}
+RUNNER_WORDS = {"sudo", "env", "npx", "nice", "nohup", "yarn", "pnpm", "pnpx", "bunx"}
+EXEC_RUNNERS = {"npm", "pnpm", "yarn"}  # <runner> exec/dlx TOOL ...
 RUNNER_VALUE_FLAGS = {"-u", "-n", "-g"}  # sudo -u USER, nice -n N, sudo -g GRP
 SHELL_KEYWORDS = {
     "if", "then", "elif", "else", "fi",
@@ -125,13 +126,17 @@ def strip_runners(tokens):
         if token in SHELL_KEYWORDS:
             i += 1
             continue
+        if (
+            token in EXEC_RUNNERS
+            and i + 1 < len(tokens)
+            and tokens[i + 1] in ("exec", "dlx")
+        ):
+            saw_runner = True
+            i += 2
+            continue
         if token in RUNNER_WORDS:
             saw_runner = True
             i += 1
-            continue
-        if token == "npm" and i + 1 < len(tokens) and tokens[i + 1] == "exec":
-            saw_runner = True
-            i += 2
             continue
         if "=" in token and not token.startswith("-"):
             name = token.split("=", 1)[0]
@@ -151,6 +156,11 @@ def invocation_of(tokens):
     if not stripped:
         return "", []
     basename = stripped[0].rsplit("/", 1)[-1]
+    # npx-style package specs pin versions (eslint@9, eslint@^9.0.0) — strip
+    # the trailing @spec so basename equality still matches; a LEADING @ is a
+    # scope (@scope/pkg) and is not a version separator
+    if "@" in basename[1:]:
+        basename = basename[0] + basename[1:].split("@", 1)[0]
     return basename, stripped[1:]
 
 
@@ -243,6 +253,41 @@ def judge_commit_pathspec(tokens):
     return reasons
 
 
+# declarative flag rules (DOCS.md: a row is name, invocation basenames,
+# forbidden flag prefixes, reason; one judge shared by every row)
+FLAG_ROWS = [
+    {
+        "name": "eslint-autofix",
+        "invocations": {"eslint"},
+        "flag_prefixes": ("--fix",),
+        "reason": (
+            "eslint --fix is severity-blind autofix — the largest crater in "
+            "this repo's history (0e05c5ac: 150 files reformatted). Use "
+            "`npm run lint:fix:study-lenses` (the sanctioned, scoped, "
+            "reviewed autofix) or fix by hand."
+        ),
+    },
+]
+
+
+def judge_flag_rows(tokens):
+    """One judge for every declarative row: invocation basename equality +
+    forbidden flag prefix at ANY token position. The rule-name tag is derived
+    from the row — one source of truth for attribution."""
+    basename, args = invocation_of(tokens)
+    reasons = []
+    for row in FLAG_ROWS:
+        if basename not in row["invocations"]:
+            continue
+        if any(
+            arg.startswith(prefix)
+            for arg in args
+            for prefix in row["flag_prefixes"]
+        ):
+            reasons.append(f"[{row['name']}] {row['reason']}")
+    return reasons
+
+
 COARSE_COMMIT = re.compile(
     r"^\s*(?:\w+=\S*\s+)*(?:(?:sudo|env|npx|nice|nohup)\s+)*"
     r"\S*git\s+(?:-\S+\s+)*commit\b"
@@ -261,7 +306,7 @@ def judge_unparseable(piece):
     return []
 
 
-RULES = [judge_commit_pathspec]
+RULES = [judge_commit_pathspec, judge_flag_rows]
 
 
 def decide(command):

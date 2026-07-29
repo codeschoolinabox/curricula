@@ -129,6 +129,55 @@ ALLOW = [
     "npm run lint:md",
 ]
 
+# --- eslint-autofix rule ----------------------------------------------------
+
+DENY_ESLINT = [
+    # leading and trailing flag positions; the settings deny is a
+    # leading-position belt only — this rule is the any-position coverage
+    ("npx eslint --fix src/a.ts", ("eslint-autofix", "0e05c5ac")),
+    ("npx eslint src/a.ts --fix", "0e05c5ac"),
+    ("eslint --fix .", "0e05c5ac"),
+    ("./node_modules/.bin/eslint --fix src/", "0e05c5ac"),
+    ("npm exec eslint -- --fix src/", "0e05c5ac"),
+    ("npx eslint --fix-type layout src/", "0e05c5ac"),
+    ("npx eslint --fix-dry-run src/", "0e05c5ac"),
+    # npx version pins are ordinary momentum syntax (AR-4 3.2 c.1)
+    ("npx eslint@9 --fix src/", "0e05c5ac"),
+    ("npx -y eslint@^9.0.0 --fix src/", "0e05c5ac"),
+    # yarn/pnpm runner families (AR-4 3.2 c.6)
+    ("pnpm exec eslint --fix src/", "0e05c5ac"),
+    ("yarn eslint --fix src/", "0e05c5ac"),
+    # KNOWN LIMITATION, pinned (AR-4 3.2 c.2): the any-position scan cannot
+    # tell a flag from a preceding flag's VALUE that happens to start with
+    # --fix; accepted per the momentum threat model (real values almost
+    # never start with the literal --fix)
+    ("npx eslint --rulesdir --fix-stuff src/", "0e05c5ac"),
+    # one command, two rules: BOTH corrections teach in one decision
+    (
+        "npx eslint --fix src/a.ts && git commit -m 'x'",
+        ("eslint-autofix", "commit-pathspec"),
+    ),
+]
+
+ALLOW_ESLINT = [
+    # every basename form WITHOUT the flag stays silent (AR-3 3.2 c.1)
+    "npx eslint src/a.ts",
+    "eslint src/a.ts",
+    "npm exec eslint -- src/a.ts",
+    "./node_modules/.bin/eslint src/lib/a.ts",
+    # basename EQUALITY, not substring: eslint_d is a different tool (c.2)
+    "./node_modules/.bin/eslint_d --fix src/a.ts",
+    # the sanctioned autofix path carries no eslint invocation of its own
+    "npm run lint:fix:study-lenses",
+    "node scripts/lint-fix-study-lenses.mjs",
+    # prose and quoted mentions are not invocations
+    "echo npx eslint --fix",
+    "git commit -m 'ban eslint --fix everywhere' -- DEV.md",
+]
+
+DENY += DENY_ESLINT
+ALLOW += ALLOW_ESLINT
+
 # --- protocol: fail-open on malformed or degenerate payloads ----------------
 
 MALFORMED = [
