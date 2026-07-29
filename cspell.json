@@ -109,7 +109,11 @@
 		"Sabc",
 		"pnpx",
 		"bunx",
-		"basenames"
+		"basenames",
+		"mdlint",
+		"metachars",
+		"metacharacter",
+		"metacharacters"
 	],
 	"ignorePaths": [
 		"node_modules",

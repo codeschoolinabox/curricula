@@ -81,8 +81,10 @@ a command tripping two rules teaches both corrections in one round-trip:
    `npm`/`pnpm`/`yarn` exec, direct paths). The sanctioned
    `npm run lint:fix:study-lenses` passes by construction: its own command line
    carries no eslint invocation.
-3. **`markdownlint-globs`** — denies a markdownlint-cli2 invocation with a
-   non-flag, non-glob path argument and no `--no-globs`.
+3. **`markdownlint-globs`** — denies a markdownlint-cli2 invocation carrying a
+   plain path argument (no metacharacter of the tool's glob dialect
+   `* ? [ ] { } ! # :`) without `--no-globs`; flag values (`--config x`) are not
+   path arguments, and glob-intended arguments pass.
 4. **`write-flag-on-read-command`** — denies `--output` on
    `git diff`/`log`/`show` and `--fix` on markdownlint-cli2, at any token
    position (the settings denies are leading-position belts only).

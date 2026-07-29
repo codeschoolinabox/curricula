@@ -178,6 +178,48 @@ ALLOW_ESLINT = [
 DENY += DENY_ESLINT
 ALLOW += ALLOW_ESLINT
 
+# --- markdownlint-globs rule ------------------------------------------------
+
+DENY_MDLINT = [
+    # a bare file argument is silently treated as a GLOB by markdownlint-cli2
+    # — the documented per-file checkpoint requires --no-globs
+    ("npx markdownlint-cli2 README.md", ("markdownlint-globs", "--no-globs")),
+    ("npx markdownlint-cli2 DEV.md AGENTS.md", "--no-globs"),
+    ("./node_modules/.bin/markdownlint-cli2 README.md", "--no-globs"),
+    ("markdownlint-cli2 .claude/README.md", "--no-globs"),
+    # a filename never used elsewhere kills a hardcoded-name Fake It
+    ("npx markdownlint-cli2 CONTRIBUTING.md", "--no-globs"),
+    # a plain path BESIDE an intentional glob still needs --no-globs — kills
+    # first-arg-only and any-glob-anywhere heuristics
+    ('npx markdownlint-cli2 "**/*.md" AGENTS.md', "--no-globs"),
+    # runner-family parity with the sibling rules
+    ("npm exec markdownlint-cli2 -- README.md", "--no-globs"),
+    ("npx markdownlint-cli2@0.21.0 README.md", "--no-globs"),
+    # a flag VALUE (--config x) is not a path argument; the plain path
+    # beside it still denies
+    ("npx markdownlint-cli2 --config custom.jsonc README.md", "--no-globs"),
+]
+
+ALLOW_MDLINT = [
+    # the corrected per-file form
+    "npx markdownlint-cli2 --no-globs README.md",
+    'npx markdownlint-cli2 --no-globs "DEV.md"',
+    # glob-INTENDED invocations pass: metacharacters or a #-exclusion mean
+    # the caller wants globbing (the documented repo-wide form)
+    'npx markdownlint-cli2 "**/*.md" "#node_modules"',
+    "npx markdownlint-cli2 docs/*.md",
+    # no path arguments at all: nothing to misread as a glob
+    "npx markdownlint-cli2 --help",
+    "npm run lint:md",
+    # the tool's real glob dialect includes ? and [] character classes —
+    # glob-intended args pass (verified live against markdownlint-cli2)
+    'npx markdownlint-cli2 "notes/[ab]doc.md"',
+    'npx markdownlint-cli2 "report?.md"',
+]
+
+DENY += DENY_MDLINT
+ALLOW += ALLOW_MDLINT
+
 # --- protocol: fail-open on malformed or degenerate payloads ----------------
 
 MALFORMED = [

@@ -288,6 +288,46 @@ def judge_flag_rows(tokens):
     return reasons
 
 
+GLOB_METACHARS = set("*?[]{}!#:")  # markdownlint-cli2's documented glob dialect
+MDLINT_VALUE_FLAGS = {"--config"}  # flags whose next token is a value
+
+
+def judge_markdownlint_globs(tokens):
+    """The markdownlint-globs rule (bespoke: conditional on flag ABSENCE).
+    A bare path argument is silently treated as a GLOB by markdownlint-cli2
+    and merges with the config's repo-wide globs — the per-file checkpoint
+    form requires --no-globs. Glob-intended args (any metacharacter of the
+    tool's dialect) pass; flag values are not path arguments."""
+    basename, args = invocation_of(tokens)
+    if basename != "markdownlint-cli2":
+        return []
+    if "--no-globs" in args:
+        return []
+    plain_paths = []
+    i = 0
+    while i < len(args):
+        arg = args[i]
+        if arg in MDLINT_VALUE_FLAGS:
+            i += 2
+            continue
+        if arg.startswith("-"):
+            i += 1
+            continue
+        if not (set(arg) & GLOB_METACHARS):
+            plain_paths.append(arg)
+        i += 1
+    if plain_paths:
+        return [
+            "[markdownlint-globs] a bare file argument is treated as a GLOB "
+            "and merges with the repo-wide config globs — this would lint "
+            "hundreds of files, not "
+            + ", ".join(plain_paths)
+            + ". Per-file form: `npx markdownlint-cli2 --no-globs \"<file>\"`; "
+            "full sweep: `npm run lint:md`."
+        ]
+    return []
+
+
 COARSE_COMMIT = re.compile(
     r"^\s*(?:\w+=\S*\s+)*(?:(?:sudo|env|npx|nice|nohup)\s+)*"
     r"\S*git\s+(?:-\S+\s+)*commit\b"
@@ -306,7 +346,7 @@ def judge_unparseable(piece):
     return []
 
 
-RULES = [judge_commit_pathspec, judge_flag_rows]
+RULES = [judge_commit_pathspec, judge_flag_rows, judge_markdownlint_globs]
 
 
 def decide(command):

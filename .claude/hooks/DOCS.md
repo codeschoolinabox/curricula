@@ -76,9 +76,11 @@ flowchart TD
   reproducible. Rule attribution in tests asserts each rule's named reason, and
   all-matched reporting removes any coupling between rule order and which
   correction an agent is taught.
-- **Rules are declarative rows** (name, invocation, forbidden shape, reason,
-  correction) sharing one judging implementation; only `commit-pathspec` is
-  bespoke logic. Adding a rule is a data edit, not a new predicate.
+- **Rules are declarative rows where the shape allows** (name, invocation,
+  forbidden flag prefixes, reason) sharing one judging implementation. Two rules
+  are bespoke logic by necessity: `commit-pathspec` (multi-condition) and
+  `markdownlint-globs` (conditional on flag ABSENCE — a shape rows cannot
+  express). Adding a flag-shaped rule is a data edit, not a new predicate.
 - **shlex before any matching**: no rule ever scans the raw command string — a
   commit message _about_ the pathspec rule legitimately contains `--`, and a
   naive scan would pass or deny on prose. The coarse fallback fires only on lex
@@ -119,6 +121,11 @@ flowchart TD
   command substitution. The threat model is agent momentum, not malice (README §
   Threat model); closing bypass would be an unwinnable arms race inside a
   fail-open guard.
+- **Post-lex shell semantics** — the guard judges the string the agent typed,
+  never what the shell makes of it afterwards: an unquoted glob the shell would
+  expand before the tool runs is judged as the glob that was typed.
+  Pre-execution visibility is the hook contract; runtime expansion is the
+  shell's.
 - **Non-commit destructive git shapes** (`push`, `reset`, `rebase`, …) — owned
   by the user-global destructive-git sibling, which is machine-local; this hook
   covers the commit shapes (including `--amend`) so the repo's own guarantee is
