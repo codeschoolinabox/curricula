@@ -28,6 +28,23 @@ Educational content for learning to program, powered by
 | `npm run lint:names`    | ls-lint for file/directory naming                |
 | `npm run lint:spelling` | cspell spell-check across all content            |
 
+## Architecture
+
+This repository is a [Docusaurus](https://docusaurus.io/) site wrapping two
+kinds of source:
+
+- **Curriculum content** under `spiralearn/` — one directory per curriculum (see
+  § Content Structure below).
+- **Interactive study tooling** under `src/` — Docusaurus pages and plugins
+  (`src/pages/`, `src/plugins/`), and the study-lens / embody engine libraries
+  under `src/lib/`.
+
+Repo-level tooling lives in `scripts/` (lint orchestration) and `eslint-rules/`
+(local ESLint rules with their tests). Internal conventions, module boundaries,
+and the development workflow live in [DEV.md](./DEV.md); agent governance lives
+in [AGENTS.md](./AGENTS.md) and [AGENTS.principal.md](./AGENTS.principal.md),
+routed by [CLAUDE.md](./CLAUDE.md).
+
 ## Content Structure
 
 Each curriculum lives in its own directory under `spiralearn/`:
