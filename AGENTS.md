@@ -383,7 +383,7 @@ rewrites branches, publishes to remotes, or destroys work.
 **Allowed** (read-only + additive, reversible):
 
 - Read-only: `git status`, `git diff`, `git log`, `git show`, `git blame`,
-  `git branch --list`, `git ls-files`, `git remote -v`
+  `git branch --list`, `git ls-files`, `git remote -v`, `git rev-parse`
 - Additive: `git add <specific-files>`, `git commit -m "..."` (new commits
   only), `git fetch` (remote-read-only), `git stash push` (reversible)
 - Branch creation: `git branch <new-name>`, `git checkout -b <new-name>` — only
