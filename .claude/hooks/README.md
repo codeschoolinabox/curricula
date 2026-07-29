@@ -28,13 +28,15 @@ their own gates, under their own reviews.
   their hooks define their own terms in their amendments.
 - **command** — the raw Bash command string carried by the payload.
 - **segment** — a run of tokens between shell-operator tokens (`&&`, `||`, `;`,
-  `|`, newline), obtained from one whole-command lex. When the whole command
-  cannot be lexed, a raw-string split on those operators is the fallback, and
-  its pieces are judged only by the coarse fallback.
+  `|`, `&`, `(`, `)`, newline), obtained from one whole-command lex. When the
+  whole command cannot be lexed, a raw-string split on those operators is the
+  fallback, and its pieces are judged only by the coarse fallback.
 - **token** — one shlex-parsed word of the command.
 - **invocation** — the tool a segment invokes, matched by **basename** after
-  skipping the runner prefixes (`npx`, `npm exec`, `env`, `sudo`): `eslint`,
-  `npx eslint`, and `./node_modules/.bin/eslint` are all the same invocation.
+  skipping shell keywords (`if`, `for`, `time`, `!`, …), the runner prefixes
+  (`npx`, `npm exec`, `env`, `sudo`) AND the runners' own flags (`env -i`,
+  `sudo -u root`): `eslint`, `npx eslint`, and `./node_modules/.bin/eslint` are
+  all the same invocation.
 - **rule** — a named declarative row (name, invocation, forbidden shape, reason,
   correction) judged against one segment. Only `commit-pathspec` is bespoke
   logic; the flag-shaped rules share one implementation.
@@ -65,13 +67,14 @@ directory.
 order; **every rule that matches contributes its reason to the one decision** —
 a command tripping two rules teaches both corrections in one round-trip:
 
-1. **`commit-pathspec`** — denies a `git commit` that has no
-   `-m`/`--message=`/`-F`; or no bare `--` pathspec (or nothing after it); or
-   `-a`/`--all` (including bundled short flags); or a whole-tree sweep (`-- .`,
-   `-- :/`, `-- *`); or `--amend` — history rewrites are forbidden by
-   governance, and covering them here keeps a fresh checkout guarded (the
-   user-global destructive-git sibling also denies them where it exists;
-   overlapping denies are harmless).
+1. **`commit-pathspec`** — denies a `git commit` that has no message flag
+   (`-m`/`--message`/`-F`/`--file`, glued, `=`, or space-separated values all
+   recognized); or no bare `--` pathspec (or nothing after it); or `-a`/`--all`
+   (including bundled short flags — note `-ma` is `-m` with the glued value `a`,
+   per git's own semantics); or a whole-tree sweep (`-- .`, `-- :/`, `-- *`); or
+   `--amend` — history rewrites are forbidden by governance, and covering them
+   here keeps a fresh checkout guarded (the user-global destructive-git sibling
+   also denies them where it exists; overlapping denies are harmless).
 2. **`eslint-autofix`** — denies any eslint invocation carrying `--fix` or
    `--fix-type`. The sanctioned `npm run lint:fix:study-lenses` passes by
    construction: its own command line carries no eslint invocation.

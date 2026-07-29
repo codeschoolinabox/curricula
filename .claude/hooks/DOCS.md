@@ -13,17 +13,22 @@
    extracted; anything unreadable or absent ends in silence. Input: raw stdin
    bytes. Output: a command string, or an early silent exit.
 
-2. **Normalize** (pure) — backslash-newline continuations are joined so a
-   wrapped command reads as one line. The join is textual, quoted content
-   included — an accepted lossiness; it must run before segmentation because the
-   operator set includes newline. Input: command string. Output: normalized
-   command.
+2. **Normalize** (pure) — backslash-newline continuations are joined, then every
+   UNQUOTED newline becomes a `;` separator (a quote-state scan keeps newlines
+   inside quoted strings intact), so the lexer sees one line and the quoted
+   multi-line message stays one token. The continuation join is textual, quoted
+   content included — an accepted lossiness. Input: command string. Output:
+   normalized command.
 
 3. **Lex** (pure) — the whole normalized command lexes into tokens, shell
-   operators preserved as operator tokens. On lex failure the fallback is a
-   raw-string split on the operator set, whose pieces carry an unparseable
-   marker. Input: normalized command. Output: a token stream, or marked raw
-   pieces.
+   operators preserved as operator tokens; comment stripping is disabled (bash
+   treats a mid-word `#` as literal, and so does this lex — no silent content
+   loss). On lex failure the fallback is a raw-string split on the operator set,
+   and **each raw piece is re-lexed individually** — one malformed segment never
+   demotes its well-formed neighbours to the coarse fallback (segment-local
+   judgment); only pieces that still fail to lex carry the unparseable marker.
+   Input: normalized command. Output: a token stream, or re-lexed pieces plus
+   marked unparseable pieces.
 
 4. **Segment** (pure) — the token stream splits at operator tokens into segments
    (runs of tokens); unparseable raw pieces pass through as unparseable

@@ -95,7 +95,18 @@
 		"lossiness",
 		"heredoc",
 		"heredocs",
-		"stdlib"
+		"stdlib",
+		"pathspecs",
+		"nohup",
+		"worktree",
+		"unlexable",
+		"mfoo",
+		"commenters",
+		"esac",
+		"neighbour",
+		"neighbours",
+		"uall",
+		"Sabc"
 	],
 	"ignorePaths": [
 		"node_modules",
