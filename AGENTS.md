@@ -224,7 +224,9 @@ See DEV.md § Linting Conventions for full details. Summary:
   via per-file checkpoints and `npm run validate`, never the hook
 - Manual review for: default `= {}` params, verb-first naming, file granularity,
   comment quality
-- Run `npm run validate` to check every tool at once
+- `npm run validate` checks every tool at once — it is the aspirational full
+  gate while repo-wide lint carries known burndown debt; per-file checkpoints
+  are the per-commit gate (see DEV.md § Development Workflow)
 
 ### Incremental TDD Workflow
 

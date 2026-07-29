@@ -886,11 +886,20 @@ quick reference:
    branches unless explicitly instructed; see AGENTS git policy)
 2. Follow Phase 0 → Phase 1 (per increment) → Phase 2 (see below)
 3. Update `README.md` in affected directories
-4. Run quality checks before each commit:
+4. Run quality checks before each commit — scoped to what you changed, because
+   repo-wide lint carries known debt under incremental burndown (CI runs
+   `npm run lint` non-blocking for the same reason):
 
 ```bash
-npm run validate  # typecheck + format check + lint + test
+npx eslint <changed files>                        # code + .mdx
+npx markdownlint-cli2 --no-globs "<changed .md>"
+npx cspell <changed files>
+npx tsc --noEmit                                  # stays at the measured baseline
+./node_modules/.bin/vitest run --project unit <changed test paths>
 ```
+
+`npm run validate` (typecheck + format check + lint + test) is the full
+aspirational gate — restore it as the per-commit gate once the lint debt clears.
 
 ### 3. Conventions Checklist
 
@@ -1353,7 +1362,11 @@ For each behavioral increment:
     > [§ AR-4: Implementation Audit](#ar-4-implementation-audit) below for focus
     > areas, including structural quality and Fake It residue checks.
 
-13. **Quality checks** — `npm test && npm run lint && npm run typecheck`
+13. **Quality checks** — scoped to the increment: `npx tsc --noEmit`
+    (baseline-delta), the unit project for this module
+    (`./node_modules/.bin/vitest run --project unit <paths>`), and the per-file
+    lint checkpoints from steps 4/6/8/10. Repo-wide `npm run lint` is a known
+    red under incremental burndown; the per-file checkpoints are the gate.
 14. **Verify docs match implementation** — update README.md and DOCS.md if
     behavior or structure changed during TDD
 15. **Atomic commit** — one behavior per commit
@@ -1414,7 +1427,11 @@ green is the exact failure mode they exist to prevent.
 
 After all increments are complete, before prompting the human to commit:
 
-1. **Run full quality checks** — `npm test && npm run lint && npm run typecheck`
+1. **Run full quality checks** — `npx tsc --noEmit` clean at the measured
+   baseline, the unit project green for every changed module
+   (`./node_modules/.bin/vitest run --project unit <paths>`), and per-file lint
+   checkpoints clean on every changed file. `npm run validate` remains the
+   aspirational full gate while the repo-wide lint debt burns down.
 2. **Adversarial Pre-Merge Review (AR-5)** — Spawn a separate reviewer agent to
    review the full changeset. See
    [§ AR-5: Pre-Merge Review](#ar-5-pre-merge-review) below for focus areas.

@@ -275,9 +275,11 @@ sketch → self-review ([§ Self-Review Checklists](#self-review-checklists)) �
 **AR-4** → quality checks → 🔍 sandbox checkpoint when user-observable → commit
 (autonomous, announced).
 
-**Phase 2**: full quality checks (`npm run validate` — see
-[§ Linting](#linting)) → **AR-5** → commit (autonomous, announced) → push
-prompt.
+**Phase 2**: full quality checks — per-file checkpoints on every changed file,
+scoped unit tests, `npx tsc --noEmit` at the measured baseline
+(`npm run validate` is the aspirational full gate while repo-wide lint debt
+burns down; see [§ Linting](#linting)) → **AR-5** → commit (autonomous,
+announced) → push prompt.
 
 **Default execution after Phase 0:** a session fans out across the type-defined
 dependency DAG by default
