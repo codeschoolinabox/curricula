@@ -132,7 +132,7 @@ import type { Node as AcornNode, Comment as AcornComment } from 'acorn';
 
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 
-import type { CreateTransport } from '../lib/engine/worker/types.js';
+import type { CreateTransport } from '../study-lenses--deprecated-architecture/lib/engine/worker/types.js';
 
 import type { EmbodyScenario } from './embody-scenarios.js';
 import traceVariables from './lib/evaluating/trace/variables/trace-variables.js';
