@@ -133,7 +133,8 @@
 		"fanout",
 		"reflog",
 		"frontmatter",
-		"unlaunchable"
+		"unlaunchable",
+		"footgun"
 	],
 	"ignorePaths": [
 		"node_modules",

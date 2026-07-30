@@ -109,6 +109,78 @@ Recorded so a later reader can tell foreign debt from this campaign's own.
 
 ## AR resolutions
 
-None yet — `ar-3` fires after each increment's first failing test and `ar-4`
-after each self-review. AR-5 does **not** fire in this ceremony; it waits for
-the sprint's Phase 2, after ceremony 3.
+`ar-3` fires after each increment's first failing test and `ar-4` after each
+self-review. AR-5 does **not** fire in this ceremony; it waits for the sprint's
+Phase 2, after ceremony 3.
+
+### R1 — `ar-3` on the worker-setup test cluster (CONSIDER → all findings fixed)
+
+Nine findings, every one test-additive or mechanical, all applied before
+implementation began (DEV.md's batch-fix-now default). The reviewer confirmed
+the intended triangulator — a natural-end halt reporting the real run total
+after three guard calls — genuinely kills the plausible Fake It, because it
+forces the injected helpers and the halt author into one shared closure.
+
+The finding worth carrying forward: **`__$ir` was verified by name only.**
+`Object.keys(globals)` proved the key existed, but no row ever called the reset
+and observed an effect, so a no-op reset — or one wired to a different closure —
+would have passed the whole suite. This is exactly half of iteration-guard's
+"splice and inject are one obligation" pairing, and it is the half run owns.
+Closed with a paired negative/positive: a cap of 1 trips on the second iteration
+of one entry, and the same sequence with a reset call between does not.
+
+Also applied: key comparison now sorts before matching, so the suite no longer
+pins iteration-guard's object-literal insertion order (the sibling
+`create-iteration-guard.test.ts` already avoided this exact brittleness); a
+dedicated row for halt-author registration, previously proven only as a side
+effect of ~16 other rows' setup; a `trip` assertion for the ordinary-throw case,
+the one `RunHalt` field the most common halt shape left unpinned; a
+returned-wrapper freeze row; the dialog-absence row widened to an `it.each` over
+`prompt`/`alert`/`confirm`; and Zero re-ordered before Many within the
+natural-end block.
+
+The reviewer assessed R-1's ratified try/catch deviation as well-contained and
+honestly documented, and confirmed the cap-edge rows are **not** duplicates of
+iteration-guard's own suite: those call `createIterationGuard(cap)` with a
+literal, while these read the cap through `workerConfig.iterationLimit`, which
+is run's own read site. The `cap: 0` row in particular guards the classic
+falsy-zero footgun (`iterationLimit || DEFAULT`).
+
+### R1 — `ar-4` on the worker-setup implementation (CONSIDER → all findings resolved)
+
+No blockers. The reviewer independently re-ran the suite, `tsc`, and `eslint`
+rather than accepting relayed numbers, and confirmed the implementation matches
+DOCS.md's phase-3 and phase-5 prose with no hidden nodes. It also cleared three
+questions raised deliberately for scrutiny: `readCap`'s `typeof` check is
+narrowing off `unknown`, not a policy gate (`0`, negatives, `Infinity`, and
+`NaN` all survive it unchanged); the `as RunWorkerConfig` cast matches the
+engine's own sibling precedent and is re-checked at runtime rather than trusted;
+and `buildHaltAuthor` is **not** a banned mutable closure — it closes over a
+`const` binding and calls a published accessor, with the mutation confined to
+iteration-guard's own declared exception.
+
+**The one decision that sets cross-evaluator precedent — the halt payload is
+deliberately NOT frozen.** The reviewer accepted the conclusion but rejected
+half the original reasoning: "the bootstrap clones it anyway, so freezing
+guarantees nothing downstream" is true but is not why DEV.md § 13 exists, and
+`cloneAndFreeze` was available to satisfy § 13's letter without touching a
+foreign object. Resolved by keeping the payload unfrozen on the argument that
+actually carries: § 13's requirement on a value crossing a `postMessage`
+boundary is clone-safe **shape**, which `RunHalt` has; the freeze half protects
+in-process consumers, and this payload's only one is the bootstrap, which clones
+it and drops it. Freezing in place would additionally reach into `trip`, which
+`readLimitTrip` returns BY REFERENCE and run does not own — on a well-formed
+forgery that record belongs to the learner's program. The engine's own
+`reference-worker-setup.ts` returns unfrozen halt payloads too. The weak leg is
+struck from the code comment. **Recorded here so intercept's halt author
+inherits the decision rather than re-deriving it**, and so the human can veto it
+before a second evaluator follows.
+
+Also applied: the returned `WorkerSetupResult` now freezes via
+`@utils/freeze-in-place.js` rather than a raw `Object.freeze` (the engine's
+sibling uses the raw call only because the engine is dependency-free by design;
+run has no such constraint), and the cast site carries its own inline WHY. The
+hoisted `QUIET_API` fixture the reviewer flagged as an under-sourced deviation
+was removed rather than defended — the api stub now lives inside the helpers
+that build it, so no module-level fixture exists and the deviation is gone
+instead of litigated.
