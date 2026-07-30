@@ -15,6 +15,7 @@ repo. Nothing here ships with the Docusaurus site build.
 | `lint-all.mjs`              | Compound linter: eslint (code + `.mdx`), markdownlint-cli2, ls-lint, cspell       | `npm run lint`                  |
 | `lint-fix-study-lenses.mjs` | The one sanctioned, scoped autofix (study-lenses tree only)                       | `npm run lint:fix:study-lenses` |
 | `check-governance.mjs`      | Governance checker: verifies the governance corpus keeps naming things that exist | `npm run check:governance`      |
+| `repo-facts.mjs`            | Measured-facts oracle: prints the numbers governance keeps misquoting, live       | `npm run repo:facts`            |
 
 **Standing rule:** new checks get their own npm script — never added to
 `lint-all.mjs`, and never a blocking CI step while repo-wide lint debt burns
@@ -130,7 +131,10 @@ consistency, never intent or style.
      Allowed/Forbidden lists (error); matching is verb-level, so
      `git rev-parse HEAD` is covered by a bare `git rev-parse` list entry. List
      entries themselves define the sets and are never flagged.
-  7. named skip classes: tokens containing `<angle>` or `[square]` placeholders;
+  7. a missing path whose target is GITIGNORED downgrades to advisory —
+     machine-generated artifacts exist per-machine, never in the tree (a named
+     class, not a silent skip);
+  8. named skip classes: tokens containing `<angle>` or `[square]` placeholders;
      bare prefixes standing alone as syntax under discussion (`./`, `../`, git's
      `:/`, a lone infrastructure directory); bare glob patterns with no
      directory (pattern illustrations); `~/`-home paths (outside the repo);
@@ -171,3 +175,27 @@ documents plus an entry-built snapshot — tests never touch the filesystem. The
 typedefs are load-bearing, not decorative: `npm run typecheck:scripts` (a
 `checkJs` pass over `scripts/**`) enforces them; it runs standalone and is
 deliberately not part of `npm run validate` or `lint-all.mjs`.
+
+## Measured-facts oracle
+
+The oracle prints repo numbers nobody should ever quote from memory: node
+version vs engines, tsc error count and locations, cspell version, markdownlint
+count, `HEAD`, and the foreign dirty files ("working tree not yours until
+proven"). Sketch:
+[DOCS.md § Measured-facts oracle](./DOCS.md#measured-facts-oracle).
+
+- **measurement** — a value produced by a command the oracle just ran, carried
+  with its label, the producing command verbatim, and an ISO timestamp. (Named
+  `measurement`, not "fact" — `facts.*` is a live domain term in the
+  embody/evaluators tree.)
+- **cache** — `.claude/cache/repo-facts.json`, temp-then-rename, gitignored:
+  only slow measurements read through it, and only `--refresh` re-measures them
+  eagerly. "Slow" is a fixed design-time classification (today: markdownlint),
+  not a measured runtime threshold.
+
+Every emission opens with the load-bearing header, verbatim:
+`MEASURED AT <ts>, not asserted — supersedes any memory or handoff claim about these numbers.`
+Known hole, by harness design: SessionStart hooks never fire for spawned
+subagents — orchestrators paste this script's OUTPUT into worker briefs, never a
+retyped number (the fanout skill encodes this). Tests live in
+`scripts/lib/repo-facts/tests/`; pure functions only — no test shells out.

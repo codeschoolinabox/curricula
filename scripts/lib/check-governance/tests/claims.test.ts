@@ -9,6 +9,7 @@ function snapshot(overrides = {}) {
 		existingPaths: new Set<string>(),
 		headingsByPath: {},
 		matchingGlobs: new Set<string>(),
+		ignoredPaths: new Set<string>(),
 		...overrides,
 	};
 }
@@ -102,6 +103,54 @@ describe('checkClaims', () => {
 		const docs = parsed('A.md', 'the hook at `.claude/hooks/gone.py` fires\n');
 		expect(checkClaims(docs, snapshot())).toEqual([
 			expect.objectContaining({ severity: 'error' }),
+		]);
+	});
+
+	it('downgrades a missing gitignored target to advisory', () => {
+		const docs = parsed(
+			'A.md',
+			'the cache at `.claude/cache/repo-facts.json` is machine-generated\n',
+		);
+		const snap = snapshot({
+			ignoredPaths: new Set(['.claude/cache/repo-facts.json']),
+		});
+		expect(checkClaims(docs, snap)).toEqual([
+			expect.objectContaining({
+				severity: 'advisory',
+				message: expect.stringContaining('gitignored'),
+			}),
+		]);
+	});
+
+	it('downgrades a missing gitignored dot-relative target to advisory', () => {
+		const docs = parsed(
+			'scripts/A.md',
+			'the cache at `./cache/tmp.json` is machine-generated\n',
+		);
+		const snap = snapshot({
+			ignoredPaths: new Set(['scripts/cache/tmp.json']),
+		});
+		expect(checkClaims(docs, snap)).toEqual([
+			expect.objectContaining({
+				severity: 'advisory',
+				message: expect.stringContaining('gitignored'),
+			}),
+		]);
+	});
+
+	it('downgrades a missing gitignored unprefixed target to advisory', () => {
+		const docs = parsed(
+			'scripts/A.md',
+			'artifacts land in `lib/cache/tmp.json` between runs\n',
+		);
+		const snap = snapshot({
+			ignoredPaths: new Set(['scripts/lib/cache/tmp.json']),
+		});
+		expect(checkClaims(docs, snap)).toEqual([
+			expect.objectContaining({
+				severity: 'advisory',
+				message: expect.stringContaining('gitignored'),
+			}),
 		]);
 	});
 

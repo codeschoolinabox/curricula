@@ -170,13 +170,22 @@ function judgePathWord(doc, word, line, snapshot) {
 	const docRelative = resolveFrom(doc.path, word);
 	if (dotRelative) {
 		if (exists(snapshot, docRelative)) return null;
+		if (isIgnored(snapshot, docRelative)) {
+			return ignoredFinding(doc.path, line, word, docRelative);
+		}
 		return finding(doc.path, line, `${word} — ${docRelative} does not exist`);
 	}
 	if (infraPrefixed) {
 		if (exists(snapshot, word)) return null;
+		if (isIgnored(snapshot, word)) {
+			return ignoredFinding(doc.path, line, word, word);
+		}
 		return finding(doc.path, line, `${word} does not exist`);
 	}
 	if (exists(snapshot, docRelative) || exists(snapshot, word)) return null;
+	if (isIgnored(snapshot, docRelative) || isIgnored(snapshot, word)) {
+		return ignoredFinding(doc.path, line, word, docRelative);
+	}
 	const landsInInfra = INFRA_DIRS.some((dir) =>
 		docRelative.startsWith(`${dir}/`),
 	);
@@ -186,6 +195,32 @@ function judgePathWord(doc, word, line, snapshot) {
 		check: 'claims',
 		severity: landsInInfra ? 'error' : 'advisory',
 		message: `${word} — neither ${docRelative} nor a root ${word} exists`,
+	};
+}
+
+/**
+ * @param {RepoSnapshot} snapshot
+ * @param {string} path
+ * @returns {boolean}
+ */
+function isIgnored(snapshot, path) {
+	return snapshot.ignoredPaths.has(path.replace(/\/$/, ''));
+}
+
+/**
+ * @param {string} docPath
+ * @param {number} line
+ * @param {string} word
+ * @param {string} resolved
+ * @returns {Finding}
+ */
+function ignoredFinding(docPath, line, word, resolved) {
+	return {
+		path: docPath,
+		line,
+		check: 'claims',
+		severity: 'advisory',
+		message: `${word} — ${resolved} is gitignored (machine-generated, exists per-machine)`,
 	};
 }
 

@@ -31,6 +31,9 @@
  *   each referenced markdown target (null = unreadable or not markdown).
  * @property {Set<string>} matchingGlobs Referenced glob tokens that match at
  *   least one file (a glob matching nothing follows the path rules).
+ * @property {Set<string>} ignoredPaths Referenced paths that are missing AND
+ *   gitignored — machine-generated artifacts that exist per-machine, never
+ *   in the tree; a claim on one downgrades to advisory (named class).
  *
  * @typedef {'error'|'advisory'} Severity `error` sets exit 1; `advisory`
  *   never affects the exit code.

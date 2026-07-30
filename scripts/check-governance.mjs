@@ -254,7 +254,61 @@ function buildSnapshot(parsedDocs) {
 		}
 	}
 
-	return { npmScripts, binTools, existingPaths, headingsByPath, matchingGlobs };
+	const ignoredPaths = ignoredAmong(
+		[...candidates]
+			.map((candidate) => candidate.replace(/\/$/, ''))
+			.filter((candidate) => candidate !== '' && !existingPaths.has(candidate)),
+	);
+
+	return {
+		npmScripts,
+		binTools,
+		existingPaths,
+		headingsByPath,
+		matchingGlobs,
+		ignoredPaths,
+	};
+}
+
+/**
+ * Missing candidates that git would ignore — machine-generated artifacts the
+ * claims check downgrades to advisory (the named gitignored class).
+ *
+ * @param {string[]} missing
+ * @returns {Set<string>}
+ */
+function ignoredAmong(missing) {
+	/** @type {Set<string>} */
+	const ignored = new Set();
+	if (missing.length === 0) return ignored;
+	try {
+		const out = execFileSync('git', ['check-ignore', '--stdin', '-z'], {
+			encoding: 'utf8',
+			input: missing.join('\0'),
+		});
+		for (const entry of out.split('\0')) {
+			if (entry !== '') ignored.add(entry);
+		}
+	} catch (error) {
+		if (!isCheckIgnoreMiss(error)) throw error;
+	}
+	return ignored;
+}
+
+/**
+ * `git check-ignore` exits 1 when NO path is ignored — a normal outcome, not
+ * a failure.
+ *
+ * @param {unknown} error
+ * @returns {boolean}
+ */
+function isCheckIgnoreMiss(error) {
+	return (
+		typeof error === 'object' &&
+		error !== null &&
+		'status' in error &&
+		error.status === 1
+	);
 }
 
 /**

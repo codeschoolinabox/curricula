@@ -9,6 +9,7 @@ function snapshot(overrides = {}) {
 		existingPaths: new Set<string>(),
 		headingsByPath: {},
 		matchingGlobs: new Set<string>(),
+		ignoredPaths: new Set<string>(),
 		...overrides,
 	};
 }
