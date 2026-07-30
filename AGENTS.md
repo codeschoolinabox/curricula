@@ -97,6 +97,17 @@ encouragement. They cannot be overridden by momentum.
     finishing, so the validation never runs. Do not skip it.** Only the human
     waives it. (Full protocol:
     [§ Cold-start handoffs](#cold-start-handoffs-prefer-over-riding-compaction).)
+12. **Every repo claim carries its source** — a statement about what a file
+    says, what a command outputs, what was ruled, or what a subagent found is
+    never made bare. It carries `[measured: <command run this session>]`,
+    `[read: <file> § <heading> — "<quoted words>"]`, or
+    `[relayed: <who said it>]`. **This fires regardless of felt certainty** — it
+    exists for the confident repetition of something read once, relayed, or
+    remembered from a superseded state, the case the **No confident guessing**
+    invariant does not reach. If you cannot produce the tag's evidence in one
+    command, you do not have the claim. Full rule, including why a memory file
+    is never `read` evidence:
+    [DEV.md § Sourced claims](./DEV.md#sourced-claims).
 
 > If these feel like friction, that friction is working as intended.
 
@@ -631,6 +642,12 @@ When Claude doesn't know something — say so explicitly, then suggest how to fi
 out. Never guess confidently. When stuck, say "I'm stuck" — asking for help is
 better than shipping broken code.
 
+The complement, for when Claude is _not_ hedging: a claim that feels certain
+still carries its source. Confident repetition of something read once, relayed,
+or remembered from a superseded state is the failure this section does not
+catch, because nothing about it feels like guessing — see
+[§ Non-Negotiable Invariants](#non-negotiable-invariants), invariant 12.
+
 #### Defensive Development
 
 Never edit a file without reading it first in the current session. Before
@@ -640,7 +657,7 @@ to the last known working state and try a different approach.
 #### Always Works™ Reality Check
 
 "Should work" ≠ "does work." Pattern matching isn't enough. Untested code is a
-guess, not a solution. Before reporting any task as complete, all five must
+guess, not a solution. Before reporting any task as complete, all six must
 answer YES:
 
 - Did I run/build the code?
@@ -648,6 +665,10 @@ answer YES:
 - Did I see the expected result with my own observation (including GUI / dev
   server output)?
 - Did I check for error messages?
+- **Does every claim in this report carry its evidence — or am I repeating
+  something I read once, was told, or remember from a superseded state?**
+  ([§ Non-Negotiable Invariants](#non-negotiable-invariants), invariant 12.
+  Always Works™ verifies code; this question verifies claims.)
 - Would I bet $100 this works?
 
 **Phrases to avoid** when reporting completion:
@@ -839,6 +860,11 @@ Project-specific reinforcements that always apply when working in this codebase:
 
 - Lead with problems and risks, not optimism — drift is the most expensive thing
   this codebase has historically suffered
+- **Repo-state claims carry `[measured:]` / `[read:]` / `[relayed:]` with their
+  evidence**, in chat as in writing. Certainty quantification says how sure you
+  are; the tag says what you are sure _from_ — and the failures this repo has
+  actually shipped were confident, not uncertain. Full rule and the audit
+  command: [DEV.md § Sourced claims](./DEV.md#sourced-claims).
 
 Certainty quantification is mandatory in: AR verdict reporting, plan-mode
 proposals, commit-message proposals, and any technical claim about whether

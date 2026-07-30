@@ -125,6 +125,17 @@ encouragement. They cannot be overridden by momentum.
     code. **This step is routinely skipped — writing the handoff feels like
     finishing, so the validation never runs. Do not skip it.** Only the human
     waives it. (Full protocol: [§ Cold-start handoffs](#cold-start-handoffs).)
+13. **Every repo claim carries its source** — a statement about what a file
+    says, what a command outputs, what was ruled, or what a subagent found is
+    never made bare. It carries `[measured: <command run this session>]`,
+    `[read: <file> § <heading> — "<quoted words>"]`, or
+    `[relayed: <who said it>]`. **This fires regardless of felt certainty** — it
+    exists for the confident repetition of something read once, relayed, or
+    remembered from a superseded state, the case the _No confident guessing_
+    invariant does not reach. If you cannot produce the tag's evidence in one
+    command, you do not have the claim. Full rule, including why a memory file
+    is never `read` evidence:
+    [DEV.md § Sourced claims](./DEV.md#sourced-claims).
 
 > If these feel like friction, that friction is working as intended.
 
@@ -416,13 +427,17 @@ artifact — not the mechanical change. Prefixes: `add:` (new behavior), `docs:`
 ## Verification
 
 "Should work" ≠ "does work." Untested code is a guess, not a solution. Before
-reporting any task complete, all five answer YES:
+reporting any task complete, all six answer YES:
 
 - Did I run/build the code?
 - Did I trigger the exact feature I changed?
 - Did I see the expected result with my own observation (including GUI / dev
   server output)?
 - Did I check for error messages?
+- **Does every claim in this report carry its evidence — or am I repeating
+  something I read once, was told, or remember from a superseded state?**
+  ([§ Non-Negotiable Invariants](#non-negotiable-invariants), invariant 13.
+  Always Works™ verifies code; this question verifies claims.)
 - Would I stake the claim on it without hedging?
 
 | Change         | Verification                         |
@@ -451,6 +466,7 @@ Run both at step 12 of every increment (and at any self-review point).
 | **Verbose docs**            | Name + types explain? Skip JSDoc                             | Only document WHY or non-obvious contracts                     |
 | **Fake It without Make It** | Hardcoded values expire at the second test                   | Write the test that makes hardcoding impossible                |
 | **Status hedging in docs**  | Status / phase / hedging belongs in plan, handoff, or commit | `## Status — pre-impl...` → plan file or `.planning-handoffs/` |
+| **Confident repetition**    | A repo-state claim with no command behind it                 | "cspell can't run" → `[measured: npx cspell --version]`        |
 
 **Pre-proposal checklist** — before proposing code, YES to all:
 
@@ -763,6 +779,11 @@ Project-specific requirements:
   something will work.
 - Lead with problems and risks, not optimism — architectural drift is the most
   expensive thing this codebase has historically suffered.
+- **Repo-state claims carry `[measured:]` / `[read:]` / `[relayed:]` with their
+  evidence**, in chat as in writing. Certainty quantification says how sure you
+  are; the tag says what you are sure _from_ — and the failures this repo has
+  actually shipped were confident, not uncertain. Full rule and the audit
+  command: [DEV.md § Sourced claims](./DEV.md#sourced-claims).
 
 ---
 

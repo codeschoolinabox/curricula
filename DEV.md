@@ -965,6 +965,48 @@ Never cite by `file:line`. Line numbers are the fastest-rotting form there is:
 during one campaign `DEV.md`'s numbering drifted +21 and `AGENTS.md`'s +9 in a
 single day.
 
+### Sourced claims
+
+**Every claim about repo state carries its source.** A statement about what a
+file says, what a command outputs, what was ruled, or what a subagent found is
+never made bare. It carries one of three tags, and the tag carries its evidence:
+
+| tag                                      | carries                                                                   | example                                                                                       |
+| ---------------------------------------- | ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `[measured: <command>]`                  | the command run **this session**                                          | `[measured: npx cspell DEV.md]` 7 unknown words                                               |
+| `[read: <file> § <heading> — "<words>"]` | the file re-opened this session, quoted where the wording is load-bearing | `[read: AGENTS.md § Non-Negotiable Invariants — "or sequence/state diagram, whichever fits"]` |
+| `[relayed: <who>]`                       | who said it — never restated as fact                                      | `[relayed: ar-1]` MD041 would not fire — unverified                                           |
+
+**`read` means re-opened this session, and quoted rather than paraphrased**
+whenever the claim is about what a document says. A memory file, handoff, plan,
+or prior transcript is **never `read` evidence for current repo state** — it is
+`relayed` at best. A file read yesterday is a file that may have changed; the
+tag asserts currency, not familiarity.
+
+`measured` is the prose sibling of the **measurement** record
+`scripts/repo-facts.mjs` emits (see
+[scripts/DOCS.md § Measured-facts oracle](./scripts/DOCS.md#measured-facts-oracle)
+for that one). Same evidence discipline, deliberately lighter: the command,
+without the label-and-ISO-timestamp envelope, because prose carries its session
+as context.
+
+**This fires regardless of felt certainty.** It exists for the confident
+repetition of something read once, relayed by a subagent, or remembered from a
+superseded state — the case the _No confident guessing_ invariant does not
+reach, because that one keys on uncertainty and there is none here. If you
+cannot produce the tag's evidence in one command, you do not have the claim.
+
+**Auditing it.** `git grep -nE '\[(measured|read|relayed):'` finds every tag.
+Note what that does and does not buy: `.prettierrc.json` sets
+`proseWrap: "always"`, and prettier wraps **inside** the brackets, so a search
+for the complete tag misses any tag long enough to wrap — measured, 2 of 8 found
+— while the opening token is never split and finds 8 of 8. Whether a tag's
+evidence is adequate is a reviewer's judgment, not a grep's.
+
+The four written surfaces where this is auditable are **plan files, commit
+bodies, AR reports, and handoffs**. Chat is not auditable and never will be; the
+tag's value there is that a missing one is visible to the reader.
+
 ## Development Workflow
 
 ### Shared-worktree git mechanics
