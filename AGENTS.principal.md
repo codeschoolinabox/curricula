@@ -9,10 +9,11 @@ a codebase, and delegate work to subagents effectively. `CLAUDE.md`'s router
 points here when an agent's model id matches its qualifying list. Agents and
 tools that don't match use [AGENTS.md](./AGENTS.md). Both files carry the same
 policy gates; the capacities above are the selection criterion, not the whole
-difference — `AGENTS.md` additionally carries § Safety Guardrails' mandatory
-risk-class warnings (multi-file/refactor/deployment/architectural changes),
-which this file assumes are internalized rather than prompted. This one assumes
-a current-generation harness (plan mode, registered subagents, automatic context
+difference — `AGENTS.md` additionally carries
+[§ Safety Guardrails](./AGENTS.md#safety-guardrails)' mandatory risk-class
+warnings (multi-file/refactor/deployment/architectural changes), which this file
+assumes are internalized rather than prompted. This one assumes a
+current-generation harness (plan mode, registered subagents, automatic context
 summarization) and states each rule once.
 
 "Principal" here is a capability classification — a property of the model —
@@ -32,8 +33,9 @@ observation (2026-07-28), which had found it absent. Subagent reach has now been
 observed in both directions one day apart — treat it as never guaranteed for a
 given spawn path. The reading agent checks its own model id against
 `CLAUDE.md`'s qualifying list and explicitly reads whichever of `AGENTS.md` /
-`AGENTS.principal.md` matches — that explicit read, not auto-load, is what §
-Orchestrated delegation's worker launch prompts rely on.
+`AGENTS.principal.md` matches — that explicit read, not auto-load, is what
+[§ Orchestrated delegation](#orchestrated-delegation)'s worker launch prompts
+rely on.
 
 - [Non-Negotiable Invariants](#non-negotiable-invariants)
 - [Session Start](#session-start)
@@ -122,8 +124,7 @@ encouragement. They cannot be overridden by momentum.
     blind to their own gaps — this is the same bias-correction the ARs apply to
     code. **This step is routinely skipped — writing the handoff feels like
     finishing, so the validation never runs. Do not skip it.** Only the human
-    waives it. (Full protocol: § Context Compaction Protocol → Cold-start
-    handoffs.)
+    waives it. (Full protocol: [§ Cold-start handoffs](#cold-start-handoffs).)
 
 > If these feel like friction, that friction is working as intended.
 
@@ -504,6 +505,8 @@ one-line summaries, user decisions that won't be obvious from the diff, prose
 drafts not yet in canonical files, AR-cycle status and carry-forward notes,
 explicit deferrals, and untracked scratch files. Do NOT persist running diffs,
 file contents, or tool transcripts — those are recoverable.
+
+### Cold-start handoffs
 
 **Prefer a deliberate cold-start to riding repeated summarizations.** At a clean
 increment-cluster or phase boundary, a fresh session reading the durable

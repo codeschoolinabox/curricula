@@ -18,7 +18,9 @@ context cruft (rejected alternatives in plan files, stale handoff folders, agent
 self-reports of relevance that aren't reliable signals). Subagent spawns are
 intended to reload the matching governance doc as fresh context per spawn, but a
 harness reliably doing so for every spawn path isn't something this repo can
-verify — see AGENTS.md/AGENTS.principal.md § Orchestrated delegation for the
+verify — see § Orchestrated delegation in whichever governance file applies to
+you ([AGENTS.md](./AGENTS.md#orchestrated-delegation) or
+[AGENTS.principal.md](./AGENTS.principal.md#orchestrated-delegation)) for the
 explicit-read backstop that doesn't depend on it. Opus on max for everything
 (including AR-3/AR-4 reviewers that don't need it) burns tokens that Sonnet
 would handle indistinguishably.
@@ -422,13 +424,13 @@ style preferences.
 
 **Lesson routing — where does a new lesson go?**
 
-| Lesson is about...                                                              | Goes in...                                                                                    |
-| ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| A rule that binds **every** agent and tool, whichever governance file routed it | `DEV.md` — one copy, both `AGENTS*.md` point in (the § Adversarial Review Protocol precedent) |
-| A this-project workflow detail specific to one agent tier                       | The matching `AGENTS.md` / `AGENTS.principal.md` — and say which                              |
-| A this-project human discipline                                                 | `HUMANS.md` (this file)                                                                       |
-| A cross-project personal style                                                  | `~/.claude/CLAUDE.md`                                                                         |
-| A specific feedback pattern that should fire across sessions                    | Memory file (project-scoped)                                                                  |
+| Lesson is about...                                                              | Goes in...                                                                                                                            |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| A rule that binds **every** agent and tool, whichever governance file routed it | `DEV.md` — one copy, both `AGENTS*.md` point in (the [§ Adversarial Review Protocol](./DEV.md#adversarial-review-protocol) precedent) |
+| A this-project workflow detail specific to one agent tier                       | The matching `AGENTS.md` / `AGENTS.principal.md` — and say which                                                                      |
+| A this-project human discipline                                                 | `HUMANS.md` (this file)                                                                                                               |
+| A cross-project personal style                                                  | `~/.claude/CLAUDE.md`                                                                                                                 |
+| A specific feedback pattern that should fire across sessions                    | Memory file (project-scoped)                                                                                                          |
 
 When a lesson could go in multiple places, pick the most-narrowly-scoped home;
 the broader docs reference it if needed.

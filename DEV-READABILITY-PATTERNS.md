@@ -1,7 +1,9 @@
 # Readability Patterns
 
-> Extracted from `DEV.md` § 12. Reference material — consult when writing or
-> reviewing code style, not required reading up front.
+> Extracted from
+> [DEV.md § 12. Readability Patterns](./DEV.md#12-readability-patterns).
+> Reference material — consult when writing or reviewing code style, not
+> required reading up front.
 
 ## Guard-first, happy-path-last
 

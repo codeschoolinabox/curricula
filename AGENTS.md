@@ -48,14 +48,15 @@ encouragement. They cannot be overridden by momentum.
 5. **Atomic commits with clear messages** — commit autonomously after each
    passing TDD cycle and after completing Phase 0 artifacts. Each commit
    captures one behavior or milestone; never batch multiple increments. Message
-   format lives in § Git checkpoints. No per-commit approval prompt — announce
-   each commit as it lands (SHA + message) so the human can audit and revert;
-   new commits only, so every checkpoint is droppable. Pushing remains
-   human-gated; the Phase-0 → Phase-1 human review gate is unchanged. Under
-   orchestrated fan-out (§ Orchestrated delegation) each worker's commits are
-   still announced individually for audit (full SHA + message); the orchestrator
-   only orders the ledger per-subtree — presentation, not aggregation — and the
-   safe revert unit is the subtree.
+   format lives in [§ Git checkpoints](#git-checkpoints). No per-commit approval
+   prompt — announce each commit as it lands (SHA + message) so the human can
+   audit and revert; new commits only, so every checkpoint is droppable. Pushing
+   remains human-gated; the Phase-0 → Phase-1 human review gate is unchanged.
+   Under orchestrated fan-out
+   ([§ Orchestrated delegation](#orchestrated-delegation)) each worker's commits
+   are still announced individually for audit (full SHA + message); the
+   orchestrator only orders the ledger per-subtree — presentation, not
+   aggregation — and the safe revert unit is the subtree.
 6. **Plans are execution checklists, not references** — every plan document must
    explicitly list every required workflow step: Phase 0 DDD steps, AR trigger
    points (AR-1 through AR-5), commit steps, and quality checks. "Follow
@@ -94,8 +95,8 @@ encouragement. They cannot be overridden by momentum.
     blind to their own gaps — this is the same bias-correction the ARs apply to
     code. **This step is routinely skipped — writing the handoff feels like
     finishing, so the validation never runs. Do not skip it.** Only the human
-    waives it. (Full protocol: § Context Compaction Protocol → Cold-start
-    handoffs.)
+    waives it. (Full protocol:
+    [§ Cold-start handoffs](#cold-start-handoffs-prefer-over-riding-compaction).)
 
 > If these feel like friction, that friction is working as intended.
 
@@ -163,11 +164,12 @@ often:
 ### Readability Patterns
 
 Full guide with worked before/after examples:
-[DEV-READABILITY-PATTERNS.md](./DEV-READABILITY-PATTERNS.md) (`DEV.md` § 12 now
-just points here). Headline patterns: guard-first/happy-path-last, named
-intermediate values, ternary for value selection only, within-file helpers for
-readability (single-use OK), WHY comments for non-obvious JS semantics, numbered
-step comments for multi-phase functions, blank lines as paragraph breaks.
+[DEV-READABILITY-PATTERNS.md](./DEV-READABILITY-PATTERNS.md)
+([DEV.md § 12. Readability Patterns](./DEV.md#12-readability-patterns) now just
+points here). Headline patterns: guard-first/happy-path-last, named intermediate
+values, ternary for value selection only, within-file helpers for readability
+(single-use OK), WHY comments for non-obvious JS semantics, numbered step
+comments for multi-phase functions, blank lines as paragraph breaks.
 
 ### Documentation Convention
 
@@ -222,7 +224,8 @@ dependency-order coverage. Quick agent-facing rules:
 
 ### Linting Approach
 
-See DEV.md § Linting Conventions for full details. Summary:
+See [DEV.md § Linting Conventions](./DEV.md#linting-conventions) for full
+details. Summary:
 
 - **Lint pipeline**: `npm run lint` = ESLint (code + `.mdx`) + markdownlint-cli2
   (`.md`) + ls-lint (file names) + cspell (spelling); plus Prettier (formatting)
@@ -234,12 +237,14 @@ See DEV.md § Linting Conventions for full details. Summary:
   comment quality
 - `npm run validate` checks every tool at once — it is the aspirational full
   gate while repo-wide lint carries known burndown debt; per-file checkpoints
-  are the per-commit gate (see DEV.md § Development Workflow)
+  are the per-commit gate (see
+  [DEV.md § Development Workflow](./DEV.md#development-workflow))
 
 ### Incremental TDD Workflow
 
-All development uses TDD with atomic increments. See DEV.md § Incremental
-Development Workflow for the full process.
+All development uses TDD with atomic increments. See
+[DEV.md § Incremental Development Workflow](./DEV.md#incremental-development-workflow)
+for the full process.
 
 **Summary:**
 
@@ -261,8 +266,9 @@ Development Workflow for the full process.
 Each passing TDD cycle = one atomic commit. Do not batch behaviors.
 
 **Default execution after Phase 0:** a session fans out across the type-defined
-dependency DAG by default (§ Orchestrated delegation); the human may override to
-synchronous.
+dependency DAG by default
+([§ Orchestrated delegation](#orchestrated-delegation)); the human may override
+to synchronous.
 
 > **On DDD**: The ubiquitous language established in Phase 0 is not optional
 > ceremony. Names chosen here propagate into every function signature, test
@@ -311,10 +317,11 @@ utility"). Full cycle diagram, redirect policy, and content-quality rules:
   why
 
 **Plans must explicitly list every workflow step** — the full Phase 0 /
-per-increment / Phase 2 sequence summarized in § Incremental TDD Workflow above,
-with every AR trigger point and commit step written out. Plans that omit these
-steps are incomplete. "See AGENTS.md for the workflow" is not a valid substitute
-— write the steps out.
+per-increment / Phase 2 sequence summarized in
+[§ Incremental TDD Workflow](#incremental-tdd-workflow) above, with every AR
+trigger point and commit step written out. Plans that omit these steps are
+incomplete. "See AGENTS.md for the workflow" is not a valid substitute — write
+the steps out.
 
 **During TDD cycles:**
 
@@ -350,8 +357,9 @@ steps are incomplete. "See AGENTS.md for the workflow" is not a valid substitute
   autonomous; inter-file changes require user check-in if ANY trigger fires
   (file added to or removed from the flow; I/O shape change; phase annotation
   change; helper extracted to a new domain-related file — domain-agnostic
-  utilities are exempt). Full trigger definitions: DEV.md § Incremental
-  Development Workflow, step 9.
+  utilities are exempt). Full trigger definitions:
+  [DEV.md § Incremental Development Workflow](./DEV.md#incremental-development-workflow),
+  step 9.
 - At step 12 (self-review): run through the LLM Anti-Pattern Checklist. Reality
   check: did I run it? Did I trigger the exact behavior I changed? Would I bet
   $100 this works? Flag what you're least confident about for the user to
@@ -369,7 +377,8 @@ steps are incomplete. "See AGENTS.md for the workflow" is not a valid substitute
 - After each passing TDD cycle: commit
   `add: [behavior this increment implements]` and announce the SHA.
 - After the last increment: "Sprint complete — ready to push to main" — the push
-  itself stays with the human (§ Git policy).
+  itself stays with the human
+  ([§ Git: Additive Actions Only](#git-additive-actions-only)).
 
 Commit message format: imperative voice, one line, describes the behavior or
 artifact — not the mechanical change. Prefixes: `add:` (new behavior), `docs:`
@@ -525,14 +534,14 @@ durable half (transient tool output, superseded reasoning).
   ripple-analysis conclusions, cross-increment decisions + their rationale, AR
   carry-forward notes (a concern deferred to a later increment), and the current
   code-vs-contract gap (implemented vs pending) — enough to reproduce your
-  understanding without the transcript. (Contents checklist: § Proactive
-  persistence for long-running work.)
+  understanding without the transcript. (Contents checklist:
+  [§ Proactive persistence for long-running work](#proactive-persistence-for-long-running-work).)
 - **Status lives in the plan, not the docs.** The code-vs-contract gap belongs
   in the RESUMPTION POINT, never as a migration status-note in end-state
   README/DOCS/types (per
-  [DEV.md § What goes in docs vs. plans vs. handoffs](./DEV.md)). Keep end-state
-  docs a clean present-tense contract; let the plan carry the gap, so a
-  cold-started agent trusts the docs.
+  [DEV.md § What goes in docs vs. plans vs. handoffs](./DEV.md#what-goes-in-docs-vs-plans-vs-handoffs)).
+  Keep end-state docs a clean present-tense contract; let the plan carry the
+  gap, so a cold-started agent trusts the docs.
 - **Validate the handoff with a context-free agent — MANDATORY at each
   increment-cluster / phase boundary before a cold-start.** Spawn a fresh agent
   (no session context); hand it the RESUMPTION POINT + the launch prompt; have
@@ -603,8 +612,8 @@ Work stops immediately if:
 - Claude catches itself skipping workflow steps
 - An inter-file data flow trigger fires during refactor (file added to or
   removed from the flow; file's input/output shape changes; phase annotation
-  changes). See § Incremental TDD Workflow step 9 for the full two-tier autonomy
-  rule.
+  changes). See [§ Incremental TDD Workflow](#incremental-tdd-workflow) step 9
+  for the full two-tier autonomy rule.
 
 **Resolution default**: if the brake fires before this increment is committed,
 default to _proposing_ discard-and-retry over patch-in-place — name the specific
@@ -612,7 +621,8 @@ issue and re-attempt once the human confirms. Nothing is lost by discarding
 since nothing is committed. This sets the default proposal, not an exception to
 human sign-off — the human can still choose to patch instead. If the brake fires
 after a commit already exists, discarding means reverting committed history,
-which stays a human-gated git action (§ Git: Additive Actions Only) — never a
+which stays a human-gated git action
+([§ Git: Additive Actions Only](#git-additive-actions-only)) — never a
 unilateral agent choice.
 
 #### Intellectual Honesty
@@ -884,8 +894,9 @@ work resumable across a compaction boundary:
   agent did its job well, the handoff cost is zero or near-zero.
 - **Prefer a deliberate cold-start to riding repeated compactions.** At a clean
   increment-cluster / phase boundary, a fresh start from the durable artifacts
-  beats a long auto-compacted context — you choose what survives. See § Context
-  Compaction Protocol → Cold-start handoffs for when and at what grain.
+  beats a long auto-compacted context — you choose what survives. See
+  [§ Cold-start handoffs](#cold-start-handoffs-prefer-over-riding-compaction)
+  for when and at what grain.
 
 ## Adversarial Review Protocol
 

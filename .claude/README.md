@@ -2,7 +2,9 @@
 
 This directory is governance surface: agents do not edit it without explicit
 human instruction in the current conversation — the same standing rule as branch
-creation (AGENTS.md § Git policy).
+creation ([AGENTS.md § Git checkpoints](../AGENTS.md#git-checkpoints), or
+[AGENTS.principal.md § Git Policy](../AGENTS.principal.md#git-policy) if that is
+the file `CLAUDE.md` routed you to).
 
 ## What is tracked here
 
@@ -31,10 +33,12 @@ creation (AGENTS.md § Git policy).
   protocol in [hooks/README.md](./hooks/README.md), architecture in
   [hooks/DOCS.md](./hooks/DOCS.md).
 - **`agents/`** — the registered adversarial reviewers (`ar-1`…`ar-5`), invoked
-  by name per DEV.md § Adversarial Review Protocol; the harness-probe (measures
-  the live subagent harness at harness/model upgrades); and the tdd-worker (the
-  orchestrated fan-out's worker contract — the registry snapshots at session
-  start, so a fresh registration is spawnable after the next restart).
+  by name per
+  [DEV.md § Adversarial Review Protocol](../DEV.md#adversarial-review-protocol);
+  the harness-probe (measures the live subagent harness at harness/model
+  upgrades); and the tdd-worker (the orchestrated fan-out's worker contract —
+  the registry snapshots at session start, so a fresh registration is spawnable
+  after the next restart).
 - **`skills/`** — repo skills, loadable from this repo root.
 
 `settings.local.json` is personal, per-machine state (session-accumulated

@@ -38,7 +38,7 @@ This repository is a [Docusaurus](https://docusaurus.io/) site wrapping two
 kinds of source:
 
 - **Curriculum content** under `spiralearn/` — one directory per curriculum (see
-  § Content Structure below).
+  [§ Content Structure](#content-structure) below).
 - **Interactive study tooling** under `src/` — Docusaurus pages and plugins
   (`src/pages/`, `src/plugins/`), and the study-lens / embody engine libraries
   under `src/lib/`.

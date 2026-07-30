@@ -23,6 +23,8 @@ otherwise.
     [DEV-READABILITY-PATTERNS.md](./DEV-READABILITY-PATTERNS.md); consult when
     writing or reviewing code style, not required reading up front)
 - [Directory Structure](#directory-structure) — (core)
+- [Citation and claim conventions](#citation-and-claim-conventions) — (core —
+  how docs cite paths and sections, and what a repo-state claim must carry)
 - [Development Workflow](#development-workflow) — (core)
 - [Testing Strategy](#testing-strategy) — (core)
 - [Incremental Development Workflow](#incremental-development-workflow) — (core
@@ -33,9 +35,9 @@ otherwise.
   subagent-only** — the registered `ar-1`…`ar-5` subagents fetch those
   themselves when they run. You do not need to read them.)
 - [Linting Conventions](#linting-conventions) — (core for the command reference;
-  Enforced/Manual Review Conventions are pointers back to § Codebase Conventions
-  and Teaching Moments for rules that have a home there, plus a short list of
-  rules that don't)
+  Enforced/Manual Review Conventions are pointers back to
+  [§ Codebase Conventions](#codebase-conventions) and Teaching Moments for rules
+  that have a home there, plus a short list of rules that don't)
 - [Module Boundaries](#module-boundaries) — (reference: consult when adding an
   architectural layer or import-boundary rule)
 - [Code Quality Anti-Patterns](#code-quality-anti-patterns) — (pointer only —
@@ -55,28 +57,28 @@ Detailed conventions and module boundaries are documented in sections below.
 
 ### Conventions Summary
 
-| Situation                       | Convention                                                                                                                           |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| Non-trivial function            | Named `function` declaration                                                                                                         |
-| Inline callback (trivial)       | Arrow OK: `user => user.id`, `n => n > 0`                                                                                            |
-| Arrow assigned to variable      | **Not allowed** — use named `function` declaration                                                                                   |
-| Arrow with body block `{}`      | **Not allowed** — use named `function` declaration                                                                                   |
-| Callback (non-trivial)          | Extract as named `function`, pass by name                                                                                            |
-| Hoisting below call site        | Encouraged for readability                                                                                                           |
-| `this` keyword                  | **Banned** (functional codebase)                                                                                                     |
-| Classes                         | **Banned** (exception: error classes in `/errors`)                                                                                   |
-| Error handling                  | Use base error class for catch-all                                                                                                   |
-| Mutable closures                | **Banned**                                                                                                                           |
-| Immutable closures              | OK (e.g. currying over cached config)                                                                                                |
-| Method shorthand in objects     | Allowed (`{ process() {} }`)                                                                                                         |
-| Variable bindings               | Prefer `const`; `let` only when reassignment needed                                                                                  |
-| Export                          | Function files: inline `export default function` at top. Constant files: define first, `export default` at bottom (file-kind signal) |
-| Import paths                    | Always include `.js` extension                                                                                                       |
-| Multiple things from one file   | Split into separate files                                                                                                            |
-| Destructured object params      | Default empty object: `{ ... } = {}`                                                                                                 |
-| Boolean functions               | Prefix with `is`/`has`/`can`/`should`                                                                                                |
-| Return values (objects/arrays)  | Deep freeze (clone+freeze for external, freeze-in-place for own)                                                                     |
-| Shape of frozen/serialized data | Plain object (`Record`, string keys) + arrays — never `Map`/`Set`/`Date` (§ 13)                                                      |
+| Situation                       | Convention                                                                                                                                  |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Non-trivial function            | Named `function` declaration                                                                                                                |
+| Inline callback (trivial)       | Arrow OK: `user => user.id`, `n => n > 0`                                                                                                   |
+| Arrow assigned to variable      | **Not allowed** — use named `function` declaration                                                                                          |
+| Arrow with body block `{}`      | **Not allowed** — use named `function` declaration                                                                                          |
+| Callback (non-trivial)          | Extract as named `function`, pass by name                                                                                                   |
+| Hoisting below call site        | Encouraged for readability                                                                                                                  |
+| `this` keyword                  | **Banned** (functional codebase)                                                                                                            |
+| Classes                         | **Banned** (exception: error classes in `/errors`)                                                                                          |
+| Error handling                  | Use base error class for catch-all                                                                                                          |
+| Mutable closures                | **Banned**                                                                                                                                  |
+| Immutable closures              | OK (e.g. currying over cached config)                                                                                                       |
+| Method shorthand in objects     | Allowed (`{ process() {} }`)                                                                                                                |
+| Variable bindings               | Prefer `const`; `let` only when reassignment needed                                                                                         |
+| Export                          | Function files: inline `export default function` at top. Constant files: define first, `export default` at bottom (file-kind signal)        |
+| Import paths                    | Always include `.js` extension                                                                                                              |
+| Multiple things from one file   | Split into separate files                                                                                                                   |
+| Destructured object params      | Default empty object: `{ ... } = {}`                                                                                                        |
+| Boolean functions               | Prefix with `is`/`has`/`can`/`should`                                                                                                       |
+| Return values (objects/arrays)  | Deep freeze (clone+freeze for external, freeze-in-place for own)                                                                            |
+| Shape of frozen/serialized data | Plain object (`Record`, string keys) + arrays — never `Map`/`Set`/`Date` ([§ 13. Deep Freeze Return Values](#13-deep-freeze-return-values)) |
 
 ### 1. Export Conventions
 
@@ -506,7 +508,7 @@ downstream.
 Use the freeze utilities from this package's shared utilities:
 
 ```typescript
-// One default export per file, no barrel (see § module conventions):
+// One default export per file, no barrel (see § 1. Export Conventions):
 import freezeInPlace from '@utils/freeze-in-place.js';
 import cloneAndFreeze from '@utils/clone-and-freeze.js';
 ```
@@ -571,8 +573,9 @@ object-identity keys without iteration.) If a `Map`/`Set` ever does end up
 inside owned-then-frozen data, document the limitation at that site (the freeze
 does not reach its entries). A compile-time `ReadonlyMap` type is **not** a
 substitute for projection: it binds only well-typed callers, whereas this freeze
-is a runtime guarantee against the untyped LLM consumer § 13 exists to protect —
-a type annotation cannot enforce it, and it does nothing for `JSON`
+is a runtime guarantee against the untyped LLM consumer
+[§ 13. Deep Freeze Return Values](#13-deep-freeze-return-values) exists to
+protect — a type annotation cannot enforce it, and it does nothing for `JSON`
 serialization.
 
 **Exception:** Performance-critical hot paths where profiling shows freeze
@@ -819,7 +822,9 @@ Within scope, four kinds of documentation, with strict separation:
   live at `~/.claude/plans/*.md`, other tools use their own location): context,
   scope, AR cycles, open questions, verification. Ephemeral; deleted or archived
   when the task lands. May contain process narrative as long as it's pruned
-  aggressively (`HUMANS.md § Plan-clutter discipline` covers the pruning).
+  aggressively
+  ([HUMANS.md § Plan-clutter discipline](./HUMANS.md#plan-clutter-discipline)
+  covers the pruning).
 - **Handoff files** (`*-HANDOFF.md` at repo or directory root,
   `.planning-handoffs/*.md` including per-stream `*-notes.md`): per-migration
   coordination scaffolding. Process info, ordered steps, phase splits, status
@@ -869,17 +874,13 @@ but cannot see prose-level loss — plain constraint sentences, table cells,
 code-fence bodies, link targets, or semantic weakening ("must" → "should") — so
 **an empty mechanical listing never discharges the ledger**.
 
-Stale content is not an exception: "fix it or delete it if it goes stale" (§
-Directory Documentation Convention) licenses the fix-or-delete _decision_, not a
-silent deletion — a staleness deletion is enumerated in the loss ledger like any
-other removal.
+Stale content is not an exception: "fix it or delete it if it goes stale"
+([§ Directory Documentation Convention](#directory-documentation-convention))
+licenses the fix-or-delete _decision_, not a silent deletion — a staleness
+deletion is enumerated in the loss ledger like any other removal.
 
-**Path citations.** Governance and docs cite content by stable alias
-(`@utils/`), by concept plus a discovery command (`git ls-files '<pattern>'`),
-or by machine-checked infrastructure path (`.claude/**`, `scripts/**`, root
-docs). Volatile source-tree paths in governance prose are rot by construction —
-they break every time the tree reorganizes, and the citation outlives the layout
-it named.
+Citation form — how to cite a path or a section — is in
+[§ Citation and claim conventions](#citation-and-claim-conventions).
 
 ### Test Organization
 
@@ -899,6 +900,70 @@ src/
   project's tsconfig (e.g. when the parent tsconfig sets `jsx: 'preserve'` and
   only `.tsx` files allow JSX syntax).
 - Root `/tests/` directory: integration test fixtures (not unit tests)
+
+## Citation and claim conventions
+
+How this repository's docs point at things, and what a claim about repo state
+has to carry. These bind every agent and tool, whichever governance file routed
+it; both `AGENTS.md` and `AGENTS.principal.md` point in and neither restates.
+
+### Path citations
+
+Governance and docs cite content by stable alias (`@utils/`), by concept plus a
+discovery command (`git ls-files '<pattern>'`), or by machine-checked
+infrastructure path (`.claude/**`, `scripts/**`, root docs). Volatile
+source-tree paths in governance prose are rot by construction — they break every
+time the tree reorganizes, and the citation outlives the layout it named.
+
+### Section citations
+
+**A `§` citation is a link with a `#fragment`.** The `§` sigil asserts that a
+heading exists; the fragment is what makes the assertion checkable.
+`scripts/check-governance.mjs`'s `[links]` check verifies every fragment —
+cross-file and same-document alike — against the target's real headings. Without
+a fragment it verifies only that the file exists, so a wrong section name lands
+green.
+
+The heading-name portion of the link text matches a real heading **exactly**;
+the `§` sigil and any file prefix are part of the citation, not the heading.
+Everything else stays outside the link:
+
+| form          | write it as                                                                                      |
+| ------------- | ------------------------------------------------------------------------------------------------ |
+| cross-file    | `[DEV.md § Testing Strategy](./DEV.md#testing-strategy)`                                         |
+| same-document | `[§ Git Policy](#git-policy)`                                                                    |
+| positional    | `[§ Two-Tier Autonomy](#two-tier-autonomy) above`                                                |
+| possessive    | `[§ Orchestrated delegation](#orchestrated-delegation)'s worker briefs`                          |
+| sub-anchor    | `[DEV.md § Incremental Development Workflow](./DEV.md#incremental-development-workflow), step 9` |
+| nested path   | cite the **deepest** heading that resolves, not the chain to it                                  |
+
+Three forms are defects, not styles:
+
+- **A bare citation** — `AGENTS.md § Git Policy` with no link around it is
+  invisible to every check by construction. It is the form that rots silently,
+  because nothing reports it.
+- **A link with no fragment** — `[DEV.md § Foo](./DEV.md)` is not a section
+  citation. It reads as verified and is not.
+- **Numeric shorthand with no anchor** — `§ 13` names nothing a reader or a
+  checker can resolve. Cite the heading
+  (`[§ 13. Deep Freeze Return Values](#13-deep-freeze-return-values)`); an
+  abbreviated link text is fine once the fragment carries the identity, which is
+  why the `[§7](#7-no-this-keyword)` forms in
+  [§ Linting Conventions](#linting-conventions) are correct as they stand.
+
+Two cases the link form cannot reach — name the target in plain prose instead,
+and never wrap it in link syntax:
+
+- **Inside a code fence.** Fenced lines are blanked before parsing, so a link
+  there is invisible to `[links]` _and_ corrupts the code sample.
+- **A bold lead-in that is not a heading.** Either promote it to a heading, or
+  cite the enclosing heading and name the lead-in in prose. Writing `§ Foo` for
+  a paragraph that merely opens with **Foo.** is the same defect as citing a
+  heading that never existed.
+
+Never cite by `file:line`. Line numbers are the fastest-rotting form there is:
+during one campaign `DEV.md`'s numbering drifted +21 and `AGENTS.md`'s +9 in a
+single day.
 
 ## Development Workflow
 
@@ -936,7 +1001,10 @@ All non-trivial changes follow the Incremental Development Workflow below. For
 quick reference:
 
 1. Work directly on main — atomic commits per increment (agents never create
-   branches unless explicitly instructed; see AGENTS git policy)
+   branches unless explicitly instructed; see
+   [AGENTS.md § Git checkpoints](./AGENTS.md#git-checkpoints), or
+   [AGENTS.principal.md § Git Policy](./AGENTS.principal.md#git-policy) if that
+   is the file `CLAUDE.md` routed you to)
 2. Follow Phase 0 → Phase 1 (per increment) → Phase 2 (see below)
 3. Update `README.md` in affected directories
 4. Run quality checks before each commit — scoped to what you changed, because
@@ -1127,8 +1195,8 @@ inventory one-liner and the pinned-guard's suffix scope, so reviewers alone hold
 it. Honest limit, stated: coverage equals seeding discipline — plant a pin at
 every AR PAUSE resolution and human ruling, and never bulk-sweep pins onto
 expectations nobody ruled on. Disambiguation: elsewhere in this file "pin" means
-a _model pin_ (§ Sub-model dispatch); a pinned expectation is a different
-concept — a test-level ruling marker.
+a _model pin_ ([§ Sub-model dispatch](#sub-model-dispatch)); a pinned
+expectation is a different concept — a test-level ruling marker.
 
 #### Triangulation
 
@@ -1318,8 +1386,9 @@ record the structural target in DOCS.md.
 This is what separates a plan that produces architecture from a plan that
 produces test-passing code. The sketch describes execution phases, structural
 constraints, and explicit boundaries in domain terms — no function names, no
-variable names, no pseudocode. See § Directory Documentation Convention above
-for the required format and example.
+variable names, no pseudocode. See
+[§ Directory Documentation Convention](#directory-documentation-convention)
+above for the required format and example.
 
 The sketch answers: _What shape must a correct implementation take?_ The
 Refactor step in Phase 1 is held against this document. If the implementation
@@ -1702,7 +1771,9 @@ Only when the human explicitly opts out.
   merge, clone) correctly omitted as invisible, and domain-related functions
   correctly shown as nodes?
 - **Presentation-component exception**: if the DOCS is a presentation-component
-  module under the § Data flow diagram exception (a render component owning no
+  module under
+  [§ Directory Documentation Convention](#directory-documentation-convention)'s
+  presentation-component exception (a render component owning no
   downstream-consumed derivation), apply the component/prop-flow rules instead —
   confirm the diagram is genuinely wiring (props-down / callbacks-up) and that
   the module owns no derivation a downstream consumer reads (if it does, it
@@ -1761,7 +1832,7 @@ the human explicitly opts out.
 - **Loss lens (doc changes)**: diff every touched `README.md`/`DOCS.md` against
   the baseline; anything present at baseline, absent in the result, and missing
   from the change's loss ledger is a finding — enumerate it BEFORE judging style
-  (§ Documentation migration discipline).
+  ([§ Documentation migration discipline](#documentation-migration-discipline)).
 - Does it follow the codebase's functional conventions (no this, no mutable
   closures)?
 - Are there subtle bugs (off-by-one, null handling, async footguns)?
@@ -1770,7 +1841,8 @@ the human explicitly opts out.
   TODO stubs to remove?
 - Would a junior developer understand this without explanation?
 - **Sandbox Checkpoints**: for user-observable features, confirm a 🔍 sandbox
-  checkpoint is present and reachable (see § Sandbox Checkpoints).
+  checkpoint is present and reachable (see
+  [§ Sandbox Checkpoints — user-observable features](#sandbox-checkpoints--user-observable-features)).
 - **Security regressions**: where this increment touches untrusted input or a
   trust boundary (parsing untrusted input, shelling out, rendering user-supplied
   content), check for injection, XSS, and the OWASP Top 10. No-op for pure
@@ -1807,8 +1879,8 @@ prompt. **Skip:** Only when the human explicitly opts out.
   that accumulate past increment-level review.
 - **Loss lens (doc changes)**: across the whole changeset, diff every touched
   doc against the baseline and enumerate anything present at baseline, absent in
-  the result, and missing from the loss ledgers — BEFORE judging style (§
-  Documentation migration discipline).
+  the result, and missing from the loss ledgers — BEFORE judging style
+  ([§ Documentation migration discipline](#documentation-migration-discipline)).
 - Type contract integrity: is types.ts still the single source of truth? Flag
   casts, `any`s, or parallel type definitions added during increments. No-op for
   pure content/markdown increments.
