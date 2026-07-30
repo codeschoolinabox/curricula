@@ -422,12 +422,13 @@ style preferences.
 
 **Lesson routing — where does a new lesson go?**
 
-| Lesson is about...                                           | Goes in...                                                  |
-| ------------------------------------------------------------ | ----------------------------------------------------------- |
-| A this-project workflow detail                               | `AGENTS.md` (agent-facing) or `DEV.md` (contributor-facing) |
-| A this-project human discipline                              | `HUMANS.md` (this file)                                     |
-| A cross-project personal style                               | `~/.claude/CLAUDE.md`                                       |
-| A specific feedback pattern that should fire across sessions | Memory file (project-scoped)                                |
+| Lesson is about...                                                              | Goes in...                                                                                    |
+| ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| A rule that binds **every** agent and tool, whichever governance file routed it | `DEV.md` — one copy, both `AGENTS*.md` point in (the § Adversarial Review Protocol precedent) |
+| A this-project workflow detail specific to one agent tier                       | The matching `AGENTS.md` / `AGENTS.principal.md` — and say which                              |
+| A this-project human discipline                                                 | `HUMANS.md` (this file)                                                                       |
+| A cross-project personal style                                                  | `~/.claude/CLAUDE.md`                                                                         |
+| A specific feedback pattern that should fire across sessions                    | Memory file (project-scoped)                                                                  |
 
 When a lesson could go in multiple places, pick the most-narrowly-scoped home;
 the broader docs reference it if needed.

@@ -395,13 +395,22 @@ rewrites branches, publishes to remotes, or destroys work.
 - Read-only: `git status`, `git diff`, `git log`, `git show`, `git blame`,
   `git branch --list`, `git ls-files`, `git remote -v`, `git rev-parse`,
   `git grep`
-- Additive: `git add <specific-files>`, `git commit -m "..."` (new commits
-  only), `git fetch` (remote-read-only), `git stash push` (reversible)
+- Additive: `git add <specific-files>`, `git commit -m "…" -- <your paths>` (new
+  commits only; the pathspec is required — see below), `git fetch`
+  (remote-read-only), `git stash push` (reversible)
 - Branch creation: `git branch <new-name>`, `git checkout -b <new-name>` — only
   when the user has explicitly instructed a branch in the current conversation
   (the default workflow is commit-to-main)
 - Bypassing pre-commit hooks on commit: `git commit --no-verify` (permitted —
   deliberate workflow for repos carrying pre-existing hook/lint debt)
+
+> **This worktree is shared, and the commit form is enforced by a hook.** A
+> commit with no explicit pathspec after `--` is DENIED at `PreToolUse`, because
+> an unscoped commit takes whatever is staged — including a peer's files. The
+> canonical rules — the stage-and-commit sequence, the `index.lock` retry, and
+> the foreign-debt baselines your quality gates are measured against — live in
+> [DEV.md § Shared-worktree git mechanics](./DEV.md#shared-worktree-git-mechanics).
+> Read them before your first commit; they bind every agent and tool here.
 
 **Forbidden** (destructive, rewriting, or publishing):
 

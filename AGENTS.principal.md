@@ -644,20 +644,15 @@ working copy, not the baseline.
 Field-proven rules for running the fan-out; they bind every orchestrated
 session.
 
-- **Concurrent commits share one worktree — commit with a pathspec.** Stage and
-  commit in ONE shell invocation: `git add <explicit paths>` →
-  `git diff --staged --stat` (the staged diff must be exclusively yours) →
-  `git commit -m "…" -- <your paths>`. The pathspec keeps a peer's
-  concurrently-staged files out of your commit. On an `index.lock` collision,
-  wait briefly and retry. The pre-commit hook's lint-staged stash cycle runs per
-  commit — expect transient stash entries, never clean them up.
-- **Honest quality gates in a shared tree.** Before fan-out, the orchestrator
-  captures the repo's foreign-debt baselines (typecheck error count and
-  locations; failing test files) and bakes the numbers into every worker brief.
-  A worker's bar: its own directory's test run fully green (show the three
-  vitest summary lines), and zero NEW failures outside the named baseline paths.
-  Whole-repo green is not the gate — peers hold deliberately-red tests
-  mid-increment.
+- **The shared-worktree git mechanics are canonical in DEV.md, not here** —
+  [DEV.md § Shared-worktree git mechanics](./DEV.md#shared-worktree-git-mechanics)
+  carries the pathspec commit form, the `index.lock` retry, and the foreign-debt
+  baselines. They bind every agent and tool in this repo, not only orchestrated
+  sessions, so they live where both governance files point rather than in one.
+  Read them; they are not restated here. Fan-out adds one obligation on top: the
+  orchestrator captures those baselines **before** launching and bakes the
+  numbers into every worker brief, so each worker knows which failures are not
+  its own.
 - **Validate every fan-out decomposition context-free** (the "validate every
   handoff with a context-free agent" invariant applied to launches, not just
   handoffs): before launching a wave of workers, a fresh agent holding only the

@@ -902,6 +902,27 @@ src/
 
 ## Development Workflow
 
+### Shared-worktree git mechanics
+
+Canonical for **every** agent and tool that commits here, whichever governance
+file routed it — this worktree is shared, and concurrent sessions stage into the
+same index. Both `AGENTS.md` and `AGENTS.principal.md` point in; neither
+restates.
+
+- **Concurrent commits share one worktree — commit with a pathspec.** Stage and
+  commit in ONE shell invocation: `git add <explicit paths>` →
+  `git diff --staged --stat` (the staged diff must be exclusively yours) →
+  `git commit -m "…" -- <your paths>`. The pathspec keeps a peer's
+  concurrently-staged files out of your commit. On an `index.lock` collision,
+  wait briefly and retry. The pre-commit hook's lint-staged stash cycle runs per
+  commit — expect transient stash entries, never clean them up.
+- **Honest quality gates in a shared tree.** Capture the repo's foreign-debt
+  baselines (typecheck error count and locations; failing test files) before
+  starting, and — under fan-out — bake the numbers into every worker brief. The
+  bar: your own directory's test run fully green (show the three vitest summary
+  lines), and zero NEW failures outside the named baseline paths. Whole-repo
+  green is not the gate — peers hold deliberately-red tests mid-increment.
+
 ### 1. Setup
 
 ```bash
