@@ -38,11 +38,11 @@ This is **_just enough JavaScript_** to:
   - [Code & PseudoCode](#code--pseudocode)
   - [Statements vs Expressions](#statements-vs-expressions)
 - [Code Style](#code-style)
-  - [Program Type: Strict Mode Script](#program-type-strict-mode-script)
+  - [Before Your Code Runs](#before-your-code-runs)
+  - [Program Type: Module](#program-type-module)
   - [Naming Convention: camelCase](#naming-convention-camelcase)
   - [Indentation: Tabs](#indentation-tabs)
   - [Semicolons](#semicolons)
-  - [Before Your Code Runs](#program-type-strict-mode-script)
 - [Syntax You'll Learn](#syntax-youll-learn)
   - [Comments](#comments)
   - [Primitive Types](#primitive-types)
@@ -196,6 +196,8 @@ Each syntax section below is labeled as one or the other.
 
 ## Code Style
 
+### Before Your Code Runs
+
 The learning environment checks your code through several steps before running
 it. If something is wrong at any stage your program will be rejected and you'll
 get feedback about what to fix:
@@ -211,18 +213,25 @@ get feedback about what to fix:
    not a language constraint.
 4. **Run it!**: Run the program and return data about the code's execution.
 
-### Program Type: Strict Mode Script
+### Program Type: Module
 
-Your programs run as strict mode scripts. The learning environment automatically
-adds `"use strict"` at the top of your code before running it — you don't need
-to write it yourself.
+Your JEJ programs are JavaScript **modules**, and modules are always in strict
+mode. You never write `'use strict'` yourself, and nothing is inserted above
+your first line — so the line numbers you see are the line numbers the machine
+reports.
 
-Strict mode catches common mistakes JavaScript normally allows silently:
+JEJ programs can't `import` or `export`: splitting code across files is out of
+scope here. You get the strictness without the machinery — and modules are how
+modern JavaScript applications are structured, so this is the shape real code
+takes.
 
-- Using a variable before declaring it throws a `ReferenceError` instead of
-  silently creating a global
-- Assigning to a read-only value throws a `TypeError` instead of silently doing
-  nothing
+Here is what that strictness buys you, compared with the older, looser mode a
+plain script can still run in:
+
+- Assigning to a variable you never declared throws a `ReferenceError` instead
+  of silently creating one on the global object
+- Assigning to a read-only value — `undefined = 5`, say — throws a `TypeError`
+  instead of silently doing nothing
 
 <table>
 
@@ -230,7 +239,7 @@ Strict mode catches common mistakes JavaScript normally allows silently:
 <td>
 
 ```js
-// the runner adds this automatically — you just write your code:
+// nothing is added above this line — a module is strict already:
 let name = 'Alice';
 alert(name);
 ```
@@ -245,13 +254,14 @@ alert(name);
 </table>
 
 <details>
-<summary>Fun fact: module mode</summary>
+<summary>Fun fact: how a plain script does it</summary>
 <br>
 
-Modern JavaScript applications often use `<script type="module">` in HTML, which
-also enables strict mode automatically — plus `import`/`export` for splitting
-code across files. JEJ programs skip the module system (arrays and imports are
-out of scope here). You get the same strict error-checking with less machinery.
+A plain `<script>` still works the older way. To get strict mode it has to opt
+in, by writing `'use strict';` as its very first line — and a script that leaves
+it out runs under the looser rules. Modules took the choice away:
+`<script type="module">` in HTML, and every file it loads, is strict whether you
+ask or not.
 
 </details>
 
@@ -1638,9 +1648,9 @@ console.dir(Math); // interactive tree of all Math properties
 <br>
 
 `console.trace(label?)` prints the current call stack. In JEJ programs — which
-have no user-defined functions — the stack is always just the top-level script,
-so the output isn't informative. It becomes useful once you start writing
-functions (covered in later modules).
+have no user-defined functions — the stack is always just your top-level
+program, so the output isn't informative. It becomes useful once you start
+writing functions (covered in later lessons).
 
 ```js
 console.trace('where am I?'); // logs: "where am I?" + a one-line stack
@@ -3140,7 +3150,7 @@ let divided = 7n / 2n; // 3n (not 3.5)
 
 // comparison across types
 42n === 42; // false (different types)
-42n == 42; // true (loose equality coerces)
+42n <= 42; // true (comparison looks at the value, not the type)
 
 // typeof
 typeof 42n; // 'bigint'
@@ -3162,7 +3172,7 @@ product ← 3n * 4n
 divided ← 7n / 2n   (truncates)
 
 42n === 42   → false
-42n == 42    → true
+42n <= 42    → true
 
 typeof 42n   → 'bigint'
 ```
@@ -3174,5 +3184,7 @@ typeof 42n   → 'bigint'
 > **Important:** You cannot mix BigInt and regular numbers in arithmetic.
 > `42n + 1` throws a TypeError. Convert explicitly: `42n + BigInt(1)` or
 > `Number(42n) + 1` (but Number conversion loses precision for large values).
+> Comparison is the exception — `<`, `>`, `<=`, `>=` compare a BigInt against a
+> Number just fine.
 
 [TOP](#just-enough-javascript-jej)
