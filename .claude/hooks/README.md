@@ -8,10 +8,10 @@ the tracked configuration inventoried in [../README.md](../README.md). One
 design principle: **mechanise intent-independent command shape; leave intent to
 the reviewers.** Architecture and constraints: [DOCS.md](./DOCS.md).
 
-Current occupant: **the governance-guard**. Later tool hooks (the advisory
-governance checker, the pinned-expectation guard) add their glossary and
-protocol deltas to this README — and their sketch amendments to DOCS.md — at
-their own gates, under their own reviews.
+Current occupants: **the governance-guard and the governance-advisory**. Later
+tool hooks (the pinned-expectation guard) add their glossary and protocol deltas
+to this README — and their sketch amendments to DOCS.md — at their own gates,
+under their own reviews.
 
 ## Ubiquitous language
 
@@ -91,6 +91,31 @@ a command tripping two rules teaches both corrections in one round-trip:
    real flags, and `-O<orderfile>` reorders, it does not write) and `--fix` on
    markdownlint-cli2, at any token position (the settings denies are
    leading-position belts only).
+
+## Roster — the governance-advisory
+
+`governance-advisory.py` (PostToolUse, matcher `Edit|Write`). Non-blocking by
+construction: it emits only `context` and `silence` — NEVER a deny. On an edit
+to a governance-corpus document it runs the governance checker and relays only
+the edited document's findings back to the agent via
+`hookSpecificOutput.additionalContext`; on everything else — non-corpus paths,
+checker failures (no report produced; the checker's exit code is never consulted
+— exit 1 with a report is its normal error-findings state), malformed payloads —
+silence, exit 0. Sketch:
+[DOCS.md § Sketch amendment — the governance-advisory pipeline](./DOCS.md#sketch-amendment--the-governance-advisory-pipeline-posttooluse).
+Tests: `tests/test-governance-advisory.py` (the same case-list harness; the
+checker command is injected via `GOVERNANCE_ADVISORY_CMD` so no test shells to
+the real corpus).
+
+Glossary deltas for the file-tool payload: **`file_path`** — the edited file's
+absolute path in the PostToolUse payload's `tool_input`, relativized against the
+project directory before classification; **corpus document** — a file the
+governance checker's classifier accepts (the checker is the authority; this hook
+carries a deliberately tiny mirror); **checker / finding** — as used in
+`scripts/README.md` § Ubiquitous language. Protocol delta: the advisory wire
+shape is `hookSpecificOutput.hookEventName: "PostToolUse"` plus
+`hookSpecificOutput.additionalContext` carrying the filtered findings — never
+`permissionDecision`.
 
 ## Protocol
 

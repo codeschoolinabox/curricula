@@ -65,6 +65,41 @@ flowchart TD
     H -->|no| I
 ```
 
+### Sketch amendment — the governance-advisory pipeline (PostToolUse)
+
+A second, simpler pipeline shares the fail-open boundary but nothing else: on a
+PostToolUse Edit/Write payload whose `file_path` is a governance-corpus
+document, the hook runs the governance checker (`npm run check:governance`'s
+entry) and relays ONLY the edited document's findings back to the agent as
+`hookSpecificOutput.additionalContext` — a non-blocking advisory channel, never
+a deny. Exit 0 on every path; a checker FAILURE, a non-corpus path, or a
+malformed payload all end in silence — and **"failure" means the checker
+produced no report** (spawn failure, timeout, empty or unparseable stdout); the
+checker's exit code is never consulted, because exit 1 WITH a report is its
+normal error-findings state and must be relayed. The corpus test is an in-script
+mirror of the checker's own classifier (kept deliberately tiny; the checker
+remains the authority; drift in either direction degrades to SILENCE for the
+drifted documents, never a false advisory — the suite pins mirror-vs-authority
+agreement over a fixed path list). Accepted limitation: findings an edit causes
+in a SIBLING document are attributed to that sibling and are not relayed — the
+full-corpus view belongs to running the checker itself. Accepted cost: one full
+checker run per corpus edit, measured 0.6s (2026-07-29), bounded by a 30-second
+ceiling — a hung checker stalls the edit round-trip at most that long, then
+silence. The checker command is injected via `GOVERNANCE_ADVISORY_CMD` so the
+tests never shell to the real corpus.
+
+```mermaid
+flowchart TD
+    P[raw stdin payload] -->|ingest| Q{corpus file_path?}
+    Q -->|no, or any error| S[silence, exit zero]
+    Q -->|yes, run the governance checker| R2{report produced?}
+    R2 -->|no| S
+    R2 -->|yes| R[checker report]
+    R -->|filter to the edited document| T{findings for it?}
+    T -->|yes| U[additionalContext JSON on stdout]
+    T -->|no| S
+```
+
 ### Structural constraints
 
 - **Fail-open, always**: exit 0 on every path; a deny exists only as JSON on

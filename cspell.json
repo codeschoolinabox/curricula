@@ -128,7 +128,8 @@
 		"spirlearn",
 		"fanout",
 		"reflog",
-		"frontmatter"
+		"frontmatter",
+		"unlaunchable"
 	],
 	"ignorePaths": [
 		"node_modules",

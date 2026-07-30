@@ -23,8 +23,10 @@ creation (AGENTS.md § Git policy).
   threat model. Known gap, measured 2026-07-29: the vitest allow admits
   `--update` and first-run snapshot writes; the unit project contains zero
   snapshot tests today — re-evaluate the entry if snapshot tests ever land.
-- **`hooks/`** — project tool hooks (PreToolUse/PostToolUse guards), starting
-  with the governance-guard; roster, ubiquitous language, and protocol in
+- **`hooks/`** — project tool hooks: the governance-guard (PreToolUse Bash,
+  deny-capable) and the governance-advisory (PostToolUse Edit|Write,
+  context-only — relays the governance checker's findings for an edited corpus
+  document, never blocks); roster, ubiquitous language, and protocol in
   [hooks/README.md](./hooks/README.md), architecture in
   [hooks/DOCS.md](./hooks/DOCS.md).
 - **`agents/`** — the registered adversarial reviewers (`ar-1`…`ar-5`), invoked
@@ -43,7 +45,10 @@ can tighten, but never loosen — the user's global configuration.
 
 ## The snapshot caveat
 
-A session reads hooks and permissions **at session start**. A newly committed
-change to `settings.json` protects the session that made it only after that
-session restarts, and protects peer sessions only after each of them restarts.
-When this file changes, restart at the next clean boundary.
+Propagation of `settings.json` changes is a harness property that has varied
+across observations: hooks and permissions were measured to bind at session
+start (2026-07-29, morning), while current Claude Code documentation states hook
+changes hot-reload via a file watcher. Treat propagation as version-dependent —
+after changing this file, VERIFY the change is live with a cheap probe rather
+than assuming either way; a restart at the next clean boundary remains the
+reliable fallback, for this session and for peers.
