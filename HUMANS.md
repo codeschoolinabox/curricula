@@ -18,12 +18,13 @@ context cruft (rejected alternatives in plan files, stale handoff folders, agent
 self-reports of relevance that aren't reliable signals). Subagent spawns are
 intended to reload the matching governance doc as fresh context per spawn, but a
 harness reliably doing so for every spawn path isn't something this repo can
-verify — see § Orchestrated delegation in whichever governance file applies to
-you ([AGENTS.md](./AGENTS.md#orchestrated-delegation) or
-[AGENTS.principal.md](./AGENTS.principal.md#orchestrated-delegation)) for the
-explicit-read backstop that doesn't depend on it. Opus on max for everything
-(including AR-3/AR-4 reviewers that don't need it) burns tokens that Sonnet
-would handle indistinguishably.
+verify — see
+[AGENTS.md § Orchestrated delegation](./AGENTS.md#orchestrated-delegation), or
+[AGENTS.principal.md § Orchestrated delegation](./AGENTS.principal.md#orchestrated-delegation)
+if that is the file `CLAUDE.md` routed you to, for the explicit-read backstop
+that doesn't depend on it. Opus on max for everything (including AR-3/AR-4
+reviewers that don't need it) burns tokens that Sonnet would handle
+indistinguishably.
 
 This file's protocols are the discipline that recovers session efficiency
 without sacrificing the rigor that makes the work hold up.
@@ -93,7 +94,8 @@ quality cliff is small or absent.
   sketch authoring)
 - AR-1 (Design Challenge) — drift / cross-cutting (the one pinned judgment
   review; AR-2 and AR-5 are deliberately NOT pinned — they inherit the session's
-  model so they track the authoring tier, see Sub-model dispatch below)
+  model so they track the authoring tier, see
+  [DEV.md § Sub-model dispatch](./DEV.md#sub-model-dispatch))
 - Plan authoring, especially in plan mode
 - Hard refactors where the structural target is unclear
 - Cross-cutting changes that touch multiple modules
@@ -376,13 +378,12 @@ agent claims things are done; you verify they actually are.
   ([DEV.md § Ruling provenance](./DEV.md#ruling-provenance)). An agent has
   invented one before. Ask where it is written.
 
-**Citation and claim conventions (your rulings, 2026-07-30 — re-decide any
+**Citation and claim conventions (human ruling 2026-07-30 — re-decide any
 time):** the tag rule is canonical in `DEV.md` with a short invariant in both
-AGENTS files pointing in; `§` citations are links with a fragment, swept corpus-
-wide, strict on the heading name with qualifiers left outside the link and
-unanchored numeric shorthand banned; `AGENTS.principal.md` carries its own
-cold-start-handoff heading; the ` ```quote ` fence pilot is deferred to the
-session that builds its checker.
+AGENTS files pointing in; `§` citations are links with a fragment, swept across
+the corpus, with the fragment carrying identity and qualifiers left outside the
+link; `AGENTS.principal.md` carries its own cold-start-handoff heading; the
+` ```quote ` fence pilot is deferred to the session that builds its checker.
 
 **Standing accepted risks (your rulings, 2026-07-29 — re-decide any time):**
 

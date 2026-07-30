@@ -97,9 +97,9 @@ encouragement. They cannot be overridden by momentum.
     finishing, so the validation never runs. Do not skip it.** Only the human
     waives it. (Full protocol:
     [§ Cold-start handoffs](#cold-start-handoffs-prefer-over-riding-compaction).)
-12. **Every repo claim carries its source** — a statement about what a file
-    says, what a command outputs, what was ruled, or what a subagent found is
-    never made bare. It carries `[measured: <command run this session>]`,
+12. **Every repo-state claim carries its source** — a statement about what a
+    file says, what a command outputs, what was ruled, or what a subagent found
+    is never made bare. It carries `[measured: <command run this session>]`,
     `[read: <file> § <heading> — "<quoted words>"]`, or
     `[relayed: <who said it>]`. **This fires regardless of felt certainty** — it
     exists for the confident repetition of something read once, relayed, or
@@ -324,6 +324,11 @@ utility"). Full cycle diagram, redirect policy, and content-quality rules:
   exit, not how the body is written.
 - Before starting work, verify understanding with the user: what will be built,
   what constraints apply, what success looks like
+- **Repo-state claims in the plan carry their evidence** —
+  `[measured:]`/`[read:]`/`[relayed:]`, per
+  [DEV.md § Sourced claims](./DEV.md#sourced-claims). A plan is one of the four
+  auditable surfaces, and the human's approval gate is where a stale fact does
+  the most damage.
 - Before writing any code, explain in plain language what you're about to do and
   why
 
@@ -919,7 +924,10 @@ work resumable across a compaction boundary:
   from the diff alone, (c) prose drafts that haven't yet been written to
   canonical files, (d) AR-cycle status, (e) explicit deferrals (what's out of
   scope and why), (f) untracked scratch files the agent shouldn't accidentally
-  commit.
+  commit, (g) tagged evidence for every repo-state claim the RESUMPTION POINT
+  asserts ([DEV.md § Sourced claims](./DEV.md#sourced-claims)) — a handoff is
+  where a stale number travels furthest, because the next agent has no way to
+  tell measurement from memory.
 - **What NOT to persist:** running diffs, file contents (those are recoverable
   via Read), or step-by-step tool transcripts.
 - **When compaction strikes mid-task:** the human can ask the freshly-compacted

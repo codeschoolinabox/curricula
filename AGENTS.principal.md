@@ -125,9 +125,9 @@ encouragement. They cannot be overridden by momentum.
     code. **This step is routinely skipped — writing the handoff feels like
     finishing, so the validation never runs. Do not skip it.** Only the human
     waives it. (Full protocol: [§ Cold-start handoffs](#cold-start-handoffs).)
-13. **Every repo claim carries its source** — a statement about what a file
-    says, what a command outputs, what was ruled, or what a subagent found is
-    never made bare. It carries `[measured: <command run this session>]`,
+13. **Every repo-state claim carries its source** — a statement about what a
+    file says, what a command outputs, what was ruled, or what a subagent found
+    is never made bare. It carries `[measured: <command run this session>]`,
     `[read: <file> § <heading> — "<quoted words>"]`, or
     `[relayed: <who said it>]`. **This fires regardless of felt certainty** — it
     exists for the confident repetition of something read once, relayed, or
@@ -361,6 +361,11 @@ it works" is not a checkpoint. Full rules:
   discovers the implementation; the sketch constrains the structure; the plan
   names what each increment does and what types enter and exit.
 - Plans start from completed work and list ONLY unimplemented work.
+- **Repo-state claims in the plan carry their evidence** —
+  `[measured:]`/`[read:]`/`[relayed:]`, per
+  [DEV.md § Sourced claims](./DEV.md#sourced-claims). A plan is one of the four
+  auditable surfaces, and the human's approval gate is where a stale fact does
+  the most damage.
 - Before starting, verify understanding with the user: what will be built, what
   constraints apply, what success looks like.
 
@@ -526,8 +531,12 @@ POINT** block (top of `~/.claude/plans/<plan>.md`) is the durable handoff.
 Update it after each meaningful checkpoint with: state at pause, commit log with
 one-line summaries, user decisions that won't be obvious from the diff, prose
 drafts not yet in canonical files, AR-cycle status and carry-forward notes,
-explicit deferrals, and untracked scratch files. Do NOT persist running diffs,
-file contents, or tool transcripts — those are recoverable.
+explicit deferrals, untracked scratch files, and **tagged evidence for every
+repo-state claim it asserts**
+([DEV.md § Sourced claims](./DEV.md#sourced-claims)) — a handoff is where a
+stale number travels furthest, because the next agent has no way to tell
+measurement from memory. Do NOT persist running diffs, file contents, or tool
+transcripts — those are recoverable.
 
 ### Cold-start handoffs
 

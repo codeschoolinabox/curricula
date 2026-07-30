@@ -24,7 +24,8 @@ otherwise.
     writing or reviewing code style, not required reading up front)
 - [Directory Structure](#directory-structure) — (core)
 - [Citation and claim conventions](#citation-and-claim-conventions) — (core —
-  how docs cite paths and sections, and what a repo-state claim must carry)
+  how docs cite paths and sections, what a repo-state claim must carry, and
+  where a ruling has to be recorded to count)
 - [Development Workflow](#development-workflow) — (core)
 - [Testing Strategy](#testing-strategy) — (core)
 - [Incremental Development Workflow](#incremental-development-workflow) — (core
@@ -924,18 +925,24 @@ cross-file and same-document alike — against the target's real headings. Witho
 a fragment it verifies only that the file exists, so a wrong section name lands
 green.
 
-The heading-name portion of the link text matches a real heading **exactly**;
-the `§` sigil and any file prefix are part of the citation, not the heading.
-Everything else stays outside the link:
+**The fragment carries identity; the link text is the author's.** `[links]`
+verifies the fragment and never reads the link text, so a renamed heading fires
+on the dead fragment whatever the text says. Prefer the full heading name —
+abbreviate only when the full name would wreck the sentence, as
+`[§7](#7-no-this-keyword)` does in
+[§ Linting Conventions](#linting-conventions). Qualifiers stay outside the link:
 
-| form          | write it as                                                                                      |
-| ------------- | ------------------------------------------------------------------------------------------------ |
-| cross-file    | `[DEV.md § Testing Strategy](./DEV.md#testing-strategy)`                                         |
-| same-document | `[§ Git Policy](#git-policy)`                                                                    |
-| positional    | `[§ Two-Tier Autonomy](#two-tier-autonomy) above`                                                |
-| possessive    | `[§ Orchestrated delegation](#orchestrated-delegation)'s worker briefs`                          |
-| sub-anchor    | `[DEV.md § Incremental Development Workflow](./DEV.md#incremental-development-workflow), step 9` |
-| nested path   | cite the **deepest** heading that resolves, not the chain to it                                  |
+| form          | write it as                                                                                                                                                                       |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| cross-file    | `[DEV.md § Testing Strategy](./DEV.md#testing-strategy)`                                                                                                                          |
+| same-document | `[§ Resolution Rules](#resolution-rules)`                                                                                                                                         |
+| positional    | `[§ Two-Tier Autonomy](#two-tier-autonomy) above`                                                                                                                                 |
+| possessive    | `[§ Orchestrated delegation](#orchestrated-delegation)'s worker briefs`                                                                                                           |
+| sub-anchor    | `[DEV.md § Incremental Development Workflow](./DEV.md#incremental-development-workflow), step 9`                                                                                  |
+| dual-target   | `[AGENTS.md § Git checkpoints](./AGENTS.md#git-checkpoints), or [AGENTS.principal.md § Git Policy](./AGENTS.principal.md#git-policy) if that is the file CLAUDE.md routed you to` |
+
+For a nested target, cite the **deepest** heading that resolves, not the chain
+to it.
 
 Three forms are defects, not styles:
 
@@ -945,11 +952,13 @@ Three forms are defects, not styles:
 - **A link with no fragment** — `[DEV.md § Foo](./DEV.md)` is not a section
   citation. It reads as verified and is not.
 - **Numeric shorthand with no anchor** — `§ 13` names nothing a reader or a
-  checker can resolve. Cite the heading
-  (`[§ 13. Deep Freeze Return Values](#13-deep-freeze-return-values)`); an
-  abbreviated link text is fine once the fragment carries the identity, which is
-  why the `[§7](#7-no-this-keyword)` forms in
-  [§ Linting Conventions](#linting-conventions) are correct as they stand.
+  checker can resolve. Cite the heading:
+  `[§ 13. Deep Freeze Return Values](#13-deep-freeze-return-values)`.
+
+**A section reference without the `§` sigil is the same defect.** The sigil is
+not what makes it a citation — naming a heading in bare prose ("see Sub-model
+dispatch below") rots exactly as silently, and is harder to find because every
+`§`-scoped search misses it.
 
 Two cases the link form cannot reach — name the target in plain prose instead,
 and never wrap it in link syntax:
@@ -961,15 +970,15 @@ and never wrap it in link syntax:
   a paragraph that merely opens with **Foo.** is the same defect as citing a
   heading that never existed.
 
-Never cite by `file:line`. Line numbers are the fastest-rotting form there is:
-during one campaign `DEV.md`'s numbering drifted +21 and `AGENTS.md`'s +9 in a
-single day.
+Never cite a document **section** by `file:line`. Line numbers are the
+fastest-rotting form there is: during one campaign `DEV.md`'s numbering drifted
++21 and `AGENTS.md`'s +9 in a single day.
 
 ### Sourced claims
 
-**Every claim about repo state carries its source.** A statement about what a
-file says, what a command outputs, what was ruled, or what a subagent found is
-never made bare. It carries one of three tags, and the tag carries its evidence:
+**Every repo-state claim carries its source.** A statement about what a file
+says, what a command outputs, what was ruled, or what a subagent found is never
+made bare. It carries one of three tags, and the tag carries its evidence:
 
 | tag                                      | carries                                                                   | example                                                                                       |
 | ---------------------------------------- | ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
@@ -999,9 +1008,9 @@ cannot produce the tag's evidence in one command, you do not have the claim.
 **Auditing it.** `git grep -nE '\[(measured|read|relayed):'` finds every tag.
 Note what that does and does not buy: `.prettierrc.json` sets
 `proseWrap: "always"`, and prettier wraps **inside** the brackets, so a search
-for the complete tag misses any tag long enough to wrap — measured, 2 of 8 found
-— while the opening token is never split and finds 8 of 8. Whether a tag's
-evidence is adequate is a reviewer's judgment, not a grep's.
+for the complete tag misses any tag long enough to wrap, while the opening token
+is never split. Search on the opening token. Whether a tag's evidence is
+adequate is a reviewer's judgment, not a grep's.
 
 The four written surfaces where this is auditable are **plan files, commit
 bodies, AR reports, and handoffs**. Chat is not auditable and never will be; the
@@ -1065,8 +1074,9 @@ npm run test:watch  # Run tests in watch mode
 
 ### 2. Making Changes
 
-All non-trivial changes follow the Incremental Development Workflow below. For
-quick reference:
+All non-trivial changes follow
+[§ Incremental Development Workflow](#incremental-development-workflow) below.
+For quick reference:
 
 1. Work directly on main — atomic commits per increment (agents never create
    branches unless explicitly instructed; see
@@ -2069,7 +2079,10 @@ Not documented elsewhere — kept here:
 
 - No classes (use factory functions)
 - No parameter reassignment (create new bindings) — also stated in
-  `AGENTS.md`/`AGENTS.principal.md`'s Non-Negotiable Invariants
+  [AGENTS.md § Non-Negotiable Invariants](./AGENTS.md#non-negotiable-invariants),
+  or
+  [AGENTS.principal.md § Non-Negotiable Invariants](./AGENTS.principal.md#non-negotiable-invariants)
+  if that is the file `CLAUDE.md` routed you to
 - Immutable data / no mutations (`functional/immutable-data`, warn —
   `**.current` exempted for React refs, `eslint.config.mjs:212-217`; see also
   [§4](#4-pure-functional-approach) for the design principle)
