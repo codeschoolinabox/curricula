@@ -18,8 +18,9 @@ import type {
 
 import freezeInPlace from '@utils/freeze-in-place.js';
 
+import type { NodeRule, SyntaxAllowlist } from '../../lib/screening/types.js';
+
 import buildRealmModel from './realm-model.js';
-import type { NodeRule, SyntaxAllowlist } from './types.js';
 
 /**
  * The level's allowlist as data: the node rules the walk dispatches on, and the

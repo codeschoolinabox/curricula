@@ -5,16 +5,44 @@
  * `language-levels/<key>/` exports. A level is a passive, consultable
  * library — data and pure functions; never a plugin, never an actor.
  *
- * The only import is acorn, type-only — the parser's own vocabulary. The
- * snippet-type vocabulary is a local structural mirror: no type edge runs
- * from levels into embody, and ownership of the shared parse vocabulary can
- * move to the shared parse leaf without touching any level.
+ * Two type-only edges, no runtime edge: acorn's, the parser's own
+ * vocabulary; and the screening leaf's `Violation` and `SourceRange`, which
+ * this file **re-exports rather than re-declares** — the violation shape is
+ * one contract shared by the machinery that produces violations and the
+ * levels that hand them on, and a second declaration would be a second
+ * source. The snippet-type vocabulary is a local structural mirror: no type
+ * edge runs from levels into embody, and ownership of the shared parse
+ * vocabulary can move to the shared parse leaf without touching any level.
  *
  * Region docs: ./README.md (mechanics) · ./DOCS.md (architecture). The
  * package glossary (../README.md) owns the shared vocabulary.
  */
 
 import type { Comment, Identifier, Program, Token } from 'acorn';
+
+import type { Violation } from '../lib/screening/types.js';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// The violation vocabulary, published here for every level-side consumer
+//
+// Declared by the screening leaf, which produces violations. `Violation` is
+// re-exported because levels hand violations on and the shape must be one
+// contract; `SourceRange` alongside it because it is `Violation.location`'s
+// type — a level naming that field would otherwise reach past the region
+// boundary for it. What the leaf cannot say, knowing nothing of levels:
+//
+// No level controls the parse. A range is offsets rather than line/column
+// precisely because offsets are unconditional — a line/column range would
+// depend on a parser option the parse facts cannot express, and no level sets
+// it. Editor surfaces take offsets directly; a level never converts, having no
+// source text to count lines in.
+//
+// And enforcement posture is global. Whether violations block anything is the
+// orchestrator's ruling over the whole program, never a property of one
+// violation — which is why a violation carries no severity.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type { SourceRange, Violation } from '../lib/screening/types.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Foreign vocabulary, mirrored
@@ -71,43 +99,6 @@ export type ParseFacts = {
 	readonly comments: ReadonlyArray<Comment>;
 	readonly ast: Program;
 	readonly unresolvedReferences: ReadonlyArray<UnresolvedReference>;
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Violations
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Where something sits in the source, as the parser's own character offsets:
- * `start` is the first character; `end` is exclusive — one past the last.
- *
- * @remarks
- * Offsets, not line/column. Every parsed node carries them unconditionally,
- * so a violation's range is always constructible from the parse facts — a
- * line/column range would instead depend on a parser option the facts cannot
- * express, and no level controls the parse. Editor surfaces take offsets
- * directly; a level never converts, having no source text to count lines in.
- */
-export type SourceRange = {
-	readonly start: number;
-	readonly end: number;
-};
-
-/**
- * One place the program steps outside the level.
- *
- * @remarks
- * Enough to display a message with source context AND to locate the
- * offending node (the dot-delimited node path is the package's canonical
- * node identity). A violation carries no severity: it never blocks
- * execution — enforcement posture is global and orchestrator-side, never
- * per-violation.
- */
-export type Violation = {
-	readonly nodeType: string;
-	readonly message: string;
-	readonly location: SourceRange;
-	readonly nodePath: string;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

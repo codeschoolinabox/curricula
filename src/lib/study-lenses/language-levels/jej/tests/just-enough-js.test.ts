@@ -6,8 +6,8 @@ import {
 } from 'acorn';
 import { describe, expect, it } from 'vitest';
 
+import type { ConstraintCheck } from '../../../lib/screening/types.js';
 import justEnoughJs from '../just-enough-js.js';
-import type { ConstraintCheck } from '../types.js';
 
 function programOf(source: string): Program {
 	return parse(source, {

@@ -1,6 +1,6 @@
 import cloneAndFreeze from '@utils/clone-and-freeze.js';
 
-import type { SourceRange, Violation } from '../types.js';
+import type { SourceRange, Violation } from '../../lib/screening/types.js';
 
 /**
  * Builds a frozen {@link Violation} — one place the program steps outside the

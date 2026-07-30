@@ -27,6 +27,10 @@ genuinely projects.
   program's variables: one frozen `VariableUsage` per `let`/`const` binding
   (kind, post-declaration read/write counts, declared node) folded from embody's
   scope environment, for scope-aware consumers.
+- [screening/](./screening/README.md) — the generic default-deny walk over a
+  curated slice of JavaScript: one frozen `Violation` per place a parsed program
+  leaves the slice an allowlist's node-rule table describes, plus the parse
+  settings that walk's soundness is relative to.
 - [socratizing/](./socratizing/README.md) — a Socratic code analyzer: turns an
   embodiment into frozen `CodeQuestion`s (questions, not corrections) about a
   program's micro-decisions and comprehension, anchored to source offsets and
