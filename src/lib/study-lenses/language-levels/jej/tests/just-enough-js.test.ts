@@ -72,6 +72,11 @@ describe('justEnoughJs', () => {
 		it('FunctionDeclaration has no rule — absence is refusal', () => {
 			expect('FunctionDeclaration' in justEnoughJs.nodes).toBe(false);
 		});
+
+		it('ParenthesizedExpression has no rule — the published ast never carries one', () => {
+			// PINNED(human ruling 2026-07-30: published ast is ESTree-shaped — parens fold away; the table carries no entry for a node type the parse never publishes)
+			expect('ParenthesizedExpression' in justEnoughJs.nodes).toBe(false);
+		});
 	});
 
 	describe('unconditionally admitted node types', () => {
@@ -90,7 +95,6 @@ describe('justEnoughJs', () => {
 			'ConditionalExpression',
 			'ChainExpression',
 			'CallExpression',
-			'ParenthesizedExpression',
 			'LabeledStatement',
 			'SequenceExpression',
 		])('%s is admitted outright', (nodeType) => {

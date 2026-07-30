@@ -57,9 +57,6 @@ const justEnoughJs: SyntaxAllowlist = freezeInPlace({
 		// calls are not gated: the reference permits computed dispatch
 		// (`Math[method]()`); the member check governs the dot access itself
 		CallExpression: true,
-		// the package's one parse preserves parentheses, so `(a + b) * c`
-		// carries a node of its own — admitted, and an anchor for lenses
-		ParenthesizedExpression: true,
 
 		// easter eggs — admitted, untaught
 		LabeledStatement: true,

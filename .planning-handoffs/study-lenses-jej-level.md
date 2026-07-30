@@ -410,6 +410,11 @@ stands** and treat this as amendment-risk.
     `preserveParens: true`** (old `parse-old/parse-program.ts:42` set it).
     Without it, that rule is dead code.
 
+    > This half of OQ-6 is RESOLVED (human ruling 2026-07-30): the published ast
+    > is permanently ESTree-shaped, so the entry was dead by design — it and its
+    > test row are deleted, and a PINNED default-deny absence assertion in
+    > `jej/tests/just-enough-js.test.ts` guards against re-adding.
+
   Does `ParseFacts` need a documented precondition, a contract amendment, or a
   runtime guard? **Inter-region — expect to escalate.** ⚠️ **The parallel embody
   stream is currently planning to DROP `locations: true`** (its `StageCause`
