@@ -188,8 +188,9 @@ The rules that bite most often:
 - Verb-first naming; predicates prefixed `is`/`has`/`can`/`should`
 - Prefer `type` over `interface`; types live in the module's `types.ts`
 - Throw on invalid input at boundaries; fail fast for critical errors
-- Deep freeze return values — `freezeInPlace` for objects you just built,
-  `cloneAndFreeze` for caller-provided ones, both from `@utils/freeze.js`
+- Deep freeze return values — `freezeInPlace` for objects you just built (from
+  `@utils/freeze-in-place.js`), `cloneAndFreeze` for caller-provided ones (from
+  `@utils/clone-and-freeze.js`)
 
 ### Readability Patterns
 
@@ -374,7 +375,8 @@ branches unless explicitly instructed in the current conversation.
 **Allowed** (read-only and additive):
 
 - Read-only: `git status`, `git diff`, `git log`, `git show`, `git blame`,
-  `git branch --list`, `git ls-files`, `git remote -v`, `git rev-parse`
+  `git branch --list`, `git ls-files`, `git remote -v`, `git rev-parse`,
+  `git grep`
 - Additive: `git add <specific-files>`, `git commit -m "..."` (new commits
   only), `git fetch` (without `--prune`), `git stash push`
 - `git commit --no-verify` is permitted — deliberate workflow for repos carrying

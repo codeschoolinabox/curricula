@@ -43,7 +43,7 @@ consistency, never intent or style.
   terms.
 - **repo snapshot** — plain data the entry materializes for exactly the targets
   parsing found: npm script names, bin tool names, existing paths, headings of
-  referenced targets. The checks' only window onto the repo.
+  referenced targets, matching globs. The checks' only window onto the repo.
 - **baseline** — the corpus as it reads at `HEAD`; the headings check diffs the
   working corpus against it.
 - **check** — one verification over the corpus (links, roster, claims,
@@ -72,7 +72,10 @@ consistency, never intent or style.
   document: a heading, bold term, backticked token, or Mermaid node label, with
   its line.
 - **candidate loss** — an extracted term present in a source document at a git
-  ref and absent from every destination file (`--migration` output).
+  ref and absent from every destination file (`--migration` output). Matching is
+  exact text, no case folding — a recapitalized term shows up as a candidate
+  loss for the ledger to answer; a term repeated in the source is listed once,
+  at its first location.
 
 ### Scope of each check
 
@@ -94,18 +97,48 @@ consistency, never intent or style.
 - **claims** — see the glossary entry. **Recognition contract** (the claims
   analog of the slug contract): extraction tokenizes inside multi-word code
   spans; then each token is classified —
-  1. `npm run <script>` → the script must exist in `package.json` (error);
-  2. `npx <tool>` → the tool must exist in `node_modules/.bin` (error);
-  3. a path-like token opening with an infrastructure prefix (`./` and `../`
+  1. `npm run <script>` → the FIRST word after `npm run` must exist in
+     `package.json` (error); trailing arguments are not part of the script name.
+  2. `npx <tool>` → the FIRST word after `npx` must exist in `node_modules/.bin`
+     (error); trailing flags are not part of the tool name.
+  3. **path-like** means: the token's characters stay within path charset
+     (letters, digits, `@ . / - _`), AND it contains `/` AND (opens with a
+     recognized prefix, OR its last segment carries a known file extension, OR
+     it ends with `/`) — or it is a bare filename with a known extension. Tokens
+     like `import/order` (eslint rule ids), `Object.freeze` (API references),
+     and `vi.mock('./sibling')` (code snippets) are not path-like and are
+     ignored. `@utils/<rest>` is the one recognized import alias: it resolves
+     against the alias's real target and a broken one is an error.
+     `./node_modules/<rest>` is a shell-invocation form and resolves from the
+     repo root.
+  4. a path-like token opening with an infrastructure prefix (`./` and `../`
      resolved from the document's directory, `.claude/`, `scripts/`, `.github/`,
-     `eslint-rules/`, or a root doc name) → must exist (error);
-  4. a path-like token without a leading prefix is resolved from its document's
-     directory — error when that lands in infrastructure, advisory otherwise;
-  5. a `git <verb>` in an AGENTS file → the verb must appear in that file's own
-     Allowed/Forbidden lists (error);
-  6. named skip classes: tokens containing `<placeholders>`, `~/`-home paths
-     (outside the repo), and glob tokens that match at least one file (a glob
-     matching nothing follows the path rules above).
+     `eslint-rules/`) → must exist (error);
+  5. a path-like token without a leading prefix, and any bare filename, resolves
+     from its document's directory FIRST and from the repo root as the fallback;
+     existing at either accepts. A missing one is an error when the doc-relative
+     resolution lands in an infrastructure directory, advisory otherwise
+     (existing content-tree paths pass silently — the advisory is a
+     broken-reference nudge, not a permanent nag; the no-volatile-paths style
+     rule lives in governance prose, not here). Stated reach limit: resolution
+     never searches the repo — an elliptical bare `<filename>.ts` mention of a
+     file living elsewhere reads as a standing advisory; accepted trade-off,
+     flagged for the human audit. A bare extension with no basename (`.mdx`
+     alone, naming a file TYPE) is not a filename and is ignored;
+  6. a `git <verb>` in an AGENTS file (any root `AGENTS*.md`) → the VERB (first
+     word after `git`) must appear among the verbs of that file's own
+     Allowed/Forbidden lists (error); matching is verb-level, so
+     `git rev-parse HEAD` is covered by a bare `git rev-parse` list entry. List
+     entries themselves define the sets and are never flagged.
+  7. named skip classes: tokens containing `<angle>` or `[square]` placeholders;
+     bare prefixes standing alone as syntax under discussion (`./`, `../`, git's
+     `:/`, a lone infrastructure directory); bare glob patterns with no
+     directory (pattern illustrations); `~/`-home paths (outside the repo);
+     leading-`/` tokens (app slash-commands like `/clear` and root-relative
+     shorthand — neither is a checkable repo path); bare convention nouns
+     (`README.md`, `DOCS.md`, `types.ts`, `index.ts`, `tests/` — generic
+     directory-anatomy references, not file claims); and glob tokens that match
+     at least one file (a glob matching nothing follows the path rules above).
 - **headings** — advisory only: headings present in a document at `HEAD` and
   missing from the entire working corpus.
 

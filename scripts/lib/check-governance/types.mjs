@@ -29,6 +29,8 @@
  *   file).
  * @property {Record<string, string[] | null>} headingsByPath Headings of
  *   each referenced markdown target (null = unreadable or not markdown).
+ * @property {Set<string>} matchingGlobs Referenced glob tokens that match at
+ *   least one file (a glob matching nothing follows the path rules).
  *
  * @typedef {'error'|'advisory'} Severity `error` sets exit 1; `advisory`
  *   never affects the exit code.

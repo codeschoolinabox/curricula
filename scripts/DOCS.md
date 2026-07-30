@@ -29,8 +29,10 @@ context — checks reference them via JSDoc imports, never redeclare them).
    (link targets, path-like claim tokens) and materializes the repo snapshot as
    PLAIN DATA: npm script names, `node_modules/.bin` tool names, the set of
    referenced paths that exist, and the headings of referenced markdown targets.
-   Load and Resolve are the ONLY phases that touch the filesystem, git, or
-   `package.json`.
+   A referenced `.js`/`.jsx` path exists when its `.ts`/`.tsx` sibling does —
+   the repo's NodeNext import convention writes `.js` specifiers for `.ts`
+   sources. Load and Resolve are the ONLY phases that touch the filesystem, git,
+   or `package.json`.
 4. **Check** — each check (links, roster, claims, headings) maps parsed
    documents plus the snapshot to findings (the headings check consumes the
    baseline corpus instead of the snapshot — its second input is documents, not

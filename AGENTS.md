@@ -393,7 +393,8 @@ rewrites branches, publishes to remotes, or destroys work.
 **Allowed** (read-only + additive, reversible):
 
 - Read-only: `git status`, `git diff`, `git log`, `git show`, `git blame`,
-  `git branch --list`, `git ls-files`, `git remote -v`, `git rev-parse`
+  `git branch --list`, `git ls-files`, `git remote -v`, `git rev-parse`,
+  `git grep`
 - Additive: `git add <specific-files>`, `git commit -m "..."` (new commits
   only), `git fetch` (remote-read-only), `git stash push` (reversible)
 - Branch creation: `git branch <new-name>`, `git checkout -b <new-name>` — only
@@ -897,8 +898,8 @@ live in [DEV.md § Sub-model dispatch](./DEV.md#sub-model-dispatch).
 
 ## Vibetoading and Frogramming — house terms
 
-Two house terms appear throughout this org's documentation, defined in
-`spiralearn/welcome-to-programming/syllabus.md` §0.3:
+Two house terms appear throughout this org's documentation (defined inline below
+— the inline definitions are the contract):
 
 - **Frogramming** (🔬) — development grounded in the notional machine. The
   practitioner predicts what the machine will do, evaluates output against that

@@ -8,6 +8,7 @@ function snapshot(overrides = {}) {
 		binTools: [],
 		existingPaths: new Set<string>(),
 		headingsByPath: {},
+		matchingGlobs: new Set<string>(),
 		...overrides,
 	};
 }

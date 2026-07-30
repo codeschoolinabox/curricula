@@ -94,8 +94,9 @@ a command tripping two rules teaches both corrections in one round-trip:
 
 ## Protocol
 
-Identical **in protocol** to the user-global `block-destructive-git.py`
-precedent: payload on stdin; a deny printed as the
+Identical **in protocol** to the user-global
+`~/.claude/hooks/block-destructive-git.py` precedent (on the human's machine,
+outside this repo): payload on stdin; a deny printed as the
 `hookSpecificOutput.permissionDecision` JSON on stdout; always exit 0; fail open
 on any exception. The test layout deliberately differs — suites live in `tests/`
 per this repo's test-organization convention. Precedence semantics live in
