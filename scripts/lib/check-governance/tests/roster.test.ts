@@ -247,6 +247,8 @@ describe('checkRoster', () => {
 		]);
 	});
 
+	// PINNED(Wave-5 ruling 2026-07-29: a duplicate AR row is an ERROR — the
+	// silent last-wins overwrite is the defect class this checker exists for)
 	it('reports a duplicate AR row instead of letting it overwrite', () => {
 		const table = [
 			'### Sub-model dispatch',

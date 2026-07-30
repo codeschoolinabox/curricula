@@ -71,6 +71,8 @@ describe('parseDocument', () => {
 		expect(parseDocument({ path: 'A.md', content }).tokens).toEqual([]);
 	});
 
+	// PINNED(AR-4 BLOCKER fix 2026-07-29: CommonMark run-length fence nesting —
+	// a longer fence wraps a shorter one as content; reproduced live on DEV.md)
 	describe('a longer fence wraps a shorter fence as content', () => {
 		const content =
 			'````markdown\n```mermaid\nflowchart TD\n    A[inner label] --> B[inner too]\n```\n# Fenced heading\n`fenced token`\n````\n# Real heading\n';

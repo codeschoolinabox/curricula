@@ -32,6 +32,8 @@ describe('presenceDiff', () => {
 		]);
 	});
 
+	// PINNED(5.4 fork DECIDED 2026-07-29: multiplicity loss reports ONCE, at
+	// the FIRST source location; matching is EXACT text, no case folding)
 	it('reports a fully-lost repeated term once, at its first source location', () => {
 		const source = [heading('Removed', 2), heading('Removed', 9)];
 		expect(presenceDiff(source, [])).toEqual([

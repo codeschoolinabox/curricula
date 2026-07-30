@@ -33,6 +33,9 @@ DENY = [
     ("git commit -m 'x' -- .", "name the files"),
     ("git commit -m 'x' -- :/", "name the files"),
     ("git commit -m 'x' -- *", "name the files"),
+    # PINNED(Wave-3 ruling 2026-07-29: --amend is denied — history rewrites are
+    # forbidden by governance, and the repo's own guarantee must hold on a fresh
+    # checkout without the machine-local destructive-git sibling)
     # --amend is a history rewrite (covered here so a fresh checkout is
     # guarded); bare --amend also aggregates the message/pathspec teaching
     ("git commit --amend -m 'x' -- DEV.md", "amend"),

@@ -106,6 +106,8 @@ describe('checkClaims', () => {
 		]);
 	});
 
+	// PINNED(Wave-6 ruling 2026-07-30: a machine-generated target — gitignored,
+	// absent until produced — is an advisory, never an error)
 	it('downgrades a missing gitignored target to advisory', () => {
 		const docs = parsed(
 			'A.md',

@@ -127,6 +127,9 @@ if result.stdout.strip().startswith("{"):
 else:
     check("emits JSON", False, result.stdout[:80])
 
+# PINNED(AR-2+AR-3 convergent BLOCKER 2026-07-29: exit 1 WITH a report is the
+# checker's NORMAL error-findings state — an implementation silencing it is
+# inverted; "failure" means NO REPORT PRODUCED, the exit code is never consulted)
 print("FIRING: checker exit 1 WITH a report is findings, not failure")
 result = run_hook(
     payload_for(str(PROJECT / "scripts" / "README.md")), checker_exit_one
