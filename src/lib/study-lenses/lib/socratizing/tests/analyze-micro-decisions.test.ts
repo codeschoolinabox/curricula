@@ -1,3 +1,5 @@
+// cspell:ignore entwined entwining
+
 import { describe, expect, it } from 'vitest';
 
 import embody from '../../../embody/index.js';
@@ -17,6 +19,44 @@ function withFailedEnvironment(embodiment: Embodiment, offset = 3): Embodiment {
 			environment: {
 				ok: false,
 				cause: { stage: 'environment', message: 'scope exploded', offset },
+			},
+		},
+	};
+}
+
+/**
+ * Overrides a real embodiment's tokens stage with a failure, keeping a valid
+ * AST. Unreachable through `embody()`, whose ast stage short-circuits on failed
+ * tokens — so this pins that the engine does not read the stage, not that the
+ * combination occurs.
+ */
+function withFailedTokens(embodiment: Embodiment): Embodiment {
+	return {
+		...embodiment,
+		facts: {
+			...embodiment.facts,
+			tokens: {
+				ok: false,
+				cause: { stage: 'tokens', message: 'tokenizer exploded' },
+			},
+		},
+	};
+}
+
+/**
+ * Overrides a real embodiment's entwined stage with a failure, keeping a valid
+ * AST and a healthy environment. Unreachable through `embody()`, whose
+ * environment stage short-circuits on a failed entwined — so no real embodiment
+ * carries this pair. Same guard as `withFailedTokens`.
+ */
+function withFailedEntwined(embodiment: Embodiment): Embodiment {
+	return {
+		...embodiment,
+		facts: {
+			...embodiment.facts,
+			entwined: {
+				ok: false,
+				cause: { stage: 'entwined', message: 'entwining exploded' },
 			},
 		},
 	};
@@ -79,6 +119,86 @@ describe('analyzeMicroDecisions — integration', () => {
 				throw new Error('expected ok:false');
 			}
 			expect(result.error.offset).toBe(0);
+		});
+	});
+
+	describe('unread stages — a failure that is not a refusal', () => {
+		describe('a failed tokens stage', () => {
+			it('still returns ok:true', () => {
+				const result = analyzeMicroDecisions(
+					withFailedTokens(
+						embody('const a = 1;\nconst b = 2;\nconsole.log(a, b);'),
+					),
+				);
+				expect(result.ok).toBe(true);
+			});
+
+			it('still yields questions', () => {
+				const result = analyzeMicroDecisions(
+					withFailedTokens(
+						embody('const a = 1;\nconst b = 2;\nconsole.log(a, b);'),
+					),
+				);
+				if (!result.ok) {
+					throw new Error('expected ok:true');
+				}
+				expect(result.questions.length).toBeGreaterThan(0);
+			});
+
+			it('yields exactly the questions an all-green embodiment yields', () => {
+				expect(
+					analyzeMicroDecisions(
+						withFailedTokens(
+							embody('const a = 1;\nconst b = 2;\nconsole.log(a, b);'),
+						),
+					),
+				).toEqual(
+					analyzeMicroDecisions(
+						embody('const a = 1;\nconst b = 2;\nconsole.log(a, b);'),
+					),
+				);
+			});
+		});
+
+		describe('a failed entwined stage', () => {
+			it('still returns ok:true', () => {
+				const result = analyzeMicroDecisions(
+					withFailedEntwined(
+						embody('const a = 1;\nconst b = 2;\nconsole.log(a, b);'),
+					),
+				);
+				expect(result.ok).toBe(true);
+			});
+
+			it('still yields questions', () => {
+				const result = analyzeMicroDecisions(
+					withFailedEntwined(
+						embody('const a = 1;\nconst b = 2;\nconsole.log(a, b);'),
+					),
+				);
+				if (!result.ok) {
+					throw new Error('expected ok:true');
+				}
+				expect(result.questions.length).toBeGreaterThan(0);
+			});
+
+			it('yields exactly the questions an all-green embodiment yields', () => {
+				// PINNED(AR-3 2026-07-30, human sign-off 2026-07-30: the refusal surface
+				// is ast + environment only. deriveScopeUsage takes the environment
+				// alone, so a later change making scoping need entwined would silently
+				// add a third refusal stage)
+				expect(
+					analyzeMicroDecisions(
+						withFailedEntwined(
+							embody('const a = 1;\nconst b = 2;\nconsole.log(a, b);'),
+						),
+					),
+				).toEqual(
+					analyzeMicroDecisions(
+						embody('const a = 1;\nconst b = 2;\nconsole.log(a, b);'),
+					),
+				);
+			});
 		});
 	});
 
