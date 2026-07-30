@@ -290,13 +290,21 @@ Quick reference for the tools you can fire (or that I can fire on your behalf).
 
 - **`.claude/settings.json`** — shared permissions (read-only verification
   allowlist, write-flag denies) and the tool-hook registrations.
-  `settings.local.json` stays personal and untracked. **Snapshot caveat:** a
-  session reads hooks and permissions at session start — after a tracked
-  settings or hook change lands, restart your session (and peers restart theirs)
-  before relying on it.
-- **`.claude/hooks/`** — the governance-guard (pathspec commits, autofix,
-  markdownlint form, write-flags). After ANY hook edit: `npm run test:hooks` —
-  the suite is the layer's only behavioral contract.
+  `settings.local.json` stays personal and untracked. **Propagation caveat:**
+  whether a settings/hook change binds at session start or hot-reloads has
+  varied across observations (bind-at-start measured 2026-07-29 morning;
+  hot-reload live-fired the same day) — treat it as version-dependent: verify
+  with a cheap probe after a change lands, or restart at the next clean boundary
+  (peers too).
+- **`.claude/hooks/`** — three occupants. The governance-guard (denies bad
+  command shapes: pathspec commits, autofix, markdownlint form, write-flags).
+  The governance-advisory (after an agent edits a governance doc, it relays the
+  checker's findings into that agent's context — invisible to you, never
+  blocking). The **pinned-guard**: when an edit would erase a
+  `// PINNED(<reason>)` test ruling, you get an ASK prompt quoting the pin —
+  approving it is YOUR sign-off on inverting a settled expectation; decline if
+  the ruling stands. After ANY hook edit: `npm run test:hooks` — the suites are
+  the layer's only behavioral contract.
 - **`/btw` (`Cmd+;`)** — side-question overlay that does NOT enter the
   conversation context; use it for questions that don't need to steer the
   running task.

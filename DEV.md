@@ -1100,12 +1100,14 @@ its ruling with it:
 on the line above the settled assertion. The obligation: **never invert a pinned
 expectation without human sign-off** — the pinned-guard hook asks before an edit
 erases one. Inventory, zero rot:
-`git grep -n "// PINNED" -- "*.test.ts" "*.test.tsx"`. Honest limit, stated:
-coverage equals seeding discipline — plant a pin at every AR PAUSE resolution
-and human ruling, and never bulk-sweep pins onto expectations nobody ruled on.
-Disambiguation: elsewhere in this file "pin" means a _model pin_ (§ Sub-model
-dispatch); a pinned expectation is a different concept — a test-level ruling
-marker.
+`git grep -n "// PINNED" -- "*.test.ts" "*.test.tsx"`. Python suites use a
+`# PINNED(<reason>)` analog — convention-only: it sits outside both the
+inventory one-liner and the pinned-guard's suffix scope, so reviewers alone hold
+it. Honest limit, stated: coverage equals seeding discipline — plant a pin at
+every AR PAUSE resolution and human ruling, and never bulk-sweep pins onto
+expectations nobody ruled on. Disambiguation: elsewhere in this file "pin" means
+a _model pin_ (§ Sub-model dispatch); a pinned expectation is a different
+concept — a test-level ruling marker.
 
 #### Triangulation
 

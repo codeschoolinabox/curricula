@@ -256,9 +256,10 @@ flowchart TD
 - All measurements run sequentially, synchronously, single-process — the
   injected path's budget is the sum, which is why eslint is out and markdownlint
   reads through the cache.
-- **SessionStart never fires for spawned subagents** — a known hole, baked into
-  the fanout skill: orchestrators paste this script's OUTPUT into briefs, never
-  a retyped number.
+- **SessionStart reach into spawned subagents is unmeasured** (harness-probe
+  covers router reach, not SessionStart) — treated as a hole and baked into the
+  fanout skill: orchestrators paste this script's OUTPUT into briefs, never a
+  retyped number.
 - Windows path shapes are out of reach (no Windows dev/CI platform exists here)
   — a stated restriction, not a silent one.
 

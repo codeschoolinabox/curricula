@@ -13,20 +13,24 @@ Educational content for learning to program, powered by
 
 ## Available Scripts
 
-| Script                  | What it does                                     |
-| ----------------------- | ------------------------------------------------ |
-| `npm start`             | Launch Docusaurus dev server                     |
-| `npm run build`         | Build static site for deployment                 |
-| `npm run typecheck`     | TypeScript type check (tsc --noEmit)             |
-| `npm test`              | Run vitest test suite                            |
-| `npm run lint`          | Run all linters                                  |
-| `npm run format`        | Auto-format all files                            |
-| `npm run validate`      | typecheck + format check + lint + test (CI gate) |
-| `npm run lint:js`       | ESLint on JS/MJS/JSX/TS/TSX files                |
-| `npm run lint:md`       | markdownlint on Markdown files                   |
-| `npm run lint:mdx`      | ESLint + MDX plugin on MDX files                 |
-| `npm run lint:names`    | ls-lint for file/directory naming                |
-| `npm run lint:spelling` | cspell spell-check across all content            |
+| Script                      | What it does                                              |
+| --------------------------- | --------------------------------------------------------- |
+| `npm start`                 | Launch Docusaurus dev server                              |
+| `npm run build`             | Build static site for deployment                          |
+| `npm run typecheck`         | TypeScript type check (tsc --noEmit)                      |
+| `npm test`                  | Run vitest test suite                                     |
+| `npm run lint`              | Run all linters                                           |
+| `npm run format`            | Auto-format all files                                     |
+| `npm run validate`          | typecheck + format check + lint + test (CI gate)          |
+| `npm run lint:js`           | ESLint on JS/MJS/JSX/TS/TSX files                         |
+| `npm run lint:md`           | markdownlint on Markdown files                            |
+| `npm run lint:mdx`          | ESLint + MDX plugin on MDX files                          |
+| `npm run lint:names`        | ls-lint for file/directory naming                         |
+| `npm run lint:spelling`     | cspell spell-check across all content                     |
+| `npm run check:governance`  | Governance-docs checker (links, roster, claims, headings) |
+| `npm run repo:facts`        | Emit measured repo facts (the oracle)                     |
+| `npm run typecheck:scripts` | Type-check `scripts/` (checked-JS project)                |
+| `npm run test:hooks`        | Behavioral suites for the `.claude` tool hooks            |
 
 ## Architecture
 
@@ -39,11 +43,13 @@ kinds of source:
   (`src/pages/`, `src/plugins/`), and the study-lens / embody engine libraries
   under `src/lib/`.
 
-Repo-level tooling lives in `scripts/` (lint orchestration) and `eslint-rules/`
-(local ESLint rules with their tests). Internal conventions, module boundaries,
-and the development workflow live in [DEV.md](./DEV.md); agent governance lives
-in [AGENTS.md](./AGENTS.md) and [AGENTS.principal.md](./AGENTS.principal.md),
-routed by [CLAUDE.md](./CLAUDE.md).
+Repo-level tooling lives in `scripts/` (lint orchestration, the governance
+checker, and the measured-facts oracle — see `scripts/README.md`) and
+`eslint-rules/` (local ESLint rules with their tests). Internal conventions,
+module boundaries, and the development workflow live in [DEV.md](./DEV.md);
+agent governance lives in [AGENTS.md](./AGENTS.md) and
+[AGENTS.principal.md](./AGENTS.principal.md), routed by
+[CLAUDE.md](./CLAUDE.md).
 
 ## Content Structure
 

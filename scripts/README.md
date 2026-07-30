@@ -195,7 +195,9 @@ proven"). Sketch:
 
 Every emission opens with the load-bearing header, verbatim:
 `MEASURED AT <ts>, not asserted — supersedes any memory or handoff claim about these numbers.`
-Known hole, by harness design: SessionStart hooks never fire for spawned
-subagents — orchestrators paste this script's OUTPUT into worker briefs, never a
-retyped number (the fanout skill encodes this). Tests live in
-`scripts/lib/repo-facts/tests/`; pure functions only — no test shells out.
+Known hole: whether SessionStart injection reaches a spawned subagent is a
+harness behavior this repo does not currently measure (harness-probe covers
+router reach, not SessionStart) — so orchestrators paste this script's OUTPUT
+into worker briefs, never a retyped number (the fanout skill encodes this).
+Tests live in `scripts/lib/repo-facts/tests/`; pure functions only — no test
+shells out.

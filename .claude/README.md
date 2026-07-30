@@ -31,7 +31,10 @@ creation (AGENTS.md § Git policy).
   protocol in [hooks/README.md](./hooks/README.md), architecture in
   [hooks/DOCS.md](./hooks/DOCS.md).
 - **`agents/`** — the registered adversarial reviewers (`ar-1`…`ar-5`), invoked
-  by name per DEV.md § Adversarial Review Protocol.
+  by name per DEV.md § Adversarial Review Protocol; the harness-probe (measures
+  the live subagent harness at harness/model upgrades); and the tdd-worker (the
+  orchestrated fan-out's worker contract — the registry snapshots at session
+  start, so a fresh registration is spawnable after the next restart).
 - **`skills/`** — repo skills, loadable from this repo root.
 
 `settings.local.json` is personal, per-machine state (session-accumulated
