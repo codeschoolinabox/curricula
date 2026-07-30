@@ -32,9 +32,11 @@ context — checks reference them via JSDoc imports, never redeclare them).
    Load and Resolve are the ONLY phases that touch the filesystem, git, or
    `package.json`.
 4. **Check** — each check (links, roster, claims, headings) maps parsed
-   documents plus the snapshot to findings. Checks are pure: same input, same
-   findings; they never import fs/git/process — all ground truth arrives as the
-   snapshot's data.
+   documents plus the snapshot to findings (the headings check consumes the
+   baseline corpus instead of the snapshot — its second input is documents, not
+   facts). Checks are pure: same input, same findings; they never import
+   fs/git/process — all ground truth arrives as the snapshot's data or the
+   baseline corpus.
 5. **Report** — findings merge and print grouped by document, in corpus order
    then line order; any error-severity finding sets exit 1, advisories never do.
 
@@ -108,7 +110,15 @@ flowchart TD
 - The roster check hard-fails on an unparseable roster: zero rows or a missing
   heading is a `ROSTER PARSE FAILURE` (exit 1), never an empty map — an empty
   map would silently pass everything. Its reviewer-only scope (`ar-*.md`) is a
-  named skip class inside the check.
+  named skip class inside the check. Row-level breakage never hides: a row whose
+  AR cell does not parse and a duplicate row are each their own error finding at
+  that row's line (a duplicate must never silently overwrite), and a reviewer
+  file with malformed frontmatter is a whole-document error. Attribution follows
+  DEV.md's own "frontmatter wins" rule: parity and missing-row findings
+  attribute to DEV.md at the row (or heading) line; name-vs-stem findings
+  attribute to the agent file. The join key is the file stem. Trigger/Provide
+  framing is checked per existing `### AR-N` section; section existence per row
+  is deliberately not asserted.
 - Zero silent suppressions: every skip class (http links, root-relative
   Docusaurus routes, non-path link targets, content-tree advisory paths, claims
   in `.claude/skills/**` documents, non-reviewer agent files in roster,
