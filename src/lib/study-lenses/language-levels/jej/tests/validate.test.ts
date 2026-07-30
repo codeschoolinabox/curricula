@@ -94,6 +94,11 @@ describe('validate', () => {
 		it('produces no violations', () => {
 			expect(validate(parseFacts('let x = 1;\nalert(x);'))).toEqual([]);
 		});
+
+		it('a parenthesized assignment target produces no violations', () => {
+			// PINNED(human ruling 2026-07-30: published ast is ESTree-shaped — parens fold away; (a) = 5 reaches the level as a plain Identifier assignment, via this file's locally-parsed ParseFacts)
+			expect(validate(parseFacts('let a = 1;\n(a) = 5;'))).toEqual([]);
+		});
 	});
 
 	describe('the union is ordered by source position, not by phase', () => {

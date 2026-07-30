@@ -194,6 +194,21 @@ describe('deriveEntwined', () => {
 			});
 		});
 
+		describe('parenthesized source', () => {
+			it('the init resolves at its unlengthened path — no paren segment', () => {
+				const snippet = { source: 'let x = (1 + 2);', type: 'script' } as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
+				const initType =
+					stage &&
+					stage.ok &&
+					stage.value.byPath['$.body.0.declarations.0.init']?.node.type;
+				// PINNED(human ruling 2026-07-30: published ast is ESTree-shaped — parens fold away; byPath identities never lengthen through parens)
+				expect(initType).toBe('BinaryExpression');
+			});
+		});
+
 		describe('two statements', () => {
 			it('children keep source order — first', () => {
 				const snippet = {

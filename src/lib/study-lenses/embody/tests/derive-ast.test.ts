@@ -1,3 +1,4 @@
+import type { BinaryExpression, ExpressionStatement } from 'acorn';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import deriveAst from '../derive-ast.js';
@@ -34,6 +35,19 @@ describe('deriveAst', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const stage = deriveAst(snippet, deriveTokens(snippet));
 				expect(stage.ok && stage.value.range?.[1]).toBe(9);
+			});
+		});
+
+		describe('parenthesized source', () => {
+			it('a parenthesized operand folds — no ParenthesizedExpression is published', () => {
+				const snippet = { source: '(1 + 2) * 3', type: 'script' } as const;
+				const stage = deriveAst(snippet, deriveTokens(snippet));
+				const statement =
+					stage.ok && (stage.value.body[0] as ExpressionStatement);
+				// PINNED(human ruling 2026-07-30: published ast is ESTree-shaped — parens fold away)
+				expect(
+					statement && (statement.expression as BinaryExpression).left.type,
+				).toBe('BinaryExpression');
 			});
 		});
 

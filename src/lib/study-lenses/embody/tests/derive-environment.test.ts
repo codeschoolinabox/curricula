@@ -575,6 +575,27 @@ describe('deriveEnvironment', () => {
 				);
 			});
 
+			it('a parenthesized reassignment is access write, init false', () => {
+				const snippet = {
+					source: 'let l = 1; (l) = 2;',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const stage = deriveEnvironment(snippet.type, ast, entwined);
+				const write =
+					stage &&
+					stage.ok &&
+					stage.value.root.variables[0]?.references.find(
+						(reference) => reference.access === 'write' && !reference.init,
+					);
+				// PINNED(human ruling 2026-07-30: published ast is ESTree-shaped — parens fold away; a parenthesized write target keeps access write)
+				expect(write && write.access === 'write' && write.init === false).toBe(
+					true,
+				);
+			});
+
 			it('an update is access readwrite, init false', () => {
 				const snippet = { source: 'let l = 1; l++;', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);

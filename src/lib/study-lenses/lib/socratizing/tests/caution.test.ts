@@ -64,6 +64,15 @@ describe('caution analyzers', () => {
 			const results = analyzeAll('for (; x = next(); ) { work(); }', analyze);
 			expect(results).toHaveLength(1);
 		});
+
+		it('fires on a parenthesized assignment in an if condition', () => {
+			const results = analyzeAll(
+				'let value = 0;\nif ((value = 5)) { console.log(value); }',
+				analyze,
+			);
+			// PINNED(human ruling 2026-07-30: published ast is ESTree-shaped — parens fold away; a parenthesized assignment condition still fires)
+			expect(results).toHaveLength(1);
+		});
 	});
 
 	describe('empty-block', () => {
@@ -141,6 +150,12 @@ describe('caution analyzers', () => {
 
 		it('does not fire on function calls', () => {
 			const results = analyzeAll('console.log("hello");', analyze);
+			expect(results).toHaveLength(0);
+		});
+
+		it('does not fire on a parenthesized call', () => {
+			const results = analyzeAll('(console.log("hello"));', analyze);
+			// PINNED(human ruling 2026-07-30: published ast is ESTree-shaped — parens fold away; a parenthesized call keeps its side effect)
 			expect(results).toHaveLength(0);
 		});
 
@@ -276,6 +291,15 @@ describe('caution analyzers', () => {
 				'let first = 0;\nlet second = 0;\nfirst = second = 5;',
 				analyze,
 			);
+			expect(results).toHaveLength(1);
+		});
+
+		it('fires when the inner assignment is parenthesized', () => {
+			const results = analyzeAll(
+				'let first = 0;\nlet second = 0;\nfirst = (second = 5);',
+				analyze,
+			);
+			// PINNED(human ruling 2026-07-30: published ast is ESTree-shaped — parens fold away; a parenthesized inner assignment still chains)
 			expect(results).toHaveLength(1);
 		});
 
