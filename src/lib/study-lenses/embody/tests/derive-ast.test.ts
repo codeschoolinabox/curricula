@@ -34,6 +34,7 @@ describe('deriveAst', () => {
 			it('range marks the source span end at 9', () => {
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const stage = deriveAst(snippet, deriveTokens(snippet));
+				// PINNED(human ruling 2026-07-30: parse facts carry source spans — the scope analyzer reads node ranges)
 				expect(stage.ok && stage.value.range?.[1]).toBe(9);
 			});
 		});
