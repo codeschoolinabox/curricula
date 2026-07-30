@@ -5,11 +5,10 @@ import collectNodes from '../analyzers/collect-nodes.js';
 
 /**
  * `collectNodes` flattens the AST in pre-order (a node before its descendants)
- * and keeps every node whose `type` is in the given set. It was restructured
- * from an imperative push-walk into a functional recursion; these tests pin the
- * OUTER traversal (order + membership). The INNER child-walk it delegates to is
- * separately anchored by `get-child-nodes.test.ts` — this file does not re-prove
- * the walker.
+ * and keeps every node whose `type` is in the given set. These tests pin the
+ * OUTER traversal: membership, self before descendant, and siblings in source
+ * order. The INNER child-walk it delegates to is separately anchored by
+ * `get-child-nodes.test.ts` — this file does not re-prove the walker.
  */
 
 const parse = (source: string): acorn.Program =>
