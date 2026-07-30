@@ -9,7 +9,9 @@ and a **copy-paste agent prompt**. Run the streams in the order the dependency
 graph allows; enforce the golden rules; accept nothing that isn't wired in and
 green.
 
-Verified against live code 2026-07-22. Scope is locked (see §Decisions).
+Verified against live code 2026-07-22; the E1 re-source inventory and the
+Open-questions entry it feeds were re-measured 2026-07-30. Scope is locked (see
+§Decisions).
 
 ---
 
@@ -142,7 +144,8 @@ trace-debugging → `evaluation` (panel-excluded is fine for v1).
 4. **Coloring is shared and facts-driven.** DOM lenses consume the `0a`
    highlighter off `facts.tokens`; they don't each re-tokenize or pull in Prism.
 5. **embody is type-only; the embodiment is frozen.** No runtime import from
-   embody; no mutation of props.
+   `study-lenses/embody` (the greenfield region — the `src/lib/embody` quarry
+   tree is a separate question); no mutation of props.
 6. **No retired vocabulary in migrated content.** Don't reintroduce terms the
    greenfield killed (e.g. `realm`, the old phase names). There is no committed
    banned-terms file in the tree — confirm the current set with the maintainer
@@ -362,24 +365,33 @@ end-to-end lens is gated by runtime plumbing — **run E2 first**.
 - **Target:** `study-lenses/evaluators/tracers/variables/` (doesn't exist yet —
   this becomes the first working greenfield evaluator; even `danger/` is
   types-only).
-- **Engine re-point (trivial, proven):** swap the 5 engine imports from
+- **Engine re-point (trivial, proven):** swap the 9 engine imports — across 6
+  files, 2 of them tests — from
   `study-lenses--deprecated-architecture/lib/engine` to
   `study-lenses/lib/engine` (API-identical; only rename
   `Settlement`→`EngineSettlement`).
-- **⚠️ The real work — re-source 7 NON-engine deps + one decision (cold-start
-  finding; this is NOT the trivial part).** `trace-variables.ts` /
-  `instrument-variables.ts` also import `buildScope` (`scope/`),
-  `justEnoughJs`+`validateProgram`+`ValidationReport` (`validating/`), and
-  `buildNodePathMap`+`getChildNodes`+`ScopeInfo` (`parse-old/`) — all break on
-  relocation. Re-point them to `study-lenses/language-levels/jej/`, which HAS
-  `build-scope`, `get-child-nodes`, `build-node-path-map`, `just-enough-js` —
-  but ships `validate.ts` (NOT `validate-program.ts`) with consolidated types,
-  so reconcile the `validate-program`→`validate` rename/signature and the merged
-  `types.ts`. Do NOT instead reach back into
-  `embody/lib/{scope,validating,parse-old}` at runtime: `parse-old/**` is
-  tsconfig-excluded, and a runtime embody-internal import violates the evaluator
-  contract's type-only embody edge. Consulting the **jej language level** at
-  runtime IS sanctioned — that's the decision.
+- **⚠️ The real work — re-source 8 NON-engine deps + one open question (this is
+  NOT the trivial part).** Three source files — `trace-variables.ts`,
+  `instrument-variables.ts`, `project-scope-table.ts` — carry 11 such imports
+  over 8 names: `buildScope`+`ScopeInfo`+`ScopeAnalysis` (`scope/`),
+  `justEnoughJs`+`validateProgram`+`ValidationReport` (`validating/`),
+  `buildNodePathMap`+`getChildNodes` (`parse-old/`). Three test files add 7 more
+  import statements. All break on relocation.
+  `study-lenses/language-levels/jej/` supplies **two** of the eight —
+  `get-child-nodes` and `just-enough-js`, though `justEnoughJs`'s only current
+  use is the allowlist argument `validate` no longer takes. It ships
+  `validate.ts` (NOT `validate-program.ts`), and that is a re-contract rather
+  than a rename: `ParseFacts` in, `ReadonlyArray<Violation>` out, allowlist
+  hardwired, no report wrapper and no parse of its own — so the tracer needs a
+  new source for the AST it currently reads off `report.ast`, and `ParseFacts`
+  itself requires upstream scope resolution. Where `buildScope`,
+  `buildNodePathMap`, `ScopeInfo` and `ScopeAnalysis` come from is **unsettled —
+  see Open questions**; surface it rather than inventing a source. Do NOT settle
+  it by reaching back into `src/lib/embody/lib/{scope,validating,parse-old}` at
+  runtime (absolute — this is the quarry tree, not `study-lenses/embody`): that
+  tree is read-only migration quarry, and `parse-old/**` is additionally
+  tsconfig-excluded. Consulting the **jej language level** at runtime IS
+  sanctioned.
 - **The adapter (`index.ts`):** `name` + non-throwing `applicability` (JEJ
   gate) + `main(spec)` reading `facts.source`, `try/catch` the eager throw →
   `EvaluatorRefusal`, remap each event's discriminant `event`→`kind`, expose
@@ -394,24 +406,32 @@ end-to-end lens is gated by runtime plumbing — **run E2 first**.
 > `src/lib/embody/lib/evaluating/trace/variables/` (copy A — READ-ONLY; do NOT
 > use the partial orphan under `--deprecated-architecture/embody/`). Create
 > `study-lenses/evaluators/tracers/variables/` as the first greenfield
-> evaluator: move the tier, re-point its 5 engine imports from
-> `study-lenses--deprecated-architecture/lib/engine` to
+> evaluator: move the tier, re-point its 9 engine imports (6 files, 2 of them
+> tests) from `study-lenses--deprecated-architecture/lib/engine` to
 > `study-lenses/lib/engine` (they're API-identical; the only rename is
-> `Settlement`→`EngineSettlement`). **Also re-point the ~7 NON-engine imports**
-> — `buildScope` (`scope/`), `justEnoughJs`/`validateProgram`/`ValidationReport`
-> (`validating/`), `buildNodePathMap`/`getChildNodes`/`ScopeInfo` (`parse-old/`)
-> — to `study-lenses/language-levels/jej/` (it has build-scope/get-child-nodes/
-> build-node-path-map/just-enough-js); reconcile its `validate.ts` (vs
-> `validate-program.ts`) and consolidated types. Do NOT runtime-import embody
-> internals (violates the type-only embody edge; `parse-old` is
-> tsconfig-excluded). Then add an `index.ts` adapter to the `Evaluator` contract
-> — `applicability` runs the JEJ gate without throwing; `main(spec)` reads
-> `facts.source`, converts the tracer's eager throw into an `EvaluatorRefusal`,
-> remaps each event's `event` discriminant to `kind`, and exposes `settled` from
-> the handle's `result` (map the 5 outcomes onto the 3 settlement arms). Decide
-> and document the `iterations`-vs-`seconds` cap. Re-run the tier's existing
-> fake-transport + real-worker tests against `lib/engine`. Full AR cycle.
-> Blocked on E2 proving worker plumbing.
+> `Settlement`→`EngineSettlement`). **Also re-point the 11 NON-engine imports**
+> — 8 names across `trace-variables.ts`, `instrument-variables.ts` and
+> `project-scope-table.ts` (3 test files add 7 more): `buildScope`/`ScopeInfo`/
+> `ScopeAnalysis` (`scope/`), `justEnoughJs`/`validateProgram`/
+> `ValidationReport` (`validating/`), `buildNodePathMap`/`getChildNodes`
+> (`parse-old/`). `study-lenses/language-levels/jej/` supplies only
+> `getChildNodes` and `justEnoughJs`; `validateProgram`/`ValidationReport`
+> re-contract onto its `validate.ts` (`ParseFacts` in,
+> `ReadonlyArray<Violation>` out — no parse, no report wrapper, allowlist
+> hardwired), so state where the tracer's AST now comes from. **`buildScope`,
+> `buildNodePathMap`, `ScopeInfo` and `ScopeAnalysis` are UNSETTLED — surface
+> them to the human before choosing a source; do not invent one. If it is still
+> unsettled when you reach them, stop after the engine re-point and the adapter
+> and report; do not land a partial re-source.** Do NOT runtime-import embody
+> internals (read-only quarry; `parse-old` is also tsconfig-excluded). Then add
+> an `index.ts` adapter to the `Evaluator` contract — `applicability` runs the
+> JEJ gate without throwing; `main(spec)` reads `facts.source`, converts the
+> tracer's eager throw into an `EvaluatorRefusal`, remaps each event's `event`
+> discriminant to `kind`, and exposes `settled` from the handle's `result` (map
+> the 5 outcomes onto the 3 settlement arms). Decide and document the
+> `iterations`-vs-`seconds` cap. Re-run the tier's existing fake-transport +
+> real-worker tests against `lib/engine`. Full AR cycle. Blocked on E2 proving
+> worker plumbing.
 
 ### E3 — the pedagogical trace-debugging lens (fresh build)
 
@@ -465,6 +485,24 @@ end-to-end lens is gated by runtime plumbing — **run E2 first**.
 
 ## Open questions to settle as you go
 
+- **E1's scope + node-path source (blocks E1 — settle before dispatching).**
+  `buildScope`, `buildNodePathMap`, `ScopeInfo` and `ScopeAnalysis` have no
+  drop-in greenfield twin, but part of the capability is already upstream.
+  `EvaluationSpec` hands the evaluator `facts` — including `facts.environment`,
+  the one eslint-scope graph, and `facts.entwined.byPath`, the node index. Read
+  the contract before leaning on it: `source`/`tokens`/`ast`/`entwined` are
+  gate-guaranteed at drive time, but **`environment` is not** — it is the one
+  derived stage that can fail in a reachable `evaluation` phase, as a loud
+  dev-mode embody defect, so narrow its `ok` once and never assert it
+  (`evaluators/README.md`). Enumerate scopes by `root`/`childScopes`, never by
+  `byPath`, which collapses path collisions and would drop a module's outer
+  scope (`lib/scoping/derive-scope-usage.ts`). `lib/scoping` is a leaf the
+  evaluator may import, not something the spec hands it, and its `ScopeUsage`
+  covers the `allDeclarations` half only — the scope tree is deliberately
+  omitted, so `ScopeInfo` has no candidate at all. Re-source the tracer to the
+  facts, or port the legacy shapes? The region rule — one parse truth, one scope
+  analysis — points at the facts; `project-scope-table.ts` is written against
+  the legacy `ScopeInfo` shape.
 - **Built-in roster policy** (0b) — which lenses ship default vs inject-only?
 - **quiz/socratize boundary** — confirm with the indexed-pony owner before
   anyone touches question infra; this playbook assumes they're out.
