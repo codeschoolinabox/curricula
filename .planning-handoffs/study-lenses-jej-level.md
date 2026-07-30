@@ -422,6 +422,11 @@ stands** and treat this as amendment-risk.
   option). If that lands and you need `node.loc`, the two streams collide.
   **Raise this early.**
 
+  > The loc half is also RESOLVED (human ruling 2026-07-30): `locations` stays
+  > OFF as settled contract (`embody/DOCS.md` § Parse decisions, offsets
+  > bullet), and the collision is moot — greenfield jej is offset-based
+  > (`Violation.location`) and reads no `node.loc` anywhere.
+
 ## The quarry map — EXACT paths, with classification
 
 ⚠️ **The canonical quarry is `src/lib/embody/`, NOT the deprecated tree.** The
