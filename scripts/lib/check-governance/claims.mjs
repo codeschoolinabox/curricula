@@ -12,6 +12,9 @@
  * @typedef {import('./types.mjs').Severity} Severity
  */
 
+import resolveFrom from './resolve-from.mjs';
+import resolveUtilsAlias from './utils-alias.mjs';
+
 const INFRA_DIRS = ['.claude', 'scripts', '.github', 'eslint-rules'];
 const CONVENTION_NOUNS = new Set([
 	'README.md',
@@ -23,7 +26,6 @@ const CONVENTION_NOUNS = new Set([
 ]);
 const AGENTS_FILE = /^AGENTS[^/]*\.md$/;
 const PLACEHOLDER = /<[^>]*>|\[[^\]]*\]/;
-const UTILS_ALIAS_TARGET = 'src/lib/utils';
 const PATH_CHARSET = /^[\w@./-]+$/;
 const FILENAME_WITH_EXTENSION =
 	/^[\w@-][\w@.-]*\.(md|mdx|ts|tsx|js|jsx|mjs|cjs|py|json|jsonc|yml|yaml|txt|css|html|svg|sh)$/;
@@ -137,10 +139,10 @@ function judgePathWord(doc, word, line, snapshot) {
 		if (!word.includes('/')) return null;
 	}
 
-	if (word.startsWith('@utils/')) {
-		const target = `${UTILS_ALIAS_TARGET}/${word.slice('@utils/'.length)}`;
-		if (exists(snapshot, target)) return null;
-		return finding(doc.path, line, `${word} — ${target} does not exist`);
+	const aliasTarget = resolveUtilsAlias(word);
+	if (aliasTarget !== null) {
+		if (exists(snapshot, aliasTarget)) return null;
+		return finding(doc.path, line, `${word} — ${aliasTarget} does not exist`);
 	}
 	if (!PATH_CHARSET.test(word.replaceAll('*', 'x').replaceAll('?', 'x'))) {
 		return null;
@@ -229,26 +231,6 @@ function readGitVerbLists(doc) {
  */
 function exists(snapshot, path) {
 	return snapshot.existingPaths.has(path.replace(/\/$/, ''));
-}
-
-/**
- * @param {string} docPath
- * @param {string} relative
- * @returns {string}
- */
-function resolveFrom(docPath, relative) {
-	const lastSlash = docPath.lastIndexOf('/');
-	const docDir = lastSlash === -1 ? [] : docPath.slice(0, lastSlash).split('/');
-	const segments = [...docDir];
-	for (const piece of relative.split('/')) {
-		if (piece === '' || piece === '.') continue;
-		if (piece === '..') {
-			segments.pop();
-			continue;
-		}
-		segments.push(piece);
-	}
-	return segments.join('/');
 }
 
 /**

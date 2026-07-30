@@ -125,7 +125,10 @@
 		"unbackticked",
 		"frontmatters",
 		"Spir",
-		"spirlearn"
+		"spirlearn",
+		"fanout",
+		"reflog",
+		"frontmatter"
 	],
 	"ignorePaths": [
 		"node_modules",

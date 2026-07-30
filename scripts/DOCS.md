@@ -136,6 +136,14 @@ flowchart TD
   shorter fence inside a longer one is content); indented (4-space) code blocks
   and tilde fences are out of reach (none exist in the corpus today) — a stated
   restriction, not a silent one.
+- Glob handling covers `*`, `**`, and `?` only; brace-alternation tokens
+  (`*.{ts,tsx}` forms) fall outside the path charset and are ignored by the
+  claims check — a stated restriction, not a silent one (one such token exists
+  in the corpus today, in DEV.md's module-boundary prose).
+- Glob-token existence (`matchingGlobs`) is answered against `git ls-files` —
+  tracked files only, unlike plain-path existence which is filesystem truth. A
+  glob claim satisfied only by an untracked working-tree file reads as broken
+  until staged — a stated restriction, not a silent one.
 - Severity is two-valued: `error` gates, `advisory` never does.
 - A finding's line is `null` only for whole-document findings (unreadable file,
   roster parse failure).
