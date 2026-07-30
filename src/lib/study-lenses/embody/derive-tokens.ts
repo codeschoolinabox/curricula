@@ -27,6 +27,12 @@ export default function deriveTokens(snippet: Snippet): FactStage<Tokens> {
 				sourceType: snippet.type,
 				ecmaVersion: ECMA_VERSION,
 				onComment: comments,
+				// ranges gives tokens and comments the same [start, end] span
+				// vocabulary the ast stage's nodes carry — one cross-navigation
+				// currency across the parse facts. No consumer reads it yet; the
+				// option lands ahead of one by ruling (facts expose what the
+				// machine computes). Tests pin it on both arrays.
+				ranges: true,
 			}),
 		];
 

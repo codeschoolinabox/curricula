@@ -25,6 +25,12 @@ describe('deriveTokens', () => {
 				const stage = deriveTokens({ source: 'let x = 1', type: 'script' });
 				expect(stage.ok && stage.value.tokens[3].type.label).toBe('num');
 			});
+
+			it('the num token carries its range — [8, 9]', () => {
+				const stage = deriveTokens({ source: 'let x = 1', type: 'script' });
+				// PINNED(human ruling 2026-07-30 Q6: token ranges give cross-navigation parity with the ast stage — infra precedes consumers)
+				expect(stage.ok && stage.value.tokens[3].range).toEqual([8, 9]);
+			});
 		});
 
 		describe('multiple statements with comments', () => {
@@ -42,6 +48,15 @@ describe('deriveTokens', () => {
 					type: 'script',
 				});
 				expect(stage.ok && stage.value.comments[0].type).toBe('Line');
+			});
+
+			it('the line comment carries its range — [11, 17]', () => {
+				const stage = deriveTokens({
+					source: 'let a = 1; // one\nlet b = 2; /* two */',
+					type: 'script',
+				});
+				// PINNED(human ruling 2026-07-30 Q6: token ranges give cross-navigation parity with the ast stage — infra precedes consumers)
+				expect(stage.ok && stage.value.comments[0].range).toEqual([11, 17]);
 			});
 
 			it('tokenizes both statements', () => {
