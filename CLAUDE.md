@@ -16,6 +16,7 @@ names) when a new model qualifies for principal governance; see
 [HUMANS.md § Update triggers](./HUMANS.md#update-triggers):
 
 - `fable`
+- `opus-5`
 
 The two files carry the same policy gates; the capacities above are the
 selection criterion, not the whole difference — `AGENTS.md` additionally carries
