@@ -362,6 +362,28 @@ agent claims things are done; you verify they actually are.
   you'd see? If the agent said "tabs / single quotes / semicolons / 80-col wrap"
   and you see four-space indents, the test was wrong.
 
+**In any message, at any time:**
+
+- **An untagged repo-state claim is the tell — ask for the command.** When the
+  agent says what a file contains, what a command outputs, or what was ruled, it
+  owes you `[measured:]`, `[read:]`, or `[relayed:]` with the evidence
+  ([DEV.md § Sourced claims](./DEV.md#sourced-claims)). The dangerous ones do
+  not sound uncertain; they sound settled. "Which command?" costs you four
+  words.
+- **"You ruled X" with no citation is the other tell.** Rulings live in
+  `PINNED(...)`, a `.planning-handoffs/<campaign>/AR-LOG.md`, or a dated
+  `(human ruling YYYY-MM-DD)` line
+  ([DEV.md § Ruling provenance](./DEV.md#ruling-provenance)). An agent has
+  invented one before. Ask where it is written.
+
+**Citation and claim conventions (your rulings, 2026-07-30 — re-decide any
+time):** the tag rule is canonical in `DEV.md` with a short invariant in both
+AGENTS files pointing in; `§` citations are links with a fragment, swept corpus-
+wide, strict on the heading name with qualifiers left outside the link and
+unanchored numeric shorthand banned; `AGENTS.principal.md` carries its own
+cold-start-handoff heading; the ` ```quote ` fence pilot is deferred to the
+session that builds its checker.
+
 **Standing accepted risks (your rulings, 2026-07-29 — re-decide any time):**
 
 - `~/.claude/settings.json` still auto-approves `git push`/`git rebase`/

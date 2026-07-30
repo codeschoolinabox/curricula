@@ -1007,6 +1007,32 @@ The four written surfaces where this is auditable are **plan files, commit
 bodies, AR reports, and handoffs**. Chat is not auditable and never will be; the
 tag's value there is that a missing one is visible to the reader.
 
+### Ruling provenance
+
+**A ruling is cited or it does not exist.** Before asserting that the human, an
+AR, or a prior decision settled anything, produce the record. The citation is
+the ruling's existence proof, not its footnote — a ruling you cannot locate in
+one command is one you are inventing. Say so and ask.
+
+Three homes already exist; **add no new file**:
+
+- `PINNED(<reason>)` beside a settled test assertion, defended by the
+  pinned-guard hook — see [§ Pinned expectations](#pinned-expectations).
+- `.planning-handoffs/<campaign>/AR-LOG.md` for campaign decisions.
+- A dated inline `(human ruling YYYY-MM-DD)` parenthetical for durable rules,
+  promoted from the AR-LOG at campaign close.
+
+`git grep -n 'human ruling'`, `git grep -n 'PINNED('`, and
+`git ls-files '*AR-LOG*'` are the three lookups.
+
+**Record on confirmation, not eventually.** The read half of this rule is
+useless without the write half: when the human confirms a ruling, write it into
+one of the three homes **in the same turn**. A rule that says "grep three homes,
+and finding nothing means you invented it" degrades into a near-always-fail gate
+agents learn to route around, unless the corpus actually accumulates. A ruling
+that lives only in a plan file under `~/.claude/plans/` does not exist —
+`git grep` cannot see it.
+
 ## Development Workflow
 
 ### Shared-worktree git mechanics
@@ -1723,6 +1749,9 @@ Every adversarial review prompt follows this structure:
   concerns to human, wait for decision"; the human can still choose to patch
   instead.
 - Never skip a PAUSE verdict — it exists to protect the codebase
+- **Cite the ruling you are resolving against.** A resolution that appeals to
+  what the human, an AR, or a prior decision settled produces the record — see
+  [§ Ruling provenance](#ruling-provenance).
 
 ### Sub-model dispatch
 
