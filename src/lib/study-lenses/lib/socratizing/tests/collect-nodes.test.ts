@@ -57,6 +57,14 @@ describe('collectNodes', () => {
 				'Literal',
 			]);
 		});
+
+		it('visits siblings in source order — the first statement before the second', () => {
+			const found = collectNodes(
+				parse('f(); g();'),
+				new Set(['CallExpression']),
+			);
+			expect(found.map((node) => node.start)).toEqual([0, 5]);
+		});
 	});
 
 	describe('boundaries', () => {
