@@ -144,7 +144,7 @@ lib/screening/
   README.md                     (this — orientation + glossary + the default-deny rule)
   DOCS.md                       architectural sketch + Mermaid data flow
   types.ts                      SyntaxAllowlist, NodeRule, ConstraintCheck,
-                                Violation, SourceRange
+                                ChildWithPath, Violation, SourceRange
   parse-settings.ts             the published parse contract, as data
   collect-violations.ts         the default-deny walk — the leaf's principal export
   get-child-nodes-with-path.ts  path-tagged child traversal
