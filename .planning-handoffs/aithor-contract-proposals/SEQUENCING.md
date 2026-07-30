@@ -42,14 +42,17 @@ Source homes today: the vendored types sit in
 the section); the walk is `jej/collect-violations.ts` (+ its traversal helpers
 `get-child-nodes-with-path.ts` / `create-violation.ts`); `Violation` is
 `src/lib/study-lenses/language-levels/types.ts`. The structural floor does not
-exist yet — it is authored at extraction. **Parse-settings caution:** the walk
-takes a pre-parsed `Program` "as the caller parsed it," so the settings live
-with callers — the instrument's one parse is
-`src/lib/study-lenses/embody/derive-ast.ts`, and the project memory records a
-live embody-vs-jej `preserveParens` divergence; the leaf's paired parse must be
-pinned against the settings the DATASETS are authored for (JEJ admits
-`ParenthesizedExpression`, i.e. `preserveParens` ON), not blindly copied from
-either caller.
+exist yet — it is authored at extraction. **Parse-settings: pin against the
+now-committed published-parse contract** (refreshed 2026-07-30 — the repo RULED
+after this memo was first written): the walk takes a pre-parsed `Program` "as
+the caller parsed it," so the settings live with callers, and the package has
+since pinned its published parse — **ESTree-shaped facts (no
+`ParenthesizedExpression` node; the once-live embody-vs-jej `preserveParens`
+divergence is CLOSED — `8d46e88b` dropped the inert allowlist entry), character
+offsets, numeric ECMA year, stable node paths** (`c3e19091` pins the contract;
+`edd84e6a` records the decisions; the instrument's one parse is
+`src/lib/study-lenses/embody/derive-ast.ts`). The leaf's paired parse adopts
+THAT contract; nothing is inferred from a dataset's authorship anymore.
 
 - **Cross-territory obligation (maintainer flag):** this wave writes in the jej
   tree (import repoints) and the levels region's `types.ts` (the re-export). The
@@ -68,15 +71,20 @@ types through the leaf. P3 lands as documentation only: aithor is posture-blind;
 the orchestrator computes `level ∪ featuresOf(seed)` and threads the union as
 the dataset (P7's integration step).
 
-- **Evals impact — large, and this is the cheap moment** (the GPU driver does
-  not exist yet; the corpus re-author lands before any driver is written): all
-  10 CaseSpecs re-authored to the new config shape; `Quadrant` re-derived from
-  `raw` instead of `validate`; `lift-outcome`'s path discriminant
+- **Evals impact — large** (refreshed 2026-07-30: the GPU driver LANDED on
+  2026-07-28 — `02ddc503` and its docs trio — so the original "re-author before
+  the driver exists" cheap-moment clause is struck; the driver is now IN scope):
+  all 10 CaseSpecs re-authored to the new config shape; `Quadrant` re-derived
+  from `raw` instead of `validate`; `lift-outcome`'s path discriminant
   (`config.validate !== false`) rewritten; `featureDrift`'s Histogram re-keyed
   from the deleted `FeatureName` to node types; the two vary-hold cases
   re-expressed under `vary.syntax` + the structural floor; the evals README/DOCS
-  "uncurated" vocabulary re-grounded on `raw`. The harness measures the
-  committed contract until this wave lands, then re-shapes in the same wave.
+  "uncurated" vocabulary re-grounded on `raw`; **plus the landed driver**
+  (`evals/tests/run-eval.browser.test.ts` + its named reads-boundary type)
+  re-pointed at the reshaped config, and a fresh real sample run after the
+  reshape (the committed sample attestation describes the pre-reshape contract).
+  The harness measures the committed contract until this wave lands, then
+  re-shapes in the same wave.
 - **Socket re-pin — FLAG REQUIRED (maintainer relays to the consumer stream):**
   the `Generator*` redeclarations in `orchestrate/generator/types.ts` transcribe
   `AithorResult` / `Refusal` / `Meta` / the config's required fields. The

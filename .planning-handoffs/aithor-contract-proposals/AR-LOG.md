@@ -1,4 +1,4 @@
-<!-- cspell:ignore aithor unparseable ungated Begel unioned -->
+<!-- cspell:ignore aithor unparseable ungated Begel unioned repoints -->
 
 # AR trail — aithor contract-proposals dossier
 
@@ -80,3 +80,27 @@ CONSIDER-level batch-fixes. All fixes are in the current drafts.
 | 11  | Empty candidate parses → `ok: true` `""` under the parse tier    | Named in the sketch as accepted transition behavior; a consumer's gate or size floor excludes it. AR-3 may revisit at the first failing test.                                                                      |
 | 12  | Progress-order notation; `repair(n)`'s number                    | Notation fixed (the final gating is followed by a result or the exhaustion refusal); `repair(n)` carries the refused attempt's number.                                                                             |
 | 13  | `ok`-boolean convention bullet dropped                           | Restored as a structural constraint.                                                                                                                                                                               |
+
+## The gate ruling (2026-07-30)
+
+The maintainer ruled at the Phase-0 → Phase-1 gate, via in-session questions, on
+the seven items of `SEQUENCING.md` § Gate items. **The gate is PASSED — waves
+may open**, in the ratified order, each as its own full-ceremony campaign.
+
+| Item | Subject                                                                             | Ruling                                                                                                                                                       |
+| ---- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1    | Rawness fate (`raw: true` amends ratified P2)                                       | **RATIFIED.** The explicit uncurated opt-in stands; always-curated holds as instrument policy (the consumer never passes it).                                |
+| 2    | P4 collapse (profile out of the config)                                             | **RATIFIED.** Lifecycle profiles live in the consumer-curried injected gate; the `'undetermined'` arm carries the never-gates-what-it-can't-parse carve-out. |
+| 3    | The wave merge (4 waves vs the charter's 6)                                         | **RATIFIED.** Leaf extraction → core reshape (P1+P2+P4) → the move → options API; P7 later, orchestrator-side.                                               |
+| 4    | `Meta.tier` (optional tier-honesty field)                                           | **RATIFIED.** The field lands; additive-optional; the consumer stream re-pins deliberately (flag stands).                                                    |
+| 5    | Wave-1 cross-territory writes (jej repoints; `Violation` moves w/ region re-export) | **Acknowledged/authorized** — executed at Wave-1, under its own ceremony.                                                                                    |
+| 6    | local-llm signal extension                                                          | **Acknowledged** as a named future obligation in another leaf's territory; Wave-4's tiered cancel stands on its own until it lands.                          |
+| 7    | Cancel exit (reject-with-reason)                                                    | **Acted** — already human-ruled at the AR-1 presentation; the gate confirms it; the consumer socket's swallow obligation stands as documented.               |
+
+Same-day context recorded with the ruling: the maintainer separately
+re-confirmed the three AR-2 rulings ("1 yes · 3 propagate · 4+5 ok" — already
+applied above), and the dossier's SEQUENCING was refreshed in the same commit as
+this section for two post-dossier repo events: the eval driver landed
+(2026-07-28) and the published-parse contract was pinned ESTree-shaped/offsets
+(2026-07-30), closing the `preserveParens` divergence the Wave-1 caution had
+warned about.
