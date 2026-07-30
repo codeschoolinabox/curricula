@@ -51,7 +51,8 @@ CLAUDE.md router text in context without reading files: YES | NO
 ```
 
 Cadence: rerun at harness or model upgrades (roughly twice a year). After each
-run, the maintaining agent rewords governance prose and the reviewer agents'
-frontmatters (`ar-*.md`) to match the measurement — never the reverse. This
-file's own `tools:` line stays `Read, Bash, Grep, Glob` permanently, so every
-future run re-tests the full surface regardless of what any single run measured.
+run, once the human directs the reword, the maintaining agent updates governance
+prose and the reviewer agents' frontmatters (`ar-*.md`) to match that run's
+measurement — never the reverse, and never on standing permission. This file's
+own `tools:` line stays `Read, Bash, Grep, Glob` permanently, so every future
+run re-tests the full surface regardless of what any single run measured.

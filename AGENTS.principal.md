@@ -586,12 +586,14 @@ mechanical (read from the type-defined DAG the human locked at the Phase-0 →
 Phase-1 gate, not the agent's judgment about what is independent). The human may
 override to synchronous.
 
-- **The guard.** A type edge ⇒ serialize. The _absence_ of one does NOT license
-  parallel — serialize is the default, parallel the earned exception.
-  Affirmatively clear every non-type coupling first (environment colocation,
+- **The guard.** A type edge ⇒ serialize that pair. Everything else runs
+  parallel by default — serializing work the DAG allows in parallel wastes the
+  human's wall-clock and saves no tokens (human ruling 2026-07-29). Sweep the
+  candidates for non-type couplings first (environment colocation,
   frozen-singleton / registration order, semantic protocol — not an exhaustive
-  list); when in doubt, serialize. A hidden dependency the types can't see is a
-  `types.ts` modeling gap to enrich, not paper over.
+  list): a cleared sweep launches parallel; a coupling that cannot be cleared
+  serializes that pair only, never the wave. A hidden dependency the types can't
+  see is a `types.ts` modeling gap to enrich, not paper over.
 - **A worker** is a fresh subagent owning one complete triangulated unit (a
   function + its ZOMBIES cluster), running the full cycle (ZOMBIES → `ar-3` →
   implement → refactor → `ar-4`) and committing green — full ceremony, never
@@ -620,6 +622,23 @@ still need human approval) **or** a suspected cross-subtree coupling the
 orchestrator then checks at the seam. Gates are unchanged; the win is a
 permanently lean, coherent orchestrator — not throughput.
 
+**Registered instruments** (discoverable by name; each contract lives in its own
+file): the `tdd-worker` subagent (`.claude/agents/tdd-worker.md`) is the worker
+contract above, launched by `subagent_type` — until orchestrators launch it by
+name, its contract covers nothing; the `harness-probe` subagent measures the
+live subagent harness at harness/model upgrades; the `fanout` skill builds
+worker briefs around measured baselines (`scripts/repo-facts.mjs` output pasted,
+never retyped); the `handoff` skill builds and context-free-validates resumption
+points, ending in the human's last-mile instructions; the `btw` skill answers
+side-questions in a subagent so research never floods the orchestrator's
+context.
+
+**Governance surface (invariant):** `CLAUDE.md`, `.claude/agents/*.md`,
+`.claude/skills/**`, `.claude/settings.json`, `DEV.md`, and `AGENTS*.md` are
+governance surface — agents never edit them without explicit human instruction
+in the current conversation. If a review is in flight, reviewers read the
+working copy, not the baseline.
+
 ### Execution mechanics
 
 Field-proven rules for running the fan-out; they bind every orchestrated
@@ -639,10 +658,11 @@ session.
   vitest summary lines), and zero NEW failures outside the named baseline paths.
   Whole-repo green is not the gate — peers hold deliberately-red tests
   mid-increment.
-- **Validate every fan-out decomposition context-free** (invariant 12 applied to
-  launches, not just handoffs): before launching a wave of workers, a fresh
-  agent holding only the launch prompts plus repo access reports where each
-  worker would stumble, guess, or block. Apply must-fix findings first.
+- **Validate every fan-out decomposition context-free** (the "validate every
+  handoff with a context-free agent" invariant applied to launches, not just
+  handoffs): before launching a wave of workers, a fresh agent holding only the
+  launch prompts plus repo access reports where each worker would stumble,
+  guess, or block. Apply must-fix findings first.
 - **PAUSE bubbles, the pipeline continues.** A worker's AR PAUSE stops that
   worker; the orchestrator presents it to the human with the reviewer's proposed
   resolution and keeps every independent thread moving. CONSIDER is resolved by

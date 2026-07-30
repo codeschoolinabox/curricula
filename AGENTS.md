@@ -703,15 +703,15 @@ _mechanical_ — read from the type-defined DAG the human locked at the Phase-0 
 Phase-1 gate, not from the agent's judgment about what is independent. The human
 may override to synchronous at any time.
 
-- **The guard.** A type edge ⇒ **serialize** (mechanical and certain). The
-  _absence_ of a type edge does **not** license parallelism — serialization is
-  the default, parallelism the earned exception. Before parallelizing two
-  subtrees, the orchestrator must affirmatively clear every non-type coupling:
-  among them **environment colocation** (node vs. browser / `Worker` +
-  `SharedArrayBuffer`), **shared frozen-singleton / registration order**, and
-  **semantic-protocol** contracts — examples, not an exhaustive checklist.
-  **When in doubt, serialize**: a missed parallelization costs latency, a wrong
-  one costs coherence.
+- **The guard.** A type edge ⇒ **serialize that pair** (mechanical and certain).
+  Everything else runs **parallel by default** — serializing work the DAG allows
+  in parallel wastes the human's wall-clock and saves no tokens (human ruling
+  2026-07-29). Before launching, the orchestrator sweeps the candidates for
+  non-type couplings: among them **environment colocation** (node vs. browser /
+  `Worker` + `SharedArrayBuffer`), **shared frozen-singleton / registration
+  order**, and **semantic-protocol** contracts — examples, not an exhaustive
+  checklist. A cleared sweep launches parallel; a coupling that cannot be
+  cleared serializes that pair only, never the wave.
 - **Enrichment over reliance.** A real ordering dependency the types cannot see
   is a `types.ts` _modeling gap_. Recurring hidden dependencies are a signal to
   enrich the contract until the type graph **is** the full DAG — not to lean
@@ -776,6 +776,23 @@ the human; fan-out removes no gate. The point is not throughput — it is a
 **permanently lean and coherent orchestrator**, holding only the spine and never
 the churn, so the work stays trackable and drift-resistant across a long body of
 development.
+
+**Registered instruments** (discoverable by name; each contract lives in its own
+file): the `tdd-worker` subagent (`.claude/agents/tdd-worker.md`) is the worker
+contract above, launched by `subagent_type` — until orchestrators launch it by
+name, its contract covers nothing; the `harness-probe` subagent measures the
+live subagent harness at harness/model upgrades; the `fanout` skill builds
+worker briefs around measured baselines (`scripts/repo-facts.mjs` output pasted,
+never retyped); the `handoff` skill builds and context-free-validates resumption
+points, ending in the human's last-mile instructions; the `btw` skill answers
+side-questions in a subagent so research never floods the orchestrator's
+context.
+
+**Governance surface (invariant):** `CLAUDE.md`, `.claude/agents/*.md`,
+`.claude/skills/**`, `.claude/settings.json`, `DEV.md`, and `AGENTS*.md` are
+governance surface — agents never edit them without explicit human instruction
+in the current conversation. If a review is in flight, reviewers read the
+working copy, not the baseline.
 
 ## LLM Collaboration Conventions
 
