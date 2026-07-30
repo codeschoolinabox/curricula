@@ -1692,6 +1692,18 @@ never skip its own review — that defeats the purpose.
 > urge to skip is highest when the review would be most valuable. The only valid
 > skip is an explicit opt-out from the human in the current conversation.
 
+A review is only worth the evidence behind it, so the reviewer is held to the
+same sourcing standard as the agent it is reviewing:
+
+> **Sourced-claims rule**: every repo-state claim in a reviewer's own report
+> carries `[measured:]`, `[read:]`, or `[relayed:]` with its evidence
+> ([§ Sourced claims](#sourced-claims)). Reviewers hold Bash — run the command
+> rather than repeating what the implementing agent said. A review's authority
+> comes from independence, and a relayed claim has none: one of the false
+> assertions this rule exists to stop was relayed out of an AR-1 report and
+> repeated downstream as verified. The dispatching agent states this requirement
+> in the prompt; it is not assumed.
+
 ### How to Run an Adversarial Review
 
 Spawn a separate agent instance with read-only access to the codebase. The
@@ -1908,6 +1920,10 @@ the human explicitly opts out.
   closures)?
 - Are there subtle bugs (off-by-one, null handling, async footguns)?
 - Is error handling appropriate (validate at boundaries only)?
+- **Sourced claims**: every repo-state claim in this increment's prose and
+  commit body carries `[measured:]`/`[read:]`/`[relayed:]` with its evidence
+  ([§ Sourced claims](#sourced-claims)). Catch it here rather than at AR-5 — a
+  commit body is immutable once written, since amend is forbidden.
 - Dead code: are there commented-out blocks, unreachable branches, or leftover
   TODO stubs to remove?
 - Would a junior developer understand this without explanation?
@@ -1961,6 +1977,10 @@ prompt. **Skip:** Only when the human explicitly opts out.
 - Security: an OWASP Top 10 pass across the changed files, scaled to the
   changeset — no-op for pure content, thorough where code touches untrusted
   input or a trust boundary.
+- **Sourced claims**: across the whole changeset, every repo-state claim in the
+  prose and the commit bodies carries `[measured:]`/`[read:]`/`[relayed:]` with
+  its evidence ([§ Sourced claims](#sourced-claims)). Run
+  `npm run check:governance` yourself rather than accepting a reported count.
 - Non-Negotiable Invariants: confirm every invariant in
   [§ Non-Negotiable Invariants](AGENTS.md#non-negotiable-invariants) holds
   across the full changeset.

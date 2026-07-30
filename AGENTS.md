@@ -396,6 +396,13 @@ artifact — not the mechanical change. Prefixes: `add:` (new behavior), `docs:`
 (documentation/types/README), `fix:` (correcting broken behavior), `refactor:`
 (structural changes with no behavior change).
 
+**Commit bodies carry sourced claims.** A body that states a repo fact — a
+count, what a command returned, what a file says, what was ruled — tags it
+`[measured:]`/`[read:]`/`[relayed:]` with its evidence
+([DEV.md § Sourced claims](./DEV.md#sourced-claims)). The body is the one
+durable record of what was actually verified, and it is immutable once written
+since amend is forbidden. AR-4 and AR-5 audit this.
+
 **Default workflow: commit directly to main.** Frequent atomic commits on main
 provide rollback points without branching overhead. Feature branches are the
 human's discretion — agents do NOT create branches unless explicitly instructed
