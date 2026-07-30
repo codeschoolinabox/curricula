@@ -32,7 +32,7 @@
 		"test:browser:shard3": "vitest run --project browser --shard=3/3",
 		"test:browser:parallel": "npm run test:browser:shard1 & npm run test:browser:shard2 & npm run test:browser:shard3 & wait",
 		"test:watch": "vitest",
-		"test:hooks": "python3 .claude/hooks/tests/test-governance-guard.py && python3 .claude/hooks/tests/test-governance-advisory.py",
+		"test:hooks": "python3 .claude/hooks/tests/test-governance-guard.py && python3 .claude/hooks/tests/test-governance-advisory.py && python3 .claude/hooks/tests/test-pinned-guard.py",
 		"validate": "npm run typecheck &&  npm run lint && npm run format:check && npm run test",
 		"prepare": "husky"
 	},

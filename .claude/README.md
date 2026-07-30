@@ -24,10 +24,11 @@ creation (AGENTS.md § Git policy).
   `--update` and first-run snapshot writes; the unit project contains zero
   snapshot tests today — re-evaluate the entry if snapshot tests ever land.
 - **`hooks/`** — project tool hooks: the governance-guard (PreToolUse Bash,
-  deny-capable) and the governance-advisory (PostToolUse Edit|Write,
-  context-only — relays the governance checker's findings for an edited corpus
-  document, never blocks); roster, ubiquitous language, and protocol in
-  [hooks/README.md](./hooks/README.md), architecture in
+  deny-capable), the governance-advisory (PostToolUse Edit|Write, context-only —
+  relays the governance checker's findings for an edited corpus document, never
+  blocks), and the pinned-guard (PreToolUse Edit|Write, ask-only — asks before
+  an edit erases a pinned test expectation); roster, ubiquitous language, and
+  protocol in [hooks/README.md](./hooks/README.md), architecture in
   [hooks/DOCS.md](./hooks/DOCS.md).
 - **`agents/`** — the registered adversarial reviewers (`ar-1`…`ar-5`), invoked
   by name per DEV.md § Adversarial Review Protocol.

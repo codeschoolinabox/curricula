@@ -8,10 +8,10 @@ the tracked configuration inventoried in [../README.md](../README.md). One
 design principle: **mechanise intent-independent command shape; leave intent to
 the reviewers.** Architecture and constraints: [DOCS.md](./DOCS.md).
 
-Current occupants: **the governance-guard and the governance-advisory**. Later
-tool hooks (the pinned-expectation guard) add their glossary and protocol deltas
-to this README — and their sketch amendments to DOCS.md — at their own gates,
-under their own reviews.
+Current occupants: **the governance-guard, the governance-advisory, and the
+pinned-guard**. Later tool hooks add their glossary and protocol deltas to this
+README — and their sketch amendments to DOCS.md — at their own gates, under
+their own reviews.
 
 ## Ubiquitous language
 
@@ -116,6 +116,38 @@ carries a deliberately tiny mirror); **checker / finding** — as used in
 shape is `hookSpecificOutput.hookEventName: "PostToolUse"` plus
 `hookSpecificOutput.additionalContext` carrying the filtered findings — never
 `permissionDecision`.
+
+## Roster — the pinned-guard
+
+`pinned-guard.py` (PreToolUse, matcher `Edit|Write`). Emits only `ask` and
+`silence` — NEVER a deny: `ask` prevents an edit from erasing a pinned
+expectation while routing the decision to the human, mechanising the ERASURE
+face of DEV.md § Pinned expectations' "never invert without human sign-off"
+(inversion that keeps every marker verbatim stays with reviewers — a stated
+limit). Scope: `**/*.test.ts` and `**/*.test.tsx`, suffix-only — identical to
+the convention's inventory scope by construction. An Edit asks when its
+`old_string` carries a `// PINNED(` marker or the 3 on-disk lines directly above
+any match site do (every site checked, `replace_all` or not; a failed disk read
+degrades to the `old_string`-only check). A Write asks when the ON-DISK file
+carries a pin line the new content drops — a multiset of exact marker-line texts
+(leading/trailing whitespace normalized; undecodable bytes replaced, never
+aborting), per occurrence, so duplicate-pin erasure and reworded reasons both
+ask; a Write to a path absent on disk finds no pins and stays silent (the
+new-file red-stub path). One ask quotes every pin involved, in file order.
+Sketch:
+[DOCS.md § Sketch amendment — the pinned-guard pipeline](./DOCS.md#sketch-amendment--the-pinned-guard-pipeline-pretooluse).
+Tests: `tests/test-pinned-guard.py` (the same case-list harness; fixtures are
+real temp files — the on-disk baseline needs no injection seam).
+
+Glossary deltas: **pinned expectation** — a settled test assertion carrying its
+ruling in a `// PINNED(<reason>)` marker, per DEV.md § Pinned expectations;
+distinct from a _model pin_ (the glossary's "pin" entry). **match site** — a
+position in the on-disk file where an Edit's `old_string` occurs; the 3-line
+context check runs at EVERY match site. **new content** — a Write payload's
+`content` field, compared against the on-disk file (the baseline). Protocol
+delta: the ask wire shape is the governance-guard's PreToolUse shape with
+`permissionDecision: "ask"`; `permissionDecisionReason` quotes the pins
+involved.
 
 ## Protocol
 

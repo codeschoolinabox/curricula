@@ -100,6 +100,64 @@ flowchart TD
     T -->|no| S
 ```
 
+### Sketch amendment — the pinned-guard pipeline (PreToolUse)
+
+A third pipeline, sharing only the fail-open boundary: on a PreToolUse
+Edit/Write payload whose `file_path` carries a test suffix (`**/*.test.ts` or
+`**/*.test.tsx` — suffix-only, the same scope as DEV.md § Pinned expectations'
+inventory one-liner, so guard scope and inventory scope cannot drift), the hook
+asks — never denies — before an edit erases a pinned expectation
+(`// PINNED(<reason>)`, DEV.md § Pinned expectations). `ask` prevents the
+erasure AND routes it to the human; a deny would recreate the bootstrap deadlock
+that killed the earlier surface-guard design (a pin could never be legitimately
+changed). What it mechanises is the ERASURE face of "never invert without human
+sign-off" — two stated limits frame that honestly: a Write that keeps every
+marker verbatim while rewriting the assertions beneath them is unguarded
+(inversion-without-erasure stays with reviewers), and the Edit check
+deliberately asks BROADER than erasure (any touch near a pin), failing toward
+ask.
+
+An Edit asks when its `old_string` contains a pin marker, or when the **3
+on-disk lines directly above a match site** carry one — 3 is contract, sized to
+span a multi-line settled assertion (an edit deeper inside a longer pinned
+assertion is a stated residual miss); EVERY match site is checked (`replace_all`
+or not), and any pinned site asks. If the on-disk read fails, the judgment
+degrades to the `old_string`-only check — a verdict already in hand is never
+discarded (a designed degradation, distinct from the exception→silence
+boundary). A Write asks when the ON-DISK file carries a pin line the new content
+drops — the comparison is a MULTISET of exact marker-line texts, per occurrence:
+the new content must carry each pin line at least as many times as the disk
+baseline, so erasing one of two duplicate pins still asks, and REWORDING a pin's
+reason asks too (the old ruling's text is gone; judging a rewording faithful
+would be intent judgment — out of scope by this layer's own rule). Marker-line
+comparison strips leading/trailing whitespace — re-indentation alone never asks
+— and disk reads decode UTF-8 with undecodable bytes REPLACED, never aborting
+the judgment: a corrupted pin line simply cannot be matched by new content,
+which fails toward ask. The on-disk baseline — not `git show HEAD:` — is
+deliberate: a pin is settled when PLANTED, and the seeding discipline plants at
+AR resolutions mid-increment, exactly the uncommitted window a `HEAD` baseline
+is blind to; it also gives Edit and Write one shared disk read with no git
+dependency, and a Write to a path absent on disk (the ordinary new-test-file
+red-stub path) finds vacuously no pins and stays silent. One ask per invocation,
+quoting EVERY erased or touched pin in file order (the layer's
+aggregate-everything law). The matcher roster (`Edit|Write`) is
+documented-not-enumerated: the live edit-tool enumeration probe was
+classifier-blocked this campaign (Wave P ledger); current Claude Code
+documentation names Edit, Write, and NotebookEdit as the file-modifying tools,
+and NotebookEdit cannot produce a test-suffixed path.
+
+```mermaid
+flowchart TD
+    V[raw stdin payload] -->|ingest| W{test-suffixed file_path?}
+    W -->|no, or any error| S2[silence, exit zero]
+    W -->|yes, Edit| X{old_string carries a pin, or the 3 disk lines above any match site do?}
+    W -->|yes, Write| Y{a disk pin line missing from the new content, counted per occurrence?}
+    X -->|yes| Z[one ask on stdout, quoting every pin involved, in file order]
+    X -->|no| S2
+    Y -->|yes| Z
+    Y -->|no| S2
+```
+
 ### Structural constraints
 
 - **Fail-open, always**: exit 0 on every path; a deny exists only as JSON on
@@ -137,7 +195,9 @@ flowchart TD
 - **No hook reads test results or lint results as a gate**: the workflow
   mandates a failing test, a lint-red stub, and `any` placeholders; a guard
   firing on those fires on correct work. Quality-tool output reaches agents only
-  through non-blocking advisory hooks.
+  through non-blocking advisory hooks. (The pinned-guard reads test FILE CONTENT
+  — source text — never test RESULTS; source text is not tool output, so it sits
+  outside this constraint.)
 - **Segment-local judgment**: no state across segments, no state across
   invocations, no stored baselines — nothing to rot.
 - **Self-teaching reasons**: every reason prints the corrected command; the
@@ -160,6 +220,11 @@ flowchart TD
   command substitution. The threat model is agent momentum, not malice (README §
   Threat model); closing bypass would be an unwinnable arms race inside a
   fail-open guard.
+- **Bash-mediated file edits** — `sed -i` or shell redirection over a test file
+  erases a pin with no Edit/Write payload ever fired: a different tool channel
+  than the Bash guard's evasion item above. Accepted per the momentum threat
+  model — this layer's own culture routes file content through Write/Edit, never
+  Bash.
 - **Post-lex shell semantics** — the guard judges the string the agent typed,
   never what the shell makes of it afterwards: an unquoted glob the shell would
   expand before the tool runs is judged as the glob that was typed.
