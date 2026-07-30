@@ -1084,7 +1084,28 @@ it.each([
 
 #### No Comments in Tests
 
-Test names and describe blocks are executable documentation.
+Test names and describe blocks are executable documentation. One sanctioned
+exception: the `// PINNED(<reason>)` marker (next section) — it is a
+machine-checked expectation guard, not commentary.
+
+#### Pinned expectations
+
+A settled test expectation — one an AR PAUSE or a human ruling decided — carries
+its ruling with it:
+
+```ts
+// PINNED(AR-4 2026-07-29: duplicate rows must never silently overwrite)
+```
+
+on the line above the settled assertion. The obligation: **never invert a pinned
+expectation without human sign-off** — the pinned-guard hook asks before an edit
+erases one. Inventory, zero rot:
+`git grep -n "// PINNED" -- "*.test.ts" "*.test.tsx"`. Honest limit, stated:
+coverage equals seeding discipline — plant a pin at every AR PAUSE resolution
+and human ruling, and never bulk-sweep pins onto expectations nobody ruled on.
+Disambiguation: elsewhere in this file "pin" means a _model pin_ (§ Sub-model
+dispatch); a pinned expectation is a different concept — a test-level ruling
+marker.
 
 #### Triangulation
 
