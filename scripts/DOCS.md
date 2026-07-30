@@ -170,7 +170,102 @@ flowchart TD
   humans; the checker only verifies that what prose names exists.
 - Style and formatting — the linters own them.
 - Measuring repo state (node version, tsc counts, lint counts) — that is the
-  measured-facts oracle's job, a separate bounded context.
+  measured-facts oracle's job, a separate bounded context (next section).
 - When and whether the checker runs (advisory hook, CI, npm invocation) — the
   callers' business, registered at their own gates.
 - Fixing — the checker reports; it never edits.
+
+## Measured-facts oracle
+
+Bounded context: the numbers governance keeps misquoting, measured live.
+Typedefs live in `lib/repo-facts/types.mjs` (the oracle's own single typedef
+home — `Measurement` lives here, not in the checker's). The oracle asserts
+nothing: every value it prints was produced by a command it ran, at the
+timestamp it prints beside that value.
+
+### Phases
+
+1. **Measure** — the thin entry runs each producing command (node version
+   against `package.json` engines — printing both values and their inequality is
+   measurement, concluding "therefore do Y" would be judging and stays out;
+   `tsc --noEmit` count + locations; cspell version; markdownlint count; `HEAD`;
+   foreign dirty files from `git status --porcelain`) and captures raw output
+   with a timestamp. eslint is deliberately absent from the injected path
+   (measured 16–19s). "Slow" is a fixed design-time classification — today
+   exactly the markdownlint measurement has a cache path — never a live runtime
+   threshold: nothing measures a command's duration to decide. A slow
+   measurement whose cached value is fresh — and no `--refresh` — is read from
+   the cache instead of run: the cached measurement joins the set with its
+   ORIGINAL timestamp intact.
+2. **Condense** — pure functions reduce raw command output to measurement
+   values: tsc output to a count plus locations (a location-less global
+   diagnostic still counts), porcelain output to a foreign-dirt line list
+   (renames and quoted paths verbatim). Freshly-run slow measurements are
+   persisted to the cache, temp-then-rename.
+3. **Emit** — the formatter opens with the load-bearing header, verbatim:
+   `MEASURED AT <ts>, not asserted — supersedes any memory or handoff claim about these numbers.`
+   — `<ts>` is the EMISSION time; each measurement block below it carries its
+   own label, value, producing command, and the measurement's own timestamp (for
+   a cached value, the two differ — the per-measurement timestamp is the honest
+   one). Condense owns the shape of a value; Emit owns the report's assembly
+   around the values.
+
+### Data flow
+
+```mermaid
+flowchart TD
+    A[producing commands] --> Z{slow measurement with a fresh cache, no refresh flag?}
+    Z -->|yes, read through| K[cache]
+    K -->|cached measurement, original timestamp| C[measurements]
+    Z -->|no, run and capture with timestamp| B[raw outputs]
+    B -->|condense| C
+    C -->|persist freshly-run slow measurements, temp-then-rename| K
+    C -->|format under the measured-at header| E[emission on stdout]
+```
+
+### Running
+
+- `npm run repo:facts` (default) — measure everything, slow measurements through
+  the cache, emit under the header.
+- `--session-start` — the same measurement path, invoked by the SessionStart
+  registration; identical emission.
+- `--refresh` — re-measure eagerly, cache included, then emit.
+
+### Constraints
+
+- **A producing command that fails to run is still its measurement**: the value
+  carries the failure evidence (exit status, stderr head) under the same label,
+  command, and timestamp — never omitted, never a zero. "This tool cannot run
+  here" is itself a measured fact, and precisely the fact this oracle exists to
+  inject.
+- Pure functions (formatting, tsc parsing, porcelain condensing, staleness) are
+  exported and vitest-tested with injected strings — a deliberate, blessed
+  narrowing of the plan's "injected runners": pure functions over strings need
+  no runner seam at all. No test shells out; the thin entry (`repo-facts.mjs`)
+  owns every process/fs/git touch.
+- The header line is contract, verbatim, on its own line — downstream skills and
+  briefs quote it; changing it breaks them.
+- A false zero is the worst failure: a tsc diagnostic without a file(line,col)
+  location still increments the count.
+- "Slow" is an implementation constant measured at execution (the plan's
+  threshold guidance: ~10s); the cache lives at `.claude/cache/repo-facts.json`,
+  written temp-then-rename, gitignored; a torn or unparsable cache read counts
+  as stale.
+- The oracle exits nonzero only on its own operational failure — never because a
+  measured number is bad (that would be judging).
+- All measurements run sequentially, synchronously, single-process — the
+  injected path's budget is the sum, which is why eslint is out and markdownlint
+  reads through the cache.
+- **SessionStart never fires for spawned subagents** — a known hole, baked into
+  the fanout skill: orchestrators paste this script's OUTPUT into briefs, never
+  a retyped number.
+- Windows path shapes are out of reach (no Windows dev/CI platform exists here)
+  — a stated restriction, not a silent one.
+
+### Out of scope
+
+- Judging the numbers — the oracle measures; gates and humans judge.
+- Governance-corpus truthfulness — the checker's context, above.
+- When and whether the oracle runs (the SessionStart registration, briefs, CI) —
+  the callers' business, registered at their own gates.
+- Remediation — the oracle never fixes what it measures.

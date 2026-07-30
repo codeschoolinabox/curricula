@@ -45,6 +45,16 @@
 					}
 				]
 			}
+		],
+		"SessionStart": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "node \"$CLAUDE_PROJECT_DIR\"/scripts/repo-facts.mjs --session-start"
+					}
+				]
+			}
 		]
 	}
 }

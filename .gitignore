@@ -31,3 +31,6 @@ __screenshots__/
 
 # python bytecode from the hooks test suite
 __pycache__/
+
+# machine-generated oracle cache (scripts/repo-facts.mjs)
+.claude/cache/

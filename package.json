@@ -12,6 +12,7 @@
 		"typecheck": "tsc --noEmit",
 		"typecheck:scripts": "tsc --noEmit -p tsconfig.scripts.json",
 		"check:governance": "node scripts/check-governance.mjs",
+		"repo:facts": "node scripts/repo-facts.mjs",
 		"lint:js": "eslint \"**/*.{js,mjs,jsx,ts,tsx}\"",
 		"lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\"",
 		"lint:mdx": "eslint \"**/*.mdx\"",
