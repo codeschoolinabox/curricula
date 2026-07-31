@@ -6,24 +6,23 @@ import BrowserOnly from '@docusaurus/BrowserOnly';
 
 # StudyLenses — checkpoint
 
-The full instrument, live, with the built-in JEJ level, the injected scaffolding
-level, the three ported lenses (parsons and writeme in the Source select;
-debug-props is panel-excluded — reachable only as a focus request), and one
-page-injected demonstration lens ("notes", self-recommending). Expected — the
-SWAP model, EDITOR-FIRST: the editor mounts at load holding the seed program (no
-lens is named in the props, so the home base is the default); opening any lens
-from the Source select REPLACES the editor, and an Edit code button appears
-leading the control row; closing — Edit code, or the `—` none entry — brings the
-editor back with your edits intact; typing until the debounce settles re-renders
-the phases; breaking the parse bars the downstream phases with the parser's
-cause and fixing it reopens them; the type toggle re-derives immediately,
-closing any open lens first (as do level and posture changes); the level
-selector lists both levels — the built-in JEJ and the injected scaffold — each
-with its own live fit mark; under strict with a `debugger;` the masked overlay
-covers the content region and the strip goes inert and dim — the editor stays
-alive; the guide reveals its topics after the panel. The honored-focus variant
-(a lens open AT load) is prop-driven — add `lens="notes"` to the harness to see
-it; it is jsdom-pinned and was machine-replayed before this page flipped to the
+The full instrument, live, with the scaffolding level, the three ported lenses
+(parsons and writeme in the Source select; debug-props is panel-excluded —
+reachable only as a focus request), and one page-injected demonstration lens
+("notes", self-recommending). Expected — the SWAP model, EDITOR-FIRST: the
+editor mounts at load holding the seed program (no lens is named in the props,
+so the home base is the default); opening any lens from the Source select
+REPLACES the editor, and an Edit code button appears leading the control row;
+closing — Edit code, or the `—` none entry — brings the editor back with your
+edits intact; typing until the debounce settles re-renders the phases; breaking
+the parse bars the downstream phases with the parser's cause and fixing it
+reopens them; the type toggle re-derives immediately, closing any open lens
+first (as do level and posture changes); the level selector shows the scaffold's
+live fit mark; under strict with a `debugger;` the masked overlay covers the
+content region and the strip goes inert and dim — the editor stays alive; the
+guide reveals its topics after the panel. The honored-focus variant (a lens open
+AT load) is prop-driven — add `lens="notes"` to the harness to see it; it is
+jsdom-pinned and was machine-replayed before this page flipped to the
 editor-first default.
 
 export function InstrumentHarness() {
