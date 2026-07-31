@@ -1,16 +1,17 @@
 import type { Node } from 'acorn';
 
+import type { ChildWithPath } from './types.js';
+
 /**
  * Every direct child AST node of a parent, each paired with the path segment
  * that reaches it.
  *
  * @remarks
- * The path-tracking companion to `getChildNodes`, and a vendored tree-walk: the
- * same traversal rules, but each child carries a `segment`. An object-valued
- * property yields its key (`'init'`); an array element yields `'key.index'`
- * where the index is the source-array position — so a `null` hole leaves later
- * siblings' indices unshifted. `null`, primitives, and non-node objects (a
- * `Literal.regex`) never satisfy the node check, so they contribute no segment.
+ * An object-valued property yields its key (`'init'`); an array element yields
+ * `'key.index'` where the index is the source-array position — so a hole does
+ * not renumber its later siblings. `null`, primitives, and non-node objects — a
+ * `Literal.regex` record, and the numeric span array the published settings add
+ * — never satisfy the node check, so they contribute no segment.
  *
  * The caller's walk joins its parent path with each `segment` to form a full
  * Program-rooted node path (e.g. `'$.body.0.declarations.0'`) as it descends —
@@ -32,19 +33,6 @@ export default function getChildNodesWithPath(
 		.filter((key) => !isMetadataKey(key))
 		.flatMap((key) => segmentedChildren(key, properties[key]));
 }
-
-/**
- * A direct child paired with the path segment that reaches it from its parent.
- *
- * Kept local rather than in `./types.ts`: this is vendored-machinery vocabulary,
- * not a level model, and promoting it would route sibling increments through one
- * shared types file for no gain. The consuming walk (`collect-violations.ts`)
- * destructures it, inferring the shape structurally — no import needed.
- */
-type ChildWithPath = {
-	readonly child: Node;
-	readonly segment: string;
-};
 
 /** The keys present on every acorn node that are never children. */
 function isMetadataKey(key: string): boolean {
@@ -72,8 +60,8 @@ function segmentedChildren(
 
 /**
  * Whether a value looks like an acorn AST node: a non-null object with a string
- * `type`. Kept local (not shared with `getChildNodes`) so each vendored
- * traversal stays independently readable.
+ * `type`. Small enough to read inline, so it stays beside its one caller rather
+ * than becoming a shared export.
  */
 function isNode(value: unknown): value is Node {
 	return (

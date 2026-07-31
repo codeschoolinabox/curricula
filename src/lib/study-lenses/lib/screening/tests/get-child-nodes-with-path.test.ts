@@ -1,14 +1,11 @@
-import { parse, type Program } from 'acorn';
+import { type Node, parse, type Program } from 'acorn';
 import { describe, expect, it } from 'vitest';
 
 import getChildNodesWithPath from '../get-child-nodes-with-path.js';
+import PARSE_SETTINGS from '../parse-settings.js';
 
 function programOf(source: string): Program {
-	return parse(source, {
-		ecmaVersion: 'latest',
-		sourceType: 'module',
-		locations: true,
-	});
+	return parse(source, { ...PARSE_SETTINGS, sourceType: 'module' });
 }
 
 describe('getChildNodesWithPath', () => {
@@ -122,6 +119,33 @@ describe('getChildNodesWithPath', () => {
 			const [{ child: array }] = getChildNodesWithPath(program.body[0]);
 			const segments = getChildNodesWithPath(array).map((pair) => pair.segment);
 			expect(segments).toEqual(['elements.1']);
+		});
+	});
+
+	describe('a source span is not a child', () => {
+		it('the published settings put a span on a parsed program', () => {
+			const program = programOf('42;');
+			expect(Object.keys(program)).toContain('range');
+		});
+
+		it('a source-span array contributes no segment of its own', () => {
+			const program = programOf('42;');
+			const segments = getChildNodesWithPath(program).map(
+				(pair) => pair.segment,
+			);
+			expect(segments).toEqual(['body.0']);
+		});
+	});
+
+	describe('a metadata key is never a child', () => {
+		it('a node-shaped value on a metadata key contributes no segment', () => {
+			const synthetic = {
+				type: 'Synthetic',
+				start: { type: 'Identifier' },
+				end: { type: 'Identifier' },
+				loc: { type: 'Identifier' },
+			} as unknown as Node;
+			expect(getChildNodesWithPath(synthetic)).toHaveLength(0);
 		});
 	});
 });

@@ -3,13 +3,12 @@ import type { Node, Program } from 'acorn';
 import freezeInPlace from '@utils/freeze-in-place.js';
 
 import createViolation from '../../lib/screening/create-violation.js';
+import getChildNodesWithPath from '../../lib/screening/get-child-nodes-with-path.js';
 import type {
 	NodeRule,
 	SyntaxAllowlist,
 	Violation,
 } from '../../lib/screening/types.js';
-
-import getChildNodesWithPath from './get-child-nodes-with-path.js';
 
 /**
  * Screens every node of a program's syntax tree against an allowlist's node

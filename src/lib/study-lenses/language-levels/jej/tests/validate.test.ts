@@ -2,8 +2,8 @@ import { parse, type Identifier, type Node } from 'acorn';
 import { analyze } from 'eslint-scope';
 import { describe, expect, it } from 'vitest';
 
+import getChildNodesWithPath from '../../../lib/screening/get-child-nodes-with-path.js';
 import type { LanguageLevel, ParseFacts } from '../../types.js';
-import getChildNodesWithPath from '../get-child-nodes-with-path.js';
 import validate from '../validate.js';
 
 function parseFacts(source: string): ParseFacts {
