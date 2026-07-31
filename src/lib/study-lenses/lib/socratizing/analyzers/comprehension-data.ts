@@ -25,7 +25,11 @@ function literalType(
 	}
 
 	const { value } = getRecord(node);
-	// Skip null (handled separately), regex, and bigint
+	// Skip the object-valued literals: null, which `null-and-undefined` below
+	// fires on exactly as this clause skips it, and regex, whose value is a
+	// RegExp. `typeof null` is already `'object'`, so the explicit `=== null`
+	// clause adds no coverage — it names the hand-off. BigInt is not skipped:
+	// `typeof 10n` is `'bigint'`, and the engine analyzes whatever parsed.
 	if (value === null || typeof value === 'object') {
 		return null;
 	}

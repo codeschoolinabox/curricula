@@ -44,6 +44,15 @@ import type {
 /**
  * Analyzes an embodiment for micro-decision and comprehension questions.
  *
+ * @remarks The walk runs over the raw acorn tree from `facts.ast`; it does not
+ * read `facts.entwined`. Neither `PointAnalyzer` nor `getChildNodes` is
+ * contracted on an `EntwinedNode` wrapper — both read acorn's own node shape —
+ * and reading the binding would add a `FactStage` narrow whose failure branch a
+ * real embodiment never reaches, since the environment stage already
+ * short-circuits on a failed `entwined`. The surface this entry does declare is
+ * pinned in `tests/analyze-micro-decisions.test.ts` (`PINNED`, human sign-off
+ * 2026-07-30).
+ *
  * @param embodiment - A frozen `Embodiment` from `embody()`.
  * @param config - Optional filtering configuration; every field defaults to
  *   "include everything".

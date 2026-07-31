@@ -5,6 +5,18 @@
  * the learner has discovered — constructs not covered by
  * reference.md. These are fundamentally voice choices (exploring
  * the language beyond the documented subset).
+ *
+ * `with-statement` is the one analyzer here whose reachability depends on how
+ * the host parsed the source. `with` is a SyntaxError anywhere strict mode is
+ * in force — an ES module, a `'use strict'` program or function, a class body
+ * (strict with no directive) — so the node reaches this file only when the
+ * source was embodied as a script (`embody(source, { type: 'script' })`) and
+ * the statement sits outside every such region: parsing as a script is
+ * necessary, not sufficient. Under the module goal the result is not a missing
+ * node but a refusal — tokenizing still succeeds, the ast stage carries the
+ * parser's cause, and `analyzeMicroDecisions` returns `ok: false` before any
+ * analyzer runs. Both parse goals are supported; `'module'` is only embody's
+ * default. Every other analyzer here fires under either goal.
  */
 
 import type { Node } from 'acorn';

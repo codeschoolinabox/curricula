@@ -86,9 +86,9 @@ levels: `syntax`, `semantics`, `connections`, `goals`, `userExperience`. The raw
 
 Context strings use Purpose, Behavior, Strategy, and Implementation naturally.
 This is not labeling — it's vocabulary practice. When a learner reads "This
-**implementation** choice affects how other developers read the code," they're
-reinforcing their understanding of what "implementation" means in the PBSI
-framework.
+**implementation** choice affects how **other developers** read the code,"
+they're reinforcing their understanding of what "implementation" means in the
+PBSI framework.
 
 The distinction matters most for strategy-level micro-decisions like input
 validation approaches (while-head vs boolean-flag vs while-true-break), where
@@ -387,7 +387,9 @@ flowchart TD
 
 - **No validation** — the caller confirms the facts; this module assumes valid
   JeJ.
-- **No formatting** — static analysis only.
+- **No formatting** — the module returns questions, never a rewritten source;
+  `location` offsets index the exact string `embody()` parsed, so a caller can
+  slice its own text with them.
 - **No execution** — this is static analysis only.
 - **No fix suggestions** — it asks questions, never tells the learner what to
   change.

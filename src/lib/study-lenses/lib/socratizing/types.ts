@@ -168,8 +168,14 @@ export type Category =
  * (Kalyuga et al. 2003). `location` is a zero-indexed half-open `[start, end)`
  * offset range into the source (from `node.start`/`node.end`); it inlines its
  * shape rather than name a range type. `context` uses PBSI vocabulary and
- * references rhetorical audiences where natural. All fields are readonly;
- * `CodeQuestion` objects are frozen.
+ * references rhetorical audiences where natural; where it does, the term is
+ * usually bolded in place — the `let-vs-const` context ends "This **implementation**
+ * choice affects how **other developers** read the code." That bolding is an
+ * analyzer-authoring habit, not a constraint this type enforces: nothing
+ * validates the markup, many contexts carry no bold at all, and a bolded word
+ * need not be a `PBSILevel` or `Audience` member verbatim (`**user**` appears
+ * where the member is `users`). All fields are readonly; `CodeQuestion`
+ * objects are frozen.
  */
 export type CodeQuestion = {
 	readonly id: string;
