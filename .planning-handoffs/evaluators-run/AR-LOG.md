@@ -184,3 +184,69 @@ hoisted `QUIET_API` fixture the reviewer flagged as an under-sourced deviation
 was removed rather than defended — the api stub now lives inside the helpers
 that build it, so no module-level fixture exists and the deviation is gone
 instead of litigated.
+
+### R3 — `ar-3` on the map-settlement truth table (CONSIDER → all findings fixed)
+
+The reviewer's sharpest catch: **the named triangulator did not defeat the
+anti-pattern the contract exists to forbid.** A two-entry lookup keyed only on
+`outcome` — `cancelled → canceled`, `completed → clean`, never reading the halt
+— passes both the stated Zero row and its intended triangulator, and survives
+eight further rows. The row that actually forces the mapper to read the carried
+data sat thirteen rows down, filed as an edge case. Closed by adding
+`an errored outcome carrying a well-formed natural halt maps to unreachable-outcome, not clean`
+directly after the pair, where it does double duty: it is the real kill-shot for
+the lookup table AND the missing parallel to the natural-halt-on-timeout row.
+
+The reviewer independently confirmed two claims rather than accepting them: (1)
+`an errored settlement whose engine cause is timeout maps to timeout, not defect`
+**is** the only row distinguishing an `error.cause`-keyed implementation from an
+`outcome`-keyed one — it enumerated every row against both candidate selectors;
+(2) the inbound compile probe genuinely fails the build, verified empirically by
+adding a fifth engine cause to a scratch copy and getting `TS2322` from
+`tsc --noEmit`. It also confirmed from `evaluate.ts` that a `failed` outcome
+carries only `failReason` and never an `error`, so the defensive expectation for
+that arm is correct.
+
+Also applied: a block comment naming the three rows that are type-valid against
+the public `EngineSettlement` but unreachable through run's own wiring, so a
+later reader does not mistake them for observed production shapes; a top-level
+`Object.isFrozen` row (freeze coverage had only asserted the deepest leaf); and
+a reworded pin on the machinery-cause row, whose original text described a
+ruling actually enforced two rows away.
+
+### R3 — `ar-4` on the map-settlement implementation (CONSIDER → all findings resolved)
+
+No blockers. The reviewer re-ran the suite, `tsc`, and `eslint` itself, and
+cleared the decisions raised for scrutiny: `freezeInPlace` is genuinely deep
+(recursive with a cycle guard, so the `loc.start` assertion is real coverage);
+freezing the trip **here** is safe and the asymmetry with R1 is correctly
+reasoned, because the object crossed a structured clone and is a fresh
+allocation; four freeze call sites do **not** violate the
+single-settlement-author constraint, which targets the stream's resolution site
+(R4), not a pure mapper's early returns; unconditional `console.warn` matches
+all five other non-test call sites in the region, and no dev-gating mechanism
+exists in this codebase to be inconsistent with; and the precedence ordering is
+correct at the edge that matters — the first branch guards on
+`halt !== null && !halt.natural`, so a natural halt riding a timed-out
+settlement falls through as ratified.
+
+**The finding worth carrying forward: `narrowHalt` validated `trip` shallower
+than its own doc comment claimed.** Every sibling field was checked to its full
+type depth, but `trip` accepted _any_ object — `{}` included — which would have
+typed as `LimitTrip` and ridden onto the `loop-cap` arm, where a consumer
+reading `error.trip.loc.start.line` (exactly what the arm's own test does)
+throws far downstream with no breadcrumb. Unreachable through the committed
+wiring, since `readLimitTrip` validates full depth worker-side before a trip is
+ever stamped — but this function is the one site branded as the sole narrowing
+point for adversarial worker output, so the gap was closed rather than argued
+away: an `isTripShaped` predicate now checks the two named parts, leaf
+finiteness stays iteration-guard's (duplicating its acceptance rule at a second
+site is the thing to avoid), and a triangulating row asserts `trip: {}` routes
+to `unreachable-outcome`.
+
+Also applied: a header comment cross-referencing the R1/R3 freeze asymmetry, so
+the deliberate distinction is legible from `map-settlement.ts` alone. And a
+citation correction worth recording: the `Partial<RunHalt>` cast is justified by
+**R1's ar-4 ruling on the `as RunWorkerConfig` precedent** (narrow-then-validate
+at a clone-transported boundary), not by DEV.md § 2.5, which is scoped to `any`
+and does not reach type assertions.
