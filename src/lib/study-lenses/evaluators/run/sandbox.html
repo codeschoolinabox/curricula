@@ -1,0 +1,325 @@
+<!doctype html>
+<!--
+  run evaluator sandbox — permanent dev infrastructure, not part of run's contract.
+
+  Serve it with the engine's sandbox config, which already sets the COOP/COEP
+  headers SharedArrayBuffer needs and roots at the study-lenses package:
+
+      npx vite --config src/lib/study-lenses/lib/engine/vite.sandbox.config.ts
+
+  then open  /evaluators/run/sandbox.html
+
+  This page drives run through the KIND SURFACE — applicability, then main —
+  never its internal factory, so what you exercise here is exactly what a
+  consuming lens gets. There are deliberately NO io-mock toggles: run injects
+  no dialogs, so a prompt() call is the program's own honest ReferenceError.
+-->
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>run evaluator sandbox</title>
+		<style>
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+			body {
+				font-family: monospace;
+				font-size: 13px;
+				padding: 1.5rem;
+				max-width: 820px;
+				margin: 0 auto;
+			}
+			h1 {
+				font-size: 1.1rem;
+				margin-bottom: 0.4rem;
+			}
+			p.note {
+				color: #666;
+				margin-bottom: 1rem;
+			}
+			textarea {
+				width: 100%;
+				height: 170px;
+				font-family: monospace;
+				font-size: 13px;
+				padding: 0.5rem;
+				tab-size: 2;
+				border: 2px solid #333;
+				resize: vertical;
+			}
+			.controls {
+				margin-top: 0.5rem;
+				display: flex;
+				gap: 0.75rem;
+				align-items: center;
+				flex-wrap: wrap;
+			}
+			button {
+				padding: 0.4rem 1.2rem;
+				font-family: monospace;
+				font-size: 13px;
+				cursor: pointer;
+				border: 2px solid #333;
+				background: #eee;
+			}
+			button:disabled {
+				opacity: 0.5;
+				cursor: not-allowed;
+			}
+			label {
+				font-size: 12px;
+			}
+			input[type='number'] {
+				width: 6em;
+				font-family: monospace;
+				font-size: 13px;
+				padding: 0.25rem;
+				border: 2px solid #333;
+			}
+			select {
+				font-family: monospace;
+				font-size: 12px;
+				border: 2px solid #333;
+				padding: 0.2rem;
+			}
+			#settlement {
+				margin-top: 0.75rem;
+				padding: 0.6rem;
+				border: 1px dashed #999;
+				background: #fafafa;
+				white-space: pre-wrap;
+				min-height: 6em;
+			}
+			.presets {
+				margin-top: 0.5rem;
+			}
+			.presets summary {
+				cursor: pointer;
+				color: #555;
+				font-size: 12px;
+			}
+			.preset-btns {
+				margin-top: 0.4rem;
+				display: flex;
+				gap: 0.5rem;
+				flex-wrap: wrap;
+			}
+			#banner {
+				margin-bottom: 1rem;
+				padding: 0.6rem;
+				border-left: 3px solid #c00;
+				background: #fff0f0;
+				color: #c00;
+				display: none;
+			}
+			.console-note {
+				margin-top: 0.75rem;
+				padding: 0.5rem;
+				border-left: 3px solid #840;
+				background: #fff8e6;
+				font-size: 11px;
+				color: #555;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>run evaluator sandbox</h1>
+		<p class="note">
+			Drives <strong>run</strong> through the kind surface and reports only how
+			the run ended. run emits no events — its whole output is the settlement.
+		</p>
+
+		<div id="banner"></div>
+
+		<textarea id="code" title="the program to run" aria-label="the program to run">
+let total = 0;
+for (let i = 0; i &lt; 5; i = i + 1) {
+	total = total + i;
+}
+</textarea
+		>
+
+		<details open class="presets">
+			<summary>checkpoint snippets</summary>
+			<div class="preset-btns">
+				<button type="button" class="preset" data-code="let total = 0;
+for (let i = 0; i &lt; 5; i = i + 1) {
+	total = total + i;
+}">
+					[1 · clean]
+				</button>
+				<button type="button" class="preset" data-code="null();">
+					[2 · runtime error]
+				</button>
+				<button
+					type="button"
+					class="preset"
+					data-code="while (true) {
+	let x = 1;
+}"
+					data-iterations="1000"
+				>
+					[3 · loop cap]
+				</button>
+				<button type="button" class="preset" data-code="prompt('hi');">
+					[4 · dialog → ReferenceError]
+				</button>
+				<button
+					type="button"
+					class="preset"
+					data-code="while (true) {
+	let x = 1;
+}"
+				>
+					[5 · uncapped → cancel]
+				</button>
+			</div>
+		</details>
+
+		<div class="controls">
+			<button id="run" type="button">[run]</button>
+			<button id="cancel" type="button" disabled>[cancel]</button>
+			<label
+				>axis:
+				<select id="axis">
+					<option value="function">function (script)</option>
+					<option value="module">module</option>
+				</select>
+			</label>
+			<label>
+				<input id="capEnabled" type="checkbox" title="enforce an iteration cap" />
+				max iterations:
+				<input
+					id="cap"
+					type="number"
+					min="-10"
+					placeholder="none"
+					title="the iteration cap, passed to the spec unchanged"
+				/>
+			</label>
+		</div>
+
+		<div id="settlement">click [run] to begin.</div>
+
+		<p class="console-note">
+			The program's own <code>console.log</code> prints to the worker's native
+			console — open dev tools to see it. run neither traps nor forwards it; that
+			is intercept's job.
+		</p>
+
+		<script type="module">
+			import embody from '../../embody/index.ts';
+			import run from './index.ts';
+
+			const codeEl = document.getElementById('code');
+			const runBtn = document.getElementById('run');
+			const cancelBtn = document.getElementById('cancel');
+			const axisEl = document.getElementById('axis');
+			const capEnabledEl = document.getElementById('capEnabled');
+			const capEl = document.getElementById('cap');
+			const settlementEl = document.getElementById('settlement');
+			const bannerEl = document.getElementById('banner');
+
+			// The engine's pause protocol lives on shared memory; without the
+			// isolation headers there is nothing to run in, and run would refuse.
+			if (typeof SharedArrayBuffer === 'undefined') {
+				bannerEl.textContent =
+					'⚠ SharedArrayBuffer is unavailable — serve this page with COOP/COEP headers (use the engine vite config named at the top of this file). run will refuse until then.';
+				bannerEl.style.display = 'block';
+				runBtn.disabled = true;
+			}
+
+			for (const button of document.querySelectorAll('.preset')) {
+				button.addEventListener('click', () => {
+					codeEl.value = button.dataset.code;
+					const preset = button.dataset.iterations;
+					capEnabledEl.checked = preset !== undefined;
+					capEl.value = preset ?? '';
+				});
+			}
+
+			// WHY the empty-string guard: Number('') is 0, and a cap of 0 trips on
+			// the very first guard call — without this check an empty input would
+			// make every loop in every program trip immediately. Absent stays absent.
+			function readCap() {
+				if (!capEnabledEl.checked || capEl.value === '') {
+					return undefined;
+				}
+				return Number(capEl.value);
+			}
+
+			function describe(settlement) {
+				const lines = [`ended: ${settlement.ended}`];
+				if (settlement.ended !== 'error') {
+					return lines.join('\n');
+				}
+				const { error } = settlement;
+				lines.push(`reason: ${error.reason}`, `name: ${error.name}`);
+				lines.push(`message: ${error.message}`);
+				if (error.cause !== undefined) {
+					lines.push(`cause: ${error.cause}`);
+				}
+				if (error.iterationCount !== undefined) {
+					lines.push(`iterationCount: ${error.iterationCount}`);
+				}
+				if (error.trip !== undefined) {
+					const { loopIndex, loc } = error.trip;
+					lines.push(
+						`trip.loopIndex: ${loopIndex}`,
+						`trip.loc: ${loc.start.line}:${loc.start.column} → ${loc.end.line}:${loc.end.column}`,
+					);
+				}
+				return lines.join('\n');
+			}
+
+			let iterator = null;
+
+			runBtn.addEventListener('click', async () => {
+				const axis = axisEl.value;
+				const facts = embody(codeEl.value, {
+					type: axis === 'module' ? 'module' : 'script',
+				}).facts;
+				const cap = readCap();
+				const spec =
+					cap === undefined
+						? { facts, execution: axis }
+						: { facts, execution: axis, iterations: cap };
+
+				settlementEl.textContent = `applicability: ${run.applicability(spec)}\nrunning…`;
+
+				const answer = run.main(spec);
+				if ('refused' in answer) {
+					settlementEl.textContent = `refused: ${answer.reason}`;
+					return;
+				}
+
+				runBtn.disabled = true;
+				cancelBtn.disabled = false;
+				iterator = answer[Symbol.asyncIterator]();
+				// The first pull starts the run; run yields no events, so this one
+				// pull spans the whole run.
+				const pull = iterator.next();
+				try {
+					settlementEl.textContent = describe(await answer.settled);
+				} finally {
+					await pull;
+					iterator = null;
+					runBtn.disabled = false;
+					cancelBtn.disabled = true;
+				}
+			});
+
+			cancelBtn.addEventListener('click', () => {
+				if (iterator === null) {
+					return;
+				}
+				// Ceasing to pull IS the cancellation — teardown resolves canceled.
+				void iterator.return();
+				settlementEl.textContent = 'cancel sent — waiting for teardown…';
+			});
+		</script>
+	</body>
+</html>
