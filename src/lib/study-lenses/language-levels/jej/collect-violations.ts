@@ -2,13 +2,13 @@ import type { Node, Program } from 'acorn';
 
 import freezeInPlace from '@utils/freeze-in-place.js';
 
+import createViolation from '../../lib/screening/create-violation.js';
 import type {
 	NodeRule,
 	SyntaxAllowlist,
 	Violation,
 } from '../../lib/screening/types.js';
 
-import createViolation from './create-violation.js';
 import getChildNodesWithPath from './get-child-nodes-with-path.js';
 
 /**

@@ -1,8 +1,7 @@
 import freezeInPlace from '@utils/freeze-in-place.js';
 
+import createViolation from '../../lib/screening/create-violation.js';
 import type { UnresolvedReference, Violation } from '../types.js';
-
-import createViolation from './create-violation.js';
 
 /**
  * Rules every reference of the scope resolution's escape list against the
