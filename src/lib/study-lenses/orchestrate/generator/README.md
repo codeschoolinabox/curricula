@@ -60,6 +60,28 @@ in-flight ask with it; the learner hears that before they start, not after they
 lose one. The view renders inline text only, no heading elements: the
 instrument's sole headings stay the guide's topic titles.
 
+## The view's own words
+
+Two strings are this view's own and learner-visible, so both are written down
+here verbatim, for the reason
+[§ The placeholder socket](#the-placeholder-socket) gives for the socket's: a
+value nobody specified is a value someone invents.
+
+**The warning**, rendered before the first click:
+
+```text
+Generating can take a while. Leaving this view ends it — and so does changing the level, the posture, or the snippet type.
+```
+
+One sentence per fact, and the second names the derivation-context controls
+outright rather than gesturing at them: those are the click in the same band
+that costs a learner an ask, and a learner who was not told loses one and hears
+why afterwards.
+
+**The prompt field's label** is `Your prompt` — the same two words the
+placeholder's marker comment already uses for the same thing, so the learner
+meets one name for it wherever it appears.
+
 ## The generator socket
 
 The view is built SOCKET-FIRST: it calls a `GeneratorSocket` whose
