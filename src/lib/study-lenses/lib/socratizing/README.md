@@ -151,6 +151,12 @@ Question text uses `{name}`, `{method}`, `{operator}` as placeholders filled at
 runtime from the AST. Fifty-six registered analyzers — **48 point** + **8
 program**.
 
+The **Example questions** column is illustrative, not a verbatim spec of the
+emitted strings: cells shorten wording to fit the table, and show only some of a
+`CodeQuestion`'s one-to-three questions. The files under `analyzers/` are the
+authority on exact wording; this table is the authority on the catalog's shape —
+which ids exist, which feature each belongs to, and roughly what each asks.
+
 ### Voice — micro-decision (10)
 
 | ID                          | Feature         | Example questions                                                                                                                                                     |
