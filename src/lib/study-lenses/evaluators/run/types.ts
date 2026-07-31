@@ -52,10 +52,12 @@ export type RunErrorReason = 'threw' | 'loop-cap' | 'timeout' | 'defect';
  * The `'defect'` arm's discriminant. The three machinery values mirror the
  * engine's structured cause union minus its timeout value — carrying that
  * one would restate `reason: 'timeout'`, a second copy of the same fact —
- * and `'unreachable-outcome'` is run's own value for a settlement
- * combination the mapper refuses to guess about (an outcome run's surface
- * cannot produce, a completed settlement missing its halt, a malformed halt
- * payload). The mirror is locked by a compile-time probe in the tests, in
+ * and `'unreachable-outcome'` is run's own value for a condition it refuses
+ * to guess about: a settlement combination the mapper cannot answer (an
+ * outcome run's surface cannot produce, a completed settlement missing its
+ * halt, a malformed halt payload), or an assemble-time dev condition that
+ * short-circuited past the engine — no machine ran there, so no machinery
+ * cause would be honest. The mirror is locked by a compile-time probe in the tests, in
  * the inbound direction: every engine machinery cause must land in this
  * union, so a new engine cause fails the build loudly.
  */

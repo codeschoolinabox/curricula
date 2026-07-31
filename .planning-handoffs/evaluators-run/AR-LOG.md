@@ -250,3 +250,87 @@ citation correction worth recording: the `Partial<RunHalt>` cast is justified by
 **R1's ar-4 ruling on the `as RunWorkerConfig` precedent** (narrow-then-validate
 at a clone-transported boundary), not by DEV.md § 2.5, which is scoped to `any`
 and does not reach type assertions.
+
+### R4 — `ar-3` on the stream-factory cluster (**PAUSE** → both blockers fixed)
+
+Decomposed and executed under the standing ruling: both blockers were
+test-additive or a wrong pinned value, neither contract nor design, so neither
+bubbled. Recorded here for human audit.
+
+**Blocker 1 — the suite omitted the one Node-tier row the committed README
+names.** `run/README.md § Testing posture` places
+"cancel-interrupts-the-pending-pull" on the Node tier, and the cluster had no
+such row. The `@file` block had justified the omission by conflating two
+different things: cancelling a genuinely LIVE worker program (correctly
+impossible under a fake that runs the program eagerly and synchronously) with
+interrupting a pending PULL — which is a microtask-ordering race, not a
+live-program race, and is deterministic: `next()` left unawaited, then
+`return()` on the next line, lands the cancel on the engine's first-write-wins
+slot before the queued halt is pumped. The row was added and **passes**, which
+retires the tier-move flag this plan carried since approval: the README was
+right and the Node tier does reach it. Nothing moves to R5.
+
+**Blocker 2 — a pinned guard-splice value was off by one column.** The row
+pinned `__$il(1, '1:0:1:26');` for `while (true) { let x = 1; }`. Verified
+independently against the project's own acorn
+`[measured: node -e "acorn.parse(src, {locations:true})" on the fixture]` — the
+`WhileStatement` span ends at column **27**, and `splice-loop-guards.ts` passes
+`loop.loc` through unmodified. A correct implementation would have failed that
+row, and an implementer trusting the pin would have encoded a wrong column into
+shipped guard text — the exact attribution iteration-guard's contract exists to
+protect. Corrected to `'1:0:1:27'`.
+
+Also applied: an honest restatement of the triangulation (the pre-start cancel
+and the clean-run row do NOT kill a two-branch fake that never reads the spec —
+the row that forces a real run is the program-throw row, and the `@file` block
+now says so rather than crediting the wrong row), plus four rows the reviewer
+identified as missing: the engine is driven exactly once on a first pull; a
+second pull after a NATURAL settlement starts nothing (the same latch class as
+`9c974dfc`, reached by the completion path rather than the cancel path); the
+assembled spec attaches a worker factory (the assemble edge's unexercised half,
+which an implementation could have omitted and failed only at R5); and accessing
+`settled` without pulling starts nothing.
+
+### R4 — `ar-4` on the stream-factory implementation (**PAUSE** → both concerns fixed)
+
+The reviewer explicitly declined AR-4's discard-and-retry default, judging both
+concerns narrow mechanical patches against an otherwise sound implementation.
+Fixed and re-verified rather than escalated; recorded for audit.
+
+**Concern 1 — the assemble-defect settlement was not frozen.** Every other
+settlement route freezes; this one returned a bare literal, and no test caught
+it. It contradicts `run/DOCS.md § Structural constraints` ("Everything returned
+is deep-frozen at the boundary"), whose phase-7 scope is exactly what R4
+implements, and both available precedents freeze the analogous hand-built object
+(`map-settlement.ts`'s own defensive arm, and danger's pre-start teardown).
+Fixed with `freezeInPlace`, plus the missing row.
+
+**Concern 2 — my eslint-disable justification was factually false.** The comment
+on the `unicorn/relative-url-style` disable claimed the `./` prefix is what
+"every worker site in this repo carries". The reviewer measured all eight other
+`new Worker(` sites: every one resolves through `../`, which that rule never
+reaches. run's is the repo's FIRST same-directory worker/entry pair. The
+decision to keep `./` stands — the engine's `workerFactory` doc pins that
+literal, and dropping it is untested territory for webpack's static specifier
+detection that no test would catch — but the justification now states the true
+reasoning instead of appealing to a pattern that does not exist. Recorded
+because a false claim inside a disable comment is precisely what the
+sourced-claims rule exists to stop, and it survived my own self-review.
+
+The reviewer also audited the structural constraint AR-3 deferred to it and
+confirmed it holds: exactly one resolver call site, both direct routes feeding
+it and the engine route arriving through the pre-registered continuation, the
+teardown latch consulted before the resolver on every route, the handle assigned
+once with `result` read once and never iterated (so neither hang-hazard is
+reachable), and the assemble/mapper asymmetry defensible on two independent
+grounds — `'unreachable-outcome'` is not an engine cause and so cannot come from
+the mapper, and DOCS.md's own diagram draws the assemble bypass as a distinct
+edge.
+
+**Foreign-debt note for this increment.** `[measured: npx tsc --noEmit]` reports
+3 errors, all in
+`src/lib/study-lenses/lib/screening/tests/collect-violations.test.ts` — a
+concurrent stream's file, staged mid-increment (`AM`), zero in run's paths. Per
+DEV.md § Shared-worktree git mechanics the gate is own-directory green with no
+new failures in my paths, not whole-repo green; peers hold deliberately-red
+tests mid-increment.

@@ -134,7 +134,9 @@
 		"reflog",
 		"frontmatter",
 		"unlaunchable",
-		"footgun"
+		"footgun",
+		"microtask",
+		"unawaited"
 	],
 	"ignorePaths": [
 		"node_modules",
