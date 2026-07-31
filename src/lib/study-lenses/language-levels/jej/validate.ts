@@ -1,9 +1,9 @@
 import freezeInPlace from '@utils/freeze-in-place.js';
 
+import collectViolations from '../../lib/screening/collect-violations.js';
 import type { ParseFacts, Violation } from '../types.js';
 
 import checkUndeclaredGlobals from './check-undeclared-globals.js';
-import collectViolations from './collect-violations.js';
 import justEnoughJs from './just-enough-js.js';
 
 /**

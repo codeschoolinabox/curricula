@@ -2,36 +2,29 @@ import type { Node, Program } from 'acorn';
 
 import freezeInPlace from '@utils/freeze-in-place.js';
 
-import createViolation from '../../lib/screening/create-violation.js';
-import getChildNodesWithPath from '../../lib/screening/get-child-nodes-with-path.js';
-import type {
-	NodeRule,
-	SyntaxAllowlist,
-	Violation,
-} from '../../lib/screening/types.js';
+import createViolation from './create-violation.js';
+import getChildNodesWithPath from './get-child-nodes-with-path.js';
+import type { NodeRule, SyntaxAllowlist, Violation } from './types.js';
 
 /**
  * Screens every node of a program's syntax tree against an allowlist's node
  * rules and collects one {@link Violation} per place the grammar leaves the
- * level.
+ * curated slice.
  *
  * @remarks
- * Reshaped generic validating machinery (not policy this level owns), colocated
- * here until a shared leaf exists: the walk is
- * level-agnostic and reads only the node-rule table it is handed. Default-deny
- * — a node type the table does not name is outside the level; `true` admits
- * outright; a constraint check answers legality only, and its message becomes a
- * violation here, the one place a node's range and path are read. The walk is
- * complete, never first-hit: a parent's violation never suppresses its
- * children's.
+ * The module's principal export: one pure pass over a parsed tree, reading only
+ * the node-rule table it is handed. Default-deny — a node type the table does
+ * not name is outside the slice; `true` admits outright; a constraint check
+ * answers legality only, and its message becomes a violation here, the one
+ * place a node's range and path are read. The walk is complete, never
+ * first-hit: a parent's violation never suppresses its children's.
  *
  * Collection order is depth-first, and deterministic — but it is not source
  * order in general. A node precedes its children and array-valued children
  * follow their source-array positions, yet sibling *properties* follow the
  * parser's own property order, which diverges for some node shapes (a template
  * literal's interpolated expressions enumerate before its text chunks). A
- * consumer needing strict source order sorts by `location.start`, as this
- * level's `validate` does.
+ * consumer needing strict source order sorts by `location.start` itself.
  *
  * @param root - The program's syntax tree, as the caller parsed it.
  * @param nodes - The allowlist's node-rule table the walk dispatches on.
@@ -47,7 +40,7 @@ export default function collectViolations(
 /**
  * One walk step: the node's own screening, then every child's, depth-first.
  * Recursion never stops at a violation — a refused parent's children are
- * still screened, so the learner sees the complete picture.
+ * still screened, so a consumer sees the complete picture.
  */
 function walk(
 	node: Node,
@@ -85,11 +78,11 @@ function screenNode(
 
 /**
  * Legality only — what is wrong, never where. Absence is refusal: a node type
- * the table does not name answers with the not-allowed message.
+ * the table does not name answers with the default-deny message.
  */
 function applyRule(rule: NodeRule | undefined, node: Node): true | string {
 	if (rule === undefined) {
-		return `'${node.type}' is not allowed at this language level`;
+		return `'${node.type}' isn't in the admitted syntax`;
 	}
 	if (rule === true) return true;
 

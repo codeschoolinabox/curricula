@@ -1,17 +1,36 @@
+// cspell:ignore quasis
+
 import { parse, type Program } from 'acorn';
 import { describe, expect, it } from 'vitest';
 
 import collectViolations from '../collect-violations.js';
+import PARSE_SETTINGS from '../parse-settings.js';
 
 function programOf(source: string): Program {
-	return parse(source, {
-		ecmaVersion: 'latest',
-		sourceType: 'module',
-		locations: true,
-	});
+	return parse(source, { ...PARSE_SETTINGS, sourceType: 'module' });
 }
 
 describe('collectViolations', () => {
+	describe('an empty program', () => {
+		it('yields no violations under a table admitting the envelope', () => {
+			const program = programOf('');
+			const violations = collectViolations(program, { Program: true });
+			expect(violations).toEqual([]);
+		});
+
+		it('yields exactly one violation under a table admitting nothing', () => {
+			const program = programOf('');
+			const violations = collectViolations(program, {});
+			expect(violations).toHaveLength(1);
+		});
+
+		it('refuses the program envelope itself', () => {
+			const program = programOf('');
+			const violations = collectViolations(program, {});
+			expect(violations[0].nodePath).toBe('$');
+		});
+	});
+
 	describe('a program the allowlist fully admits', () => {
 		it('produces no violations', () => {
 			const program = programOf('x;');
@@ -43,14 +62,14 @@ describe('collectViolations', () => {
 			expect(violations[0].nodeType).toBe('Literal');
 		});
 
-		it('carries the not-allowed message for the node type', () => {
+		it('carries the default-deny message for the node type', () => {
 			const program = programOf('42;');
 			const violations = collectViolations(program, {
 				Program: true,
 				ExpressionStatement: true,
 			});
 			expect(violations[0].message).toBe(
-				"'Literal' is not allowed at this language level",
+				"'Literal' isn't in the admitted syntax",
 			);
 		});
 
@@ -74,7 +93,7 @@ describe('collectViolations', () => {
 	});
 
 	describe('collects every violation across sibling statements', () => {
-		it('two refused nodes produce two violations in source order', () => {
+		it('two refused nodes produce two violations in traversal order', () => {
 			const program = programOf('42; 43;');
 			const violations = collectViolations(program, {
 				Program: true,
@@ -87,8 +106,35 @@ describe('collectViolations', () => {
 		});
 	});
 
+	describe('traversal order is property order, not source order', () => {
+		it('a template literal reports its interpolation before its text chunks', () => {
+			// PINNED(Phase-0 2437801d: the walk publishes the order it delivers —
+			// a template literal enumerates expressions before quasis, so offsets
+			// run 4, 1, 6; a consumer needing source order sorts by offset itself)
+			const program = programOf('`a${b}c`;');
+			const violations = collectViolations(program, {
+				Program: true,
+				ExpressionStatement: true,
+				TemplateLiteral: true,
+			});
+			expect(
+				violations.map((violation) => ({
+					path: violation.nodePath,
+					start: violation.location.start,
+				})),
+			).toEqual([
+				{ path: '$.body.0.expression.expressions.0', start: 4 },
+				{ path: '$.body.0.expression.quasis.0', start: 1 },
+				{ path: '$.body.0.expression.quasis.1', start: 6 },
+			]);
+		});
+	});
+
 	describe('the walk is complete, never first-hit', () => {
 		it("a violating parent's child is still screened and reported", () => {
+			// PINNED(Phase-0 2437801d: completeness is carried by this test, never
+			// by a guard — a first-hit walk under-reports silently, and a violation
+			// count quietly stops meaning what consumers read it as)
 			const program = programOf('{ 42; }');
 			const violations = collectViolations(program, {
 				Program: true,
@@ -216,7 +262,7 @@ describe('collectViolations', () => {
 						: true,
 			});
 			expect(violations.map((violation) => violation.message)).toEqual([
-				"'Literal' is not allowed at this language level",
+				"'Literal' isn't in the admitted syntax",
 				'names longer than 3 characters are outside this fixture',
 			]);
 		});
