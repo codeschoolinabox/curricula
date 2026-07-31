@@ -1,22 +1,29 @@
 import { describe, expect, it } from 'vitest';
 
+import debugPropsLens from '../../../../lenses/debug-props/index.jsx';
+import parsonsLens from '../../../../lenses/parsons/index.jsx';
+import writemeLens from '../../../../lenses/writeme/index.jsx';
 import joinLensRoster from '../join-lens-roster.js';
 
 describe('joinLensRoster', () => {
 	describe('no injections', () => {
-		it('empty injections → the empty built-in roster', () => {
-			expect(joinLensRoster([])).toEqual([]);
+		it('empty injections → exactly the built-in roster', () => {
+			expect(joinLensRoster([])).toEqual([
+				parsonsLens,
+				writemeLens,
+				debugPropsLens,
+			]);
 		});
 	});
 
 	describe('appending injections', () => {
-		it('one injected lens → a roster of exactly that lens', () => {
+		it('one injected lens → appended after the built-in roster', () => {
 			const highlight = {
 				name: 'highlight',
 				applicability: () => true,
 				main: () => null,
 			};
-			expect(joinLensRoster([highlight])).toEqual([highlight]);
+			expect(joinLensRoster([highlight]).slice(-1)).toEqual([highlight]);
 		});
 
 		it('preserves the given injection order', () => {
@@ -30,7 +37,7 @@ describe('joinLensRoster', () => {
 				applicability: () => true,
 				main: () => null,
 			};
-			expect(joinLensRoster([highlight, outline])).toEqual([
+			expect(joinLensRoster([highlight, outline]).slice(-2)).toEqual([
 				highlight,
 				outline,
 			]);
@@ -63,6 +70,20 @@ describe('joinLensRoster', () => {
 			expect(joinLensRoster([]).some((lens) => lens.name === 'scaffold')).toBe(
 				false,
 			);
+		});
+
+		it('sorts before injections in the joined roster', () => {
+			const highlight = {
+				name: 'highlight',
+				applicability: () => true,
+				main: () => null,
+			};
+			expect(joinLensRoster([highlight])).toEqual([
+				parsonsLens,
+				writemeLens,
+				debugPropsLens,
+				highlight,
+			]);
 		});
 	});
 
@@ -102,6 +123,15 @@ describe('joinLensRoster', () => {
 				main: () => null,
 			};
 			expect(() => joinLensRoster([highlight, highlight])).toThrow();
+		});
+
+		it('an injection colliding with a built-in name → throws naming the offender', () => {
+			const shadowingParsons = {
+				name: 'parsons',
+				applicability: () => false,
+				main: () => null,
+			};
+			expect(() => joinLensRoster([shadowingParsons])).toThrow('parsons');
 		});
 	});
 });

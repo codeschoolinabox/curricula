@@ -19,9 +19,9 @@ import type { JoinedLensRoster } from './types.js';
 export default function joinLensRoster(
 	injected: ReadonlyArray<Lens>,
 ): JoinedLensRoster {
-	// The built-ins-first edge has no regression test while the built-in
-	// roster is empty (no black-box test can force this spread) — the first
-	// shipped built-in lens carries the order + built-in-collision tests.
+	// Built-ins first, injections after. That order is this spread's
+	// mechanical consequence, not a precedence claim — a built-in lens
+	// outranks nothing.
 	const joined = [...builtInLenses, ...injected];
 
 	// Loud at the author's desk: a duplicate name anywhere in the combined
