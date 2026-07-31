@@ -116,6 +116,14 @@ describe('caution analyzers', () => {
 			expect(results).toHaveLength(2);
 		});
 
+		it('leaves the trailing else of an else-if chain unnamed', () => {
+			const results = analyzeAll(
+				'if (a) { } else if (b) { } else { }',
+				analyze,
+			);
+			expect(results).toHaveLength(2);
+		});
+
 		it('names the empty block as a control-flow block', () => {
 			const results = analyzeAll('if (true) { }', analyze);
 			expect(results[0].questions.map((q) => q.text)).toEqual([

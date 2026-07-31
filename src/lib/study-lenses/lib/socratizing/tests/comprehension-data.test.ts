@@ -60,6 +60,23 @@ describe('comprehension data analyzers', () => {
 			expect(results).toHaveLength(0);
 		});
 
+		it('fires on a bigint literal', () => {
+			const results = analyzeAll('const x = 10n;', analyze);
+			expect(results).toHaveLength(1);
+		});
+
+		it('names bigint as the type of a bigint literal', () => {
+			const results = analyzeAll('const x = 10n;', analyze);
+			expect(results[0].context).toBe(
+				'A literal bigint value appears in the code.',
+			);
+		});
+
+		it('does not fire on regex literals', () => {
+			const results = analyzeAll('const x = /a+/gi;', analyze);
+			expect(results).toHaveLength(0);
+		});
+
 		it('has correct metadata', () => {
 			const results = analyzeAll('const x = "hello";', analyze);
 			expect(results[0].id).toBe('literal-type');

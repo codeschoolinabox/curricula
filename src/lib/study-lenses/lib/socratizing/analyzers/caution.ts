@@ -82,8 +82,8 @@ const CONDITION_STATEMENTS: ReadonlySet<string> = new Set([
  *
  * One node raises at most one question, so when both arms of an `if` are empty only
  * the first is named — in `if (a) { } else if (b) { } else { }` the trailing empty
- * `else` goes unmentioned because the outer `if` already spent its question on its
- * own empty body.
+ * `else` goes unmentioned because the `if (b)` that owns it already spent its
+ * question on its own empty body. The outer `if (a)` never sees that arm at all.
  */
 function controlFlowClauses(node: Node): readonly Node[] {
 	if (node.type === 'IfStatement') {

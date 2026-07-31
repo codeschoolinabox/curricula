@@ -183,7 +183,10 @@ describe('trap analyzers', () => {
 		});
 
 		it('fires on a for-of loop with an empty body', () => {
-			const results = analyzeAll('const xs = [];\nfor (const x of xs);', analyze);
+			const results = analyzeAll(
+				'const xs = [];\nfor (const x of xs);',
+				analyze,
+			);
 			expect(results).toHaveLength(1);
 		});
 
@@ -206,7 +209,10 @@ describe('trap analyzers', () => {
 		});
 
 		it('does not fire on a do-while loop with a block body', () => {
-			const results = analyzeAll('let x = false;\ndo { run(); } while (x);', analyze);
+			const results = analyzeAll(
+				'let x = false;\ndo { run(); } while (x);',
+				analyze,
+			);
 			expect(results).toHaveLength(0);
 		});
 

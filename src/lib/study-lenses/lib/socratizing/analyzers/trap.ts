@@ -34,8 +34,8 @@ const CONDITION_LABELS: Readonly<Record<string, string>> = {
  * Every statement whose body a stray semicolon can empty, named as a learner would
  * say it. Membership doubles as the type gate: a statement absent from this table
  * has no body a semicolon could swallow. `for...in` is admitted defensively, exactly
- * as `caution.ts`'s `LOOP_STATEMENTS` and `voice-profile.ts`'s loop set admit it —
- * the engine analyzes whatever parsed, not only what the JeJ level admits.
+ * as `caution.ts`'s `LOOP_STATEMENTS` admits it — the engine analyzes whatever
+ * parsed, not only what the JeJ level admits.
  */
 const STATEMENT_LABELS: Readonly<Record<string, string>> = {
 	IfStatement: 'if',
