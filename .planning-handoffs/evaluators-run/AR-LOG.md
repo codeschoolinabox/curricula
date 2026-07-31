@@ -333,4 +333,69 @@ edge.
 concurrent stream's file, staged mid-increment (`AM`), zero in run's paths. Per
 DEV.md § Shared-worktree git mechanics the gate is own-directory green with no
 new failures in my paths, not whole-repo green; peers hold deliberately-red
-tests mid-increment.
+tests mid-increment. (That peer's file compiled clean again by R5.)
+
+### R5 — `ar-3` on the kind-surface cluster (CONSIDER → all findings fixed)
+
+The highest-value finding: **nothing tested `applicability` in the browser.** A
+backwards-wired implementation —
+`applicability = () => typeof Worker === 'undefined'`, constant-true only
+because Node happens to lack Worker — passes every committed Node row and would
+silently flip to `false` in a real browser, breaking the consuming lens's
+options list, which is the one thing D8-as-widened exists to prevent. Closed
+with a browser-tier row asserting `true` where both prerequisites genuinely
+exist, pinned to the ruling.
+
+The reviewer also showed the Node tier's refusal rows **do not triangulate
+alone**: a hardcoded always-refuse `main` passes all of them, because a constant
+reason string containing "Worker" satisfies the wording row without anything
+reading `typeof Worker`. The killing row lives in the browser file
+(`does not refuse where Worker and shared memory both exist`) — a legitimate
+environment-boundary crossing, but previously implicit. The Node file's `@file`
+block now states the pairing outright.
+
+Also applied: `PINNED` markers on the applicability rows at both tiers (they
+encode the same ruling as the refusal row and had none); a freeze row for the
+refusal, matching danger's `freezeInPlace` precedent; the module-axis baseline
+row renamed, since `let x = 1;` settles clean on EITHER axis and the real
+axis-routing proof is the differential top-level-await row beside it; and one
+redundant fixture swapped for `throw 'oops';` — the non-Error throw was
+documented in README § Edge cases but had never been driven through a real
+Worker, only against R1's stub api.
+
+**A gap accepted and named, not silently absorbed: the `SharedArrayBuffer`
+refusal arm is untestable at either tier.** Node has shared memory but no
+Worker, so it never reaches that branch; the browser project always serves
+COOP/COEP, so it never refuses at all. The reviewer confirmed the sandbox's
+documented launch path cannot reach it either — the engine's
+`vite.sandbox.config.ts` bakes the same headers. Reaching it honestly would need
+a third vitest project with a second Playwright context and no COOP/COEP
+middleware: real infrastructure for one defensive row. **Recommended to the
+human as a one-sentence addendum to `run/README.md § Testing posture`**, held
+here rather than written, because that file is a ratified Phase-0 artifact and
+this session's plan committed to leaving Phase-0 docs byte-untouched apart from
+ruling R-2's widening. The human sees it at the 🔍 C1 gate.
+
+### R5 — `ar-4` on the kind-surface implementation (**PAUSE** → blocker fixed)
+
+**A real blocker, and a ceremony slip of mine.** `npx tsc --noEmit` failed on
+R5's own new test file — `TS2379` under `exactOptionalPropertyTypes`, because an
+`it.each` table inferred `iterations` as `number | undefined` and passed it into
+a `Partial<EvaluationSpec>` spread, where the kind's optional `iterations` means
+_absent_, not _present-and-undefined_. I had run `tsc` for R4 and not again
+after editing R5's tests, so step 13's gate never ran; the reviewer caught it
+because it re-measured rather than accepting my reported check list, which
+omitted `tsc` entirely. Fixed with the sibling's established idiom — `specFor`
+now takes explicit parameters and spreads the cap conditionally, the same shape
+`danger/tests/index.browser.test.ts` uses — and re-verified clean. Recorded
+because the failure mode is instructive: the check list I reported from was the
+check list I ran, and both were short one gate.
+
+The reviewer confirmed the rest: `satisfies Evaluator` genuinely preserves run's
+richer return type (the browser suite reads `.error.trip.loc.start` with no cast
+anywhere); `main` executes nothing before returning, since `start()` is
+reachable only from the iterator; `missingCapability` is clean separation rather
+than trivial indirection, because it is the one place probe ORDER is encoded;
+the `.toContain('Worker')`-only pin is the right amount, since DEV.md warns
+against bulk-pinning prose nobody ruled on; and `newspaper-order` structurally
+no-ops on an object-default-export file, matching danger's layout.
