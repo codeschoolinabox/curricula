@@ -1,5 +1,3 @@
-// cspell:ignore entwined entwining
-
 import { describe, expect, it } from 'vitest';
 
 import embody from '../../../embody/index.js';
@@ -183,10 +181,12 @@ describe('analyzeMicroDecisions — integration', () => {
 			});
 
 			it('yields exactly the questions an all-green embodiment yields', () => {
-				// PINNED(AR-3 2026-07-30, human sign-off 2026-07-30: the refusal surface
-				// is ast + environment only. deriveScopeUsage takes the environment
-				// alone, so a later change making scoping need entwined would silently
-				// add a third refusal stage)
+				// PINNED(AR-3 + human sign-off 2026-07-30, mechanism corrected by AR-2
+				// under fresh sign-off the same day: the refusal surface is ast +
+				// environment only. A failed entwined is unreachable past those guards —
+				// derive-environment short-circuits on it — so reading the binding would
+				// add a narrow whose failure branch is dead, not a third refusal stage.
+				// This locks that the entry has no entwined dependency at all)
 				expect(
 					analyzeMicroDecisions(
 						withFailedEntwined(
