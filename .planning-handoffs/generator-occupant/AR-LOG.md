@@ -77,7 +77,52 @@ are not restated here; this log carries what those artifacts do not already say.
   `AbortController` and unmount-abort, cancel, accept, discard, and
   stale-resolution dropping all remain Increment 4's.
 
+## AR resolutions — 2026-08-03 (Increment 3, the job flow)
+
+- **AR-3 CONSIDER — the opener pinned the wrong half, and the fix is now a
+  pin.** "Asking opens the output slot" proved that something renders on an ask,
+  not that it renders BECAUSE the socket announced a stage — so a `hasAsked`
+  boolean flipped in the click handler would have passed every one of the ~31
+  planned tests while violating
+  [generator/DOCS.md § Decisions](../../src/lib/study-lenses/orchestrate/generator/DOCS.md#decisions)'
+  "Why the stages are announced, not inferred". The counter-test — a click the
+  socket has not answered for leaves the slot closed — is carried as
+  `// PINNED(AR-3 2026-08-03)` in `generator/tests/index.test.tsx`. AR-3's minor
+  finding was folded too: the refusal `it.each` scripts BOTH stages, so the
+  ordinary `Generating → Refused` edge is exercised separately from the unusual
+  `Loading → Refused` one rather than collapsing into it.
+
+- **AR-4 PROCEED**, with two non-blocking suggestions. Resolutions:
+  1. **An in-test comment explaining why the three Exceptions tests use `act`
+     rather than the suite's house `waitFor` — DECLINED, on the same ground
+     Increment 2 declined the same shape.**
+     [DEV.md § No Comments in Tests](../../DEV.md#no-comments-in-tests) permits
+     only the `PINNED` marker, and this is a mechanism note, not a settled
+     expectation, so pinning it would stretch a marker the same section warns
+     against bulk-sweeping. The reason lives in the Increment 3 commit body,
+     which is where DEV.md puts it. The suite also self-defends: normalizing
+     those three tests to `waitFor` does not quietly weaken them, it makes the
+     throw escape as an uncaught error and lights up vitest's `Errors` summary
+     line.
+  2. **`attempts: 0` on a success — FLAGGED, deliberately not implemented.**
+     `describeProducer` would render "in 0 attempts" if a socket ever broke
+     [types.ts § GeneratorMeta](../../src/lib/study-lenses/orchestrate/generator/types.ts)'s
+     "Never zero on a success". It stays out because the invariant is stated in
+     prose only — `attempts: number` admits `0` — and neither README nor DOCS
+     lists it among the resolutions the result shape cannot serve. Adding a
+     fourth loud arm would validate a rule the contract does not express.
+
 ## Operational notes (not rulings, but they cost time once)
+
+- **`expect(act(…)).rejects` silently produces a FALSE POSITIVE.** RTL's `act`
+  returns a custom thenable, not a real promise, and vitest's `.rejects`
+  mishandles it: the assertion resolves as `undefined`, its own AssertionError
+  escapes as an UNCAUGHT exception, and the test still reports as passed. Three
+  tests passed vacuously this way before the `Errors` summary line caught it.
+  Use the function form —
+  `await expect(async () => { await act(…) }).rejects.toThrow(…)`. This is the
+  concrete case behind the standing rule to grep all three vitest summary lines,
+  never just `Tests`.
 
 - **The pinned-guard hook cannot be satisfied in a non-interactive session.**
   Its "ask" has no one to answer, so it resolves to a denial and a

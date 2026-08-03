@@ -1,23 +1,33 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render } from '@testing-library/react';
+import {
+	act,
+	cleanup,
+	fireEvent,
+	render,
+	waitFor,
+} from '@testing-library/react';
 import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import GeneratorView from '../index.jsx';
+import type { GeneratorSocket } from '../types.js';
 
-import { unaskedSocket } from './fakes.js';
+import { scriptedSocket, unaskedSocket } from './fakes.js';
 
 afterEach(cleanup);
 
-function mountOver(seed: string): HTMLElement {
+function mountOver(
+	seed: string,
+	socket: GeneratorSocket = unaskedSocket(),
+): HTMLElement {
 	const { container } = render(
 		<React.StrictMode>
 			<GeneratorView
 				onAccept={vi.fn()}
 				onDiscard={vi.fn()}
 				seed={seed}
-				socket={unaskedSocket()}
+				socket={socket}
 			/>
 		</React.StrictMode>,
 	);
@@ -42,10 +52,40 @@ function queryAsk(container: HTMLElement): HTMLButtonElement | null {
 	);
 }
 
+function queryOutput(container: HTMLElement): HTMLElement | null {
+	return container.querySelector<HTMLElement>(
+		'[data-generator] [data-generator-output]',
+	);
+}
+
+function queryPreview(container: HTMLElement): HTMLElement | null {
+	return container.querySelector<HTMLElement>(
+		'[data-generator] [data-generator-preview]',
+	);
+}
+
+function queryMeta(container: HTMLElement): HTMLElement | null {
+	return container.querySelector<HTMLElement>(
+		'[data-generator] [data-generator-meta]',
+	);
+}
+
+function queryRefusal(container: HTMLElement): HTMLElement | null {
+	return container.querySelector<HTMLElement>(
+		'[data-generator] [data-generator-refusal]',
+	);
+}
+
 function writePrompt(container: HTMLElement, text: string): void {
 	const field = queryPrompt(container);
 	if (!field) throw new Error('missing the prompt field');
 	fireEvent.change(field, { target: { value: text } });
+}
+
+function clickAsk(container: HTMLElement): void {
+	const affordance = queryAsk(container);
+	if (!affordance) throw new Error('missing the ask affordance');
+	fireEvent.click(affordance);
 }
 
 describe('GeneratorView', () => {
@@ -195,6 +235,463 @@ describe('GeneratorView', () => {
 			const container = mountOver('');
 			writePrompt(container, 'vary this program');
 			expect(queryPrompt(container)?.value).toBe('vary this program');
+		});
+	});
+
+	describe('an ask leaves (Zero)', () => {
+		it('asking opens the output slot', () => {
+			const container = mountOver(
+				'let x = 1;',
+				scriptedSocket({ announces: ['loading'] }),
+			);
+			clickAsk(container);
+			expect(queryOutput(container)).not.toBeNull();
+		});
+
+		// PINNED(AR-3 2026-08-03: the slot follows the announcement, never the
+		// click — without this a hasAsked flag passes the whole suite)
+		it('a click the socket has not answered for leaves the slot closed', () => {
+			const container = mountOver('let x = 1;', scriptedSocket());
+			clickAsk(container);
+			expect(queryOutput(container)).toBeNull();
+		});
+	});
+
+	describe('one stage, then one candidate (One)', () => {
+		it('reports bring-up while the socket is bringing up', () => {
+			const container = mountOver(
+				'let x = 1;',
+				scriptedSocket({ announces: ['loading'] }),
+			);
+			clickAsk(container);
+			expect(queryOutput(container)?.textContent).toBe(
+				'Getting the generator ready…',
+			);
+		});
+
+		it('reports drafting once the socket announces it', () => {
+			const container = mountOver(
+				'let x = 1;',
+				scriptedSocket({ announces: ['loading', 'generating'] }),
+			);
+			clickAsk(container);
+			expect(queryOutput(container)?.textContent).toBe('Writing a program…');
+		});
+
+		it('renders the candidate in the preview slot', async () => {
+			const container = mountOver(
+				'let x = 1;',
+				scriptedSocket({
+					announces: ['loading', 'generating'],
+					answers: {
+						ok: true,
+						program: 'let x = 2;',
+						meta: { model: 'nano-3', attempts: 1 },
+					},
+				}),
+			);
+			clickAsk(container);
+			await waitFor(() => {
+				expect(queryPreview(container)?.textContent).toBe('let x = 2;');
+			});
+		});
+
+		it('names the producer beside the candidate', async () => {
+			const container = mountOver(
+				'let x = 1;',
+				scriptedSocket({
+					announces: ['loading', 'generating'],
+					answers: {
+						ok: true,
+						program: 'let x = 2;',
+						meta: { model: 'nano-3', attempts: 1 },
+					},
+				}),
+			);
+			clickAsk(container);
+			await waitFor(() => {
+				expect(queryMeta(container)?.textContent).toBe(
+					'Produced by nano-3 in 1 attempt.',
+				);
+			});
+		});
+	});
+
+	describe('both stages, then the answer (Many)', () => {
+		it('replaces the bring-up report rather than stacking a second line', () => {
+			const container = mountOver(
+				'let x = 1;',
+				scriptedSocket({ announces: ['loading', 'generating'] }),
+			);
+			clickAsk(container);
+			expect(queryOutput(container)?.textContent).not.toContain(
+				'Getting the generator ready',
+			);
+		});
+
+		it('drops the stage report once a candidate is on screen', async () => {
+			const container = mountOver(
+				'let x = 1;',
+				scriptedSocket({
+					announces: ['loading', 'generating'],
+					answers: {
+						ok: true,
+						program: 'let x = 2;',
+						meta: { model: 'nano-3', attempts: 1 },
+					},
+				}),
+			);
+			clickAsk(container);
+			await waitFor(() => {
+				expect(queryOutput(container)?.textContent).not.toContain(
+					'Writing a program',
+				);
+			});
+		});
+	});
+
+	describe('the edges of one ask (Boundaries)', () => {
+		it('spends the ask affordance while an ask is live', () => {
+			const container = mountOver(
+				'let x = 1;',
+				scriptedSocket({ announces: ['loading'] }),
+			);
+			clickAsk(container);
+			expect(queryAsk(container)?.disabled).toBe(true);
+		});
+
+		it('arms the ask affordance again once a candidate is on screen', async () => {
+			const container = mountOver(
+				'let x = 1;',
+				scriptedSocket({
+					announces: ['loading', 'generating'],
+					answers: {
+						ok: true,
+						program: 'let x = 2;',
+						meta: { model: 'nano-3', attempts: 1 },
+					},
+				}),
+			);
+			clickAsk(container);
+			await waitFor(() => {
+				expect(queryAsk(container)?.disabled).toBe(false);
+			});
+		});
+
+		it('arms the ask affordance again once a refusal is on screen', async () => {
+			const container = mountOver(
+				'let x = 1;',
+				scriptedSocket({
+					announces: ['loading', 'generating'],
+					answers: { ok: false, refusal: { cause: 'no-model-available' } },
+				}),
+			);
+			clickAsk(container);
+			await waitFor(() => {
+				expect(queryAsk(container)?.disabled).toBe(false);
+			});
+		});
+
+		it('an empty candidate is still a candidate, not a violation', async () => {
+			const container = mountOver(
+				'let x = 1;',
+				scriptedSocket({
+					announces: ['loading', 'generating'],
+					answers: {
+						ok: true,
+						program: '',
+						meta: { model: 'nano-3', attempts: 1 },
+					},
+				}),
+			);
+			clickAsk(container);
+			await waitFor(() => {
+				expect(queryPreview(container)).not.toBeNull();
+			});
+		});
+
+		it('more than one pass reads as attempts', async () => {
+			const container = mountOver(
+				'let x = 1;',
+				scriptedSocket({
+					announces: ['loading', 'generating'],
+					answers: {
+						ok: true,
+						program: 'let x = 2;',
+						meta: { model: 'nano-3', attempts: 3 },
+					},
+				}),
+			);
+			clickAsk(container);
+			await waitFor(() => {
+				expect(queryMeta(container)?.textContent).toBe(
+					'Produced by nano-3 in 3 attempts.',
+				);
+			});
+		});
+
+		it('a refusal out of bring-up renders without ever drafting', async () => {
+			const container = mountOver(
+				'let x = 1;',
+				scriptedSocket({
+					announces: ['loading'],
+					answers: { ok: false, refusal: { cause: 'no-model-available' } },
+				}),
+			);
+			clickAsk(container);
+			await waitFor(() => {
+				expect(queryRefusal(container)).not.toBeNull();
+			});
+		});
+	});
+
+	describe('what crosses the seam (Interfaces)', () => {
+		it('hands the socket the seed as the program to work from', () => {
+			const generate = vi.fn(scriptedSocket().generate);
+			const container = mountOver('let x = 1;', { generate });
+			clickAsk(container);
+			expect(generate.mock.calls[0]?.[0]).toBe('let x = 1;');
+		});
+
+		it("hands the socket the learner's prompt", () => {
+			const generate = vi.fn(scriptedSocket().generate);
+			const container = mountOver('let x = 1;', { generate });
+			writePrompt(container, 'add a loop');
+			clickAsk(container);
+			expect(generate.mock.calls[0]?.[1].prompt).toBe('add a loop');
+		});
+
+		it('asks for no particular model', () => {
+			const generate = vi.fn(scriptedSocket().generate);
+			const container = mountOver('let x = 1;', { generate });
+			clickAsk(container);
+			expect(generate.mock.calls[0]?.[1].model).toBe('');
+		});
+
+		it('hands the socket a way to announce its stages', () => {
+			const generate = vi.fn(scriptedSocket().generate);
+			const container = mountOver('let x = 1;', { generate });
+			clickAsk(container);
+			expect(typeof generate.mock.calls[0]?.[2]?.onPhase).toBe('function');
+		});
+
+		it('an empty prompt over a seed is still an ask', () => {
+			const generate = vi.fn(scriptedSocket().generate);
+			const container = mountOver('let x = 1;', { generate });
+			clickAsk(container);
+			expect(generate.mock.calls[0]?.[1].prompt).toBe('');
+		});
+
+		it('seats the candidate inside the output slot', async () => {
+			const container = mountOver(
+				'let x = 1;',
+				scriptedSocket({
+					announces: ['loading', 'generating'],
+					answers: {
+						ok: true,
+						program: 'let x = 2;',
+						meta: { model: 'nano-3', attempts: 1 },
+					},
+				}),
+			);
+			clickAsk(container);
+			await waitFor(() => {
+				expect(queryOutput(container)?.contains(queryPreview(container))).toBe(
+					true,
+				);
+			});
+		});
+
+		it('seats the meta line inside the output slot', async () => {
+			const container = mountOver(
+				'let x = 1;',
+				scriptedSocket({
+					announces: ['loading', 'generating'],
+					answers: {
+						ok: true,
+						program: 'let x = 2;',
+						meta: { model: 'nano-3', attempts: 1 },
+					},
+				}),
+			);
+			clickAsk(container);
+			await waitFor(() => {
+				expect(queryOutput(container)?.contains(queryMeta(container))).toBe(
+					true,
+				);
+			});
+		});
+
+		it('seats the refusal inside the output slot', async () => {
+			const container = mountOver(
+				'let x = 1;',
+				scriptedSocket({
+					announces: ['loading', 'generating'],
+					answers: { ok: false, refusal: { cause: 'no-model-available' } },
+				}),
+			);
+			clickAsk(container);
+			await waitFor(() => {
+				expect(queryOutput(container)?.contains(queryRefusal(container))).toBe(
+					true,
+				);
+			});
+		});
+
+		it('names the placeholder as a producer like any other', async () => {
+			const container = mountOver(
+				'let x = 1;',
+				scriptedSocket({
+					announces: ['loading', 'generating'],
+					answers: {
+						ok: true,
+						program: 'let x = 2;',
+						meta: { model: 'placeholder', attempts: 1 },
+					},
+				}),
+			);
+			clickAsk(container);
+			await waitFor(() => {
+				expect(queryMeta(container)?.textContent).toBe(
+					'Produced by placeholder in 1 attempt.',
+				);
+			});
+		});
+
+		it('adds no heading to the instrument over a candidate either', async () => {
+			const container = mountOver(
+				'let x = 1;',
+				scriptedSocket({
+					announces: ['loading', 'generating'],
+					answers: {
+						ok: true,
+						program: 'let x = 2;',
+						meta: { model: 'nano-3', attempts: 1 },
+					},
+				}),
+			);
+			clickAsk(container);
+			await waitFor(() => {
+				expect(queryPreview(container)).not.toBeNull();
+			});
+			expect(
+				container.querySelector(
+					'[data-generator] h1, [data-generator] h2, [data-generator] h3, [data-generator] h4, [data-generator] h5, [data-generator] h6',
+				),
+			).toBeNull();
+		});
+	});
+
+	describe('an answer the result shape cannot serve (Exceptions)', () => {
+		it('a candidate carrying no program is an invariant violation', async () => {
+			const container = mountOver(
+				'let x = 1;',
+				scriptedSocket({
+					announces: ['loading', 'generating'],
+					answers: { ok: true, meta: { model: 'nano-3', attempts: 1 } },
+				}),
+			);
+			clickAsk(container);
+			await expect(async () => {
+				await act(async () => {
+					await Promise.resolve();
+				});
+			}).rejects.toThrow(
+				'generator invariant violated: a candidate carried no program',
+			);
+		});
+
+		it('a candidate naming no producer is an invariant violation', async () => {
+			const container = mountOver(
+				'let x = 1;',
+				scriptedSocket({
+					announces: ['loading', 'generating'],
+					answers: { ok: true, program: 'let x = 2;' },
+				}),
+			);
+			clickAsk(container);
+			await expect(async () => {
+				await act(async () => {
+					await Promise.resolve();
+				});
+			}).rejects.toThrow(
+				'generator invariant violated: a candidate named no producer',
+			);
+		});
+
+		it('a refusal carrying no cause is an invariant violation', async () => {
+			const container = mountOver(
+				'let x = 1;',
+				scriptedSocket({
+					announces: ['loading', 'generating'],
+					answers: { ok: false },
+				}),
+			);
+			clickAsk(container);
+			await expect(async () => {
+				await act(async () => {
+					await Promise.resolve();
+				});
+			}).rejects.toThrow(
+				'generator invariant violated: a refusal carried no cause',
+			);
+		});
+	});
+
+	describe('the refusal in learner words (Simple)', () => {
+		it.each([
+			[
+				'attempt-bound-exhausted',
+				"The generator tried a few times but couldn't make a program that fits — adjust the prompt and ask again.",
+			],
+			['no-model-available', 'No model can run here right now.'],
+			[
+				'unknown-model',
+				"The generator doesn't know the model that was asked for.",
+			],
+		] as const)('%s reads as one learner sentence', async (cause, sentence) => {
+			const container = mountOver(
+				'let x = 1;',
+				scriptedSocket({
+					announces: ['loading', 'generating'],
+					answers: { ok: false, refusal: { cause } },
+				}),
+			);
+			clickAsk(container);
+			await waitFor(() => {
+				expect(queryRefusal(container)?.textContent).toBe(sentence);
+			});
+		});
+
+		it.each([
+			['retry', 'Try again.'],
+			[
+				'free-space',
+				'Your device is low on storage — free some space and try again.',
+			],
+			[
+				'reconnect',
+				"The model couldn't download — check your connection and try again.",
+			],
+			[
+				'use-native-app',
+				"This device can't run a model inside a web browser — a desktop app can.",
+			],
+		] as const)('%s rides along as its own line', async (nextStep, line) => {
+			const container = mountOver(
+				'let x = 1;',
+				scriptedSocket({
+					announces: ['loading', 'generating'],
+					answers: {
+						ok: false,
+						refusal: { cause: 'no-model-available', nextStep },
+					},
+				}),
+			);
+			clickAsk(container);
+			await waitFor(() => {
+				expect(queryRefusal(container)?.textContent).toContain(line);
+			});
 		});
 	});
 });
