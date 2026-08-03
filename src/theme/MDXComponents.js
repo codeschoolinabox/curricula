@@ -2,12 +2,11 @@
  * @file Swizzled MDXComponents registry. Extends Docusaurus's default
  * registry with three entries:
  *
- * - `StudyLenses` — the orchestrator component. The new-tree
+ * - `StudyLenses` — the orchestrator component, pointed at the new-tree
  *   `src/lib/study-lenses/orchestrate/` (per the embody / lenses /
- *   orchestrate three-peer architecture) hasn't been rebuilt yet, so this
- *   is a temporary pointer at the frozen, still-functional
- *   `src/lib/study-lenses--deprecated-architecture/orchestrate/index.tsx`.
- *   Swap this import back to the new tree once its orchestrator lands.
+ *   orchestrate three-peer architecture). The formerly-frozen
+ *   `src/lib/study-lenses--deprecated-architecture/orchestrate/index.tsx`
+ *   is read-only quarry now — never edit it, copy from it if needed.
  *   The remark plugin emits every `<StudyLenses>` occurrence as an
  *   `mdxJsxFlowElement` node via `codeBlockToJsx` — in-page fences,
  *   bottom-mode sibling embeds, AND the inner `<StudyLenses>` nested
@@ -28,7 +27,7 @@ import MDXComponents from '@theme-original/MDXComponents';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-import StudyLenses from '@site/src/lib/study-lenses--deprecated-architecture/orchestrate/index';
+import StudyLenses from '@site/src/lib/study-lenses/orchestrate/index';
 
 export default {
 	...MDXComponents,
