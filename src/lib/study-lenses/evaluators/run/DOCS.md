@@ -8,7 +8,7 @@ discipline — on the simplest possible member, one that emits nothing and answe
 only how the run ended. The vocabulary is pinned in
 [README.md § Ubiquitous language](./README.md); the kind's obligations in
 [../README.md](../README.md); the engine's machinery in
-[../../../lib/engine/DOCS.md](../../../lib/engine/DOCS.md).
+[../../lib/engine/DOCS.md](../../lib/engine/DOCS.md).
 
 ## Architectural sketch
 

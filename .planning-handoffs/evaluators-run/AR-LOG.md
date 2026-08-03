@@ -399,3 +399,81 @@ than trivial indirection, because it is the one place probe ORDER is encoded;
 the `.toContain('Worker')`-only pin is the right amount, since DEV.md warns
 against bulk-pinning prose nobody ruled on; and `newspaper-order` structurally
 no-ops on an object-default-export file, matching danger's layout.
+
+## Post-ceremony gate items — closed 2026-08-03
+
+The human ruled two of the three items ceremony 2 left standing: fix the broken
+links, and write the shared-memory caveat now rather than defer it. Both landed
+in one `docs:` commit, which drew `ar-1` under the standing docs-AR rule.
+
+**The broken links.** `run/README.md` (3 sites) and `run/DOCS.md` (1) cited
+`../../../lib/engine/…`; from `evaluators/run/` the real depth is
+`../../lib/engine/…`, and the old targets resolved to nothing.
+`[measured: git log -S'../../../lib/engine/README.md']` shows the depth was born
+in the ratified Phase-0 commit `6256571c` — defect repair, not regression. All
+nine relative links in both files now resolve.
+
+**The shared-memory caveat, and why it was written now rather than handed on.**
+The gap belongs in `run/README.md § Testing posture` — the exact file the link
+fix already opened — and this session still held why it exists (the `ar-3` that
+found it, plus the verification that the sandbox config also serves COOP/COEP).
+The next session's work is intercept Phase-0 DESIGN, so a run/README chore sits
+off its critical path and third in a list of three — the shape of thing that
+rots. Batch-fix-now applied.
+
+**`ar-1` on the docs commit: PAUSE → all findings fixed.** The reviewer was
+right on every count, and three were factual errors in my own paragraph:
+
+1. **"The arm stays defensive code" was false, twice over.**
+   `[read: docusaurus.config.ts — "Production hosting must set these headers separately"]`
+   — the deployed site is not guaranteed cross-origin isolated, so on such a
+   host the shared-memory refusal is not defensive at all: it is the live,
+   learner-facing path. And "defensive" is a term this module uses ten times to
+   mean the `'defect'` arm, i.e. unreachable by construction — I re-pointed
+   established vocabulary at a reachable environment answer, in a ratified
+   contract file. A maintainer reading it would have had a deletion warrant for
+   the branch that fires for real learners on a misconfigured host.
+2. **"the sandbox's banner is where a human meets it" was false.** The page I
+   wrote runs its OWN probe and sets `runBtn.disabled = true`, so `main` is
+   never called and run's refusal is never reached. What a human meets is my
+   hand-written HTML prose ABOUT run. The sentence pointed at a manual repro
+   that does not repro.
+3. **"every surface that serves this module" over-generalized two verified
+   instances** into a universal that the deployed site falsifies — the recorded
+   doc-claim failure mode exactly (see the standing feedback: falsehoods come
+   from over-generalizing verified facts).
+
+Also caught: the paragraph was AR-response narration rather than end-state prose
+("has no green row behind it", "structural rather than an oversight" — arguing
+with an imagined reviewer, in a file DEV.md scopes to what the thing IS); Node
+does have `Worker` via `node:worker_threads`, so the precise claim is no GLOBAL
+`Worker`; the vite config is the ENGINE's, not "the sandbox's own" (ruling R-4
+rejected a run-local twin); and the link fix shortened two lines without
+rewrapping, breaking `format:check` from a **clean** baseline — the pre-commit
+hook would have silently rewritten them, so the committed bytes would not have
+been the reviewed bytes. Ran `prettier --write` before committing instead.
+
+Resolved by the reviewer's counter-proposal A: the caveat folded into § Testing
+posture's opening as three structural sentences, the standalone paragraph
+deleted, the cost argument left here where rejected alternatives belong. **Loss
+ledger: zero prose lost** —
+`[measured: whitespace-normalized sentence diff vs HEAD]` reports four old
+sentences absent, and all four are accounted for (three are the corrected link
+sites, one is the deliberately amended opening).
+
+**The third gate item — the pinned-guard hook — is the human's and stays open.**
+Found this session: the hook had been disabled by commenting the block out of
+`.claude/settings.json` with `//`, which is not legal JSON, and a settings file
+that fails to parse silently disables EVERYTHING in it. Proven live rather than
+assumed: `npx markdownlint-cli2 "HUMANS.md"` (no `--no-globs`) ran freely and
+linted 694 files, when `governance-guard` denies exactly that; after deleting
+the commented block the identical command is denied by the guard's own message.
+So pathspec-commit enforcement, the eslint-autofix denial, and the permission
+allow/deny lists were all off. The block is now deleted rather than commented,
+which keeps the human's intent (the pinned-guard left out of the roster) with
+valid JSON. **The script itself was NOT deleted** — `npm run test:hooks` runs
+its suite as one of three legs, and DEV.md (twice), HUMANS.md,
+`.claude/README.md`, `.claude/hooks/README.md` and `.claude/hooks/DOCS.md` all
+reference it. Leaving it out of the roster is reversible; deleting breaks an npm
+script and dangles six governance-doc references. Whether to COMMIT the settings
+change is the human's — that file is tracked, so it would reach every peer.

@@ -16,7 +16,7 @@ evaluation spec. The kind's [README](../README.md) owns the caller protocol
 (applicability first, then main; laziness and cancellation belong to the
 consumer); this document owns what run adds to it.
 
-run drives the package's shared [engine](../../../lib/engine/README.md) — the
+run drives the package's shared [engine](../../lib/engine/README.md) — the
 generic sandboxed streaming evaluator — as leaf machinery, and consumes the
 region's shared [iteration-guard](../lib/iteration-guard/README.md) for the
 runaway-loop discipline. It is the simplest proof of that whole seam: one
@@ -31,8 +31,7 @@ iteration count, trip, marker, classification —
 [`../lib/iteration-guard/README.md`](../lib/iteration-guard/README.md)), and the
 engine's (spec, worker factory, worker entry, worker logic, thread logic, halt,
 serializeHalt, termination cause, settlement —
-[`../../../lib/engine/README.md`](../../../lib/engine/README.md)). This module
-owns:
+[`../../lib/engine/README.md`](../../lib/engine/README.md)). This module owns:
 
 - **run evaluator** (this module) vs. **a run** (one execution of the studied
   program, from first pull to settlement) vs. **the run lens** (the
@@ -245,30 +244,37 @@ owns:
 
 ## Testing posture
 
-The refusal is proven through main in Node (no `Worker` there — exactly the
-refused environment). Everything else main wires is proven in two honest tiers,
-the engine's own split: the **Node tier** drives run's internal stream factory
-through the engine seam over the engine's fake transport — map-settlement
-truth-tabled over synthetic engine settlements (every arm, the engine-made-error
-rows, the defensive rows), the worker setup and halt author driven directly
-against a stub of the engine's worker api, laziness (nothing started before the
-first pull), cancel-interrupts-the-pending-pull, and the teardown latch (a pull
-after teardown must not start a fresh run). The **browser tier** is the
-end-to-end evidence through main over the real transport: clean, throw, limit
-trip, cancel, the dialog `ReferenceError`, and a module-axis row (the fake runs
-the function path regardless of the axis — only the real transport evidences the
-axis riding through). The timeout and defect arms are deliberately Node-tier
-rows: a live browser timeout costs real wall-clock seconds and proves nothing
-the truth table doesn't. The sandbox page is permanent dev infrastructure for
-exercising the same paths by hand.
+The refusal's **worker** arm is proven through main in Node (no global `Worker`
+there — exactly the refused environment); its **shared-memory** arm is not
+reachable from either tier by construction, because the probe names the missing
+worker first and every surface under test — the browser project, the engine's
+sandbox config — serves the isolation headers, so nothing under test is ever
+non-isolated. That arm is live all the same, on any host that does not serve
+COOP/COEP; the sandbox page carries the same probe of its own and disables its
+run control, so a hand-driven page explains itself without calling main.
+Everything else main wires is proven in two honest tiers, the engine's own
+split: the **Node tier** drives run's internal stream factory through the engine
+seam over the engine's fake transport — map-settlement truth-tabled over
+synthetic engine settlements (every arm, the engine-made-error rows, the
+defensive rows), the worker setup and halt author driven directly against a stub
+of the engine's worker api, laziness (nothing started before the first pull),
+cancel-interrupts-the-pending-pull, and the teardown latch (a pull after
+teardown must not start a fresh run). The **browser tier** is the end-to-end
+evidence through main over the real transport: clean, throw, limit trip, cancel,
+the dialog `ReferenceError`, and a module-axis row (the fake runs the function
+path regardless of the axis — only the real transport evidences the axis riding
+through). The timeout and defect arms are deliberately Node-tier rows: a live
+browser timeout costs real wall-clock seconds and proves nothing the truth table
+doesn't. The sandbox page is permanent dev infrastructure for exercising the
+same paths by hand.
 
 ## Navigation
 
 - Region: [`../README.md`](../README.md) — the evaluator kind this implements.
 - [`../lib/iteration-guard/README.md`](../lib/iteration-guard/README.md) — the
   shared iteration-guard semantics run consumes.
-- [`../../../lib/engine/README.md`](../../../lib/engine/README.md) — the engine
-  run drives.
+- [`../../lib/engine/README.md`](../../lib/engine/README.md) — the engine run
+  drives.
 - Siblings: [`../danger/`](../danger/README.md) — the real-window evaluator
   (shares run's refusal-as-data and eventless-stream shape); `intercept/` — run
   plus the program's own I/O as events (the region README's tree).
