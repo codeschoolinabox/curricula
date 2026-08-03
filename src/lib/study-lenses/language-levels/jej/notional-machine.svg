@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1460"
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1460" viewBox="0 0 1500 1460"
      font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
      role="img"
-     aria-label="JEJ Notional Machine, organized around the program's lifecycle as two acts. Act 1 SETUP is syntactic (source, tokens, ast) and derives the static environment: the initial scope tree with every binding reserved in the temporal dead zone. Then RUN: the derived environment enters the world and comes alive. Act 2 RUNTIME is evaluation inside the realm; the realm (ECMA intrinsics and host bindings) is the world the program runs in and the top of the scope chain (block to module to realm). Evaluation has three interlinked cells: code (what the code says), nm (the semantics: the dynamic environment, scope and prototype chains, values, coercion), and host (the I/O buckets: dev console and user dialogs). The arrows between cells are the observable trace events resolve, coerce, emit, and return.">
-  <title>JEJ Notional Machine — the program's lifecycle</title>
+     aria-labelledby="nm-title nm-desc">
+  <title id="nm-title">JEJ Notional Machine — the program's lifecycle</title>
+  <desc id="nm-desc">JEJ Notional Machine, organized around the program's lifecycle as two acts. Act 1 SETUP is syntactic (source, tokens, ast) and derives the static environment: the initial scope tree with every binding reserved in the temporal dead zone. Then RUN: the derived environment enters the world and comes alive. Act 2 RUNTIME is evaluation inside the realm; the realm (ECMA intrinsics and host bindings) is the world the program runs in and the top of the scope chain (block to module to realm). Evaluation has three interlinked cells: code (what the code says), nm (the semantics: the dynamic environment, scope and prototype chains, values, coercion), and host (the I/O buckets: dev console and user dialogs). The arrows between cells are the observable trace events resolve, coerce, emit, and return.</desc>
 
   <style>
     .title       { font-size: 23px; font-weight: 700; fill: #111; }
