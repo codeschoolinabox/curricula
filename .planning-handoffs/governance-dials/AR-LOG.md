@@ -143,9 +143,11 @@ Bash command shapes only.
   through AR-5, all of Phase 0, the ZOMBIES bar, per-directory `DOCS.md`, and
   the 🔍 checkpoint** — contradicting the design's own separation of ceremony
   from twinning. It routes on `"tadpotyping, my call"`, a phrase absent from
-  `HUMANS.md`, and its own name is unspelled in `cspell.json`. It also disagrees
-  with the docs on its own name — the docs say **Tadpoling**, the skill says
-  **Tadpotyping**.
+  `HUMANS.md`. It also disagrees with the docs on its own name — the docs say
+  **Tadpoling**, the skill says **Tadpotyping**. _(An earlier revision of this
+  bullet added "and its own name is unspelled in `cspell.json`". That was true
+  when written and false by the time it was committed — `103ad736` added both
+  spellings at `cspell.json:43-44`. Corrected here rather than left to rot.)_
 - **⛔ `retrospective` work is BLOCKED** pending a human ruling on invariant 2's
   Phase-0 ordering. R1 tightened this rather than loosening it: under
   `retrospective`, steps 0.1, 0.2 and the DOCS half of 0.3 all defer, so **AR-1
@@ -156,8 +158,20 @@ Bash command shapes only.
   the Refactor step loses its structural target.**
 - **A partial revert turns the checker red.** 8 of the 11 `#territory-tracks`
   links are cross-file (AGENTS → DEV), so reverting `DEV.md` alone yields **8
-  `[links]` errors, exit 1**. Revert `DEV.md`, `AGENTS.md`,
-  `AGENTS.principal.md` and `cspell.json` **together**.
+  `[links]` errors, exit 1**. Revert **`DEV.md`, `AGENTS.md` and
+  `AGENTS.principal.md` together — three files.** `cspell.json` is **not** in
+  the set (R7) and is already committed, so including it would be a no-op that
+  reads as a reversal of the ruling. _(This bullet said "and `cspell.json` …
+  four" before R7 landed; a cold-start validator caught the contradiction
+  against R7 in the same file.)_
+- **⛔ Do not `git add` or commit `DEV.md`, `AGENTS.md` or `AGENTS.principal.md`
+  before the increment-2.5 revert.** Each still carries the superseded
+  four-track draft in the working copy. Committing any of them writes that draft
+  into history permanently, turns the human's revert into a no-op, and makes
+  undoing it require the history rewriting
+  [§ Git Policy](../../AGENTS.principal.md#git-policy) forbids. The standing
+  warning against _extending_ the draft does not cover _committing_ it — a
+  cold-start validator put the odds of an agent walking into this at 30–40 %.
 - **Renumbering radius is ~135 sites across ~23 files**, of which ~85 are live
   peer-campaign handoffs. Two need an explicit "written under the seven-step
   scheme" stamp: `src/lib/embody/lib/evaluating/trace/syntax/PLAN.md` (+ its
