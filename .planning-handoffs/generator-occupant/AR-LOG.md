@@ -112,6 +112,97 @@ are not restated here; this log carries what those artifacts do not already say.
      lists it among the resolutions the result shape cannot serve. Adding a
      fourth loud arm would validate a rule the contract does not express.
 
+## Human rulings — 2026-08-03 (Increment 4, resolve and retire)
+
+- **R-4 — Discard does NOT clear a refusal. Cancel owns the reset.** The
+  maintainer ruled this at the Phase-0 → Phase-1 gate (2026-07-28), overriding
+  an earlier plan body that had Increments 2–4 clearing the refusal on discard.
+  Recorded here only now, because until now it lived **only** in a plan file:
+  per [DEV.md § Ruling provenance](../../DEV.md#ruling-provenance) that means it
+  did not exist. Neither README nor DOCS states it either — the job diagram's
+  `Refused → [*]: discard` edge is terminal, so the docs never had to say what
+  discard does to view state. Raised by AR-3 against Increment 4. Carried as a
+  `// PINNED(maintainer 2026-07-28…)` marker on "discarding leaves the refusal
+  standing" in `generator/tests/index.test.tsx`.
+
+- **R-5 — `tests/fakes.ts` grows by one (`abortableSocket`), unreachable branch
+  and all.** Increment 4's suite needs a stage announced AFTER a cancel, which
+  the synchronous `scriptedSocket` cannot produce. Two ways to get one: a new
+  double, or driving the view's own `onPhase` off the `vi.fn()` spy the suite
+  already uses. The maintainer chose the double for campaign continuity, over
+  the recommendation of the plan-design pass, which had argued it fails R-1's
+  own test — Increment 2 declined to ship a scripted resolving socket precisely
+  because its resolution path would have been unreachable. The honest cost, on
+  the record: **no view test can reach `abortableSocket`'s abort guard**,
+  because cancel deliberately does not abort and an unmounted view has nothing
+  left to observe. That branch is conformance modelling, not covered behavior.
+  Its deferred-announcement half IS reached, by "a stage announced after a stop
+  leaves the view idle".
+
+- **R-6 — the pinned label set includes `Generate`, which is Increment 2's.**
+  R-2 obliges each increment to pin its own learner-facing prose in
+  [§ The view's own words](../../src/lib/study-lenses/orchestrate/generator/README.md#the-views-own-words).
+  That section claims totality over the view's own strings, and `Generate` had
+  shipped in Increment 2 without ever being pinned there — so the claim was
+  already false before Increment 4 touched it. The maintainer ruled to close the
+  gap in the same edit rather than carry it: five labels are now pinned, four
+  authored here plus `Generate` transcribed from § Selector contract.
+
+## AR resolutions — 2026-08-03 (Increment 4, resolve and retire)
+
+- **AR-3 CONSIDER**, three IMPORTANT concerns. Resolutions:
+  1. **The rejected-promise half of "refusal-as-data is total" had no
+     implementation and no test — CLOSED, on the maintainer's ruling.**
+     [DOCS § Structural constraints](../../src/lib/study-lenses/orchestrate/generator/DOCS.md#structural-constraints)
+     says a rejected promise and a malformed resolution are _"Both loud in dev
+     AND prod"_, but only the malformed resolution was: `ask()` carried no
+     rejection handler, so a rejection escaped as an unhandled promise
+     rejection. Scope was the question — this is Increment 3's `ask()`, not
+     phases 4–5 — and adding a throws path fires an inter-file trigger, so it
+     went to the maintainer, who ruled to close it now while `ask()` was already
+     being rewritten. Landed as `readRejection`, raised from inside the state
+     updater like `readAnswer`'s three arms so it reaches RENDER, guarded by the
+     same retirement check, and attached as `then`'s second argument rather than
+     a trailing `.catch` so it answers for the socket's promise alone and never
+     swallows `present`'s own invariant throws.
+  2. **"An answer the shape cannot serve is dropped before it is unwrapped" now
+     asserts the DOM, not the absence of a throw.** AR-3 was right that
+     `resolves.toBeUndefined()` is a weak proxy for the claim. The test now
+     asserts the output slot is closed after the drop; if the drop ever
+     regresses, `readAnswer` throws in render, the enclosing `act` rejects, and
+     the failure names itself with the invariant message.
+  3. **`abortableSocket`'s later tick is a microtask, never a timer.** Nothing
+     in the view's suite uses fake timers, and a real clock in the one new
+     double would have been its first wall-clock flakiness vector.
+
+- AR-3's three MINOR items needed no change: the plan's `file:line` citations
+  had gone stale by exactly the 12 lines this session's helper additions
+  inserted [measured: `git diff 18223536 -- generator/tests/index.test.tsx`]
+  (DEV.md's own warning about line citations, self-inflicted and
+  self-consistent); four tests are absence and regression guards rather than
+  triangulating anything, which the plan already said; and the "(Many)" block
+  covers a state space rather than a collection, matching this suite's existing
+  usage.
+
+- **The triangulation was verified by mutation, not by argument.** Four guards
+  were each broken on purpose and the suite re-run [measured: four successive
+  edits to `generator/index.tsx`, each followed by `./node_modules/.bin/vitest
+  run --project unit src/lib/study-lenses/orchestrate/generator`, then
+  reverted]: swapping the identity check for a cheap null-guard failed exactly
+  "a stage announced by a stopped ask never displaces the next one" and "a
+  second ask supersedes an unanswered first" (2 failed | 138 passed — two
+  distinct loopholes, as AR-3 predicted); removing the unmount's abort failed
+  exactly "aborts the ask the mount leaves behind" (1 failed | 139 passed);
+  handing over an already-dead signal failed exactly "hands the socket a signal
+  that is not already aborted" (1 failed | 139 passed); and dropping the
+  answer-path guard failed the two retirement Exceptions tests (2 failed | 138
+  passed), one of them reporting the invariant message itself. **The convention
+  this section now follows** — every repo-state claim tagged per
+  [DEV.md § Sourced claims](../../DEV.md#sourced-claims) — was raised by AR-4
+  against Increment 4, which measured this log at 0 tags against sibling
+  campaigns' 19, 25 and 10 [relayed: ar-4, `grep -c` across the repo's
+  `AR-LOG.md` files].
+
 ## Operational notes (not rulings, but they cost time once)
 
 - **`expect(act(…)).rejects` silently produces a FALSE POSITIVE.** RTL's `act`

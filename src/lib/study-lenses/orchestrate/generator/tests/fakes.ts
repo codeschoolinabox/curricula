@@ -60,9 +60,50 @@ export function scriptedSocket({
 	};
 }
 
+// One ask whose work SPANS TICKS, which is what makes retirement observable.
+// The first phase is announced inside the call — as the shipped socket
+// announces `loading` before its first wait — and every later phase on a
+// microtask, as the shipped socket announces `generating` after one. A test can
+// therefore stop the ask in between, and assert that what the socket says
+// afterwards changes nothing.
+//
+// A microtask rather than a timer: nothing in this suite uses fake timers, and
+// a real clock here would be its first source of wall-clock flakiness.
+//
+// The abort guard mirrors the shipped socket's, so this double models a
+// CONFORMANT socket rather than one that keeps talking after being aborted. No
+// test in the view's suite can reach it — cancel deliberately does not abort,
+// and an unmounted view has nothing left to observe — so it is conformance
+// modelling, not covered behavior.
+export function abortableSocket({
+	announces = [],
+}: DeferredAsk = {}): GeneratorSocket {
+	return {
+		generate(_program, _request, { onPhase, signal } = {}) {
+			const [firstPhase, ...laterPhases] = announces;
+			if (firstPhase !== undefined) {
+				onPhase?.(firstPhase);
+			}
+			for (const phase of laterPhases) {
+				void Promise.resolve().then(function announceOnALaterTick(): void {
+					if (signal?.aborted) return;
+					onPhase?.(phase);
+				});
+			}
+			return new Promise<GeneratorResult>(function holdOpen(): void {
+				// Deliberately no settle path — see `scriptedSocket` above.
+			});
+		},
+	};
+}
+
 // `answers` is OMITTED, never passed as undefined: `exactOptionalPropertyTypes`
 // is on, and omission is what the never-settling arm reads.
 type ScriptedAsk = {
 	readonly announces?: readonly GeneratorPhase[];
 	readonly answers?: GeneratorResult;
+};
+
+type DeferredAsk = {
+	readonly announces?: readonly GeneratorPhase[];
 };

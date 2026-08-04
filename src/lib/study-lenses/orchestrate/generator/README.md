@@ -113,6 +113,27 @@ for a socket that never ran a model and one that did. The count is the singular
 line for one pass and the plural for any other, so a curated loop's repairs are
 visible rather than rounded away.
 
+**The control labels**, one per affordance the view offers:
+
+```text
+Generate
+Stop
+Start over
+Accept
+Discard
+```
+
+`Generate` sends the ask. `Accept` and `Discard` are the two ways an answer ends
+the excursion, and they are offered only once there is an answer to judge —
+`Accept` over a candidate alone, because a refusal leaves nothing to accept.
+`Stop` and `Start over` are ONE control: it retires the ask either way, keeping
+the seed and the prompt, and it reads `Stop` while an ask is in flight and
+`Start over` once a candidate or a refusal is on screen. Two labels for one act,
+because stopping something that is running and starting again from a finished
+answer are not the same sentence to a learner. The opening affordance's
+`Generate code` is not among these — it lives in the region's control row, not
+in this view.
+
 ## The generator socket
 
 The view is built SOCKET-FIRST: it calls a `GeneratorSocket` whose

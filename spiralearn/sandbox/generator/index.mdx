@@ -1,0 +1,68 @@
+---
+sidebar_position: 6
+---
+
+import React from 'react';
+import BrowserOnly from '@docusaurus/BrowserOnly';
+
+# Generator — checkpoint
+
+The view mounts over a fixed seed with the placeholder socket behind it, so no
+model runs and every stage is scripted at 400ms. The region's own wiring — the
+Generate-code button, the pane swap, the mask — is not here; this page mounts
+the leaf alone.
+
+Expected: **Generate** is live over the seed and spends itself while an ask is
+in flight; the output slot reports `Getting the generator ready…` then
+`Writing a program…`; the reset control reads **Stop** mid-flight and **Start
+over** once an answer is on screen. Stopping keeps the prompt and re-arms the
+ask. **Accept** and **Discard** appear only once there is an answer, and
+**Accept** never appears over a refusal. A prompt beginning `refuse:` answers
+with a refusal instead. The relay line below reports which intent was raised;
+accepting or discarding unmounts the view, which is what aborts a live ask. The
+browser console stays clean, and the page gains no heading of its own.
+
+export function GeneratorHarness() {
+	const GeneratorView =
+		require('@site/src/lib/study-lenses/orchestrate/generator/index.tsx').default;
+	const createGeneratorSocket =
+		require('@site/src/lib/study-lenses/orchestrate/generator/create-generator-socket.ts').default;
+	const [socket] = React.useState(() => createGeneratorSocket());
+	const [open, setOpen] = React.useState(true);
+	const [raised, setRaised] = React.useState(null);
+	if (!open) {
+		return (
+			<div>
+				<p data-generator-checkpoint-relay>{raised}</p>
+				<button onClick={() => setOpen(true)} type="button">
+					Open the generator again
+				</button>
+			</div>
+		);
+	}
+	return (
+		<div>
+			<GeneratorView
+				onAccept={(program) => {
+					setRaised(
+						`accept raised — ${program.length} characters, last line: ${program.split('\n').at(-1)}`,
+					);
+					setOpen(false);
+				}}
+				onDiscard={() => {
+					setRaised('discard raised — nothing was committed');
+					setOpen(false);
+				}}
+				seed={'let total = 0;\nfor (const n of [1, 2, 3]) total += n;'}
+				socket={socket}
+			/>
+			<p data-generator-checkpoint-relay>
+				{raised === null ? 'no intent raised yet' : raised}
+			</p>
+		</div>
+	);
+}
+
+<BrowserOnly fallback={<p>loading the generator…</p>}>
+	{() => <GeneratorHarness />}
+</BrowserOnly>
