@@ -1,4 +1,4 @@
-// cspell:ignore quasis
+// cspell:ignore quasis unlengthened
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -206,6 +206,22 @@ describe('deriveEntwined', () => {
 					stage.value.byPath['$.body.0.declarations.0.init']?.node.type;
 				// PINNED(human ruling 2026-07-30: published ast is ESTree-shaped — parens fold away; byPath identities never lengthen through parens)
 				expect(initType).toBe('BinaryExpression');
+			});
+
+			it('a doubly-wrapped operand resolves at its unlengthened path', () => {
+				const snippet = {
+					source: 'let x = ((1 + 2)) * 3;',
+					type: 'script',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const ast = deriveAst(snippet, tokens);
+				const stage = deriveEntwined(snippet.source, tokens, ast);
+				const leftType =
+					stage &&
+					stage.ok &&
+					stage.value.byPath['$.body.0.declarations.0.init.left']?.node.type;
+				// PINNED(human ruling 2026-07-30 Q2: node paths are stable — a grouping never lengthens a path, at any depth)
+				expect(leftType).toBe('BinaryExpression');
 			});
 		});
 

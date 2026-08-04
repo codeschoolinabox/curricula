@@ -105,3 +105,62 @@ Campaign ruling home per DEV.md § Ruling provenance. Phase-0 session opened
   embody's own suite 10 files / 408 passed / 0 failed [relayed: ar-2, measured]
   — 0.7 must re-measure with per-file attribution and the commit body must scope
   its green claim accordingly.
+
+## Phase 1 (implementation) — opened 2026-08-04
+
+- Phase-1 baseline: `e7f693a851567574c5ef926f74a58873b02bd946` [measured: `git
+  rev-parse HEAD` at this session's start]. Scoped gate GREEN at that baseline —
+  119 files / 3045 passed / 8 todo / 0 failed [measured: `npx vitest run
+  --project unit src/lib/study-lenses/`]; ar-2's C3 foreign red
+  (`orchestrate/generator`) has since gone green, so no foreign failure is
+  attributable this session. Plan: `~/.claude/plans/joyful-sniffing-pike.md`
+  (Plan-agent passes ×2: the transport fork and the TDD decomposition, both
+  folded in before approval).
+- **2026-08-04 implementing-agent decision (increment 1's testable seam — the
+  launch brief assigned this call, no ruling covers it)**: the fold is
+  behavior-preserving at `deriveAst`'s published boundary **by construction**,
+  so no test on the published tree can go Red when it lands. Increment 1 is
+  therefore a characterization guard net committed BEFORE the fold — green at
+  this commit and green at the next is the evidence the fold preserved behavior,
+  evidence that does not exist if the guards land inside the fold's own commit.
+  The honest substitute for Red is **deliberate-defect verification**: the fold
+  was modelled out-of-tree with six defects and every guard evaluated against
+  each. All six are caught [measured this session]. Only the own-span guard
+  catches a span-hoisting fold; only the array-hole guard catches an array
+  rebuild; only the ChainExpression guards catch a chain-skipping fold; the
+  equivalence sweep catches all six.
+- **2026-08-04 ar-3 verdict: CONSIDER** [relayed: ar-3] — the net is
+  ZOMBIES-sequenced and convention-clean; the equivalence oracle is sound and
+  its cross-region `PARSE_SETTINGS` import is architecturally clean
+  (`lib/screening` is not one of the six tracked `STUDY_LENSES_SUBSYSTEMS`, so
+  the `import/no-restricted-paths` zones do not reach it [relayed: ar-3,
+  measured]). Two escapes named, both closed in the same increment: (1) a
+  **clone-and-rebuild fold** passed every guard including the equivalence
+  oracle, because `toEqual` is value-only — closed by switching the oracle to
+  `toStrictEqual`, which compares prototypes (a rebuilt tree lands on
+  `Object.prototype` where acorn's is `Node`) [measured this session]; (2)
+  **nesting depth capped at 2** across the whole corpus — closed by 3-deep
+  fixtures in both the equivalence sweep and the tree-wide negative sweep.
+  ar-3's own counter-proposal for (1) — an identity assertion through a
+  parenthesized fixture — was NOT adopted: both of its sides resolve from the
+  same `ast.value`, so it holds whether or not `deriveAst` cloned, exactly the
+  flaw already recorded for `index.test.ts:192-199`. A test that appears to
+  guard what it cannot is worse than none.
+- **2026-08-04 ar-4 verdict: CONSIDER** [relayed: ar-4] — gates and the two
+  load-bearing mechanical claims (the `toStrictEqual` prototype distinction;
+  acorn preserving a wrapped node's own span) reproduced first-party in its
+  session. Its one IMPORTANT finding is resolved by this entry: an AR verdict
+  relayed into a commit body needs its `[relayed:]` tag, and AR verdicts belong
+  in this file rather than only in a session transcript. Its MINOR tag
+  observations were applied to the commit body.
+- **2026-08-04 standing carry-forward into increment 2's ar-4** [relayed: ar-4,
+  concern 2]: two properties are **not** black-box testable from `deriveAst`'s
+  return and must be audited by READING the implementation, not by trusting the
+  guard net — (a) a **prototype-preserving rebuild** (`Object.create` of the
+  right prototype plus a field copy) passes `toStrictEqual`, the own-span guard
+  and the array-hole guard, yet violates "its nodes are the very nodes the parse
+  built, held by reference, never reproduced"; (b) a **second parse** (one plain
+  for the tree, one `preserveParens` only to harvest spans) passes every test in
+  increment 1 while violating "nothing parses the same source twice". Both
+  constraints are contract text, not test-covered. Named in increment 2's ar-4
+  prompt.

@@ -1,6 +1,15 @@
-import type { BinaryExpression, ExpressionStatement } from 'acorn';
+import { parse } from 'acorn';
+import type {
+	ArrayExpression,
+	AssignmentExpression,
+	BinaryExpression,
+	ExpressionStatement,
+	MemberExpression,
+	NewExpression,
+} from 'acorn';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import PARSE_SETTINGS from '../../lib/screening/parse-settings.js';
 import deriveAst from '../derive-ast.js';
 import deriveTokens from '../derive-tokens.js';
 
@@ -49,6 +58,110 @@ describe('deriveAst', () => {
 				expect(
 					statement && (statement.expression as BinaryExpression).left.type,
 				).toBe('BinaryExpression');
+			});
+
+			it('a doubly-wrapped operand folds at every depth', () => {
+				const snippet = { source: '((x)) + 0', type: 'script' } as const;
+				const stage = deriveAst(snippet, deriveTokens(snippet));
+				const statement =
+					stage.ok && (stage.value.body[0] as ExpressionStatement);
+				expect(
+					statement && (statement.expression as BinaryExpression).left.type,
+				).toBe('Identifier');
+			});
+
+			it("a folded operand keeps its own span, not the enclosing pair's", () => {
+				const snippet = { source: '((1))', type: 'script' } as const;
+				const stage = deriveAst(snippet, deriveTokens(snippet));
+				const statement =
+					stage.ok && (stage.value.body[0] as ExpressionStatement);
+				expect(statement && statement.expression.start).toBe(2);
+			});
+
+			it('the published tree names no parenthesis anywhere', () => {
+				const snippet = {
+					source: 'let a = (((1))) + f((b)); if ((c)) { (d); }',
+					type: 'script',
+				} as const;
+				const stage = deriveAst(snippet, deriveTokens(snippet));
+				// PINNED(human ruling 2026-07-30 Q1: the published ast is ESTree-shaped — no node names a parenthesis)
+				expect(stage.ok && JSON.stringify(stage.value)).not.toContain(
+					'ParenthesizedExpression',
+				);
+			});
+		});
+
+		describe('grouping parentheses that change the parse', () => {
+			it('(a?.b).c → the member object is a ChainExpression', () => {
+				const snippet = { source: '(a?.b).c', type: 'script' } as const;
+				const stage = deriveAst(snippet, deriveTokens(snippet));
+				const statement =
+					stage.ok && (stage.value.body[0] as ExpressionStatement);
+				expect(
+					statement && (statement.expression as MemberExpression).object.type,
+				).toBe('ChainExpression');
+			});
+
+			it('new (a?.b)() → the callee is a ChainExpression', () => {
+				const snippet = { source: 'new (a?.b)()', type: 'script' } as const;
+				const stage = deriveAst(snippet, deriveTokens(snippet));
+				const statement =
+					stage.ok && (stage.value.body[0] as ExpressionStatement);
+				expect(
+					statement && (statement.expression as NewExpression).callee.type,
+				).toBe('ChainExpression');
+			});
+
+			it('(a) = 5 → the assignment target is an Identifier', () => {
+				const snippet = { source: '(a) = 5', type: 'script' } as const;
+				const stage = deriveAst(snippet, deriveTokens(snippet));
+				const statement =
+					stage.ok && (stage.value.body[0] as ExpressionStatement);
+				expect(
+					statement && (statement.expression as AssignmentExpression).left.type,
+				).toBe('Identifier');
+			});
+
+			it('(a.b) = 5 → the assignment target is a MemberExpression', () => {
+				const snippet = { source: '(a.b) = 5', type: 'script' } as const;
+				const stage = deriveAst(snippet, deriveTokens(snippet));
+				const statement =
+					stage.ok && (stage.value.body[0] as ExpressionStatement);
+				expect(
+					statement && (statement.expression as AssignmentExpression).left.type,
+				).toBe('MemberExpression');
+			});
+
+			it('[(1), , (2)] → the array keeps its hole at index 1', () => {
+				const snippet = { source: '[(1), , (2)]', type: 'script' } as const;
+				const stage = deriveAst(snippet, deriveTokens(snippet));
+				const statement =
+					stage.ok && (stage.value.body[0] as ExpressionStatement);
+				expect(
+					statement && (statement.expression as ArrayExpression).elements[1],
+				).toBe(null);
+			});
+		});
+
+		describe('the published settings reproduce the published tree', () => {
+			it.each([
+				'let x = 1 + 2',
+				'(1 + 2) * 3',
+				'((x)) + 0',
+				'(((x))) + 0',
+				'(a?.b).c',
+				'new (a?.b)()',
+				'(a) = 5',
+				'(a.b) = 5',
+				'[(1), , (2)]',
+				'f((a), (b))',
+				'if ((c)) { (d); }',
+			])('%s → identical to a parse with the published settings', (source) => {
+				const snippet = { source, type: 'script' } as const;
+				const stage = deriveAst(snippet, deriveTokens(snippet));
+				expect(stage.ok && stage.value).toStrictEqual(
+					parse(source, { ...PARSE_SETTINGS, sourceType: 'script' }),
+				);
 			});
 		});
 
