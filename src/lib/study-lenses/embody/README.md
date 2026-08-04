@@ -15,10 +15,23 @@ owns how the embodiment is built and where this region's boundary lies.
 
 ```text
 embody/
-  README.md      this file — the region's domain model + navigation
-  DOCS.md        the architectural sketch
-  types.ts       the keystone contracts — Snippet · Facts · Gateable · Embodiment
-  lib/           the factory's internal machinery — documents itself
+  README.md                 this file — the region's domain model + navigation
+  DOCS.md                   the architectural sketch
+  types.ts                  the keystone contracts — Snippet · Facts · Gateable · Embodiment
+  index.ts                  the factory's boundary — embody()
+  derive-facts.ts           the six fact stages, threaded once in dependency order
+  derive-tokens.ts          token stream + set-aside comments
+  derive-ast.ts             the syntax tree
+  derive-entwined.ts        the source⇄tree binding
+  derive-environment.ts     the static scope structure
+  derive-accessibility.ts   the per-phase accessibility map
+  gate-lenses.ts            run each phase-declaring applicability, wrapped
+  attach-lenses.ts          group fitting lenses under their declared phases
+  join-study.ts             join accessibility + attachments into the study layer
+  ecma-version.ts           the one shared numeric language year
+  lifecycle-phase-order.ts  the five phases, in specification order
+  to-stage-cause.ts         parser error → structured StageCause
+  tests/                    the region's unit tests
 ```
 
 The contract, compactly (the full doc-commented version is
@@ -134,7 +147,30 @@ this region owns.
   predicates test and accessibility reads from.
 - **entwining / entwined** — the derived source⇄tree binding: the stage tying
   each syntax-tree node to its exact place in the source text. Built at
-  embodiment time, in this region.
+  embodiment time, in this region. Beside its node, token, and comment ties, the
+  binding carries the parse's own record of grouping parentheses: for each node
+  the parentheses wrapped, its paren spans, keyed by that node's path —
+  path-keyed data, so it lives here, where paths are born.
+- **grouping parentheses** — the parentheses the parser itself records around an
+  expression (`(1 + 2) * 3`), as distinct from the parentheses that belong to a
+  call, a parameter list, or a control head. Some are load-bearing — `(a?.b).c`
+  seals the optional chain; `(a) = 5` is legal only because the parser reads the
+  assignment target through the parens, while a parenthesized pattern
+  (`({x}) = y`) is not — and the record carries them all: it is the parser's
+  reading, never a judgment about which parentheses mattered. The published tree
+  stays ESTree-shaped — no node for them, and no path ever traverses one — and
+  the entwined stage records where they were. Source text, not structure.
+  (Distinct from `lib/classifying`'s `grouping` token role, which is assigned by
+  elimination and can claim a parenthesis the parser records no expression
+  around — dynamic `import()`'s, for one.)
+- **paren span** — where one pair of grouping parentheses sat: `start` at the
+  `(`, `end` one past the `)` — half-open offsets in UTF-16 code units, the same
+  `start`/`end` vocabulary every node and token carries. The parser's own
+  recorded positions, never re-derived from the text. A node wrapped more than
+  once carries one span per pair, outermost first; a node with no grouping
+  parentheses has no entry at all. At a paren's own offset, `byOffset` resolves
+  to the enclosing node — a consumer needing paren→node builds the one-pass
+  reverse index from this record.
 - **environment** — the derived static scope structure, pre-execution: the stage
   resolving how each name is bound across the program's nested scopes, toggled
   for scripts or modules. Built at embodiment time, in this region, from the

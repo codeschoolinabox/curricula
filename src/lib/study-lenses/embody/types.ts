@@ -158,6 +158,21 @@ export type EntwinedNode = {
 };
 
 /**
+ * Where one pair of grouping parentheses sat: `start` at the `(`, `end` one
+ * past the `)` — half-open offsets in UTF-16 code units, the same
+ * `start`/`end` vocabulary every node and token carries. The parser's own
+ * recorded positions, never re-derived from the text. Entwined data, keyed
+ * by the path of the node the parentheses wrapped; a node wrapped more than
+ * once carries one span per pair, outermost first — ascending `start`, the
+ * order the source reads — and a node with no grouping parentheses has no
+ * entry at all (README § Glossary — paren span).
+ */
+export type ParenSpan = {
+	readonly start: number;
+	readonly end: number;
+};
+
+/**
  * The source⇄tree binding: one shared graph of entwined nodes, tokens, and
  * comments, with two canonical entry points. Both hold the same references
  * as the tree — entry points into the graph, never copies.

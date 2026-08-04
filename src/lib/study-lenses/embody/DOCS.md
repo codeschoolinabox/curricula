@@ -17,7 +17,8 @@ abstraction.
 1. **Derive the fact stages** (sync, pure) — the six stages derive once, in
    dependency order: source and type restated from the snippet; tokens — the
    token stream plus the set-aside comments — from the source; ast from the
-   tokens; entwined from ast, tokens, and source; environment — the static scope
+   tokens; entwined from ast, tokens, and source, together with the parse's own
+   record of where grouping parentheses sat; environment — the static scope
    structure — from the ast, the source⇄tree binding, and the snippet type.
    Every result is tagged — a value or a structured cause — and a failure never
    stops the walk: a stage whose input is missing fails carrying the upstream
@@ -90,7 +91,11 @@ flowchart TD
   its own stage, never adds a bar to phase accessibility, and so never changes
   the data flow above. The scope structure carries two: `usedBeforeBound` and
   `exportedNames`, each documenting its own boundaries and departures at its
-  field.
+  field. The entwined binding carries one fact of the first tier with the
+  residence of the second: the grouping-parentheses record is the parser's own
+  reading — projected authority, nothing derived — and it lives on the entwined
+  stage because it is path-keyed data: paths are born in the binding, and the
+  ast fact's value is contractually the bare tree, never an envelope.
 - **Level-blind.** No level knowledge in the region's data or pipeline; level
   logic runs only black-boxed inside individual gates.
 - **Truth, not permission.** This region states what is TRUE about the program;
@@ -156,6 +161,23 @@ Settled decisions on the shape of the parse facts:
   which deliberately has no node for them, and the path identities below stay
   stable because no wrapper ever lengthens them. The source and token facts
   still carry every parenthesis, as text and as tokens.
+- **The entwined binding records where grouping parentheses sat.** The parse
+  itself recognizes each pair of grouping parentheses — the pair an expression
+  carries, as distinct from a call's, a parameter list's, or a control head's —
+  and the published tree folds it away; the entwined stage publishes the
+  parser's record: for each wrapped node, its paren spans, keyed by that node's
+  path. A span is `start` at the `(`, `end` one past the `)` — half-open offsets
+  in UTF-16 code units, the region's one position vocabulary. A node wrapped
+  more than once carries one span per pair, outermost first — ascending `start`,
+  the order the source reads; a node with no grouping parentheses has no entry,
+  and an empty list is never published. The record is the parser's reading,
+  complete: parentheses that change what the program means are recorded like any
+  other, and no judgment about which mattered is derived. It adds no parse
+  setting a consumer must mirror — parsing with the shared leaf's published
+  settings reproduces the published tree shape; where the parentheses sat is the
+  region's own record beside that shape, not a parse-shape difference. At a
+  parenthesis's own offset the offset index resolves to the enclosing node; a
+  consumer needing paren→node builds the one-pass reverse index from the record.
 - **Nodes, tokens, and comments all carry source spans.** The scope analyzer
   reads node ranges and throws without them; tokens and comments carry the same
   span vocabulary so every parse fact cross-navigates in one currency — offsets
@@ -193,5 +215,5 @@ Settled decisions on the shape of the parse facts:
   traversal; anything niche a consumer derives itself from the structures the
   facts already expose. What earns a fact is the fact-admission constraint
   above.
-- **Internal decomposition** — the factory's internal libraries document
-  themselves at their own abstraction level.
+- **Internal decomposition** — each file documents its own mechanics at its own
+  level; this sketch constrains only the region's root abstraction.
