@@ -225,7 +225,7 @@ describe('deriveAst', () => {
 				]);
 			});
 
-			it("a control head's parentheses are not a grouping", () => {
+			it("a control head's parentheses are not grouping parentheses", () => {
 				const snippet = { source: 'if (x) (y);', type: 'script' } as const;
 				const derivation = deriveAst(snippet, deriveTokens(snippet));
 				const statement =
@@ -235,7 +235,7 @@ describe('deriveAst', () => {
 				).toBeUndefined();
 			});
 
-			it("the expression inside a control head's body is a grouping", () => {
+			it("the expression inside a control head's body carries grouping parentheses", () => {
 				const snippet = { source: 'if (x) (y);', type: 'script' } as const;
 				const derivation = deriveAst(snippet, deriveTokens(snippet));
 				const statement =
@@ -247,7 +247,7 @@ describe('deriveAst', () => {
 				).toEqual([{ start: 7, end: 10 }]);
 			});
 
-			it("a call's own parentheses are not a grouping", () => {
+			it("a call's own parentheses are not grouping parentheses", () => {
 				const snippet = { source: 'f((a))', type: 'script' } as const;
 				const derivation = deriveAst(snippet, deriveTokens(snippet));
 				expect(derivation.parenSpansByNode.size).toBe(1);

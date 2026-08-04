@@ -315,7 +315,7 @@ describe('deriveEntwined', () => {
 					stage &&
 					stage.ok &&
 					stage.value.byPath['$.body.0.declarations.0.init.left']?.node.type;
-				// PINNED(human ruling 2026-07-30 Q2: node paths are stable — a grouping never lengthens a path, at any depth)
+				// PINNED(human ruling 2026-07-30 Q2: node paths are stable — grouping parentheses never lengthen a path, at any depth)
 				expect(leftType).toBe('BinaryExpression');
 			});
 		});
@@ -470,6 +470,65 @@ describe('deriveEntwined', () => {
 					stage &&
 						stage.ok &&
 						'$.body.0.declarations.0.init.right' in stage.value.parenSpans,
+				).toBe(false);
+			});
+
+			it('every recorded pair reaches the published record — none lost in the re-keying', () => {
+				const snippet = {
+					source:
+						'let a = ((1)) + f((b)); if ((c)) { (d); } export const e = (2);',
+					type: 'module',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const stage = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
+				expect(
+					stage && stage.ok && Object.keys(stage.value.parenSpans),
+				).toHaveLength(parenSpansByNode.size);
+			});
+
+			it('a module goal records its pairs too', () => {
+				const snippet = {
+					source: 'import { x } from "m"; export const y = (x + 1);',
+					type: 'module',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const stage = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
+				expect(
+					stage &&
+						stage.ok &&
+						stage.value.parenSpans['$.body.1.declaration.declarations.0.init'],
+				).toEqual([{ start: 40, end: 47 }]);
+			});
+
+			it('a bare import specifier resolves at two paths yet records no pair', () => {
+				const snippet = {
+					source: 'import { x } from "m"; export const y = (x + 1);',
+					type: 'module',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const stage = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
+				expect(
+					stage &&
+						stage.ok &&
+						'$.body.0.specifiers.0.imported' in stage.value.parenSpans,
 				).toBe(false);
 			});
 

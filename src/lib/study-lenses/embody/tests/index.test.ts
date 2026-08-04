@@ -132,6 +132,14 @@ describe('embody', () => {
 			).toBe(true);
 		});
 
+		it('freezes a published paren span, not just the record around it', () => {
+			const { facts } = embody('let x = (1 + 2)');
+			const spans =
+				facts.entwined.ok &&
+				facts.entwined.value.parenSpans['$.body.0.declarations.0.init'];
+			expect(spans && Object.isFrozen(spans[0])).toBe(true);
+		});
+
 		it('freezes the cyclic scope graph without hanging', () => {
 			// real production cycles — upper and childScopes, resolved and
 			// references, the ast reached via three paths — completing at all

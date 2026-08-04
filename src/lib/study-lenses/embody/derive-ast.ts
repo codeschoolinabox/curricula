@@ -41,10 +41,15 @@ export default function deriveAst(
 		return toFailedDerivation(tokens.cause);
 	}
 
+	// only the parse is guarded. A grammar error is the learner's own data and
+	// the cause built from it speaks in the parser's voice; the fold below is
+	// embody's machinery, so it stays OUTSIDE this try — a defect there must
+	// stay loud, never dressed up as a grammar error the learner never made.
+	let program: Program;
 	try {
 		// the parser reads the source itself — acorn has no tokens→AST entry
 		// point; the tokens stage gates this derivation, never feeds it.
-		const program = parse(snippet.source, {
+		program = parse(snippet.source, {
 			sourceType: snippet.type,
 			ecmaVersion: ECMA_VERSION,
 			// ranges feeds the environment stage: eslint-scope's resolution reads
@@ -59,12 +64,14 @@ export default function deriveAst(
 			// pair leaves the tree exactly as it would parse without either.
 			preserveParens: true,
 		});
-		const parenSpansByNode = foldGroupings(program);
-
-		return { ast: { ok: true, value: program }, parenSpansByNode };
 	} catch (error) {
 		return toFailedDerivation(toStageCause(error, 'ast'));
 	}
+
+	return {
+		ast: { ok: true, value: program },
+		parenSpansByNode: foldGroupingParens(program),
+	};
 }
 
 function toFailedDerivation(cause: StageCause): AstDerivation {
@@ -81,7 +88,7 @@ function toFailedDerivation(cause: StageCause): AstDerivation {
  * slots are reassigned, never rebuilt, so every surviving node keeps its
  * identity, its span, and the very `range` array the parse gave it.
  */
-function foldGroupings(program: Program): ParenSpansByNode {
+function foldGroupingParens(program: Program): ParenSpansByNode {
 	const spansByNode = new Map<Node, ReadonlyArray<ParenSpan>>();
 	foldSlots(program, spansByNode);
 
@@ -103,7 +110,7 @@ function foldSlots(
 		if (Array.isArray(value)) {
 			foldElements(value, spansByNode);
 		} else if (isNode(value)) {
-			const held = unwrapGroupings(value, spansByNode);
+			const held = unwrapGroupingParens(value, spansByNode);
 			slots[key] = held;
 			foldSlots(held, spansByNode);
 		}
@@ -122,7 +129,7 @@ function foldElements(
 		if (!isNode(element)) {
 			continue;
 		}
-		const held = unwrapGroupings(element, spansByNode);
+		const held = unwrapGroupingParens(element, spansByNode);
 		elements[index] = held;
 		foldSlots(held, spansByNode);
 	}
@@ -134,17 +141,17 @@ function foldElements(
  * order the source reads. A node no pair wrapped comes back untouched and earns
  * no entry: the record is sparse, and an empty list is never made.
  */
-function unwrapGroupings(
+function unwrapGroupingParens(
 	node: Node,
 	spansByNode: Map<Node, ReadonlyArray<ParenSpan>>,
 ): Node {
-	if (!isGrouping(node)) {
+	if (!isGroupingParens(node)) {
 		return node;
 	}
 
 	const spans: ParenSpan[] = [];
 	let held: Node = node;
-	while (isGrouping(held)) {
+	while (isGroupingParens(held)) {
 		spans.push({ start: held.start, end: held.end });
 		held = held.expression;
 	}
@@ -154,7 +161,7 @@ function unwrapGroupings(
 }
 
 /** Whether the parse built this node around a pair of grouping parentheses. */
-function isGrouping(node: Node): node is ParenthesizedExpression {
+function isGroupingParens(node: Node): node is ParenthesizedExpression {
 	return node.type === 'ParenthesizedExpression';
 }
 

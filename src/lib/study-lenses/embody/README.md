@@ -21,7 +21,7 @@ embody/
   index.ts                  the factory's boundary — embody()
   derive-facts.ts           the six fact stages, threaded once in dependency order
   derive-tokens.ts          token stream + set-aside comments
-  derive-ast.ts             the syntax tree
+  derive-ast.ts             the syntax tree + the parse's grouping-paren record
   derive-entwined.ts        the source⇄tree binding
   derive-environment.ts     the static scope structure
   derive-accessibility.ts   the per-phase accessibility map

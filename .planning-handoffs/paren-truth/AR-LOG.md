@@ -1,4 +1,4 @@
-<!-- cspell:ignore reddy unobjected greppable injective -->
+<!-- cspell:ignore reddy unobjected greppable injective unlengthened -->
 
 # AR-LOG — paren-truth campaign (Shape C: fold the parse, entwine the parens)
 
@@ -261,8 +261,8 @@ Campaign ruling home per DEV.md § Ruling provenance. Phase-0 session opened
   campaign [measured: `git show 6614142e:src/lib/study-lenses/embody/types.ts`]
   — but it is newly load-bearing, because `indexParenSpans` is the first code
   that looks up by node identity across `byPath`'s whole key space. **No bug
-  today**: a grouping pair can never wrap an import or export specifier's
-  identifier, so the shared node never carries a span and nothing
+  today**: a pair of grouping parentheses can never wrap an import or export
+  specifier's identifier, so the shared node never carries a span and nothing
   double-publishes. NOT edited here — a published contract sentence is the
   human's gate, and this is a pre-existing falsehood rather than something this
   campaign introduced. Proposed resolution for the human: narrow the sentence,
@@ -279,3 +279,90 @@ Campaign ruling home per DEV.md § Ruling provenance. Phase-0 session opened
   the audit trail exists somewhere greppable; surfaced at the close. Standing
   correction for every later commit in this repo: the tag is
   `[measured: <the command>]`, one tag per claim, never a bare parenthetical.
+
+### Phase-1 close — ar-5
+
+- **2026-08-04 ar-5 verdict: CONSIDER** [relayed: ar-5], scoped to the
+  campaign's three commits; the concurrent generator-occupant commit `6d4fa40a`
+  rode into the baseline range and was excluded [measured: `git log --oneline
+  e7f693a8..HEAD` — four commits, one foreign]. It re-verified the campaign's
+  load-bearing claim far beyond the suite's reach: **byte-identity of the
+  published tree across ~32,300 comparisons** — a 76-source corpus, every
+  `.js`/`.mjs` in the repo, and a 1,280-source paren-injection fuzz — JSON- and
+  prototype-identical, 0 divergences, plus an **unclaimed failure-arm
+  equivalence check** (77 unparseable sources: message, offset, line and column
+  identical with and without `preserveParens`) [all relayed: ar-5, measured in
+  its session]. It also corrected the PINNED inventory this session had relayed:
+  **49 markers / 17 files at the baseline → 54 / 18 at HEAD, zero removed, zero
+  inverted** — the "52 / 18" figure does not reproduce at the baseline commit
+  and must not be carried forward [relayed: ar-5, measured].
+- **2026-08-04 ar-5 concern 1, FIXED** [relayed: ar-5]: the fold ran inside the
+  parse `try`, so a defect in embody's own machinery was caught and republished
+  as a **learner grammar error in the parser's voice** — breaching "a defect in
+  embody's own machinery is loud to the developer, graceful to the learner". The
+  trigger is real and reproduces first-party: acorn parses `a` + `.b`×5000 and
+  `a` + `()`×5000 fine, while the fold's structural recursion overflows
+  [measured: `node --input-type=module -e` running the shipped fold algorithm
+  against the repo's acorn, this session]. Fixed by hoisting the fold OUT of the
+  `try`: only the parse is guarded now, so the cause the stage carries is
+  genuinely the parser's, and a fold defect stays loud. Deliberately NOT covered
+  by a test — a stack-depth threshold is environment-dependent and a test
+  pinning it would be flaky; the property is enforced by reading, like the
+  reference-preservation constraint above. The wider recursion-depth exposure is
+  pre-existing (the same inputs already threw uncaught out of `deriveEntwined`'s
+  walk at baseline [relayed: ar-5, measured]) and belongs to its own campaign.
+- **2026-08-04 ar-5 concern 2, FIXED where reachable** [relayed: ar-5]: the
+  human's term ruling — "bare noun `grouping` never used by embody" — had
+  drifted back in at seven sites, the same violation ar-2 caught once in
+  Phase 0. Renamed `foldGroupings`/`unwrapGroupings`/`isGrouping` to
+  `foldGroupingParens`/`unwrapGroupingParens`/`isGroupingParens`; reworded three
+  test titles and one PINNED marker (a wording change, never an inversion — the
+  expectation is untouched). **The commit subject of `8da55d2f` carries it and
+  is immutable**; recorded here because amend is forbidden. The homonym is live,
+  not theoretical: `lib/classifying` assigns a token role literally named
+  `grouping` by elimination, and claims dynamic `import()`'s paren, which the
+  parser records no wrapper around [relayed: ar-5, read from that region's
+  README].
+- **2026-08-04 ar-5 concern 3 — correction to this log's own flag** [relayed:
+  ar-5]. Two errors in the entry above. First, **all three** commit bodies are
+  non-conforming, not two: `59a5ef60` fixed the `[measured` family but still
+  carries `[both relayed]`, which the audit regex also cannot match. Second,
+  **`git grep` cannot audit commit bodies at all** — it searches the tree; the
+  working instrument is `git log -E --grep=`. By that instrument every one of
+  the three commits is discoverable (each carries at least one conforming tag),
+  while two carry a non-conforming `[measured` [relayed: ar-5, measured both
+  forms]. Materially: no claim in any of the three bodies is substantively
+  **wrong** — ar-5 re-ran every checkable one, including the churn counts, the
+  `git blame` for `unlengthened`, the single breaking site, the warning counts
+  and the byte-identity claim itself. The defect is tag form only.
+- **2026-08-04 ar-5 concern 4, FIXED** [relayed: ar-5] — four coverage gaps
+  invisible to any single increment's review, all closed at the close: (a) every
+  new paren test used the **script** goal, leaving the module goal — the only
+  goal where one node object is reachable at two paths — untested; (b) nothing
+  pinned that the count of pairs the fold **recorded** equals the count the
+  entwining walk **published**, so a divergence between the two traversals would
+  lose spans silently; (c) `parenSpans` had no freeze assertion, breaking that
+  suite's own per-published-member convention; (d) the standing flag's safety
+  argument ("a pair can never wrap an import or export specifier") lived only in
+  this log. One test each.
+- **2026-08-04 ar-5 concern 5, NOT done — the human's gate** [relayed: ar-5]:
+  `isNode` is now defined in both `derive-ast.ts` and `derive-entwined.ts`,
+  which meets DEV.md's 2-call-site extraction bar, and the two walks carry
+  **different metadata-key policies** (the fold filters nothing and argues the
+  node check is the whole guarantee; `directChildren` keeps an `isMetadataKey`
+  list whose own comment concedes the same point). They agree today, and the new
+  count test in (b) above would now catch a divergence. Extracting a shared
+  domain-related file is an inter-file two-tier trigger, so it is proposed, not
+  taken. Surfaced at the close together with the policy question: delete the
+  list, or adopt it in both.
+- **2026-08-04 ar-5 concerns 6-9, recorded** [relayed: ar-5]: (6) the README
+  file inventory said `derive-ast.ts  the syntax tree` for a file that now
+  derives two things — **fixed**; ar-5's sentence-by-sentence loss-lens read of
+  README and DOCS otherwise found **no false sentence**, so Phase 0 did describe
+  what shipped. (7) `WeakMap` is arguably the closer fit than `Map` — the
+  transport is never iterated, only `.get()` — which would make "never frozen,
+  never serialized" structural rather than documented; a judgment call, no
+  defect, left as is. (8) the AR-LOG's cspell pragma silently paid down Phase-0
+  lint debt (`reddy`, `unobjected` shipped at `2ad2407b` without one) — scope,
+  disclosed. (9) the transport is spelled `spansByNode` inside the fold's
+  helpers where the sibling deriver would use a named building type; cosmetic.
