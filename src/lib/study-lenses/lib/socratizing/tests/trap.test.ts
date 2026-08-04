@@ -147,6 +147,21 @@ describe('trap analyzers', () => {
 				expect.stringContaining(`condition in this ${label} is`),
 			]);
 		});
+
+		it.each([
+			['if (true) { run(); }', 'if'],
+			['while (true) { run(); }', 'while'],
+			['do { run(); } while (true);', 'do...while'],
+			['for (let i = 0; true; i++) { run(); }', 'for'],
+		])('asks about %s article-free', (source, label) => {
+			const results = analyzeAll(source, analyze);
+			// PINNED(human ruling 2026-08-04: the open question carries no article.
+			// `if` is the one vowel-initial label in this grammar-closed table, and
+			// read "a if" until this landed)
+			expect(results[0].questions[0].text).toBe(
+				`What does it mean when the condition in this ${label} can never change?`,
+			);
+		});
 	});
 
 	describe('accidental-semicolon', () => {

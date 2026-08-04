@@ -80,7 +80,7 @@ function constantCondition(
 		questions: [
 			{
 				register: 'open',
-				text: `What does it mean when a ${statementType} condition can never change?`,
+				text: `What does it mean when the condition in this ${statementType} can never change?`,
 			},
 			{
 				register: 'pointed',

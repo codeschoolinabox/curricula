@@ -118,6 +118,18 @@ returned PAUSE. The rulings below close that PAUSE.
 - **R-14 — `README.md`'s invented "strategies" quotation is replaced.** Same
   defect class as R-11 one sentence over: nothing ships the quoted string.
 
+- **R-15 — `constant-condition`'s open question drops its article.** The
+  template read "when a `${statementType}` condition can never change?" and
+  `CONDITION_LABELS` maps `IfStatement` to `if`, so an `if` emitted the
+  learner-facing "when **a if** condition". The other three labels are
+  consonant-initial, which is why it survived. Reworded to "when the condition
+  in this `${statementType}` can never change?" — the article-free phrasing
+  already shipping in the same call's `context`. An `articleFor()` helper and an
+  article column in the label table were both rejected: each leaves a per-label
+  obligation, and removing the article retires the class. AR-3 required the pin
+  to cover all four labels rather than two, because a two-branch hardcode would
+  otherwise pass while leaving `do...while` and `for` unfixed.
+
 ## Open — NOT authorized
 
 - **O-1 — the `{IfStatement, WhileStatement}` narrowed sets.** `consistency.ts`
