@@ -1,40 +1,51 @@
 {
-  "config": {
-    "default": true,
-    // Allow inline HTML (educational content uses details/summary, tables, etc.)
-    "MD033": {
-      "allowed_elements": [
-        "summary",
-        "details",
-        "br",
-        "strong",
-        "code",
-        "em",
-        "table",
-        "thead",
-        "tbody",
-        "tr",
-        "th",
-        "td",
-        "a",
-        "sup",
-        "sub",
-        "img",
-        "kbd"
-      ]
-    },
-    // Allow trailing punctuation in headings (question marks in study content)
-    "MD026": { "punctuation": ".,;:!" },
-    // Line length handled by Prettier
-    "MD013": false,
-    // Allow duplicate headings in sibling sections
-    "MD024": { "siblings_only": true },
-    // Allow multiple top-level headings
-    "MD025": false,
-    // Allow hard tabs inside fenced code blocks (curriculum JS samples
-    // legitimately use tabs to match Prettier's useTabs: true)
-    "MD010": { "code_blocks": false }
-  },
-  "ignores": ["node_modules/**", "build/**", ".docusaurus/**"],
-  "globs": ["**/*.md"]
+	"config": {
+		"default": true,
+		// Allow inline HTML (educational content uses details/summary, tables, etc.)
+		"MD033": {
+			"allowed_elements": [
+				"summary",
+				"details",
+				"br",
+				"strong",
+				"code",
+				"em",
+				"table",
+				"thead",
+				"tbody",
+				"tr",
+				"th",
+				"td",
+				"a",
+				"sup",
+				"sub",
+				"img",
+				"kbd",
+			],
+		},
+		// Allow trailing punctuation in headings (question marks in study content)
+		"MD026": { "punctuation": ".,;:!" },
+		// Line length handled by Prettier
+		"MD013": false,
+		// Emphasis style handled by Prettier — it has no option to configure this
+		// and always normalises emphasis to _underscore_, strong to **asterisk**.
+		// MD049 left at "consistent" fights the pre-commit hook (which always
+		// wins), and pinning it to "underscore" surfaces every not-yet-formatted
+		// file: 97 -> 147 repo-wide errors [measured: npm run lint:md]. Prettier
+		// owns emphasis, same as it owns line length above.
+		"MD049": false,
+		// MD050 is pinned rather than disabled: "asterisk" is what Prettier emits
+		// and costs 0 errors today [measured: npm run lint:md], so it is a free
+		// guard rather than a fight.
+		"MD050": { "style": "asterisk" },
+		// Allow duplicate headings in sibling sections
+		"MD024": { "siblings_only": true },
+		// Allow multiple top-level headings
+		"MD025": false,
+		// Allow hard tabs inside fenced code blocks (curriculum JS samples
+		// legitimately use tabs to match Prettier's useTabs: true)
+		"MD010": { "code_blocks": false },
+	},
+	"ignores": ["node_modules/**", "build/**", ".docusaurus/**"],
+	"globs": ["**/*.md"],
 }

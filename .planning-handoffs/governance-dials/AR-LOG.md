@@ -1,12 +1,4 @@
-<!-- cspell:ignore tadpotyping Tadpotyping Tadpoling Lilypadagogy greppable unrouted -->
-<!-- cspell:ignore pathspec unpushed Authorisation unenforceability -->
-<!-- cspell:ignore parameterisation institutionalise unspelled -->
-
-<!--
-  Inline ignores rather than cspell.json edits ON PURPOSE: cspell.json is one of
-  the four files the human reverts at increment 2.5, so a word added there now
-  would be reverted along with the four-track draft.
--->
+<!-- cspell:ignore pathspec -->
 
 # AR-LOG — governance-dials campaign (two tracks × three dials)
 
@@ -72,6 +64,27 @@ superseded four-track campaign were consequently lost.
   duplicates the thinking without banking it, and over a live red suite because
   that would expire Fake It early [read: `DEV.md § Fake It (Till You Make It)` —
   "it expires when the second test is written"].
+- **R7 — 2026-08-04. `cspell.json` is KEPT, not reverted** [relayed: human,
+  verbatim: "you can and should keep changes in cspell, don't revert them"].
+  **The increment-2.5 revert is therefore THREE files, not four:**
+  `git checkout -- DEV.md AGENTS.md AGENTS.principal.md`. Consequences: the
+  superseded model's vocabulary (`Tadpole`, `Tadpoling`, `Lilypad`,
+  `Lilypadagogy`, `Lilypadagogue`) stays in the dictionary — harmless, since a
+  dictionary entry asserts only that a word is spelled correctly, never that the
+  concept is live — and the draft's removal of a duplicate `"Frogram"` entry is
+  kept as a genuine tidy-up. New campaign vocabulary goes in `cspell.json`, not
+  in inline `cspell:ignore` directives. Safe for the checker: `cspell.json`
+  carries no links, so reverting the other three alone cannot orphan a fragment.
+- **R8 — 2026-08-04. Prettier owns markdown emphasis style; markdownlint
+  yields** [relayed: human, who asked that the two tools be aligned]. Prettier
+  exposes no emphasis option and always emits `_underscore_` / `**asterisk**`,
+  so with MD049 at `"consistent"` the two fought and the pre-commit hook always
+  won. `MD049` is now `false` (same treatment as `MD013` line length, which the
+  config already delegates to Prettier) and `MD050` is pinned to `"asterisk"`.
+  Pinning MD049 to `"underscore"` instead was measured and rejected: it took the
+  repo from **97 to 147** errors by flagging every not-yet-formatted file. Net
+  effect **97 → 85** repo-wide errors [measured: `npm run lint:md`], with
+  MD049/MD050 at zero and a stable prettier→markdownlint round-trip.
 
 ## AR verdicts and dispositions
 
