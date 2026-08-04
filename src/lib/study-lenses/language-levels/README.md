@@ -79,15 +79,19 @@ of which live outside this region). Three consumers project the one validate
 result: the selector asks "any violations?", the gutter asks "where?", the mask
 asks "empty or not?" — the level answers once.
 
+A level is present, never imposed. Every registered level gets a fit mark, but
+only the selected level — the host's initial choice or the learner's own — and
+only under the strict posture, masks anything. And a level is a slice, never a
+rung: nothing here ranks levels or moves a learner between them; progression
+belongs to the curriculum around the instrument.
+
 ## What a level ships — and never ships
 
 A registered level powers the level selector, the editor's support, and
 enforcement — identically whether it is built-in or injected. **Levels never
 ship lenses**: a level's machine-facing lenses come from that level's own
 author, importing the level directly. No level gets anything special from the
-architecture; JEJ is simply the first one written. (Written, not registered —
-the built-in roster is still empty, and the first level to ship in it also owes
-the built-ins-first ordering and collision tests `join-level-roster.ts` names.)
+architecture; JEJ is simply the first.
 
 ## One parse truth
 

@@ -129,11 +129,11 @@ describe('StudyLenses', () => {
 			).toEqual([true, true, true, true]);
 		});
 
-		it('mounts no level selector when no levels are registered', async () => {
+		it('mounts the level selector with no injected levels', async () => {
 			const container = await mountInstrument(
 				<StudyLenses snippet="const x = 1;" />,
 			);
-			expect(container.querySelector('[data-level-selector]')).toBeNull();
+			expect(container.querySelector('[data-level-selector]')).not.toBeNull();
 		});
 
 		it('mounts exactly one live editor under StrictMode', async () => {
@@ -213,6 +213,27 @@ describe('StudyLenses', () => {
 				<StudyLenses languageLevels={[scaffoldLevel]} snippet="const x = 1;" />,
 			);
 			expect(container.querySelector('[data-level-selector]')).not.toBeNull();
+		});
+
+		it('offers the built-in level with no injected levels', async () => {
+			const container = await mountInstrument(
+				<StudyLenses snippet="const x = 1;" />,
+			);
+			const face = container.querySelector<HTMLElement>('[data-level-face]');
+			if (!face) throw new Error('missing the selector face');
+			fireEvent.click(face);
+			expect(
+				container.querySelector('[data-level-option="jej"]'),
+			).not.toBeNull();
+		});
+
+		it('marks the built-in level fitting for an admitted snippet', async () => {
+			const container = await mountInstrument(
+				<StudyLenses activeLanguageLevel="jej" snippet="const x = 1;" />,
+			);
+			expect(container.querySelector('[data-level-face]')?.textContent).toBe(
+				'Just Enough JavaScript · fits',
+			);
 		});
 
 		it('threads the initial level and posture from the props', async () => {

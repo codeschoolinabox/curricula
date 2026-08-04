@@ -1,17 +1,22 @@
 import { describe, expect, it } from 'vitest';
 
+import jejLevel from '../../../../language-levels/jej/index.js';
 import type { LanguageLevel } from '../../../../language-levels/types.js';
 import joinLevelRoster from '../join-level-roster.js';
 
 describe('joinLevelRoster', () => {
 	describe('no injections', () => {
-		it('empty injections → the empty built-in roster', () => {
-			expect(joinLevelRoster([])).toEqual([]);
+		it('empty injections → a roster of one', () => {
+			expect(joinLevelRoster([])).toHaveLength(1);
+		});
+
+		it('empty injections → jej is the sole entry', () => {
+			expect(joinLevelRoster([])[0]).toBe(jejLevel);
 		});
 	});
 
 	describe('appending injections', () => {
-		it('one injected level → a roster of exactly that level', () => {
+		it('one injected level → the built-in precedes it', () => {
 			const testA: LanguageLevel = {
 				key: 'test-a',
 				label: 'Test A',
@@ -21,10 +26,14 @@ describe('joinLevelRoster', () => {
 				editorSupport: { completion: null, hover: null, format: null },
 				models: {},
 			};
-			expect(joinLevelRoster([testA])).toEqual([testA]);
+			// PINNED(human ruling 2026-07-30 R-8: built-ins-first is this
+			// function's current mechanical join order, never a claim that a
+			// built-in level outranks an injected one. A later alphabetical or
+			// subset-driven order replaces this deliberately, not by accident.)
+			expect(joinLevelRoster([testA])).toEqual([jejLevel, testA]);
 		});
 
-		it('preserves the given injection order', () => {
+		it('preserves the given injection order after the built-in', () => {
 			const testA: LanguageLevel = {
 				key: 'test-a',
 				label: 'Test A',
@@ -43,7 +52,11 @@ describe('joinLevelRoster', () => {
 				editorSupport: { completion: null, hover: null, format: null },
 				models: {},
 			};
-			expect(joinLevelRoster([testA, testB])).toEqual([testA, testB]);
+			// PINNED(human ruling 2026-07-30 R-8: built-ins-first is this
+			// function's current mechanical join order, never a claim that a
+			// built-in level outranks an injected one. A later alphabetical or
+			// subset-driven order replaces this deliberately, not by accident.)
+			expect(joinLevelRoster([testA, testB])).toEqual([jejLevel, testA, testB]);
 		});
 	});
 
@@ -144,6 +157,34 @@ describe('joinLevelRoster', () => {
 				models: {},
 			};
 			expect(() => joinLevelRoster([testA, testA])).toThrow();
+		});
+
+		it('an injection colliding with a built-in key → throws', () => {
+			const shadowingJej: LanguageLevel = {
+				key: 'jej',
+				label: 'Shadowing JEJ',
+				validate: () => [],
+				snippetTypes: ['script'],
+				docs: { reference: '', notionalMachine: '' },
+				editorSupport: { completion: null, hover: null, format: null },
+				models: {},
+			};
+			expect(() => joinLevelRoster([shadowingJej])).toThrow();
+		});
+
+		it('the built-in collision error names the offending key', () => {
+			const shadowingJej: LanguageLevel = {
+				key: 'jej',
+				label: 'Shadowing JEJ',
+				validate: () => [],
+				snippetTypes: ['script'],
+				docs: { reference: '', notionalMachine: '' },
+				editorSupport: { completion: null, hover: null, format: null },
+				models: {},
+			};
+			expect(() => joinLevelRoster([shadowingJej])).toThrow(
+				'duplicate level key "jej"',
+			);
 		});
 	});
 

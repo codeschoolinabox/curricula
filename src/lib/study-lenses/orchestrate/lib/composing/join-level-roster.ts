@@ -31,9 +31,9 @@ export default function joinLevelRoster(
 		);
 	}
 
-	// The built-ins-first edge has no regression test while the built-in
-	// roster is empty (no black-box test can force this spread) — the first
-	// shipped built-in level carries the order + built-in-collision tests.
+	// Built-ins first, injections after. That order is this spread's
+	// mechanical consequence, not a precedence claim — a built-in level
+	// outranks nothing (human ruling 2026-07-30).
 	const joined = [...builtInLevels, ...injected];
 
 	// Loud at the author's desk: a duplicate key anywhere in the combined
