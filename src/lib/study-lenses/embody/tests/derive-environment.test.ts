@@ -18,8 +18,13 @@ describe('deriveEnvironment', () => {
 			it('the root is the global scope', () => {
 				const snippet = { source: '', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(stage && stage.ok && stage.value.root.type).toBe('global');
 			});
@@ -27,8 +32,13 @@ describe('deriveEnvironment', () => {
 			it('the root upper is null', () => {
 				const snippet = { source: '', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(stage && stage.ok && stage.value.root.upper).toBe(null);
 			});
@@ -36,8 +46,13 @@ describe('deriveEnvironment', () => {
 			it('a script has only the global scope', () => {
 				const snippet = { source: '', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(stage && stage.ok && stage.value.root.childScopes).toHaveLength(
 					0,
@@ -47,8 +62,13 @@ describe('deriveEnvironment', () => {
 			it('no names are born', () => {
 				const snippet = { source: '', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(stage && stage.ok && stage.value.root.variables).toHaveLength(0);
 			});
@@ -56,8 +76,13 @@ describe('deriveEnvironment', () => {
 			it('no references are made', () => {
 				const snippet = { source: '', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(stage && stage.ok && stage.value.root.references).toHaveLength(
 					0,
@@ -67,8 +92,13 @@ describe('deriveEnvironment', () => {
 			it('nothing resolves through', () => {
 				const snippet = { source: '', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(stage && stage.ok && stage.value.root.through).toHaveLength(0);
 			});
@@ -76,8 +106,13 @@ describe('deriveEnvironment', () => {
 			it('the script global is not strict', () => {
 				const snippet = { source: '', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(stage && stage.ok && stage.value.root.isStrict).toBe(false);
 			});
@@ -85,8 +120,13 @@ describe('deriveEnvironment', () => {
 			it("a script's $ resolves to the global scope", () => {
 				const snippet = { source: '', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const environment = stage && stage.ok && stage.value;
 				expect(environment && environment.byPath.$ === environment.root).toBe(
@@ -99,8 +139,13 @@ describe('deriveEnvironment', () => {
 			it('a module adds its own scope', () => {
 				const snippet = { source: '', type: 'module' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(stage && stage.ok && stage.value.root.childScopes).toHaveLength(
 					1,
@@ -110,8 +155,13 @@ describe('deriveEnvironment', () => {
 			it('the added scope is the module scope', () => {
 				const snippet = { source: '', type: 'module' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(stage && stage.ok && stage.value.root.childScopes[0]?.type).toBe(
 					'module',
@@ -121,8 +171,13 @@ describe('deriveEnvironment', () => {
 			it('the module scope is strict', () => {
 				const snippet = { source: '', type: 'module' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(
 					stage && stage.ok && stage.value.root.childScopes[0]?.isStrict,
@@ -134,8 +189,13 @@ describe('deriveEnvironment', () => {
 			it('the global scope declares the name', () => {
 				const snippet = { source: 'let l = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(stage && stage.ok && stage.value.root.variables).toHaveLength(1);
 			});
@@ -143,8 +203,13 @@ describe('deriveEnvironment', () => {
 			it('the name is l', () => {
 				const snippet = { source: 'let l = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(stage && stage.ok && stage.value.root.variables[0]?.name).toBe(
 					'l',
@@ -154,8 +219,13 @@ describe('deriveEnvironment', () => {
 			it('one identifier introduces it', () => {
 				const snippet = { source: 'let l = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(
 					stage && stage.ok && stage.value.root.variables[0]?.identifiers,
@@ -165,8 +235,13 @@ describe('deriveEnvironment', () => {
 			it('one definition introduces it', () => {
 				const snippet = { source: 'let l = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(
 					stage && stage.ok && stage.value.root.variables[0]?.defs,
@@ -176,8 +251,13 @@ describe('deriveEnvironment', () => {
 			it('the definition type is Variable', () => {
 				const snippet = { source: 'let l = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(
 					stage && stage.ok && stage.value.root.variables[0]?.defs[0]?.type,
@@ -187,8 +267,13 @@ describe('deriveEnvironment', () => {
 			it('the definition holds the very identifier the parse built', () => {
 				const snippet = { source: 'let l = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const environment = stage && stage.ok && stage.value;
 				const declaration = ast.ok && ast.value.body[0];
@@ -209,8 +294,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(stage && stage.ok && stage.value.root.childScopes[0]?.type).toBe(
 					'function',
@@ -223,8 +313,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(
 					stage &&
@@ -241,8 +336,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(
 					stage &&
@@ -257,8 +357,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const environment = stage && stage.ok && stage.value;
 				expect(
@@ -273,8 +378,13 @@ describe('deriveEnvironment', () => {
 			it('the declared var collects no references', () => {
 				const snippet = { source: 'var v = 1; v;', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(
 					stage && stage.ok && stage.value.root.variables[0]?.references,
@@ -284,8 +394,13 @@ describe('deriveEnvironment', () => {
 			it('both uses resolve through to nothing', () => {
 				const snippet = { source: 'var v = 1; v;', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(stage && stage.ok && stage.value.root.through).toHaveLength(2);
 			});
@@ -293,8 +408,13 @@ describe('deriveEnvironment', () => {
 			it('the first through-use resolves to null', () => {
 				const snippet = { source: 'var v = 1; v;', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(stage && stage.ok && stage.value.root.through[0]?.resolved).toBe(
 					null,
@@ -304,8 +424,13 @@ describe('deriveEnvironment', () => {
 			it('the second through-use resolves to null', () => {
 				const snippet = { source: 'var v = 1; v;', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(stage && stage.ok && stage.value.root.through[1]?.resolved).toBe(
 					null,
@@ -317,8 +442,13 @@ describe('deriveEnvironment', () => {
 			it('the module-declared var collects both references', () => {
 				const snippet = { source: 'var v = 1; v;', type: 'module' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(
 					stage &&
@@ -330,8 +460,13 @@ describe('deriveEnvironment', () => {
 			it('nothing resolves through', () => {
 				const snippet = { source: 'var v = 1; v;', type: 'module' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(stage && stage.ok && stage.value.root.through).toHaveLength(0);
 			});
@@ -339,8 +474,13 @@ describe('deriveEnvironment', () => {
 			it('the scope and the variable share the very same reference — never copies', () => {
 				const snippet = { source: 'var v = 1; v;', type: 'module' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const moduleScope =
 					stage && stage.ok && stage.value.root.childScopes[0];
@@ -356,8 +496,13 @@ describe('deriveEnvironment', () => {
 			it('a child wires upward to the root', () => {
 				const snippet = { source: '', type: 'module' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const environment = stage && stage.ok && stage.value;
 				expect(
@@ -372,8 +517,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const environment = stage && stage.ok && stage.value;
 				const outer =
@@ -389,8 +539,13 @@ describe('deriveEnvironment', () => {
 			it("a reference's variable holds that very reference back", () => {
 				const snippet = { source: 'var v = 1; v;', type: 'module' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const variable =
 					stage && stage.ok && stage.value.root.childScopes[0]?.variables[0];
@@ -407,8 +562,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const environment = stage && stage.ok && stage.value;
 				expect(
@@ -422,8 +582,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const environment = stage && stage.ok && stage.value;
 				expect(
@@ -438,8 +603,13 @@ describe('deriveEnvironment', () => {
 			it('the root scope is a plain object', () => {
 				const snippet = { source: 'var v = 1; v;', type: 'module' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(stage && stage.ok && isPlainObject(stage.value.root)).toBe(true);
 			});
@@ -447,8 +617,13 @@ describe('deriveEnvironment', () => {
 			it('a variable is a plain object', () => {
 				const snippet = { source: 'var v = 1; v;', type: 'module' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(
 					stage &&
@@ -460,8 +635,13 @@ describe('deriveEnvironment', () => {
 			it('a reference is a plain object', () => {
 				const snippet = { source: 'var v = 1; v;', type: 'module' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(
 					stage &&
@@ -473,8 +653,13 @@ describe('deriveEnvironment', () => {
 			it('a definition is a plain object', () => {
 				const snippet = { source: 'var v = 1; v;', type: 'module' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(
 					stage &&
@@ -493,8 +678,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const variables = stage && stage.ok && stage.value.root.variables;
 				expect(
@@ -509,8 +699,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const variables = stage && stage.ok && stage.value.root.variables;
 				expect(
@@ -524,8 +719,13 @@ describe('deriveEnvironment', () => {
 			it('a read-only use is access read, init false', () => {
 				const snippet = { source: 'let l = 1; l;', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const read =
 					stage &&
@@ -541,8 +741,13 @@ describe('deriveEnvironment', () => {
 			it('an initializer is access write, init true', () => {
 				const snippet = { source: 'let l = 1; l;', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const init =
 					stage &&
@@ -561,8 +766,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const write =
 					stage &&
@@ -581,8 +791,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const write =
 					stage &&
@@ -599,8 +814,13 @@ describe('deriveEnvironment', () => {
 			it('an update is access readwrite, init false', () => {
 				const snippet = { source: 'let l = 1; l++;', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const update =
 					stage &&
@@ -619,8 +839,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const compound =
 					stage &&
@@ -634,8 +859,13 @@ describe('deriveEnvironment', () => {
 			it('through references carry access and init too', () => {
 				const snippet = { source: 'var v = 1; v;', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const through = stage && stage.ok && stage.value.root.through;
 				const write =
@@ -655,8 +885,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const write =
 					stage &&
@@ -676,8 +911,13 @@ describe('deriveEnvironment', () => {
 			it('an update writes with no right-hand side — writeExpr is null but present', () => {
 				const snippet = { source: 'let l = 1; l++;', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const update =
 					stage &&
@@ -693,8 +933,13 @@ describe('deriveEnvironment', () => {
 			it('a read has no writeExpr property at all', () => {
 				const snippet = { source: 'let l = 1; l;', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const read =
 					stage &&
@@ -711,8 +956,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const compound =
 					stage &&
@@ -734,8 +984,13 @@ describe('deriveEnvironment', () => {
 			it('a let declaration carries kind let', () => {
 				const snippet = { source: 'let l = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(
 					stage && stage.ok && stage.value.root.variables[0]?.defs[0]?.kind,
@@ -745,8 +1000,13 @@ describe('deriveEnvironment', () => {
 			it('a const declaration carries kind const', () => {
 				const snippet = { source: 'const c = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(
 					stage && stage.ok && stage.value.root.variables[0]?.defs[0]?.kind,
@@ -756,8 +1016,13 @@ describe('deriveEnvironment', () => {
 			it('a var declaration carries kind var', () => {
 				const snippet = { source: 'var v = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(
 					stage && stage.ok && stage.value.root.variables[0]?.defs[0]?.kind,
@@ -767,8 +1032,13 @@ describe('deriveEnvironment', () => {
 			it('a declaration parent is its declaration statement', () => {
 				const snippet = { source: 'let l = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const environment = stage && stage.ok && stage.value;
 				expect(
@@ -782,8 +1052,13 @@ describe('deriveEnvironment', () => {
 			it('the first declarator has index 0 — not coerced to null', () => {
 				const snippet = { source: 'let a = 1, b = 2', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const first =
 					stage &&
@@ -795,8 +1070,13 @@ describe('deriveEnvironment', () => {
 			it('the second declarator has index 1', () => {
 				const snippet = { source: 'let a = 1, b = 2', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const second =
 					stage &&
@@ -808,8 +1088,13 @@ describe('deriveEnvironment', () => {
 			it('a parameter carries no kind, null parent, and index 0', () => {
 				const snippet = { source: 'function f(a) {}', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const parameter =
 					stage &&
@@ -829,8 +1114,13 @@ describe('deriveEnvironment', () => {
 			it('a function name carries no kind, null parent, null index', () => {
 				const snippet = { source: 'function f() {}', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const functionName =
 					stage &&
@@ -851,8 +1141,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const binding =
 					stage &&
@@ -873,8 +1168,13 @@ describe('deriveEnvironment', () => {
 			it('the outer class name carries no kind property', () => {
 				const snippet = { source: 'class C {}', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const outer =
 					stage &&
@@ -887,8 +1187,13 @@ describe('deriveEnvironment', () => {
 			it('the inner class binding carries no kind either — the undefined source', () => {
 				const snippet = { source: 'class C {}', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const classScope =
 					stage &&
@@ -912,8 +1217,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const catchScope =
 					stage &&
@@ -936,8 +1246,13 @@ describe('deriveEnvironment', () => {
 			it('a reference path resolves through the entwined graph to its identifier', () => {
 				const snippet = { source: 'let l = 1; l;', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const read =
 					stage &&
@@ -956,8 +1271,13 @@ describe('deriveEnvironment', () => {
 			it('a definition path resolves through the entwined graph to its name', () => {
 				const snippet = { source: 'let l = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const definition =
 					stage && stage.ok && stage.value.root.variables[0]?.defs[0];
@@ -974,8 +1294,13 @@ describe('deriveEnvironment', () => {
 			it('a self-referential initializer flags the right-hand-side read', () => {
 				const snippet = { source: 'let x = x', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const read =
 					stage &&
@@ -989,8 +1314,13 @@ describe('deriveEnvironment', () => {
 			it('the initializer write itself is never flagged', () => {
 				const snippet = { source: 'let x = x', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const init =
 					stage &&
@@ -1004,8 +1334,13 @@ describe('deriveEnvironment', () => {
 			it('a use positioned before the declaration is flagged', () => {
 				const snippet = { source: 'x; let x = 1;', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const read =
 					stage &&
@@ -1022,8 +1357,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const a =
 					stage &&
@@ -1037,8 +1377,13 @@ describe('deriveEnvironment', () => {
 			it('a resolved var use before its declaration is not flagged — no dead zone', () => {
 				const snippet = { source: 'v; var v = 1;', type: 'module' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const v =
 					stage &&
@@ -1057,8 +1402,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const x =
 					stage &&
@@ -1072,8 +1422,13 @@ describe('deriveEnvironment', () => {
 			it('a read after the declaration is not flagged', () => {
 				const snippet = { source: 'let x = 1; x;', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const read =
 					stage &&
@@ -1090,8 +1445,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const functionName =
 					stage &&
@@ -1113,8 +1473,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const cls =
 					stage &&
@@ -1132,8 +1497,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const cls =
 					stage &&
@@ -1151,8 +1521,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const classScope =
 					stage &&
@@ -1170,8 +1545,13 @@ describe('deriveEnvironment', () => {
 			it('a use immediately abutting the class end is not flagged — the class has finished evaluating', () => {
 				const snippet = { source: 'class C{}C', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const cls =
 					stage &&
@@ -1189,8 +1569,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const classScope =
 					stage &&
@@ -1208,8 +1593,13 @@ describe('deriveEnvironment', () => {
 			it('an unresolved reference is never flagged — no binding to precede', () => {
 				const snippet = { source: 'foo; let x = 1;', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const unresolved =
 					stage &&
@@ -1226,8 +1616,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const loopScope =
 					stage &&
@@ -1250,8 +1645,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const loopScope =
 					stage &&
@@ -1274,8 +1674,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const outer =
 					stage &&
@@ -1293,8 +1698,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const loopScope =
 					stage &&
@@ -1317,8 +1727,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const loopScope =
 					stage &&
@@ -1341,8 +1756,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const loopScope =
 					stage &&
@@ -1366,8 +1786,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const outerLoop =
 					stage &&
@@ -1390,8 +1815,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const loopScope =
 					stage &&
@@ -1414,8 +1844,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const loopScope =
 					stage &&
@@ -1438,8 +1873,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const loopScope =
 					stage &&
@@ -1464,8 +1904,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const loopScope =
 					stage &&
@@ -1488,8 +1933,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const outer =
 					stage &&
@@ -1507,8 +1957,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const variable =
 					stage &&
@@ -1528,8 +1983,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const classScope =
 					stage &&
@@ -1550,8 +2010,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const classScope =
 					stage &&
@@ -1572,8 +2037,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const classScope =
 					stage &&
@@ -1594,8 +2064,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const outer =
 					stage &&
@@ -1613,8 +2088,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const outer =
 					stage &&
@@ -1632,8 +2112,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const outer =
 					stage &&
@@ -1651,8 +2136,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const outer =
 					stage &&
@@ -1670,8 +2160,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const classScope =
 					stage &&
@@ -1692,8 +2187,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const classScope =
 					stage &&
@@ -1714,8 +2214,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const parameter =
 					stage &&
@@ -1735,8 +2240,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const classScope =
 					stage &&
@@ -1757,8 +2267,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const outer =
 					stage &&
@@ -1776,8 +2291,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const read =
 					stage &&
@@ -1794,8 +2314,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const read =
 					stage &&
@@ -1812,8 +2337,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const read =
 					stage &&
@@ -1830,8 +2360,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const read =
 					stage &&
@@ -1850,8 +2385,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const binding =
 					stage &&
@@ -1868,8 +2408,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const moduleScope =
 					stage &&
@@ -1887,8 +2432,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const moduleScope =
 					stage &&
@@ -1906,8 +2456,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const moduleScope =
 					stage &&
@@ -1925,8 +2480,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const moduleScope =
 					stage &&
@@ -1944,8 +2504,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const moduleScope =
 					stage &&
@@ -1963,8 +2528,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const moduleScope =
 					stage &&
@@ -1982,8 +2552,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const moduleScope =
 					stage &&
@@ -2001,8 +2576,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const moduleScope =
 					stage &&
@@ -2020,8 +2600,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const moduleScope =
 					stage &&
@@ -2039,8 +2624,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const moduleScope =
 					stage &&
@@ -2058,8 +2648,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const moduleScope =
 					stage &&
@@ -2077,8 +2672,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const moduleScope =
 					stage &&
@@ -2096,8 +2696,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const moduleScope =
 					stage &&
@@ -2115,8 +2720,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const moduleScope =
 					stage &&
@@ -2134,8 +2744,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const moduleScope =
 					stage &&
@@ -2153,8 +2768,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const moduleScope =
 					stage &&
@@ -2174,8 +2794,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const moduleScope =
 					stage &&
@@ -2196,8 +2821,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const moduleScope =
 					stage &&
@@ -2215,8 +2845,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const moduleScope =
 					stage &&
@@ -2234,8 +2869,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const moduleScope =
 					stage &&
@@ -2253,8 +2893,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const moduleScope =
 					stage &&
@@ -2272,8 +2917,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const moduleScope =
 					stage &&
@@ -2291,8 +2941,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const moduleScope =
 					stage &&
@@ -2310,8 +2965,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const moduleScope =
 					stage &&
@@ -2329,8 +2989,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const moduleScope =
 					stage &&
@@ -2348,8 +3013,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const moduleScope =
 					stage &&
@@ -2367,8 +3037,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const moduleScope =
 					stage &&
@@ -2386,8 +3061,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const moduleScope =
 					stage &&
@@ -2405,8 +3085,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const moduleScope =
 					stage &&
@@ -2424,8 +3109,13 @@ describe('deriveEnvironment', () => {
 					type: 'module',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const moduleScope =
 					stage &&
@@ -2445,8 +3135,13 @@ describe('deriveEnvironment', () => {
 			it("a function scope indexes under its declaration's path", () => {
 				const snippet = { source: 'function f(){}', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const environment = stage && stage.ok && stage.value;
 				expect(
@@ -2461,8 +3156,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const environment = stage && stage.ok && stage.value;
 				expect(
@@ -2477,8 +3177,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const environment = stage && stage.ok && stage.value;
 				expect(
@@ -2493,8 +3198,13 @@ describe('deriveEnvironment', () => {
 					type: 'script',
 				} as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const environment = stage && stage.ok && stage.value;
 				expect(
@@ -2507,8 +3217,13 @@ describe('deriveEnvironment', () => {
 			it('a block scope indexes too', () => {
 				const snippet = { source: '{ let x; }', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(stage && stage.ok && stage.value.byPath['$.body.0']?.type).toBe(
 					'block',
@@ -2518,8 +3233,13 @@ describe('deriveEnvironment', () => {
 			it('a shared program node keeps exactly one key', () => {
 				const snippet = { source: 'function f() {}', type: 'module' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(
 					stage &&
@@ -2533,8 +3253,13 @@ describe('deriveEnvironment', () => {
 			it("a module's function indexes inside the module scope", () => {
 				const snippet = { source: 'function f() {}', type: 'module' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const environment = stage && stage.ok && stage.value;
 				expect(
@@ -2547,8 +3272,13 @@ describe('deriveEnvironment', () => {
 			it("a module's $ resolves to the innermost program scope, not the global", () => {
 				const snippet = { source: '', type: 'module' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				const environment = stage && stage.ok && stage.value;
 				expect(
@@ -2562,8 +3292,13 @@ describe('deriveEnvironment', () => {
 			it('its reference resolves to null', () => {
 				const snippet = { source: 'foo()', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(
 					stage && stage.ok && stage.value.root.references[0]?.resolved,
@@ -2577,8 +3312,13 @@ describe('deriveEnvironment', () => {
 			it('carries the ast cause by identity — a rebuilt equal cause must not pass', () => {
 				const snippet = { source: 'const', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(!ast.ok && !stage.ok && stage.cause === ast.cause).toBe(true);
 			});
@@ -2586,8 +3326,13 @@ describe('deriveEnvironment', () => {
 			it('carries a tokens-origin cause by identity', () => {
 				const snippet = { source: '01', type: 'module' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(!tokens.ok && !stage.ok && stage.cause === tokens.cause).toBe(
 					true,
@@ -2629,8 +3374,13 @@ describe('deriveEnvironment', () => {
 			it('the carried envelope is fresh — never the upstream stage itself', () => {
 				const snippet = { source: 'const', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
 				expect(stage !== ast).toBe(true);
 			});
@@ -2641,8 +3391,13 @@ describe('deriveEnvironment', () => {
 					.mockImplementation(() => {});
 				const snippet = { source: 'const', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				deriveEnvironment(snippet.type, ast, entwined);
 				expect(errorSpy).toHaveBeenCalledTimes(0);
 			});
@@ -2651,8 +3406,13 @@ describe('deriveEnvironment', () => {
 				const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 				const snippet = { source: 'const', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				deriveEnvironment(snippet.type, ast, entwined);
 				expect(warnSpy).toHaveBeenCalledTimes(0);
 			});
@@ -2663,8 +3423,13 @@ describe('deriveEnvironment', () => {
 					.mockImplementation(() => {});
 				const snippet = { source: '01', type: 'module' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				deriveEnvironment(snippet.type, ast, entwined);
 				expect(errorSpy).toHaveBeenCalledTimes(0);
 			});
@@ -2673,8 +3438,13 @@ describe('deriveEnvironment', () => {
 				const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 				const snippet = { source: '01', type: 'module' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				deriveEnvironment(snippet.type, ast, entwined);
 				expect(warnSpy).toHaveBeenCalledTimes(0);
 			});
@@ -2711,8 +3481,13 @@ describe('deriveEnvironment', () => {
 				vi.spyOn(console, 'error').mockImplementation(() => {});
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(
 					snippet.type,
 					{ ok: true, value: null as unknown as Program },
@@ -2727,8 +3502,13 @@ describe('deriveEnvironment', () => {
 					.mockImplementation(() => {});
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				deriveEnvironment(
 					snippet.type,
 					{ ok: true, value: null as unknown as Program },
@@ -2743,8 +3523,13 @@ describe('deriveEnvironment', () => {
 					.mockImplementation(() => {});
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				deriveEnvironment(
 					snippet.type,
 					{ ok: true, value: null as unknown as Program },
@@ -2759,8 +3544,13 @@ describe('deriveEnvironment', () => {
 				vi.spyOn(console, 'error').mockImplementation(() => {});
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(
 					snippet.type,
 					{ ok: true, value: null as unknown as Program },
@@ -2773,8 +3563,13 @@ describe('deriveEnvironment', () => {
 				vi.spyOn(console, 'error').mockImplementation(() => {});
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(
 					snippet.type,
 					{ ok: true, value: null as unknown as Program },
@@ -2787,8 +3582,13 @@ describe('deriveEnvironment', () => {
 				vi.spyOn(console, 'error').mockImplementation(() => {});
 				const snippet = { source: 'let x = 1', type: 'script' } as const;
 				const tokens = deriveTokens(snippet);
-				const { ast } = deriveAst(snippet, tokens);
-				const entwined = deriveEntwined(snippet.source, tokens, ast);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const entwined = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
 				const stage = deriveEnvironment(
 					snippet.type,
 					{ ok: true, value: null as unknown as Program },

@@ -44,6 +44,16 @@ describe('deriveFacts', () => {
 		});
 	});
 
+	describe('a program with grouping parentheses', () => {
+		it("the parse's record reaches the entwined binding", () => {
+			const facts = deriveFacts({ source: 'let x = (1 + 2)', type: 'script' });
+			expect(
+				facts.entwined.ok &&
+					facts.entwined.value.parenSpans['$.body.0.declarations.0.init'],
+			).toEqual([{ start: 8, end: 15 }]);
+		});
+	});
+
 	describe('an empty module', () => {
 		it('derives all six stages ok', () => {
 			const facts = deriveFacts({ source: '', type: 'module' });

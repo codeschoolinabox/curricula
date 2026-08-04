@@ -1,3 +1,5 @@
+<!-- cspell:ignore reddy unobjected greppable injective -->
+
 # AR-LOG — paren-truth campaign (Shape C: fold the parse, entwine the parens)
 
 Campaign ruling home per DEV.md § Ruling provenance. Phase-0 session opened
@@ -211,3 +213,69 @@ Campaign ruling home per DEV.md § Ruling provenance. Phase-0 session opened
   the tree's structural depth — the paren-draining loop itself is iterative — so
   it is the same risk class acorn's own recursive descent already carries, not a
   regression.
+
+### Increment 3 — the published, path-keyed record
+
+- **2026-08-04 ar-3 verdict: CONSIDER** [relayed: ar-3] — confirmed that `in` is
+  the right sparseness instrument rather than `toBeUndefined()` (under this
+  tsconfig the value type carries an explicit `| undefined`, so
+  `toBeUndefined()` would pass for both an absent key and a key holding
+  `undefined`, collapsing exactly the distinction the contract draws — and `in`
+  also rejects the other prohibited form, a key holding `[]`), and that a
+  failure-arm test would be vacuous because `deriveEntwined` returns on the
+  upstream-failure branch before any record could be built. Three IMPORTANT
+  gaps, all applied BEFORE the implementation was written, each the exact analog
+  of a gap the fold-level gate had already caught one increment earlier: (1) the
+  cardinality test did not check **attribution** — split into per-key `toEqual`
+  assertions for the left and right pairs plus a no-phantom-entries count; (2)
+  no **sibling** sparseness test — the wrapped node's unwrapped sibling now
+  asserts absence, beside the existing ancestor case; (3) no **key-space
+  coherence** test — a `parenSpans` key now asserts it resolves through
+  `byPath`, the gap being that a drifted re-keying would address nothing and the
+  sparse type makes that silent. Test order also corrected to Zero → One → Many
+  → Boundaries.
+- **2026-08-04 ar-4 verdict: CONSIDER** [relayed: ar-4] — every focus area
+  verified by reading and by running: the freeze reaches `parenSpans`, its
+  arrays and each `{ start, end }` (all plain, all region-allocated), while the
+  transient `Map` is unreachable from `Facts` and so never meets it; key-space
+  coherence is **structural**, not merely tested, because the indexing pass
+  iterates `Object.entries(byPath)` and writes under that same key; no `[]` can
+  be published because the span list is only ever set inside a loop that has
+  already run once; and the separate indexing pass is the file's own precedent
+  (`byOffset` is built the same way). One breaking-change site outside embody,
+  and only one [relayed: ar-4, which swept for hand-built `Entwined` literals
+  independently of tsc].
+- **2026-08-04 ar-4 finding, APPLIED** [relayed: ar-4]: no test covered
+  `derive-facts.ts`'s wiring — a regression substituting an empty `Map` at that
+  one call site would typecheck and pass every test, because `deriveEntwined`'s
+  own tests always build the record from the real `deriveAst`. Closed with one
+  assertion in `derive-facts.test.ts` on a paren-bearing snippet.
+- **2026-08-04 STANDING FLAG for the human — a committed contract claim is
+  false.** `types.ts`'s `NodePath` doc says paths are "injective over one syntax
+  tree: every node has exactly one path". They are not: for a bare
+  `import { x }` and a bare `export { x }`, acorn hands back **one** Identifier
+  object for both `local` and `imported`/`exported`, so two distinct paths
+  resolve to the same node [measured: `node --input-type=module -e` against the
+  repo's acorn, this session — bare forms `true`, renamed forms `false`; first
+  surfaced by ar-4]. The claim is **pre-existing** — unchanged since before this
+  campaign [measured: `git show 6614142e:src/lib/study-lenses/embody/types.ts`]
+  — but it is newly load-bearing, because `indexParenSpans` is the first code
+  that looks up by node identity across `byPath`'s whole key space. **No bug
+  today**: a grouping pair can never wrap an import or export specifier's
+  identifier, so the shared node never carries a span and nothing
+  double-publishes. NOT edited here — a published contract sentence is the
+  human's gate, and this is a pre-existing falsehood rather than something this
+  campaign introduced. Proposed resolution for the human: narrow the sentence,
+  and pin the collision with a regression test. Surfaced at the Phase-1 close.
+- **2026-08-04 PROCESS FINDING, third occurrence of the sourced-claims defect**
+  [relayed: ar-4]: the tag form `[measured this session]` and
+  `[measured this session: <command>]` do **not** match DEV.md's own audit
+  regex, which requires the colon immediately after the word —
+  `git grep -nE '\[(measured|read|relayed):'` finds neither [measured: that grep
+  against both literal strings, this session]. Increment 3's commit body was
+  corrected before it landed. **The bodies of `8da55d2f` and `6614142e` carry
+  the non-conforming form and are immutable** (amend is forbidden), so those two
+  commits' gate claims are invisible to the repo-wide audit. Recorded here so
+  the audit trail exists somewhere greppable; surfaced at the close. Standing
+  correction for every later commit in this repo: the tag is
+  `[measured: <the command>]`, one tag per claim, never a bare parenthetical.

@@ -1,6 +1,13 @@
 import type { Comment, Node, Program, Token } from 'acorn';
 
-import type { Entwined, FactStage, NodePath, Tokens } from './types.js';
+import type {
+	Entwined,
+	FactStage,
+	NodePath,
+	ParenSpan,
+	ParenSpansByNode,
+	Tokens,
+} from './types.js';
 
 /**
  * Derive the entwined fact stage from the source, the tokens stage, and the
@@ -30,11 +37,17 @@ import type { Entwined, FactStage, NodePath, Tokens } from './types.js';
  * a comment carries its innermost node and its nearest token neighbors —
  * tokens, never comments, null past either end — and the token chain itself
  * never threads through a comment.
+ *
+ * The parse's record of where grouping parentheses sat arrives keyed by node
+ * object and is published keyed by path — this walk is where a node's path is
+ * born, so it is the only place the translation can happen. A node no pair
+ * wrapped gets no entry, so the published record stays sparse.
  */
 export default function deriveEntwined(
 	source: string,
 	tokens: FactStage<Tokens>,
 	ast: FactStage<Program>,
+	parenSpansByNode: ParenSpansByNode,
 ): FactStage<Entwined> {
 	// spelling precedes grammar — the first upstream failure's cause carries,
 	// its origin still named; nothing derives past it
@@ -64,11 +77,12 @@ export default function deriveEntwined(
 	const byPath: Record<NodePath, BuildingNode> = {};
 	const root = entwineNode(ast.value, '$', null, byPath);
 	const byOffset = indexByOffset(root);
+	const parenSpans = indexParenSpans(byPath, parenSpansByNode);
 	const tokenTies = tieTokens(tokens.value.tokens, byOffset);
 	const commentTies = tieComments(tokens.value.comments, byOffset);
 	wireCommentNeighbors(commentTies, tokenTies);
 
-	return { ok: true, value: { root, byPath, byOffset } };
+	return { ok: true, value: { root, byPath, byOffset, parenSpans } };
 }
 
 // the parent↔children graph is cyclic, so nodes build by local mutation and
@@ -106,6 +120,28 @@ function entwineNode(
 	}
 
 	return entwined;
+}
+
+/**
+ * The parse's grouping-parenthesis record, re-keyed from node objects to the
+ * paths the walk just assigned them — the published form of the same data.
+ * Only nodes a pair actually wrapped get a key, so the record stays sparse and
+ * no empty list is ever published; the span lists themselves are handed on by
+ * reference, never rebuilt.
+ */
+function indexParenSpans(
+	byPath: Record<NodePath, BuildingNode>,
+	parenSpansByNode: ParenSpansByNode,
+): Record<NodePath, ReadonlyArray<ParenSpan>> {
+	const parenSpans: Record<NodePath, ReadonlyArray<ParenSpan>> = {};
+	for (const [path, entwined] of Object.entries(byPath)) {
+		const spans = parenSpansByNode.get(entwined.node);
+		if (spans !== undefined) {
+			parenSpans[path] = spans;
+		}
+	}
+
+	return parenSpans;
 }
 
 /**

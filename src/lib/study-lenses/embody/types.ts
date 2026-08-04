@@ -174,8 +174,11 @@ export type ParenSpan = {
 
 /**
  * The source⇄tree binding: one shared graph of entwined nodes, tokens, and
- * comments, with two canonical entry points. Both hold the same references
- * as the tree — entry points into the graph, never copies.
+ * comments, with two canonical entry points — `root` and `byPath`. Both hold
+ * the same references as the tree — entry points into the graph, never copies.
+ * `byOffset` addresses that same graph from the source side, and `parenSpans`
+ * sits beside all three: not an entry point but a record about the source, keyed
+ * into the graph's own identity space.
  */
 export type Entwined = {
 	readonly root: EntwinedNode;
@@ -191,6 +194,17 @@ export type Entwined = {
 	 * offset; reach them via `byPath`.
 	 */
 	readonly byOffset: ReadonlyArray<EntwinedNode>;
+	/**
+	 * Where the parse recorded grouping parentheses, keyed by the path of the
+	 * node each pair wrapped — the same key space as `byPath`, so a key here
+	 * always resolves there. Sparse: a node with no grouping parentheses has no
+	 * entry, and an empty list is never published, so a present key always means
+	 * at least one pair. A node wrapped more than once carries one span per pair,
+	 * outermost first. See {@link ParenSpan}.
+	 */
+	readonly parenSpans: Readonly<
+		Record<NodePath, ReadonlyArray<ParenSpan> | undefined>
+	>;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

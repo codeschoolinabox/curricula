@@ -152,6 +152,7 @@ describe('assembleParseFacts', () => {
 						root: entwinedRoot,
 						byPath: { $: entwinedRoot },
 						byOffset: [],
+						parenSpans: {},
 					},
 				},
 				environment: {
