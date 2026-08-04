@@ -164,3 +164,50 @@ Campaign ruling home per DEV.md § Ruling provenance. Phase-0 session opened
   increment 1 while violating "nothing parses the same source twice". Both
   constraints are contract text, not test-covered. Named in increment 2's ar-4
   prompt.
+
+### Increment 2 — the fold and its record
+
+- **2026-08-04 ar-3 verdict: CONSIDER** [relayed: ar-3] — the two Red tests
+  (Zero, One) needed no change, the `((x))` fixture genuinely discriminates
+  outermost-first from innermost-first ordering (both are defensible readings of
+  "bottom-up", and `toEqual` on arrays is order-sensitive), and the planned
+  `PINNED(Phase-0 2ad2407b: …)` marker is legitimately grounded — the ordering
+  landed in that commit's own `types.ts` diff and in DOCS § Parse decisions
+  [relayed: ar-3, `git show 2ad2407b`], and the citation form matches house
+  precedent at `lib/screening/tests/parse-settings.test.ts`. Three IMPORTANT
+  concerns, all applied BEFORE the remaining tests were authored, which is what
+  this gate exists for: (1) cardinality-only assertions (`size === n`) do not
+  check **attribution** — a cross-wired record still counts right, so each
+  parser-authority test now asserts per-node (`if (x) (y);` records nothing on
+  the test and `[{7,10}]` on the consequent's expression; `f((a))` records
+  `[{2,5}]` on the argument); (2) sparseness was untested on a tree that mixes a
+  wrapped and an unwrapped node — a mixed-tree test now asserts the unwrapped
+  sibling has no entry; (3) `derive-facts.ts` is a production call site the
+  churn inventory had not named. MINOR: the churn counts are 22 and 101, not 17
+  and 100 [relayed: ar-3, measured] — corrected in the commit body. Its judgment
+  that the One test alone could still be passed by dispatching on the input
+  string, and that Many is what closes that, is accepted; both landed together.
+- **2026-08-04 ar-4 verdict: CONSIDER** [relayed: ar-4] — every carry-forward
+  above verified by reading the implementation, as required, not by trusting the
+  net: the fold constructs no node-shaped value by literal, `new`,
+  `Object.create`, `Object.assign` or spread, so every survivor is the parser's
+  own object reassigned into an existing slot; `range` is routed through the
+  array path where the node check rejects each number, so its identity survives;
+  exactly one `parse(` and no `tokenizer(` is reachable from one call [all
+  relayed: ar-4, measured in its session]. It also confirmed the transport `Map`
+  reaches no `Facts` member and therefore never meets the freeze, and that the
+  churn diff contains nothing but the two call shapes. Its one IMPORTANT finding
+  is resolved by this entry — a commit body claimed an ar-3 verdict that had not
+  yet been written here. **This is the second occurrence of the same defect in
+  two increments** (increment 1's ar-4 found it first); the rule that failed is
+  "record on confirmation, not eventually", and the correction is to write the
+  AR-LOG entry when the verdict arrives rather than when the commit is drafted.
+  Surfaced at the close as a process finding, not only a fixed instance.
+- **2026-08-04 ar-4 MINOR, accepted without change** [relayed: ar-4]: the fold
+  does not recurse into an array nested directly inside another array. No ESTree
+  node shape has an array-of-arrays property, so the gap is unreachable against
+  the current grammar; adding a defensive branch would be speculative. Recorded
+  so a future grammar change has a place to look. Stack depth is proportional to
+  the tree's structural depth — the paren-draining loop itself is iterative — so
+  it is the same risk class acorn's own recursive descent already carries, not a
+  regression.

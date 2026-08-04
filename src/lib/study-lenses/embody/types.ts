@@ -511,3 +511,38 @@ export type EmbodyOptions = {
 	readonly type?: SnippetType;
 	readonly lenses?: ReadonlyArray<Gateable>;
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Internal transport (internal) — carried between derivations, never published
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * (internal) The parse's record of where grouping parentheses sat, keyed by the
+ * node object each pair wrapped. Born in the ast derivation, read by the
+ * entwining walk, discarded there — it reaches no member of the Facts, so the
+ * embodiment's freeze never meets it.
+ *
+ * Object identity is the only key available where the record is made: a node's
+ * path is born in the entwining walk, which runs afterwards, and re-deriving
+ * the path grammar here would be a second copy of it to keep in step. A `Map`
+ * is the shape DEV.md § 13 names for exactly this case — transient internal
+ * computation with object-identity keys, never frozen and never serialized.
+ *
+ * Spans are ordered as the published record orders them: outermost first.
+ */
+export type ParenSpansByNode = ReadonlyMap<AcornNode, ReadonlyArray<ParenSpan>>;
+
+/**
+ * (internal) What deriving the syntax tree produces: the ast fact stage, and
+ * the parse's record of where grouping parentheses sat. One parse yields both,
+ * so they travel together — the same reason the tokens value carries the
+ * comments the tokenizer set aside.
+ *
+ * The record is empty on a failed stage: there was no tree to fold, so nothing
+ * was recorded. Only `ast` is published — the record's own published form is
+ * the entwined binding's, keyed by path rather than by node.
+ */
+export type AstDerivation = {
+	readonly ast: FactStage<Program>;
+	readonly parenSpansByNode: ParenSpansByNode;
+};

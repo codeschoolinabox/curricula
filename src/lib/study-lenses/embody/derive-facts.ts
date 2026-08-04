@@ -17,7 +17,7 @@ import type { Facts, Snippet } from './types.js';
  */
 export default function deriveFacts(snippet: Snippet): Facts {
 	const tokens = deriveTokens(snippet);
-	const ast = deriveAst(snippet, tokens);
+	const { ast } = deriveAst(snippet, tokens);
 	const entwined = deriveEntwined(snippet.source, tokens, ast);
 	const environment = deriveEnvironment(snippet.type, ast, entwined);
 
