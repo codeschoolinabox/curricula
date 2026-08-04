@@ -366,3 +366,18 @@ Campaign ruling home per DEV.md § Ruling provenance. Phase-0 session opened
   lint debt (`reddy`, `unobjected` shipped at `2ad2407b` without one) — scope,
   disclosed. (9) the transport is spelled `spansByNode` inside the fold's
   helpers where the sibling deriver would use a named building type; cosmetic.
+- **2026-08-04 CORRECTION to `d6d4c6d4`'s own commit body — a wrong number, by
+  the implementing agent, self-caught.** That body claims "embody suite 10 files
+  / 457 passed"; the true count is **455** [measured: `npx vitest run --project
+  unit src/lib/study-lenses/embody/`, run immediately after the commit landed].
+  455 is consistent with every other figure — 451 at `59a5ef60` plus the four
+  tests that commit adds — and the full scoped-suite figure in the same body
+  (3093) is correct. The number was carried forward from an arithmetic guess
+  instead of re-measured after the last edit: precisely the confident-repetition
+  failure invariant 13 exists to stop, committed in the same body that resolves
+  ar-5's findings about other tag defects. Amend is forbidden, so this entry is
+  the repair. **Process correction, third distinct instance of the
+  sourced-claims family in this campaign** (increment 1: untagged relayed
+  verdict; increment 3: non-conforming tag form; here: an unmeasured number):
+  every numeric gate claim is re-run in the same turn the body is written, never
+  computed from a previous run plus a delta.
