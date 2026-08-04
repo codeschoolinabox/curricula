@@ -3,9 +3,10 @@
  *
  * @remarks The single public export of `lib/scoping`. Given a snippet's scope
  * environment (embody's static scope graph, computed once via eslint-scope),
- * produces one frozen `VariableUsage` per `let`/`const` binding — its name,
- * kind, post-declaration read/write counts, and declared-identifier node —
- * gathered into a flat `ScopeUsage` that crosses every scope depth.
+ * produces one frozen `VariableUsage` per `let`/`const` binding — its name and
+ * kind, its post-declaration read/write counts, its declared identifier node,
+ * and whether it is exported — gathered into a flat `ScopeUsage` that crosses
+ * every scope depth.
  *
  * Pure and total: it reads embody's per-reference access classification, it
  * never re-walks the AST or recomputes scope, and it never mutates the
@@ -61,7 +62,7 @@ function enumerateScopes(scope: Scope): readonly Scope[] {
  * filtered out here), while function / parameter / class / import / catch
  * bindings carry no `kind` at all — and folds one into a `VariableUsage`:
  * name / kind / node from its declaration, read/write counts tallied from its
- * references.
+ * references, and `exported` from the binding's export names.
  */
 function toVariableUsage(variable: ScopeVariable): VariableUsage | null {
 	const declaration = variable.defs.find(
