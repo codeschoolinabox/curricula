@@ -75,6 +75,15 @@ superseded four-track campaign were consequently lost.
   kept as a genuine tidy-up. New campaign vocabulary goes in `cspell.json`, not
   in inline `cspell:ignore` directives. Safe for the checker: `cspell.json`
   carries no links, so reverting the other three alone cannot orphan a fragment.
+  **Operational consequence, because R7 and the per-increment pathspecs
+  otherwise deadlock:** when an increment coins a word, its commit stages
+  `cspell.json` **in addition to** its own pathspec — e.g. increment 1 becomes
+  `-- .planning-handoffs/governance-dials/ cspell.json`. That is the only
+  sanctioned widening; it never extends to `DEV.md`, `AGENTS.md` or
+  `AGENTS.principal.md`, which stay barred until the increment-2.5 revert.
+  _(Increment 0 used an inline `cspell:ignore` for `pathspec`, which R7 has
+  since voided; that one line is left in place rather than churned, and R7
+  governs everything after it. A cold-start validator flagged the deadlock.)_
 - **R8 — 2026-08-04. Prettier owns markdown emphasis style; markdownlint
   yields** [relayed: human, who asked that the two tools be aligned]. Prettier
   exposes no emphasis option and always emits `_underscore_` / `**asterisk**`,
@@ -123,9 +132,11 @@ Recorded so the next campaign is not surprised. Of the design's rules, **exactly
 one is mechanically checkable**: the `## Epistemology` block, via a heading grep
 over READMEs — and under R4 it is the artifact that ships on almost every
 module, which is what makes it worth wiring. It also answers a measured gap:
-**45 directories under `src/` have a README and no `DOCS.md`** [measured: `find
-src -name README.md | wc -l` → 147; `find src -name DOCS.md | wc -l` → 102] —
-the default state, never declared.
+**44 directories under `src/` have a README and no `DOCS.md`** [measured: `find
+src -name README.md | wc -l` → 147; `find src -name DOCS.md | wc -l` → 103, at
+2026-08-04T21:15Z — this drifted from 45 within one session as a peer landed a
+`DOCS.md`, so re-measure rather than quote it] — the default state, never
+declared.
 
 Unenforceable by any current check: track-derived-from-path; the per-file union
 rule; `frog`/`vibetoad` phrase recognition; that the agent states its dials;
@@ -134,6 +145,26 @@ campaign-end trigger, which is a chat string. `check:governance` runs four
 checks — `links`, `roster`, `claims`, `headings` — of which only `links`
 produces errors, and **none reads step numbers**. `governance-guard.py` judges
 Bash command shapes only.
+
+## Ceremony disclosures for this campaign
+
+Recorded here rather than only in the plan, because this file is the canonical
+record and `ceremony: full` nominally fires AR-4 per text increment.
+
+- **Campaign ceremony: `full`, AR-3 not applicable** — no tests exist to
+  challenge. Real gate set: AR-1 on the design · an AR-2 analog on the section
+  _structure_ before prose · AR-4 in loss-lens-only mode per **text** increment
+  (4–9) · AR-5 pathspec-scoped at close.
+- **No AR fires on increment 1** (the glossary). It is not a text increment in
+  the 4–9 sense — it writes no governance prose — and AR-1 at increment 2
+  reviews the whole corrected design with the glossary included. This is a
+  disclosure of scope, **not** an agent-side lightening: per
+  [AGENTS.principal.md § Execution mechanics](../../AGENTS.principal.md#execution-mechanics)
+  only the human grants ceremony exceptions, and this is not one — increment 1's
+  output is reviewed, just at the next gate rather than its own.
+- **⚠ `full` is undefined for docs-class work** — all three ceremony values are
+  specified in ARs that presuppose code (AR-3 needs a failing test, AR-4 an
+  implementation file). Carried as an open item; do not treat it as settled.
 
 ## Standing hazards
 
