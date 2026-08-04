@@ -106,7 +106,9 @@ posture **parse-relative**, and the reason this leaf publishes the settings:
 - A node type **the parse never emits** needs no entry. A rule for one is inert:
   the walk would never reach it. (`ParenthesizedExpression` is the live example
   — the published tree is ESTree-shaped and folds grouping parentheses away, so
-  the table carries no entry for it and must not.)
+  the table carries no entry for it and must not. The settled pipeline
+  additionally records where those parentheses sat; a screening caller needs
+  only the shape, which the published settings reproduce.)
 
 The published settings pin most of that universe. The **numeric** language year
 is load-bearing, not cosmetic — a scope analyzer's version gate is a numeric
