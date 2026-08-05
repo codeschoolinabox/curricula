@@ -766,6 +766,140 @@ carries an AR_ — `setting` is a governance noun that entered the record with n
 review. **Increment 3's `ar-2` adjudicates it before increment 4 writes it into
 `DEV.md`.** (Also a context-free validator catch.)
 
+## Section structure (increment 3)
+
+The structural sketch, written before any governance prose, for `ar-2` to
+challenge. Increment 3's deliverable per the campaign's declared gate set.
+
+### Two naming decisions this increment owed
+
+- **The `DEV.md` section is named `## Work routing and ceremony`** [relayed:
+  human, 2026-08-05]. ⚠ **An earlier draft of this line named it
+  `## What a unit of work owes`; `ar-2` rejected that and it is withdrawn.** The
+  phrase was free, but the _noun_ was not: `DEV.md` already owns this concept as
+  `increment` — **96** lines across the four governance files against **18**
+  bare `unit`, of which the `DEV.md` ones are the _test_ sense — and the file
+  reads **"One unit test = one increment of work"**, putting the two on either
+  side of an equals sign [measured: `git show HEAD:DEV.md | grep -ciE
+  '\bincrements?\b'` etc.]. Coining a rival scope noun is exactly the
+  synonym-and-homonym pair step 0.1 exists to resolve. The chosen name coins no
+  scope noun at all.
+- **`setting` is RETIRED as a collective noun — no replacement.** It was coined
+  without adjudication (flagged at increment 2) and it fails the Glossary's
+  criterion 2: `git grep setting` is dominated by the harness config [measured,
+  at `2055a838`: `settings.json` on **13** lines; `\bsettings?\b` in committed
+  governance **13** — `DEV.md` 2, `AGENTS.md` 1, `AGENTS.principal.md` 1,
+  `HUMANS.md` 9; live corpus **10**]. The three things are named individually —
+  `twin-doc`, `ceremony`, and the documentation timing — exactly as the work
+  kind gets no collective noun. **The campaign's own summary sentence must stop
+  saying "three settings."**
+
+### Heading tree
+
+`DEV.md` — one new `## What a unit of work owes`, placed after
+`## Citation and claim conventions` and before `## Development Workflow`, so it
+reads before the workflow it modifies:
+
+```text
+## What a unit of work owes
+### Software work and curriculum work      ← path-routed, mechanical
+### twin-doc                                ← which reader owed a written account
+### The Epistemology block                  ← the 3 fields, incl. the delegate
+### ceremony                                ← which reviews fire; human-set
+### Prospective and retrospective           ← incl. the standing block
+### Where the answers are recorded          ← commit body + campaign AR-LOG
+```
+
+`AGENTS.md` and `AGENTS.principal.md` — **no restatement of the above.** Each
+gets a short pointer, plus two edits they alone carry:
+
+```text
+§ Execution mechanics   ← R11's amendment: uniform WITHIN a declared level
+§ Vibetoading and Frogramming — house terms
+                        ← R4's fence: taught terms, never routing labels
+```
+
+### The rule that puts each thing where it goes
+
+A rule binding every agent and tool lives in `DEV.md`, **one copy**, with both
+`AGENTS*.md` pointing in [read: `HUMANS.md § Field protocols`]. So the model
+itself is `DEV.md`'s; only the two amendments above are duplicated, and they are
+duplicated because each file states its own execution rules.
+
+### Which citations carry fragments
+
+`.planning-handoffs/` is outside the checker's corpus, but **both `AGENTS*.md`
+are inside it**, so their inbound fragments are verified. Every pointer from
+`AGENTS*.md` into the new section must use the live anchor
+`#what-a-unit-of-work-owes`. **No citation anywhere may point at a draft-only
+heading** — `#territory-tracks` is dead and must appear nowhere.
+
+### Out of scope for the three files
+
+Increments 7–9 target `HUMANS.md § Override grammar`, `.claude/agents/ar-1.md`
+and `ar-5.md`, and `.claude/skills/tadpotyping/`. **They are not part of this
+DRAFT set** and remain owed.
+
+### AR-2 analog verdict and the DRAFT set (increments 3–6)
+
+**2026-08-04 `ar-2` verdict: PAUSE** [relayed: ar-2] — four blockers, all
+verified independently and all fixed before prose was written:
+
+1. **`§ Execution mechanics` exists only in `AGENTS.principal.md`** [measured:
+   `git show HEAD:AGENTS.md | grep -c 'Execution mechanics'` → **0**]. The
+   sketch had specified it for both files. Fixed: the _rule_ lives once in
+   `DEV.md`; `AGENTS.principal.md` gets a corrected bullet, and **`AGENTS.md`
+   gains a prompted block-quote it never had** — it is the file for models that
+   need things prompted rather than assumed.
+2. **The tree covered 1 of at least 6 `DEV.md` touch points.** All six are now
+   written [relayed: human, "All six — make the DRAFTs complete"].
+3. **The section name coined a rival scope noun** — see above.
+4. **§ Out of scope answered the wrong question.** Now names what a _reader_
+   might wrongly assume the section covers.
+
+`ar-2` also ruled, against the reflex, **do not split `### ceremony`** — the
+corpus carries both § 4 horns in one 20-line sub-subsection, and the real
+problem was that the two horns describe a **relation** between `twin-doc` and
+`ceremony`. The relation now sits in the section lead, where it governs both.
+
+**The DRAFT set, ready to swap:** `DEV.DRAFT.md`, `AGENTS.DRAFT.md`,
+`AGENTS.principal.DRAFT.md`, each built from **HEAD**, not the dirty working
+copy [verified byte-identical to HEAD before editing]. The four-track draft
+therefore never enters history, and the increment-2.5 revert becomes unnecessary
+— the human deletes the dirty originals and renames these.
+
+⚠ **Two live consequences of the DRAFT mechanism, both measured:**
+
+- **`check:governance` reads 6 errors until the swap** [measured: `npm run
+  check:governance`], all one cause — `./DEV.md#work-routing-and-ceremony` from
+  the two `AGENTS.DRAFT` files, pointing at a heading that exists in
+  `DEV.DRAFT.md` and not yet in the live `DEV.md`. **They resolve on rename.**
+  The alternative — pointing at `./DEV.DRAFT.md#…` — would be wrong at merge.
+- **The DRAFTs mask the `[headings]` loss check.** It fires only when a HEAD
+  heading is missing from the **entire working corpus** [read:
+  `scripts/lib/check-governance/headings.mjs`], and `DEV.DRAFT.md` currently
+  holds all 93 of `DEV.md`'s HEAD headings. **While the DRAFTs exist, no heading
+  deletion from the canonicals can raise an advisory.** The campaign's own
+  loss-detection instrument is disabled by its own scaffolding. Re-run the check
+  after the swap, when the masking lifts.
+
+### Still owed after this DRAFT set
+
+Not in the three files, and **not** silently dropped:
+
+- `HUMANS.md § Override grammar` — the ceremony phrases the human uses to set a
+  level, and a workflow-step entry in `§ Update triggers`.
+- `.claude/agents/ar-1.md` and `ar-5.md` — both anchor to "the Phase 0 README
+  spec" and need the twin named as an input. **Semantic, not numeric.**
+- **`.claude/agents/ar-2.md` — newly urgent, and in no increment.** It carries
+  three dead Phase-0 step numbers [measured: `git grep -nE 'step 0\.|Phase 0
+  step' HEAD -- '.claude/'` → `ar-2.md:6` "(Phase 0 step 0.6)", `:41` "step
+  0.1", `:42` "step 0.4"]. Under the three-step scheme now written into
+  `DEV.DRAFT.md`, `0.6` and `0.4` name steps that do not exist and `0.1` means
+  something else. Found by `ar-2` reviewing its own contract.
+- `.claude/skills/tadpotyping/` — still VOID; its DROPPED list must gain the
+  twin or `twin-doc: none` work silently starts owing one.
+
 ## Honour-system inventory (finding I)
 
 Recorded so the next campaign is not surprised. Of the design's rules, **exactly
