@@ -361,6 +361,82 @@ are SCOPE calls, three were silences in the committed docs.
   shape and the same omission, so the gap is pre-existing and symmetric rather
   than introduced here.
 
+## Human rulings — 2026-08-05 (Increment 6 scope, at the plan gate)
+
+- **R-13 — the plan bullet's "the never-resolving socket's late settle changes
+  nothing after dispose" is DROPPED, because it is structurally impossible to
+  fail rather than merely untested.** The campaign plan's Increment 6 bullet
+  asks for it, so its absence is a decision and not an oversight. Three facts
+  make the assertion unfalsifiable by any implementation that could exist behind
+  this seam. The view's only upward channels are `onAccept` and `onDiscard`, and
+  both are bound exclusively to button `onClick` handlers — an unmounted view
+  renders no buttons [read:
+  [generator/index.tsx](../../src/lib/study-lenses/orchestrate/generator/index.tsx)
+  — `onClick={() => onAccept(job.program)}` and `onClick={onDiscard}` are the
+  only references besides the destructure]. Every socket callback is guarded by
+  an identity check against a ref the unmount cleanup nulls, so a late answer is
+  never even unwrapped. And the region's only dispatch producers are the
+  settled-announce effect and five click-driven commit functions, none of which
+  the socket can reach: a settled identity moves only through the edit intake or
+  the flush, and the socket touches neither. A test whose assertion no
+  implementation could violate spends review budget and teaches a later reader
+  that a hazard was guarded when it was merely impossible. Recorded rather than
+  silently omitted because an unrecorded deliberate non-test is exactly what a
+  later AR reopens — R-7's own lesson.
+
+- **R-13b — the substitute was considered and DECLINED; the claim goes to the 🔍
+  checkpoint instead.** The takes-time warning makes a region-level behavioral
+  promise that neither suite tests — _"Leaving this view ends it — and so does
+  changing the level, the posture, or the snippet type"_ [read:
+  [generator/README.md § The view's own words](../../src/lib/study-lenses/orchestrate/generator/README.md#the-views-own-words)]
+  — and that sentence is pinned learner-facing prose under R-2. A region test
+  asserting the in-flight ask's signal aborts on a level commit would cover it,
+  but it has **no unique falsifier**: dropping the view's unmount-abort fails it
+  AND the view suite's own "aborts the ask the mount leaves behind", while
+  removing `commitLevel`'s dispose fails it AND this increment's level pin. It
+  would also need a never-resolving double the suite does not otherwise want,
+  against R-5's finding that a real clock in a double is this campaign's
+  wall-clock flakiness vector. The promise is user-observable, and
+  [DEV.md § Sandbox Checkpoints](../../DEV.md#sandbox-checkpoints--user-observable-features)
+  is where user-observable claims belong, so it becomes a named GEN-6 action:
+  ask, then toggle the type mid-flight, and watch that nothing paints late.
+
+- **R-14 — R-9's enumeration of what Increment 6 retained was INCOMPLETE, and
+  the two tests that look like scope creep are its unfinished half plus R-10's
+  missing premise guard.** Raised by AR-4 against Increment 6, which noticed
+  that neither test is named by any ruling and did the git archaeology rather
+  than assume.
+  - **The correction.** R-9 said Increment 6 retains "the three
+    derivation-context dispose-order pins, the orphan-defense pin, and the
+    late-settle test", and the campaign plan's RESUMPTION POINT went further and
+    called the `openLensSurface` "strip-and-recommendation work" _already done_.
+    **Only the strip half was done.** The strip-path pin landed with the code in
+    Increment 5 [measured: `git log --oneline -1 -S "announces the generator
+    close before the lens open when a lens opens over it" -- <the region suite>`
+    → `b8379b8b`], but the RECOMMENDATION path had no test at all until
+    Increment 6 [measured: the same command for "announces the generator close
+    before a recommendation opens its lens" → no output, i.e. no history before
+    this increment]. So Increment 6's T5 is the unfinished half of R-9's own
+    item, not an addition beyond it. **Both `openLensSurface` callers now have a
+    pin**, and that matters more than the bookkeeping: `commitOpenLens` and
+    `commitOpenRecommended` are its only two callers, so moving the pre-close
+    down into either one leaves the other silently un-announcing — a mutation
+    that leaves every other test in the suite green [measured: that exact
+    mutation → 1 failed | 117 passed, T5 alone].
+  - **T6 is a premise guard for R-10, recorded because R-10 is a deliberate
+    NON-guard.** R-10 leaves the strip's none entry unguarded as a
+    generator-close path on the strength of a DOM fact — every strip select
+    already sits at its none entry during a generator excursion — and that fact
+    was asserted in code only for the honored-excluded lens case, never for the
+    generator arm. If a later increment lets a select carry a value during a
+    generator excursion, R-10's premise goes false silently and a
+    browser-unreachable path becomes reachable. **Disclosed weakness: T6 has no
+    realistic one-line mutation falsifier.** It guards a ruling's premise, not a
+    behavior, and it pins the select COUNT rather than the length-agnostic
+    `.every()` its nearest sibling uses, because `.every()` over an empty list
+    is vacuously true and would still pass in exactly the world where the
+    premise had failed.
+
 ## AR resolutions — 2026-08-04 (Increment 5, the third arm wired, `b8379b8b`)
 
 - **AR-3 CONSIDER, six concerns, all folded.** The one that mattered was a gap

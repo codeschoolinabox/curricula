@@ -77,17 +77,33 @@ function returnThroughEditCode(container: HTMLElement): void {
 // The two pane-occupant announcements, named with their payloads and left in
 // dispatch order — the close event is per arm, so a sequence is the only shape
 // that can show a generator dispose announcing a lens's close, or either one
-// firing twice.
+// firing twice. `alsoKeep` carries other event names through un-renamed, for
+// the dispose-order pins: naming BOTH arms is what lets the sequence catch an
+// implementation that announces the wrong one, or both.
 function namePaneAnnouncements(
 	dispatches: Array<[string, unknown]>,
+	alsoKeep: ReadonlyArray<string> = [],
 ): Array<string> {
 	return dispatches
-		.filter(([name]) => name === 'generator-opened' || name === 'lens-opened')
-		.map(([name, payload]) =>
-			name === 'generator-opened'
-				? `generator-opened:${String((payload as { open: boolean }).open)}`
-				: `lens-opened:${String((payload as { lens: string | null }).lens)}`,
-		);
+		.filter(
+			([name]) =>
+				name === 'generator-opened' ||
+				name === 'lens-opened' ||
+				alsoKeep.includes(name),
+		)
+		.map(([name, payload]) => nameOneAnnouncement(name, payload));
+}
+
+function nameOneAnnouncement(name: string, payload: unknown): string {
+	if (name === 'generator-opened') {
+		return `generator-opened:${String((payload as { open: boolean }).open)}`;
+	}
+
+	if (name === 'lens-opened') {
+		return `lens-opened:${String((payload as { lens: string | null }).lens)}`;
+	}
+
+	return name;
 }
 
 function editLiveSource(container: HTMLElement, source: string): void {
@@ -1393,6 +1409,27 @@ describe('StudyLenses', () => {
 				).every((value) => value === ''),
 			]).toEqual([true, 0, true]);
 		});
+
+		it('leaves the generator standing when the flush moves the facts beneath it', async () => {
+			const dispatches = recordDispatches();
+			const container = await mountInstrument(
+				<StudyLenses snippet="const x = 1;" />,
+			);
+			vi.useFakeTimers();
+			try {
+				editLiveSource(container, '1 +');
+				openGenerator(container);
+				act(() => {
+					vi.advanceTimersByTime(2000);
+				});
+			} finally {
+				vi.useRealTimers();
+			}
+			expect([
+				container.querySelector('[data-generator]') !== null,
+				namePaneAnnouncements(dispatches),
+			]).toEqual([true, ['generator-opened:true']]);
+		});
 	});
 
 	describe('the redesign contract (Interfaces)', () => {
@@ -2125,6 +2162,125 @@ describe('StudyLenses', () => {
 				container.querySelector('[data-probe]') !== null,
 				container.querySelector('[data-generator]'),
 			]).toEqual([true, null]);
+		});
+
+		it('announces the generator close before a recommendation opens its lens', async () => {
+			const dispatches = recordDispatches();
+			const target = buildLens('target', {
+				main: () => <div data-target-probe>opened</div>,
+			});
+			const proposer = buildLens('proposer', {
+				recommend: () => [
+					{ lens: target, config: {}, relevance: 0.7, label: 'study next' },
+				],
+			});
+			const container = await mountInstrument(
+				<StudyLenses lenses={[proposer, target]} snippet="const x = 1;" />,
+			);
+			openGenerator(container);
+			const affordance = container.querySelector<HTMLElement>(
+				'[data-recommendation="target"]',
+			);
+			if (!affordance) throw new Error('missing the recommendation');
+			fireEvent.click(affordance);
+			expect(namePaneAnnouncements(dispatches)).toEqual([
+				'generator-opened:true',
+				'generator-opened:false',
+				'lens-opened:target',
+			]);
+		});
+	});
+
+	describe('the dispose rule over the generator (Boundaries)', () => {
+		it('leaves every strip select at its none entry while the generator holds the pane', async () => {
+			const probe = buildLens('probe', {
+				main: () => <div data-probe>open</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses lenses={[probe]} snippet="const x = 1;" />,
+			);
+			openGenerator(container);
+			expect(
+				Array.from(
+					container.querySelectorAll<HTMLSelectElement>('select'),
+					(select) => select.value,
+				),
+			).toEqual(['', '', '', '', '']);
+		});
+
+		it('closes the generator before the type toggles', async () => {
+			const dispatches = recordDispatches();
+			const container = await mountInstrument(
+				<StudyLenses snippet="const x = 1;" />,
+			);
+			openGenerator(container);
+			const toggle = container.querySelector<HTMLElement>('[data-type-toggle]');
+			if (!toggle) throw new Error('missing the type toggle');
+			fireEvent.click(toggle);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-editor')).not.toBeNull();
+			});
+			expect([
+				container.querySelector('[data-generator]'),
+				namePaneAnnouncements(dispatches, ['type-toggled', 'settled']),
+			]).toEqual([
+				null,
+				[
+					'generator-opened:true',
+					'generator-opened:false',
+					'type-toggled',
+					'settled',
+				],
+			]);
+		});
+
+		it('closes the generator before a level selection commits', async () => {
+			const dispatches = recordDispatches();
+			const container = await mountInstrument(
+				<StudyLenses languageLevels={[scaffoldLevel]} snippet="const x = 1;" />,
+			);
+			openGenerator(container);
+			const face = container.querySelector<HTMLElement>('[data-level-face]');
+			if (!face) throw new Error('missing the selector face');
+			fireEvent.click(face);
+			const option = container.querySelector<HTMLElement>(
+				'[data-level-option="scaffold"]',
+			);
+			if (!option) throw new Error('missing the scaffold option');
+			fireEvent.click(option);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-editor')).not.toBeNull();
+			});
+			expect([
+				container.querySelector('[data-generator]'),
+				namePaneAnnouncements(dispatches, ['level-selected', 'settled']),
+			]).toEqual([
+				null,
+				['generator-opened:true', 'generator-opened:false', 'level-selected'],
+			]);
+		});
+
+		it('closes the generator before the posture commits', async () => {
+			const dispatches = recordDispatches();
+			const container = await mountInstrument(
+				<StudyLenses languageLevels={[scaffoldLevel]} snippet="const x = 1;" />,
+			);
+			openGenerator(container);
+			const toggle = container.querySelector<HTMLElement>(
+				'[data-strict-toggle]',
+			);
+			if (!toggle) throw new Error('missing the strict toggle');
+			fireEvent.click(toggle);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-editor')).not.toBeNull();
+			});
+			expect([
+				container.querySelector('[data-generator]'),
+				namePaneAnnouncements(dispatches, ['posture-toggled', 'settled']),
+			]).toEqual([
+				null,
+				['generator-opened:true', 'generator-opened:false', 'posture-toggled'],
+			]);
 		});
 	});
 

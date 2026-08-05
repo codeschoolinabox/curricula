@@ -62,6 +62,33 @@ the level face, the strict toggle, one phase select, then the prompt. Reachable,
 so a cosmetic redirect rather than a barrier; it rolls into a later increment
 per the redirect policy, and pane-swap focus stays unspecified by R-11. |
 
+| GEN-6 | `(this row's commit)` | `/spiralearn/sandbox/orchestrate` | open the
+generator, then: open the level face and pick Scaffold FROM INSIDE the open
+popover; click the strict toggle; click the `notes` recommendation; ask and then
+toggle the type while a stage report is still on screen; and separately, type
+`1 +` and IMMEDIATELY click Generate code | REPLAYED LIVE — five actions in real
+Chromium, browser console clean, no behavioral defect. Two of these carried
+browser-only risk jsdom structurally cannot show, and both came back clean.
+**The popover hazard:** the level list WAS open at the moment of the click
+(`popoverWasOpenWhenClicked: true`), the generator vanished, the editor returned
+with the buffer intact, the face read `Scaffold · fits`, and the popover did NOT
+orphan itself open over the remounted editor. **The prose claim R-13b sent here
+instead of a test:** with `Getting the generator ready…` on screen, toggling the
+type ended the excursion and **nothing painted late** — no output slot, no
+preview, no generator node 2.2s later, well past the placeholder's ~800ms of
+staged delay. That is the takes-time warning's promise (_"Leaving this view ends
+it — and so does changing the level, the posture, or the snippet type"_) honored
+in a browser. The posture toggle swapped cleanly with `aria-pressed` flipping to
+`true`; the `notes` recommendation replaced the generator with the LENS (editor
+still absent, Edit code still present, Generate code still withdrawn), which is
+the vector this increment's one genuine triangulator pins; and a generator
+opened over `1 +` STOOD, seeded `1 +` verbatim, with `environment` and
+`evaluation` barred behind it — the orphan defense correctly ignoring an arm
+that names no lens. **One cosmetic observation, R-11's again and at its worse
+case:** when a control the learner did not aim at the pane closes the generator
+under them, focus falls to `body`. Reachable and non-blocking, so it rolls
+forward; it is the same finding GEN-5 raised from the other direction. |
+
 Entries append as 🔍-bearing increments land. Wave 0 carried no 🔍.
 
 **GEN-4 broke the deferral pattern deliberately, and the maintainer ruled it.**
