@@ -1,4 +1,4 @@
-<!-- cspell:ignore pathspec -->
+<!-- cspell:ignore pathspec tadpo -->
 
 # AR-LOG — the governance-dials campaign
 
@@ -241,6 +241,37 @@ mid-campaign and orphan `7ac0e36e`'s subject line for no semantic gain.
     Amend is forbidden, so the 7 bodies without a line stay without one. **A
     future reader who greps the middot form will miss this entire campaign** —
     grep the hyphen form.
+  - ⚠ **Correction, 2026-08-05 (AR-5 close) — "7 … carry no settings line at
+    all" is FALSE, and so is "the 7 bodies without a line stay without one."**
+    The true split across the campaign's 21 commits is **14 `work: software` · 6
+    `dials: track software` · exactly 1 with no settings line at all**, and the
+    one is `a712a945` [measured: per-SHA `git show -s --format=%B <sha> | grep
+    -E '^(work: |dials: )'` over all 21]. At R13's write moment (15 campaign
+    commits) the split was **8 / 6 / 1**, not 8 / 7. **R13's substance is
+    unchanged and R13 is not edited** — the hyphen hazard, the fact that it
+    cannot be fixed, and the grep instruction all stand. Only the count is
+    corrected, here, in place.
+    - **The defect is this campaign's signature failure mode, one step from its
+      own correction.** A sound measurement — `grep -c 'work: software'` → 8 of
+      15 — was subtracted from the total and the remainder renamed "no settings
+      line **at all**". That silently discarded the 6 commits carrying a
+      settings line in **increment 0's vocabulary**, a form this campaign chose
+      deliberately and documented twice [read: `f7580e74` body — "That line is
+      deliberately written in increment 0's vocabulary for format continuity";
+      restated in `b2060515`]. The measurement was of one _token_; the
+      conclusion was about _any_ settings line.
+    - ⚠ **The record's only account of the retired form was the wrong one.**
+      This file contains **zero** occurrences of `dials: track` or
+      `format continuity` [measured: `grep -c` on both] — so until this
+      correction, R13 was the sole record of those 6 commits, and it reported
+      them as carrying nothing. **A future reader grepping the hyphen form as
+      R13 instructs still misses 6 of 21.** The complete instrument is
+      `grep -E '^(work: |dials: )'`.
+    - The news is **better** than R13 reported, which is precisely why it is
+      worth correcting rather than leaving as conservative: **20 of 21 commits
+      carry a settings line.** Found by `ar-5` at the closing gate and confirmed
+      by an independent verifier and by the orchestrator's own per-SHA run —
+      three instruments, one answer.
 - **R14 — 2026-08-05. `.claude/skills/tadpotyping/` is RETIRED, not rewritten.**
   [relayed: human, choosing "Retire it, bank the content"] The directory is
   deleted; its salvageable content is banked as a loss ledger in this file, and
@@ -320,6 +351,43 @@ mid-campaign and orphan `7ac0e36e`'s subject line for no semantic gain.
   acknowledged weakness. `ar-1` found the `mv` option had been offered in
   conversation and recorded nowhere; under "a ruling is cited or it does not
   exist", its disposition had not happened until this line.
+  - ⛔ **R18 WAS NOT FOLLOWED. Correction, 2026-08-05 (AR-5 close).** The skill
+    was **deleted outright; no copy survives** [relayed: human, in the AR-5
+    session, answering a direct question]. There is no `mv`, no destination, and
+    **no byte-exact copy** — so R18's stated rationale, "the human keeps a
+    byte-exact copy, which is the only real answer to the ledger's acknowledged
+    weakness," is **void in outcome**. Independently corroborated before the
+    human was asked: `~/tadpotyping-retired-2026-08-05` absent, `~/.Trash`
+    empty, and `find /Users/master -maxdepth 8 -iname '*tadpo*'` (excluding
+    `node_modules/` and `Library/`) returning nothing [measured]. **R18 is a
+    human ruling and is not edited** — this records that a ruling was **departed
+    from**, which is the one thing the record must never silently conform to.
+    Consequences are worked through in
+    [§ Increment 9](#increment-9--the-tadpotyping-retirement-and-its-loss-ledger).
+- **R19 — 2026-08-05. The missing AR-4 on increments 4–6 is RUN, not excused.**
+  [relayed: human, choosing "Run ar-4 loss-lens-only now" over recording the
+  exemption] `ar-5` found — and two independent blind verifiers confirmed — that
+  increments 4, 5 and 6 shipped with **no AR-4 and no disclosure**, against
+  R13's own gate set, while the campaign disclosed its other three ceremony
+  deviations explicitly. The review was dispatched against `651ad312..e91bcaf9`
+  on `DEV.md`/`AGENTS.md`/`AGENTS.principal.md` with its Loss lens **widened in
+  the prompt** per R13's standing correction. It returned **PAUSE**; its BLOCKER
+  is discharged at `d45dd18f`.
+- **R20 — 2026-08-05. Governance-surface authorization for the AR-5 session,
+  granted per named edit — never as a standing grant.** [relayed: human] The
+  agent asked for a blanket pre-authorization against a hypothetical finding and
+  **the human declined to grant one, asking "what are the edits you intend to
+  make?"** — at which point the agent withdrew the request, because AR-5 had not
+  yet run and no diff could be named. Authorization was then given **twice, each
+  time against a specific named change**: first `DEV.md` § AR-1 plus
+  `.claude/agents/ar-1.md` (the restored glossary-completeness check) and
+  invariant 2 in both `AGENTS*.md`; then, after `ar-4` reported, the Phase 0
+  restoration and the AR-2 chain caveat in `DEV.md`. **The 2026-08-04
+  full-surface grant in
+  [§ Authorisation](#ar-log--the-governance-dials-campaign) did not carry**,
+  exactly as that block's closing sentence requires. `.claude/settings.json`,
+  `.claude/skills/**`, `CLAUDE.md` and the other `.claude/agents/*.md` were
+  **never** authorized in this conversation and were not touched.
 
 ## AR verdicts and dispositions
 
@@ -381,6 +449,84 @@ dismissed by the dispositions below.
 | **J** | No gate sequences the revert, so the text increments have no defined starting state                                                                                                                                                                                                                                                                                                                                                                                                                          | **ACCEPTED.** Increment 2.5 is an explicit human gate; the agent verifies zero residue before any text increment opens.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | **K** | Increment 1 was padded — "is the dangling promise committed?" is one command                                                                                                                                                                                                                                                                                                                                                                                                                                 | **ACCEPTED and answered: draft-only.** All three `HUMANS.md#override-grammar` inbound links exist only in the working copy, so the defect dies with the revert. Increment 1 re-scoped to the glossary.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | **L** | **Over-parameterisation** — named in the Plan-agent PAUSE at the top of this section but never given a letter, so the campaign's own gate ("a resolution line for every finding A–K") could not catch it                                                                                                                                                                                                                                                                                                     | **ACCEPTED, and lettered at increment 2 so the gate reaches it.** The finding is correct on arithmetic: the design takes on **2 work kinds x 4 twin-doc values x 3 ceremony values x 2 documentation modes = 48 cells**, and by this file's own record every `retrospective` cell is BLOCKED, every `ceremony: full` docs-class cell is undefined, and curriculum twin-doc values are deferred entirely. **Exactly one cell — the default — is worked through.** Shipping 48 cells to serve 1 is the primary AR-1 lens. Carried to the gate as the strongest argument for the reviewer's CP-A.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+
+### AR-5 (closing, pathspec-scoped) — verdict: **PAUSE**, 2026-08-05
+
+Baseline `651ad312`; changeset handed over as the campaign's **own 21 SHAs**,
+`7ac0e36e`…`48d807d2`, per `a712a945`'s rule. Run on **Opus 5** — `ar-5.md` has
+no `model:` key, so the reviewer model _is_ the session model, and a reviewer
+below the authoring tier is the one most likely to rubber-stamp the author's
+drift. Session model confirmed by a fresh unpinned subagent's self-report,
+`CLAUDE.md`'s own ground-truth method, rather than from the environment block.
+
+**3 BLOCKER · 4 IMPORTANT · 3 MINOR.** ⚠ **Every finding was then put to an
+adversarial verification fan-out — 11 agents tasked to _refute_, with a second
+independent blind pass on each BLOCKER — and three hinge claims were re-run by
+the orchestrator directly.** That pass changed the picture materially, and the
+dispositions below are the **verified** ones, not the reported ones. This is the
+campaign's own standing lesson applied to its own closing gate: _a reviewer's
+proposed count is a hypothesis until it is run._
+
+| #       | Finding (as reported)                                                                                      | Verified disposition                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ------- | ---------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **C1**  | BLOCKER — increments 4–6 shipped with no AR-4, undisclosed                                                 | **UPHELD as BLOCKER** (both blind passes). **RESOLVED by R19** — the review was run; see `d45dd18f`. Four limbs were wrong and are corrected: the scope is **one gap across two commits** (`9bb33e9f`, `e91bcaf9`), not five; the instrument is `grep -in 'ar-4'` → **20** hits, not the case-sensitive 9; there were **three** disclosed deviations, not two (R15 is the third); and limb (f) is **wrong on coinage** — increments 4–6 coined nothing, the nouns were adjudicated at increments 1–3 and the AR-LOG routes that rule to increment 3's `ar-2`. **The two strongest limbs were the ones AR-5 missed**: R11 is a _human ruling_ that increment 5's amended text carries its own AR, and `445d4116` proves the cost — a context-free validator, **not a gate**, caught a real Phase-0 recital defect in the un-loss-lensed output. |
+| **C2**  | BLOCKER — the Phase 0 ledger asserts null loss; nine passages dropped                                      | **DOWNGRADED to IMPORTANT** (both passes), then **RESOLVED at `d45dd18f`**. Its headline was wrong: the ledger does **not** assert null loss — it opens "LOSS LEDGER - not null"; the false claim is the narrower "Nothing in the old steps is dropped." **Eight in scope, not nine** (row 9 is present verbatim at HEAD and originates outside Phase 0's steps). ⚠ **AR-5's stated instrument was unsound** — `git grep '<phrase>'` cannot match these phrases, because `DEV.md` is prettier-wrapped at 80 columns and every one spans a line break; a verifier demonstrated a false negative on a control phrase that _is_ present. The absences held, but not by the method reported.                                                                                                                                                       |
+| **C3**  | BLOCKER — the ceremony/Phase-0 contradiction now sits inside a non-negotiable invariant                    | **DOWNGRADED to IMPORTANT** (both passes), then **RESOLVED at `3adec7fe` + `d45dd18f`**. ⚠ **Limb (e) is REFUTED**: baseline invariant 2 **already** read "…→ run AR-1 → define types.ts → … → run AR-2. All seven steps before any implementation." under the **identical** "apply unconditionally" preamble [read: `git show 651ad312:AGENTS.md`, § Non-Negotiable Invariants]. The unconditional listing is **inherited**; what this campaign added is the **level dial**, which turned a pre-existing over-statement into one wrong on the **default** path. Also refuted: limb (d) — the campaign _did_ make the AR-1..AR-4 `Skip:` lines level-aware — and "broader than disclosed", since AR-LOG:792-794 names AR-2, AR-3 **and** AR-4 verbatim as BLOCKER 1, resolved by R11.                                                          |
+| **C4**  | IMPORTANT — three surviving agent-stated `full ceremony` declarations                                      | **DOWNGRADED to MINOR.** Mechanism wrong on three points: `tdd-worker.md` is **not in the changeset at all** [measured: `git diff --name-only 651ad312..48d807d2 -- .claude/agents/` → `ar-1.md`, `ar-2.md`, `ar-5.md` only]; the two `AGENTS*.md` sites were **explicitly counted** at § "⚠ DISCLOSED WIDENING", so "never seen" survives only for `tdd-worker.md`; and the campaign reconciled **half** the `full ceremony` text — baseline had four such lines and R4 drove the deletion of two. **Recorded as owed** in § STILL OPEN.                                                                                                                                                                                                                                                                                                      |
+| **C5**  | IMPORTANT — R13 records a false measured claim about the campaign's own commit record                      | **CONFIRMED with zero corrections** — the only finding to survive verification untouched. **Corrected in place beneath R13.** The verifier added two the reviewer missed: R13's trailing "the 7 bodies without a line stay without one" is false for the same 6, and this file contained **zero** occurrences of `dials: track` or `format continuity`, so R13 was the record's only — and wholly misleading — account of the retired form.                                                                                                                                                                                                                                                                                                                                                                                                    |
+| **C6**  | IMPORTANT — the loss ledger's "fourth control" never existed; R18 not followed                             | **CONFIRMED**, orchestrator-measured before the human was asked. **Resolved in four parts**, per the reviewer's own list, in § Increment 9 and § Standing hazards. AR-5 was explicitly right that the one-line "pending → done" edit originally planned would have left the record **worse than before**, still asserting an out-of-tree copy that never existed.                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| **C7**  | IMPORTANT (reviewer's own certainty ~70%) — step 0.2 is structurally impossible to discharge for this work | **LARGELY REFUTED → MINOR.** The load-bearing limb is false: `README.md`, `.claude/README.md` and `scripts/README.md` all exist and are tracked, and `DEV.md:641-655` defines the discharge format — an **unused mechanism, not an undefined one**. And `HUMANS.md:273-277` — a sentence this changeset itself rewrote — scopes Phase 0 to _new-module establishment work_, under which this campaign owes no 0.2 at all. **What survives is recorded in § STILL OPEN**: that scoping lives only in `HUMANS.md`, which `CLAUDE.md` says carries no agent instructions.                                                                                                                                                                                                                                                                         |
+| **C8**  | MINOR — `DEV.md § AR-5` carries two focus bullets `.claude/agents/ar-5.md` does not                        | **CONFIRMED and PRE-EXISTING** [measured: `grep -ic 'loss lens\|sourced claim' .claude/agents/ar-5.md` → **0**, at baseline and at HEAD; 7 bullets vs `DEV.md`'s fuller list]. Not campaign-caused, and mitigated — `ar-5.md` instruction 2 forwards to `DEV.md § AR-5`, which is the only reason this review had a Loss lens at all. **Recorded as owed** in § STILL OPEN; not fixed here, because `ar-5.md` was not authorized in this conversation (R20).                                                                                                                                                                                                                                                                                                                                                                                   |
+| **C9**  | MINOR — the new `AGENTS.md` block-quote swallowed unrelated DAG-ordering rules                             | **UPHELD as MINOR**, limb (c) wrong on both halves: `AGENTS.principal.md` did **not** "take" the ceremony rule into § Execution mechanics — that bullet existed there at baseline and was amended in place — and its DAG sentences live in a **different section**, so there is no "leaving in place" relation. The direction of change also inverts: baseline `AGENTS.md` carried **no** ceremony-uniformity rule, so the campaign _reduced_ content divergence and _added_ format divergence. **Recorded as owed** in § STILL OPEN.                                                                                                                                                                                                                                                                                                          |
+| **C10** | MINOR — `AGENTS.md` mode change 100755→100644, and `retrospective` ships blocked                           | **NOT A DEFECT.** The mode flip is real and unenumerated, but no repo rule requires enumerating it — `DEV.md`'s duty is explicitly **content**-scoped — and it _normalized_ `AGENTS.md` to match its two sibling governance files. The `retrospective` half is human-ruled in at **R10**. Three stated details are themselves wrong: the R10 "quote" is not verbatim, there is **no fourth record _key_** (the slot carries no key), and "the original task statement names three questions" has **no source**.                                                                                                                                                                                                                                                                                                                                |
+
+⚠ **The task statement AR-5 reviewed against was authored by a handoff, not by
+the human.** The launch brief asserted "there is no other statement of it, so
+use this." AR-5's scope-vs-spec lens ran in good faith against agent-written
+text. Recorded because a scope check is only as good as the scope it is handed,
+and nothing else in this record says where that sentence came from.
+
+### AR-4 (increments 4–6, loss-lens-only, run late per R19) — verdict: **PAUSE**, 2026-08-05
+
+Dispatched against `651ad312..e91bcaf9` on the three canonical files, lens
+widened in the prompt per R13. Ran on **Sonnet** — `ar-4.md` carries
+`model: sonnet` in its frontmatter and the pin was **not** overridden, per
+`DEV.md § Sub-model dispatch`. It was deliberately **not** told what `ar-5` had
+found, so its derivation would be independent.
+
+**1 BLOCKER · 1 IMPORTANT · 3 MINOR.**
+
+- **BLOCKER — six passages LOST, none enumerated in either ledger. UPHELD, and
+  RESOLVED at `d45dd18f`** by restoring all six (human ruling: restore rather
+  than ledger). It **independently corroborated** five of `ar-5`'s and **found a
+  sixth nobody else had** — "The sketch answers: what shape must a correct
+  implementation take?". The orchestrator re-measured all eight fragments
+  wrap-safe against a flattened corpus of every tracked `.md` at HEAD, with a
+  control phrase proving the instrument, before restoring anything.
+  - **Its sharpest point, and the one worth carrying forward:** `e91bcaf9`'s
+    ledger cites a clean `[headings]` run as its discharge, but `headings.mjs`
+    diffs **heading text only** and none of the six were headings. `DEV.md`
+    names this exact anti-pattern in its own words — "an empty mechanical
+    listing never discharges the ledger". **The campaign committed the
+    anti-pattern its own rule names.**
+- **IMPORTANT — three dangling retired-step-number citations shipped in the
+  "reconciled" text.** UPHELD as a record defect only: all three were
+  independently found and fixed later by `a842ba1e`, so live risk is nil
+  [measured]. That they were fixed by a **subsequent commit rather than by a
+  gate** is itself the evidence for C1/R19.
+- **MINOR ×3** — the cut "that defeats the purpose" clause, the `full ceremony`
+  collision (same as C4), and the mode flip (same as C10). Dispositions as
+  above.
+
+⚠ **ONE AR-4 CLAIM REJECTED ON MEASUREMENT, and it mattered.** It judged the
+lost glossary-completeness check **not** a loss, holding that AR-1's focus list
+"is already a superset of old-0.3's Key DDD questions". **That is wrong on one
+of three.** Baseline's three questions map: Q1 → HEAD AR-1 bullet 1, Q2 → bullet
+2, **Q3 → nothing**. The nearest HEAD bullet asks "What edge cases are missing
+from the **spec**?" — whether every case is specified, not whether every concept
+is named. `ar-5` and two independent blind verifiers reached the opposite
+conclusion, and the orchestrator re-ran the comparison directly rather than
+counting votes. Restored at `3adec7fe`.
 
 ## Glossary — agent decisions (increment 1)
 
@@ -1206,6 +1352,39 @@ cited or it does not exist"].
   path]. The ledger lands first on purpose: committing it while the source is
   still on disk is what makes it auditable against that source, and the removal
   produces no diff, so nothing about it needs to ride in a commit.
+  - ⛔ **OUTCOME, 2026-08-05 (AR-5 close) — this is what actually happened, and
+    it is not what R18 chose.** The removal is **no longer pending**: the skill
+    is gone from `.claude/skills/`, and it was **deleted outright — no copy
+    survives** [relayed: human, asked directly in the AR-5 session]. Measured
+    before the human was asked, and independently by `ar-5`:
+    `ls -d .claude/skills/tadpotyping` → no such file;
+    `ls -d ~/tadpotyping-retired-2026-08-05` → no such file; `ls -lat ~/.Trash`
+    → empty;
+    `find /Users/master -maxdepth 8 -iname '*tadpo*' -not -path '*/node_modules/*' -not -path '/Users/master/Library/*'`
+    → no matches; `git ls-files | grep -ci tadpotyping` → 0. `.claude/skills/`
+    now holds exactly `aran-weaving`, `btw`, `fanout`, `handoff`.
+    - **The paragraph above is kept, not rewritten**, because it is the record
+      of what was decided and why. This bullet is the record of what occurred.
+      **R18 is a human ruling and is not edited.**
+    - **There is therefore no fourth control and nothing to audit against.** The
+      out-of-tree copy R18 called "the only real answer to the ledger's
+      acknowledged weakness" survived zero seconds. See the correction to the
+      cost paragraph below.
+    - ⚠ **The permanent residual, stated once and plainly.** This ledger is
+      organized by _what the campaign decided about content_, never by _an
+      inventory of the source_ — no line count, no section list, no "SKILL.md
+      had N sections, here is every one accounted for." So the question **"was
+      anything missed entirely?"** is now **permanently unanswerable.** What is
+      verified is the coverage of the content the ledger names; what can never
+      be re-checked is its **exhaustiveness**. `ar-5` judged the sequencing
+      defense sound for the named content and this gap real and unfixable, and
+      that is the honest summary.
+    - ⚠ **`git status --porcelain` is not evidence here** and never was: a
+      never-existent untracked path and a just-deleted one are indistinguishable
+      to git. Only `ls` answers this question.
+    - **Not claimed:** that the skill is gone from the _session skill list_.
+      That needs a session restart and is the human's observation at the next
+      session start.
 
 ⚠ **"Never tracked" was an accident, not a design property, and this increment
 makes it permanent.** The DRAFT files were _built_ never to be committed — that
@@ -1226,6 +1405,25 @@ retirement with the live file present, and `ar-4` ran the loss lens over the
 ledger against the live file. That is the only moment at which both artifacts
 exist, and this increment is built around it. R18's out-of-tree copy is the
 fourth control, and the only one that outlives the deletion.
+
+⛔ **Correction, 2026-08-05 (AR-5 close) — THE FOURTH CONTROL DOES NOT EXIST.**
+The sentence immediately above is **false in outcome** and is kept only because
+it is part of the argument this ledger made for why the loss was acceptable —
+leaving it unmarked would overstate that defense by exactly one control. R18's
+`mv` never ran; the skill was deleted and **no copy survives** (see the OUTCOME
+bullet above). **Nothing outlives the deletion except this file.**
+
+**So the honest count is three controls, not four**, and all three ran _before_
+the source was gone: the ledger was drafted against the live file, `ar-1`
+reviewed the retirement with the live file present, and `ar-4` ran the loss lens
+over the ledger against the live file. `ar-5` judged that trio **sufficient for
+the content this ledger names** — and it is worth recording _why_ it said so
+rather than just that it did: two independent reviewers, reading against the
+live source, each found real omissions (`ar-1`: the R14 miscount and the
+paraphrased source sentence; `ar-4`: the sandbox waiver in no bucket, BANK-4 in
+no bucket, and the dropped separation-of-concerns clause). **A control that
+catches four real defects is a control that worked.** What it cannot do, now, is
+answer for anything nobody thought to look for.
 
 ### The ledger
 
@@ -1480,6 +1678,45 @@ at close has no successor by default, and "the next campaign should take this
 up" is the same construction as this file's own recorded miss — _an obligation
 written into the record is not discharged by being written_ (`ar-1` CP-5).
 
+### STILL OPEN — four more, added at the AR-5 close (2026-08-05)
+
+Surfaced by `ar-5` and its verification pass, each verified, none fixed here —
+every one of them lands on a path this conversation was **not** authorized to
+touch (R20), and inventing a grant to close them is exactly the move the
+authorisation rule exists to prevent.
+
+1. **`.claude/agents/tdd-worker.md` declares a ceremony level.** It says "full
+   ceremony" and hardcodes a Phase-1 cycle presupposing AR-3, which `medium` and
+   `light` both exclude — against the design's own rule that the agent never
+   states the level. It is **unmodified from baseline** and appears **nowhere**
+   in this file or in any of the 21 commit bodies [measured: `grep -ic
+   'tdd-worker'` → 0 on both], so it is the one site the campaign genuinely
+   never saw. Two further sites (`AGENTS.md`, `AGENTS.principal.md`) carry the
+   same bare phrase but **were** counted, under § "⚠ DISCLOSED WIDENING".
+   **Owner: the next campaign that touches `.claude/agents/` or
+   `DEV.md § ceremony`.**
+2. **Phase 0's scope lives only in `HUMANS.md`.** `HUMANS.md:273-277` — a
+   sentence this campaign itself rewrote — scopes Phase 0 to _new-module
+   establishment work_. That is the sentence that refutes the "step 0.2 cannot
+   be discharged" charge (C7), and it sits in the one file `CLAUDE.md` declares
+   carries **no agent instructions**, while attributing itself to an "AGENTS.md
+   invariant" that `AGENTS.md` does not carry. **A load-bearing scoping rule
+   that no agent is told to read is not a scoping rule.** Owner: as above.
+3. **`.claude/agents/ar-5.md` omits two of `DEV.md § AR-5`'s focus bullets** —
+   the **Loss lens** and **Sourced claims** [measured: `grep -ic 'loss
+   lens\|sourced claim' .claude/agents/ar-5.md` → **0**, at baseline and at
+   HEAD]. Pre-existing, not campaign-caused, and mitigated only because
+   instruction 2 forwards the reviewer to `DEV.md`. ⚠ **The Loss lens is the
+   bullet this campaign's own closing review turned on** — had the reviewer
+   worked from the agent file alone, it would have had no Loss lens at all.
+   Owner: as above.
+4. **`AGENTS.md`'s ceremony block-quote encloses three DAG-ordering sentences**
+   that were body prose at baseline and are about decomposition, not ceremony.
+   Nothing was lost — the span is byte-identical — but three delegation rules
+   now sit under a "Ceremony is uniform" prompt, and `AGENTS.principal.md`
+   carries the same rule as a bullet in a different section. Cosmetic, and
+   recorded so it is not rediscovered as a defect. Owner: as above.
+
 ### Records carried in from increment 8
 
 Raised by `ar-4` as concern 7 — that two design-affecting calls were made with
@@ -1502,9 +1739,15 @@ alone:
 
 ## Standing hazards
 
-- **🪦 `.claude/skills/tadpotyping/` — RETIRED at increment 9 (R14).** ⚠ **The
-  removal itself is PENDING and is the human's** — `mv` to
-  `~/tadpotyping-retired-2026-08-05` per R18.
+- **🪦 `.claude/skills/tadpotyping/` — RETIRED at increment 9 (R14), and GONE
+  from disk as of 2026-08-05.** ⚠ **It was DELETED, not moved: R18's `mv` to
+  `~/tadpotyping-retired-2026-08-05` never ran, and no copy survives** [relayed:
+  human; corroborated by `ls`, `~/.Trash`, and a `find` sweep — see
+  [§ Increment 9](#increment-9--the-tadpotyping-retirement-and-its-loss-ledger)].
+  This file is now the **only** account of it that exists anywhere. The rest of
+  this bullet is written in the future tense of the moment the skill was still
+  live; it is kept as the record of why it was a hazard, and the removal it
+  waits on has since happened.
   - ⚠ **Correction, 2026-08-05 (handoff) — the stated reason was wrong, and the
     true one is stronger.** An earlier revision of this bullet said the agent is
     "hard-blocked from it by the global destructive-FS hook." **`mv` is not on
