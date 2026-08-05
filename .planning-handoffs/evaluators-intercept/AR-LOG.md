@@ -297,4 +297,83 @@ queue/stream nodes added so the module's own output is on the diagram.
   shifts every later pairing; which call-ish nodes are in scope beyond plain
   call expressions; the narrowing predicate's depth; and how a zero-argument
   dialog decodes its message. These are Phase-1 increment briefs, not Phase-0
-  contract gaps — recorded so they are briefed rather than guessed.
+  contract gaps — recorded so they are briefed rather than guessed. [Answered: §
+  Phase-1 briefing decisions below, B-1…B-6.]
+
+## Phase-1 briefing decisions — 2026-08-05, ratified at the Phase-1 plan gate
+
+`[relayed: the ratified Phase-1 plan, ~/.claude/plans/read-and-execute-the-sharded-pebble.md]`
+— the human approved the plan carrying these six decisions verbatim. They answer
+`ar-2`'s five briefing gaps plus the handoff validator's sixth; the committed
+trio deliberately leaves all six to implementation, so they are recorded here
+before I1's first test rather than settled by one by accident. An independent
+Plan-agent design pass (verdict CONSIDER) challenged them before ratification;
+its two substantive corrections are already folded in (B-5's per-dialog IDL
+split; B-2/B-3's widened decline shapes).
+
+- **B-1 — span encoding: the wrap reuses `'L:C:L:C'`** (1-based lines, 0-based
+  columns — loop-guard's committed encoding, the same form the quarry's Seam 4
+  pinned for `__$lc`
+  `[measured: grep -n "L:C:L:C" src/lib/embody/lib/evaluating/evaluators/intercept/types.ts]`).
+  One region, one span encoding, one decode discipline (four finite numbers or
+  no record). The CODE is not shared: intercept authors its own in-file encode
+  and decode helpers — iteration-guard's decoder is a private in-file helper,
+  and promotion into `evaluators/lib/` stays barred mid-sprint.
+- **B-2 — the decline rule runs over BOTH readings, symmetrically.** One
+  syntactic eligibility predicate (a function of the call node's own subtree),
+  applied identically to the original parse's and the guarded parse's call lists
+  (after the `__$`-callee skip). The guard splice inserts only single-line
+  `__$`-prefixed statements, so it cannot change a learner call's subtree shape;
+  the two filtered lists must correspond 1:1 in reading order, and the
+  reconciliation asserts it (B-6).
+- **B-3 — call-ish scope: ESTree `CallExpression` nodes exactly**, honoring the
+  committed README's "every call expression" literally (the H-3 discipline) and
+  matching the quarry's node set. `NewExpression`, tagged templates, and
+  `ImportExpression` are not wrapped — a throw through them carries `loc: null`,
+  which the contract allows. A `CallExpression` whose callee is `Super`, and
+  direct `eval`, are in the node set and DECLINED under the ratified rule ("a
+  call whose scope is its own call site" — `ar-2`'s third shape);
+  `await`/`yield` belonging to the enclosing function anywhere in the call's own
+  subtree (callee position included) declines too, since `() => (await f)()` is
+  a syntax error the learner never wrote.
+- **B-4 — the narrowing predicate validates full declared depth, except learner
+  values**: `kind` against the four record literals; `step` finite; `loc` null
+  or a full four-finite-position span; `method` a string on `console`; `args` an
+  array whose ELEMENTS stay `unknown` (that IS the declared depth);
+  `returnValue` per kind exactly (`alert` present-and-`undefined`, `confirm`
+  boolean, `prompt` string-or-null). Anything less is dropped, never guessed at
+  — iteration-guard's full-`LimitTrip`-depth precedent and run's `narrowHalt`
+  rule.
+- **B-5 — zero-argument dialogs decode as the platform renders them, PER DIALOG
+  (WebIDL).** `alert` is two overloads: `alert()` → `message: ''`,
+  `alert(undefined)` → `message: 'undefined'`. `confirm`/`prompt` declare
+  `optional DOMString message = ""`, where an explicit `undefined` counts as
+  omitted: `confirm(undefined)` and `prompt(undefined)` decode `message: ''`.
+  Otherwise `message = String(args[0])`. `prompt`'s `defaultValue` is ABSENT
+  when the second argument was omitted OR `undefined` (the browser's own
+  `prompt('x', undefined)` shows an empty input); present otherwise as
+  `String(args[1])`. This models the platform, which is what H-3 ratified these
+  traps as doing.
+- **B-6 — a reconciliation disagreement THROWS a typed boundary error**
+  (loop-guard's `LoopGuardError` shape: a real `Error` plus a discriminant tag
+  and reason), caught by assemble's existing try/catch and routed to the
+  `'defect'` arm with cause `'unreachable-outcome'` — the destination
+  `InterceptDefectCause` already names for "an instrument-time dev condition
+  that short-circuited past the engine" (ruling R-2's precedent).
+
+**Phase-1 step-0 baselines** — measured fresh, 2026-08-05:
+
+- `[measured: git rev-parse HEAD]`
+  **`ff5625c4afdae15925d72825a7279ccdf20e4002`** — the CANDIDATE AR-5 baseline
+  for the sprint's Phase 2. **Open flag for the human**: whether that AR-5 diffs
+  the whole sprint (ceremony 2 + 3, by SHA list — ~19+ foreign commits
+  interleave, so by-SHA scoping is mandatory either way) or ceremony 3 only. Not
+  settled here.
+- `[measured: npx tsc --noEmit]` **0 errors**.
+- `[measured: ./node_modules/.bin/vitest run --project unit src/lib/study-lenses/evaluators src/lib/study-lenses/lib/engine src/lib/study-lenses/lib/loop-guard]`
+  **26 files / 409 tests green**.
+- `[measured: ./node_modules/.bin/vitest run --project browser src/lib/study-lenses/lib/engine src/lib/study-lenses/evaluators]`
+  **10 files / 148 tests green**.
+- `[measured: git log --oneline 2dbc4db9..HEAD -- <evaluators, lib/engine, lib/loop-guard>]`
+  **empty** — every consumed contract untouched since the ceremony's last
+  commit.
