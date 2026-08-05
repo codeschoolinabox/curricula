@@ -225,6 +225,112 @@ are not restated here; this log carries what those artifacts do not already say.
   and only a whitespace-only prompt renders it empty-looking [measured: three
   asks driven through `/spiralearn/sandbox/generator/`].
 
+## Human rulings — 2026-08-04 (Increment 5 scope, at the plan gate)
+
+Five open questions went to the maintainer in one batch before any code, because
+Increment 5 is the first increment whose ratified design has genuine holes. Two
+are SCOPE calls, three were silences in the committed docs.
+
+- **R-8 — accept and discard are implemented in Increment 5, with one happy-path
+  test each. Forced, not preferred.** The plan body assigns accept/discard to
+  Increment 7, but the `mode === 'generator'` render branch cannot be written
+  without them:
+  [generator/types.ts](../../src/lib/study-lenses/orchestrate/generator/types.ts)'s
+  `GeneratorViewProperties` requires all four props, none optional, so `tsc`
+  rejects the JSX outright. Three ways out were weighed and two are unavailable.
+  The region cannot suppress the Accept control — the view renders it
+  unconditionally at `job.status === 'preview'` and owns that JSX, and
+  `generator/README.md` is ASK-FIRST. A throwing stub would put a crash under a
+  human's finger at a 🔍 checkpoint, and
+  [DEV.md § Sandbox Checkpoints](../../DEV.md#sandbox-checkpoints--user-observable-features)
+  makes a behavioral defect there block the commit. Wiring `onAccept` to
+  `disposeToEditor()` alone is worse than a crash: the dispose reseeds the
+  remounting editor from the live source, which never saw the candidate, so
+  Accept would SILENTLY DESTROY the program. What remains for Increment 7: the
+  field-equal-no-settle Boundary, the re-derived-phases assertion, and the full
+  bus-order pins. **Coupling worth knowing:** neither control renders until an
+  ask has resolved, so this ruling is what promotes plan D8's module-spy socket
+  seam from a ratification to a load-bearing dependency of Increment 5.
+
+- **R-9 — `openLensSurface`'s generator pre-close comes forward from
+  Increment 6.** The plan assigns it to Increment 6, but the path goes live the
+  moment Increment 5 lands: the strip and every recommendation button still
+  render during a generator excursion and both reach `openLensSurface`, which
+  announces `lens-opened` alone. Two committed docs state the ordering in the
+  PRESENT tense —
+  [event-bus/README.md § Dispatch ordering](../../src/lib/study-lenses/orchestrate/event-bus/README.md#dispatch-ordering)
+  (_"a lens opening over the generator announces `{ open: false }` before
+  `lens-opened` with the name — two facts, two events"_) and
+  [orchestrate/DOCS.md](../../src/lib/study-lenses/orchestrate/DOCS.md) § The
+  settle loop's state diagram — and both would be false for a whole increment
+  otherwise. **The argument NOT to use, because it is refutable in one
+  command:** "a subscriber would believe the generator is open forever" is false
+  — there are zero production bus subscribers anywhere in the repo [measured:
+  `grep -rn "\.subscribe(" src/ spiralearn/ | grep -v /tests/` → no output]. The
+  bus is region-internal by contract, so the cost is documentation truth, not a
+  broken consumer. Increment 6 retains the three derivation-context
+  dispose-order pins, the orphan-defense pin, and the late-settle test.
+
+- **R-10 — the strip's none entry is left UNGUARDED as a generator-close path,
+  and no test fires it.**
+  [orchestrate/README.md](../../src/lib/study-lenses/orchestrate/README.md)'s
+  `dispose` glossary entry says the none entry _"cannot fire"_ during a
+  generator excursion because every strip select already sits at its none entry.
+  That is a real-BROWSER DOM guarantee, not a code one: React routes a
+  `<select>`'s change event through `getTargetInstForChangeEvent`, which returns
+  the target instance unconditionally with no value-changed gate (unlike text
+  inputs), so `fireEvent.change(select, { target: { value: '' } })` fires
+  `onChange` regardless of the current value [relayed: the Plan-agent design
+  pass, measured against
+  `node_modules/react-dom/cjs/react-dom-client.development.js`]. The moment
+  dispose generalizes, the strip becomes a live generator-close path in jsdom.
+  It is left unguarded because the behavior is correct if it fires, and because
+  `commitCloseLens` is shared by BOTH the strip's `onCloseLens` and the Edit
+  code button — and Edit code MUST close a generator, so a mode guard inside it
+  would break the guaranteed way home. Guarding in the panel's own
+  `relaySelection` would add a prop to a presentation component for a
+  browser-unreachable case. **The obligation this places on every later
+  increment:** never close a generator through the suite's
+  `openLensThroughStrip(container, phase, '')` helper — it is the reflex close,
+  it has seven existing call sites, and it WILL pass. A test named "the strip's
+  none entry closes the generator" would encode as region contract a path the
+  README says cannot fire.
+
+- **R-11 — no pane-swap focus management in Increment 5; the reach is a
+  checkpoint observation instead.** Whether focus moves when the pane swaps is
+  specified nowhere: both region docs use "focus" only in the initial-focus-
+  REQUEST sense, and the generator docs mention it only as the out-of-scope
+  honored-focus arm. The region does no focus management at all today [measured:
+  `grep -rn "\.focus()\|autoFocus\|tabIndex" src/lib/study-lenses/orchestrate/
+  --include=*.tsx --include=*.ts | grep -v /tests/` → no output], and no
+  `jsx-a11y` plugin is configured, so nothing mechanical will flag it. The
+  generator inherits the lens arm's behavior rather than regressing. It IS the
+  first pane occupant whose primary affordance is a text field the learner must
+  reach, so rather than defer silently, "how many stops to reach the prompt
+  field, and does the path make sense" is a NAMED action in the Increment 5 🔍
+  checkpoint — which is precisely what
+  [DEV.md § Sandbox Checkpoints](../../DEV.md#sandbox-checkpoints--user-observable-features)
+  says checkpoints exist to catch (_"only a human eye at a running dev server
+  catches … focus behavior, keyboard feel"_). Designing it blind first would
+  answer the question the checkpoint exists to ask.
+
+- **R-12 — `orchestrate/DOCS.md` is not edited, and this ruling discharges the
+  inter-file contract check.** DEV.md's inter-file trigger fires at Increment
+  5's refactor step because a file enters the region's data flow, so the
+  question was asked at the plan gate rather than mid-refactor. The answer is
+  that the `## Data flow` diagram is already complete: it carries a `CANDIDATE`
+  node with both its edges, its `SUR` node already names the generator, and §
+  State residency already lists the generator socket as held by the top
+  component and created once at mount. **The doc is AHEAD of the code, and
+  Increment 5 makes it true.** Adding a node for the view itself would
+  contradict
+  [DEV.md § Directory Documentation Convention](../../DEV.md#directory-documentation-convention)
+  (_"**Nodes are data states**, not files or types"_). One genuine gap was found
+  and deliberately left: there is no `settled snippet → rendered environment`
+  edge for a seed reaching the pane — but the EDITOR arm's seed has the same
+  shape and the same omission, so the gap is pre-existing and symmetric rather
+  than introduced here.
+
 ## Operational notes (not rulings, but they cost time once)
 
 - **`expect(act(…)).rejects` silently produces a FALSE POSITIVE.** RTL's `act`
