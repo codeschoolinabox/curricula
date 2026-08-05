@@ -453,3 +453,136 @@ Campaign ruling home per DEV.md § Ruling provenance. Phase-0 session opened
   deliberately independent ("an independent route to the same set as the
   entwined index — agreement is the sanity check"), so merging it would delete
   the very independence that gives it value.
+
+## F5 follow-on — the JEJ level's consultation harness (2026-08-05)
+
+Executes [FOLLOW-ONS.md](./FOLLOW-ONS.md) § F5. Ceremony `full`, declared by the
+human in the launch brief. Baseline `d83d1c22cea865d201c8969b096e3788372d7e3f`
+[measured: `git rev-parse HEAD` at plan approval]. The changeset is a **SHA
+list**, per DEV.md § Shared-worktree git mechanics — the range is mostly
+foreign:
+
+- `2f6720e1cf589b9b4fe94e054d82077fdc916ded` — `fix:` the crash + 6 fixtures
+- `d8fa1461bc9a0ca5bbe58eaffe9e55f08f097902` — `refactor:` adopt
+  `PARSE_SETTINGS`
+- `e708841c416e13af1f3c8484a37cfa1b8875cc14` — `add:` the default-parameter
+  fixture (ar-5's)
+
+### Two corrections to § F5's own framing, both measured first-party
+
+- **The crash trigger is broader than § F5 states.** It is not "a default
+  parameter shadowed in the body" — `__isValidResolution` is an override on
+  `FunctionScope`, so it fires on **any** reference resolving to a variable
+  declared in that same function scope. Plain function, arrow, object method and
+  class method all throw; a function with no references, and one referring only
+  outward, do not [measured: `node --input-type=module -e` over 7 sources, acorn
+  8.16.0 + eslint-scope 8.4.0].
+- **`ranges: true` alone fixes it.** § F5 couples the fix to the `'latest'` →
+  `2024` narrowing; they are orthogonal [measured: same probe,
+  `{ecmaVersion:'latest', ranges:true}` resolves cleanly].
+
+§ F5's escalation condition — "if any fixture depends on post-2024 syntax, take
+the fork to the human" — **did not fire**: all 13 of the file's fixture sources
+parse byte-identically under both settings once `range` is stripped [measured:
+`node` JSON compare with a range-stripping replacer].
+
+### Human rulings (2026-08-05)
+
+1. **Both increments** — fix the crash, then adopt the published contract.
+   Presented with the measurement showing the narrowing is unexercised.
+2. **Pin the regression assertion, dated today.** The human was shown the "no
+   pin" option with DEV.md's bulk-sweep warning quoted, and chose to pin. This
+   ruling is the one `validate.test.ts`'s `PINNED(human ruling 2026-08-05)`
+   cites; this row is its promotion out of a plan file.
+3. **Resolve ar-5's PAUSE in full** — the fixture and this record, not either
+   alone.
+
+### AR verdicts and resolutions
+
+- **ar-3 (increment 1): CONSIDER** [relayed: ar-3]. Confirmed the swallow-the-
+  analyzer wrong fix survives Block A and is forbidden only by Block B. Asked
+  for a shadowed-global fixture to close a non-scope-aware escape list.
+  **Applied.** Also argued the PINNED marker was unearned — **overridden by
+  human ruling 2**.
+- **ar-4 (increment 1): CONSIDER** [relayed: ar-4]. Three findings, all applied.
+  (a) The draft commit body overstated a test-only gap as a live defect —
+  production has carried `ranges: true` since `d5162bc4` under a comment naming
+  this exact hazard [measured: `git log -S "ranges: true" --
+  .../derive-ast.ts`]. Body rewritten. (b) The pin's plural wording promised
+  cluster-wide coverage the guard's 3-line window cannot give; narrowed to
+  singular. (c) **ar-3's own fixture does not discriminate** — its declaration
+  and reference share a scope, so a scope-blind escape list reaches the same
+  verdict. The cross-scope fixture
+  `'function f() { let document = 1; } document;'` is the one that closes it
+  [measured: real `through` is `['document']`; a "declared anywhere" check would
+  suppress it]. Both kept — together they pin scope-awareness in each direction.
+- **ar-4 (increment 2): CONSIDER** [relayed: ar-4]. Two factual errors caught
+  before the body became immutable: a fixture count of 11 that is really 13, and
+  "None builds ParseFacts" when `language-levels/scaffold/tests/index.test.ts`
+  does. Both corrected. The honest discriminator for not sweeping the four
+  siblings is that **none calls `analyze()`** [measured: `grep -l eslint-scope`
+  over the four].
+- **ar-5: PAUSE** [relayed: ar-5]. The code held under attack from four
+  directions; what blocked was the record, plus one gap: no fixture pinned the
+  rule the quoted `scope.js:730` actually implements [read:
+  `node_modules/eslint-scope/lib/scope.js:717-722` — "References in default
+  parameters isn't resolved to variables which are in their function body."].
+  **Applied** as `e708841c`. Note ar-5 predicted two violations for that
+  fixture; the measured count is **three** — `AssignmentPattern` has no
+  allowlist entry either [measured: `grep -n AssignmentPattern
+  .../just-enough-js.ts` — no match].
+
+### Cross-campaign: aithor FLAG 1 is now half-closed
+
+`.planning-handoffs/aithor-contract-proposals/AR-LOG.md:367` flags
+"`jej/tests/validate.test.ts` parses at `ecmaVersion: 'latest'` and analyzes at
+`2024`". `d8fa1461` closes the **parse** half; the hand-typed `2024` in the
+`analyze` call survives, and the line has moved. That ledger is foreign-modified
+in the working tree, so it is deliberately not edited here — an aithor Wave-2
+agent should read this row alongside it.
+
+### Deferred, named rather than papered over
+
+- **The `analyze()` call's hand-typed `2024`** — a third copy of the numeral,
+  and `lib/screening/tests/parse-settings.test.ts`'s alarm does not reach it.
+  Both obvious routes are blocked: `PARSE_SETTINGS.ecmaVersion` is acorn's union
+  type and will not typecheck into eslint-scope's `number`, and importing
+  embody's `ECMA_VERSION` would create the first `language-levels → embody` code
+  edge. **ar-5 counter-proposes a third route** [relayed: ar-5, measured in its
+  session]: changing `parse-settings.ts` to the `satisfies` form narrows the
+  literal to `2024` and dissolves the type wall in one line — a shared-leaf
+  change deserving its own increment. Unverified here.
+- **Four sibling harnesses still hand-roll `'latest'`** — the three other jej
+  tests and `scaffold/tests/index.test.ts`. None calls `analyze()`, so none is
+  exposed. A sweep is scope creep.
+- **The two `ranges`-less production parsers** the brief asked about —
+  `evaluators/intercept/wrap-call-expressions.ts:117` and
+  `lib/loop-guard/splice-loop-guards.ts:110`. **Measured not exposed**: neither
+  reaches eslint-scope, neither reads `.range`, and `locations: true` is
+  load-bearing for both. No action owed.
+- **`.claude/settings.json` has the `pinned-guard.py` PreToolUse hook deleted in
+  the working tree** [measured: `git diff -- .claude/settings.json`]; the
+  committed state still registers it. The pin planted here rests on the
+  committed state. `.planning-handoffs/aithor-contract-proposals/AR-LOG.md` row
+  H6 reached the opposite conclusion the same day on the same question — flagged
+  for the maintainer, not resolved here.
+
+### Commit-body defects ar-5 found, unrepairable because amend is forbidden
+
+Recorded here so the bodies are read with them: `2f6720e1` relays an ar-3/ar-4
+exchange without a `[relayed:]` tag (the discipline is correct in `d8fa1461`);
+it truncates a quoted `PINNED` from `derive-ast.test.ts:48`, closing a paren the
+source does not close there; and four true-but-untagged repo-state claims appear
+across the two bodies, of which "Production was never exposed" is the
+load-bearing one — ar-5 verified it independently, finding exactly two
+eslint-scope `analyze` call sites in the subsystem.
+
+### Gate
+
+`npx vitest run --project unit src/lib/study-lenses/` →
+`Test Files 126 passed (126)` / `Tests 3375 passed | 8 todo (3383)`;
+`npx tsc --noEmit` → 0; `npm run check:governance` → 0 errors, 62 advisories,
+none touching the changed file [all measured this session]. The scoped-gate
+baseline at plan approval was `1 failed | 125 passed` /
+`42 failed | 3325 passed | 8 todo` — the sole failing file was foreign and a
+peer has since fixed it.

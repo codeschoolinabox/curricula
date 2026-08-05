@@ -335,6 +335,15 @@ person to make it is the maintainer.
 
 ## F5 — the JEJ level's test harness has a latent crash
 
+> ✅ **DONE 2026-08-05** — `2f6720e1`, `d8fa1461`, `e708841c`. Record and both
+> corrections to this section's framing are in [AR-LOG.md](./AR-LOG.md) § F5
+> follow-on. **Read that before re-reading the analysis below**: the crash
+> trigger is broader than stated here (any reference resolving inside its own
+> function scope, not just a shadowed default parameter), and `ranges: true`
+> alone fixes it — the `'latest'` → 2024 narrowing is orthogonal, not part of
+> the fix. The escalation condition below did not fire: no fixture depended on
+> post-2024 syntax.
+
 **Severity: a real, reproduced defect — upgraded from "worth a look" by the dry
 run. Size: small.**
 
