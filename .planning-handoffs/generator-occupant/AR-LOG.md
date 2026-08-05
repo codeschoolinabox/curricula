@@ -203,6 +203,28 @@ are not restated here; this log carries what those artifacts do not already say.
   campaigns' 19, 25 and 10 [relayed: ar-4, `grep -c` across the repo's
   `AR-LOG.md` files].
 
+## Human rulings — 2026-08-04 (a standing deferral, closed)
+
+- **R-7 — the whitespace-only prompt's empty-looking marker line is CLOSED as
+  wontfix. Do not re-raise it, and do not "fix" it.** A prompt of nothing but
+  whitespace makes the placeholder emit `// Your prompt:` followed by the
+  normalized whitespace, which reads as an empty line. That is the literal
+  reading of
+  [§ The placeholder socket](../../src/lib/study-lenses/orchestrate/generator/README.md#the-placeholder-socket)
+  — normalize, never trim, and carry the line whenever the prompt is non-empty —
+  and it is pinned by a test in
+  `generator/tests/create-generator-socket.test.ts`. The maintainer first
+  deferred it on 2026-07-30 ("leave it for now, fix it later if it's a
+  problem"), then saw it surface at Increment 4's sandbox checkpoint and ruled
+  it closed on 2026-08-04: _"the whitespace-only prompt, forget it."_ Recorded
+  here because until now the deferral lived only in a memory file and a plan
+  file, which per [DEV.md § Ruling provenance](../../DEV.md#ruling-provenance)
+  means it did not exist — and an unrecorded wontfix is exactly the kind a later
+  AR re-opens. Measured at the running sandbox harness before the ruling: an
+  empty prompt emits no prompt line at all, a real prompt carries it verbatim,
+  and only a whitespace-only prompt renders it empty-looking [measured: three
+  asks driven through `/spiralearn/sandbox/generator/`].
+
 ## Operational notes (not rulings, but they cost time once)
 
 - **`expect(act(…)).rejects` silently produces a FALSE POSITIVE.** RTL's `act`
