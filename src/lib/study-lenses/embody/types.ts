@@ -1,4 +1,4 @@
-// cspell:ignore Gateable entwine entwined entwining injective Failable
+// cspell:ignore Gateable entwine entwined entwining Failable
 
 /**
  * The embody region's keystone contracts: the snippet that comes in, the
@@ -122,9 +122,17 @@ export type Facts = {
 
 /**
  * Dot-delimited node-path rooted at the Program node; array indices are bare
- * segments, e.g. `"$.body.0.declarations.0.init"`. The canonical node
- * identity across the package — postMessage-safe, and injective over one
- * syntax tree: every node has exactly one path.
+ * segments, e.g. `"$.body.0.declarations.0.init"`. The canonical node identity
+ * across the package — postMessage-safe, and unambiguous in the direction
+ * consumers read it: a path names exactly one node.
+ *
+ * The reverse direction is one-to-one for every node the grammar gives its own
+ * slot, but not quite for all: where the parse reuses a single node object in
+ * two slots, both paths lead to it. A bare import or export specifier is the
+ * case that occurs — `import { x }` builds one identifier and hangs it at both
+ * `local` and `imported` (`export { x }` likewise, at `local` and `exported`),
+ * while the renamed forms build two. So a consumer keyed by node identity
+ * rather than by path may meet the same node twice, and should tolerate it.
  */
 export type NodePath = string;
 

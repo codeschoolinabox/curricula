@@ -381,3 +381,44 @@ Campaign ruling home per DEV.md § Ruling provenance. Phase-0 session opened
   verdict; increment 3: non-conforming tag form; here: an unmeasured number):
   every numeric gate claim is re-run in the same turn the body is written, never
   computed from a previous run plus a delta.
+
+### Post-AR-5 follow-ups (maintainer-directed, 2026-08-04)
+
+- **2026-08-04 human ruling (the two open flags, presented as forks)** [relayed:
+  maintainer via AskUserQuestion this session]: (1) **push — deferred**, the
+  commits stay local and the decision is taken later; (2) **the false `NodePath`
+  claim — fix now, small scope**: narrow the sentence to what is true and add a
+  regression test; (3) **`isNode` — extract AND unify the policy**: one shared
+  file, and the metadata-key disagreement between the two walks settled rather
+  than preserved. Rulings (2) and (3) discharge the published-contract and
+  inter-file gates for those two changes respectively.
+- **2026-08-04 ar-4 verdict on the `NodePath` fix: CONSIDER** [relayed: ar-4] —
+  it verified the new sentence's completeness the strongest available way, by
+  reading acorn's parser source: `parseImportSpecifier` and
+  `parseExportSpecifier` are **the only two sites in the whole parser** that
+  alias an already-built node into a second slot, corroborated by a
+  ~40-construct sweep and by walking every parseable `.js`/`.mjs` in the repo
+  (681 files, 113 collisions, every one an `Identifier` at an `imported`/`local`
+  or `local`/`exported` pair, no other node type anywhere) [all relayed: ar-4,
+  measured in its session]. Shorthand properties build two distinct identifiers
+  despite identical spans, and `import { x as x }` does not collide — the
+  parser's branch is syntactic, not name-equality. Two findings applied: the
+  first test compared two optional chains to each other, so a regression wiping
+  BOTH keys would make `undefined === undefined` read as a pass — each test now
+  also pins the node's `type`; and `injective` was left behind in the file's
+  `cspell:ignore` list once the word left the prose.
+- **2026-08-04 STANDING FLAG for the human, discovered by ar-4, NOT fixed
+  here**: where two paths share one node, **only one of the two `EntwinedNode`
+  wrappers receives the shared token** — the other's `tokens` array is empty, in
+  violation of that field's own contract ("Every token within the node's span").
+  Measured on `import { x } from "m";`: the `imported` wrapper ties 0 tokens,
+  the `local` wrapper 1; symmetric for a bare `export` [relayed: ar-4, measured
+  in its session]. The mechanism is `entwineNode` building one wrapper per path
+  while `fillSpans`'s identical-span tie-break ("the later-enumerated wins", its
+  own committed comment) gives `byOffset` — and so `tieTokens` — only the last
+  wrapper. **Pre-existing and untouched by this campaign**, but unlike the
+  `parenSpans` case it is unconditional rather than "no bug today", and it
+  reaches the canonical `byPath` entry point rather than only a consumer's own
+  identity-keyed map. No test exercises `.tokens` on either wrapper of a
+  collision. Fixing the tie-break is a materially larger change than the doc
+  narrowing the maintainer authorized, so it is logged rather than taken.

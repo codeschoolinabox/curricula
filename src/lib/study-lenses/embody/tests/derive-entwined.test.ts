@@ -320,6 +320,55 @@ describe('deriveEntwined', () => {
 			});
 		});
 
+		describe('a node the parse reuses in two slots', () => {
+			it('a bare import specifier resolves to one node at both paths', () => {
+				const snippet = {
+					source: 'import { x } from "m";',
+					type: 'module',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const stage = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
+				const entwined = stage && stage.ok && stage.value;
+				const local =
+					entwined && entwined.byPath['$.body.0.specifiers.0.local'];
+				const imported =
+					entwined && entwined.byPath['$.body.0.specifiers.0.imported']?.node;
+				// PINNED(human ruling 2026-08-04: paths name one node each, but a node may answer to two — the NodePath doc says so because this is measurably true)
+				expect(
+					local && local.node.type === 'Identifier' && local.node === imported,
+				).toBe(true);
+			});
+
+			it('a renamed import specifier resolves to two distinct nodes', () => {
+				const snippet = {
+					source: 'import { x as y } from "m";',
+					type: 'module',
+				} as const;
+				const tokens = deriveTokens(snippet);
+				const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+				const stage = deriveEntwined(
+					snippet.source,
+					tokens,
+					ast,
+					parenSpansByNode,
+				);
+				const entwined = stage && stage.ok && stage.value;
+				const local =
+					entwined && entwined.byPath['$.body.0.specifiers.0.local'];
+				const imported =
+					entwined && entwined.byPath['$.body.0.specifiers.0.imported']?.node;
+				expect(
+					local && local.node.type === 'Identifier' && local.node !== imported,
+				).toBe(true);
+			});
+		});
+
 		describe('grouping-parentheses record', () => {
 			it('a source with no grouping parentheses publishes an empty record', () => {
 				const snippet = { source: 'let x = 1 + 2', type: 'script' } as const;
