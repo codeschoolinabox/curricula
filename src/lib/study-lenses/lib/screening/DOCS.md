@@ -78,7 +78,9 @@ flowchart TD
         Floor["structural floor<br/>the types an inventory-derived<br/>slice must admit"]
     end
 
-    Prog["parsed program<br/>ESTree-shaped · character offsets<br/>no parenthesis nodes"]
+    Root[/"the root, as the caller handed it"/]
+    Prog["a root the walk can screen<br/>usually a parsed program — ESTree-shaped,<br/>character offsets, no parenthesis nodes"]
+    Refused[["TypeError<br/>(the leaf's one boundary check)"]]
     Rules["node-rule table<br/>default-deny; absence is refusal"]
     Paired["every node, paired with its path<br/>depth-first, path carried inline"]
     Verdict["per-node verdict<br/>admitted · or a refusal message"]
@@ -87,6 +89,8 @@ flowchart TD
 
     Settings -.->|"the caller parses an unsettled source with these"| Prog
     Floor -.->|"the caller unions under its own entries"| Rules
+    Root -->|"not node-shaped — no string node type"| Refused
+    Root -->|"node-shaped"| Prog
     Prog -->|"descend, carrying each path, never short-circuiting, pure"| Paired
     Paired -->|"screen: look up the node type, apply the rule<br/>absence answers default-deny, pure"| Verdict
     Rules -->|"the table the screen dispatches on"| Verdict
@@ -122,12 +126,16 @@ those two data artifacts and never applies them itself.
   segment. Paths are a published identity consumers persist and compare, so an
   index that moves is a broken contract rather than a cosmetic difference —
   pinned by a test over a sparse array and an omitted clause.
-- **Trusts its inputs; validates nothing.** The walk takes a parsed tree and a
-  table as given — no boundary check, no defensive narrowing. A caller handing
-  it something that is not a parsed tree gets an error in the parser's own
-  vocabulary; screening owns no input-validation vocabulary because it owns no
-  parse. Depth is the caller's too: the descent recurses, so a pathologically
-  nested tree exhausts the stack rather than degrading.
+- **Checks its root; trusts everything else.** `collectViolations` refuses a
+  root that is not node-shaped — a non-null object carrying a string `type` —
+  with a `TypeError`. The root is the one value that arrives from outside, and a
+  domain-blind leaf cannot assume a caller parsed anything; below it the descent
+  yields only values that already passed the same test. Node-shaped rather than
+  program-shaped, so the walk is not made to refuse a root it can perfectly well
+  answer for. **This is the only check the leaf performs**: the table is taken
+  as given, and the other two published exports trust their arguments entirely.
+  Depth is the caller's too — the descent recurses, so a pathologically nested
+  tree exhausts the stack rather than degrading.
 - **No async boundary.** Every phase is synchronous. The module has no I/O, no
   scheduling, and no randomness.
 - **Default-deny has no allow-all encoding.** An empty table denies everything,
@@ -156,12 +164,27 @@ those two data artifacts and never applies them itself.
 - **Union semantics for a derived table** — whether a floor union may relax a
   caller's own constraint check is the caller's question; the floor is published
   as data so this module does not answer it.
+- **A node-shaped root's completeness beyond its type** — the root check reads
+  `type` and nothing else, so a root carrying no `start`/`end` is screened and,
+  if refused, yields a violation whose location is empty. Reading further would
+  be the defensive narrowing the constraint above declines; a caller handing the
+  walk a hand-built node owns its shape.
 - **Line/column conversion** — the consumer holds the source and counts; this
   module has no source text.
 - **Any second walk** — the package's other tree traversals serve other
   subjects; this leaf owns none of them.
 
 ## Decisions
+
+- **The root check admits any node, not only a program (human ruling
+  2026-08-05).** The alternative was to hold the guard to the export's declared
+  `root: Program`. Node-shaped won because the walk can screen any node, so a
+  program-shaped check would refuse roots it is able to answer for — a caller
+  inventorying a subtree is the case it would have cost. The consequence is
+  deliberate and worth stating: the guard is **wider than the signature**, so a
+  bare statement handed in as a root is screened rather than refused, and the
+  declared parameter type documents the expected caller rather than the enforced
+  floor.
 
 - **The paired parse ships as settings, not a parse verb (maintainer ruling).**
   The alternative was a parse function owning an acorn call. The settings-only

@@ -275,6 +275,64 @@ describe('collectViolations', () => {
 		});
 	});
 
+	describe('a root that is not a syntax tree', () => {
+		it('refuses an empty object', () => {
+			expect(() => collectViolations({} as unknown as Program, {})).toThrow(
+				/not a syntax tree/,
+			);
+		});
+
+		it('refuses an object carrying keys but no node type', () => {
+			expect(() =>
+				collectViolations({ start: 0, end: 1 } as unknown as Program, {}),
+			).toThrow(/not a syntax tree/);
+		});
+
+		it("refuses an object whose node type isn't a string", () => {
+			expect(() =>
+				collectViolations(
+					{ type: 42, start: 0, end: 1 } as unknown as Program,
+					{},
+				),
+			).toThrow(/not a syntax tree/);
+		});
+
+		it('refuses a string', () => {
+			expect(() => collectViolations('n;' as unknown as Program, {})).toThrow(
+				/not a syntax tree/,
+			);
+		});
+
+		it('refuses null by its own message, never by reading through it', () => {
+			expect(() => collectViolations(null as unknown as Program, {})).toThrow(
+				/not a syntax tree/,
+			);
+		});
+
+		it('refuses undefined by its own message, never by reading through it', () => {
+			expect(() =>
+				collectViolations(undefined as unknown as Program, {}),
+			).toThrow(/not a syntax tree/);
+		});
+
+		it('refuses with the type error a mis-shaped argument deserves', () => {
+			expect(() => collectViolations({} as unknown as Program, {})).toThrow(
+				TypeError,
+			);
+		});
+	});
+
+	describe('a root that is node-shaped but not a program', () => {
+		it('screens it rather than refusing it', () => {
+			const literal = programOf('"s";').body[0];
+			const violations = collectViolations(literal as unknown as Program, {
+				ExpressionStatement: true,
+				Literal: true,
+			});
+			expect(violations).toEqual([]);
+		});
+	});
+
 	describe('a node type the table inherits but does not own', () => {
 		it('refuses one whose inherited value would answer', () => {
 			const violations = collectViolations(rootOver('toString'), {

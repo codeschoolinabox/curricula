@@ -34,6 +34,12 @@ export default function collectViolations(
 	root: Program,
 	nodes: SyntaxAllowlist['nodes'],
 ): ReadonlyArray<Violation> {
+	if (!isNode(root)) {
+		throw new TypeError(
+			'collectViolations was handed a root that is not a syntax tree',
+		);
+	}
+
 	return freezeInPlace(walk(root, '$', nodes));
 }
 
@@ -74,6 +80,24 @@ function screenNode(
 			path,
 		),
 	];
+}
+
+/**
+ * Whether a value is node-shaped: a non-null object carrying a string `type`.
+ *
+ * WHY the root is checked and nothing else is: everything below the root is
+ * reached by the descent, which only yields values that already passed this
+ * same test. The root is the one value that arrives from outside, and this leaf
+ * is domain-blind — it cannot assume a caller parsed anything. Node-shaped, not
+ * `Program`-shaped: the walk screens any node, so demanding a program would
+ * refuse a root it is perfectly able to answer for.
+ */
+function isNode(value: unknown): value is Node {
+	return (
+		typeof value === 'object' &&
+		value !== null &&
+		typeof (value as Record<string, unknown>).type === 'string'
+	);
 }
 
 /**
