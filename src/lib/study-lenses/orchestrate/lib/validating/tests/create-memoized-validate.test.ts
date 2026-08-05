@@ -400,5 +400,22 @@ describe('createMemoizedValidate', () => {
 					: null,
 			).toEqual(['DebuggerStatement']);
 		});
+
+		it('stamps the violation at its folded path, carrying no wrapper segment', () => {
+			const { facts } = embody('const f = (() => { debugger; });');
+			const validate = createMemoizedValidate();
+			const record = validate(
+				{ source: 'const f = (() => { debugger; });', type: 'module' },
+				assembleParseFacts(facts),
+				[scaffoldLevel],
+			);
+			const verdict = record['scaffold'];
+			// PINNED(human ruling 2026-07-30 Q2: node paths are stable — grouping parentheses never lengthen a path, at any depth; this is where that reaches a level's published violation)
+			expect(
+				verdict?.kind === 'validated'
+					? verdict.violations.map((violation) => violation.nodePath)
+					: null,
+			).toEqual(['$.body.0.declarations.0.init.body.body.0']);
+		});
 	});
 });
