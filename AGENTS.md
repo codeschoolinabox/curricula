@@ -263,13 +263,18 @@ for the full process.
 
 **Summary:**
 
-- **Phase 0** _(do not skip)_: Establish ubiquitous language (domain glossary) →
-  README spec (domain model in prose, bounded context) → AR-1 design challenge →
-  types.ts (domain model in TypeScript) → architectural sketch in DOCS.md
-  including the **Mermaid `## Data flow` diagram** (structural target for the
-  Refactor step; abstraction level matches this directory's position in the
-  tree) → AR-2 sketch challenge → commit Phase 0 artifacts
-  (`docs: establish [module] domain model and architectural sketch`)
+- **Phase 0** _(do not skip)_ — **three steps, not seven**: **0.1 README spec**
+  (domain model in prose, bounded context) **with the ubiquitous-language
+  glossary inside it** — the glossary is not a separate step → **0.2 the twin**,
+  or the `## Epistemology` block that discharges it at `twin-doc: none` → **AR-1
+  design challenge**, which challenges the README **and the twin** together →
+  **0.3 types.ts** (domain model in TypeScript) **+ architectural sketch in
+  DOCS.md** including the **Mermaid `## Data flow` diagram** (structural target
+  for the Refactor step; abstraction level matches this directory's position in
+  the tree) **+ the tests, written for real and committed skipped** → **AR-2
+  sketch challenge** → commit Phase 0 artifacts
+  (`docs: establish [module] domain model and architectural sketch`). Phase 1
+  un-skips one test at a time in ZOMBIES order; AR-3 fires on each un-skip.
 - **Phase 1**: For each increment: JSDoc → stub → test (ZOMBIES order) → AR-3 →
   implement (Fake It is valid for the first test; second test must triangulate
   it away) → lint → refactor (structural quality against DOCS.md sketch) → AR-4
@@ -1027,7 +1032,7 @@ catch. What kind of work a unit is, and how heavily it is reviewed, are answered
 by [DEV.md § Work routing and ceremony](./DEV.md#work-routing-and-ceremony) —
 which deliberately uses neither word. Frogramming and Vibetoading name a
 practitioner's **stance**, defined by which twin they hold; no file path, no
-setting, and no ceremony level asserts that anyone holds a twin.
+declared value, and no ceremony level asserts that anyone holds a twin.
 
 They are a spectrum, not a binary, and **neither is the default governance
 mode** (human ruling 2026-08-04). The default is stated in one place — the

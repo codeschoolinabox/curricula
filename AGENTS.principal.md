@@ -291,12 +291,16 @@ Full details: [DEV.md § Linting Conventions](./DEV.md#linting-conventions).
 All development uses TDD with atomic increments. Full process:
 [DEV.md § Incremental Development Workflow](./DEV.md#incremental-development-workflow).
 
-**Phase 0 — Documentation specification** (all seven steps, in order, before any
-code): establish ubiquitous language → README spec (domain model in prose,
-bounded context) → **AR-1** → types.ts (domain model in TypeScript) →
-architectural sketch in DOCS.md with the **Mermaid `## Data flow` diagram** →
-**AR-2** → review, resolve, and commit Phase 0 artifacts. Phase 1 does not start
-until the human approves the Phase 0 commit.
+**Phase 0 — Documentation specification** (all three steps, in order, before any
+code): **0.1 README** — the domain model in prose and its bounded context, with
+the ubiquitous-language glossary **inside it**, not as a separate step → **0.2
+the twin**, or the `## Epistemology` block that discharges it at
+`twin-doc: none` → **AR-1**, which challenges the README **and the twin**
+together → **0.3 types.ts + the architectural sketch in DOCS.md** (with the
+**Mermaid `## Data flow` diagram**) **+ the tests, written for real and
+committed skipped** → **AR-2** → review, resolve, and commit Phase 0 artifacts.
+Phase 1 un-skips one test at a time in ZOMBIES order, and AR-3 fires on each
+un-skip. Phase 1 does not start until the human approves the Phase 0 commit.
 
 **Phase 1 — per increment**: JSDoc → stub → ONE failing test in ZOMBIES order →
 **AR-3** → implement (Fake It is legitimate for the first test; it expires when
@@ -849,7 +853,7 @@ catch. What kind of work a unit is, and how heavily it is reviewed, are answered
 by [DEV.md § Work routing and ceremony](./DEV.md#work-routing-and-ceremony) —
 which deliberately uses neither word. Frogramming and Vibetoading name a
 practitioner's **stance**, defined by which twin they hold; no file path, no
-setting, and no ceremony level asserts that anyone holds a twin.
+declared value, and no ceremony level asserts that anyone holds a twin.
 
 They are a spectrum, not a binary, and **neither is the default governance
 mode** (human ruling 2026-08-04). The default is stated in one place — the

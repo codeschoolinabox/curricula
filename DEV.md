@@ -1691,11 +1691,13 @@ For each behavioral increment:
 2. **Stub function** — create function with stub body
 3. **Placeholder types** — `any`/`unknown` to unblock; tighten later
 4. **Lint checkpoint 1** — `npx eslint <new-file>`. Fix violations.
-5. **Unit test** — write ONE failing test in ZOMBIES order. Start with the
-   degenerate case (Zero) if this is the first test for this function. After
-   writing it, ask: _could this be passed by returning a hardcoded value?_ If
-   yes, note what the second test will be — the one that makes hardcoding
-   impossible — before moving on.
+5. **Unit test** — bring ONE failing test live, in ZOMBIES order. Where 0.3
+   committed the suite skipped, this is an **un-skip**, one at a time; where
+   there is no suite yet, write the test. Either way exactly one test goes red
+   per increment, and **AR-3 fires on it**. Start with the degenerate case
+   (Zero) if this is the first for this function. Then ask: _could this be
+   passed by returning a hardcoded value?_ If yes, note what the second test
+   will be — the one that makes hardcoding impossible — before moving on.
 
    > **5b. Adversarial Test Challenge (AR-3)** — Spawn a separate reviewer agent
    > to challenge the test strategy before implementing. See
