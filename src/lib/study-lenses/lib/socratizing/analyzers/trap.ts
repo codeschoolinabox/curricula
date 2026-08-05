@@ -21,7 +21,8 @@ import getRecord from './get-record.js';
  * Every statement that states a condition, named as a learner would say it.
  * Membership doubles as the type gate. Deliberately narrower than
  * `STATEMENT_LABELS`: `for...of` and `for...in` iterate rather than test, so they
- * carry no condition that could be constant.
+ * carry no condition that could be constant. Same membership as `caution.ts`'s
+ * `CONDITION_STATEMENTS` — see the note there for why the two stay separate.
  */
 const CONDITION_LABELS: Readonly<Record<string, string>> = {
 	IfStatement: 'if',

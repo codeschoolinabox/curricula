@@ -1,8 +1,10 @@
 /**
  * @file Comprehension analyzers for user interaction.
  *
- * @remarks Questions about understanding prompt, alert, confirm,
- * console.log — the JeJ constructs that communicate with users.
+ * @remarks Questions about understanding prompt, alert and confirm — the JeJ
+ * constructs that communicate with users. `console.log` is not among them. It
+ * is tagged `userInteraction` as an I/O construct, but its audience is the
+ * developer, not the user; `console-log-audience` asks about it.
  */
 
 import type { Node } from 'acorn';

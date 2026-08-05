@@ -64,7 +64,16 @@ const LOOP_STATEMENTS: ReadonlySet<string> = new Set([
 	'ForOfStatement',
 ]);
 
-/** Statements with a `.test` condition that an assignment could hide in. */
+/**
+ * Statements with a `.test` condition that an assignment could hide in. Same
+ * membership as `trap.ts`'s `CONDITION_LABELS`, which labels these four for the
+ * learner, and both files mean to cover all four — so a change to one is a
+ * change to both. Acorn puts `.test` on exactly these four statement forms;
+ * `SwitchCase` and `ConditionalExpression` carry one too, and leaving them out
+ * is this analyzer's scope choice, not something the grammar decides. Kept as
+ * two shapes on purpose — a set only gates here, while there the same
+ * membership also supplies the learner-facing label.
+ */
 const CONDITION_STATEMENTS: ReadonlySet<string> = new Set([
 	'IfStatement',
 	'WhileStatement',

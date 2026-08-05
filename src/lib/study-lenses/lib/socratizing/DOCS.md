@@ -100,10 +100,11 @@ Tagging each question with affected audiences (developers, computer, users)
 reinforces the curriculum's core framework: source code communicates with three
 audiences simultaneously.
 
-Questions reference audiences where natural: "Does this log communicate
-something to the **user**, or is it for **developers** debugging?" This
-distinction helps learners see that the same line of code can serve different
-audiences.
+Questions reference audiences where natural: `console-log-audience` asks "Who is
+the intended audience for this console.log()?" and follows it by asking how
+`alert()` would change who sees the output. Contrasting two constructs that
+reach different audiences makes the framework concrete — a `console.log` speaks
+to developers, an `alert` to users.
 
 ## Category design
 
@@ -123,10 +124,8 @@ correctness — patterns that are likely mistakes.
 Easter eggs get their own category rather than being folded into voice because
 they involve undocumented features. The learner is exploring territory not
 covered by the JeJ reference, which is qualitatively different from choosing
-between two documented alternatives. However, most easter eggs (labels, void,
-comma operator) are fundamentally voice choices — they offer unique expressive
-possibilities. `eval` is the exception: it can be creative voice or dangerous
-mistake depending on intent.
+between two documented alternatives. Labels, void, and the comma operator are
+nonetheless voice choices at heart — they offer unique expressive possibilities.
 
 ## Voice profile
 

@@ -108,16 +108,17 @@ and coverage tracking.
 
 The curriculum's four-level framework for understanding programs. Context
 strings use PBSI vocabulary naturally — "This **implementation** choice
-affects…" or "There are different **strategies** for…" — so learners practise
-the vocabulary every time they encounter a question.
+affects…" or "The **strategy** for validating this input…" — so learners
+practise the vocabulary every time they encounter a question.
 
 ### Rhetorics of Programming (three audiences)
 
 Source code communicates with developers (through naming, structure, comments),
 the computer (through precise instructions), and users (through program
 behavior). Each question is tagged with the audiences it affects, and questions
-reference audiences where natural: "Does this log communicate something to the
-**user**, or is it for **developers** debugging?"
+reference audiences where natural: `console-log-audience` asks "Who is the
+intended audience for this console.log()?", then asks how `alert()` would change
+who sees the output.
 
 ## Question registers
 

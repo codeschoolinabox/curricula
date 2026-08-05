@@ -109,11 +109,21 @@ returned PAUSE. The rulings below close that PAUSE.
 
 - **R-13 — no shared statement-kinds module.** The duplicated condition set
   (`{IfStatement, WhileStatement, DoWhileStatement, ForStatement}`) stays
-  duplicated with reciprocal cross-reference comments. Reasons: the set is
-  closed by the ECMAScript grammar, so drift risk is structurally zero; the two
-  shapes do not unify (a `ReadonlySet` and a labelled `Record`); the module's
+  duplicated with reciprocal cross-reference comments. Reasons: the two shapes
+  do not unify (a `ReadonlySet` and a labelled `Record`); the module's
   established pattern is the cross-reference comment; and a new file is an
   inter-file trigger plus a README-tree edit.
+
+  ⚠️ **Corrected during A4.** This ruling first gave a fourth reason — "the set
+  is closed by the ECMAScript grammar, so drift risk is structurally zero" — and
+  AR-2 refuted it. The grammar caps how many statement forms can carry a
+  `.test`; it does not bind two independently declared sets to equal membership.
+  Membership is an editorial choice, and this module already holds two
+  _narrower_ sets of the same concept — `consistency.ts` and
+  `comprehension-control-flow.ts`, which is O-1. The ruling asserted the
+  impossibility of a divergence that had already happened twice in the same
+  directory. The outcome stands on its other three reasons; only that one is
+  struck.
 
 - **R-14 — `README.md`'s invented "strategies" quotation is replaced.** Same
   defect class as R-11 one sentence over: nothing ships the quoted string.
@@ -159,6 +169,26 @@ returned PAUSE. The rulings below close that PAUSE.
   never mentioned labels — before or after R-12. So A3's "the doc now matches
   the code" holds relative to `programPaths`' set, **not** relative to every use
   of the `controlFlow` tag across the module. Pre-existing; not created by A3.
+
+- **O-6 — `assignment-in-condition` cannot see two `.test` sites that exist.**
+  Raised independently by AR-1 and AR-2 on A4, and measured: acorn puts `.test`
+  on six node types, and the analyzer covers the four that are _statements_.
+  `case (y = 1):` and `(x = 1) ? a : b` both hide an assignment in a `.test` and
+  neither is reached. Excluding them is a scope choice, which the code comment
+  now says out loud instead of implying the grammar decided it. Widening is a
+  behavior change needing red tests — the same class as O-1, and not authorized.
+
+- **O-7 — `userInteraction` groups `console.log` with prompt/alert/confirm,
+  while R-11 puts its audience with developers.** Raised by both reviewers on
+  A4. `types.ts`'s `Feature` doc enumerates `console.log` among the
+  user-interaction constructs and `voice.ts` tags `console-log-audience` with
+  that feature, so the grouping is load-bearing for the `features` filter — it
+  is a _feature bucket_, not an audience claim. A4's header note says both
+  things explicitly so the next reader does not "fix" the type doc by striking
+  `console.log`, which would leave the tag and the filter disagreeing. Whether
+  the feature should be renamed, its gloss widened, or the split simply
+  documented is a contract decision. **Do not edit `types.ts` on R-11's
+  strength** — R-11 ruled on audience, not on bucketing.
 
 - **O-2 — the Wave-2 `lib/scoping` contract Phase 0** remains at its human gate,
   untouched by this campaign.
