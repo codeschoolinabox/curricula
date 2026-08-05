@@ -1,0 +1,630 @@
+<!doctype html>
+<!--
+  intercept evaluator sandbox — permanent dev infrastructure, not part of
+  intercept's contract.
+
+  Serve it with the engine's sandbox config, which already sets the COOP/COEP
+  headers SharedArrayBuffer needs and roots at the study-lenses package:
+
+      npx vite --config src/lib/study-lenses/lib/engine/vite.sandbox.config.ts
+
+  then open  /evaluators/intercept/sandbox.html
+
+  This page drives intercept through the KIND SURFACE — applicability, then
+  main — never its internal factory, so what you exercise here is exactly what
+  a consuming lens gets. There are deliberately NO io-mock toggles: every
+  dialog suspends the run and only your answer releases it. An unanswered card
+  IS the suspended program; the event log stops until you answer it.
+-->
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>intercept evaluator sandbox</title>
+		<style>
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+			body {
+				font-family: monospace;
+				font-size: 13px;
+				padding: 1.5rem;
+				max-width: 860px;
+				margin: 0 auto;
+			}
+			h1 {
+				font-size: 1.1rem;
+				margin-bottom: 0.4rem;
+			}
+			p.note {
+				color: #666;
+				margin-bottom: 1rem;
+			}
+			textarea {
+				width: 100%;
+				height: 150px;
+				font-family: monospace;
+				font-size: 13px;
+				padding: 0.5rem;
+				tab-size: 2;
+				border: 2px solid #333;
+				resize: vertical;
+			}
+			.controls {
+				margin-top: 0.5rem;
+				display: flex;
+				gap: 0.75rem;
+				align-items: center;
+				flex-wrap: wrap;
+			}
+			button {
+				padding: 0.4rem 1.2rem;
+				font-family: monospace;
+				font-size: 13px;
+				cursor: pointer;
+				border: 2px solid #333;
+				background: #eee;
+			}
+			button:disabled {
+				opacity: 0.5;
+				cursor: not-allowed;
+			}
+			label {
+				font-size: 12px;
+			}
+			input[type='number'] {
+				width: 6em;
+				font-family: monospace;
+				font-size: 13px;
+				padding: 0.25rem;
+				border: 2px solid #333;
+			}
+			select {
+				font-family: monospace;
+				font-size: 12px;
+				border: 2px solid #333;
+				padding: 0.2rem;
+			}
+			.presets {
+				margin-top: 0.5rem;
+			}
+			.presets summary {
+				cursor: pointer;
+				color: #555;
+				font-size: 12px;
+			}
+			.preset-btns {
+				margin-top: 0.4rem;
+				display: flex;
+				gap: 0.5rem;
+				flex-wrap: wrap;
+			}
+			#events {
+				margin-top: 0.75rem;
+				border: 2px solid #333;
+				padding: 0.5rem;
+				max-height: 320px;
+				overflow-y: auto;
+				font-size: 12px;
+				white-space: pre-wrap;
+			}
+			#events:empty::after {
+				content: 'no events yet — click [run].';
+				color: #888;
+			}
+			.ev {
+				margin-bottom: 4px;
+			}
+			.ev > summary {
+				cursor: pointer;
+			}
+			/* The full event, verbatim — the inspection surface. */
+			pre.dump {
+				margin: 0.25rem 0 0.4rem 1.1rem;
+				padding: 0.4rem 0.5rem;
+				border-left: 3px solid #ccc;
+				background: #fbfbfb;
+				color: #333;
+				font-size: 11px;
+				overflow-x: auto;
+			}
+			#settlement details > summary {
+				cursor: pointer;
+				font-size: 11px;
+				color: #555;
+				margin-top: 0.4rem;
+			}
+			.ev-console {
+				color: #060;
+			}
+			.ev-console.warn {
+				color: #850;
+			}
+			.ev-console.error {
+				color: #c00;
+			}
+			.ev-alert,
+			.ev-confirm,
+			.ev-prompt {
+				color: #006;
+			}
+			#settlement {
+				margin-top: 0.75rem;
+				padding: 0.6rem;
+				border: 1px dashed #999;
+				background: #fafafa;
+				white-space: pre-wrap;
+				min-height: 4.5em;
+			}
+			#banner {
+				margin-bottom: 1rem;
+				padding: 0.6rem;
+				border-left: 3px solid #c00;
+				background: #fff0f0;
+				color: #c00;
+				display: none;
+			}
+			/* The answer card: an unanswered one IS the suspended run. */
+			#cards:not(:empty) {
+				margin-top: 0.75rem;
+			}
+			.card {
+				border: 2px solid #006;
+				background: #f4f7ff;
+				padding: 0.6rem;
+				margin-bottom: 0.5rem;
+			}
+			.card.stale {
+				border-color: #999;
+				background: #f4f4f4;
+				color: #777;
+			}
+			.card h2 {
+				font-size: 0.85rem;
+				margin-bottom: 0.35rem;
+			}
+			.card .ask {
+				margin-bottom: 0.45rem;
+			}
+			.card input[type='text'] {
+				width: 16em;
+				font-family: monospace;
+				font-size: 13px;
+				padding: 0.25rem;
+				border: 2px solid #333;
+				margin-right: 0.4rem;
+			}
+			.card .held {
+				font-size: 11px;
+				color: #006;
+				margin-top: 0.35rem;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>intercept evaluator sandbox</h1>
+		<p class="note">
+			Drives <strong>intercept</strong> through the kind surface and shows what
+			the program said and what it asked. Every dialog <strong>suspends</strong>
+			the run: the card below is the program waiting on you, and nothing more
+			streams until you answer it. Every event and the settlement are printed
+			<strong>in full</strong> beneath their summary line — a key present with
+			an <code>undefined</code> value shows as
+			<code>[present, undefined]</code> rather than vanishing the way
+			<code>JSON.stringify</code> would drop it, and the live objects also go to
+			the devtools console.
+		</p>
+
+		<div id="banner"></div>
+
+		<textarea
+			id="code"
+			title="the program to run"
+			aria-label="the program to run"
+		>
+const name = prompt('who?');
+console.log('Hello, ' + name + '!');</textarea
+		>
+
+		<details open class="presets">
+			<summary>checkpoint snippets</summary>
+			<div class="preset-btns">
+				<button
+					type="button"
+					class="preset"
+					data-code="console.log('hello', 1);"
+				>
+					[1 · one console event]
+				</button>
+				<button
+					type="button"
+					class="preset"
+					data-code="const name = prompt('who?');
+console.log(name);"
+				>
+					[2 · prompt → answer → record]
+				</button>
+				<button
+					type="button"
+					class="preset"
+					data-code="const ok = confirm('sure?');
+console.log(ok);"
+				>
+					[3 · confirm → Cancel]
+				</button>
+				<button
+					type="button"
+					class="preset"
+					data-code="const first = prompt('leave me unanswered');
+console.log('never reached');"
+				>
+					[4 · unanswered → cancel]
+				</button>
+				<button
+					type="button"
+					class="preset"
+					data-code="for (let i = 0; i &lt; 10; i = i + 1) {
+	console.log(i);
+}"
+					data-iterations="4"
+				>
+					[5 · loop cap with a loc]
+				</button>
+			</div>
+		</details>
+
+		<div class="controls">
+			<button id="run" type="button">[run]</button>
+			<button id="cancel" type="button" disabled>[cancel]</button>
+			<label
+				>axis:
+				<select id="axis">
+					<option value="function">function (script)</option>
+					<option value="module">module</option>
+				</select>
+			</label>
+			<label>
+				<input
+					id="capEnabled"
+					type="checkbox"
+					title="enforce an iteration cap"
+				/>
+				max iterations:
+				<input
+					id="cap"
+					type="number"
+					min="-10"
+					placeholder="none"
+					title="the iteration cap, passed to the spec unchanged"
+				/>
+			</label>
+		</div>
+
+		<div id="cards"></div>
+		<div id="events"></div>
+		<div id="settlement">click [run] to begin.</div>
+
+		<script type="module">
+			import embody from '../../embody/index.ts';
+			import intercept from './index.ts';
+
+			const codeEl = document.getElementById('code');
+			const runBtn = document.getElementById('run');
+			const cancelBtn = document.getElementById('cancel');
+			const axisEl = document.getElementById('axis');
+			const capEnabledEl = document.getElementById('capEnabled');
+			const capEl = document.getElementById('cap');
+			const eventsEl = document.getElementById('events');
+			const cardsEl = document.getElementById('cards');
+			const settlementEl = document.getElementById('settlement');
+			const bannerEl = document.getElementById('banner');
+
+			// The engine's pause protocol lives on shared memory; without the
+			// isolation headers there is nothing to run in, and intercept would
+			// refuse.
+			if (typeof SharedArrayBuffer === 'undefined') {
+				bannerEl.textContent =
+					'⚠ SharedArrayBuffer is unavailable — serve this page with COOP/COEP headers (use the engine vite config named at the top of this file). intercept will refuse until then.';
+				bannerEl.style.display = 'block';
+				runBtn.disabled = true;
+			}
+
+			for (const button of document.querySelectorAll('.preset')) {
+				button.addEventListener('click', () => {
+					codeEl.value = button.dataset.code;
+					const preset = button.dataset.iterations;
+					capEnabledEl.checked = preset !== undefined;
+					capEl.value = preset ?? '';
+				});
+			}
+
+			// WHY the empty-string guard: Number('') is 0, and a cap of 0 trips on
+			// the very first guard call — without this check an empty input would
+			// make every loop in every program trip immediately. Absent stays absent.
+			function readCap() {
+				if (!capEnabledEl.checked || capEl.value === '') {
+					return undefined;
+				}
+				return Number(capEl.value);
+			}
+
+			function describeArgs(args) {
+				return args.map((argument) => JSON.stringify(argument)).join(', ');
+			}
+
+			function describeLoc(loc) {
+				return loc === null
+					? 'loc: none'
+					: `loc ${loc.start.line}:${loc.start.column}→${loc.end.line}:${loc.end.column}`;
+			}
+
+			/**
+			 * Every field the event actually carries, verbatim — including the two
+			 * kinds a plain `JSON.stringify` would silently swallow: a key whose
+			 * value is `undefined` (which is exactly what an `alert` record's
+			 * `returnValue` is, deliberately) and the pending interaction's live
+			 * `respond` function. Both are rendered as explicit markers instead of
+			 * disappearing, because "the key is present and undefined" is a
+			 * contract fact worth being able to see.
+			 */
+			function dumpEvent(value) {
+				return JSON.stringify(
+					value,
+					(_key, entry) => {
+						if (typeof entry === 'function') {
+							return '[function — live, not a wire value]';
+						}
+						if (entry === undefined) {
+							return '[present, undefined]';
+						}
+						return entry;
+					},
+					2,
+				);
+			}
+
+			/** The readable line, with the full event folded out beneath it. */
+			function appendEvent(summaryText, event, className) {
+				const row = document.createElement('details');
+				row.open = true;
+				row.className = `ev ${className}`;
+				const summary = document.createElement('summary');
+				summary.textContent = summaryText;
+				const dump = document.createElement('pre');
+				dump.className = 'dump';
+				dump.textContent = dumpEvent(event);
+				row.append(summary, dump);
+				eventsEl.appendChild(row);
+				eventsEl.scrollTop = eventsEl.scrollHeight;
+				// The live object goes to devtools too, so `respond` and the frozen
+				// interiors can be poked at directly.
+				console.log('[intercept event]', event);
+			}
+
+			function renderRecord(record) {
+				const head =
+					record.kind === 'console'
+						? `console.${record.method}(${describeArgs(record.args)})`
+						: `${record.kind}(${describeArgs(record.args)}) → ${JSON.stringify(record.returnValue)}`;
+				const className =
+					record.kind === 'console'
+						? `ev-console ${record.method}`
+						: `ev-${record.kind}`;
+				appendEvent(
+					`step ${record.step} · ${head} · ${describeLoc(record.loc)}`,
+					record,
+					className,
+				);
+			}
+
+			/**
+			 * The answer card. It is the suspended program made visible: while it
+			 * stands unanswered nothing else streams, and answering it is the only
+			 * thing that releases the run. A stale card (the run ended without it)
+			 * stays on screen deliberately — answering one is inert, which is worth
+			 * being able to see.
+			 */
+			function renderCard(pending) {
+				const card = document.createElement('div');
+				card.className = 'card';
+				const { request } = pending;
+				const heading = document.createElement('h2');
+				heading.textContent = `step ${pending.step} · ${request.kind} — the run is SUSPENDED`;
+				const ask = document.createElement('div');
+				ask.className = 'ask';
+				ask.textContent =
+					`asks: ${JSON.stringify(request.message)}` +
+					(request.defaultValue === undefined
+						? ''
+						: ` · default ${JSON.stringify(request.defaultValue)}`);
+				const held = document.createElement('div');
+				held.className = 'held';
+				held.textContent = `${describeLoc(pending.loc)} — nothing more streams until you answer`;
+				card.append(heading, ask);
+
+				// The suspended event's own full data, same treatment as a record's.
+				const dumpRow = document.createElement('details');
+				dumpRow.open = true;
+				const dumpSummary = document.createElement('summary');
+				dumpSummary.textContent = 'the full pending-interaction event';
+				const dump = document.createElement('pre');
+				dump.className = 'dump';
+				dump.textContent = dumpEvent(pending);
+				dumpRow.append(dumpSummary, dump);
+				card.append(dumpRow);
+				console.log('[intercept event]', pending);
+
+				if (request.kind === 'prompt') {
+					const input = document.createElement('input');
+					input.type = 'text';
+					input.value = request.defaultValue ?? '';
+					const ok = document.createElement('button');
+					ok.type = 'button';
+					ok.textContent = '[OK]';
+					const cancelAnswer = document.createElement('button');
+					cancelAnswer.type = 'button';
+					cancelAnswer.textContent = '[Cancel]';
+					ok.addEventListener('click', () => {
+						answer(card, pending, input.value);
+					});
+					cancelAnswer.addEventListener('click', () => {
+						answer(card, pending, null);
+					});
+					card.append(input, ok, cancelAnswer);
+					input.focus();
+				} else if (request.kind === 'confirm') {
+					const ok = document.createElement('button');
+					ok.type = 'button';
+					ok.textContent = '[OK]';
+					const no = document.createElement('button');
+					no.type = 'button';
+					no.textContent = '[Cancel]';
+					ok.addEventListener('click', () => {
+						answer(card, pending, true);
+					});
+					no.addEventListener('click', () => {
+						answer(card, pending, false);
+					});
+					card.append(ok, no);
+				} else {
+					const ok = document.createElement('button');
+					ok.type = 'button';
+					ok.textContent = '[OK]';
+					// alert's answer is ignored — any answer releases it, and the
+					// record it emits carries undefined.
+					ok.addEventListener('click', () => {
+						answer(card, pending, undefined);
+					});
+					card.append(ok);
+				}
+
+				card.append(held);
+				cardsEl.appendChild(card);
+			}
+
+			function answer(card, pending, value) {
+				try {
+					pending.respond(value);
+					card.classList.add('stale');
+					card.querySelector('h2').textContent =
+						`step ${pending.step} · ${pending.request.kind} — answered`;
+				} catch (error) {
+					// A wrong-kind answer is a dev defect at the consumer: the run
+					// stays suspended and the ask can be answered again.
+					const problem = document.createElement('div');
+					problem.className = 'held';
+					problem.textContent = `rejected: ${error.message}`;
+					card.append(problem);
+				}
+			}
+
+			function describeSettlement(settlement) {
+				const lines = [`ended: ${settlement.ended}`];
+				if (settlement.ended !== 'error') {
+					return lines.join('\n');
+				}
+				const { error } = settlement;
+				lines.push(
+					`reason: ${error.reason}`,
+					`name: ${error.name}`,
+					`message: ${error.message}`,
+				);
+				if (error.cause !== undefined) {
+					lines.push(`cause: ${error.cause}`);
+				}
+				if (error.iterationCount !== undefined) {
+					lines.push(`iterationCount: ${error.iterationCount}`);
+				}
+				if (error.loc !== undefined) {
+					lines.push(`throw ${describeLoc(error.loc)}`);
+				}
+				if (error.trip !== undefined) {
+					const { loopIndex, loc } = error.trip;
+					lines.push(
+						`trip.loopIndex: ${loopIndex}`,
+						`trip.${describeLoc(loc)}`,
+					);
+				}
+				return lines.join('\n');
+			}
+
+			/** The readable settlement, with its full data folded out beneath. */
+			function renderSettlement(settlement) {
+				settlementEl.textContent = '';
+				const summary = document.createElement('div');
+				summary.textContent = describeSettlement(settlement);
+				const dumpRow = document.createElement('details');
+				dumpRow.open = true;
+				const dumpSummary = document.createElement('summary');
+				dumpSummary.textContent = 'the full settlement';
+				const dump = document.createElement('pre');
+				dump.className = 'dump';
+				dump.textContent = dumpEvent(settlement);
+				dumpRow.append(dumpSummary, dump);
+				settlementEl.append(summary, dumpRow);
+				console.log('[intercept settlement]', settlement);
+			}
+
+			let iterator = null;
+
+			runBtn.addEventListener('click', async () => {
+				const axis = axisEl.value;
+				const facts = embody(codeEl.value, {
+					type: axis === 'module' ? 'module' : 'script',
+				}).facts;
+				const cap = readCap();
+				const spec =
+					cap === undefined
+						? { facts, execution: axis }
+						: { facts, execution: axis, iterations: cap };
+
+				eventsEl.innerHTML = '';
+				cardsEl.innerHTML = '';
+				settlementEl.textContent = `applicability: ${intercept.applicability(spec)}\nrunning…`;
+
+				const answered = intercept.main(spec);
+				if ('refused' in answered) {
+					settlementEl.textContent = `refused: ${answered.reason}`;
+					return;
+				}
+
+				runBtn.disabled = true;
+				cancelBtn.disabled = false;
+				iterator = answered[Symbol.asyncIterator]();
+				try {
+					// One pull per event: the pull IS the demand, so the program
+					// advances exactly as fast as this loop reads.
+					for (;;) {
+						const step = await iterator.next();
+						if (step.done === true) {
+							break;
+						}
+						if (step.value.kind === 'pending-interaction') {
+							renderCard(step.value);
+						} else {
+							renderRecord(step.value);
+						}
+					}
+					renderSettlement(await answered.settled);
+				} finally {
+					iterator = null;
+					runBtn.disabled = false;
+					cancelBtn.disabled = true;
+				}
+			});
+
+			cancelBtn.addEventListener('click', () => {
+				if (iterator === null) {
+					return;
+				}
+				// Ceasing to pull IS the cancellation — teardown stops the run and
+				// then releases whatever it had suspended, so a stale card's answer
+				// never reaches the program.
+				void iterator.return();
+				settlementEl.textContent = 'cancel sent — waiting for teardown…';
+			});
+		</script>
+	</body>
+</html>

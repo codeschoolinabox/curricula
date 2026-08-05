@@ -851,3 +851,63 @@ grounding, the 250 ms race being sound in the direction that matters).
   exists to add precision README compresses, and the exception is fully
   specified in README § Design commitments — so a SECOND trio amendment is not
   justified this phase. The absent sandbox is the ratified I8 split, not a gap.
+
+### I8 — the sandbox page: no AR pair, by sibling precedent
+
+The per-increment cycle puts `ar-3` after an increment's first failing test and
+`ar-4` after its self-review. I8 lands `sandbox.html` — permanent dev
+infrastructure beside the module, carrying no test cluster, so `ar-3` has no
+subject. `ar-4` is skipped on the SIBLING CEREMONY'S PRECEDENT, not on my
+judgment: run's own sandbox increment R6 ran neither
+`[read: .planning-handoffs/evaluators-run/AR-LOG.md § AR resolutions — the recorded pairs run R1…R5 and stop; R6 has no entry]`,
+and its gate was the 🔍 C1 human checkpoint, exactly as I8's is 🔍 C2. A page
+whose whole claim is what a human sees is verified by the human seeing it.
+
+### 🔍 C2 — PASSED, all five items, human verdict verbatim: "all clean!"
+
+Run at HEAD `48d807d2` against the page served by the engine's
+`vite.sandbox.config.ts` (ruling R-4, no local twin) at
+`http://localhost:5199/evaluators/intercept/sandbox.html`. The five ledger
+items, each confirmed: one console event with method, args, step 1 and a loc,
+then clean; the prompt program's card holding the stream visibly, answering
+releasing it into the record then the console event; confirm answered Cancel
+carrying `returnValue: false`; an unanswered card plus cancel settling
+`canceled` with the stale card's answer inert; and the iteration cap reporting
+`loop-cap` with the loop's own span. No behavioral defect, no cosmetic redirect
+— the commit is unblocked on the checkpoint's own terms.
+
+**One amendment the human asked for BEFORE running it, and why it was not
+cosmetic**: every event and the settlement now print their complete data under
+the readable summary line, through a serializer that survives what
+`JSON.stringify` silently drops. Two cases matter here and both are contract
+surface: a present-but-`undefined` key — which is exactly what `alert`'s
+`returnValue` IS under ruling H-3 and `exactOptionalPropertyTypes` — renders as
+`[present, undefined]` rather than vanishing, and the pending interaction's live
+`respond` renders as a function rather than being omitted. A plain dump would
+have shown H-3's modelled `undefined` as an ABSENT key, i.e. as the drop
+condition B-4's narrowing tests for. The live objects also reach the devtools
+console under `[intercept event]` / `[intercept settlement]`.
+
+### Carried forward from I8 — for Phase 2, a coordinate-space question
+
+Named here because it surfaced at the checkpoint and belongs to a consumer, not
+to this module. Every intercept event carries `loc: InterceptLoc | null`, and
+`InterceptLoc = LoopLoc = { start, end }` over 1-based-line / 0-based-column
+positions `[read: src/lib/study-lenses/lib/loop-guard/types.ts:25–38]`. embody's
+Facts address the same source by OFFSET: it parses `ranges: true` with no
+`locations` `[read: src/lib/study-lenses/embody/derive-ast.ts:54–66]`, and
+`entwined.byOffset` is indexed by source character offset while `byPath` is
+keyed by `NodePath` `[read: src/lib/study-lenses/embody/types.ts:191–215]`. So
+an event holds NO key that resolves into either index — a lens wanting the AST
+node behind an event must convert line/column to an offset against
+`facts.source` itself. That is deliberate at the contract level (README §
+Excludes bars node paths and an AST index as the tracers'), and the wrap could
+not honestly stamp a path anyway: it runs over REWRITTEN text, whose parse has
+different node identities than `facts.ast`, so a stamped path would be a
+plausible foreign key resolving to the wrong node or to nothing. The span is the
+only coordinate valid in both spaces, because it is read from the learner's
+ORIGINAL text. The OPEN question is narrower and is the human's: whether a
+future phase publishes an offset pair ALONGSIDE the line/column span, which
+would make the join direct (`byOffset[start]`) at the cost of a second
+coordinate in a ratified type. Not this phase — the trio is ratified and B-1
+chose one region-wide span encoding on purpose.
