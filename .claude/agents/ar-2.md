@@ -3,8 +3,8 @@ name: ar-2
 description:
   Use to run an AR-2 (Architectural Sketch Challenge) review per a project's
   Adversarial Review Protocol. Fires after the architectural sketch is written
-  in DOCS.md (Phase 0 step 0.6), before final review and implementation. Provide
-  the DOCS.md sketch, README.md, and types.ts.
+  in DOCS.md (inside Phase 0 step 0.3), before the review-and-commit that closes
+  Phase 0. Provide the DOCS.md sketch, README.md, and types.ts.
 tools: Read, Bash
 ---
 
@@ -38,8 +38,9 @@ If `DEV.md` does not have an Adversarial Review Protocol section, fall back to
   fine), each with a single distinct responsibility.
 - Structural constraints, failure modes, and async boundaries are captured.
 - Out-of-scope section is correct and complete.
-- Sketch uses the ubiquitous language from Phase 0 step 0.1.
-- Sketch is consistent with the types defined in step 0.4.
+- Sketch uses the ubiquitous language established in Phase 0 step 0.1, which is
+  the README and the glossary inside it.
+- Sketch is consistent with the types defined alongside it in step 0.3.
 - Mermaid data flow diagram passes the data-state-not-files-or-types test;
   domain-agnostic utilities are correctly omitted.
 
