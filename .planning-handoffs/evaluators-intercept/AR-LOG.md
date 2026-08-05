@@ -528,3 +528,48 @@ cannot survive either).
   region's ratified stance is "shape, never provenance"; a one-file divergence
   would itself be drift. A region-wide follow-up may close all three sites
   together.
+
+### I4 — `ar-3` on the map-settlement truth table (**CONSIDER** → all applied)
+
+The reviewer walked run's R3 suite block by block and confirmed NO inherited row
+was dropped in the mirroring (two consolidations are strictly stronger; the
+threw arm's split is an addition for the new loc field). Applied:
+
+- **The natural+trip row, decided deliberately rather than by accident.** The
+  committed phase-10 wording differs from run's — "a well-formed trip means the
+  guard stopped the run, ELSE a non-natural halt means the program threw" — so
+  the trip is checked FIRST, unconditioned on the natural flag, which in that
+  position is exactly the outcome-label the precedence exists to ignore. Honored
+  literally (the H-3 discipline) and PINNED; a run-shaped `!natural`-first port
+  would have diverged silently, with no row able to catch it.
+- The collision row upgraded to a full-shape `toStrictEqual` — the arm must
+  carry NO loc key for the colliding span to leak into (the committed "no second
+  span beside the trip" sentence describes this exact fixture).
+- A freeze row on the threw arm's stamped span; run's totality comment restored
+  above the cannot-produce block.
+
+### I4 — `ar-4` on the map-settlement implementation (**CONSIDER** → resolved)
+
+The reviewer diffed the file against run's by hand, re-ran every gate, and
+confirmed: totality, one narrowing site, all six freeze routes, the
+freeze-asymmetry and four-freeze-sites rulings transferring, and no `undefined`
+reaching the threw arm's loc under `exactOptionalPropertyTypes`.
+
+- **Applied — a trip-bearing halt now races a coexisting engine error** in its
+  own row (the refinement-throw corner rides a loop-cap halt as easily as a
+  threw one; an error-first branch order would have passed every prior row).
+  Also applied: the guard-style cleanup in `isLocShaped` (the two-branch shape
+  `isTripShaped` already uses), derived cast types
+  (`Partial<InterceptHalt['trip'] & object>`, run's own idiom), and
+  cross-referencing depth-policy comments at BOTH narrowing sites — the record
+  path's full leaf depth is B-4's ruling for that seam, the halt path's
+  shape-only depth is run's R3 precedent, and each file now names the other's
+  policy so the asymmetry reads as decided, not accidental (this rides the I4
+  commit as a one-comment touch to the committed I3 file — a new commit, never
+  an amend).
+- **OPEN FLAG for the human — the natural+trip corner.** The reviewer accepts
+  the literal-reading pin as faithful to the committed wording but argues the
+  tighter reading (a self-contradictory forged halt → `'unreachable-outcome'`)
+  better fits the module's never-guess posture, at zero happy-path cost. Kept as
+  pinned — inverting a pin needs human sign-off — and surfaced here for the gate
+  beside the chain-root flag.

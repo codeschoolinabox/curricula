@@ -64,7 +64,10 @@ function hasSoundBase(candidate: Record<string, unknown>): boolean {
 
 /** `null`, or a full two-position span with four finite numbers — the
  * region's guard order: object-ness before any leaf read, so a malformed
- * position drops rather than throws. */
+ * position drops rather than throws. Deliberately DEEPER than the halt
+ * path's loc check (`map-settlement.ts`, shape only): B-4's full-declared-
+ * depth ruling governs this record seam; the halt follows run's R3
+ * trip-shaped precedent — one depth per ruling, each named at its site. */
 function isLocArm(loc: unknown): boolean {
 	if (loc === null) {
 		return true;
