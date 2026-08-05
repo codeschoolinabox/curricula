@@ -2360,6 +2360,19 @@ Not documented elsewhere — kept here:
   3-group scheme with no alphabetization — that example has drifted from the
   real config; needs its own future fix, out of scope here.
 
+**`DOCS-FLAG` — what the marker means.** It records a **known documentation
+drift** that is genuinely outside the current change and **names its fix**. It
+is **not a loophole and not a code deferral**, and it **does not travel into
+source** — a `DOCS-FLAG` in a `.ts` file is a `TODO` wearing a different name.
+Use it only where the drift is real, already understood, and out of the current
+scope; anything you could fix now is not a `DOCS-FLAG`.
+
+_(This definition is the surviving content of the retired `tadpotyping` skill,
+which was the only document in the repository that defined a marker this file
+already used. Promoted under a narrow exception to the retirement rule — a
+retirement may not leave undefined a convention `DEV.md` already uses — recorded
+as R17 in `.planning-handoffs/governance-dials/AR-LOG.md`.)_
+
 ### TypeScript Strict Mode
 
 All TypeScript strict checks are enabled. Run `npm run typecheck` to verify.

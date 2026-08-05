@@ -268,6 +268,44 @@ mid-campaign and orphan `7ac0e36e`'s subject line for no semantic gain.
     mitigation is in the AR-4 brief: report on both halves, and run the loss
     lens on the recital half specifically.
 
+- **R16 — 2026-08-05. A mode that skips Phase 0 entirely does NOT exist; the
+  question is CLOSED, answered NO.** [relayed: human, choosing "Invert to CLOSED
+  — answered NO"] Increment 9's first draft recorded it as an OPEN NEED
+  discharged by the pending `retrospective` ruling; `ar-1` returned a BLOCKER on
+  both halves and the human took its counter-proposal. **The standing answer is
+  already committed** — invariant 2 plus `DEV.md § Phase 0`'s do-not-skip block,
+  both unconditional — and the retired skill was the only text in the repository
+  that said otherwise. Two reasons the draft was wrong: (i) no `ceremony` value,
+  override phrase, or ruling about `retrospective`'s artifact _ordering_ can
+  create a Phase-0 skip; **only an amendment to invariant 2 can**, so the
+  discharge condition was structurally incapable of paying; (ii) a recorded
+  "open need to skip Phase 0" is a permanent, greppable back-door of exactly the
+  kind R14 retired the skill to close. **A future ruling wanting such a mode
+  must amend a non-negotiable invariant explicitly, not add a fourth setting
+  key.** See § CLOSED — a mode that skips Phase 0 entirely does not exist.
+- **R17 — 2026-08-05. The `DOCS-FLAG` definition is PROMOTED into `DEV.md`,
+  under a narrow stated exception.** [relayed: human, choosing "Promote the
+  definition into DEV.md now"] The retirement rule stands — _a retirement may
+  record what it drops; it may not add convention_ — with one clause added:
+  **_…but it may not leave undefined a convention `DEV.md` already uses._**
+  `DEV.md` uses the marker and defines it nowhere [measured: `git grep -in
+  'DOCS-FLAG' HEAD` → one hit, `DEV.md:2358`, an _instance_, not a definition],
+  and the only definition in the repository was inside the file being deleted.
+  Retiring under the unmodified rule would have left `DEV.md` **strictly worse
+  than before this increment ran** — the one hole where the rule produced a
+  worse repo than it inherited. **Exactly one item qualifies today.** BANK-1 and
+  BANK-3 stay CANDIDATE; both genuinely would add convention.
+- **R18 — 2026-08-05. The skill is removed by `mv`, not `rm`.** [relayed: human,
+  choosing "mv to an out-of-tree path"] Destination
+  `~/tadpotyping-retired-2026-08-05`, **named in the ledger** so the
+  transcription stays auditable for as long as that copy survives. The file
+  leaves the working tree, the checker's corpus and the session skill list, and
+  still never enters history — so the DRAFT-swap precedent holds — while the
+  human keeps a byte-exact copy, which is the only real answer to the ledger's
+  acknowledged weakness. `ar-1` found the `mv` option had been offered in
+  conversation and recorded nowhere; under "a ruling is cited or it does not
+  exist", its disposition had not happened until this line.
+
 ## AR verdicts and dispositions
 
 - **2026-08-04 `ar-1` verdict: PAUSE** [relayed: ar-1]. Three contract-level
@@ -1107,24 +1145,399 @@ record and `ceremony: full` nominally fires AR-4 per text increment.
   specified in ARs that presuppose code (AR-3 needs a failing test, AR-4 an
   implementation file). Carried as an open item; do not treat it as settled.
 
+## Increment 9 — the tadpotyping retirement and its loss ledger
+
+R14 retired `.claude/skills/tadpotyping/`. The skill was **never tracked**, so
+deleting it leaves no commit, no diff, and no `git show <sha>:path` — **this
+ledger is the only record that will exist.** That is a harder case than an
+ordinary doc migration, and the sequencing below is the whole answer to it.
+
+> ⚠ **This file is NOT transitional scaffolding and is NOT deleted at campaign
+> close.**
+> [DEV.md § What goes in docs vs. plans vs. handoffs](../../DEV.md#what-goes-in-docs-vs-plans-vs-handoffs)
+> says handoff files under `.planning-handoffs/` are "deleted when their
+> migration completes" and are "never a durable source of truth" — read
+> literally, that is explicit license to delete the sole record of an
+> irreversibly deleted governance instrument. It does not apply here: this file
+> is a **ruling home** under
+> [DEV.md § Ruling provenance](../../DEV.md#ruling-provenance), discovered by
+> `git ls-files '*AR-LOG*'`, and § Increment 9 below is the only surviving
+> account of a file that has no SHA. Flagged by `ar-1` as the retirement's
+> bounded-context defect.
+
+### Why the file was not committed first
+
+**Three alternatives existed. All three are recorded, because a disposition that
+is not written did not happen** [read:
+[DEV.md § Ruling provenance](../../DEV.md#ruling-provenance) — "a ruling is
+cited or it does not exist"].
+
+- **Commit it, then delete it — REJECTED.** This campaign's binding precedent is
+  that superseded governance does not enter history: the DRAFT-file swap existed
+  precisely so the four-track draft "never enters history" [read: § AR-2 analog
+  verdict and the DRAFT set]. A void governance document recoverable by SHA
+  reads as authoritative to whoever finds it and enumerates nothing; the
+  migration rule asks for **enumeration** [read:
+  [DEV.md § Documentation migration discipline](../../DEV.md#documentation-migration-discipline)],
+  which a SHA satisfies not at all.
+- **`rm -rf` — REJECTED** [relayed: human, 2026-08-05, choosing `mv`].
+- **`mv` out of tree — CHOSEN (R18), and PENDING as of this commit.**
+  Destination `~/tadpotyping-retired-2026-08-05`, named here so the
+  transcription stays auditable for as long as that copy survives. The file will
+  leave the working tree, the checker's corpus, and the session skill list, and
+  still never enter history. **The `mv` is the human's to run and had not run
+  when this ledger was committed** [measured: `ls -la .claude/skills/` →
+  `tadpotyping` still present; `ls ~/tadpotyping-retired-2026-08-05` → no such
+  path]. The ledger lands first on purpose: committing it while the source is
+  still on disk is what makes it auditable against that source, and the removal
+  produces no diff, so nothing about it needs to ride in a commit.
+
+⚠ **"Never tracked" was an accident, not a design property, and this increment
+makes it permanent.** The DRAFT files were _built_ never to be committed — that
+was their mechanism. This skill was authored as a live, registered, loadable
+instrument in a directory where **tracking is the house norm and every one of
+its four peers got its own commit** [measured: `git ls-files .claude/skills` →
+`aran-weaving/` (+2 references), `btw/`, `fanout/`, `handoff/`; `git
+check-ignore -v` on the tadpotyping path → exit 1, so it was never ignored]. It
+was simply never staged. The "no commit, no diff, no `git show`" framing below
+describes the consequence of an oversight the campaign is electing to make
+permanent — not a property the artifact was given on purpose. (`ar-1` finding.)
+
+**The honest cost:** a ledger is a lossy transcription, and once the file is
+gone nobody can audit the transcription against its source. That is answered by
+**sequencing, not by argument** — all three controls ran while the file still
+existed: the ledger was drafted against the live file, `ar-1` reviewed the
+retirement with the live file present, and `ar-4` ran the loss lens over the
+ledger against the live file. That is the only moment at which both artifacts
+exist, and this increment is built around it. R18's out-of-tree copy is the
+fourth control, and the only one that outlives the deletion.
+
+### The ledger
+
+**BANKED** — quoted, because nothing in `DEV.md` carries it. Each is marked
+**`CANDIDATE — not promoted`**: _a retirement may record what it drops; it may
+not add convention._ Promoting any of these into `DEV.md` is a governance change
+owing its own AR, its own increment, and the human's approval. Doing it inside a
+retirement commit would be smuggling.
+
+> **R17's narrow exception, added after `ar-1`:** _…but a retirement may not
+> leave **undefined** a convention `DEV.md` already **uses**._ Writing down what
+> an already-in-use marker means is documenting an existing convention, not
+> adding one, and the rule as first stated produced the one outcome a loss
+> ledger exists to prevent — a canonical file left using a marker it defines
+> nowhere. **Exactly one item qualifies today (BANK-2);** BANK-1 and BANK-3 stay
+> CANDIDATE, unchanged, because both genuinely would add convention.
+
+**THE SOURCE SENTENCE THIS LEDGER IS COMPUTED OVER, quoted verbatim** — it is
+the passage most in need of preservation and the first draft paraphrased it
+[read: `.claude/skills/tadpotyping/SKILL.md:33-35`]:
+
+> DROPPED: Phase 0 in full (ubiquitous language, README spec, `types.ts`-first,
+> the DOCS.md architectural sketch), AR-1 through AR-5, the ZOMBIES test bar,
+> the per-directory `DOCS.md`, and the 🔍 sandbox checkpoint.
+
+⚠ **Correction, 2026-08-05 — R14 miscounted this sentence.** R14 says "5 of its
+6 DROPPED categories" and its own enumeration names five in total. **The
+sentence has FIVE top-level items**, not six: Phase 0 in full · AR-1 through
+AR-5 · the ZOMBIES test bar · the per-directory `DOCS.md` · the 🔍 sandbox
+checkpoint. The correct statement of R14's ground is: **four of the five are
+outside the `ceremony` axis entirely, and the fifth — the ARs — is only partly
+expressible, because `light` drops AR-1 through AR-4 but no value removes
+AR-5.** R14's substance is unchanged and R14 itself is not edited; the count is
+corrected here. Caught by `ar-1`, and it is this campaign's own adopted lesson
+landing on its last increment — a false claim in an append-only record, of
+exactly the kind an AR catches.
+
+- **BANK-1 — "Defer nothing" (§ 3). CANDIDATE, not promoted.** Verbatim: _"no
+  `TODO`, no `FIXME`, no 'clean this up later', no commented-out alternative
+  kept 'just in case'. **If it is worth a deferral comment, it is worth doing
+  now or worth not writing.**"_ **The loss is the application, not the
+  principle** — and the ledger must not overstate it. **`AGENTS.principal.md`**
+  carries the reasoning already [read:
+  [AGENTS.principal.md § Adversarial Review Protocol](../../AGENTS.principal.md#adversarial-review-protocol)
+  — "Deferred issues cost more than fixed ones: the context you hold now is
+  worth more than the context you'd rebuild later"], with the analog at
+  [AGENTS.md § Adversarial Review Protocol](../../AGENTS.md#adversarial-review-protocol);
+  both apply it to **review findings**. _(An earlier revision of this bullet
+  said `DEV.md` carries it and then evidenced `AGENTS.principal.md`. The quote
+  was real; the file name was wrong.)_ What no file carries is the rule against
+  writing the marker in the first place: `DEV.md` **detects** leftover markers
+  at a gate but never forbids authoring them [measured: `grep -n 'TODO\|FIXME'
+  DEV.md` → 2 hits, `:1555` using TODO approvingly and `:2185` an AR-4 detection
+  question; no prohibition].
+- **BANK-2 — the `DOCS-FLAG` paragraph (§ 3). PROMOTED to `DEV.md` (R17), the
+  only item that is.** Verbatim: _"DEV.md's `DOCS-FLAG` marker is not a
+  loophole. It records a KNOWN documentation drift that is genuinely outside the
+  current change and names its fix; it is not a code deferral, and it does not
+  travel into source."_ **The retired skill was the only document in this
+  repository that defined a marker `DEV.md` actively uses** [measured: `git grep
+  -in 'DOCS-FLAG' HEAD` → **one** hit, `DEV.md:2358`, and it is an _instance_
+  ("**DOCS-FLAG**: § 11's own example shows a different, older 3-group
+  scheme…"), not a definition; the only definition was `SKILL.md:60`. **Grep
+  `HEAD`, not the working tree** — this ledger now quotes the term itself, so
+  the working-tree count is self-polluted and will not reproduce.] Retiring it
+  under the no-promotion rule would have left `DEV.md` **strictly worse than
+  before this increment ran**: the marker used in the canonical file and defined
+  nowhere in the corpus. That is the one hole where the rule produced a worse
+  repo than it inherited, which is why R17 carves it and nothing else.
+- **BANK-3 — "no grandfathering" (§ 5). CANDIDATE, not promoted.** Verbatim:
+  _"There is NO grandfathering: surviving code does not inherit trust from
+  having been written, and 'it already works' is not evidence it was designed."_
+  [measured: `git grep -in 'grandfather' HEAD` → **0** repo-wide — again grep
+  `HEAD`, since this bullet's own quoting pollutes the working tree]. The
+  nearest live text is about _running_ ("'Should work' ≠ 'does work'"), not
+  about _design_.
+- **BANK-4 — the justification triad and the obligation to record it (§ 1, § 4).
+  CANDIDATE, not promoted.** Verbatim: _"the track for work whose **complexity,
+  deadline, or centrality** does not warrant the full cycle"_ and _"Name in the
+  body which of complexity, deadline, or centrality bought the shortcut."_
+  **Added after `ar-1` found it in none of the four buckets** [measured: `grep
+  -in 'centrality\|deadline'` over this file before the fix → 0]. It is not the
+  "build budget" frame, which is separately DROPPED below — it is the
+  **obligation to record a ground**, and the gap it leaves is real: the merged
+  design records the ceremony **value** and never **why**, while
+  `DEV.md § Work routing and ceremony`'s lead asserts that "**low ceremony is
+  earned by a strong twin**". Nothing anywhere records how a sub-maximum level
+  was earned, so that claim is currently unfalsifiable by construction. The
+  retired skill held the only such mechanism the repo ever had, crude as it was.
+
+**DROPPED, with reasons** — enumerated so the drop is not silent:
+
+- **§ 2's "ceremony for build budget."** Both negative clauses are **covered and
+  improved**: `DEV.md § ceremony` says no value removes AR-5, and
+  `§ Work routing and ceremony`'s lead says "**ceremony and `twin-doc` move
+  inversely. Low ceremony is earned by a strong twin, not by a missing one.**"
+  The _positive_ clause — that lowering ceremony buys **build budget** — is
+  genuinely absent, and its absence is **deliberate**: the merged design grounds
+  a sub-maximum ceremony in ontology § 4's twin relation, a **quality**
+  argument. "Budget" is the exact rationalization the skip-resistance rule
+  exists to catch, so banking it as a candidate would re-import the frame the
+  design chose against.
+- **The `hack:` commit prefix (§ 4).** A contradiction to drop, not a loss to
+  record: used **zero** times in the repository's entire history [measured: `git
+  log --all --format=%s | grep -c '^hack:'` → 0], while both `AGENTS*.md` state
+  a closed prefix set (`add:` / `docs:` / `fix:` / `refactor:`). Its rationale
+  sentence — "the commit record IS the audit trail" — is covered and improved by
+  `DEV.md § Who decides, and where the answers are recorded`, which names
+  **two** durable surfaces where the skill named one.
+- **The routing phrase `"tadpotyping, my call"`.** [measured: `grep -c
+  'tadpotyping' HUMANS.md` → 0] An override channel that never had human-side
+  grammar. Removing it also removes a channel that would have **competed with
+  increment 7's ceremony phrases**, which landed at `70c07a2b`.
+- **The tadpole metaphor** ("the tadpole is not thrown away — it grows up").
+  Dies with the retired `track` vocabulary. `Tadpole` and `Tadpoling` survive as
+  `cspell.json` entries under R7, which is all a dictionary entry ever asserts.
+- **The 🔍 sandbox-checkpoint waiver (§ 2). Added after `ar-4` returned a
+  BLOCKER: the first draft put this item in NO bucket at all.** It was swept
+  under "Phase 0 in full", and **that is wrong** — unlike the ZOMBIES bar and
+  the per-directory `DOCS.md`, which really are 0.3 artifacts, the 🔍 checkpoint
+  is a **Phase-1/2 step** with its own skip condition, unrelated to 0.1/0.2/0.3
+  [read:
+  [DEV.md § Sandbox Checkpoints](../../DEV.md#sandbox-checkpoints--user-observable-features)].
+  So R16 does not reach it and it needed its own line.
+  - **What is already committed, and is the standing answer:** the checkpoint is
+    a **human-held gate** — "only the human skips, and the only legitimate skip
+    is an increment with no user-visible surface, declared explicitly."
+  - **The narrow delta the skill held, disclosed rather than escalated:** it
+    allowed a waiver for work that _does_ have a user-visible surface, on
+    complexity/deadline/centrality grounds. Nothing replaces that, and — per
+    R16's reasoning — recording it as an unmet "need" would manufacture a second
+    citable back-door around a gate the human already controls. **The honest
+    statement is that the waiver is gone and the gate is unchanged**; a human
+    who wants to skip a checkpoint on a user-observable increment says so
+    directly, and it is visible in the conversation rather than licensed by a
+    skill.
+
+**COVERED — nothing banked**, each cited to its live home. Citations are
+**dual-target** where the rule binds every agent, because the retired skill
+bound every session regardless of model and a single-file citation asserts
+coverage a non-principal agent cannot find:
+
+- § 1's never-self-assign and its skip-resistance restatement —
+  `DEV.md § ceremony` ("the agent never states it and never lowers it") and
+  `DEV.md § Adversarial Review Protocol`'s skip-resistance rule.
+- § 2's BINDING list — structural: `ceremony` names which reviews fire and
+  nothing else, so the conventions were never in its scope.
+- § 3's "that is a finding for the human — say so and stop" —
+  `AGENTS.principal.md § Emergency Brake and Redirects` and
+  `AGENTS.md § Emergency Brake`. ⚠ **Imperfect, and recorded as such:** those
+  sections cover being _stuck or blocked_, while the skill's clause is
+  specifically about a **budget** that "genuinely will not stretch." Since this
+  ledger separately purges "budget" as a legitimate frame, citing a
+  budget-contingent sentence as covered by a budget-agnostic mechanism sits in
+  mild tension. Disclosed rather than smoothed over (`ar-4` finding).
+- § 4's announce-each-commit and pushing-stays-with-the-human —
+  `AGENTS.principal.md` invariant 5 and § Git Policy, and `AGENTS.md`'s analog.
+
+**RESOLVED CONFLICT — not covered, and moved out of COVERED after `ar-1`:** §
+1's _"The route may be scoped to one task or named for a campaign. **Ask which
+if the human did not say**, and carry the answer into every commit body."_ The
+first draft filed this under `DEV.md § ceremony`'s "per increment or per
+campaign", which establishes only that two scopes **exist**. What an agent does
+when the human's phrase fills the value slot and leaves the scope slot empty is
+**not** answered there — and `HUMANS.md § Override grammar`'s "One thing the
+agent may ask you, **and only this**" now arguably forbids that ask. Recorded as
+a conflict this campaign created and did not resolve, not as content that
+survived.
+
+**BANKED IN ONE LINE — the authoring principle**, because whatever eventually
+answers the open items below faces the same question: § 0's _"This skill is the
+ceremony delta ONLY. Everything in DEV.md § Codebase Conventions binds
+unchanged, and this file does not restate it."_ CANDIDATE, not promoted.
+
+### CLOSED — a mode that skips Phase 0 entirely does NOT exist (R16)
+
+⚠ **An earlier draft of this section recorded this as an OPEN NEED, discharged
+by the pending `retrospective` ruling. Both halves of that were wrong**, and
+`ar-1` returned a BLOCKER on it. Corrected in place rather than dropped, because
+the reasoning matters more than the conclusion.
+
+**The standing answer is NO, and it is already committed.** Phase 0 is
+**non-negotiable invariant 2**, and the invariant preamble is unconditional
+[read:
+[AGENTS.principal.md § Non-Negotiable Invariants](../../AGENTS.principal.md#non-negotiable-invariants)
+— "These apply unconditionally, regardless of task size, time pressure, or user
+encouragement. They cannot be overridden by momentum"], reinforced at [read:
+[DEV.md § Phase 0](../../DEV.md#phase-0-documentation-specification-before-any-code)
+— "Agents routinely skip this phase under time pressure or when a task feels
+small. Do not skip it. … Phase 0 is not overhead — it is the work."]. **The
+retired skill was the only text in this repository that said otherwise, and it
+is retired with it.**
+
+**Why the first draft's discharge condition was structurally incapable of
+paying.** It tied the need to the ruling on invariant 2's Phase-0 _ordering_ —
+the one that unblocks `retrospective`. But no `ceremony` value, no
+`HUMANS.md § Override grammar` phrase, and no ruling about artifact ordering can
+create a Phase-0-skipping mode. **Only an amendment to invariant 2 itself can.**
+The block asked a question about the invariant's _ordering_ to answer a question
+about the invariant's _existence_ — R3's silent-rot hazard one layer deeper than
+the draft saw.
+
+**And a recorded "open need to skip Phase 0" is a citable back-door.** After
+this increment, `git grep` would have returned a campaign ruling home stating
+the capability is an unmet need awaiting a ruling. R14's own third ground was
+that a rewrite "would have shipped an unblocked back-door around a deliberately
+blocked door" — the draft re-opened that door in prose instead of in a skill
+file, and under the skip-resistance rule it is exactly the citation an agent
+under budget pressure would find and lean on.
+
+**The honest half, kept:** the three mechanisms a reader might reach for do not
+provide this, so nobody should go looking. `ceremony` names **which reviews
+fire** and nothing else — every row of its table is an AR, and `light` does not
+touch 0.1, 0.2 or 0.3. `retrospective` is ⛔ blocked, and even unblocked it
+covers **deferral, not skipping** — it would leave types and tests standing,
+where the skill dropped all of Phase 0. (⚠ R14's second ground told the human
+that "skipping Phase 0 outright is what `retrospective` is blocked for"; that is
+**withdrawn** — the real conflict was always with invariant 2. R14 stands on
+grounds 1 and 3, both of which verify measured.) And `trivial fix mode`
+explicitly refuses to be this [read: `HUMANS.md § Override grammar` — "Phase 0
+is **not bypassed** — Phase 0 governs _new module establishment work_"].
+
+**If a future ruling wants such a mode, it must amend a non-negotiable invariant
+explicitly** — not add a fourth setting key, and not arrive as a skill.
+
+### STILL OPEN — two gaps the retirement leaves, both with owners
+
+Unlike the item above, these are not answered by anything committed.
+
+1. **No re-review trigger for work that landed at low ceremony and became
+   load-bearing.** The retired skill's § 5 carried one [read:
+   `.claude/skills/tadpotyping/SKILL.md:88-89` — "Raise the promotion to the
+   human when the code starts carrying weight the route never priced in."], and
+   its mechanism ("promotion to any other track costs that track's Phase 0 in
+   full") **dies with `track`** — the merged design has no promotion concept at
+   all, because ceremony attaches to an increment or a campaign and never to
+   code. **The design already has the right shape for this on a neighboring
+   axis:** the `## Epistemology` block's third field is "what would falsify that
+   delegation — the condition under which this module starts owing its own
+   twin." There is no ceremony counterpart. **Owner: the next campaign that
+   touches `DEV.md § ceremony`.** Either build the counterpart or record that
+   the design refuses it by construction; silence is what this entry exists to
+   prevent (`ar-1` finding).
+2. **No mechanism records the GROUND for a sub-maximum ceremony level** — see
+   BANK-4. `DEV.md § Work routing and ceremony` asserts that low ceremony "is
+   **earned** by a strong twin", and nothing anywhere records how any given
+   level was earned, so the claim is unfalsifiable by construction. **Owner: the
+   same.**
+
+⚠ **Both entries are written with owners and triggers deliberately.** A campaign
+at close has no successor by default, and "the next campaign should take this
+up" is the same construction as this file's own recorded miss — _an obligation
+written into the record is not discharged by being written_ (`ar-1` CP-5).
+
+### Records carried in from increment 8
+
+Raised by `ar-4` as concern 7 — that two design-affecting calls were made with
+no citable record. Both are recorded here rather than left in a commit body
+alone:
+
+- **Increment 7's `ar-4` concern 1 is DISCHARGED at `c35ebe5a`.** It found the
+  level-versus-per-review-opt-out interaction rules freshly authored in
+  `HUMANS.md` with no `DEV.md` anchor — new normative content in the human's
+  operating manual, which that file's own lesson-routing table assigns to
+  `DEV.md`. They now live in `DEV.md § ceremony`; `HUMANS.md` keeps the human's
+  half and points in.
+- **A plan deviation, taken deliberately.** The approved plan classified the
+  missing AR-5 handoff floor on `§ AR-5`'s Trigger line as _record-only, do not
+  fix_, reasoning that it was "a third `DEV.md` passage." **That reasoning was
+  factually wrong** — Trigger and Skip are the same sentence and were already
+  under edit in the same hunk — so it was fixed instead, quoting the clause
+  verbatim from `§ ceremony`'s existing floor. `ar-4` verified the quote and
+  judged the deviation justified rather than scope creep.
+
 ## Standing hazards
 
-- ⚠ **SUPERSEDED by R14, 2026-08-05 — "until rewritten" is wrong; it is
-  RETIRED.** The human ruled deletion over rewrite. This bullet is rewritten in
-  full at increment 9, together with the loss ledger and two corrections it owes
-  — one of its charges below is **false as stated**. Until that lands, read this
-  bullet as the record of why the skill was a hazard, not as a plan for it.
-- **⛔ `.claude/skills/tadpotyping/` — every claim in it is VOID until
-  rewritten.** Untracked but **registered and loadable in every session**, and
-  inside `check:governance`'s corpus despite being untracked. It drops **AR-1
-  through AR-5, all of Phase 0, the ZOMBIES bar, per-directory `DOCS.md`, and
-  the 🔍 checkpoint** — contradicting the design's own separation of ceremony
-  from twinning. It routes on `"tadpotyping, my call"`, a phrase absent from
-  `HUMANS.md`. It also disagrees with the docs on its own name — the docs say
-  **Tadpoling**, the skill says **Tadpotyping**. _(An earlier revision of this
-  bullet added "and its own name is unspelled in `cspell.json`". That was true
-  when written and false by the time it was committed — `103ad736` added both
-  spellings at `cspell.json:43-44`. Corrected here rather than left to rot.)_
+- **🪦 `.claude/skills/tadpotyping/` — RETIRED at increment 9 (R14).** ⚠ **The
+  removal itself is PENDING and is the human's** — `mv` to
+  `~/tadpotyping-retired-2026-08-05` per R18; the agent is hard-blocked from it
+  by the global destructive-FS hook, and `git rm` refuses an untracked path.
+  **Until that runs, the skill is still on disk and still loadable in every
+  session, and every claim in it is still VOID.** The ledger landed first and
+  deliberately: it was reviewed against the live file by both `ar-1` and `ar-4`,
+  which is the only moment both artifacts exist. It was never tracked, so the
+  removal will produce no commit and no recoverable SHA; its content and every
+  judgement below are banked in § Increment 9 — the tadpotyping retirement and
+  its loss ledger. **What this bullet claimed while the skill was live, kept as
+  the record of why it was a hazard:** every claim in it was VOID; it was
+  untracked but **registered and loadable in every session**, and inside
+  `check:governance`'s corpus despite being untracked; it dropped **AR-1 through
+  AR-5, all of Phase 0, the ZOMBIES bar, per-directory `DOCS.md`, and the 🔍
+  checkpoint** — **contradicting the design's own separation of ceremony from
+  twinning**; and it routed on `"tadpotyping, my call"`, a phrase absent from
+  `HUMANS.md`. Those were true and are now moot. _(An earlier revision added
+  "and its own name is unspelled in `cspell.json`". That was true when written
+  and false by the time it was committed — `103ad736` added both spellings at
+  `cspell.json:43-44`. Corrected here rather than left to rot.)_ ⚠ **The
+  separation-of-concerns clause was itself dropped by increment 9's first draft
+  and restored after `ar-4` caught it** — it is framed in the campaign's
+  surviving concepts, not in retired `track` vocabulary, so losing it would have
+  been a silent loss of the sharpest critique this bullet ever made.
+  - ⚠ **Correction, 2026-08-05 (increment 9) — the name disagreement never
+    existed.** This bullet claimed the skill "disagrees with the docs on its own
+    name — the docs say **Tadpoling**, the skill says **Tadpotyping**." **That
+    is false.** `Tadpoling` appears in exactly two places repo-wide,
+    `cspell.json:42` and this file, and **no tracked governance file names this
+    track at all** [measured: `git grep -in 'Tadpoling'` → `cspell.json:42` plus
+    this file's own lines]. There were never two names in the docs — there was
+    one name in an untracked skill, plus a dictionary entry left behind by the
+    superseded four-track model and deliberately kept under R7. The charge was
+    manufactured from a `cspell` entry read as a doctrinal claim, which is
+    exactly what R7 says a dictionary entry is not: "a dictionary entry asserts
+    only that a word is spelled correctly, never that the concept is live."
+  - ⚠ **Correction, 2026-08-05 (increment 9) — "inside the corpus" was read as
+    "deleting it would break the checker." It does not.** Corpus membership was
+    real [read: `scripts/lib/check-governance/corpus.mjs` —
+    `CORPUS_GLOBS = ['.claude/**/*.md', 'scripts/**/*.md']`, and the walk is a
+    filesystem walk, so an untracked file is in the working corpus], but
+    membership is what made its _contents_ checked, never what made its
+    _existence_ required. Three reasons, each independently sufficient: (i)
+    `[headings]` diffs **HEAD** headings against the working corpus, and an
+    untracked file has no HEAD headings, so it can lose none; (ii) **no document
+    in any corpus linked to it**, so `[links]` lost no target; (iii) `[roster]`
+    reads `DEV.md` and `.claude/agents/ar-*.md` only. `.ls-lint.yml` carries no
+    `.claude` rule, no hook or script enumerates `.claude/skills/`, and the
+    skill was clean under both `markdownlint` and `cspell`, so it contributed
+    nothing to either count.
 - **⛔ `retrospective` work is BLOCKED** pending a human ruling on invariant 2's
   Phase-0 ordering. R1 tightened this rather than loosening it: under
   `retrospective`, steps 0.1, 0.2 and the DOCS half of 0.3 all defer, so **AR-1
