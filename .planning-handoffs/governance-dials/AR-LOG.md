@@ -1517,33 +1517,47 @@ alone:
     `.claude/skills/**` is **governance surface**, which "agents never edit
     without explicit human instruction in the current conversation" [read:
     [AGENTS.principal.md § Orchestrated delegation](../../AGENTS.principal.md#orchestrated-delegation)],
-    and this path was **not** among those the human authorized at plan approval.
+    and **no grant carries across conversations.**
+    - ⚠ **Second correction, same bullet — read this against § Authorisation
+      above.** A revision of this line said the path "was **not** among those
+      the human authorized at plan approval." **That contradicts §
+      Authorisation**, which records a full-governance-surface grant on
+      2026-08-04 naming `.claude/skills/**` explicitly, and it is **withdrawn**.
+      The path _was_ authorized — in **that** conversation. The 2026-08-05
+      conversation that ran increments 7–9 granted a narrower set (`HUMANS.md`,
+      `.claude/agents/ar-1.md`, `.claude/agents/ar-5.md`, `DEV.md`, this file),
+      and § Authorisation's own closing sentence is what decides it: **"The
+      invariant requires in-conversation instruction."** Caught by a second
+      context-free validator, which noted the first correction had recreated the
+      defect it was fixing — inside the file AR-5 reads first.
+
     Left as the human's on that ground, plus the ordinary one: an irreversible
     removal of a file with no git history is not an agent's call. **A wrong
     reason invites the next agent to check it, find it false, and act** — which
-    is exactly what the context-free validator did. **Until that runs, the skill
-    is still on disk and still loadable in every session, and every claim in it
-    is still VOID.** The ledger landed first and deliberately: it was reviewed
-    against the live file by both `ar-1` and `ar-4`, which is the only moment
-    both artifacts exist. It was never tracked, so the removal will produce no
-    commit and no recoverable SHA; its content and every judgement below are
-    banked in § Increment 9 — the tadpotyping retirement and its loss ledger.
-    **What this bullet claimed while the skill was live, kept as the record of
-    why it was a hazard:** every claim in it was VOID; it was untracked but
-    **registered and loadable in every session**, and inside
-    `check:governance`'s corpus despite being untracked; it dropped **AR-1
-    through AR-5, all of Phase 0, the ZOMBIES bar, per-directory `DOCS.md`, and
-    the 🔍 checkpoint** — **contradicting the design's own separation of
-    ceremony from twinning**; and it routed on `"tadpotyping, my call"`, a
-    phrase absent from `HUMANS.md`. Those were true and are now moot. _(An
-    earlier revision added "and its own name is unspelled in `cspell.json`".
-    That was true when written and false by the time it was committed —
-    `103ad736` added both spellings at `cspell.json:43-44`. Corrected here
-    rather than left to rot.)_ ⚠ **The separation-of-concerns clause was itself
-    dropped by increment 9's first draft and restored after `ar-4` caught it** —
-    it is framed in the campaign's surviving concepts, not in retired `track`
-    vocabulary, so losing it would have been a silent loss of the sharpest
-    critique this bullet ever made.
+    a validator did to the first revision, and then did again to the second.
+    **Until the `mv` runs, the skill is still on disk and still loadable in
+    every session, and every claim in it is still VOID.** The ledger landed
+    first and deliberately: it was reviewed against the live file by both `ar-1`
+    and `ar-4`, which is the only moment both artifacts exist. It was never
+    tracked, so the removal will produce no commit and no recoverable SHA; its
+    content and every judgement below are banked in § Increment 9 — the
+    tadpotyping retirement and its loss ledger. **What this bullet claimed while
+    the skill was live, kept as the record of why it was a hazard:** every claim
+    in it was VOID; it was untracked but **registered and loadable in every
+    session**, and inside `check:governance`'s corpus despite being untracked;
+    it dropped **AR-1 through AR-5, all of Phase 0, the ZOMBIES bar,
+    per-directory `DOCS.md`, and the 🔍 checkpoint** — **contradicting the
+    design's own separation of ceremony from twinning**; and it routed on
+    `"tadpotyping, my call"`, a phrase absent from `HUMANS.md`. Those were true
+    and are now moot. _(An earlier revision added "and its own name is unspelled
+    in `cspell.json`". That was true when written and false by the time it was
+    committed — `103ad736` added both spellings at `cspell.json:43-44`.
+    Corrected here rather than left to rot.)_ ⚠ **The separation-of-concerns
+    clause was itself dropped by increment 9's first draft and restored after
+    `ar-4` caught it** — it is framed in the campaign's surviving concepts, not
+    in retired `track` vocabulary, so losing it would have been a silent loss of
+    the sharpest critique this bullet ever made.
+
   - ⚠ **Correction, 2026-08-05 (increment 9) — the name disagreement never
     existed.** This bullet claimed the skill "disagrees with the docs on its own
     name — the docs say **Tadpoling**, the skill says **Tadpotyping**." **That
@@ -1570,6 +1584,7 @@ alone:
     `.claude` rule, no hook or script enumerates `.claude/skills/`, and the
     skill was clean under both `markdownlint` and `cspell`, so it contributed
     nothing to either count.
+
 - **⛔ `retrospective` work is BLOCKED** pending a human ruling on invariant 2's
   Phase-0 ordering. R1 tightened this rather than loosening it: under
   `retrospective`, steps 0.1, 0.2 and the DOCS half of 0.3 all defer, so **AR-1
