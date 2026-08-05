@@ -201,6 +201,24 @@ describe('validate', () => {
 		});
 	});
 
+	describe('a default parameter reading a name the body rebinds', () => {
+		it("the parameter's own reference is the one that escapes", () => {
+			const violations = validate(
+				parseFacts('function f(a = document) { let document = 1; }'),
+			);
+			expect(violations[2].location).toEqual({ start: 15, end: 23 });
+		});
+
+		it('the escape is ruled on by the vocabulary, not the grammar', () => {
+			const violations = validate(
+				parseFacts('function f(a = document) { let document = 1; }'),
+			);
+			expect(violations[2].message).toBe(
+				"'document' is not available at this language level",
+			);
+		});
+	});
+
 	describe('a name bound only inside a function body', () => {
 		it('an outer reference to it still escapes → two violations', () => {
 			expect(
