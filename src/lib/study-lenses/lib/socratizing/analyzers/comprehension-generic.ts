@@ -77,11 +77,20 @@ function programPaths(
 	const hasBranching =
 		collectNodes(
 			ast,
+			// Every form `trap.ts`'s STATEMENT_LABELS treats as control flow, plus
+			// the ternary — the engine analyzes whatever parsed, not only what the
+			// JeJ level teaches. `LogicalExpression` is deliberately absent: it
+			// short-circuits a value rather than forking a statement. `switch` and
+			// `try` fork too and are absent; that is an open question, not a
+			// settled exclusion.
 			new Set([
 				'IfStatement',
 				'ConditionalExpression',
 				'WhileStatement',
+				'DoWhileStatement',
+				'ForStatement',
 				'ForOfStatement',
+				'ForInStatement',
 			]),
 		).length > 0;
 

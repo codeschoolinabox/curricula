@@ -81,7 +81,7 @@ export type CodeQuestionKind = 'micro-decision' | 'comprehension';
  * - `variables`: let/const declarations, reads, writes, naming
  * - `data`: literals, types, string values
  * - `operators`: arithmetic, comparison, logical, string
- * - `controlFlow`: if/else, while, for-of, ternary
+ * - `controlFlow`: if/else, while, do-while, for, for-of, for-in, ternary
  * - `functions`: method calls (JeJ has calls but no declarations)
  * - `userInteraction`: prompt, confirm, alert, console.log
  * - `reading`: holistic questions — read-aloud, program paths, audience

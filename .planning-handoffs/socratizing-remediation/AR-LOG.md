@@ -141,6 +141,25 @@ returned PAUSE. The rulings below close that PAUSE.
   tests. No evidence was found either way for the narrowing being deliberate,
   and none was asserted.
 
+- **O-4 — `switch` and `try` fork execution and are absent from the branching
+  set.** Raised by AR-4 on A3. Both create multiple paths in exactly the sense
+  `program-paths`' own context string means. They were **not** folded into R-12
+  because R-12's evidence was specific to `for` / `do...while` / `for...in`:
+  each of those is already tagged `controlFlow` by a sibling analyzer, so the
+  widening had in-module precedent to lean on. `switch` and `try` have none — no
+  analyzer tags either as control flow, and `voice-profile` counts them only
+  toward a generic statement tally. Widening to them would be the same
+  unauthorized reach that O-1 was correctly held back from. The code comment in
+  `comprehension-generic.ts` names them as an open question rather than implying
+  a settled exclusion.
+
+- **O-5 — the `controlFlow` feature tag is wider than its doc line, still.**
+  Also from AR-4 on A3. `easter-egg.ts`'s `labeled-statement` tags
+  `feature: 'controlFlow'` for a `LabeledStatement`, and the `Feature` doc has
+  never mentioned labels — before or after R-12. So A3's "the doc now matches
+  the code" holds relative to `programPaths`' set, **not** relative to every use
+  of the `controlFlow` tag across the module. Pre-existing; not created by A3.
+
 - **O-2 — the Wave-2 `lib/scoping` contract Phase 0** remains at its human gate,
   untouched by this campaign.
 

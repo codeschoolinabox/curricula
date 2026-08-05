@@ -87,9 +87,57 @@ describe('comprehension generic analyzers', () => {
 			expect(results).toHaveLength(1);
 		});
 
+		it('fires on programs with a classic for loop', () => {
+			const results = analyzeProgram(
+				'for (let i = 0; i < 3; i = i + 1) { alert(i); }',
+				analyze,
+			);
+			expect(results).toHaveLength(1);
+		});
+
+		it('fires on programs with a do-while loop', () => {
+			const results = analyzeProgram(
+				'let i = 0;\ndo { i = i + 1; } while (i < 3);',
+				analyze,
+			);
+			expect(results).toHaveLength(1);
+		});
+
+		it('fires on programs with a for-in loop', () => {
+			const results = analyzeProgram(
+				'const o = { a: 1 };\nfor (const k in o) { alert(k); }',
+				analyze,
+			);
+			expect(results).toHaveLength(1);
+		});
+
+		it('fires on programs with a ternary expression', () => {
+			const results = analyzeProgram(
+				'const x = true ? 1 : 2;\nalert(x);',
+				analyze,
+			);
+			expect(results).toHaveLength(1);
+		});
+
 		it('does not fire on linear programs without branching', () => {
 			const results = analyzeProgram(
 				'const x = 5;\nconst y = 10;\nalert(x + y);',
+				analyze,
+			);
+			expect(results).toHaveLength(0);
+		});
+
+		it('does not fire when branching words appear only inside a string', () => {
+			const results = analyzeProgram(
+				'const msg = "use a for loop or a while loop here";\nalert(msg);',
+				analyze,
+			);
+			expect(results).toHaveLength(0);
+		});
+
+		it('does not fire on logical operators, which branch no statement', () => {
+			const results = analyzeProgram(
+				'const x = true && false;\nalert(x);',
 				analyze,
 			);
 			expect(results).toHaveLength(0);
