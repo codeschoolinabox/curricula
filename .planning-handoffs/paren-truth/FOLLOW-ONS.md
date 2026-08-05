@@ -171,8 +171,11 @@ embody could still absorb a fold regression silently:
   the guarantee — so this is a test gap, not the code defect an earlier handoff
   implied.
 - `language-levels/jej/tests/validate.test.ts` parses locally, so it is blind to
-  embody's fold by construction. **See F5 — that same parse call has a live
-  bug.**
+  embody's fold by construction — the settings it parses with carry no
+  `preserveParens`. **F5 is DONE** (`2f6720e1`, `d8fa1461`, `e708841c`,
+  `be722850`), so the live crash that section described is fixed; adopting the
+  published parse settings did **not** change this blindness, and it is not F2's
+  to fix.
 
 ---
 
