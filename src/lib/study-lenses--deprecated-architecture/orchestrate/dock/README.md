@@ -1,13 +1,14 @@
 # dock
 
-The omnipresent region's **run/debug controls surface**: a collapsible affordance
-container holding the type toggle (+ adjacent script-mode hint), the sandbox
-toggle, run limits, Run, Cancel, and the danger-only debugger option. The
-orchestrator drives execution (the lazy half of the embody contract); the dock
-configures the run and routes intent up. The run's **output no longer lives in the
-dock** — the two channels render in the [output panels](../output-panels/) beside
-the active surface (see [`../README.md` § The output panels](../README.md)); the
-dock keeps only the controls (run state + outcome still surface on the Run control).
+The omnipresent region's **run/debug controls surface**: a collapsible
+affordance container holding the type toggle (+ adjacent script-mode hint), the
+sandbox toggle, run limits, Run, Cancel, and the danger-only debugger option.
+The orchestrator drives execution (the lazy half of the embody contract); the
+dock configures the run and routes intent up. The run's **output no longer lives
+in the dock** — the two channels render in the
+[output panels](../output-panels/) beside the active surface (see
+[`../README.md` § The output panels](../README.md)); the dock keeps only the
+controls (run state + outcome still surface on the Run control).
 
 The canonical design lives at [`../README.md` § The dock](../README.md) and
 [`../README.md` § The omnipresent region](../README.md) — those sections are the
@@ -54,10 +55,10 @@ Props (full contract in [`./index.tsx`](./index.tsx) JSDoc):
 Full list in [`../README.md` § Data attributes](../README.md). The dock's roots:
 `data-orchestrator-dock`, `-dock-collapsed`, `-dock-type-toggle`,
 `-dock-type-hint`, `-dock-sandbox-toggle`, `-dock-limit`, `-dock-debugger`,
-`-dock-run`, `-dock-run-state`, `-dock-outcome`. Value-bearing attributes carry the
-current value; tests anchor on attribute + value, never label text. (The output
-channels' `-dock-channel` selector retired when the channels left the dock for the
-output panels — now `data-orchestrator-output-channel`, see
+`-dock-run`, `-dock-run-state`, `-dock-outcome`. Value-bearing attributes carry
+the current value; tests anchor on attribute + value, never label text. (The
+output channels' `-dock-channel` selector retired when the channels left the
+dock for the output panels — now `data-orchestrator-output-channel`, see
 [`../output-panels/`](../output-panels/).)
 
 ## Durable rules

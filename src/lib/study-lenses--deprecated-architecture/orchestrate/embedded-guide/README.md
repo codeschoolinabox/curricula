@@ -26,8 +26,8 @@ embedded-guide/
 renders authored documentation of the instrument and a reveal affordance. It
 reads no embodiment, takes no program input, and holds no orchestrator state —
 unlike the dock (run/debug) and the generative lenses (program-dependent), the
-guide is the same regardless of the snippet. Its content is real authored
-prose (drawn from the instrument's own design — stations, reveal rules, toggles,
+guide is the same regardless of the snippet. Its content is real authored prose
+(drawn from the instrument's own design — stations, reveal rules, toggles,
 limits, danger), not a mock.
 
 Props (full contract in [`./index.tsx`](./index.tsx) JSDoc):

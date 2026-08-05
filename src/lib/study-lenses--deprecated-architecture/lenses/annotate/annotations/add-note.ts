@@ -1,4 +1,9 @@
-import type { AnnotationSet, AnnotationsByView, Note, ViewMode } from '../types.js';
+import type {
+	AnnotationSet,
+	AnnotationsByView,
+	Note,
+	ViewMode,
+} from '../types.js';
 import replaceView from './replace-view.js';
 
 /**

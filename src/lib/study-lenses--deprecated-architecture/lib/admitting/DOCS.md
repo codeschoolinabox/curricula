@@ -73,12 +73,12 @@ flowchart TD
   the source string is re-validated **only** when no verdict is recorded. For a
   **real-composition** snippet — where `source.code` _is_ the validated source —
   the recorded verdict and a fresh `validate(source.code)` agree by construction
-  (same gate, same source). For **canned scenario fixtures** the two can diverge:
-  the sentinel `source.code` is not the code the recorded verdict was computed
-  from. `embody('VALIDATION_FAIL')` records `isJeJ: false` (a canned violation),
-  yet re-validating its `'VALIDATION_FAIL'` sentinel gives `ok: true` (a bare
-  undeclared identifier is not a JEJ violation) — so only the recorded verdict is
-  correct, which is exactly why it is read first.
+  (same gate, same source). For **canned scenario fixtures** the two can
+  diverge: the sentinel `source.code` is not the code the recorded verdict was
+  computed from. `embody('VALIDATION_FAIL')` records `isJeJ: false` (a canned
+  violation), yet re-validating its `'VALIDATION_FAIL'` sentinel gives
+  `ok: true` (a bare undeclared identifier is not a JEJ violation) — so only the
+  recorded verdict is correct, which is exactly why it is read first.
 - **Module-type shadow.** The seam computes exactly what `status.validated` will
   carry once embody wires validation in: the re-validation arm is guarded by
   `type === 'module'`, because `status.validated` (and `validation`) are

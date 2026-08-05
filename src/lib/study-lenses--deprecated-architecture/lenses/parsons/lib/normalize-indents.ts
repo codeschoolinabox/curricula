@@ -10,7 +10,9 @@
  * - less → the level of the nearest earlier line with the same raw indent, or
  *   `-1` if none (IndentationError).
  */
-export default function normalizeIndents(rawIndents: ReadonlyArray<number>): number[] {
+export default function normalizeIndents(
+	rawIndents: ReadonlyArray<number>,
+): number[] {
 	const normalized: number[] = [];
 	const matchIndent = (index: number): number => {
 		for (let i = index - 1; i >= 0; i--) {

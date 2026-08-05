@@ -142,8 +142,13 @@ describe('guardLoops', () => {
 					const items = Array.from({ length: 1000 }, (_, index) => index);
 					const code = 'for (const n of items) { executed.push(loop1); }\n';
 					const result = guardLoops(code, max);
-					 
-					const function_ = new Function('loop1', 'items', 'executed', result.code);
+
+					const function_ = new Function(
+						'loop1',
+						'items',
+						'executed',
+						result.code,
+					);
 					expect(() => function_(0, items, executed)).toThrow(RangeError);
 					expect(executed).toEqual(expected);
 				},
@@ -157,8 +162,8 @@ describe('guardLoops', () => {
 			const result = guardLoops(code, MAX);
 
 			// Pass loop1 as a parameter initialized to 0
-			 
-			const function_ = new Function('loop1', 'x', `${result.code  }\nreturn x;`);
+
+			const function_ = new Function('loop1', 'x', `${result.code}\nreturn x;`);
 			const finalX = function_(0, 0);
 			expect(finalX).toBe(3);
 		});
@@ -167,7 +172,6 @@ describe('guardLoops', () => {
 			const code = 'while (true) {\n\tx++;\n}\n';
 			const result = guardLoops(code, 5);
 
-			 
 			const function_ = new Function('loop1', 'x', result.code);
 			expect(() => function_(0, 0)).toThrow(RangeError);
 			expect(() => function_(0, 0)).toThrow(/Loop 1 exceeded 5 iterations/);
@@ -204,12 +208,11 @@ describe('guardLoops', () => {
 			].join('\n');
 			const result = guardLoops(code, 5);
 
-			 
 			const function_ = new Function(
 				'loop1',
 				'loop2',
 				'outerCount',
-				`${result.code  }\nreturn outerCount;`,
+				`${result.code}\nreturn outerCount;`,
 			);
 			// Should complete without throwing — inner resets each outer iteration
 			expect(function_(0, 0, 0)).toBe(2);
@@ -241,7 +244,7 @@ describe('guardLoops', () => {
 				const executed: number[] = [];
 				const code = 'while (true) { executed.push(loop1); }\n';
 				const result = guardLoops(code, max);
-				 
+
 				const function_ = new Function('loop1', 'executed', result.code);
 				expect(() => function_(0, executed)).toThrow(RangeError);
 				expect(executed).toEqual(expected);
@@ -438,7 +441,7 @@ describe('guardLoops', () => {
 						const executed: number[] = [];
 						const code = 'do { executed.push(loop1); } while (true);\n';
 						const result = guardLoops(code, max);
-						 
+
 						const function_ = new Function('loop1', 'executed', result.code);
 						expect(() => function_(0, executed)).toThrow(RangeError);
 						expect(executed).toEqual(expected);
@@ -473,7 +476,7 @@ describe('guardLoops', () => {
 					const code =
 						'for (let i = 0; i < 1000; i++) { executed.push(loop1); }\n';
 					const result = guardLoops(code, max);
-					 
+
 					const function_ = new Function('loop1', 'executed', result.code);
 					expect(() => function_(0, executed)).toThrow(RangeError);
 					expect(executed).toEqual(expected);

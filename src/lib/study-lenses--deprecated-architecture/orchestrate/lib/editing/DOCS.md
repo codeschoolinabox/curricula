@@ -114,11 +114,10 @@ crashes from out-of-range diagnostics.
 
 ### LintDiagnostic
 
-Returned by linter callbacks and pushed via `setInterpretedDiagnostics`.
-Aligns with JeJ's `Violation` type. The
-`'rejection'` severity is mapped to CM's `'warning'` — JEJ-subset violations are
-teaching-boundary signals (yellow/orange gutter marker), not syntax errors.
-Parse failures (`'error'`) stay red.
+Returned by linter callbacks and pushed via `setInterpretedDiagnostics`. Aligns
+with JeJ's `Violation` type. The `'rejection'` severity is mapped to CM's
+`'warning'` — JEJ-subset violations are teaching-boundary signals (yellow/orange
+gutter marker), not syntax errors. Parse failures (`'error'`) stay red.
 
 ```js
 {

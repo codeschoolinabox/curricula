@@ -264,4 +264,3 @@ const MEMBER_ENTRIES: Readonly<Record<string, DocumentEntry>> = {
 };
 
 export default MEMBER_ENTRIES;
-

@@ -17,7 +17,10 @@ const arr = (
 });
 
 /** Every id appears in exactly one of pool / solution. */
-const partitionOk = (state: Arrangement, allIds: ReadonlyArray<string>): boolean => {
+const partitionOk = (
+	state: Arrangement,
+	allIds: ReadonlyArray<string>,
+): boolean => {
 	const seen = [...state.pool, ...state.solution.map((s) => s.id)].sort();
 	return JSON.stringify(seen) === JSON.stringify([...allIds].sort());
 };
@@ -51,7 +54,13 @@ describe('arrange', () => {
 		});
 
 		it('inserts at a middle index', () => {
-			const start = arr(['c'], [['a', 0], ['b', 0]]);
+			const start = arr(
+				['c'],
+				[
+					['a', 0],
+					['b', 0],
+				],
+			);
 			const result = placeFromPool(start, 'c', 1);
 			expect(result.solution.map((s) => s.id)).toEqual(['a', 'c', 'b']);
 			expect(result.pool).toEqual([]);
@@ -86,7 +95,14 @@ describe('arrange', () => {
 
 	describe('reorderWithinSolution', () => {
 		it('moves a placed line down, preserving its indent', () => {
-			const start = arr([], [['a', 0], ['b', 1], ['c', 2]]);
+			const start = arr(
+				[],
+				[
+					['a', 0],
+					['b', 1],
+					['c', 2],
+				],
+			);
 			const result = reorderWithinSolution(start, 'a', 2);
 			expect(result.solution).toEqual([
 				{ id: 'b', indent: 1 },
@@ -96,41 +112,79 @@ describe('arrange', () => {
 		});
 
 		it('moves a placed line up', () => {
-			const start = arr([], [['a', 0], ['b', 0], ['c', 0]]);
+			const start = arr(
+				[],
+				[
+					['a', 0],
+					['b', 0],
+					['c', 0],
+				],
+			);
 			const result = reorderWithinSolution(start, 'c', 0);
 			expect(result.solution.map((s) => s.id)).toEqual(['c', 'a', 'b']);
 		});
 
 		it('moves to a precise in-range middle index', () => {
-			const start = arr([], [['a', 0], ['b', 0], ['c', 0]]);
-			expect(reorderWithinSolution(start, 'a', 1).solution.map((s) => s.id)).toEqual([
-				'b',
-				'a',
-				'c',
-			]);
+			const start = arr(
+				[],
+				[
+					['a', 0],
+					['b', 0],
+					['c', 0],
+				],
+			);
+			expect(
+				reorderWithinSolution(start, 'a', 1).solution.map((s) => s.id),
+			).toEqual(['b', 'a', 'c']);
 		});
 
 		it('clamps the target index', () => {
-			const start = arr([], [['a', 0], ['b', 0]]);
-			expect(reorderWithinSolution(start, 'a', 99).solution.map((s) => s.id)).toEqual([
-				'b',
-				'a',
-			]);
+			const start = arr(
+				[],
+				[
+					['a', 0],
+					['b', 0],
+				],
+			);
+			expect(
+				reorderWithinSolution(start, 'a', 99).solution.map((s) => s.id),
+			).toEqual(['b', 'a']);
 		});
 
 		it('is a no-op-shaped move when reordered to its own position', () => {
-			const start = arr([], [['a', 0], ['b', 0], ['c', 0]]);
-			expect(reorderWithinSolution(start, 'b', 1).solution.map((s) => s.id)).toEqual([
-				'a',
-				'b',
-				'c',
-			]);
+			const start = arr(
+				[],
+				[
+					['a', 0],
+					['b', 0],
+					['c', 0],
+				],
+			);
+			expect(
+				reorderWithinSolution(start, 'b', 1).solution.map((s) => s.id),
+			).toEqual(['a', 'b', 'c']);
 		});
 
 		it('does not mutate the input arrangement and returns fresh line objects', () => {
-			const start = arr([], [['a', 0], ['b', 1], ['c', 2]]);
+			const start = arr(
+				[],
+				[
+					['a', 0],
+					['b', 1],
+					['c', 2],
+				],
+			);
 			const result = reorderWithinSolution(start, 'a', 2);
-			expect(start).toEqual(arr([], [['a', 0], ['b', 1], ['c', 2]]));
+			expect(start).toEqual(
+				arr(
+					[],
+					[
+						['a', 0],
+						['b', 1],
+						['c', 2],
+					],
+				),
+			);
 			expect(result.solution).not.toBe(start.solution);
 		});
 
@@ -187,7 +241,16 @@ describe('arrange', () => {
 		});
 
 		it('only changes the targeted line', () => {
-			const result = indentLine(arr([], [['a', 0], ['b', 0]]), 'b');
+			const result = indentLine(
+				arr(
+					[],
+					[
+						['a', 0],
+						['b', 0],
+					],
+				),
+				'b',
+			);
 			expect(result.solution).toEqual([
 				{ id: 'a', indent: 0 },
 				{ id: 'b', indent: 1 },

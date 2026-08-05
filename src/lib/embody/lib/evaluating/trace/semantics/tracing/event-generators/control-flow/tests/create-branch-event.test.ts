@@ -51,7 +51,10 @@ describe('createBranchEvent', () => {
 	});
 
 	it('scopeCreationStep threaded', () => {
-		const event = createBranchEvent({ branch: 'consequent', scopeCreationStep: 9 });
+		const event = createBranchEvent({
+			branch: 'consequent',
+			scopeCreationStep: 9,
+		});
 		expect(event.scopeCreationStep).toBe(9);
 	});
 

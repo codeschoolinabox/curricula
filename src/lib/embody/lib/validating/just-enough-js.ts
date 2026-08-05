@@ -406,7 +406,10 @@ function createMemberValidator(
 
 		if (computed) return true;
 
-		const property = record.property as { readonly type: string; readonly name: string };
+		const property = record.property as {
+			readonly type: string;
+			readonly name: string;
+		};
 		if (!blockedNames.has(property.name)) return true;
 
 		return createViolation(

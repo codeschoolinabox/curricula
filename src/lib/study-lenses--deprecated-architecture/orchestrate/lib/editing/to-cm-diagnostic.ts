@@ -27,7 +27,10 @@ import type { LintDiagnostic } from './types.js';
  * @param diagnostic - LintDiagnostic from a callback
  * @returns CodeMirror Diagnostic
  */
-export default function toCMDiagnostic(doc: Text, diagnostic: LintDiagnostic): Diagnostic {
+export default function toCMDiagnostic(
+	doc: Text,
+	diagnostic: LintDiagnostic,
+): Diagnostic {
 	const { line, column, endLine, endColumn, severity, message, source, entry } =
 		diagnostic;
 
@@ -75,4 +78,3 @@ export default function toCMDiagnostic(doc: Text, diagnostic: LintDiagnostic): D
 
 	return result;
 }
-

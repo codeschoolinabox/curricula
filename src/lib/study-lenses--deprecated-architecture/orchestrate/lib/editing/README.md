@@ -107,10 +107,10 @@ editor.setInterpretedDiagnostics([
 Each push **replaces** the previously pushed array (`[]` clears). The pushed
 feed is merged with the linter results by a positional supersede — an
 interpreted diagnostic replaces a structural one at the same `(line, column)`;
-everything else coexists (see `interpreted-diagnostics.ts` for the predicate
-and its non-goals fence). The method no-ops on a linter-less editor: the
-interpreted feed rides the linter pipeline, which is only installed when
-`linters` are configured.
+everything else coexists (see `interpreted-diagnostics.ts` for the predicate and
+its non-goals fence). The method no-ops on a linter-less editor: the interpreted
+feed rides the linter pipeline, which is only installed when `linters` are
+configured.
 
 `onChange` fires **synchronously** inside each `docChanged` transaction with the
 new document content as a plain string. It is the single mechanism by which

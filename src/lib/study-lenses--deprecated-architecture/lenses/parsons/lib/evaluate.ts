@@ -116,5 +116,11 @@ export default function buildEvaluation(
 	// per-Check React state consumed read-only within one render, not a
 	// LensModule-level constant (those use freezeInPlace per DOCS § Deep Freeze).
 	const correctnessMapReadonly: CorrectnessMap = correctnessMap;
-	return { correctnessMap: correctnessMapReadonly, total, correct, score, success };
+	return {
+		correctnessMap: correctnessMapReadonly,
+		total,
+		correct,
+		score,
+		success,
+	};
 }

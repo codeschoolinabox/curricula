@@ -105,7 +105,7 @@ describe('buildLocationIndex', () => {
 		it('children entries are the SAME ASTNode references as named slots', () => {
 			const index = indexFor('console.log(1);');
 			const callExpr = index.astByPath.get('$.body.0.expression')!;
-			const {callee} = (callExpr as unknown as { callee: unknown });
+			const { callee } = callExpr as unknown as { callee: unknown };
 			const argumentsArray = (callExpr as unknown as { arguments: unknown[] })
 				.arguments;
 			// children[0] === .callee, children[1] === .arguments[0]

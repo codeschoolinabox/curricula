@@ -127,9 +127,9 @@ The lens is **pure** against the embodiment (see the lenses peer's
     `not Just-Enough-JavaScript`), matched with `.includes` — NOT `.startsWith`:
     the real messages are prefixed `traceVariableLifecycle:` (embody,
     `../../embody/index.ts`) / `traceVariables:` (the tracer gate,
-    `../../embody/lib/evaluating/trace/variables/trace-variables.ts`), so
-    these tokens are interior. The text is authored by the embody/tracer tier,
-    not this lens — a tier-side wording change is a breaking change for this
+    `../../embody/lib/evaluating/trace/variables/trace-variables.ts`), so these
+    tokens are interior. The text is authored by the embody/tracer tier, not
+    this lens — a tier-side wording change is a breaking change for this
     classifier. The other shape is a structurally-branded
     `InstrumentBoundaryError` (carries an own `instrumentBoundary === true`
     discriminant and a `reason`). The boundary error is **not** on the embody
@@ -171,10 +171,10 @@ These selectors are stable; renaming or removing one is a contract change.
 ## How to navigate the code
 
 - `index.tsx` — default export: the `LensModule` with the React `Component`.
-  Owns the click-kickoff Run, the Stop/seconds controls, the three dumps, and the
-  cleanup-cancel + mounted-guard + per-run generation-token lifecycle.
-  (Cancel-on-embodiment-identity is **cut** — dev-only; see DOCS § Implementation
-  status.)
+  Owns the click-kickoff Run, the Stop/seconds controls, the three dumps, and
+  the cleanup-cancel + mounted-guard + per-run generation-token lifecycle.
+  (Cancel-on-embodiment-identity is **cut** — dev-only; see DOCS §
+  Implementation status.)
 - `core.ts` — pure-TS derivation: `formatEvent`, `deriveSettlementModel`,
   `formatAdmissionError`. No React, no async; testable in vitest without
   `jsdom`.

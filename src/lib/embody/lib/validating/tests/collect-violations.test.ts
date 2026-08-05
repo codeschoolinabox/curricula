@@ -74,14 +74,18 @@ describe('collectViolations', () => {
 		it('finds violations inside if bodies', () => {
 			const ast = parseToAst('if (true) { var x = 1; }');
 			const violations = collectViolations(ast, justEnoughJs.nodes);
-			const variableViolation = violations.find((v) => v.message.includes('var'));
+			const variableViolation = violations.find((v) =>
+				v.message.includes('var'),
+			);
 			expect(variableViolation).toBeDefined();
 		});
 
 		it('finds violations inside while loops', () => {
 			const ast = parseToAst('while (true) { var i = 0; }');
 			const violations = collectViolations(ast, justEnoughJs.nodes);
-			const variableViolation = violations.find((v) => v.message.includes('var'));
+			const variableViolation = violations.find((v) =>
+				v.message.includes('var'),
+			);
 			expect(variableViolation).toBeDefined();
 		});
 	});
@@ -155,14 +159,18 @@ describe('collectViolations', () => {
 		it('a self-constructed (missing-from-allowlist) violation gets its path', () => {
 			const ast = parseToAst('function foo() {}');
 			const violations = collectViolations(ast, justEnoughJs.nodes);
-			const function_ = violations.find((v) => v.nodeType === 'FunctionDeclaration');
+			const function_ = violations.find(
+				(v) => v.nodeType === 'FunctionDeclaration',
+			);
 			expect(function_?.nodePath).toBe('$.body.0');
 		});
 
 		it('a nested self-constructed violation gets its full path', () => {
 			const ast = parseToAst('{ function foo() {} }');
 			const violations = collectViolations(ast, justEnoughJs.nodes);
-			const function_ = violations.find((v) => v.nodeType === 'FunctionDeclaration');
+			const function_ = violations.find(
+				(v) => v.nodeType === 'FunctionDeclaration',
+			);
 			expect(function_?.nodePath).toBe('$.body.0.body.0');
 		});
 

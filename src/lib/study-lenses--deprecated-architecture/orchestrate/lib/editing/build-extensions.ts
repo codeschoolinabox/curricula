@@ -80,8 +80,9 @@ export default async function buildExtensions(
 
 					const structural = runLinterCallbacks(linterCallbacks, code);
 					const interpreted = view.state.field(interpretedDiagnosticsField);
-					return mergeDiagnostics(structural, interpreted)
-						.map((d) => toCMDiagnostic(view.state.doc, d));
+					return mergeDiagnostics(structural, interpreted).map((d) =>
+						toCMDiagnostic(view.state.doc, d),
+					);
 				},
 				{
 					needsRefresh(update) {

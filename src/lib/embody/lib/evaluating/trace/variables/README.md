@@ -21,8 +21,7 @@ notional machine; the other vocabularies are reference, not contract:
   — **canon**: the authority for the binding lifecycle and scope model. Every
   tier event must be true to it.
 - [`../semantics/tracing/types.ts`](../semantics/tracing/types.ts)
-  `BindingEvent` and
-  [`../syntax/types.ts`](../syntax/types.ts) `ScopeStep` /
+  `BindingEvent` and [`../syntax/types.ts`](../syntax/types.ts) `ScopeStep` /
   `InitializationStep` / `WriteStep` — **inspiration**: existing shapes this
   tier borrows names from, not vocabularies it must conform to.
 - [`../../../../types.ts`](../../../../types.ts) `RuntimeScopeNMEvent` /

@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import evaluateLineOrder, { type PlacedCode } from '../lib/evaluate-line-order.js';
+import evaluateLineOrder, {
+	type PlacedCode,
+} from '../lib/evaluate-line-order.js';
 
 const p = (id: string, code: string): PlacedCode => ({ id, code });
 

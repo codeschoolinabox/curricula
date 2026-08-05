@@ -19,20 +19,22 @@ cross-origin-isolated browser. It is intentionally recommender-inert
 `phase`), exactly like [`debug-props`](../debug-props/). It is **not** the
 polished prediction/quiz lens (a separate, later pedagogical surface).
 
-> **Implementation status (dev-only reframe, 2026-06-30).** This lens is dev-only
-> tracer-proof scaffolding; the pedagogical consumer lens is built fresh later.
-> **Delivered:** the pure core, the `run-trace.ts` seam, the `index.tsx` shell
-> (click-kickoff Run/Stop/seconds, the three dumps, **cleanup-cancel on unmount**,
-> and a **per-run generation token** that gates a superseded run's late callbacks),
-> the smoke page, and the real-worker `trace-debugging.browser.test.ts` (the four
-> settlement classes). **Cut** — the sketch below still describes them as the design
-> target, but a smoke-page-mounted dev harness needs neither, so they are NOT
-> implemented (sections marked **⚠️ CUT** below): the `[embodiment]`-keyed
+> **Implementation status (dev-only reframe, 2026-06-30).** This lens is
+> dev-only tracer-proof scaffolding; the pedagogical consumer lens is built
+> fresh later. **Delivered:** the pure core, the `run-trace.ts` seam, the
+> `index.tsx` shell (click-kickoff Run/Stop/seconds, the three dumps,
+> **cleanup-cancel on unmount**, and a **per-run generation token** that gates a
+> superseded run's late callbacks), the smoke page, and the real-worker
+> `trace-debugging.browser.test.ts` (the four settlement classes). **Cut** — the
+> sketch below still describes them as the design target, but a
+> smoke-page-mounted dev harness needs neither, so they are NOT implemented
+> (sections marked **⚠️ CUT** below): the `[embodiment]`-keyed
 > **cancel-on-embodiment-identity** reset effect (no same-instance identity swap
-> without the orchestrator), and the **StrictMode double-mount test** (click-kickoff
-> already makes StrictMode safe; the mounted-ref + generation token hold the
-> invariant). Registration in `LENS_REGISTRY` is likewise cut (the smoke page mounts
-> the lens directly). The future pedagogical lens will own these.
+> without the orchestrator), and the **StrictMode double-mount test**
+> (click-kickoff already makes StrictMode safe; the mounted-ref + generation
+> token hold the invariant). Registration in `LENS_REGISTRY` is likewise cut
+> (the smoke page mounts the lens directly). The future pedagogical lens will
+> own these.
 
 ## Architectural sketch
 
@@ -146,23 +148,22 @@ the parse in the wrapper leaves the seam's start thunk a plain handle-producer.
   the live instance; splitting set and reset across effects would risk gating
   every callback off. The cleanup-cancel on the discarded first mount cancels a
   handle that was never started — a no-op, since kickoff is click-only.
-- **Cancel-on-embodiment-identity.** ⚠️ **CUT (dev-only reframe — not implemented;
-  the per-run generation token + a `key={code}` remount cover the dev harness).**
-  The orchestrator mounts the lens with **no
-  `key`** (the lens-mount site,
-  [`../../orchestrate/index.tsx`](../../orchestrate/index.tsx) ~L908 —
-  `<lensModule.Component embodiment={…} config={…} />` carries no `key`), so the
-  internal debounced/flush re-embody swaps the `embodiment` prop **identity** on
-  the **same component instance** — there is no remount. (The lenses-peer DOCS's
-  "React unmounts when the snippet changes" describes the _caller's_ `key={…}`
-  remount path; the internal re-embody is distinct — lens-mode coherence pins
-  the snippet constant while minting a fresh embodiment object, so only an
-  **identity**-keyed effect catches it, not a `source.code` _value_ effect.) A
-  single effect keyed on the embodiment owns both halves: its cleanup cancels
-  the old run, its body resets the dumps to `idle`. This is a **new** pattern
-  with no exact sibling precedent — the `annotate` lens's `cancelled`-flag,
-  `source.code`-value-keyed effect is a weaker analogue, not a mirror. No
-  orphaned worker survives the swap.
+- **Cancel-on-embodiment-identity.** ⚠️ **CUT (dev-only reframe — not
+  implemented; the per-run generation token + a `key={code}` remount cover the
+  dev harness).** The orchestrator mounts the lens with **no `key`** (the
+  lens-mount site, [`../../orchestrate/index.tsx`](../../orchestrate/index.tsx)
+  ~L908 — `<lensModule.Component embodiment={…} config={…} />` carries no
+  `key`), so the internal debounced/flush re-embody swaps the `embodiment` prop
+  **identity** on the **same component instance** — there is no remount. (The
+  lenses-peer DOCS's "React unmounts when the snippet changes" describes the
+  _caller's_ `key={…}` remount path; the internal re-embody is distinct —
+  lens-mode coherence pins the snippet constant while minting a fresh embodiment
+  object, so only an **identity**-keyed effect catches it, not a `source.code`
+  _value_ effect.) A single effect keyed on the embodiment owns both halves: its
+  cleanup cancels the old run, its body resets the dumps to `idle`. This is a
+  **new** pattern with no exact sibling precedent — the `annotate` lens's
+  `cancelled`-flag, `source.code`-value-keyed effect is a weaker analogue, not a
+  mirror. No orphaned worker survives the swap.
 - **No undrained-iterable / no-hung-worker invariant.** Claiming the handle's
   async iterator imposes backpressure: an abandoned `for await` would freeze the
   worker at a parked item and leave the terminal result pending forever.
@@ -242,8 +243,8 @@ The diagram is per-mount. The orchestrator (upstream) supplies `embodiment` and
 `config`; the recommender (sibling) calls `applicableTo` (always `true`) and
 `recommend` (always `[]`). The exercise UI is the three dumps the operator
 reads; their content is per-mount, and the lens cancels its run when the lens
-unmounts (cleanup-cancel — delivered); the snippet-change identity effect is
-⚠️ cut (dev-only; see § Implementation status).
+unmounts (cleanup-cancel — delivered); the snippet-change identity effect is ⚠️
+cut (dev-only; see § Implementation status).
 
 ### Structural constraints
 
@@ -268,14 +269,14 @@ unmounts (cleanup-cancel — delivered); the snippet-change identity effect is
 - **Click-kickoff, not effect-kickoff** — the run starts on an interaction,
   never a mount effect (StrictMode double-fire safety).
 - **Cancel on unmount** (the cleanup-cancel — delivered; ⚠️ the on-embodiment-
-  identity-change half is **CUT**, dev-only), with a mounted-guard ref + a per-run
-  generation token; idempotent cancel; the no-undrained-iterable invariant — the drain is
-  **total** (a `try/finally` whose **guarded** cancel settles on every path and
-  catches callback throws, so the seam's `done` resolves always and never
-  rejects).
+  identity-change half is **CUT**, dev-only), with a mounted-guard ref + a
+  per-run generation token; idempotent cancel; the no-undrained-iterable
+  invariant — the drain is **total** (a `try/finally` whose **guarded** cancel
+  settles on every path and catches callback throws, so the seam's `done`
+  resolves always and never rejects).
 - ⚠️ **CUT (dev-only reframe — test not written; click-kickoff makes StrictMode
-  safe and the mounted-ref + generation token hold the invariant).**
-  **A StrictMode double-mount test pins the mounted-guard survival** — after the
+  safe and the mounted-ref + generation token hold the invariant).** **A
+  StrictMode double-mount test pins the mounted-guard survival** — after the
   development-mode mount→unmount→mount, the live instance's ref reads `true`
   (set in one effect's body, reset in that same effect's cleanup), and the
   discarded first mount's cleanup-cancel is a no-op (no handle, since kickoff is

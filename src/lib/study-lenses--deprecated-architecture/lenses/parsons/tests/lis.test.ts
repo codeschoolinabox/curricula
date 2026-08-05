@@ -86,9 +86,9 @@ describe('lis', () => {
 					[0, 2, 1, 3],
 					[1, 3, 2, 4, 3, 5],
 				]) {
-					expect(keptIsStrictlyIncreasing(input, bestLiseInverseIndices(input))).toBe(
-						true,
-					);
+					expect(
+						keptIsStrictlyIncreasing(input, bestLiseInverseIndices(input)),
+					).toBe(true);
 				}
 			});
 
@@ -116,8 +116,18 @@ describe('lis', () => {
 			// [0,2] here, whereas the restored _.max yields [1,2]. The
 			// higher-score-last case is included too (both impls agree there) to
 			// pin position-independence.
-			expect(bestLise([[1, 2], [0, 2]])).toEqual([1, 2]); // higher-score first
-			expect(bestLise([[0, 2], [1, 2]])).toEqual([1, 2]); // higher-score last
+			expect(
+				bestLise([
+					[1, 2],
+					[0, 2],
+				]),
+			).toEqual([1, 2]); // higher-score first
+			expect(
+				bestLise([
+					[0, 2],
+					[1, 2],
+				]),
+			).toEqual([1, 2]); // higher-score last
 		});
 
 		it('prefers the longer-scoring run [0,1,2] over a singleton [5]', () => {

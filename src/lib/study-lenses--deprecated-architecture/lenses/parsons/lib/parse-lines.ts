@@ -20,7 +20,12 @@ export default function parseLines(source: string): {
 } {
 	// `rawIndent` is only meaningful for solution lines (distractors get -1
 	// regardless); it is consumed by normalizeIndents over the solution subset.
-	type Raw = { id: string; code: string; distractor: boolean; rawIndent: number };
+	type Raw = {
+		id: string;
+		code: string;
+		distractor: boolean;
+		rawIndent: number;
+	};
 	const kept: Raw[] = [];
 	let idCounter = 0;
 	for (const rawLine of source.split('\n')) {

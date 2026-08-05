@@ -17,10 +17,14 @@
 import React from 'react';
 import type { ComponentType } from 'react';
 
-import type { LensConfig, LensModule, LensProps as LensProperties, Snippet } from '../types.js';
+import type {
+	LensConfig,
+	LensModule,
+	LensProps as LensProperties,
+	Snippet,
+} from '../types.js';
 
 import deriveDisplayTree from './core.js';
-
 
 const DebugPropertiesComponent: ComponentType<LensProperties> =
 	function DebugPropertiesComponent_({ embodiment, config }) {
@@ -53,7 +57,9 @@ const debugPropertiesLens: LensModule = Object.freeze({
 		// values (TypeScript prevents at the call site).
 		return Object.freeze({ ...overrides }) as LensConfig;
 	},
-	applicableTo: function debugPropertiesApplicableTo(_embodiment: Snippet): boolean {
+	applicableTo: function debugPropertiesApplicableTo(
+		_embodiment: Snippet,
+	): boolean {
 		return true;
 	},
 	recommend: function debugPropertiesRecommend(_embodiment: Snippet) {

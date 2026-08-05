@@ -615,7 +615,10 @@ type NMConfig = Readonly<{
 	/** Passthrough to tracer. Loop iteration limit. */
 	readonly iterations?: number;
 	/** TODO (Resolution 4): range filtering, Phase 1+ extension. */
-	readonly range?: Readonly<{ readonly start: SourceLocation; readonly end: SourceLocation }>;
+	readonly range?: Readonly<{
+		readonly start: SourceLocation;
+		readonly end: SourceLocation;
+	}>;
 
 	/**
 	 * Consumer-supplied I/O functions passed through to tracer.
@@ -623,7 +626,10 @@ type NMConfig = Readonly<{
 	 * See PLAN.md §Phase 0-A for the tracer contract.
 	 */
 	readonly io?: Readonly<{
-		readonly prompt?: (message: string, placeholder?: string) => Promise<string | null>;
+		readonly prompt?: (
+			message: string,
+			placeholder?: string,
+		) => Promise<string | null>;
 		readonly alert?: (message: string) => Promise<void>;
 		readonly confirm?: (message: string) => Promise<boolean>;
 		readonly console?: Readonly<{
@@ -632,14 +638,20 @@ type NMConfig = Readonly<{
 			readonly error?: (...arguments_: readonly unknown[]) => Promise<void>;
 			readonly info?: (...arguments_: readonly unknown[]) => Promise<void>;
 			readonly debug?: (...arguments_: readonly unknown[]) => Promise<void>;
-			readonly assert?: (condition: boolean, ...arguments_: readonly unknown[]) => Promise<void>;
+			readonly assert?: (
+				condition: boolean,
+				...arguments_: readonly unknown[]
+			) => Promise<void>;
 			readonly count?: (label?: string) => Promise<void>;
 			readonly countReset?: (label?: string) => Promise<void>;
 			readonly group?: (label?: string) => Promise<void>;
 			readonly groupCollapsed?: (label?: string) => Promise<void>;
 			readonly groupEnd?: () => Promise<void>;
 			readonly time?: (label?: string) => Promise<void>;
-			readonly timeLog?: (label?: string, ...arguments_: readonly unknown[]) => Promise<void>;
+			readonly timeLog?: (
+				label?: string,
+				...arguments_: readonly unknown[]
+			) => Promise<void>;
 			readonly timeEnd?: (label?: string) => Promise<void>;
 			readonly clear?: () => Promise<void>;
 		}>;

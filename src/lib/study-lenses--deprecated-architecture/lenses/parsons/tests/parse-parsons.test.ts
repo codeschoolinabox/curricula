@@ -102,9 +102,7 @@ describe('parse-parsons', () => {
 			});
 
 			it('normalizes nested-block indentation to relative levels', () => {
-				const result = parseLines(
-					'function f() {\n\treturn 1;\n}',
-				);
+				const result = parseLines('function f() {\n\treturn 1;\n}');
 				expect(result.solution.map((l) => l.indent)).toEqual([0, 1, 0]);
 				expect(result.solution.map((l) => l.code)).toEqual([
 					'function f() {',
@@ -273,7 +271,10 @@ describe('extractHints — block-comment hints (Inc 9)', () => {
 	it('strips an own-line indented block without leaving a phantom indent', () => {
 		const src = 'const a = 1;\n  /* note */\nconst b = 2;';
 		const { solution } = parseLines(extractHints(src).code);
-		expect(solution.map((l) => l.code)).toEqual(['const a = 1;', 'const b = 2;']);
+		expect(solution.map((l) => l.code)).toEqual([
+			'const a = 1;',
+			'const b = 2;',
+		]);
 		expect(solution.map((l) => l.indent)).toEqual([0, 0]);
 	});
 

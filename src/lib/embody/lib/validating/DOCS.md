@@ -136,10 +136,10 @@ fix suggestions.
    checking. If a node's type is not a key in the record, it's an automatic
    violation. Safer than a denylist — new JS features are blocked by default.
 
-3. **Injectable configuration.** `validateProgram` takes the `SyntaxAllowlist` as
-   an argument rather than hardcoding it. Different exercises can use different
-   subsets. `allowedGlobals` and `blockedMemberNames` are `ReadonlySet<string>`
-   for the same reason — injectable, not hardcoded.
+3. **Injectable configuration.** `validateProgram` takes the `SyntaxAllowlist`
+   as an argument rather than hardcoding it. Different exercises can use
+   different subsets. `allowedGlobals` and `blockedMemberNames` are
+   `ReadonlySet<string>` for the same reason — injectable, not hardcoded.
 
 4. **No type checking.** `.log` called on a string is a runtime error, not a
    static validation concern. We check property _names_ against a blocklist

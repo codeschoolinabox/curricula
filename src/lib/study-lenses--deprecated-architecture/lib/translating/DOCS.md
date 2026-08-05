@@ -44,20 +44,20 @@ identity; no pack).
 
 2. **Build the scope tree** (pure) — `buildScope(ast)` returns a `ScopeAnalysis`
    (the `ScopeInfo` tree). This is a **prerequisite** the descent consumes: the
-   descent threads the current `ScopeInfo` down that tree, so the tree must exist
-   first. Scope boundaries are `Program`/`BlockStatement`/`ForOfStatement`
+   descent threads the current `ScopeInfo` down that tree, so the tree must
+   exist first. Scope boundaries are `Program`/`BlockStatement`/`ForOfStatement`
    (`build-scope.ts`). Lexical shadow resolution — § Decisions D3.
 
 3. **One scope-threaded descent** (pure — the sibling's `collectAstRefinements`
    single-descent shape, sharpened to the
    `check-undeclared-globals.ts::walkForGlobals` scope-threading). A single
-   parent-aware traversal, carrying the current `ScopeInfo`, does three things in
-   one pass:
+   parent-aware traversal, carrying the current `ScopeInfo`, does three things
+   in one pass:
    - **emits keyword spans**, per keyword-role node — **identity from the node
      type**, **location from the keyword token** at the node boundary. The three
-     keywords with no owning node position (`else`, binary `in`, and the do-while
-     tail `while`) are located by the single keyword token in the node's
-     child-gap. No `.keyword` flag is read.
+     keywords with no owning node position (`else`, binary `in`, and the
+     do-while tail `while`) are located by the single keyword token in the
+     node's child-gap. No `.keyword` flag is read.
    - collects the **member-property claim-set** — the name + `[start, end)` of
      every non-computed `MemberExpression.property`.
    - collects the **identifier-reference claim-set** — every `Identifier` in
@@ -71,21 +71,21 @@ identity; no pack).
      scope — `for (const console of console)` keeps the RHS `console` a genuine
      global while the binding and body references resolve to the binding.
      Resolution is `isNameDeclared` upward from the **threaded** `ScopeInfo`,
-     **not** a positional innermost-scope lookup. `findChildScope`/`isNameDeclared`
-     are module-private in `check-undeclared-globals.ts` → export additively or
-     mirror (an AR-3 call).
+     **not** a positional innermost-scope lookup.
+     `findChildScope`/`isNameDeclared` are module-private in
+     `check-undeclared-globals.ts` → export additively or mirror (an AR-3 call).
 
 4. **Emit member + builtin spans** (pure, membership filtering) — the two
    pack-dependent triggers over the phase-3 claims: a **member** span for every
-   member-property claim whose name is a `pack.members` key (total and safe while
-   JEJ admits no user-defined properties); a **builtin** span for every
+   member-property claim whose name is a `pack.members` key (total and safe
+   while JEJ admits no user-defined properties); a **builtin** span for every
    _genuine-global_ reference claim (shadow already resolved in phase 3) whose
    name is a `pack.builtins` key. Keyword spans were already emitted in phase 3.
 
 5. **Merge + freeze** (pure, shape finalization) — concatenate the span lists,
    sort ascending by `range[0]`, deep-freeze via `@utils/freeze-in-place.js`.
-   Non-overlap is a structural consequence of the Identifier classification
-   (§ Structural constraints), so ordering is total.
+   Non-overlap is a structural consequence of the Identifier classification (§
+   Structural constraints), so ordering is total.
 
 ### Execution phases — `reversePack`
 
@@ -138,9 +138,9 @@ flowchart LR
   invariant.
 - **Pack membership is necessary but not sufficient.** Each partition carries a
   role guard (keyword: **AST node identity**, located by token offset, never
-  `.keyword`; member: `MemberExpression.property`; builtin: scope-resolved global
-  reference, label-excluded). A user token that merely shares a name is never
-  translated.
+  `.keyword`; member: `MemberExpression.property`; builtin: scope-resolved
+  global reference, label-excluded). A user token that merely shares a name is
+  never translated.
 - **Categories are pack-partition, not classifying-semantic.** The trigger keys
   on which pack map a token's text is in — NOT on `../classifying/`'s `keyword`
   category (which excludes `typeof`/`in`/`null`/`true`/`false`, all of which ARE
@@ -155,13 +155,13 @@ flowchart LR
   keyword-lexeme ranges owned by distinct keyword-role nodes (or the gap-token
   between distinct nodes — do-while owns `do` at its start _and_ a tail `while`,
   different ranges), which are never `Identifier` ranges. The value-literal
-  keywords (`true`/`false`/`null`) originate **only** from `Literal` nodes, whose
-  ranges never coincide with the `Identifier` ranges of the same words used as
-  property names (`x.null`'s `null` is an `Identifier`, a distinct occurrence).
-  No source offset is claimed by two spans, so merge-by-`range[0]` is total.
-  Unlike the superseded token-pass design, this needs **no** member-property
-  cross-reference: `console.if` cannot collide with anything because it produces
-  a `MemberExpression`, never an `IfStatement`.
+  keywords (`true`/`false`/`null`) originate **only** from `Literal` nodes,
+  whose ranges never coincide with the `Identifier` ranges of the same words
+  used as property names (`x.null`'s `null` is an `Identifier`, a distinct
+  occurrence). No source offset is claimed by two spans, so merge-by-`range[0]`
+  is total. Unlike the superseded token-pass design, this needs **no**
+  member-property cross-reference: `console.if` cannot collide with anything
+  because it produces a `MemberExpression`, never an `IfStatement`.
 - **Keyword location is token-pinned; gap keywords are bounded.** A keyword
   span's range is a keyword **token**'s `[start, end)`, never a character-scan.
   Node-boundary keywords take the token at the node's start; the three
@@ -169,10 +169,10 @@ flowchart LR
   single keyword-surface token in the node's child-gap. The gap between two
   adjacent keyword-role child nodes holds exactly one such token, and comments
   and stray `)` (from a parenthesized operand — `raw.ast` carries no
-  `ParenthesizedExpression`) are their own tokens, matched-by-text and skipped. A
-  _mis-location_ here would mis-**paint** but cannot mis-**identify** — a strictly
-  smaller failure class than the over-translation the old `.keyword` design
-  risked.
+  `ParenthesizedExpression`) are their own tokens, matched-by-text and skipped.
+  A _mis-location_ here would mis-**paint** but cannot mis-**identify** — a
+  strictly smaller failure class than the over-translation the old `.keyword`
+  design risked.
 - **Closed registry.** `LanguageCode` is a closed union;
   `Record<LanguageCode, LanguageMetadata>` is exhaustive. Pack availability (not
   registry membership) gates a language — `load-pack` returns `null` for a
@@ -238,25 +238,26 @@ per DEV.md).
   `NewExpression`→`new`; `UnaryExpression`→`typeof`; `BinaryExpression`→`in`;
   value `Literal`→`true`/`false`/`null`; and the remaining statement keywords by
   their statement nodes, except the gap-located `else` / binary `in` / do-while
-  tail `while` which have no owning node position, § Execution phases), **never**
-  because a token carries acorn's `.keyword` flag; the token stream is read only
-  to pin each keyword's `[start, end)` offset. **Why the committed D4 failed
-  (both verified):** (1) `embody`'s `raw.tokens` comes from a context-free
-  `acorn.tokenizer()` pass (`embody/index.ts` `runAcorn`), so `console.if`'s `if`
-  is tagged `[keyword:if]` — keying on `.keyword` mistranslates a property (the
-  bug that shipped three times); (2) `let` is a contextual keyword emitted as a
-  `name` token with `.keyword === undefined`, so a `.keyword` guard misses it
-  entirely. Node-authoritative identity is immune to both by construction, and
-  its failure mode is safe under-translation. It also makes contextual-keyword
-  widening (`of`, `var`, `instanceof`) need **no `.keyword`-guard re-audit** —
-  identity rides the node type, never a lexical flag — though a genuinely new
-  keyword still needs its own node→keyword identity + location rule and the
-  `KEYWORDS`/drift-guard surface change (it is not a pack-only edit). The token
-  stream is re-admitted for **location only** (comments are not tokens, and the
-  stray `)` of a parenthesized operand — `raw.ast` carries no
-  `ParenthesizedExpression`, since `runAcorn` omits `preserveParens` — are their
-  own tokens, matched-by-text and skipped) — which is why this graft deletes the
-  pure-AST alternative's fragile hand-rolled trivia/paren scanner.
+  tail `while` which have no owning node position, § Execution phases),
+  **never** because a token carries acorn's `.keyword` flag; the token stream is
+  read only to pin each keyword's `[start, end)` offset. **Why the committed D4
+  failed (both verified):** (1) `embody`'s `raw.tokens` comes from a
+  context-free `acorn.tokenizer()` pass (`embody/index.ts` `runAcorn`), so
+  `console.if`'s `if` is tagged `[keyword:if]` — keying on `.keyword`
+  mistranslates a property (the bug that shipped three times); (2) `let` is a
+  contextual keyword emitted as a `name` token with `.keyword === undefined`, so
+  a `.keyword` guard misses it entirely. Node-authoritative identity is immune
+  to both by construction, and its failure mode is safe under-translation. It
+  also makes contextual-keyword widening (`of`, `var`, `instanceof`) need **no
+  `.keyword`-guard re-audit** — identity rides the node type, never a lexical
+  flag — though a genuinely new keyword still needs its own node→keyword
+  identity + location rule and the `KEYWORDS`/drift-guard surface change (it is
+  not a pack-only edit). The token stream is re-admitted for **location only**
+  (comments are not tokens, and the stray `)` of a parenthesized operand —
+  `raw.ast` carries no `ParenthesizedExpression`, since `runAcorn` omits
+  `preserveParens` — are their own tokens, matched-by-text and skipped) — which
+  is why this graft deletes the pure-AST alternative's fragile hand-rolled
+  trivia/paren scanner.
 
 - **Anti-regression pin (never read `.keyword`; never re-parse).** `raw.tokens`
   is embody's context-free `acorn.tokenizer()` output; its `.keyword` flag is
@@ -268,10 +269,10 @@ per DEV.md).
   unreachable-in-valid-JEJ constructs carry **no live tests**, but for two
   different reasons: top-level `return`, `with`, and bare `let;` are **parse
   errors** under `sourceType: 'module'` (strict); `for…in` **parses** but is
-  rejected by the node allowlist (`just-enough-js.ts` has no `ForInStatement`). A
-  `ForInStatement` could therefore reach this module only if a caller skipped the
-  `validation.isJeJ` gate — so keeping it in the identity mapping is a defensive
-  entry, not dead code against an impossible node.
+  rejected by the node allowlist (`just-enough-js.ts` has no `ForInStatement`).
+  A `ForInStatement` could therefore reach this module only if a caller skipped
+  the `validation.isJeJ` gate — so keeping it in the identity mapping is a
+  defensive entry, not dead code against an impossible node.
 
 - **D5 — `LanguageCode` is a closed union** (AR-1 C5), ported closed from
   Legesher (no `| string`), so `Record<LanguageCode, LanguageMetadata>` stays
@@ -299,14 +300,15 @@ per DEV.md).
   token pass** (updates the committed D8). Member-property and
   identifier-reference claims are still collected in one AST descent (the
   `classify-tokens.ts` `collectAstRefinements` shape), now scope-threaded in the
-  `walkForGlobals` shape so a `for…of` iterable resolves in the parent scope. The
-  keyword phase no longer cross-references the member-property set — keyword spans
-  are emitted per keyword-role node during the same descent — so the data-flow
-  diagram carries **no** `facts → keyword` edge. The reference set explicitly
-  excludes labels (`LabeledStatement`/`BreakStatement`/`ContinueStatement`) — a
-  mandatory addition, since the mirrored `walkForGlobals` has no label case and
-  would leak a builtin-named label. `findChildScope`/`isNameDeclared` remain
-  module-private → export additively or mirror (an inc-3 AR-3 call, per D3).
+  `walkForGlobals` shape so a `for…of` iterable resolves in the parent scope.
+  The keyword phase no longer cross-references the member-property set — keyword
+  spans are emitted per keyword-role node during the same descent — so the
+  data-flow diagram carries **no** `facts → keyword` edge. The reference set
+  explicitly excludes labels
+  (`LabeledStatement`/`BreakStatement`/`ContinueStatement`) — a mandatory
+  addition, since the mirrored `walkForGlobals` has no label case and would leak
+  a builtin-named label. `findChildScope`/`isNameDeclared` remain module-private
+  → export additively or mirror (an inc-3 AR-3 call, per D3).
   `LanguagePack.language` is a self-identification tag (drift-test failure
   messages + `load-pack` sanity), read by no forward phase. Splitting
   `translate-tokens` TDD into keyword / member / builtin trigger sub-increments

@@ -3,16 +3,16 @@
 ## Why this module exists
 
 The omnipresent region's run/debug surface is a **collapsible affordance
-container** (controls only — the run output moved to the output panels), not part of
-the editor or the panel: running and
-inspecting a program is a distinct activity from authoring it or reading the
-lifecycle. Module-folder presentation keeps that surface separable from the
-orchestrator's state machine — the orchestrator decides WHAT runs and owns the
-run lifecycle; this module decides only HOW the controls and output render.
+container** (controls only — the run output moved to the output panels), not
+part of the editor or the panel: running and inspecting a program is a distinct
+activity from authoring it or reading the lifecycle. Module-folder presentation
+keeps that surface separable from the orchestrator's state machine — the
+orchestrator decides WHAT runs and owns the run lifecycle; this module decides
+only HOW the controls and output render.
 
 The locked design — the affordance set, the per-backend run-limit semantics, the
-danger-only debugger option, the selector contract —
-lives at [`../README.md` § The dock](../README.md) and
+danger-only debugger option, the selector contract — lives at
+[`../README.md` § The dock](../README.md) and
 [`../DOCS.md` § The omnipresent region](../DOCS.md). This sketch covers the
 module-internal structure only.
 
@@ -39,8 +39,8 @@ flowchart TD
 - **Owns no execution backend.** The orchestrator invokes
   `evaluation.events.{run, intercept}` on the live embodiment and feeds the dock
   `runState` / `outcome` (the accumulated channel output crosses to the **output
-  panels**, not the dock). The worker engine and the deferred danger-iframe backend
-  live behind the `EvaluateHandle` contract, off this surface entirely.
+  panels**, not the dock). The worker engine and the deferred danger-iframe
+  backend live behind the `EvaluateHandle` contract, off this surface entirely.
 - **`run-state` (transport) and `outcome` (result) are orthogonal axes.**
   `runState ∈ {idle, running, settled}`; `outcome` is the seven-way
   `EndReportOutcome`, present only when `settled`. The dock never collapses the
@@ -55,14 +55,14 @@ flowchart TD
   the danger toggle position render conditionally on `sandboxMode` /
   `dangerAvailable` (mirrors the panel's "hidden = fully removed").
 - **Collapse acts on the controls.** Collapsing hides the controls strip; the
-  Run affordance stays reachable (there is no output surface in the dock now — output
-  lives in the output panels). Exact visual treatment is a Phase-1 presentational
-  choice; tests anchor on attributes, never label text.
-- **One IoMocks builder.** The orchestrator constructs the `IoMocks` whose callbacks
-  append to the two channels' `channelOutput` state and threads it as
-  `EvaluateOptions.io`; the **output panels** render the accumulated lines (the dock
-  no longer does). For the interactive User Interface channel the mocks are **async**
-  (set a pending interaction, await the learner's answer) — see
+  Run affordance stays reachable (there is no output surface in the dock now —
+  output lives in the output panels). Exact visual treatment is a Phase-1
+  presentational choice; tests anchor on attributes, never label text.
+- **One IoMocks builder.** The orchestrator constructs the `IoMocks` whose
+  callbacks append to the two channels' `channelOutput` state and threads it as
+  `EvaluateOptions.io`; the **output panels** render the accumulated lines (the
+  dock no longer does). For the interactive User Interface channel the mocks are
+  **async** (set a pending interaction, await the learner's answer) — see
   [`../output-panels/DOCS.md`](../output-panels/DOCS.md).
 
 ## Out of scope

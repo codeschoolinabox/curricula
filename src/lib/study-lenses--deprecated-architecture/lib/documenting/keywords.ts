@@ -162,4 +162,3 @@ const KEYWORD_ENTRIES: Readonly<Record<string, DocumentEntry>> = {
 };
 
 export default KEYWORD_ENTRIES;
-

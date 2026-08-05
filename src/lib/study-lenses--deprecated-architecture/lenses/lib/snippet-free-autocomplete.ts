@@ -32,4 +32,3 @@ export default function snippetFreeAutocomplete(): Extension {
 		override: [localCompletionSource, completeFromList([...JS_KEYWORDS])],
 	});
 }
-

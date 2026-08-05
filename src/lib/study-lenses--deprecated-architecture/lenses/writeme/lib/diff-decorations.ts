@@ -71,7 +71,9 @@ function computeWriteDiffDecorations(
  *   into the editor's diff compartment, or read it off an `EditorState` via
  *   `state.field(returnedField)` to inspect the decoration set in a test.
  */
-export default function buildWriteDiffField(solution: string): StateField<DecorationSet> {
+export default function buildWriteDiffField(
+	solution: string,
+): StateField<DecorationSet> {
 	return StateField.define<DecorationSet>({
 		create(state) {
 			return computeWriteDiffDecorations(state, solution);
@@ -87,4 +89,3 @@ export default function buildWriteDiffField(solution: string): StateField<Decora
 		provide: (field) => EditorView.decorations.from(field),
 	});
 }
-

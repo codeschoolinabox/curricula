@@ -5,7 +5,9 @@
  * @remarks Restores the original `_.max(scores, s => s.score)` semantics (see
  * lis.ts file header) rather than the parsonizer `.sort()` transcription bug.
  */
-export default function bestLise(lises: ReadonlyArray<ReadonlyArray<number>>): number[] {
+export default function bestLise(
+	lises: ReadonlyArray<ReadonlyArray<number>>,
+): number[] {
 	if (lises.length === 0) return [];
 	const lis_scores = lises.map((item, index) => {
 		if (item.length <= 1) {

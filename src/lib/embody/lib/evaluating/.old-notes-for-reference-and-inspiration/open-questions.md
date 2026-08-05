@@ -31,7 +31,8 @@ phase).
   literals, no try/catch, no async). Does the absence of these simplify or
   complicate Aran's hook model in ways we should know about?
 
-<strong>How should we visually lay out and represent the notional machine?</strong>
+<strong>How should we visually lay out and represent the notional
+machine?</strong>
 
 We need a diagram that:
 
@@ -50,7 +51,8 @@ evaluation-resolution sequence visually?
 
 ## 2. Event architecture — the lighter/thinner model
 
-<strong>Can Aran support enter/exit brackets around compound expressions?</strong>
+<strong>Can Aran support enter/exit brackets around compound
+expressions?</strong>
 
 Our new event model uses lighter events in sequences:
 
@@ -90,7 +92,8 @@ desugar the expression in a way that loses the sub-expression structure?
 
 ## 3. Scope chain lookup
 
-<strong>Can Aran expose the scope chain walk as separate events per scope checked?</strong>
+<strong>Can Aran expose the scope chain walk as separate events per scope
+checked?</strong>
 
 We want:
 
@@ -182,7 +185,8 @@ breaks the binding lifecycle event sequence.
 
 ## 7. TDZ representation
 
-<strong>How does Aran represent TDZ state in the frame passed to block@declaration?</strong>
+<strong>How does Aran represent TDZ state in the frame passed to
+block@declaration?</strong>
 
 Currently we detect TDZ via `typeof value === 'symbol'` (Aran uses a Symbol as
 the deadzone marker). Is this the stable API? Could this change in future Aran
@@ -196,7 +200,8 @@ initialize/available. Is this correct?
 
 ## 8. ASTNode building
 
-<strong>Can Aran's digest callback build ASTNode objects with parent refs?</strong>
+<strong>Can Aran's digest callback build ASTNode objects with parent
+refs?</strong>
 
 Our current `instrument.ts` builds ASTNode objects during the digest callback,
 setting `.parent` by looking up a pre-built parent-info map from the ESTree AST.

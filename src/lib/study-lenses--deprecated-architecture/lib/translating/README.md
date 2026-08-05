@@ -121,10 +121,10 @@ keyword.
   declaration id, not a non-computed member property, not a label) that
   **resolves to the global** (not shadowed by a learner binding). The two
   filters are distinct: _reference classification_ excludes decl-ids, members,
-  and labels; _scope resolution_ then suppresses a genuine shadow. A **computed**
-  member property that names a global **is** a reference and does translate
-  (`x[Math]` renders `Math`); only a **non-computed** `.property` is a member.
-  Both guards are detailed in § Edge cases.
+  and labels; _scope resolution_ then suppresses a genuine shadow. A
+  **computed** member property that names a global **is** a reference and does
+  translate (`x[Math]` renders `Math`); only a **non-computed** `.property` is a
+  member. Both guards are detailed in § Edge cases.
 
 **Forward vs. reverse.** _Forward_ (`translateTokens`) reads canonical English
 and emits native spans for display. _Reverse_ (`reversePack`) inverts a pack

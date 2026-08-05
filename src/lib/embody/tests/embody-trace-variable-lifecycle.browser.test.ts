@@ -25,8 +25,9 @@ describe('embody traceVariableLifecycle (browser, real worker)', () => {
 	});
 
 	it('forwards the seconds budget: a 0.2s budget times out far under the 5s default', async () => {
-		const { settlement } = await embody('while (true) { let x = 1; }')
-			.events.evaluation.traceVariableLifecycle({ seconds: 0.2 }).result;
+		const { settlement } = await embody(
+			'while (true) { let x = 1; }',
+		).events.evaluation.traceVariableLifecycle({ seconds: 0.2 }).result;
 
 		expect(settlement.outcome).toBe('timed-out');
 		expect(settlement.engineError?.cause).toBe('timeout');

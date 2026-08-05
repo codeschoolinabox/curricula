@@ -173,4 +173,3 @@ const GLOBAL_ENTRIES: Readonly<Record<string, DocumentEntry>> = {
 };
 
 export default GLOBAL_ENTRIES;
-

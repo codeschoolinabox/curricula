@@ -40,7 +40,8 @@ describe('classifyLoadError', () => {
 		// from the cache; …" (AR-3 web-verified against wllama source).
 		it('a NotFoundError DOMException', () => {
 			expect(
-				classifyLoadError(new DOMException('entry gone', 'NotFoundError')).cause,
+				classifyLoadError(new DOMException('entry gone', 'NotFoundError'))
+					.cause,
 			).toBe('cache-evicted');
 		});
 		it('a duck-typed { name: NotFoundError } (cross-realm)', () => {
@@ -51,7 +52,9 @@ describe('classifyLoadError', () => {
 		it("wllama's real 'deleted from the cache' message", () => {
 			expect(
 				classifyLoadError(
-					new Error('Model is deleted from the cache; call ModelManager to redownload'),
+					new Error(
+						'Model is deleted from the cache; call ModelManager to redownload',
+					),
 				).cause,
 			).toBe('cache-evicted');
 		});
@@ -71,9 +74,9 @@ describe('classifyLoadError', () => {
 			).toBe('device-lost');
 		});
 		it('a message naming a lost device (gap-tolerant: "device was lost")', () => {
-			expect(classifyLoadError(new Error('the GPU device was lost')).cause).toBe(
-				'device-lost',
-			);
+			expect(
+				classifyLoadError(new Error('the GPU device was lost')).cause,
+			).toBe('device-lost');
 		});
 	});
 
@@ -128,7 +131,9 @@ describe('classifyLoadError', () => {
 
 	describe('detail — the seam-crossing hint', () => {
 		it('carries the error name + message (name: message)', () => {
-			expect(classifyLoadError(new Error('boom')).detail).toMatch(/Error: boom/);
+			expect(classifyLoadError(new Error('boom')).detail).toMatch(
+				/Error: boom/,
+			);
 		});
 		it('truncates a very long message', () => {
 			const long = 'x'.repeat(10_000);

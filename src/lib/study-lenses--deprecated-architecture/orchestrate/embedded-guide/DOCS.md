@@ -3,13 +3,12 @@
 ## Why this module exists
 
 Every other affordance in the package teaches _through_ the program — lenses,
-the panel's lifecycle display, the dock's run output. The
-embedded guide is the one **meta** surface: it teaches the **instrument** (why
-stations appear and vanish, what the toggles and limits do, what danger mode
-risks), so a learner who is confused by the environment itself has somewhere to
-look. It is orchestrator-resident and program-independent. Module-folder
-presentation keeps the authored content separable from the orchestrator's state
-machine.
+the panel's lifecycle display, the dock's run output. The embedded guide is the
+one **meta** surface: it teaches the **instrument** (why stations appear and
+vanish, what the toggles and limits do, what danger mode risks), so a learner
+who is confused by the environment itself has somewhere to look. It is
+orchestrator-resident and program-independent. Module-folder presentation keeps
+the authored content separable from the orchestrator's state machine.
 
 The locked placement and tool-kind classification live at
 [`../README.md` § The omnipresent region](../README.md) and

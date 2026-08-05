@@ -157,6 +157,10 @@ export const scriptedAdapter = (script: Record<string, 'ok' | Error>) => {
 // A small catalog double: a feasible webllm model + a CPU (wllama) model whose
 // runtime tests register or omit to drive the feasible / no-feasible branches.
 export const FAKE_CATALOG: ModelCatalog = [
-	webllmEntry({ id: 'fake-webllm-small', sizeClass: 'small', vramRequiredMB: 1000 }),
+	webllmEntry({
+		id: 'fake-webllm-small',
+		sizeClass: 'small',
+		vramRequiredMB: 1000,
+	}),
 	wllamaEntry({ id: 'fake-cpu-tiny', sizeClass: 'tiny' }),
 ];

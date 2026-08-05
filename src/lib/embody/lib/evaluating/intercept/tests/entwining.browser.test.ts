@@ -75,7 +75,7 @@ describe('AST entwining (browser, end-to-end)', () => {
 			const callPath = '$.body.0.expression';
 			const callExpr = result.ast![callPath];
 			expect(callExpr.type).toBe('CallExpression');
-			const {callee} = (callExpr as unknown as { callee: unknown });
+			const { callee } = callExpr as unknown as { callee: unknown };
 			const argumentsArray = (callExpr as unknown as { arguments: unknown[] })
 				.arguments;
 			expect(callExpr.children[0]).toBe(callee);
@@ -355,7 +355,9 @@ describe('AST entwining (browser, end-to-end)', () => {
 			const node = result.ast![consoleEvent.nodePath!];
 			expect(node.events.length).toBe(3);
 			for (let index = 1; index < node.events.length; index++) {
-				expect(node.events[index].step).toBeGreaterThan(node.events[index - 1].step);
+				expect(node.events[index].step).toBeGreaterThan(
+					node.events[index - 1].step,
+				);
 			}
 		});
 

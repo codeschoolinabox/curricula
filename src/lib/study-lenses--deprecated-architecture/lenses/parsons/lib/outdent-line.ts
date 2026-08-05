@@ -1,7 +1,10 @@
 import type { Arrangement } from '../types.js';
 
 /** Decrease a placed line's indent level by one, flooring at 0. No-op if `id` is not placed. */
-export default function outdentLine(state: Arrangement, id: string): Arrangement {
+export default function outdentLine(
+	state: Arrangement,
+	id: string,
+): Arrangement {
 	if (!state.solution.some((s) => s.id === id)) return state;
 	return {
 		pool: state.pool,

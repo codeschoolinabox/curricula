@@ -58,5 +58,5 @@ Examples:
 ## All events carry scopeCreationStep
 
 Every control flow event references the scope it belongs to via
-`scopeCreationStep`. This lets consumers correlate control flow events with their
-enclosing scope without relying on trace ordering.
+`scopeCreationStep`. This lets consumers correlate control flow events with
+their enclosing scope without relying on trace ordering.

@@ -51,7 +51,7 @@ describe('createEditor', () => {
 
 	describe('format callback', () => {
 		it('invokes callback with current content', async () => {
-			const formatSpy = vi.fn((code: string) => `${code  }!`);
+			const formatSpy = vi.fn((code: string) => `${code}!`);
 			const editor = await createEditor('OK', { format: formatSpy });
 			editor.format();
 			expect(formatSpy).toHaveBeenCalledWith('OK');
@@ -59,7 +59,7 @@ describe('createEditor', () => {
 
 		it('dispatches return value into editor buffer', async () => {
 			const editor = await createEditor('OK', {
-				format: (code: string) => `${code  }!`,
+				format: (code: string) => `${code}!`,
 			});
 			editor.format();
 			// Format runs in a microtask (async IIFE) — flush before
@@ -70,7 +70,7 @@ describe('createEditor', () => {
 
 		it('dispatches resolved value when format is async', async () => {
 			const editor = await createEditor('OK', {
-				format: async (code: string) => `${code  }!`,
+				format: async (code: string) => `${code}!`,
 			});
 			editor.format();
 			// Async format → wait for the IIFE's await + microtask drain.
@@ -200,7 +200,7 @@ describe('createEditor', () => {
 			// also dispatches changes, and onChange fires for that dispatch.
 			const onChange = vi.fn();
 			const editor = await createEditor('OK', {
-				format: (code: string) => `${code  }!`,
+				format: (code: string) => `${code}!`,
 				onChange,
 			});
 			editor.format();
@@ -228,9 +228,7 @@ describe('createEditor', () => {
 			// throws are caught at the editor boundary and surfaced via
 			// console.warn so a misbehaving onChange consumer does not
 			// destabilize CodeMirror's update cycle.
-			const warnSpy = vi
-				.spyOn(console, 'warn')
-				.mockImplementation(() => {});
+			const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 			try {
 				const editor = await createEditor('OK', {
 					onChange: () => {
