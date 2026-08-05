@@ -36,6 +36,32 @@ once there is an answer and Accept never appears over a refusal; Start over
 closes the output, keeps the prompt, and re-arms the ask; Discard raises the
 return home and leaves the refusal standing |
 
+| GEN-5 | `(this row's commit)` | `/spiralearn/sandbox/orchestrate` | load the
+page and read the control row; click Generate code; Tab from the top of the
+document to the prompt field; type a fresh line and IMMEDIATELY click Generate
+code; click Edit code; ask with a prompt and click Accept; ask and click
+Discard; open the generator and click the type toggle; open the generator and
+pick notes from the Source select | REPLAYED LIVE, NOT DEFERRED — all nine
+actions verified in real Chromium, browser console clean throughout, no
+behavioral defect. In editor mode the control row reads `Generate code` with no
+Edit code button; clicking it replaces the editor (0 editors) with the view,
+seeded with the harness program verbatim, the takes-time warning already on
+screen, Edit code now present and Generate code withdrawn; the view mounts in
+the SECOND maskable region and not the strip's (`[false, true]`, the same
+assertion shape the jsdom test carries). The flush-at-open seeds
+`let justTyped = 42;` exactly as typed, and Edit code returns it intact. Accept
+lands the candidate byte-for-byte — 158 characters in the preview, 158 read back
+out of the buffer, `identical: true` [measured: the candidate's `<pre>`
+textContent compared against the reopened seed's]. Discard leaves
+`const untouched = 1;` untouched. The type toggle closes the generator first and
+lands in the editor reading `script`; picking notes from the Source select
+replaces the generator with the lens, the editor still absent and Edit code
+still present. **One cosmetic observation, R-11's**: reaching the prompt field
+takes SIX Tab presses from the top of the document — Edit code, the type toggle,
+the level face, the strict toggle, one phase select, then the prompt. Reachable,
+so a cosmetic redirect rather than a barrier; it rolls into a later increment
+per the redirect policy, and pane-swap focus stays unspecified by R-11. |
+
 Entries append as 🔍-bearing increments land. Wave 0 carried no 🔍.
 
 **GEN-4 broke the deferral pattern deliberately, and the maintainer ruled it.**

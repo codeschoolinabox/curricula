@@ -14,19 +14,22 @@ SWAP model, EDITOR-FIRST: the editor mounts at load holding the seed program (no
 lens is named in the props, so the home base is the default); opening any lens
 from the Source select REPLACES the editor, and an Edit code button appears
 leading the control row; closing — Edit code, or the `—` none entry — brings the
-editor back with your edits intact; typing until the debounce settles re-renders
-the phases; breaking the parse bars the downstream phases with the parser's
-cause and fixing it reopens them; the type toggle re-derives immediately,
-closing any open lens first (as do level and posture changes); the level
-selector lists both levels — the built-in JEJ and the injected scaffold — and
-the closed face shows the selected level's live fit mark (each entry's own mark
-rides the `data-level-mark` attribute, not visible text, so pick a level to see
-one); under strict with a `debugger;` the masked overlay covers the content
-region and the strip goes inert and dim — the editor stays alive; the guide
-reveals its topics after the panel. The honored-focus variant (a lens open AT
-load) is prop-driven — add `lens="notes"` to the harness to see it; it is
-jsdom-pinned and was machine-replayed before this page flipped to the
-editor-first default.
+editor back with your edits intact; a Generate code button sits beside Edit code
+in editor mode only, and opens the generator as the pane's third occupant —
+seeded with the buffer exactly as typed, and left through Accept, Discard, or
+Edit code (Accept lands the candidate in the editor, everything else leaves the
+buffer untouched); typing until the debounce settles re-renders the phases;
+breaking the parse bars the downstream phases with the parser's cause and fixing
+it reopens them; the type toggle re-derives immediately, closing any open lens
+first (as do level and posture changes); the level selector lists both levels —
+the built-in JEJ and the injected scaffold — and the closed face shows the
+selected level's live fit mark (each entry's own mark rides the
+`data-level-mark` attribute, not visible text, so pick a level to see one);
+under strict with a `debugger;` the masked overlay covers the content region and
+the strip goes inert and dim — the editor stays alive; the guide reveals its
+topics after the panel. The honored-focus variant (a lens open AT load) is
+prop-driven — add `lens="notes"` to the harness to see it; it is jsdom-pinned
+and was machine-replayed before this page flipped to the editor-first default.
 
 export function InstrumentHarness() {
 	const React = require('react');

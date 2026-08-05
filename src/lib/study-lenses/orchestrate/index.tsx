@@ -5,17 +5,19 @@
  * composition root: the mount-time joins (loud), the session choices'
  * single owner, the per-instance bus and memoized validate, the settle
  * loop, one study derivation per settle, and the render projection over
- * the surface pane (the editor home base XOR the open lens), the study
- * panel, the level UI, the type toggle, the ranked recommendations, and
- * the guide.
+ * the surface pane (the editor home base XOR one excursion — the open lens
+ * or the generator), the study panel, the level UI, the type toggle, the
+ * ranked recommendations, and the guide.
  *
  * @remarks
  * Selector contract: `data-study-lenses` on the root;
  * `data-type-toggle` on the snippet-type toggle (its text is the CURRENT
- * type; clicking commits the other one); `data-edit-return` on the
- * lens-mode-only Edit code button (class 2 — the guaranteed way home);
- * the mounted surfaces carry their own documented attributes. Session choices commit here and announce on
- * the bus; surfaces raise intent upward and hold none.
+ * type; clicking commits the other one); `data-edit-return` on the Edit
+ * code button, rendered whenever an excursion holds the pane (class 2 — the
+ * guaranteed way home); `data-generator-open` ("Generate code") on the
+ * generator's opening affordance, rendered in editor mode only; the mounted
+ * surfaces carry their own documented attributes. Session choices commit
+ * here and announce on the bus; surfaces raise intent upward and hold none.
  */
 
 import React from 'react';
@@ -34,6 +36,9 @@ import deriveStudy from './derive-study.js';
 import DISPLAY_LABELS from './display-labels.js';
 import Editor from './editor/index.jsx';
 import createEventBus from './event-bus/create-event-bus.js';
+import createGeneratorSocket from './generator/create-generator-socket.js';
+import GeneratorView from './generator/index.jsx';
+import type { GeneratorSocket } from './generator/types.js';
 import Guide from './guide/index.jsx';
 import LevelSelector from './level-ui/index.jsx';
 import joinLensRoster from './lib/composing/join-lens-roster.js';
@@ -79,6 +84,10 @@ export default function StudyLenses({
 			lenses: joinLensRoster(injectedLenses),
 			levels: joinLevelRoster(injectedLevels),
 			snippet,
+			// Mount-frozen like the bus: the view binds a live ask to the
+			// socket it was handed, and its abort-and-retire mechanics key on
+			// that identity staying put across renders and across reopens.
+			socket: createGeneratorSocket(),
 			validate: createMemoizedValidate(),
 		}),
 	);
@@ -193,6 +202,15 @@ export default function StudyLenses({
 		// batch, so the render invariants' field-equality holds; anchoring
 		// `settled` here instead would capture the stale pre-flush closure.
 		settleNow();
+		// A lens opening over the generator closes it first: two facts ride two
+		// events, in that order. The mirror is read BEFORE the overwrite below,
+		// for the same reason the dispose reads it before its own. Deliberately
+		// NOT a disposeToEditor() call — routing through it would announce the
+		// editor return between the two, and a lens→lens switch announces no
+		// null between its two opens.
+		if (occupantReference.current.mode === 'generator') {
+			session.bus.dispatch(GENERATOR_OPENED, { open: false });
+		}
 		occupantReference.current = freezeInPlace({
 			mode: 'lens',
 			openLensName: lensName,
@@ -203,17 +221,48 @@ export default function StudyLenses({
 		session.bus.dispatch(LENS_OPENED, { lens: lensName });
 	}
 
+	// The generator's own open. Reachable from editor mode alone, so unlike
+	// openLensSurface it never has an outgoing excursion to close first. The
+	// arm carries one field — the settled pair it opened over — doing both
+	// jobs the lens arm's openedAt does: the seed the view remixes, and the
+	// coherence anchor.
+	function openGeneratorSurface(): void {
+		// The flush-at-open, exactly as the lens path does it: the anchor is
+		// built from the SAME live values the flush settles with, because both
+		// commit in one batch — reading the render-closure `settled` here would
+		// capture the stale pre-flush pair and seed the view from code the
+		// learner has already typed past.
+		settleNow();
+		occupantReference.current = freezeInPlace({
+			mode: 'generator',
+			openedAt: freezeInPlace({ source: readLiveSource(), type }),
+		});
+		setOccupant(occupantReference.current);
+		session.bus.dispatch(GENERATOR_OPENED, { open: true });
+	}
+
 	// Idle-safe: a dispose with nothing open commits nothing and announces
 	// nothing (the bus contract's "dispose with nothing open is silent").
 	// The editor arm's seed is the LIVE buffer — edits survive the
 	// excursion in the settle hook's slot, and the remount reads it here.
+	// Editor mode is the ONLY early return: anything else is an excursion and
+	// closes, so every dispose path serves all three arms through one function.
 	function disposeToEditor(): void {
-		if (occupantReference.current.mode !== 'lens') return;
+		// The outgoing arm, read BEFORE the mirror is overwritten below — the
+		// close announcement is per arm, and a read after the overwrite reports
+		// the editor and announces nothing.
+		const closing = occupantReference.current;
+		if (closing.mode === 'editor') return;
 		occupantReference.current = freezeInPlace({
 			editorSeed: readLiveSource(),
 			mode: 'editor',
 		});
 		setOccupant(occupantReference.current);
+		if (closing.mode === 'generator') {
+			session.bus.dispatch(GENERATOR_OPENED, { open: false });
+			return;
+		}
+
 		session.bus.dispatch(LENS_OPENED, { lens: null });
 	}
 
@@ -222,6 +271,26 @@ export default function StudyLenses({
 	}
 
 	function commitCloseLens(): void {
+		disposeToEditor();
+	}
+
+	// The candidate reaches the region's ONE edit intake BEFORE the dispose,
+	// and all three land in one synchronous batch. The order is load-bearing
+	// twice over: the dispose seeds the remounting editor from the live source,
+	// so a reversed order would remount on the pre-accept buffer and lose the
+	// program; and the coherence invariants require the settled pair to
+	// field-equal the generator arm's anchor at every generator render, so a
+	// settle committed in a later frame would render one frame of a moved
+	// settle against a stale anchor and throw.
+	function commitAcceptCandidate(program: string): void {
+		onEdit(program);
+		settleNow();
+		disposeToEditor();
+	}
+
+	// Discard leaves the buffer exactly as the learner left it: the excursion
+	// ends and nothing reaches the edit intake.
+	function commitDiscardCandidate(): void {
 		disposeToEditor();
 	}
 
@@ -263,10 +332,10 @@ export default function StudyLenses({
 	// the mask projects the SELECTED level's assessment crossed with the
 	// posture over the class-3 surfaces (an inert overlay — everything
 	// beneath stays mounted). ONE VISUAL PANE, TWO DOM SLOTS: the class-1
-	// editor renders in its own slot OUTSIDE both maskable containers; the
-	// open lens renders INSIDE the maskable content region (class 3) — the
-	// pane swap must never merge the two slots, or one class assignment
-	// breaks.
+	// editor renders in its own slot OUTSIDE both maskable containers; both
+	// excursion arms — the open lens and the generator — render INSIDE the
+	// maskable content region (class 3) — the pane swap must never merge the
+	// two slots, or one class assignment breaks.
 	const phases = LIFECYCLE_PHASE_ORDER.map((name) =>
 		toPhaseEntry(name, derivation.embodiment.study[name], session.lenses),
 	);
@@ -277,7 +346,7 @@ export default function StudyLenses({
 				) ?? null)
 			: null;
 
-	if (occupant.mode === 'lens') {
+	if (occupant.mode !== 'editor') {
 		assertPaneCoherence(occupant, settled, openLens);
 	}
 
@@ -290,6 +359,9 @@ export default function StudyLenses({
 		occupant.mode === 'lens' && openLens !== null
 			? isOpenLensReachable(openLens, derivation.embodiment)
 			: false;
+	// The editor is away exactly while an excursion holds the pane, which is
+	// what the Edit code button offers a way back from — either arm.
+	const isExcursionOpen = occupant.mode !== 'editor';
 	const selectedLevel =
 		session.levels.find((level) => level.key === selectedLevelKey) ?? null;
 	const mask = deriveMask({
@@ -312,11 +384,20 @@ export default function StudyLenses({
 					marginBottom: '0.5rem',
 				}}
 			>
-				{occupant.mode === 'lens' ? (
+				{isExcursionOpen ? (
 					<button data-edit-return onClick={commitCloseLens} type="button">
 						Edit code
 					</button>
 				) : null}
+				{isExcursionOpen ? null : (
+					<button
+						data-generator-open
+						onClick={openGeneratorSurface}
+						type="button"
+					>
+						Generate code
+					</button>
+				)}
 				<button
 					aria-label={`snippet type: ${type} — switch to ${type === 'module' ? 'script' : 'module'}`}
 					data-type-toggle
@@ -361,14 +442,16 @@ export default function StudyLenses({
 			) : null}
 			<div style={{ position: 'relative' }}>
 				<div data-maskable inert={mask.masked || undefined}>
-					{occupant.mode === 'lens' && openLens && openLensReachable ? (
-						<MountedLens
-							configs={configs}
-							embodiment={derivation.embodiment}
-							lens={openLens}
-							opened={occupant.opened}
-						/>
-					) : null}
+					<ExcursionSlot
+						configs={configs}
+						embodiment={derivation.embodiment}
+						occupant={occupant}
+						onAcceptCandidate={commitAcceptCandidate}
+						onDiscardCandidate={commitDiscardCandidate}
+						openLens={openLens}
+						openLensReachable={openLensReachable}
+						socket={session.socket}
+					/>
 					{derivation.recommendations.length > 0 ? (
 						<section data-recommendations>
 							{derivation.recommendations.map((proposal, index) => (
@@ -411,29 +494,39 @@ export default function StudyLenses({
 // The one bus event three commit paths share.
 const LENS_OPENED = 'lens-opened';
 
-// The pane's coherence invariants — loud in dev AND prod. Unreachable
-// through the public surface by construction (the flush anchors every open,
-// every derivation-context commit disposes first, and proposals are vetted
-// at collection); reachable only by a future regression, which must crash,
-// never drift.
+// The generator's own arm of the same taxonomy. Never folded into LENS_OPENED:
+// that payload NAMES a lens, so an occupant change that is not a lens has no
+// honest payload to ride there.
+const GENERATOR_OPENED = 'generator-opened';
+
+// The pane's coherence invariants — loud in dev AND prod, at EVERY
+// excursion-arm render. Unreachable through the public surface by construction
+// (the flush anchors every open, every derivation-context commit disposes
+// first, and proposals are vetted at collection); reachable only by a future
+// regression, which must crash, never drift.
+//
+// Settle-coherence covers both excursion arms: the generator's anchor does the
+// same job as the lens's, so the same staleness would be the same bug. The
+// roster check stays lens-only — it asks whether the open lens resolves, and a
+// generator names none.
 function assertPaneCoherence(
-	occupant: Extract<PaneOccupant, { mode: 'lens' }>,
+	occupant: Extract<PaneOccupant, { mode: 'lens' | 'generator' }>,
 	settled: SettledSnippet,
 	openLens: Lens | null,
 ): void {
 	if (settled.source !== occupant.openedAt.source) {
 		throw new Error(
-			'orchestrator invariant violated: the open lens must render against its open-time source',
+			'orchestrator invariant violated: the open excursion must render against its open-time source',
 		);
 	}
 
 	if (settled.type !== occupant.openedAt.type) {
 		throw new Error(
-			'orchestrator invariant violated: the open lens must render against its open-time type',
+			'orchestrator invariant violated: the open excursion must render against its open-time type',
 		);
 	}
 
-	if (openLens === null) {
+	if (occupant.mode === 'lens' && openLens === null) {
 		throw new Error(
 			`orchestrator invariant violated: open lens "${occupant.openLensName}" is not on the mount roster`,
 		);
@@ -451,6 +544,58 @@ function formatBlockedSentence(
 	}
 
 	return `${masked.levelLabel} applies to ${masked.cause.admitted.join(' / ')} programs — toggle the type or pick another level`;
+}
+
+// The pane's excursion slot — the class-3 half of ONE VISUAL PANE, TWO DOM
+// SLOTS. The editor keeps its own never-masked slot above; a lens and the
+// generator share this one, because both are class-3 study surfaces over a
+// frozen program. One function rather than two sibling conditions so the
+// arms' exclusivity is structural: the occupant is one discriminated slot,
+// and nothing here can render two surfaces into a pane that holds one.
+function ExcursionSlot({
+	occupant,
+	configs,
+	embodiment,
+	openLens,
+	openLensReachable,
+	socket,
+	onAcceptCandidate,
+	onDiscardCandidate,
+}: {
+	readonly occupant: PaneOccupant;
+	readonly configs: NonNullable<StudyLensesProperties['configs']>;
+	readonly embodiment: Embodiment;
+	readonly openLens: Lens | null;
+	readonly openLensReachable: boolean;
+	readonly socket: GeneratorSocket;
+	readonly onAcceptCandidate: (program: string) => void;
+	readonly onDiscardCandidate: () => void;
+}): React.JSX.Element | null {
+	if (occupant.mode === 'generator') {
+		return (
+			<GeneratorView
+				onAccept={onAcceptCandidate}
+				onDiscard={onDiscardCandidate}
+				seed={occupant.openedAt.source}
+				socket={socket}
+			/>
+		);
+	}
+
+	// The orphan render-gate: an open lens the CURRENT derivation rejects
+	// renders nothing this frame, and the orphan defense disposes post-commit.
+	if (occupant.mode === 'lens' && openLens !== null && openLensReachable) {
+		return (
+			<MountedLens
+				configs={configs}
+				embodiment={embodiment}
+				lens={openLens}
+				opened={occupant.opened}
+			/>
+		);
+	}
+
+	return null;
 }
 
 // The opened lens, mounted with the frozen embodiment and its resolved

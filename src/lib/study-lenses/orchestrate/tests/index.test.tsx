@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-// cspell:ignore affordances
+// cspell:ignore affordances editless entrancy
 
 import { EditorView } from '@codemirror/view';
 import {
@@ -16,6 +16,7 @@ import scaffoldLevel from '../../language-levels/scaffold/index.js';
 import type { LanguageLevel } from '../../language-levels/types.js';
 import type { Lens } from '../../lenses/types.js';
 import * as eventBusModule from '../event-bus/create-event-bus.js';
+import * as generatorSocketModule from '../generator/create-generator-socket.js';
 import StudyLenses from '../index.jsx';
 
 afterEach(cleanup);
@@ -50,6 +51,45 @@ async function mountInstrument(
 	return container;
 }
 
+function openGenerator(container: HTMLElement): void {
+	const open = container.querySelector<HTMLElement>('[data-generator-open]');
+	if (!open) throw new Error('missing the Generate code button');
+	fireEvent.click(open);
+}
+
+// Neither Accept nor Discard renders until an ask has answered, so every test
+// that reaches them drives one first.
+async function askTheGenerator(container: HTMLElement): Promise<void> {
+	const ask = container.querySelector<HTMLElement>('[data-generator-generate]');
+	if (!ask) throw new Error('missing the Generate affordance');
+	fireEvent.click(ask);
+	await waitFor(() => {
+		expect(container.querySelector('[data-generator-preview]')).not.toBeNull();
+	});
+}
+
+function returnThroughEditCode(container: HTMLElement): void {
+	const back = container.querySelector<HTMLElement>('[data-edit-return]');
+	if (!back) throw new Error('missing the Edit code button');
+	fireEvent.click(back);
+}
+
+// The two pane-occupant announcements, named with their payloads and left in
+// dispatch order — the close event is per arm, so a sequence is the only shape
+// that can show a generator dispose announcing a lens's close, or either one
+// firing twice.
+function namePaneAnnouncements(
+	dispatches: Array<[string, unknown]>,
+): Array<string> {
+	return dispatches
+		.filter(([name]) => name === 'generator-opened' || name === 'lens-opened')
+		.map(([name, payload]) =>
+			name === 'generator-opened'
+				? `generator-opened:${String((payload as { open: boolean }).open)}`
+				: `lens-opened:${String((payload as { lens: string | null }).lens)}`,
+		);
+}
+
 function editLiveSource(container: HTMLElement, source: string): void {
 	const host = container.querySelector('.cm-editor');
 	if (!host) throw new Error('missing the live editor');
@@ -74,6 +114,22 @@ function recordDispatches(): Array<[string, unknown]> {
 		};
 	});
 	return dispatches;
+}
+
+// The socket seam, through the same module spy recordDispatches uses. It must
+// be installed BEFORE the mount: the composition root builds the socket in a
+// lazy state initializer that runs once. The double answers in one microtask —
+// the real placeholder holds each stage behind a timer, which would be this
+// suite's only wall-clock dependency.
+function scriptGeneratorSocket(program: string) {
+	return vi.spyOn(generatorSocketModule, 'default').mockImplementation(() => ({
+		generate: () =>
+			Promise.resolve({
+				ok: true,
+				program,
+				meta: { model: 'test-producer', attempts: 1 },
+			}),
+	}));
 }
 
 function buildLevel(
@@ -1730,7 +1786,7 @@ describe('StudyLenses', () => {
 	});
 
 	describe('the Edit code return (Interfaces)', () => {
-		it('shows the Edit code affordance only while a lens is open', async () => {
+		it('shows the Edit code affordance only while an excursion holds the pane', async () => {
 			const probe = buildLens('probe', {
 				main: () => <div data-probe>open</div>,
 			});
@@ -1744,6 +1800,16 @@ describe('StudyLenses', () => {
 				container.querySelector('[data-control-row] [data-edit-return]') !==
 					null,
 			]).toEqual([null, true]);
+		});
+
+		it('offers the Edit code affordance while the generator holds the pane', async () => {
+			const container = await mountInstrument(
+				<StudyLenses snippet="const x = 1;" />,
+			);
+			openGenerator(container);
+			expect(
+				container.querySelector('[data-control-row] [data-edit-return]'),
+			).not.toBeNull();
 		});
 
 		it('disposes to the editor on click, announcing the close', async () => {
@@ -1849,6 +1915,256 @@ describe('StudyLenses', () => {
 				);
 			});
 			expect(container.querySelectorAll('.cm-editor')).toHaveLength(1);
+		});
+	});
+
+	describe('the generator affordance (Zero)', () => {
+		it('offers the Generate code affordance in editor mode, with no generator mounted', async () => {
+			const container = await mountInstrument(
+				<StudyLenses snippet="const x = 1;" />,
+			);
+			expect([
+				container.querySelector('[data-generator-open]') !== null,
+				container.querySelector('[data-generator]') !== null,
+			]).toEqual([true, false]);
+		});
+
+		it('withdraws the Generate code affordance while the generator holds the pane', async () => {
+			const container = await mountInstrument(
+				<StudyLenses snippet="const x = 1;" />,
+			);
+			openGenerator(container);
+			expect(container.querySelector('[data-generator-open]')).toBeNull();
+		});
+
+		it('withdraws the Generate code affordance while a lens holds the pane', async () => {
+			const probe = buildLens('probe', {
+				main: () => <div data-probe>open</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses lenses={[probe]} snippet="const x = 1;" />,
+			);
+			openLensThroughStrip(container, 'source', 'probe');
+			expect(container.querySelector('[data-generator-open]')).toBeNull();
+		});
+	});
+
+	describe('the generator excursion (Interfaces)', () => {
+		it('replaces the editor with the generator view on a Generate code click', async () => {
+			const container = await mountInstrument(
+				<StudyLenses snippet="const x = 1;" />,
+			);
+			openGenerator(container);
+			expect([
+				container.querySelector('[data-generator]') !== null,
+				container.querySelectorAll('.cm-editor').length,
+			]).toEqual([true, 0]);
+		});
+
+		it('mounts the generator in the content region, never the strip region', async () => {
+			const container = await mountInstrument(
+				<StudyLenses snippet="const x = 1;" />,
+			);
+			openGenerator(container);
+			expect(
+				Array.from(
+					container.querySelectorAll('[data-maskable]'),
+					(region) => region.querySelector('[data-generator]') !== null,
+				),
+			).toEqual([false, true]);
+		});
+
+		it('announces the generator open as generator-opened true', async () => {
+			const dispatches = recordDispatches();
+			const container = await mountInstrument(
+				<StudyLenses snippet="const x = 1;" />,
+			);
+			openGenerator(container);
+			expect(dispatches).toContainEqual(['generator-opened', { open: true }]);
+		});
+
+		it('announces the generator close as generator-opened false, never lens-opened null', async () => {
+			const dispatches = recordDispatches();
+			const container = await mountInstrument(
+				<StudyLenses snippet="const x = 1;" />,
+			);
+			openGenerator(container);
+			returnThroughEditCode(container);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-editor')).not.toBeNull();
+			});
+			expect(namePaneAnnouncements(dispatches)).toEqual([
+				'generator-opened:true',
+				'generator-opened:false',
+			]);
+		});
+
+		it('closes a lens without announcing generator-opened', async () => {
+			const dispatches = recordDispatches();
+			const probe = buildLens('probe', {
+				main: () => <div data-probe>open</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses lenses={[probe]} snippet="const x = 1;" />,
+			);
+			openLensThroughStrip(container, 'source', 'probe');
+			returnThroughEditCode(container);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-editor')).not.toBeNull();
+			});
+			expect(namePaneAnnouncements(dispatches)).toEqual([
+				'lens-opened:probe',
+				'lens-opened:null',
+			]);
+		});
+
+		it('returns home from the generator on an Edit code click', async () => {
+			const container = await mountInstrument(
+				<StudyLenses snippet="const x = 1;" />,
+			);
+			openGenerator(container);
+			returnThroughEditCode(container);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-editor')).not.toBeNull();
+			});
+			expect(container.querySelector('[data-generator]')).toBeNull();
+		});
+
+		it('constructs the generator socket once across a reopen', async () => {
+			const factory = scriptGeneratorSocket('const generated = 1;');
+			const container = await mountInstrument(
+				<StudyLenses snippet="const x = 1;" />,
+			);
+			const callsAtMount = factory.mock.calls.length;
+			openGenerator(container);
+			returnThroughEditCode(container);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-editor')).not.toBeNull();
+			});
+			openGenerator(container);
+			expect(factory.mock.calls.length).toBe(callsAtMount);
+		});
+	});
+
+	describe('the flush at generator open (Boundaries)', () => {
+		it('seeds the generator with the exact live buffer, pending keystrokes absorbed', async () => {
+			const container = await mountInstrument(
+				<StudyLenses snippet="const x = 1;" />,
+			);
+			vi.useFakeTimers();
+			try {
+				editLiveSource(container, 'let pending = 9;');
+				openGenerator(container);
+			} finally {
+				vi.useRealTimers();
+			}
+			expect(
+				container.querySelector('[data-generator-seed]')?.textContent,
+			).toBe('let pending = 9;');
+		});
+
+		it('announces the absorbed settle after the generator open, and never again', async () => {
+			const dispatches = recordDispatches();
+			const container = await mountInstrument(
+				<StudyLenses snippet="const x = 1;" />,
+			);
+			vi.useFakeTimers();
+			try {
+				editLiveSource(container, 'let pending = 9;');
+				openGenerator(container);
+				act(() => {
+					vi.advanceTimersByTime(2000);
+				});
+			} finally {
+				vi.useRealTimers();
+			}
+			const names = dispatches
+				.map(([name]) => name)
+				.filter((name) => ['generator-opened', 'settled'].includes(name));
+			expect(names).toEqual(['generator-opened', 'settled']);
+		});
+
+		it('announces no settle on an editless generator open', async () => {
+			const dispatches = recordDispatches();
+			const container = await mountInstrument(
+				<StudyLenses snippet="const x = 1;" />,
+			);
+			openGenerator(container);
+			expect(dispatches.filter(([name]) => name === 'settled')).toHaveLength(0);
+		});
+	});
+
+	describe('opening a lens over the generator (Interfaces)', () => {
+		it('announces the generator close before the lens open when a lens opens over it', async () => {
+			const dispatches = recordDispatches();
+			const probe = buildLens('probe', {
+				main: () => <div data-probe>open</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses lenses={[probe]} snippet="const x = 1;" />,
+			);
+			openGenerator(container);
+			openLensThroughStrip(container, 'source', 'probe');
+			expect(namePaneAnnouncements(dispatches)).toEqual([
+				'generator-opened:true',
+				'generator-opened:false',
+				'lens-opened:probe',
+			]);
+		});
+
+		it('replaces the generator with a lens opened from the strip', async () => {
+			const probe = buildLens('probe', {
+				main: () => <div data-probe>open</div>,
+			});
+			const container = await mountInstrument(
+				<StudyLenses lenses={[probe]} snippet="const x = 1;" />,
+			);
+			openGenerator(container);
+			openLensThroughStrip(container, 'source', 'probe');
+			expect([
+				container.querySelector('[data-probe]') !== null,
+				container.querySelector('[data-generator]'),
+			]).toEqual([true, null]);
+		});
+	});
+
+	describe('the generator accept and discard (Simple)', () => {
+		it('lands the accepted candidate in the remounted editor', async () => {
+			scriptGeneratorSocket('const generated = 1;');
+			const container = await mountInstrument(
+				<StudyLenses snippet="const x = 1;" />,
+			);
+			openGenerator(container);
+			await askTheGenerator(container);
+			const accept = container.querySelector<HTMLElement>(
+				'[data-generator-accept]',
+			);
+			if (!accept) throw new Error('missing the Accept affordance');
+			fireEvent.click(accept);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')?.textContent).toContain(
+					'const generated = 1;',
+				);
+			});
+		});
+
+		it('leaves the buffer untouched on a discard', async () => {
+			scriptGeneratorSocket('const generated = 1;');
+			const container = await mountInstrument(
+				<StudyLenses snippet="const x = 1;" />,
+			);
+			openGenerator(container);
+			await askTheGenerator(container);
+			const discard = container.querySelector<HTMLElement>(
+				'[data-generator-discard]',
+			);
+			if (!discard) throw new Error('missing the Discard affordance');
+			fireEvent.click(discard);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')?.textContent).toContain(
+					'const x = 1;',
+				);
+			});
 		});
 	});
 
