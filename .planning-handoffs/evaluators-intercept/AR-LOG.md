@@ -377,3 +377,63 @@ split; B-2/B-3's widened decline shapes).
 - `[measured: git log --oneline 2dbc4db9..HEAD -- <evaluators, lib/engine, lib/loop-guard>]`
   **empty** — every consumed contract untouched since the ceremony's last
   commit.
+
+## Phase-1 AR resolutions
+
+### I1 — `ar-3` on the loc-wrap cluster (**PAUSE** → decomposed and executed)
+
+Every finding was test-additive or mechanical, so the PAUSE was decomposed and
+executed under the standing ruling rather than bubbled; recorded here for human
+audit. The reviewer independently re-derived ten pinned spans against the
+project's acorn and ran two runtime experiments rather than trusting the brief.
+
+- **Blocker — the optional-chain decline was tested at its narrowest shape.** A
+  per-node `optional` check (the natural wrong implementation) passed every row
+  while breaking `a?.b().c().d()` at runtime — the reviewer proved the break
+  empirically, and a probe confirmed acorn flags the MEMBER, not the call: every
+  call node in that chain is `optional: false`, so only the chain-ancestor rule
+  can decline them. Closed with a continuing-chain row. On the reviewer's one
+  granularity question — decline the whole chain vs. wrap its terminal link —
+  the implementing agent took the ratified plan's own wording (decline every
+  call inside a chain, always meaning-preserving); see the `ar-4` entry's open
+  flag for the coverage cost.
+- **`yield` had zero coverage** despite riding B-3's same clause as `await` — an
+  AwaitExpression-only special case passed every row. Closed with a
+  generator-fixture row (`h()` span measured at `2:9:2:12`).
+- **"Anywhere in the subtree" was only tested at depth 1** — a direct-child
+  check would fail to decline the outermost call of `f(x(await g()))`. Closed
+  with the depth-2 row.
+- Also applied: the callee-position nested-wrap row (`(await g())();`), the
+  `new Foo()` boundary-documentation row, the ordering fix ("ordinary calls"
+  moved before the boundary material per the feature→happy→edge→error
+  convention), and a provenance correction (the optional-chain pin cited B-3,
+  which never mentions chains — it now cites the `ar-1` decline commitment).
+
+### I1 — `ar-4` on the loc-wrap implementation (**CONSIDER** → all resolved)
+
+The reviewer re-ran the suite, tsc, and eslint itself; confirmed the structural
+match to DOCS.md phase 2 (parse → collect with one predicate → reconcile → pair
+→ bottom-up rewrite), no Fake It residue, no execution path over learner text,
+and that the transient identity-keyed `Map` is DEV.md § 13's own sanctioned
+shape.
+
+- **Applied — the reconciliation gained its pairwise leg.** Count equality alone
+  would let two unrelated same-count texts reconcile silently and mis-attribute
+  every span (a stale-original caller bug); a per-index structural fingerprint
+  (callee type, argument count) now throws the same boundary error, with a
+  same-count-different-shape test row. This also closes `ar-3`'s deferred
+  concern about the reconciliation's depth.
+- **Applied**: a WHY comment on the acorn-cast bridge; a comment recording why
+  `StaticBlock` is absent from the function-boundary set (the grammar forbids a
+  direct await/yield there); prettier run before commit.
+- **OPEN FLAG for the human — chain-root loc coverage.** The ratified decline
+  rule as pinned declines the WHOLE optional chain, root call included; the
+  reviewer measured that wrapping just the root (`a?.b()` whole) is
+  behavior-preserving, so `console?.log(x)`-style moments carry `loc: null` at a
+  cost the stated rationale (interior short-circuit) does not require. Faithful
+  to the pinned ruling; loosening it is a design question for the gate, not a
+  silent code change.
+- **Noted for I6**: the wrap verb's input type and boundary-error tag are
+  in-file (the ratified trio stays byte-untouched); the assemble phase catches
+  the boundary error generically, reading no imported type — the danger
+  sibling's precedent.
