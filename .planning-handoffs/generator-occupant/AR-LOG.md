@@ -251,6 +251,23 @@ are SCOPE calls, three were silences in the committed docs.
   bus-order pins. **Coupling worth knowing:** neither control renders until an
   ask has resolved, so this ruling is what promotes plan D8's module-spy socket
   seam from a ratification to a load-bearing dependency of Increment 5.
+  **Evidence added 2026-08-04, on AR-4's finding** that this was the
+  weakest-sourced of the five rulings landed with it. The four required props
+  are [read:
+  [generator/types.ts](../../src/lib/study-lenses/orchestrate/generator/types.ts)
+  § `GeneratorViewProperties` — _"readonly seed: string; readonly socket:
+  GeneratorSocket; readonly onAccept: (program: string) => void; readonly
+  onDiscard: () => void"_], none optional. Accept renders unconditionally at the
+  preview stage [read:
+  [generator/index.tsx](../../src/lib/study-lenses/orchestrate/generator/index.tsx)
+  — _"{job.status === 'preview' && (<button data-generator-accept …"_]. The
+  dispose reseeds the remounting editor from the live source, which is what
+  makes a bare `disposeToEditor()` destroy the candidate [read:
+  [orchestrate/index.tsx](../../src/lib/study-lenses/orchestrate/index.tsx) §
+  `disposeToEditor` — _"editorSeed: readLiveSource()"_]. The plan body's
+  assignment of accept/discard to Increment 7 lives in
+  `~/.claude/plans/purring-floating-sprout.md` § Implementation sequence, which
+  `git grep` cannot see — that is why the ruling is recorded here at all.
 
 - **R-9 — `openLensSurface`'s generator pre-close comes forward from
   Increment 6.** The plan assigns it to Increment 6, but the path goes live the
@@ -265,11 +282,24 @@ are SCOPE calls, three were silences in the committed docs.
   settle loop's state diagram — and both would be false for a whole increment
   otherwise. **The argument NOT to use, because it is refutable in one
   command:** "a subscriber would believe the generator is open forever" is false
-  — there are zero production bus subscribers anywhere in the repo [measured:
-  `grep -rn "\.subscribe(" src/ spiralearn/ | grep -v /tests/` → no output]. The
-  bus is region-internal by contract, so the cost is documentation truth, not a
-  broken consumer. Increment 6 retains the three derivation-context
-  dispose-order pins, the orphan-defense pin, and the late-settle test.
+  — there is no production bus-subscriber code anywhere in the repo [measured:
+  `grep -rn "\.subscribe(" --include='*.ts' --include='*.tsx' --include='*.js'
+  --include='*.jsx' src/ spiralearn/ | grep -v /tests/` → no output]. The bus is
+  region-internal by contract, so the cost is documentation truth, not a broken
+  consumer. Increment 6 retains the three derivation-context dispose-order pins,
+  the orphan-defense pin, and the late-settle test. **Evidence corrected
+  2026-08-04, on AR-4's finding against Increment 5.** This ruling first
+  recorded the same claim under an unrestricted
+  `grep -rn "\.subscribe(" src/ spiralearn/ | grep -v /tests/` → "no output".
+  That command does NOT reproduce: it returns one line, a prose mention of
+  `bus.subscribe(eventName, listener)` in the RETIRED
+  `study-lenses--deprecated-architecture` module's own README [measured: the
+  unrestricted form, re-run]. The substance was unaffected — that is
+  documentation, not runtime code, and it predates the ruling by three weeks
+  [measured: `git log -1 --format=%cI` on that README → `2026-07-15`] — but the
+  recorded command did not produce what it claimed, which is the exact failure
+  mode [DEV.md § Sourced claims](../../DEV.md#sourced-claims) exists to catch.
+  The extension-restricted form above is what the claim actually rests on.
 
 - **R-10 — the strip's none entry is left UNGUARDED as a generator-close path,
   and no test fires it.**
@@ -330,6 +360,59 @@ are SCOPE calls, three were silences in the committed docs.
   edge for a seed reaching the pane — but the EDITOR arm's seed has the same
   shape and the same omission, so the gap is pre-existing and symmetric rather
   than introduced here.
+
+## AR resolutions — 2026-08-04 (Increment 5, the third arm wired, `b8379b8b`)
+
+- **AR-3 CONSIDER, six concerns, all folded.** The one that mattered was a gap
+  neither the plan nor the implementing agent had seen: **no test in the
+  eighteen-test plan could distinguish a socket built per OPEN from one built
+  per MOUNT**, because the placeholder socket is stateless, so the difference is
+  behaviorally invisible. `orchestrate/DOCS.md` § State residency commits to
+  mount-stability in the present tense (_"the generator socket | the top
+  component, created once at mount — the socket's mount-stability is what the
+  generator's abort-and-retire mechanics key on"_), so a DOCS-stated invariant
+  had zero coverage. AR-3's counter-proposal — reuse the module spy the
+  accept/discard tests already need and assert the factory's call count — landed
+  as "constructs the generator socket once across a reopen", written in the
+  house's own `callsAtMount` shape so StrictMode's double-invoked lazy
+  initializer cannot make it flaky. It mutation-fails correctly: moving the
+  factory call into the render body fails that test and only that test
+  [measured: the mutation, then the suite → 1 failed | 111 passed].
+
+- **Four more AR-3 concerns folded, one premise corrected.** The socket seam
+  moved from the real factory at `stageDelay: 0` to an inline double, removing
+  the suite's only wall-clock dependency — R-5 had recorded that a real clock in
+  a double would be this campaign's first flakiness vector, and `stageDelay: 0`
+  still chains two real timers. The accept/discard block was relabelled
+  `(Boundaries)` → `(Simple)`, since R-8 scopes it to one happy path each and
+  the actual boundary is deferred. The maskable-membership test was strengthened
+  from a `closest()` probe — which cannot tell the two identically-attributed
+  regions apart — to an ordered `[false, true]` over both, pinning WHICH region
+  holds the view. AR-3's fourth concern, that the Generate code button's masked
+  state was untested, rested on a false premise: no mask code ships in Increment
+  5 at all (the button's inert/dim classing is Increment 8's), so there was
+  nothing to test; the underlying ask — record the absence rather than leave it
+  silent — was honored in the commit body.
+
+- **AR-4 PROCEED**, no blocker or important findings; three MINOR, all
+  evidentiary rather than architectural. Two are resolved above: R-8's missing
+  evidence tags and R-9's non-reproducing grep, both corrected in place with the
+  correction disclosed rather than silently rewritten. The third — that the
+  review prompt said "exactly two files" when the working tree held three under
+  `orchestrate/` — was a stale framing in the prompt, written before the
+  checkpoint ledger row was appended; the ledger row was in the same commit and
+  is the increment's 🔍 evidence, so nothing was hidden from the audit, and AR-4
+  found it on its own by running `git status` rather than trusting the count.
+
+- **AR-4 confirmed, independently, the two claims most worth confirming.** That
+  `types.ts` needed no edit because its `PaneOccupant` docstring was FALSE
+  before this increment and true after it; and that the roster check had to stay
+  lens-only or every generator render would throw in dev and prod, since
+  `openLens` is structurally `null` for a generator. It also cleared
+  `ExcursionSlot` and `commitDiscardCandidate` against the over-engineering and
+  trivial-indirection anti-patterns, on the grounds that `MountedLens`,
+  `toPhaseEntry` and `commitCloseLens` are the file's own precedents for both
+  shapes.
 
 ## Operational notes (not rulings, but they cost time once)
 
