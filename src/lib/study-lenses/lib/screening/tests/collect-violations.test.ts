@@ -10,6 +10,13 @@ function programOf(source: string): Program {
 	return parse(source, { ...PARSE_SETTINGS, sourceType: 'module' });
 }
 
+function rootOver(nodeType: string): Program {
+	return {
+		...programOf(''),
+		body: [{ type: nodeType, start: 0, end: 1 }],
+	} as unknown as Program;
+}
+
 describe('collectViolations', () => {
 	describe('an empty program', () => {
 		it('yields no violations under a table admitting the envelope', () => {
@@ -264,6 +271,35 @@ describe('collectViolations', () => {
 			expect(violations.map((violation) => violation.message)).toEqual([
 				"'Literal' isn't in the admitted syntax",
 				'names longer than 3 characters are outside this fixture',
+			]);
+		});
+	});
+
+	describe('a node type the table inherits but does not own', () => {
+		it('refuses one whose inherited value would answer', () => {
+			const violations = collectViolations(rootOver('toString'), {
+				Program: true,
+			});
+			expect(violations.map((violation) => violation.message)).toEqual([
+				"'toString' isn't in the admitted syntax",
+			]);
+		});
+
+		it('refuses one whose inherited value would throw', () => {
+			const violations = collectViolations(rootOver('valueOf'), {
+				Program: true,
+			});
+			expect(violations.map((violation) => violation.message)).toEqual([
+				"'valueOf' isn't in the admitted syntax",
+			]);
+		});
+
+		it('refuses one whose inherited value is not a function', () => {
+			const violations = collectViolations(rootOver('constructor'), {
+				Program: true,
+			});
+			expect(violations.map((violation) => violation.message)).toEqual([
+				"'constructor' isn't in the admitted syntax",
 			]);
 		});
 	});

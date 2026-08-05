@@ -63,7 +63,7 @@ function screenNode(
 	path: string,
 	nodes: SyntaxAllowlist['nodes'],
 ): readonly Violation[] {
-	const verdict = applyRule(nodes[node.type], node);
+	const verdict = applyRule(ruleFor(node.type, nodes), node);
 	if (verdict === true) return [];
 
 	return [
@@ -74,6 +74,25 @@ function screenNode(
 			path,
 		),
 	];
+}
+
+/**
+ * The table's own rule for a node type, or nothing.
+ *
+ * WHY the own-property check: a caller's table is a plain object, so a bare
+ * lookup also finds `Object.prototype`'s members. A node typed `toString` would
+ * then be screened by `Object.prototype.toString` — called as though it were a
+ * constraint check — and a node typed `constructor` would produce a violation
+ * whose message is an object. Most of the twelve are worse still: called on a
+ * node they throw, aborting the whole walk rather than refusing one node, so
+ * the caller gets no answer at all. Default-deny means absence is refusal, and
+ * a name the caller never wrote is absent.
+ */
+function ruleFor(
+	nodeType: string,
+	nodes: SyntaxAllowlist['nodes'],
+): NodeRule | undefined {
+	return Object.hasOwn(nodes, nodeType) ? nodes[nodeType] : undefined;
 }
 
 /**
