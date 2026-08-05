@@ -392,6 +392,7 @@ export default function StudyLenses({
 				{isExcursionOpen ? null : (
 					<button
 						data-generator-open
+						{...classThreeAtOwnElement(mask.masked)}
 						onClick={openGeneratorSurface}
 						type="button"
 					>
@@ -544,6 +545,23 @@ function formatBlockedSentence(
 	}
 
 	return `${masked.levelLabel} applies to ${masked.cause.admitted.join(' / ')} programs — toggle the type or pick another level`;
+}
+
+// Class 3 carried at a surface's OWN element, for a class-3 affordance that
+// renders outside both maskable containers. A surface's class is a fact about
+// what the surface IS, never about which container it happens to render in, so
+// the Generate code button takes the mask's treatment with it into the control
+// row. Named rather than inlined because the geometry is easy to "simplify"
+// away — see DOCS.md § The render projection. The `|| undefined` matches the
+// two maskable containers' idiom; React 19 omits a false `inert` either way.
+function classThreeAtOwnElement(masked: boolean): {
+	readonly inert: true | undefined;
+	readonly style: React.CSSProperties;
+} {
+	return {
+		inert: masked || undefined,
+		style: { opacity: masked ? 0.5 : 1 },
+	};
 }
 
 // The pane's excursion slot — the class-3 half of ONE VISUAL PANE, TWO DOM

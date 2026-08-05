@@ -746,6 +746,81 @@ describe('StudyLenses', () => {
 			).toBe(false);
 		});
 
+		// PINNED(R-16 2026-08-05: dims to 0.5, deliberately NOT the strip's 0.4 —
+		// a lone dimmed control among live siblings reads differently than a
+		// whole dimmed block does)
+		it('marks the Generate code button inert and dimmed while masked', async () => {
+			const container = await mountInstrument(
+				<StudyLenses
+					activeLanguageLevel="scaffold"
+					languageLevels={[scaffoldLevel]}
+					snippet="debugger;"
+					strictLanguageLevels={true}
+				/>,
+			);
+			const open = container.querySelector<HTMLElement>(
+				'[data-generator-open]',
+			);
+			if (!open) throw new Error('missing the Generate code button');
+			expect([
+				open.hasAttribute('inert'),
+				open.style.opacity,
+				open.closest('[data-maskable]'),
+			]).toEqual([true, '0.5', null]);
+		});
+
+		it('keeps the Generate code button live under strict while in level', async () => {
+			const container = await mountInstrument(
+				<StudyLenses
+					activeLanguageLevel="scaffold"
+					languageLevels={[scaffoldLevel]}
+					snippet="const x = 1;"
+					strictLanguageLevels={true}
+				/>,
+			);
+			const open = container.querySelector<HTMLElement>(
+				'[data-generator-open]',
+			);
+			if (!open) throw new Error('missing the Generate code button');
+			expect([
+				open.hasAttribute('inert'),
+				open.style.opacity,
+				open.closest('[data-maskable]'),
+			]).toEqual([false, '1', null]);
+		});
+
+		it('guards the masked Generate code button with inert alone, never a click handler', async () => {
+			const container = await mountInstrument(
+				<StudyLenses
+					activeLanguageLevel="scaffold"
+					languageLevels={[scaffoldLevel]}
+					snippet="debugger;"
+					strictLanguageLevels={true}
+				/>,
+			);
+			openGenerator(container);
+			expect(container.querySelector('[data-generator]')).not.toBeNull();
+		});
+
+		it('keeps the Generate code button live under warn while out of level', async () => {
+			const container = await mountInstrument(
+				<StudyLenses
+					activeLanguageLevel="scaffold"
+					languageLevels={[scaffoldLevel]}
+					snippet="debugger;"
+				/>,
+			);
+			const open = container.querySelector<HTMLElement>(
+				'[data-generator-open]',
+			);
+			if (!open) throw new Error('missing the Generate code button');
+			expect([
+				open.hasAttribute('inert'),
+				open.style.opacity,
+				open.closest('[data-maskable]'),
+			]).toEqual([false, '1', null]);
+		});
+
 		it('keeps the study panel mounted beneath the mask', async () => {
 			const container = await mountInstrument(
 				<StudyLenses
@@ -1798,10 +1873,10 @@ describe('StudyLenses', () => {
 		});
 
 		it('disposes an honored lens and unmasks in the same posture commit', async () => {
-			// The frozen-mask-input payoff, at its ONE reachable instance: the
-			// honored mount is the only masked-open state, and the class-2
-			// strict toggle is clickable over it — the commit must dispose the
-			// lens AND lift the mask together.
+			// The frozen-mask-input payoff, at its ONE reachable instance: an
+			// honored mount is the lens arm's masked-at-load state, and the
+			// class-2 strict toggle is clickable over it — the commit must
+			// dispose the lens AND lift the mask together.
 			const probe = buildLens('focused', {
 				main: () => <div data-focused-probe>mounted</div>,
 			});
@@ -2128,6 +2203,33 @@ describe('StudyLenses', () => {
 				.map(([name]) => name)
 				.filter((name) => ['generator-opened', 'settled'].includes(name));
 			expect(names).toEqual(['generator-opened', 'settled']);
+		});
+
+		it('masks the generator opened by a flush that lands out of level', async () => {
+			const container = await mountInstrument(
+				<StudyLenses
+					activeLanguageLevel="scaffold"
+					languageLevels={[scaffoldLevel]}
+					snippet="const x = 1;"
+					strictLanguageLevels={true}
+				/>,
+			);
+			vi.useFakeTimers();
+			try {
+				editLiveSource(container, 'debugger;');
+				openGenerator(container);
+			} finally {
+				vi.useRealTimers();
+			}
+			const view = container.querySelector('[data-generator]');
+			const back = container.querySelector<HTMLElement>('[data-edit-return]');
+			if (!view) throw new Error('missing the generator view');
+			if (!back) throw new Error('missing the Edit code button');
+			expect([
+				container.querySelector('[data-enforcement-mask]') !== null,
+				view.closest('[data-maskable]') !== null,
+				back.closest('[data-maskable]'),
+			]).toEqual([true, true, null]);
 		});
 
 		it('announces no settle on an editless generator open', async () => {

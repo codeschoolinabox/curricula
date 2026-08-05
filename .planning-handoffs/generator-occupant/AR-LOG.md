@@ -437,6 +437,71 @@ are SCOPE calls, three were silences in the committed docs.
     is vacuously true and would still pass in exactly the world where the
     premise had failed.
 
+## Human rulings — 2026-08-05 (Increments 8 + 9 scope, at the plan gate)
+
+Four questions went to the maintainer in one batch before any code. Three of
+them exist because [DEV.md § ceremony](../../DEV.md#ceremony) forbids the agent
+from supplying the answer.
+
+- **R-15 — this cycle runs `ceremony: full`, and the commit-body settings line
+  starts now.** The campaign had been running AR-3 and AR-4 per increment
+  without ever declaring a level, which left the level unrecorded rather than
+  set: no commit in Increments 1–7 carries a settings line [measured: `git log
+  -1 --format=%B` on `6b66a6d3`, `9a294052`, `b8379b8b`, `8e1f718f`, `e1f69580`
+  → `grep -c "ceremony:"` returns 0 for all five], while the convention is live
+  repo-wide — **29 of the last 300 commits carry one** [measured: `git log
+  --format=%B -300 | grep -c "ceremony:"`], the earliest dated 2026-08-04. This
+  matters beyond bookkeeping: AR-3 and AR-4 each carry _"Skip: … or when the
+  declared ceremony level does not include this review"_ [read:
+  [DEV.md § AR-3](../../DEV.md#ar-3-test-strategy-challenge),
+  [§ AR-4](../../DEV.md#ar-4-implementation-audit)], so an undeclared level
+  leaves it ambiguous whether the reviews that HAVE been firing were owed. Both
+  of this cycle's commits carry
+  `work: software · twin-doc: none · ceremony: full · prospective`. Increment
+  9's `work:` reads `software` despite editing a `spiralearn/` path: the kind is
+  derived mechanically from the path table, which names
+  `spiralearn/frogramming-and-vibetoading/` as the only curriculum path [read:
+  [DEV.md § Software work and curriculum work](../../DEV.md#software-work-and-curriculum-work)].
+
+- **R-16 — the masked Generate code button dims to `opacity: 0.5`, not the
+  strip's `0.4`.** `orchestrate/DOCS.md:250-257` says "inert and dimmed at its
+  OWN element while the mask is up, like the strip's selects" and states no
+  number; the strip's own dim is `0.4` [read: `orchestrate/index.tsx` — the
+  first maskable div's `opacity: mask.masked ? 0.4 : 1`]. The maintainer chose
+  the lighter value with the tradeoff stated: a lone dimmed control among live
+  siblings reads differently than a whole dimmed block does. **This does not put
+  the implementation at odds with DOCS and needs no DOCS edit** — the "like the
+  strip's selects" clause's subject is the _mechanism_ (an own-element inline
+  dim rather than an inherited container dim), which is the entire contrast that
+  paragraph exists to draw, and the value was left unspecified.
+
+- **R-17 — Increment 9's real gate set under `full` is AR-1 + AR-2 + AR-4; AR-3
+  is n/a and its commit body says so.**
+  [DEV.md § ceremony](../../DEV.md#ceremony) refuses to define `full` for work
+  with no code — _"AR-3 needs a failing test, AR-4 an implementation file. A
+  documentation-only campaign running `full` must name its real gate set
+  explicitly rather than assume one. This is a known gap, not a settled rule."_
+  Increment 9 edits a sandbox page, this log, and the checkpoint ledger; it
+  writes no test and no implementation. The maintainer named the set: **AR-1**
+  challenges the corrected sandbox prose as the learner-facing spec, **AR-2**
+  challenges it against `orchestrate/DOCS.md`'s shipped architecture, and
+  **AR-4** audits the result with its **Loss lens named explicitly** — the lens
+  that catches a "correction" quietly dropping a true sentence. Recorded because
+  the campaign's own prior `docs:` commit (`e1f69580`) names no AR in its body
+  at all, so precedent alone would have under-determined this.
+
+- **R-18 — Phase 2 re-runs the full seven-step Playwright replay; Increment 9's
+  replay is scoped to its own prose claims.** The plan of record assigns the
+  same outline to both Increment 9 and Phase 2, which is a genuine ambiguity
+  rather than a redundancy. The maintainer ruled that Phase 2's run is the one
+  that counts against final HEAD. **This does not thin either increment's 🔍**:
+  Increment 8's checkpoint still fires before Increment 8's commit and is the
+  only place the dimmed button's real non-interactivity can be observed at all,
+  because jsdom enforces neither `inert` nor dimming [read:
+  `orchestrate/tests/index.test.tsx` — the in-test comment _"jsdom enforces
+  neither inert nor disabled — the structural checks … are the real
+  assertions"_].
+
 ## AR resolutions — 2026-08-04 (Increment 5, the third arm wired, `b8379b8b`)
 
 - **AR-3 CONSIDER, six concerns, all folded.** The one that mattered was a gap
@@ -635,7 +700,68 @@ settled by RUNNING the mutation rather than arguing it.**
   tests should carry markers is a standing question for the maintainer, not an
   Increment-7 call.
 
+## AR resolutions — 2026-08-05 (Increment 8, the button takes its class)
+
+- **AR-3 CONSIDER, three concerns, all folded before implementation.** The one
+  that mattered was a **triangulation blocker the implementing agent, the plan,
+  and an independent design pass all missed**: the planned pair was
+  `strict + debugger;` (masked) and `warn + debugger;` (live), across which
+  `strict` and `mask.masked` are **perfectly correlated**, so a Fake It reading
+  the raw posture — `inert={strict || undefined}` — passes both while never
+  consulting the assessment at all. The fix is a third fixture holding the
+  posture at `strict` and varying the code instead
+  (`keeps the Generate code button live under strict while in level`). **That
+  test is the single point of failure for the whole guarantee**: drop it and the
+  suite tolerates the posture-keyed bug. Recorded because the same shape will
+  recur on every future surface that consumes `mask.masked` — varying the input
+  that co-varies with the output is not triangulation.
+- **AR-3's second concern replaced a disclosed dead test with a live one.** The
+  planned compose-over-generator test was coverage theater by the implementing
+  agent's own admission (no one-line mutation failed it alone). AR-3 named a
+  real, doc-anchored, zero-coverage gap in its place: the generator **beginning
+  masked through a divergent flush** — `orchestrate/README.md` promises the view
+  _"can begin masked through the same flush path as a lens"_, the lens arm
+  carries that coverage and the generator arm carried none. It ships as
+  `masks the generator opened by a flush that lands out of level`. Honest
+  status: green on arrival, and **non-vacuous** — if the flush's facts did not
+  reach the mask the buffer would still read `const x = 1;`, no overlay would
+  render, and it would fail. It is arm-parity coverage, not a novel falsifier
+  class.
+- **AR-4 CONSIDER, six concerns.** Two were real defects in this increment and
+  are fixed: a new `cspell` failure on `affordances` in the increment's own
+  comment, and a false mechanism claim in that same comment (below). Two were
+  citation drift in this log's own R-16/R-18, re-anchored to quoted content
+  rather than line numbers — **line cites do not survive a shared worktree**.
+  One (`classThreeAtOwnElement` is not deep-frozen) matches the in-file
+  precedent `toPhaseEntry` and needs no action.
+- **AR-4's test suggestion was adopted:**
+  `guards the masked Generate code button with inert alone, never a click handler`.
+  It is the **only** thing that can distinguish `inert`-alone from `inert` plus
+  a JS click-guard — a guard would look identical in a real browser, so the
+  sandbox checkpoint cannot catch it, and jsdom's non-enforcement of `inert` is
+  exactly what makes the distinction observable. The test name carries the claim
+  because [DEV.md § No Comments in Tests](../../DEV.md#no-comments-in-tests)
+  permits no explanatory comment to carry it.
+
 ## Operational notes (not rulings, but they cost time once)
+
+- **⚠️ The Increment-8 cold-start brief carried a FALSE React claim, and it was
+  copied into a code comment before it was caught.** Under "Increment 8's
+  mechanism facts, each re-derived from the code", fact 4 read: _"Copy the
+  `inert={mask.masked || undefined}` idiom exactly … Not `inert={mask.masked}`;
+  React serializes a `false` boolean attribute in a way the existing
+  `hasAttribute('inert')` probes do not expect."_ **React 19 omits a false
+  `inert`.** Mutating the helper to a bare `inert: masked` leaves both liveness
+  tests green [measured: the mutation, then `npx vitest run
+  src/lib/study-lenses/orchestrate/tests/index.test.tsx -t "Generate code button
+  live"` → 2 passed; `react-dom` is 19.2.4]. The `|| undefined` form still
+  ships, because it is the idiom both maskable containers already use and one
+  file should read one way — but it is **consistency, not necessity**, and the
+  comment now says so. This is the THIRD consecutive brief in this campaign to
+  ship a confident, load-bearing, false mechanism claim (Increment 7's
+  `settleNow` ordering, Increment 8's this one). **A brief's "re-derived from
+  the code" label is not evidence; re-derive anything you are about to build
+  against.**
 
 - **`expect(act(…)).rejects` silently produces a FALSE POSITIVE.** RTL's `act`
   returns a custom thenable, not a real promise, and vitest's `.rejects`

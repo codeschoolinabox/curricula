@@ -109,6 +109,35 @@ the generator under the learner. Two sightings already stand (GEN-5, GEN-6), and
 a third promotes R-11 to its own increment; that promotion is now expected on
 whichever checkpoint next runs live.
 
+| GEN-8 | `(this row's commit)` | `/spiralearn/sandbox/orchestrate` | load the
+page and read the control row; open the level face and pick Scaffold; click the
+strict toggle; type `debugger;`; CLICK THE DIMMED Generate code button; delete
+the violation and click Generate code again | REPLAYED LIVE, NOT DEFERRED — all
+six actions verified in real Chromium, browser console clean throughout, no
+behavioral defect. At load the row reads `Generate code` at opacity `1` with no
+Edit code button. Under Scaffold + strict + `debugger;` the overlay names the
+cause (`Scaffold: debugger statements are not part of the scaffold level`) and
+the button carries the class-3 treatment **at its own element**:
+`{inert: true, inlineOpacity: "0.5", computedOpacity: "0.5", insideMaskable: false}`
+— dimmed and inert while standing OUTSIDE every maskable container, which is the
+geometry `DOCS.md § The render projection` calls easily "simplified" away. **The
+observation jsdom structurally cannot make:** clicking that dimmed button — with
+Playwright `force: true`, bypassing actionability checks — did **not** open the
+generator, and the editor stayed mounted. The browser's `inert` genuinely
+refuses the event; jsdom enforces neither `inert` nor `disabled`, so no unit
+test can reach this fact and the checkpoint was not skippable. Class 2 stayed
+bright and operable throughout (type toggle, strict toggle and level selector
+all at opacity `1`), the strip sat at its own `0.4`, and the editor stayed alive
+at `1`. Deleting the violation restored the button to
+`{inert: false, inlineOpacity: "1"}`; clicking it then opened the generator,
+withdrew Generate code and produced Edit code. **Screenshot reviewed** (the
+judgment no machine makes): at `0.5` the button reads as deliberately disabled
+rather than broken — greyed but legible, one visible step brighter than the
+`0.4` strip beneath it and in clear contrast to its three live siblings. R-16's
+lighter value is legible in place. **R-11 did NOT reach a third sighting here:**
+this replay exercised no keyboard traversal and no control that closes the pane
+under the learner, so the counter still stands at two (GEN-5, GEN-6). |
+
 **GEN-4 broke the deferral pattern deliberately, and the maintainer ruled it.**
 The 2026-07-18 mandate above defers 🔍 rows to this ledger because checkpoints
 were not to block on the maintainer's presence. Increment 4's AR-4 pointed out
