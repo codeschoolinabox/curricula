@@ -210,19 +210,44 @@ mirrors them in its § 0.
   `supersede`, rationale = ratified and human-affirmed. **Knock-on**: the
   re-iteration machinery in `create-execution.ts` is therefore NOT part of the
   migration — the handle contract is wanted, the replay cache is not.
+- **HR-3 — GO BACK TO A HANDLE.** `main()` returns a handle, not a bare stream.
+  The target shape is the reference's:
+  `AsyncIterable & PromiseLike & { result, cancel }`, widened per evaluator with
+  its own eager fields. Ruled after the human asked whether a handle is more
+  useful for consumers and was given the three grounds recorded above — zero
+  current consumers, the handle being a strict superset that leaves
+  consumer-paced iteration intact, and `AsyncIterable<never>` being a shape that
+  exists only to satisfy an interface it does not benefit from.
+
+  **Consequences, all ruled in by implication — do not re-litigate them:**
+  - `src/lib/study-lenses/evaluators/types.ts` (the shared `Evaluator` kind)
+    CHANGES. It declares `main`'s return type, so eager fields cannot be added
+    evaluator-side.
+  - `danger` is touched. It implements the kind, so a kind change reaches it,
+    even though HR-1 keeps it out of scope for REPAIR. Update it to compile and
+    keep its tests green; do not enrich it.
+  - This is a Phase-0 contract redesign, with the ceremony that implies: kind +
+    both evaluators' README/types/DOCS re-ratified, `ar-1` and `ar-2`. The
+    index/stream test clusters are rewritten; the internals clusters (wrap,
+    narrowing, settlement mapping, worker setup) survive.
+  - Eager-versus-deferred is a per-evaluator choice, not a global one — the
+    reference made it both ways (`run/types.ts:203` synchronous,
+    `intercept/types.ts:315` a Promise). Choose per evaluator against its own
+    laziness posture; the port's "nothing runs before the first pull" rows are
+    not automatically invalidated.
 
 ---
 
 ## Open — for the next agent, before any planning
 
-Carried in the cold-start brief § 6, in the human's own words there. In short:
-what the target actually is (API-preserving port vs additive re-enrichment);
-whether the `Evaluator` kind itself changes; whether `run` regains a
-caller-supplied `io` option; scope beyond run + intercept (`trace/` is the
-largest thing never ported in the region and has never been audited, `adapter/`
-likewise); what happens to the existing unpushed Phase-1 work; and whether
-entwining is restored wholesale from `link/` or re-derived against embody's
-Facts — noting embody parses with `ranges: true`
+Carried in the cold-start brief § 6. With HR-1…HR-3 settled, five remain: how
+faithful the naming must be (reproduce the reference's exported names and result
+vocabulary, or keep the port's `ended`/`reason` spelling inside the handle
+shape); whether `run` regains a caller-supplied `io` option; scope beyond run +
+intercept (`trace/` is the largest thing never ported in the region and has
+never been audited, `adapter/` likewise); what happens to the existing unpushed
+Phase-1 work; and whether entwining is restored wholesale from `link/` or
+re-derived against embody's Facts — noting embody parses with `ranges: true`
 (`src/lib/study-lenses/embody/derive-ast.ts:59`) and no `locations`, so its
 indices are offset-keyed while the port's events carry line/column.
 
