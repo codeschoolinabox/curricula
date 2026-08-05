@@ -130,9 +130,10 @@ what that gap cost.
 ### Increment ledger (wave 1)
 
 **The wave is open through 1.4.** Increment 1.5 — the structural floor, which
-`SEQUENCING.md` § Wave 1 names as in scope and which the leaf's committed README
-already advertises as a file and an export — is not built, and the wave-close
-`docs:` commit has not landed. Both append their rows here at close.
+[SEQUENCING.md § Wave 1 — the shared allowlist leaf](./SEQUENCING.md#wave-1--the-shared-allowlist-leaf)
+names as in scope and which the leaf's committed README already advertises as a
+file and an export — is not built, and the wave-close `docs:` commit has not
+landed. Both append their rows here at close.
 
 | #      | SHA        | Subject                                                          |
 | ------ | ---------- | ---------------------------------------------------------------- |
@@ -170,14 +171,14 @@ from the rename list alone would never look there.
 Numbered here so they are citable; the numbering is this section's, not the
 maintainer's.
 
-| #      | Ruling                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Recorded                                                                   |
-| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| **H1** | The leaf's default-deny refusal message is reworded **domain-blind**. The superseded wording `'X' is not allowed at this language level` was **shipped production code**, not a draft — it was live in the level before the move [measured 2026-08-05: `git show a7be59e6^:src/lib/study-lenses/language-levels/jej/collect-violations.ts` → line 92]. It carries level vocabulary into a leaf whose committed README forbids it [read: `src/lib/study-lenses/lib/screening/README.md` § Conventions — _"Domain-blind. No language levels … in the code or in the prose"_]. So this is a **behavior change**, as `a7be59e6`'s body classifies it, and that is why 1.4 became **user-observable** and a 🔍 sandbox checkpoint fired on it. H1 rules that it be reworded; **H3 settles what to**. | 2026-07-30. `a7be59e6` commit body, and this row.                          |
-| **H2** | The leaf README's **"Never parses."** bullet gains a test-tree qualifier, matching the shape its sibling ECMA-version bullet already uses. One approved edit to a committed Phase-0 artifact.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | 2026-07-30. Execution owed by the Wave-1 close `docs:` commit.             |
-| **H3** | The leaf's default-deny wording is `'X' isn't in the admitted syntax`. Ruled at 1.4's 🔍 checkpoint, over a first draft using the leaf's own term "curated slice" — `ar-4` measured that term to be invisible to learners and argued the swap was jargon-for-jargon rather than jargon removal. The concept keeps the name "curated slice" in the leaf's prose and types; only the learner-facing string is plain.                                                                                                                                                                                                                                                                                                                                                                              | 2026-07-30. `a7be59e6` body; live at `screening/collect-violations.ts:85`. |
-| **H4** | **A ledger states the rule that now holds.** A superseded row is corrected in place; annotation trails and historical notes in documentation are a footgun and are not written. This ruling retires the earlier one that had frozen AR-1 CONSIDER row 5 as a historical record — row 5 now names the five members, so the ledger and the leaf's `DOCS.md` agree and a naive `git grep` returns the rule rather than its predecessor.                                                                                                                                                                                                                                                                                                                                                            | 2026-08-05. This row, and row 5 itself.                                    |
-| **H5** | This commit carries **`ar-1` and `ar-4`**. `ar-2` does not fire: its subject is an architectural sketch and its inputs are `DOCS.md`/`README.md`/`types.ts` [read: [DEV.md § AR-2: Architectural Sketch Challenge](../../DEV.md#ar-2-architectural-sketch-challenge)], none of which a ruling ledger has. Full ceremony, no agent-side lightening.                                                                                                                                                                                                                                                                                                                                                                                                                                              | 2026-08-05, at the plan gate. This row.                                    |
-| **H6** | Increment 1.5's three boundary tests ship **without `PINNED(…)` markers** while the pinned-guard hook is unregistered (FLAG 8). A marker that reads as protected while nothing defends it is worse than none. The markers are added once the guard is re-armed.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | 2026-08-05. This row.                                                      |
+| #      | Ruling                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Recorded                                                                   |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------- |
+| **H1** | The leaf's default-deny refusal message is reworded **domain-blind**. The superseded wording `'X' is not allowed at this language level` was **shipped production code**, not a draft — it was live in the level before the move [measured 2026-08-05: `git show a7be59e6^:src/lib/study-lenses/language-levels/jej/collect-violations.ts` → line 92]. It carries level vocabulary into a leaf whose committed README forbids it [read: `src/lib/study-lenses/lib/screening/README.md` § Conventions — _"Domain-blind. No language levels … in the code or in the prose"_]. So this is a **behavior change**, as `a7be59e6`'s body classifies it, and that is why 1.4 became **user-observable** and a 🔍 sandbox checkpoint fired on it. H1 rules that it be reworded; **H3 settles what to**.                                                                                                                                                                                                                                                  | 2026-07-30. `a7be59e6` commit body, and this row.                          |
+| **H2** | The leaf README's **"Never parses."** bullet gains a test-tree qualifier, matching the shape its sibling ECMA-version bullet already uses. One approved edit to a committed Phase-0 artifact.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | 2026-07-30. Execution owed by the Wave-1 close `docs:` commit.             |
+| **H3** | The leaf's default-deny wording is `'X' isn't in the admitted syntax`. Ruled at 1.4's 🔍 checkpoint, over a first draft using the leaf's own term "curated slice" — `ar-4` measured that term to be invisible to learners and argued the swap was jargon-for-jargon rather than jargon removal. The concept keeps the name "curated slice" in the leaf's prose and types; only the learner-facing string is plain.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | 2026-07-30. `a7be59e6` body; live at `screening/collect-violations.ts:85`. |
+| **H4** | **A ledger states the rule that now holds.** A superseded row is corrected in place; annotation trails and historical notes in documentation are a footgun and are not written. This ruling retires the earlier one that had frozen AR-1 CONSIDER row 5 as a historical record — row 5 now names the five members, so the ledger and the leaf's `DOCS.md` agree and a naive `git grep` returns the rule rather than its predecessor. **The retired wording was `(envelope/wrapper/identifier/literal/declaration node types)`, recoverable at `git show 4b244b23:.planning-handoffs/aithor-contract-proposals/AR-LOG.md`** — recorded here, on the ruling row, because `2437801d`'s body quotes that exact phrase in a `[read:]` tag and **a commit body cannot be amended**, so without this pointer the wave's own `ar-5` follows a citation into nothing and cannot tell a correction from an invention. One provenance clause on the ruling row is not the annotation trail this ruling forbids; a trail accreting on row 5 itself would be. | 2026-08-05. This row, and row 5 itself.                                    |
+| **H5** | This commit carries **`ar-1` and `ar-4`**. `ar-2` does not fire: its subject is an architectural sketch and its inputs are `DOCS.md`/`README.md`/`types.ts` [read: [DEV.md § AR-2: Architectural Sketch Challenge](../../DEV.md#ar-2-architectural-sketch-challenge)], none of which a ruling ledger has. Full ceremony, no agent-side lightening.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | 2026-08-05, at the plan gate. This row.                                    |
+| **H6** | Increment 1.5's three boundary tests ship **without `PINNED(…)` markers** while the pinned-guard hook is unregistered (FLAG 8). A marker that reads as protected while nothing defends it is worse than none. The markers are added once the guard is re-armed.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | 2026-08-05. This row.                                                      |
 
 **Phase 0's four maintainer rulings are not renumbered here.** They were taken
 2026-07-30 at the Phase-0 gate and are durable in `2437801d`'s body, which is
@@ -193,9 +194,25 @@ them** — the amendment H4's row-5 correction now publishes.
 
 ### AR verdicts (wave 1)
 
-Transported from the four commit bodies, because `git grep` cannot search commit
-messages — it searches the tree — so a verdict recorded only in a body is not
-reachable from any of § Ruling provenance's three homes.
+Transported from **all six** wave commit bodies, because `git grep` cannot
+search commit messages — it searches the tree — so a verdict recorded only in a
+body is not reachable from any of
+[DEV.md § Ruling provenance](../../DEV.md#ruling-provenance)'s three homes.
+Phase 0 ran `ar-1`/`ar-2`; the increments ran `ar-3`/`ar-4`, so they are tabled
+separately rather than forced into shared columns.
+
+**Phase 0 is where the wave's only two PAUSEs are**, and an earlier revision of
+this subsection omitted them — a table headed "wave 1" that showed four
+CONSIDERs and no PAUSE told a Wave-2 reader the wave never paused.
+
+| #      | `ar-1`                                                                                                                                       | `ar-2`                                                                              |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| P0     | **PAUSE** → resolved. Three blockers, six important, two minor; **the floor's membership went to the maintainer**, the other ten batch-fixed | **PAUSE** → resolved. Two blockers, ten important, eight minor, all fixed in-commit |
+| P0 fix | **no verdicts stated in the body** [measured: `git show -s --format=%B 1b8588f0`]                                                            | same                                                                                |
+
+P0's `ar-1` row carries the wave's most consequential referral: it is where the
+five-member floor amendment (H4, row 5) originated. That sentence existed only
+in `2437801d`'s body until this subsection transported it.
 
 | #   | `ar-3`                                                                                                                                                          | `ar-4`                                                                                                                  |
 | --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
@@ -226,10 +243,12 @@ walking "let n = 3; { n; }"
   five + both                    -> []
 ```
 
-[measured 2026-08-05 by running the leaf's **own** `collectViolations` and
-`PARSE_SETTINGS` — bundled with esbuild and executed, not re-implemented — over
-acorn 8.16.0 at `sourceType: 'module'`. Independently re-derived 2026-07-30 and
-again by `ar-1`, all three agreeing.]
+[measured 2026-08-05 by bundling the leaf's **own** `collect-violations.ts` and
+`parse-settings.ts` with esbuild and executing the bundle against
+`node_modules/acorn` 8.16.0 at `sourceType: 'module'` — the leaf's real exports,
+not a re-implementation of its walk.] [relayed: independently re-derived
+2026-07-30 by the Phase-1 session, and again by `ar-1` and by `ar-4`, all four
+agreeing cell-for-cell.]
 
 **The durable lesson is about the published parse, not about this ledger.**
 acorn nests a `VariableDeclarator` beneath every `VariableDeclaration`, so a
@@ -238,14 +257,31 @@ nodes**, and must count two when it admits neither. That is a fact about the
 tree the package publishes, and it outlives any wave.
 
 The prompt's specific wrong number is nevertheless traceable: the floor it was
-written against admitted `VariableDeclarator` and not `VariableDeclaration`
-[read: the wave's Phase-0 handoff — _"a `ReadonlySet<string>` of **six** node
-types — `Program`, `ExpressionStatement`, `BlockStatement`, `Identifier`,
-`Literal`, `VariableDeclarator`"_], which is exactly the row of the table above
-that yields one violation named `VariableDeclaration`. The membership was
-amended to five before Phase 1 opened; the expectation was not. **Row 5 has
-since been corrected to name the five (H4), so the stale text that carried the
-superseded membership no longer exists to be re-derived from.**
+written against admitted `VariableDeclarator` and not `VariableDeclaration` —
+_"a `ReadonlySet<string>` of **six** node types — `Program`,
+`ExpressionStatement`, `BlockStatement`, `Identifier`, `Literal`,
+`VariableDeclarator`"_ [relayed:
+`~/.claude/plans/cold-start-handoff-agile-beaver.md`, quoted verbatim; a plan
+file is outside the tree, so this is `relayed`, never `read` — the quote is
+reproduced inline here precisely because that file is ephemeral and `git grep`
+cannot reach it]. That is exactly the row of the table above which yields one
+violation named `VariableDeclaration`. The membership was amended to five before
+Phase 1 opened; the expectation was not.
+
+**Two corrections to how this defect used to be explained.** First, row 5 never
+carried the six-member list — it carried a five-item _category_ shorthand, and
+the six-member list lives in the launch prompt's ancestor handoff. So H4's row-5
+correction removed a stale category; it did **not** remove the text that
+produced the wrong number, and nothing can, because a plan file is not a durable
+artifact and is not corrected. That is why the durable lesson above is stated
+about the parse rather than about any one document. Second, the same superseded
+quote fixes the wrong **shape**: the floor ships as a node-rule table —
+`SyntaxAllowlist['nodes']` narrowed to all-`true` — not as a `ReadonlySet`
+[read: `src/lib/study-lenses/lib/screening/README.md` § Public API —
+_"`STRUCTURAL_FLOOR` — a node-rule table of the types an inventory-derived slice
+must admit"_]. A set and an all-`true` table are not interchangeable at the
+union site that README describes, and `types.ts` declares no floor type and
+needs none.
 
 #### DEF-2 — the proposed zero-case was blind to one floor member
 
@@ -279,9 +315,10 @@ failing test.
 and foreign commits accumulate between the wave's own commits faster than any
 written count survives: **49 as of `e11714a5`**, having read 38, 44 and 46 at
 three earlier HEADs the same day [measured 2026-08-05: `git rev-list --count
-a7be59e6..HEAD`]. **Take the number from the instrument, never from this line**
-— it is pinned to a SHA precisely so a reader can tell it is stale rather than
-trusting it. `<baseline>..HEAD` is therefore not this changeset, and
+a7be59e6..e11714a5` — the SHA is in the command, not only in the prose, so the
+tag reproduces its own value]. **Take the number from the instrument, never from
+this line** — it is pinned to a SHA precisely so a reader can tell it is stale
+rather than trusting it. `<baseline>..HEAD` is therefore not this changeset, and
 `.claude/agents/ar-5.md` instruction 3 — which tells the reviewer to run exactly
 that — is overridden **in the prompt**, never by editing the agent file, which
 is governance surface. The reviewer is handed the wave's commits and runs
@@ -384,12 +421,17 @@ compressed [read:
    because 1.4 planted `PINNED` markers that nothing currently defends, and it
    is why H6 rules 1.5's markers out until the guard returns. Raised to the
    human directly, not left to this ledger.
-9. **`DEV.md`'s § Directory Documentation Convention contradicts its own
-   template on the data-flow heading level.** The prose requires a
-   `## Data flow` section; the fenced template inside the same section nests
-   `### Data flow`, and both recent exemplar leaves — including this one —
-   follow the template [measured 2026-08-05: `grep -n "Data flow" DEV.md` → the
-   prose at 659, 667 and 697 against the template at 747 and 772; `grep -n
-   "^#\{2,3\} " src/lib/study-lenses/lib/screening/DOCS.md` → `###`]. Governance
-   surface, so the human's call, not an agent's. Source: `2437801d` body — the
-   FLAG the earlier draft of this list omitted.
+9. **[DEV.md § Directory Documentation Convention](../../DEV.md#directory-documentation-convention)
+   contradicts its own template on the data-flow heading level.** Its prose
+   bullets require a `## Data flow` section; the fenced template inside the same
+   section nests `### Data flow`, and both recent exemplar leaves — including
+   this one — follow the template [read: that section, prose — _"A **`## Data
+   flow`** section with a Mermaid flowchart diagram"_ — against its own fenced
+   template's `### Data flow`; measured 2026-08-05: `grep -n "^#\{2,3\} "
+   src/lib/study-lenses/lib/screening/DOCS.md` → `###`]. **Cited by heading, not
+   by line**: an earlier revision of this row gave `DEV.md` line numbers that a
+   same-day peer commit invalidated within the hour, which is the rot
+   [DEV.md § Section citations](../../DEV.md#section-citations) warns about —
+   _"Never cite a document **section** by `file:line`"_. Governance surface, so
+   the human's call, not an agent's. Source: `2437801d` body — the FLAG the
+   earlier draft of this list omitted.
