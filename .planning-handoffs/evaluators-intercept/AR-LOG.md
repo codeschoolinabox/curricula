@@ -573,3 +573,37 @@ reaching the threw arm's loc under `exactOptionalPropertyTypes`.
   better fits the module's never-guess posture, at zero happy-path cost. Kept as
   pinned — inverting a pin needs human sign-off — and surfaced here for the gate
   beside the chain-root flag.
+
+### I5 — `ar-3` on the interaction-channel cluster (**PAUSE** → decomposed and executed)
+
+Every finding test-additive or mechanical; decomposed under the standing ruling,
+recorded for audit. Two blockers:
+
+- **`confirm`'s `true` was never exercised** — only the falsy branch; a Fake-It
+  dressed as validation (`answer !== false` throws) would have passed all twenty
+  rows. Closed with the any-boolean row.
+- **`alert` never rode the latch or teardown pipeline** — the one
+  validation-free kind is exactly where a fast path bypassing both gates is most
+  tempting, and the kind's @remarks make twice-inert and inert-after-teardown
+  UNCONDITIONAL across kinds. Closed with an alert-after-teardown row and an
+  alert-second-answer row.
+
+Also applied: the three in-body try/catch blocks replaced (one collapsed to the
+file's own `.not.toThrow()` idiom; two moved into a hoisted `swallowThrow`
+helper, the R-1 capture-helper shape), and a two-channel independence row (a
+module-scoped latch would previously have failed only as collateral damage,
+never by a row naming the defect). The teardown-vs-latch order when BOTH hold
+stays deliberately unpinned — both paths inert, no learner-facing difference,
+ratified by the reviewer.
+
+### I5 — `ar-4` on the interaction-channel implementation (**CONSIDER** → resolved)
+
+The reviewer probed the real module at runtime (top-level frozen, request
+frozen, respond callable, strict-mode mutation throws), verified re-entrant
+safety (the latch is set BEFORE deliver), and confirmed the security posture
+(validation touches only typeof/=== — no property access on the untrusted
+answer). Applied: the missing top-level `Object.isFrozen(pending)` row (the one
+place this suite was thinner than every sibling's), the `WHY the cast` tag on
+the post-validation cast (a type predicate would be unsound on alert's
+validate-anything arm), and an unreachable-branch comment on
+`describeExpected`'s alert arm (kept for the three-kind symmetry).
