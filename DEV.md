@@ -1653,6 +1653,13 @@ sit between them:
      → HUMAN GATE
 ```
 
+**The chain above draws the gates at `ceremony: full`.** Which of AR-1 and AR-2
+actually fire is set by the declared level — each `### AR-N` section's **Skip:**
+line carries that caveat ([§ ceremony](#ceremony)). What binds unconditionally
+is the **artifact order**: 0.1 → 0.2 → 0.3 → the human gate, at every level.
+Reading a missing AR as license to reorder or drop an artifact inverts
+[non-negotiable invariant 2](./AGENTS.principal.md#non-negotiable-invariants).
+
 **0.1. README.md — and the ubiquitous language inside it.** The README is the
 domain model in prose: what does this module do, where does it fit in the
 bounded context, what does it own, and what lies outside its boundary? Identify
@@ -1703,9 +1710,15 @@ ruling 2026-08-04). Spawn the registered `ar-1` reviewer. See
 because they are one contract expressed three ways:
 
 - **types.ts** — the domain model expressed in TypeScript, using the 0.1
-  vocabulary. Types are the contract; they lock what 0.1 described in prose.
+  vocabulary and incorporating AR-1's feedback on the design it just challenged.
+  Types are the contract; they lock what 0.1 described in prose. Translate the
+  ubiquitous language directly into type names: `Config` in the glossary becomes
+  `type Config` here — not `Options`, not `Settings`, not `Params`. Type errors
+  after this step become the **TODO list for implementation**.
 - **The architectural sketch in DOCS.md** — the structural target the Refactor
-  step is later held against, including the Mermaid `## Data flow` diagram. See
+  step is later held against, including the Mermaid `## Data flow` diagram. The
+  sketch answers one question: **what shape must a correct implementation
+  take?** See
   [§ Directory Documentation Convention](#directory-documentation-convention)
   for the format.
 - **The tests — written for real, and committed skipped** (human ruling
@@ -1716,7 +1729,12 @@ because they are one contract expressed three ways:
   would expire Fake It immediately — see
   [§ Fake It (Till You Make It)](#fake-it-till-you-make-it).
 
-**→ AR-2 fires here**, challenging the sketch against the types.
+**→ AR-2 fires here**, challenging the sketch against the types. The sketch is
+the **single most consequential document in the workflow** — it is what the
+entire Refactor step is held against. A first-pass agent writing it without
+challenge will routinely produce a sketch that is either too abstract (useless
+as a structural target) or too prescriptive (pseudocode in disguise). That is
+what this gate exists to catch.
 
 **Then review, resolve, and commit.** Can you read `types.ts`, `README.md` and
 `DOCS.md` together and fully predict what the implementation will do and what
@@ -1779,6 +1797,10 @@ For each behavioral increment:
      triangulated away by the second test. If hardcoded values survive here,
      either the test suite didn't triangulate or generalization was skipped.
    - Does the code use the ubiquitous language from Phase 0?
+
+   If the implementation passes all tests but doesn't reflect the sketch — wrong
+   phases, collapsed concerns, missing boundaries — **refactoring is not
+   complete**.
 
    **Data flow check** (ephemeral) — sketch the actual intra-file data flow as
    Mermaid for your own reasoning; this is a thinking tool, not a committed
