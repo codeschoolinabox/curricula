@@ -197,6 +197,15 @@ describe('assembleParseFacts', () => {
 		it('an admitted program crosses the seam with nothing to report', () => {
 			expect(jejViolations('let count = 1;\n')).toEqual([]);
 		});
+
+		it('a grouping parenthesis reaches the level as neither a node nor a longer path', () => {
+			// PINNED(human ruling 2026-07-30: published ast is ESTree-shaped — parens fold away; the level's allowlist carries no ParenthesizedExpression rule under a default-deny screen, so a surviving wrapper would be reported as a grammar violation)
+			expect(
+				jejViolations('let x = (document);\n').map(
+					(violation) => violation.nodePath,
+				),
+			).toEqual(['$.body.0.declarations.0.init']);
+		});
 	});
 });
 
