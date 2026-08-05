@@ -375,10 +375,14 @@ that a reasonable reading of the kind alone would get wrong:
 - **The halt payload is narrowed exactly once**, thread-side, and a malformed or
   missing payload is the defensive `'defect'` arm — never a guess.
 - **Precedence over the carried data runs through the trip, not the loc.** A
-  well-formed trip means the guard stopped the run; otherwise a non-natural halt
-  means the program threw. Branching on whether a location exists would be the
-  outcome-label anti-pattern in a new costume — and a guard throw propagating
-  through a wrapped call legitimately carries both.
+  well-formed trip on a halt that records a stop means the guard stopped the
+  run; otherwise a non-natural halt means the program threw. Branching on
+  whether a location exists would be the outcome-label anti-pattern in a new
+  costume — and a guard throw propagating through a wrapped call legitimately
+  carries both. A halt that claims a natural end AND carries a trip asserts two
+  contradictory things about one stop; no correct halt author produces it, so
+  every branch that reads a halt answers it as the defect it is rather than
+  believing one field over the other (human ruling 2026-08-05).
 - **`loop-cap` carries the trip and no separate location.** The trip is the
   classification AND the attribution in one field; a second span beside it would
   be a second copy of one fact, and the two would disagree the moment a guard

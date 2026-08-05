@@ -724,3 +724,50 @@ arrival leaving the parked waiter for `settle` to complete rather than hanging.
 - **Noted, not a finding**: DOCS phases 2 and 3 are collapsed into one
   `assemble` function, exactly as the committed sibling does; the intra-file
   flow still matches the diagram node for node.
+
+### H-5 and H-6 executed — `ar-4` over the pair (**CONSIDER** → both findings ruled and applied)
+
+The two rulings were implemented as one repair changeset over the already-
+committed I1 and I4, each inverting the `PINNED` row its ruling overturned.
+
+**H-5's shape.** The region-wide "inside a `ChainExpression`" flag is replaced
+by a three-state spine position (`none` | `root` | `interior`) threaded through
+the walk, with the child KEY now available so the spine can be followed through
+`callee`/`object` alone. The chain's root is `ChainExpression.expression`;
+interior links hang off `callee.object`; anything reached off any other key — an
+argument above all — leaves the spine and is judged by the ordinary rules, which
+is the H-5 extension.
+
+The reviewer verified this by PROBE rather than by reading, across seven shapes
+(`a?.b()`, `a?.b().c().d()`, `a?.b(c())`, `a?.b?.().c()`, `(a?.b)()`,
+`a?.[k]()`, and a chain nested in a chain's argument), and additionally ran a
+runtime harness comparing original against rewritten evaluation under both a
+nullish and a live receiver: throw/no-throw parity and identical call order on
+every shape. It reports finding no AST key other than `callee`/`object` through
+which an interior link is reachable, so the spine rule cannot wrap one. It also
+confirmed V8 never evaluates a short-circuited chain's argument — the mechanism
+the extension's rationale rests on.
+
+**H-6's reach — a second human ruling.** The reviewer probed the shipped fix and
+found it closed only the branch it gated: the same natural+trip forgery under
+`outcome: 'completed'` still answered `clean`, and under `'cancelled'` answered
+`canceled`. Since H-6's recorded text is unconditional, this was put back to the
+human. **Ruled: extend to the completed branch, leave cancelled alone.** The
+reasoning executed rather than inferred: the completed branch READS the halt (it
+requires one to answer clean), so a contradictory halt there is the same
+never-guess case; the cancelled branch consults no halt at all by design — a
+consumer-ended run's settlement does not depend on what the worker said — so
+extending there would invent a dependency. Both halves now carry a row, and the
+asymmetry carries a comment at the site.
+
+**The stale prose — a third ruling, and the one sanctioned trio edit of this
+phase.** The reviewer found four descriptions of the precedence rule still
+reading as the pre-H-6 rule: `map-settlement.ts`'s own header (mine to fix), and
+three in the RATIFIED trio — `types.ts`'s `InterceptHalt` doc,
+`README.md § Design commitments`, and `DOCS.md` phase 10. It named the risk
+precisely: a future reader "fixes" the code back to match the docs and silently
+re-inverts the ruling. **Ruled: amend the trio now**, breaking this phase's
+byte-untouched commitment deliberately and on the human's say-so. Loss ledger:
+nothing removed at any of the three sites — each gains a clause; the
+pre-existing sentences stand unchanged apart from "a well-formed trip" becoming
+"a well-formed trip on a halt that records a stop".

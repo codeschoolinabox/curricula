@@ -4,14 +4,18 @@
  *
  * TOTAL by a precedence rule over the CARRIED DATA, running THROUGH THE
  * TRIP — never through the outcome label, and never through whether a span
- * exists: a well-formed trip means the guard stopped the run (`'loop-cap'`,
- * the trip being classification AND attribution in one field, NO separate
- * span beside it); otherwise a non-natural halt means the program threw
+ * exists: a well-formed trip ON A HALT THAT RECORDS A STOP means the guard
+ * stopped the run (`'loop-cap'`, the trip being classification AND
+ * attribution in one field, NO separate span beside it); a natural halt
+ * carrying a trip contradicts itself and takes the defensive arm on every
+ * branch that reads a halt (human ruling H-6, 2026-08-05); otherwise a
+ * non-natural halt means the program threw
  * (`'threw'`, carrying the stamped call site or its honest null);
  * natural-end halts fall through. Else an engine-made error answers — the
  * budget as its own `'timeout'`, the machinery causes onto `'defect'`. Else
- * a consumer-ended run is canceled and a completed one carrying its natural
- * halt is clean. Every remaining combination is the defensive
+ * a consumer-ended run is canceled — that branch consults no halt, by
+ * design — and a completed one carrying an UNATTRIBUTED natural halt is
+ * clean. Every remaining combination is the defensive
  * `'defect'`/`'unreachable-outcome'` arm, loudly flagged as a dev
  * condition — never a guess. A guard throw that propagated through a
  * wrapped call legitimately carries BOTH trip and loc; the trip wins, which
@@ -54,10 +58,13 @@ export default function mapSettlement(
 ): InterceptSettlement {
 	const halt = narrowHalt(settlement.halt);
 
-	// The trip first, unconditioned on the natural flag — the committed
-	// phase-10 wording read literally: "a well-formed trip means the guard
-	// stopped the run, ELSE a non-natural halt means the program threw".
-	if (halt !== null && halt.trip !== null) {
+	// The trip decides FIRST among the halt-backed arms, but only for a halt
+	// that actually records a stop: the same phase-10 sentence ends "natural-end
+	// halts fall through", and this module's own worker never pairs a natural
+	// end with a trip. A halt asserting both is self-contradictory forged data
+	// and falls to the defensive arm rather than being guessed at (human ruling
+	// H-6, 2026-08-05).
+	if (halt !== null && !halt.natural && halt.trip !== null) {
 		return freezeInPlace<InterceptSettlement>({
 			ended: 'error',
 			error: {
@@ -94,7 +101,18 @@ export default function mapSettlement(
 		return freezeInPlace<InterceptSettlement>({ ended: 'canceled' });
 	}
 
-	if (settlement.outcome === 'completed' && halt !== null) {
+	// A completed run answers clean only on a halt that carries no
+	// attribution: this branch READS the halt, so a natural halt arriving
+	// with a trip is the same self-contradiction the trip branch refuses to
+	// guess about and falls through to the defensive arm (human ruling H-6 as
+	// extended, 2026-08-05). The canceled branch above deliberately does NOT
+	// consult the halt at all — a consumer-ended run's settlement does not
+	// depend on what the worker said — so the asymmetry is by design.
+	if (
+		settlement.outcome === 'completed' &&
+		halt !== null &&
+		halt.trip === null
+	) {
 		return freezeInPlace<InterceptSettlement>({ ended: 'clean' });
 	}
 

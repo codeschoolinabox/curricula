@@ -180,18 +180,29 @@ describe('wrapCallExpressions', () => {
 			);
 		});
 
-		it('a call inside an optional chain is identity by reference', () => {
-			const guarded = 'a?.b();';
-
-			// PINNED(ar-1 decline commitment 2026-08-04, README § Design commitments: a call whose short-circuit a wrap would defeat is left unwrapped)
-			expect(wrapSame(guarded)).toBe(guarded);
+		it("a chain's ROOT call is wrapped, carrying the chain's own span", () => {
+			// PINNED(human ruling H-5 2026-08-05: the root's span already covers the whole chain verbatim, so wrapping it is behavior-preserving on every axis ar-4 probed — return value, short-circuit on a nullish receiver, and argument-evaluation side effects; only INTERIOR links defeat the short-circuit)
+			expect(wrapSame('a?.b();')).toBe("__$lc('1:0:1:6', () => a?.b());");
 		});
 
-		it('every call in a continuing chain is declined, whatever its own optional flag', () => {
-			const guarded = 'a?.b().c().d();';
+		it('a continuing chain wraps only its root, leaving every interior link verbatim', () => {
+			// PINNED(human ruling H-5 2026-08-05: acorn flags the member, not the call, so every call node here is optional:false — the spine rule is what distinguishes them; wrapping an interior link turns a short-circuiting program into a throwing one)
+			expect(wrapSame('a?.b().c().d();')).toBe(
+				"__$lc('1:0:1:14', () => a?.b().c().d());",
+			);
+		});
 
-			// PINNED(ar-3 I1 resolution 2026-08-05: acorn flags the member, not the call — every call node here is optional:false, so only the chain-ancestor rule declines them; wrapping an interior link makes a short-circuiting program throw)
-			expect(wrapSame(guarded)).toBe(guarded);
+		it('a trapped surface reached through a chain gets its loc', () => {
+			expect(wrapSame('console?.log(x);')).toBe(
+				"__$lc('1:0:1:15', () => console?.log(x));",
+			);
+		});
+
+		it("a call in a chain call's ARGUMENTS is wrapped — it is no chain link", () => {
+			// PINNED(human ruling H-5 extension 2026-08-05: an argument call cannot affect the chain's short-circuit — if the receiver is nullish the argument never evaluates either way — so declining it would cost a span for no safety reason)
+			expect(wrapSame('a?.b(c());')).toBe(
+				"__$lc('1:0:1:9', () => a?.b(__$lc('1:5:1:8', () => c())));",
+			);
 		});
 
 		it('a super call is identity by reference', () => {

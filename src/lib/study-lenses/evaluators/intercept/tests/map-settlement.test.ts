@@ -81,6 +81,47 @@ describe('mapSettlement', () => {
 				Object.isFrozen(mapSettlement(settlementOf({ outcome: 'cancelled' }))),
 			).toBe(true);
 		});
+
+		it('a completed settlement whose natural halt carries a trip is the defensive arm, not clean', () => {
+			// PINNED(human ruling H-6 as extended 2026-08-05: this branch READS the halt, so the same self-contradiction the trip branch refuses to guess about cannot pass here either)
+			const mapped = quietly(() =>
+				mapSettlement(
+					settlementOf({
+						halt: haltOf({
+							trip: {
+								loopIndex: 1,
+								loc: {
+									start: { line: 1, column: 0 },
+									end: { line: 1, column: 5 },
+								},
+							},
+						}),
+					}),
+				),
+			);
+
+			expect(mapped).toHaveProperty('error.cause', 'unreachable-outcome');
+		});
+
+		it('a cancelled settlement ignores the halt entirely, by design', () => {
+			// PINNED(human ruling H-6 as extended 2026-08-05: the canceled branch consults no halt — a consumer-ended run's settlement does not depend on what the worker said, so the asymmetry with the completed branch is deliberate)
+			expect(
+				mapSettlement(
+					settlementOf({
+						outcome: 'cancelled',
+						halt: haltOf({
+							trip: {
+								loopIndex: 1,
+								loc: {
+									start: { line: 1, column: 0 },
+									end: { line: 1, column: 5 },
+								},
+							},
+						}),
+					}),
+				),
+			).toStrictEqual({ ended: 'canceled' });
+		});
 	});
 
 	describe('a halt recording the program its own throw', () => {
@@ -231,25 +272,26 @@ describe('mapSettlement', () => {
 			});
 		});
 
-		it('a well-formed trip riding a NATURAL halt still resolves through the trip', () => {
-			// PINNED(ar-3 I4 resolution 2026-08-05, honoring the committed DOCS phase-10 wording literally: "a well-formed trip means the guard stopped the run, ELSE a non-natural halt means the program threw" — the trip is checked first, unconditioned on the natural flag, which here acts as the outcome-label the precedence exists to ignore)
-			const settlement = settlementOf({
-				outcome: 'errored',
-				halt: haltOf({
-					trip: {
-						loopIndex: 1,
-						loc: {
-							start: { line: 1, column: 0 },
-							end: { line: 1, column: 5 },
-						},
-					},
-				}),
-			});
-
-			expect(mapSettlement(settlement)).toHaveProperty(
-				'error.reason',
-				'loop-cap',
+		it('a well-formed trip riding a NATURAL halt is the defensive arm, not loop-cap', () => {
+			// PINNED(human ruling H-6 2026-08-05, inverting the I4 ar-3 pin: the same phase-10 sentence's other clause is "natural-end halts fall through", and this combination is unreachable from intercept's own worker (its natural-end branch hardcodes trip: null) — so a halt asserting both is self-contradictory forged data, and the one place this mapper would otherwise trust one field over a directly contradicting sibling field)
+			const mapped = quietly(() =>
+				mapSettlement(
+					settlementOf({
+						outcome: 'errored',
+						halt: haltOf({
+							trip: {
+								loopIndex: 1,
+								loc: {
+									start: { line: 1, column: 0 },
+									end: { line: 1, column: 5 },
+								},
+							},
+						}),
+					}),
+				),
 			);
+
+			expect(mapped).toHaveProperty('error.cause', 'unreachable-outcome');
 		});
 
 		it('freezes the settlement through the trip span', () => {

@@ -111,6 +111,9 @@ const FUNCTION_BOUNDARY_TYPES = new Set([
 
 const SUSPENSION_TYPES = new Set(['AwaitExpression', 'YieldExpression']);
 
+/** The keys that continue a chain's spine downward from its root. */
+const SPINE_KEYS = new Set(['callee', 'object']);
+
 /** Fixed parse goal, loud on failure — never a fallback (README § Design
  * commitments: the same goal the snippet was parsed with). */
 function parseSource(code: string, sourceType: 'script' | 'module'): Node {
@@ -129,22 +132,51 @@ function parseSource(code: string, sourceType: 'script' | 'module'): Node {
  */
 function collectEligibleCalls(root: Node): readonly Node[] {
 	const calls: Node[] = [];
-	visitForCalls(root, false, calls);
+	visitForCalls(root, 'none', calls);
 	return calls;
 }
 
-function visitForCalls(node: Node, inChain: boolean, calls: Node[]): void {
-	const childInChain = inChain || node.type === 'ChainExpression';
-	eachChildNode(node, function collectChild(child) {
-		if (child.type === 'CallExpression' && isEligible(child, childInChain)) {
+/**
+ * Where a node sits relative to an optional chain: `'none'` outside one,
+ * `'root'` for the chain's outermost expression (whose span covers the whole
+ * chain, so wrapping it is safe), `'interior'` for a link reached by
+ * descending the chain's SPINE from that root — the only position where a
+ * wrap would defeat the short-circuit (human ruling H-5). A call reached
+ * off any other key, an argument especially, leaves the spine and is judged
+ * by the ordinary rules.
+ */
+type SpinePosition = 'none' | 'root' | 'interior';
+
+function visitForCalls(
+	node: Node,
+	position: SpinePosition,
+	calls: Node[],
+): void {
+	eachChildNode(node, function collectChild(child, key) {
+		const childPosition = spinePositionOf(node, position, key);
+		if (child.type === 'CallExpression' && isEligible(child, childPosition)) {
 			calls.push(child);
 		}
-		visitForCalls(child, childInChain, calls);
+		visitForCalls(child, childPosition, calls);
 	});
 }
 
-function isEligible(call: Node, inChain: boolean): boolean {
-	if (inChain) {
+function spinePositionOf(
+	node: Node,
+	position: SpinePosition,
+	key: string,
+): SpinePosition {
+	if (node.type === 'ChainExpression') {
+		return key === 'expression' ? 'root' : 'none';
+	}
+	if (position === 'none' || !SPINE_KEYS.has(key)) {
+		return 'none';
+	}
+	return 'interior';
+}
+
+function isEligible(call: Node, position: SpinePosition): boolean {
+	if (position === 'interior') {
 		return false;
 	}
 	// WHY the cast: acorn's public `Node` type carries only type/start/end/loc;
@@ -235,7 +267,10 @@ function collectTopmostWrapped(
 
 /** Walks a node's direct child nodes — array-valued and single — in key
  * order, skipping the meta keys. */
-function eachChildNode(node: Node, visit: (child: Node) => void): void {
+function eachChildNode(
+	node: Node,
+	visit: (child: Node, key: string) => void,
+): void {
 	for (const key of Object.keys(node)) {
 		if (META_KEYS.has(key)) {
 			continue;
@@ -244,7 +279,7 @@ function eachChildNode(node: Node, visit: (child: Node) => void): void {
 		const items = Array.isArray(value) ? value : [value];
 		for (const item of items) {
 			if (isNode(item)) {
-				visit(item);
+				visit(item, key);
 			}
 		}
 	}

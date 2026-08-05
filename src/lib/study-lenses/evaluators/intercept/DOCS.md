@@ -91,14 +91,18 @@ nothing to zoom into.)
 
 10. **Map the settlement** (sync, pure, TOTAL) — the engine's settlement is
     translated onto the kind's three arms by a precedence rule over the CARRIED
-    DATA, running through the trip: a well-formed trip means the guard stopped
-    the run, else a non-natural halt means the program threw; natural-end halts
-    fall through — else an engine-made error answers, the budget or the
-    machinery; else a consumer-ended run is canceled and a completed one clean;
-    every remaining combination is the defensive defect arm, loudly flagged. The
-    halt payload is narrowed exactly once, here. Input: the engine settlement.
-    Output: intercept's settlement — its error arm carrying the run total and
-    either the guard's trip or the throw's call site — deep-frozen.
+    DATA, running through the trip: a well-formed trip on a halt that records a
+    stop means the guard stopped the run, else a non-natural halt means the
+    program threw; natural-end halts fall through, and one that carries a trip
+    anyway is self-contradictory data every halt-reading branch answers as the
+    defect it is (human ruling 2026-08-05) — else an engine-made error answers,
+    the budget or the machinery; else a consumer-ended run is canceled, its
+    settlement deliberately independent of any halt, and a completed one
+    carrying an unattributed natural halt is clean; every remaining combination
+    is the defensive defect arm, loudly flagged. The halt payload is narrowed
+    exactly once, here. Input: the engine settlement. Output: intercept's
+    settlement — its error arm carrying the run total and either the guard's
+    trip or the throw's call site — deep-frozen.
 
 11. **Settle once, releasing what is suspended** (teardown) — the companion
     promise resolves exactly once, whatever ended the run. Ceasing to pull stops

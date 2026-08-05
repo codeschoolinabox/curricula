@@ -316,8 +316,12 @@ export type InterceptWorkerConfig = {
  * It carries BOTH `trip` and `loc` because a guard throw that propagates
  * through a wrapped call legitimately has both. The mapper's precedence
  * therefore runs through the TRIP, never through "does a span exist": a
- * well-formed trip means the guard stopped the run, and only otherwise does a
- * non-natural halt mean the program threw.
+ * well-formed trip ON A HALT THAT RECORDS A STOP means the guard stopped the
+ * run, and only otherwise does a non-natural halt mean the program threw. A
+ * `natural` halt carrying a trip asserts two contradictory things about one
+ * stop — unreachable from a correct halt author, so every mapper branch that
+ * reads a halt answers it with the defensive `'defect'` arm rather than
+ * guessing which field to believe (human ruling 2026-08-05).
  *
  * Not frozen. What DEV.md § 13 requires of a value crossing `postMessage` is
  * clone-safe SHAPE, which this has; the freeze half protects in-process
