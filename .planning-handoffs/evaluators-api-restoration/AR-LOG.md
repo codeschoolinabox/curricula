@@ -112,10 +112,15 @@ the `PromiseLike` `.then` delegate, `RunOptions.io` entirely, `rejections` and
 the parse/formatting error arms, the `io-error` termination cause, and the
 sandbox's IO toggles. Plus **error position**: the reference carried `line`,
 `column` and `phase` on a JavaScript error (`run/types.ts:31-38`), extracted
-worker-side (`run/create-worker-script.ts:231-237`) and consumed downstream
+worker-side (`extractLineFromError`, declared `run/create-worker-script.ts:230`)
+and consumed downstream
 (`study-lenses--deprecated-architecture/orchestrate/lib/error-interpreting/extract-context.ts:33-34`).
-The port's `threw` arm carries name and message only — a learner throw no longer
-says WHERE.
+The port's `threw` arm carries name, message, `reason` and `iterationCount` only
+(`run/types.ts:89-93`) — a learner throw no longer says WHERE. **`column` is the
+exception and must be classified `drop`, not `restore`**: it was declared and
+never populated — the extractor's regex `/:(\d+):\d+\)?$/` discards the column
+group, and `column` appears exactly once in the whole reference run directory,
+at its own declaration.
 
 **Fair on both sides**: outcome classification largely survives in different
 spelling (the reference's `outcome` maps onto `ended` × `reason`, except
@@ -129,7 +134,7 @@ them** `[read: src/lib/study-lenses/lib/engine/types.ts]`:
 | Dropped from the evaluator surface   | Already in the engine                                                                                                 |
 | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
 | `.fail(reason?)`                     | `EngineHandle.fail` — `types.ts:133-137`                                                                              |
-| `result.events`                      | `EngineResult.items` — "every yielded item, then how the run ended", `:140`                                           |
+| `result.events`                      | `EngineResult.items` — "every yielded item, then how the run ended", `:141`                                           |
 | `options.seconds`                    | `EvaluateSpec.seconds`, default 5 — `:51`                                                                             |
 | the IO round-trip + its budget pause | `ThreadLogic.onCall` — "the time budget pauses while it runs", `:85-91`; run passes none (`create-run-stream.ts:131`) |
 
@@ -168,10 +173,20 @@ overstated version was carried to the human once.
 
 ### Why a handle, and why now — the blast radius is currently zero
 
-`[measured: grep -rln "evaluators/(run|intercept|danger)" over src/lib/study-lenses, excluding the evaluators directory itself]`
-→ **0 files.** Nothing outside the evaluators consumes them yet. The cost of
-changing the public shape is confined to the evaluators and their own tests, and
-it only grows from here.
+`[measured: grep -rlE "from ['\"].*evaluators/(run|intercept|danger)" over src, all extensions]`
+→ 2 files, and **neither imports the port**:
+`embody/lib/evaluating/adapter/types.ts:39` and its deprecated-architecture twin
+both resolve to `../evaluators/intercept/types.js`, i.e. the INTERMEDIATE
+contract inside the quarry. **Nothing imports
+`src/lib/study-lenses/evaluators/*`.** So the cost of changing the public shape
+is confined to the evaluators and their own tests, and it only grows from here.
+
+Two caveats kept because both were wrong on a first pass and re-measured:
+`src/lib/study-lenses/lib/loop-guard/README.md` carries **four** links into
+`evaluators/danger/` `[measured: grep -c]` — documentation a kind change may
+need to touch, invisible to an imports-only grep; and a looser grep over
+`src/lib/study-lenses` alone reports "0 files" only if it excludes that README.
+State which grep you ran when you re-measure this.
 
 A handle is a strict SUPERSET of the current stream, not an alternative to it:
 `Execution = AsyncIterable & PromiseLike & { result, cancel }`. Iteration
@@ -230,6 +245,16 @@ mirrors them in its § 0.
     both evaluators' README/types/DOCS re-ratified, `ar-1` and `ar-2`. The
     index/stream test clusters are rewritten; the internals clusters (wrap,
     narrowing, settlement mapping, worker setup) survive.
+  - Two things HR-3 does NOT settle, both load-bearing, both now open questions
+    for the planning agent: whether intercept widens its base to a full
+    `AsyncGenerator` as the reference did (`intercept/types.ts:261`, exposing
+    `.next`/`.return`/`.throw`), and whether `await handle` DRAINS when nobody
+    iterates. The second collides with a PINNED port assertion —
+    `intercept/tests/create-intercept-stream.test.ts:118` pins "nothing
+    engine-side exists before the first pull" while
+    `shared/create-execution.ts:30` promises "an internal drain loop consumes
+    all events so `.result` resolves". Inverting a PINNED row needs human
+    sign-off; neither reading follows from "use a handle".
   - Eager-versus-deferred is a per-evaluator choice, not a global one — the
     reference made it both ways (`run/types.ts:203` synchronous,
     `intercept/types.ts:315` a Promise). Choose per evaluator against its own
