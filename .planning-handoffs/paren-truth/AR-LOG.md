@@ -1,4 +1,4 @@
-<!-- cspell:ignore reddy unobjected greppable injective unlengthened quasis -->
+<!-- cspell:ignore reddy unobjected greppable injective unlengthened quasis socratizing -->
 
 # AR-LOG — paren-truth campaign (Shape C: fold the parse, entwine the parens)
 
@@ -592,11 +592,12 @@ peer has since fixed it.
 Executes [FOLLOW-ONS.md](./FOLLOW-ONS.md) § F2. Baseline
 `fbf5aa2797c9609d8585aa91c42c667e1b1a436e` [measured: `git rev-parse HEAD` at
 plan approval]. Scoped gate GREEN there — `Test Files 127 passed (127)` /
-`Tests 3400 passed | 8 todo (3408)`, and `npx tsc --noEmit` → 0 [both measured
-this session] — so **no foreign failure is attributable and any red this work
-produces is its own**. The changeset is a **SHA list**, per DEV.md §
-Shared-worktree git mechanics: five foreign commits landed during the planning
-session alone [measured: `git rev-list --count 227640e3..fbf5aa27`].
+`Tests 3400 passed | 8 todo (3408)` [measured: `npx vitest run --project unit
+src/lib/study-lenses/`] — and `npx tsc --noEmit` → 0 [measured: that command] —
+so **no foreign failure is attributable and any red this work produces is its
+own**. The changeset is a **SHA list**, per DEV.md § Shared-worktree git
+mechanics: five foreign commits landed during the planning session alone
+[measured: `git rev-list --count 227640e3..fbf5aa27`].
 
 ```text
 work: software · twin-doc: none · ceremony: full (AR-1, AR-2 n/a) · prospective
@@ -620,16 +621,20 @@ labelled as producing a paren-bearing fixture that guards nothing.
 § F2 is right that all three gaps are real. Two of its bullets are wrong only
 about the remedy's address, and the correction is measured, not argued:
 
-- **debug-props — closeable exactly as § F2 says.** All six distinct fixture
-  sources in `lenses/debug-props/tests/core.test.ts` are paren-free [measured:
-  `grep -o "embody([^)]*" … | sort -u` — 34 call sites, 6 distinct sources].
+- **debug-props — closeable exactly as § F2 says.** No fixture in
+  `lenses/debug-props/tests/core.test.ts` carried a `ParenthesizedExpression`
+  before this work: 34 call sites over 6 distinct fixture strings [measured:
+  `grep -o "embody([^)]*"` on that file at `fbf5aa27`, then `sed 's/embody(//'`,
+  then `sed 's/, {.*//'`, then `sort -u`; the bare grep piped straight to
+  `sort -u` gives 8 instead, because it splits one fixture across its
+  config-argument variants].
 - **scaffold — the gap is real; scaffold's own test cannot hold the guard.**
   `language-levels/scaffold/tests/index.test.ts` builds its `ParseFacts` from
-  its own
-  `parse(source, { ecmaVersion: 'latest', onComment, onToken, sourceType: 'module' })`
-  [read: that file, lines 8-18] — **no `preserveParens`**, so it is blind to the
-  fold by construction, the same blindness § F2 attributes only to the jej test.
-  Any fixture added there stays green with the fold broken. Routing it through
+  its own `parse` call, whose four options are exactly `ecmaVersion: 'latest'`,
+  `onComment: comments`, `onToken: tokens` and `sourceType: 'module'` [read:
+  that file, lines 11-16] — **no `preserveParens`**, so it is blind to the fold
+  by construction, the same blindness § F2 attributes only to the jej test. Any
+  fixture added there stays green with the fold broken. Routing it through
   embody is not available either: that is the first `language-levels → embody`
   code edge, which embody's sketch forbids [read: `embody/DOCS.md` § Out of
   scope — "no type edge from levels into embody"] and which this log already
@@ -654,7 +659,7 @@ its test directory already runs the whole seam against real levels.
 
 Each was proven fold-sensitive out-of-tree BEFORE being written — the same
 deliberate-defect instrument increment 1 used, and the bar is that a fixture
-whose two columns agree guards nothing and is rejected [all measured: `node -e`
+whose two columns agree guards nothing and is rejected [measured: `node -e`
 transcribing the real algorithms against the repo's acorn, both parse modes]:
 
 - `debug-props/tests/core.test.ts`, fixture `const x = ((1 + 2)) * (3 - 4);` —
@@ -695,3 +700,105 @@ a peer's `git add`, so each mutation window is a single uninterruptible unit.
 Its two proposed values were **re-measured first-party before adoption** rather
 than relayed — including its counter-proposed jej fixture, which replaced a
 weaker `[]`-asserting draft of the implementing agent's.
+
+### AR verdicts and resolutions
+
+- **ar-3 (increment 2, debug-props): PROCEED** [relayed: ar-3]. It re-derived
+  the 11/14 discrimination first-party and enumerated the whole survival
+  combinatorics. Two CONSIDER notes, both applied: the entwined `PINNED` marker
+  had cited the Q2 path-length ruling while asserting `byPath` **cardinality**,
+  and the scope this guard cannot reach needed stating rather than implying.
+- **ar-4 (increment 2): PAUSE, scoped to the commit body, not the diff**
+  [relayed: ar-4]. Two BLOCKERs, both reproduced first-party before being fixed:
+  a `[measured:]` tag whose cited command did **not** reproduce its own number
+  (the 6-vs-8 above), and two tags carrying a leading word before the tag name,
+  a form the audit regex cannot match. Two IMPORTANT overreaches also applied.
+- **ar-3 (increment 3, scaffold): PROCEED** [relayed: ar-3]. It measured all
+  three alternative observables and confirmed only `nodePath` discriminates —
+  count, `nodeType` and `location` are identical in both fold states.
+- **ar-4 (increment 3): PAUSE, again scoped to the body** [relayed: ar-4]. One
+  BLOCKER: a **false universal** about the test file's own contents (the body
+  claimed every pre-existing test there uses the local `buildLevel` double; one
+  uses the real `scaffoldLevel`). One IMPORTANT: a `[read:]` tag whose quote was
+  paraphrased rather than copied. Both verified first-party and fixed.
+- **ar-3 (increment 4, jej): PROCEED** [relayed: ar-3]. It re-derived both fold
+  states by **running** the real `deriveEntwined`, `collectViolations` and
+  `checkUndeclaredGlobals` rather than transcribing them.
+- **ar-4 (increment 4): CONSIDER** [relayed: ar-4] — no BLOCKER, the first body
+  of the four to clear the bar. Three MINOR sourcing-tightness notes, all
+  applied.
+
+### Human rulings (2026-08-05)
+
+1. **Resolve ar-4's increment-2 PAUSE by patching the draft body, not
+   discarding** — commit the increment, and defer the ledger repairs to the
+   campaign close. The reviewer itself proposed patch-not-discard, the diff
+   being sound.
+2. **Same disposition for the increment-3 PAUSE, plus a standing change of
+   practice: commit bodies get leaner.** No universal claims over file contents;
+   no clause without a command run in the same turn; quotes copied, never
+   retyped. Presented with the observation that two consecutive AR-4 PAUSEs had
+   found the _same_ defect family, so the fix had to attack the source rather
+   than rely on AR-4 catching each instance. **It worked**: increment 4's body
+   carries zero `[read:]` tags — removing the paraphrase class by construction —
+   and was the first to draw no BLOCKER.
+
+### The sourced-claims defect family, fourth occurrence — recorded, not repaired
+
+`2e9fa91f`'s body carries one non-conforming tag — the word `measured` with no
+colon after it — which the audit regex cannot match [measured: `git log -1
+--format=%B 2e9fa91f` piped through a bracket-span grep, one hit]. Amend is
+forbidden, so this entry is the repair, exactly as the campaign's Phase-1 close
+did for its own three bodies. Two further instances **were** repairable, because
+they sat in this file's tree text rather than in a commit message, and are fixed
+in the same commit as this entry: one tag carrying a leading word before
+`measured:`, and one `read` tag whose quote of scaffold's parse options was
+reflowed rather than copied.
+
+This is the campaign's fourth occurrence of the family, and it happened despite
+this log already carrying a standing correction against it. The durable lesson
+is ruling 2 above: the defect is not caught by knowing the rule, it is avoided
+by writing bodies that contain fewer derived claims.
+
+### The consolidated mutation window
+
+Run once at the close over the whole scoped gate, as the ceremony's headline
+evidence. With the fold disabled in `derive-ast.ts` —
+`parenSpansByNode: foldGroupingParens(program)` replaced by `new Map()`:
+
+- **fold disabled:** `Test Files 9 failed | 118 passed (127)` /
+  `Tests 50 failed | 3358 passed | 8 todo (3416)`
+- **fold restored:** `Test Files 127 passed (127)` /
+  `Tests 3408 passed | 8 todo (3416)`, and `npx tsc --noEmit` → 0
+
+[measured: `npx vitest run --project unit src/lib/study-lenses/` and `npx tsc
+--noEmit`, both runs this session]. The restore was verified byte-identical
+before anything was staged [measured: `git diff --quiet --
+src/lib/study-lenses/embody/derive-ast.ts`, exit 0].
+
+**What the red set proves.** Nine files fail under the mutation. Six are
+pre-existing coverage — embody's own net (`derive-ast`, `derive-entwined`,
+`derive-environment`, `derive-facts`, `index`) plus
+`lib/socratizing/tests/caution.test.ts`, the one out-of-embody suite that
+already carried grouping-paren fixtures. **The other three are the files this
+work touched**, and before it they were green under this same mutation. That is
+the gap § F2 named, closed and demonstrated rather than asserted.
+
+### Gate
+
+Baseline `fbf5aa27` measured `Tests 3400 passed | 8 todo (3408)`; the close
+measures `Tests 3408 passed | 8 todo (3416)`. The `+8` is **+4 from this work**
+(its three test files, 46 insertions, no deletions [measured: `git diff --stat
+fbf5aa27..HEAD -- '*.test.ts' '*.test.tsx'`]) and **+4 foreign** — four
+uncommitted `it(` blocks a concurrent session holds in
+`orchestrate/tests/index.test.tsx` [measured: `git diff --` that path, counting
+added `it(` lines]. Nine commits separate the baseline from the close and five
+of them are foreign, which is why the changeset below is a SHA list.
+
+Changeset, this follow-on's own SHAs:
+
+- `2e9fa91fb06f864f8756e776746faf5a5f34ad5d` — `docs:` the ruling record
+- `28cbd1140c3546bfa6506307fca44e734dc7c1b9` — `add:` the debug-props guard
+- `46d77084cad4b1af33f6d97c0adc1f8c76546188` — `add:` the scaffold seam guard
+- `9564e1788a0a80a2da4a98a4fa8ddfb429a9ed61` — `add:` the jej seam guard
+- this commit — `docs:` the close, the rulings, and the tag repairs
