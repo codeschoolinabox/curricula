@@ -52,11 +52,14 @@ without sacrificing the rigor that makes the work hold up.
 Long sessions decay. Plan for it.
 
 **Default to one Phase 0 increment per session, then `/clear`.** Phase 0 (DDD:
-ubiquitous language → README → AR-1 → types.ts → architectural sketch → AR-2) is
-heavy context. Phase 0 + Phase 1 in one session is where context decay starts to
-bite. After Phase 0 commits land, the natural break point is now. The agent
-should remind you of this when Phase 0 finishes; you decide whether to push
-through.
+0.1 the README, with the ubiquitous-language glossary inside it → 0.2 the twin,
+or the `## Epistemology` block that discharges it → AR-1, on the README and the
+twin together → 0.3 types.ts + the DOCS.md sketch + the ZOMBIES suite, written
+for real and committed skipped → AR-2 → review, resolve, commit → your gate) is
+heavy context — the suite at 0.3 makes it heavier than the step count suggests.
+Phase 0 + Phase 1 in one session is where context decay starts to bite. After
+Phase 0 commits land, the natural break point is now. The agent should remind
+you of this when Phase 0 finishes; you decide whether to push through.
 
 **Commit between increments, not at session end.** Each passing TDD cycle is one
 atomic commit. If you finish three increments before committing, you have three
@@ -90,8 +93,12 @@ quality cliff is small or absent.
 
 **Use Opus for:**
 
-- Phase 0 design work (DDD, ubiquitous language establishment, architectural
-  sketch authoring)
+- Phase 0 design work — the DDD thinking, across all three steps: the README and
+  the ubiquitous-language glossary inside it; the twin, or the `## Epistemology`
+  block that discharges it; and types.ts with the architectural sketch in
+  DOCS.md **and the ZOMBIES suite** — 0.3 is three artifacts, and the suite is
+  the one that makes it expensive
+  ([DEV.md § Phase 0](./DEV.md#phase-0-documentation-specification-before-any-code))
 - AR-1 (Design Challenge) — drift / cross-cutting (the one pinned judgment
   review; AR-2 and AR-5 are deliberately NOT pinned — they inherit the session's
   model so they track the authoring tier, see
@@ -215,6 +222,34 @@ that is the signal it is rationalizing skipping ceremony and must instead
 surface the friction explicitly. ARs are mandatory; only the human's explicit
 invocation flips that.
 
+**One thing the agent may ask you, and only this.** If it is about to write a
+ceremony level into a record — a commit body, a campaign's ruling log — and you
+have not set one for that increment or that campaign, it must ask you rather
+than supply one. That is the "surface the friction explicitly" half of the rule
+above, not an exception to it: the ask names no value, offers no menu, and
+carries no recommendation. An agent that proposes a level, argues one is
+appropriate here, or asks "shall we run this one light?" is drafting your
+phrase, and the rule above catches it. **Transcribing the level you set is not
+choosing it; supplying one because you never did is.** The line to hold, as a
+contrast pair: _"you haven't set a ceremony level for this campaign — what
+should the commit body say?"_ is the permitted ask; _"shall we run this one
+light?"_ is the banned one, and the difference is that the second named a value.
+
+**If you don't answer, the agent ships the line with the ceremony field marked
+unset — it does not fill it in, and it does not block on you.** An honest gap
+you can rule on later is worth more than a level nobody chose, and it stays
+greppable, which a silently-omitted line does not.
+
+**Your silence is an answer for the work and not for the record — that is the
+whole reason the ask exists.** Say nothing and the work runs at `medium`; the
+agent needs no permission for that and must not interrupt you to get it. But a
+level written into a commit body or a ruling log is a **ruling**, and a ruling
+nobody made is not one
+([DEV.md § Ruling provenance](./DEV.md#ruling-provenance)). So the ask fires at
+exactly one moment — when a record is about to claim you chose something — and
+answering it with "medium, my call" is a different act from having said nothing,
+even though the ARs that fire are identical.
+
 **Phrases below are listed verbatim.** The agent should accept close paraphrases
 ("skip the alignment check" for "skip alignment check") but reject
 reinterpretations ("let's just go" is NOT "skip plan mode").
@@ -230,16 +265,30 @@ considered choice:
 - **"skip AR-3 this increment, my call"** (or AR-1/2/4/5) — override a specific
   AR. Agent notes the override in the commit/conversation. ARs default to
   mandatory; this is the only legitimate way to skip.
+- **"ceremony: full this campaign, my call"** — set the review level. Two slots,
+  both closed: swap the value for `medium` or `light`, and `this campaign` for
+  `this increment` to scope it to one — so **"ceremony: light this increment, my
+  call"** is the other end of the grammar, written out here because this list
+  promises literals. `full` fires AR-1 · AR-2 · AR-3 · AR-4 · AR-5; `medium`
+  fires AR-1 and AR-5; `light` fires AR-5 alone; **no level removes AR-5**
+  ([DEV.md § ceremony](./DEV.md#ceremony)). Both directions are yours: `medium`
+  is the default, so `full` is a level someone has to ask for, and the agent may
+  not pick one, raise one, or lower one. Say nothing and the work runs at
+  `medium` — a declared position, not a lapse — but see the ask above before
+  that silence reaches a commit body.
 - **"override and proceed"** — when the agent has flagged a risk and you
   acknowledge it. Agent proceeds with the risk noted.
 - **"trivial fix mode"** — for typo fixes, lint cleanup, format-only changes, or
   other edits that touch a single file with no public-API surface. Phase 0 is
-  **not bypassed** — Phase 0 governs _new module establishment work_ (DDD,
-  ubiquitous language, architectural sketch). Trivial fixes aren't Phase 0 work
-  in the first place. If the change touches a public type, an exported function
-  signature, a peer-file contract, or a `DOCS.md` data flow, **trivial fix mode
-  does NOT apply** and the agent must refuse this label. Always Works™
-  verification still applies in all cases.
+  **not bypassed** — Phase 0 governs _new module establishment work_: the README
+  with the ubiquitous-language glossary inside it, the twin or the
+  `## Epistemology` block that discharges it, and types.ts with the DOCS.md
+  sketch and the test suite
+  ([DEV.md § Phase 0](./DEV.md#phase-0-documentation-specification-before-any-code)).
+  Trivial fixes aren't Phase 0 work in the first place. If the change touches a
+  public type, an exported function signature, a peer-file contract, or a
+  `DOCS.md` data flow, **trivial fix mode does NOT apply** and the agent must
+  refuse this label. Always Works™ verification still applies in all cases.
 - **"meta mode"** — non-code work (planning conversations, reading sessions,
   refactor design). Agent skips test-writing and code-output expectations.
 - **"explore only, no edits"** — research session. Agent reads and reports; must
@@ -248,6 +297,37 @@ considered choice:
 If you find yourself needing an override phrase that isn't here, it's worth
 adding to this file rather than improvising — the agent doesn't recognize ad-hoc
 phrases reliably.
+
+**The level and the per-AR skip are two separate mechanisms, and both are
+yours**
+([DEV.md § Adversarial Review Protocol](./DEV.md#adversarial-review-protocol)
+says so in those terms). The level declares the gate set for a scope; the per-AR
+phrase is a one-off opt-out from whatever gate set is already standing. They
+interact in exactly three ways worth writing down:
+
+- **The narrower phrase wins for the increment it names, and leaves the level
+  standing afterwards.** Scope beats value; increment beats campaign; later
+  beats earlier.
+- **The per-AR phrase only ever subtracts.** There is no "add AR-2 this
+  increment" — to put a review back, raise the level. An increment-scoped raise
+  applies to that increment only, and the campaign level resumes after it.
+- **`skip AR-5 …, my call` is legal, and it is the one skip with no floor
+  beneath it.** "No level removes AR-5" is a statement about _levels_ — your
+  explicit per-review opt-out still reaches it. Nothing catches that one but
+  you, which is why
+  [§ Anti-protocol](#anti-protocol--patterns-to-catch-yourself-in) names
+  skipping AR-5 as a pattern to catch yourself in.
+
+**Ceremony's record has a narrower home than the other overrides.** The closing
+rule below accepts a conversation, a commit message, or a plan-file note. For a
+ceremony level a plan-file note is **not enough**: the level is a ruling, and
+rulings live in the commit body — and, for a campaign, **also** in its
+`.planning-handoffs/<campaign>/AR-LOG.md`, which is the campaign's citable
+record ([DEV.md § Ruling provenance](./DEV.md#ruling-provenance)). Both, not
+either: the commit body is where the level binds a changeset, and the ruling log
+is where a later reader finds it without knowing which commit to open. A level
+that reached neither is not set. This campaign learned that the expensive way —
+seven increments shipped carrying a ceremony value no ruling recorded.
 
 **Override is not skip-with-no-record.** Every override should be visible: in
 the conversation, in the commit message, or in a plan-file note. Future-you
@@ -334,10 +414,36 @@ agent claims things are done; you verify they actually are.
 
 - Read README.md, types.ts, and DOCS.md together. Can you predict what the
   implementation will do?
-- Verify AR-1 and AR-2 actually fired (check for the spawned agents in
-  conversation history)
+- **Find the glossary inside the README.** The ubiquitous language is step 0.1's
+  own content, not a separate deliverable — a README with no glossary is an
+  incomplete 0.1, not a complete step with another one still to come.
+- **Find step 0.2.** Either a twin document exists, or the README carries an
+  `## Epistemology` block — and that block names three things: the twin **not**
+  built, the named holder it is delegated to, and what would falsify that
+  delegation. A block that records only the gap describes the failure mode; it
+  does not discharge the step.
+- **Verify the ARs your ceremony level actually fires** (check for the spawned
+  agents in conversation history). At `full` that is AR-1 **and** AR-2; at
+  `medium` — the default — it is **AR-1 only**, and a missing AR-2 is correct,
+  not a lapse; at `light` neither fires and AR-5 carries the whole gate. Check
+  the level before you check the agents, or you will flag a compliant agent for
+  skipping a review its level never asked for.
+- Whichever fired, verify **AR-1 was handed the twin as well as the README** —
+  it challenges both together, so an AR-1 that only saw the README reviewed half
+  of what it is for.
+- **Ask to see the skipped test suite.** The full ZOMBIES suite is written for
+  real at 0.3 and committed in a skipped state; Phase 1 un-skips one at a time.
+  The tests should report as skipped, not as absent — a Phase 0 with no suite
+  has pushed the test-writing into Phase 1, where the AR-3 cadence assumes it is
+  already there.
 - Check that the commit message describes the artifacts
   (`docs: establish [module] domain model and architectural sketch`)
+- **Check the commit BODY, not just the subject, for the work-routing line** —
+  `work: … · twin-doc: … · ceremony: … · prospective`
+  ([DEV.md § Work routing and ceremony](./DEV.md#work-routing-and-ceremony)).
+  The body is the only durable record of the level you set, and amend is
+  forbidden, so a body that ships without it ships without it forever. This is
+  the check that would have caught the seven increments counted above.
 
 **After a Phase 1 increment:**
 
@@ -530,9 +636,35 @@ Some things are yours to do. Don't outsource these:
 
 ## Update triggers
 
-New override phrase, retired tool, new AR type, recurring coaching pattern (3+
-sessions in a row), new collaborator joining, a new model qualifies for
-principal governance (append its model-id substring to CLAUDE.md's qualifying
-list — the list only, never rename `AGENTS.principal.md` itself), a new tool
-hook or tracked-settings change lands (restart sessions, run its live-fire
-probes, `npm run test:hooks`). Audit at ~400 lines.
+New override phrase, retired tool, new AR type, **a workflow step changing shape
+— renamed, renumbered, merged, reordered, or gaining or losing a gate**,
+recurring coaching pattern (3+ sessions in a row), new collaborator joining, a
+new model qualifies for principal governance (append its model-id substring to
+CLAUDE.md's qualifying list — the list only, never rename `AGENTS.principal.md`
+itself), a new tool hook or tracked-settings change lands (restart sessions, run
+its live-fire probes, `npm run test:hooks`). Audit at ~400 lines.
+
+**A step that keeps its number and changes its meaning is the dangerous case**,
+because nothing fails loudly — every other kind of change leaves a dangling
+reference that something eventually trips over. Watch for that one specifically.
+
+**When a workflow step changes shape, this file recites that workflow in four
+places and they are not next to each other.** That is why a stale recital
+survives here: you fix the section you happened to be editing, and three others
+keep teaching the old shape. Re-read all four against the changed step:
+
+- the Phase 0 chain in [§ Session sizing rules](#session-sizing-rules);
+- the Phase 0 bullet in [§ Model selection rules](#model-selection-rules);
+- the "Phase 0 is not bypassed" clause inside "trivial fix mode" in
+  [§ Override grammar](#override-grammar);
+- the "After a Phase 0" checklist in
+  [§ Verification rituals](#verification-rituals) — the one you actually run at
+  the gate, and therefore the one where a stale recital costs the most.
+
+The source of truth is
+[DEV.md § Phase 0](./DEV.md#phase-0-documentation-specification-before-any-code);
+both AGENTS files carry a summary of it, so if the three disagree, one of them
+is stale and you do not get to pick which. If you ever add a fifth recital, add
+it to this list. (`npm run check:governance` verifies these four links resolve,
+so a renamed heading fails loudly — but it cannot tell you whether the prose
+under them still says the right thing. That part is yours.)
