@@ -126,6 +126,45 @@ Recorded so a later reader can tell foreign debt from this campaign's own.
   variables-tracer sprint, which is where its content is addressed; a delete
   proposal belongs there, not here.
 
+## Human rulings — 2026-08-05 (mid-Phase-1, on the two AR-raised flags)
+
+Both flags were raised by Phase-1 reviewers, kept pinned pending sign-off
+(inverting a `PINNED` expectation is never the agent's), and put to the human
+mid-phase rather than at the close — I7 builds on both paths, so deciding before
+it costs less than after.
+
+- **H-5 — the loc wrap WRAPS an optional chain's ROOT call; only interior links
+  decline.** I1 shipped declining every call inside a `ChainExpression`, root
+  included, so `console?.log(x)` carried `loc: null`. `ar-4` measured that
+  wrapping just the root is behavior-preserving on all three axes it probed
+  (return value, short-circuit on a nullish receiver, and argument-evaluation
+  side effects), and observed that the stated rationale — a wrap defeating the
+  chain's short-circuit — only ever reaches INTERIOR links, since the root's own
+  span already covers the whole chain verbatim. **Ruled: wrap the root, keep
+  declining the interior.** Consequences the agent executes rather than infers:
+  I1's chain rule gains a root-vs-interior distinction, the `ar-3`-added
+  continuing-chain row is REPLACED (a pin inversion, which is why this needed
+  the human) by rows pinning both halves — the root wrapped with the chain's own
+  span, every interior link still verbatim — and the decline predicate's chain
+  arm is re-derived rather than patched, since "inside a chain" and "inside a
+  chain but not its root" are different questions.
+
+- **H-6 — the settlement mapper's trip branch requires a non-natural halt; a
+  self-contradictory halt is the defensive arm.** I4 shipped the committed
+  phase-10 wording's trip clause read literally — trip first, unconditioned — so
+  a forged halt claiming BOTH `natural: true` and a well-formed trip resolved
+  `loop-cap`. `ar-4` argued the same sentence's other clause ("natural-end halts
+  fall through") supports requiring `!natural`, and that this is the one place
+  an otherwise guess-free mapper trusts one field over a directly contradicting
+  sibling field on the same object. The combination is unreachable from
+  intercept's own worker
+  (`[read: intercept-worker-setup.ts, the halt author's natural-end branch — "natural: true, … trip: null, loc: null"]`),
+  so the change is zero-cost on every honest halt. **Ruled: tighten to
+  never-guess.** The `PINNED` row added at I4's `ar-3` is inverted (again, the
+  reason this needed the human) and re-pinned to this ruling, with the
+  combination moving into the cannot-produce block beside the other forged
+  shapes.
+
 ## AR resolutions
 
 `ar-1` fired at step 0.3, before `types.ts`; `ar-2` at step 0.6, over the three
@@ -607,3 +646,81 @@ place this suite was thinner than every sibling's), the `WHY the cast` tag on
 the post-validation cast (a type predicate would be unsound on alert's
 validate-anything arm), and an unreachable-branch comment on
 `describeExpected`'s alert arm (kept for the three-kind symmetry).
+
+### I6 — `ar-3` on the stream-factory cluster (**PAUSE** → decomposed and executed)
+
+**An ordering slip is disclosed here as well as in the test header**: the
+implementation was drafted BEFORE the cluster, then parked outside the repo and
+the file re-stubbed so the cluster ran honest RED and the reviewer saw the tests
+on their own terms (run's inc-3 precedent for disclosing rather than hiding a
+cycle deviation). The agent's own read of the parked draft before the review
+found one defect the first cluster missed — `next()` draining the arrival queue
+BEFORE consulting the teardown latch, so a post-teardown pull would serve a
+leftover event instead of the end — and three rows were added for it before
+`ar-3` ran.
+
+Three blockers, all test-additive, decomposed under the standing ruling:
+
+- **Nothing proved `assemble` composes splice-then-wrap in that ORDER.** Both
+  instrumentation rows used a fixture exercising only one pass (a loop with no
+  call; a call with no loop), so a wrap-first orchestration would have passed
+  all 35 rows while corrupting exactly the attribution both instruments exist to
+  provide. Closed with the modal shape — a call inside a guarded loop body —
+  asserting both spliced texts, using spans already measured at I1.
+- **The assemble-defect settlement's freeze was untested** — the one route that
+  hand-builds its settlement outside the mapper, and the exact bug `run`'s own
+  R4 shipped and had to catch at `ar-4`. Closed with run's row verbatim.
+- **No row asserted `reason: 'loop-cap'`** end-to-end; the loop-cap rows checked
+  the trip and count only, so every other arm had a reason row and this one
+  silently did not. Closed.
+
+Also applied: a throw-outside-any-wrap row proving `loc: null` through the whole
+pipeline (wrap decline → halt author → mapper, previously only unit-tested in
+isolation), a meaningful delivered floor on the H-2 ceiling row (>500 rather
+than >0 — the charge is flat arithmetic, so ~1000 records land), ZOMBIES
+reordering, and the two exclusions documented in the header.
+
+**Two adjudications the reviewer settled from the contract rather than leaving
+open**: the H-2 ceiling rows are honest Node-tier logic (the budget and charge
+are thread-side arithmetic; only real-elapsed overhead makes the exact point
+non-deterministic, which is why the rows assert a reason and a floor); and a
+post-settlement pull DRAINS what the stream still holds, because the committed
+`InterceptStream` says it must be pulled for every event it holds. Its request
+for an isolated drain-past-settlement row was answered by ATTEMPTING it: the row
+hung 5005ms, which is the committed edge case itself — with demand-driven
+reaching an event never sits in the queue while a run ends, so a consumer that
+pulls once and only awaits holds the program at its boundary moment. Recorded as
+exclusion 2 in the header; the corner is browser-tier, where the retained
+reach's one-event slack is the only thing that queues an event.
+
+### I6 — `ar-4` on the stream-factory implementation (**PAUSE** → both concerns fixed)
+
+The reviewer traced all three sibling-teaches-wrongly invariants against
+`evaluate.ts` and confirmed each holds: the claim happens before `result` is
+touched; the teardown's cancel-then-release genuinely breaks the documented
+circular wait (the engine's `dispatchCall` always awaits `onCall` before
+consulting the stop, so awaiting the engine iterator's own exit would deadlock)
+and the released answer is genuinely discarded; and the `reachOutstanding` guard
+is sufficient against `pullNext`'s unconditional waiter overwrite, with a `done`
+arrival leaving the parked waiter for `settle` to complete rather than hanging.
+
+- **Applied — a real bug, found by probe, in BOTH evaluators.** `start()`'s
+  restart guard checked only `handle !== undefined`, but the assemble-defect
+  route never assigns a handle — so every pull past a defect settlement re-ran
+  the whole instrument-and-assemble pass and re-fired its warning (the reviewer
+  measured 1 warn after one pull, 2 after two). Fixed with `|| hasSettled` plus
+  a regression row, and the reviewer's probe reproduced the identical defect in
+  the COMMITTED `run/create-run-stream.ts`, missed by run's own `ar-3` AND
+  `ar-4`. **Human ruling H-7 (2026-08-05): fix both now** —
+  batch-fix-while-context-is-fresh — so run's copy lands as its own pathspec
+  commit with its own `ar-4` rather than being deferred into rot. Recorded in
+  run's log too.
+- **Applied**: a WHY comment naming why `releaseAsk`'s unconditional
+  reassignment is safe (the engine's pump serializes `dispatchCall`, so a second
+  concurrent ask cannot exist) so the dependency is stated rather than silent;
+  plus the `facts.type.value` comment tightened — that stage carries no failure
+  arm to narrow, and the gate-guarantee violation it described is a runtime
+  caller bug assemble's catch already covers.
+- **Noted, not a finding**: DOCS phases 2 and 3 are collapsed into one
+  `assemble` function, exactly as the committed sibling does; the intra-file
+  flow still matches the diagram node for node.
