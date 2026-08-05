@@ -112,6 +112,20 @@ Recorded so a later reader can tell foreign debt from this campaign's own.
   required property typed `undefined`, so the contract states the modelled value
   rather than omitting it.
 
+- **H-4 — `evaluators/PHASE-1-HANDOFF.claude-delete-if-stale.md` is KEPT.**
+  Rev-C had this ceremony propose deleting it at the gate. Proposed with its
+  price measured rather than relayed: `[measured: wc -l]` **148 lines**;
+  `[measured: git log --oneline -1 -- <it>]` **empty — untracked, never
+  committed, so deletion is unrecoverable**;
+  `[measured: grep -cE "variables|semantics|syntax|tracer"]` **29 lines** are
+  tracer material (quarry `trace/{variables,semantics,syntax}` prior art, the
+  variable/binding/environmentDiff event design, and three open human decisions
+  for sprints 3–5). Intercept's Phase 0 harvested none of it — Rev-C's harvest
+  covered the intercept contract, not this file. **Ruled: keep it.** It stays
+  foreign and untracked; no ceremony stages it. The next natural reader is the
+  variables-tracer sprint, which is where its content is addressed; a delete
+  proposal belongs there, not here.
+
 ## AR resolutions
 
 `ar-1` fired at step 0.3, before `types.ts`; `ar-2` at step 0.6, over the three
