@@ -20,6 +20,12 @@
  * @typedef {object} CacheRecord
  * @property {string} value The condensed measurement value as cached.
  * @property {string} measuredAt ISO 8601 time the cached value was measured.
+ *
+ * @typedef {Record<string, CacheRecord>} CacheFile The cache file parsed
+ *   whole: one CacheRecord per successful slow measurement, keyed by that
+ *   measurement's cache key. A write merges its record over the keys already
+ *   present — persisting one measurement preserves the records under the
+ *   others.
  */
 
 export {};

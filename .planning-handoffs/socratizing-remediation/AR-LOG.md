@@ -162,6 +162,84 @@ returned PAUSE. The rulings below close that PAUSE.
   to cover all four labels rather than two, because a two-branch hardcode would
   otherwise pass while leaving `do...while` and `for` unfixed.
 
+## Human rulings — 2026-08-05 (cluster B, the oracle measures prettier drift)
+
+Cluster B executes R-9's mandate ("the agent adds the detection"). B0 is the
+Phase-0 amendment: the `scripts/` README/DOCS/types describe the measurement
+before any code implements it, then stop at the human gate. Plan of record:
+`~/.claude/plans/mellow-forging-badger.md` § Cluster B.
+
+- **R-16 — B0's twin-doc is `machine`, and
+  `scripts/DOCS.md § Measured-facts oracle` is itself the machine-twin
+  document.** ["machine — DOCS is the twin"] No `## Epistemology` block is owed
+  — DEV.md discharges that only at `twin-doc: none`; at any other value the step
+  produces the twin document itself `[read: DEV.md § Phase 0 step 0.2]`. This
+  corrects the plan of record's premise that DEV.md scopes 0.1–0.3 to new
+  modules: the obligation keys to the twin-doc value, not module age.
+  Retro-application context:
+  `[measured: grep -rl "## Epistemology" src/ scripts/ → empty, 2026-08-05]` —
+  no existing region has retro-added the block.
+- **R-17 — B0 carries no test artifact.** ["Docs amendment — no tests in B0"] A
+  `docs:` amendment under the jej-registration R-4 precedent (AR-1 on README
+  content, AR-2 on DOCS content); a declared deviation from DEV.md § Phase 0
+  step 0.3's "tests committed skipped". B1–B4 proceed live-red exactly as the
+  approved plan specifies.
+- **R-18 — the producing command is `npm run format:check`, and the count is
+  that command's scope.** ["npm run format:check"] R-9's re-measure command
+  (`git ls-files -z | xargs -0 npx prettier --list-different`) enumerates a
+  DIFFERENT set — tracked files of any prettier-parseable extension, vs the npm
+  script's glob minus prettier's default ignore path. Measured minutes apart on
+  the same tree: 4 files (format:check) vs 9 (ls-files)
+  `[relayed: plan-mode adversarial reviewer, 2026-08-05]`. Neither is "the"
+  number; never file the two counts against each other as a defect.
+- **R-19 — the cache never persists a failure value, uniformly.** ["Never cache
+  failures, both"] Resolves an ar-1 PAUSE item: a peer's mid-edit unparsable
+  file → prettier exit 2 → no drift summary; caching that failure would pin a
+  false alarm for a full cache window. The rule covers markdownlint too —
+  today's shipped path persists failure values unconditionally
+  `[read: scripts/repo-facts.mjs § measureMarkdownlint — writeCache is called on the no-summary value]`;
+  the behavior change lands with B2/B3's rework. Migration transient for the
+  implementer: a well-formed legacy cache already holding a failure record is
+  neither torn nor unparsable and will be served as fresh for up to one window —
+  self-healing, no migration step (ar-2 concern 7b).
+- **R-20 — the cache key is `prettier`, and keys follow the producing-tool
+  convention.** ["prettier"] Deviates from the approved plan's `formatDrift`.
+  Matches the existing `markdownlint` key; the convention is now stated in the
+  README cache gloss so a third slow measurement has a rule to follow. Unknown
+  keys survive every merge, so an abandoned key is permanent — rename only with
+  a pruning plan.
+- **R-21 — the emission label is `prettier drift (npm run format:check)`.**
+  ["prettier drift (npm run format:check)"] The label carries its own scope, per
+  R-18. The shipped `markdownlint errors (repo-wide)` label predates the rule
+  and is grandfathered; correcting it is not authorized here.
+- **R-22 — the cold cost is accepted as measured.** ["Accept as measured"] Three
+  consecutive `npm run format:check` runs took 17s / 11s / 12s
+  `[relayed: ar-1's wall-clock measurements, 2026-08-05]` — inside eslint's
+  16–19s exclusion band, paid once per cache window rather than every run. DOCS
+  now states the discriminator: the cache, not raw cost.
+
+**Reviews fired on B0.** `ar-1` → **PAUSE**: 12 concerns; the four human items
+became R-19–R-22, and the author-side items were applied — the recognition
+contract enumerated and version-pinned, the scope sentence corrected (the npm
+script's glob, prettier's default ignore path, not git's), the producing command
+named in the twin, persist and merge ownership split, the label pinned, the
+cache-in-glob coupling stated. `ar-2` → **CONSIDER**: 7 concerns, all resolved
+in-text — containment semantics added to the recognition contract (shapes match
+by sentence-within-output; `[warn]` prefix, per-file lines, and the npm banner
+are ambient); **Persist** named as its own phase so Condense stays pure and the
+Mermaid's cache-write edge has a home; the merge edge gained its success filter;
+"fresh" and the key convention defined; the contract references anchored as
+prettier-drift-specific; the residual concurrent-write window stated with its
+accepted residue.
+
+**Notes for B1's session** (recorded, not B0 obligations): test fixtures must
+come from `node_modules/.bin/prettier` — a bare `npx prettier` outside the repo
+resolved to a global 3.4.2 whose exit-2 shape differs (ar-1); include at least
+one captured REAL concatenated output (`[warn]`-prefixed, npm banner included)
+alongside the minimal row shapes (ar-2); counting `[warn]` lines with the
+summary as cross-check is a recognized implementation option satisfying the same
+contract (ar-1 counter-proposal B).
+
 ## Work routing and ceremony — cluster A, recorded here rather than amended
 
 `DEV.md § Work routing and ceremony` requires the classification line in **the
@@ -202,6 +280,27 @@ learner-facing question text, the `machine` entries mark contracts a consumer
 codes against. And DEV.md flags that **`full` is not yet defined for work with
 no code**: A0, A4 and `3918ca9c` are documentation-only, so their AR-3/AR-4
 slots have no object rather than being skipped.
+
+## Work routing and ceremony — cluster B, keyed by increment
+
+Cluster B starts after `DEV.md § Work routing and ceremony` became canonical
+(`e91bcaf9`, mid-cluster-A — see the section above), so every cluster-B commit
+carries the classification line in its own body; this table is the AR-LOG's
+co-equal copy of the same lines. It is keyed by increment rather than SHA
+because each row is written inside the commit it describes, before that commit's
+SHA exists.
+
+`work:` is derived from the path — `scripts/` is software work by DEV.md's path
+table, and `.planning-handoffs/` is unnamed, which the same table routes to
+software work. `retrospective` is blocked by DEV.md, so all rows are
+`prospective`. **`ceremony:` is the human's to set; each row records what
+actually fired**, as observed fact — the same honest-notes form as cluster A's
+table, and per DEV.md's own gap note, a no-code increment names its real gate
+set rather than a level word.
+
+| increment | line                                                                             |
+| --------- | -------------------------------------------------------------------------------- |
+| B0        | `work: software · twin-doc: machine · ceremony: AR-1 · AR-2 fired · prospective` |
 
 ## Open — NOT authorized
 

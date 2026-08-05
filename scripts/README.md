@@ -180,18 +180,40 @@ deliberately not part of `npm run validate` or `lint-all.mjs`.
 
 The oracle prints repo numbers nobody should ever quote from memory: node
 version vs engines, tsc error count and locations, cspell version, markdownlint
-count, `HEAD`, and the foreign dirty files ("working tree not yours until
-proven"). Sketch:
+count, prettier drift count, `HEAD`, and the foreign dirty files ("working tree
+not yours until proven"). Sketch:
 [DOCS.md § Measured-facts oracle](./DOCS.md#measured-facts-oracle).
 
 - **measurement** — a value produced by a command the oracle just ran, carried
   with its label, the producing command verbatim, and an ISO timestamp. (Named
   `measurement`, not "fact" — `facts.*` is a live domain term in the
   embody/evaluators tree.)
-- **cache** — `.claude/cache/repo-facts.json`, temp-then-rename, gitignored:
-  only slow measurements read through it, and only `--refresh` re-measures them
-  eagerly. "Slow" is a fixed design-time classification (today: markdownlint),
-  not a measured runtime threshold.
+- **cache** — `.claude/cache/repo-facts.json`, one record per successful slow
+  measurement, keyed by producing tool (`markdownlint`, `prettier`), merged on
+  write, temp-then-rename, gitignored: only slow measurements read through it (a
+  cached value is fresh within an implementation-constant window, day-scale
+  today), and only `--refresh` re-measures them eagerly. It holds successful
+  measurements only — a failure value is emitted but never persisted, so the
+  next run re-measures. "Slow" is a fixed design-time classification (today:
+  markdownlint and prettier drift), not a measured runtime threshold.
+- **prettier drift** — the count of files `npm run format:check` reports as
+  needing formatting. The count is that command's scope, not "the repo's": the
+  npm script's glob, minus prettier's default ignore path (the root `.gitignore`
+  and `.prettierignore`) — prettier's ignore resolution is not git's. A slow
+  measurement — it reads through the cache under the key `prettier`. "Drift",
+  not "format": in this bounded context the formatter is the report assembler
+  (`lib/repo-facts/format-facts.mjs`), a different thing. **Recognition
+  contract** — a shape is recognized when its sentence appears within the
+  concatenated stdout+stderr of prettier 3.8.1's `--check` output; the `[warn]`
+  prefix, the per-file lines, and npm's script banner are ambient text, not
+  shapes, and the shapes are this reader's contract, not an enumeration of
+  prettier's output space:
+  1. `All matched files use Prettier code style!` → 0
+  2. `Code style issues found in the above file.` → 1
+  3. `Code style issues found in <n> files.` → n
+  4. anything else → a failure value, never 0 — the error-exit sentence
+     included, even when it carries a count (a count of files that failed to
+     parse, not a drift count).
 
 Every emission opens with the load-bearing header, verbatim:
 `MEASURED AT <ts>, not asserted — supersedes any memory or handoff claim about these numbers.`

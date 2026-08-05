@@ -188,11 +188,12 @@ timestamp it prints beside that value.
 1. **Measure** — the thin entry runs each producing command (node version
    against `package.json` engines — printing both values and their inequality is
    measurement, concluding "therefore do Y" would be judging and stays out;
-   `tsc --noEmit` count + locations; cspell version; markdownlint count; `HEAD`;
-   foreign dirty files from `git status --porcelain`) and captures raw output
-   with a timestamp. eslint is deliberately absent from the injected path
-   (measured 16–19s). "Slow" is a fixed design-time classification — today
-   exactly the markdownlint measurement has a cache path — never a live runtime
+   `tsc --noEmit` count + locations; cspell version; markdownlint count;
+   prettier drift count (`npm run format:check`); `HEAD`; foreign dirty files
+   from `git status --porcelain`) and captures raw output with a timestamp.
+   eslint is deliberately absent from the injected path (measured 16–19s).
+   "Slow" is a fixed design-time classification — the slow set is exactly the
+   markdownlint and prettier-drift measurements — never a live runtime
    threshold: nothing measures a command's duration to decide. A slow
    measurement whose cached value is fresh — and no `--refresh` — is read from
    the cache instead of run: the cached measurement joins the set with its
@@ -200,15 +201,24 @@ timestamp it prints beside that value.
 2. **Condense** — pure functions reduce raw command output to measurement
    values: tsc output to a count plus locations (a location-less global
    diagnostic still counts), porcelain output to a foreign-dirt line list
-   (renames and quoted paths verbatim). Freshly-run slow measurements are
-   persisted to the cache, temp-then-rename.
-3. **Emit** — the formatter opens with the load-bearing header, verbatim:
+   (renames and quoted paths verbatim), prettier-check output to a drift count
+   or a failure value per the README's prettier-drift recognition contract.
+3. **Persist** — the thin entry writes each freshly-run successful slow
+   measurement to the cache through the pure merge, temp-then-rename. The pure
+   layer owns the merge; the entry owns the write, over cache text re-read
+   immediately before each write, never from a snapshot taken earlier in the
+   run: each record lands under its own cache key, the keys already present
+   survive the write, and a torn or unparsable existing file merges as if it
+   were empty. A failure value is emitted but never persisted. The re-read
+   narrows the concurrent-session window without closing it — the accepted
+   residue is a lost cache record and a later re-measure.
+4. **Emit** — the formatter opens with the load-bearing header, verbatim:
    `MEASURED AT <ts>, not asserted — supersedes any memory or handoff claim about these numbers.`
    — `<ts>` is the EMISSION time; each measurement block below it carries its
    own label, value, producing command, and the measurement's own timestamp (for
    a cached value, the two differ — the per-measurement timestamp is the honest
-   one). Condense owns the shape of a value; Emit owns the report's assembly
-   around the values.
+   one). Condense owns the shape of a value; Persist owns its durability; Emit
+   owns the report's assembly around the values.
 
 ### Data flow
 
@@ -219,7 +229,7 @@ flowchart TD
     K -->|cached measurement, original timestamp| C[measurements]
     Z -->|no, run and capture with timestamp| B[raw outputs]
     B -->|condense| C
-    C -->|persist freshly-run slow measurements, temp-then-rename| K
+    C -->|merge freshly-run successful slow measurements over existing keys, temp-then-rename| K
     C -->|format under the measured-at header| E[emission on stdout]
 ```
 
@@ -238,24 +248,39 @@ flowchart TD
   command, and timestamp — never omitted, never a zero. "This tool cannot run
   here" is itself a measured fact, and precisely the fact this oracle exists to
   inject.
-- Pure functions (formatting, tsc parsing, porcelain condensing, staleness) are
-  exported and vitest-tested with injected strings — a deliberate, blessed
-  narrowing of the plan's "injected runners": pure functions over strings need
-  no runner seam at all. No test shells out; the thin entry (`repo-facts.mjs`)
-  owns every process/fs/git touch.
+- Pure functions (report assembly, tsc parsing, prettier-check parsing,
+  porcelain condensing, cache merging, staleness) are exported and vitest-tested
+  with injected strings — a deliberate, blessed narrowing of the plan's
+  "injected runners": pure functions over strings need no runner seam at all. No
+  test shells out; the thin entry (`repo-facts.mjs`) owns every process/fs/git
+  touch.
 - The header line is contract, verbatim, on its own line — downstream skills and
   briefs quote it; changing it breaks them.
 - A false zero is the worst failure: a tsc diagnostic without a file(line,col)
-  location still increments the count.
+  location still increments the count, and prettier-check output outside the
+  README's prettier-drift recognition contract condenses to a failure value,
+  never to 0 — a count printed under prettier's error exit is a parse-failure
+  count, not a drift count, and maps to the failure value too.
+- The prettier-drift emission label is `prettier drift (npm run format:check)` —
+  the label carries its own scope, the producing command; a bare "repo-wide"
+  would claim an enumeration the command does not make. The markdownlint label's
+  `(repo-wide)` predates this rule and is grandfathered.
 - "Slow" is an implementation constant measured at execution (the plan's
   threshold guidance: ~10s); the cache lives at `.claude/cache/repo-facts.json`,
-  written temp-then-rename, gitignored; a torn or unparsable cache read counts
-  as stale.
+  one keyed record per successful slow measurement, merged on write,
+  temp-then-rename, gitignored; a torn or unparsable cache read counts as stale.
+- The check glob includes `**/*.json` and the oracle writes its cache to
+  `.claude/cache/repo-facts.json` — the root `.gitignore`'s `.claude/cache/`
+  line, honored by prettier's default ignore path, is what keeps the oracle out
+  of its own measurement. A stated coupling, not an accident.
 - The oracle exits nonzero only on its own operational failure — never because a
   measured number is bad (that would be judging).
 - All measurements run sequentially, synchronously, single-process — the
-  injected path's budget is the sum, which is why eslint is out and markdownlint
-  reads through the cache.
+  injected path's budget is the sum, which is why eslint is out and the slow
+  measurements (markdownlint, prettier drift) read through the cache. The
+  discriminator is the cache, not raw cost: a cold prettier-check run (measured
+  11–17s, 2026-08-05) sits in eslint's own exclusion band, but pays it once per
+  cache window rather than every run.
 - **SessionStart reach into spawned subagents is unmeasured** (harness-probe
   covers router reach, not SessionStart) — treated as a hole and baked into the
   fanout skill: orchestrators paste this script's OUTPUT into briefs, never a
