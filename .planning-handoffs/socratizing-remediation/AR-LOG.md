@@ -71,18 +71,31 @@ returned PAUSE. The rulings below close that PAUSE.
   established, not assumed: **`git commit --no-verify`**, which
   `AGENTS.principal.md § Git Policy` sanctions. Isolated by three same-day
   commits over the same five files — with the flag, drift lands; without it, it
-  does not. The mandated pathspec form is **exonerated**: sixty consecutive
-  commits and 179 files under it carry zero drift. Sixty-eight of the 86
-  currently-drifted tracked files trace to one 962-file bulk rename. The
-  maintainer performs the sweep; the agent adds the detection.
+  does not. The mandated pathspec form is **exonerated**
+  `[measured: per-commit blob-vs-prettier comparison over the last 160 commits, 2026-08-04]`:
+  sixty consecutive commits and 179 files under it carry zero drift. Most of the
+  standing drift traces to one 962-file bulk rename, which a rename carries
+  forward untouched. The maintainer performs the sweep; the agent adds the
+  detection.
+
+  **Do not quote a drift count from this entry** — it moves with every peer
+  commit. It was 86 when the ruling was made and **95** three days later
+  `[measured: git ls-files -z | xargs -0 npx prettier --list-different, 2026-08-05]`.
+  Re-measure with that command.
 
 - **R-10 — the eval easter-egg claim is removed.** ["remove the eval"] Six
   easter-egg analyzers are registered and none is `eval`
   (`[read: analyzers/easter-egg.ts]`). Removing the sentence leaves a dangling
   "most"; the quantifier goes too, rather than naming a replacement exception —
-  zero new claims, no registry-sync obligation. The claim itself is not lost
-  from the repo: `language-levels/jej/notional-machine.md` carries it where it
-  belongs.
+  zero new claims, no registry-sync obligation.
+
+  ⚠️ **Corrected during cluster A's AR-5.** This ruling first ended "The claim
+  itself is not lost from the repo: `language-levels/jej/notional-machine.md`
+  carries it where it belongs." That overstates by one step. The file carries
+  **eval-is-an-easter-egg** (`ƒ eval` — an easter egg: admitted but untaught).
+  It does **not** carry the voice-versus-hazard reading that was actually
+  deleted; `[measured: grep -rn "creative voice" src/]` hits only the frozen
+  deprecated tree. So it is a deletion, not a relocation.
 
 - **R-11 — console.log is for the developer, period.** ["the line in the docs is
   stupid. in our ontology console.log is for the dev, period"] The sentence
@@ -106,6 +119,15 @@ returned PAUSE. The rulings below close that PAUSE.
   the type doc and the analyzer widen to include `do...while`, `for` and
   `for...in`. Fixing the analyzer alone was rejected: it would re-create the
   doc-versus-code divergence this campaign exists to remove.
+
+  ⚠️ **Narrowed during cluster A's AR-5.** The policy-conflict framing covers
+  **`for...in` only**. JeJ's allowlist is default-deny and it **admits**
+  `DoWhileStatement` and `ForStatement`, each with a check
+  `[read: language-levels/jej/just-enough-js.ts]`; `ForInStatement` appears
+  nowhere in the level. So for `do...while` and `for` the old doc line was
+  narrower than JeJ's **own** allowlist — a plain omission needing no policy
+  argument, and the allowlist is the cheaper, harder citation. The outcome is
+  unchanged; only the recorded reason narrows.
 
 - **R-13 — no shared statement-kinds module.** The duplicated condition set
   (`{IfStatement, WhileStatement, DoWhileStatement, ForStatement}`) stays
@@ -148,8 +170,23 @@ returned PAUSE. The rulings below close that PAUSE.
   one level down — a `do...while (x)` and a `for (;x;)` each carry a `.test`
   worth comparing and describing. Deliberately **not** folded into R-12's
   increment: it is a behavior change in two more analyzers needing its own red
-  tests. No evidence was found either way for the narrowing being deliberate,
-  and none was asserted.
+  tests.
+
+  ⚠️ **Corrected during cluster A's AR-5.** This item first said "No evidence
+  was found either way for the narrowing being deliberate, and none was
+  asserted." That is a universal negative asserted without a search, and it is
+  false: `socratizing/DOCS.md` § Prior art integration records **Dropped: …
+  switch/case, do-while, for-in** against **Kept: … if/while/for-of questions**,
+  and every gate in `comprehension-control-flow.ts` sits inside that Kept set.
+  So the narrowing **is** a documented JeJ port decision. The real open question
+  is different and better: does R-12's engine-blind policy supersede that port
+  decision? Whoever executes this must answer that rather than treat the
+  narrowing as an oversight.
+
+  **Evidence:** `[read: socratizing/DOCS.md § Prior art integration]`. **Scope
+  correction:** `comprehension-control-flow.ts` holds two _further_ narrowed
+  sets beyond the `{If, While}` pair — `{While, ForOf}` and
+  `{If, While, ForOf}`. A fix that stops at the pair closes part of the gap.
 
 - **O-4 — `switch` and `try` fork execution and are absent from the branching
   set.** Raised by AR-4 on A3. Both create multiple paths in exactly the sense
@@ -163,12 +200,31 @@ returned PAUSE. The rulings below close that PAUSE.
   `comprehension-generic.ts` names them as an open question rather than implying
   a settled exclusion.
 
+  ⚠️ **Qualified during cluster A's AR-5.** "Open question" understates what the
+  tree records. JeJ's default-deny allowlist admits **neither**
+  `SwitchStatement` nor `TryStatement`
+  `[read: language-levels/jej/just-enough-js.ts]`, and `socratizing/DOCS.md` §
+  Prior art integration lists **switch/case** among the dropped question
+  templates. Both point the same way. Widening would still be a behavior change
+  needing red tests, so this stays unauthorized — but the exclusion is
+  better-evidenced than "open" suggests.
+
 - **O-5 — the `controlFlow` feature tag is wider than its doc line, still.**
   Also from AR-4 on A3. `easter-egg.ts`'s `labeled-statement` tags
   `feature: 'controlFlow'` for a `LabeledStatement`, and the `Feature` doc has
   never mentioned labels — before or after R-12. So A3's "the doc now matches
   the code" holds relative to `programPaths`' set, **not** relative to every use
   of the `controlFlow` tag across the module. Pre-existing; not created by A3.
+
+  ⚠️ **Completed during cluster A's AR-5.** This item first named only
+  `LabeledStatement`, which would have closed half the gap. `easter-egg.ts` also
+  ships `with-statement` tagged `feature: 'controlFlow'`, and `WithStatement` is
+  likewise absent from the doc line — and from JeJ's allowlist entirely. State
+  the gap as: **the tag's live extension = the doc line ∪ {`LabeledStatement`,
+  `WithStatement`}.** **Evidence:**
+  `[measured: grep -rn "feature: 'controlFlow'" analyzers/]` → 18 sites across 6
+  files; the two easter-egg ones are the only members outside the widened doc
+  line.
 
 - **O-6 — `assignment-in-condition` cannot see two `.test` sites that exist.**
   Raised independently by AR-1 and AR-2 on A4, and measured: acorn puts `.test`
@@ -181,7 +237,7 @@ returned PAUSE. The rulings below close that PAUSE.
 - **O-7 — `userInteraction` groups `console.log` with prompt/alert/confirm,
   while R-11 puts its audience with developers.** Raised by both reviewers on
   A4. `types.ts`'s `Feature` doc enumerates `console.log` among the
-  user-interaction constructs and `voice.ts` tags `console-log-audience` with
+  user-interaction constructs, and `voice.ts` tags `console-log-audience` with
   that feature, so the grouping is load-bearing for the `features` filter — it
   is a _feature bucket_, not an audience claim. A4's header note says both
   things explicitly so the next reader does not "fix" the type doc by striking

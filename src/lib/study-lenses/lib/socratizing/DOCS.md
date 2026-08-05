@@ -210,6 +210,12 @@ Key adaptations for JeJ:
 - **Kept**: variable questions, operator questions, if/while/for-of questions,
   data literal questions, user interaction questions.
 
+"Dropped" and "Kept" describe which of `ask/`'s **question templates** were
+ported, not which constructs the engine sees. `do...while` and `for...in` have
+no dedicated comprehension question, but both are `controlFlow` constructs and
+both are recognized as branching — the engine analyzes whatever parsed, not only
+what the JeJ level admits.
+
 Level mapping from `ask/` to this module:
 
 - Level 0 (some variable questions) → `syntax`
