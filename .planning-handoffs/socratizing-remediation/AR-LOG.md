@@ -162,6 +162,47 @@ returned PAUSE. The rulings below close that PAUSE.
   to cover all four labels rather than two, because a two-branch hardcode would
   otherwise pass while leaving `do...while` and `for` unfixed.
 
+## Work routing and ceremony — cluster A, recorded here rather than amended
+
+`DEV.md § Work routing and ceremony` requires the classification line in **the
+commit body, and for a campaign its AR-LOG** — two co-equal homes, both
+`git grep`-able. That section became canonical **mid-cluster-A** (`e91bcaf9`),
+so cluster A's own bodies predate it and none carries the line.
+
+The human authorized an amend. **It was declined, and this record is the
+substitute.** My six commits are not contiguous and not at the tip: **38 peer
+commits sit between the first and the last**, three more landed after, and 274
+commits are unpushed. Amending would mean rebasing 44 commits and rewriting the
+SHAs of 38 belonging to roughly five concurrent sessions on a shared worktree —
+several of which cite SHAs in their own ledgers, and every citation would break.
+The rule's stated purpose is that the record be greppable and immutable; this
+file satisfies it without rewriting a peer's history.
+
+`work:` is derived from the path — `src/` and unnamed paths are **software
+work**. `retrospective` is blocked by DEV.md, so all are `prospective`.
+**`ceremony:` is the human's to set; what follows is what actually fired**, as
+observed fact.
+
+| commit        | line                                                                                     |
+| ------------- | ---------------------------------------------------------------------------------------- |
+| `9a9f6c48` A0 | `work: software · twin-doc: none · ceremony: none fired · prospective`                   |
+| `47c323e2` A1 | `work: software · twin-doc: machine · ceremony: AR-1 · AR-2 fired · prospective`         |
+| `0d6d3100` A2 | `work: software · twin-doc: user · ceremony: AR-3 · AR-4 fired · prospective`            |
+| `5fdb2c39` A3 | `work: software · twin-doc: machine · ceremony: AR-3 · AR-4 fired · prospective`         |
+| `df2c0dee` A4 | `work: software · twin-doc: user · ceremony: AR-1 · AR-2 fired · prospective`            |
+| `3918ca9c`    | `work: software · twin-doc: none · ceremony: AR-5 fired · prospective`                   |
+| `122284ab`    | `work: software · twin-doc: none · ceremony: none fired (an AR-5 finding) · prospective` |
+
+Across the cluster the reviews that fired were AR-1 ×2, AR-2 ×2, AR-3 ×2, AR-4
+×2, AR-5 ×1 — **`ceremony: full` at cluster granularity**.
+
+Two honest notes. `twin-doc` names which reader is owed a written account and
+**never asserts the author holds that twin** — the `user` entries mark
+learner-facing question text, the `machine` entries mark contracts a consumer
+codes against. And DEV.md flags that **`full` is not yet defined for work with
+no code**: A0, A4 and `3918ca9c` are documentation-only, so their AR-3/AR-4
+slots have no object rather than being skipped.
+
 ## Open — NOT authorized
 
 - **O-1 — the `{IfStatement, WhileStatement}` narrowed sets.** `consistency.ts`
