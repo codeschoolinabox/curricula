@@ -1,5 +1,6 @@
 import type { Comment, Node, Program, Token } from 'acorn';
 
+import isNode from './is-node.js';
 import type {
 	Entwined,
 	FactStage,
@@ -286,13 +287,6 @@ function wireCommentNeighbors(
 	}
 }
 
-/** The keys present on every acorn node that are never children. */
-function isMetadataKey(key: string): boolean {
-	// `range` needs no entry: its two numbers fail the node check below, so it
-	// contributes no segments either way — the check is the guarantee
-	return key === 'type' || key === 'start' || key === 'end' || key === 'loc';
-}
-
 type ChildWithSegment = {
 	readonly child: Node;
 	readonly segment: string;
@@ -304,13 +298,17 @@ type ChildWithSegment = {
  * array-valued one — the index is the source position, kept across array
  * holes so later siblings' paths stay stable. The returned array is
  * transient: read immediately and discarded, never frozen.
+ *
+ * Every key is offered to the segment rule, including the ones that are never
+ * children: the node check is what excludes them, so naming them a second time
+ * would only be a list to keep in step.
  */
 function directChildren(node: Node): readonly ChildWithSegment[] {
 	const properties = node as unknown as Record<string, unknown>;
 
-	return Object.keys(properties)
-		.filter((key) => !isMetadataKey(key))
-		.flatMap((key) => toSegments(key, properties[key]));
+	return Object.keys(properties).flatMap((key) =>
+		toSegments(key, properties[key]),
+	);
 }
 
 function toSegments(key: string, value: unknown): readonly ChildWithSegment[] {
@@ -321,16 +319,4 @@ function toSegments(key: string, value: unknown): readonly ChildWithSegment[] {
 	return [...value.entries()]
 		.filter((entry): entry is [number, Node] => isNode(entry[1]))
 		.map(([index, child]) => ({ child, segment: `${key}.${index}` }));
-}
-
-/**
- * Whether a value looks like an acorn node: a non-null object with a string
- * `type`. The minimal shape every ESTree node shares.
- */
-function isNode(value: unknown): value is Node {
-	return (
-		typeof value === 'object' &&
-		value !== null &&
-		typeof (value as Record<string, unknown>).type === 'string'
-	);
 }

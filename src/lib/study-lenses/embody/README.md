@@ -29,6 +29,7 @@ embody/
   attach-lenses.ts          group fitting lenses under their declared phases
   join-study.ts             join accessibility + attachments into the study layer
   ecma-version.ts           the one shared numeric language year
+  is-node.ts                the membership rule every generic walk here shares
   lifecycle-phase-order.ts  the five phases, in specification order
   to-stage-cause.ts         parser error → structured StageCause
   tests/                    the region's unit tests

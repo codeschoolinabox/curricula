@@ -2,6 +2,7 @@ import { parse } from 'acorn';
 import type { Node, ParenthesizedExpression, Program } from 'acorn';
 
 import ECMA_VERSION from './ecma-version.js';
+import isNode from './is-node.js';
 import toStageCause from './to-stage-cause.js';
 import type {
 	AstDerivation,
@@ -163,19 +164,4 @@ function unwrapGroupingParens(
 /** Whether the parse built this node around a pair of grouping parentheses. */
 function isGroupingParens(node: Node): node is ParenthesizedExpression {
 	return node.type === 'ParenthesizedExpression';
-}
-
-/**
- * Whether a value looks like an acorn node: a non-null object with a string
- * `type`. The minimal shape every ESTree node shares — and the whole guarantee
- * this walk needs, which is why it carries no metadata-key list: `start` and
- * `end` are numbers, `range` is a pair of them, and a source location has no
- * `type`, so none of them can pass the check.
- */
-function isNode(value: unknown): value is Node {
-	return (
-		typeof value === 'object' &&
-		value !== null &&
-		typeof (value as Record<string, unknown>).type === 'string'
-	);
 }

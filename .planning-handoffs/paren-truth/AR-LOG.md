@@ -1,4 +1,4 @@
-<!-- cspell:ignore reddy unobjected greppable injective unlengthened -->
+<!-- cspell:ignore reddy unobjected greppable injective unlengthened quasis -->
 
 # AR-LOG — paren-truth campaign (Shape C: fold the parse, entwine the parens)
 
@@ -422,3 +422,34 @@ Campaign ruling home per DEV.md § Ruling provenance. Phase-0 session opened
   identity-keyed map. No test exercises `.tokens` on either wrapper of a
   collision. Fixing the tie-break is a materially larger change than the doc
   narrowing the maintainer authorized, so it is logged rather than taken.
+- **2026-08-04 ar-4 verdict on the `isNode` extraction: PROCEED** [relayed:
+  ar-4] — the campaign's only PROCEED. The one real risk was whether deleting
+  `isMetadataKey` changes any path segment, since `directChildren` derives the
+  package's canonical node identity and `byOffset`'s tie-break depends on child
+  enumeration order. Measured neutral twice over: the implementing agent
+  compared the full ordered segment list under both policies across 1275 parses
+  — every `.js`/`.mjs` in the repo × both goals — with 0 divergences [measured:
+  `node --input-type=module -e` harness, this session]; ar-4 then re-derived it
+  independently over a **synthetic corpus the repo cannot exercise** — regex and
+  BigInt literals, template `quasis`, private class fields, static blocks,
+  computed keys, generators, optional chaining, `import.meta`, destructuring
+  with holes and rest — 20 combinations, 0 divergences, and separately confirmed
+  the harness was not passing vacuously. It also settled the one case neither
+  corpus reaches: with `locations: true` acorn's `loc` carries only `start` and
+  `end`, no `type`, so it fails the node check even then [all relayed: ar-4,
+  measured in its session]. Two MINOR findings applied: the doc-merge loss
+  ledger belongs in the commit body (three comments folded into one, nothing
+  lost); and the framing's "110 entwined tests" was wrong — the measured count
+  is 120.
+- **2026-08-04 ar-4 finding, logged not fixed** [relayed: ar-4]: the
+  `import/no-restricted-paths` boundary rule only blocks a sibling subsystem's
+  `<subsystem>/lib/**`, and `embody/` has no `lib/` — every file sits flat at
+  the region root. So the mechanical rule would not catch a cross-subsystem
+  import of `embody/is-node.ts`, even though the prose intent is that only
+  `index.ts` and `types.ts` are public. **Pre-existing** — every other flat
+  embody file was already equally unprotected — and this increment changes no
+  boundary config. Also confirmed: the other three copies of this predicate
+  elsewhere in the package were rightly left alone, and `debug-props`'s is
+  deliberately independent ("an independent route to the same set as the
+  entwined index — agreement is the sanity check"), so merging it would delete
+  the very independence that gives it value.
