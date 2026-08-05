@@ -1189,6 +1189,34 @@ is flat across mechanical-looking and novel increments, and self-classification
 fails precisely where review is needed. The level applies to every increment
 under it, equally.
 
+**How the level interacts with the per-review opt-out.** They are separate
+mechanisms ([§ Adversarial Review Protocol](#adversarial-review-protocol)) and
+both are the human's, so an agent needs a rule for what to do when both are in
+play. Three, and no others:
+
+- **The narrower scope wins for the increment it names, and leaves the level
+  standing afterwards.** Scope beats value; increment beats campaign; later
+  beats earlier. A per-increment opt-out does not lower the campaign's level.
+- **The per-review opt-out only ever subtracts.** There is no "add AR-2 this
+  increment" — a review is put back by raising the level, and an
+  increment-scoped raise applies to that increment alone, after which the
+  campaign level resumes.
+- **"No value removes AR-5" is a statement about _levels_.** The human's
+  explicit per-review opt-out still reaches AR-5; no level does. An agent never
+  proposes that one, and nothing mechanical catches it.
+
+**When no level has been set and one is about to be recorded, the agent asks —
+it does not supply.** A level written into a commit body or an AR-LOG is a
+ruling, and a ruling nobody made does not exist
+([§ Ruling provenance](#ruling-provenance)). Silence is an answer for the _work_
+— it runs at `medium`, and the agent must not interrupt to confirm that — but it
+is not an answer for the _record_. Transcribing the human's level is not stating
+it; supplying one they never set is. If the human does not answer, the settings
+line ships with `ceremony` marked unset rather than filled in: an honest,
+greppable gap beats an invented value, and beats omitting the line entirely. The
+human-facing half of this rule, including the phrases that set a level, is
+[HUMANS.md § Override grammar](./HUMANS.md#override-grammar).
+
 ⚠ **`full` is not yet defined for work with no code.** All three values are
 specified in ARs that presuppose an implementation — AR-3 needs a failing test,
 AR-4 an implementation file. A documentation-only campaign running `full` must
@@ -2042,8 +2070,11 @@ declared ceremony level does not include this review.
   unnecessarily?
 - Are the types over- or under-specified?
 
-**Provide to agent:** README updates, any design notes, existing codebase
-patterns
+**Provide to agent:** README updates **and the twin** — or, at `twin-doc: none`,
+the `## Epistemology` block inside the README that discharges step 0.2 — any
+design notes, existing codebase patterns. AR-1 challenges the README and the
+twin together, so handing over the README alone gives this reviewer half its
+inputs.
 
 ### AR-2: Architectural Sketch Challenge
 
@@ -2175,13 +2206,29 @@ used
 ### AR-5: Pre-Merge Review
 
 **Trigger:** After all increments complete, before the final commit and the push
-prompt. **Skip:** Only when the human explicitly opts out, or when the declared
-ceremony level does not include this review.
+prompt, **or at the last commit before a handoff, whichever comes first**.
+**Skip:** Only when the human explicitly opts out. The second disjunct AR-1
+through AR-4 carry — "when the declared ceremony level does not include this
+review" — **can never be true here**: [§ ceremony](#ceremony) states that **no
+value removes AR-5**. An agent reading only this section's Trigger and Skip
+lines, which is what
+[AGENTS.principal.md § Adversarial Review Protocol](./AGENTS.principal.md#adversarial-review-protocol)
+tells it to do, must not find a ceremony-shaped escape hatch on the one review
+that has none.
 
 <strong>Focus areas:</strong>
 
 - Cross-file consistency: do naming, patterns, and conventions align?
 - Documentation sync: do README, DOCS.md, types, JSDoc, and tests all agree?
+  Include Phase 0 step 0.2 — the twin, or at `twin-doc: none` the
+  `## Epistemology` block inside the README. Its three fields must still be
+  filled, the **Delegated to** holder must still resolve to something real (a
+  holder you cannot find is the same defect as a blank field), and **Falsified
+  if** must be read against the changeset: if these increments met the stated
+  condition, the module now owes its own twin and the block is stale. Judge
+  whether the delegation is still _true_, not whether it was ever _wise_ — the
+  latter is AR-1's question, and re-opening it here turns the merge gate into a
+  second design review.
 - Missing test scenarios: are there untested code paths?
 - Convention compliance: does the full changeset follow DEV.md conventions?
 - Architecture: does this fit cleanly into the existing layer stack? Does the
@@ -2214,10 +2261,13 @@ ceremony level does not include this review.
 
 **Provide to agent:** the baseline SHA (recorded at plan approval via
 `git rev-parse HEAD`) and the modified file paths — the reviewer runs
-`git diff <baseline>..HEAD` itself — plus the original task description and
-DOCS.md paths for modified modules. Pass paths, not pasted contents: the
-reviewer has Read and Bash — `git grep` covers search — and pulls its own
-inputs.
+`git diff <baseline>..HEAD` itself — plus the original task description and the
+**Phase 0 spec paths** for modified modules: `README.md` (which carries the
+twin, or the `## Epistemology` block that discharges it), `types.ts`, and
+`DOCS.md`. **Not `DOCS.md` alone** — the spec is those artifacts read together,
+so a reviewer handed one of them runs its scope-vs-spec check against a third of
+the spec. Pass paths, not pasted contents: the reviewer has Read and Bash —
+`git grep` covers search — and pulls its own inputs.
 
 ## Linting Conventions
 

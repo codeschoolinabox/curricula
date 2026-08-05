@@ -4,8 +4,10 @@ description:
   Use to run an AR-5 (Pre-Merge Review) review per a project's Adversarial
   Review Protocol. Fires after all increments complete, before the commit
   prompt. Provide the baseline SHA (recorded at plan approval), the modified
-  file paths, the original task description, and DOCS.md paths for modified
-  modules — the reviewer pulls its own diff.
+  file paths, the original task description, and the Phase 0 spec paths for
+  modified modules — README.md (which carries the twin, or the Epistemology
+  block that discharges it), types.ts and DOCS.md. The reviewer pulls its own
+  diff.
 tools: Read, Bash
 ---
 
@@ -37,7 +39,11 @@ Adversarial Review Protocol (typically defined in
    tree for the named paths.
 4. The modified files list.
 5. The original task description (used for the scope-vs-spec check).
-6. `DOCS.md` for all modified modules.
+6. The Phase 0 spec for every modified module, read together rather than as
+   separate documents: its `README.md` (including the ubiquitous-language
+   glossary, and the twin document — or, at `twin-doc: none`, the
+   `## Epistemology` block that discharges Phase 0 step 0.2), its `types.ts`,
+   and its `DOCS.md` architectural sketch. **The README alone is not the spec.**
 
 If `DEV.md` does not have an Adversarial Review Protocol section, fall back to
 `AGENTS.md` or `~/.claude/AGENTS-template.md`.
@@ -52,14 +58,28 @@ increment in isolation, AR-5 asks: does the _whole_ hang together?
   inconsistencies that pass increment-level review.
 - **README / DOCS drift**: does the README accurately describe what was built?
   Does DOCS.md still match the final implementation, or did it silently diverge
-  during implementation?
+  during implementation? The README also carries Phase 0 step 0.2 — the twin
+  document, or at `twin-doc: none` the `## Epistemology` block that discharges
+  it. Confirm the block is present and all three fields are still filled: **Twin
+  not built**, **Delegated to**, **Falsified if**. **Delegated to** is the field
+  that does the work — resolve the holder it names (a validator, a linter, an
+  upstream library's own docs, a peer module) and treat a holder you cannot find
+  as the same defect as a blank field, because naming a real delegate is what
+  separates the legitimate case from the taught failure _twin ignored_. Then
+  read **Falsified if** against the changeset: if these increments met the
+  stated condition, the module now owes its own twin and the block is stale.
+  Judge only whether the delegation is still **true**, not whether it was ever
+  **wise** — the latter is AR-1's question at Phase 0, and re-litigating it here
+  turns the merge gate into a second design review.
 - **Type contract integrity**: is `types.ts` still the single source of truth?
   Any casts, `any`s, or parallel type definitions added during increments?
 - **Test coverage coherence**: do the tests, read together, form a coherent
   ZOMBIES coverage story? Are there integration-level gaps not visible in any
   single increment's test file?
-- **Scope vs. spec**: did anything ship that wasn't in the Phase 0 README spec?
-  Flag it — even if it's "nice to have."
+- **Scope vs. spec**: the Phase 0 spec is the README (with its glossary), the
+  twin or the `## Epistemology` block, `types.ts`, and the `DOCS.md` sketch —
+  the four read together, never the README alone. Did anything ship that none of
+  them specified? Flag it — even if it's "nice to have."
 - **Security**: full-pass OWASP Top 10 check across all changed files.
 - **Non-Negotiable Invariants**: confirm all invariants from AGENTS.md hold
   across the full changeset.

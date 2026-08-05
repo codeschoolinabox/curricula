@@ -222,33 +222,23 @@ that is the signal it is rationalizing skipping ceremony and must instead
 surface the friction explicitly. ARs are mandatory; only the human's explicit
 invocation flips that.
 
-**One thing the agent may ask you, and only this.** If it is about to write a
-ceremony level into a record — a commit body, a campaign's ruling log — and you
-have not set one for that increment or that campaign, it must ask you rather
-than supply one. That is the "surface the friction explicitly" half of the rule
-above, not an exception to it: the ask names no value, offers no menu, and
-carries no recommendation. An agent that proposes a level, argues one is
-appropriate here, or asks "shall we run this one light?" is drafting your
-phrase, and the rule above catches it. **Transcribing the level you set is not
-choosing it; supplying one because you never did is.** The line to hold, as a
-contrast pair: _"you haven't set a ceremony level for this campaign — what
-should the commit body say?"_ is the permitted ask; _"shall we run this one
-light?"_ is the banned one, and the difference is that the second named a value.
+**One thing the agent may ask you, and only this** — read it as the "surface the
+friction explicitly" half of the rule above rather than an exception to it. When
+a record is about to claim you chose a ceremony level and you never set one, the
+agent asks instead of supplying a value. **Your silence answers for the work,
+not for the record:** say nothing and the work runs at `medium`, and the agent
+must not interrupt you to confirm that — but a level in a commit body is a
+ruling, and a ruling nobody made is not one. The mechanics, including what the
+agent writes if you don't answer, are canonical in
+[DEV.md § ceremony](./DEV.md#ceremony).
 
-**If you don't answer, the agent ships the line with the ceremony field marked
-unset — it does not fill it in, and it does not block on you.** An honest gap
-you can rule on later is worth more than a level nobody chose, and it stays
-greppable, which a silently-omitted line does not.
-
-**Your silence is an answer for the work and not for the record — that is the
-whole reason the ask exists.** Say nothing and the work runs at `medium`; the
-agent needs no permission for that and must not interrupt you to get it. But a
-level written into a commit body or a ruling log is a **ruling**, and a ruling
-nobody made is not one
-([DEV.md § Ruling provenance](./DEV.md#ruling-provenance)). So the ask fires at
-exactly one moment — when a record is about to claim you chose something — and
-answering it with "medium, my call" is a different act from having said nothing,
-even though the ARs that fire are identical.
+**What is yours here is telling a permitted ask from a banned one**, because
+that judgement is coaching and nothing mechanical makes it. The contrast pair:
+_"you haven't set a ceremony level for this campaign — what should the commit
+body say?"_ is permitted; _"shall we run this one light?"_ is not, and the only
+difference is that the second named a value. An agent that proposes a level,
+argues one is appropriate here, or offers you a menu is drafting your phrase,
+and the rule above catches it — **push back on that one; answer the other.**
 
 **Phrases below are listed verbatim.** The agent should accept close paraphrases
 ("skip the alignment check" for "skip alignment check") but reject
@@ -299,24 +289,16 @@ adding to this file rather than improvising — the agent doesn't recognize ad-h
 phrases reliably.
 
 **The level and the per-AR skip are two separate mechanisms, and both are
-yours**
-([DEV.md § Adversarial Review Protocol](./DEV.md#adversarial-review-protocol)
-says so in those terms). The level declares the gate set for a scope; the per-AR
-phrase is a one-off opt-out from whatever gate set is already standing. They
-interact in exactly three ways worth writing down:
-
-- **The narrower phrase wins for the increment it names, and leaves the level
-  standing afterwards.** Scope beats value; increment beats campaign; later
-  beats earlier.
-- **The per-AR phrase only ever subtracts.** There is no "add AR-2 this
-  increment" — to put a review back, raise the level. An increment-scoped raise
-  applies to that increment only, and the campaign level resumes after it.
-- **`skip AR-5 …, my call` is legal, and it is the one skip with no floor
-  beneath it.** "No level removes AR-5" is a statement about _levels_ — your
-  explicit per-review opt-out still reaches it. Nothing catches that one but
-  you, which is why
-  [§ Anti-protocol](#anti-protocol--patterns-to-catch-yourself-in) names
-  skipping AR-5 as a pattern to catch yourself in.
+yours.** The level declares the gate set for a scope; the per-AR phrase is a
+one-off opt-out from whatever gate set is already standing. How they interact
+when both are in play — the narrower scope wins and leaves the level standing,
+the per-AR phrase only ever subtracts, and **`skip AR-5 …, my call` is legal,
+because "no level removes AR-5" is a statement about _levels_** — is canonical
+in [DEV.md § ceremony](./DEV.md#ceremony), which binds every agent and tool, and
+is not restated here. The one consequence that is yours rather than the agent's:
+**nothing mechanical catches an AR-5 skip**, which is why
+[§ Anti-protocol](#anti-protocol--patterns-to-catch-yourself-in) names it as a
+pattern to catch yourself in.
 
 **Ceremony's record has a narrower home than the other overrides.** The closing
 rule below accepts a conversation, a commit message, or a plan-file note. For a
