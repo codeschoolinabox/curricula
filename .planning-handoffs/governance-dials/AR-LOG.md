@@ -159,19 +159,49 @@ Both reviewers, independently, proposed substantially the same minimal
 successor. That convergence is the strongest signal in the record and is not
 dismissed by the dispositions below.
 
-| #     | Finding                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Disposition                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **A** | `learner · teacher` is not a valid twin pair — `teacher` is a role the author occupies, and the corpus teaches **four** fluid roles on equal footing, of which the design silently takes two                                                                                                                                                                                                                                                                                                                 | **OVERRULED by R5.** `teacher` is a second _audience_ of the same artifact, not a role in the learning community: a teacher running material in class needs pacing, stuck-points, a misconception watch-list; a learner needs the explanation and exercises. Two readers, two generative models — which is § 4's own definition of a twin, and the case it names for documentation ("both _dev / reader twinning_ … AND _NM-twinning_"). Already half-built as the eight `teaching-tips.md` files. **Must be handed to the AR-1 re-run so it is not re-raised.** |
-| **B** | The path→track function is partial — **83 tracked files** match no cell [relayed: ar-1], including all root governance (**5,118 lines** [relayed: Plan agent]); the campaign shipping this text is not routed by its own rule                                                                                                                                                                                                                                                                                | **RESOLVED by R4.** The track only names which twin _vocabulary_ applies when twinning is raised above `none`. Since `none` is the default, an unrouted path owes neither twin and the question does not arise. Stated rule: **unnamed paths fall to the software track at `twinning: none`.** A stated default, not an inference.                                                                                                                                                                                                                               |
-| **C** | `ontology.md` § 4 already models this repo as **one** coordinated cycle (curriculum = V, `lenses/embody` = F, "each shaping the other's next iteration… We are doing the innovation process we're teaching"), and names the failure of separating them ("absent coordination between affordance spaces")                                                                                                                                                                                                     | **PARTIALLY OPEN — the campaign's deepest unresolved question.** R5 shows the two crafts have genuinely different twin _structures_ (F+V vs V+V), which is a real craft boundary. It does **not** answer whether two tracks with per-file obligations institutionalise the failure § 4 warns of. **Must be handed to the AR-1 re-run as an explicit open question.**                                                                                                                                                                                             |
-| **D** | The dials are not orthogonal — dial 1's value set depends on the track                                                                                                                                                                                                                                                                                                                                                                                                                                       | **ACCEPTED.** The orthogonality claim is withdrawn, not defended. What is claimed instead: the three _questions_ are the same on both tracks; only twinning's vocabulary changes. **The phrase "the same three dials on both tracks" must not appear in the governance text.**                                                                                                                                                                                                                                                                                   |
-| **E** | "twinning depth" names an unordered lattice as a ladder (`both` is wider, not deeper)                                                                                                                                                                                                                                                                                                                                                                                                                        | **ACCEPTED.** The dial is named `twinning`, never `twinning depth`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| **F** | `ceremony: none` is dishonest naming while AR-5 always fires, and duplicates an existing override phrase that already carries the audit-trail rule                                                                                                                                                                                                                                                                                                                                                           | **ACCEPTED.** Values are `full` / `medium` / `light`; **no value removes AR-5**, whose floor fires at the "Sprint complete — ready to push" prompt already defined in [AGENTS.principal.md § Git Checkpoints](../../AGENTS.principal.md#git-checkpoints).                                                                                                                                                                                                                                                                                                        |
-| **G** | _As raised by both reviewers:_ "the new vocabulary collides worse than the old" — `twin` **322** uses in the live corpus [measured: `grep -roi 'twin' spiralearn/frogramming-and-vibetoading/ \| wc -l`]; `track` already means _language variant_; `dial` already means the Belgian voice control; `ceremony` is taught as a _failure symptom_. **Left standing as raised, not as a finding of fact — increment 1 measured two of these limbs to be understated, one overstated, and one false as stated.** | **CLOSED at increment 1.** See [§ Glossary](#glossary--agent-decisions-increment-1), which adjudicates every token against one uniform test. `track`, `dial` and `twinning` are **RETIRED**; **`ceremony` is KEPT** because the premise fails for it — the curriculum's taught term is the compound `ceremony-without-twin`, and governance owns the bare noun at HEAD.                                                                                                                                                                                          |
-| **H** | The disclosure mechanism rests on a hook branch that does not exist                                                                                                                                                                                                                                                                                                                                                                                                                                          | **ACCEPTED and fixed.** Confirmed independently: `session-start` appears **0** times in `scripts/repo-facts.mjs` [measured: `grep -c 'session-start' scripts/repo-facts.mjs`]. Dial settings go in the **commit body** and this AR-LOG — both `git grep`-able — never in a plan file, which [DEV.md § Ruling provenance](../../DEV.md#ruling-provenance) says "does not exist". No `AskUserQuestion` popup: the agent **states** the settings, it does not ask.                                                                                                  |
-| **I** | Nothing in the design is mechanically checkable except the Epistemology block                                                                                                                                                                                                                                                                                                                                                                                                                                | **ACCEPTED.** Inventory recorded below.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| **J** | No gate sequences the revert, so the text increments have no defined starting state                                                                                                                                                                                                                                                                                                                                                                                                                          | **ACCEPTED.** Increment 2.5 is an explicit human gate; the agent verifies zero residue before any text increment opens.                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| **K** | Increment 1 was padded — "is the dangling promise committed?" is one command                                                                                                                                                                                                                                                                                                                                                                                                                                 | **ACCEPTED and answered: draft-only.** All three `HUMANS.md#override-grammar` inbound links exist only in the working copy, so the defect dies with the revert. Increment 1 re-scoped to the glossary.                                                                                                                                                                                                                                                                                                                                                           |
+- **2026-08-04 `ar-1` RE-RUN (increment 2) verdict: PAUSE** [relayed: ar-1].
+  Baseline `f7580e74`; HEAD moved twice during the review to `e1f69580`, both
+  foreign. **Three blockers** — (1) R9 does not resolve the ceremony
+  contradiction; (2) R5's supporting citation is read against its sense and its
+  evidence sits outside the routed tree; (3) the default cell's defense is
+  incoherent. **Seven important**, three minor. It **confirmed as sound**: the
+  `track`, `dial` and `twinning` retirements, R5's substance, and the `ceremony`
+  keep ("right token, wrong write-up"). It **answered finding C**, which is now
+  closed. Its lead counter-proposal is **CP-A**.
+  - **Agent-resolved in this increment** (evidence corrections and additive
+    spec, none of which reverses a human ruling): blocker 3 via the delegate
+    field; concerns 5a, 5b, 5c, 6, 7 and 8 corrected in place; finding C closed;
+    finding **L** lettered.
+  - **Bubbled to the human**, unresolved by design: blockers 1 and 2, plus CP-A
+    and CP-D. See
+    [§ Open at the increment-2.5 gate](#open-at-the-increment-25-gate).
+  - **One reviewer charge rejected on measurement:** that the `81` count "does
+    not return at any commit". It returns at `af6e811d`, the SHA that was HEAD
+    when it was measured, which the review did not test. Its underlying point
+    stands and drove the SHA-pinning correction.
+  - ⚠ **Its judgement on the increment-1 ceremony disclosure — recorded because
+    it cuts against this campaign:** procedurally defensible, but the gate set
+    that exempted increment 1 was **agent-authored at increment 0**, which R9
+    now says was the human's to set; and the human ratified **conclusions, not
+    evidence**. Increment 1 shipped four false claims into a permanent record,
+    all four of the kind an AR catches and a ratification does not. **Adopted
+    rule: any increment that retires or coins a governance noun carries an AR,
+    whether or not it writes prose.**
+
+| #     | Finding                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Disposition                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **A** | `learner · teacher` is not a valid twin pair — `teacher` is a role the author occupies, and the corpus teaches **four** fluid roles on equal footing, of which the design silently takes two                                                                                                                                                                                                                                                                                                                 | **OVERRULED by R5.** `teacher` is a second _audience_ of the same artifact, not a role in the learning community: a teacher running material in class needs pacing, stuck-points, a misconception watch-list; a learner needs the explanation and exercises. Two readers, two generative models. **R5's substance STANDS — it is a human ruling and the AR-1 re-run accepted it.** ⚠ But increment 2 corrected the evidence beneath it, twice: (i) the § 4 citation was read against its plain sense — "Documentation as a both-hats case" is a **conjunction**, V _and_ F, so the one passage insisting the documentation case needs an F-twin was cited as authority for a pair with **two V-twins and no F-twin**; (ii) "already half-built as the eight `teaching-tips.md` files" is **withdrawn** — all eight sit in `welcome-to-programming/` (6) and `welcome-to-algorithms/` (2), and **zero** are in the routed curriculum tree [measured: `find spiralearn -name 'teaching-tips*'`; `find spiralearn/frogramming-and-vibetoading -name 'teaching-tips*' \| wc -l` → 0]. The routed cell has no instance of its own twin, and the cited artifacts live in a tree this design freezes. **Consequence, escalated to the gate: the curriculum side owes an F-twin** — see [§ Open at the increment-2.5 gate](#open-at-the-increment-25-gate). |
+| **B** | The path→track function is partial — **83 tracked files** match no cell [relayed: ar-1], including all root governance (**5,118 lines** [relayed: Plan agent]); the campaign shipping this text is not routed by its own rule                                                                                                                                                                                                                                                                                | **RESOLVED by R4.** The track only names which twin _vocabulary_ applies when twinning is raised above `none`. Since `none` is the default, an unrouted path owes neither twin and the question does not arise. Stated rule: **unnamed paths fall to the software track at `twinning: none`.** A stated default, not an inference.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| **C** | `ontology.md` § 4 already models this repo as **one** coordinated cycle (curriculum = V, `lenses/embody` = F, "each shaping the other's next iteration… We are doing the innovation process we're teaching"), and names the failure of separating them ("absent coordination between affordance spaces")                                                                                                                                                                                                     | **CLOSED at increment 2 — the premise is wrong and the citation is misattributed.** (i) "absent coordination between affordance spaces" is **not in § 4**; it is at `ontology.md:258`, inside § 2, and its subject is two stances failing to coordinate _inside one artifact_ (encodings, name fields, date formats), not the curriculum↔`embody` pair [measured: `grep -rn 'absent coordination' --include='*.md' .`]. (ii) § 4 does **not** model the repo as one undifferentiated cycle — it names **exactly two artifacts**, "**the curriculum**" (V) and "**`lenses/embody`**" (F), as two translational artifacts "**in the same trading zone**" [read: `ontology.md:596-612`], and a trading zone requires two parties. **So naming two kinds of work is what § 4 does; the split does not institutionalise § 4's failure.** ⚠ The real defect is the **axis**: the design cuts by directory tree, § 4 cuts by which twin the artifact is grounded in — which folds the ontology's named F pole (`src/lib/embody/`) into undifferentiated "software work" and leaves the curriculum side with no F-twin. **Boundary to move, not a split to remove** — carried to the gate.                                                                                                                                                                  |
+| **D** | The dials are not orthogonal — dial 1's value set depends on the track                                                                                                                                                                                                                                                                                                                                                                                                                                       | **ACCEPTED.** The orthogonality claim is withdrawn, not defended. What is claimed instead: the three _questions_ are the same on both tracks; only twinning's vocabulary changes. **The phrase "the same three dials on both tracks" must not appear in the governance text.**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| **E** | "twinning depth" names an unordered lattice as a ladder (`both` is wider, not deeper)                                                                                                                                                                                                                                                                                                                                                                                                                        | **ACCEPTED.** The dial is named `twinning`, never `twinning depth`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| **F** | `ceremony: none` is dishonest naming while AR-5 always fires, and duplicates an existing override phrase that already carries the audit-trail rule                                                                                                                                                                                                                                                                                                                                                           | **ACCEPTED.** Values are `full` / `medium` / `light`; **no value removes AR-5**, whose floor fires at the "Sprint complete — ready to push" prompt already defined in [AGENTS.principal.md § Git Checkpoints](../../AGENTS.principal.md#git-checkpoints).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| **G** | _As raised by both reviewers:_ "the new vocabulary collides worse than the old" — `twin` **322** uses in the live corpus [measured: `grep -roi 'twin' spiralearn/frogramming-and-vibetoading/ \| wc -l`]; `track` already means _language variant_; `dial` already means the Belgian voice control; `ceremony` is taught as a _failure symptom_. **Left standing as raised, not as a finding of fact — increment 1 measured two of these limbs to be understated, one overstated, and one false as stated.** | **CLOSED at increment 1.** See [§ Glossary](#glossary--agent-decisions-increment-1), which adjudicates every token against one uniform test. `track`, `dial` and `twinning` are **RETIRED**; **`ceremony` is KEPT** because the premise fails for it — the curriculum's taught term is the compound `ceremony-without-twin`, and governance owns the bare noun at HEAD.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| **H** | The disclosure mechanism rests on a hook branch that does not exist                                                                                                                                                                                                                                                                                                                                                                                                                                          | **ACCEPTED and fixed.** Confirmed independently: `session-start` appears **0** times in `scripts/repo-facts.mjs` [measured: `grep -c 'session-start' scripts/repo-facts.mjs`]. Dial settings go in the **commit body** and this AR-LOG — both `git grep`-able — never in a plan file, which [DEV.md § Ruling provenance](../../DEV.md#ruling-provenance) says "does not exist". No `AskUserQuestion` popup: the agent **states** the settings, it does not ask.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| **I** | Nothing in the design is mechanically checkable except the Epistemology block                                                                                                                                                                                                                                                                                                                                                                                                                                | **ACCEPTED.** Inventory recorded below.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| **J** | No gate sequences the revert, so the text increments have no defined starting state                                                                                                                                                                                                                                                                                                                                                                                                                          | **ACCEPTED.** Increment 2.5 is an explicit human gate; the agent verifies zero residue before any text increment opens.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| **K** | Increment 1 was padded — "is the dangling promise committed?" is one command                                                                                                                                                                                                                                                                                                                                                                                                                                 | **ACCEPTED and answered: draft-only.** All three `HUMANS.md#override-grammar` inbound links exist only in the working copy, so the defect dies with the revert. Increment 1 re-scoped to the glossary.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| **L** | **Over-parameterisation** — named in the Plan-agent PAUSE at the top of this section but never given a letter, so the campaign's own gate ("a resolution line for every finding A–K") could not catch it                                                                                                                                                                                                                                                                                                     | **ACCEPTED, and lettered at increment 2 so the gate reaches it.** The finding is correct on arithmetic: the design takes on **2 work kinds x 4 twin-doc values x 3 ceremony values x 2 documentation modes = 48 cells**, and by this file's own record every `retrospective` cell is BLOCKED, every `ceremony: full` docs-class cell is undefined, and curriculum twin-doc values are deferred entirely. **Exactly one cell — the default — is worked through.** Shipping 48 cells to serve 1 is the primary AR-1 lens. Carried to the gate as the strongest argument for the reviewer's CP-A.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 
 ## Glossary — agent decisions (increment 1)
 
@@ -195,8 +225,16 @@ than quietly dropped.
 
 ### The test
 
-One criterion, applied uniformly to all four tokens, so that no ruling rests on
-taste. A governance term is admissible only if:
+Three criteria, so that no ruling rests on taste. A governance term is
+admissible only if:
+
+⚠ **Correction, increment 2.** This paragraph first read "One criterion, applied
+uniformly to all four tokens". That was false on the section's own face — only
+criterion 1 is argued for all four tokens; criterion 2 is argued for `track`
+alone and criterion 3 for `dial` and `twinning`. The honest description is
+**three criteria, applied as each becomes relevant**, with criterion 1 as the
+one that binds every token. The rulings do not change; the claim about their
+uniformity does.
 
 1. **Incumbency** — committed governance **at HEAD** already uses it in the
    **intended** sense, **or** the taught curriculum does not claim it. Measured
@@ -234,13 +272,26 @@ holds the clear majority of the word's uses.
 - **10 lines** of committed governance at HEAD carry it [measured: `git show
   HEAD:<f> | grep -ciE 'ceremony'` → `DEV.md` 1, `AGENTS.md` 4,
   `AGENTS.principal.md` 4, `HUMANS.md` 1].
-- **81 lines** carry the word across all tracked `.md` at HEAD [measured: `git
-  grep -icE 'ceremony' HEAD -- '*.md'`, summed]; only **10** are in the two
-  curriculum corpora [measured: `grep -rniE 'ceremony'` over
-  `frogramming-and-vibetoading/` + `welcome-to-frogramming/`] — 5 live, 5
-  frozen. The stem needs no wildcard: the plural and adjectival forms are absent
+- **81 lines** carried the word across all tracked `.md` **at `af6e811d`**
+  [measured: `git grep -icE 'ceremony' af6e811d -- '*.md'`, summed]; **10** are
+  in the two curriculum corpora — 5 live, 5 frozen [measured: `grep -rniE
+  'ceremony'` over `frogramming-and-vibetoading/` + `welcome-to-frogramming/`].
+  The stem needs no wildcard: the plural and adjectival forms are absent
   repo-wide [measured: `git grep -icE 'ceremonies|ceremonial' HEAD -- '*.md'` →
   no matching files].
+  - **⚠ Correction, increment 2 — the number was pinned to a moving label.** It
+    was written as "at HEAD it is 81", which self-invalidated the moment this
+    campaign committed: the glossary's own text added ~32 lines carrying the
+    word. Measured across the range [measured: `git grep -icE 'ceremony' <sha>
+    -- '*.md'`, summed]: `7a5239b7` → **69**, `af6e811d` → **81**, `f7580e74` →
+    **113**, `e1f69580` → **113**. **81 was correct when measured**, at
+    `af6e811d`; it is not correct now, and "HEAD" was the wrong anchor for a
+    durable record. **Repo-state counts in this file are SHA-pinned from here
+    on.** (An AR-1 reviewer reported the command "does not return 81 at any
+    commit"; it does, at `af6e811d`, which the review did not test. The
+    reviewer's underlying point — that a HEAD-pinned count in a file whose own
+    commit moves HEAD is self-invalidating — is correct and is why this
+    correction exists.)
 - The curriculum's **taught** term is the hyphenated compound
   **`ceremony-without-twin`**, and it is examined [read:
   `spiralearn/frogramming-and-vibetoading/chapters.md:605` — "🐣 … recognize
@@ -248,6 +299,33 @@ holds the clear majority of the word's uses.
 
 ⇒ Governance is not borrowing a taught term; it is **putting a value on a word
 it already holds**.
+
+⚠ **DISCLOSED WIDENING — added at increment 2, the same flag `prospective`
+carries.** The incumbency above is real but is **narrower than the intended
+sense**, and the first draft failed to say so while flagging a smaller widening
+elsewhere. At HEAD `ceremony` is a **constant**, not a variable: 9 of its 10
+committed governance lines are "full ceremony", "Ceremony is uniform", or
+"skipping ceremony". The design replaces that constant with a **three-valued
+setting whose default is below maximum**. Constant → variable is a _larger_
+widening than `prospective`'s adjective → work mode. Two consequences must be
+stated rather than absorbed:
+
+- The campaign is **deleting part of the incumbency it claims** — increment 6
+  inverts the house-terms body containing "full ceremony — for production work",
+  and R4/R9 make "Ceremony is uniform" false as written. See the § Execution
+  mechanics item in
+  [§ Open at the increment-2.5 gate](#open-at-the-increment-25-gate).
+- The earlier claim that governance holds "the clear majority of the word's
+  uses" is **withdrawn**. At `e1f69580` root governance carries 10 lines and the
+  two curriculum corpora carry 10 — parity. The largest single body is
+  `.planning-handoffs/`, in the **count-noun** sense this campaign declines to
+  reconcile.
+
+What survives, and is sufficient: governance holds the **bare noun** in its own
+sense, the curriculum's taught term is the compound, and the key-bound form is
+measurably unambiguous — `ceremony:` appears on **13 lines** repo-wide
+[measured: `git grep -inE 'ceremony:' e1f69580 -- '*.md'`], almost all of them
+this campaign's own record.
 
 **Three corrections to this glossary's own first draft**, each found by the
 design pass and verified here:
@@ -268,15 +346,28 @@ design pass and verified here:
 
 **Obligations that ship with the ruling:**
 
-- **(a) Governance states the whole of § 4, not the half that flatters it.** The
-  flattering half is the rescue [read: `ontology.md:453-459` — twin-less
-  processes "carry accumulated wisdom … they aren't worthless without it
-  either"]. The half governance must also carry is [read: `ontology.md:461` —
-  "**Strict process _with_ strong twinning is itself a failure mode**"] and
-  [read: `ontology.md:468-470` — "processes _afford_ structure; twins _do_ the
-  work … _You have to understand the rules in order to break them._"].
-  **Governance says plainly that a ceremony setting exists _because of_ that
-  second horn** — a fixed maximum is what § 4 names a failure mode.
+- **(a) Governance states the whole of § 4 — BOTH horns, and neither one
+  alone.** § 4 cuts against a fixed maximum _and_ against a low default, and
+  governance must carry both or it is quoting selectively in its own favour
+  either way:
+  - The horn that licenses a setting at all: [read: `ontology.md:461` —
+    "**Strict process _with_ strong twinning is itself a failure mode**"] and
+    [read: `ontology.md:468-470` — "processes _afford_ structure; twins _do_ the
+    work … _You have to understand the rules in order to break them._"]. **A
+    fixed maximum is what § 4 names a failure mode** — that is why the setting
+    exists.
+  - The horn that argues _against_ a low default, and which the first draft
+    omitted: [read: `ontology.md:453-459` — twin-less processes "have evolved as
+    effective guardrails / guides / checklists; they **carry accumulated wisdom
+    against well-known failure patterns** … they aren't worthless without it
+    either"]. **This is the sentence that licenses `ceremony: full` on twin-less
+    work** — precisely the work `twin-doc: none` describes. A design whose
+    default is `twin-doc: none · ceremony: medium` is lowering ceremony exactly
+    where § 4 says the guardrails still carry value.
+  - ⚠ **Correction, increment 2.** The first draft called `:453-459` "the
+    flattering half" and quoted only the second horn. That got it backwards for
+    this design: under a sub-maximum default it is `:453-459` that is
+    inconvenient, and it was the half left out.
 - **(b) No ceremony value is ever evidence of twinning.** `ceremony: full` never
   discharges a twin obligation.
 - **(c) Always written key-bound** — `ceremony: full`, never a bare "the
@@ -290,8 +381,16 @@ design pass and verified here:
    tier"] or the **git participle** [read: same — "tracked edits",
    "remote-tracking refs"; `git show HEAD:HUMANS.md` — "**Tracked** project
    guardrails"]. **None** is a classification noun.
-2. **Instrument cost.** The new noun would arrive as a small minority in a field
-   dominated by the git participle, inside the very files where it would live.
+2. **Instrument cost.** The new noun would arrive as a small minority among the
+   **10** `track*` lines in the three root governance files, none of which is a
+   classification noun — **6 verb, 4 git participle** [measured: `git show
+   e1f69580:<f> | grep -niE '\btrack(s|ed|ing)?\b'` → `DEV.md` 1797, 1806, 2137,
+   2145; `AGENTS.md` 460; `AGENTS.principal.md` 65, 410, 603, 712, 777].
+   - ⚠ **Correction, increment 2.** This ground first said the field was
+     "dominated by the git participle". Measured, it is dominated by the
+     **verb** (6 vs 4). The conclusion survives — a new noun is a minority among
+     10 non-noun uses either way — but the stated fact was wrong, and a
+     criterion argued on its own merits cannot afford to be argued wrongly.
 3. **The curriculum collision is broader than finding G recorded** — **five**
    sites across **four** regions, not one:
    - [read: `spiralearn/frogramming-and-vibetoading/guide.authors.md:268` — "A
@@ -408,13 +507,44 @@ than adopting its root.
 `twin-doc: none · ceremony: medium` breaks the _spelling_ that
 `twinning: none · ceremony: medium` produced — correctly, since the governance
 sense is document-not-cognition. **It does not answer whether the default cell
-is defensible.** That is finding C's question and it stays open. § 4's own
-carve-out is what a defense would rest on [read: `ontology.md:371-379` —
-building by feel without a deep twin "is a legitimate stance", and "what matters
-is _which twin_ is being **intentionally delegated**"], which makes the
-declared, `git grep`-able record load-bearing rather than bookkeeping: an
-_undeclared_ default is the taught failure "twin ignored" [read:
-`ontology.md:415`].
+is defensible.**
+
+**Answered at increment 2 — and the first draft's answer was incoherent.** It
+invoked § 4's carve-out while failing that carve-out's stated condition. Read
+both branches: the stance "can be V-flavored (user-experience-led **with the NM
+delegated**) or F-flavored (NM-led **with user-research delegated**)" [read:
+`ontology.md:371-379`]. In each branch one twin is held and the other is
+**delegated to a named holder**. The carve-out never blesses delegating both,
+and it never treats _absence_ as delegation. `twin-doc: none`, as first
+specified, delegates to nobody — and § 4 names declared absence: "**Twin
+ignored** — you know you should build a twin … but skip it" [read:
+`ontology.md:415`], the both-NO corner it calls "the starting position the
+curriculum brings learners _out of_" [read: `ontology.md:426-435`].
+
+The draft also took both sides of a straight either/or eight lines apart: it
+justified the `twinning` → `twin-doc` rename on the ground that the governance
+sense is _document-not-cognition_, then defended the default with a carve-out
+about _stance_. If the rename's rationale holds, the stance carve-out cannot
+defend the setting; if the carve-out applies, the setting is stance-adjacent and
+the rename's rationale weakens.
+
+**RULING — the Epistemology block names the delegate. Three fields, not two:**
+
+1. **which twin is not built**;
+2. **to whom or what it is delegated** — a named holder: a validator, an
+   upstream library's own docs, a linter, a peer module;
+3. **what would falsify that delegation** — the condition under which this unit
+   starts owing its own twin.
+
+Worked shape: _"The NM twin is delegated to the JEJ validator and the
+eslint-scope analyzer; if either stops being authoritative for scoping, this
+module owes its own NM document."_
+
+This is what moves the default cell out of "twin ignored" and into § 4's
+legitimate, intentionally-delegated stance. It costs one sentence of spec and it
+makes the block worth grepping for rather than a disclosure of a gap. **Without
+field 2 the default cell is § 4's fourth corner with a disclosure attached** —
+and that, not the spelling, was the defect the rename risked hiding.
 
 ### Checked and cleared, so `ar-1` need not re-open them
 
@@ -461,6 +591,79 @@ _undeclared_ default is the taught failure "twin ignored" [read:
 - **The plan's increment-4 heading and model tables.**
 - **The peer banned-term list** — no action needed; retiring `dial` helps it.
 
+## Open at the increment-2.5 gate
+
+Everything the agent could resolve is resolved. **These six need the human, and
+increment 3 does not open until the first two are answered.** Each carries the
+reviewer's proposed resolution, per the PAUSE protocol.
+
+1. **⛔ BLOCKER — the ceremony contradiction is NOT resolved by R9.** R9 fixed
+   _who narrates_ the value; the invariant governs _who grants the exception_.
+   Committed baseline ceremony is **all five ARs** [read: `git show
+   e1f69580:AGENTS.principal.md` § Incremental TDD Workflow]; `medium` fires
+   **AR-1 and AR-5 only**, so the default silently removes AR-2, AR-3 and AR-4
+   from every unit of work. The invariant sanctions exceptions "**per increment
+   or per campaign**" — a standing repo-wide default is neither. And **nothing
+   in the increment list amends the section**: increment 5 amends _invariant 2_
+   (Phase-0 ordering), a different thing [read:
+   `~/.claude/plans/governance-campaign-resuming-recursive-quokka.md:535`]. As
+   planned, `AGENTS.principal.md` ships asserting "Ceremony is uniform — no
+   agent-side lightening" **and** a sub-maximum default.
+   - **Option (i) — CP-B, the reviewer's pick.** Default `ceremony: full`, and
+     let `HUMANS.md § Override grammar` be the mechanism — it is already
+     human-only, agent-never-proposes, and carries the audit-trail rule.
+     `medium` becomes "skip AR-2, AR-3 and AR-4 this campaign, my call". Keeps
+     the invariant literally true, needs no amendment, and makes the ceremony
+     setting **redundant rather than contradictory**. ⚠ Cost: it reverses R4's
+     `medium`, which is why it is the human's call and not the agent's.
+   - **Option (ii) — keep R4.** Add an explicit § Execution mechanics amendment
+     to increment 5's scope, restating uniformity _within a declared level_ and
+     naming the default. Preserves R4; enlarges the surgery.
+2. **⛔ BLOCKER — the curriculum side owes an F-twin.** § 4's "Documentation as
+   a both-hats case" is a conjunction requiring V **and** F, and it is the
+   passage R5's disposition cites while concluding a two-V pair. Plan open item
+   1 already suspected this ("exercise files _arguably_ owe an F-twin too"); it
+   is not arguable — the cited sentence says so. **Options:** (a) make the
+   curriculum pair `learner · teacher · the-NM-being-taught`; or (b) drop the
+   pair to `reader` and let the F-twin ride the same `twin-doc` values software
+   work uses. Either way the § 4 citation must be quoted for what it says.
+3. **CP-A — the reviewer's lead proposal: ship only the one enforceable rule.**
+   The `## Epistemology` block (now three fields, per the delegate ruling) on
+   every `src/` README, plus one heading check in
+   `scripts/lib/check-governance/`, plus the house-terms fence R4 requires
+   anyway. **Defer** the work-kind split, the twin-doc value sets, the ceremony
+   setting and prospective/retrospective. Rationale is finding **L**: 48 cells,
+   one worked through. It would dissolve items 1, 4 and 6 here and take the
+   campaign from six text increments to two. It answers a measured gap — **44
+   `src/` directories carry a README and no `DOCS.md`** against a committed
+   convention requiring both.
+4. **CP-D — a fourth `retrospective` option the earlier set missed.** Define
+   `retrospective` as a **remediation mode for code that already exists**, never
+   a mode of Phase 0. Then invariant 2 is not in conflict at all, because Phase
+   0 governs _new module establishment_ — there is committed precedent for that
+   scoping move [read: `git show e1f69580:HUMANS.md` § Override grammar, the
+   "trivial fix mode" entry]. AR-1 and AR-2 are then correctly **absent** rather
+   than degraded, and the 44-directory backlog gets a named mode. The reviewer
+   also found option (a)'s price understated on four counts, the sharpest being
+   that `ceremony: full · retrospective` fires five ARs while **no AR ever
+   reviews a design** — which instantiates the very symptom `ceremony` is named
+   after.
+5. **The twin document's boundary against `DOCS.md` is unspecified** — and a
+   third state already exists at HEAD: the blocked peer shipped twin content as
+   a README section, `## What a consumer can predict` [measured: `git grep -n
+   'What a consumer can predict' e1f69580`]. Either sanction that shape as a
+   discharged twin, or say what happens to it.
+6. **Finding C's residue — the boundary runs on the wrong axis.** Either name
+   `src/lib/embody/` explicitly as the F-grounded artifact § 4 names, or drop
+   the work-kind split and let the `twin-doc` value carry the distinction
+   (`twin-doc: machine` _is_ "this is F work"), which also dissolves finding B
+   without R4's unnamed-paths patch.
+
+**Unchanged and still held by the human:** the increment-2.5 revert —
+`git checkout -- DEV.md AGENTS.md AGENTS.principal.md`, **three files**; the
+invariant-2 ruling that unblocks `retrospective`; and curriculum twin-doc
+values.
+
 ## Honour-system inventory (finding I)
 
 Recorded so the next campaign is not surprised. Of the design's rules, **exactly
@@ -477,9 +680,26 @@ Unenforceable by any current check: track-derived-from-path; the per-file union
 rule; `frog`/`vibetoad` phrase recognition; that the agent states its dials;
 that a `retrospective` artifact set is ever actually produced; and the AR-5
 campaign-end trigger, which is a chat string. `check:governance` runs four
-checks — `links`, `roster`, `claims`, `headings` — of which only `links`
-produces errors, and **none reads step numbers**. `governance-guard.py` judges
-Bash command shapes only.
+checks — `links`, `roster`, `claims`, `headings` — and **none reads step
+numbers**. `governance-guard.py` judges Bash command shapes only.
+
+**⚠ Correction, increment 2 (AR-1 re-run).** An earlier revision of the sentence
+above said "**of which only `links` produces errors**". **That is false, and it
+understated this repo's own enforcement.** Measured:
+
+| check      | severity               | evidence                 |
+| ---------- | ---------------------- | ------------------------ |
+| `links`    | error                  | `links.mjs:106`          |
+| `roster`   | **error**              | `roster.mjs:249`         |
+| `claims`   | advisory **and** error | `claims.mjs:46` / `:278` |
+| `headings` | advisory only          | `headings.mjs:29`        |
+
+[measured:
+`grep -on "severity: '[a-z]*'" scripts/lib/check-governance/{links,roster,claims,headings}.mjs`].
+**Three of the four can error**; only `headings` is advisory-only. The plan file
+had this right and the committed AR-LOG contradicted it. The honour-system
+conclusion still holds — the design's rules remain almost entirely unenforced —
+but it must not be argued from a false floor.
 
 ## Ceremony disclosures for this campaign
 
