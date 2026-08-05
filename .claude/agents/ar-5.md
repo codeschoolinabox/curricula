@@ -24,10 +24,17 @@ Adversarial Review Protocol (typically defined in
    agent prompt structure, verdict definitions, resolution rules.
 2. The project's `DEV.md` § AR-5: Pre-Merge Review — the full focus areas list,
    including cross-increment coherence and README drift checks.
-3. The full diff of the changeset: run `git diff <baseline>..HEAD` yourself from
-   the baseline SHA the implementing agent recorded at plan approval (under
-   commit-to-main workflows there is no branch to diff against; if the changeset
-   is not yet committed, diff the working tree for the named paths).
+3. The full diff of the changeset. **If the prompt names the changeset as a list
+   of SHAs, that list is the changeset — use it and do not run a range.** In a
+   shared worktree, unrelated campaigns commit between a campaign's own commits,
+   so `<baseline>..HEAD` is routinely mostly foreign; the dispatching agent
+   overrides this instruction in the prompt rather than editing this file. Per
+   commit, `git show -M <sha>` gives you the body, the rename similarity indices
+   and the patch in one command. Otherwise, run `git diff <baseline>..HEAD`
+   yourself from the baseline SHA the implementing agent recorded at plan
+   approval (under commit-to-main workflows there is no branch to diff against).
+   Either way, if part of the changeset is not yet committed, diff the working
+   tree for the named paths.
 4. The modified files list.
 5. The original task description (used for the scope-vs-spec check).
 6. `DOCS.md` for all modified modules.

@@ -1252,6 +1252,20 @@ restates.
   bar: your own directory's test run fully green (show the three vitest summary
   lines), and zero NEW failures outside the named baseline paths. Whole-repo
   green is not the gate — peers hold deliberately-red tests mid-increment.
+- **A review's changeset is a SHA list, not `baseline..HEAD`.** Foreign commits
+  land between a campaign's own commits faster than any range survives — one
+  wave measured 38, 44, 46 and 49 foreign commits behind the same baseline
+  within a single day (human ruling 2026-08-05). So the dispatching agent hands
+  the reviewer **the campaign's own SHAs** and states that the range form is
+  overridden **in the prompt**; `.claude/agents/ar-5.md` and
+  [§ AR-5: Pre-Merge Review](#ar-5-pre-merge-review)'s _Provide to agent_ line
+  both still describe the range, and neither is edited to suit one campaign. Per
+  commit, `git show -M <sha>` carries the body, the rename similarity indices
+  and the patch together — the three things the sourced-claims audit, the rename
+  post-condition and the Loss lens respectively need. `git show --stat -M`
+  elides the leading segments of long paths and prints no similarity index, so
+  it cannot evidence a rename. Uncommitted changeset members are reviewed in the
+  working tree by pathspec, as the reviewer's own contract already provides.
 
 ### 1. Setup
 
