@@ -771,3 +771,83 @@ byte-untouched commitment deliberately and on the human's say-so. Loss ledger:
 nothing removed at any of the three sites — each gains a clause; the
 pre-existing sentences stand unchanged apart from "a well-formed trip" becoming
 "a well-formed trip on a halt that records a stop".
+
+### I7 — `ar-3` on the kind-surface clusters (**PAUSE** → decomposed and executed)
+
+**A cycle deviation is disclosed rather than hidden: RED→GREEN was not observed
+for this increment** — `index.ts` (a probe-and-delegate mirror of the committed
+sibling's) and both clusters were written together, so the reviewer saw them
+green. It was asked to judge what the deviation cost, and its answer is the
+entry's most useful finding: the cost landed exactly where skipping RED is most
+dangerous — on the one behavior hardest to provoke black-box.
+
+- **BLOCKER — the retained reach's one-event slack had no test anywhere.**
+  `DOCS.md § Testing` names it in a six-item browser-tier list ("the hold and
+  its one-event exception"); the reviewer walked all six and found this the sole
+  item with zero coverage, in the one tier structurally capable of carrying it
+  (the fake cannot represent a retained reach at all). So a contract behavior
+  had only ever been asserted in prose, never checked. Closed with a row that
+  answers an ask, takes the slack, and proves the hold REASSERTS — a runaway
+  would have settled.
+- **The byte ceiling was proven only as a mapping.** The `'call-error'` cause
+  was truth-tabled from a synthetic settlement at I4, but nothing drove a
+  genuinely oversized answer through a real `respond` over real shared memory.
+  Closed end-to-end (20,000 characters against the engine's 8168-byte ceiling —
+  ~2.4× over, deliberately not boundary-adjacent).
+- **Cancel-while-suspended was tested only at One.** All three rows used a lone
+  first-ever dialog, so a release latch set once and never reset would misbehave
+  only on the second occurrence. Closed with a second-dialog row.
+- **No fixture ever varied `facts.type` independently of `execution`.** Every
+  fixture across I1, I6 and I7 tied them in lockstep, so an implementation
+  reading the AXIS as its parse goal would have been byte-identical on all of
+  them — the same "passes for the wrong reason" shape as the fixture bug below.
+  Closed with a differential that holds the axis constant and varies only the
+  snippet type: `await 1;` settles `'threw'` under the module goal and
+  `'defect'` under the script goal (grounded in ECMAScript grammar, not engine
+  internals; the reviewer re-verified both halves by probe).
+- **Precision restored** to the module-axis console row (it now pins method and
+  exclusivity, not merely that a matching args array exists somewhere).
+
+**Two environment findings from the first real-worker run**, both documented at
+their sites rather than papered over:
+
+1. The fixture flattened `facts.type` to a bare string where the real `Facts`
+   carries a `StageSuccess` wrapper, so the wrap's parse goal read as
+   `undefined` and acorn silently defaulted to script — every module-axis row
+   failed as a parse defect. Fixed at all three fixture sites; the I6 unit
+   fixture had the same bug and had been passing for the wrong reason.
+2. On the MODULE axis the trapped console captured the dev server's HMR client
+   log, because the engine installs globals on the worker's `globalThis` there.
+   Judged harness noise, not a contract question, and the `ar-4` verified the
+   scoping independently: each run gets its own single-purpose worker whose only
+   other occupant is the engine's own bootstrap, which never calls console, so
+   nothing but the learner's program shares that scope in production.
+
+### I7 — `ar-4` on the kind-surface implementation (**PAUSE** → the record written)
+
+Verified sound by the reviewer, independently rather than by reading alone:
+`main` is genuinely side-effect-free before the first pull (nothing calls
+`start`, the engine factory, or any I/O outside the returned iterator); the
+refusal names capabilities in probe order; `satisfies Evaluator` genuinely
+preserves the richer return type, checked structurally since the hoisted,
+separately-typed members keep the literal's narrower property types; and each
+new row's robustness (the ceiling's 2.4× margin, the differential's grammar
+grounding, the 250 ms race being sound in the direction that matters).
+
+- **The PAUSE was for this entry's absence**, not for the code — the commit body
+  cites `ar-3`'s five findings, and a citation must resolve to a record
+  `git grep` can see. Written here; the reviewer explicitly recommended patch
+  over the pre-commit discard default, since nothing in the increment was worth
+  throwing away.
+- **Applied**: the parse-goal differential now reaches the error arm through its
+  own discriminant instead of an ad hoc inline cast, so a row landing on the
+  wrong arm fails as an assertion rather than crashing on an undefined read. The
+  reviewer noted this pattern is inherited — the sibling's browser tier casts
+  the same way, and `toHaveProperty('error.trip.loc.start', …)` proves a runtime
+  value, never the static type it was once credited with.
+- **Judged and left alone, with reasons**: the README/DOCS drift `ar-3` raised
+  ("the emit-pause hold" versus "the hold and its one-event exception") is
+  compression rather than contradiction — DOCS opens by pointing at README and
+  exists to add precision README compresses, and the exception is fully
+  specified in README § Design commitments — so a SECOND trio amendment is not
+  justified this phase. The absent sandbox is the ratified I8 split, not a gap.

@@ -66,9 +66,16 @@ function specFor(
 	code: string,
 	extras: Partial<EvaluationSpec> = {},
 ): EvaluationSpec {
+	// `type` mirrors embody's real stage shape — a StageSuccess wrapper, not a
+	// bare string. A flattened fixture reads as an undefined parse goal, which
+	// acorn silently defaults to script: these rows would pass for the wrong
+	// reason (I7's first real-worker run caught it on the module axis).
 	const facts = {
 		source: { ok: true, value: code },
-		type: 'script',
+		type: {
+			ok: true,
+			value: extras.execution === 'module' ? 'module' : 'script',
+		},
 	} as unknown as Facts;
 	return { facts, execution: 'function', ...extras };
 }
