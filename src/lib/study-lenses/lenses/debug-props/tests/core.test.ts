@@ -196,6 +196,26 @@ describe('summarize', () => {
 		});
 	});
 
+	describe('a program with grouping parentheses', () => {
+		it('counts the folded tree, not the parenthesized parse', () => {
+			const summary = summarize(embody('const x = ((1 + 2)) * (3 - 4);'), {});
+			// PINNED(human ruling 2026-07-30: published ast is ESTree-shaped — parens fold away; the exact count is the guard, since a surviving wrapper inflates it)
+			expect(summary.facts.find((entry) => entry.stage === 'ast')).toEqual({
+				stage: 'ast',
+				ok: true,
+				description: '11 nodes',
+			});
+		});
+
+		it('counts the same folded nodes through the entwined index', () => {
+			const summary = summarize(embody('const x = ((1 + 2)) * (3 - 4);'), {});
+			// PINNED(human ruling 2026-07-30: published ast is ESTree-shaped — parens fold away; byPath identities never lengthen through parens, so no wrapper adds a key)
+			expect(summary.facts.find((entry) => entry.stage === 'entwined')).toEqual(
+				{ stage: 'entwined', ok: true, description: '11 nodes' },
+			);
+		});
+	});
+
 	describe('the study layer', () => {
 		it('surfaces attached lens names in roster order', () => {
 			const flowchart = {
