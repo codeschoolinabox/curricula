@@ -900,6 +900,62 @@ Not in the three files, and **not** silently dropped:
 - `.claude/skills/tadpotyping/` — still VOID; its DROPPED list must gain the
   twin or `twin-doc: none` work silently starts owing one.
 
+## STATE AS OF 2026-08-05 — read this before anything above
+
+⚠ **Several sections above are now STALE. This block supersedes them.** They are
+kept because they record how decisions were reached, but do not act on them.
+
+**The design is MERGED.** `DEV.md § Work routing and ceremony` exists; Phase 0
+is three artifact-named steps; both `AGENTS*.md` carry the pointer, the R4
+fence, the R11 ceremony correction, and a Phase-0 summary that matches. The
+three canonicals are committed and the four-track draft never entered history —
+it was replaced by a DRAFT-file swap rather than the planned revert.
+
+**Superseded by this block:**
+
+- **The ⛔ do-not-commit order on `DEV.md`/`AGENTS.md`/`AGENTS.principal.md` is
+  DISCHARGED.** It existed only while they carried the four-track draft
+  [measured: `grep -c territory-tracks` on the three → **0/0/0**]. Committing
+  them is now correct and required.
+- **The increment-2.5 revert is MOOT** — never run, never needed. Every "partial
+  revert turns the checker red / 8 of 11 links" warning is spent.
+- **The renumbering radius is NOT ~135 sites across ~23 files.** Measured live
+  after the rewrite: **12 lines**, and the largest holder (`ar-2.md`, 3) is
+  closed. The recorded figure estimated a scheme that no longer exists.
+- **§ Still owed after this DRAFT set** listed `ar-1.md` and `ar-2.md`; both are
+  **closed** at `1ad540f6`. There is no DRAFT set any more.
+- **§ Section structure's heading tree** still shows the withdrawn name
+  `## What a unit of work owes` at its root. The ratified name is
+  **`## Work routing and ceremony`**, as the two naming-decision bullets above
+  the tree already say.
+- **§ Notice to the `evaluators-intercept` campaign** says the successor section
+  "has no name yet" and that naming it is increment 3's job. Increment 3 landed;
+  **the successor is `DEV.md § Work routing and ceremony`.** That is the notice
+  to relay — and it is still undischarged toward that campaign.
+- **§ `setting` — coined without adjudication** reads as open. It was
+  **adjudicated and RETIRED** at increment 3; see the naming bullets.
+
+### ⚠ OPEN — this campaign's own `ceremony` value has no recorded human ruling
+
+Two lines in this file promise, in the future tense, that "the human confirms it
+at the increment-2 gate". Increment 2 landed at `b2060515`; **no ruling records
+the confirmation** [measured: `grep -n 'human confirms it'` → 2 hits, both
+future-tense; no R-number records a ceremony value]. Under R9 and
+[DEV.md § Ruling provenance](../../DEV.md#ruling-provenance) — "a ruling is
+cited or it does not exist" — **this campaign's `ceremony: full` is still
+agent-stated**, which is precisely what R9 forbids. Every commit body in this
+campaign carries `ceremony: full` on that unconfirmed basis. **Ask the human to
+confirm or set it, and record it as a ruling.** Found by a context-free
+validator; the rule this campaign wrote bit the campaign that wrote it.
+
+### Recording the value is not choosing it
+
+A related gap the same validator found, worth stating once because agents will
+hit it: **transcribing the human's ceremony value into a commit body is not
+"stating" it.** R9 forbids the agent _choosing or lowering_ the level; the
+commit-body line is the audit record of the human's choice. If no value has been
+set, the agent asks — it does not pick one and write it down.
+
 ## Honour-system inventory (finding I)
 
 Recorded so the next campaign is not surprised. Of the design's rules, **exactly
