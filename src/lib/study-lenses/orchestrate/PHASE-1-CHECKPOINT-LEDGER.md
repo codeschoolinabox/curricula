@@ -27,7 +27,35 @@ Replay setup: `npm start`, then visit the page each entry names.
 | DISP-5    | (this row's commit) | `/sandbox/orchestrate`                                                                                             | open parsons; pick a level from the selector; open parsons again; flip strict                                                                                                      | each derivation-context commit closes the open lens FIRST and lands you in the live editor — no change ever happens beneath a mount. The masked-honored variant (strict + violation at load over a focus lens) needs a harness prop edit (lens + activeLanguageLevel + strictLanguageLevels + a `debugger;` seed); it is pinned by the jsdom tests "disposes an honored lens and unmasks in the same posture commit" and "disposes an honored lens on a type toggle under the mask" |
 | FLUSH-6   | (this row's commit) | `/sandbox/orchestrate`                                                                                             | type a fresh line and IMMEDIATELY (before the debounce lands) open parsons; click Edit code                                                                                        | the lens opens over the code exactly as typed — pending keystrokes are absorbed at the open, never discarded — and Edit code returns the editor holding them. (Parsons is text-tier, so it stays open over broken code; the self-close of a lens whose applicability needs the parse is pinned by the jsdom gate test "never mounts a lens the flushed facts reject".)                                                                                                              |
 
+| GEN-4 | `6d4fa40a` | `/spiralearn/sandbox/generator` | ask with a prompt and
+let it answer; click Start over; ask again and click Stop mid-flight; ask with a
+prompt beginning `refuse:`; click Discard | REPLAYED LIVE, NOT DEFERRED — see
+the note below. The stage reports replace one another and the reset control
+reads Stop mid-flight, Start over over an answer; Accept and Discard appear only
+once there is an answer and Accept never appears over a refusal; Start over
+closes the output, keeps the prompt, and re-arms the ask; Discard raises the
+return home and leaves the refusal standing |
+
 Entries append as 🔍-bearing increments land. Wave 0 carried no 🔍.
+
+**GEN-4 broke the deferral pattern deliberately, and the maintainer ruled it.**
+The 2026-07-18 mandate above defers 🔍 rows to this ledger because checkpoints
+were not to block on the maintainer's presence. Increment 4's AR-4 pointed out
+that the generator view had no page at all — three increments of UI had shipped
+unseen — and that `spiralearn/sandbox/editor/index.mdx` had already set the
+pattern: a ~40-line leaf-mount harness needing no orchestrator wiring. The
+maintainer ruled build-it-and-run-it, so
+`spiralearn/sandbox/generator/index.mdx` now exists and GEN-4 was replayed live
+rather than recorded for later. Outcome: no behavioral defect. The one
+observation raised — every candidate carries the placeholder's marker comment —
+is the socket's specified output, not a defect
+([generator/README.md § The placeholder socket](./generator/README.md#the-placeholder-socket)).
+
+⚠️ **The routes in this table's older rows are stale by a prefix.** They read
+`/sandbox/…`; the served route is `/spiralearn/sandbox/…` [measured: the
+generated `path:` entries in `.docusaurus/routes.js`]. A dev server also serves
+a client-rendered shell, so a `curl` against a MISSING route still returns 200 —
+verify a page with a real browser, never a status code.
 
 > **Swap supersession note (the c65e0c7 re-spec).** Three earlier rows pinned
 > coexist-era observations; the rows stay verbatim for historical replay, but
