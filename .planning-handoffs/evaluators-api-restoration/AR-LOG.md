@@ -11,8 +11,11 @@ because the findings and the human's rulings are region-wide and have no home in
 either.
 
 Cold-start brief for the next agent:
-`~/.claude/plans/cold-start-evaluator-api-re-enrichment.md` (validated by a
-context-free agent, which found twelve errors; all corrected before handoff).
+`~/.claude/plans/cold-start-evaluator-api-re-enrichment.md` — validated by
+context-free agents three times before handoff (twelve factual errors; then ten
+contradictions plus seven errors, with a "could not start" verdict; then five
+remaining defects and a "could start"). All corrected. Four numbers across those
+passes were agent-supplied and wrong, caught only by re-running the command.
 
 ---
 
@@ -60,8 +63,11 @@ against `"type":"result"` before trusting either journal.
 
 `[relayed: both audits]` — with the caveat that agent-supplied counts are
 hypotheses. One was wrong on relay and was corrected: `LinkedInterceptEvent` was
-reported as carrying 11 fields; it **adds eight** on top of the base event
-`[measured: grep -c "readonly " over link/types.ts:144-176]`.
+reported as carrying 11 fields; it **adds eight** on top of the REFERENCE's base
+event `[measured: grep -c "readonly " over link/types.ts:144-176]`. Mind the
+baseline when you quote that number: measured against the PORT's
+`InterceptEventBase` the delta is **seven**, because one of the eight is `loc`,
+which the port has. The enumeration below is the seven.
 
 ---
 
@@ -265,14 +271,21 @@ mirrors them in its § 0.
 
 ## Open — for the next agent, before any planning
 
-Carried in the cold-start brief § 6. With HR-1…HR-3 settled, five remain: how
-faithful the naming must be (reproduce the reference's exported names and result
-vocabulary, or keep the port's `ended`/`reason` spelling inside the handle
-shape); whether `run` regains a caller-supplied `io` option; scope beyond run +
-intercept (`trace/` is the largest thing never ported in the region and has
-never been audited, `adapter/` likewise); what happens to the existing unpushed
-Phase-1 work; and whether entwining is restored wholesale from `link/` or
-re-derived against embody's Facts — noting embody parses with `ranges: true`
+Carried in the cold-start brief § 6. With HR-1…HR-3 settled, **seven** remain.
+Two of them come out of HR-3 itself and are the brief's Q1 and Q2, because
+neither follows from "use a handle": whether intercept's handle widens to a full
+`AsyncGenerator` (`intercept/types.ts:261`, exposing
+`.next`/`.return`/`.throw`), and whether `await handle` DRAINS when nobody
+iterates — the latter needing human sign-off if it inverts the PINNED row at
+`intercept/tests/create-intercept-stream.test.ts:118` (`DEV.md:1490` § Pinned
+expectations, `:1499`). The other five: how faithful the naming must be
+(reproduce the reference's exported names and result vocabulary, or keep the
+port's `ended`/`reason` spelling inside the handle shape); whether `run` regains
+a caller-supplied `io` option; scope beyond run + intercept (`trace/` is the
+largest thing never ported in the region and has never been audited, `adapter/`
+likewise); what happens to the existing unpushed Phase-1 work; and whether
+entwining is restored wholesale from `link/` or re-derived against embody's
+Facts — noting embody parses with `ranges: true`
 (`src/lib/study-lenses/embody/derive-ast.ts:59`) and no `locations`, so its
 indices are offset-keyed while the port's events carry line/column.
 
