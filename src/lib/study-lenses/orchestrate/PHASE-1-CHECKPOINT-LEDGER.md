@@ -91,6 +91,24 @@ forward; it is the same finding GEN-5 raised from the other direction. |
 
 Entries append as 🔍-bearing increments land. Wave 0 carried no 🔍.
 
+**GEN-7 — NO SANDBOX CHECKPOINT, declared and maintainer-approved.** Increment 7
+is test-only: it wrote **zero implementation code**, and `orchestrate/index.tsx`
+and `use-settled-snippet.ts` are byte-identical to their parents [measured: `git
+diff --exit-code` on both paths]. It adds **no user-visible surface**, which is
+[DEV.md § Sandbox Checkpoints](../../../../DEV.md#sandbox-checkpoints--user-observable-features)'s
+sanctioned skip category (_"increments with no user-visible surface"_). The
+behavior it pins was already replayed live: **GEN-5** exercised Accept
+(byte-for-byte, 158 = 158) and Discard, **GEN-6** the mid-flight kill. Recorded
+rather than left silent because a lapsed checkpoint is precisely the failure the
+section exists to prevent. **Why this differs from Increment 6**, which was also
+pin-only and still ran GEN-6 live: that increment had a specific claim routed to
+the checkpoint by R-13b (the takes-time warning's abort promise). Increment 7
+routes nothing. **One thing a live GEN-7 would very likely have surfaced:**
+R-11's THIRD sighting — focus falling to `body` when Accept or Discard closes
+the generator under the learner. Two sightings already stand (GEN-5, GEN-6), and
+a third promotes R-11 to its own increment; that promotion is now expected on
+whichever checkpoint next runs live.
+
 **GEN-4 broke the deferral pattern deliberately, and the maintainer ruled it.**
 The 2026-07-18 mandate above defers 🔍 rows to this ledger because checkpoints
 were not to block on the maintainer's presence. Increment 4's AR-4 pointed out

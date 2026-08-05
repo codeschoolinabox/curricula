@@ -68,6 +68,15 @@ async function askTheGenerator(container: HTMLElement): Promise<void> {
 	});
 }
 
+// The Accept click. Discard keeps its inline query — one call site.
+function acceptTheCandidate(container: HTMLElement): void {
+	const accept = container.querySelector<HTMLElement>(
+		'[data-generator-accept]',
+	);
+	if (!accept) throw new Error('missing the Accept affordance');
+	fireEvent.click(accept);
+}
+
 function returnThroughEditCode(container: HTMLElement): void {
 	const back = container.querySelector<HTMLElement>('[data-edit-return]');
 	if (!back) throw new Error('missing the Edit code button');
@@ -2321,6 +2330,136 @@ describe('StudyLenses', () => {
 					'const x = 1;',
 				);
 			});
+		});
+	});
+
+	describe('the accepted candidate (Boundaries)', () => {
+		it('announces the close and never settles when the candidate field-equals the seed', async () => {
+			const dispatches = recordDispatches();
+			scriptGeneratorSocket('const x = 1;');
+			const container = await mountInstrument(
+				<StudyLenses snippet="const x = 1;" />,
+			);
+			openGenerator(container);
+			await askTheGenerator(container);
+			vi.useFakeTimers();
+			try {
+				acceptTheCandidate(container);
+				act(() => {
+					vi.advanceTimersByTime(2000);
+				});
+			} finally {
+				vi.useRealTimers();
+			}
+			await waitFor(() => {
+				expect(container.querySelector('.cm-editor')).not.toBeNull();
+			});
+			expect(namePaneAnnouncements(dispatches, ['settled'])).toEqual([
+				'generator-opened:true',
+				'generator-opened:false',
+			]);
+		});
+
+		it('re-derives the phases from the accepted candidate', async () => {
+			scriptGeneratorSocket('1 +');
+			const container = await mountInstrument(
+				<StudyLenses snippet="const x = 1;" />,
+			);
+			openGenerator(container);
+			await askTheGenerator(container);
+			acceptTheCandidate(container);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-editor')).not.toBeNull();
+			});
+			expect(
+				Array.from(
+					container.querySelectorAll<HTMLElement>('[data-phase-barred]'),
+					(section) => section.dataset['phase'],
+				),
+			).toEqual(['environment', 'evaluation']);
+		});
+	});
+
+	describe('the accept and discard announcements (Interfaces)', () => {
+		it('settles the accepted candidate under the module type, after the generator close', async () => {
+			const dispatches = recordDispatches();
+			scriptGeneratorSocket('const generated = 1;');
+			const container = await mountInstrument(
+				<StudyLenses snippet="const x = 1;" />,
+			);
+			openGenerator(container);
+			await askTheGenerator(container);
+			acceptTheCandidate(container);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-editor')).not.toBeNull();
+			});
+			expect([
+				namePaneAnnouncements(dispatches, ['settled']),
+				dispatches.find(([name]) => name === 'settled')?.[1],
+			]).toEqual([
+				['generator-opened:true', 'generator-opened:false', 'settled'],
+				{ source: 'const generated = 1;', type: 'module' },
+			]);
+		});
+
+		it('settles the accepted candidate under the toggled script type', async () => {
+			const dispatches = recordDispatches();
+			scriptGeneratorSocket('const generated = 1;');
+			const container = await mountInstrument(
+				<StudyLenses snippet="const x = 1;" />,
+			);
+			const toggle = container.querySelector<HTMLElement>('[data-type-toggle]');
+			if (!toggle) throw new Error('missing the type toggle');
+			fireEvent.click(toggle);
+			openGenerator(container);
+			await askTheGenerator(container);
+			acceptTheCandidate(container);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-editor')).not.toBeNull();
+			});
+			expect([
+				namePaneAnnouncements(dispatches, ['type-toggled', 'settled']),
+				dispatches.at(-1)?.[1],
+			]).toEqual([
+				[
+					'type-toggled',
+					'settled',
+					'generator-opened:true',
+					'generator-opened:false',
+					'settled',
+				],
+				{ source: 'const generated = 1;', type: 'script' },
+			]);
+		});
+
+		it('announces the generator close alone on a discard', async () => {
+			const dispatches = recordDispatches();
+			scriptGeneratorSocket('const generated = 1;');
+			const container = await mountInstrument(
+				<StudyLenses snippet="const x = 1;" />,
+			);
+			openGenerator(container);
+			await askTheGenerator(container);
+			const discard = container.querySelector<HTMLElement>(
+				'[data-generator-discard]',
+			);
+			if (!discard) throw new Error('missing the Discard affordance');
+			vi.useFakeTimers();
+			try {
+				fireEvent.click(discard);
+				act(() => {
+					vi.advanceTimersByTime(2000);
+				});
+			} finally {
+				vi.useRealTimers();
+			}
+			await waitFor(() => {
+				expect(container.querySelector('.cm-editor')).not.toBeNull();
+			});
+			expect(namePaneAnnouncements(dispatches, ['settled'])).toEqual([
+				'generator-opened:true',
+				'generator-opened:false',
+			]);
 		});
 	});
 

@@ -490,6 +490,151 @@ are SCOPE calls, three were silences in the committed docs.
   `toPhaseEntry` and `commitCloseLens` are the file's own precedents for both
   shapes.
 
+## AR resolutions — 2026-08-05 (Increment 7, accept and discard pinned)
+
+**Increment 7 wrote NO implementation code.** `orchestrate/index.tsx` and
+`use-settled-snippet.ts` are byte-identical to their parents [measured: `git
+diff --exit-code` on both paths, after the last mutation was reverted]. Five
+tests, all GREEN ON ARRIVAL, so red-green validates nothing and
+mutation-in-place-and-revert is the ceremony — the campaign's precedent from
+Increments 4 and 6. Nine mutations were applied, run, and reverted.
+
+- **Two fail exactly one test each**, which is the strongest evidence available.
+  A stray `settled` dispatch injected into `commitDiscardCandidate` fails the
+  discard pin ALONE (1 failed | 614 passed): before this increment no test
+  recorded dispatches across a discard at all. Hardcoding `type: 'module'` in
+  `settleNow`'s replace branch fails the toggled-type pin ALONE (1 | 614) — that
+  hardcode would have shipped silently against the 610-test baseline, which is
+  the whole reason the fifth test exists.
+- **The keep-list hazard was proven live, both ways.** With the stray discard
+  dispatch in place, the discard pin fails WITH `'settled'` in its keep list (1
+  | 614) and PASSES with the keep list emptied (615 passed, all green). That is
+  Increment 6's AR-3 finding reproduced against a genuinely broken
+  implementation rather than asserted a second time.
+- **The field-equal pin's 2000 ms advance is load-bearing, proven both ways.**
+  Dropping `settle.cancel()` from `settleNow` fails five tests WITH the advance
+  and four WITHOUT it — the pin passes on a late-settling implementation once
+  the window is removed. The advance is what makes its name ("never settles")
+  true rather than "does not settle at this instant". The discard pin carries
+  the same window as insurance, on AR-3's C7: nothing on that path can arm the
+  debounce today, so it guards a future stray rather than a live hazard, and it
+  is disclosed as insurance rather than counted as coverage.
+
+**The placement ruling — `(Simple)` left untouched, two flat siblings added**
+(`the accepted candidate (Boundaries)` and
+`the accept and discard announcements (Interfaces)`), immediately after it.
+Renaming `(Simple)` back to `(Boundaries)` would silently re-litigate a recorded
+Increment-5 AR-3 outcome (see the resolutions above); the two tests it holds
+really are happy-path sanity checks, which is what DEV.md § ZOMBIES defines
+`(S)` as. The file carries **zero two-level nesting**, so a nested parent to
+reunify the three blocks would itself be a structural novelty in a test-only
+commit. **Disclosed against it:** the resulting block order reads `(Simple)` →
+`(Boundaries)` → `(Interfaces)`, which reverses the canonical ZOMBIES letters —
+kept deliberately, because ZOMBIES governs the order tests are AUTHORED across
+increments, not a mandate to re-sort a file each time a later increment lands,
+and because re-sorting would move a committed Increment-5 block for cosmetic
+reasons. **A first draft of this paragraph also cited DEV.md § Test Ordering in
+support; AR-4 caught that the citation overreaches** — that section is scoped
+_"**Within each describe block**"_ [read: `git show HEAD:DEV.md` § Test
+Ordering], so it governs order INSIDE a block and says nothing about sibling
+blocks. Removed rather than stretched. AR-3 asked for this to be a conscious
+call rather than a silent artifact; it is.
+
+**Three deliberate non-tests, recorded rather than silently omitted (R-13's
+precedent).** "A field-equal accept re-derives nothing" is structurally
+unobservable — the only probe is a spied level's `validate`, and
+`createMemoizedValidate` keys its slot on content rather than identity, so the
+count is 1 either way. "A discard leaves the derivation alone" has no unique
+falsifier. "Accept announces `generator-opened:false`, never `lens-opened:null`"
+is already carried by every sequence assertion, since the helper names both arms
+with their payloads.
+
+**HONEST FRAMING, owed twice.** First, gap 3 asks for `{open:false}` **then**
+the settle, but that order is near-structural: the close dispatches
+synchronously inside the click handler while `announceSettled` fires after the
+commit, so no permutation of `commitAcceptCandidate`'s three statements inverts
+it — measured, not assumed (see the AR-3 C1 note below). What the accept pins
+genuinely falsify is **presence, payload, and the absence of strays**.
+
+Second, **two of the five have no unique falsifier — but for two different
+reasons, and AR-4 was right that collapsing them into one disclosure misleads.**
+
+- **The field-equal pin** is the R-14 case: kept, with the weakness disclosed.
+  Every mutation that reaches it also reaches the flush-at-open callers, because
+  all three share `settleNow`, and no sharper site exists. Its honest substitute
+  is the stray-accept-dispatch mutation, whose entire failure set is this
+  increment's own three accept pins and which no pre-existing test notices.
+- **The module-type pin is NOT a weakness to apologize for — it is what the
+  first half of a triangulating pair looks like by construction.** DEV.md §
+  Triangulation asks, of a first test, _"could this be passed by returning a
+  fixed value?"_ and requires a second test that makes the hardcode fail; the
+  first test of such a pair therefore never has a unique falsifier, by
+  definition. Here the toggled-type pin is that second test, and it fails alone
+  (1 | 614). **Honest limit on how far the pair goes:** the two do NOT
+  triangulate the type field in both directions — the opposite hardcode is
+  caught by 12 pre-existing tests, so only the `'module'` direction was ever
+  uncovered (see the AR-3 C2 note below). What dropping the module-type pin
+  would actually cost is the DEFAULT-type accept announcement losing its only
+  dedicated pin.
+
+**AR-3 CONSIDER, no blocker. Its C1 was right, its C2 was wrong, and both were
+settled by RUNNING the mutation rather than arguing it.**
+
+- **C1 was right and produced a ninth mutation nobody had planned.** Swapping
+  `settleNow()` and `disposeToEditor()` inside `commitAcceptCandidate` leaves
+  **all 615 green** [measured: that mutation, then the region suite]. It is
+  behaviorally invisible because `onEdit` writes the live source first, so the
+  dispose still seeds the candidate. This is the correction to the Increment-7
+  brief recorded under Operational notes below — and note what it does NOT
+  impeach: the reorder that actually loses the program is dispose-before-intake,
+  and that one fails Increment 5's own accept test alone (1 | 614). The code's
+  own comment claims exactly that pair and a **later-frame** settle, so the
+  comment is correct as written and needed no edit.
+- **C2 was wrong, and the measurement is the record.** It argued that a
+  hardcoded `type: 'script'` in the same branch would be caught ONLY by the
+  module-type pin, making the two accept pins a two-directional triangulation.
+  It is caught by **13 tests, 12 of them pre-existing** [measured: that
+  mutation, then the suite], because a `'script'` hardcode breaks every
+  default-`module` flush path in the region. The triangulation is
+  **asymmetric**: only the `'module'` direction was uncovered. That is what
+  justifies the fifth test and what denies the module-type pin the unique-guard
+  role C2 credited it with.
+- **C6 independently confirmed the fifth test is not scope creep**, by checking
+  every type-toggle call site in the suite rather than relaying the claim
+  [measured: `grep -c "data-type-toggle"` on the region suite → 11]. The
+  mutation then confirmed it a second way.
+- **C2's naming concern was taken.** Two tests were renamed to lead with their
+  falsifiable content (the settled payload's type) rather than the "before"
+  ordering the sequence cannot independently prove.
+- **C3 was declined, with reason.** It proposed moving the re-derivation pin
+  into `the settle loop live (Boundaries)` beside the edit- and toggle-triggered
+  siblings. Declined: those two pin the settle LOOP's triggers, whereas this one
+  pins that the ACCEPT PATH reaches the loop at all — same observable, different
+  subject — and every other accept/discard pin lives in the contiguous generator
+  range.
+- **C5 was declined for this increment and raised to the maintainer — and AR-4
+  then corrected the ground I declined it on.** C5 notes that R-8 is a human
+  ruling whose resolving tests carry no `// PINNED` marker. True, and true of
+  R-4/R-9/R-14 in this same file. **My first answer said the marker "has only
+  ever been used in the `generator/` sub-suite". That was FALSE, carried no
+  evidence tag, and was checkable in one command** — AR-4 found the
+  counterexample: `orchestrate/lib/composing/tests/join-level-roster.test.ts`
+  carries two ruling-derived markers inside this region and outside
+  `generator/`, committed 2026-08-04 [measured: `grep -rn "// PINNED"
+  --include="*.test.ts" --include="*.test.tsx" src/lib/study-lenses/orchestrate/
+  | grep -v "/generator/"` → 2 hits, lines 29 and 55; note their `R-8` is the
+  2026-07-30 built-ins-first ruling of a DIFFERENT campaign, not this log's
+  R-8]. Repo-wide the marker is used in **25** test files [measured: `grep -rl`
+  on the same pattern over `src/`]. **So the convention is already established
+  in this very region, not a novel ask** — which strengthens C5 rather than
+  weakening it. Recorded rather than quietly rewritten, because this is the same
+  failure mode R-9 corrected in itself and the correction is the point. The
+  decline still stands on its own independent ground: the pinned-guard hook
+  resolves to a DENIAL in a non-interactive session, which would make the marked
+  line uneditable for every later increment. Whether this file's ruling-derived
+  tests should carry markers is a standing question for the maintainer, not an
+  Increment-7 call.
+
 ## Operational notes (not rulings, but they cost time once)
 
 - **`expect(act(…)).rejects` silently produces a FALSE POSITIVE.** RTL's `act`
@@ -508,3 +653,33 @@ are SCOPE calls, three were silences in the committed docs.
   fired live on 2026-07-30, on a false positive — a typo fix that preserved the
   assertion's meaning exactly. The maintainer's chosen workaround is to approve
   the edit interactively; routing around it with `Write` is not sanctioned.
+
+- **The Increment-7 cold-start brief carried one FALSE claim, and it was
+  load-bearing enough to have produced a bogus test.** Under "the three facts
+  that will cost you most" it stated that in `commitAcceptCandidate` —
+  `onEdit(program)` → `settleNow()` → `disposeToEditor()` — _"reversing the last
+  two loses the learner's program, because the dispose seeds the remounting
+  editor from `readLiveSource()`"_. It does not. `onEdit` writes
+  `liveSource.current` before either of them [read:
+  [use-settled-snippet.ts](../../src/lib/study-lenses/orchestrate/use-settled-snippet.ts)
+  § `relayEdit` — _"liveSource.current = source; settle(source)"_], so the
+  dispose still seeds the candidate: that swap leaves **all 615 tests green**
+  [measured: the mutation, then `npx vitest run
+  src/lib/study-lenses/orchestrate`]. The brief mis-paraphrased a **correct**
+  code comment, which claims the intake-before-dispose order (a real hazard —
+  that reorder fails Increment 5's accept test, 1 failed | 614 passed
+  [measured]) and a **later-frame** settle against the coherence anchor, neither
+  of which is the pair the brief named. No code change was warranted. **The cost
+  avoided:** a test written to pin the brief's stated order would have been
+  unfalsifiable, exactly the shape R-13 dropped.
+
+- **A mutation site's blast radius includes suites the brief does not name.**
+  The same brief noted that `settleNow` _"has its own suite"_; that suite holds
+  **three** retention pins its sanctioned mutation breaks [read:
+  [tests/use-settled-snippet.test.tsx](../../src/lib/study-lenses/orchestrate/tests/use-settled-snippet.test.tsx)
+  — _"retains the settled identity when the buffer equals the settled pair"_,
+  _"cancels the pending debounce even on a retained-identity flush"_, _"retains
+  the first flush's pair on a second flush with no edit between"_], and they sit
+  inside the region's own 615. Forcing that flag false fails **13 | 602**
+  [measured], not the handful the brief implied. Before recording a mutation as
+  evidence, run it — a predicted `N failed` is not a measured one.
