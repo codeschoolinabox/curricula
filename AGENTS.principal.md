@@ -753,9 +753,9 @@ Quick reference:
   **CONSIDER** (document a response to each concern, then continue), or
   **PAUSE** (present to the human, wait).
 - **Invoke the registered agents by name**: `ar-1` (design challenge, Phase 0
-  step 0.3), `ar-2` (sketch challenge, step 0.6), `ar-3` (test strategy, after
-  the first failing test), `ar-4` (implementation audit, after self-review),
-  `ar-5` (pre-merge, after all increments).
+  after 0.2), `ar-2` (sketch challenge, inside 0.3), `ar-3` (test strategy,
+  after the first failing test), `ar-4` (implementation audit, after
+  self-review), `ar-5` (pre-merge, after all increments).
 - **Pass file paths and the baseline SHA, never pasted contents.** Record
   `git rev-parse HEAD` at plan approval; AR-5 reviews `baseline..HEAD` and runs
   `git diff` itself. Reviewers have Read and Bash — `git grep` covers search;

@@ -629,7 +629,7 @@ Every source directory under `src/` has both a `README.md` and a `DOCS.md`:
   constraints, and the **data flow diagram** for this directory's abstraction
   level. Keep it short. It is NOT an API reference — JSDoc handles that.
   Hand-maintained: fix it or delete it if it goes stale.
-- For **new modules**, DOCS.md is written in Phase 0 step 0.5 as an
+- For **new modules**, DOCS.md is written inside Phase 0 step 0.3 as an
   **architectural sketch**, before any implementation exists. This is the
   structural target the Refactor step is held against. See format below.
 - Tests directories (`tests/`) are exempt from needing `README.md`
@@ -2051,8 +2051,8 @@ review.
   things callers are responsible for?
 - Does the sketch use the ubiquitous language from step 0.1, or has new
   terminology crept in?
-- Is the sketch consistent with the types defined in step 0.4? Do domain terms
-  in the sketch map cleanly to types?
+- Is the sketch consistent with the types defined alongside it in 0.3? Do domain
+  terms in the sketch map cleanly to types?
 - **Data flow**: Does the sketch's Mermaid flow diagram make sense? Is data
   passed through phases that don't use it? Are any transformations redundant —
   data restructured into an equivalent shape under a different name? Is the data
