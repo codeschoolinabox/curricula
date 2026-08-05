@@ -491,3 +491,40 @@ ask-ordinal-before-record-ordinal.
 - **Accepted as inherited, informational**: the span decoder's `Number('')`
   colon-count quirk copies iteration-guard's committed decoder shape and is
   unreachable through I1's encoder.
+
+### I3 — `ar-3` on the narrowing cluster (**PAUSE** → decomposed and executed)
+
+Every finding test-additive or a test-strength upgrade; decomposed under the
+standing ruling, recorded for audit. The blocker: alert's `returnValue` was
+tested present-and-correct and absent, never present-and-WRONG — a presence-only
+check (`hasOwn` without `=== undefined`) would have passed every row while
+violating H-3's literal reading. Closed with the present-but-not-undefined drop
+row. Also applied: the per-kind args-is-array row (a console-only check would
+have passed), the loc start-not-an-object row (a naive destructure would THROW
+instead of dropping — the region's guard-order precedent), four riding rows
+strengthened from `.not.toBeUndefined()` to `.toBe(message)` (pinning the
+same-reference pure narrowing — a prompt-arm clone-and-rebuild would have
+survived), a top-level freeze row, and an args-arm describe regrouping. The
+extra-keys latitude stays deliberately UNPINNED — both precedents (run's
+`narrowHalt`, iteration-guard's classifier) leave it structural, and pinning
+here would diverge from the shapes B-4 cites.
+
+### I3 — `ar-4` on the narrowing implementation (**CONSIDER** → resolved)
+
+The reviewer re-ran all gates itself and confirmed: `Number.isFinite` alone
+closes the step arm (no coercion), the narrow-then-cast matches run's
+`payload as RunHalt` precedent with every declared field runtime-checked, and
+the exotic-getter safety argument holds on BOTH future entry paths (real
+transport posts clones; the fake `structuredClone`s every message — accessors
+cannot survive either).
+
+- **Applied — the DEV.md § 13 at-the-site note**: `freezeInPlace` cannot make a
+  clone-safe Map/Set inside `args` immutable (internal slots); the limitation is
+  now documented at the freeze call, the section's own template. A codebase-wide
+  grep found NO existing site carrying the note — this is the first, at the one
+  site whose open `unknown` elements invite the case.
+- **Accepted as inherited, informational**: an Array wearing `start`/`end` named
+  properties satisfies the span shape — identical in both precedents, and the
+  region's ratified stance is "shape, never provenance"; a one-file divergence
+  would itself be drift. A region-wide follow-up may close all three sites
+  together.
