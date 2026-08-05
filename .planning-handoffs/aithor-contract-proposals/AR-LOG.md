@@ -129,20 +129,25 @@ what that gap cost.
 
 ### Increment ledger (wave 1)
 
-**The wave is open through 1.4.** Increment 1.5 — the structural floor, which
-[SEQUENCING.md § Wave 1 — the shared allowlist leaf](./SEQUENCING.md#wave-1--the-shared-allowlist-leaf)
-names as in scope and which the leaf's committed README already advertises as a
-file and an export — is not built, and the wave-close `docs:` commit has not
-landed. Both append their rows here at close.
+**Phase 1 is complete.** The wave ran Phase 0, five increments, and a wave-close
+`docs:` commit, all in the scope
+[SEQUENCING.md § Wave 1 — the shared screening leaf](./SEQUENCING.md#wave-1--the-shared-screening-leaf)
+names.
 
-| #      | SHA        | Subject                                                          |
-| ------ | ---------- | ---------------------------------------------------------------- |
-| P0     | `2437801d` | docs: establish screening domain model and architectural sketch  |
-| P0 fix | `1b8588f0` | docs: the screening file map lists every type the leaf declares  |
-| 1.1    | `1e6d78e5` | add: the screening leaf publishes the package's parse settings   |
-| 1.2    | `6a2cacbc` | refactor: violation construction graduates to the screening leaf |
-| 1.3    | `f89fcb7c` | refactor: child-node traversal graduates to the screening leaf   |
-| 1.4    | `a7be59e6` | refactor: the default-deny walk graduates to the screening leaf  |
+| #      | SHA        | Subject                                                             |
+| ------ | ---------- | ------------------------------------------------------------------- |
+| P0     | `2437801d` | docs: establish screening domain model and architectural sketch     |
+| P0 fix | `1b8588f0` | docs: the screening file map lists every type the leaf declares     |
+| 1.1    | `1e6d78e5` | add: the screening leaf publishes the package's parse settings      |
+| 1.2    | `6a2cacbc` | refactor: violation construction graduates to the screening leaf    |
+| 1.3    | `f89fcb7c` | refactor: child-node traversal graduates to the screening leaf      |
+| 1.4    | `a7be59e6` | refactor: the default-deny walk graduates to the screening leaf     |
+| ledger | `9d56ad44` | docs: Wave 1's rulings land in the ledger git grep can see          |
+| 1.5    | `d83d1c22` | add: the structural floor names the node types no curation gates    |
+| close  | _this one_ | docs: the screening leaf and its sequencing memo record what landed |
+
+The wave-close row carries no SHA because a commit cannot cite its own;
+`git log` carries it.
 
 **The increment numbers are plan numbers, not commit order.** `6a2cacbc` (1.2)
 is an **ancestor** of `1e6d78e5` (1.1) — 21:28:07 against 21:31:58 [measured:

@@ -9,10 +9,12 @@ not name is outside the slice, so new JavaScript is outside by default rather
 than by oversight.
 
 Screening decides **legality, never policy**. It holds no opinion about which
-node types belong; the caller supplies the table, and the leaf supplies the
-walk, the default-deny posture, and violation construction. It is equally blind
-to what a violation _means_ — nothing here knows about language levels,
-lifecycle phases, enforcement postures, or lenses.
+node types a curation admits; the caller supplies the table, and the leaf
+supplies the walk, the default-deny posture, violation construction, the parse
+settings, and — for a table **derived** rather than authored — the structural
+floor that derivation is incomplete without. It is equally blind to what a
+violation _means_ — nothing here knows about language levels, lifecycle phases,
+enforcement postures, or lenses.
 
 Screening also **never parses**. It publishes, as data, the parse settings its
 walk's soundness is relative to, and the caller parses with them. One named
@@ -237,9 +239,11 @@ Behavior:
 ## Consumers
 
 - **`language-levels/jej`** — its `validate` hands the level's allowlist table
-  and the embodiment's syntax-tree fact to the walk, and returns the violations
-  unchanged (sorted by offset, since the walk's order is property order). The
-  level supplies the data; it owns none of the mechanism.
+  and the embodiment's syntax-tree fact to the walk, then folds the walk's
+  violations into its own answer beside a vocabulary ruling the level owns,
+  sorted by offset since the walk's order is property order. The level owns none
+  of the _screening_ mechanism; grammar is this leaf's phase of its answer, not
+  the whole of it.
 - **Callers screening an unsettled program** — one a model just produced, or one
   being inventoried to derive a table from — parse with the published settings
   and screen against a table they compose, taking its union with
@@ -282,9 +286,12 @@ rules:
   region — not embody, not levels, not lenses — not even for types; its only
   foreign vocabulary is acorn's, type-only. (Repo-wide freezing utilities are
   not a package region.)
-- **Never parses.** The leaf publishes the settings and takes a parsed tree. A
-  parser call inside this leaf would make it the second parse configuration it
-  exists to prevent.
+- **Never parses — the shipped graph's acorn import is type-only.** The leaf
+  publishes the settings and takes a parsed tree. A parser call inside this leaf
+  would make it the second parse configuration it exists to prevent, and the
+  type-only import is what leaves one no way in: every module the leaf ships
+  names acorn's vocabulary, never its `parse`. The test tree imports it as a
+  value, because a test needs a tree before it can screen one.
 - **The settings are screening's precondition, not the package's parse home.**
   The leaf publishes the configuration its own walk's soundness depends on; it
   owns no parse verb, no parser wrapper, and no other module's parse needs. A

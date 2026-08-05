@@ -26,10 +26,10 @@ is argued below). The maintainer ratifies or strikes this merge at the gate.
 wave; the consumer's `GeneratorRequest = { prompt, model }` strict-subset
 guarantee is re-affirmed in each wave's flag note.
 
-### Wave 1 — the shared allowlist leaf
+### Wave 1 — the shared screening leaf
 
-The vendored machinery graduates out of the JEJ level into a new
-`src/lib/study-lenses/lib/` leaf (name decided at extraction): the
+The vendored machinery graduates out of the JEJ level into
+`src/lib/study-lenses/lib/screening/`, the name decided at extraction: the
 `SyntaxAllowlist` / `NodeRule` / `ConstraintCheck` types, the default-deny walk,
 the **paired parse** the walk's soundness is relative to (AR-1 blocker #2), the
 **structural floor** the vary inventory unions (AR-1 #5), and the levels
@@ -37,22 +37,25 @@ region's `Violation` — moved per AR-1 #14 option (a), with the region
 re-exporting it so every existing consumer keeps its import. jej repoints its
 own imports to the leaf.
 
-Source homes today: the vendored types sit in
-`src/lib/study-lenses/language-levels/jej/types.ts` (the vendored banner marks
-the section); the walk is `jej/collect-violations.ts` (+ its traversal helpers
-`get-child-nodes-with-path.ts` / `create-violation.ts`); `Violation` is
-`src/lib/study-lenses/language-levels/types.ts`. The structural floor does not
-exist yet — it is authored at extraction. **Parse-settings: pin against the
-now-committed published-parse contract** (refreshed 2026-07-30 — the repo RULED
-after this memo was first written): the walk takes a pre-parsed `Program` "as
-the caller parsed it," so the settings live with callers, and the package has
-since pinned its published parse — **ESTree-shaped facts (no
-`ParenthesizedExpression` node; the once-live embody-vs-jej `preserveParens`
-divergence is CLOSED — `8d46e88b` dropped the inert allowlist entry), character
-offsets, numeric ECMA year, stable node paths** (`c3e19091` pins the contract;
-`edd84e6a` records the decisions; the instrument's one parse is
-`src/lib/study-lenses/embody/derive-ast.ts`). The leaf's paired parse adopts
-THAT contract; nothing is inferred from a dataset's authorship anymore.
+Where they landed: `SyntaxAllowlist` / `NodeRule` / `ConstraintCheck`, the walk,
+its traversal helpers, the violation factory, `Violation` and `SourceRange` all
+now live in `src/lib/study-lenses/lib/screening/`; the levels region re-exports
+`Violation` and `SourceRange` type-only, so every level-side consumer kept its
+import. The structural floor was authored at extraction and is
+`screening/structural-floor.ts`. The per-increment SHAs are the authoritative
+record [read:
+[AR-LOG.md § Increment ledger (wave 1)](./AR-LOG.md#increment-ledger-wave-1)].
+**Parse-settings: pin against the now-committed published-parse contract**
+(refreshed 2026-07-30 — the repo RULED after this memo was first written): the
+walk takes a pre-parsed `Program` "as the caller parsed it," so the settings
+live with callers, and the package has since pinned its published parse —
+**ESTree-shaped facts (no `ParenthesizedExpression` node; the once-live
+embody-vs-jej `preserveParens` divergence is CLOSED — `8d46e88b` dropped the
+inert allowlist entry), character offsets, numeric ECMA year, stable node
+paths** (`c3e19091` pins the contract; `edd84e6a` records the decisions; the
+instrument's one parse is `src/lib/study-lenses/embody/derive-ast.ts`). The
+leaf's paired parse adopts THAT contract; nothing is inferred from a dataset's
+authorship anymore.
 
 - **Cross-territory obligation (maintainer flag):** this wave writes in the jej
   tree (import repoints) and the levels region's `types.ts` (the re-export). The

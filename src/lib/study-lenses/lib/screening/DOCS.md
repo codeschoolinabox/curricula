@@ -45,10 +45,12 @@ if readability asks. One guarantee per phase, each auditable alone.
 
 2. **Screen** (sync, pure) — for one node, look up its node type in the
    allowlist's node-rule table and apply what is found. Absence answers with the
-   not-allowed message — that is the whole of default-deny. Outright admission
-   answers yes. A constraint check answers legality only, in its own words.
-   Input: a node and the table. Output: a verdict — admitted, or a refusal
-   message. **Guarantees default-deny.**
+   default-deny message, the one message this leaf authors — that is the whole
+   of default-deny. Outright admission answers yes. A constraint check answers
+   legality only, in its own words. The wording itself lives in the walk, named
+   here only by category so a reword cannot strand this sketch. Input: a node
+   and the table. Output: a verdict — admitted, or a refusal message.
+   **Guarantees default-deny.**
 
 3. **Locate** (sync, pure) — turn a refusal message into a violation by reading
    the refused node's source range and pairing it with the node's path and node
@@ -63,9 +65,9 @@ if readability asks. One guarantee per phase, each auditable alone.
 
 Two exports are **published data rather than phases**: the parse settings a
 caller parses an unsettled source with, and the structural floor a caller unions
-into a table it derived by inventorying an existing program. Neither is consumed
-by the walk; both exist so that what the walk's soundness depends on is
-nameable.
+under its own entries in a table it derived by inventorying an existing program.
+Neither is consumed by the walk; both exist so that what the walk's soundness
+depends on is nameable.
 
 ### Data flow
 
@@ -86,7 +88,7 @@ flowchart TD
     Settings -.->|"the caller parses an unsettled source with these"| Prog
     Floor -.->|"the caller unions under its own entries"| Rules
     Prog -->|"descend, carrying each path, never short-circuiting, pure"| Paired
-    Paired -->|"screen: look up the node type, apply the rule<br/>absence answers not-allowed, pure"| Verdict
+    Paired -->|"screen: look up the node type, apply the rule<br/>absence answers default-deny, pure"| Verdict
     Rules -->|"the table the screen dispatches on"| Verdict
     Verdict -->|"admitted — contributes nothing"| Out
     Verdict -->|"locate: read the refused node's range<br/>the one place a range becomes data, pure"| Located
@@ -136,9 +138,9 @@ those two data artifacts and never applies them itself.
   some node shapes. The module publishes the order it actually delivers; a
   consumer needing strict source order sorts by offset.
 - **Domain-blind, and structurally so.** The module imports no package region,
-  not even for types; its only foreign vocabulary is the parser's. Nothing about
-  levels, lifecycle phases, enforcement postures, or lenses appears in the code
-  or the prose.
+  not even for types; its only foreign vocabulary is the parser's. (Repo-wide
+  freezing utilities are not a package region.) Nothing about levels, lifecycle
+  phases, enforcement postures, or lenses appears in the code or the prose.
 
 ### Out of scope
 
