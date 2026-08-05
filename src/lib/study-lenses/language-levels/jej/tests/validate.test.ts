@@ -7,7 +7,11 @@ import type { LanguageLevel, ParseFacts } from '../../types.js';
 import validate from '../validate.js';
 
 function parseFacts(source: string): ParseFacts {
-	const ast = parse(source, { ecmaVersion: 'latest', sourceType: 'module' });
+	const ast = parse(source, {
+		ecmaVersion: 'latest',
+		ranges: true,
+		sourceType: 'module',
+	});
 	const manager = analyze(ast, { ecmaVersion: 2024, sourceType: 'module' });
 	// @types/eslint-scope is stale (omits fields, types nodes as estree) — the
 	// same structural read embody's derive-environment.ts documents
@@ -158,6 +162,53 @@ describe('validate', () => {
 
 		it('only the grammar → one violation', () => {
 			expect(validate(parseFacts('var x = 1;'))).toHaveLength(1);
+		});
+	});
+
+	describe('a program whose function body resolves its own names', () => {
+		it('produces exactly one violation', () => {
+			// PINNED(human ruling 2026-08-05: this fixture stays — the scope analyzer reads node ranges, so without the harness's source spans a function-carrying program cannot be posed to the level here at all)
+			expect(
+				validate(parseFacts('function f() { let x = 1; x; }')),
+			).toHaveLength(1);
+		});
+
+		it('the grammar violation names the refused declaration', () => {
+			const violations = validate(parseFacts('function f() { let x = 1; x; }'));
+			expect(violations[0].nodeType).toBe('FunctionDeclaration');
+		});
+	});
+
+	describe('a function body that also escapes a name', () => {
+		it('produces two violations', () => {
+			expect(
+				validate(parseFacts('function f() { let x = document; x; }')),
+			).toHaveLength(2);
+		});
+
+		it("the vocabulary violation's path descends into the function body", () => {
+			const violations = validate(
+				parseFacts('function f() { let x = document; x; }'),
+			);
+			expect(violations[1].nodePath).toBe(
+				'$.body.0.body.body.0.declarations.0.init',
+			);
+		});
+	});
+
+	describe('a function body that shadows a name the level withholds', () => {
+		it('the shadowed name never escapes → one violation', () => {
+			expect(
+				validate(parseFacts('function f() { let document = 1; document; }')),
+			).toHaveLength(1);
+		});
+	});
+
+	describe('a name bound only inside a function body', () => {
+		it('an outer reference to it still escapes → two violations', () => {
+			expect(
+				validate(parseFacts('function f() { let document = 1; } document;')),
+			).toHaveLength(2);
 		});
 	});
 
