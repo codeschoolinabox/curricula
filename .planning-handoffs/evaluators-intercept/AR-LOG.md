@@ -437,3 +437,57 @@ shape.
   in-file (the ratified trio stays byte-untouched); the assemble phase catches
   the boundary error generically, reading no imported type — the danger
   sibling's precedent.
+
+### I2 — `ar-3` on the worker-setup cluster (**PAUSE** → decomposed and executed)
+
+Every finding test-additive; decomposed under the standing ruling, recorded for
+audit. Four blockers, each a contract-documented behavior a plausible
+increment-by-increment implementation would have walked through unpunished:
+
+- **The trip+loc coexistence halt had zero coverage** — a mapper-feeding branch
+  shaped `if (trip) … else if (loc)` (the outcome-label anti-pattern by name)
+  would have passed. Closed: a guard trip escaping a wrapped call now asserts
+  BOTH fields ride the halt.
+- **The stack's restore-on-exit was untested** — a missing `finally` would
+  silently mis-attribute every later moment of every ordinary program. Closed
+  with an after-exit row and a sequential-wraps row.
+- **The run total was only proven on natural halts** — closed on the throw and
+  trip branches (the sibling's three-branch coverage).
+- **A wrapped dialog's loc was untested on both its ask and its record** —
+  closed with two rows.
+
+Also applied: the dialog-inside-a-console-argument sequence row plus the
+one-shared-step-sequence row (killing per-kind counters), confirm's record row,
+the trap-reassignment row (which PINS that the console trap is not frozen), the
+strengthened cannot-cross-the-boundary assertion plus a Symbol row, the
+`WorkerSetup` compile probe, five positive breadth rows over untouched console
+methods, and two ordering fixes. The reviewer ratified `stampedThrowOf` as a
+legitimate extension of R-1's capture-helper shape (same need — a held throw —
+different call frame).
+
+### I2 — `ar-4` on the worker-setup implementation (**CONSIDER** → all resolved)
+
+The reviewer re-ran everything itself and verified the two named hazards clean:
+the dialog trap's once-captured loc is faithful (the worker is blocked for the
+round-trip's whole span), and JS object-literal evaluation order guarantees
+ask-ordinal-before-record-ordinal.
+
+- **Applied — the freeze mechanism now uses `@utils/deep-freeze-except.js`**
+  with the console trap as the one exemption, replacing two hand-rolled shallow
+  `Object.freeze` calls. run's own `ar-4` drew this exact line (only the
+  dependency-free engine hand-rolls); the exemption exists because a learner
+  reassigning `console.log` must silence records and CONTINUE — a deep-frozen
+  trap would throw under the engine's strict default. Two new rows pin the inner
+  freeze and the trap's deliberate mutability.
+- **Applied — the step-counter authority claim corrected.** The header had
+  attributed the counter to the README's declared exception, which names ONLY
+  the current-loc stack — the campaign's own over-generalization failure mode,
+  caught in a code comment before it shipped. Now cited to the DEV.md § 8
+  license iteration-guard's counters already ride.
+- **Applied**: `CallResponse` typing through the return-value modelling (no
+  precision discarded), disable-comment consistency on the stack's push/pop, and
+  this AR-LOG entry itself (the reviewer caught that the commit body would cite
+  a trail `git grep` could not find).
+- **Accepted as inherited, informational**: the span decoder's `Number('')`
+  colon-count quirk copies iteration-guard's committed decoder shape and is
+  unreachable through I1's encoder.
