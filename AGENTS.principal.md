@@ -51,6 +51,7 @@ rely on.
   full protocol)
 - [Sub-Model Dispatch for Subagents](#sub-model-dispatch-for-subagents)
 - [Communication](#communication)
+- [Work routing and ceremony](#work-routing-and-ceremony)
 - [Vibetoading and Frogramming — house terms](#vibetoading-and-frogramming--house-terms)
 - [References](#references)
 
@@ -64,11 +65,15 @@ encouragement. They cannot be overridden by momentum.
 1. **Read before editing** — never modify a file you haven't read in this
    session. The harness enforces this mechanically for tracked edits; it remains
    policy for every path around the tooling.
-2. **Phase 0 before Phase 1** — work through Phase 0 in order: establish
-   ubiquitous language → update README → run AR-1 → define types.ts → write the
-   architectural sketch in DOCS.md → run AR-2 → commit Phase 0 artifacts. The
-   pull to skip this under time pressure is real for every agent generation. Do
-   not skip it.
+2. **Phase 0 before Phase 1** — work through Phase 0 in order: **0.1 README**
+   (with the ubiquitous-language glossary inside it) → **0.2 the twin**, or the
+   `## Epistemology` block that discharges it → **AR-1**, which challenges the
+   README and the twin together → **0.3 types.ts + the DOCS.md sketch + the
+   tests**, written for real and committed skipped → **AR-2** → review, resolve,
+   commit → **human gate**. Three artifact-named steps, not seven numbered ones
+   ([DEV.md § Phase 0](./DEV.md#phase-0-documentation-specification-before-any-code)).
+   The pull to skip this under time pressure is real for every agent generation.
+   Do not skip it.
 3. **Plan before implementing** — enter plan mode for anything beyond a trivial
    fix. Exception: user explicitly says "skip plan mode."
 4. **One increment at a time** — complete Red → Green → Refactor → Lint before
@@ -718,12 +723,15 @@ session.
   small resume. Interrupted subagents resume from their transcripts — the real
   loss is post-resume re-verification, minimized by committing green work early
   and often.
-- **Ceremony is uniform — no agent-side lightening.** No increment is classified
-  "mechanical" by its implementer to skip or thin its reviews: in practice the
-  catch distribution is flat across mechanical-looking and novel increments, and
-  self-classification fails precisely where review is needed (the
-  skip-resistance rule). Only the human grants exceptions, per increment or per
-  campaign.
+- **Ceremony is uniform _within a declared level_ — no agent-side lightening.**
+  No increment is classified "mechanical" by its implementer to skip or thin its
+  reviews: in practice the catch distribution is flat across mechanical-looking
+  and novel increments, and self-classification fails precisely where review is
+  needed (the skip-resistance rule). **The level itself is the human's, set per
+  increment or per campaign, and the agent never states it and never lowers it**
+  — which ARs fire at each level, and the default, are stated once in
+  [DEV.md § Work routing and ceremony](./DEV.md#work-routing-and-ceremony). No
+  level removes AR-5.
 
 ---
 
@@ -803,6 +811,27 @@ Project-specific requirements:
 
 ---
 
+## Work routing and ceremony
+
+Two questions govern every piece of work here — **what kind of work is this**,
+and **how heavily is it reviewed** — and they are answered in one place:
+[DEV.md § Work routing and ceremony](./DEV.md#work-routing-and-ceremony). It is
+not restated here.
+
+What you need before reading it:
+
+- The default is **software work · `twin-doc: none` · `ceremony: medium` ·
+  `prospective`**. Unnamed paths are software work. The default is a declared
+  position, not a lapse — and the declaration is what makes it one.
+- **You state three of the four answers; you never state `ceremony`.** The kind
+  of work is derived from the path, mechanically. `ceremony` is the human's.
+- Record the answers in the **commit body**, and for a campaign in its
+  `.planning-handoffs/<campaign>/AR-LOG.md`. A plan file is not a record.
+
+```text
+work: software · twin-doc: none · ceremony: full (AR-3 n/a) · prospective
+```
+
 ## Vibetoading and Frogramming — house terms
 
 Two house terms appear throughout this org's documentation:
@@ -814,10 +843,19 @@ Two house terms appear throughout this org's documentation:
 - **Vibetoading** (🎨) — development grounded in user-visible behavior: the
   machine underneath is a black box; iteration is on outcomes.
 
-They are a spectrum, not a binary. This file governs **frogramming** behavior —
-Phase 0, ARs, full ceremony — for production work. Deliberate vibetoading is
-supported but explicit: the human declares it; it never arises from the agent
-skipping ceremony on its own assessment.
+These are terms the **curriculum teaches**. They are **not** governance labels,
+and reaching for one as a routing label is the error this section exists to
+catch. What kind of work a unit is, and how heavily it is reviewed, are answered
+by [DEV.md § Work routing and ceremony](./DEV.md#work-routing-and-ceremony) —
+which deliberately uses neither word. Frogramming and Vibetoading name a
+practitioner's **stance**, defined by which twin they hold; no file path, no
+setting, and no ceremony level asserts that anyone holds a twin.
+
+They are a spectrum, not a binary, and **neither is the default governance
+mode** (human ruling 2026-08-04). The default is stated in one place — the
+default cell in § Work routing and ceremony. Deliberate vibetoading is supported
+but explicit: the human declares it; it never arises from the agent skipping
+ceremony on its own assessment.
 
 ---
 

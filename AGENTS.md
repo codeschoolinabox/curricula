@@ -24,6 +24,7 @@ repository (spiralearn / `@codeschoolinabox/spiralearn`).
 - [Adversarial Review Protocol](#adversarial-review-protocol) (→ DEV.md for full
   protocol)
   - [Sub-model dispatch for AR subagents](#sub-model-dispatch-for-ar-subagents)
+- [Work routing and ceremony](#work-routing-and-ceremony)
 - [Vibetoading and Frogramming — house terms](#vibetoading-and-frogramming--house-terms)
 - [References](#references)
 
@@ -36,11 +37,14 @@ encouragement. They cannot be overridden by momentum.
 
 1. **Read before editing** — never modify a file you haven't read in this
    session.
-2. **Phase 0 before Phase 1** — work through Phase 0 in order: establish
-   ubiquitous language → update README → run AR-1 → define types.ts → write the
-   architectural sketch in DOCS.md → run AR-2. All seven steps before any
-   implementation. Agents routinely skip this under time pressure. Do not skip
-   it.
+2. **Phase 0 before Phase 1** — work through Phase 0 in order: **0.1 README**
+   (with the ubiquitous-language glossary inside it) → **0.2 the twin**, or the
+   `## Epistemology` block that discharges it → **AR-1**, which challenges the
+   README and the twin together → **0.3 types.ts + the DOCS.md sketch + the
+   tests**, written for real and committed skipped → **AR-2** → review, resolve,
+   commit → **human gate**. Three artifact-named steps, not seven numbered ones
+   ([DEV.md § Phase 0](./DEV.md#phase-0-documentation-specification-before-any-code)).
+   Agents routinely skip this under time pressure. Do not skip it.
 3. **Plan before implementing** — enter plan mode for anything beyond a trivial
    fix. Exception: user explicitly says "skip plan mode."
 4. **One increment at a time** — complete Red → Green → Refactor → Lint before
@@ -773,13 +777,22 @@ may override to synchronous at any time.
 function (or tight pair) plus its full ZOMBIES increment cluster — and runs the
 full per-increment cycle itself (ZOMBIES → `ar-3` → implement → lint → refactor
 against the DOCS sketch → `ar-4`), committing green. Full ceremony, not a
-lightweight mode. Never split a worker mid-triangulation: the clean commit
-boundary is the clean delegation boundary (the same rule as cold-start's "never
-hand off between a red test and its green"). Order the DAG bottom-up — leaf →
-engine → API, per
-[§ Dependency-order coverage](./DEV.md#dependency-order-coverage) — and
-parallelize only across subtrees already committed-and-covered that pass the
-guard.
+lightweight mode.
+
+> **Ceremony is uniform _within a declared level_, and the level is not yours to
+> set.** You never classify an increment "mechanical" to skip or thin its
+> reviews, and you never lower the level to avoid one. **The human sets it, per
+> increment or per campaign.** Which ARs fire at each level, and the default,
+> are stated once in
+> [DEV.md § Work routing and ceremony](./DEV.md#work-routing-and-ceremony). **No
+> level removes AR-5.** If you find yourself reasoning about why this particular
+> case needs less review, that reasoning is the signal it needs more. Never
+> split a worker mid-triangulation: the clean commit boundary is the clean
+> delegation boundary (the same rule as cold-start's "never hand off between a
+> red test and its green"). Order the DAG bottom-up — leaf → engine → API, per
+> [§ Dependency-order coverage](./DEV.md#dependency-order-coverage) — and
+> parallelize only across subtrees already committed-and-covered that pass the
+> guard.
 
 **A worker is also a mini cold-start**, so its launch prompt is a cold-start
 launch prompt: `DEV.md`'s conventions, the module README/DOCS/types, its cluster
@@ -974,6 +987,27 @@ a `model` parameter when spawning ARs; it would silently override the configured
 roster. The canonical roster table, the tier reasoning, and the inherit caveat
 live in [DEV.md § Sub-model dispatch](./DEV.md#sub-model-dispatch).
 
+## Work routing and ceremony
+
+Two questions govern every piece of work here — **what kind of work is this**,
+and **how heavily is it reviewed** — and they are answered in one place:
+[DEV.md § Work routing and ceremony](./DEV.md#work-routing-and-ceremony). It is
+not restated here.
+
+What you need before reading it:
+
+- The default is **software work · `twin-doc: none` · `ceremony: medium` ·
+  `prospective`**. Unnamed paths are software work. The default is a declared
+  position, not a lapse — and the declaration is what makes it one.
+- **You state three of the four answers; you never state `ceremony`.** The kind
+  of work is derived from the path, mechanically. `ceremony` is the human's.
+- Record the answers in the **commit body**, and for a campaign in its
+  `.planning-handoffs/<campaign>/AR-LOG.md`. A plan file is not a record.
+
+```text
+work: software · twin-doc: none · ceremony: full (AR-3 n/a) · prospective
+```
+
 ## Vibetoading and Frogramming — house terms
 
 Two house terms appear throughout this org's documentation (defined inline below
@@ -987,10 +1021,19 @@ Two house terms appear throughout this org's documentation (defined inline below
   notional machine underneath is a black box; iteration is on outcomes (does the
   button work? does the test pass?).
 
-Vibetoading and Frogramming are a spectrum, not a binary. AGENTS.md governs
-Frogramming behavior — Phase 0, ARs, full ceremony — for production code.
-Deliberate Vibetoading is supported but explicit (the human says so); it does
-not arise from the agent skipping ceremony on its own assessment.
+These are terms the **curriculum teaches**. They are **not** governance labels,
+and reaching for one as a routing label is the error this section exists to
+catch. What kind of work a unit is, and how heavily it is reviewed, are answered
+by [DEV.md § Work routing and ceremony](./DEV.md#work-routing-and-ceremony) —
+which deliberately uses neither word. Frogramming and Vibetoading name a
+practitioner's **stance**, defined by which twin they hold; no file path, no
+setting, and no ceremony level asserts that anyone holds a twin.
+
+They are a spectrum, not a binary, and **neither is the default governance
+mode** (human ruling 2026-08-04). The default is stated in one place — the
+default cell in § Work routing and ceremony. Deliberate vibetoading is supported
+but explicit: the human declares it; it never arises from the agent skipping
+ceremony on its own assessment.
 
 ## References
 

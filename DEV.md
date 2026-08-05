@@ -26,6 +26,8 @@ otherwise.
 - [Citation and claim conventions](#citation-and-claim-conventions) — (core —
   how docs cite paths and sections, what a repo-state claim must carry, and
   where a ruling has to be recorded to count)
+- [Work routing and ceremony](#work-routing-and-ceremony) — (core — what kind of
+  work this is, and how heavily it is reviewed)
 - [Development Workflow](#development-workflow) — (core)
 - [Testing Strategy](#testing-strategy) — (core)
 - [Incremental Development Workflow](#incremental-development-workflow) — (core
@@ -636,6 +638,23 @@ Every source directory under `src/` has both a `README.md` and a `DOCS.md`:
 - Public functions have JSDoc/TSDoc in source; no generated-docs pipeline is
   currently wired
 
+**`## Epistemology` block format** (for README.md, whenever `twin-doc: none` —
+which is the default, so this is the near-universal case). The heading name is
+fixed, because it is the one rule in
+[§ Work routing and ceremony](#work-routing-and-ceremony) that a check can find:
+
+```markdown
+## Epistemology
+
+**Twin not built:** the notional machine this module runs on. **Delegated to:**
+the JEJ validator and the eslint-scope analyzer. **Falsified if:** either stops
+being authoritative for scoping — then this module owes its own NM document.
+```
+
+Three fields, all required. A block that records only the gap describes the
+taught failure _twin ignored_; the **Delegated to** field is what makes the
+default a declared position instead.
+
 **Architectural sketch format** (for DOCS.md, written prospectively in Phase 0):
 
 The sketch describes _structure_, not _implementation_. It constrains the space
@@ -1042,6 +1061,175 @@ agents learn to route around, unless the corpus actually accumulates. A ruling
 that lives only in a plan file under `~/.claude/plans/` does not exist —
 `git grep` cannot see it.
 
+## Work routing and ceremony
+
+Two questions govern every piece of work here: **what kind of work is this**,
+and **how heavily is it reviewed**. They are separate questions with separate
+answers, and neither implies the other.
+
+**The default, which is what almost all work is in:**
+
+```text
+software work · twin-doc: none · ceremony: medium · prospective
+```
+
+Unnamed paths are software work. Nothing about that default is a lapse — it is a
+declared position, and the declaration is what makes it one.
+
+> **Both horns of the curriculum's own claim, because governance does not get to
+> quote the flattering half.**
+> `spiralearn/frogramming-and-vibetoading/ontology.md` § 4 says **"Strict
+> process _with_ strong twinning is itself a failure mode"** — processes are
+> descriptive, and a practitioner who treats them as composition rules "loses
+> the responsiveness their twin and automated experience provide". That is why
+> ceremony is adjustable at all rather than pinned at maximum. But the same
+> section also says twin-less processes "have evolved as effective guardrails …
+> they **carry accumulated wisdom against well-known failure patterns** … they
+> aren't worthless without it either". That is the argument **against** lowering
+> ceremony where no twin is held. Read together: **ceremony and `twin-doc` move
+> inversely.** Low ceremony is earned by a strong twin, not by a missing one.
+> The healthy relationship § 4 states: _processes afford structure; twins do the
+> work._
+
+### Software work and curriculum work
+
+The kind is **derived from the path**, mechanically. It is not chosen, argued,
+or declared by preference:
+
+| Path                                      | Kind            |
+| ----------------------------------------- | --------------- |
+| `spiralearn/frogramming-and-vibetoading/` | curriculum work |
+| `src/`, `scripts/`, `.claude/`, root docs | software work   |
+| anything unnamed                          | software work   |
+
+There is deliberately **no collective noun** for the pair. Write "software work"
+and "curriculum work"; the record key is `work:`.
+
+**The two kinds owe structurally different twins, and that asymmetry is the
+whole reason they are two kinds:**
+
+- **Software work** owes the **machine** and the **user** — one F-twin and one
+  V-twin.
+- **Curriculum work** owes the **learner** and the **teacher** — two audiences
+  of one artifact, and two genuinely different twinnings, not two readings of
+  one (human ruling 2026-08-04). A teacher running material in class needs
+  pacing, stuck-points and a misconception watch-list; a learner needs the
+  explanation and the exercises.
+- **Curriculum work's F-twin is real but second-order** (human ruling
+  2026-08-04). You do not twin the notional machine directly; you twin **the
+  learner's and the teacher's twinning of it** — what models they will form, and
+  which wrong ones produce right answers for a while. That is the curriculum's
+  own two-layer misconception mechanism, and it is why a misconception
+  watch-list is an NM artifact. So
+  `spiralearn/frogramming-and-vibetoading/ontology.md` § 4's both-hats
+  requirement is satisfied by **nesting**, not by a third twin.
+
+### twin-doc
+
+`twin-doc` names **which reader this work owes a written account to**. Values:
+
+| Kind            | Values                                      |
+| --------------- | ------------------------------------------- |
+| software work   | `machine` · `user` · `both` · **`none`**    |
+| curriculum work | `learner` · `teacher` · `both` · **`none`** |
+
+> **Declaring a `twin-doc` names which reader is owed a document. It never
+> asserts that the author holds that twin.** The taught term for producing the
+> artifact of a practice without the stance behind it is
+> _ceremony-without-twin_, and it is a failure symptom. No `twin-doc` value is
+> evidence of twinning, and neither is any ceremony value.
+
+### The Epistemology block
+
+At `twin-doc: none` — the default — the obligation is discharged by a
+`## Epistemology` block in the module README. **It has three fields, and the
+second is the one that does the work:**
+
+1. **which twin is not built**;
+2. **to whom or what it is delegated** — a named holder: a validator, a linter,
+   an upstream library's own documentation, a peer module;
+3. **what would falsify that delegation** — the condition under which this
+   module starts owing its own twin.
+
+> _"The NM twin is delegated to the JEJ validator and the eslint-scope analyzer;
+> if either stops being authoritative for scoping, this module owes its own NM
+> document."_
+
+Field 2 is not bookkeeping. `spiralearn/frogramming-and-vibetoading/ontology.md`
+§ 4 treats building without a twin as legitimate **when a twin is intentionally
+delegated** — and treats a bare absence as _twin ignored_, the first of its
+named failures. A block that records only the gap describes the failure; a block
+that names the delegate describes the legitimate case. Format and heading name:
+[§ Directory Documentation Convention](#directory-documentation-convention).
+
+### ceremony
+
+`ceremony` names **which reviews fire**. It is a separate question from
+`twin-doc` and from the kind of work.
+
+| Value                    | Fires                                                |
+| ------------------------ | ---------------------------------------------------- |
+| `full`                   | AR-1 · AR-2 · AR-3 · AR-4 · AR-5                     |
+| **`medium`** _(default)_ | **AR-1 · AR-5** — the design gate and the drift read |
+| `light`                  | AR-5 only                                            |
+
+**No value removes AR-5.** Its floor fires at the "Sprint complete — ready to
+push to main" prompt, or at the last commit before a handoff, whichever comes
+first.
+
+**Ceremony is the human's to set, per increment or per campaign — the agent
+never states it and never lowers it** (human ruling 2026-08-04). This is the
+same rule as "no agent-side lightening"; what changed is that the level is now
+explicit rather than assumed. An agent may state the other three answers,
+because their defaults are safe by construction. It may not state this one.
+
+**Uniformity now means uniform _within a declared level_.** An agent may not
+classify one increment "mechanical" and thin its reviews: the catch distribution
+is flat across mechanical-looking and novel increments, and self-classification
+fails precisely where review is needed. The level applies to every increment
+under it, equally.
+
+⚠ **`full` is not yet defined for work with no code.** All three values are
+specified in ARs that presuppose an implementation — AR-3 needs a failing test,
+AR-4 an implementation file. A documentation-only campaign running `full` must
+name its real gate set explicitly rather than assume one. This is a known gap,
+not a settled rule.
+
+### Prospective and retrospective documentation
+
+**`prospective`** — the default — means the 0.1–0.3 artifacts are written
+**before** the code and constrain it. The word is already this repo's, for the
+DOCS.md sketch "written prospectively in Phase 0"; using it for the whole
+artifact set is a deliberate **widening** of its extension, stated here rather
+than assumed.
+
+**`retrospective`** means the documentation is produced after the code exists.
+
+> ⛔ **`retrospective` is blocked and may not be used.** Under it, 0.1, 0.2 and
+> the DOCS half of 0.3 all defer, so **AR-1 has neither of its inputs** and
+> Phase 0 reduces to types plus tests — which collides with the Phase-0-before-
+> Phase-1 invariant. Resolving that collision needs a human ruling that has not
+> been made. **Its price, whatever the resolution: the Refactor step loses its
+> structural target**, because there is no sketch to hold the implementation
+> against. Saying that plainly is what lets the documentation be asked for
+> without pretending the design discipline happened.
+
+### Who decides, and where the answers are recorded
+
+**Who:** the human sets `ceremony`. The agent states the other three — the kind
+of work (derived from the path), `twin-doc`, and prospective/retrospective —
+because each has a safe default and a question whose answer is almost always the
+default is friction on a path that should have none.
+
+**Where:** the **commit body**, and for a campaign its
+`.planning-handoffs/<campaign>/AR-LOG.md`. Both are `git grep`-able and
+immutable once written. A plan file under `~/.claude/plans/` is **not** a record
+— see [§ Ruling provenance](#ruling-provenance). The form:
+
+```text
+work: software · twin-doc: none · ceremony: full (AR-3 n/a) · prospective
+```
+
 ## Development Workflow
 
 ### Shared-worktree git mechanics
@@ -1120,6 +1308,8 @@ aspirational gate — restore it as the per-commit gate once the lint debt clear
 - [ ] Throw on invalid input at boundaries; fail fast for critical errors
 - [ ] Errors handled gracefully past the boundary check
 - [ ] `README.md` exists and is current in every modified directory
+- [ ] `## Epistemology` block present in every module README at `twin-doc: none`
+      (three fields: twin not built · delegated to · falsified if)
 - [ ] `DOCS.md` written (new module) or updated (structural change); reflects
       actual implementation phases and constraints
 - [ ] JSDoc/TSDoc on public functions; `@remarks` for consumer-facing "why"
@@ -1399,7 +1589,7 @@ of work.
 > **⛔ Agents routinely skip this phase under time pressure or when a task feels
 > small. Do not skip it. The cost of a wrong domain model or ambiguous
 > vocabulary compounds across every file written after. Phase 0 is not overhead
-> — it is the work. Proceed to Phase 1 only after all seven steps below are
+> — it is the work. Proceed to Phase 1 only after all three steps below are
 > complete.**
 
 Documentation-driven development ensures clarity BEFORE code exists. It is also
@@ -1407,8 +1597,30 @@ where Domain-Driven Design (DDD) thinking lives: the domain model, the
 ubiquitous language, and the bounded context should all be established in
 writing before a single type is defined.
 
-**0.1. Establish the ubiquitous language** — Before touching README or code,
-identify the domain vocabulary for this module.
+**The three steps are named for the artifact each produces** (human ruling
+2026-08-04), so a step number and a deliverable are the same thing. The AR gates
+sit between them:
+
+```text
+0.1  README          — incl. the ubiquitous-language glossary
+0.2  the twin        — or the ## Epistemology block that discharges it
+     → AR-1            challenges the README AND the twin, together
+0.3  types.ts + DOCS.md sketch + tests
+     → AR-2            challenges the sketch against the types
+     → review, resolve, commit
+     → HUMAN GATE
+```
+
+**0.1. README.md — and the ubiquitous language inside it.** The README is the
+domain model in prose: what does this module do, where does it fit in the
+bounded context, what does it own, and what lies outside its boundary? Identify
+inputs and outputs at the boundary — what crosses in, what it returns, what it
+explicitly does NOT handle. If you cannot explain the module in plain language
+without ambiguity, the design is not ready.
+
+**The ubiquitous language is established here, inside 0.1 — it is not optional
+and it is not a separate step** (human ruling 2026-08-04). Before writing the
+prose, identify the domain vocabulary:
 
 - What do the humans who use this codebase call the core concepts?
 - List the key terms and their precise meanings in a short glossary. This
@@ -1427,71 +1639,48 @@ resolved, validated options passed to a tracer. Not the same as user-provided
 options (UserOptions), which may be partial.
 ```
 
-**0.2. Update README.md** — Using the ubiquitous language established above:
-what does this module do? Where does it fit in the bounded context of this
-package? What does it own, and what lies outside its boundary?
+> **The step number that changed meaning.** Under the previous scheme `0.1`
+> meant _establish the ubiquitous language_ and `0.2` meant _README_. It now
+> means _README, with the glossary inside it_. Every other retired step number
+> names a step that no longer exists, and so fails loudly; this one silently
+> means something else. A plan or handoff written before 2026-08-04 that says
+> "step 0.1" means the glossary alone.
 
-- The README is the domain model in prose. If you cannot explain the module in
-  plain language without ambiguity, the design is not ready.
-- Identify inputs and outputs at the boundary. What crosses into this module?
-  What does it return? What does it explicitly NOT handle?
+**0.2. The twin — or the block that discharges it.** What this step produces is
+set by the work's `twin-doc` value
+([§ Work routing and ceremony](#work-routing-and-ceremony)). At `twin-doc: none`
+— the default — the step is discharged by the `## Epistemology` block in the
+README, which names the twin **not** built, its delegate, and what would falsify
+that delegation. At any other value it produces the twin document itself.
 
-**0.3. Adversarial Design Challenge (AR-1)** — Spawn a separate reviewer agent
-to challenge the README spec before types lock the contract. See
-[§ Adversarial Review Protocol](#adversarial-review-protocol) below for prompt
-structure and verdict definitions.
+**→ AR-1 fires here, and it challenges the README and the twin together** (human
+ruling 2026-08-04). Spawn the registered `ar-1` reviewer. See
+[§ Adversarial Review Protocol](#adversarial-review-protocol).
 
-Key DDD questions for AR-1:
+**0.3. types.ts, the DOCS.md sketch, and the tests.** Three artifacts, one step,
+because they are one contract expressed three ways:
 
-- Does the ubiquitous language align with the rest of the codebase? Any
-  collisions or redefinitions?
-- Are the bounded context boundaries correct? Is this module doing too much or
-  too little?
-- Are any domain concepts missing from the language glossary?
+- **types.ts** — the domain model expressed in TypeScript, using the 0.1
+  vocabulary. Types are the contract; they lock what 0.1 described in prose.
+- **The architectural sketch in DOCS.md** — the structural target the Refactor
+  step is later held against, including the Mermaid `## Data flow` diagram. See
+  [§ Directory Documentation Convention](#directory-documentation-convention)
+  for the format.
+- **The tests — written for real, and committed skipped** (human ruling
+  2026-08-04). The full ZOMBIES suite is written now and committed in a skipped
+  state; Phase 1 un-skips **one at a time**, in ZOMBIES order, and **AR-3 fires
+  on each un-skip**. This was chosen over a plan-only test list, which
+  duplicates the thinking without banking it, and over a live red suite, which
+  would expire Fake It immediately — see
+  [§ Fake It (Till You Make It)](#fake-it-till-you-make-it).
 
-**0.4. Update types.ts** — Types are the domain model expressed in TypeScript.
+**→ AR-2 fires here**, challenging the sketch against the types.
 
-- Translate the ubiquitous language directly into type names. `Config` in the
-  glossary becomes `type Config` here — not `Options`, not `Settings`, not
-  `Params`.
-- Update type definitions to reflect the new contract (incorporating AR-1
-  feedback).
-- Type errors after this step become the TODO list for implementation.
-
-**0.5. Write the architectural sketch → DOCS.md** — Before any implementation,
-record the structural target in DOCS.md.
-
-This is what separates a plan that produces architecture from a plan that
-produces test-passing code. The sketch describes execution phases, structural
-constraints, and explicit boundaries in domain terms — no function names, no
-variable names, no pseudocode. See
-[§ Directory Documentation Convention](#directory-documentation-convention)
-above for the required format and example.
-
-The sketch answers: _What shape must a correct implementation take?_ The
-Refactor step in Phase 1 is held against this document. If the implementation
-passes all tests but doesn't reflect the sketch — wrong phases, collapsed
-concerns, missing boundaries — refactoring is not complete.
-
-**0.6. Adversarial Sketch Challenge (AR-2)** — Spawn a separate reviewer agent
-to challenge the architectural sketch before implementation begins. See
-[§ AR-2: Architectural Sketch Challenge](#ar-2-architectural-sketch-challenge)
-below for focus areas.
-
-The sketch is the single most consequential document in the workflow — it is
-what the entire Refactor step is held against. A first-pass agent writing it
-without challenge will routinely produce a sketch that is either too abstract
-(useless as a structural target) or too prescriptive (pseudocode in disguise).
-AR-2 catches this before it locks in.
-
-**0.7. Review & Resolve** — Confirm understanding before writing code.
-
-- Can you read types.ts, README.md, and DOCS.md together and fully predict what
-  the implementation will do and what shape it will take?
-- If not, the ambiguity will surface as a bug or a structural mess. Resolve it
-  now.
-- Commit the Phase 0 artifacts (autonomous, announced) and present them to the
-  human for review. **Phase 1 does not start until the human approves.**
+**Then review, resolve, and commit.** Can you read `types.ts`, `README.md` and
+`DOCS.md` together and fully predict what the implementation will do and what
+shape it will take? If not, the ambiguity will surface as a bug or a structural
+mess — resolve it now. Commit the Phase 0 artifacts (autonomous, announced) and
+present them to the human. **Phase 1 does not start until the human approves.**
 
 ### Phase 1: TDD Implementation
 
@@ -1694,8 +1883,13 @@ Adversarial reviews use a separate agent instance acting as devil's advocate.
 The reviewer agent has READ-ONLY access and produces a structured report with
 concerns, counter-proposals, and a verdict (PROCEED / CONSIDER / PAUSE).
 
-Only the **human** can skip an adversarial review. The implementing agent must
-never skip its own review — that defeats the purpose.
+Only the **human** can skip or lighten an adversarial review. The implementing
+agent must never skip its own review, and never lowers the ceremony level to
+avoid one — the level is set by the human, per increment or per campaign
+([§ Work routing and ceremony](#work-routing-and-ceremony)). Which ARs fire at
+each level is stated there; **no level removes AR-5**. Below, each AR's
+**Skip:** line names the per-review opt-out, which is a separate mechanism from
+the level and is likewise the human's alone.
 
 > **Skip resistance rule**: If you find yourself reasoning about why _this
 > particular case_ doesn't need an AR, that reasoning is the signal it does. The
@@ -1811,8 +2005,10 @@ downgrade with the session — pin explicitly if that matters.
 
 ### AR-1: Design Challenge
 
-**Trigger:** During Phase 0, after README spec (step 0.2), before types.ts locks
-the contract (step 0.4). **Skip:** Only when the human explicitly opts out.
+**Trigger:** During Phase 0, after the README (0.1) and the twin (0.2), before
+`types.ts` locks the contract (0.3). It challenges the README **and** the twin
+together. **Skip:** Only when the human explicitly opts out, or when the
+declared ceremony level does not include this review.
 
 <strong>Focus areas:</strong>
 
@@ -1835,9 +2031,10 @@ patterns
 
 ### AR-2: Architectural Sketch Challenge
 
-**Trigger:** After the architectural sketch is written in DOCS.md (Phase 0 step
-0.6), before the final review and implementation begin (step 0.7). **Skip:**
-Only when the human explicitly opts out.
+**Trigger:** After the architectural sketch is written in DOCS.md, inside 0.3,
+before the review-and-commit that closes Phase 0. **Skip:** Only when the human
+explicitly opts out, or when the declared ceremony level does not include this
+review.
 
 <strong>Focus areas:</strong>
 
@@ -1878,8 +2075,10 @@ Only when the human explicitly opts out.
 
 ### AR-3: Test Strategy Challenge
 
-**Trigger:** After first failing test is written for an increment. **Skip:**
-Only when the human explicitly opts out.
+**Trigger:** After the first failing test is written for an increment — which,
+under tests-committed-skipped, is each un-skip. **Skip:** Only when the human
+explicitly opts out, or when the declared ceremony level does not include this
+review.
 
 <strong>Focus areas:</strong>
 
@@ -1908,7 +2107,8 @@ existing tests, the peer DOCS.md data flow diagram
 ### AR-4: Implementation Audit
 
 **Trigger:** After self-review (step 12) for an increment. **Skip:** Only when
-the human explicitly opts out.
+the human explicitly opts out, or when the declared ceremony level does not
+include this review.
 
 <strong>Focus areas:</strong>
 
@@ -1959,7 +2159,8 @@ used
 ### AR-5: Pre-Merge Review
 
 **Trigger:** After all increments complete, before the final commit and the push
-prompt. **Skip:** Only when the human explicitly opts out.
+prompt. **Skip:** Only when the human explicitly opts out, or when the declared
+ceremony level does not include this review.
 
 <strong>Focus areas:</strong>
 
