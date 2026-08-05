@@ -3,15 +3,12 @@ import { analyze } from 'eslint-scope';
 import { describe, expect, it } from 'vitest';
 
 import getChildNodesWithPath from '../../../lib/screening/get-child-nodes-with-path.js';
+import PARSE_SETTINGS from '../../../lib/screening/parse-settings.js';
 import type { LanguageLevel, ParseFacts } from '../../types.js';
 import validate from '../validate.js';
 
 function parseFacts(source: string): ParseFacts {
-	const ast = parse(source, {
-		ecmaVersion: 'latest',
-		ranges: true,
-		sourceType: 'module',
-	});
+	const ast = parse(source, { ...PARSE_SETTINGS, sourceType: 'module' });
 	const manager = analyze(ast, { ecmaVersion: 2024, sourceType: 'module' });
 	// @types/eslint-scope is stale (omits fields, types nodes as estree) — the
 	// same structural read embody's derive-environment.ts documents
