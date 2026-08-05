@@ -142,6 +142,50 @@ mid-campaign and orphan `7ac0e36e`'s subject line for no semantic gain.
     lightens nothing, so no invariant was breached — the human confirms it at
     the increment-2 gate.
 
+- **R10 — 2026-08-04. SCOPE: the full design ships. CP-A is REJECTED.**
+  [relayed: human, choosing "Keep the full design"] All four settings ship
+  across text increments 4–9 as planned: the two kinds of work, `twin-doc`,
+  `ceremony`, and prospective/retrospective. Finding **L**'s arithmetic stands
+  as an acknowledged cost — 48 cells, one exercised — and is not a reason to
+  trim. Increment 3 therefore designs the section structure for the **whole**
+  model.
+- **R11 — 2026-08-04. BLOCKER 1: R4's `medium` default STANDS; the campaign
+  amends § Execution mechanics instead.** [relayed: human, choosing "Keep R4
+  `medium` + amend"] CP-B (default `full`, override grammar as the mechanism) is
+  rejected. **Increment 5's scope is enlarged**: in addition to the invariant-2
+  amendment already listed, it amends
+  `AGENTS.principal.md § Execution mechanics` so that "Ceremony is uniform — no
+  agent-side lightening" reads as **uniform _within a declared level_**, and
+  names the default. Without that amendment the file would ship asserting
+  uniformity while defaulting below maximum — the contradiction R9 did not
+  reach. The amended text carries its own AR.
+- **R12 — 2026-08-04. BLOCKER 2: the curriculum twin pair stays
+  `learner · teacher`, and its NM-twin is SECOND-ORDER.** [relayed: human,
+  verbatim: "it's a learner and a teacher, different twinnings. and the NM
+  twinning isn't direct, it's rolled into twinning the others because you're
+  twinning their twinning of it"]
+  - **`learner` and `teacher` are distinct twins, not two readings of one
+    audience.** They are different _twinnings_ — different generative models,
+    different predictions. Collapsing them to `reader` is rejected; R5 is
+    reaffirmed, not merely preserved.
+  - **The curriculum author's NM-twin is real but indirect** — it is _nested
+    inside_ the learner- and teacher-twins, because what the author models about
+    a learner is centrally **the learner's own model of the machine**. You twin
+    their twinning.
+  - **This satisfies § 4's both-hats conjunction** [read: `ontology.md:472-480`]
+    rather than departing from it: the F-twin is present, nested rather than
+    beside. It is also what the corpus's own mechanism describes [read:
+    `pedagogy.md:96-103` — "the two-layer misconception mechanism … many wrong
+    models of the notional machine …"] and it has a V-side counterpart [read:
+    `chapters.md:1379` — "**The V-side two-layer misconception** earns the
+    rigor-parity"]. A misconception watch-list _is_ a model of the learner's
+    wrong NM-model.
+  - **Consequences.** The AR-1 re-run's blocker 2 is resolved without a third
+    twin value and without asymmetric value sets. The §-4 citation defect
+    recorded against finding A is **repaired by this ruling**, not merely
+    disclosed. Plan open item 1 ("the taught NM has no slot on the curriculum
+    side") is **CLOSED**: the slot exists and is second-order.
+
 ## AR verdicts and dispositions
 
 - **2026-08-04 `ar-1` verdict: PAUSE** [relayed: ar-1]. Three contract-level
@@ -593,13 +637,23 @@ and that, not the spelling, was the defect the rename risked hiding.
 
 ## Open at the increment-2.5 gate
 
-Everything the agent could resolve is resolved. **These six need the human, and
-increment 3 does not open until the first two are answered.** Each carries the
-reviewer's proposed resolution, per the PAUSE protocol.
+✅ **UPDATE 2026-08-04 — the three blocking items are ANSWERED.** The human
+ruled scope (**R10** — full design ships, CP-A rejected), the ceremony
+contradiction (**R11** — R4 stands, increment 5 amends § Execution mechanics),
+and the curriculum F-twin (**R12** — `learner · teacher` stay distinct, the
+NM-twin is second-order). Items 1, 2 and 3 below are retained as the record of
+what was decided and why; **read them with their rulings**. Items 4, 5 and 6
+remain open and do **not** block increment 3.
 
-1. **⛔ BLOCKER — the ceremony contradiction is NOT resolved by R9.** R9 fixed
-   _who narrates_ the value; the invariant governs _who grants the exception_.
-   Committed baseline ceremony is **all five ARs** [read: `git show
+**The only thing still standing between here and increment 3 is the revert
+itself** — `git checkout -- DEV.md AGENTS.md AGENTS.principal.md`, verified with
+`git status --porcelain --` on those three returning empty.
+
+Each item carries the reviewer's proposed resolution, per the PAUSE protocol.
+
+1. **✅ ANSWERED by R11 — the ceremony contradiction R9 did not reach.** R9
+   fixed _who narrates_ the value; the invariant governs _who grants the
+   exception_. Committed baseline ceremony is **all five ARs** [read: `git show
    e1f69580:AGENTS.principal.md` § Incremental TDD Workflow]; `medium` fires
    **AR-1 and AR-5 only**, so the default silently removes AR-2, AR-3 and AR-4
    from every unit of work. The invariant sanctions exceptions "**per increment
@@ -619,17 +673,18 @@ reviewer's proposed resolution, per the PAUSE protocol.
    - **Option (ii) — keep R4.** Add an explicit § Execution mechanics amendment
      to increment 5's scope, restating uniformity _within a declared level_ and
      naming the default. Preserves R4; enlarges the surgery.
-2. **⛔ BLOCKER — the curriculum side owes an F-twin.** § 4's "Documentation as
-   a both-hats case" is a conjunction requiring V **and** F, and it is the
-   passage R5's disposition cites while concluding a two-V pair. Plan open item
-   1 already suspected this ("exercise files _arguably_ owe an F-twin too"); it
-   is not arguable — the cited sentence says so. **Options:** (a) make the
-   curriculum pair `learner · teacher · the-NM-being-taught`; or (b) drop the
-   pair to `reader` and let the F-twin ride the same `twin-doc` values software
-   work uses. Either way the § 4 citation must be quoted for what it says.
-3. **CP-A — the reviewer's lead proposal: ship only the one enforceable rule.**
-   The `## Epistemology` block (now three fields, per the delegate ruling) on
-   every `src/` README, plus one heading check in
+2. **✅ ANSWERED by R12 — the curriculum side owes an F-twin, and it is
+   second-order.** § 4's "Documentation as a both-hats case" is a conjunction
+   requiring V **and** F, and it is the passage R5's disposition cites while
+   concluding a two-V pair. Plan open item 1 already suspected this ("exercise
+   files _arguably_ owe an F-twin too"); it is not arguable — the cited sentence
+   says so. **Options:** (a) make the curriculum pair
+   `learner · teacher · the-NM-being-taught`; or (b) drop the pair to `reader`
+   and let the F-twin ride the same `twin-doc` values software work uses. Either
+   way the § 4 citation must be quoted for what it says.
+3. **❌ REJECTED by R10 — CP-A, the reviewer's lead proposal: ship only the one
+   enforceable rule.** The `## Epistemology` block (now three fields, per the
+   delegate ruling) on every `src/` README, plus one heading check in
    `scripts/lib/check-governance/`, plus the house-terms fence R4 requires
    anyway. **Defer** the work-kind split, the twin-doc value sets, the ceremony
    setting and prospective/retrospective. Rationale is finding **L**: 48 cells,
