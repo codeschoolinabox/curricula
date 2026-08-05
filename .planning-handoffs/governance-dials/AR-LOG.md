@@ -664,6 +664,53 @@ reviewer's proposed resolution, per the PAUSE protocol.
 invariant-2 ruling that unblocks `retrospective`; and curriculum twin-doc
 values.
 
+⚠ **The revert's verification instrument must be `git status`, not a grep.** The
+draft is **338 changed lines** across the three files, of which only **11**
+contain the string `territory-tracks` [measured:
+`git diff -U0 -- DEV.md AGENTS.md AGENTS.principal.md | grep -E '^[+-]' | grep -v '^[+-][+-][+-]'`,
+total vs `grep -c territory-tracks`]. The draft's own section heading is
+`## Territory tracks` — **a space, not a hyphen** — so a `territory-tracks` grep
+never matches `DEV.md:917`, the section the model is named after. **A grep-only
+gate can read green over a partial revert.** Verify with
+`git status --porcelain -- DEV.md AGENTS.md AGENTS.principal.md` returning
+**empty**, and re-run it immediately before staging any governance file, because
+peers dirty this worktree continuously. (Caught by a context-free handoff
+validator, not by the campaign.)
+
+### Notice to the `evaluators-intercept` campaign — partial discharge
+
+That campaign's close condition is "the governance campaign landing **§
+Territory tracks**" [read:
+`.planning-handoffs/evaluators-intercept/AR-LOG.md:69`]. **This file is the
+notice; their file is not edited.**
+
+- **§ Territory tracks will never land.** The four-track model is superseded,
+  and increment 1 retired the noun `track` outright — see the
+  [Glossary](#glossary--agent-decisions-increment-1).
+- **The successor section has no name yet**, because `track` was retired with no
+  replacement. **Naming it is increment 3's job** — it is the increment that
+  decides what sections exist — and until it lands, that campaign's gate item
+  has no target. This is exactly the silent-rot hazard R3 names.
+- Their citation defect is separate and still open: their `:57` quotes a
+  sentence that exists nowhere. Also theirs to fix.
+
+⚠ **Process note, recorded because it is this campaign's own miss.** Two lines
+in this file said "**Increment 2 must tell that campaign what replaced it**",
+and increment 2 did not [measured: `git show b2060515 --stat` → 1 file changed,
+this AR-LOG only]. **An obligation written into the record is not discharged by
+being written.** Increment 3 completes it once the successor section is named.
+
+### `setting` — coined without adjudication, owed an AR
+
+The campaign's defining sentence now reads "two kinds of work × three
+**settings**", and `setting` occupies the slot `dial` was retired from. **It was
+never run through the Glossary's three-criteria test** — no incumbency
+measurement, no corpus-collision check, no ruling. Under the rule this campaign
+adopted at increment 2 — _any increment that retires or coins a governance noun
+carries an AR_ — `setting` is a governance noun that entered the record with no
+review. **Increment 3's `ar-2` adjudicates it before increment 4 writes it into
+`DEV.md`.** (Also a context-free validator catch.)
+
 ## Honour-system inventory (finding I)
 
 Recorded so the next campaign is not surprised. Of the design's rules, **exactly
