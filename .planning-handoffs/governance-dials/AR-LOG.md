@@ -186,6 +186,88 @@ mid-campaign and orphan `7ac0e36e`'s subject line for no semantic gain.
     disclosed. Plan open item 1 ("the taught NM has no slot on the curriculum
     side") is **CLOSED**: the slot exists and is second-order.
 
+- **R13 — 2026-08-05. This campaign runs `ceremony: full`, AR-3 not
+  applicable.** [relayed: human, choosing "full — the status quo"] This closes
+  the gap
+  [§ ⚠ OPEN — this campaign's own ceremony value has no recorded human ruling](#-open--this-campaigns-own-ceremony-value-has-no-recorded-human-ruling)
+  opened against this campaign: every commit since increment 0 carried
+  `ceremony: full` on an **agent-stated** basis, which R9 forbids. **The value
+  does not change; its provenance does** — what was a default the agent supplied
+  is now a level the human set. Nothing already committed becomes wrong; it
+  becomes citable.
+  - **The real gate set is unchanged and is restated here as the ruled one:**
+    AR-1 on the design · an AR-2 analog on the section structure before prose ·
+    **AR-4 in loss-lens-only mode per text increment (4–9)** · AR-5
+    pathspec-scoped at close. AR-3 is n/a because no tests exist to challenge.
+  - ⚠ **Correction to the campaign's own gate, found while ruling it.** `DEV.md`
+    scopes AR-4's Loss lens to `README.md`/`DOCS.md` [read: `DEV.md` § AR-4:
+    Implementation Audit — "diff every touched `README.md`/`DOCS.md` against the
+    baseline"]. **Neither remaining increment touches either kind of file** —
+    increment 7 is `HUMANS.md`, increment 8 is `.claude/agents/` plus `DEV.md`,
+    increment 9 is this file. Read literally, this campaign's declared gate is a
+    **no-op on its own last three increments**. The fix is in the dispatch
+    prompt, not in `DEV.md`: every `ar-4` launch states that the lens applies to
+    the named paths as authored documents, on the authority of
+    [DEV.md § Documentation migration discipline](../../DEV.md#documentation-migration-discipline),
+    which binds any authored artifact and is the bullet `DEV.md` itself cites.
+    Widening the `DEV.md` bullet is a governance change owing its own AR and is
+    **not** taken here.
+  - **The settings line diverges from its own spec, and this is unfixable.**
+    `DEV.md` specifies the middot form [read: `DEV.md` § Who decides, and where
+    the answers are recorded — `work: software · twin-doc: none · …`]. **All 8
+    committed instances in this campaign use ASCII hyphens** [measured: `git log
+    --format=%B 651ad312..HEAD -- <campaign pathspec> | grep 'work: software' |
+    od -c` → `w o r k : s o f t w a r e -`], and **7 of the campaign's 15
+    commits carry no settings line at all**, including `a712a945`, a
+    governance-surface edit [measured: `grep -c 'work: software'` over the same
+    log → 8; `git log --oneline` over the same pathspec → 15]. The remaining
+    increments **keep the hyphen form**, so one grep finds the whole campaign
+    record, and the campaign's commit bodies are ASCII throughout by convention.
+    Amend is forbidden, so the 7 bodies without a line stay without one. **A
+    future reader who greps the middot form will miss this entire campaign** —
+    grep the hyphen form.
+- **R14 — 2026-08-05. `.claude/skills/tadpotyping/` is RETIRED, not rewritten.**
+  [relayed: human, choosing "Retire it, bank the content"] The directory is
+  deleted; its salvageable content is banked as a loss ledger in this file, and
+  the capability it uniquely offered is recorded as an open need. Grounds, all
+  measured before the ruling:
+  - **No `ceremony` value can express what it dropped.** `ceremony` names
+    **which reviews fire** and nothing else [read: `DEV.md` § ceremony — every
+    row of its table contains only AR names]. Five of the skill's six DROPPED
+    categories — all of Phase 0, the ZOMBIES bar, the per-directory `DOCS.md`,
+    the 🔍 checkpoint — are outside that axis entirely, and the sixth is only
+    partly expressible because **it drops AR-5, which no value removes** [read:
+    `DEV.md` § ceremony — "**No value removes AR-5.**"].
+  - **Its one unique offer is a blocked axis.** Skipping Phase 0 outright is
+    what `retrospective` is ⛔ blocked for, pending a human ruling not yet made.
+    Rewriting the skill would have shipped an unblocked back-door around a
+    deliberately blocked door.
+  - **Rewriting had no coherent middle.** Trimmed to what `ceremony: light`
+    licenses it duplicates `DEV.md § Work routing and ceremony`; kept as it
+    stands it exceeds the model. And it would have been a **second override
+    channel** competing with increment 7's new ceremony grammar.
+  - **Nothing depends on it** [measured: 0 inbound links from any corpus
+    document; `npm run check:governance` unchanged with the directory removed;
+    `.ls-lint.yml` carries no `.claude` rule; no hook or script enumerates
+    `.claude/skills/`; 0 orphaned `cspell.json` entries, since this file keeps
+    every one of them alive].
+- **R15 — 2026-08-05. Increment 7's scope is ENLARGED to repair four stale
+  Phase-0 recitals in `HUMANS.md`.** [relayed: human, choosing "Yes — fix all
+  4"] The increment was scoped to `§ Override grammar` plus a
+  `§ Update triggers` entry. A full read found the file teaching the retired
+  seven-step scheme in four further places, including **the human's own Phase-0
+  verification checklist**, which cannot see step 0.2 at all [measured: `grep
+  -ci 'twin' HUMANS.md` → 0; `grep -ci 'epistemology' HUMANS.md` → 0]. This is
+  the same prose-recital failure mode that shipped in both `AGENTS*.md` and was
+  repaired at `445d4116` — same campaign, same shape, caught before landing this
+  time.
+  - **Disclosure, not absorbed:** increment 7 now carries **two deliverables**
+    under one AR-4, which halves the review density the declared gate set buys
+    per increment. Recorded here rather than left implicit, because this
+    campaign's own `ar-1` objected to the last undisclosed scope exemption. The
+    mitigation is in the AR-4 brief: report on both halves, and run the loss
+    lens on the recital half specifically.
+
 ## AR verdicts and dispositions
 
 - **2026-08-04 `ar-1` verdict: PAUSE** [relayed: ar-1]. Three contract-level
@@ -937,6 +1019,14 @@ it was replaced by a DRAFT-file swap rather than the planned revert.
 
 ### ⚠ OPEN — this campaign's own `ceremony` value has no recorded human ruling
 
+✅ **ANSWERED by R13, 2026-08-05 — this heading is kept for the record and is no
+longer open.** The human set `ceremony: full` for the campaign, so the value is
+now cited rather than agent-stated. **The two future-tense promises below were
+never kept and are not retroactively true** — no confirmation happened at the
+increment-2 gate; the confirmation happened at increment 7's gate, five
+increments later, and only because a context-free validator found the gap. Read
+the paragraph below as the finding, and R13 as its discharge.
+
 Two lines in this file promise, in the future tense, that "the human confirms it
 at the increment-2 gate". Increment 2 landed at `b2060515`; **no ruling records
 the confirmation** [measured: `grep -n 'human confirms it'` → 2 hits, both
@@ -1019,6 +1109,11 @@ record and `ceremony: full` nominally fires AR-4 per text increment.
 
 ## Standing hazards
 
+- ⚠ **SUPERSEDED by R14, 2026-08-05 — "until rewritten" is wrong; it is
+  RETIRED.** The human ruled deletion over rewrite. This bullet is rewritten in
+  full at increment 9, together with the loss ledger and two corrections it owes
+  — one of its charges below is **false as stated**. Until that lands, read this
+  bullet as the record of why the skill was a hazard, not as a plan for it.
 - **⛔ `.claude/skills/tadpotyping/` — every claim in it is VOID until
   rewritten.** Untracked but **registered and loadable in every session**, and
   inside `check:governance`'s corpus despite being untracked. It drops **AR-1
