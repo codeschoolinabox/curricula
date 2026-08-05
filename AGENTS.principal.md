@@ -73,7 +73,12 @@ encouragement. They cannot be overridden by momentum.
    commit → **human gate**. Three artifact-named steps, not seven numbered ones
    ([DEV.md § Phase 0](./DEV.md#phase-0-documentation-specification-before-any-code)).
    The pull to skip this under time pressure is real for every agent generation.
-   Do not skip it.
+   Do not skip it. **What binds unconditionally is the artifact order**; the
+   chain above draws the gates at `ceremony: full`, and which of AR-1 and AR-2
+   actually fire is set by the declared level — each `### AR-N` section's
+   **Skip:** line carries that caveat ([DEV.md § ceremony](./DEV.md#ceremony)).
+   Reading a missing AR as license to reorder or drop an artifact inverts this
+   invariant.
 3. **Plan before implementing** — enter plan mode for anything beyond a trivial
    fix. Exception: user explicitly says "skip plan mode."
 4. **One increment at a time** — complete Red → Green → Refactor → Lint before

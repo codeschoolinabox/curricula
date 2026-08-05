@@ -44,6 +44,9 @@ clarification from the implementing agent before proceeding.
 
 - Does the ubiquitous language in the README align with the rest of the
   codebase? Any naming collisions, synonyms, or redefinitions?
+- Are any domain concepts missing from the ubiquitous-language glossary? The
+  bullet above asks whether the named concepts are the right names; this one
+  asks whether every concept the module works with is named at all.
 - Are bounded context boundaries correct — is this module doing too much or too
   little? (Primary AR-1 lens.)
 - Does the README design suggest a clean separation of concerns, or will it

@@ -2058,6 +2058,10 @@ declared ceremony level does not include this review.
 
 - Does the ubiquitous language in the README align with the rest of the
   codebase? Any naming collisions, synonyms, or redefinitions?
+- Are any domain concepts missing from the ubiquitous-language glossary? The
+  bullet above asks whether the named concepts are the _right_ names; this one
+  asks whether every concept the module works with is named at all. A concept
+  the README uses and the glossary never names is the gap.
 - Are bounded context boundaries correct — is this module doing too much or too
   little?
 - Does the README design suggest a clean separation of concerns, or will it
