@@ -364,10 +364,16 @@ saying "the four increment bodies". Each row names its source and what was
 compressed [read:
 [DEV.md § Documentation migration discipline](../../DEV.md#documentation-migration-discipline)].
 
-1. **`jej/tests/validate.test.ts` parses at `ecmaVersion: 'latest'` and analyzes
-   at `2024`** — lines 10 and 11, precisely the version drift this leaf exists
-   to prevent, on a jej-side parse outside Wave 1's scope [measured 2026-08-05:
-   the two lines read together]. Source: `f89fcb7c` body.
+1. **DISCHARGED, by a peer, mid-wave.** `jej/tests/validate.test.ts` parsed at
+   `ecmaVersion: 'latest'` while analyzing at `2024` — precisely the version
+   drift this leaf exists to prevent. A concurrent campaign adopted the
+   published settings in that harness at `d8fa1461`, so the file now parses with
+   `{ ...PARSE_SETTINGS, sourceType: 'module' }` [measured 2026-08-05: the file
+   at HEAD]. Recorded as discharged rather than deleted, because the row was
+   already committed as open and a reader of the wave's history needs to know it
+   closed and by whose hand. Source: `f89fcb7c` body. **The lesson generalizes:
+   this row's own instruction to re-run rather than trust was applied to the
+   foreign-commit list and not to the FLAGs themselves.**
 2. **`jej/get-child-nodes.ts` is dead code** — the only importer of _that_
    module is its own test [measured: `git grep -n "get-child-nodes\.js" -- src`
    → the jej module has one importer, `jej/tests/get-child-nodes.test.ts`; the
@@ -440,3 +446,43 @@ compressed [read:
    _"Never cite a document **section** by `file:line`"_. Governance surface, so
    the human's call, not an agent's. Source: `2437801d` body — the FLAG the
    earlier draft of this list omitted.
+
+### FLAGs raised at the wave's close (2026-08-05)
+
+Found by `ar-5` and the two resolution increments that followed it. Recorded
+here because `git grep` cannot search commit messages, and an earlier draft of
+this campaign left two of them reachable only through a commit body — the exact
+failure the ledger exists to abolish.
+
+- **W1-C1 —** **⚠️ Wave 2's own spec contradicts what Wave 1 shipped.** Two
+  ratified dossier drafts still describe a leaf that was ruled against:
+  `README.PROPOSED.md` describes the structural floor as including
+  **declarations**, and `types.PROPOSED.ts` imports from a placeholder
+  `'../allowlisting/types.js'` [measured 2026-08-05: both strings present in
+  those files]. The floor has five members and no declaration, and the leaf is
+  named `screening`. **Wave 2 is specified to land those drafts as the committed
+  contract** [read:
+  [SEQUENCING.md § Wave 2](./SEQUENCING.md#wave-2--the-core-contract-reshape-p1--p2--p4-p3-documented)],
+  so an agent implementing from them builds a declaration-admitting floor at the
+  wrong address. **`ar-5` asked that this be closed before Wave 2's Phase 0
+  opens, not merely before the push.**
+- **W1-C2 —** **`createViolation` manufactures a contract-breaching `Violation`
+  in silence.** Handed an undefined node type or a null location it throws
+  nothing and returns a violation whose `nodeType` is not a string and whose
+  `location` is not a `SourceRange` [measured 2026-08-05: the real module driven
+  directly]. That is strictly worse than what the root guard at `227640e3` just
+  fixed in `collectViolations`, and `getChildNodesWithPath` carries a milder
+  form of the same exposure. Deliberately not folded into that increment —
+  `ar-3` disciplined exactly that batching out of it twice — so it is named here
+  instead.
+- **W1-C3 —** **`isNode` is now duplicated verbatim inside the leaf**, in
+  `collect-violations.ts` and `get-child-nodes-with-path.ts`. Duplication is the
+  prevailing package-wide pattern for this predicate rather than a deviation,
+  and sharing it would need a new file under the no-barrel rule — so this is
+  recorded, not resolved.
+- **W1-C4 —** **The superseded default-deny wording survives in another
+  region.** A fixture in `orchestrate/lib/marking/` still carries the
+  pre-`a7be59e6` phrasing [measured 2026-08-05: `git grep "is not allowed at
+  this level" -- src`]. It asserts nothing false about this leaf and is not this
+  campaign's file, but it is the "a copy survives the reword" case `a7be59e6`'s
+  loss ledger item 6 was written against.

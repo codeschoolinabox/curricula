@@ -310,6 +310,24 @@ rules:
   every consumer reads; widening it is an inter-module contract change, not a
   local edit.
 
+## Epistemology
+
+**Twin not built:** the notional machine of the language being screened — what a
+node type _means_, which constructs are worth refusing, and what a refusal
+should cost a reader. **Delegated to:** the caller's curation, which owns the
+node-rule table and the ruling on what a violation is worth, and the parser,
+which is authoritative for what node types exist and what shape they take.
+**Falsified if:** this leaf ever acquires a severity, an ordering by importance,
+a default table, or a message a consumer is expected to show a reader unedited —
+each of those is a claim about the language or its reader, and holding one means
+this module owes its own notional-machine document.
+
+The delegation is why the module is domain-blind rather than merely generic: it
+is not that a language model was too costly to build here, but that two
+consumers hold different ones — a language level's curriculum position, and a
+generator's screening of a candidate — and a single leaf holding either would be
+wrong for the other.
+
 ## Navigation
 
 - **Parent peer:** [`../README.md`](../README.md).

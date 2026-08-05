@@ -30,8 +30,10 @@ genuinely projects.
   scope-aware consumers.
 - [screening/](./screening/README.md) — the generic default-deny walk over a
   curated slice of JavaScript: one frozen `Violation` per place a parsed program
-  leaves the slice an allowlist's node-rule table describes, plus the parse
-  settings that walk's soundness is relative to.
+  leaves the slice an allowlist's node-rule table describes, plus the two data
+  artifacts that walk depends on — the parse settings its soundness is relative
+  to, and the structural floor a caller unions under a table it derived by
+  inventorying an existing program.
 - [socratizing/](./socratizing/README.md) — a Socratic code analyzer: turns an
   embodiment into frozen `CodeQuestion`s (questions, not corrections) about a
   program's micro-decisions and comprehension, anchored to source offsets and
