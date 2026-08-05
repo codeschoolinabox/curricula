@@ -586,3 +586,112 @@ none touching the changed file [all measured this session]. The scoped-gate
 baseline at plan approval was `1 failed | 125 passed` /
 `42 failed | 3325 passed | 8 todo` — the sole failing file was foreign and a
 peer has since fixed it.
+
+## F2 follow-on — the fold's out-of-embody guards (2026-08-05)
+
+Executes [FOLLOW-ONS.md](./FOLLOW-ONS.md) § F2. Baseline
+`fbf5aa2797c9609d8585aa91c42c667e1b1a436e` [measured: `git rev-parse HEAD` at
+plan approval]. Scoped gate GREEN there — `Test Files 127 passed (127)` /
+`Tests 3400 passed | 8 todo (3408)`, and `npx tsc --noEmit` → 0 [both measured
+this session] — so **no foreign failure is attributable and any red this work
+produces is its own**. The changeset is a **SHA list**, per DEV.md §
+Shared-worktree git mechanics: five foreign commits landed during the planning
+session alone [measured: `git rev-list --count 227640e3..fbf5aa27`].
+
+```text
+work: software · twin-doc: none · ceremony: full (AR-1, AR-2 n/a) · prospective
+```
+
+AR-1 and AR-2 have no inputs on this changeset — no README, twin,
+`## Epistemology` block, `types.ts` or DOCS sketch is touched. The implementing
+agent proposed the subtraction and the **human ratified it at plan approval**
+rather than it being taken agent-side.
+
+### Human ruling (2026-08-05)
+
+**Close all three of § F2's gaps, relocated to where a guard can actually bite**
+— never touching `language-levels/jej/tests/validate.test.ts` or
+`language-levels/scaffold/tests/index.test.ts`. Presented as a three-way fork
+carrying the measurements below, with the literal-to-the-brief option shown
+labelled as producing a paren-bearing fixture that guards nothing.
+
+### Where the guards land, and why not where § F2 points
+
+§ F2 is right that all three gaps are real. Two of its bullets are wrong only
+about the remedy's address, and the correction is measured, not argued:
+
+- **debug-props — closeable exactly as § F2 says.** All six distinct fixture
+  sources in `lenses/debug-props/tests/core.test.ts` are paren-free [measured:
+  `grep -o "embody([^)]*" … | sort -u` — 34 call sites, 6 distinct sources].
+- **scaffold — the gap is real; scaffold's own test cannot hold the guard.**
+  `language-levels/scaffold/tests/index.test.ts` builds its `ParseFacts` from
+  its own
+  `parse(source, { ecmaVersion: 'latest', onComment, onToken, sourceType: 'module' })`
+  [read: that file, lines 8-18] — **no `preserveParens`**, so it is blind to the
+  fold by construction, the same blindness § F2 attributes only to the jej test.
+  Any fixture added there stays green with the fold broken. Routing it through
+  embody is not available either: that is the first `language-levels → embody`
+  code edge, which embody's sketch forbids [read: `embody/DOCS.md` § Out of
+  scope — "no type edge from levels into embody"] and which this log already
+  deferred under § Deferred.
+- **jej — § F2's bullet 3 is true and is NOT falsified here.**
+  `jej/tests/validate.test.ts` really is blind by construction and stays
+  untouched. What is added is that the **same gap is closeable at a seam file
+  the brief never fenced**, and that it is the most severe of the three:
+  `collectViolations` is default-deny [read:
+  `lib/screening/collect-violations.ts` — "a node type the table does not name
+  is outside the slice"] and the allowlist has no `ParenthesizedExpression` rule
+  [measured: `grep -n ParenthesizedExpression …/jej/just-enough-js.ts` — no
+  match], so a broken fold makes jej report a grammar violation on every
+  grouping-paren pair a learner writes.
+
+The guards land where embody's tree actually crosses into a consumer.
+`assembleParseFacts` hands a level `facts.ast.value` — the published, post-fold
+tree, by reference, with no second parse [read: that file, lines 36-69] — and
+its test directory already runs the whole seam against real levels.
+
+### The three fixtures, with their measured fold-sensitivity
+
+Each was proven fold-sensitive out-of-tree BEFORE being written — the same
+deliberate-defect instrument increment 1 used, and the bar is that a fixture
+whose two columns agree guards nothing and is rejected [all measured: `node -e`
+transcribing the real algorithms against the repo's acorn, both parse modes]:
+
+- `debug-props/tests/core.test.ts`, fixture `const x = ((1 + 2)) * (3 - 4);` —
+  the ast and entwined entries both read `11 nodes` with the fold working and
+  `14 nodes` with it broken. The fixture carries one nested pair and one flat
+  pair deliberately, so an outermost-only fold lands on `12` and is caught too.
+  Note the two counts still **agree** with the fold broken: the exact number,
+  never their agreement, is what guards.
+- `create-memoized-validate.test.ts`, fixture `const f = (() => { debugger; });`
+  — the scaffold violation's `nodePath` is
+  `$.body.0.declarations.0.init.body.body.0` with the fold working and
+  `$.body.0.declarations.0.init.expression.body.body.0` with it broken. The
+  assertion is the path, because `nodeType` stays `DebuggerStatement` either way
+  and would guard nothing.
+- `assemble-parse-facts.test.ts`, fixture `let x = (document);\n` — jej reports
+  one violation, at `$.body.0.declarations.0.init`, with the fold working; with
+  it broken it reports two, a `ParenthesizedExpression` at that same path plus
+  the escape reference displaced to `$.body.0.declarations.0.init.expression`.
+
+The jej fixture is the only one of the three that discriminates a break on
+**both** walks the seam block's own comment exists to guard — the level's
+descent-accumulated grammar path and the vocabulary path `assembleParseFacts`
+stamps off the entwined graph. Recorded because it is not obvious: **not one
+pre-existing test in that block is fold-sensitive** — `var x = document;\n` is
+byte-identical folded and unfolded [measured: same probe].
+
+### Plan-agent design pass: PAUSE, all findings applied
+
+[relayed: Plan agent] Two BLOCKERs and four MAJORs, all applied before approval.
+The two BLOCKERs are worth keeping visible for any later mutation ceremony in
+this shared tree: (1) the plan named no **restore** mechanism for the mutated
+production file, and the two an agent reaches for first — `git checkout --` and
+`git restore` — are on the Forbidden list, while `git stash` here would capture
+13 foreign dirty paths; the restore is therefore an inverse hand edit, verified
+by `git diff --quiet -- <file>` with a non-zero exit treated as an emergency
+brake. (2) A dirty production file held across a turn boundary can be swept into
+a peer's `git add`, so each mutation window is a single uninterruptible unit.
+Its two proposed values were **re-measured first-party before adoption** rather
+than relayed — including its counter-proposed jej fixture, which replaced a
+weaker `[]`-asserting draft of the implementing agent's.
