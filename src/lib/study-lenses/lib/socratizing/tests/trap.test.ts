@@ -155,9 +155,9 @@ describe('trap analyzers', () => {
 			['for (let i = 0; true; i++) { run(); }', 'for'],
 		])('asks about %s article-free', (source, label) => {
 			const results = analyzeAll(source, analyze);
-			// PINNED(human ruling 2026-08-04: the open question carries no article.
-			// `if` is the one vowel-initial label in this grammar-closed table, and
-			// read "a if" until this landed)
+			// PINNED(human ruling 2026-08-04, sign-off 2026-08-05: the open question
+			// carries no article. `if` is the only vowel-initial label the table
+			// holds today, and it read "a if" until this landed)
 			expect(results[0].questions[0].text).toBe(
 				`What does it mean when the condition in this ${label} can never change?`,
 			);
