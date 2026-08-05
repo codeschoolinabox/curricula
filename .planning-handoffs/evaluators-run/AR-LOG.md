@@ -461,6 +461,37 @@ ledger: zero prose lost** —
 sentences absent, and all four are accounted for (three are the corrected link
 sites, one is the deliberately amended opening).
 
+## Post-close defect repair — 2026-08-05 (found by ceremony 3)
+
+**Human ruling H-7 (recorded canonically in
+[`../evaluators-intercept/AR-LOG.md`](../evaluators-intercept/AR-LOG.md) § I6
+`ar-4`, mirrored here because the fix lands in THIS module): fix both evaluators
+now rather than defer the sibling's copy.**
+
+`create-run-stream.ts`'s `start()` guarded only on `handle !== undefined`. The
+assemble-defect route never assigns a handle — it settles and returns — so every
+pull past a defect settlement re-entered `start()`, re-ran `assemble`, re-threw,
+and re-fired `assembleDefect`'s `console.warn`. Intercept's I6 `ar-4` found it
+by probe in its own copy
+(`[relayed: that ar-4 — 1 warn after one pull, 2 after two]`) and reproduced the
+identical behavior here; run's own R4 `ar-3` AND `ar-4` both missed it, which is
+why it is recorded rather than quietly patched. The single-resolution invariant
+always held (`settle`'s own `hasSettled` latch discarded the second settlement),
+so nothing downstream was ever corrupted — the defect was wasted work plus a
+duplicated dev warning.
+
+Fixed by adding `|| hasSettled` to the guard, with a PINNED regression row in
+the existing assemble-defect block asserting the warn fires exactly once across
+two pulls. This repair's own `ar-4` verdict was **CONSIDER**: it traced every
+`start()` caller and every `hasSettled` writer and confirmed the disjunct is
+reachable ONLY on this route (a pre-start teardown never reaches `start()`,
+since `next()`'s `tornDown` gate excludes it), verified by probe that the new
+row fails against the old guard, and judged `start()` the right home for its own
+idempotency rather than the call site. Its one finding was this entry's absence,
+resolved by writing it. It also checked a third sibling — `danger/index.ts`
+carries the same bare guard, but its `start()` has no try/catch and so no route
+that returns without assigning a handle; the defect does not exist there.
+
 **The third gate item — the pinned-guard hook — is the human's and stays open.**
 Found this session: the hook had been disabled by commenting the block out of
 `.claude/settings.json` with `//`, which is not legal JSON, and a settings file

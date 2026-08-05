@@ -24,7 +24,7 @@
  * live-program race, and it is tested below.
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import type { Facts } from '../../../embody/types.js';
 import evaluate from '../../../lib/engine/evaluate.js';
@@ -294,6 +294,21 @@ describe('createRunStream', () => {
 			const { specs } = await runOf(specFor('let x = ;'));
 
 			expect(specs).toHaveLength(0);
+		});
+
+		it('a second pull after the defect settlement does not re-run the assemble', async () => {
+			// PINNED(human ruling 2026-08-05, H-7 in intercept's AR-LOG: found by intercept's ar-4 probe and reproduced here — a handle-only restart guard misses this route, since no handle is ever assigned, so every later pull re-assembled and re-warned)
+			const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+			const iterator = createRunStream(
+				specFor('let x = ;'),
+				recordingEvaluate().evaluateFunction,
+			)[Symbol.asyncIterator]();
+			await iterator.next();
+			await iterator.next();
+			const warned = warn.mock.calls.length;
+			warn.mockRestore();
+
+			expect(warned).toBe(1);
 		});
 
 		it('freezes the settlement it authors, like every other route', async () => {

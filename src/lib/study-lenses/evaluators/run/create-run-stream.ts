@@ -67,7 +67,12 @@ export default function createRunStream(
 	}
 
 	function start(): void {
-		if (handle !== undefined) {
+		// `hasSettled` is part of the guard, not decoration: on the
+		// assemble-defect route no handle is ever assigned, so a handle-only
+		// check would re-run the whole assemble — and re-fire its warning —
+		// on every later pull (human ruling 2026-08-05, H-7 in intercept's
+		// AR-LOG: found by intercept's ar-4 probe, which reproduced it here).
+		if (handle !== undefined || hasSettled) {
 			return;
 		}
 		let engineSpec: EvaluateSpec;
