@@ -3,18 +3,17 @@
 # Handoff — study-lenses greenfield: Phase-0 #2 (keystone contracts)
 
 > **WAVE COMPLETE (2026-07-15).** All five region Phase-0s ran the full
-> seven-step ceremony and committed (async gates — the maintainer reviews
-> the commits): `f0f145a` embody · `e253ade` embody README enrichment ·
-> `266e8ea` lenses · `9232741` evaluators · `0221ef6` language-levels ·
-> `2612fe9` orchestrate. Every region: Plan-agent pass + ar-1 + ar-2, all
-> verdicts CONSIDER with every finding folded; the final ar-2 doubled as
-> the cross-region seam audit — **wave coherence verdict: COHERENT**
-> (12/12 seams aligned, banned-vocabulary sweep clean across all five
-> triples + root). Maintainer decision items live in the session's final
-> gate summary and the plan file's RESUMPTION POINT. Next: maintainer
-> review + push; Phase-1 TDD and all later work runs on opus (ar-2/ar-5
-> inherit opus — the historical normal). This brief's mission is
-> fulfilled; the sections below remain as the wave's record.
+> seven-step ceremony and committed (async gates — the maintainer reviews the
+> commits): `f0f145a` embody · `e253ade` embody README enrichment · `266e8ea`
+> lenses · `9232741` evaluators · `0221ef6` language-levels · `2612fe9`
+> orchestrate. Every region: Plan-agent pass + ar-1 + ar-2, all verdicts
+> CONSIDER with every finding folded; the final ar-2 doubled as the cross-region
+> seam audit — **wave coherence verdict: COHERENT** (12/12 seams aligned,
+> banned-vocabulary sweep clean across all five triples + root). Maintainer
+> decision items live in the session's final gate summary and the plan file's
+> RESUMPTION POINT. Next: maintainer review + push; Phase-1 TDD and all later
+> work runs on opus (ar-2/ar-5 inherit opus — the historical normal). This
+> brief's mission is fulfilled; the sections below remain as the wave's record.
 
 > Written 2026-07-14 at the Phase-0 #1 human gate, by the session that authored
 > the package-root docs. Phase-0 #1 committed `aa9496a` (root README.md +
@@ -80,17 +79,17 @@ approval (DOCS.md is an architectural contract).
    contracts land with their owning REGIONS' Phase-0s — which is also when each
    region's home gets pinned (resolving the § 3.3 tension naturally: homes are
    decided exactly when a region's DDD starts, not before). FURTHER RULING
-   (2026-07-14): all FIVE entity-region Phase-0s — embody, lenses,
-   evaluators, language-levels, orchestrate — run on Fable-generation
-   sessions (the ar-2/ar-5 inherit-the-session-model mechanism upgrades the
-   judgment reviews exactly there), under a HARD BUDGET: the maintainer's
-   Fable quota is finite and access ENDS ~2026-07-20 — after that, Phase-1
-   TDD and everything else runs Opus (ar-2/ar-5 then inherit Opus, the
-   historical normal). Recommended order: embody → lenses → evaluators →
-   language-levels → orchestrate (dependency order; the kind-contract
-   triangle first). Record § 2.4's geography — Facts/lifecycle/Gateable
-   embody-side, component-kind extension lens-side — remains the [PROPOSED]
-   starting point to ratify or amend at plan approval.
+   (2026-07-14): all FIVE entity-region Phase-0s — embody, lenses, evaluators,
+   language-levels, orchestrate — run on Fable-generation sessions (the
+   ar-2/ar-5 inherit-the-session-model mechanism upgrades the judgment reviews
+   exactly there), under a HARD BUDGET: the maintainer's Fable quota is finite
+   and access ENDS ~2026-07-20 — after that, Phase-1 TDD and everything else
+   runs Opus (ar-2/ar-5 then inherit Opus, the historical normal). Recommended
+   order: embody → lenses → evaluators → language-levels → orchestrate
+   (dependency order; the kind-contract triangle first). Record § 2.4's
+   geography — Facts/lifecycle/Gateable embody-side, component-kind extension
+   lens-side — remains the [PROPOSED] starting point to ratify or amend at plan
+   approval.
 4. **The § 3.2 drafting pins that types force**: exact field names for the
    six-phase lifecycle payload (`{ accessible, cause?, lenses }` per record §
    2.5) — data names only; learner-facing display labels and the none-state
@@ -102,36 +101,33 @@ approval (DOCS.md is an architectural contract).
 
 ## Execution shape for the keystone wave (maintainer-ruled 2026-07-14)
 
-- **One thread, five regions, dependency order**: embody → lenses →
-  evaluators → language-levels → orchestrate. Each region runs the FULL
-  seven-step ceremony and ends in its own commit + human gate. The kind-
-  contract triangle (embody/lenses/evaluators — Gateable and its extension,
-  the evaluator contract lenses consume) comes first while context is
-  freshest; orchestrate, the consumer of everything, closes the wave and its
-  ar-2 carries an EXPLICIT cross-region seam mandate (it is the wave's
-  de-facto coherence audit).
+- **One thread, five regions, dependency order**: embody → lenses → evaluators →
+  language-levels → orchestrate. Each region runs the FULL seven-step ceremony
+  and ends in its own commit + human gate. The kind- contract triangle
+  (embody/lenses/evaluators — Gateable and its extension, the evaluator contract
+  lenses consume) comes first while context is freshest; orchestrate, the
+  consumer of everything, closes the wave and its ar-2 carries an EXPLICIT
+  cross-region seam mandate (it is the wave's de-facto coherence audit).
 - **Sessions are physical segments of that thread.** Start fresh from this
-  brief; run as many regions as fit CLEANLY. At any gate where context
-  tightens: update THIS brief (it is the living handoff), cold-validate it
-  (invariant 12), cold-start the next segment. Never carry a new region on a
-  summarized context.
-- **Budget reality**: the maintainer's Fable quota is more than half spent
-  and access ends ~2026-07-20. ar-1 is pinned opus (does not draw Fable).
-  ar-2 inherits Fable — the wave's main quota consumer. Economies: CONTINUE
-  one ar-2 agent across regions (SendMessage continuation — it retains the
-  record between passes; proven in Phase-0 #1); if quota nears exhaustion,
-  the maintainer may explicitly authorize ar-2-on-opus for evaluators (the
-  most bounded contract) — human-only call, never self-granted. After Fable
-  access ends, Phase-1 TDD and all remaining work runs opus; ar-2/ar-5 then
-  inherit opus (this repo's historical normal — nothing to reconfigure).
-- **Quarry mining order**: read record § 4.2 (the embody/types.ts
-  field-by-field disposition) BEFORE opening the old types files, so you
-  mine only surviving fields. Main reads — note the embody one is NOT in
-  the deprecated tree: embody's old types (1328 lines) live at the stray
-  `src/lib/embody/types.ts` (byte-identical to
-  `git show HEAD:src/lib/study-lenses/embody/types.ts`); the other two are
-  `src/lib/study-lenses--deprecated-architecture/lenses/types.ts` and
-  `src/lib/study-lenses--deprecated-architecture/orchestrate/types.ts`.
+  brief; run as many regions as fit CLEANLY. At any gate where context tightens:
+  update THIS brief (it is the living handoff), cold-validate it (invariant 12),
+  cold-start the next segment. Never carry a new region on a summarized context.
+- **Budget reality**: the maintainer's Fable quota is more than half spent and
+  access ends ~2026-07-20. ar-1 is pinned opus (does not draw Fable). ar-2
+  inherits Fable — the wave's main quota consumer. Economies: CONTINUE one ar-2
+  agent across regions (SendMessage continuation — it retains the record between
+  passes; proven in Phase-0 #1); if quota nears exhaustion, the maintainer may
+  explicitly authorize ar-2-on-opus for evaluators (the most bounded contract) —
+  human-only call, never self-granted. After Fable access ends, Phase-1 TDD and
+  all remaining work runs opus; ar-2/ar-5 then inherit opus (this repo's
+  historical normal — nothing to reconfigure).
+- **Quarry mining order**: read record § 4.2 (the embody/types.ts field-by-field
+  disposition) BEFORE opening the old types files, so you mine only surviving
+  fields. Main reads — note the embody one is NOT in the deprecated tree:
+  embody's old types (1328 lines) live at the stray `src/lib/embody/types.ts`
+  (byte-identical to `git show HEAD:src/lib/study-lenses/embody/types.ts`); the
+  other two are `src/lib/study-lenses--deprecated-architecture/lenses/types.ts`
+  and `src/lib/study-lenses--deprecated-architecture/orchestrate/types.ts`.
 
 ## Vocabulary rules established by Phase-0 #1 (binding on your drafts)
 
@@ -149,12 +145,12 @@ approval (DOCS.md is an architectural contract).
 
 ## Ground truth at writing (VERIFY BEFORE USE — the tree churns)
 
-- HEAD `89288e6` — the last of the four root-doc commits (ledger below).
-  On-disk new-tree content:
+- HEAD `89288e6` — the last of the four root-doc commits (ledger below). On-disk
+  new-tree content:
   `src/lib/study-lenses/{README.md, DOCS.md, WORKFLOWS.md, explorotron-quadrants-and-pyramid.png}`
   (the PNG was never un-tracked; it was physically restored in the worktree,
-  byte-identical, so it carries no diff). Record your OWN baseline SHA at
-  plan approval — do not reuse any SHA from this brief.
+  byte-identical, so it carries no diff). Record your OWN baseline SHA at plan
+  approval — do not reuse any SHA from this brief.
 - ⚠️ Git still TRACKS the old tree's hundreds of files under
   `src/lib/study-lenses/` — they appear as uncommitted worktree DELETIONS
   (porcelain status `D`, unstaged) inside your own package dir. That is the
@@ -170,12 +166,12 @@ approval (DOCS.md is an architectural contract).
   learner walkthroughs, maintainer-authorized), `89288e6` (story reframed
   package-scope — maintainer ruling: root docs mention NO specific curriculum
   — + layer table + mermaid edge-label hardening: no `<br/>` in EDGE labels,
-  node labels only; keep that rule in future diagrams). Gate notes RESOLVED
-  by the maintainer (2026-07-14): the "Two hats" personas (🔬 Frogrammer /
-  🎨 Vibetoader) STAY in the README (the no-specific-curriculum ruling was
-  scoped to the story's framing, not the persona vocabulary); the token/ast
-  viewer lenses remain UNPROMISED in the root docs ([GFI] candidates — the
-  phase table names only the decided error-explanation affordance).
+  node labels only; keep that rule in future diagrams). Gate notes RESOLVED by
+  the maintainer (2026-07-14): the "Two hats" personas (🔬 Frogrammer / 🎨
+  Vibetoader) STAY in the README (the no-specific-curriculum ruling was scoped
+  to the story's framing, not the persona vocabulary); the token/ast viewer
+  lenses remain UNPROMISED in the root docs ([GFI] candidates — the phase table
+  names only the decided error-explanation affordance).
 - `src/lib/README.md` (parent) is 0 bytes in the worktree; the parent→child
   down-link is deferred repo-wide — do not edit that file without maintainer
   instruction.

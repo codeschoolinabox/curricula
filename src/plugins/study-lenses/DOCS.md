@@ -28,20 +28,19 @@ to rewrite exercise-set category labels at sidebar-build time.
    fenced code block whose language identifier is **configured (a non-null
    entry) in** the resolved configuration's `defaults` (a **configured
    language**), rewrite the node in place so that downstream rendering produces
-   the plugin's React component. Fences whose language is **absent from or
-   null in** `defaults` (the latter case = **subtree deconfiguration**) are
-   left untouched and fall through to Docusaurus's default rendering.
+   the plugin's React component. Fences whose language is **absent from or null
+   in** `defaults` (the latter case = **subtree deconfiguration**) are left
+   untouched and fall through to Docusaurus's default rendering.
 
    **Suffix parsing (URL-style):**
    - Split the info string on `:` → `[lang, suffix]`.
    - If `suffix` is absent (bare `js`): the `lens` prop is populated by the
-     **default-lens precedence chain** — frontmatter `defaultLens` first,
-     then (when no frontmatter) cascade `defaults[fenceLang]` as the
-     **cascade default lens**. When neither frontmatter nor the cascade
-     entry resolves a lens, the bare-fence emission carries no `lens`
-     attribute; the orchestrator falls back to the editor home base. (L2
-     reverses prior locked-decision-1; the cascade default lens is now
-     the fence-side third tier.)
+     **default-lens precedence chain** — frontmatter `defaultLens` first, then
+     (when no frontmatter) cascade `defaults[fenceLang]` as the **cascade
+     default lens**. When neither frontmatter nor the cascade entry resolves a
+     lens, the bare-fence emission carries no `lens` attribute; the orchestrator
+     falls back to the editor home base. (L2 reverses prior locked-decision-1;
+     the cascade default lens is now the fence-side third tier.)
    - If `suffix` is present: split on `?` → `[lensName, query]`. Empty
      `lensName` → leave fence untouched (malformed). Otherwise `lensName`
      populates the `lens` attribute.
@@ -57,10 +56,11 @@ to rewrite exercise-set category labels at sidebar-build time.
 
    **Lens resolution precedence** (populates the emitted `lens` attribute,
    most-specific wins): fence `:suffix lensName` > frontmatter `defaultLens`
-   > cascade `defaults[fenceLang]` (the cascade default lens) > none. The
-   gate runs BEFORE the precedence chain: if `defaults[fenceLang]` is
-   absent or explicit `null` (**subtree deconfiguration**), the fence is
-   left untransformed and the chain does not run.
+
+   > cascade `defaults[fenceLang]` (the cascade default lens) > none. The gate
+   > runs BEFORE the precedence chain: if `defaults[fenceLang]` is absent or
+   > explicit `null` (**subtree deconfiguration**), the fence is left
+   > untransformed and the chain does not run.
 
    **Emission shape**: the three-prop public API (`snippet, lens?, configs?`).
    `snippet` always; `lens` when resolved (per the precedence above); `configs`
@@ -312,12 +312,11 @@ function.
 - **Gate-semantics parity.** Both consumer call sites of `config.defaults[lang]`
   — the remark Transform phase (fence-side, inside `transformFence` in
   `remark-study-lenses.ts`) and the sibling walker's Enumerate phase
-  (sibling-side, inside `walk` in `discover-siblings.ts`) — apply identical
-  gate semantics: absent key and explicit-null value are both skip outcomes
-  (checked via `== null`).
-  A divergence between the two would mean the same `lenses.json` produces
-  inconsistent fence-transformation and sibling-discovery results in the
-  same subtree.
+  (sibling-side, inside `walk` in `discover-siblings.ts`) — apply identical gate
+  semantics: absent key and explicit-null value are both skip outcomes (checked
+  via `== null`). A divergence between the two would mean the same `lenses.json`
+  produces inconsistent fence-transformation and sibling-discovery results in
+  the same subtree.
 - **Sidebar-generator idempotence.** The label rewrite fires only when the
   received label still starts with a configured prefix. Running the generator a
   second time on its own output produces no further changes — the first pass
@@ -398,6 +397,6 @@ function.
   `sidebar_label:` frontmatter) — the transform automatically defers to those.
 - Build-time validation that a `defaults[lang]: null` entry actually overrides
   an ancestor enablement. An inert null (no ancestor enabled the language) is
-  silently equivalent to omitting the key — the gate skips the fence either
-  way. A future lint pass could warn on null entries that don't override
-  anything; not in L2.
+  silently equivalent to omitting the key — the gate skips the fence either way.
+  A future lint pass could warn on null entries that don't override anything;
+  not in L2.

@@ -1,1 +1,5 @@
-{"defaults":{"js":"study"},"embedSiblings":{"mode":"bottom"},"exerciseSetPrefixes":[]}
+{
+	"defaults": { "js": "study" },
+	"embedSiblings": { "mode": "bottom" },
+	"exerciseSetPrefixes": []
+}

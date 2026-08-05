@@ -107,7 +107,9 @@ describe('createStudySidebarGenerator', () => {
 	});
 
 	it('doc-item labels inside a matched category are not transformed by this module', async () => {
-		const items = [cat('sl-01-while-loops', [document('lesson', 'The Lesson')])];
+		const items = [
+			cat('sl-01-while-loops', [document('lesson', 'The Lesson')]),
+		];
 		const result = await runGenerator(configWith(['sl-']), items);
 		const transformed = result[0] as { label: string; items: Array<unknown> };
 		expect(transformed.label).toBe('While Loops');

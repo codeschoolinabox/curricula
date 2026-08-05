@@ -52,7 +52,7 @@ describe('deepClone', () => {
 			function double(x: number) {
 				return x * 2;
 			}
-			expect((deepClone(double))(3)).toBe(6);
+			expect(deepClone(double)(3)).toBe(6);
 		});
 
 		it('function inside array → same reference at same index', () => {

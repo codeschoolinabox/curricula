@@ -16,7 +16,6 @@ import { describe, expect, it } from 'vitest';
 
 import codeBlockToJsx from '../code-block-to-jsx.js';
 
-
 function makeCodeNode(value: string, lang: string | null = null): Code {
 	return { type: 'code', value, lang, meta: null };
 }
@@ -46,7 +45,9 @@ describe('codeBlockToJsx', () => {
 
 		const result = codeBlockToJsx(node, { lens: 'study' });
 
-		const snippetAttribute = result.attributes.find((a) => a.name === 'snippet');
+		const snippetAttribute = result.attributes.find(
+			(a) => a.name === 'snippet',
+		);
 		expect(snippetAttribute?.value).toBe('');
 	});
 
@@ -105,7 +106,9 @@ describe('codeBlockToJsx', () => {
 			configs: wholeCascade,
 		});
 
-		const configsAttribute = result.attributes.find((a) => a.name === 'configs');
+		const configsAttribute = result.attributes.find(
+			(a) => a.name === 'configs',
+		);
 		expect(configsAttribute).toBeDefined();
 		// Expression-valued attribute, not a plain string.
 		expect(typeof configsAttribute?.value).toBe('object');
@@ -152,7 +155,9 @@ describe('codeBlockToJsx', () => {
 			configs: cascadeWithUnknownKeys,
 		});
 
-		const configsAttribute = result.attributes.find((a) => a.name === 'configs');
+		const configsAttribute = result.attributes.find(
+			(a) => a.name === 'configs',
+		);
 		const sourceCode = (configsAttribute?.value as { value: string }).value;
 		expect(sourceCode).toBe(JSON.stringify(cascadeWithUnknownKeys));
 	});
@@ -198,7 +203,9 @@ describe('codeBlockToJsx', () => {
 
 		const node = makeCodeNode('let x = 1;', 'js');
 		const result = codeBlockToJsx(node, { lens: 'trace', configs: original });
-		const configsAttribute = result.attributes.find((a) => a.name === 'configs');
+		const configsAttribute = result.attributes.find(
+			(a) => a.name === 'configs',
+		);
 		const exprValue = configsAttribute?.value as {
 			type: string;
 			value: string;

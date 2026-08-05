@@ -41,7 +41,10 @@ describe('classifyDangerError', () => {
 				classifyDangerError('RangeError', 'Loop 3 exceeded 50 iterations.', 50),
 			).toStrictEqual({
 				outcome: 'limit-exceeded',
-				error: { name: 'RangeError', message: 'Loop 3 exceeded 50 iterations.' },
+				error: {
+					name: 'RangeError',
+					message: 'Loop 3 exceeded 50 iterations.',
+				},
 			});
 		});
 	});
@@ -81,7 +84,11 @@ describe('classifyDangerError', () => {
 				'Loop 7 exceeded 1000 iterations.',
 				1000,
 			);
-			const thrown = classifyDangerError('TypeError', 'x is not a function', 1000);
+			const thrown = classifyDangerError(
+				'TypeError',
+				'x is not a function',
+				1000,
+			);
 			expect(tripped).toStrictEqual({
 				outcome: 'limit-exceeded',
 				error: {

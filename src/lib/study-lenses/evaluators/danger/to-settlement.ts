@@ -37,7 +37,11 @@ export default function toSettlement(result: DangerResult): DangerSettlement {
 	const reasonByOutcome: Record<
 		'errored' | 'limit-exceeded' | 'timed-out',
 		DangerErrorReason
-	> = { errored: 'threw', 'limit-exceeded': 'loop-cap', 'timed-out': 'timeout' };
+	> = {
+		errored: 'threw',
+		'limit-exceeded': 'loop-cap',
+		'timed-out': 'timeout',
+	};
 	const reason = reasonByOutcome[result.outcome];
 	const error = result.error ?? {
 		name: 'Error',

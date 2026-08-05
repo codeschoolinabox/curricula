@@ -55,7 +55,8 @@ function main(spec: EvaluationSpec): DangerStream | EvaluatorRefusal {
 	}
 
 	const options = {
-		type: spec.execution === 'module' ? ('module' as const) : ('script' as const),
+		type:
+			spec.execution === 'module' ? ('module' as const) : ('script' as const),
 		...(spec.iterations === undefined ? {} : { iterations: spec.iterations }),
 	};
 

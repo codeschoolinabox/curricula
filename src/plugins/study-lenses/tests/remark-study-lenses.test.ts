@@ -24,7 +24,6 @@ import { describe, expect, it, onTestFinished } from 'vitest';
 
 import createRemarkStudyLenses from '../remark-study-lenses.js';
 
-
 const FIXTURES_DIR = path.resolve(
 	import.meta.dirname,
 	'..',
@@ -422,9 +421,7 @@ describe('createRemarkStudyLenses', () => {
 		const attributes = attributesOf(node);
 		expect(attributes.lens).toBe('highlight');
 		const cascade = JSON.parse(attributes.configs) as Record<string, unknown>;
-		expect((cascade.defaults as Record<string, unknown>).js).toBe(
-			'highlight',
-		);
+		expect((cascade.defaults as Record<string, unknown>).js).toBe('highlight');
 	});
 
 	it('frontmatter defaultLens overrides cascade for plain fences; :suffix still wins', () => {
@@ -995,7 +992,10 @@ describe('createRemarkStudyLenses', () => {
 		expect(innerJsx?.name).toBe('StudyLenses');
 		const innerAttributes = attributesOf(innerJsx);
 		expect(innerAttributes.lens).toBe('parsons');
-		const cascade = JSON.parse(innerAttributes.configs) as Record<string, unknown>;
+		const cascade = JSON.parse(innerAttributes.configs) as Record<
+			string,
+			unknown
+		>;
 		expect((cascade.lenses as Record<string, unknown>).parsons).toEqual({
 			shuffleSeed: 42,
 		});

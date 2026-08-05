@@ -76,7 +76,11 @@ describe('danger evaluator (browser)', () => {
 	it('a loop over its cap settles error with reason loop-cap', async () => {
 		expect(
 			await settleOf(
-				specFor('for (let i = 0; i < 5; i = i + 1) { let x = i; }', 'function', 3),
+				specFor(
+					'for (let i = 0; i < 5; i = i + 1) { let x = i; }',
+					'function',
+					3,
+				),
 			),
 		).toStrictEqual({
 			ended: 'error',

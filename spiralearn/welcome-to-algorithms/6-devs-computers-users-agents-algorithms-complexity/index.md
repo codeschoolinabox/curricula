@@ -178,7 +178,8 @@ decisions.
 
 ## Appendix: Space vs. Time (via Absurd Algorithms)
 
-<em>(Confirmed closing subchapter — exact number TBD after 6.2+ are designed.)</em>
+<em>(Confirmed closing subchapter — exact number TBD after 6.2+ are
+designed.)</em>
 
 A fun interlude. Chapter 6 has been counting steps — measuring _time_. But
 there's another resource algorithms consume: _memory_ (space). Is one

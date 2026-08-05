@@ -35,7 +35,10 @@
  * console.log(frozen === obj);       // true — same reference
  * frozen.nested.value = 2;           // TypeError in strict mode
  */
-export default function freezeInPlace<T>(value: T, visited = new Set<object>()): Readonly<T> {
+export default function freezeInPlace<T>(
+	value: T,
+	visited = new Set<object>(),
+): Readonly<T> {
 	if (value === null || typeof value !== 'object') {
 		return value;
 	}
