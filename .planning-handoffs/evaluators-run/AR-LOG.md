@@ -111,7 +111,10 @@ Recorded so a later reader can tell foreign debt from this campaign's own.
 
 `ar-3` fires after each increment's first failing test and `ar-4` after each
 self-review. AR-5 does **not** fire in this ceremony; it waits for the sprint's
-Phase 2, after ceremony 3.
+Phase 2, after ceremony 3. [SUPERSEDED 2026-08-06: the sprint's Phase 2
+dissolved — HR-11/HR-13/HR-14 freeze this module into the deprecated region; the
+restoration campaign's ar-5 fires at its W6 over its own SHA list, baseline
+1b516bd4 (restoration AR-LOG § Human rulings).]
 
 ### R1 — `ar-3` on the worker-setup test cluster (CONSIDER → all findings fixed)
 
@@ -374,7 +377,9 @@ middleware: real infrastructure for one defensive row. **Recommended to the
 human as a one-sentence addendum to `run/README.md § Testing posture`**, held
 here rather than written, because that file is a ratified Phase-0 artifact and
 this session's plan committed to leaving Phase-0 docs byte-untouched apart from
-ruling R-2's widening. The human sees it at the 🔍 C1 gate.
+ruling R-2's widening. The human sees it at the 🔍 C1 gate. [EXECUTED 2026-08-03
+— § Post-ceremony gate items below: written into § Testing posture as three
+structural sentences, not one; ruling recorded there.]
 
 ### R5 — `ar-4` on the kind-surface implementation (**PAUSE** → blocker fixed)
 

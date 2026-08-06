@@ -114,7 +114,7 @@ exported protocol types. Entwining is the largest: `LinkedInterceptEvent`
 (`link/types.ts:144-176`) adds `nodePath`, `nodePathSource`
 (`'instrumented' | 'enclosing-fallback' | 'no-ast'`), `node` (a live `ASTNode`
 reference carrying `events[]` back-refs), `prev`, `next`, `callee`, `calleePath`
-— against the port's `step` + `loc`. `intercept/DOCS.md:26` names the
+— against the port's `step` + `loc`. the quarry `intercept/DOCS.md:24` names the
 capability: _"Bidirectional navigation between events and source."_
 
 **run** — `[relayed: wf_7cb9c40a-f4c]` `.options`/`ResolvedRunOptions`, `.code`,
@@ -265,7 +265,9 @@ mirrors them in its § 0.
     engine-side exists before the first pull" while
     `shared/create-execution.ts:30` promises "an internal drain loop consumes
     all events so `.result` resolves". Inverting a PINNED row needs human
-    sign-off; neither reading follows from "use a handle".
+    sign-off; neither reading follows from "use a handle". [CLOSED 2026-08-06:
+    HR-5 settles the generator surface; HR-6/HR-7 settle drain-on-await — §
+    Human rulings below.]
   - Eager-versus-deferred is a per-evaluator choice, not a global one — the
     reference made it both ways (`run/types.ts:203` synchronous,
     `intercept/types.ts:315` a Promise). Choose per evaluator against its own
@@ -329,8 +331,9 @@ copy of the 7-agent planning research `[measured: cmp — identical]`).
   suspended ask), the plan § 4 specifies them and the ledger records each delta.
 - **HR-6 — both consumption modes.** `for await` step-through AND `await handle`
   → the complete result. PROPOSED port-stronger carve-out, ratify at gate G1:
-  creation stays inert — the run starts at first consumption (first pull OR
-  first await), never at construction. (The reference
+  [RATIFIED 2026-08-06 — § Ledger ratification below; G1 keeps only its
+  design-review role] creation stays inert — the run starts at first consumption
+  (first pull OR first await), never at construction. (The reference
   queueMicrotask-auto-started at creation, `create-execution.ts:107-117`; the
   carve-out also kills its one-microtask claim race.)
 - **HR-7 — drain-on-await cancel policy.** An intercept ask nobody answers
@@ -366,13 +369,23 @@ copy of the 7-agent planning research `[measured: cmp — identical]`).
   stamped from the wrap's original-text parse; enrichment happens thread-side
   inside `onMessage` before the engine's shallow freeze-at-yield; the result
   carries `eventsByNode` + `visitCounts`; `link/`'s shadow tree is NOT ported.
-  Mechanism (ratify at G1): enumerable event fields are plain data (`step`,
-  `loc`, offsets, `nodePath`); `node`/`prev`/`next`/`callee` are NON-ENUMERABLE
-  ACCESSORS resolving through `facts.entwined.byPath` — the quarry's own newer
-  precedent (`trace/semantics/tracing/types.ts:845-850`), keeping events/results
-  JSON-safe while `event.node` still answers with the real EntwinedNode. The
+  Mechanism (ratify at G1) [RATIFIED 2026-08-06 — § Ledger ratification below]:
+  enumerable event fields are plain data (`step`, `loc`, offsets, `nodePath`);
+  `node`/`prev`/`next`/`callee` are NON-ENUMERABLE ACCESSORS resolving through
+  `facts.entwined.byPath` — the quarry's own newer precedent
+  (`trace/semantics/tracing/types.ts:836-843`), keeping events/results JSON-safe
+  while `event.node` still answers with the real EntwinedNode. The
   mutable-pointer accessor is a NAMED exception to the no-mutable-closures rule,
   scoped: installed inside `onMessage` before return, never written after yield.
+  [CITATION CORRECTED 2026-08-06 after a measured staleness audit: the accessor
+  precedent at :836-843 covers `prev`/`next` ONLY — the quarry's newer tracer
+  explicitly DECLINES a `.node` reference (:845-849, "There is no `.node`
+  reference — attribute via `event.nodePath`"). The `.node`/`.callee` accessors
+  therefore EXTEND the precedent rather than follow it; their warrant is HR-4
+  fidelity (the reference had `.node`) plus the mechanism answering the quarry's
+  two stated reasons for declining (non-enumerable → JSON-safe; resolving the
+  REAL entwined graph → no shadow identity). P0-K/P0-I's ar-1 must challenge
+  this extension on exactly those terms.]
 - **HR-13 — `ceremony: full`** for the whole campaign (set at plan approval):
   AR-1 · AR-2 · AR-3 (every un-skip) · AR-4 (every increment) · AR-5. Uniform
   within the level.

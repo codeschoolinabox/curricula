@@ -20,7 +20,9 @@ its title scopes it to that evaluator, so intercept's rulings would be buried in
 a file marked for deletion. DEV.md § Ruling provenance's "add no new file" bars
 new ruling-home KINDS, not a campaign's own AR-LOG instance — the
 `aithor-contract-proposals` and `jej-registration` logs are the precedent. The
-run log is READ (it carries what intercept inherits) and never written to.
+run log is READ (it carries what intercept inherits) and never written to. [One
+exception since, recorded: H-7's repair was mirrored INTO run's log — its §
+Post-close defect repair, 2026-08-05.]
 
 ## Session baselines — measured 2026-08-04, ceremony baseline `59a5ef60`
 
@@ -69,7 +71,15 @@ Recorded so a later reader can tell foreign debt from this campaign's own.
   close it: the governance campaign landing § Territory tracks, and a decision
   on the filename (`notional-machine.md` collides with the language-level
   documents at `language-levels/jej/notional-machine.md`, which are curriculum
-  content, not a module twin).
+  content, not a module twin). [CLOSED 2026-08-06 — the close condition can
+  never be met: § Territory tracks will never land — the four-track model is
+  superseded and the noun retired (governance-dials AR-LOG, its notice to this
+  campaign). That log also records that this entry's AGENTS.principal.md
+  citation ("An agent never selects the track…") exists in NO revision — a
+  write-time citation defect, recorded rather than rewritten. The deferral's
+  substance stands: the NM-shaped content lives in README § What a consumer can
+  predict, and the REBUILD's P0-I re-decides the twin question under current
+  governance (restoration campaign, HR-10/HR-11).]
 
 - **H-2 — the engine's per-yield charge is budgeted for, following the tracers'
   recorded discipline.** `ar-1` found a ceiling nobody had priced: the engine
@@ -169,7 +179,10 @@ it costs less than after.
 
 `ar-1` fired at step 0.3, before `types.ts`; `ar-2` at step 0.6, over the three
 artifacts together. AR-5 does **not** fire in this ceremony; it waits for the
-sprint's Phase 2, after this ceremony's Phase 1.
+sprint's Phase 2, after this ceremony's Phase 1. [SUPERSEDED 2026-08-06: the
+sprint's Phase 2 dissolved — HR-11/HR-13/HR-14 freeze this module into the
+deprecated region; the restoration campaign's ar-5 fires at its W6 over its own
+SHA list, baseline 1b516bd4 (restoration AR-LOG § Human rulings).]
 
 ### `ar-1` on the README (**PAUSE** → all findings resolved)
 
@@ -322,13 +335,18 @@ queue/stream nodes added so the module's own output is on the diagram.
 - **H-1's NM-doc deferral**, and the governance gap behind it: § Territory
   tracks routes through `HUMANS.md § Override grammar`, which carries no
   track-routing phrase. Foreign in-flight campaign; not this ceremony's to fix.
+  [CLOSED 2026-08-06 — the close condition can never be met; see H-1's closure
+  note above.]
 - **H-2's open engine ask** — a yield-charge opt-out on the engine spec for a
   consumer that owns its own iteration cap. Raised first by the semantics
   tracer, still unlanded, and intercept is now a second consumer with the same
   claim.
 - **Promotion into `evaluators/lib/`** stays a close-out question, designed
   against both concrete evaluators. This ceremony promoted nothing; the README
-  names the shared-in-waiting surface explicitly.
+  names the shared-in-waiting surface explicitly. [VENUE DISSOLVED 2026-08-06:
+  HR-11/HR-14 freeze this region; the close-out that would answer it never
+  happens here — the REBUILD's own Phase 0 owns its lib/ decisions (restoration
+  plan § 8).]
 - **What a Phase-1 implementer must still be told**, per `ar-2`'s step-0.7
   check: the wrap's span encoding (whether it reuses iteration-guard's
   `'L:C:L:C'` form or its own); whether the declined-call set is computed
@@ -407,7 +425,9 @@ split; B-2/B-3's widened decline shapes).
   for the sprint's Phase 2. **Open flag for the human**: whether that AR-5 diffs
   the whole sprint (ceremony 2 + 3, by SHA list — ~19+ foreign commits
   interleave, so by-SHA scoping is mandatory either way) or ceremony 3 only. Not
-  settled here.
+  settled here. [SUPERSEDED 2026-08-06: moot — see the § AR resolutions note;
+  the region freezes and the restoration campaign reviews its own SHAs from
+  1b516bd4.]
 - `[measured: npx tsc --noEmit]` **0 errors**.
 - `[measured: ./node_modules/.bin/vitest run --project unit src/lib/study-lenses/evaluators src/lib/study-lenses/lib/engine src/lib/study-lenses/lib/loop-guard]`
   **26 files / 409 tests green**.
@@ -471,7 +491,8 @@ shape.
   behavior-preserving, so `console?.log(x)`-style moments carry `loc: null` at a
   cost the stated rationale (interior short-circuit) does not require. Faithful
   to the pinned ruling; loosening it is a design question for the gate, not a
-  silent code change.
+  silent code change. [RULED: H-5, 2026-08-05 — wrap the root, keep declining
+  the interior; executed in § H-5 and H-6 executed below.]
 - **Noted for I6**: the wrap verb's input type and boundary-error tag are
   in-file (the ratified trio stays byte-untouched); the assemble phase catches
   the boundary error generically, reading no imported type — the danger
@@ -611,7 +632,8 @@ reaching the threw arm's loc under `exactOptionalPropertyTypes`.
   tighter reading (a self-contradictory forged halt → `'unreachable-outcome'`)
   better fits the module's never-guess posture, at zero happy-path cost. Kept as
   pinned — inverting a pin needs human sign-off — and surfaced here for the gate
-  beside the chain-root flag.
+  beside the chain-root flag. [RULED: H-6, 2026-08-05 — tighten to never-guess;
+  executed and extended in § H-5 and H-6 executed below.]
 
 ### I5 — `ar-3` on the interaction-channel cluster (**PAUSE** → decomposed and executed)
 
