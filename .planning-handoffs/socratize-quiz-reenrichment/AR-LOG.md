@@ -1,0 +1,152 @@
+<!-- TRANSITIONAL — retire this file only after its rulings are promoted to
+their durable homes (the Stage-3/4/5 module docs, once those modules exist);
+see § Ruling promotion at campaign close. Deleting it at campaign close would
+recreate the off-repo-canon failure this campaign exists to fix. -->
+<!-- cspell:ignore socratizing socratize quizzing reenrichment stonebraker -->
+<!-- cspell:ignore bannered Toutes undercounts gagne tient pourquoi -->
+<!-- cspell:ignore enregistre l'enregistre préserver dispositioned -->
+
+# socratize-quiz re-enrichment — ruling log
+
+Human rulings and AR resolutions for the campaign that restores the
+socratizing/quizzing spec layer lost in the study-lenses migration: re-homes the
+off-repo forward canon, carries the retired orchestrator's pedagogy forward,
+pins the pre-Stage-3 library contracts, and closes the quarry-retirement
+destruction path.
+
+Plan of record: `~/.claude/plans/you-are-opening-the-melodic-meerkat.md`.
+Recorded here because a ruling that lives only in a plan file does not exist —
+`git grep` cannot see it (DEV.md § Ruling provenance).
+
+**Evidence base.** The audit
+(`~/.claude/plans/socratize-quiz-impoverishment-audit-report.md`, 106 classified
+findings) was independently re-verified before any ruling was put to the human:
+a 12-agent adversarial workflow re-derived every finding from primary sources —
+95 AGREE, 21 NUANCE, 0 DISAGREE; no finding changed class [relayed: workflow
+wf_203ab7bb-621, 2026-08-05]. The material corrections the re-verification added
+are folded into the rulings and the FLAGGED section below.
+
+## Human rulings — 2026-08-05/06 (AskUserQuestion, campaign opening)
+
+- **R-1 — the forward canon is re-homed in-repo, in full.** ["Full re-home"] The
+  still-live content of the two off-repo plan files
+  (`~/.claude/plans/read-and-execute-the-indexed-pony.md` — the self-declared
+  canonical plan — and `…-the-playful-stonebraker.md`) transports into this
+  campaign directory's `SPEC.md`; the off-repo files become bannered history.
+  Closes the provenance violation and gives the four in-repo forward-promises
+  (classifying/scoping/lenses/socratizing docs) a referent that `git grep` can
+  see.
+
+- **R-2 — the quarry-retirement criteria name the question surfaces, all of
+  them.** ["Toutes surfaces question"]
+  `MVP-ROADMAP.md § Then — retiring the quarry` is amended to name the quiz
+  lens, the quizzing engine, AND the question-orchestrator: none deletes before
+  its content is ported or re-homed. The set at ruling time: 42 frozen test
+  files across the three quarry dirs [measured: `find
+  src/lib/study-lenses--deprecated-architecture/{lenses/quiz,lib/quizzing,lib/question-orchestrator}
+  -name '*.test.*' | wc -l` → 42; one is `component.test.tsx`, so a `*.test.ts`
+  glob undercounts].
+
+- **R-3 — all three orchestrator-collateral concepts carry forward.**
+  [multi-select: "Difficulty ladder, Coverage instrument, One-grid goal"] The
+  Block-Model difficulty ladder (concrete-to-abstract ordering), the
+  coverage-reporting instrument (spans/gaps over Block-Model cells,
+  report-only), and the "two registers on one grid" pedagogical goal are carried
+  as spec'd future work in this campaign's `SPEC.md` — none is discarded.
+  Landing sites are decided at the consuming stage's AR-1, not here.
+
+- **R-4 — the un-colorized-editor pedagogy WINS for the socratize lens.**
+  ["Un-colorized gagne", then clarified: "because we will colorize all lenses at
+  once with centralized utilities later" → "L'exception tient — c'est pourquoi
+  on l'enregistre"] Syntax highlighting stays OFF in socratize so the lens's own
+  decorations carry the only meaning. The exception is recorded in-repo
+  precisely BECAUSE a centralized colorize-all-lenses sweep is planned later —
+  this record exists so that sweep skips socratize. The conflicting pull it
+  resolves: MIGRATION-PLAYBOOK locked decision (1) ("coloring = a shared
+  facts-driven read-only highlighter") vs the quarry spec's deliberate
+  dependency omission — noting the playbook's own locked decision (2) excludes
+  socratize from its porting scope.
+
+- **R-5 — no fresh lens Phase-0 now; the library is the focus.** ["I'm more
+  worried about the library, you can just copy-paste the lens DDDs for later
+  implementation in another session. the socratize library is the brains and
+  soul behind the lens anyway"] The quarry lens DDD trios are copy-pasted into
+  this campaign dir (annotated, byte-identical below the header) for a future
+  session; restoration effort concentrates on the library layer.
+
+- **R-6 — QT-09 resolves to Option A: preserve the `usage:occ` fallback.** ["A —
+  préserver occ-fallback", after a full-context explanation was requested and
+  given] The Stage-3 scope shim resolves only the legacy tracked set —
+  `{var, let, const}` declarator ids plus the `for-of` left — and answers null
+  for everything else (function names, parameters), so the quarry oracle's occ
+  pins re-green verbatim [measured: `./node_modules/.bin/vitest run` on the
+  quarry `v7-usage-kind.test.ts` → 33/33 passed, 2026-08-05]. The ruling covers
+  BOTH divergences the re-verification measured: (a) eslint-scope resolves
+  function names and parameters the quarry forest does not track; (b) the
+  existing shared adapter
+  `src/lib/study-lenses/lib/scoping/derive-scope-usage.ts:67-73` filters to
+  `{let, const}` EXCLUDING `var`, which the quarry quizzing forest tracks —
+  quizzing's Stage-3 adapter must include `var`. Mechanics pinned in this
+  campaign's `LIBRARY-CONTRACTS.md`.
+
+- **R-7 — the evaluators-campaign PATTERN, not its path.** ["mark the old ones
+  as deprecated and start in fresh directories …" → clarified: "Le PATTERN
+  d'evaluators, pas le chemin"] Originals stay referable (the quarry is
+  untouched), weak spec-layer migrations get corrected, fresh content lands at
+  its natural home; the canon lives in this campaign dir. Nothing
+  socratize/quiz-related is created under `evaluators/`.
+
+- **R-8 — ceremony (human-set): AR-1 on README-class content + AR-2 on
+  DOCS-class content per `docs:` commit, + AR-5 pre-merge.** ["AR-1+AR-2 par
+  commit docs, + AR-5"] The jej-registration R-4 / socratizing-remediation R-17
+  precedent set for docs-only work, where AR-3/AR-4 have no object. Ruling
+  transcription (this file) and byte-identical copies are records, not authored
+  spec — no AR-1/AR-2 fires on them; they ride AR-5.
+
+- **R-9 — the enrichment license is library-first.** ["+ spec library
+  pré-Stage-3"] Beyond restoration: the re-verification-exposed gaps are closed
+  (test-harness posture note, non-overlap invariant sentence, falsehood
+  rewording), AND a pre-Stage-3 `LIBRARY-CONTRACTS.md` is authored pinning the
+  fine contracts that today exist only in the 36 quarry quiz-surface test files.
+
+## Work routing and ceremony
+
+`work:` derives from the path — `.planning-handoffs/` is unnamed, which DEV.md's
+table routes to software work; `src/lib/study-lenses/` docs edits are software
+work. `retrospective` is blocked by DEV.md, so all rows are `prospective`.
+`ceremony:` is the human's; R-8 above is that ruling, and each row records what
+fires.
+
+| increment | line                                                                                          |
+| --------- | --------------------------------------------------------------------------------------------- |
+| C1        | `work: software · twin-doc: none · ceremony: none fired (ruling transcription) · prospective` |
+
+(Rows C2–C8 append as their commits land; the campaign SHA ledger below is the
+commit index.)
+
+## FLAGGED — known gaps this campaign records but does not fix
+
+- **F-1 — four engine behavior changes rest on commit records, not human
+  rulings.** `mixed-condition-style` (same-subject narrowing), `empty-block`
+  (control-flow-clause narrowing), `what-value-stored` (trivial-initializer
+  widening), `voice-profile` (metric recalibration) are each covered by an
+  agent-reasoned fix commit only — no AR-LOG R-number, and the port plan of
+  record dispositioned analyzer bodies "verbatim" [relayed:
+  verify:ruled-main-engine, 2026-08-05]. Human ratification = the still-open
+  push gate over those unpushed commits.
+- **F-2 — classifying's non-overlap invariant has no test pin.** The old quiz
+  build test asserted `start >= previous.end`; no greenfield classifying test or
+  doc pinned it at re-verification [relayed: verify:survives]. C7 adds the doc
+  sentence; the test pin is code work outside this docs-only campaign.
+- **F-3 — the quarry freeze has one sanctioned exception.** Commit `59043f52`
+  reformatted quarry docs [measured: `git show --stat 59043f52` → 48 quarry
+  files] — the maintainer's own prettier sweep executing remediation R-9's
+  mandate ("The maintainer performs the sweep"), an authorized exception, not a
+  breach. Line-number citations into quarry docs made before that sweep were
+  re-validated after it.
+
+## Campaign SHA ledger
+
+| increment | SHA           | summary             |
+| --------- | ------------- | ------------------- |
+| C1        | (this commit) | open the ruling log |
