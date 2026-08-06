@@ -416,35 +416,35 @@ of the iteration path once the await path exists; **superseded(HR-n)** — the n
 region deliberately contradicts it. No pin fell outside the vocabulary; nothing
 bubbled.
 
-| file:line     | pinned claim (short)                                                     | disposition         | authority                                                                                                                                                                                 |
-| ------------- | ------------------------------------------------------------------------ | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| run:103       | nothing engine-side before the first pull; result access starts a run    | retained            | HR-6 keeps it — await counts as consumption, not an earlier start                                                                                                                         |
-| run:140       | teardown answers OUT OF BAND, never via generator return queueing        | retained            | carried into the new handle design (plan § 4 .return() sequencing)                                                                                                                        |
-| run:154       | a pull after teardown never starts a fresh run                           | retained            | —                                                                                                                                                                                         |
-| run:208       | guard increments before comparing; cap N trips at N+1                    | retained            | iteration-guard transports byte-identical                                                                                                                                                 |
-| run:217       | guards splice on the ORIGINAL source; trip span faithful                 | retained            | HR-12 relies on it                                                                                                                                                                        |
-| run:235       | iterations rides through unchanged (no clamp/default/gate)               | retained            | —                                                                                                                                                                                         |
-| run:272       | engine refinement hook unused; halt authored at the raw throw            | retained            | —                                                                                                                                                                                         |
-| run:289       | R-2: no machine ran → no machinery cause is honest                       | retained            | defect taxonomy rides as an HR-8 ADDITION                                                                                                                                                 |
-| run:300       | H-7 restart guard: handle-only guard misses the defect route             | retained            | H-7                                                                                                                                                                                       |
-| intercept:118 | nothing engine-side before the first pull                                | retained            | HR-6, as run:103                                                                                                                                                                          |
-| intercept:173 | both sources join ONE arrival queue in worker post order                 | retained            | carried into I6                                                                                                                                                                           |
-| intercept:200 | the wrap stamps the innermost call site, end to end                      | retained            | —                                                                                                                                                                                         |
-| intercept:208 | statement-level throw outside any wrap → loc null; NO stack parse        | retained            | subject to the ledger's enclosing-fallback escalation row — if the human ratifies `restore` there, that ratification supersedes this pin (wrap-style mechanism only, never a stack parse) |
-| intercept:250 | the fake rejects an async round-trip (property of the double)            | retained            | engine + fake untouched                                                                                                                                                                   |
-| intercept:265 | a pull after teardown never starts a fresh run                           | retained            | —                                                                                                                                                                                         |
-| intercept:292 | teardown out of band, never through the engine's stream exit             | retained            | plan § 4 .return() builds ON it                                                                                                                                                           |
-| intercept:309 | teardown LATCHES; a later pull is inert                                  | retained            | aligns with HR-2                                                                                                                                                                          |
-| intercept:337 | the stream must be pulled for every event; one pull starts, not finishes | **re-scoped(HR-6)** | true of the ITERATION path; the await path drains without consumer pulls                                                                                                                  |
-| intercept:356 | guards splice FIRST on the original text                                 | retained            | —                                                                                                                                                                                         |
-| intercept:361 | splice order not interchangeable (columns shift)                         | retained            | —                                                                                                                                                                                         |
-| intercept:394 | iterations rides through unchanged                                       | retained            | —                                                                                                                                                                                         |
-| intercept:443 | R-2 inherited                                                            | retained            | —                                                                                                                                                                                         |
-| intercept:456 | assemble-defect settlement frozen outside the mapper                     | retained            | —                                                                                                                                                                                         |
-| intercept:465 | H-7 restart guard, both modules                                          | retained            | H-7                                                                                                                                                                                       |
-| intercept:480 | an outstanding pull completes as the stream's end, any route             | retained            | —                                                                                                                                                                                         |
-| intercept:495 | H-2: yield charge named; loop safety rests on iterations                 | retained            | W1.a's D4 opt-out is the narrow fix H-2 itself anticipated, not a contradiction                                                                                                           |
-| intercept:504 | H-2: flat charge arithmetic; floor of 500 meaningful                     | retained            | same note                                                                                                                                                                                 |
+| file:line     | pinned claim (short)                                                     | disposition         | authority                                                                                                                                                         |
+| ------------- | ------------------------------------------------------------------------ | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| run:103       | nothing engine-side before the first pull; result access starts a run    | retained            | HR-6 keeps it — await counts as consumption, not an earlier start                                                                                                 |
+| run:140       | teardown answers OUT OF BAND, never via generator return queueing        | retained            | carried into the new handle design (plan § 4 .return() sequencing)                                                                                                |
+| run:154       | a pull after teardown never starts a fresh run                           | retained            | —                                                                                                                                                                 |
+| run:208       | guard increments before comparing; cap N trips at N+1                    | retained            | iteration-guard transports byte-identical                                                                                                                         |
+| run:217       | guards splice on the ORIGINAL source; trip span faithful                 | retained            | HR-12 relies on it                                                                                                                                                |
+| run:235       | iterations rides through unchanged (no clamp/default/gate)               | retained            | —                                                                                                                                                                 |
+| run:272       | engine refinement hook unused; halt authored at the raw throw            | retained            | —                                                                                                                                                                 |
+| run:289       | R-2: no machine ran → no machinery cause is honest                       | retained            | defect taxonomy rides as an HR-8 ADDITION                                                                                                                         |
+| run:300       | H-7 restart guard: handle-only guard misses the defect route             | retained            | H-7                                                                                                                                                               |
+| intercept:118 | nothing engine-side before the first pull                                | retained            | HR-6, as run:103                                                                                                                                                  |
+| intercept:173 | both sources join ONE arrival queue in worker post order                 | retained            | carried into I6                                                                                                                                                   |
+| intercept:200 | the wrap stamps the innermost call site, end to end                      | retained            | —                                                                                                                                                                 |
+| intercept:208 | statement-level throw outside any wrap → loc null; NO stack parse        | superseded          | **superseded(ledger ratification 2026-08-06)** — enclosing-fallback attribution restored AST-side via `entwined.byOffset` at halt time; still NEVER a stack parse |
+| intercept:250 | the fake rejects an async round-trip (property of the double)            | retained            | engine + fake untouched                                                                                                                                           |
+| intercept:265 | a pull after teardown never starts a fresh run                           | retained            | —                                                                                                                                                                 |
+| intercept:292 | teardown out of band, never through the engine's stream exit             | retained            | plan § 4 .return() builds ON it                                                                                                                                   |
+| intercept:309 | teardown LATCHES; a later pull is inert                                  | retained            | aligns with HR-2                                                                                                                                                  |
+| intercept:337 | the stream must be pulled for every event; one pull starts, not finishes | **re-scoped(HR-6)** | true of the ITERATION path; the await path drains without consumer pulls                                                                                          |
+| intercept:356 | guards splice FIRST on the original text                                 | retained            | —                                                                                                                                                                 |
+| intercept:361 | splice order not interchangeable (columns shift)                         | retained            | —                                                                                                                                                                 |
+| intercept:394 | iterations rides through unchanged                                       | retained            | —                                                                                                                                                                 |
+| intercept:443 | R-2 inherited                                                            | retained            | —                                                                                                                                                                 |
+| intercept:456 | assemble-defect settlement frozen outside the mapper                     | retained            | —                                                                                                                                                                 |
+| intercept:465 | H-7 restart guard, both modules                                          | retained            | H-7                                                                                                                                                               |
+| intercept:480 | an outstanding pull completes as the stream's end, any route             | retained            | —                                                                                                                                                                 |
+| intercept:495 | H-2: yield charge named; loop safety rests on iterations                 | retained            | W1.a's D4 opt-out is the narrow fix H-2 itself anticipated, not a contradiction                                                                                   |
+| intercept:504 | H-2: flat charge arithmetic; floor of 500 meaningful                     | retained            | same note                                                                                                                                                         |
 
 ### Routing
 
@@ -452,3 +452,48 @@ HR-5, HR-7, HR-12, HR-15 (intercept-relevant halves) are mirrored into
 [`../evaluators-intercept/AR-LOG.md`](../evaluators-intercept/AR-LOG.md); HR-9
 into both evaluator logs (the H-7 mirror-note precedent). Everything else is
 region-wide and canonical here alone.
+
+---
+
+## Ledger ratification — 2026-08-06, one pass (human)
+
+The LOSS-LEDGER's one-pass ratification, given via two `AskUserQuestion` rounds
+in the planning session. Every row now carries its ruling or sign-off date in
+the ledger itself; this entry is the ruling record.
+
+- **Bulk** — every PROPOSED row confirmed as written, including the drop rows'
+  sign-off AND the two G1-earmarked mechanisms (HR-6's creation-inert carve-out;
+  HR-12's non-enumerable-accessor enrichment). **G1's ratification list is now
+  EMPTY** — G1 remains as the Phase-0 design review gate only.
+- **Error `line`** — restore on intercept (already wrap-style, richer than the
+  reference); DEFERRED on run — run-side call-site instrumentation is a named
+  future increment, not this campaign's. Never a stack parse.
+- **`phase` / E2** — IN SCOPE: the engine's one try/catch splits and the worker
+  stop record gains the creation/execution discriminant. Additive; its own AR
+  pair; serialized after W1.a in the engine.
+- **Clean-arm `iterationCount`** — ADDED (reference-plus, rides the results, not
+  the settlement floor).
+- **In-stream `ErrorEvent`** — RESTORED: intercept's event union gains an error
+  arm (step + loc); the settlement keeps the structured form.
+- **Enclosing-fallback** — RESTORED, AST-side via `entwined.byOffset` at stop
+  time; supersedes pin intercept:208 (disposition table updated).
+- **Gate arms (rejections + formatting)** — resolved by the CURRENT
+  architecture, verified this session, correcting the agent's lens-owns-it
+  proposal: level marking is the ORCHESTRATOR's (live-wired: screening +
+  language-levels validate + orchestrate marking) and embody is level-blind by
+  contract
+  `[read: embody/DOCS.md:101-105 — "a language level decides what is ALLOWED"]`;
+  formatting is level-shipped editor-support DATA
+  (`[read: language-levels/README.md:46-48 — "completion, hover documentation, format options"]`)
+  consumed by the orchestrator's editor adapter
+  (`[read: orchestrate/README.md:113]`). The assignments were already recorded
+  in the regions' own docs — no new doc line owed; nothing returns to
+  evaluators.
+- **`.fail` on run** — NOT added: the reference asymmetry is kept (fail is the
+  mid-stream consumer stop; run yields nothing, cancel covers its one stop; fail
+  rides intercept + the tracers).
+
+Plan-impact deltas (folded into the campaign): E2 joins the engine chain after
+W1.a; P0-I's spec gains the ErrorEvent arm and the enclosing-fallback lookup;
+the results gain the clean-arm count; run's line deferral is a named non-goal
+this campaign.
