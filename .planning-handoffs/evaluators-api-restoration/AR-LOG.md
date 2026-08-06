@@ -1,3 +1,8 @@
+<!-- TRANSITIONAL — pruned when the restoration campaign completes; before
+pruning, promote the durable rulings (the HR-4 posture, HR-12's enrichment
+mechanism, the pin dispositions the new region's docs rely on) into the new
+region's end-state docs per DEV.md § Ruling provenance's promotion rule. -->
+
 # evaluators — public-API restoration: AR-LOG
 
 Region-level log for work that spans `evaluators/run` and `evaluators/intercept`
@@ -10,12 +15,12 @@ The per-evaluator logs stay where they are
 because the findings and the human's rulings are region-wide and have no home in
 either.
 
-Cold-start brief for the next agent:
-`~/.claude/plans/cold-start-evaluator-api-re-enrichment.md` — validated by
-context-free agents three times before handoff (twelve factual errors; then ten
-contradictions plus seven errors, with a "could not start" verdict; then five
-remaining defects and a "could start"). All corrected. Four numbers across those
-passes were agent-supplied and wrong, caught only by re-running the command.
+**Plan of record for the campaign:**
+`~/.claude/plans/read-and-execute-the-rosy-sky.md` (ExitPlanMode-approved
+2026-08-06; context-free-validated). The earlier cold-start brief
+`cold-start-evaluator-api-re-enrichment.md` is DISCHARGED — its § 8 deliverables
+all exist (the § Human rulings HR-4..HR-15, the LOSS-LEDGER, the plan); read it
+only as history.
 
 ---
 
@@ -269,7 +274,7 @@ mirrors them in its § 0.
 
 ---
 
-## Open — for the next agent, before any planning
+## Open — for the next agent, before any planning [CLOSED 2026-08-06 — every question below is ANSWERED in § Human rulings HR-4..HR-15 and § Ledger ratification; kept as history, do not re-ask]
 
 Carried in the cold-start brief § 6. With HR-1…HR-3 settled, **seven** remain.
 Two of them come out of HR-3 itself and are the brief's Q1 and Q2, because
