@@ -130,6 +130,7 @@ fires.
 | --------- | --------------------------------------------------------------------------------------------- |
 | C1        | `work: software · twin-doc: none · ceremony: none fired (ruling transcription) · prospective` |
 | C2        | `work: software · twin-doc: none · ceremony: AR-1 · AR-2 fired · prospective`                 |
+| C3        | `work: software · twin-doc: none · ceremony: AR-1 · AR-2 fired · prospective`                 |
 
 (Rows C3–C8 append as their commits land; the campaign SHA ledger below is the
 commit index. Planned landings: LIBRARY-CONTRACTS.md at C3, SPEC.md §
@@ -158,6 +159,35 @@ everywhere (C-5); the ordering parenthetical, the 361-vs-396 attribution (now
 361 + 35 measured per dir), the `.ok` narrowing, and the NodePath format note
 all corrected (C-6). AR-2 concurred prose-only dependency description is
 defensible for the residual two-edge graph.
+
+**Reviews fired on C3.** `ar-2` → **CONSIDER** (7 concerns), all applied: the
+`generate-quiz.test.ts` realm-assertion excision added to the Reading guide as a
+second surgical-excision warning (C-1); the shim-realization paragraph added —
+forest projection at lexical scopes, the `read-scope-forest` structural pins,
+the double-Program-scope collapse, and the var-hoisting/redeclaration unpinned
+edges (C-2/C-3); the table-is-illustrative footnote (C-4); stage tags on all
+clusters + the banner extended to Stages 3 AND 5 (C-5); "re-green as-is"
+qualified by the embody-import rewire counts (C-6); the forest-builder's
+legacy-tree address named (C-7). The first `ar-1` dispatch died on an API error
+with no verdict (its partial run also lacked the safety-classifier reviewer); a
+fresh `ar-1` was dispatched as the review of record → **PAUSE** (12 concerns —
+per the reviewer, none requiring a human ruling; all author-side accuracy
+corrections, applied in full before the commit): § QuizFilter rewritten from
+"pinned" to declared-NOT-built with the no-op pin and the missing
+`Source.offsets` dependency named (1); the object-literal-key stream placement
+corrected to excluded-from-BOTH (2); the mastery-durability claim split into
+pinned (verdict per-pick) vs no-pin (durability — new flag F-5) (3); the rewire
+quantifier widened to 30 of 36 (4); `resolve-binding.test.ts`'s five shim
+constraints and `run-generators.test.ts`'s ordering pin added, plus the
+no-cluster oracle list (5); prose-canon markers on the
+provenance/keying-convention bullets (6); the three-variants/four-modes
+disambiguation (7); the unpinned twelfth mode pair named (8); the range-equality
+bullet corrected to both-directions tuple equality (9); cross-references
+converted to links (10); the two malformed measured tags fixed (11); the
+quiz-lens pinned editor posture added with its colorize-sweep implication (12).
+AR-1's counter-proposal B (a 36-row oracle-index table) was partially adopted
+via the no-cluster list; the full table is deferred to the Stage-3 session that
+will consume it.
 
 ## FLAGGED — known gaps this campaign records but does not fix
 
@@ -188,6 +218,13 @@ defensible for the residual two-edge graph.
   --version` → v20.11.0]. Run `./node_modules/.bin/cspell` over
   `src/lib/study-lenses/lib/classifying/{README,DOCS}.md` in a Node ≥ 20.18
   environment before pushing those commits.
+- **F-5 — mastery durability across picks has no test pin.** Surfaced by AR-1 on
+  C3: the quarry quiz lens keeps `MasteryState` per-mount and nothing in the
+  re-pick path clears it, but no component test asserts the durability (zero
+  "mastery" hits in the three interaction test files [relayed: ar-1, grep]). The
+  verdict-is-per-pick half IS pinned. Stage 5 owes the durability a test when
+  the lens ports; `LIBRARY-CONTRACTS.md § Answer modes` carries the split
+  sourcing.
 
 ## Campaign SHA ledger
 
