@@ -138,6 +138,65 @@ lighter value is legible in place. **R-11 did NOT reach a third sighting here:**
 this replay exercised no keyboard traversal and no control that closes the pane
 under the learner, so the counter still stands at two (GEN-5, GEN-6). |
 
+| GEN-9 | `(this row's commit)` | `/spiralearn/sandbox/orchestrate` | drive each
+sentence Increment 9 corrected: open the generator and read the control row in
+all three occupant modes; close it with the type toggle, then a level change,
+then a posture flip; ask with an ordinary prompt and read the candidate; ask
+with `refuse:no-model-available`, then with `Refuse:no-model-available`; mask
+under Scaffold + strict + `debugger;` | REPLAYED LIVE, NOT DEFERRED — **scoped
+to this increment's own prose claims per R-18**, which puts the full seven-step
+outline in Phase 2. Browser console clean throughout. Five claims driven, and
+**the replay caught a false sentence in the increment's own first draft** —
+which is the whole reason a prose increment gets a replay. **Mutual
+exclusivity** holds in all three modes: editor `{generate: 1, editCode: 0}`,
+generator `{generate: 0, editCode: 1}`, lens `{generate: 0, editCode: 1}` —
+never both, so the old "sits beside Edit code" was false as written. **All three
+derivation-context commits close the generator** and land the editor back
+(`{generatorBefore: 1, generatorAfter: 0, editorBack: 1}` for type, level and
+posture alike) — the old sentence named only the lens. **The `refuse:`
+convention** answers `No model can run here right now.` with no Accept over it,
+and the case-sensitivity is real: `Refuse:` with a capital R produces an
+ordinary preview instead `{refusal: 0, preview: 1}`. **The masked sentence**
+reads true at every clause — overlay up, strip `0.4`, button `inert` at `0.5`
+and outside the covered region, editor alive, and level selector, both toggles
+and guide all at opacity `1`. **The caught defect:** the draft said each
+candidate _"opens with"_ the marker comment. It does not — the candidate's first
+line is the SEED (`const seedProgram = 1;` in the replay), and
+`composeCandidate` returns `seed \n\n marker`, so the marker sits BELOW the
+seed. The constant is named `MARKER_FIRST_LINE`, which is the marker's own first
+line, not the candidate's. Prose corrected to "carries … below the seed" before
+commit. Meta line read `Produced by placeholder in 1 attempt.` |
+
+| GEN-9b | `(this row's commit)` | `/spiralearn/sandbox/orchestrate` | the
+clauses AR-1 and AR-2 added to the prose, which GEN-9's own action list did not
+reach: open the generator then pick parsons from the Source select; read the
+overlay's sentence and what sits under it; reveal the guide and locate it; break
+the parse BOTH ways — `1 +` (grammar) and `const n = 0755;` at the module goal
+(tokens) | REPLAYED LIVE — console clean, no behavioral defect. Added because a
+corrected sentence is not covered by a replay that ran before the correction.
+**Opening a lens over the generator** closes it without going home
+(`{generatorBefore: 1, generatorAfter: 0, lensMounted: "parsons", editors: 0, editCodePresent: true}`)
+— which is why the prose says a derivation-context commit is the fourth way
+**home**, not the fourth way out: the docs enumerate five ways out and four ways
+home, and the draft crossed them. **The overlay names the level and the
+violation** —
+`Scaffold: debugger statements are not part of the scaffold level`. **The one
+surface actually covered on this page is the notes lens's recommendation** —
+`{recommendationLabel: "study the source", recommendationInsideMaskable: true, excursionSlotEmpty: true}`
+— because in editor mode the excursion slot renders nothing, so the prose now
+names it. **The strict toggle is inside the level selector**
+(`strictToggleIsInsideLevelSelector: true`), so the stays-alive list stopped
+naming them as siblings. **The guide is the instrument's last child**
+(`{topics: 4, guideIsLastChildOfInstrument: true}`), not merely after the panel.
+**Both parse-break classes bar the same two phases** —
+`["environment","evaluation"]` for the grammar break AND for the tokens break —
+which is why the sentence was restored to the general "the phases downstream of
+the break" (maintainer decision 2026-08-05). That second measurement is also the
+evidence behind
+[FLAG-ast-not-barred-by-tokens-failure.md](../../../../.planning-handoffs/generator-occupant/FLAG-ast-not-barred-by-tokens-failure.md):
+`embody`'s contract and a green unit test both say a tokens failure bars AST
+too, and the rendered panel does not. Reported, not investigated. |
+
 **GEN-4 broke the deferral pattern deliberately, and the maintainer ruled it.**
 The 2026-07-18 mandate above defers 🔍 rows to this ledger because checkpoints
 were not to block on the maintainer's presence. Increment 4's AR-4 pointed out

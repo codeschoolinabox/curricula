@@ -743,6 +743,101 @@ settled by RUNNING the mutation rather than arguing it.**
   because [DEV.md § No Comments in Tests](../../DEV.md#no-comments-in-tests)
   permits no explanatory comment to carry it.
 
+## Human rulings — 2026-08-05 (Increment 9, resolving a double PAUSE)
+
+- **R-19 — the sandbox page's parse-barring sentence takes the GENERAL form.**
+  It reads _"breaking the parse bars the phases downstream of the break, each
+  naming the parser's cause"_ rather than enumerating phases. The enumeration
+  was measured true — both a grammar break (`1 +`) and a tokens break
+  (`const n = 0755;` at the module goal) bar exactly `environment` and
+  `evaluation` [measured: real Chromium, both inputs] — **but it contradicts
+  `embody`'s own contract**, which bars `ast` on any tokens failure. The general
+  wording is true under the observed behavior AND under the contract, so it
+  survives whichever way that conflict is resolved. The maintainer chose it for
+  exactly that reason.
+- **R-20 — the AST/tokens conflict is REPORTED, not investigated.** It is a code
+  defect in `embody`/`orchestrate` surfaced by a documentation-only increment,
+  so chasing it would have turned a two-commit cycle into a bug hunt of unknown
+  depth. Written up as a standalone hand-off brief for a fresh agent:
+  [FLAG-ast-not-barred-by-tokens-failure.md](./FLAG-ast-not-barred-by-tokens-failure.md),
+  carrying the two-minute reproduction, the acorn stage-attribution table, the
+  conflicting contract and unit test, and three unverified hypotheses explicitly
+  labelled as such.
+- **R-21 — `spiralearn/sandbox/index.mdx` folds into Increment 9.** Its
+  `generator/` bullet still read _"before the region wires its opening
+  affordance"_, stale since the region wired it. Raised by AR-2. One file beyond
+  the increment's approved pathspec, folded because it is the same defect class
+  the increment exists to fix and leaving it would have the sandbox index
+  contradicting the page it links to.
+
+## AR resolutions — 2026-08-05 (Increment 9, the sandbox page made true)
+
+- **AR-1 PAUSE and AR-2 PAUSE — independently, on the same blocker, and the
+  blocker was REFUTED by measurement.** Both reviewers held that the increment's
+  enumerated parse sentence was false because a tokens-stage failure bars `ast`
+  as well, and both cited `derive-accessibility.ts` and its green unit test
+  correctly. **Neither drove the page.** Driven, the rendered panel bars
+  `environment` and `evaluation` and leaves `AST · grammar` open — for a genuine
+  tokens break as well as a grammar one [measured: `const n = 0755;` at the
+  module goal, which acorn's TOKENIZER rejects at the repo's `ECMA_VERSION`
+  2024]. **The lesson is not that the reviewers were careless** — their reading
+  of the contract is right, and chasing it is what surfaced a real defect
+  (R-20). It is that **a claim about observed behavior needs an observation**,
+  which is the same rule this campaign already applies to briefs.
+- **Their other findings were largely sound and were folded**, each verified
+  before acting: the generator has FIVE ways out but FOUR ways home, so "the
+  fourth way out" became "the fourth way **home**" [measured: opening a lens
+  over the generator closes it and lands in the lens, not the editor]; the mask
+  instruction could not be followed as written because the harness selects no
+  level, so it now opens "pick a level, turn on strict, and type `debugger;`";
+  the overlay's message and the ONE surface it actually covers on this page (the
+  notes lens's recommendation) are now named [measured:
+  `recommendationInsideMaskable: true`, `excursionSlotEmpty: true`]; the
+  honest-labeling paragraph now names the meta line
+  `Produced by placeholder in 1 attempt.`, which
+  `generator/README.md § The placeholder socket` calls the affordance that
+  "never lies" and which appeared on no sandbox page; the strict toggle is
+  inside the level selector so the stays-alive list stopped double-counting them
+  [measured: `strictToggleIsInsideLevelSelector: true`]; and the guide is the
+  instrument's LAST child, not merely after the panel.
+- **One reviewer conflict, resolved toward the learner.** AR-2 wanted the
+  `refuse:` case-sensitivity qualifier dropped as socket minutiae owned by the
+  leaf page; AR-1 wanted it kept, because a learner typing `Refuse:` gets an
+  ordinary preview and concludes the page lied. Kept, in the shortest form that
+  carries it ("lower-case, at the very start"), because a checkpoint page's job
+  is to prevent exactly that false defect report [measured: `Refuse:` yields
+  `{refusal: 0, preview: 1}`].
+- **AR-2's altitude finding was accepted.** "inert and dimmed at its OWN element
+  even though it renders outside the covered region" imported `DOCS.md`'s
+  internal argument and only parses for a reader who already holds the container
+  heuristic the architecture rejects. It now reads observationally — the button
+  "up in the live control row outside the overlay, dims and goes inert with
+  them".
+- **LOSS LEDGER for the rewritten paragraph** (the baseline is
+  `git show HEAD:spiralearn/sandbox/orchestrate/index.mdx`). The rewrite touched
+  a dense 22-line semicolon chain, so every clause the result no longer asserts
+  is enumerated here per
+  [DEV.md § Documentation migration discipline](../../DEV.md#documentation-migration-discipline).
+  **Two dropped, both deliberate:**
+  1. _"a Generate code button sits beside Edit code in editor mode only"_ —
+     dropped because it is **false**: the two buttons render from mutually
+     exclusive branches and never co-render.
+  2. _"and an Edit code button appears leading the control row"_ — dropped as
+     **redundant**, not as false. It remains true (whichever button renders is
+     the control row's first child), but the new mutual-exclusivity clause now
+     carries the same fact for both arms, and `orchestrate/DOCS.md` calls
+     sibling order within the row _"presentation, not contract"_, so restating
+     it pinned something the sketch declines to promise. Raised by AR-4, which
+     found it enumerated nowhere — it had been justified only in a review
+     prompt, which is not one of the two homes the rule accepts.
+
+  No third omission was found, by this agent or by AR-4's independent pass.
+
+- **A replay does not cover sentences written after it ran.** AR-2 closed by
+  noting GEN-9's action list never opened a lens over the generator and never
+  broke the parse two ways, so the clauses added while folding these reviews
+  were unverified. Row **GEN-9b** drives exactly those.
+
 ## Operational notes (not rulings, but they cost time once)
 
 - **⚠️ The Increment-8 cold-start brief carried a FALSE React claim, and it was

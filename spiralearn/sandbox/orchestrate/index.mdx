@@ -12,24 +12,42 @@ debug-props is panel-excluded — reachable only as a focus request), and one
 page-injected demonstration lens ("notes", self-recommending). Expected — the
 SWAP model, EDITOR-FIRST: the editor mounts at load holding the seed program (no
 lens is named in the props, so the home base is the default); opening any lens
-from the Source select REPLACES the editor, and an Edit code button appears
-leading the control row; closing — Edit code, or the `—` none entry — brings the
-editor back with your edits intact; a Generate code button sits beside Edit code
-in editor mode only, and opens the generator as the pane's third occupant —
-seeded with the buffer exactly as typed, and left through Accept, Discard, or
-Edit code (Accept lands the candidate in the editor, everything else leaves the
-buffer untouched); typing until the debounce settles re-renders the phases;
-breaking the parse bars the downstream phases with the parser's cause and fixing
-it reopens them; the type toggle re-derives immediately, closing any open lens
-first (as do level and posture changes); the level selector lists both levels —
-the built-in JEJ and the injected scaffold — and the closed face shows the
-selected level's live fit mark (each entry's own mark rides the
-`data-level-mark` attribute, not visible text, so pick a level to see one);
-under strict with a `debugger;` the masked overlay covers the content region and
-the strip goes inert and dim — the editor stays alive; the guide reveals its
-topics after the panel. The honored-focus variant (a lens open AT load) is
-prop-driven — add `lens="notes"` to the harness to see it; it is jsdom-pinned
-and was machine-replayed before this page flipped to the editor-first default.
+from the Source select REPLACES the editor; closing — Edit code, or the `—` none
+entry — brings the editor back with your edits intact; the control row shows
+Generate code in editor mode and Edit code while an excursion holds the pane,
+never both at once, because the editor is away exactly while an excursion is
+open; Generate code opens the generator as the pane's third occupant — seeded
+with the buffer exactly as typed, and left through Accept, Discard or Edit code
+(Accept lands the candidate in the editor, everything else leaves the buffer
+untouched); typing until the debounce settles re-renders the phases; breaking
+the parse bars the phases downstream of the break, each naming the parser's
+cause, and fixing it reopens them; the type toggle re-derives immediately,
+closing an open lens OR an open generator first — as do level and posture
+commits, so a derivation-context commit is the fourth way home from the
+generator (opening a lens closes it too, but lands you in the lens); the level
+selector lists both levels — the built-in JEJ and the injected scaffold — and
+the closed face shows the selected level's live fit mark (each entry's own mark
+rides the `data-level-mark` attribute, not visible text, so pick a level to see
+one); pick a level, turn on strict, and type `debugger;` — the masked overlay
+covers the content region, here the notes lens's recommendation, naming the
+level and the violation; the strip goes inert and dim; and the Generate code
+button, up in the live control row outside the overlay, dims and goes inert with
+them — the editor, the level selector with its strict toggle, the type toggle
+and the guide all stay alive; clicking the guide's reveal lists its four topics
+at the bottom of the instrument.
+
+The generator answers from the placeholder socket, so no model runs here and
+every stage is scripted: every candidate carries a marker comment saying no
+model ran — below your code, whatever the prompt asked for — and the line beside
+it reads `Produced by placeholder in 1 attempt.` A prompt beginning `refuse:`
+(lower-case, at the very start) answers with a refusal instead, which is how the
+refusal path is reachable with no model behind it. The socket's own stages and
+controls are exercised in isolation on the Generator — checkpoint page; here it
+matters only as what the generator answers with.
+
+The honored-focus variant (a lens open AT load) is prop-driven — add
+`lens="notes"` to the harness to see it; it is jsdom-pinned and was
+machine-replayed before this page flipped to the editor-first default.
 
 export function InstrumentHarness() {
 	const React = require('react');
