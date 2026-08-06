@@ -185,6 +185,22 @@ maintainer's.
 | **H5** | This commit carries **`ar-1` and `ar-4`**. `ar-2` does not fire: its subject is an architectural sketch and its inputs are `DOCS.md`/`README.md`/`types.ts` [read: [DEV.md § AR-2: Architectural Sketch Challenge](../../DEV.md#ar-2-architectural-sketch-challenge)], none of which a ruling ledger has. Full ceremony, no agent-side lightening.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | 2026-08-05, at the plan gate. This row.                                    |
 | **H6** | Increment 1.5's three boundary tests ship **without `PINNED(…)` markers** while the pinned-guard hook is unregistered (FLAG 8). A marker that reads as protected while nothing defends it is worse than none. The markers are added once the guard is re-armed.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | 2026-08-05. This row.                                                      |
 
+| **H7** | **Absence is a safer baseline than recommendation; recommendation is
+a later layer on top of the bare absence information.** Ruled while resolving
+whether the leaf's learner-visible message compromises its domain-blindness. It
+does not: `'X' isn't in the admitted syntax` reports that a node type is off the
+caller's table, and asserts nothing about JavaScript or about the reader. A
+message telling a reader what to write instead — _"use `const`"_ — would be a
+claim about the language, and belongs to whoever owns the curriculum, never to
+this leaf. **This is already the shipped architecture, not a change to it:** the
+leaf authors only the default-deny message, while every recommendation-shaped
+string is a level's constraint-check message authored in the level [read:
+`src/lib/study-lenses/language-levels/jej/just-enough-js.ts` —
+`checkForStatement`, _"Admits `for` with a block body; refuses a braceless
+one"_, whose refusal message tells the reader to use curly braces]. The ruling
+records the principle so a later recommendation layer knows which side of the
+line it sits on. | 2026-08-06. This row. |
+
 **Phase 0's four maintainer rulings are not renumbered here.** They were taken
 2026-07-30 at the Phase-0 gate and are durable in `2437801d`'s body, which is
 their citable home; naming them keeps this table from reading as the wave's
@@ -446,6 +462,27 @@ compressed [read:
    _"Never cite a document **section** by `file:line`"_. Governance surface, so
    the human's call, not an agent's. Source: `2437801d` body — the FLAG the
    earlier draft of this list omitted.
+10. **The leaf's domain-blind rule is broken by the document that states it, and
+    that rule was the cited authority for five content deletions.**
+    `screening/README.md` § Conventions forbids naming a language level _"in the
+    code or in the prose"_, and the same README's § Public API behavior list
+    says a consumer needing source order sorts by offset _"as the JEJ level's
+    `validate` does"_ — the **identical clause** `a7be59e6` deleted from
+    `collect-violations.ts`, its loss-ledger item 4 citing that rule [measured
+    2026-08-06: both sentences live in the same file; `git show -s --format=%B
+    a7be59e6` carries the deletion and its justification]. The rule is cited as
+    the deletion authority in `6a2cacbc` (items 1–3), `f89fcb7c` (items 1, 3)
+    and `a7be59e6` (items 2, 4, 5). **The deletions were right; the stated
+    authority is over-broad.** Taken literally it also forbids § Consumers,
+    which `DEV.md` § Directory Documentation Convention requires — so a Wave-2
+    author either strips a required cross-reference or concludes the rule is
+    decorative and stops applying it in the code, where it actually protects
+    something. Proposed shape, for the maintainer: scope the rule to the code
+    and to prose that states the module's **contract**, leaving § Consumers free
+    to name consumers, and move the line-211 clause out of the behavior list
+    into § Consumers — which is what `a7be59e6` already did to the code. Found
+    by an `ar-5` run 2026-08-06; not acted on, because the README is a ratified
+    Phase-0 artifact and re-authoring it needs approval.
 
 ### FLAGs raised at the wave's close (2026-08-05)
 
