@@ -293,3 +293,162 @@ indices are offset-keyed while the port's events carry line/column.
 reference public-API member classified `restore` / `supersede (with rationale)`
 / `drop (with human sign-off)`. Its absence is the root cause of this entire
 entry.
+
+---
+
+## Human rulings — HR-4..HR-15 (2026-08-05/06, planning session, ratified at plan approval)
+
+Given by the human across three `AskUserQuestion` rounds, the plan-approval
+round, and one mid-execution directive. Plan of record:
+`~/.claude/plans/read-and-execute-the-rosy-sky.md` (ExitPlanMode-approved;
+context-free-validated, verdict COULD START, must-fix applied). Canonical HERE;
+the plan mirrors them. Campaign AR-5 baseline:
+`1b516bd4e20df34c3573dcd08eabb9abe919cc74`
+`[measured: git rev-parse HEAD at the first post-approval write]` — the review
+changeset is the campaign's own SHA list, never `baseline..HEAD`. Research
+evidence: `research-digests-2026-08-05.json` beside this log (byte-identical
+copy of the 7-agent planning research `[measured: cmp — identical]`).
+
+- **HR-4 — fidelity-first.** The task is to port the REFERENCE signature and
+  behavior (`src/lib/embody/lib/evaluating/`). A port-side deviation survives
+  ONLY where demonstrably stronger, each named explicitly in the loss ledger.
+  Ledger default = `restore`; every `supersede` carries its strength argument;
+  `drop` only with human sign-off. (Human wording: "the task was to port the
+  reference signature and behavior … the handoff should say which aspects of the
+  engine and signature are stronger, anything else should be ported over.")
+- **HR-5 — intercept widens to the full generator surface** —
+  `.next`/`.return`/`.throw` plus `{ fail, code, options, ast }` per reference
+  `intercept/types.ts:261`. Where the reference's own semantics were accidental
+  or engine-incompatible (`.throw` was the NATIVE generator method — only
+  next/return were overridden; verbatim `.return()` would deadlock on a
+  suspended ask), the plan § 4 specifies them and the ledger records each delta.
+- **HR-6 — both consumption modes.** `for await` step-through AND `await handle`
+  → the complete result. PROPOSED port-stronger carve-out, ratify at gate G1:
+  creation stays inert — the run starts at first consumption (first pull OR
+  first await), never at construction. (The reference
+  queueMicrotask-auto-started at creation, `create-execution.ts:107-117`; the
+  carve-out also kills its one-microtask claim race.)
+- **HR-7 — drain-on-await cancel policy.** An intercept ask nobody answers
+  CANCELS the run at that ask (settles with the events so far). "Unanswered" is
+  STRUCTURAL — no mock supplied for that verb — never temporal. Mocks (HR-9)
+  answer first when supplied.
+- **HR-8 — reference names and values wholesale.** `Execution`, `RunHandle`,
+  `RunResult`, `InterceptHandle`, `InterceptResult`,
+  `outcome: 'complete'|'cancel'|'fail'|'timeout'|'iteration-limit'|'error'`,
+  `ok`, result fields (`events`, `code`, `options`, `ast`, `visitCounts`),
+  reference event-field spellings. Port enrichments ride as ADDITIONS:
+  machinery-defect discrimination as an added error kind, `loc` + offset pair on
+  events, the pending-interaction arm, the `trip` record.
+- **HR-9 — io mocks on BOTH evaluators.** run: worker dialog traps over the
+  engine `onCall` seam; mock answers; no mock → classified io-error outcome
+  (supersedes today's bare `ReferenceError`; the reference's native
+  main-thread-dialog fallback is a `supersede` ledger row carrying the D5b
+  rescission history). intercept: mocks answer at the `serveAsk` seam BEFORE a
+  pending-interaction is minted; no mock → pending-interaction (named
+  port-stronger carve-out); `io.console` per-method callbacks return.
+- **HR-10 — scope.** run + intercept rebuild + the trace/variables port in this
+  campaign; variables gets its own fidelity audit BEFORE its Phase 0, staged
+  strictly later so it cannot block run/intercept. trace/semantics,
+  trace/syntax, adapter/: future campaigns. The kind is designed against the 14
+  tracer forward-compat requirements (research digests, key `tracers`).
+- **HR-11 — build forward; deprecate and rebuild in new directories.** New
+  commits only, no reverts; the current port evaluators are marked DEPRECATED
+  and the rebuild happens in new directories, with the quarry AND the current
+  port as references.
+- **HR-12 — entwining re-derived against the CURRENT
+  `src/lib/study-lenses/embody/`** (the reference's event signatures and
+  entwining predate it and are stale — human PS). Events gain an offset pair
+  stamped from the wrap's original-text parse; enrichment happens thread-side
+  inside `onMessage` before the engine's shallow freeze-at-yield; the result
+  carries `eventsByNode` + `visitCounts`; `link/`'s shadow tree is NOT ported.
+  Mechanism (ratify at G1): enumerable event fields are plain data (`step`,
+  `loc`, offsets, `nodePath`); `node`/`prev`/`next`/`callee` are NON-ENUMERABLE
+  ACCESSORS resolving through `facts.entwined.byPath` — the quarry's own newer
+  precedent (`trace/semantics/tracing/types.ts:845-850`), keeping events/results
+  JSON-safe while `event.node` still answers with the real EntwinedNode. The
+  mutable-pointer accessor is a NAMED exception to the no-mutable-closures rule,
+  scoped: installed inside `onMessage` before return, never written after yield.
+- **HR-13 — `ceremony: full`** for the whole campaign (set at plan approval):
+  AR-1 · AR-2 · AR-3 (every un-skip) · AR-4 (every increment) · AR-5. Uniform
+  within the level.
+- **HR-14 — directories, Option A** (set at plan approval):
+  `git mv src/lib/study-lenses/evaluators src/lib/study-lenses/evaluators-deprecated`
+  (single-dash, kebab-legal), rebuild `evaluators/` fresh under the canonical
+  name. Stale-doc references re-derived and fixed at execution
+  (`git grep -n 'evaluators/' -- '*.md'` clean is the W0.3 doc gate); coordinate
+  the move with the human's in-flight `.ls-lint.yml` session first. The
+  deprecated region stays in tsc + vitest, frozen (compile-and-green only); its
+  exit condition is danger's future migration-onto-the-new-kind campaign.
+- **HR-15 — sandbox cadence and sandbox fidelity** (mid-execution directive,
+  2026-08-06): "stop regularly for sandbox checks so I can know all features are
+  migrated and supported" — sandbox pages are built EARLY in each evaluator
+  chain and extended per increment, so every user-observable increment fires its
+  own 🔍 checkpoint rather than one end-of-chain check; the declared 🔍 skip for
+  variables is OVERRIDDEN — it gets a sandbox page and checkpoints too. And:
+  "the sandboxes in the deprecated codebase were carefully crafted, migrate them
+  too with the same attention to fidelity" — the DEPRECATED PORT's sandbox pages
+  are fidelity targets alongside the reference's: the ledger's sandbox section
+  inventories BOTH lineages' page features (reference: IO toggles, styled
+  dialogs, slow-mock cancel rig, console dumps, presets; deprecated port: the C2
+  card flows, the full-data serializer rendering present-but-`undefined` and
+  live `respond`, per-arm presets) and the rebuilt pages carry the union, member
+  by member.
+
+### HR-3 consequence 2 — SUPERSEDED in mechanism
+
+HR-3 recorded "danger gets touched: update it to compile with its tests green".
+Under HR-11/HR-14 the old kind `types.ts` is never edited — it rides into
+`evaluators-deprecated/` untouched — so danger keeps compiling with ZERO edits
+(verified: zero importers outside the region, no engine imports, inside tsc +
+vitest). The obligation is discharged by the old kind's immutability, not by
+performing an edit. danger is thereby stranded on a deprecated kind; its
+migration onto the new kind is a named FUTURE campaign (with trace/semantics,
+trace/syntax, adapter/).
+
+### Per-pin disposition table (all 27 PINNED rows in the two rewrite-target files)
+
+New-directory builds never trip the pinned-guard on these pins, so this table is
+the record that prevents re-litigation. Inventory
+`[measured: grep -n "// PINNED" over create-run-stream.test.ts (9 rows) and create-intercept-stream.test.ts (18 rows)]`.
+Disposition vocabulary (closed): **retained** — the behavior carries into the
+new region and the pin's authority travels with it; **re-scoped(HR-6)** — true
+of the iteration path once the await path exists; **superseded(HR-n)** — the new
+region deliberately contradicts it. No pin fell outside the vocabulary; nothing
+bubbled.
+
+| file:line     | pinned claim (short)                                                     | disposition         | authority                                                                                                                                                                                 |
+| ------------- | ------------------------------------------------------------------------ | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| run:103       | nothing engine-side before the first pull; result access starts a run    | retained            | HR-6 keeps it — await counts as consumption, not an earlier start                                                                                                                         |
+| run:140       | teardown answers OUT OF BAND, never via generator return queueing        | retained            | carried into the new handle design (plan § 4 .return() sequencing)                                                                                                                        |
+| run:154       | a pull after teardown never starts a fresh run                           | retained            | —                                                                                                                                                                                         |
+| run:208       | guard increments before comparing; cap N trips at N+1                    | retained            | iteration-guard transports byte-identical                                                                                                                                                 |
+| run:217       | guards splice on the ORIGINAL source; trip span faithful                 | retained            | HR-12 relies on it                                                                                                                                                                        |
+| run:235       | iterations rides through unchanged (no clamp/default/gate)               | retained            | —                                                                                                                                                                                         |
+| run:272       | engine refinement hook unused; halt authored at the raw throw            | retained            | —                                                                                                                                                                                         |
+| run:289       | R-2: no machine ran → no machinery cause is honest                       | retained            | defect taxonomy rides as an HR-8 ADDITION                                                                                                                                                 |
+| run:300       | H-7 restart guard: handle-only guard misses the defect route             | retained            | H-7                                                                                                                                                                                       |
+| intercept:118 | nothing engine-side before the first pull                                | retained            | HR-6, as run:103                                                                                                                                                                          |
+| intercept:173 | both sources join ONE arrival queue in worker post order                 | retained            | carried into I6                                                                                                                                                                           |
+| intercept:200 | the wrap stamps the innermost call site, end to end                      | retained            | —                                                                                                                                                                                         |
+| intercept:208 | statement-level throw outside any wrap → loc null; NO stack parse        | retained            | subject to the ledger's enclosing-fallback escalation row — if the human ratifies `restore` there, that ratification supersedes this pin (wrap-style mechanism only, never a stack parse) |
+| intercept:250 | the fake rejects an async round-trip (property of the double)            | retained            | engine + fake untouched                                                                                                                                                                   |
+| intercept:265 | a pull after teardown never starts a fresh run                           | retained            | —                                                                                                                                                                                         |
+| intercept:292 | teardown out of band, never through the engine's stream exit             | retained            | plan § 4 .return() builds ON it                                                                                                                                                           |
+| intercept:309 | teardown LATCHES; a later pull is inert                                  | retained            | aligns with HR-2                                                                                                                                                                          |
+| intercept:337 | the stream must be pulled for every event; one pull starts, not finishes | **re-scoped(HR-6)** | true of the ITERATION path; the await path drains without consumer pulls                                                                                                                  |
+| intercept:356 | guards splice FIRST on the original text                                 | retained            | —                                                                                                                                                                                         |
+| intercept:361 | splice order not interchangeable (columns shift)                         | retained            | —                                                                                                                                                                                         |
+| intercept:394 | iterations rides through unchanged                                       | retained            | —                                                                                                                                                                                         |
+| intercept:443 | R-2 inherited                                                            | retained            | —                                                                                                                                                                                         |
+| intercept:456 | assemble-defect settlement frozen outside the mapper                     | retained            | —                                                                                                                                                                                         |
+| intercept:465 | H-7 restart guard, both modules                                          | retained            | H-7                                                                                                                                                                                       |
+| intercept:480 | an outstanding pull completes as the stream's end, any route             | retained            | —                                                                                                                                                                                         |
+| intercept:495 | H-2: yield charge named; loop safety rests on iterations                 | retained            | W1.a's D4 opt-out is the narrow fix H-2 itself anticipated, not a contradiction                                                                                                           |
+| intercept:504 | H-2: flat charge arithmetic; floor of 500 meaningful                     | retained            | same note                                                                                                                                                                                 |
+
+### Routing
+
+HR-5, HR-7, HR-12, HR-15 (intercept-relevant halves) are mirrored into
+[`../evaluators-intercept/AR-LOG.md`](../evaluators-intercept/AR-LOG.md); HR-9
+into both evaluator logs (the H-7 mirror-note precedent). Everything else is
+region-wide and canonical here alone.

@@ -910,4 +910,30 @@ ORIGINAL text. The OPEN question is narrower and is the human's: whether a
 future phase publishes an offset pair ALONGSIDE the line/column span, which
 would make the join direct (`byOffset[start]`) at the cost of a second
 coordinate in a ratified type. Not this phase — the trio is ratified and B-1
-chose one region-wide span encoding on purpose.
+chose one region-wide span encoding on purpose. [ANSWERED 2026-08-06 by HR-12,
+recorded canonically in `../evaluators-api-restoration/AR-LOG.md` — the
+restoration rebuild publishes the offset pair; see the mirror note below.]
+
+## Mirror notes — restoration-campaign rulings that reach intercept (2026-08-06)
+
+Recorded canonically in
+[`../evaluators-api-restoration/AR-LOG.md § Human rulings — HR-4..HR-15`](../evaluators-api-restoration/AR-LOG.md);
+mirrored here because they bind intercept's REBUILD (which happens in a new
+directory under HR-11/HR-14; this module rides into `evaluators-deprecated/`
+frozen, and its pins' dispositions are tabled in that log):
+
+- **HR-5** — the rebuilt intercept handle widens to the full generator surface
+  plus `{ fail, code, options, ast }` per the reference.
+- **HR-7** — under drain-on-await, a structurally-unanswered ask (no mock for
+  that verb) CANCELS the run at that ask.
+- **HR-9** — io mocks return (answered at the serveAsk seam before a
+  pending-interaction is minted; no mock → pending-interaction; io.console
+  callbacks return).
+- **HR-12** — entwining re-derived against the current
+  `src/lib/study-lenses/embody/`: offset pair on events (answering the open
+  coordinate question in the carried-forward-from-I8 section), enrichment via
+  non-enumerable accessors over `facts.entwined`, `eventsByNode` + `visitCounts`
+  on the result; no `link/` shadow tree.
+- **HR-15** — sandbox pages built early and extended per increment, a 🔍 per
+  user-observable increment; THIS module's sandbox (the C2 card flows, the
+  full-data serializer) is itself a fidelity target for the rebuild.

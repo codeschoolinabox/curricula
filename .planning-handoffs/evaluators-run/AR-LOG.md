@@ -508,3 +508,18 @@ its suite as one of three legs, and DEV.md (twice), HUMANS.md,
 reference it. Leaving it out of the roster is reversible; deleting breaks an npm
 script and dangles six governance-doc references. Whether to COMMIT the settings
 change is the human's — that file is tracked, so it would reach every peer.
+
+## Mirror note — restoration-campaign ruling that reaches run (2026-08-06)
+
+Recorded canonically in
+[`../evaluators-api-restoration/AR-LOG.md § Human rulings — HR-4..HR-15`](../evaluators-api-restoration/AR-LOG.md);
+mirrored here because it binds run's REBUILD (in a new directory under
+HR-11/HR-14; this module rides into `evaluators-deprecated/` frozen, its pins'
+dispositions tabled in that log): **HR-9** — run regains caller- supplied io
+mocks (worker dialog traps over the engine's onCall seam; no mock → a classified
+io-error outcome, superseding today's bare ReferenceError; the reference's
+native-dialog fallback stays out, recorded in the loss ledger with its D5b
+rescission history). Also relevant: HR-15 — run's rebuilt sandbox treats BOTH
+the reference page's features (IO toggles, styled dialogs, slow-mock cancel rig,
+console dumps) and this module's current page as fidelity targets, with a 🔍 per
+user-observable increment.
