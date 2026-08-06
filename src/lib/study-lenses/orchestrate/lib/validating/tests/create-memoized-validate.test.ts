@@ -401,7 +401,7 @@ describe('createMemoizedValidate', () => {
 			).toEqual(['DebuggerStatement']);
 		});
 
-		it('stamps the violation at its folded path, carrying no wrapper segment', () => {
+		it('stamps the violation at its published path, carrying no parenthesis segment', () => {
 			const { facts } = embody('const f = (() => { debugger; });');
 			const validate = createMemoizedValidate();
 			const record = validate(

@@ -197,7 +197,7 @@ describe('summarize', () => {
 	});
 
 	describe('a program with grouping parentheses', () => {
-		it('counts the folded tree, not the parenthesized parse', () => {
+		it('counts the published tree, not the parenthesized parse', () => {
 			const summary = summarize(embody('const x = ((1 + 2)) * (3 - 4);'), {});
 			// PINNED(human ruling 2026-07-30: published ast is ESTree-shaped — parens fold away; the exact count is the guard, since a surviving wrapper inflates it)
 			expect(summary.facts.find((entry) => entry.stage === 'ast')).toEqual({
@@ -209,7 +209,7 @@ describe('summarize', () => {
 
 		it('counts the same folded nodes through the entwined index', () => {
 			const summary = summarize(embody('const x = ((1 + 2)) * (3 - 4);'), {});
-			// PINNED(human ruling 2026-07-30: published ast is ESTree-shaped — parens fold away; byPath identities never lengthen through parens, so no wrapper adds a key)
+			// PINNED(human ruling 2026-07-30: published ast is ESTree-shaped — parens fold away; a surviving wrapper would be indexed like any other node, so the key count is what guards)
 			expect(summary.facts.find((entry) => entry.stage === 'entwined')).toEqual(
 				{ stage: 'entwined', ok: true, description: '11 nodes' },
 			);
