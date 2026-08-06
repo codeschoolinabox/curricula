@@ -616,10 +616,16 @@ rather than it being taken agent-side.
 carrying the measurements below, with the literal-to-the-brief option shown
 labelled as producing a paren-bearing fixture that guards nothing.
 
-### Where the guards land, and why not where § F2 points
+### Where the guards land
 
-§ F2 is right that all three gaps are real. Two of its bullets are wrong only
-about the remedy's address, and the correction is measured, not argued:
+§ F2 is right that all three gaps are real, and **exactly one of its three
+bullets — scaffold — needed relocating**. Bullet 1 landed exactly where § F2
+points; bullet 3 is true as written and is not falsified here. § F2 also names a
+**module** for the scaffold gap, `language-levels/scaffold/`, not a test file,
+so there is no address of its own to call wrong: the address was supplied by
+this follow-on. (Corrected after ar-5; the earlier wording of this heading and
+lead sentence claimed two wrong bullets and an address § F2 never gave. See §
+ar-5's findings below.)
 
 - **debug-props — closeable exactly as § F2 says.** No fixture in
   `lenses/debug-props/tests/core.test.ts` carried a `ParenthesizedExpression`
@@ -801,4 +807,68 @@ Changeset, this follow-on's own SHAs:
 - `28cbd1140c3546bfa6506307fca44e734dc7c1b9` — `add:` the debug-props guard
 - `46d77084cad4b1af33f6d97c0adc1f8c76546188` — `add:` the scaffold seam guard
 - `9564e1788a0a80a2da4a98a4fa8ddfb429a9ed61` — `add:` the jej seam guard
-- this commit — `docs:` the close, the rulings, and the tag repairs
+- `ae0b8bcc0054d61b5e1e7fe7acb4d51026cd4e75` — `docs:` the close and tag repairs
+- `1b516bd4e20df34c3573dcd08eabb9abe919cc74` — `refactor:` published vocabulary
+- this commit — `docs:` ar-5's findings and their resolutions
+
+### ar-5's findings, and what each got
+
+**Verdict: CONSIDER** [relayed: ar-5] — "PROCEED on the merge question
+narrowly". It reproduced every headline claim first-party under an instrument
+the implementing agent never saw: a vitest workspace whose Vite transform
+rewrote `derive-ast.ts` **in memory only**, leaving the tree untouched. The
+consolidated mutation figures, the 9-file red set, the 11-vs-14 counts and all
+eight survival subsets, both scaffold and jej fold-state paths, and the
+fold-insensitivity of `var x = document;\n` all reproduced identically [relayed:
+ar-5, each measured in its session].
+
+- **The pinned-guard hook is deregistered in the working tree, and these four
+  pins land undefended.** `HEAD`'s `.claude/settings.json` registers
+  `pinned-guard.py`; the working-tree copy does not [measured: `grep -c pinned`
+  on `git show HEAD:.claude/settings.json` — 1 — and on the working file — 0].
+  The deletion is **foreign and uncommitted**, and `.claude/**` is governance
+  surface an agent never edits without instruction in the current conversation.
+  **Human ruling 2026-08-05: surface it, do not touch it.** So it is recorded
+  here and raised at the push prompt, and left as it stands. DEV.md § Pinned
+  expectations makes the marker's obligation mechanical — "the pinned-guard hook
+  asks before an edit erases one" — so while that block is missing, **no**
+  PINNED marker in this repository is defended, not only these four.
+- **Vocabulary drift, APPLIED** as `1b516bd4` on human ruling 2026-08-05: two of
+  the three guards named embody's internal mechanism in their test titles while
+  the third named the published contract. Also applied there: one PINNED clause
+  derived key cardinality from path length, two different properties.
+- **The F2 characterization was inaccurate in this log, FIXED above.** The lead
+  sentence claimed two of § F2's bullets wrong about "the remedy's address" when
+  only scaffold needed relocating, and § F2 names a module rather than an
+  address. **ar-5's meta-point is the one worth carrying forward:** the standing
+  leaner-bodies rule adopted at `ae0b8bcc` is **tag-shaped**, and these defects
+  were **untagged prose describing another document**, which that rule does not
+  reach. A fifth occurrence of the family, found by the gate that exists to find
+  it.
+- **Two untagged claims in `28cbd114`'s immutable body, recorded not repaired**
+  [relayed: ar-5, which verified both are TRUE]: § F2's sentence is "the
+  cheapest numeric guard on the fold that exists" and the body added "outside
+  embody" — a qualifier that makes the claim truer but is still an unmarked
+  paraphrase; and "its DOCS calls their agreement the sanity check" carries no
+  `read` tag.
+- **Q1-Q7 are thinly recorded in-repo** — the fuller wording of Q2 that four new
+  pins lean on lives only in a `~/.claude/plans/` file, which DEV.md says does
+  not exist for `git grep` purposes. Pre-existing: nine pins already cite it.
+  Named here as the campaign's own open item rather than fixed, because
+  promoting a five-part ruling set is its own unit of work.
+- **ZOMBIES labels and `## Epistemology` blocks**: recorded, no action. The two
+  new validating tests sit under `(Simple)` and `(Interfaces)` where
+  `(Boundaries)` would fit; the decision was already visible in `9564e178`'s
+  body. No touched module README carries an Epistemology block, which is a
+  repo-wide pre-existing gap this test-only changeset creates no obligation
+  against [relayed: ar-5, measured].
+
+### Gate at the close
+
+`npx vitest run --project unit src/lib/study-lenses/` →
+`Test Files 127 passed (127)` / `Tests 3408 passed | 8 todo (3416)`;
+`npx tsc --noEmit` → 0 [measured: both commands this session, at `ae0b8bcc`].
+ar-5 re-ran the gate ten minutes later and measured
+`3409 passed | 8 todo (3417)` against a HEAD three foreign commits further on
+[relayed: ar-5, measured] — the shared tree moving under a review is the normal
+condition here, and it is why the changeset above is a SHA list.
