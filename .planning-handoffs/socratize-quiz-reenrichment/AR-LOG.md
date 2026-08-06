@@ -5,6 +5,7 @@ recreate the off-repo-canon failure this campaign exists to fix. -->
 <!-- cspell:ignore socratizing socratize quizzing reenrichment stonebraker -->
 <!-- cspell:ignore bannered Toutes undercounts gagne tient pourquoi -->
 <!-- cspell:ignore enregistre l'enregistre préserver dispositioned -->
+<!-- cspell:ignore complet disambiguations ledgered -->
 
 # socratize-quiz re-enrichment — ruling log
 
@@ -36,6 +37,14 @@ are folded into the rulings and the FLAGGED section below.
   Closes the provenance violation and gives the four in-repo forward-promises
   (classifying/scoping/lenses/socratizing docs) a referent that `git grep` can
   see.
+
+- **R-1a — the supplement transports in full (2026-08-06).** ["Transport
+  complet"] AR-1 on C2 surfaced a third off-repo canon file R-1's question had
+  not named — `~/.claude/plans/supplement-indexed-pony-scope-gotchas.md` (the
+  buildScope/embody homonym warnings and the quizzing scope-surface file
+  addresses). The human extended the full-re-home ruling to it: its gotchas
+  enter SPEC.md (§ Terms + the Stage-3 cell), the file becomes bannered history
+  like the other two.
 
 - **R-2 — the quarry-retirement criteria name the question surfaces, all of
   them.** ["Toutes surfaces question"]
@@ -120,9 +129,35 @@ fires.
 | increment | line                                                                                          |
 | --------- | --------------------------------------------------------------------------------------------- |
 | C1        | `work: software · twin-doc: none · ceremony: none fired (ruling transcription) · prospective` |
+| C2        | `work: software · twin-doc: none · ceremony: AR-1 · AR-2 fired · prospective`                 |
 
-(Rows C2–C8 append as their commits land; the campaign SHA ledger below is the
-commit index.)
+(Rows C3–C8 append as their commits land; the campaign SHA ledger below is the
+commit index. Planned landings: LIBRARY-CONTRACTS.md at C3, SPEC.md §
+Orchestrator collateral at C4, lens-ddd/ at C5, the MVP-ROADMAP amendment at C6,
+the module-doc fixes at C7.)
+
+**Reviews fired on C2.** `ar-1` → **PAUSE** (11 concerns): the one human item
+became R-1a (the supplement's disposition); the author-side items were all
+applied — the two dangling § Orchestrator collateral references now carry their
+C4 landing markers (as do all links to C3/C5 artifacts), the three source files
+were bannered BEFORE the transport commit so SPEC's "bannered history" sentence
+is true, the stale roster claim was replaced by the measured three-lens state, §
+Scope adapter was rewritten from the landed code (the AST-recompute rule
+recorded as superseded in Q3), the RESUMPTION POINT ledger entry was split and
+the live cspell obligation became F-4, the loss ledger was rebuilt by
+heading-walk (its own note records the rejection), citation fragments and tag
+forms were corrected, and a § Terms section now carries the
+register/buildScope/embody disambiguations. `ar-2` → **CONSIDER** (6 concerns),
+all resolved in-text: the roster bullet rewritten to measured state with the R6
+flag marked resolved (C-1); Q13 strike-annotated as superseded-in-part by R-6
+with the shim's landing site named as Stage-3 AR-1 material (C-2); the
+`getChildNodes` sentence past-tensed into socratizing precedent with quizzing's
+in-file `childNode` noted (C-3); Q4 extended with the gate-budget and
+path-less-reference ratification items (C-4); landing increments named
+everywhere (C-5); the ordering parenthetical, the 361-vs-396 attribution (now
+361 + 35 measured per dir), the `.ok` narrowing, and the NodePath format note
+all corrected (C-6). AR-2 concurred prose-only dependency description is
+defensible for the residual two-edge graph.
 
 ## FLAGGED — known gaps this campaign records but does not fix
 
@@ -144,6 +179,15 @@ commit index.)
   mandate ("The maintainer performs the sweep"), an authorized exception, not a
   breach. Line-number citations into quarry docs made before that sweep were
   re-validated after it.
+- **F-4 — Stage 1's classifying docs owe a cspell pass before their push.**
+  Carried from the bannered stonebraker RESUMPTION POINT (AR-1 on C2 caught it
+  being ledgered away as "historical"): the two re-authored classifying docs
+  were never cspell-checked because that environment's Node (20.11.0) predates
+  cspell's ≥ 20.18 requirement. Both preconditions still hold [measured: `git
+  merge-base --is-ancestor 21f871bd origin/main` → not an ancestor; `node
+  --version` → v20.11.0]. Run `./node_modules/.bin/cspell` over
+  `src/lib/study-lenses/lib/classifying/{README,DOCS}.md` in a Node ≥ 20.18
+  environment before pushing those commits.
 
 ## Campaign SHA ledger
 
