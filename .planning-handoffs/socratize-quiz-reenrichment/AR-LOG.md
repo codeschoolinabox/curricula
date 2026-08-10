@@ -153,6 +153,8 @@ fires.
 | C1        | `work: software · twin-doc: none · ceremony: none fired (ruling transcription) · prospective` |
 | C2        | `work: software · twin-doc: none · ceremony: AR-1 · AR-2 fired · prospective`                 |
 | C3        | `work: software · twin-doc: none · ceremony: AR-1 · AR-2 fired · prospective`                 |
+| C4        | `work: software · twin-doc: none · ceremony: AR-1 · AR-2 fired · prospective`                 |
+| C5        | `work: software · twin-doc: none · ceremony: none fired (byte-copies per R-8) · prospective`  |
 
 (Rows C3–C8 append as their commits land; the campaign SHA ledger below is the
 commit index. Planned landings: LIBRARY-CONTRACTS.md at C3, SPEC.md §
