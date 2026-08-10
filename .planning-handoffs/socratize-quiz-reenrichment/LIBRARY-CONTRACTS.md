@@ -352,13 +352,18 @@ in `lenses/quiz/tests/anchors.test.ts` + `component.test.tsx` +
   re-pick path clears it), and no component test asserts it [relayed: ar-1, grep
   — zero "mastery" hits in the three interaction test files]. Stage 5 owes it a
   test ([AR-LOG.md](./AR-LOG.md) F-5).
-- The quiz editor posture is pinned lens-side (`component.test.tsx`'s "read-only
-  un-colorized editor" describe): `EditorState.readOnly` true,
-  `contenteditable="false"`, mount inside the `data-quiz-editor` contract
-  selector, NO CodeMirror mount in the unparseable / non-JEJ fallbacks,
-  `role="alert"` on both fallback notices. The future colorize-all sweep meets
-  these pins as red tests — unlike socratize, whose un-colorized record is
-  doc-only (ruling R-4).
+- The quiz editor posture, split by sourcing: the READ-ONLY half is pinned
+  (`component.test.tsx`: `EditorState.readOnly` true, `contenteditable="false"`,
+  mount inside the `data-quiz-editor` contract selector, NO CodeMirror mount in
+  the unparseable / non-JEJ fallbacks, `role="alert"` on both fallback notices).
+  The UN-COLORIZED half is deliberately NOT test-pinned — the file's own header:
+  jsdom never runs CM's highlight paint pass, so "absence-of-highlight-classes
+  is a false-confidence assertion"; it is verified at the 🔍 sandbox checkpoint
+  [read: quarry `component.test.tsx` header]. The read-only pins SURVIVE
+  colorization, so the future colorize-all sweep meets no red test here — quiz's
+  un-colorized property is doc-plus-sandbox only, same exposure class as
+  socratize (ruling R-4; quiz's own coloring ruling deferred to lens-building
+  time, R-4a).
 
 ## Co-anchoring isolation [S5]
 
@@ -413,8 +418,7 @@ file-clean — it has two levels (locked decision 4):
 
 Everything else is the oracle. The question-orchestrator's own 6 test files are
 NOT Stage-3 oracle — they pin retired-orchestrator contracts and are covered by
-[SPEC.md](./SPEC.md) § Orchestrator collateral (lands at C4) and the R-2
-retirement criteria.
+[SPEC.md](./SPEC.md) § Orchestrator collateral and the R-2 retirement criteria.
 
 **Oracle files with no dedicated cluster above — read each before porting its
 unit** (the clusters distill the crafted semantics, not the whole oracle):

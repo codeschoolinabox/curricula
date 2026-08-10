@@ -2,12 +2,14 @@
 question-register lens campaign (rulings R-1/R-1a, AR-LOG.md). Retire a
 section only when the stage that consumes it lands and its own module docs
 carry the content; retire the file only when Stages 3, 4, and 5 have all
-landed. Sibling artifacts land by increment: LIBRARY-CONTRACTS.md at C3,
-§ Orchestrator collateral at C4, lens-ddd/ at C5 — links to them resolve
-from those increments forward. -->
+landed — EXCEPT § Orchestrator collateral, which is promotion-only (ruling
+R-10) and retires only into its durable home, the carried-unbuilt note in
+lib/socratizing/DOCS.md; see that section's preamble. LIBRARY-CONTRACTS.md
+and § Orchestrator collateral are in place; lens-ddd/ lands at increment C5
+— links to it resolve from that increment forward. -->
 <!-- cspell:ignore socratizing socratize quizzing reenrichment stonebraker -->
 <!-- cspell:ignore unbuilt subgraph relitigate PBSI bannered bannering -->
-<!-- cspell:ignore repoint readwrite Behaviour -->
+<!-- cspell:ignore repoint readwrite Behaviour unleveled rebuilder distractor -->
 
 # Question-register lenses — forward canon (re-homed)
 
@@ -80,8 +82,8 @@ F-3.)
    `buildScope`). Engines read scope through a small adapter projecting
    `facts.environment` onto the shape each consumes. Behavior parity is proven
    by the ported tests (the oracle). See § Scope adapter — and for quizzing, the
-   R-6 occurrence-class ruling in [LIBRARY-CONTRACTS.md](./LIBRARY-CONTRACTS.md)
-   (lands at C3).
+   R-6 occurrence-class ruling in
+   [LIBRARY-CONTRACTS.md](./LIBRARY-CONTRACTS.md).
 2. **Offset-native locations.** The quarry's `extract-location` read `node.loc`
    (line/col); greenfield `derive-ast` parses `ranges: true` without
    `locations`, so the port flips to `node.start`/`node.end` and
@@ -93,7 +95,7 @@ F-3.)
    `composeQuestions`, no cross-register co-anchoring. Each lens is a standalone
    greenfield `Lens` consuming its engine directly. What the retirement did NOT
    discard — the difficulty ladder, the coverage instrument, the one-grid goal —
-   is carried by § Orchestrator collateral (lands at C4), ruling R-3.
+   is carried by § Orchestrator collateral, ruling R-3.
 4. **Quiz ports full-fidelity but REALM-FREE** (dropped, not deferred): no
    generators V3 (provenance) + V5 (value-category), no
    `keying/realm-group-key.ts`, no `realm/read-realm-binding.ts`, no
@@ -103,7 +105,7 @@ F-3.)
    in learner copy (Q7: leave). Excision warning: the realm clause sits
    mid-sentence in the registry header adjoining the V4-fires-last rationale —
    excise surgically, keep the rationale
-   ([LIBRARY-CONTRACTS.md](./LIBRARY-CONTRACTS.md), lands at C3).
+   ([LIBRARY-CONTRACTS.md](./LIBRARY-CONTRACTS.md)).
 
 ## Resolved questions (Q1–Q14 — answers are rulings, cite before deviating)
 
@@ -136,13 +138,13 @@ socratizing; `ls src/lib/study-lenses/lenses/` → DOCS.md, MIGRATION-PLAYBOOK.m
 README.md, agent-lenses.concept.md, debug-props, lib, parsons, types.ts,
 writeme].
 
-| Stage | Lib              | Greenfield home     | Status       | Remaining scope                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| ----- | ---------------- | ------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1     | `classifying`    | `lib/classifying/`  | **COMPLETE** | — (landed `21f871bd`/`83520c77`/`c935ef59` [measured: `git rev-parse` on each]; public shape frozen per Q8)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| 2     | `socratizing`    | `lib/socratizing/`  | **COMPLETE** | — (engine 361 tests + `lib/scoping` adapter 35 tests [measured: `./node_modules/.bin/vitest run --project unit` per dir, 2026-08-06]; offset flip landed)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| 3     | `quizzing`       | `lib/quizzing/`     | unbuilt      | Realm-free port (decision 4) from quarry `lib/quizzing/`. Port the rest verbatim; quarry tests are the oracle. Scope surface lives in `resolving/read-scope-forest.ts` + `resolving/resolve-binding.ts` (7 scope-forest generators V6/V6b/V7/V8/V10a–c); **the shim is R-6-constrained** (legacy tracked set incl. `var`; see Q13 and [LIBRARY-CONTRACTS.md](./LIBRARY-CONTRACTS.md), lands at C3). The 3 free generators V1/V2/V4 anchor via the pure in-file AST walk `context/descend-identifiers.ts` — zero scope wiring; port first. Entry rewire `Snippet→Facts` in `generate-quiz`/`build-context`; inline `NodePath` type-only — and note the legacy alias is bare `type NodePath = string` while greenfield embody's `NodePath` is its own dot-delimited type: which format `anchorPath` carries is Stage-3 AR-1 material. Confirm Q12. |
-| 4     | `socratize` lens | `lenses/socratize/` | unbuilt      | The one genuine build — quarry source is documentation-only (quarry `lenses/socratize/`). Build from the annotated DDD copies ([lens-ddd/socratize/](./lens-ddd/socratize/), lands at C5) applying § Socratize DDD rewrite below. Deliverables: `core.ts` + `index.tsx` + `tests/` + css, mirroring the two-layer `writeme` module shape. Full ZOMBIES TDD. Gate: `applicability = facts.ast.ok`. **Un-colorized per ruling R-4.**                                                                                                                                                                                                                                                                                                                                                                                                               |
-| 5     | `quiz` lens      | `lenses/quiz/`      | unbuilt      | Verbatim port through inc 7 from quarry `lenses/quiz/` (annotated DDD copies: [lens-ddd/quiz/](./lens-ddd/quiz/), lands at C5). Envelope rewire isolated to `build-quiz.ts` + `index.tsx` + `core.ts` gate/recommend signatures — don't miss `core.ts`. Item-consumer graph untouched. Gate: JEJ `validate` (Q4), not `facts.ast.ok`. Anchors already offset.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Stage | Lib              | Greenfield home     | Status       | Remaining scope                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ----- | ---------------- | ------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1     | `classifying`    | `lib/classifying/`  | **COMPLETE** | — (landed `21f871bd`/`83520c77`/`c935ef59` [measured: `git rev-parse` on each]; public shape frozen per Q8)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| 2     | `socratizing`    | `lib/socratizing/`  | **COMPLETE** | — (engine 361 tests + `lib/scoping` adapter 35 tests [measured: `./node_modules/.bin/vitest run --project unit` per dir, 2026-08-06]; offset flip landed)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| 3     | `quizzing`       | `lib/quizzing/`     | unbuilt      | Realm-free port (decision 4) from quarry `lib/quizzing/`. Port the rest verbatim; quarry tests are the oracle. Scope surface lives in `resolving/read-scope-forest.ts` + `resolving/resolve-binding.ts` (7 scope-forest generators V6/V6b/V7/V8/V10a–c); **the shim is R-6-constrained** (legacy tracked set incl. `var`; see Q13 and [LIBRARY-CONTRACTS.md](./LIBRARY-CONTRACTS.md)). The 3 free generators V1/V2/V4 anchor via the pure in-file AST walk `context/descend-identifiers.ts` — zero scope wiring; port first. Entry rewire `Snippet→Facts` in `generate-quiz`/`build-context`; inline `NodePath` type-only — and note the legacy alias is bare `type NodePath = string` while greenfield embody's `NodePath` is its own dot-delimited type: which format `anchorPath` carries is Stage-3 AR-1 material. Confirm Q12. |
+| 4     | `socratize` lens | `lenses/socratize/` | unbuilt      | The one genuine build — quarry source is documentation-only (quarry `lenses/socratize/`). Build from the annotated DDD copies ([lens-ddd/socratize/](./lens-ddd/socratize/), lands at C5) applying § Socratize DDD rewrite below. Deliverables: `core.ts` + `index.tsx` + `tests/` + css, mirroring the two-layer `writeme` module shape. Full ZOMBIES TDD. Gate: `applicability = facts.ast.ok`. **Un-colorized per ruling R-4 (§ The un-colorized ruling record).**                                                                                                                                                                                                                                                                                                                                                               |
+| 5     | `quiz` lens      | `lenses/quiz/`      | unbuilt      | Verbatim port through inc 7 from quarry `lenses/quiz/` (annotated DDD copies: [lens-ddd/quiz/](./lens-ddd/quiz/), lands at C5). Envelope rewire isolated to `build-quiz.ts` + `index.tsx` + `core.ts` gate/recommend signatures — don't miss `core.ts`. Item-consumer graph untouched. Gate: JEJ `validate` (Q4), not `facts.ast.ok`. Anchors already offset.                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 
 Bottom-up order: 3 → 4 → 5. The real dependencies: Stage 5 consumes Stage 1's
 `classifying` (landed) and Stage 3's `quizzing`; Stage 4 needs only landed
@@ -173,7 +175,7 @@ resolves only the legacy tracked set (`{var, let, const}` declarator ids + the
 `for-of` left) and answers null for everything else, so the quarry oracle's
 `usage:occ` pins re-green verbatim. The shared `derive-scope-usage` must NOT be
 reused as-is (Q13). Occurrence-class table and mechanics:
-[LIBRARY-CONTRACTS.md](./LIBRARY-CONTRACTS.md) (lands at C3).
+[LIBRARY-CONTRACTS.md](./LIBRARY-CONTRACTS.md).
 
 **Traversal precedent (executed):** socratizing's `getChildNodes` (3 call sites)
 was ported as the sanctioned pure-acorn micro-vendor — landed as
@@ -240,8 +242,9 @@ inner **open→pointed→comparative Feedback Ladder** (`Question.register`);
 defined-only, deferred — Q6); **reveal-state keyed on the stable per-mount item
 index** (not `CodeQuestion.id`, constant-per-analyzer); **no
 grading/verdict/mastery**; the empty-source / zero-items / click-outside edge
-states; **un-colorized editor (ruling R-4)** — no `@codemirror/lang-javascript`,
-no theme import; the lens's decorations carry the only meaning.
+states; **un-colorized editor (ruling R-4, § The un-colorized ruling record)** —
+no `@codemirror/lang-javascript`, no theme import; the lens's decorations carry
+the only meaning.
 
 **DELETE (orchestrator layer):** `OpenOrchestratedItem` +
 `SocraticModel`/`SocraticPartition` keyed on it; the outer `register:'open'`
@@ -273,7 +276,7 @@ spelling from older prose is a type error).
 containment `location.start ≤ offset < location.end`; innermost-vs-source
 ordering pinned at AR-1); `presentRungs(question)` (distinct present registers
 in **Feedback-Ladder** order — NOT difficulty; the difficulty ladder is
-orchestrator collateral, § Orchestrator collateral, lands at C4). `index.tsx`:
+orchestrator collateral, § Orchestrator collateral). `index.tsx`:
 `SocratizeComponent({ embodiment, config })` with
 `useMemo(analyzeMicroDecisions, [embodiment])` (index-keyed reveal needs a
 stable model), rendering shelf + element cards + ladder, then the freeze
@@ -295,7 +298,7 @@ formerly designated distillation (`read-and-execute-the-linked-origami.md`) was
 DELETED before transport [measured: `ls ~/.claude/plans | grep -i origami` →
 empty, 2026-08-05]; the sources are the quarry itself, the annotated copies
 ([lens-ddd/quiz/](./lens-ddd/quiz/), land at C5), and
-[LIBRARY-CONTRACTS.md](./LIBRARY-CONTRACTS.md) (lands at C3).
+[LIBRARY-CONTRACTS.md](./LIBRARY-CONTRACTS.md).
 
 - **Port verbatim (pure, contract-independent):** `core.ts` `masteryFold`,
   `lib/decorations` (two color-free channels), earned propagation,
@@ -308,6 +311,120 @@ empty, 2026-08-05]; the sources are the quarry itself, the annotated copies
   three Stage-5 AR-1 ratification items (type match, path-less references, gate
   budget).
 - **(c)** Anchors already offset.
+
+## Orchestrator collateral — carried forward, not built (ruling R-3)
+
+The 2026-07-22 pivot retired the `question-orchestrator` MECHANISM (locked
+decision 3); it never ruled on three pedagogical concepts that lived inside it.
+Ruling R-3 carries all three forward as spec'd future work. Status of each:
+**carried, not built — the landing site is decided at its consuming stage's
+AR-1**, not here. NOTE: none of Stages 3/4/5 consumes these three concepts, so
+this section is **promotion-only — it is exempt from this file's retirement
+banner** and retires only into its durable home, the carried-unbuilt note in
+`lib/socratizing/DOCS.md` (ruling R-10, lands at C7). The quarry's pinned truth
+for all three is its `lib/question-orchestrator/` — six frozen test files
+[measured: `find … -name '*.test.*' | wc -l` → 6], protected from deletion once
+the R-2 amendment lands at C6 (`MVP-ROADMAP.md` names no question surface today
+[measured: `grep -in 'quiz\|question-orchestrator'
+src/lib/study-lenses/MVP-ROADMAP.md` → 0 hits]); read the concept's source there
+before rebuilding. A scope caution common to the two instruments: the quarry
+justified BOTH as irreducibly CROSS-register ("coverage across the Block Model
+grid is meaningful only over both registers' delivered items together";
+laddering "a mixed open+closed stream is a whole-set concern" [relayed: ar-1,
+quarry orchestrator README § Why this lib]) — with two standalone lenses, a
+per-lens landing is a SCOPE REDUCTION the consuming AR-1 must consciously
+accept; the full-fidelity carrier is the recommender/curriculum layer the
+one-grid bullet names.
+
+- **The Block-Model difficulty ladder** (quarry
+  `lib/question-orchestrator/ladder.ts` + `ladder.test.ts`): order a question
+  stream concrete-to-abstract by each item's MOST-CONCRETE Block level —
+  `LEVEL_RANK` maps atom 0 < block 1 < relation 2 < macro 3 as a
+  `Readonly<Record<BlockLevel, number>>` so a new `BlockLevel` is a compile
+  error; a multi-cell item ranks by `Math.min` over its cells (min-not-max is
+  test-pinned); zero-cell (unleveled) items sort STRICTLY last (not tied with
+  macro); ties keep emission order as a load-bearing contract (immune to anchor
+  position, idempotent — pinned; decorate/sort/strip is the implementation
+  technique, documented but not itself pinned). The ladder was OPT-OUT:
+  `config.ladder === false` → pool order — a config contract a rebuilder needs
+  (the opt-out is compose-pair: `compose-questions.ts` + its test pin
+  ladder-false → pool order, not `ladder.ts`). ⚠ These defaults (min-not-max,
+  zero-cell-last, ladder-on) sat at "Ratify or adjust" in the quarry's own DOCS
+  § Open questions, with named alternatives (coarsest level; a designated
+  primary cell) — the consuming AR-1 ratifies or adjusts, it does not merely
+  reproduce. Nothing forward orders questions by difficulty under any name
+  [relayed: ar-1 re-ran the sweep 2026-08-10:
+  `LEVEL_RANK`/`concrete-to-abstract` → 0; "difficulty" → writeme's explicit
+  negatives + a playbook distractor-difficulty knob; "ladder" → the Feedback
+  Ladder + local-llm's unrelated browser-model "ladder" — no hit orders
+  questions]; greenfield socratizing sorts by source offset. The "ladder
+  ordering" in the socratize lens plan is the Feedback-Ladder rung order
+  (`presentRungs`) — a DIFFERENT axis; and local-llm's "browser ladder" is a
+  THIRD unrelated homonym; let neither close this carry.
+- **The coverage-reporting instrument** (quarry
+  `lib/question-orchestrator/report-coverage.ts` + `report-coverage.test.ts` —
+  AND `compose-questions.ts` + `compose-questions.test.ts` +
+  `DOCS.md § Coverage semantics`, where several of the following actually live):
+  report which Block-Model cells the delivered question set SPANS and which
+  configured target cells remain GAPS. Report-only philosophy — it never
+  synthesizes an item to fill a gap (`report-coverage.ts` header); cell equality
+  is value-keyed `${dimension}:${level}`, never reference identity, with
+  cross-item and target dedup and borrowed-by-reference cells pinned
+  (`report-coverage` + its test). Pinned in the COMPOSE pair, not the report
+  pair: computed LAST over the post-cap delivered items so it "truthfully
+  describes the delivered set" (the quote is DOCS/types prose; a cap that drops
+  a cell's only item shows that cell as a gap — "cap loosely" is the README's
+  phrasing); the freeze boundary (compose does NOT freeze the caller's coverage
+  cells); the degenerate UNPARSED path reporting every target as a gap
+  (report-coverage's own test pins only the no-items case). ⚠ Post-cap coverage
+  also sat at "Ratify or adjust" in the quarry DOCS § Open questions. The
+  greenfield socratizing docs claim the cell taxonomy serves coverage auditing —
+  after C7 that prose is honest about the instrument not existing; the durable
+  carried-unbuilt note (R-10, C7) is the carrier of the plan to build it.
+- **The "two registers on one grid" pedagogical goal** (quarry
+  `lib/question-orchestrator/README.md`, attributing the goal to quizzing's own
+  README): a learning environment should place open/Socratic and closed/gradable
+  questions on ONE shared Block-Model grid — complementary views of the same
+  comprehension model. This is a curriculum-level commitment, distinct from the
+  retired co-anchoring mechanism; with no orchestrator, its future carrier is
+  the recommender/curriculum layer. The quizzing-side anchor of the idea is the
+  SHARED `BlockCell` VOCABULARY — quarry quizzing deliberately imports
+  socratizing's `BlockCell` type for `QuizItem.cells` "so a learning environment
+  can place both registers on one grid" [relayed: ar-1, quarry quizzing README +
+  types] — a mechanized correspondence, distinct from the weaker, explicitly
+  partial Family↔Feature note in
+  [LIBRARY-CONTRACTS.md](./LIBRARY-CONTRACTS.md#catalog-frame-and-future-forms-s3).
+  ⚠ Field-name trap for any rebuilder: forward socratizing names the field
+  `block`; a verbatim quizzing port names it `cells` — the unification to one
+  `cells` view lived in the RETIRED source adapters and is itself unbuilt
+  collateral.
+
+## The un-colorized ruling record (R-4)
+
+Two locked decisions pull opposite ways on one axis — "does a read-only code
+view get syntax coloring?":
+
+- The quarry socratize spec, deliberately: the lens "deliberately does **not**
+  depend on `@codemirror/lang-javascript` / `@codemirror/theme-one-dark` — it
+  omits them to stay un-colorized" [read: quarry `lenses/socratize/README.md`,
+  verbatim] — highlighting OFF so the lens's own decorations carry the ONLY
+  meaning.
+- The lens playbook, universally: "coloring = a shared facts-driven read-only
+  highlighter" [read: MIGRATION-PLAYBOOK.md locked decision (1)] — while its own
+  locked decision (2) excludes socratize from the playbook's porting scope.
+
+**Ruling R-4 (human, 2026-08-05/06): the un-colorized pedagogy WINS for
+socratize.** The Stage-4 build keeps highlighting OFF; and BECAUSE a centralized
+colorize-all-lenses sweep is planned later, this record exists so that sweep
+skips socratize — the exception is otherwise invisible (doc-only). The quarry
+QUIZ lens is factually also un-colorized, and that is ALSO not test-pinned
+(doc-plus-sandbox): its component test explicitly declines to assert the
+property in jsdom ("absence-of-highlight-classes is a false-confidence assertion
+… verified at the 🔍 sandbox checkpoint" [read: quarry
+`lenses/quiz/tests/component.test.tsx` header]) — its read-only pins survive
+colorization, so no test meets the sweep. Whether quiz's coloring gets its own
+ruling is DEFERRED to lens-building time (R-4a: the human redirected lens-side
+questions — library first; consuming lenses later).
 
 ## Verification (per remaining stage)
 

@@ -5,7 +5,7 @@ recreate the off-repo-canon failure this campaign exists to fix. -->
 <!-- cspell:ignore socratizing socratize quizzing reenrichment stonebraker -->
 <!-- cspell:ignore bannered Toutes undercounts gagne tient pourquoi -->
 <!-- cspell:ignore enregistre l'enregistre préserver dispositioned -->
-<!-- cspell:ignore complet disambiguations ledgered -->
+<!-- cspell:ignore complet disambiguations ledgered unbuilt dans repoints -->
 
 # socratize-quiz re-enrichment — ruling log
 
@@ -76,6 +76,18 @@ are folded into the rulings and the FLAGGED section below.
   dependency omission — noting the playbook's own locked decision (2) excludes
   socratize from its porting scope.
 
+- **R-4a — no lens-coloring ruling beyond socratize; library first
+  (2026-08-10).** ["you are again conflating the core library with the consuming
+  lens. right now we should focus on the pedagogically soundest and richest
+  _library_, we can build consuming lenses later."] Raised when AR-1 on C4
+  measured that the quarry quiz lens's un-colorized property is NOT test-pinned
+  (its component test explicitly declines the jsdom assertion;
+  sandbox-checkpoint verification only) and asked whether R-4 should widen to
+  cover quiz. The human's answer: the question is lens-side and DEFERRED to
+  lens-building time. The false "test-pinned" claim — which entered via a C3
+  reviewer proposal relayed without re-measurement, the exact failure the
+  campaign's own hypothesis rule names — is corrected in both carrying files.
+
 - **R-5 — no fresh lens Phase-0 now; the library is the focus.** ["I'm more
   worried about the library, you can just copy-paste the lens DDDs for later
   implementation in another session. the socratize library is the brains and
@@ -117,6 +129,16 @@ are folded into the rulings and the FLAGGED section below.
   (test-harness posture note, non-overlap invariant sentence, falsehood
   rewording), AND a pre-Stage-3 `LIBRARY-CONTRACTS.md` is authored pinning the
   fine contracts that today exist only in the 36 quarry quiz-surface test files.
+
+- **R-10 — the orchestrator collateral's durable home is a carried-unbuilt note
+  in `lib/socratizing/DOCS.md` (2026-08-10).** ["Note dans socratizing/DOCS.md"]
+  AR-1 on C4 found the carry self-retiring: SPEC.md's banner authorizes
+  retirement after Stages 3/4/5, none of which consumes the three collateral
+  concepts, and R-2's "or re-homed" deletion clause would then resolve against
+  an empty referent. Ruled: SPEC's § Orchestrator collateral is promotion-only
+  (banner-exempt); its durable home is a short carried-unbuilt note in
+  `lib/socratizing/DOCS.md`, landing at C7 beside that file's coverage-prose
+  honesty fix; the C6 roadmap amendment cites that durable home.
 
 ## Work routing and ceremony
 
@@ -188,6 +210,37 @@ quiz-lens pinned editor posture added with its colorize-sweep implication (12).
 AR-1's counter-proposal B (a 36-row oracle-index table) was partially adopted
 via the no-cluster list; the full table is deferred to the Stage-3 session that
 will consume it.
+
+**Reviews fired on C4.** The first AR-1/AR-2 pair died on the weekly usage limit
+with no verdicts (2026-08-06); fresh dispatches after the 2026-08-10 resume are
+the reviews of record. `ar-1` → **PAUSE** (2 BLOCKERs + 11 concerns): BLOCKER 1
+— the "quiz lens is TEST-pinned un-colorized" claim is FALSE (the quarry test's
+own header declines the jsdom assertion); it had entered via a C3 reviewer
+proposal relayed without re-measurement, and was corrected in BOTH carrying
+files; the widening question it raised became the human's R-4a redirect (library
+first). BLOCKER 2 — the carry self-retired under SPEC's banner while R-2's "or
+re-homed" clause would read as satisfied over the empty referent; resolved by
+the human as R-10 (durable home in socratizing DOCS at C7; banner exemption).
+The eleven author-side items were applied: coverage-bullet sources extended to
+the compose pair with quotes re-attributed (3); the quarry's own "Ratify or
+adjust" status + named alternatives added to both instrument bullets, and the
+ladder opt-out to the ladder bullet (4); the cross-register scope-reduction
+caution added to the preamble (5); the C6-future-tense protection corrected with
+its zero-hit measurement (6); the malformed sweep tag fixed and the sweep
+re-enumeration adopted, naming local-llm's third "ladder" homonym (7, 10); the
+playbook's R-4 pointer + indexed-pony repoints routed to C7 (8);
+decorate/sort/strip annotated inside the parenthetical as the implementation
+technique, "documented but not itself pinned" (9); the one-grid cross-reference
+re-anchored on the shared `BlockCell` vocabulary with the `cells`-vs-`block`
+field trap named (11, 12); citation fragments, internal R-4 pointers, and the
+two verbatim quotes upgraded to [read:] (13). `ar-2` (fresh dispatch, review of
+record) → **CONSIDER** (5 concerns, all applied): the banner-side R-10 exemption
+clause added so both retirement authorities agree (1); the two files aligned on
+"not test-pinned (doc-plus-sandbox)" for quiz's un-colorized property, per
+R-4a's own phrasing (2); the ladder opt-out's compose-pair attribution added
+(3); the roadmap-absence tag given its reproducible command (4); this record's
+own two imprecise clauses reworded (5). AR-2 verified every mechanism claim in
+the two sections against the quarry and proposed no scope shrink under R-4a.
 
 ## FLAGGED — known gaps this campaign records but does not fix
 
