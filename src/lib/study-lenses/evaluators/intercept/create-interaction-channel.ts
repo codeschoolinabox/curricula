@@ -24,8 +24,10 @@
  * mid-interaction never throws out of a dead stream: a post-teardown answer
  * is inert whatever it carries, and one that would have failed validation
  * is `console.warn`ed — the dev defect is diagnosed rather than silently
- * timing-dependent (the AR-LOG's "Teardown wins over validation, plus a
- * diagnostic" entry).
+ * timing-dependent. Teardown wins over validation because the kind's
+ * "answering after teardown is a no-op, never a throw" is absolute, and the
+ * warning exists because silence would make one dev defect throw or not
+ * depending on unmount timing (human ruling 2026-08-04).
  */
 
 import freezeInPlace from '@utils/freeze-in-place.js';

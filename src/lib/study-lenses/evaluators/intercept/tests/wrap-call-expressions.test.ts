@@ -116,7 +116,7 @@ describe('wrapCallExpressions', () => {
 		it('the guard call is never wrapped', () => {
 			const guarded = spliceIterationGuards(original).code;
 
-			// PINNED(I1 ordering ruling, campaign ledger Rev-E: guards splice FIRST on the original source and the wrap SKIPS __$-prefixed callee names — the reverse order corrupts the attribution both instruments exist to provide)
+			// PINNED(human ruling 2026-08-05: guards splice FIRST on the original source and the wrap SKIPS __$-prefixed callee names — the reverse order corrupts the attribution both instruments exist to provide)
 			expect(
 				wrapCallExpressions({ guarded, original, sourceType: 'script' }),
 			).not.toContain('() => __$il');

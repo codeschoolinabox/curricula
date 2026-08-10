@@ -297,7 +297,7 @@ describe('createRunStream', () => {
 		});
 
 		it('a second pull after the defect settlement does not re-run the assemble', async () => {
-			// PINNED(human ruling 2026-08-05, H-7 in intercept's AR-LOG: found by intercept's ar-4 probe and reproduced here — a handle-only restart guard misses this route, since no handle is ever assigned, so every later pull re-assembled and re-warned)
+			// PINNED(human ruling 2026-08-05: found by probe in the sibling evaluator and reproduced here — a handle-only restart guard misses this route, since no handle is ever assigned, so every later pull re-assembled and re-warned)
 			const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 			const iterator = createRunStream(
 				specFor('let x = ;'),

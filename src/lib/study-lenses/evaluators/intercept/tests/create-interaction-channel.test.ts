@@ -252,7 +252,7 @@ describe('createInteractionChannel', () => {
 		});
 
 		it('an invalid answer after teardown does not throw', () => {
-			// PINNED(AR-LOG "Teardown wins over validation, plus a diagnostic": validation-first would make the same dev defect throw or not depending on unmount timing)
+			// PINNED(human ruling 2026-08-04: teardown wins over validation, plus a diagnostic — validation-first would make the same dev defect throw or not depending on unmount timing)
 			const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 			const { pending, teardown } = channelOf({
 				kind: 'prompt',

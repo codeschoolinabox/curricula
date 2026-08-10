@@ -353,7 +353,7 @@ describe('createInterceptStream', () => {
 				specFor('while (true) { let x = 1; }', { iterations: 5 }),
 			);
 
-			// PINNED(I1 ordering ruling, campaign ledger Rev-E: guards splice FIRST on the original text)
+			// PINNED(human ruling 2026-08-05: guards splice FIRST on the original text — the reverse order shifts the columns the guard reports)
 			expect(specs[0]?.code).toContain("__$il(1, '1:0:1:27');");
 		});
 
