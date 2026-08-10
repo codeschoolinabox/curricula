@@ -155,6 +155,18 @@ NEVER push.
 
 ## F2 — three fixtures that close the fold's remaining blind spots
 
+> ✅ **DONE 2026-08-05** — `2e9fa91f`, `28cbd114`, `46d77084`, `9564e178`,
+> `ae0b8bcc`, `1b516bd4`, `883431a6`. Record, rulings, AR verdicts and the
+> consolidated mutation evidence are in [AR-LOG.md](./AR-LOG.md) § F2 follow-on
+> — **read that before re-reading the analysis below.** Two of the three guards
+> landed at seam files (`orchestrate/lib/validating/tests/`'s
+> `create-memoized-validate.test.ts` and `assemble-parse-facts.test.ts`) rather
+> than where the bullets below point, on the 2026-08-05 human ruling "relocated
+> to where a guard can actually bite". Only the scaffold bullet needed
+> correcting — bullets 1 and 3 hold as written, and `validate.test.ts` remains
+> fold-blind by construction: its gap was closed at the seam, never in that
+> file.
+
 **Severity: low. Size: small, test-only. Unclaimed.**
 
 The fold is guarded by a net committed at `8da55d2f`, but three places outside
