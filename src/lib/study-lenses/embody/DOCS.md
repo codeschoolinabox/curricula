@@ -154,12 +154,16 @@ flowchart TD
 
 ## Parse decisions
 
-Settled decisions on the shape of the parse facts:
+Settled decisions on the shape of the parse facts (human ruling 2026-07-30; the
+parenthesis record extended by human ruling 2026-08-04). Test suites across the
+package pin these by short id — **Q1** the ESTree-shaped tree, **Q2** stable
+paths, **Q6** span parity across the fact stages — and each resolves to its
+bullet below:
 
-- **The published tree carries no parenthesis nodes.** Grouping parentheses are
-  source text, not structure: every downstream analyzer speaks the ESTree shape,
-  which deliberately has no node for them, and the path identities below stay
-  stable because no wrapper ever lengthens them. The source and token facts
+- **Q1 — The published tree carries no parenthesis nodes.** Grouping parentheses
+  are source text, not structure: every downstream analyzer speaks the ESTree
+  shape, which deliberately has no node for them, and the path identities below
+  stay stable because no wrapper ever lengthens them. The source and token facts
   still carry every parenthesis, as text and as tokens.
 - **The entwined binding records where grouping parentheses sat.** The parse
   itself recognizes each pair of grouping parentheses — the pair an expression
@@ -178,10 +182,10 @@ Settled decisions on the shape of the parse facts:
   region's own record beside that shape, not a parse-shape difference. At a
   parenthesis's own offset the offset index resolves to the enclosing node; a
   consumer needing paren→node builds the one-pass reverse index from the record.
-- **Nodes, tokens, and comments all carry source spans.** The scope analyzer
-  reads node ranges and throws without them; tokens and comments carry the same
-  span vocabulary so every parse fact cross-navigates in one currency — offsets
-  into the one source.
+- **Q6 — Nodes, tokens, and comments all carry source spans.** The scope
+  analyzer reads node ranges and throws without them; tokens and comments carry
+  the same span vocabulary so every parse fact cross-navigates in one currency —
+  offsets into the one source.
 - **Offsets, never line/column, in the fact values.** Offsets are the region's
   position vocabulary; line/column is presentation arithmetic a consumer
   derives, holding the source as it always does. The one exception: a failed
@@ -192,10 +196,12 @@ Settled decisions on the shape of the parse facts:
   numeric comparison that silently degrades on a string; one shared numeric year
   keeps the tokenizer, the parser, and the scope analysis reading the source at
   the same language version, so they cannot drift.
-- **Paths are the canonical node identity across the package — a published,
+- **Q2 — Paths are the canonical node identity across the package — a published,
   stable contract.** Consumers may persist and compare them within one tree; a
   change to the published tree's shape is a breaking contract change, never a
-  configuration tweak.
+  configuration tweak. Stability is what Q1 buys: no wrapper node ever lengthens
+  a path, so a path recorded against one reading of the source still names the
+  same node under another.
 
 ## Out of scope
 
