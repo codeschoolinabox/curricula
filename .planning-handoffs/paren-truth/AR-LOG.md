@@ -1,4 +1,4 @@
-<!-- cspell:ignore reddy unobjected greppable injective unlengthened quasis socratizing -->
+<!-- cspell:ignore reddy unobjected greppable injective unlengthened quasis socratizing numstat -->
 
 # AR-LOG — paren-truth campaign (Shape C: fold the parse, entwine the parens)
 
@@ -872,3 +872,31 @@ ar-5 re-ran the gate ten minutes later and measured
 `3409 passed | 8 todo (3417)` against a HEAD three foreign commits further on
 [relayed: ar-5, measured] — the shared tree moving under a review is the normal
 condition here, and it is why the changeset above is a SHA list.
+
+## F1 handoff refresh (2026-08-10)
+
+The follow-on's tail: § F2's DONE banner (`b508f310`), § F1's Addendum
+2026-08-10, and the untracked `START-HERE-paren-truth-followups.md` launchpad
+brought current (no commit — the file is untracked by its own design).
+
+### Human rulings (2026-08-10)
+
+1. **Sandbox inspection is required for F1, not optional.** The maintainer
+   expects 🔍 inspection points in a browser sandbox to visually judge the
+   entwined data structures; the "pure data, no user-visible surface" checkpoint
+   skip is not available to that unit. Recorded operationally in § F1's Addendum
+   2026-08-10 in [FOLLOW-ONS.md](./FOLLOW-ONS.md).
+2. **F1 goes to a fresh session** — design on the strongest available tier at
+   high effort, post-gate TDD may hand to a cheaper tier; ratified with this
+   tail's plan approval, per § Handoff agency's design-ahead rule.
+
+### A wrong number in `b508f310`'s immutable body, recorded same turn
+
+The body claims "15 insertions, 0 deletions [measured: git diff --numstat on
+this path]"; the landed diff is **12 insertions** [measured: `git show --numstat
+--format="" b508f310`]. The number was written from counting the edit's lines
+instead of running the cited command — the tag named a command that had not been
+run, which the leaner-bodies rule (previous section) exists precisely to forbid.
+Sixth occurrence of the sourced-claims family this campaign; amend is forbidden,
+so this entry is the repair. The banner's content claims are unaffected — only
+the insertion count is wrong.

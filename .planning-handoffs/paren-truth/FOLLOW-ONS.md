@@ -112,6 +112,41 @@ winner, so it has the identical mechanism — but vacuously, since the only
 colliding node is a bare `Identifier` whose span cannot contain a comment. Worth
 one sentence in whatever you write; not worth a fix.
 
+### Addendum 2026-08-10 — read together with the launch prompt
+
+The launch prompt below was context-free validated 2026-08-05; its substance is
+untouched. Four things post-date that validation:
+
+- **§ F2's three fold guards now exist** (`28cbd114`, `46d77084`, `9564e178`).
+  None of their fixtures contains an import/export specifier — the parser's only
+  aliasing sites — so no candidate above breaks them through the collision
+  [read: AR-LOG.md § The three fixtures, with their measured fold-sensitivity —
+  the three fixture strings are quoted there]. But candidate 2's own named
+  target, `assemble-parse-facts.test.ts`, now also carries a fold guard, and the
+  § F2 work planted **four new PINNED markers**, one in that same file.
+- **The pinned-guard hook is deregistered in the working tree** while HEAD
+  registers it, so NO PINNED marker in the repository is mechanically defended
+  right now — pin collisions are read-discipline only, and inverting one still
+  needs human sign-off. This is working-tree state: re-measure it at your start,
+  with one grep of `.claude/settings.json` against its HEAD copy.
+- **Sandbox inspection is required, not optional** (human ruling 2026-08-10):
+  the maintainer expects 🔍 inspection points in a **browser sandbox** to
+  visually judge the entwined data structures — the "no user-visible surface /
+  pure data" checkpoint skip is not available to this unit.
+  `evaluators/run/sandbox.html` already calls `embody()` live in a browser and
+  is the natural surface to extend (or a scratch page beside it): render
+  `facts.entwined.value.byPath` for a colliding fixture with both wrappers'
+  `tokens` arrays visible. Name the action and the expected observation — e.g.
+  "type `import { x } from "m";`, open the inspection panel; two byPath entries,
+  node identity shown, each wrapper's token count" — and fire one checkpoint at
+  the design fork and one before the Phase-1 close.
+- **Operating instructions**: open in plan mode as a design/Phase-0 unit on the
+  strongest available tier; the maintainer asked for **high effort on the design
+  phase** (their instruction); post-gate TDD may hand to a cheaper tier per
+  AGENTS.principal.md § Sub-Model Dispatch for Subagents. The human holds the
+  design fork, the Phase-0→1 gate, and the push. F5 and § F2 are both done —
+  re-measure every baseline at your start, as the prompt already commands.
+
 ### Launch prompt — F1
 
 ```text
@@ -122,8 +157,10 @@ FIRST — governance routing: read repo-root CLAUDE.md NOW; it routes by model i
 to AGENTS.md or AGENTS.principal.md. Read your routed file END-TO-END, then
 DEV.md END-TO-END. Governance outranks this brief everywhere they touch.
 
-THEN read .planning-handoffs/paren-truth/FOLLOW-ONS.md § F1 (this task), and the
-flag as originally recorded in .planning-handoffs/paren-truth/AR-LOG.md
+THEN read .planning-handoffs/paren-truth/FOLLOW-ONS.md § F1 (this task)
+INCLUDING its "Addendum 2026-08-10" directly above this prompt — it carries a
+binding sandbox-inspection ruling and the post-validation state — and the flag
+as originally recorded in .planning-handoffs/paren-truth/AR-LOG.md
 § "Post-AR-5 follow-ups" (NOT § "Phase-1 close" — the flag is not there).
 
 The defect: where two NodePaths resolve to the same acorn node object,
