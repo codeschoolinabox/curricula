@@ -3,19 +3,22 @@
 # Evaluator public-API restoration — LOSS LEDGER
 
 Every reference public-API member, classified. This artifact's absence is the
-recorded root cause of the original failure (AR-LOG § What happened); its
+recorded root cause of the original failure — a multi-week port verified every
+increment against its own new contract and never once diffed that contract
+against the implementation it replaced, so no gate could catch the loss; its
 per-increment discharge rule is the campaign's anti-failure mechanism (plan § 1:
 every Phase-1 increment names the rows it discharges).
 
 **Classification vocabulary** (HR-4): `restore` (the default — the member
 returns, reference-faithful) · `supersede` (a port-side or new design wins —
 ONLY with a named strength argument) · `drop` (the member does not return — ONLY
-with human sign-off). **RATIFIED 2026-08-06 in one pass** (AR-LOG § Ledger
-ratification — one bulk confirm of every PROPOSED row plus eight individual
-ESCALATE decisions): no row remains open; each carries its ruling or its
-sign-off date. Evidence cites the reference/port files directly; the full audit
-trail with per-member verification is `research-digests-2026-08-05.json` beside
-this file (keys `runAudit`, `interceptAudit`)
+with human sign-off). **RATIFIED 2026-08-06 in one pass** (human ruling
+2026-08-06, § Rulings of record below: one bulk confirm of every proposed row
+plus eight individual escalated decisions): no row remains open; each carries
+its ruling or its sign-off date. Evidence cites the reference/port files
+directly; the full audit trail with per-member verification is
+`research-digests-2026-08-05.json` beside this file (keys `runAudit`,
+`interceptAudit`)
 `[relayed: the two fidelity audits wf_7cb9c40a-f4c and wf_5c5b0dc6-37e, re-verified per row by the planning research agents]`.
 
 ## Shared handle contract (`shared/`)
@@ -117,18 +120,18 @@ this file (keys `runAudit`, `interceptAudit`)
 
 ## intercept — entwining
 
-| member                                                  | classification                                                    | rationale                                                                                                                                                                                                | evidence                                                               |
-| ------------------------------------------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `nodePath` per event                                    | restore (ruled HR-12)                                             | enumerable plain string, joined thread-side via offsets → `entwined.byOffset` → deepest-exact-span ascent                                                                                                | quarry `link/types.ts:145`                                             |
-| offset pair on events                                   | ADDITION (ruled HR-12)                                            | stamped near-free from the wrap's original-text parse; the coordinate valid in both spaces — answers the I8 carried-forward question                                                                     | wrap parse `start`/`end`                                               |
-| `node` live reference                                   | restore-as-accessor (ruled HR-12 — mechanism ratified 2026-08-06) | NON-ENUMERABLE accessor resolving the REAL `EntwinedNode` — JSON-safe, §13-clean; an enumerable own-property ref would re-create the shadow-graph/cycle problems the quarry's own newer tracer abandoned | quarry `link/types.ts:147`; `trace/semantics/tracing/types.ts:845-850` |
-| `prev` / `next` timeline links                          | restore-as-accessors (ruled HR-12)                                | installed inside `onMessage` before yield; mutable-pointer closure = the NAMED no-mutable-closures exception                                                                                             | quarry `link/types.ts:152, :162`                                       |
-| `callee` / `calleePath`                                 | restore-as-accessor/derived (ruled HR-12)                         | resolved off the joined CallExpression node                                                                                                                                                              | quarry `link/types.ts:170, :175`                                       |
-| `node.events[]` back-refs                               | supersede (ruled HR-12)                                           | STRENGTH: embody's graph is frozen and cannot grow arrays; `eventsByNode` on the result carries the same join, JSON-safe                                                                                 | quarry `link/types.ts:100`                                             |
-| `nodePathSource` 3-state provenance                     | drop (audit-refuted)                                              | 2 of 3 values unreachable in the port architecture; `'instrumented'` ≡ `loc !== null`                                                                                                                    | Appendix A                                                             |
-| `loc === node.loc` identity                             | drop (signed 2026-08-06)                                          | loc survives as a fresh per-event span; identity served replay-adjacent navigation                                                                                                                       | quarry `link/types.ts:148`                                             |
-| `'enclosing-fallback'` (stack → deepest enclosing node) | restore (ruled 2026-08-06 — AST-side)                             | deepest-enclosing-node via `entwined.byOffset` at halt time — cheap, exact, §13-clean, NEVER a stack parse; supersedes pin intercept:208 (disposition flipped in the AR-LOG table by this ratification)  | quarry `link/lookup-node-path.ts:45,:79`                               |
-| link/ shadow AST tree (456 lines)                       | supersede (ruled HR-12)                                           | STRENGTH: duplicates `entwined` nearly field-for-field, mints a second node-identity space, and its post-freeze mutation pattern conflicts with DEV.md §13                                               | `link/build-location-index.ts` vs embody `types.ts:191-215`            |
+| member                                                  | classification                                                    | rationale                                                                                                                                                                                                       | evidence                                                               |
+| ------------------------------------------------------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `nodePath` per event                                    | restore (ruled HR-12)                                             | enumerable plain string, joined thread-side via offsets → `entwined.byOffset` → deepest-exact-span ascent                                                                                                       | quarry `link/types.ts:145`                                             |
+| offset pair on events                                   | ADDITION (ruled HR-12)                                            | stamped near-free from the wrap's original-text parse; the coordinate valid in both spaces — answers the I8 carried-forward question                                                                            | wrap parse `start`/`end`                                               |
+| `node` live reference                                   | restore-as-accessor (ruled HR-12 — mechanism ratified 2026-08-06) | NON-ENUMERABLE accessor resolving the REAL `EntwinedNode` — JSON-safe, §13-clean; an enumerable own-property ref would re-create the shadow-graph/cycle problems the quarry's own newer tracer abandoned        | quarry `link/types.ts:147`; `trace/semantics/tracing/types.ts:845-850` |
+| `prev` / `next` timeline links                          | restore-as-accessors (ruled HR-12)                                | installed inside `onMessage` before yield; mutable-pointer closure = the NAMED no-mutable-closures exception                                                                                                    | quarry `link/types.ts:152, :162`                                       |
+| `callee` / `calleePath`                                 | restore-as-accessor/derived (ruled HR-12)                         | resolved off the joined CallExpression node                                                                                                                                                                     | quarry `link/types.ts:170, :175`                                       |
+| `node.events[]` back-refs                               | supersede (ruled HR-12)                                           | STRENGTH: embody's graph is frozen and cannot grow arrays; `eventsByNode` on the result carries the same join, JSON-safe                                                                                        | quarry `link/types.ts:100`                                             |
+| `nodePathSource` 3-state provenance                     | drop (audit-refuted)                                              | 2 of 3 values unreachable in the port architecture; `'instrumented'` ≡ `loc !== null`                                                                                                                           | Appendix A                                                             |
+| `loc === node.loc` identity                             | drop (signed 2026-08-06)                                          | loc survives as a fresh per-event span; identity served replay-adjacent navigation                                                                                                                              | quarry `link/types.ts:148`                                             |
+| `'enclosing-fallback'` (stack → deepest enclosing node) | restore (ruled 2026-08-06 — AST-side)                             | deepest-enclosing-node via `entwined.byOffset` at halt time — cheap, exact, §13-clean, NEVER a stack parse; supersedes pin intercept:208 (disposition flipped in § Pin dispositions below by this ratification) | quarry `link/lookup-node-path.ts:45,:79`                               |
+| link/ shadow AST tree (456 lines)                       | supersede (ruled HR-12)                                           | STRENGTH: duplicates `entwined` nearly field-for-field, mints a second node-identity space, and its post-freeze mutation pattern conflicts with DEV.md §13                                                      | `link/build-location-index.ts` vs embody `types.ts:191-215`            |
 
 ## intercept — error taxonomy and stream
 
@@ -146,7 +149,7 @@ this file (keys `runAudit`, `interceptAudit`)
 | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------- |
 | REFERENCE run sandbox: IO toggles, styled dialogs, console dumps (`[run handle]`/`[run result]`), unexpected-throw catch, presets (+ timeout preset), max-seconds control                       | restore (ruled HR-15) | the reference pages are fidelity targets; the slow-mock cancel rig returns ADAPTED (cancel-waits-for-mock is superseded — the rig demonstrates discard-on-stop instead)        | quarry `run/sandbox.html`                         |
 | DEPRECATED-PORT sandboxes: intercept C2 card flows (5 checkpoint items), full-data serializer (present-but-`undefined` rendered, live `respond` shown), per-arm presets; run's page equivalents | restore (ruled HR-15) | "carefully crafted — migrate them too with the same attention to fidelity"; full feature inventory of both deprecated pages taken at R6/I8 execution and appended here as rows | port `run/sandbox.html`, `intercept/sandbox.html` |
-| sandbox cadence                                                                                                                                                                                 | ruled HR-15           | pages built EARLY in each chain, extended per increment; every user-observable increment fires its own 🔍; variables' declared skip OVERRIDDEN — it gets a page                | AR-LOG HR-15                                      |
+| sandbox cadence                                                                                                                                                                                 | ruled HR-15           | pages built EARLY in each chain, extended per increment; every user-observable increment fires its own 🔍; variables' declared skip OVERRIDDEN — it gets a page                | human ruling 2026-08-06 (HR-15) below             |
 
 ## docs-only rows
 
@@ -179,3 +182,237 @@ redesign; handle already `AsyncIterable & {result, cancel, fail}`; result
 conventions that MATCH current embody (verified); its settlement speaks the
 engine's five outcomes — its vocabulary under HR-8 is P0-V's design question,
 not silently inherited.
+
+---
+
+## Rulings of record
+
+The campaign's binding decisions, each dated at the turn the human gave it. This
+section is the home; the plan of record
+(`~/.claude/plans/read-and-execute-the-rosy-sky.md` § ②) mirrors them for
+execution and never holds one alone.
+
+### Scope and posture
+
+- **Fidelity-first (human ruling 2026-08-06, HR-4).** The task is to port the
+  REFERENCE signature and behavior (`src/lib/embody/lib/evaluating/`). A
+  port-side deviation survives ONLY where demonstrably stronger, and every such
+  exception is named in this ledger with its strength argument. The default
+  classification is `restore`.
+- **`danger/` is out of scope for repair (human ruling 2026-08-05, HR-1).** Its
+  synchronous-only IO mocks (`danger/backend/types.ts:63`, with the constraint
+  at `:57` that a real `<script>` cannot `await`) are expected and correct.
+  Corollary: danger having mocks does NOT excuse run not having them — that
+  reasoning is re-partitioning, and run's IO question stands on its own.
+- **Replay stays out (human ruling 2026-08-05, HR-2).** The port's non-goal at
+  `lib/engine/DOCS.md:174-175` — _"Replay by re-iterating a settled handle — the
+  result's items array is the cache; each evaluate call is a fresh run"_ — is
+  affirmed. The re-iteration machinery in `create-execution.ts` is therefore NOT
+  part of the migration: the handle contract is wanted, the replay cache is not.
+- **Scope (human ruling 2026-08-06, HR-10):** run + intercept rebuild plus the
+  trace/variables port; variables was never audited, so its own fidelity pass
+  precedes its Phase 0 and is staged strictly later so it cannot block
+  run/intercept. trace/semantics, trace/syntax and adapter/ are future
+  campaigns. The kind is designed against the fourteen tracer
+  forward-compatibility requirements (`research-digests-2026-08-05.json`, key
+  `tracers`).
+- **Build forward; deprecate and rebuild (human ruling 2026-08-06, HR-11 +
+  HR-14).** New commits only, no reverts. The current port evaluators are
+  renamed to `src/lib/study-lenses/evaluators-deprecated` (single-dash,
+  kebab-legal) and `evaluators/` is rebuilt fresh under the canonical name, with
+  the quarry AND the deprecated port both serving as references. The deprecated
+  region stays in tsc and vitest, frozen — compile-and-green only; its exit
+  condition is danger's future migration onto the new kind.
+
+### The contract
+
+- **A handle, not a bare stream (human ruling 2026-08-05, HR-3).** `main()`
+  returns the reference's shape —
+  `AsyncIterable & PromiseLike & { result, cancel }` — widened per evaluator
+  with its own eager fields. Ruled on three grounds: zero current consumers, the
+  handle being a strict superset that leaves consumer-paced iteration intact,
+  and `AsyncIterable<never>` being a shape that exists only to satisfy an
+  interface it does not benefit from. Consequences ruled in by implication: the
+  shared kind's `types.ts` changes (it declares `main`'s return type, so eager
+  fields cannot be added evaluator-side); it is a Phase-0 contract redesign with
+  `ar-1` and `ar-2`; and eager-versus-deferred is a per-evaluator choice, which
+  the reference itself made both ways (`run/types.ts:203` synchronous,
+  `intercept/types.ts:315` a Promise).
+  - **Its consequence 2 is superseded in mechanism (2026-08-06).** HR-3 said
+    danger gets touched to keep compiling. Under HR-11/HR-14 the old kind's
+    `types.ts` is never edited — it rides into `evaluators-deprecated/`
+    untouched — so danger keeps compiling with ZERO edits (zero importers
+    outside the region, no engine imports, inside tsc and vitest). The
+    obligation is discharged by the old kind's immutability, not by an edit.
+- **The full generator surface (human ruling 2026-08-06, HR-5).** intercept's
+  handle widens to `.next`/`.return`/`.throw` plus
+  `{ fail, code, options, ast }` per the reference (`intercept/types.ts:261`).
+  Where the reference's own semantics were accidental or engine-incompatible —
+  `.throw` was the NATIVE generator method, only next/return were overridden —
+  this ledger specifies the replacement and records the delta as its own row.
+- **Both consumption modes (human ruling 2026-08-06, HR-6).** `for await`
+  step-through AND `await handle` → the complete result. Creation stays inert:
+  the run starts at first consumption (first pull OR first await), never at
+  construction. This is the campaign's one laziness carve-out against the
+  reference, which queueMicrotask-auto-started at creation
+  (`shared/create-execution.ts:107-117`); it also kills that design's
+  one-microtask claim race.
+- **Drain-on-await cancels at an unanswered ask (human ruling 2026-08-06,
+  HR-7).** Under a batch drain, an intercept ask nobody answers cancels the run
+  at that ask, settling with the events so far. "Unanswered" is STRUCTURAL — no
+  mock supplied for that verb — never temporal.
+- **Reference names and values, wholesale (human ruling 2026-08-06, HR-8).**
+  `Execution`, `RunHandle`, `RunResult`, `InterceptHandle`, `InterceptResult`,
+  `outcome: 'complete'|'cancel'|'fail'|'timeout'|'iteration-limit'|'error'`,
+  `ok`, the result fields (`events`, `code`, `options`, `ast`, `visitCounts`),
+  and the reference's event-field spellings all return. Port enrichments ride as
+  ADDITIONS in reference style: machinery-defect discrimination as an added
+  error kind, `loc` plus an offset pair on events, the pending-interaction arm,
+  and the `trip` record on iteration-limit.
+- **IO mocks on both evaluators (human ruling 2026-08-06, HR-9).** run gains
+  worker dialog traps over the engine's existing `onCall` seam; a supplied mock
+  answers, and no mock settles a classified io-error outcome. intercept answers
+  mocks at its `serveAsk` seam BEFORE a pending interaction is minted; no mock
+  yields the pending interaction as today. `io.console` per-method callbacks
+  return.
+- **Entwining re-derived against current embody (human ruling 2026-08-06,
+  HR-12).** The reference's event signatures predate today's
+  `src/lib/study-lenses/embody/`, so fidelity here targets the CAPABILITY, not
+  the mechanism. Events gain an offset pair stamped from the wrap's
+  original-text parse; enrichment happens thread-side inside `onMessage`, before
+  the engine's shallow freeze-at-yield (`lib/engine/evaluate.ts:275`); the
+  result carries `eventsByNode` and `visitCounts`; `link/`'s shadow AST tree is
+  NOT ported. **Mechanism:** enumerable event fields stay plain data (`step`,
+  `loc`, offsets, `nodePath`); `node`, `prev`, `next` and `callee` are
+  NON-ENUMERABLE ACCESSORS resolving through `facts.entwined.byPath` and a
+  thread-side pointer, so `JSON.stringify` stays safe while `event.node` answers
+  with the real `EntwinedNode`. The mutable-pointer accessor is a NAMED
+  exception to the no-mutable-closures rule, scoped: installed inside
+  `onMessage` before return, never written after yield. **Caveat carried
+  deliberately:** the quarry precedent at
+  `trace/semantics/tracing/types.ts:836-843` covers `prev`/`next` ONLY — that
+  tracer explicitly DECLINES a `.node` reference (`:845-849`, _"There is no
+  `.node` reference — attribute via `event.nodePath`"_). The `.node`/`.callee`
+  accessors therefore EXTEND the precedent rather than follow it; `ar-1` must
+  challenge that extension on its own terms.
+- **Tracer config fidelity targets git history (human ruling 2026-08-10,
+  HR-16).** The trace config surfaces were painstakingly crafted with the
+  creator of Aran, and the working-tree quarry copy is itself a descendant — so
+  the fidelity target is the RICHEST revision in history, not the current
+  checkout. Anchors
+  `[measured: git log --follow over the quarry's semantics/config.types.ts; git log --diff-filter=A over '*trace*/config*']`:
+  a full `configuring/` pipeline (ajv schema validation, expand-shorthand,
+  fill-defaults, prepare-config, validate-config, tests, README) exists at
+  `68fa9981` and `c969412b` under
+  `src/lib/welcome-to-programming/just-enough/javascript/lib/evaluating/trace/`.
+  Consequences: every tracer fidelity audit sweeps history (`git log --follow`
+  plus `git show <sha>:<path>`) and may cite `SHA:path` as reference evidence;
+  the kind must not foreclose that config richness; and the semantics port's
+  future audit opens with this archaeology.
+
+### Ceremony and sandboxes
+
+- **`ceremony: full` (human ruling 2026-08-05, HR-13):** AR-1 · AR-2 · AR-3 on
+  every un-skip · AR-4 on every increment · AR-5. Uniform within the level — no
+  agent-side lightening.
+- **Sandbox cadence and sandbox fidelity (human ruling 2026-08-06, HR-15):**
+  sandbox pages are built EARLY in each evaluator chain and extended per
+  increment, so every user-observable increment fires its own 🔍 checkpoint
+  rather than one end-of-chain check; the declared 🔍 skip for variables is
+  overridden. And the DEPRECATED port's sandbox pages are fidelity targets
+  alongside the reference's — both lineages' page features are inventoried in
+  this ledger's sandbox section, and the rebuilt pages carry the union.
+
+### The ratification, and what it settled (human ruling 2026-08-06)
+
+One pass over every row. The bulk confirm covered all proposed rows, including
+the two mechanisms that had been earmarked for the Phase-0 design gate — the
+creation-inert carve-out and the accessor-based enrichment — so that gate keeps
+only its design-review role. The eight escalated decisions:
+
+- **Error `line`** — restore on intercept, which already carries a wrap-style
+  `loc` richer than the reference's line; DEFERRED on run, which has no wrap
+  layer, so run-side call-site instrumentation is a named future increment.
+  Never a stack parse; the reference's own untested numbers are not the
+  conformance target.
+- **`phase: 'creation' | 'execution'`** — IN SCOPE as its own engine increment:
+  the engine's single try/catch splits and the worker stop record gains the
+  discriminant. Additive, with its own AR pair.
+- **Clean-arm `iterationCount`** — ADDED, reference-plus: the total is already
+  computed under always-splice, and it rides the results rather than the
+  settlement floor.
+- **In-stream `ErrorEvent`** — RESTORED: intercept's event union gains an error
+  arm carrying `step` and `loc`, landing in stream order; the settlement keeps
+  the structured form. Both, as the reference had.
+- **Enclosing-fallback attribution** — RESTORED AST-side, via
+  `entwined.byOffset` at stop time: cheap, exact, and never a stack parse.
+- **Gate arms (`rejections`, formatting)** — resolved by the current
+  architecture rather than restored: level marking is the ORCHESTRATOR's
+  (screening plus the language level's validate plus orchestrate marking,
+  live-wired) and embody is level-blind by contract (`embody/DOCS.md:101-105`,
+  _"a language level decides what is ALLOWED"_); formatting is level-shipped
+  editor-support DATA (`language-levels/README.md:46-48`) consumed by the
+  orchestrator's editor adapter (`orchestrate/README.md:113`). Already recorded
+  in those regions' own docs — nothing returns to evaluators.
+- **`.fail` on run** — NOT added. The reference asymmetry is kept: fail is the
+  mid-stream consumer stop, run yields nothing, and cancel covers its one stop;
+  fail rides intercept and the tracers.
+
+## Pin dispositions
+
+The rebuild happens in a new directory, so a new-region build never trips the
+pinned-guard on the deprecated region's settled expectations. This table is what
+prevents their re-litigation. Inventory
+`[measured: grep -n "// PINNED" over create-run-stream.test.ts (9 rows) and create-intercept-stream.test.ts (18 rows)]`,
+paths relative to `src/lib/study-lenses/evaluators-deprecated/`. Disposition
+vocabulary (closed): **retained** — the behavior carries into the new region and
+the pin's authority travels with it; **re-scoped** — true of the iteration path
+once the await path exists; **superseded** — the new region deliberately
+contradicts it. No pin fell outside the vocabulary.
+
+| file:line     | pinned claim (short)                                                                            | disposition | authority                                                                                                                            |
+| ------------- | ----------------------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| run:103       | nothing engine-side before the first pull; result access starts a run                           | retained    | HR-6 keeps it — await counts as consumption, not an earlier start                                                                    |
+| run:140       | teardown answers OUT OF BAND, never via generator return queueing                               | retained    | carried into the new handle design (the `.return()` sequencing)                                                                      |
+| run:154       | a pull after teardown never starts a fresh run                                                  | retained    | —                                                                                                                                    |
+| run:208       | guard increments before comparing; cap N trips at N+1                                           | retained    | iteration-guard transports byte-identical                                                                                            |
+| run:217       | guards splice on the ORIGINAL source; trip span faithful                                        | retained    | HR-12 relies on it                                                                                                                   |
+| run:235       | iterations rides through unchanged (no clamp/default/gate)                                      | retained    | —                                                                                                                                    |
+| run:272       | the engine's refinement hook goes unused; the stop record is authored where the raw throw lives | retained    | —                                                                                                                                    |
+| run:289       | no machine ran → no machinery cause is honest                                                   | retained    | defect taxonomy rides as an HR-8 addition                                                                                            |
+| run:300       | restart guard: a handle-only guard misses the defect route                                      | retained    | human ruling 2026-08-05 (H-7)                                                                                                        |
+| intercept:118 | nothing engine-side before the first pull                                                       | retained    | HR-6, as run:103                                                                                                                     |
+| intercept:173 | both sources join ONE arrival queue in worker post order                                        | retained    | carried into the stream factory's rebuild                                                                                            |
+| intercept:200 | the wrap stamps the innermost call site, end to end                                             | retained    | —                                                                                                                                    |
+| intercept:208 | statement-level throw outside any wrap → loc null; NO stack parse                               | superseded  | ledger ratification 2026-08-06 — enclosing-fallback attribution restored AST-side via `entwined.byOffset`; still NEVER a stack parse |
+| intercept:250 | the fake rejects an async round-trip (property of the double)                                   | retained    | engine + fake untouched                                                                                                              |
+| intercept:265 | a pull after teardown never starts a fresh run                                                  | retained    | —                                                                                                                                    |
+| intercept:292 | teardown out of band, never through the engine's stream exit                                    | retained    | the `.return()` sequencing builds ON it                                                                                              |
+| intercept:309 | teardown LATCHES; a later pull is inert                                                         | retained    | aligns with HR-2                                                                                                                     |
+| intercept:337 | the stream must be pulled for every event; one pull starts, not finishes                        | re-scoped   | HR-6 — true of the ITERATION path; the await path drains without consumer pulls                                                      |
+| intercept:356 | guards splice FIRST on the original text                                                        | retained    | —                                                                                                                                    |
+| intercept:361 | splice order not interchangeable (columns shift)                                                | retained    | —                                                                                                                                    |
+| intercept:394 | iterations rides through unchanged                                                              | retained    | —                                                                                                                                    |
+| intercept:443 | no machine ran → no machinery cause is honest, inherited                                        | retained    | —                                                                                                                                    |
+| intercept:456 | assemble-defect settlement frozen outside the mapper                                            | retained    | —                                                                                                                                    |
+| intercept:465 | restart guard, both modules                                                                     | retained    | human ruling 2026-08-05 (H-7)                                                                                                        |
+| intercept:480 | an outstanding pull completes as the stream's end, any route                                    | retained    | —                                                                                                                                    |
+| intercept:495 | yield charge named; loop safety rests on iterations                                             | retained    | the engine's yield-charge opt-out is the narrow fix that ruling anticipated, not a contradiction                                     |
+| intercept:504 | flat charge arithmetic; a floor of 500 is meaningful                                            | retained    | same note                                                                                                                            |
+
+## Open items carried into execution
+
+- **The engine's yield-charge opt-out** — raised first by the semantics tracer,
+  re-raised by intercept (human ruling 2026-08-04): the engine deducts a flat
+  charge per yielded event against a 5-second default, so a densely emitting
+  program times out with almost no real runtime. The ruling was "budget for it,
+  and treat the narrow fix as the engine's": emit everything, name the cost,
+  rest loop safety on the iterations cap. The opt-out on the engine spec is this
+  campaign's first engine increment; both intercept and trace/variables qualify
+  for it.
+- **`evaluators/PHASE-1-HANDOFF.claude-delete-if-stale.md` is KEPT** (human
+  ruling 2026-08-04). Untracked and never committed, so deletion would be
+  unrecoverable; 29 of its 148 lines are tracer material — quarry prior art, the
+  variable/binding/environmentDiff event design, and open decisions for later
+  sprints. It rides any region move untouched, and the variables phase is its
+  natural reader.
