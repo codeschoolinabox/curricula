@@ -90,9 +90,9 @@ session.
 - **RESUMPTION POINT** — SPLIT (AR-1 concern 5 rejected the first draft's
   blanket "historical" justification): the Stage-1 status + SHAs survive in the
   stage table; the HEAD-specific push-gate warning is historical; the
-  **cspell-before-push obligation is STILL LIVE** and is carried as AR-LOG F-4 +
-  SPEC § Verification (both preconditions re-measured: the Stage-1 commits are
-  not on origin/main; node is v20.11.0).
+  **cspell-before-push obligation is STILL LIVE** and is carried in SPEC §
+  Verification (both preconditions re-measured: the Stage-1 commits are not on
+  origin/main; node is v20.11.0).
 - **§ Stage-1 learnings** — TRANSPORTED (four gotchas), minus the "R1 did not
   fire" historical note.
 - **§ Stage-2 cold-start specifics** — mostly executed; the live residue
@@ -137,9 +137,10 @@ session.
   (Stage-3 cell).
 - **Closing one-liners** — the ignored-`_scope`-param fact TRANSPORTED (§ Scope
   adapter); the "frozen at `0fca239`" claim OMITTED as STALE (the quarry has
-  moved since — the sanctioned prettier sweep, AR-LOG F-3; copies verify against
-  current HEAD blobs instead); the "live M2 owner — coordinate" note OMITTED as
-  superseded by Q1 (marked in the Q1 row).
+  moved since — the maintainer's sanctioned prettier sweep `59043f52` (SPEC §
+  The quarry is READ-ONLY); copies verify against current HEAD blobs instead);
+  the "live M2 owner — coordinate" note OMITTED as superseded by Q1 (marked in
+  the Q1 row).
 
 ## Explicitly NOT omitted (checked against the audit's loss list)
 

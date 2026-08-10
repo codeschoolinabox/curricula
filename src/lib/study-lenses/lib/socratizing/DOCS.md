@@ -82,6 +82,23 @@ levels: `syntax`, `semantics`, `connections`, `goals`, `userExperience`. The raw
 `block` cells are retained in each question for auditing. Consumers filter by
 `levels`; the curriculum team audits by `block`.
 
+<!-- cspell:ignore unbuilt reenrichment socratize -->
+
+### Orchestrator collateral (carried, unbuilt)
+
+Three concepts from the retired question-orchestrator are carried forward as
+future work, none discarded (human ruling 2026-08-05/06; durable home here,
+human ruling 2026-08-10): the spans-and-gaps **coverage reporter** over the
+12-cell grid (no such instrument exists in this module or anywhere forward — the
+cells make coverage auditable, nothing yet reports it); the **Block-Model
+difficulty ladder** (concrete-to-abstract question ordering — nothing forward
+orders questions by difficulty; this module sorts by source offset); and the
+**two-registers-on-one-grid goal** shared with the future quiz register. The
+carried specs live in `.planning-handoffs/socratize-quiz-reenrichment/SPEC.md` §
+Orchestrator collateral; landing sites are decided at the consuming stage's
+design review, and the quarry `lib/question-orchestrator/` tests remain the
+pinned truth until then.
+
 ### PBSI vocabulary
 
 Context strings use Purpose, Behavior, Strategy, and Implementation naturally.

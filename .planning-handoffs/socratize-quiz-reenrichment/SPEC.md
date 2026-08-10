@@ -1,15 +1,15 @@
 <!-- TRANSITIONAL — this spec is the in-repo forward canon for the
-question-register lens campaign (rulings R-1/R-1a, AR-LOG.md). Retire a
-section only when the stage that consumes it lands and its own module docs
-carry the content; retire the file only when Stages 3, 4, and 5 have all
-landed — EXCEPT § Orchestrator collateral, which is promotion-only (ruling
-R-10) and retires only into its durable home, the carried-unbuilt note in
-lib/socratizing/DOCS.md; see that section's preamble. LIBRARY-CONTRACTS.md
-and § Orchestrator collateral are in place; lens-ddd/ lands at increment C5
-— links to it resolve from that increment forward. -->
+question-register lens campaign (human rulings 2026-08-05/06, inline
+below). Retire a section only when the stage that consumes it lands and its
+own module docs carry the content; retire the file only when Stages 3, 4,
+and 5 have all landed — EXCEPT § Orchestrator collateral, which is
+promotion-only (human ruling 2026-08-10) and retires only into its durable
+home, the carried-unbuilt note in lib/socratizing/DOCS.md; see that
+section's preamble. -->
 <!-- cspell:ignore socratizing socratize quizzing reenrichment stonebraker -->
 <!-- cspell:ignore unbuilt subgraph relitigate PBSI bannered bannering -->
 <!-- cspell:ignore repoint readwrite Behaviour unleveled rebuilder distractor -->
+<!-- cspell:ignore dispositioned -->
 
 # Question-register lenses — forward canon (re-homed)
 
@@ -17,12 +17,14 @@ The forward plan for the two question-register lenses (`socratize`, `quiz`) and
 their engines, transported in-repo from
 `~/.claude/plans/read-and-execute-the-indexed-pony.md` (previously the canonical
 plan), `…-the-playful-stonebraker.md`, and
-`…/supplement-indexed-pony-scope-gotchas.md` per rulings R-1/R-1a
-([AR-LOG.md](./AR-LOG.md#human-rulings--2026-08-0506-askuserquestion-campaign-opening)).
-All three source files carry RE-HOMED banners as of 2026-08-06 [measured: head
--8 on each after bannering]; **this file is the canon.** Omissions from the
-transport are enumerated in [LOSS-LEDGER.md](./LOSS-LEDGER.md). Governance
-outranks this spec: `CLAUDE.md → AGENTS[.principal].md → DEV.md`.
+`…/supplement-indexed-pony-scope-gotchas.md`. **The transport is the human's
+re-home ruling** (human ruling 2026-08-05/06, extended 2026-08-06 to the
+supplement when review surfaced it): the still-live content of all three
+off-repo files moves in-repo in full, and the off-repo files become bannered
+history. All three carry RE-HOMED banners as of 2026-08-06 [measured: head -8 on
+each after bannering]; **this file is the canon.** Omissions from the transport
+are enumerated in [LOSS-LEDGER.md](./LOSS-LEDGER.md). Governance outranks this
+spec: `CLAUDE.md → AGENTS[.principal].md → DEV.md`.
 
 ## Terms (disambiguation a Stage-3/4/5 executor needs on day one)
 
@@ -71,10 +73,12 @@ adapter to the greenfield **Facts** model. This mirrors how `engine` and
 
 The prior architecture at `src/lib/study-lenses--deprecated-architecture/` is a
 byte-identical reference. Never modify, move, or delete under it. Migration =
-read the quarry, write new code into `src/lib/study-lenses/`. (One sanctioned
-exception on record:
-[AR-LOG.md § FLAGGED](./AR-LOG.md#flagged--known-gaps-this-campaign-records-but-does-not-fix),
-F-3.)
+read the quarry, write new code into `src/lib/study-lenses/`. One sanctioned
+exception on record: the maintainer's own prettier drift sweep (`59043f52`)
+reformatted quarry docs [measured: `git show --stat 59043f52` → 48 quarry files]
+— an authorized maintainer action, not a breach; line-number citations into
+quarry docs from before that sweep were re-validated after it, and quarry
+citations here use test TITLES, not line numbers, for exactly this reason.
 
 ## Locked decisions (maintainer-ratified 2026-07-22; do not relitigate)
 
@@ -143,8 +147,8 @@ writeme].
 | 1     | `classifying`    | `lib/classifying/`  | **COMPLETE** | — (landed `21f871bd`/`83520c77`/`c935ef59` [measured: `git rev-parse` on each]; public shape frozen per Q8)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | 2     | `socratizing`    | `lib/socratizing/`  | **COMPLETE** | — (engine 361 tests + `lib/scoping` adapter 35 tests [measured: `./node_modules/.bin/vitest run --project unit` per dir, 2026-08-06]; offset flip landed)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | 3     | `quizzing`       | `lib/quizzing/`     | unbuilt      | Realm-free port (decision 4) from quarry `lib/quizzing/`. Port the rest verbatim; quarry tests are the oracle. Scope surface lives in `resolving/read-scope-forest.ts` + `resolving/resolve-binding.ts` (7 scope-forest generators V6/V6b/V7/V8/V10a–c); **the shim is R-6-constrained** (legacy tracked set incl. `var`; see Q13 and [LIBRARY-CONTRACTS.md](./LIBRARY-CONTRACTS.md)). The 3 free generators V1/V2/V4 anchor via the pure in-file AST walk `context/descend-identifiers.ts` — zero scope wiring; port first. Entry rewire `Snippet→Facts` in `generate-quiz`/`build-context`; inline `NodePath` type-only — and note the legacy alias is bare `type NodePath = string` while greenfield embody's `NodePath` is its own dot-delimited type: which format `anchorPath` carries is Stage-3 AR-1 material. Confirm Q12. |
-| 4     | `socratize` lens | `lenses/socratize/` | unbuilt      | The one genuine build — quarry source is documentation-only (quarry `lenses/socratize/`). Build from the annotated DDD copies ([lens-ddd/socratize/](./lens-ddd/socratize/), lands at C5) applying § Socratize DDD rewrite below. Deliverables: `core.ts` + `index.tsx` + `tests/` + css, mirroring the two-layer `writeme` module shape. Full ZOMBIES TDD. Gate: `applicability = facts.ast.ok`. **Un-colorized per ruling R-4 (§ The un-colorized ruling record).**                                                                                                                                                                                                                                                                                                                                                               |
-| 5     | `quiz` lens      | `lenses/quiz/`      | unbuilt      | Verbatim port through inc 7 from quarry `lenses/quiz/` (annotated DDD copies: [lens-ddd/quiz/](./lens-ddd/quiz/), lands at C5). Envelope rewire isolated to `build-quiz.ts` + `index.tsx` + `core.ts` gate/recommend signatures — don't miss `core.ts`. Item-consumer graph untouched. Gate: JEJ `validate` (Q4), not `facts.ast.ok`. Anchors already offset.                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| 4     | `socratize` lens | `lenses/socratize/` | unbuilt      | The one genuine build — quarry source is documentation-only (quarry `lenses/socratize/`). Build from the annotated DDD copies ([lens-ddd/socratize/](./lens-ddd/socratize/)) applying § Socratize DDD rewrite below. Deliverables: `core.ts` + `index.tsx` + `tests/` + css, mirroring the two-layer `writeme` module shape. Full ZOMBIES TDD. Gate: `applicability = facts.ast.ok`. **Un-colorized per ruling R-4 (§ The un-colorized ruling record).**                                                                                                                                                                                                                                                                                                                                                                            |
+| 5     | `quiz` lens      | `lenses/quiz/`      | unbuilt      | Verbatim port through inc 7 from quarry `lenses/quiz/` (annotated DDD copies: [lens-ddd/quiz/](./lens-ddd/quiz/)). Envelope rewire isolated to `build-quiz.ts` + `index.tsx` + `core.ts` gate/recommend signatures — don't miss `core.ts`. Item-consumer graph untouched. Gate: JEJ `validate` (Q4), not `facts.ast.ok`. Anchors already offset.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 
 Bottom-up order: 3 → 4 → 5. The real dependencies: Stage 5 consumes Stage 1's
 `classifying` (landed) and Stage 3's `quizzing`; Stage 4 needs only landed
@@ -232,8 +236,10 @@ applies only there.
 ## Socratize DDD rewrite (Stage 4 — from the annotated quarry copies)
 
 The pedagogy is the constant; the orchestrator layer and the old lens contract
-go. Source: [lens-ddd/socratize/](./lens-ddd/socratize/) (annotated byte-copies
-of the quarry trio, land at C5).
+go. Source: [lens-ddd/socratize/](./lens-ddd/socratize/) — annotated byte-copies
+of the quarry trio, designated instead of fresh Phase-0 authoring (human ruling
+2026-08-05: "copy-paste the lens DDDs for later implementation in another
+session"; the library is the focus).
 
 **KEEP (pedagogy):** the overview **shelf** + the `nodeType==='Program'`
 partition (a crisp generation-time discriminant, not a span heuristic); the
@@ -297,7 +303,7 @@ The quarry quiz lens is complete through inc 7 and already direct-to-quizzing
 formerly designated distillation (`read-and-execute-the-linked-origami.md`) was
 DELETED before transport [measured: `ls ~/.claude/plans | grep -i origami` →
 empty, 2026-08-05]; the sources are the quarry itself, the annotated copies
-([lens-ddd/quiz/](./lens-ddd/quiz/), land at C5), and
+([lens-ddd/quiz/](./lens-ddd/quiz/)), and
 [LIBRARY-CONTRACTS.md](./LIBRARY-CONTRACTS.md).
 
 - **Port verbatim (pure, contract-independent):** `core.ts` `masteryFold`,
@@ -312,29 +318,33 @@ empty, 2026-08-05]; the sources are the quarry itself, the annotated copies
   budget).
 - **(c)** Anchors already offset.
 
-## Orchestrator collateral — carried forward, not built (ruling R-3)
+## Orchestrator collateral — carried forward, not built
 
 The 2026-07-22 pivot retired the `question-orchestrator` MECHANISM (locked
 decision 3); it never ruled on three pedagogical concepts that lived inside it.
-Ruling R-3 carries all three forward as spec'd future work. Status of each:
-**carried, not built — the landing site is decided at its consuming stage's
-AR-1**, not here. NOTE: none of Stages 3/4/5 consumes these three concepts, so
-this section is **promotion-only — it is exempt from this file's retirement
-banner** and retires only into its durable home, the carried-unbuilt note in
-`lib/socratizing/DOCS.md` (ruling R-10, lands at C7). The quarry's pinned truth
-for all three is its `lib/question-orchestrator/` — six frozen test files
-[measured: `find … -name '*.test.*' | wc -l` → 6], protected from deletion once
-the R-2 amendment lands at C6 (`MVP-ROADMAP.md` names no question surface today
-[measured: `grep -in 'quiz\|question-orchestrator'
-src/lib/study-lenses/MVP-ROADMAP.md` → 0 hits]); read the concept's source there
-before rebuilding. A scope caution common to the two instruments: the quarry
-justified BOTH as irreducibly CROSS-register ("coverage across the Block Model
-grid is meaningful only over both registers' delivered items together";
-laddering "a mixed open+closed stream is a whole-set concern" [relayed: ar-1,
-quarry orchestrator README § Why this lib]) — with two standalone lenses, a
-per-lens landing is a SCOPE REDUCTION the consuming AR-1 must consciously
-accept; the full-fidelity carrier is the recommender/curriculum layer the
-one-grid bullet names.
+**All three carry forward as spec'd future work — none is discarded** (human
+ruling 2026-08-05/06, multi-select: difficulty ladder, coverage instrument,
+one-grid goal). Status of each: **carried, not built — the landing site is
+decided at its consuming stage's AR-1**, not here. NOTE: none of Stages 3/4/5
+consumes these three concepts, so this section is **promotion-only — it is
+exempt from this file's retirement banner** and retires only into its durable
+home, the carried-unbuilt note in `lib/socratizing/DOCS.md` (human ruling
+2026-08-10). The quarry's pinned truth for all three is its
+`lib/question-orchestrator/` — six frozen test files [measured: `find … -name
+'*.test.*' | wc -l` → 6], protected from deletion once the quarry-retirement
+criteria amendment lands (**the criteria must name ALL question surfaces — quiz
+lens, quizzing engine, AND question-orchestrator; none deletes before its
+content is ported or re-homed** — human ruling 2026-08-05/06; `MVP-ROADMAP.md`
+names no question surface today [measured: `grep -in
+'quiz\|question-orchestrator' src/lib/study-lenses/MVP-ROADMAP.md` → 0 hits]);
+read the concept's source there before rebuilding. A scope caution common to the
+two instruments: the quarry justified BOTH as irreducibly CROSS-register
+("coverage across the Block Model grid is meaningful only over both registers'
+delivered items together"; laddering "a mixed open+closed stream is a whole-set
+concern" [relayed: ar-1, quarry orchestrator README § Why this lib]) — with two
+standalone lenses, a per-lens landing is a SCOPE REDUCTION the consuming AR-1
+must consciously accept; the full-fidelity carrier is the recommender/curriculum
+layer the one-grid bullet names.
 
 - **The Block-Model difficulty ladder** (quarry
   `lib/question-orchestrator/ladder.ts` + `ladder.test.ts`): order a question
@@ -423,8 +433,23 @@ property in jsdom ("absence-of-highlight-classes is a false-confidence assertion
 … verified at the 🔍 sandbox checkpoint" [read: quarry
 `lenses/quiz/tests/component.test.tsx` header]) — its read-only pins survive
 colorization, so no test meets the sweep. Whether quiz's coloring gets its own
-ruling is DEFERRED to lens-building time (R-4a: the human redirected lens-side
-questions — library first; consuming lenses later).
+ruling is DEFERRED to lens-building time (R-4a, human ruling 2026-08-10: the
+human redirected lens-side questions — library first; consuming lenses later).
+
+## Standing flags (gaps this campaign records but does not fix)
+
+- **Four socratizing behavior changes rest on commit records, not human
+  rulings** (flagged 2026-08-05): `mixed-condition-style` (same-subject
+  narrowing), `empty-block` (control-flow-clause narrowing), `what-value-stored`
+  (trivial-initializer widening), `voice-profile` (metric recalibration) — each
+  covered by an agent-reasoned fix commit only, while the port plan of record
+  dispositioned analyzer bodies "verbatim". Human ratification = the still-open
+  push gate over those unpushed commits.
+- **`lib/classifying`'s non-overlap invariant has no test pin** (flagged
+  2026-08-05): the quarry quiz build test asserted `start >= previous.end`; no
+  greenfield classifying test or doc pinned it at re-verification. The doc
+  sentence lands with this campaign's module-doc fixes; the test pin is code
+  work a future classifying session owes.
 
 ## Verification (per remaining stage)
 
@@ -437,9 +462,12 @@ questions — library first; consuming lenses later).
 - Lenses: component tests (jsdom) + a 🔍 sandbox smoke-run on the reused lens
   dev surface (socratize: pick → reveal → shelf; quiz: pick → answer → verdict +
   mastery decoration).
-- **Standing pre-push obligation (AR-LOG F-4):** Stage 1's two re-authored
-  classifying docs still owe a cspell pass in a Node ≥ 20.18 environment before
-  their commits push (this env is Node 20.11.0 [measured: `node --version`]).
+- **Standing pre-push obligation:** Stage 1's two re-authored classifying docs
+  still owe a cspell pass in a Node ≥ 20.18 environment before their commits
+  push — that environment's Node predates cspell's requirement, so the check
+  never ran (both preconditions re-measured 2026-08-10: the Stage-1 commits are
+  not on origin/main; this env is Node 20.11.0 [measured: `git merge-base
+  --is-ancestor 21f871bd origin/main` → not an ancestor; `node --version`]).
 
 ## Stage-1 learnings (recur in Stages 3/5 — also verbatim ports)
 

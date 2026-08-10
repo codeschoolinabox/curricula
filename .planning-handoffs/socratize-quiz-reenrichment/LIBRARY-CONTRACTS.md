@@ -1,8 +1,11 @@
-<!-- TRANSITIONAL — pre-Stage-3/5 contracts spec (ruling R-9, AR-LOG.md).
-Retire only when Stages 3 AND 5 have BOTH landed and each stage's contracts
-are promoted to its own module docs (lib/quizzing for the Stage-3 clusters,
-lenses/quiz for the Stage-5 clusters — each cluster below carries its stage
-tag). Retiring at Stage-3 close would orphan the lens contracts. -->
+<!-- TRANSITIONAL — pre-Stage-3/5 contracts spec. This file is the
+deliverable of the human's library-first enrichment license (human ruling
+2026-08-05/06: beyond restoration, author the pre-Stage-3 library-contracts
+spec pinning what only the quarry tests carry). Retire only when Stages 3
+AND 5 have BOTH landed and each stage's contracts are promoted to its own
+module docs (lib/quizzing for the Stage-3 clusters, lenses/quiz for the
+Stage-5 clusters — each cluster below carries its stage tag). Retiring at
+Stage-3 close would orphan the lens contracts. -->
 <!-- cspell:ignore socratizing socratize quizzing reenrichment unbuilt -->
 <!-- cspell:ignore groupKey rekeys undercounts Disjointness reassignable -->
 <!-- cspell:ignore distractors isomorphically -->
@@ -30,8 +33,9 @@ src/lib/study-lenses--deprecated-architecture/lenses/quiz -name '*.test.*' | wc
 -l` → 9; same over `lib/quizzing` → 27]. Every contract below was verified
 against those files by the 2026-08-05 adversarial re-verification (95 AGREE / 21
 NUANCE / 0 DISAGREE over the audit's findings); cite tests by TITLE, not line
-number — the quarry's line numbers moved once already ([AR-LOG.md](./AR-LOG.md)
-F-3).
+number — the quarry's line numbers moved once already (the maintainer's
+sanctioned prettier sweep `59043f52`; see [SPEC.md](./SPEC.md) § The quarry is
+READ-ONLY).
 
 ## Group-key grammar — the mastery-propagation identity system [S3]
 
@@ -77,10 +81,10 @@ per-occurrence in one snippet) — 33/33 green at ruling time [measured:
 resolve function names and parameters, so a naive "pre-resolved refs collapse
 `resolveBinding` to a lookup" swap breaks those pins and silently changes
 pedagogy (params/function names would join V10b bulk-credit and V10c sameness).
-**Ruling R-6 (Option A)**: the Stage-3 shim answers null for every occurrence
-OUTSIDE the legacy tracked set, preserving the occ fallback verbatim. Free
-globals behave identically under both scope sources (`resolved: null` either
-way).
+**Ruling R-6, Option A (human ruling 2026-08-05)**: the Stage-3 shim answers
+null for every occurrence OUTSIDE the legacy tracked set, preserving the occ
+fallback verbatim. Free globals behave identically under both scope sources
+(`resolved: null` either way).
 
 **The second divergence R-6 also covers**: the landed shared adapter
 `src/lib/study-lenses/lib/scoping/derive-scope-usage.ts` keeps only
@@ -351,7 +355,7 @@ in `lenses/quiz/tests/anchors.test.ts` + `component.test.tsx` +
   is read from the quarry `index.tsx`'s per-mount `MasteryState` (nothing in the
   re-pick path clears it), and no component test asserts it [relayed: ar-1, grep
   — zero "mastery" hits in the three interaction test files]. Stage 5 owes it a
-  test ([AR-LOG.md](./AR-LOG.md) F-5).
+  test (standing gap, flagged 2026-08-06).
 - The quiz editor posture, split by sourcing: the READ-ONLY half is pinned
   (`component.test.tsx`: `EditorState.readOnly` true, `contenteditable="false"`,
   mount inside the `data-quiz-editor` contract selector, NO CodeMirror mount in

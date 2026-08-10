@@ -5,7 +5,7 @@ one blank line is byte-identical to git blob 883e630b712882159ceb933890a3dd6a592
 (src/lib/study-lenses--deprecated-architecture/lenses/quiz/README.md
 at HEAD 1f0fb2d9, copied 2026-08-10). Designated source for the future
 Stage-5 quiz lens session; NEVER edit the body — annotate only in this header.
-Applicable rulings (see AR-LOG.md + SPEC.md): REALM-FREE (locked
+Applicable rulings (see SPEC.md): REALM-FREE (locked
 decision 4); gate = JEJ validate, not facts.ast.ok (Q4); anchors already
 offsets; verbatim port through inc 7 (SPEC.md § Quiz port); coloring ruling
 deferred to lens-building (R-4a); contracts guide = LIBRARY-CONTRACTS.md.

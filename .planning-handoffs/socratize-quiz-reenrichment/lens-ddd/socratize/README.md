@@ -5,7 +5,7 @@ one blank line is byte-identical to git blob 13675acb5c3145d10237984046eb525053c
 (src/lib/study-lenses--deprecated-architecture/lenses/socratize/README.md
 at HEAD 1f0fb2d9, copied 2026-08-10). Designated source for the future
 Stage-4 socratize lens session; NEVER edit the body — annotate only in this header.
-Applicable rulings (see AR-LOG.md + SPEC.md): R-4 un-colorized WINS —
+Applicable rulings (see SPEC.md): R-4 un-colorized WINS —
 KEEP the dependency omission; offset-native locations (locked decision 2);
 rewrite guide = SPEC.md § Socratize DDD rewrite (KEEP/DELETE/CHANGE/RE-TYPE).
 Verify: strip everything through the marker line plus one blank line, then
