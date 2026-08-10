@@ -3,9 +3,8 @@
 # Follow-ons from the paren-truth campaign
 
 What the campaign left behind, one section per unit of work, each with a
-copy-pasteable launch prompt. Rulings and AR verdicts are canonical in
-[AR-LOG.md](./AR-LOG.md); this file carries only what a fresh session needs to
-pick one of these up cold.
+copy-pasteable launch prompt. It carries what a fresh session needs to pick one
+of these up cold, and the rulings each unit still answers to.
 
 **Every section below was dry-run by two context-free agents holding only this
 file** (2026-08-05). Their must-fix findings are applied, and several sections
@@ -120,10 +119,10 @@ untouched. Four things post-date that validation:
 - **§ F2's three fold guards now exist** (`28cbd114`, `46d77084`, `9564e178`).
   None of their fixtures contains an import/export specifier — the parser's only
   aliasing sites — so no candidate above breaks them through the collision
-  [read: AR-LOG.md § The three fixtures, with their measured fold-sensitivity —
-  the three fixture strings are quoted there]. But candidate 2's own named
-  target, `assemble-parse-facts.test.ts`, now also carries a fold guard, and the
-  § F2 work planted **four new PINNED markers**, one in that same file.
+  [measured over the three fixtures, each checked for fold-sensitivity]. But
+  candidate 2's own named target, `assemble-parse-facts.test.ts`, now also
+  carries a fold guard, and the § F2 work planted **four new PINNED markers**,
+  one in that same file.
 - **The pinned-guard hook is deregistered in the working tree** while HEAD
   registers it, so NO PINNED marker in the repository is mechanically defended
   right now — pin collisions are read-discipline only, and inverting one still
@@ -159,9 +158,9 @@ DEV.md END-TO-END. Governance outranks this brief everywhere they touch.
 
 THEN read .planning-handoffs/paren-truth/FOLLOW-ONS.md § F1 (this task)
 INCLUDING its "Addendum 2026-08-10" directly above this prompt — it carries a
-binding sandbox-inspection ruling and the post-validation state — and the flag
-as originally recorded in .planning-handoffs/paren-truth/AR-LOG.md
-§ "Post-AR-5 follow-ups" (NOT § "Phase-1 close" — the flag is not there).
+binding sandbox-inspection ruling and the post-validation state. The flag was
+first raised in this campaign's post-review follow-ups, not at its Phase-1
+close; the section below is its full statement.
 
 The defect: where two NodePaths resolve to the same acorn node object,
 deriveEntwined builds one EntwinedNode wrapper per path and only one receives
@@ -194,9 +193,8 @@ NEVER push.
 
 > ✅ **DONE 2026-08-05** — `2e9fa91f`, `28cbd114`, `46d77084`, `9564e178`,
 > `ae0b8bcc`, `1b516bd4`, `883431a6`. Record, rulings, AR verdicts and the
-> consolidated mutation evidence are in [AR-LOG.md](./AR-LOG.md) § F2 follow-on
-> — **read that before re-reading the analysis below.** Two of the three guards
-> landed at seam files (`orchestrate/lib/validating/tests/`'s
+> consolidated mutation evidence ride those commits' own bodies. Two of the
+> three guards landed at seam files (`orchestrate/lib/validating/tests/`'s
 > `create-memoized-validate.test.ts` and `assemble-parse-facts.test.ts`) rather
 > than where the bullets below point, on the 2026-08-05 human ruling "relocated
 > to where a guard can actually bite". Only the scaffold bullet needed
@@ -270,13 +268,12 @@ at the semantics tracer.
 
 ### Where this work belongs
 
-The evaluators migration campaign owns it. Read
-`.planning-handoffs/evaluators-intercept/AR-LOG.md` **specifically** —
-`git ls-files '*AR-LOG*'` returns eight files and two are "evaluators". Read it
-for the stream's shape and gate discipline; it contains **nothing** about paren
-spans, so do not expect inherited context. Its header names a cross-ceremony
-ledger under `~/.claude/plans/` that `git ls-files` cannot surface — the chain
-only resolves through that pointer.
+The evaluators campaign owns it. Read
+`.planning-handoffs/evaluators-api-restoration/LOSS-LEDGER.md` for that stream's
+shape and gate discipline; it contains **nothing** about paren spans, so do not
+expect inherited context. Its own record names a cross-ceremony ledger under
+`~/.claude/plans/` that `git ls-files` cannot surface — the chain only resolves
+through that pointer.
 
 That stream is at **Phase 1** (its log carries Phase-1 briefing decisions
 ratified 2026-08-05 and AR resolutions through I4, ending on an open human flag)
@@ -319,10 +316,10 @@ Then read:
    its tests. This is the ONE live legacy consumer that really does walk
    ParenthesizedExpression nodes, and it is the concrete thing that will need
    embody's parenSpans (or need re-shaping without paren nodes) when it ports.
-2. .planning-handoffs/evaluators-intercept/AR-LOG.md — the stream this work
-   belongs to, currently at Phase 1. Read it for shape and gate discipline; it
-   contains nothing about paren spans, so do not expect inherited context. Its
-   header names a cross-ceremony ledger under ~/.claude/plans/ that git ls-files
+2. .planning-handoffs/evaluators-api-restoration/LOSS-LEDGER.md — the stream
+   this work belongs to. Read it for shape and gate discipline; it contains
+   nothing about paren spans, so do not expect inherited context. It names a
+   cross-ceremony plan under ~/.claude/plans/ that git ls-files
    cannot find — follow that pointer.
 3. Load the `aran-weaving` skill for the porting machinery. It says nothing
    about parentheses.
@@ -347,10 +344,9 @@ implemented, nothing pushed.
 **Severity: the flag stands, but the evidence says the work is not worth doing
 and may be unsound. Size: read this section, then most likely close the flag.**
 
-L6 was deferred in Phase 0 with a recorded rationale ([AR-LOG.md](./AR-LOG.md),
-searchable for `L6`): the paren record is embody's own `{ start, end }` data,
-independent of acorn's optional `node.range` typing, so the two were never
-coupled.
+L6 was deferred in Phase 0 with a recorded rationale: the paren record is
+embody's own `{ start, end }` data, independent of acorn's optional `node.range`
+typing, so the two were never coupled.
 
 ### ⚠️ What the dry run found: the case for doing it is false
 
@@ -369,10 +365,10 @@ is wrong on both halves [all relayed: context-free validator, measured]:
   genuinely have no `range`, so a type saying it is always present would be a
   lie about them.
 - **Why the radius is ~0:** acorn declares `start`/`end` **required** and
-  `range` optional, and this region reads `.start`/`.end` (67 non-test sites).
-  `ar-2`'s C5/C11 deliberately dropped the `.range`-optionality sentence "in
-  favor of always-present `.start`/`.end`" ([AR-LOG.md](./AR-LOG.md)). Consumers
-  already have a non-optional path; `range` is close to dead surface.
+  `range` optional, and this region reads `.start`/`.end` (67 non-test sites). A
+  Phase-0 review deliberately dropped the `.range`-optionality sentence "in
+  favor of always-present `.start`/`.end`" (2026-08-03). Consumers already have
+  a non-optional path; `range` is close to dead surface.
 
 **Recommendation: close L6 as wontfix** unless someone produces a consumer that
 needs `range` specifically and cannot use `.start`/`.end`. If anyone revisits
@@ -388,13 +384,29 @@ person to make it is the maintainer.
 ## F5 — the JEJ level's test harness has a latent crash
 
 > ✅ **DONE 2026-08-05** — `2f6720e1`, `d8fa1461`, `e708841c`. Record and both
-> corrections to this section's framing are in [AR-LOG.md](./AR-LOG.md) § F5
-> follow-on. **Read that before re-reading the analysis below**: the crash
-> trigger is broader than stated here (any reference resolving inside its own
-> function scope, not just a shadowed default parameter), and `ranges: true`
-> alone fixes it — the `'latest'` → 2024 narrowing is orthogonal, not part of
-> the fix. The escalation condition below did not fire: no fixture depended on
-> post-2024 syntax.
+> corrections to this section's framing ride those commits' bodies, and both are
+> stated here because the analysis below is wrong without them.
+>
+> **Correction 1 — the crash trigger is broader than this section states.** It
+> is not "a default parameter shadowed in the body": `__isValidResolution` is an
+> override on `FunctionScope`, so it fires on ANY reference resolving to a
+> variable declared in that same function scope. Plain function, arrow, object
+> method and class method all throw; a function with no references, and one
+> referring only outward, do not [measured 2026-08-05: `node > >
+> --input-type=module -e` over 7 sources, acorn 8.16.0 + eslint-scope 8.4.0].
+>
+> **Correction 2 — `ranges: true` alone fixes it.** This section couples the fix
+> to the `'latest'` → `2024` narrowing; they are orthogonal [measured > >
+> 2026-08-05: same probe, `{ecmaVersion:'latest', ranges:true}` resolves > >
+> cleanly].
+>
+> The escalation condition below — "if any fixture depends on post-2024 syntax,
+> take the fork to the human" — did NOT fire: all 13 fixture sources parse
+> byte-identically under both settings once `range` is stripped [measured >
+> 2026-08-05: `node` JSON compare with a range-stripping replacer]. The human
+> ruled both increments (fix the crash, then adopt the published contract) and
+> chose to pin the regression assertion, dated — the ruling `validate.test.ts`'s
+> `PINNED(human ruling 2026-08-05)` cites.
 
 **Severity: a real, reproduced defect — upgraded from "worth a look" by the dry
 run. Size: small.**
@@ -492,8 +504,8 @@ in ONE invocation, staged diff exclusively yours, announce full SHAs, NEVER push
 
 `ar-2` observed that the region's committed text names source positions
 inconsistently and ruled it out of the Phase-0 diff: "committed-text alignment
-is its own later pass" [verbatim, [AR-LOG.md](./AR-LOG.md), the 2026-08-03 ar-2
-entry, C6]. Nothing is false; the vocabulary is just not uniform.
+is its own later pass" [verbatim, that review's concern C6, 2026-08-03]. Nothing
+is false; the vocabulary is just not uniform.
 
 **What the dry run found:** within embody the legacy phrasing survives in
 **`types.ts` only**, at three lines — `:66`, `:199`, `:338` — while `README.md`
@@ -518,8 +530,8 @@ to AGENTS.md or AGENTS.principal.md. Read your routed file END-TO-END, then
 DEV.md END-TO-END, including § Documentation migration discipline — every reword
 is enumerated in a loss ledger in the commit body or the plan.
 
-Read .planning-handoffs/paren-truth/FOLLOW-ONS.md § F6 and the AR-LOG's
-2026-08-03 ar-2 entry (concern C6).
+Read .planning-handoffs/paren-truth/FOLLOW-ONS.md § F6; the review concern it
+rests on (C6, 2026-08-03) is quoted there in full.
 
 The work is smaller than the name suggests: within embody, only types.ts still
 carries the legacy phrasing, at three lines (:66, :199, :338). README.md and
@@ -553,7 +565,7 @@ announce full SHAs, NEVER push.
 
 - **The bare noun `grouping` in `8da55d2f`'s subject line.** It violates the
   human's term ruling, `git commit --amend` is forbidden here, and the violation
-  is recorded in the AR-LOG. Nothing to do.
+  is recorded in that commit's own body. Nothing to do.
 - **The `import/no-restricted-paths` gap** `ar-4` found: the rule only blocks a
   sibling subsystem's `<subsystem>/lib/**`, and `embody/` has no `lib/`, so its
   internals are mechanically unprotected. Pre-existing, applies to every flat
