@@ -352,7 +352,7 @@ Then read:
 2. .planning-handoffs/evaluators-api-restoration/LOSS-LEDGER.md — the stream
    this work belongs to. Read it for shape and gate discipline; it contains
    nothing about paren spans, so do not expect inherited context. It
-   header names a cross-ceremony ledger under ~/.claude/plans/ that git ls-files
+   names a cross-ceremony plan under ~/.claude/plans/ that git ls-files
    cannot find — follow that pointer.
 3. Load the `aran-weaving` skill for the porting machinery. It says nothing
    about parentheses.

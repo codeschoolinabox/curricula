@@ -119,7 +119,7 @@ untouched. Four things post-date that validation:
 - **§ F2's three fold guards now exist** (`28cbd114`, `46d77084`, `9564e178`).
   None of their fixtures contains an import/export specifier — the parser's only
   aliasing sites — so no candidate above breaks them through the collision
-  [measured over the three fixtures, each checked for fold-sensitivity]. But
+  [read: the three fold-guard test files, whose pins carry the reasoning]. But
   candidate 2's own named target, `assemble-parse-facts.test.ts`, now also
   carries a fold guard, and the § F2 work planted **four new PINNED markers**,
   one in that same file.
@@ -392,21 +392,22 @@ person to make it is the maintainer.
 > override on `FunctionScope`, so it fires on ANY reference resolving to a
 > variable declared in that same function scope. Plain function, arrow, object
 > method and class method all throw; a function with no references, and one
-> referring only outward, do not [measured 2026-08-05: `node > >
-> --input-type=module -e` over 7 sources, acorn 8.16.0 + eslint-scope 8.4.0].
+> referring only outward, do not — measured 2026-08-05 by probe:
+> `node --input-type=module -e` over 7 sources, acorn 8.16.0 with eslint-scope
+> 8.4.0.
 >
 > **Correction 2 — `ranges: true` alone fixes it.** This section couples the fix
-> to the `'latest'` → `2024` narrowing; they are orthogonal [measured > >
-> 2026-08-05: same probe, `{ecmaVersion:'latest', ranges:true}` resolves > >
-> cleanly].
+> to the `'latest'` → `2024` narrowing; they are orthogonal — measured
+> 2026-08-05 by the same probe: `{ecmaVersion:'latest', ranges:true}` resolves
+> cleanly.
 >
 > The escalation condition below — "if any fixture depends on post-2024 syntax,
 > take the fork to the human" — did NOT fire: all 13 fixture sources parse
-> byte-identically under both settings once `range` is stripped [measured >
-> 2026-08-05: `node` JSON compare with a range-stripping replacer]. The human
-> ruled both increments (fix the crash, then adopt the published contract) and
-> chose to pin the regression assertion, dated — the ruling `validate.test.ts`'s
-> `PINNED(human ruling 2026-08-05)` cites.
+> byte-identically under both settings once `range` is stripped — measured
+> 2026-08-05, a `node` JSON comparison with a range-stripping replacer. The
+> human ruled both increments (fix the crash, then adopt the published contract)
+> and chose to pin the regression assertion, dated — the ruling
+> `validate.test.ts`'s `PINNED(human ruling 2026-08-05)` cites.
 
 **Severity: a real, reproduced defect — upgraded from "worth a look" by the dry
 run. Size: small.**
