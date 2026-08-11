@@ -2,10 +2,11 @@
 
 # Brief — strip the `## Epistemology` block convention
 
-> **Status:** decided by the maintainer 2026-08-06, **not** executed, and one
-> design question is open that must be answered before any file is edited. This
-> brief states the reason, the scope and the traps. Written by the session that
-> found the defect, because the reason is the part that would be lost.
+> **Status:** decided by the maintainer 2026-08-06, **not** executed. The design
+> question **was answered 2026-08-11** — see [§ Human rulings](#human-rulings),
+> which supersedes the four exits below. This brief states the reason, the scope
+> and the traps. Written by the session that found the defect, because the
+> reason is the part that would be lost.
 >
 > **Validated context-free 2026-08-06** by a fresh agent holding only this file;
 > its seven must-fix findings are applied below.
@@ -23,8 +24,10 @@ This brief hands off to **two** agents, not one:
    does the edits. § Ripple inventory, § Coordination and § Gates are addressed
    to it.
 
-If you are reading this and the design question is still unanswered, you are
-agent 1.
+**Agent 1 has run and the design question is answered** (2026-08-11,
+[§ Human rulings](#human-rulings)). If you are reading this now, **you are agent
+2** — read § Human rulings before § The design question, whose four exits the
+rulings supersede.
 
 ## The decision
 
@@ -101,7 +104,62 @@ a good trigger from either.
    [`lib/screening/README.md`](../../src/lib/study-lenses/lib/screening/README.md)).
    It is what field 3 got wrong, and it outlives this strip.
 
-## The design question — answer it before editing
+## Human rulings
+
+Taken 2026-08-11, after agent 1 put § The design question to the maintainer.
+**These supersede the four exits below**; that section is kept for its
+reasoning, not as a live choice.
+
+**HR-1 — step 0.2 becomes an ask** (human ruling 2026-08-11). It is an optional
+stage, discharged by asking rather than by an artifact: the step opens by asking
+the developer whether any twin docs are required, then proceeds or skips on the
+answer. **The ask is a bare yes/no; no delegate is named.** This supersedes
+`DEV.md` § Who decides for `twin-doc` specifically: that value moves from
+agent-**stated** to human-**asked**. It is a fifth exit, not one of (a)–(d) — it
+keeps step 0.2 (so no renumbering, and non-`none` `twin-doc` values still have a
+producing step) while removing the `## Epistemology` block as the discharge
+mechanism, because the recorded answer _is_ the discharge.
+
+> **Objection recorded and overruled.** Agent 1 argued the ask should be
+> two-part — _"required? and if not, who holds the twin instead?"_ — on the
+> ground that a bare "no" is the **bare absence** that
+> `spiralearn/frogramming-and-vibetoading/ontology.md` § 4 names **_twin
+> ignored_**, the first of its named twin failures, and that DEV.md's whole case
+> for the delegate field is that naming a holder is what separates the
+> legitimate case from it. The maintainer chose the bare yes/no with that
+> objection in view. **Recorded as made; agent 2 does not re-litigate it.**
+
+**HR-2 — the convention is deleted; the one live instance survives as prose**
+(human ruling 2026-08-11). The `## Epistemology` convention is removed from
+`DEV.md`, from every recital of it, and from `ar-1.md` / `ar-5.md`.
+`src/lib/study-lenses/lib/screening/README.md` **keeps its content as plain
+prose** under a non-fixed heading — only the fixed `## Epistemology` heading and
+the three-field form go. This resolves § The one live instance's contingency the
+cheap way: the paragraph opening on the bare anaphor "The delegation" keeps its
+antecedent, so **that opening needs no rewrite**.
+
+**Where these rulings live, and why here rather than in `DEV.md`.** Obligation 3
+below says this brief "carries the question, never the ruling", and that the
+answer belongs in `DEV.md` at the section it changes. That still holds as the
+**end state** — but `DEV.md` is governance surface, and editing it _is_ the
+strip: agent 2's scope, under a ceremony level the maintainer has not yet set.
+So the rulings ride the campaign's own durable artifact in the meantime, exactly
+as [DEV.md § Ruling provenance](../../DEV.md#ruling-provenance) provides — _"A
+ruling whose end-state home does not exist yet rides its campaign's own durable
+artifact — a spec, a ledger, a brief — and moves into that document when it is
+written"_. **Agent 2 moves them into `DEV.md`, dated, as part of the strip, and
+its closing commit body enumerates what went where.**
+
+**One collision agent 2 must not silently absorb.** HR-1 reverses a standing
+sentence [read: `DEV.md` § Who decides, and where the answers are recorded —
+_"The agent states the other three — the kind of work (derived from the path),
+`twin-doc`, and prospective/retrospective — because each has a safe default and
+a question whose answer is almost always the default is friction on a path that
+should have none."_]. That sentence exists specifically to prevent the friction
+HR-1 introduces, so the strip must amend it rather than leave the two in
+contradiction.
+
+## The design question — ANSWERED 2026-08-11; kept for its reasoning
 
 `DEV.md`'s Phase 0 sequence currently reads [read: `DEV.md` § Incremental
 Development Workflow, the Phase 0 artifact-order block]:
@@ -113,7 +171,10 @@ Development Workflow, the Phase 0 artifact-order block]:
 ```
 
 `twin-doc: none` is the **default**, so for the near-universal case the block
-_is_ step 0.2. Four exits, and the maintainer picks:
+_is_ step 0.2. Four exits were offered; **the maintainer took a fifth** —
+[§ Human rulings](#human-rulings). The four are kept below because the
+trade-offs they name are the reasoning agent 2 needs, **not because any of them
+is live**:
 
 - **(a)** Step 0.2 survives as "the twin"; at `twin-doc: none` it is simply
   **not owed**. Phase 0 becomes two steps for most modules and AR-1 challenges
@@ -232,7 +293,12 @@ documents, never the history behind them.
    `(human ruling YYYY-MM-DD)` line in the document the ruling governs — plus
    the commit body of the turn it is given. The design question here is about
    `DEV.md`'s own convention, so its answer belongs in `DEV.md` at the section
-   it changes, dated. This brief carries the question, never the ruling.
+   it changes, dated. **The answer was given 2026-08-11 and is parked in
+   [§ Human rulings](#human-rulings) above**, under the same section's
+   ride-the-campaign-artifact clause, because `DEV.md` cannot be edited outside
+   the strip itself. **Moving HR-1 and HR-2 into `DEV.md` is part of agent 2's
+   changeset, not optional cleanup**, and the closing commit body enumerates
+   what went where.
 
 ## Coordination and traps
 
