@@ -32,6 +32,7 @@ embody/
   is-node.ts                the membership rule every generic walk here shares
   lifecycle-phase-order.ts  the five phases, in specification order
   to-stage-cause.ts         parser error → structured StageCause
+  sandbox.html              permanent dev page — renders byPath wrappers for inspection
   tests/                    the region's unit tests
 ```
 

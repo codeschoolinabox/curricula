@@ -1,0 +1,278 @@
+<!doctype html>
+<!--
+  embody sandbox — permanent dev infrastructure, not part of embody's contract.
+
+  Serve it with the engine's sandbox config, which roots at the study-lenses
+  package (embody itself needs no SharedArrayBuffer; the config's COOP/COEP
+  headers are harmless here):
+
+      npx vite --config src/lib/study-lenses/lib/engine/vite.sandbox.config.ts
+
+  then open  /embody/sandbox.html
+
+  This page renders the entwined byPath wrappers for visual inspection: one
+  row per path, with the wrapper's node type, span, a node-identity tag
+  (wrappers over the SAME node object share a tag), and its token and comment
+  tie counts. A non-zero-width wrapper tying zero tokens is flagged — that is
+  the starvation the tokens contract forbids. The preset snippets are the
+  measured starvation family.
+
+  cspell:ignore entwined
+-->
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>embody sandbox</title>
+		<style>
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+			body {
+				font-family: monospace;
+				font-size: 13px;
+				padding: 1.5rem;
+				max-width: 900px;
+				margin: 0 auto;
+			}
+			h1 {
+				font-size: 1.1rem;
+				margin-bottom: 0.4rem;
+			}
+			p.note {
+				color: #666;
+				margin-bottom: 1rem;
+			}
+			textarea {
+				width: 100%;
+				height: 90px;
+				font-family: monospace;
+				font-size: 13px;
+				padding: 0.5rem;
+				tab-size: 2;
+				border: 2px solid #333;
+				resize: vertical;
+			}
+			.controls {
+				margin-top: 0.5rem;
+				display: flex;
+				gap: 0.75rem;
+				align-items: center;
+				flex-wrap: wrap;
+			}
+			button {
+				padding: 0.4rem 1.2rem;
+				font-family: monospace;
+				font-size: 13px;
+				cursor: pointer;
+				border: 2px solid #333;
+				background: #eee;
+			}
+			label {
+				font-size: 12px;
+			}
+			select {
+				font-family: monospace;
+				font-size: 12px;
+				border: 2px solid #333;
+				padding: 0.2rem;
+			}
+			.presets {
+				margin-top: 0.5rem;
+			}
+			.presets summary {
+				cursor: pointer;
+				color: #555;
+				font-size: 12px;
+			}
+			.preset-btns {
+				margin-top: 0.4rem;
+				display: flex;
+				gap: 0.5rem;
+				flex-wrap: wrap;
+			}
+			#status {
+				margin-top: 0.75rem;
+				padding: 0.5rem;
+				border: 1px dashed #999;
+				background: #fafafa;
+				white-space: pre-wrap;
+			}
+			table {
+				margin-top: 0.75rem;
+				border-collapse: collapse;
+				width: 100%;
+			}
+			th,
+			td {
+				border: 1px solid #bbb;
+				padding: 0.25rem 0.5rem;
+				text-align: left;
+				font-size: 12px;
+			}
+			th {
+				background: #eee;
+			}
+			tr.starved td {
+				background: #fff0f0;
+			}
+			tr.zero-width td {
+				color: #999;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>embody sandbox — entwined byPath inspection</h1>
+		<p class="note">
+			One row per <strong>byPath</strong> entry. Wrappers over the same node
+			object share an identity tag. A red row is a starved wrapper: its span
+			holds at least one token, but its <code>tokens</code> tie is empty.
+		</p>
+
+		<textarea
+			id="code"
+			title="the program to embody"
+			aria-label="the program to embody"
+>import { x } from "m";</textarea
+		>
+
+		<details open class="presets">
+			<summary>starvation-family snippets</summary>
+			<div class="preset-btns">
+				<button type="button" class="preset" data-code='import { x } from "m";'>
+					[1 · bare import]
+				</button>
+				<button type="button" class="preset" data-code="let x; export { x };">
+					[2 · bare export]
+				</button>
+				<button
+					type="button"
+					class="preset"
+					data-code='export { config } from "./m.js";'
+				>
+					[3 · re-export]
+				</button>
+				<button
+					type="button"
+					class="preset"
+					data-code='export { "x" } from "m";'
+				>
+					[4 · string re-export]
+				</button>
+				<button type="button" class="preset" data-code="const o = { x };">
+					[5 · shorthand property]
+				</button>
+				<button type="button" class="preset" data-code="const { x } = y;">
+					[6 · shorthand pattern]
+				</button>
+				<button type="button" class="preset" data-code="const { x = 1 } = y;">
+					[7 · pattern default]
+				</button>
+			</div>
+		</details>
+
+		<div class="controls">
+			<button id="render" type="button">[render]</button>
+			<label
+				>type:
+				<select id="type">
+					<option value="module">module</option>
+					<option value="script">script</option>
+				</select>
+			</label>
+		</div>
+
+		<div id="status">click [render] to begin.</div>
+		<table id="table" hidden>
+			<thead>
+				<tr>
+					<th>path</th>
+					<th>node type</th>
+					<th>span</th>
+					<th>node identity</th>
+					<th>tokens</th>
+					<th>comments</th>
+				</tr>
+			</thead>
+			<tbody id="rows"></tbody>
+		</table>
+
+		<script type="module">
+			import embody from './index.ts';
+
+			const codeEl = document.getElementById('code');
+			const typeEl = document.getElementById('type');
+			const renderBtn = document.getElementById('render');
+			const statusEl = document.getElementById('status');
+			const tableEl = document.getElementById('table');
+			const rowsEl = document.getElementById('rows');
+
+			for (const button of document.querySelectorAll('.preset')) {
+				button.addEventListener('click', () => {
+					codeEl.value = button.dataset.code;
+					typeEl.value = 'module';
+					render();
+				});
+			}
+
+			renderBtn.addEventListener('click', render);
+
+			function render() {
+				const { facts } = embody(codeEl.value, { type: typeEl.value });
+				if (!facts.entwined.ok) {
+					const { stage, message } = facts.entwined.cause;
+					statusEl.textContent = `entwined stage failed (origin: ${stage}): ${message}`;
+					tableEl.hidden = true;
+					return;
+				}
+
+				const { byPath } = facts.entwined.value;
+				const entries = Object.entries(byPath);
+
+				// identity tags: wrappers over the SAME node object share a tag —
+				// indexOf over an array keeps object identity visible without ===
+				// eyeballing across rows
+				const seenNodes = [];
+				let starvedCount = 0;
+				rowsEl.textContent = '';
+				for (const [path, wrapper] of entries) {
+					const { node, tokens, comments } = wrapper;
+					let tag = seenNodes.indexOf(node);
+					if (tag === -1) {
+						tag = seenNodes.push(node) - 1;
+					}
+					const zeroWidth = node.start === node.end;
+					const starved = !zeroWidth && tokens.length === 0;
+					if (starved) {
+						starvedCount = starvedCount + 1;
+					}
+
+					const row = document.createElement('tr');
+					if (starved) {
+						row.className = 'starved';
+					} else if (zeroWidth) {
+						row.className = 'zero-width';
+					}
+					appendCell(row, path);
+					appendCell(row, node.type);
+					appendCell(row, `[${node.start}, ${node.end})`);
+					appendCell(row, `n${tag}`);
+					appendCell(row, String(tokens.length));
+					appendCell(row, String(comments.length));
+					rowsEl.append(row);
+				}
+
+				tableEl.hidden = false;
+				statusEl.textContent = `${entries.length} byPath entries · ${seenNodes.length} distinct nodes · ${starvedCount} starved wrapper(s)`;
+			}
+
+			function appendCell(row, text) {
+				const cell = document.createElement('td');
+				cell.textContent = text;
+				row.append(cell);
+			}
+		</script>
+	</body>
+</html>
