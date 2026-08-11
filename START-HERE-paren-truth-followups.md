@@ -62,7 +62,7 @@ Everything else below is optional work you can start, ignore, or delete.
 | ------ | ----------------------------------------------------------------------- | ---------------- | ------------------------------------------------------ |
 | **F5** | A real crash lurking in the JEJ level's test harness                    | Small            | DONE 2026-08-05 — see FOLLOW-ONS § F5's banner         |
 | **F2** | Three cheap test fixtures that protect the fold from silent regressions | Small, test-only | DONE 2026-08-05 — see FOLLOW-ONS § F2's banner         |
-| **F1** | An embody wrapper whose `tokens` list is empty when it shouldn't be     | One increment    | Yes, but it needs a **design decision from you**       |
+| **F1** | An embody wrapper whose `tokens` list is empty when it shouldn't be     | One increment    | DONE 2026-08-11 — see FOLLOW-ONS § F1's banner         |
 | **F6** | Tidying inconsistent wording about source positions                     | Three lines      | Only if someone's already in those files               |
 | **F3** | Actually _using_ the paren spans (trace / highlighting)                 | A whole campaign | This is the payoff — but it's Phase-0 work, not a task |
 | **F4** | Making `range` a required field                                         | —                | **No.** The evidence says close it. See below          |
@@ -95,8 +95,7 @@ what to read, and sets the gates. They were dry-run by fresh agents holding only
 the handoff, and the problems that found were fixed before you got here.
 
 **Don't run two of these at once in the same worktree** unless you're
-comfortable with concurrent sessions committing into one index — F1 and F5 both
-touch `src/lib/study-lenses/`.
+comfortable with concurrent sessions committing into one index.
 
 ---
 
@@ -212,7 +211,12 @@ announce full SHAs, NEVER push.
 
 ---
 
-### F1 — the empty `tokens` list (needs your design call)
+### F1 — the empty `tokens` list
+
+> ✅ **DONE 2026-08-11 — do not launch this prompt.** Closed as containment ties
+> — a fourth shape none of the three candidates below names, after measurement
+> showed the starvation family is larger than the shared-node case; see
+> FOLLOW-ONS § F1's banner, which carries the six SHAs and the record.
 
 Acorn reuses a single identifier object for both halves of a bare
 `import { x }`. embody builds two wrappers for it — one per path — and only one
@@ -228,6 +232,8 @@ published contract.
 > session's fork presentation must account for that annotation. **The annotation
 > itself is the record — read it in place.** (Docs are the source of truth;
 > rulings live inline, dated, where they govern.)
+>
+> **Superseded 2026-08-11:** the fork was answered — see the DONE banner above.
 
 ```text
 Fix the shared-node token gap in embody. Repo:
@@ -374,9 +380,9 @@ implemented, nothing pushed.
 
 ## 5. Housekeeping
 
-- **This file is untracked on purpose.** Delete it whenever you like —
-  `.planning-handoffs/paren-truth/FOLLOW-ONS.md` is the committed copy and holds
-  the full detail behind every section above.
+- **This file is tracked.** Delete it whenever you like (`git rm`) —
+  `.planning-handoffs/paren-truth/FOLLOW-ONS.md` holds the full detail behind
+  every section above.
 - Each prompt ends with **NEVER push**, so an agent can't publish on your
   behalf.
 - If an agent comes back with a fork, that's working as intended — F1 and F6 are
