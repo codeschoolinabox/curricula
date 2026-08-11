@@ -9,7 +9,7 @@ section's preamble. -->
 <!-- cspell:ignore socratizing socratize quizzing reenrichment stonebraker -->
 <!-- cspell:ignore unbuilt subgraph relitigate PBSI bannered bannering -->
 <!-- cspell:ignore repoint readwrite Behaviour unleveled rebuilder distractor -->
-<!-- cspell:ignore dispositioned -->
+<!-- cspell:ignore dispositioned blankable -->
 
 # Question-register lenses — forward canon (re-homed)
 
@@ -390,7 +390,8 @@ layer the one-grid bullet names.
   also sat at "Ratify or adjust" in the quarry DOCS § Open questions. The
   greenfield socratizing docs claim the cell taxonomy serves coverage auditing —
   after C7 that prose is honest about the instrument not existing; the durable
-  carried-unbuilt note (R-10, C7) is the carrier of the plan to build it.
+  carried-unbuilt note in `lib/socratizing/DOCS.md` (human ruling 2026-08-10,
+  landed) is the carrier of the plan to build it.
 - **The "two registers on one grid" pedagogical goal** (quarry
   `lib/question-orchestrator/README.md`, attributing the goal to quizzing's own
   README): a learning environment should place open/Socratic and closed/gradable
@@ -462,12 +463,13 @@ human redirected lens-side questions — library first; consuming lenses later).
 - Lenses: component tests (jsdom) + a 🔍 sandbox smoke-run on the reused lens
   dev surface (socratize: pick → reveal → shelf; quiz: pick → answer → verdict +
   mastery decoration).
-- **Standing pre-push obligation:** Stage 1's two re-authored classifying docs
-  still owe a cspell pass in a Node ≥ 20.18 environment before their commits
-  push — that environment's Node predates cspell's requirement, so the check
-  never ran (both preconditions re-measured 2026-08-10: the Stage-1 commits are
-  not on origin/main; this env is Node 20.11.0 [measured: `git merge-base
-  --is-ancestor 21f871bd origin/main` → not an ancestor; `node --version`]).
+- **Discharged 2026-08-11 — the Stage-1 classifying-docs cspell obligation.**
+  The obligation's blocking premise ("cspell needs Node ≥ 20.18") was refuted by
+  measurement: the repo's pinned cspell 8.19.4 declares `engines >= 18` and runs
+  on this env's Node 20.11.0. The owed pass has now run [measured:
+  `./node_modules/.bin/cspell` over `lib/classifying/{README,DOCS}.md` → 2
+  issues, both the house word `blankable`, now covered by in-file ignores].
+  Nothing blocks the Stage-1 push on spelling.
 
 ## Stage-1 learnings (recur in Stages 3/5 — also verbatim ports)
 

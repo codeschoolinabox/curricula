@@ -74,8 +74,10 @@ two purposes:
 1. **For the learning environment**: Filter questions by BLOCK cell to target
    specific comprehension areas. If a learner struggles with `atom × execution`
    (what single statements do at runtime), show more questions from that cell.
-2. **For the curriculum team**: Audit question coverage across all 12 cells.
-   Gaps indicate areas where the tool doesn't yet support comprehension.
+2. **For the curriculum team**: the raw `block` cells make question coverage
+   auditable across the 12-cell grid; gaps indicate areas the tool doesn't yet
+   reach. No instrument reports this — the cells enable the audit, and the
+   reporting tool is carried, unbuilt (see § Orchestrator collateral below).
 
 The consumer-facing `levels` field linearizes the 12-cell matrix into five named
 levels: `syntax`, `semantics`, `connections`, `goals`, `userExperience`. The raw
@@ -350,6 +352,17 @@ same question `id` from a `TemplateLiteral` branch and a `+` `BinaryExpression`
 branch. A consumer that tracks reveal/mastery state must key on the per-mount
 item index, not the question `id` — the id is constant-per-analyzer, not
 per-occurrence.
+
+### Test-harness posture
+
+Suites that take parsed input fall into two deliberate postures. Suites
+exercising pure AST walks (analyzer behavior independent of embody) construct
+their inputs with a direct `acorn.parse` call — the same posture
+`lib/classifying` documents. Suites exercising the production seam — the
+scope-reading analyzers, the entry's refusal arm, the entry's integration suite
+— build a real `Embodiment` via `embody()`. Both postures are pinned
+intentionally: bare-acorn suites pin analyzers against the raw AST they actually
+walk; embody-backed suites pin the facts-reading entry path.
 
 ## Architectural sketch
 

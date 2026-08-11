@@ -1,3 +1,5 @@
+<!-- cspell:ignore blankable -->
+
 # lib/classifying
 
 Exhaustive syntax-element classification for a parsed JavaScript snippet. Given
@@ -173,8 +175,9 @@ here are a caller bug to surface, not a runtime state to absorb.
 
 Behavior:
 
-- **Total and source-ordered.** One `ClassifiedToken` per non-empty token,
-  ascending by `start`. Ranges are zero-indexed half-open `[start, end)` into
+- **Total, source-ordered, non-overlapping.** One `ClassifiedToken` per
+  non-empty token, ascending by `start` and never overlapping — both inherited
+  from the token stream. Ranges are zero-indexed half-open `[start, end)` into
   `code`; `text === code.slice(start, end)` always (the source slice is
   authoritative — never Acorn's processed `value`).
 - **Pure.** No mutation of `tokens`, `ast`, or `code` — safe on deep-frozen

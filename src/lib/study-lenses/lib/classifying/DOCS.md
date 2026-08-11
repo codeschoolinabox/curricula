@@ -1,3 +1,5 @@
+<!-- cspell:ignore blankable -->
+
 # lib/classifying — Architecture & Decisions
 
 ## Why this module exists
@@ -95,7 +97,7 @@ flowchart TD
     Seeded["totally categorized tokens<br/>(semantic category + role seed;<br/>partner null)"]
     Refined["AST-refined tokens<br/>(block + paren + operator roles;<br/>generator * re-binned)"]
     Paired["paired tokens<br/>(partner links + closers<br/>inherit opener role)"]
-    Out["frozen ClassifiedToken[]<br/>(source-ordered, total)"]
+    Out["frozen ClassifiedToken[]<br/>(source-ordered, total, non-overlapping)"]
 
     In -->|"validate — throws TypeError<br/>on null/missing"| Shaped
     Shaped -->|"classify by token type<br/>(pure; element list fixed here)"| Seeded
@@ -120,6 +122,10 @@ flowchart TD
 - **Totality from phase 2 — categories AND roles.** Every non-empty token has a
   home category and a role seed before the AST is consulted; a parse-anomalous
   AST can leave roles at their seeds but can never drop a token.
+- **Ordering and non-overlap are inherited, not established.** The output
+  preserves the token stream's ascending, non-overlapping ranges verbatim — no
+  phase reorders, widens, or merges ranges (internal operator claim ranges never
+  reach the output; claims resolve to token offsets).
 - **Grouping by elimination is sound only if the claim list is exhaustive.**
   `grouping` is assigned to parens no other owner claims, so every other paren
   owner MUST claim its tokens: call/`new` argument lists, control heads (`if` /

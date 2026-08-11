@@ -101,8 +101,8 @@ Each question is tagged with metadata from three frameworks.
 A 12-cell matrix crossing three dimensions (text surface, program execution,
 function/purpose) with four levels (atom, block, relation, macro). Linearized
 into five consumer-facing levels: `syntax`, `semantics`, `connections`, `goals`,
-`userExperience`. The raw BLOCK cells are retained in each question for auditing
-and coverage tracking.
+`userExperience`. The raw BLOCK cells are retained in each question for
+auditing.
 
 ### PBSI (Purpose, Behavior, Strategy, Implementation)
 

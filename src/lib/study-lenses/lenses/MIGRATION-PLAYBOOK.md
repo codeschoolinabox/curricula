@@ -1,4 +1,5 @@
 <!-- TRANSITIONAL — delete when the migration completes. Not a permanent region doc. -->
+<!-- cspell:ignore socratize reenrichment -->
 
 # Lens Migration Playbook
 
@@ -61,10 +62,14 @@ contract.
 | **Gen 1 — ORIGINALS** | `.../0--study-lenses--it-begins/src/lenses/`    | **visuals** — Preact + rich CSS; where coloring lives                                |
 
 **Decisions (locked):** (1) coloring = a shared facts-driven read-only
-highlighter; (2) quiz + socratize are EXCLUDED (owned by the question-lenses
-"indexed-pony" pivot — coordinate the boundary, don't port); (3) four static
-ports — blanks, annotate, variables, dropdowns; (4) trace-debugging is IN, as an
-independent stream.
+highlighter — EXCEPTION: the socratize lens stays un-colorized (human ruling
+2026-08-05/06; recorded in
+[SPEC.md § The un-colorized ruling record (R-4)](../../../../.planning-handoffs/socratize-quiz-reenrichment/SPEC.md#the-un-colorized-ruling-record-r-4))
+— a colorize-all sweep skips it; (2) quiz + socratize are EXCLUDED (owned by the
+socratize-quiz re-enrichment campaign, canon in-repo at
+[SPEC.md](../../../../.planning-handoffs/socratize-quiz-reenrichment/SPEC.md) —
+coordinate the boundary, don't port); (3) four static ports — blanks, annotate,
+variables, dropdowns; (4) trace-debugging is IN, as an independent stream.
 
 ## What you're shipping this week
 
@@ -504,8 +509,9 @@ end-to-end lens is gated by runtime plumbing — **run E2 first**.
   analysis — points at the facts; `project-scope-table.ts` is written against
   the legacy `ScopeInfo` shape.
 - **Built-in roster policy** (0b) — which lenses ship default vs inject-only?
-- **quiz/socratize boundary** — confirm with the indexed-pony owner before
-  anyone touches question infra; this playbook assumes they're out.
+- **quiz/socratize boundary** — confirm against the in-repo canon
+  ([SPEC.md](../../../../.planning-handoffs/socratize-quiz-reenrichment/SPEC.md))
+  before anyone touches question infra; this playbook assumes they're out.
 - **annotate deps** — adopt `js2flowchart` for the flowchart, or defer the
   flowchart and ship colored-view-only first?
 - **Tracer cap** — accept time-budget-only (`seconds`), or invest to honor
