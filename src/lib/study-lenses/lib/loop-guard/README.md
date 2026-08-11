@@ -17,10 +17,10 @@ the load-bearing invariant, not a nicety.
 A **peer-independent** module under [`lib/`][lib], a sibling of
 [`engine/`][engine]. The evaluators region consumes it two ways:
 
-- **danger** ([`evaluators/danger/`][danger]) — the same-origin iframe runner —
-  imports it directly from its [backend runner][dangerrun].
+- **danger** ([`evaluators-deprecated/danger/`][danger]) — the same-origin
+  iframe runner — imports it directly from its [backend runner][dangerrun].
 - **the engine-backed evaluators** (run, intercept) — through the region's
-  shared iteration-guard (`evaluators/lib/iteration-guard/`), the
+  shared iteration-guard (`evaluators-deprecated/lib/iteration-guard/`), the
   closure-counter form [Seam 4][interceptseam] pins.
 
 ### Why this module exists
@@ -62,11 +62,11 @@ now; that coexistence is deliberate, not an oversight.
 
 [lib]: ../README.md
 [engine]: ../engine/README.md
-[danger]: ../../evaluators/danger/README.md
+[danger]: ../../evaluators-deprecated/danger/README.md
 [interceptseam]: ../../../embody/lib/evaluating/evaluators/intercept/types.ts
 [oracle]: ../../../embody/lib/evaluating/shared/guard-loops/guard-loops.ts
 [docs]: ./DOCS.md
-[dangerrun]: ../../evaluators/danger/backend/run.ts
+[dangerrun]: ../../evaluators-deprecated/danger/backend/run.ts
 [run]: ../../../embody/lib/evaluating/run/run.ts
 [snippetrydebug]: ../../../snippetry/debug/guard-loops/guard-loops.ts
 
@@ -128,7 +128,7 @@ are parameterized. danger's adoption has landed — its runner passes these hook
 directly ([`run.ts`][dangerrun]); the closure-counter form arrives with the
 evaluators region's iteration-guard.
 
-[dangerbuild]: ../../evaluators/danger/backend/build-counters.ts
+[dangerbuild]: ../../evaluators-deprecated/danger/backend/build-counters.ts
 
 ## Ubiquitous language
 
@@ -327,6 +327,18 @@ check placement _and_ the no-newline invariant at once. Three gates pin fidelity
   fixture and an adjacency fixture (nested, consecutive siblings, do-while last
   in an outer body), so the distinct-offset property the apply-sort relies on
   can't silently break.
+
+## A known divergence from the package's published parse
+
+`splice-loop-guards.ts` parses with `{ ecmaVersion: 'latest', locations: true }`
+while the package's published parse contract is a shared **numeric** language
+year with **offsets** and no `locations` — the shape every parse fact
+cross-navigates in. The divergence is real and recorded rather than fixed
+(raised 2026-08-05): this module's parse is internal, its result never leaves as
+a published fact, and it was separately measured **not exposed** to any
+consumer. It matters if that ever changes — a numeric year is what keeps a scope
+analyzer's version gate from silently degrading on a string, and a second
+position vocabulary is what the offsets rule exists to prevent.
 
 ## Navigation
 

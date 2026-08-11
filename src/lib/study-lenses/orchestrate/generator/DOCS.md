@@ -200,6 +200,15 @@ stateDiagram-v2
   unpredictable time on a learner's own device; a view that timed its own
   transitions would lie under load. The socket reports what happened, and the
   view renders only that.
+- **Why "a late settle after dispose changes nothing" has no test** (recorded
+  2026-08-05). The plan asked for one, so its absence is a decision, not an
+  oversight: the assertion is structurally unfalsifiable rather than merely
+  untested. The view's only upward channels are the accept and discard
+  callbacks, both bound exclusively to button click handlers, and an unmounted
+  view renders no buttons — so no implementation that could exist behind this
+  seam can fail it. A test asserting it would pass for the wrong reason forever.
+  The substitute a review proposed was declined for the same cause and routed to
+  the human checkpoint instead.
 
 ## Out of scope
 

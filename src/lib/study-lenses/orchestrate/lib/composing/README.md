@@ -55,6 +55,22 @@ mode — and the ref is dropped from the render, because nothing in the study
 surface throws at the learner. The joined roster is the one truth of what this
 session can render.
 
+## A gap in the reserved-key guard
+
+The reserved-key guard covers INJECTED levels only. A built-in claiming the
+empty key `''` would collide with the reserved default and become
+default-selected — nothing stops it, and the absence is pinned only indirectly,
+by an interface test that would also pass for other reasons (recorded
+2026-07-30). Either extend the guard to cover built-ins, or pin the absence with
+an assertion that names it; until then a built-in's key is trusted rather than
+checked.
+
+Related, from the same review: `index.test.tsx`'s "mounts the selector when
+levels are registered" no longer discriminates — the selector mounts
+unconditionally now, so the assertion would pass with zero injections. No
+coverage is lost (the scaffold option is checked directly elsewhere); the name
+claims more than it proves.
+
 ## Navigation
 
 - Library index: [`../README.md`](../README.md); region root:
