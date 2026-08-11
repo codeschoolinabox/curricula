@@ -1,3 +1,5 @@
+<!-- cspell:ignore socratizing quizzing -->
+
 # lib
 
 Shared leaf libraries of the study-lenses package: peer-independent machinery
@@ -11,6 +13,17 @@ levels, and lenses built on those facts. This is a widening of the original "no
 package region even for types" rule, scoped to structural fact-types a leaf
 genuinely projects.
 
+One entry below is a parent directory, not a leaf: `questioning/` holds the two
+question engines plus, in the parent itself, only their shared truth (the
+BLOCK-model grid, taxonomies, leveling) as documentation and types. It is
+admissible on this tier's own terms: the tier's "no levels" bar means **language
+levels**, and the questioning parent and both engines are language-level-blind,
+lifecycle-blind, and lens-blind. The tier's existing leaves already carry
+pedagogical domain models (classifying's `Category`/`Role`, socratizing's
+framework stack), so the parent changes the tier's depth, not its kind — and it
+adds no machinery: it composes nothing and runs nothing, and each engine inside
+it qualifies as a leaf in its own right.
+
 - [classifying/](./classifying/README.md) — exhaustive, selection-free
   syntax-element classification: one frozen `ClassifiedToken` per source token
   (category, role, partner) from a snippet's Acorn tokens + AST.
@@ -23,6 +36,11 @@ genuinely projects.
   finds each guarded loop and splices caller-supplied guard/reset call text into
   it without moving a line, returning the rewritten source and a count of loops
   guarded.
+- [questioning/](./questioning/README.md) — the shared parent of the two
+  question engines — socratizing (the open register: questions a human judges)
+  and quizzing (the closed register: questions a machine grades) — holding the
+  BLOCK-model grid types and the shared pedagogy documentation both engines tag
+  their questions with.
 - [scoping/](./scoping/README.md) — a flat, per-declaration usage view of a
   program's variables: one frozen `VariableUsage` per `let`/`const` binding
   (name, kind, post-declaration read/write counts, declared identifier node, and
