@@ -1217,11 +1217,21 @@ greppable gap beats an invented value, and beats omitting the line entirely. The
 human-facing half of this rule, including the phrases that set a level, is
 [HUMANS.md § Override grammar](./HUMANS.md#override-grammar).
 
-⚠ **`full` is not yet defined for work with no code.** All three values are
+⚠ **`full` is not fully defined for work with no code.** All three values are
 specified in ARs that presuppose an implementation — AR-3 needs a failing test,
 AR-4 an implementation file. A documentation-only campaign running `full` must
-name its real gate set explicitly rather than assume one. This is a known gap,
-not a settled rule.
+name its real gate set explicitly rather than assume one.
+
+**The gate set docs-only work has actually used, twice, and may adopt by citing
+it** (human ruling 2026-07-30, followed 2026-08-05): **AR-1 on the content of
+each documentation commit-group, AR-2 where a sketch or structural artifact is
+among the changed files, and AR-5 over the campaign's own SHA list.** AR-3 and
+AR-4 are `n/a` and the settings line says so — a documentation change has no
+failing test to challenge and no implementation to audit, so declaring them
+fired would be ceremony-without-substance. A campaign whose changeset also
+touches source declares that increment under the ordinary set. This is a
+followed precedent, not yet a universal rule: name the set in the campaign's own
+record either way.
 
 ### Prospective and retrospective documentation
 
@@ -1487,6 +1497,21 @@ Test names and describe blocks are executable documentation. One sanctioned
 exception: the `// PINNED(<reason>)` marker (next section) — it is a
 machine-checked expectation guard, not commentary.
 
+#### Assertions that pass without asserting
+
+Two shapes measured in this repo look like coverage and are not. Both were found
+only because a reviewer re-ran the suite and read what it actually proved:
+
+- **`expect(act(…)).rejects…` is a silent false positive.** React's `act`
+  returns a thenable that is not a rejected promise in the shape the matcher
+  expects, so the assertion resolves whatever the code under test does — three
+  tests passed vacuously before this was caught. Assert the rejection from the
+  awaited call itself, outside `act`.
+- **Read all three vitest summary lines, not the first.** `Test Files`, `Tests`,
+  and `Errors` are independent: an unhandled error fails the FILE while every
+  named test still reports passed, so a run can read green in the line most
+  people quote and be red one line down.
+
 #### Pinned expectations
 
 A settled test expectation — one an AR PAUSE or a human ruling decided — carries
@@ -1507,6 +1532,24 @@ every AR PAUSE resolution and human ruling, and never bulk-sweep pins onto
 expectations nobody ruled on. Disambiguation: elsewhere in this file "pin" means
 a _model pin_ ([§ Sub-model dispatch](#sub-model-dispatch)); a pinned
 expectation is a different concept — a test-level ruling marker.
+
+**A marker cites what a reader can grep TODAY** (human ruling 2026-07-30). The
+reason inside the parentheses states the rule the assertion answers to, in
+enough words to stand alone; a pointer to a document, an increment id, or a
+review round is not a citation, because the reader in front of the assertion
+cannot resolve it. Where the ruling has a durable home, name the rule and its
+date, not the file.
+
+**A guard-down period accepts no NEW pins** (human ruling 2026-08-06, resolving
+two same-day campaign rulings that had gone opposite ways). When the
+pinned-guard hook is not registered — the working tree can differ from HEAD
+here, so check rather than assume — a marker planted then reads as protected
+while nothing defends it, which is worse than a clear absence. Ship the
+assertion, and plant its marker when the guard is re-armed. Existing pins keep
+their full authority throughout: the sign-off obligation is a rule about
+inverting a ruling, not a property of the hook, and it binds whether or not
+anything mechanical is watching. The hook is also `ask`-only and cannot be
+satisfied non-interactively, so an unattended run never trips it.
 
 #### Triangulation
 
@@ -1638,6 +1681,16 @@ Documentation-driven development ensures clarity BEFORE code exists. It is also
 where Domain-Driven Design (DDD) thinking lives: the domain model, the
 ubiquitous language, and the bounded context should all be established in
 writing before a single type is defined.
+
+**What Phase 0 governs, stated so the do-not-skip rule above is not read wider
+than it is:** Phase 0 is **new-module establishment work** — the README with the
+ubiquitous-language glossary inside it, the twin or the `## Epistemology` block
+that discharges it, and `types.ts` with the DOCS.md sketch and the test suite. A
+trivial fix, a single-file edit with no public-API surface, or a correction
+inside an existing contract is not Phase-0 work in the first place, so it is not
+an exception to the rule and needs no waiver. The rule bites where a module, a
+contract, or a region is being established or reshaped — and there it does not
+bend.
 
 **The three steps are named for the artifact each produces** (human ruling
 2026-08-04), so a step number and a deliverable are the same thing. The AR gates
@@ -1933,6 +1986,11 @@ Each passing TDD cycle = one atomic commit:
 - One behavior per commit
 - Descriptive message: `add: createConfig expands boolean shorthand`
 - Commits go directly to main; branches only when the human explicitly instructs
+- **A rule amendment ships as its own commit** (human ruling 2026-07-30). When a
+  change alters a standing rule — in this file, in the governance files, or in a
+  module's own contract — it lands alone, with the amendment as the subject
+  line. An amendment buried inside a batch is invisible to `git log --oneline`,
+  which is where a later reader looks for when a rule changed and why.
 
 ### What NOT to Do
 
@@ -2393,11 +2451,12 @@ source** — a `DOCS-FLAG` in a `.ts` file is a `TODO` wearing a different name.
 Use it only where the drift is real, already understood, and out of the current
 scope; anything you could fix now is not a `DOCS-FLAG`.
 
-_(This definition is the surviving content of the retired `tadpotyping` skill,
-which was the only document in the repository that defined a marker this file
-already used. Promoted under a narrow exception to the retirement rule — a
-retirement may not leave undefined a convention `DEV.md` already uses — recorded
-as R17 in `.planning-handoffs/governance-dials/AR-LOG.md`.)_
+_(This definition is the surviving content of a retired skill, which was the
+only document in the repository that defined a marker this file already used.
+Promoted under a narrow exception to the retirement rule — **a retirement may
+not leave undefined a convention `DEV.md` already uses** (human ruling
+2026-08-05), which is the rule this paragraph exists to satisfy and the one a
+later retirement should check itself against.)_
 
 ### TypeScript Strict Mode
 
