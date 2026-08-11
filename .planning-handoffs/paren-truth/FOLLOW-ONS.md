@@ -39,6 +39,18 @@ otherwise.**
 
 ## F1 — a shared node leaves one of its two wrappers without its token
 
+> ✅ **DONE 2026-08-11** — `fb751d95`, `a19a6f53`, `f14a1c2d`, `78667ecd`,
+> `00cc7a7a`. The human chose a shape this section did not list: **containment
+> ties** — every wrapper whose span holds a token ties it — after measurement
+> showed the aliased cases below are one subfamily of a larger family (shorthand
+> and pattern keys starve by the same mechanism as DISTINCT objects, and
+> re-exports plus string export names alias too, so all three candidates below
+> were narrower than the defect). The ruling lives inline at the tokens contract
+> (`embody/types.ts`, human ruling 2026-08-11), ratified at two 🔍 checkpoints
+> on the new `/embody/sandbox.html` inspection page; record, AR verdicts, and
+> mutation evidence ride the commits' own bodies. The scope-fact path canaries
+> ride `derive-environment.test.ts`, deliberately unpinned.
+
 **Severity: real defect, no consumer pressing on it. Size: one increment, but a
 design one — it changes published-contract semantics.**
 
