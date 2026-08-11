@@ -900,3 +900,28 @@ run, which the leaner-bodies rule (previous section) exists precisely to forbid.
 Sixth occurrence of the sourced-claims family this campaign; amend is forbidden,
 so this entry is the repair. The banner's content claims are unaffected — only
 the insertion count is wrong.
+
+### Validation postscript (2026-08-11) — one SHOULD-FIX, carried here
+
+The context-free dry run of the F1 launch prompt returned YES — a cold session
+orients and reaches the reproduction without guessing [relayed: context-free
+validator, this session]. Its one SHOULD-FIX: the foreign commit `ff4532f1`
+(2026-08-11) annotated the tokens contract at
+`src/lib/study-lenses/embody/types.ts` with the collision, both aliasing sites,
+and the three-way design question "(recorded 2026-08-05)" [read: that file —
+"with one measured exception the contract does not yet cover"]. Consequence for
+F1: the prompt's "against that field's documented contract" is now half-stale —
+the promise still opens the doc block, but the same block records the exception
+— and **candidate 3 is partially pre-executed** (the wart is documented, though
+as an open question, not a narrowed promise). The design fork survives; the fork
+presentation to the human must account for this.
+
+Carried HERE and in the untracked launchpad rather than in § F1's addendum,
+because FOLLOW-ONS is actively mid-edit by a concurrent session at the time of
+writing [measured: `git status --porcelain` — `MM` on that path] and staging it
+would sweep the peer's unstaged work into this record's commit. One addendum
+bullet is still owed to § F1 when that file frees up; until then this row and
+the launchpad's note are the record. The validator's remaining findings were
+NOTEs, including that the file-header's "Suggested order" line cannot derail an
+F1 session (the addendum corrects it before any action) — per the tail plan,
+that report decides, so the header stays untouched.
