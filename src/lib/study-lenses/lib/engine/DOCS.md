@@ -3,7 +3,8 @@
 Vocabulary: [README.md § Glossary](./README.md). The outcome table and what each
 settlement carries: [README.md § How a run ends](./README.md). The downstream
 vocabulary — the evaluator kind's settlement each evaluator maps onto:
-[evaluators/types.ts](../../evaluators/types.ts) § Settlement.
+[evaluators-deprecated/types.ts](../../evaluators-deprecated/types.ts) §
+Settlement.
 
 ## Architectural Sketch
 

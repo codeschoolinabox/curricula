@@ -39,7 +39,7 @@ check every port's DoD names.
 | Quarry (Gen-2, READ-ONLY)                       | `<repo>/src/lib/study-lenses--deprecated-architecture/lenses/`                                                                                         |
 | Originals (Gen-1) — **separate committee tree** | `/Users/master/Documents/0-teach-code/0-spiralearn/0-study-lenses-committee/zz--oldd-clauding-and-context-dump/0--study-lenses--it-begins/src/lenses/` |
 | Coloring input                                  | `study-lenses/embody/types.ts` (`Tokens`, `Environment`)                                                                                               |
-| Engine / evaluators                             | `study-lenses/lib/engine/` · `study-lenses/evaluators/`                                                                                                |
+| Engine / evaluators                             | `study-lenses/lib/engine/` · `study-lenses/evaluators-deprecated/`                                                                                     |
 | Tracer (copy A, the complete one)               | `<repo>/src/lib/embody/lib/evaluating/trace/variables/`                                                                                                |
 | Tracer handoff notes (Stream E)                 | `<repo>/src/lib/embody/lib/evaluating/.handoff/variables-tracer-launch.md` + `trace-debugging-lens-launch.md`                                          |
 | `lib/classifying` (blanks dep)                  | `study-lenses/lib/classifying/`                                                                                                                        |
@@ -406,11 +406,11 @@ end-to-end lens is gated by runtime plumbing — **run E2 first**.
   the engine swap is hours; the jej re-source + reconcile is the multi-day part.
 
 > **Agent prompt — E1:** Read
-> `study-lenses/evaluators/README.md`/`DOCS.md`/`types.ts` (the `Evaluator`
-> contract), `study-lenses/lib/engine/types.ts`, and the porting source
-> `src/lib/embody/lib/evaluating/trace/variables/` (copy A — READ-ONLY; do NOT
-> use the partial orphan under `--deprecated-architecture/embody/`). Create
-> `study-lenses/evaluators/tracers/variables/` as the first greenfield
+> `study-lenses/evaluators-deprecated/README.md`/`DOCS.md`/`types.ts` (the
+> `Evaluator` contract), `study-lenses/lib/engine/types.ts`, and the porting
+> source `src/lib/embody/lib/evaluating/trace/variables/` (copy A — READ-ONLY;
+> do NOT use the partial orphan under `--deprecated-architecture/embody/`).
+> Create `study-lenses/evaluators/tracers/variables/` as the first greenfield
 > evaluator: move the tier, re-point its 9 engine imports (6 files, 2 of them
 > tests) from `study-lenses--deprecated-architecture/lib/engine` to
 > `study-lenses/lib/engine` (they're API-identical; the only rename is
@@ -456,9 +456,9 @@ end-to-end lens is gated by runtime plumbing — **run E2 first**.
   evaluator.
 - **Depends on:** E1 (the evaluator) + E2 (plumbing proven).
 
-> **Agent prompt — E3:** Read the lens contract docs, `evaluators/README.md`
-> (the caller protocol: applicability → drive `main` → pull the stream → cancel
-> by unmounting), and the Gen-2 harness
+> **Agent prompt — E3:** Read the lens contract docs,
+> `evaluators-deprecated/README.md` (the caller protocol: applicability → drive
+> `main` → pull the stream → cancel by unmounting), and the Gen-2 harness
 > `study-lenses--deprecated-architecture/lenses/trace-debugging/core.ts` for its
 > pure event/settlement projections (reference only). Read the CONCRETE new
 > event union from `evaluators/tracers/variables/types.ts` (from E1; or the
@@ -499,9 +499,9 @@ end-to-end lens is gated by runtime plumbing — **run E2 first**.
   gate-guaranteed at drive time, but **`environment` is not** — it is the one
   derived stage that can fail in a reachable `evaluation` phase, as a loud
   dev-mode embody defect, so narrow its `ok` once and never assert it
-  (`evaluators/README.md`). Enumerate scopes by `root`/`childScopes`, never by
-  `byPath`, which collapses path collisions and would drop a module's outer
-  scope (`lib/scoping/derive-scope-usage.ts`). `lib/scoping` is a leaf the
+  (`evaluators-deprecated/README.md`). Enumerate scopes by `root`/`childScopes`,
+  never by `byPath`, which collapses path collisions and would drop a module's
+  outer scope (`lib/scoping/derive-scope-usage.ts`). `lib/scoping` is a leaf the
   evaluator may import, not something the spec hands it, and its `ScopeUsage`
   covers the `allDeclarations` half only — the scope tree is deliberately
   omitted, so `ScopeInfo` has no candidate at all. Re-source the tracer to the
@@ -527,6 +527,7 @@ end-to-end lens is gated by runtime plumbing — **run E2 first**.
   `.../it-begins/src/lenses/{BlanksLens,HighlightLens,VariablesLens,DropDownsLens}.jsx`.
 - Coloring input: `study-lenses/embody/types.ts` (`Tokens`, `Environment`).
 - Tracer (copy A): `src/lib/embody/lib/evaluating/trace/variables/`. Engine:
-  `study-lenses/lib/engine/`. Evaluator contract: `study-lenses/evaluators/`.
+  `study-lenses/lib/engine/`. Evaluator contract:
+  `study-lenses/evaluators-deprecated/`.
 - Roster seam: `orchestrate/lib/composing/built-in-lenses.ts` (+
   `join-level-roster.ts`).

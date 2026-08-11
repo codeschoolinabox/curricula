@@ -1,4 +1,7 @@
-# evaluators
+# evaluators (deprecated)
+
+> **(deprecated)** This tree is frozen — compile-and-green only, no enrichment;
+> it stands as a reference implementation and regression net.
 
 The generator kind of study utility. An evaluator executes a program and emits
 events — it is **headless**: consumed by lenses, never rendered, owning no view

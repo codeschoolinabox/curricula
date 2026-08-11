@@ -200,8 +200,8 @@ engine-made `error`, no halt.
 Consumer-driven stops (`cancelled`, `failed`) carry NO engine error — nothing
 misbehaved; the consumer ended a healthy run. The evaluator kind's `canceled`
 settlement arm mirrors `cancelled`
-([evaluators/types.ts § Settlement](../../evaluators/types.ts)): a
-consumer-ended run carries no error there either. `failed` has no kind-level
+([evaluators-deprecated/types.ts § Settlement](../../evaluators-deprecated/types.ts)):
+a consumer-ended run carries no error there either. `failed` has no kind-level
 counterpart — what becomes of a `failReason` is each evaluator's own mapping.
 
 The division of limits: **time is engine-owned and standardly available;
@@ -410,6 +410,6 @@ the worker-error termination cause; halts are bootstrap-posted, exactly once.
 - [DOCS.md](./DOCS.md) — architectural sketch, data flow, decision records
 - [types.ts](./types.ts) — the engine contract
 - [../README.md](../README.md) — the shared-leaf `lib/` directory
-- [../../evaluators/README.md](../../evaluators/README.md) — the evaluator kind:
-  the consuming contract implemented on top of this engine
+- [../../evaluators-deprecated/README.md](../../evaluators-deprecated/README.md)
+  — the evaluator kind: the consuming contract implemented on top of this engine
 - [../../README.md](../../README.md) — the study-lenses package root
