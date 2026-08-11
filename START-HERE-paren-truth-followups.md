@@ -160,8 +160,8 @@ in ONE invocation, staged diff exclusively yours, announce full SHAs, NEVER push
 
 > ✅ **DONE 2026-08-05 — do not launch this prompt.** The three guards landed
 > (`28cbd114`, `46d77084`, `9564e178`), two of them relocated to the validating
-> seam on a human ruling; see FOLLOW-ONS § F2's banner and AR-LOG § F2
-> follow-on.
+> seam on a human ruling; see FOLLOW-ONS § F2's banner, which carries the
+> record.
 
 The fold has a good guard net inside embody, but three places _outside_ it could
 absorb a regression silently: `debug-props` counts syntax nodes with paren-free
@@ -226,8 +226,8 @@ published contract.
 > and the open design question — so candidate 3 ("narrow the contract") is now
 > partially pre-executed as documentation. The fork is unchanged, but the F1
 > session's fork presentation must account for that annotation. **The annotation
-> itself is the record — read it in place.** (AR-LOGs are being retired; docs
-> are the source of truth.)
+> itself is the record — read it in place.** (Docs are the source of truth;
+> rulings live inline, dated, where they govern.)
 
 ```text
 Fix the shared-node token gap in embody. Repo:
@@ -288,8 +288,8 @@ to AGENTS.md or AGENTS.principal.md. Read your routed file END-TO-END, then
 DEV.md END-TO-END, including § Documentation migration discipline — every reword
 is enumerated in a loss ledger in the commit body or the plan.
 
-Read .planning-handoffs/paren-truth/FOLLOW-ONS.md § F6 and the AR-LOG's
-2026-08-03 ar-2 entry (concern C6).
+Read .planning-handoffs/paren-truth/FOLLOW-ONS.md § F6; the review concern it
+rests on (C6, 2026-08-03) is quoted there in full.
 
 The work is smaller than the name suggests: within embody, only types.ts still
 carries the legacy phrasing, at three lines (:66, :199, :338). README.md and
@@ -349,9 +349,9 @@ Then read:
    its tests. This is the ONE live legacy consumer that really does walk
    ParenthesizedExpression nodes, and it is the concrete thing that will need
    embody's parenSpans (or need re-shaping without paren nodes) when it ports.
-2. .planning-handoffs/evaluators-intercept/AR-LOG.md — the stream this work
-   belongs to, currently at Phase 1. Read it for shape and gate discipline; it
-   contains nothing about paren spans, so do not expect inherited context. Its
+2. .planning-handoffs/evaluators-api-restoration/LOSS-LEDGER.md — the stream
+   this work belongs to. Read it for shape and gate discipline; it contains
+   nothing about paren spans, so do not expect inherited context. It
    header names a cross-ceremony ledger under ~/.claude/plans/ that git ls-files
    cannot find — follow that pointer.
 3. Load the `aran-weaving` skill for the porting machinery. It says nothing
