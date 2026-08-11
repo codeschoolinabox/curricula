@@ -149,10 +149,13 @@ this region owns.
   predicates test and accessibility reads from.
 - **entwining / entwined** — the derived source⇄tree binding: the stage tying
   each syntax-tree node to its exact place in the source text. Built at
-  embodiment time, in this region. Beside its node, token, and comment ties, the
-  binding carries the parse's own record of grouping parentheses: for each node
-  the parentheses wrapped, its paren spans, keyed by that node's path —
-  path-keyed data, so it lives here, where paths are born.
+  embodiment time, in this region. A tie is containment: a node ties every token
+  and comment whose start lies in its half-open span, through one shared wrapper
+  each; a node the parse reuses at two paths carries one wrapper per path.
+  Beside its node, token, and comment ties, the binding carries the parse's own
+  record of grouping parentheses: for each node the parentheses wrapped, its
+  paren spans, keyed by that node's path — path-keyed data, so it lives here,
+  where paths are born.
 - **grouping parentheses** — the parentheses the parser itself records around an
   expression (`(1 + 2) * 3`), as distinct from the parentheses that belong to a
   call, a parameter list, or a control head. Some are load-bearing — `(a?.b).c`

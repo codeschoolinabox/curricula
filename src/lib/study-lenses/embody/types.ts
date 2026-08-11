@@ -128,17 +128,27 @@ export type Facts = {
  *
  * The reverse direction is one-to-one for every node the grammar gives its own
  * slot, but not quite for all: where the parse reuses a single node object in
- * two slots, both paths lead to it. A bare import or export specifier is the
- * case that occurs — `import { x }` builds one identifier and hangs it at both
- * `local` and `imported` (`export { x }` likewise, at `local` and `exported`),
- * while the renamed forms build two. So a consumer keyed by node identity
- * rather than by path may meet the same node twice, and should tolerate it.
+ * two slots, both paths lead to it. The bare named specifier forms are where
+ * the parse does this — `import { x }` builds one identifier and hangs it at
+ * both `local` and `imported`; `export { x }` and the re-export `export { config } from
+ * "./m.js"` do likewise at `local` and `exported`; a string export name
+ * (`export { "x" } from "m"`) shares one string literal, so the shared node
+ * need not be an identifier. The renamed forms build two nodes. So a consumer
+ * keyed by node identity rather than by path may meet the same node twice,
+ * and should tolerate it.
  */
 export type NodePath = string;
 
 /** A token tied into the binding: its neighbors and its innermost node. */
 export type EntwinedToken = {
 	readonly token: Token;
+	/**
+	 * The wrapper `byOffset` holds at the token's start. Where several
+	 * wrappers share the innermost span, which of them this is, is not a
+	 * contract — and it may sit outside the subtree of a wrapper tying
+	 * this token. `null` would mean a token outside every span, which the
+	 * no-hole `byOffset` precludes.
+	 */
 	readonly innermostNode: EntwinedNode | null;
 	readonly previous: EntwinedToken | null;
 	readonly next: EntwinedToken | null;
@@ -147,6 +157,12 @@ export type EntwinedToken = {
 /** A comment tied into the binding, by the same geometry as a token. */
 export type EntwinedComment = {
 	readonly comment: Comment;
+	/**
+	 * The wrapper `byOffset` holds at the comment's start. Where several
+	 * wrappers share the innermost span, which of them this is, is not a
+	 * contract — and it may sit outside the subtree of a wrapper tying
+	 * this comment.
+	 */
 	readonly innermostNode: EntwinedNode | null;
 	readonly previous: EntwinedToken | null;
 	readonly next: EntwinedToken | null;
@@ -160,20 +176,22 @@ export type EntwinedNode = {
 	readonly parent: EntwinedNode | null;
 	readonly children: ReadonlyArray<EntwinedNode>;
 	/**
-	 * Every token within the node's span — with one measured exception the
-	 * contract does not yet cover. Where two paths resolve to the SAME node
-	 * object, each path gets its own wrapper and only one receives the
-	 * tokens; the other's array is empty. Acorn reuses one Identifier for
-	 * both `local` and `imported` on a bare `import { x }` (and
-	 * `local`/`exported` on a bare `export { x }`) — the parser's only two
-	 * aliasing sites — so those are the reachable cases, and the renamed
-	 * forms build two nodes and do not collide. Pre-existing and untested;
-	 * whether both wrappers should tie the tokens, one wrapper should be
-	 * shared, or this line should narrow is an open design question
-	 * (recorded 2026-08-05).
+	 * Every token whose start lies in the node's half-open span
+	 * `[start, end)`, in stream order — containment is the whole rule
+	 * (human ruling 2026-08-11): a wrapper's ties follow from its span
+	 * alone, and `innermostNode` plays no part in them. A zero-width span
+	 * ties none. Usually the wrappers holding one token are a single
+	 * ancestor chain; two cases break that, and both tie the same shared
+	 * token wrapper — one graph, never copies: a node the parse reuses at
+	 * two paths (see {@link NodePath}), and a shorthand property's key
+	 * sharing, or sitting inside, its value's span. So the token sets of
+	 * two sibling wrappers are not always disjoint.
 	 */
 	readonly tokens: ReadonlyArray<EntwinedToken>;
-	/** Every comment contained within the node's span. */
+	/**
+	 * Every comment whose start lies in the node's half-open span, in
+	 * source order — the same containment rule as `tokens`.
+	 */
 	readonly comments: ReadonlyArray<EntwinedComment>;
 };
 
@@ -204,7 +222,9 @@ export type Entwined = {
 	readonly root: EntwinedNode;
 	/**
 	 * Every node keyed by its `NodePath` — O(1) resolution from a carried
-	 * path string back to its entwined node.
+	 * path string back to its entwined node. A node the parse reuses at
+	 * two paths has one wrapper per path (see {@link NodePath}), so a key
+	 * count counts paths, not node objects.
 	 */
 	readonly byPath: Readonly<Record<NodePath, EntwinedNode>>;
 	/**
