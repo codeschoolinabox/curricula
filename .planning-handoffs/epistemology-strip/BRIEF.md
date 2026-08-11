@@ -75,9 +75,9 @@ uninterpreted [read: `src/lib/study-lenses/orchestrate/index.tsx` — ``
 `formatBlockedSentence`, whose result is the body of a `<p
 data-enforcement-cause role="status">`]. That property is not incidental — it is
 why the message was reworded mid-wave and why that increment needed a human at a
-running dev server [read:
-`.planning-handoffs/aithor-contract-proposals/AR-LOG.md` § Human rulings (wave
-1), H1].
+running dev server (human ruling 2026-08-05: the leaf's default-deny message is
+reworded domain-blind — a behavior change, live at
+`screening/collect-violations.ts`).
 
 **Read the failure precisely.** Field 3 asks an author to name a future state
 that would invalidate a present decision. Both errors are invisible at write
@@ -94,12 +94,12 @@ a good trigger from either.
    `spiralearn/frogramming-and-vibetoading/ontology.md` § 4 (_twin ignored_).
    **If any part survives, it is this one.** Whether it survives is the
    maintainer's call — ask, do not assume.
-2. **A standing design ruling taken in the same conversation**, recorded as
-   **H7** in
-   [the aithor campaign ledger](../aithor-contract-proposals/AR-LOG.md#human-rulings-wave-1),
-   not here: absence is a safer baseline than recommendation, and recommendation
-   is a later layer on top of the bare absence information. It is what field 3
-   got wrong. It outlives this strip.
+2. **A standing design ruling taken in the same conversation** — absence is a
+   safer baseline than recommendation, and recommendation is a later layer on
+   top of the bare absence information (human ruling 2026-08-06, now a
+   convention in
+   [`lib/screening/README.md`](../../src/lib/study-lenses/lib/screening/README.md)).
+   It is what field 3 got wrong, and it outlives this strip.
 
 ## The design question — answer it before editing
 
@@ -126,10 +126,11 @@ _is_ step 0.2. Four exits, and the maintainer picks:
   since field 3 is the broken field.
 - **(d)** Change the `twin-doc` default away from `none` — e.g. to `machine`, so
   `DOCS.md` _is_ the twin and step 0.2 always produces a real document, needing
-  no discharge mechanism anywhere. Precedent exists [read:
-  `.planning-handoffs/socratizing-remediation/AR-LOG.md` — _"B0's twin-doc is
-  `machine` … No `## Epistemology` block is owed"_]. This removes the failing
-  convention without renumbering.
+  no discharge mechanism anywhere. Precedent exists: one module already declared
+  `twin-doc: machine` on the ground that its own `DOCS.md` IS the machine twin,
+  so no `## Epistemology` block was owed — the obligation keys to the declared
+  value, not to a module's age (human ruling 2026-07-30). This removes the
+  failing convention without renumbering.
 
 **One fact material to the choice, which `DEV.md` gets wrong.** The block's
 stated justification is that its fixed heading is _"the one rule in § Work
@@ -203,10 +204,12 @@ false of the file.
 
 ### OUT of scope — do not sweep
 
-Three campaign ledgers carry 11 mentions (`governance-dials` 6, `paren-truth` 3,
-`socratizing-remediation` 2). They are **dated records of what was true when
-written** — one already contains a measurement that is false today, correctly
-so. Editing them to match a later decision is record falsification. Leave them.
+Dated records of what was true when they were written — a commit body, a
+measurement in a log, a decision recorded at its moment — are **not** sweep
+targets, even where a later decision made them wrong. One such record already
+contains a measurement that is false today, correctly so. Editing a dated record
+to match a later decision is record falsification. The sweep touches end-state
+documents, never the history behind them.
 
 ## Obligations the executing agent owes
 
@@ -223,12 +226,13 @@ so. Editing them to match a later decision is record falsification. Leave them.
    and they are not next to each other… you fix the section you happened to be
    editing, and three others keep teaching the old shape"_, then names the
    four]. That converts a search into a checklist.
-3. **This campaign has no `AR-LOG.md`.** Nine other campaigns have one
-   [measured: `ls .planning-handoffs/*/AR-LOG.md`], and
-   [DEV.md § Ruling provenance](../../DEV.md#ruling-provenance) names that path
-   as the home for campaign decisions while saying **add no new file**. The
-   maintainer's answer to the design question needs to land there, not in a
-   fourth kind of document.
+3. **Where the maintainer's answer lands.**
+   [DEV.md § Ruling provenance](../../DEV.md#ruling-provenance) gives two homes:
+   a `PINNED(...)` beside the assertion a ruling settles, and a dated
+   `(human ruling YYYY-MM-DD)` line in the document the ruling governs — plus
+   the commit body of the turn it is given. The design question here is about
+   `DEV.md`'s own convention, so its answer belongs in `DEV.md` at the section
+   it changes, dated. This brief carries the question, never the ruling.
 
 ## Coordination and traps
 
@@ -271,8 +275,9 @@ teaches the old one. The grep is a necessary check, not a sufficient one.
 - `node scripts/check-governance.mjs` — **re-measure the baseline in the same
   turn**; it read `0 errors, 61 advisories` on 2026-08-05 and
   `0 errors, 62 advisories` on 2026-08-06, and the delta was foreign
-- `git grep -c "Epistemology" -- .` afterwards: only the three campaign ledgers
-  should remain
+- `git grep -c "Epistemology" -- .` afterwards: the remaining hits should be
+  dated records and history only — no end-state document should still teach the
+  stripped convention
 - Re-read every step-0.2 site from Surface 2 and confirm none dangles
 - Ceremony is the maintainer's to set and is **not yet set** for this work. Ask.
 - Commit with an explicit pathspec; this worktree is shared. **Never push.**
