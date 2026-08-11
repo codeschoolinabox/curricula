@@ -1130,6 +1130,125 @@ describe('deriveEntwined', () => {
 								?.tokens,
 					).toHaveLength(1);
 				});
+
+				it.each([
+					['let x; export { x };', '$.body.1.specifiers.0.local'],
+					['export { config } from "./m.js";', '$.body.0.specifiers.0.local'],
+					['export { "x" } from "m";', '$.body.0.specifiers.0.local'],
+					['const { x } = y;', '$.body.0.declarations.0.id.properties.0.key'],
+				])(
+					'%s → the off-chain wrapper at %s ties its token',
+					(source, path) => {
+						const snippet = { source, type: 'module' } as const;
+						const tokens = deriveTokens(snippet);
+						const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+						const stage = deriveEntwined(
+							snippet.source,
+							tokens,
+							ast,
+							parenSpansByNode,
+						);
+						expect(
+							stage && stage.ok && stage.value.byPath[path]?.tokens,
+						).toHaveLength(1);
+					},
+				);
+
+				it("a shorthand key's tied token is the value's own token wrapper — never copies", () => {
+					const snippet = { source: 'const o = {x};', type: 'script' } as const;
+					const tokens = deriveTokens(snippet);
+					const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+					const stage = deriveEntwined(
+						snippet.source,
+						tokens,
+						ast,
+						parenSpansByNode,
+					);
+					const entwined = stage && stage.ok && stage.value;
+					const key =
+						entwined &&
+						entwined.byPath['$.body.0.declarations.0.init.properties.0.key'];
+					const value =
+						entwined &&
+						entwined.byPath['$.body.0.declarations.0.init.properties.0.value'];
+					expect(!!key && !!value && key.tokens[0] === value.tokens[0]).toBe(
+						true,
+					);
+				});
+
+				it("a shorthand pattern key's tied token is the value's own token wrapper — never copies", () => {
+					const snippet = {
+						source: 'const { x } = y;',
+						type: 'script',
+					} as const;
+					const tokens = deriveTokens(snippet);
+					const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+					const stage = deriveEntwined(
+						snippet.source,
+						tokens,
+						ast,
+						parenSpansByNode,
+					);
+					const entwined = stage && stage.ok && stage.value;
+					const key =
+						entwined &&
+						entwined.byPath['$.body.0.declarations.0.id.properties.0.key'];
+					const value =
+						entwined &&
+						entwined.byPath['$.body.0.declarations.0.id.properties.0.value'];
+					expect(!!key && !!value && key.tokens[0] === value.tokens[0]).toBe(
+						true,
+					);
+				});
+
+				it("a destructuring default's key ties the pattern's own token wrapper — never copies", () => {
+					const snippet = {
+						source: 'const { x = 1 } = y;',
+						type: 'script',
+					} as const;
+					const tokens = deriveTokens(snippet);
+					const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+					const stage = deriveEntwined(
+						snippet.source,
+						tokens,
+						ast,
+						parenSpansByNode,
+					);
+					const entwined = stage && stage.ok && stage.value;
+					const key =
+						entwined &&
+						entwined.byPath['$.body.0.declarations.0.id.properties.0.key'];
+					const value =
+						entwined &&
+						entwined.byPath['$.body.0.declarations.0.id.properties.0.value'];
+					expect(!!key && !!value && key.tokens[0] === value.tokens[0]).toBe(
+						true,
+					);
+				});
+
+				it("a shared token's innermost node is whatever byOffset holds at its start", () => {
+					const snippet = {
+						source: 'import { x } from "m";',
+						type: 'module',
+					} as const;
+					const tokens = deriveTokens(snippet);
+					const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+					const stage = deriveEntwined(
+						snippet.source,
+						tokens,
+						ast,
+						parenSpansByNode,
+					);
+					const entwined = stage && stage.ok && stage.value;
+					const imported =
+						entwined && entwined.byPath['$.body.0.specifiers.0.imported'];
+					expect(
+						!!entwined &&
+							!!imported &&
+							imported.tokens[0]?.innermostNode ===
+								entwined.byOffset[imported.node.start],
+					).toBe(true);
+				});
 			});
 		});
 
