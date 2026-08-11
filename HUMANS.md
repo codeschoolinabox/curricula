@@ -303,13 +303,14 @@ pattern to catch yourself in.
 **Ceremony's record has a narrower home than the other overrides.** The closing
 rule below accepts a conversation, a commit message, or a plan-file note. For a
 ceremony level a plan-file note is **not enough**: the level is a ruling, and
-rulings live in the commit body — and, for a campaign, **also** in its
-`.planning-handoffs/<campaign>/AR-LOG.md`, which is the campaign's citable
-record ([DEV.md § Ruling provenance](./DEV.md#ruling-provenance)). Both, not
-either: the commit body is where the level binds a changeset, and the ruling log
-is where a later reader finds it without knowing which commit to open. A level
-that reached neither is not set. This campaign learned that the expensive way —
-seven increments shipped carrying a ceremony value no ruling recorded.
+rulings live in the commit body that carries the work — and, where the level
+governs a module's ongoing practice, **also** in a dated line in that module's
+own docs ([DEV.md § Ruling provenance](./DEV.md#ruling-provenance)). Both, not
+either: the commit body is where the level binds a changeset, and the dated line
+is where a later reader finds it — by grepping the thing it governs, with no
+commit to look up. A level that reached neither is not set. This campaign
+learned that the expensive way — seven increments shipped carrying a ceremony
+value no ruling recorded.
 
 **Override is not skip-with-no-record.** Every override should be visible: in
 the conversation, in the commit message, or in a plan-file note. Future-you
@@ -461,10 +462,11 @@ agent claims things are done; you verify they actually are.
   not sound uncertain; they sound settled. "Which command?" costs you four
   words.
 - **"You ruled X" with no citation is the other tell.** Rulings live in
-  `PINNED(...)`, a `.planning-handoffs/<campaign>/AR-LOG.md`, or a dated
-  `(human ruling YYYY-MM-DD)` line
-  ([DEV.md § Ruling provenance](./DEV.md#ruling-provenance)). An agent has
-  invented one before. Ask where it is written.
+  `PINNED(...)` beside the assertion they settle, or in a dated
+  `(human ruling YYYY-MM-DD)` line in the document they govern
+  ([DEV.md § Ruling provenance](./DEV.md#ruling-provenance)). Two greps find
+  every one of them: `git grep -n 'human ruling'` and `git grep -n 'PINNED('`.
+  An agent has invented one before. Ask where it is written.
 
 **Citation and claim conventions (human ruling 2026-07-30 — re-decide any
 time):** the tag rule is canonical in `DEV.md` with a short invariant in both

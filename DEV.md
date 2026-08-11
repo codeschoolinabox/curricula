@@ -1042,24 +1042,30 @@ AR, or a prior decision settled anything, produce the record. The citation is
 the ruling's existence proof, not its footnote — a ruling you cannot locate in
 one command is one you are inventing. Say so and ask.
 
-Three homes already exist; **add no new file**:
+Two homes already exist; **add no new file**:
 
 - `PINNED(<reason>)` beside a settled test assertion, defended by the
   pinned-guard hook — see [§ Pinned expectations](#pinned-expectations).
-- `.planning-handoffs/<campaign>/AR-LOG.md` for campaign decisions.
-- A dated inline `(human ruling YYYY-MM-DD)` parenthetical for durable rules,
-  promoted from the AR-LOG at campaign close.
+- A dated inline `(human ruling YYYY-MM-DD)` parenthetical **in the document the
+  ruling governs** — the module's `README.md`, `DOCS.md`, or `types.ts`. A
+  ruling whose end-state home does not exist yet rides its campaign's own
+  durable artifact — a spec, a ledger, a brief — and moves into that document
+  when it is written; the campaign's closing commit body enumerates what went
+  where (human ruling 2026-08-06).
 
-`git grep -n 'human ruling'`, `git grep -n 'PINNED('`, and
-`git ls-files '*AR-LOG*'` are the three lookups.
+`git grep -n 'human ruling'` and `git grep -n 'PINNED('` are the two lookups.
+Both read the working tree, so a ruling is found by grepping the thing it
+governs — never by knowing which commit to open.
 
 **Record on confirmation, not eventually.** The read half of this rule is
 useless without the write half: when the human confirms a ruling, write it into
-one of the three homes **in the same turn**. A rule that says "grep three homes,
-and finding nothing means you invented it" degrades into a near-always-fail gate
-agents learn to route around, unless the corpus actually accumulates. A ruling
-that lives only in a plan file under `~/.claude/plans/` does not exist —
-`git grep` cannot see it.
+one of the two homes **in the same turn**, and state it in that turn's commit
+body. A rule that says "grep the homes, and finding nothing means you invented
+it" degrades into a near-always-fail gate agents learn to route around, unless
+the corpus actually accumulates. A ruling that lives only in a plan file under
+`~/.claude/plans/` does not exist — `git grep` cannot see it. A ruling recorded
+only in a commit body is findable but not readable where it binds: the body is
+the timestamp, the document is the home.
 
 ## Work routing and ceremony
 
@@ -1206,15 +1212,15 @@ play. Three, and no others:
   proposes that one, and nothing mechanical catches it.
 
 **When no level has been set and one is about to be recorded, the agent asks —
-it does not supply.** A level written into a commit body or an AR-LOG is a
-ruling, and a ruling nobody made does not exist
-([§ Ruling provenance](#ruling-provenance)). Silence is an answer for the _work_
-— it runs at `medium`, and the agent must not interrupt to confirm that — but it
-is not an answer for the _record_. Transcribing the human's level is not stating
-it; supplying one they never set is. If the human does not answer, the settings
-line ships with `ceremony` marked unset rather than filled in: an honest,
-greppable gap beats an invented value, and beats omitting the line entirely. The
-human-facing half of this rule, including the phrases that set a level, is
+it does not supply.** A level written into a commit body is a ruling, and a
+ruling nobody made does not exist ([§ Ruling provenance](#ruling-provenance)).
+Silence is an answer for the _work_ — it runs at `medium`, and the agent must
+not interrupt to confirm that — but it is not an answer for the _record_.
+Transcribing the human's level is not stating it; supplying one they never set
+is. If the human does not answer, the settings line ships with `ceremony` marked
+unset rather than filled in: an honest, greppable gap beats an invented value,
+and beats omitting the line entirely. The human-facing half of this rule,
+including the phrases that set a level, is
 [HUMANS.md § Override grammar](./HUMANS.md#override-grammar).
 
 ⚠ **`full` is not fully defined for work with no code.** All three values are
@@ -1259,10 +1265,10 @@ of work (derived from the path), `twin-doc`, and prospective/retrospective —
 because each has a safe default and a question whose answer is almost always the
 default is friction on a path that should have none.
 
-**Where:** the **commit body**, and for a campaign its
-`.planning-handoffs/<campaign>/AR-LOG.md`. Both are `git grep`-able and
-immutable once written. A plan file under `~/.claude/plans/` is **not** a record
-— see [§ Ruling provenance](#ruling-provenance). The form:
+**Where:** the **commit body**. It is reachable through `git log --grep`,
+immutable once written, and bound to the exact changeset the answers govern. A
+plan file under `~/.claude/plans/` is **not** a record — see
+[§ Ruling provenance](#ruling-provenance). The form:
 
 ```text
 work: software · twin-doc: none · ceremony: full (AR-3 n/a) · prospective

@@ -683,10 +683,10 @@ side-questions in a subagent so research never floods the orchestrator's
 context.
 
 **Governance surface (invariant):** `CLAUDE.md`, `.claude/agents/*.md`,
-`.claude/skills/**`, `.claude/settings.json`, `DEV.md`, and `AGENTS*.md` are
-governance surface — agents never edit them without explicit human instruction
-in the current conversation. If a review is in flight, reviewers read the
-working copy, not the baseline.
+`.claude/skills/**`, `.claude/hooks/**`, `.claude/settings.json`, `DEV.md`, and
+`AGENTS*.md` are governance surface — agents never edit them without explicit
+human instruction in the current conversation. If a review is in flight,
+reviewers read the working copy, not the baseline.
 
 ### Execution mechanics
 
@@ -834,8 +834,7 @@ What you need before reading it:
   position, not a lapse — and the declaration is what makes it one.
 - **You state three of the four answers; you never state `ceremony`.** The kind
   of work is derived from the path, mechanically. `ceremony` is the human's.
-- Record the answers in the **commit body**, and for a campaign in its
-  `.planning-handoffs/<campaign>/AR-LOG.md`. A plan file is not a record.
+- Record the answers in the **commit body**. A plan file is not a record.
 
 ```text
 work: software · twin-doc: none · ceremony: full (AR-3 n/a) · prospective
