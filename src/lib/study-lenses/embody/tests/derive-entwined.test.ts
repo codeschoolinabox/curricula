@@ -1046,6 +1046,91 @@ describe('deriveEntwined', () => {
 						stage.value.byPath['$.body.0.expression.quasis.0']?.tokens,
 				).toHaveLength(0);
 			});
+
+			describe('ties reach wrappers off the ancestor chain', () => {
+				it('the imported wrapper of a bare specifier ties the shared token', () => {
+					const snippet = {
+						source: 'import { x } from "m";',
+						type: 'module',
+					} as const;
+					const tokens = deriveTokens(snippet);
+					const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+					const stage = deriveEntwined(
+						snippet.source,
+						tokens,
+						ast,
+						parenSpansByNode,
+					);
+					expect(
+						stage &&
+							stage.ok &&
+							stage.value.byPath['$.body.0.specifiers.0.imported']?.tokens,
+					).toHaveLength(1);
+				});
+
+				it("a reused node's two wrappers tie one token wrapper — never copies", () => {
+					const snippet = {
+						source: 'import { x } from "m";',
+						type: 'module',
+					} as const;
+					const tokens = deriveTokens(snippet);
+					const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+					const stage = deriveEntwined(
+						snippet.source,
+						tokens,
+						ast,
+						parenSpansByNode,
+					);
+					const entwined = stage && stage.ok && stage.value;
+					const local =
+						entwined && entwined.byPath['$.body.0.specifiers.0.local'];
+					const imported =
+						entwined && entwined.byPath['$.body.0.specifiers.0.imported'];
+					expect(
+						!!local && !!imported && local.tokens[0] === imported.tokens[0],
+					).toBe(true);
+				});
+
+				it("a shorthand property's key ties its shared-span token", () => {
+					const snippet = { source: 'const o = {x};', type: 'script' } as const;
+					const tokens = deriveTokens(snippet);
+					const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+					const stage = deriveEntwined(
+						snippet.source,
+						tokens,
+						ast,
+						parenSpansByNode,
+					);
+					expect(
+						stage &&
+							stage.ok &&
+							stage.value.byPath[
+								'$.body.0.declarations.0.init.properties.0.key'
+							]?.tokens,
+					).toHaveLength(1);
+				});
+
+				it("a destructuring default's key ties its token inside the pattern's wider span", () => {
+					const snippet = {
+						source: 'const { x = 1 } = y;',
+						type: 'script',
+					} as const;
+					const tokens = deriveTokens(snippet);
+					const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+					const stage = deriveEntwined(
+						snippet.source,
+						tokens,
+						ast,
+						parenSpansByNode,
+					);
+					expect(
+						stage &&
+							stage.ok &&
+							stage.value.byPath['$.body.0.declarations.0.id.properties.0.key']
+								?.tokens,
+					).toHaveLength(1);
+				});
+			});
 		});
 
 		describe('comment ties', () => {

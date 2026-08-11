@@ -79,8 +79,8 @@ export default function deriveEntwined(
 	const root = entwineNode(ast.value, '$', null, byPath);
 	const byOffset = indexByOffset(root);
 	const parenSpans = indexParenSpans(byPath, parenSpansByNode);
-	const tokenTies = tieTokens(tokens.value.tokens, byOffset);
-	const commentTies = tieComments(tokens.value.comments, byOffset);
+	const tokenTies = tieTokens(tokens.value.tokens, byOffset, root);
+	const commentTies = tieComments(tokens.value.comments, byOffset, root);
 	wireCommentNeighbors(commentTies, tokenTies);
 
 	return { ok: true, value: { root, byPath, byOffset, parenSpans } };
@@ -184,21 +184,24 @@ type BuildingToken = {
 /**
  * Tie every token to each node whose span contains it — one wrapper per
  * token, shared across its containing nodes: one graph, never copies.
- * Iterating the stream in order keeps every per-node list in stream order,
- * chains the wrappers stream-wide (`previous`/`next`, null at both ends),
- * and hands each its innermost node — the deepest node at its start offset.
+ * Iterating the stream in order chains the wrappers stream-wide
+ * (`previous`/`next`, null at both ends) and hands each its innermost node —
+ * the deepest node at its start offset; the containment pass then fills
+ * every per-node list, in stream order, from the span alone — a node off the
+ * innermost's ancestor chain (a reused node's second wrapper, a shorthand
+ * key) ties all the same.
  */
 function tieTokens(
 	tokens: ReadonlyArray<Token>,
 	byOffset: ReadonlyArray<BuildingNode>,
+	root: BuildingNode,
 ): readonly BuildingToken[] {
 	const ties: BuildingToken[] = [];
 	let previous: BuildingToken | null = null;
 	for (const token of tokens) {
-		const innermost = byOffset[token.start];
 		const tied: BuildingToken = {
 			token,
-			innermostNode: innermost,
+			innermostNode: byOffset[token.start],
 			previous,
 			next: null,
 		};
@@ -207,17 +210,70 @@ function tieTokens(
 		}
 		previous = tied;
 		ties.push(tied);
+	}
 
-		// nodes align to token boundaries — a node covering the token's start
-		// contains the whole token, so the ancestor chain from the deepest node
-		// there is exactly the set of containing nodes
-		let node: BuildingNode | null = innermost;
-		while (node !== null) {
-			node.tokens.push(tied);
-			node = node.parent;
+	fillContainmentRun(root, ties, tokenTieStart, tokenListOf);
+	return ties;
+}
+
+// accessors for the containment pass, hoisted by name: which offset a tie
+// starts at, and which per-node list it fills
+function tokenTieStart(tied: BuildingToken): number {
+	return tied.token.start;
+}
+
+function tokenListOf(node: BuildingNode): BuildingToken[] {
+	return node.tokens;
+}
+
+/**
+ * Fill a node's list with the contiguous run of ties whose start lies in its
+ * half-open span `[start, end)`, then recurse into its children. Both tie
+ * streams arrive sorted by start, so the run begins at a binary-searched
+ * index and ends where a start passes the node's end — stream order per node
+ * by construction, and a zero-width span takes nothing. Containment is the
+ * whole rule: no tie leans on the innermost's ancestor chain, so wrappers
+ * that chain cannot reach — a reused node's second wrapper, a shorthand
+ * property's key beside or inside its value — fill like any other.
+ */
+function fillContainmentRun<Tie>(
+	node: BuildingNode,
+	ties: readonly Tie[],
+	startOf: (tie: Tie) => number,
+	listOf: (node: BuildingNode) => Tie[],
+): void {
+	const { start, end } = node.node;
+	const list = listOf(node);
+	for (
+		let index = firstAtOrAfter(ties, startOf, start);
+		index < ties.length && startOf(ties[index]) < end;
+		index++
+	) {
+		list.push(ties[index]);
+	}
+
+	for (const child of node.children) {
+		fillContainmentRun(child, ties, startOf, listOf);
+	}
+}
+
+// binary search: the first index whose tie starts at or after the offset
+function firstAtOrAfter<Tie>(
+	ties: readonly Tie[],
+	startOf: (tie: Tie) => number,
+	offset: number,
+): number {
+	let low = 0;
+	let high = ties.length;
+	while (low < high) {
+		const middle = (low + high) >>> 1;
+		if (startOf(ties[middle]) < offset) {
+			low = middle + 1;
+		} else {
+			high = middle;
 		}
 	}
-	return ties;
+	return low;
 }
 
 // the comment wrappers' token-neighbor ties wire after the per-node walk —
@@ -233,33 +289,37 @@ type BuildingComment = {
 /**
  * Tie every comment to each node whose span contains it — one wrapper per
  * comment, shared across its containing nodes: one graph, never copies.
- * Iterating in source order keeps every per-node list in source order, and
- * hands each wrapper its innermost node — the deepest node at its start.
+ * The same containment pass as the token ties fills every per-node list in
+ * source order; each wrapper carries its innermost node — the deepest node
+ * at its start. (Comments are trivia between token boundaries, and node
+ * boundaries ARE token boundaries, so start-containment holds the whole
+ * comment.)
  */
 function tieComments(
 	comments: ReadonlyArray<Comment>,
 	byOffset: ReadonlyArray<BuildingNode>,
+	root: BuildingNode,
 ): readonly BuildingComment[] {
 	const ties: BuildingComment[] = [];
 	for (const comment of comments) {
-		const innermost = byOffset[comment.start];
-		const tied: BuildingComment = {
+		ties.push({
 			comment,
-			innermostNode: innermost,
+			innermostNode: byOffset[comment.start],
 			previous: null,
 			next: null,
-		};
-		ties.push(tied);
-		// comments are trivia between token boundaries, and node boundaries ARE
-		// token boundaries — so the node at a comment's start contains the whole
-		// comment, and its ancestor chain is exactly the set of containing nodes
-		let node: BuildingNode | null = innermost;
-		while (node !== null) {
-			node.comments.push(tied);
-			node = node.parent;
-		}
+		});
 	}
+
+	fillContainmentRun(root, ties, commentTieStart, commentListOf);
 	return ties;
+}
+
+function commentTieStart(tied: BuildingComment): number {
+	return tied.comment.start;
+}
+
+function commentListOf(node: BuildingNode): BuildingComment[] {
+	return node.comments;
 }
 
 /**
