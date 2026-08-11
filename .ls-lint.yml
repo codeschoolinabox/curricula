@@ -19,7 +19,6 @@ ignore:
   - .vscode
   - build
   - .docusaurus
-  - src
   - static
   - sidebars
   - scripts

@@ -18,12 +18,19 @@ import type { FactStage, Snippet, Tokens } from './types.js';
  * position the machine reports.
  */
 export default function deriveTokens(snippet: Snippet): FactStage<Tokens> {
-	// acorn's own array-accumulator form of `onComment`, filled as the spread
-	// drains the tokenizer; fresh per call, so no shared mutable state.
+	// acorn's own array-accumulator form of `onComment`, filled as the drain
+	// below walks the tokenizer; fresh per call, so no shared mutable state.
 	const comments: Comment[] = [];
 	try {
-		const tokens = [
-			...tokenizer(snippet.source, {
+		// This bites harder here than at the Set/Map sites: a
+		// wrapped tokenizer is never DRAINED, so it never throws, so this
+		// stage reports `ok` for source that does not lex — and every phase
+		// barred by a tokens failure silently reopens. No test in this repo's
+		// harness can see it (vitest/esbuild, tsc and jsdom all compile the
+		// spread correctly); only the bundled site does.
+		// eslint-disable-next-line unicorn/prefer-spread -- Docusaurus/Babel mistranspiles `[...<iterable>]` to `[<iterable>]`; Array.from survives.
+		const tokens = Array.from(
+			tokenizer(snippet.source, {
 				sourceType: snippet.type,
 				ecmaVersion: ECMA_VERSION,
 				onComment: comments,
@@ -34,7 +41,7 @@ export default function deriveTokens(snippet: Snippet): FactStage<Tokens> {
 				// machine computes). Tests pin it on both arrays.
 				ranges: true,
 			}),
-		];
+		);
 
 		return { ok: true, value: { tokens, comments } };
 	} catch (error) {

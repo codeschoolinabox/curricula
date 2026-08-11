@@ -1,0 +1,62 @@
+-> building the model is frogramming?  noting that notional machines are at different levels of abstraction
+    architectures that reflect the concept/problem are more learnable
+    and exist as an architecture-level NM,
+    -> frogramming is building theories of the program (NMs, mental models, architecting, etc), how to explicitly teach this?
+
+https://johnwhiles.com/posts/mental-models-vs-ai-tools
+
+
+AI slows down open source developers. Peter Naur can teach us why.
+
+Metr recently published a paper about the impact AI tools have on open-source developer productivity1. They show that when open source developers working in codebases that they are deeply familiar with use AI tools to complete a task, then they take longer to complete that task compared to other tasks where they are barred from using AI tools. Interestingly the developers predict that AI will make them faster, and continue to believe that it did make them faster, even after completing the task slower than they otherwise would!
+
+When developers are allowed to use AI tools, they take 19% longer to complete issues—a significant slowdown that goes against developer beliefs and expert forecasts. This gap between perception and reality is striking: developers expected AI to speed them up by 24%, and even after experiencing the slowdown, they still believed AI had sped them up by 20%.
+Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity
+
+We can't generalise these results to all software developers. The developers in this study are a very particular sort of developer, working on very particular projects. They are experienced open source developers, working on their own projects. This study tells us that the current suite of AI tools appear to slow such developers down - but it doesn't mean that we can assume the same applies to other developers. For example, we might expect that for corporate drones working on a next.js apps that were mostly built by other people who've long since left the company (me) see huge productivity improvements!
+
+One thing we can also do, is theorise about why these particular open source developers were slowed down by tools that promise to speed them up.
+
+I'm going to focus in particular on why they were slowed down, not the gap between perceived and real performance. The inability of developers to tell if a tool sped them up or slowed them down is fascinating in itself, probably applies to many other forms of human endeavour, and explains things as varied as why so many people think that AI has made them 10 times more productive, why I continue to use Vim, why people drive in London etc. I just don't have any particular thoughts about why this gap arises beyond. I do have an opinion about why they are slowed down.
+
+two
+
+So why are they slowed down
+
+A while ago I wrote, somewhat tangentially, about an old paper by Peter Naur called programming as theory building. That paper states
+
+programming properly should be regarded as an activity by which the programmers form or achieve a certain kind of insight, a theory, of the matters at hand
+
+That is to say that the real product when we write software is our mental model of the program we've created. This model is what allowed us to build the software, and in future is what allows us to understand the system, diagnose problems within it, and work on it effectively. If you agree with this theory, which I do, then it explains things like why everyone hates legacy code, why small teams can outperform larger ones, why outsourcing generally goes badly, etc.
+
+We know that the programmers in Metr's study are all people with extremely well developed mental models of the projects they work on. And we also know that the LLMs they used had no real access to those mental models. The developers could provide chunks of that mental model to their AI tools - but doing so is a slow and lossy process that will never truly capture the theory of the program that exists in their minds. By offloading their software development work to an LLM they hampered their unique ability to work on their codebases effectively.
+
+Think of a time that you've tried to delegate a simple task to someone else, say putting a baby to bed. You can write down what you think are unambiguous instructions - "give the baby milk, put it to bed, if it cries do not respond" but you will find that nine times out of ten, when you get home the person following those instructions will do the exact opposite of what you intended. Maybe they'll have gotten the crying baby out of bed and taken it on a walk to see some frogs.
+
+The mental models with which we understand the world are incredibly rich, to the extent that even the simplest of them take an incredible amount of effort to transfer to another person. What's more that transfer can never be totally successful, and it's very hard to determine how successful the transfer has been, until we run into problems caused by a lack of shared understanding. These problems are what allow us to notice a mismatch, and mutually adapt our mental models to perform better in future. When you are limited to transferring a mental model through text, to an entity that will never challenge or ask clarifying questions, which can't really learn, and which cannot treat one statement as more important than any other - well the task becomes essentially impossible.
+
+This is why AI coding tools, as they exist today, will generally slow someone down if they know what they are doing, and are working on a project that they understand.
+
+Should I ban LLMs at my workplace?
+
+Well, maybe not. In the previous paragraph I wrote that AI tools will slow down someone who "knows what they are doing, and who is working on a project they understand" - does this describe the average software developer in industry? I doubt it. Does it describe software developers in your workplace?
+
+It's common for engineers to end up working on projects which they don't have an accurate mental model of. Projects built by people who have long since left the company for pastures new. It's equally common for developers to work in environments where little value is placed on understanding systems, but a lot of value is placed on quickly delivering changes that mostly work. In this context, I think that AI tools have more of an advantage. They can ingest the unfamiliar codebase faster than any human can, and can often generate changes that will essentially work.
+
+So if we take this narrow and short termed view of productivity and say that it is simply time to produce business value - then yes I think that an LLM can make developers more productive. I can't prove it - not having any data - but I'd love if someone did do this study. If there are no takers then I might try experimenting on myself.
+
+But there is a problem with using AI tools in this context.
+
+What about building mental models
+
+Okay, so if you don't have a mental model of a program, then maybe an LLM could improve your productivity. However, we agreed earlier that the main purpose of writing software is to build a mental model. If we outsource our work to the LLM are we still able to effectively build the mental model? I doubt it2.
+
+So should you avoid using these tools? Maybe. If you expect to work on a project long term, want to truly understand it, and wish to be empowered to make changes effectively then I think you should just write some code yourself3. If on the other hand you are just slopping out slop at the slop factory, then install cursor4 and crack on - yolo.
+
+1 It's a really fabulous study, and I strongly suggest reading at least the summary.
+
+2 One of the commonly suggested uses of Claude Code et al is that you can use them to quickly onboard into new projects by asking questions about that project. Does that help us build a mental model. Maybe yes! Does generating code 10 times faster than a normal developer lead to a strong mental model of the system that is being created? Almost certainly not.
+
+3 None of this is to say that there couldn’t be AI tools which meaningfully speed up developers with a mental model of their projects, or which help them build those mental models. But the current suite of tools that exist don’t seem to be heading in that direction. It’s possible that if models improve then we might get to a point that there’s no need for any human to ever hold a mental model of a software artifact. But we’re certainly not there yet.
+
+4 Don't install cursor, it sucks. Use Claude Code like an adult.

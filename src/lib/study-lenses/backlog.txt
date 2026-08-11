@@ -1,0 +1,3 @@
+refactor evaluators into wrapped methods on embodiment, then lenses pass a config to the method instead of importing evaluator separately.  this allows for a cleaner translation seam and encapsulates code behind evaluators and embody can gate which evaluators are available.
+    then lenses can embody variations?
+corrolary: lenses should not be within embodiment, should be applicabilitied and managed by orchestrator

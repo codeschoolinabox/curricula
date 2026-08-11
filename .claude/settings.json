@@ -33,15 +33,6 @@
 						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/governance-guard.py"
 					}
 				]
-			},
-			{
-				"matcher": "Edit|Write",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/pinned-guard.py"
-					}
-				]
 			}
 		],
 		"PostToolUse": [
