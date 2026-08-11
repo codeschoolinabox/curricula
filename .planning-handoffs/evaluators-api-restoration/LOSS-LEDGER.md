@@ -17,8 +17,10 @@ with human sign-off). **RATIFIED 2026-08-06 in one pass** (human ruling
 plus eight individual escalated decisions): no row remains open; each carries
 its ruling or its sign-off date. Evidence cites the reference/port files
 directly; the full audit trail with per-member verification is
-`research-digests-2026-08-05.json` beside this file (keys `runAudit`,
-`interceptAudit`)
+`research-digests-2026-08-05.json` — recoverable via
+`git show a8a0128d:.planning-handoffs/evaluators-api-restoration/research-digests-2026-08-05.json`
+(the working-tree copy was retired with the ruling logs, 2026-08-11; the audit
+keys are nested under `.result` — `.result.runAudit`, `.result.interceptAudit`)
 `[relayed: the two fidelity audits wf_7cb9c40a-f4c and wf_5c5b0dc6-37e, re-verified per row by the planning research agents]`.
 
 ## Shared handle contract (`shared/`)
@@ -135,13 +137,13 @@ directly; the full audit trail with per-member verification is
 
 ## intercept — error taxonomy and stream
 
-| member                                                              | classification                     | rationale                                                                                                                                                                                             | evidence                          |
-| ------------------------------------------------------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
-| streamed `ErrorEvent` (errors as step-stamped events IN the stream) | restore (ruled 2026-08-06)         | in-timeline error rendering returns — the event union gains an error arm (step + loc stamped, landing in order); the settlement keeps the structured form. Both, as the reference had                 | quarry shared `types.ts:188-195`  |
-| `phase` on error events                                             | drop (signed 2026-08-06)           | near-constant under the gate architecture                                                                                                                                                             | quarry `intercept/types.ts:52-55` |
-| `ValidationResultError` + violations                                | drop-as-loss (resolved 2026-08-06) | relocated live (screening `Violation` + language-levels validate + orchestrate marking); behavioral delta recorded: intercept no longer gates execution on level — sanctioned (level-agnostic ruling) | port `lib/screening`              |
-| `ExecuteMessage.scriptMode` (sloppy/`with`)                         | supersede (ratified 2026-08-06)    | STRENGTH: the kind's execution axis is a recorded deliberate collapse                                                                                                                                 | port `evaluators/types.ts:44-49`  |
-| `createWorkerScript(): string`                                      | drop (signed 2026-08-06)           | replaced by an importable module + fake transport; 27 string tests became 170 behavioral tests                                                                                                        | audit digest                      |
+| member                                                              | classification                     | rationale                                                                                                                                                                                             | evidence                                                         |
+| ------------------------------------------------------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| streamed `ErrorEvent` (errors as step-stamped events IN the stream) | restore (ruled 2026-08-06)         | in-timeline error rendering returns — the event union gains an error arm (step + loc stamped, landing in order); the settlement keeps the structured form. Both, as the reference had                 | quarry shared `types.ts:188-195`                                 |
+| `phase` on error events                                             | drop (signed 2026-08-06)           | near-constant under the gate architecture                                                                                                                                                             | quarry `intercept/types.ts:52-55`                                |
+| `ValidationResultError` + violations                                | drop-as-loss (resolved 2026-08-06) | relocated live (screening `Violation` + language-levels validate + orchestrate marking); behavioral delta recorded: intercept no longer gates execution on level — sanctioned (level-agnostic ruling) | port `lib/screening`                                             |
+| `ExecuteMessage.scriptMode` (sloppy/`with`)                         | supersede (ratified 2026-08-06)    | STRENGTH: the kind's execution axis is a recorded deliberate collapse                                                                                                                                 | port `src/lib/study-lenses/evaluators-deprecated/types.ts:44-49` |
+| `createWorkerScript(): string`                                      | drop (signed 2026-08-06)           | replaced by an importable module + fake transport; 27 string tests became 170 behavioral tests                                                                                                        | audit digest                                                     |
 
 ## sandbox pages (BOTH lineages per HR-15)
 
@@ -153,10 +155,10 @@ directly; the full audit trail with per-member verification is
 
 ## docs-only rows
 
-| member                                                               | classification                    | rationale                                                                                      | evidence                                          |
-| -------------------------------------------------------------------- | --------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| cancel-mechanics 6-phase table + promptness commitment               | drop (signed 2026-08-06)          | docs density; the new DOCS states the sequenced teardown instead                               | quarry run README                                 |
-| engine docs "three arms" sentence + links into `evaluators/types.ts` | restore-accuracy (W1.d increment) | goes stale under HR-8/HR-14; architectural-contract edit with human approval, never a drive-by | engine `types.ts:163-166`, README:203/413, DOCS:6 |
+| member                                                                          | classification                    | rationale                                                                                      | evidence                                          |
+| ------------------------------------------------------------------------------- | --------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| cancel-mechanics 6-phase table + promptness commitment                          | drop (signed 2026-08-06)          | docs density; the new DOCS states the sequenced teardown instead                               | quarry run README                                 |
+| engine docs "three arms" sentence + links into `evaluators-deprecated/types.ts` | restore-accuracy (W1.d increment) | goes stale under HR-8/HR-14; architectural-contract edit with human approval, never a drive-by | engine `types.ts:163-166`, README:203/413, DOCS:6 |
 
 ## Appendix A — refuted findings (NOT losses; barred from classification rows)
 
@@ -214,8 +216,10 @@ execution and never holds one alone.
   precedes its Phase 0 and is staged strictly later so it cannot block
   run/intercept. trace/semantics, trace/syntax and adapter/ are future
   campaigns. The kind is designed against the fourteen tracer
-  forward-compatibility requirements (`research-digests-2026-08-05.json`, key
-  `tracers`).
+  forward-compatibility requirements (`research-digests-2026-08-05.json` —
+  recoverable via
+  `git show a8a0128d:<this directory>/research-digests-2026-08-05.json`, key
+  `.result.tracers`).
 - **Build forward; deprecate and rebuild (human ruling 2026-08-06, HR-11 +
   HR-14).** New commits only, no reverts. The current port evaluators are
   renamed to `src/lib/study-lenses/evaluators-deprecated` (single-dash,
@@ -315,6 +319,14 @@ execution and never holds one alone.
 - **`ceremony: full` (human ruling 2026-08-05, HR-13):** AR-1 · AR-2 · AR-3 on
   every un-skip · AR-4 on every increment · AR-5. Uniform within the level — no
   agent-side lightening.
+- **AR-5 changeset form and baseline (human ruling 2026-08-05).** The review
+  changeset is the campaign's OWN SHA LIST, never `baseline..HEAD` — foreign
+  commits interleave faster than any range survives (DEV.md § Shared-worktree
+  git mechanics). Baseline `1b516bd4`
+  `[relayed: the retired AR-LOG's baseline record — recover via git show 7c93080c^:.planning-handoffs/evaluators-api-restoration/AR-LOG.md — which carried [measured: git rev-parse HEAD at the first post-approval write]]`.
+  The SHA list accumulates in each commit body as it lands (the durable
+  primary), mirrored in `~/.claude/plans/read-and-execute-the-rosy-sky.md` § ②
+  RESUMPTION POINT.
 - **Sandbox cadence and sandbox fidelity (human ruling 2026-08-06, HR-15):**
   sandbox pages are built EARLY in each evaluator chain and extended per
   increment, so every user-observable increment fires its own 🔍 checkpoint
@@ -410,9 +422,10 @@ contradicts it. No pin fell outside the vocabulary.
   rest loop safety on the iterations cap. The opt-out on the engine spec is this
   campaign's first engine increment; both intercept and trace/variables qualify
   for it.
-- **`evaluators/PHASE-1-HANDOFF.claude-delete-if-stale.md` is KEPT** (human
-  ruling 2026-08-04). Untracked and never committed, so deletion would be
-  unrecoverable; 29 of its 148 lines are tracer material — quarry prior art, the
-  variable/binding/environmentDiff event design, and open decisions for later
-  sprints. It rides any region move untouched, and the variables phase is its
-  natural reader.
+- **`evaluators-deprecated/PHASE-1-HANDOFF.claude-delete-if-stale.md` is KEPT**
+  (human ruling 2026-08-04). Untracked and never committed at ruling time, so
+  deletion would have been unrecoverable (now TRACKED — swept into the human's
+  `90c31797` checkpoint, 2026-08-11); 29 of its 148 lines are tracer material —
+  quarry prior art, the variable/binding/environmentDiff event design, and open
+  decisions for later sprints. It rides any region move untouched, and the
+  variables phase is its natural reader.
