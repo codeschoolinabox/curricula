@@ -201,6 +201,37 @@ describe('evaluate (real transport)', () => {
 
 			expect(settlement.outcome).toBe('timed-out');
 		});
+
+		it('waives the yield fee under yieldCharge false — the same dense program completes', async () => {
+			const handle = evaluate(
+				referenceSpec("for (let i = 0; i < 150; i += 1) { emit('y'); }", {
+					seconds: 0.5,
+					yieldCharge: false,
+				}),
+			);
+			const { settlement } = await handle.result;
+
+			expect(settlement.outcome).toBe('completed');
+		});
+
+		it('waives the fee without waiving the yield-wait park — a dense claimed stream survives a park longer than its whole budget', async () => {
+			const handle = evaluate(
+				referenceSpec("for (let i = 0; i < 150; i += 1) { emit('y'); }", {
+					seconds: 0.5,
+					yieldCharge: false,
+				}),
+			);
+			const pulled: unknown[] = [];
+			for await (const item of handle) {
+				pulled.push(item);
+				if (pulled.length === 1) {
+					await delay(700);
+				}
+			}
+			const { settlement } = await handle.result;
+
+			expect([pulled.length, settlement.outcome]).toEqual([150, 'completed']);
+		});
 	});
 
 	describe('environment failures settle, never throw', () => {

@@ -56,6 +56,13 @@ The spec is the whole coupling surface:
   timer) never runs, matching the function path. A module evaluation that
   rejects reaches `serializeHalt` as `kind: 'throw'`, exactly like a
   function-path throw.
+- `yieldCharge` — whether each yield deducts the flat yield charge from the
+  budget. Defaults to true; densely emitting consumers (an intercept evaluator,
+  the tracers) pass false, because at one event per program step the fee alone
+  exhausts a default budget with almost no real runtime. It waives the FEE only
+  — the budget still pauses for yield-waits and call servicing, and real running
+  time still times the run out; loop safety under the waiver rests on the
+  consumer's own iteration cap.
 
 The handle is `AsyncIterable` over whatever `onMessage` yields, plus `result`
 (the items array + settlement), `cancel()`, and `fail(reason?)`. Construction is
@@ -218,9 +225,12 @@ item awaits its pull and while `onCall` runs. Each yield deducts a flat **yield
 charge** approximating the thread-side cost of one emission cycle — and the
 charge attaches **per yield, not per drop**: a high-frequency consumer that
 drops most messages pays only worker-active time for the drops and never charges
-itself into a timeout. When the budget fires while an emission is pending
-thread-side disposal, it reschedules for the positive remaining budget; an
-exhausted budget times out even then.
+itself into a timeout. A consumer that YIELDS at every program step has no such
+escape, so it waives the fee for its run with `yieldCharge: false` — the fee
+alone: the pauses above still apply, and real running time still exhausts the
+budget. When the budget fires while an emission is pending thread-side disposal,
+it reschedules for the positive remaining budget; an exhausted budget times out
+even then.
 
 ### What the opaque payloads carry
 
@@ -288,7 +298,7 @@ Using a different name in code is a bug, not a stylistic choice.
   here; the anti-goal is any engine code that interprets a payload.
 - **factory** — the `evaluate` entry point: spec in, handle out.
 - **spec** — the factory argument: code, worker factory, worker config, thread
-  logic, seconds, strict, execution.
+  logic, seconds, strict, execution, yield charge.
 - **worker logic** — consumer-authored, worker-side:
   `setup(api, workerConfig) → { globals, serializeHalt? }` (typed
   `WorkerSetup`). Owns traps, mocks, emission decisions, halt authoring.
@@ -359,7 +369,9 @@ Using a different name in code is a bug, not a stylistic choice.
   even then.
 - **yield charge** — a flat per-YIELD deduction approximating the thread-side
   cost of one emission cycle, keeping render-bound loops finite in wall-clock
-  terms. Drops are never charged it.
+  terms. Drops are never charged it, and a consumer that emits at every program
+  step waives it per run with `yieldCharge: false` — the fee alone, never the
+  pauses.
 - **lazy pull** — no work until the first pull or result access; the handle is
   fully lazy. Laziness governs when the run starts; the drain governs who pulls
   after.

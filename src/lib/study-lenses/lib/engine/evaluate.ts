@@ -30,7 +30,7 @@ import type { CreateTransport, Transport } from './worker/types.js';
  * @param spec - The whole coupling surface (README.md § Public API):
  *   code, worker factory, clone-safe worker config, thread logic,
  *   seconds (default 5), strict (default true), execution axis
- *   (default 'function').
+ *   (default 'function'), yield charge (default true).
  * @param createTransport - Engine-internal conformance seam: the
  *   transport factory the run will use. Defaults to the real worker
  *   transport; the engine's own conformance runners inject the fake.
@@ -161,6 +161,7 @@ function startRun(state: RunState): void {
 	state.transport = transport;
 	state.budget = createBudget(
 		state.spec.seconds ?? DEFAULT_SECONDS,
+		state.spec.yieldCharge ?? true,
 		function onExhausted() {
 			requestStop(state, { kind: 'timeout' });
 		},
@@ -537,10 +538,14 @@ async function exitIterator(state: RunState): Promise<IteratorResult<unknown>> {
  * event-ready flag, and reschedules only with positive remaining
  * budget — a paused program with a pending message is rescheduled, an
  * exhausted budget times out even then. The flat yield charge attaches
- * per YIELD (never per drop, never per call service).
+ * per YIELD (never per drop, never per call service), and `charged`
+ * false waives THAT FEE ALONE: the pause itself is unconditional, so a
+ * waived run still stops its clock for every yield-wait and every
+ * serviced call.
  */
 function createBudget(
 	seconds: number,
+	charged: boolean,
 	onExhausted: () => void,
 	hasPendingEvent: () => boolean,
 ): Budget {
@@ -590,6 +595,9 @@ function createBudget(
 		resume: arm,
 		pauseForYield(): void {
 			disarm();
+			if (!charged) {
+				return;
+			}
 			clock.remainingMs -= YIELD_CHARGE_MS;
 			if (clock.remainingMs < 0) {
 				clock.remainingMs = 0;

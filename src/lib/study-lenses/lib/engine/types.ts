@@ -67,6 +67,20 @@ type EvaluateSpec = {
 	 * `kind: 'throw'`, exactly like a function-path throw.
 	 */
 	readonly execution?: 'function' | 'module';
+	/**
+	 * Charge the flat per-yield fee against the time budget. Default true;
+	 * densely emitting consumers — an intercept evaluator, the tracers —
+	 * pass false, because at one event per program step the fee alone
+	 * exhausts a default budget while almost no real time has passed.
+	 *
+	 * `false` waives THE FEE ONLY. The budget still pauses for the whole
+	 * yield-wait and for every serviced call, so a consumer that thinks
+	 * between pulls is never charged for thinking; and the wall-clock
+	 * budget still ends a genuinely long-running program. Loop safety
+	 * under the waiver rests on the consumer's own iteration cap, which
+	 * is what these consumers already carry.
+	 */
+	readonly yieldCharge?: boolean;
 };
 
 /** The consumer-authored thread-side hooks. */

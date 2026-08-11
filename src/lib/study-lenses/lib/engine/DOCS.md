@@ -76,7 +76,7 @@ Settlement.
 
 ```mermaid
 flowchart TD
-    SPEC[spec<br/>code · worker factory · worker config ·<br/>thread logic · seconds · strict · execution] --> HANDLE[lazy handle<br/>no work before first pull or result access]
+    SPEC[spec<br/>code · worker factory · worker config ·<br/>thread logic · seconds · strict · execution ·<br/>yield charge] --> HANDLE[lazy handle<br/>no work before first pull or result access]
     HANDLE -->|cancel or fail before the run starts| SETTLE
     HANDLE -->|first pull or result access| RUN[running program in module worker<br/>globals injected · halt serializer registered]
     RUN -->|emit: clone-safe message,<br/>pauses until disposed| MSG[message on thread]
@@ -118,7 +118,10 @@ flowchart TD
   (item pulled — by the consumer, or by the engine when draining), never per
   drop — a dropping high-frequency consumer must not time itself out; drops cost
   only worker-active time. The budget pauses while a yielded item awaits the
-  pull and while the call hook runs.
+  pull and while the call hook runs. A consumer that emits at every program step
+  waives the fee with `yieldCharge: false`; the PAUSES are unconditional, so a
+  waived run still stops its clock for yield-waits and call servicing, and still
+  times out on real wall-clock time.
 - **The natural end ends the run — on both paths.** Work scheduled beyond it (a
   pending timer) never runs; the module path's asynchronous natural end changes
   when the stop fires, never whether trailing work runs.
@@ -234,10 +237,15 @@ termination machine, and every other limit lives in instrumentation, classified
 worker-side (inside the halt serializer) and refined thread-side (the refinement
 hook). The budget measures the learner's program, not the learner: it pauses
 during yield-waits (think time on a step) and call servicing (styled dialogs),
-and a flat per-yield charge keeps render-bound loops finite in wall-clock terms.
-The five generic outcomes stay generic for the same reason — limit-exceeded is a
-downstream interpretation of an errored halt plus a refinement, not an engine
-concept.
+and a flat per-yield charge keeps render-bound loops finite in wall-clock terms
+for consumers that emit selectively. That last part does not generalize: an
+evaluator emitting at every program step exhausts a default budget through the
+fee alone, with almost no real runtime — so a run may waive the fee
+(`yieldCharge: false`), and loop safety for those consumers rests on the
+iteration cap they already carry. The pauses never lift, so the wall-clock
+guarantee survives the waiver. The five generic outcomes stay generic for the
+same reason — limit-exceeded is a downstream interpretation of an errored halt
+plus a refinement, not an engine concept.
 
 ### Worker-side halt authoring
 
