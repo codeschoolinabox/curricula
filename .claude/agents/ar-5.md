@@ -25,7 +25,20 @@ Adversarial Review Protocol (typically defined in
 1. The project's `DEV.md` § Adversarial Review Protocol — skip-resistance rule,
    agent prompt structure, verdict definitions, resolution rules.
 2. The project's `DEV.md` § AR-5: Pre-Merge Review — the full focus areas list,
-   including cross-increment coherence and README drift checks.
+   including cross-increment coherence and README drift checks. Two of those
+   areas are named here because a review that skips them has historically missed
+   the findings that mattered most, and a dispatching agent should not have to
+   remember to type them into the prompt:
+   - **Loss lens (doc changes)** — across the whole changeset, diff every
+     touched doc against the baseline and enumerate anything present at
+     baseline, absent in the result, and missing from the change's loss ledger.
+     Do this BEFORE judging style. A deletion nobody enumerated is a finding
+     even when the result reads better.
+   - **Sourced claims** — every repo-state claim in the changeset's prose and
+     its commit bodies carries `[measured:]`, `[read:]`, or `[relayed:]` with
+     its evidence. Run the commands yourself rather than accepting a reported
+     count; a commit body is immutable, so this is the last gate before a wrong
+     number is permanent.
 3. The full diff of the changeset. **If the prompt names the changeset as a list
    of SHAs, that list is the changeset — use it and do not run a range.** In a
    shared worktree, unrelated campaigns commit between a campaign's own commits,

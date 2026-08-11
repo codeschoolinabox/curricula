@@ -1239,6 +1239,21 @@ touches source declares that increment under the ordinary set. This is a
 followed precedent, not yet a universal rule: name the set in the campaign's own
 record either way.
 
+**Three known gaps in this section, recorded so they are not rediscovered as
+defects** (raised 2026-08-05, still open):
+
+- **No re-review trigger exists for work that landed at a low level and later
+  became load-bearing.** The `## Epistemology` block has a **Falsified if**
+  field for exactly this shape; `ceremony` has no counterpart, so a level chosen
+  while a module was peripheral keeps applying silently once it is not.
+- **Nothing records the GROUND for a sub-maximum level.** This section's own
+  lead says low ceremony "is earned by a strong twin" — a claim no artifact can
+  support or refute, since no `twin-doc` value asserts that anyone holds a twin.
+  As written it is aspirational, not checkable.
+- **The docs-only set above is a precedent, not a ruling.** Two campaigns used
+  it; nobody has ruled it universal, which is why the name-it-in-your-own-record
+  sentence stands rather than a bare citation.
+
 ### Prospective and retrospective documentation
 
 **`prospective`** — the default — means the 0.1–0.3 artifacts are written
@@ -2458,11 +2473,11 @@ Use it only where the drift is real, already understood, and out of the current
 scope; anything you could fix now is not a `DOCS-FLAG`.
 
 _(This definition is the surviving content of a retired skill, which was the
-only document in the repository that defined a marker this file already used.
-Promoted under a narrow exception to the retirement rule — **a retirement may
-not leave undefined a convention `DEV.md` already uses** (human ruling
-2026-08-05), which is the rule this paragraph exists to satisfy and the one a
-later retirement should check itself against.)_
+only document in the repository that defined a marker this file already used. It
+was carried here on the rule that **a retirement may not leave undefined a
+convention `DEV.md` already uses** (human ruling 2026-08-05) — the rule this
+paragraph exists to satisfy, and the one a later retirement should check itself
+against.)_
 
 ### TypeScript Strict Mode
 
