@@ -187,11 +187,12 @@ bullet below:
   the same span vocabulary so every parse fact cross-navigates in one currency —
   offsets into the one source.
 - **Offsets, never line/column, in the fact values.** Offsets are the region's
-  position vocabulary; line/column is presentation arithmetic a consumer
-  derives, holding the source as it always does. The one exception: a failed
-  stage's cause restates the parser's reported line and column as plain fields
-  beside the offset — plain data, never the parser's own position object, whose
-  class API the contract does not publish.
+  position vocabulary — indices into the source string, in UTF-16 code units;
+  line/column is presentation arithmetic a consumer derives, holding the source
+  as it always does. The one exception: a failed stage's cause restates the
+  parser's reported line and column as plain fields beside the offset — plain
+  data, never the parser's own position object, whose class API the contract
+  does not publish.
 - **One shared numeric language year.** The scope analyzer's version gate is a
   numeric comparison that silently degrades on a string; one shared numeric year
   keeps the tokenizer, the parser, and the scope analysis reading the source at

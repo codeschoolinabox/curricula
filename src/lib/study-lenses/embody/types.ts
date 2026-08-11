@@ -63,7 +63,7 @@ export type FailableStageName = 'tokens' | 'ast' | 'entwined' | 'environment';
 export type StageCause = {
 	readonly stage: FailableStageName;
 	readonly message: string;
-	/** Source character offset the parser reports — directly sliceable. */
+	/** Source offset the parser reports, in UTF-16 code units — directly sliceable. */
 	readonly offset?: number;
 	readonly position?: Position;
 };
@@ -228,10 +228,10 @@ export type Entwined = {
 	 */
 	readonly byPath: Readonly<Record<NodePath, EntwinedNode>>;
 	/**
-	 * Indexed by source character offset; each slot holds the deepest node
-	 * whose span covers that offset. Every offset in `[0, source.length)`
-	 * resolves at least to the root — never a hole. Zero-width nodes cover no
-	 * offset; reach them via `byPath`.
+	 * Indexed by source offset, in UTF-16 code units; each slot holds the
+	 * deepest node whose span covers that offset. Every offset in
+	 * `[0, source.length)` resolves at least to the root — never a hole.
+	 * Zero-width nodes cover no offset; reach them via `byPath`.
 	 */
 	readonly byOffset: ReadonlyArray<EntwinedNode>;
 	/**
@@ -367,8 +367,8 @@ export type ScopeReference = {
 	 * crosses a deferred-execution scope — never a reachability judgment: a
 	 * `'deferred'` read lands in the dead zone only if its context runs there,
 	 * which a consumer needing soundness decides, whereas `'eager'` is a guaranteed
-	 * dead-zone evaluation. Positions are character offsets (`.start`/`.end`, never
-	 * `.loc`).
+	 * dead-zone evaluation. Positions are offsets in UTF-16 code units
+	 * (`.start`/`.end`, never `.loc`).
 	 *
 	 * `false` for uses at or after initialization, unresolved uses, the binding's
 	 * own initializer write, and `var`/function/import/catch bindings (no dead

@@ -513,6 +513,19 @@ in ONE invocation, staged diff exclusively yours, announce full SHAs, NEVER push
 
 ## F6 — the position-vocabulary alignment pass (ar-2's C6)
 
+> ✅ **DONE 2026-08-11 (embody only) — do not launch this prompt.** The three
+> sites read the UTF-16 code-unit vocabulary — `StageCause.offset`,
+> `Entwined.byOffset`, and `ScopeReference.usedBeforeBound`'s positions sentence
+> (pinned by symbol; the line numbers below have drifted) — and the definitional
+> bullet in `embody/DOCS.md` § Parse decisions now names the unit. The scope
+> fork below was RULED: uniformity stops at the region edge for this pass (human
+> ruling 2026-08-11), and the package-wide sweep of the 19 sibling sites
+> launches immediately from its own handoff,
+> `.planning-handoffs/position-vocabulary-sweep.md`. Knowingly left:
+> `derive-entwined.ts`'s module-doc "(a UTF-16 code unit)" appositive — module
+> prose, not published contract. Loss ledger and AR record ride the closing
+> commits' bodies.
+
 **Severity: cosmetic. Size: three lines in one file — smaller than it sounds.**
 
 `ar-2` observed that the region's committed text names source positions

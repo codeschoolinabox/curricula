@@ -63,7 +63,7 @@ Everything else below is optional work you can start, ignore, or delete.
 | **F5** | A real crash lurking in the JEJ level's test harness                    | Small            | DONE 2026-08-05 — see FOLLOW-ONS § F5's banner         |
 | **F2** | Three cheap test fixtures that protect the fold from silent regressions | Small, test-only | DONE 2026-08-05 — see FOLLOW-ONS § F2's banner         |
 | **F1** | An embody wrapper whose `tokens` list is empty when it shouldn't be     | One increment    | DONE 2026-08-11 — see FOLLOW-ONS § F1's banner         |
-| **F6** | Tidying inconsistent wording about source positions                     | Three lines      | Only if someone's already in those files               |
+| **F6** | Tidying inconsistent wording about source positions                     | Three lines      | DONE 2026-08-11 — see FOLLOW-ONS § F6's banner         |
 | **F3** | Actually _using_ the paren spans (trace / highlighting)                 | A whole campaign | This is the payoff — but it's Phase-0 work, not a task |
 | **F4** | Making `range` a required field                                         | —                | **No.** The evidence says close it. See below          |
 
@@ -279,6 +279,13 @@ NEVER push.
 
 ### F6 — wording tidy (lowest priority)
 
+> ✅ **DONE 2026-08-11 (embody only) — do not launch this prompt.** The three
+> `types.ts` sites read "in UTF-16 code units"; uniformity stops at the region
+> edge for this pass (human ruling 2026-08-11), and the package-wide sweep of
+> the 19 sibling sites launches from its own handoff at
+> `.planning-handoffs/position-vocabulary-sweep.md`. See FOLLOW-ONS § F6's
+> banner for the record.
+
 Three lines in `src/lib/study-lenses/embody/types.ts` still say "character
 offset" where the rest of the contract now says "half-open offsets in UTF-16
 code units". Harmless, just untidy. The same phrasing appears ~22 more times
@@ -385,5 +392,5 @@ implemented, nothing pushed.
   every section above.
 - Each prompt ends with **NEVER push**, so an agent can't publish on your
   behalf.
-- If an agent comes back with a fork, that's working as intended — F1 and F6 are
-  both expected to.
+- If an agent comes back with a fork, that's working as intended — F1 and F6
+  both did, and both were answered 2026-08-11 (see their DONE banners).
