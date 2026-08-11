@@ -1,4 +1,5 @@
-<!-- cspell:ignore cutover unported socratizing -->
+<!-- cspell:ignore cutover unported socratizing socratize quizzing -->
+<!-- cspell:ignore reenrichment unbuilt -->
 <!-- TRANSITIONAL — delete when the greenfield migration completes. Not a permanent region doc; README.md and DOCS.md own the end state. -->
 
 # study-lenses — road to a learner
@@ -100,6 +101,20 @@ already landed (`c7004203`).
 Deletion criteria, not shipping criteria. Nothing here blocks a learner:
 
 - The four unported lenses: blanks, annotate, variables/dropdowns.
+- The question-register surfaces in the quarry — the quiz lens (`lenses/quiz/`),
+  the quizzing engine (`lib/quizzing/`), and the question-orchestrator
+  (`lib/question-orchestrator/`): none deletes before its content is ported or
+  re-homed (human ruling 2026-08-05/06). Pinned behavioral truth = 42 test files
+  across those three dirs (measured 2026-08-11; command in § Re-measuring) — the
+  port oracle for the first two, the last surviving spec of three unbuilt
+  concepts for the third. Forward canon:
+  [SPEC.md](../../../.planning-handoffs/socratize-quiz-reenrichment/SPEC.md)
+  (transitional — retire this bullet's first two surfaces with it, when Stages
+  3/4/5 land). The orchestrator's carried concepts have a durable in-tree home:
+  [lib/socratizing/DOCS.md § Orchestrator collateral (carried, unbuilt)](./lib/socratizing/DOCS.md#orchestrator-collateral-carried-unbuilt).
+  The quarry's other two question surfaces are already free —
+  `orchestrate/lib/socratizing/` ported at Stage 2, `lenses/socratize/` re-homed
+  as annotated byte-copies.
 - The 10 `src/pages/*.tsx` preview pages that import the deprecated tree
   directly, bypassing `MDXComponents`.
 - `src/lib/embody/` — a third live tree, cross-importing both others.
@@ -156,4 +171,6 @@ npx vitest run "src/lib/study-lenses/" --reporter=basic  # test state
 git show HEAD:src/lib/study-lenses/orchestrate/lib/composing/built-in-levels.ts
 ls spiralearn/frogramming-and-vibetoading/lenses.json    # gap 2
 npm run build                                            # the cutover still holds
+find src/lib/study-lenses--deprecated-architecture/{lenses/quiz,lib/quizzing,lib/question-orchestrator} \
+  -name '*.test.*' | wc -l   # → 42 pinned question-register test files; a '*.test.ts' glob returns 41 (one .test.tsx)
 ```

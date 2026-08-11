@@ -451,6 +451,15 @@ human redirected lens-side questions — library first; consuming lenses later).
   greenfield classifying test or doc pinned it at re-verification. The doc
   sentence lands with this campaign's module-doc fixes; the test pin is code
   work a future classifying session owes.
+- **The quarry-retirement criterion has no in-place guard** (flagged 2026-08-11,
+  review on the roadmap amendment): MVP-ROADMAP.md has zero inbound references
+  outside this campaign dir, the quarry README carries no deprecation banner,
+  and the 42 question-register test files carry no `PINNED(` markers — an agent
+  standing in the quarry with a delete instruction meets no signal. Cheap
+  closers for a future session: a one-line pointer banner on the quarry README,
+  or `PINNED(quarry oracle — MVP-ROADMAP § Then — retiring the quarry)` markers
+  in the three dirs (the quarry is READ-ONLY, so either needs its own human
+  sanction).
 
 ## Verification (per remaining stage)
 
