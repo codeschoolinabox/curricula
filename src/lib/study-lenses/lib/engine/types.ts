@@ -141,7 +141,7 @@ type CallResponse = string | boolean | null | undefined;
  * iterator created and then abandoned (whether or not it ever pulled)
  * holds the run; break or cancel is the exit.
  *
- * Not the evaluator kind's EvaluationStream — an evaluator wraps this
+ * Not an evaluator's own stream or handle type — an evaluator wraps this
  * handle to implement its own.
  */
 type EngineHandle = AsyncIterable<unknown> & {
@@ -160,7 +160,7 @@ type EngineResult = {
 
 /**
  * The engine's complete outcome vocabulary. Downstream vocabularies (a
- * tracer's limit classification, the evaluator kind's settlement arms) are
+ * tracer's limit classification, an evaluator kind's settlement arms) are
  * mappings applied by the layers that own them, never settled here.
  */
 type SettlementOutcome =
@@ -175,9 +175,10 @@ type SettlementOutcome =
  * settlement but never deep-freezes consumer payload interiors (halt,
  * refinement, failReason) — downstream owners deep-freeze their own data
  * (e.g. an evaluator's own deep pass). Named `EngineSettlement`, never bare
- * `Settlement`: the evaluator kind owns a `Settlement` of its own — three
- * arms an evaluator maps these five outcomes onto — and an evaluator
- * imports both.
+ * `Settlement`: an evaluator kind owns a settlement of its own — the arms
+ * an evaluator maps these five outcomes onto — and an evaluator imports
+ * both. How many arms, under which names, and whether that type is even
+ * called `Settlement` is the kind's business, not this contract's.
  */
 type EngineSettlement = {
 	readonly outcome: SettlementOutcome;
