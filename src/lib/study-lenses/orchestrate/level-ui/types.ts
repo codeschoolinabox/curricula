@@ -16,6 +16,14 @@ import type { FitMark } from '../types.js';
  * collapsed to one string upstream. Delivered v1 as plain text via the
  * native `title` attribute; the rendered-markdown hover surface is a
  * flagged follow-on (F6).
+ *
+ * That follow-on is scoped to DISCOVERABILITY, not merely rendering
+ * (human ruling 2026-07-30): a `title` attribute carrying a level's whole
+ * reference is undiscoverable — a learner has no way to know it is there —
+ * so the follow-on owes a surface that announces itself, not a prettier
+ * tooltip. It also carries a measured weight: collapsing the reference
+ * docs to a string puts roughly 109 KB into every bundle that renders the
+ * selector, whether or not anyone hovers.
  */
 export type LevelOption = {
 	readonly key: string;

@@ -81,9 +81,25 @@ export type CodeQuestionKind = 'micro-decision' | 'comprehension';
  * - `variables`: let/const declarations, reads, writes, naming
  * - `data`: literals, types, string values
  * - `operators`: arithmetic, comparison, logical, string
- * - `controlFlow`: if/else, while, do-while, for, for-of, for-in, ternary
+ * - `controlFlow`: if/else, while, do-while, for, for-of, for-in, ternary —
+ *   plus `LabeledStatement` and `WithStatement`, which the easter-egg
+ *   analyzers tag with this feature though the line above never named them
+ *   and JeJ's allowlist excludes `with` entirely. The tag's live extension is
+ *   this line ∪ those two [measured 2026-07-30: 18 `feature: 'controlFlow'`
+ *   sites across 6 analyzer files; the two easter-egg ones are the only
+ *   members outside it]. Widening the line to match is a contract decision
+ *   nobody has made.
  * - `functions`: method calls (JeJ has calls but no declarations)
- * - `userInteraction`: prompt, confirm, alert, console.log
+ * - `userInteraction`: prompt, confirm, alert, console.log — a FEATURE
+ *   BUCKET, never an audience claim. In this ontology console output is for
+ *   the developer, period (human ruling 2026-07-30); the shipped
+ *   `console-log-audience` analyzer says exactly that, contrasting with
+ *   `alert()`, which is for users. Do NOT strike `console.log` from this
+ *   bucket on that ruling's strength: `voice.ts` tags the analyzer with this
+ *   feature, so the `features` filter depends on the grouping, and the
+ *   ruling settled audience, not bucketing. Whether to rename the feature,
+ *   widen its gloss, or leave the split documented is itself an open
+ *   contract decision.
  * - `reading`: holistic questions — read-aloud, program paths, audience
  *   perspective-taking
  */

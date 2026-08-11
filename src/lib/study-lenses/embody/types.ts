@@ -159,7 +159,19 @@ export type EntwinedNode = {
 	/** `null` only at the Program root. */
 	readonly parent: EntwinedNode | null;
 	readonly children: ReadonlyArray<EntwinedNode>;
-	/** Every token within the node's span. */
+	/**
+	 * Every token within the node's span — with one measured exception the
+	 * contract does not yet cover. Where two paths resolve to the SAME node
+	 * object, each path gets its own wrapper and only one receives the
+	 * tokens; the other's array is empty. Acorn reuses one Identifier for
+	 * both `local` and `imported` on a bare `import { x }` (and
+	 * `local`/`exported` on a bare `export { x }`) — the parser's only two
+	 * aliasing sites — so those are the reachable cases, and the renamed
+	 * forms build two nodes and do not collide. Pre-existing and untested;
+	 * whether both wrappers should tie the tokens, one wrapper should be
+	 * shared, or this line should narrow is an open design question
+	 * (recorded 2026-08-05).
+	 */
 	readonly tokens: ReadonlyArray<EntwinedToken>;
 	/** Every comment contained within the node's span. */
 	readonly comments: ReadonlyArray<EntwinedComment>;
