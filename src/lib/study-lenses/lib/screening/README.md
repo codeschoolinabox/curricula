@@ -285,7 +285,16 @@ rules:
   postures, no lenses — in the code or in the prose. It imports no package
   region — not embody, not levels, not lenses — not even for types; its only
   foreign vocabulary is acorn's, type-only. (Repo-wide freezing utilities are
-  not a package region.)
+  not a package region.) The rule's own statement is bounded: naming the posture
+  in this document is describing the leaf, not practising a domain — a re-scope
+  raised 2026-08-06 and still open, because the same rule was the cited
+  authority for five deletions and its literal reading would self-apply.
+- **Absence is the baseline; recommendation is a later layer** (human ruling
+  2026-08-06). The leaf reports what it did not admit and never tells a reader
+  what to write instead. A recommendation surface — "did you mean", a suggested
+  replacement, a fix-it — is a different concern with different authority, and
+  it composes on top of an absence report rather than replacing it. A leaf that
+  recommends has silently taken a domain position about what the writer wanted.
 - **Never parses — the shipped graph's acorn import is type-only.** The leaf
   publishes the settings and takes a parsed tree. A parser call inside this leaf
   would make it the second parse configuration it exists to prevent, and the

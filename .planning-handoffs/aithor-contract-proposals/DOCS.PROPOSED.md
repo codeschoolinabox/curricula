@@ -4,8 +4,8 @@
 
 > **Dossier artifact — not the live sketch.** The full proposed `DOCS.md` for
 > the aithor module after the seven contract proposals land (wave map:
-> `./SEQUENCING.md`; AR trail: `./AR-LOG.md`). The committed `aithor/DOCS.md` is
-> untouched until ratification.
+> `./SEQUENCING.md`). The committed `aithor/DOCS.md` is untouched until
+> ratification.
 
 ---
 
@@ -232,4 +232,3 @@ there is no AST to inventory.
 - `./types.PROPOSED.ts` — the proposed contract in TypeScript.
 - `./SEQUENCING.md` — which deltas land in which wave, with per-wave
   evals-impact and socket-re-pin obligations.
-- `./AR-LOG.md` — the dossier's adversarial-review trail.

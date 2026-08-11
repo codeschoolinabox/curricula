@@ -5,9 +5,8 @@
 Which deltas land in which wave, with the per-wave evals-impact and
 socket-re-pin obligations the charter requires. Companion to
 `README.PROPOSED.md` / `types.PROPOSED.ts` / `DOCS.PROPOSED.md` (the end-state
-drafts) and `AR-LOG.md` (the review trail). Nothing in this memo executes before
-the maintainer ratifies the dossier; the evals keep measuring the COMMITTED
-contract until each wave lands.
+drafts). Nothing in this memo executes before the maintainer ratifies the
+dossier; the evals keep measuring the COMMITTED contract until each wave lands.
 
 ## The recommendation deviates from the charter's default — argued
 
@@ -43,8 +42,7 @@ now live in `src/lib/study-lenses/lib/screening/`; the levels region re-exports
 `Violation` and `SourceRange` type-only, so every level-side consumer kept its
 import. The structural floor was authored at extraction and is
 `screening/structural-floor.ts`. The per-increment SHAs are the authoritative
-record [read:
-[AR-LOG.md § Increment ledger (wave 1)](./AR-LOG.md#increment-ledger-wave-1)].
+record [read: the wave's own commit bodies, one per increment].
 **Parse-settings: pin against the now-committed published-parse contract**
 (refreshed 2026-07-30 — the repo RULED after this memo was first written): the
 walk takes a pre-parsed `Program` "as the caller parsed it," so the settings
@@ -162,10 +160,14 @@ steering) and the `steering` slot is the descriptor's designed hook.
 ## Gate items (the maintainer rules at the Phase-0 → Phase-1 gate)
 
 **Where the ruling lands:** the gate's rulings — ratifications, amendments,
-strikes — are recorded as a new `## The gate ruling` section in `./AR-LOG.md`
-(the dossier's established ruling ledger) and mirrored into the charter memory's
-addendum. A post-gate session verifies the ruling THERE before opening any wave;
+strikes — are recorded as a `## The gate ruling` section in THIS memo, dated,
+and in the commit body that lands it, then mirrored into the charter memory's
+addendum. A post-gate session verifies the ruling here before opening any wave;
 an absent section means the gate has not ruled.
+
+**THE GATE HAS RULED — see § The gate ruling (2026-07-30) at the end of this
+memo.** The seven items below are its subjects, kept as the questions that were
+put; the answers are there.
 
 1. **The rawness fate** — `raw: true` amends ratified P2's letter (argued:
    Chapter-4 pedagogy and drift telemetry need the surface; always-curated holds
@@ -182,3 +184,37 @@ an absent section means the gate has not ruled.
 7. **The cancel exit** — reject-with-reason was human-ruled at AR-1
    presentation; recorded here for the gate's visibility since it binds the
    consumer stream's swallow obligation.
+
+## The gate ruling (2026-07-30)
+
+The maintainer ruled at the Phase-0 → Phase-1 gate, via in-session questions, on
+the seven items above. **The gate is PASSED — waves may open**, in the ratified
+order, each as its own full-ceremony campaign (human ruling 2026-07-30).
+
+| Item | Subject                                                                             | Ruling                                                                                                                                                       |
+| ---- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1    | Rawness fate (`raw: true` amends ratified P2)                                       | **RATIFIED.** The explicit uncurated opt-in stands; always-curated holds as instrument policy (the consumer never passes it).                                |
+| 2    | P4 collapse (profile out of the config)                                             | **RATIFIED.** Lifecycle profiles live in the consumer-curried injected gate; the `'undetermined'` arm carries the never-gates-what-it-can't-parse carve-out. |
+| 3    | The wave merge (4 waves vs the charter's 6)                                         | **RATIFIED.** Leaf extraction → core reshape (P1+P2+P4) → the move → options API; P7 later, orchestrator-side.                                               |
+| 4    | `Meta.tier` (optional tier-honesty field)                                           | **RATIFIED.** The field lands; additive-optional; the consumer stream re-pins deliberately (flag stands).                                                    |
+| 5    | Wave-1 cross-territory writes (jej repoints; `Violation` moves w/ region re-export) | **Acknowledged/authorized** — executed at Wave 1, under its own ceremony.                                                                                    |
+| 6    | local-llm signal extension                                                          | **Acknowledged** as a named future obligation in another leaf's territory; Wave 4's tiered cancel stands on its own until it lands.                          |
+| 7    | Cancel exit (reject-with-reason)                                                    | **Acted** — already human-ruled at the AR-1 presentation; the gate confirms it; the consumer socket's swallow obligation stands as documented.               |
+
+Same-day context recorded with the ruling: the maintainer separately
+re-confirmed the three sketch-review rulings ("1 yes · 3 propagate · 4+5 ok"),
+and this memo was refreshed in the same commit for two post-dossier repo events
+— the eval driver landed (2026-07-28) and the published-parse contract was
+pinned ESTree-shaped and offset-based (2026-07-30), closing the `preserveParens`
+divergence Wave 1's caution had warned about.
+
+### Carried into Wave 2
+
+- **A Wave-2 design risk (2026-08-05):** the node-type inventory will re-admit
+  `var` unless it maps rules deliberately — the leaf's default-deny message is
+  domain-blind, so nothing else stops it.
+- **Close before Wave 2's Phase 0 opens (2026-08-05):** this memo's own Wave-2
+  spec contradicts what Wave 1 shipped — `README.PROPOSED.md` describes a
+  declaration-admitting floor while `types.PROPOSED.ts` still imports from the
+  pre-move `allowlisting` path. The two `.PROPOSED` files are the place to fix
+  it; a review asked that it be closed before the wave opens, not during.
