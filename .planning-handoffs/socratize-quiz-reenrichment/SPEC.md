@@ -42,6 +42,11 @@ spec: `CLAUDE.md → AGENTS[.principal].md → DEV.md`.
   `CreationEntwined.scopeTree` placeholder (pre-greenfield; `facts.environment`
   supersedes it — ignore the `scopeTree` term when reading quarry `resolving/`
   files).
+- **`lib/questioning/` is NOT the question-orchestrator revived** (locked
+  decision 5): the parent region is a shared DOCUMENTATION + TYPES home
+  (Block-Model grid, taxonomies, leveling) — it composes nothing, runs nothing.
+  No `composeQuestions`, no cross-register co-anchoring; the two engines inside
+  it stay independent (locked decision 3 stands untouched).
 - **Three embody-named trees**: `src/lib/embody/` is the LIVE legacy
   `embody(code) → Snippet` the quarry libs import from (`../../../../embody/…`);
   `src/lib/study-lenses/embody/` is the greenfield Facts embody (the target);
@@ -110,6 +115,24 @@ citations here use test TITLES, not line numbers, for exactly this reason.
    mid-sentence in the registry header adjoining the V4-fires-last rationale —
    excise surgically, keep the rationale
    ([LIBRARY-CONTRACTS.md](./LIBRARY-CONTRACTS.md)).
+5. **The two question engines share a parent region: `lib/questioning/`** (human
+   ruling 2026-08-11: "they should both be subdirectories in a shared directory
+   under lib/ … one source of truth documentation in their shared parent for the
+   3D block model, taxonomies, and leveling (which should be deeply rich, copied
+   from the deprecated architecture), but have their own logic for open vs.
+   closed questions"; the name was delegated and resolved to `questioning` —
+   gerund-convention, zero greenfield collisions [measured: `git grep -in
+   questioning` over `src/lib/study-lenses` excluding the quarry → 0 hits]). The
+   parent carries the shared documentation + the shared `types.ts` (Block-Model
+   cells, taxonomies, leveling); `lib/questioning/socratizing/` and
+   `lib/questioning/quizzing/` keep their own open/closed logic. A dedicated
+   upstream session (the questioning-parent stage,
+   `~/.claude/plans/questioning-parent-region-handoff.md`) drafts the shared
+   documentation and executes the socratizing move BEFORE the two engine streams
+   proceed. This supersedes Q2's landed placement; the collateral's durable home
+   (the socratizing DOCS note, human ruling 2026-08-10) moves with the file —
+   the questioning-parent stage owns the re-point pass, including the
+   MVP-ROADMAP citation.
 
 ## Resolved questions (Q1–Q14 — answers are rulings, cite before deviating)
 
@@ -120,7 +143,7 @@ Q1/Q8/Q13/Q14 — all resolved 2026-07-22).
 | Q   | Resolution                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Q1  | Quizzing (Stage 3) belongs to THIS campaign line — the M2 quizzing stream is CLOSED and handed over (maintainer, 2026-07-22). The supplement's "live M2 owner — coordinate" note predates this and is superseded.                                                                                                                                                                                                                  |
-| Q2  | `socratizing` lives at `lib/socratizing/` (peer engine, not `orchestrate/lib/`). Landed [measured: `ls src/lib/study-lenses/lib/` → socratizing present].                                                                                                                                                                                                                                                                          |
+| Q2  | ~~`socratizing` lives at `lib/socratizing/` (peer engine)~~ — landed there at Stage 2, then SUPERSEDED by the shared-parent ruling (human ruling 2026-08-11, locked decision 5): both question engines become subdirectories of `lib/questioning/`; socratizing MOVES to `lib/questioning/socratizing/` in the questioning-parent stage.                                                                                           |
 | Q3  | Scope read/write derivation. The source plan's default was "recompute from the AST inside the adapter"; **what landed is its named cleaner alternative** — embody classifies each reference's access, and the adapter only tallies (§ Scope adapter). The AST-recompute rule is dead.                                                                                                                                              |
 | Q4  | Quiz gate = JEJ `validate` over projected `facts.environment → unresolvedReferences` (candidate `environment.root.through`, refs with `resolved: null`). Ratify at Stage-5 AR-1: the type match, the path-less-reference arm (`ScopeReference.path` is optional; `UnresolvedReference.nodePath` required), AND the gate budget — `validate` walks the whole AST while the lens kind bans derived-model construction inside a gate. |
 | Q5  | socratize `phase: 'source'` — teaches the text surface, reads the AST.                                                                                                                                                                                                                                                                                                                                                             |
@@ -150,12 +173,16 @@ writeme].
 | 4     | `socratize` lens | `lenses/socratize/` | unbuilt      | The one genuine build — quarry source is documentation-only (quarry `lenses/socratize/`). Build from the annotated DDD copies ([lens-ddd/socratize/](./lens-ddd/socratize/)) applying § Socratize DDD rewrite below. Deliverables: `core.ts` + `index.tsx` + `tests/` + css, mirroring the two-layer `writeme` module shape. Full ZOMBIES TDD. Gate: `applicability = facts.ast.ok`. **Un-colorized per ruling R-4 (§ The un-colorized ruling record).**                                                                                                                                                                                                                                                                                                                                                                            |
 | 5     | `quiz` lens      | `lenses/quiz/`      | unbuilt      | Verbatim port through inc 7 from quarry `lenses/quiz/` (annotated DDD copies: [lens-ddd/quiz/](./lens-ddd/quiz/)). Envelope rewire isolated to `build-quiz.ts` + `index.tsx` + `core.ts` gate/recommend signatures — don't miss `core.ts`. Item-consumer graph untouched. Gate: JEJ `validate` (Q4), not `facts.ast.ok`. Anchors already offset.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 
-Bottom-up order: 3 → 4 → 5. The real dependencies: Stage 5 consumes Stage 1's
-`classifying` (landed) and Stage 3's `quizzing`; Stage 4 needs only landed
-Stage-2 outputs. Each stage runs full Phase-0 DDD → human gate → Phase-1, per
-the governance files — Phase-0 is **light where the port is verbatim** (Stages
-3/5, ≈ the classifying relocation) and heavier only for the Stage-4 build (≈ the
-engine rebuild).
+Bottom-up order: **questioning-parent → 3 → 4 → 5** (locked decision 5, human
+ruling 2026-08-11: the shared `lib/questioning/` parent — its rich
+Block-Model/taxonomy/leveling documentation, its shared `types.ts`, and the
+socratizing move — is an UPSTREAM stage both engine streams consume; it runs
+first). The real dependencies after it: Stage 5 consumes Stage 1's `classifying`
+(landed) and Stage 3's `quizzing`; Stage 4 needs only landed Stage-2 outputs
+(wherever socratizing then lives). Each stage runs full Phase-0 DDD → human gate
+→ Phase-1, per the governance files — Phase-0 is **light where the port is
+verbatim** (Stages 3/5, ≈ the classifying relocation) and heavier for the
+questioning-parent doc transport and the Stage-4 build (≈ the engine rebuild).
 
 ## Scope adapter (landed reality, and what Stage 3 still owes)
 
