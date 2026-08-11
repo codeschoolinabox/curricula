@@ -1288,6 +1288,61 @@ describe('deriveEnvironment', () => {
 						entwined.value.byPath[definition.path]?.node === definition.name,
 				).toBe(true);
 			});
+
+			describe("a reused node's stamped path — acorn's own key order breaks the tie", () => {
+				it("acorn's key order sends an import definition's path to the local slot", () => {
+					const snippet = {
+						source: 'import { x } from "m";',
+						type: 'module',
+					} as const;
+					const tokens = deriveTokens(snippet);
+					const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+					const entwined = deriveEntwined(
+						snippet.source,
+						tokens,
+						ast,
+						parenSpansByNode,
+					);
+					const stage = deriveEnvironment(snippet.type, ast, entwined);
+					const moduleScope =
+						stage &&
+						stage.ok &&
+						stage.value.root.childScopes.find(
+							(scope) => scope.type === 'module',
+						);
+					expect(moduleScope && moduleScope.variables[0]?.defs[0]?.path).toBe(
+						'$.body.0.specifiers.0.local',
+					);
+				});
+
+				it("acorn's key order sends an export linking read's path to the exported slot", () => {
+					const snippet = {
+						source: 'let x; export { x };',
+						type: 'module',
+					} as const;
+					const tokens = deriveTokens(snippet);
+					const { ast, parenSpansByNode } = deriveAst(snippet, tokens);
+					const entwined = deriveEntwined(
+						snippet.source,
+						tokens,
+						ast,
+						parenSpansByNode,
+					);
+					const stage = deriveEnvironment(snippet.type, ast, entwined);
+					const moduleScope =
+						stage &&
+						stage.ok &&
+						stage.value.root.childScopes.find(
+							(scope) => scope.type === 'module',
+						);
+					const read =
+						moduleScope &&
+						moduleScope.variables[0]?.references.find(
+							(reference) => reference.access === 'read',
+						);
+					expect(read && read.path).toBe('$.body.1.specifiers.0.exported');
+				});
+			});
 		});
 
 		describe('usedBeforeBound (derived)', () => {
