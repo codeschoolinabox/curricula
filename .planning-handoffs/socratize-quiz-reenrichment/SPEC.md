@@ -444,8 +444,12 @@ human redirected lens-side questions — library first; consuming lenses later).
   narrowing), `empty-block` (control-flow-clause narrowing), `what-value-stored`
   (trivial-initializer widening), `voice-profile` (metric recalibration) — each
   covered by an agent-reasoned fix commit only, while the port plan of record
-  dispositioned analyzer bodies "verbatim". Human ratification = the still-open
-  push gate over those unpushed commits.
+  dispositioned analyzer bodies "verbatim". The push gate that carried their
+  ratification has since CLOSED — those commits are on `origin/main` [measured
+  2026-08-11: `git log origin/main..HEAD -- lib/socratizing` → empty]. The
+  record class stands (reasoned commits, no explicit human ruling); anyone
+  re-opening one of the four narrowings starts from the commit bodies, not from
+  a ruling.
 - **`lib/classifying`'s non-overlap invariant has no test pin** (flagged
   2026-08-05): the quarry quiz build test asserted `start >= previous.end`; no
   greenfield classifying test or doc pinned it at re-verification. The doc
