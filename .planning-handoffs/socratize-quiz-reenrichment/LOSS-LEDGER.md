@@ -147,7 +147,7 @@ session.
 The six socratize-spec losses (CM recipe, `data-socratize-*` contract,
 tabbed-panel contract, reveal-persistence, midsize routing, shelf rationale) are
 NOT transported into SPEC.md prose — they survive whole in the annotated
-byte-copies ([lens-ddd/socratize/](./lens-ddd/socratize/), land at C5), which
+byte-copies ([lens-ddd/socratize/](./lens-ddd/socratize/), landed), which
 SPEC.md's Stage-4 row and § Socratize DDD point at. Same for the quiz-side
 test-pinned contracts, which [LIBRARY-CONTRACTS.md](./LIBRARY-CONTRACTS.md) pins
-(lands at C3).
+(landed).

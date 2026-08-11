@@ -331,20 +331,20 @@ exempt from this file's retirement banner** and retires only into its durable
 home, the carried-unbuilt note in `lib/socratizing/DOCS.md` (human ruling
 2026-08-10). The quarry's pinned truth for all three is its
 `lib/question-orchestrator/` — six frozen test files [measured: `find … -name
-'*.test.*' | wc -l` → 6], protected from deletion once the quarry-retirement
-criteria amendment lands (**the criteria must name ALL question surfaces — quiz
-lens, quizzing engine, AND question-orchestrator; none deletes before its
-content is ported or re-homed** — human ruling 2026-08-05/06; `MVP-ROADMAP.md`
-names no question surface today [measured: `grep -in
-'quiz\|question-orchestrator' src/lib/study-lenses/MVP-ROADMAP.md` → 0 hits]);
-read the concept's source there before rebuilding. A scope caution common to the
-two instruments: the quarry justified BOTH as irreducibly CROSS-register
-("coverage across the Block Model grid is meaningful only over both registers'
-delivered items together"; laddering "a mixed open+closed stream is a whole-set
-concern" [relayed: ar-1, quarry orchestrator README § Why this lib]) — with two
-standalone lenses, a per-lens landing is a SCOPE REDUCTION the consuming AR-1
-must consciously accept; the full-fidelity carrier is the recommender/curriculum
-layer the one-grid bullet names.
+'*.test.*' | wc -l` → 6], protected from deletion by the quarry-retirement
+criteria (**the criteria name ALL question surfaces — quiz lens, quizzing
+engine, AND question-orchestrator; none deletes before its content is ported or
+re-homed** — human ruling 2026-08-05/06; landed 2026-08-11 in
+`MVP-ROADMAP.md § Then — retiring the quarry` [measured: `grep -in
+'question-orchestrator' src/lib/study-lenses/MVP-ROADMAP.md` → the
+question-register bullet]); read the concept's source there before rebuilding. A
+scope caution common to the two instruments: the quarry justified BOTH as
+irreducibly CROSS-register ("coverage across the Block Model grid is meaningful
+only over both registers' delivered items together"; laddering "a mixed
+open+closed stream is a whole-set concern" [relayed: ar-1, quarry orchestrator
+README § Why this lib]) — with two standalone lenses, a per-lens landing is a
+SCOPE REDUCTION the consuming AR-1 must consciously accept; the full-fidelity
+carrier is the recommender/curriculum layer the one-grid bullet names.
 
 - **The Block-Model difficulty ladder** (quarry
   `lib/question-orchestrator/ladder.ts` + `ladder.test.ts`): order a question
@@ -388,10 +388,10 @@ layer the one-grid bullet names.
   cells); the degenerate UNPARSED path reporting every target as a gap
   (report-coverage's own test pins only the no-items case). ⚠ Post-cap coverage
   also sat at "Ratify or adjust" in the quarry DOCS § Open questions. The
-  greenfield socratizing docs claim the cell taxonomy serves coverage auditing —
-  after C7 that prose is honest about the instrument not existing; the durable
-  carried-unbuilt note in `lib/socratizing/DOCS.md` (human ruling 2026-08-10,
-  landed) is the carrier of the plan to build it.
+  greenfield socratizing docs state honestly that the cells enable the audit and
+  no instrument reports it; the durable carried-unbuilt note in
+  `lib/socratizing/DOCS.md` (human ruling 2026-08-10, landed) is the carrier of
+  the plan to build it.
 - **The "two registers on one grid" pedagogical goal** (quarry
   `lib/question-orchestrator/README.md`, attributing the goal to quizzing's own
   README): a learning environment should place open/Socratic and closed/gradable
