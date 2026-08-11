@@ -9,7 +9,7 @@ section's preamble. -->
 <!-- cspell:ignore socratizing socratize quizzing reenrichment stonebraker -->
 <!-- cspell:ignore unbuilt subgraph relitigate PBSI bannered bannering -->
 <!-- cspell:ignore repoint readwrite Behaviour unleveled rebuilder distractor -->
-<!-- cspell:ignore dispositioned blankable -->
+<!-- cspell:ignore dispositioned blankable narrowings -->
 
 # Question-register lenses — forward canon (re-homed)
 
