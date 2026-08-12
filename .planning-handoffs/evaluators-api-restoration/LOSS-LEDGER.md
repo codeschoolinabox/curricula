@@ -840,7 +840,10 @@ contradicts it. No pin fell outside the vocabulary.
   and treat the narrow fix as the engine's": emit everything, name the cost,
   rest loop safety on the iterations cap. The opt-out on the engine spec is this
   campaign's first engine increment; both intercept and trace/variables qualify
-  for it.
+  for it. **DISCHARGED 2026-08-11 by `976baed9`** — `EvaluateSpec.yieldCharge`,
+  optional and defaulting to true, waives the fee alone: the budget still pauses
+  for every yield-wait and every serviced call, and real elapsed time still ends
+  the run. Neither evaluator threads it through yet; that rides each rebuild.
 - **`evaluators-deprecated/PHASE-1-HANDOFF.claude-delete-if-stale.md` is KEPT**
   (human ruling 2026-08-04). Untracked and never committed at ruling time, so
   deletion would have been unrecoverable (now TRACKED — swept into the human's
