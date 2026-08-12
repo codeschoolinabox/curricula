@@ -258,7 +258,23 @@ shared tree.
 5. **`screening/README.md`** — HR-5's deletion plus the paragraph rewrite.
 6. **`ar-1.md` / `ar-5.md` LAST among content edits** — but see the ordering
    conflict resolved below.
-7. **AR-2**, then **AR-5** over the whole changeset, then commit by pathspec.
+7. **AR-2**, then **commit by pathspec**, then **AR-5 over that SHA**.
+
+**⚠️ Step 7's order is not negotiable, and an earlier draft of this list had it
+backwards** (AR-2 → AR-5 → commit). [read: `DEV.md` § Shared-worktree git
+mechanics — _"**A review's changeset is a SHA list, not `baseline..HEAD`.** …
+the dispatching agent hands the reviewer **the campaign's own SHAs** and states
+that the range form is overridden **in the prompt**"_]. Commit last and agent
+2's SHA list is **empty**: `ar-5.md`'s frontmatter and `DEV.md` § AR-5's Provide
+line both still describe `baseline..HEAD` and are deliberately left that way, so
+an AR-5 dispatched per its own contract would review a range that on this tree
+is **entirely foreign** — HEAD moved four times during one review session. It
+would return a clean verdict having reviewed peer commits, the Loss lens would
+never see the strip, and the campaign would close on a gate that fired at
+nothing. **That failure is silent, which is what makes it the worst one
+available.** If part of the changeset must stay uncommitted, say so in the
+prompt and name the paths — the reviewer's contract already provides for a
+working-tree diff.
 
 **Three placements this brief previously left to guesswork. These are agent-side
 calls, made here so agent 2 does not re-decide them; overrule if you disagree.**
@@ -274,6 +290,21 @@ calls, made here so agent 2 does not re-decide them; overrule if you disagree.**
   `## Epistemology` heading would otherwise leave it as untitled prose dangling
   after a bulleted `## Conventions` list. Rationale: it argues why the module
   exists domain-blind, which is that heading's subject.
+- **AR-1's own Trigger and Provide lines are DESIGN, and belong in step 2 — not
+  step 4's propagation sweep.** They define what discharges 0.2, so they are
+  part of the rule, not a recital of it. `DEV.md` § AR-1's Provide line
+  currently offers "the twin — or, at `twin-doc: none`, the `## Epistemology`
+  block … that discharges step 0.2"; under HR-1 there is **nothing to hand
+  over** at the default, so the agent call is: **AR-1 receives the README plus
+  the twin where one is owed; at `twin-doc: none` the recorded answer discharges
+  0.2 and AR-1 challenges the README alone.** The Trigger's "challenges the
+  README **and** the twin together" narrows the same way. Note this makes AR-1's
+  _operational_ behavior at the default identical to superseded exit (a) — that
+  is a consequence of HR-1, not a reversion to (a), and the difference is that
+  under HR-1 the skip is a **recorded answer** rather than a silence.
+- **AR-1 also reviews a diff that rewrites AR-1's own contract**, and it fires
+  first. Same hazard this brief flags for AR-5; say in the prompt which version
+  the reviewer is applying.
 - **The `ar-*.md`-LAST vs Loss-lens conflict.** § Coordination says edit them
   last; § Gates says AR-5 runs the Loss lens over the whole changeset. Both
   cannot hold, and `.claude/agents/ar-5.md` carries one of the largest single
@@ -407,9 +438,19 @@ list is complete even where the counts are not.
 
 ### Surface 2 — "step 0.2" and "the twin", which never say _Epistemology_
 
-**Under option (b) every one of these becomes a dangling reference**, and the
-string grep does not reach them [measured 2026-08-06: `git grep -n "0\.2" --
-'*.md'`, filtered to governance files and to lines with no `Epistemology`]:
+> **⚠️ THIS SECTION'S STATED REASON IS DEAD — THE LIST IS NOT. Do not skip it.**
+> It used to open _"Under option (b) every one of these becomes a dangling
+> reference"_. Option (b) is superseded: HR-1 keeps step 0.2 and nothing
+> renumbers, so **nothing dangles**. An agent that has correctly internalized
+> "the four exits are not live" can therefore conclude this whole section is
+> moot and skip it — and lose `DEV.md`'s AR-1 Trigger line and its AR-5
+> provide-line, two of the highest-consequence sites in the strip. **The reason
+> changed; the obligation did not.** Under HR-1 these sites do not dangle — they
+> keep **teaching the old discharge mechanism**, which is worse, because a
+> dangling reference is loud and a wrong instruction is not.
+
+The string grep does not reach these [measured 2026-08-06: `git grep -n "0\.2"
+-- '*.md'`, filtered to governance files and to lines with no `Epistemology`]:
 
 `.claude/agents/ar-1.md` (its **YAML frontmatter `description`**, plus body) ·
 `.claude/agents/ar-5.md` · `AGENTS.md` (×2) · `AGENTS.principal.md` (×3,
@@ -501,9 +542,13 @@ documents, never the history behind them.
    it changes, dated. **The answer was given 2026-08-11 and is parked in
    [§ Human rulings](#human-rulings) above**, under the same section's
    ride-the-campaign-artifact clause, because `DEV.md` cannot be edited outside
-   the strip itself. **Moving HR-1 and HR-2 into `DEV.md` is part of agent 2's
-   changeset, not optional cleanup**, and the closing commit body enumerates
-   what went where.
+   the strip itself. **SUPERSEDED in part — read the disposition table in §
+   Where each ruling ends up instead of this sentence.** It predates HR-3..HR-7
+   and names only two rulings, and it is **wrong about HR-2**, which the table
+   marks as discharged by the strip's own edits with nothing to promote into
+   `DEV.md`. Only **HR-1 + HR-3 + HR-6** are promoted. The original sentence:
+   **Moving HR-1 and HR-2 into `DEV.md` is part of agent 2's changeset, not
+   optional cleanup**, and the closing commit body enumerates what went where.
 
 ## Coordination and traps
 
@@ -524,8 +569,15 @@ documents, never the history behind them.
   1. `git status --short --` on the eight in-scope files. Whatever it returns is
      the truth; this paragraph is not.
   2. For each dirty file, test for a **content** conflict — the only kind that
-     matters:
-     `git diff -- <file> | grep -nE "Epistemolog|0\.2|twin|other three"`.
+     matters. **Filter to changed lines**, or diff context makes it
+     false-positive: a peer's insertion three lines above an untouched AR-1
+     Trigger flags the file and stalls you for nothing.
+
+     ```bash
+     git diff -U0 -- <file> | grep -E '^[+-]' | grep -vE '^(\+\+\+|---)' \
+       | grep -E "Epistemolog|0\.2|twin|other three"
+     ```
+
   3. **No hits → PROCEED.** A peer editing a different region of the same file
      is the normal state of this worktree, and the pathspec commit form is what
      makes that safe. Both times this was measured, the answer was no hits.
@@ -623,11 +675,19 @@ teaches the old one. The grep is a necessary check, not a sufficient one.
 - **THE THIRD GREP, and the one that catches the silent failure** — the four
   collision sites carry neither `Epistemology` nor `0.2`, so the two greps above
   return clean while `AGENTS.md` and `AGENTS.principal.md` still teach the old
-  rule. Run it, and confirm every hit now says the human is asked:
+  rule. **Exclude this brief**, which quotes the old text verbatim in its own
+  collision table and so pollutes the raw grep [measured 2026-08-11: raw → 11
+  hits, of which **7 are this file**; only 4 are real sites]:
 
   ```bash
-  grep -rInE "states the other three|state three of the four|other three answers" --include="*.md" .
+  grep -rInE "states the other three|state three of the four|other three answers" \
+    --include="*.md" . | grep -v "epistemology-strip/BRIEF.md"
   ```
+
+  **The gate is: every remaining hit says the human is ASKED, not that the agent
+  states it.** Four sites are expected — two in `DEV.md`, one each in
+  `AGENTS.md` and `AGENTS.principal.md`. Zero hits means you over-deleted; more
+  than four means a recital was added while you worked.
 
 - Re-read every step-0.2 site from Surface 2 and confirm none dangles. **Surface
   2's `DEV.md` list is short by at least two** — `git grep -n "0\.2" -- DEV.md`
