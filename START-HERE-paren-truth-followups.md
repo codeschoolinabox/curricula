@@ -288,7 +288,7 @@ NEVER push.
 
 Three lines in `src/lib/study-lenses/embody/types.ts` still say "character
 offset" where the rest of the contract now says "half-open offsets in UTF-16
-code units". Harmless, just untidy. The same phrasing appears ~22 more times
+code units". Harmless, just untidy. The same phrasing appears ~19 more times
 across the package, and whether to sweep those too is a call the agent will
 bring back to you.
 
