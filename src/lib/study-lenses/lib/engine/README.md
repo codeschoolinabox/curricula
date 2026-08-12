@@ -7,11 +7,11 @@ and settles every run through one termination machine. It knows nothing about
 JEJ, the notional machine, tracing, events, or pedagogy — all domain logic
 arrives as arguments.
 
-The evaluators region builds on it (the region lives elsewhere; the engine knows
-no consumer): each evaluator — run, intercept, the tracer family — supplies its
-code (instrumented or not), its worker logic (traps, advice, mocks), and its
-thread logic (event interpretation, limit refinement), and maps the engine's
-settlement onto the evaluator kind's own.
+The evaluators region builds on it (the region lives elsewhere — today
+`evaluators-deprecated/`; the engine knows no consumer): each evaluator — run,
+intercept, the tracer family — supplies its code (instrumented or not), its
+worker logic (traps, advice, mocks), and its thread logic (event interpretation,
+limit refinement), and maps the engine's settlement onto its own kind's.
 
 Light cases use the engine directly: code, a worker entry, a few thread hooks —
 no kind contract, no ceremony.
@@ -87,8 +87,8 @@ stream and walk away: an iterator created and then abandoned (whether or not it
 ever pulled) holds the run like any abandoned generator holding a resource —
 break or `cancel()` is the exit.
 
-The engine's `EngineHandle` is not the evaluator kind's `EvaluationStream` — an
-evaluator consumes the former to implement the latter. Same idea, different
+The engine's `EngineHandle` is not an evaluator's own stream or handle type — an
+evaluator consumes this handle to implement its own. Same idea, different
 layers, deliberately different names.
 
 ## The two-sided contract
@@ -205,17 +205,17 @@ throws); a crash is the worker-error termination cause and settles with an
 engine-made `error`, no halt.
 
 Consumer-driven stops (`cancelled`, `failed`) carry NO engine error — nothing
-misbehaved; the consumer ended a healthy run. The evaluator kind's `canceled`
+misbehaved; the consumer ended a healthy run. The DEPRECATED kind's `canceled`
 settlement arm mirrors `cancelled`
 ([evaluators-deprecated/types.ts § Settlement](../../evaluators-deprecated/types.ts)):
-a consumer-ended run carries no error there either. `failed` has no kind-level
-counterpart — what becomes of a `failReason` is each evaluator's own mapping.
+a consumer-ended run carries no error there either. `failed` has no counterpart
+there — what becomes of a `failReason` is each evaluator's own mapping.
 
 The division of limits: **time is engine-owned and standardly available;
 everything else (iteration counts, step budgets, domain rules) is owned by the
 instrumentation + thread logic** and reaches the settlement through
 `serializeHalt`'s halt payload and `refineError`'s opaque refinement. Downstream
-vocabularies (a tracer's limit classification, the evaluator kind's error arm)
+vocabularies (a tracer's limit classification, an evaluator kind's error arm)
 are mappings applied by the layers that own them.
 
 ### The time budget
@@ -321,6 +321,9 @@ Using a different name in code is a bug, not a stylistic choice.
   JSON-in-string.
 - **thread logic** — consumer-authored, thread-side: `onMessage` / `onCall` /
   `refineError`.
+- **evaluator kind** — the consuming contract an evaluator implements atop this
+  engine. Its outcome vocabulary, its shape, and its names are its own, never
+  the engine's; the engine neither imports nor validates it.
 - **message** — an opaque, structured-clone-safe payload crossing the boundary.
   Clone-safety is the engine's only constraint on it.
 - **item** — what `onMessage` yields; what the stream carries (pulled by the
@@ -394,28 +397,29 @@ settlement); the fake transport and the conformance suites.
 freezing of consumer payload interiors — halt, refinement, failReason
 (downstream owners deep-freeze their own data); instrumentation and any non-time
 limit (instrumentation + `serializeHalt` + `refineError`); mock behavior (worker
-logic + `onCall`); whitelisting (consumer logic, either side); the evaluator
-kind's contract — `EvaluationSpec`, `EvaluationStream`, event unions,
-refusal-as-data, pending-interaction suspension (the kind's distinguished event
-and its respond channel, built by an evaluator atop emit/call), and every
-mapping from an engine settlement onto the kind's (the evaluators region);
-hosting headers (COOP/COEP are the host page's concern); worker construction
-(the consumer's worker factory builds the `Worker`; the engine spawns only what
-it is handed — module-type and adjacency are consumer obligations, doc-enforced,
-and a classic or non-adjacent worker fails at load).
+logic + `onCall`); whitelisting (consumer logic, either side); an evaluator
+kind's contract — its own spec and handle types, event unions, refusal-as-data,
+pending-interaction suspension (the kind's distinguished event and its respond
+channel, built by an evaluator atop emit/call), and every mapping from an engine
+settlement onto the kind's (the evaluators region); hosting headers (COOP/COEP
+are the host page's concern); worker construction (the consumer's worker factory
+builds the `Worker`; the engine spawns only what it is handed — module-type and
+adjacency are consumer obligations, doc-enforced, and a classic or non-adjacent
+worker fails at load).
 
 **Placement**: the engine is a shared leaf of the study-lenses package
 (`src/lib/study-lenses/lib/engine/`); it depends on nothing outside itself, so
 every region — or any consumer beyond this package — imports it directly.
 
 **Vocabulary bridges**: what an evaluator emits as an _event_ is, to the engine,
-an opaque _item_. The engine's `EngineHandle` is not the evaluator kind's
-`EvaluationStream` — an evaluator wraps the former to implement the latter. The
-engine's _settlement_ — five outcomes — is not the kind's _settlement_ — three
-arms; an evaluator maps the former onto the latter. Likewise the engine's
-`EvaluateSpec` is not the kind's `EvaluationSpec`: an evaluator builds the
-former from the latter on every run. A worker _crash_ is not a _halt_ — crash is
-the worker-error termination cause; halts are bootstrap-posted, exactly once.
+an opaque _item_. The engine's `EngineHandle` is not an evaluator's own stream
+or handle type — an evaluator wraps this handle to implement its own. The
+engine's _settlement_ — five outcomes — is not an evaluator kind's _settlement_;
+an evaluator maps the former onto the latter, under whatever arms and names its
+kind declares. Likewise the engine's `EvaluateSpec` is not a kind's own spec
+type: an evaluator builds the former from the latter on every run. A worker
+_crash_ is not a _halt_ — crash is the worker-error termination cause; halts are
+bootstrap-posted, exactly once.
 
 ## Navigation
 
@@ -423,5 +427,6 @@ the worker-error termination cause; halts are bootstrap-posted, exactly once.
 - [types.ts](./types.ts) — the engine contract
 - [../README.md](../README.md) — the shared-leaf `lib/` directory
 - [../../evaluators-deprecated/README.md](../../evaluators-deprecated/README.md)
-  — the evaluator kind: the consuming contract implemented on top of this engine
+  — the DEPRECATED evaluator kind: a frozen consuming contract implemented on
+  top of this engine, and this document's worked example
 - [../../README.md](../../README.md) — the study-lenses package root
