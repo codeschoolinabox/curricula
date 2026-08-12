@@ -217,7 +217,8 @@ lib/questioning/
 ```
 
 Each engine's README carries its own catalog, API, and configuration; the parent
-carries only what is shared.
+carries only what is shared. The open register engine lives at
+[socratizing/](./socratizing/README.md).
 
 ## Ownership boundary
 
@@ -264,5 +265,5 @@ Two charter laws bind every future change:
 - Up: [../README.md](../README.md) — the lib tier and its admission rules.
 - Architecture and decisions: [DOCS.md](./DOCS.md).
 - Transport provenance: [LOSS-LEDGER.md](./LOSS-LEDGER.md).
-- The engines: socratizing (open register) and quizzing (closed register), each
-  in its own directory above.
+- The engines: [socratizing/](./socratizing/README.md) (open register) and
+  quizzing (closed register), each in its own directory above.

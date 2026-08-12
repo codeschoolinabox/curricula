@@ -52,9 +52,5 @@ it qualifies as a leaf in its own right.
   artifacts that walk depends on — the parse settings its soundness is relative
   to, and the structural floor a caller unions under a table it derived by
   inventorying an existing program.
-- [socratizing/](./socratizing/README.md) — a Socratic code analyzer: turns an
-  embodiment into frozen `CodeQuestion`s (questions, not corrections) about a
-  program's micro-decisions and comprehension, anchored to source offsets and
-  tagged with pedagogical metadata.
 
 Package root: [../README.md](../README.md).

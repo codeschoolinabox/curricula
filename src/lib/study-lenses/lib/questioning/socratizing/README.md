@@ -1,4 +1,4 @@
-# lib/socratizing
+# lib/questioning/socratizing
 
 A Socratic code analyzer for JeJ programs. Given a snippet's embodiment, returns
 **questions — not corrections** — about both the micro-decisions in the code and
@@ -98,11 +98,11 @@ Each question is tagged with metadata from three frameworks.
 
 ### BLOCK model (Schulte 2008)
 
-A 12-cell matrix crossing three dimensions (text surface, program execution,
-function/purpose) with four levels (atom, block, relation, macro). Linearized
-into five consumer-facing levels: `syntax`, `semantics`, `connections`, `goals`,
-`userExperience`. The raw BLOCK cells are retained in each question for
-auditing.
+The grid's definition is the questioning parent's — see
+[`../README.md`](../README.md) § The BLOCK model and § Leveling. This engine's
+use of it: every question is tagged with one or more raw `block` cells (the
+parent's `BlockCell[]`) retained for auditing, and with the linearized `levels`
+field (the parent's `Level`) that consumers filter by.
 
 ### PBSI (Purpose, Behavior, Strategy, Implementation)
 
@@ -121,6 +121,9 @@ intended audience for this console.log()?", then asks how `alert()` would change
 who sees the output.
 
 ## Question registers
+
+(The inner `Question.register` sense; the open/closed register homonym is
+resolved once in [`../README.md`](../README.md) § Glossary.)
 
 Each `CodeQuestion` carries 1–3 questions tagged by register:
 
@@ -318,7 +321,7 @@ succeed (see § Public API).
 ## What lives here
 
 ```text
-lib/socratizing/
+lib/questioning/socratizing/
   README.md               (this — orientation + catalog + public API)
   DOCS.md                 architectural sketch + Mermaid data flow + pedagogical grounding
   types.ts                CodeQuestion, Question, Category, MicroDecisionResult, …
@@ -502,9 +505,11 @@ source; escalation, fading, and mastery are the consuming environment's. See
 
 ## Conventions
 
-Inherits all conventions from [`../README.md`](../README.md),
-[`../../README.md`](../../README.md), and the repo's `DEV.md`. Module-specific
-rules:
+Inherits all conventions from the questioning parent
+([`../README.md`](../README.md)), the lib tier
+([`../../README.md`](../../README.md)), the package
+([`../../../README.md`](../../../README.md)), and the repo's `DEV.md`.
+Module-specific rules:
 
 - **Pure-sync only.** No async, no I/O, no side effects (analyzer failures
   become data in `analyzerErrors`, never `console.warn`), no state — the
@@ -520,13 +525,16 @@ rules:
 - **No AST mutation.** Analyzers walk raw acorn nodes and may run on deep-frozen
   facts; they write no synthetic fields onto nodes.
 - **The metadata unions are a cross-consumer contract.** `Category`, `Feature`,
-  `Level`, `QuestionRegister`, and the config shape are shared with the lens;
-  widening them is an inter-module change.
+  `QuestionRegister`, and the config shape are shared with the lens; widening
+  them is an inter-module change. `Level` and `BlockCell` are the questioning
+  parent's ([`../types.ts`](../types.ts)) — widening either is a region-wide
+  change affecting every questioner.
 
 ## Navigation
 
-- **Parent peer:** [`../README.md`](../README.md).
-- **Scope dependency:** [`../scoping/README.md`](../scoping/README.md).
+- **Parent (the questioning region):** [`../README.md`](../README.md).
+- **Region index (the lib tier):** [`../../README.md`](../../README.md).
+- **Scope dependency:** [`../../scoping/README.md`](../../scoping/README.md).
 - **Architectural sketch + pedagogical grounding:** [`./DOCS.md`](./DOCS.md).
 - **JeJ language reference:**
-  [`../../language-levels/jej`](../../language-levels/jej).
+  [`../../../language-levels/jej`](../../../language-levels/jej).

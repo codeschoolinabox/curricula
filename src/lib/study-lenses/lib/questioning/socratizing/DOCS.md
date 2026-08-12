@@ -1,4 +1,4 @@
-# lib/socratizing — Architecture & Decisions
+# lib/questioning/socratizing — Architecture & Decisions
 
 ## Why questions, not corrections
 
@@ -77,29 +77,25 @@ two purposes:
 2. **For the curriculum team**: the raw `block` cells make question coverage
    auditable across the 12-cell grid; gaps indicate areas the tool doesn't yet
    reach. No instrument reports this — the cells enable the audit, and the
-   reporting tool is carried, unbuilt (see § Orchestrator collateral below).
+   reporting tool is carried, unbuilt (see § Carried collateral below).
 
-The consumer-facing `levels` field linearizes the 12-cell matrix into five named
-levels: `syntax`, `semantics`, `connections`, `goals`, `userExperience`. The raw
+The consumer-facing `levels` field carries the parent's five-level `Level`
+linearization (defined in [`../README.md`](../README.md) § Leveling). The raw
 `block` cells are retained in each question for auditing. Consumers filter by
 `levels`; the curriculum team audits by `block`.
 
 <!-- cspell:ignore unbuilt reenrichment socratize -->
 
-### Orchestrator collateral (carried, unbuilt)
+### Carried collateral (homed in the parent)
 
-Three concepts from the retired question-orchestrator are carried forward as
-future work, none discarded (human ruling 2026-08-05/06; durable home here,
-human ruling 2026-08-10): the spans-and-gaps **coverage reporter** over the
-12-cell grid (no such instrument exists in this module or anywhere forward — the
-cells make coverage auditable, nothing yet reports it); the **Block-Model
-difficulty ladder** (concrete-to-abstract question ordering — nothing forward
-orders questions by difficulty; this module sorts by source offset); and the
-**two-registers-on-one-grid goal** shared with the future quiz register. The
-carried specs live in `.planning-handoffs/socratize-quiz-reenrichment/SPEC.md` §
-Orchestrator collateral; landing sites are decided at the consuming stage's
-design review, and the quarry `lib/question-orchestrator/` tests remain the
-pinned truth until then.
+The three concepts carried from the retired question-orchestrator (the
+spans-and-gaps coverage reporter, the Block-Model difficulty ladder, the
+two-registers-on-one-grid goal) have their durable home in the questioning
+parent — see [`../DOCS.md`](../DOCS.md) § Carried collateral (promoted there by
+human ruling 2026-08-11, superseding the 2026-08-10 placement here). This
+engine's own relationship to them is unchanged: its raw `block` cells make
+coverage auditable and no instrument here reports it, and it orders questions by
+source offset, never by difficulty.
 
 ### PBSI vocabulary
 

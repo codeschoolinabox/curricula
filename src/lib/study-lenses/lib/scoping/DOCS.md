@@ -2,15 +2,15 @@
 
 ## Why this module exists
 
-Two engines — `lib/socratizing` now, `lib/quizzing` next — ask the same
-declaration-level questions: "is this `let` ever reassigned?", "how many times
-is `count` read?". Both need the same flat, per-declaration read/write tally.
-The scope graph that answers them is computed once by embody (via eslint-scope);
-recomputing it inside each engine would duplicate a subtle analysis (reference
-resolution, read/write classification, shadowing) and risk two engines
-disagreeing about the same program. This leaf factors the flatten into one
-domain-blind projection both engines consume, so there is a single scope truth
-and neither engine carries scope-graph machinery. See
+Two engines — `lib/questioning/socratizing` now, `lib/questioning/quizzing` next
+— ask the same declaration-level questions: "is this `let` ever reassigned?",
+"how many times is `count` read?". Both need the same flat, per-declaration
+read/write tally. The scope graph that answers them is computed once by embody
+(via eslint-scope); recomputing it inside each engine would duplicate a subtle
+analysis (reference resolution, read/write classification, shadowing) and risk
+two engines disagreeing about the same program. This leaf factors the flatten
+into one domain-blind projection both engines consume, so there is a single
+scope truth and neither engine carries scope-graph machinery. See
 [`./README.md`](./README.md) for the fold rule and the bounded context ("scoping
 projects; consumers judge").
 

@@ -111,7 +111,7 @@ Deletion criteria, not shipping criteria. Nothing here blocks a learner:
   [SPEC.md](../../../.planning-handoffs/socratize-quiz-reenrichment/SPEC.md)
   (transitional — retire this bullet's first two surfaces with it, when Stages
   3/4/5 land). The orchestrator's carried concepts have a durable in-tree home:
-  [lib/socratizing/DOCS.md § Orchestrator collateral (carried, unbuilt)](./lib/socratizing/DOCS.md#orchestrator-collateral-carried-unbuilt).
+  [lib/questioning/DOCS.md § Carried collateral (unbuilt)](./lib/questioning/DOCS.md#carried-collateral-unbuilt).
   The quarry's other two question surfaces are already free —
   `orchestrate/lib/socratizing/` ported at Stage 2, `lenses/socratize/` re-homed
   as annotated byte-copies.
@@ -136,7 +136,8 @@ Deletion criteria, not shipping criteria. Nothing here blocks a learner:
   routing, no governance amendment.
 - **The 272 files unreachable from the mounted component stay untouched** until
   MVP-1 lands. That includes `orchestrate/generator/` (built and tested, zero
-  importers) and `lib/socratizing/` (44 files, zero consumers).
+  importers) and `lib/questioning/socratizing/` (43 tracked files, zero code
+  consumers).
 
 ---
 

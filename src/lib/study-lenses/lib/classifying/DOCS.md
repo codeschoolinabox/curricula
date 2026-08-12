@@ -5,13 +5,13 @@
 ## Why this module exists
 
 The blanks lens needs token classification to decide what is blankable; the quiz
-lens's question generator (`lib/quizzing`) needs the same classification as
-quiz-anchor ground truth. Classification and selection are distinct concerns — a
-walk that rolled probabilities during classification, skipped config-excluded
-tokens, or mutated AST nodes en route could not be shared. This module is the
-pure, exhaustive, selection-free classification both consumers draw from. See
-[`./README.md`](./README.md) for the taxonomy, the public API, and the bounded
-context ("classifying describes; consumers select").
+lens's question generator (`lib/questioning/quizzing`) needs the same
+classification as quiz-anchor ground truth. Classification and selection are
+distinct concerns — a walk that rolled probabilities during classification,
+skipped config-excluded tokens, or mutated AST nodes en route could not be
+shared. This module is the pure, exhaustive, selection-free classification both
+consumers draw from. See [`./README.md`](./README.md) for the taxonomy, the
+public API, and the bounded context ("classifying describes; consumers select").
 
 ## Architectural sketch
 
@@ -175,7 +175,7 @@ flowchart TD
 
 - **Selection.** Probability rolls, content-type filtering, blank generation —
   the blanks lens.
-- **Question generation, grading, grouping.** `lib/quizzing`.
+- **Question generation, grading, grouping.** `lib/questioning/quizzing`.
 - **Scope analysis / identifier usage** (read vs assign, binding resolution) —
   scope-aware consumer work.
 - **Comments.** Not tokens; they travel on the parse's comment channel, not the

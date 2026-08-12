@@ -10,10 +10,10 @@ crosses every scope depth.
 
 Scoping **projects**; it never judges. It tells a consumer that `x` is a `let`
 read three times and written zero times — it never concludes "that should be a
-`const`." That judgment is the consumer's (`lib/socratizing`'s `let-vs-const`
-question, a future usage lens). It folds the read/write classification embody
-already computed into a flat list; it never re-walks the AST or recomputes
-scope.
+`const`." That judgment is the consumer's (`lib/questioning/socratizing`'s
+`let-vs-const` question, a future usage lens). It folds the read/write
+classification embody already computed into a flat list; it never re-walks the
+AST or recomputes scope.
 
 ## Glossary
 
@@ -173,12 +173,13 @@ Behavior:
 
 ## Consumers
 
-- **`lib/socratizing`** — five of its analyzers read `allDeclarations` to ask
-  declaration-level questions: `let-vs-const` and `mixed-declaration-style` (is
-  a `let` ever reassigned?), `unused-variable` (`readCount`, matched by `node`
-  identity), the voice profile, and the voice-level naming questions.
-- **`lib/quizzing`** (a later stage) and future usage-analysis lenses share the
-  same flat declaration view.
+- **`lib/questioning/socratizing`** — five of its analyzers read
+  `allDeclarations` to ask declaration-level questions: `let-vs-const` and
+  `mixed-declaration-style` (is a `let` ever reassigned?), `unused-variable`
+  (`readCount`, matched by `node` identity), the voice profile, and the
+  voice-level naming questions.
+- **`lib/questioning/quizzing`** (a later stage) and future usage-analysis
+  lenses share the same flat declaration view.
 
 Consumers read the counts and the kind; scoping never decides what they mean.
 

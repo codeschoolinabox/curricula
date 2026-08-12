@@ -238,9 +238,9 @@ Behavior:
 - **The blanks lens** — derives blank eligibility by filtering classified tokens
   on the learner's enabled content types (any-match over the category set), then
   applies its own probability roll and placeholder replacement.
-- **`lib/quizzing`** — derives quiz anchors and category/role ground truth for
-  the quiz lens's generated questions ("what kind of element is this?", "what
-  role do these parentheses play?", "click this brace's partner").
+- **`lib/questioning/quizzing`** — derives quiz anchors and category/role ground
+  truth for the quiz lens's generated questions ("what kind of element is
+  this?", "what role do these parentheses play?", "click this brace's partner").
 
 The input asymmetry between classifying and an `Embodiment`-holding consumer is
 deliberate: a full consumer reads scope and analysis surfaces (`facts.entwined`,

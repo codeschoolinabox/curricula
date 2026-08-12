@@ -1,6 +1,7 @@
 // PROVENANCE: micro-vendor of the point-analyzer child-node walk from
 // `src/lib/embody/lib/parse-old/get-child-nodes.ts` (pure-acorn, zero deps).
-// Vendored so `lib/socratizing/` owns its walk without a runtime import into
+// Vendored so `lib/questioning/socratizing/` owns its walk without a runtime
+// import into
 // the standalone `embody` tree. Restructured from the source's imperative
 // push-loop into this leaf's functional idiom (the embody source is
 // eslint-ignored; this dir is linted) — BEHAVIOURALLY identical, with
