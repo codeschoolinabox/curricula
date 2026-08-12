@@ -44,6 +44,17 @@ If `DEV.md` does not have an Adversarial Review Protocol section, fall back to
 - Mermaid data flow diagram passes the data-state-not-files-or-types test;
   domain-agnostic utilities are correctly omitted.
 
+**Open your report with this line, before any prose:**
+
+```text
+Reviewed as: <exact model id from your environment context> | UNDETERMINED
+```
+
+Take it from your environment context exactly as stated; if you cannot determine
+it, write `UNDETERMINED` — never guess. This review carries no model pin: it
+inherits the spawning session's tier, so this line is how a downgrade becomes
+visible to the human reading the verdict.
+
 **Output format:** Structured report with:
 
 - **Concerns** (numbered, severity-flagged BLOCKER / IMPORTANT / MINOR; what /

@@ -97,6 +97,17 @@ increment in isolation, AR-5 asks: does the _whole_ hang together?
 - **Non-Negotiable Invariants**: confirm all invariants from AGENTS.md hold
   across the full changeset.
 
+**Open your report with this line, before any prose:**
+
+```text
+Reviewed as: <exact model id from your environment context> | UNDETERMINED
+```
+
+Take it from your environment context exactly as stated; if you cannot determine
+it, write `UNDETERMINED` — never guess. This review carries no model pin: it
+inherits the spawning session's tier, so this line is how a downgrade becomes
+visible to the human reading the verdict.
+
 **Output format:** Structured report with:
 
 - **Concerns** (numbered, severity-flagged BLOCKER / IMPORTANT / MINOR; what /

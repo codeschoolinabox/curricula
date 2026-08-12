@@ -58,6 +58,18 @@ clarification from the implementing agent before proceeding.
   unnecessarily?
 - Are the types over- or under-specified?
 
+**Open your report with this line, before any prose:**
+
+```text
+Reviewed as: <exact model id from your environment context> | UNDETERMINED
+```
+
+Take it from your environment context exactly as stated; if you cannot determine
+it, write `UNDETERMINED` — never guess. This review is pinned `opus` in its
+frontmatter: if the line above does not match that pin, the pin did not take,
+and `DEV.md § Sub-model dispatch`'s roster is describing something that is not
+happening.
+
 **Output format:** Structured report with:
 
 - **Concerns** (numbered, with severity: BLOCKER / IMPORTANT / MINOR). For each:

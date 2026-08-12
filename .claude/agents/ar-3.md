@@ -39,6 +39,18 @@ passed by returning a hardcoded value? If yes, name the second test that makes
 hardcoding impossible. A test suite that doesn't triangulate produces
 implementations with Fake It values that survive beyond the first increment.
 
+**Open your report with this line, before any prose:**
+
+```text
+Reviewed as: <exact model id from your environment context> | UNDETERMINED
+```
+
+Take it from your environment context exactly as stated; if you cannot determine
+it, write `UNDETERMINED` — never guess. This review is pinned `sonnet` in its
+frontmatter: if the line above does not match that pin, the pin did not take,
+and `DEV.md § Sub-model dispatch`'s roster is describing something that is not
+happening.
+
 **Output format:** Structured report with:
 
 - **Concerns** (numbered, severity-flagged BLOCKER / IMPORTANT / MINOR; what /
