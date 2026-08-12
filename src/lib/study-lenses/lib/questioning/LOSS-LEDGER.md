@@ -9,12 +9,15 @@ omission, merge, split, or reword is enumerated here with its justification.
 Built by a heading-by-heading walk of each source at the transport baseline, not
 from recollection. In-directory placement (rather than the commit-body/plan
 default) follows the stage handoff's explicit mandate (human-validated
-2026-08-11): the ledger rides the same commit as the transported docs, in the
-destination directory. Scope: this stage's transport only — the Stage-3
-quizzing-docs transport owes its own ledger in its own directory. Source paths
-cite the read-only quarry (`src/lib/study-lenses--deprecated-architecture/`) and
-the greenfield open engine at its pre-move path
-(`src/lib/study-lenses/lib/socratizing/`).
+2026-08-11): the ledger rides the campaign's transport commits, homed in the
+region the campaign establishes. **This file is a burn-down** (human ruling
+2026-08-11): rows retire as their points are resolved in discussion or restored
+in content; whoever empties it deletes it. Scope: this campaign's transport
+program — the questioning parent AND the `PEDAGOGY.md` transport add rows here;
+the Stage-3 quizzing-docs transport owes its own ledger in its own directory.
+Source paths cite the read-only quarry
+(`src/lib/study-lenses--deprecated-architecture/`) and the greenfield open
+engine at its pre-move path (`src/lib/study-lenses/lib/socratizing/`).
 
 ## Source: quarry `lib/quizzing/README.md`
 

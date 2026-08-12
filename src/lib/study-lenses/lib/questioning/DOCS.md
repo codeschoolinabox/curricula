@@ -127,9 +127,12 @@ questions by difficulty; the open engine sorts by source offset); and the
 **two-registers-on-one-grid goal** shared by both registers. A fourth, smaller
 carry: the unification of the two carrying field names (`block` open, `cells`
 closed) into one view lived in the retired composition layer and is likewise
-unbuilt. The quarry `lib/question-orchestrator/` tests remain the pinned truth
-until a consuming stage builds an instrument, and landing sites are decided at
-that stage's design review; the transitional record rides the campaign spec
+unbuilt. The landing site is designated: a higher-order questioner inside this
+region — a child that itself implements `Questioner` while consuming other
+questioners (locked decision 7, human rulings 2026-08-11/12; directory name
+parked until its Phase-0 session; the carried defaults remain ratify-or-adjust
+at its design review). The quarry `lib/question-orchestrator/` tests remain the
+pinned truth until it is built; the transitional record rides the campaign spec
 (`.planning-handoffs/socratize-quiz-reenrichment/SPEC.md` § Orchestrator
 collateral) until it retires.
 

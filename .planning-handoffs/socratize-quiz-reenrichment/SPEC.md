@@ -3,13 +3,13 @@ question-register lens campaign (human rulings 2026-08-05/06, inline
 below). Retire a section only when the stage that consumes it lands and its
 own module docs carry the content; retire the file only when Stages 3, 4,
 and 5 have all landed — EXCEPT § Orchestrator collateral, which is
-promotion-only (human ruling 2026-08-10) and retires only into its durable
-home, the carried-unbuilt note in lib/socratizing/DOCS.md; see that
-section's preamble. -->
+promotion-only and retires only into its durable home — promoted 2026-08-11
+to lib/questioning/DOCS.md § Carried collateral, superseding the 2026-08-10
+socratizing placement; see that section's preamble. -->
 <!-- cspell:ignore socratizing socratize quizzing reenrichment stonebraker -->
 <!-- cspell:ignore unbuilt subgraph relitigate PBSI bannered bannering -->
 <!-- cspell:ignore repoint readwrite Behaviour unleveled rebuilder distractor -->
-<!-- cspell:ignore dispositioned blankable narrowings -->
+<!-- cspell:ignore dispositioned blankable narrowings Explorotron PBIS -->
 
 # Question-register lenses — forward canon (re-homed)
 
@@ -45,8 +45,16 @@ spec: `CLAUDE.md → AGENTS[.principal].md → DEV.md`.
 - **`lib/questioning/` is NOT the question-orchestrator revived** (locked
   decision 5): the parent region is a shared DOCUMENTATION + TYPES home
   (Block-Model grid, taxonomies, leveling) — it composes nothing, runs nothing.
-  No `composeQuestions`, no cross-register co-anchoring; the two engines inside
-  it stay independent (locked decision 3 stands untouched).
+  The engines stay independent; the region's composition concern is DESIGNATED
+  to a higher-order questioner (locked decision 7, unbuilt, name parked) — the
+  parent itself still composes nothing (decision 3's scope as revised
+  2026-08-11).
+- **questioner vs engine**: a _questioner_ is anything implementing the parent
+  `Questioner` envelope (decision 6); an _engine_ is the machinery a leaf
+  questioner fronts (socratizing's analyzers, quizzing's generators). A
+  _higher-order questioner_ implements the same envelope while consuming other
+  questioners inside (decision 7). The landed parent glossary's "engine" entries
+  survive under this reading.
 - **Three embody-named trees**: `src/lib/embody/` is the LIVE legacy
   `embody(code) → Snippet` the quarry libs import from (`../../../../embody/…`);
   `src/lib/study-lenses/embody/` is the greenfield Facts embody (the target);
@@ -59,7 +67,8 @@ spec: `CLAUDE.md → AGENTS[.principal].md → DEV.md`.
 ## What is being built
 
 Two independent greenfield **lenses**, each consuming its engine directly — **no
-shared orchestrator**:
+shared orchestrator** (a questioning-internal higher-order questioner is
+designated but unbuilt — locked decision 7):
 
 - **`socratize`** — the **open / Socratic** register: reflective, program-level
   "why is it written this way?" questions a human judges. Consumes
@@ -104,7 +113,10 @@ citations here use test TITLES, not line numbers, for exactly this reason.
    `composeQuestions`, no cross-register co-anchoring. Each lens is a standalone
    greenfield `Lens` consuming its engine directly. What the retirement did NOT
    discard — the difficulty ladder, the coverage instrument, the one-grid goal —
-   is carried by § Orchestrator collateral, ruling R-3.
+   is carried by § Orchestrator collateral, ruling R-3. **Scope revised
+   2026-08-11 (decision 7): the PACKAGE-LEVEL orchestrator stays retired and the
+   lenses still consume their engines directly; a questioning-internal
+   `composing/` sub-lib is designated for the carried collateral.**
 4. **Quiz ports full-fidelity but REALM-FREE** (dropped, not deferred): no
    generators V3 (provenance) + V5 (value-category), no
    `keying/realm-group-key.ts`, no `realm/read-realm-binding.ts`, no
@@ -130,9 +142,68 @@ citations here use test TITLES, not line numbers, for exactly this reason.
    `~/.claude/plans/questioning-parent-region-handoff.md`) drafts the shared
    documentation and executes the socratizing move BEFORE the two engine streams
    proceed. This supersedes Q2's landed placement; the collateral's durable home
-   (the socratizing DOCS note, human ruling 2026-08-10) moves with the file —
-   the questioning-parent stage owns the re-point pass, including the
-   MVP-ROADMAP citation.
+   was PROMOTED to the parent DOCS (human ruling 2026-08-11, superseding both
+   the 2026-08-10 socratizing placement and this sentence's earlier
+   moves-with-the-file wording) — the questioning-parent stage owns the re-point
+   pass, whose named targets are the socratizing DOCS note (reduced to a
+   pointer) and the MVP-ROADMAP durable-home citation.
+6. **`lib/questioning/` is an open family with a shared signature** (human
+   ruling 2026-08-11; admission rule 2026-08-12): the region is a folder of a
+   KIND — questioners — and the parent's docs/types define the kind, never a
+   closed roster. The admission rule: **every child implements `Questioner`** —
+   leaf questioners walk the code themselves; higher-order questioners
+   (decision 7) consume other questioners as their internal strategy; admitting
+   a child that is not a questioner is a ruling, not an edit. The parent
+   `types.ts` carries a `Questioner` envelope (name, pure `applicability(facts)`
+   predicate, a produced-coverage declaration, one ask entry, refusal-as-data)
+   generic over the item type — NO item-type unification at the signature and NO
+   learner-model parameter: questioner config is declarative and serializable;
+   consumers map learner models onto config outside the boundary. Exact fields
+   are the questioning-DDD session's AR-1 material
+   (`~/.claude/plans/questioning-ddd-rewrite-handoff.md`), including whether the
+   envelope is also generic over the facts type so the parent keeps its
+   zero-imports invariant.
+7. **A higher-order questioner is designated** (human rulings 2026-08-11 +
+   2026-08-12, revising decision 3's SCOPE): a questioning-internal child that
+   ITSELF implements `Questioner` while consuming other questioners as its
+   internal strategy — mixing, matching, and aligning both registers' items for
+   a more comprehensive questioning experience. It is the designated landing
+   site for the carried collateral (one-item-model merge incl. the
+   `block`/`cells` unification, difficulty ladder, coverage reporter,
+   co-anchoring provision). **Its directory name is PARKED** (human ruling
+   2026-08-12) — chosen at its own Phase-0 session with a collision check
+   (`orchestrate/lib/composing/` exists; concept-directory basenames are
+   currently unique package-wide). Phase 0 via copy-paste-modify from the quarry
+   orchestrator (`~/.claude/plans/higher-order-questioner-phase0-handoff.md`),
+   AFTER Stage 3; the BUILD is deferred. Designation does NOT ratify the carried
+   defaults (min-not-max, zero-cell-last, ladder-on, post-cap coverage) — its
+   AR-1 ratifies or adjusts each.
+8. **`src/lib/study-lenses/PEDAGOGY.md` is the package pedagogy home** (human
+   ruling 2026-08-11): ALL pedagogy theory — the BLOCK model's own treatment,
+   the 3D space, ATT, SOLO, the 5 layers, expertise reversal, threshold
+   concepts, the Explorotron quadrants, PBSI (canon LETTER-ORDER, human ruling
+   2026-08-12, knowingly overriding pedagogy.md's bolded "PBIS (canonical
+   letter-order; NOT PBSI)" declaration — the typed source of truth `PBSILevel`
+   wins), static/dynamic — transports from the shifting curriculum files into
+   one stable software-side reference; each kind's docs carry only their own
+   interpretation/application (questioning keeps the two-registers thesis).
+   Source SHA in the transport commit body only. Session:
+   `~/.claude/plans/pedagogy-md-transport-handoff.md`.
+9. **Questioners are pure and stateless — assessment is data** (human ruling
+   2026-08-11): engines provide answer keys, pure grading, and propagation edges
+   as data; mastery accumulation, learner models, and session state are consumer
+   intelligence (the embody Core Boundary Principle applied one layer up). The
+   curated bank is UN-bounded from JEJ (it grows toward all JS); the
+   `applicability` predicate replaces boundedness as the serve-this-code test.
+   Lens-side constraints are OUT of this campaign's scope entirely (human ruling
+   2026-08-12, third reiteration): the libraries make no promises about any
+   lens's gate; Q4 and the un-colorized record remain lens-stage material
+   untouched by library decisions.
+10. **Working-record rulings** (human, 2026-08-11): the questioning
+    `LOSS-LEDGER.md` is a BURN-DOWN — rows retire as their points are resolved
+    in discussion or restored in content; whoever empties it deletes it. Docs in
+    this campaign are written for an expert pedagogue AND developer with deep PL
+    knowledge — full helpful prose, clearly navigable, visuals where helpful.
 
 ## Resolved questions (Q1–Q14 — answers are rulings, cite before deviating)
 
@@ -154,35 +225,38 @@ Q1/Q8/Q13/Q14 — all resolved 2026-07-22).
 | Q10 | First move was Stage 1 bottom-up. Executed.                                                                                                                                                                                                                                                                                                                                                                                        |
 | Q11 | Intake housekeeping. Executed 2026-07-22.                                                                                                                                                                                                                                                                                                                                                                                          |
 | Q12 | Realm-removal completeness: confirm at Stage 3 that no register lib beyond quizzing's V3/V5/realm couples to the removed embody realm phase.                                                                                                                                                                                                                                                                                       |
-| Q13 | ~~One shared adapter imported by both engines~~ — superseded in part by R-6: the Stage-2 `lib/scoping` leaf serves socratizing, but its `{let, const}` filter makes it unusable as-is for quizzing (which needs `var`). Quizzing gets its own R-6-constrained shim; its landing site (inside `lib/quizzing/` vs a second `lib/scoping` export) is a Stage-3 AR-1 decision.                                                         |
+| Q13 | ~~One shared adapter imported by both engines~~ — superseded in part by R-6: the Stage-2 `lib/scoping` leaf serves socratizing, but its `{let, const}` filter makes it unusable as-is for quizzing (which needs `var`). Quizzing gets its own R-6-constrained shim; its landing site (inside `lib/questioning/quizzing/` vs a second `lib/scoping` export) is a Stage-3 AR-1 decision.                                             |
 | Q14 | Stage-4/5 lenses are sandbox-verified by reusing the existing lens dev surface (writeme/parsons); the span-pick surface is the open Stage-4 build question.                                                                                                                                                                                                                                                                        |
 
 ## Campaign stages — measured status and remaining scope
 
-Status measured 2026-08-06 [measured: `ls src/lib/study-lenses/lib/` → DOCS.md,
-README.md, classifying, engine, local-llm, loop-guard, scoping, screening,
-socratizing; `ls src/lib/study-lenses/lenses/` → DOCS.md, MIGRATION-PLAYBOOK.md,
-README.md, agent-lenses.concept.md, debug-props, lib, parsons, types.ts,
-writeme].
+Status re-measured 2026-08-12 [measured: `ls src/lib/study-lenses/lib/` →
+README.md, classifying, engine, local-llm, loop-guard, questioning, scoping,
+screening, socratizing; `ls src/lib/study-lenses/lenses/` → DOCS.md,
+MIGRATION-PLAYBOOK.md, README.md, agent-lenses.concept.md, debug-props, lib,
+parsons, types.ts, writeme].
 
-| Stage | Lib              | Greenfield home     | Status       | Remaining scope                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| ----- | ---------------- | ------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1     | `classifying`    | `lib/classifying/`  | **COMPLETE** | — (landed `21f871bd`/`83520c77`/`c935ef59` [measured: `git rev-parse` on each]; public shape frozen per Q8)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| 2     | `socratizing`    | `lib/socratizing/`  | **COMPLETE** | — (engine 361 tests + `lib/scoping` adapter 35 tests [measured: `./node_modules/.bin/vitest run --project unit` per dir, 2026-08-06]; offset flip landed)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| 3     | `quizzing`       | `lib/quizzing/`     | unbuilt      | Realm-free port (decision 4) from quarry `lib/quizzing/`. Port the rest verbatim; quarry tests are the oracle. Scope surface lives in `resolving/read-scope-forest.ts` + `resolving/resolve-binding.ts` (7 scope-forest generators V6/V6b/V7/V8/V10a–c); **the shim is R-6-constrained** (legacy tracked set incl. `var`; see Q13 and [LIBRARY-CONTRACTS.md](./LIBRARY-CONTRACTS.md)). The 3 free generators V1/V2/V4 anchor via the pure in-file AST walk `context/descend-identifiers.ts` — zero scope wiring; port first. Entry rewire `Snippet→Facts` in `generate-quiz`/`build-context`; inline `NodePath` type-only — and note the legacy alias is bare `type NodePath = string` while greenfield embody's `NodePath` is its own dot-delimited type: which format `anchorPath` carries is Stage-3 AR-1 material. Confirm Q12. |
-| 4     | `socratize` lens | `lenses/socratize/` | unbuilt      | The one genuine build — quarry source is documentation-only (quarry `lenses/socratize/`). Build from the annotated DDD copies ([lens-ddd/socratize/](./lens-ddd/socratize/)) applying § Socratize DDD rewrite below. Deliverables: `core.ts` + `index.tsx` + `tests/` + css, mirroring the two-layer `writeme` module shape. Full ZOMBIES TDD. Gate: `applicability = facts.ast.ok`. **Un-colorized per ruling R-4 (§ The un-colorized ruling record).**                                                                                                                                                                                                                                                                                                                                                                            |
-| 5     | `quiz` lens      | `lenses/quiz/`      | unbuilt      | Verbatim port through inc 7 from quarry `lenses/quiz/` (annotated DDD copies: [lens-ddd/quiz/](./lens-ddd/quiz/)). Envelope rewire isolated to `build-quiz.ts` + `index.tsx` + `core.ts` gate/recommend signatures — don't miss `core.ts`. Item-consumer graph untouched. Gate: JEJ `validate` (Q4), not `facts.ast.ok`. Anchors already offset.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Stage | Lib              | Greenfield home             | Status       | Remaining scope                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ----- | ---------------- | --------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1     | `classifying`    | `lib/classifying/`          | **COMPLETE** | — (landed `21f871bd`/`83520c77`/`c935ef59` [measured: `git rev-parse` on each]; public shape frozen per Q8)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| 2     | `socratizing`    | `lib/socratizing/`          | **COMPLETE** | — (engine 361 tests + `lib/scoping` adapter 35 tests [measured: `./node_modules/.bin/vitest run --project unit` per dir, 2026-08-06]; offset flip landed)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| 3     | `quizzing`       | `lib/questioning/quizzing/` | unbuilt      | Realm-free port (decision 4) from quarry `lib/quizzing/`. Port the rest verbatim; quarry tests are the oracle. Scope surface lives in `resolving/read-scope-forest.ts` + `resolving/resolve-binding.ts` (7 scope-forest generators V6/V6b/V7/V8/V10a–c); **the shim is R-6-constrained** (legacy tracked set incl. `var`; see Q13 and [LIBRARY-CONTRACTS.md](./LIBRARY-CONTRACTS.md)). The 3 free generators V1/V2/V4 anchor via the pure in-file AST walk `context/descend-identifiers.ts` — zero scope wiring; port first. Entry rewire `Snippet→Facts` in `generate-quiz`/`build-context`; inline `NodePath` type-only — and note the legacy alias is bare `type NodePath = string` while greenfield embody's `NodePath` is its own dot-delimited type: which format `anchorPath` carries is Stage-3 AR-1 material. Confirm Q12. |
+| 4     | `socratize` lens | `lenses/socratize/`         | unbuilt      | The one genuine build — quarry source is documentation-only (quarry `lenses/socratize/`). Build from the annotated DDD copies ([lens-ddd/socratize/](./lens-ddd/socratize/)) applying § Socratize DDD rewrite below. Deliverables: `core.ts` + `index.tsx` + `tests/` + css, mirroring the two-layer `writeme` module shape. Full ZOMBIES TDD. Gate: `applicability = facts.ast.ok`. **Un-colorized per ruling R-4 (§ The un-colorized ruling record).**                                                                                                                                                                                                                                                                                                                                                                            |
+| 5     | `quiz` lens      | `lenses/quiz/`              | unbuilt      | Verbatim port through inc 7 from quarry `lenses/quiz/` (annotated DDD copies: [lens-ddd/quiz/](./lens-ddd/quiz/)). Envelope rewire isolated to `build-quiz.ts` + `index.tsx` + `core.ts` gate/recommend signatures — don't miss `core.ts`. Item-consumer graph untouched. Gate: JEJ `validate` (Q4), not `facts.ast.ok`. Anchors already offset.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 
-Bottom-up order: **questioning-parent → 3 → 4 → 5** (locked decision 5, human
-ruling 2026-08-11: the shared `lib/questioning/` parent — its rich
-Block-Model/taxonomy/leveling documentation, its shared `types.ts`, and the
-socratizing move — is an UPSTREAM stage both engine streams consume; it runs
-first). The real dependencies after it: Stage 5 consumes Stage 1's `classifying`
-(landed) and Stage 3's `quizzing`; Stage 4 needs only landed Stage-2 outputs
-(wherever socratizing then lives). Each stage runs full Phase-0 DDD → human gate
-→ Phase-1, per the governance files — Phase-0 is **light where the port is
-verbatim** (Stages 3/5, ≈ the classifying relocation) and heavier for the
-questioning-parent doc transport and the Stage-4 build (≈ the engine rebuild).
+Bottom-up order: **questioning-parent (Phase 0 landed; move + re-point land in
+the same stage) → PEDAGOGY.md transport → questioning-DDD rewrite → 3 →
+higher-order-questioner Phase 0 → 4 → 5** (locked decisions 5–9, human rulings
+2026-08-11/12; the three new sessions' handoffs live in
+`~/.claude/plans/{pedagogy-md-transport,questioning-ddd-rewrite,higher-order-questioner-phase0}-handoff.md`
+— ⚠ the stage-3 and stage-4 handoffs predate decisions 6–9; the questioning-DDD
+session refreshes stage-3's before it launches). The real dependencies after it:
+Stage 5 consumes Stage 1's `classifying` (landed) and Stage 3's `quizzing`;
+Stage 4 needs only landed Stage-2 outputs (wherever socratizing then lives).
+Each stage runs full Phase-0 DDD → human gate → Phase-1, per the governance
+files — Phase-0 is **light where the port is verbatim** (Stages 3/5, ≈ the
+classifying relocation) and heavier for the questioning-parent doc transport and
+the Stage-4 build (≈ the engine rebuild).
 
 ## Scope adapter (landed reality, and what Stage 3 still owes)
 
@@ -352,18 +426,19 @@ decision 3); it never ruled on three pedagogical concepts that lived inside it.
 **All three carry forward as spec'd future work — none is discarded** (human
 ruling 2026-08-05/06, multi-select: difficulty ladder, coverage instrument,
 one-grid goal). Status of each: **carried, not built — the landing site is
-decided at its consuming stage's AR-1**, not here. NOTE: none of Stages 3/4/5
-consumes these three concepts, so this section is **promotion-only — it is
-exempt from this file's retirement banner** and retires only into its durable
-home, the carried-unbuilt note in `lib/socratizing/DOCS.md` (human ruling
-2026-08-10). The quarry's pinned truth for all three is its
-`lib/question-orchestrator/` — six frozen test files [measured: `find … -name
-'*.test.*' | wc -l` → 6], protected from deletion by the quarry-retirement
-criteria (**the criteria name ALL question surfaces — quiz lens, quizzing
-engine, AND question-orchestrator; none deletes before its content is ported or
-re-homed** — human ruling 2026-08-05/06; landed 2026-08-11 in
-`MVP-ROADMAP.md § Then — retiring the quarry` [measured: `grep -in
-'question-orchestrator' src/lib/study-lenses/MVP-ROADMAP.md` → the
+DESIGNATED: `lib/questioning/composing/` (locked decision 7, human ruling
+2026-08-11); the carried defaults remain ratify-or-adjust at its AR-1.** NOTE:
+none of Stages 3/4/5 consumes these three concepts, so this section is
+**promotion-only — it is exempt from this file's retirement banner** and retires
+only into its durable home, `lib/questioning/DOCS.md` § Carried collateral
+(human ruling 2026-08-11, superseding the 2026-08-10 socratizing placement). The
+quarry's pinned truth for all three is its `lib/question-orchestrator/` — six
+frozen test files [measured: `find … -name '*.test.*' | wc -l` → 6], protected
+from deletion by the quarry-retirement criteria (**the criteria name ALL
+question surfaces — quiz lens, quizzing engine, AND question-orchestrator; none
+deletes before its content is ported or re-homed** — human ruling 2026-08-05/06;
+landed 2026-08-11 in `MVP-ROADMAP.md § Then — retiring the quarry` [measured:
+`grep -in 'question-orchestrator' src/lib/study-lenses/MVP-ROADMAP.md` → the
 question-register bullet]); read the concept's source there before rebuilding. A
 scope caution common to the two instruments: the quarry justified BOTH as
 irreducibly CROSS-register ("coverage across the Block Model grid is meaningful
@@ -417,8 +492,8 @@ carrier is the recommender/curriculum layer the one-grid bullet names.
   also sat at "Ratify or adjust" in the quarry DOCS § Open questions. The
   greenfield socratizing docs state honestly that the cells enable the audit and
   no instrument reports it; the durable carried-unbuilt note in
-  `lib/socratizing/DOCS.md` (human ruling 2026-08-10, landed) is the carrier of
-  the plan to build it.
+  `lib/questioning/DOCS.md` § Carried collateral (promoted 2026-08-11) is the
+  carrier of the plan to build it.
 - **The "two registers on one grid" pedagogical goal** (quarry
   `lib/question-orchestrator/README.md`, attributing the goal to quizzing's own
   README): a learning environment should place open/Socratic and closed/gradable
