@@ -114,9 +114,10 @@ citations here use test TITLES, not line numbers, for exactly this reason.
    greenfield `Lens` consuming its engine directly. What the retirement did NOT
    discard — the difficulty ladder, the coverage instrument, the one-grid goal —
    is carried by § Orchestrator collateral, ruling R-3. **Scope revised
-   2026-08-11 (decision 7): the PACKAGE-LEVEL orchestrator stays retired and the
-   lenses still consume their engines directly; a questioning-internal
-   `composing/` sub-lib is designated for the carried collateral.**
+   2026-08-11/12 (decision 7): the PACKAGE-LEVEL orchestrator stays retired and
+   the lenses still consume their engines directly; a questioning-internal
+   higher-order questioner (name parked) is designated for the carried
+   collateral.**
 4. **Quiz ports full-fidelity but REALM-FREE** (dropped, not deferred): no
    generators V3 (provenance) + V5 (value-category), no
    `keying/realm-group-key.ts`, no `realm/read-realm-binding.ts`, no
@@ -426,9 +427,10 @@ decision 3); it never ruled on three pedagogical concepts that lived inside it.
 **All three carry forward as spec'd future work — none is discarded** (human
 ruling 2026-08-05/06, multi-select: difficulty ladder, coverage instrument,
 one-grid goal). Status of each: **carried, not built — the landing site is
-DESIGNATED: `lib/questioning/composing/` (locked decision 7, human ruling
-2026-08-11); the carried defaults remain ratify-or-adjust at its AR-1.** NOTE:
-none of Stages 3/4/5 consumes these three concepts, so this section is
+DESIGNATED: the questioning region's higher-order questioner (locked decision 7,
+human rulings 2026-08-11/12; directory name PARKED pending its own session's
+collision check); the carried defaults remain ratify-or-adjust at its AR-1.**
+NOTE: none of Stages 3/4/5 consumes these three concepts, so this section is
 **promotion-only — it is exempt from this file's retirement banner** and retires
 only into its durable home, `lib/questioning/DOCS.md` § Carried collateral
 (human ruling 2026-08-11, superseding the 2026-08-10 socratizing placement). The
