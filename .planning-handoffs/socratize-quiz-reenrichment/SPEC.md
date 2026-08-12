@@ -75,7 +75,7 @@ designated but unbuilt — locked decision 7):
   `lib/questioning/socratizing`.
 - **`quiz`** — the **closed / gradable** register: analytically verifiable "what
   kind of element is this?" questions a machine grades, with mastery. Consumes
-  `lib/quizzing` (+ `lib/classifying`).
+  `lib/questioning/quizzing` (+ `lib/classifying`).
 
 The engines are pure and decoupled from embody (analyzers/generators walk raw
 acorn nodes), so engine work is a **port**, not a rewrite — the source plans

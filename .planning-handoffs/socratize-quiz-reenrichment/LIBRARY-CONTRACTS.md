@@ -3,7 +3,8 @@ deliverable of the human's library-first enrichment license (human ruling
 2026-08-05/06: beyond restoration, author the pre-Stage-3 library-contracts
 spec pinning what only the quarry tests carry). Retire only when Stages 3
 AND 5 have BOTH landed and each stage's contracts are promoted to its own
-module docs (lib/quizzing for the Stage-3 clusters, lenses/quiz for the
+module docs (lib/questioning/quizzing for the Stage-3 clusters, lenses/quiz
+for the
 Stage-5 clusters — each cluster below carries its stage tag). Retiring at
 Stage-3 close would orphan the lens contracts. -->
 <!-- cspell:ignore socratizing socratize quizzing reenrichment unbuilt -->
@@ -23,7 +24,7 @@ tests re-green as-is modulo the `Snippet→Facts` entry/fixture rewire (30 of th
 `grep -l embody` over each tests dir]) and minus the realm excisions named in §
 Reading guide; it tells the executor what each cluster protects so a red test is
 understood, not "fixed". Each cluster carries its stage tag: **[S3]** =
-`lib/quizzing` (Stage 3), **[S5]** = `lenses/quiz` (Stage 5).
+`lib/questioning/quizzing` (Stage 3), **[S5]** = `lenses/quiz` (Stage 5).
 
 Sources: the quarry quiz surfaces (READ-ONLY) —
 `src/lib/study-lenses--deprecated-architecture/lenses/quiz/` (9 test files; one

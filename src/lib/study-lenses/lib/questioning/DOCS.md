@@ -21,10 +21,11 @@ What the retirement kept is the **shared truth**: one `BlockCell` grid
 vocabulary, one anchor coordinate system, the one-grid curriculum commitment,
 and the carried instruments below. What stays retired is the **mechanism**: the
 source registry, the composition entry point, cross-register co-anchoring,
-anchor normalization, and the composition pipeline. The parent is a
-documentation-and-types home for the former and none of the latter — it composes
-nothing and runs nothing (human ruling 2026-08-11, locked decision 5 of the
-question-register campaign).
+anchor normalization, and the composition pipeline — retired at the parent
+level; what survives as concepts is designated to a future child questioner (§
+Carried collateral). The parent is a documentation-and-types home for the former
+and none of the latter — it composes nothing and runs nothing (human ruling
+2026-08-11, locked decision 5 of the question-register campaign).
 
 ## Architectural sketch
 
