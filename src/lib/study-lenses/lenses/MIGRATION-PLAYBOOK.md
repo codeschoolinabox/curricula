@@ -106,6 +106,26 @@ parallel. Stream E lives in a different region (`evaluators/`), so it runs
 alongside Wave 1 with no contention; its real gate is **plumbing (E2)**, not
 code — run E2 first.
 
+⛔ **STREAM E IS SUPERSEDED — human ruling 2026-08-11.** Per item, because the
+three do not share a fate:
+
+- **E1 — superseded.** The evaluator public-API restoration campaign's variables
+  phase owns it (HR-10): the tracer is re-shaped onto the restored kind through
+  that campaign's own Phase 0, not wrapped as-is.
+- **E3 — RE-GATED, owner unassigned.** Not replaced: no campaign's ruled scope
+  contains a lens. Whether the trace-debugging lens is a fidelity target for the
+  rebuilt region is that campaign's P0-V open question, and E3 is blocked on the
+  restored kind either way.
+- **E2 — partly discharged.** Webpack worker-chunk emission is proven live by
+  `src/pages/trace-debugging-smoke.tsx` → the embody variables tracer — but that
+  path imports the DEPRECATED-architecture engine copy, not
+  `study-lenses/lib/engine`. COOP/COEP is configured for the DEV SERVER ONLY
+  (`docusaurus.config.ts` § devServer.headers, which states that production
+  hosting must set them separately); production isolation is still OPEN.
+
+Everything outside § STREAM E stands. The Stream-E clauses in § Coordination
+read (above), § Definition of Done, and § Open questions are void.
+
 **Dispatch discipline (cold-start-verified):** never dispatch a downstream agent
 before its upstream has MERGED. annotate needs 0a landed (its coloring rewrite
 consumes 0a's API); every port needs 0b to prove "reachable"; E3 needs E1
@@ -336,6 +356,11 @@ section.
 
 ## STREAM E — the variables tracer + trace-debugging lens (parallel)
 
+⛔ **SUPERSEDED (human ruling 2026-08-11) — do not dispatch these prompts.** See
+§ Coordination read for the per-item disposition (E1 superseded, E3 re-gated,
+E2 partly discharged). The prompts below are kept as the record of what was
+planned; each carries its own marker.
+
 This is dynamic (`evaluation` phase) and lives in `evaluators/`, so it doesn't
 contend with Wave 1. The tracer is a **thin wrap** (verified), but the
 end-to-end lens is gated by runtime plumbing — **run E2 first**.
@@ -349,6 +374,9 @@ end-to-end lens is gated by runtime plumbing — **run E2 first**.
 - **DoD:** a minimal smoke page runs the engine (`lib/engine`) in a worker under
   the actual production bundler + a cross-origin-isolated dev server, proving
   both.
+
+⛔ **SUPERSEDED — do not dispatch.** E2 is partly discharged; see § Coordination
+read.
 
 > **Agent prompt — E2:** Read `study-lenses/lib/engine/README.md` + `DOCS.md`
 > and the tracer handoff notes. Stand up a minimal smoke page that drives
@@ -405,6 +433,10 @@ end-to-end lens is gated by runtime plumbing — **run E2 first**.
   `lib/engine` (the tier was typecheck-quarantined — expect type fixes). Effort:
   the engine swap is hours; the jej re-source + reconcile is the multi-day part.
 
+⛔ **SUPERSEDED — do not dispatch.** E1 belongs to the evaluator public-API
+restoration campaign's variables phase (HR-10). Dispatching this prompt would
+build into that campaign's region; see § Coordination read.
+
 > **Agent prompt — E1:** Read
 > `study-lenses/evaluators-deprecated/README.md`/`DOCS.md`/`types.ts` (the
 > `Evaluator` contract), `study-lenses/lib/engine/types.ts`, and the porting
@@ -456,6 +488,9 @@ end-to-end lens is gated by runtime plumbing — **run E2 first**.
   evaluator.
 - **Depends on:** E1 (the evaluator) + E2 (plumbing proven).
 
+⛔ **SUPERSEDED — do not dispatch.** E3 is re-gated with no owner; whether the
+lens is a fidelity target is an open P0-V question. See § Coordination read.
+
 > **Agent prompt — E3:** Read the lens contract docs,
 > `evaluators-deprecated/README.md` (the caller protocol: applicability → drive
 > `main` → pull the stream → cancel by unmounting), and the Gen-2 harness
@@ -485,12 +520,15 @@ end-to-end lens is gated by runtime plumbing — **run E2 first**.
 - **Wired into `built-in-lenses.ts` and reachable in the sandbox.**
 - Banned-term grep clean; full AR cycle complete; your DDD→TDD human gate
   honored.
-- Stream E extra: tier suites green **on `lib/engine`**; E2 plumbing proven; the
-  lens renders a real run under cross-origin isolation.
+- Stream E extra (⛔ VOID — Stream E is superseded; see § Coordination read):
+  tier suites green **on `lib/engine`**; E2 plumbing proven; the lens renders a
+  real run under cross-origin isolation.
 
 ## Open questions to settle as you go
 
-- **E1's scope + node-path source (blocks E1 — settle before dispatching).**
+- **E1's scope + node-path source** (⛔ VOID as a dispatch gate — E1 is
+  superseded; the question itself survives as input to the restoration
+  campaign's P0-V, where it is tracked as ScopeAnalysis re-homing).
   `buildScope`, `buildNodePathMap`, `ScopeInfo` and `ScopeAnalysis` have no
   drop-in greenfield twin, but part of the capability is already upstream.
   `EvaluationSpec` hands the evaluator `facts` — including `facts.environment`,
