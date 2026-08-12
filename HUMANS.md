@@ -138,6 +138,25 @@ frontmatter (`model: sonnet`) for any reusable agent definition — the register
 reviewers live in this repo's `.claude/agents/`, not the global
 `~/.claude/agents/`.
 
+**Switching tier mid-session — let the agent reach a clean commit boundary
+first.** Otherwise expect an AR-5 at the switch, which is what
+[DEV.md § AR-5](./DEV.md#ar-5-pre-merge-review) now obliges: AR-2 and AR-5
+inherit your tier, so a downgrade with work still standing leaves that work
+reviewed below the tier that wrote it. Two things the agent cannot do for you
+here. It **cannot detect the switch** — its environment block goes stale at
+exactly that event, so it learns your new tier only when you say so or when an
+unpinned subagent reports one it did not expect; tell it. And a downgrade can
+move the session **off `CLAUDE.md`'s qualifying list**, so a different
+governance file binds it than the one it read at session start — say so, and it
+re-runs the router. An upgrade needs neither: the next review is stronger.
+
+**Reasoning effort is a separate dial from the tier, and it is also yours.**
+Nothing in the roster models it — the dispatch mechanism is the `model:`
+frontmatter key and nothing else — and **whether a spawned subagent inherits
+your effort setting has never been measured here**. Until `harness-probe` is
+extended to report it, treat effort as unmodelled: no rule in this corpus keys
+off it, and none should until there is a measurement to key off.
+
 ---
 
 ## Plan-clutter discipline

@@ -615,10 +615,12 @@ worker a fresh context — this rule governs the orchestrator's own lifetime.
 
 **A handoff carries its own operating instructions**, not just state: which
 model runs the next phase (design tracks the strongest available tier; post-gate
-TDD is proven on a cheaper one), which phase it opens in, which gates the human
-will hold, and the specific things to watch for. A handoff replaces the
-orchestrator, never the workers — same-campaign execution waves keep riding
-fresh worker subagents.
+TDD is proven on a cheaper one — and a downgrade is named together with its
+cost, because `ar-2` and `ar-5` inherit it,
+[DEV.md § Sub-model dispatch](./DEV.md#sub-model-dispatch)), which phase it
+opens in, which gates the human will hold, and the specific things to watch for.
+A handoff replaces the orchestrator, never the workers — same-campaign execution
+waves keep riding fresh worker subagents.
 
 ---
 
