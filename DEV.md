@@ -1179,9 +1179,10 @@ that names the delegate describes the legitimate case. Format and heading name:
 | **`medium`** _(default)_ | **AR-1 · AR-5** — the design gate and the drift read |
 | `light`                  | AR-5 only                                            |
 
-**No value removes AR-5.** Its floor fires at the "Sprint complete — ready to
-push to main" prompt, or at the last commit before a handoff, whichever comes
-first.
+**No value removes AR-5.** When its floor fires is stated once, in
+[§ AR-5: Pre-Merge Review](#ar-5-pre-merge-review)'s **Trigger** line — a second
+copy here would be a second thing to keep in sync, and the first edit to that
+trigger already missed it.
 
 **Ceremony is the human's to set, per increment or per campaign — the agent
 never states it and never lowers it** (human ruling 2026-08-04). This is the
@@ -2148,6 +2149,47 @@ fires at the earliest, cheapest-to-redo gate, and the Phase-0→1 human gate
 follows it. Caveat: under a deliberately cheaper main agent, inherited reviews
 downgrade with the session — pin explicitly if that matters.
 
+**The guarantee above is narrower than it reads.** Inside one session it is
+automatic — the spawning session _is_ the authoring session. Across a boundary
+it survives only because AR-5 also fires _"at the last commit before a handoff,
+whichever comes first"_ ([§ AR-5: Pre-Merge Review](#ar-5-pre-merge-review)),
+and what that buys is **one at-tier AR-5 per stretch of work** — not an at-tier
+_terminal_ one: that review's baseline is the campaign's, recorded at plan
+approval, so after a downgrade the push gate reads the earlier increments below
+the tier that wrote them. Weaken the handoff trigger and even the per-stretch
+coverage goes, silently.
+
+**AR-2 has no equivalent trigger.** Two human-facing defaults keep it near the
+authoring tier and neither is a guarantee: Phase 0 design work is assigned to
+the strongest tier
+([HUMANS.md § Model selection rules](./HUMANS.md#model-selection-rules)), and
+Phase 0 defaults to one session
+([HUMANS.md § Session sizing rules](./HUMANS.md#session-sizing-rules)). Both
+speak to session boundaries; neither speaks to a tier change inside one. A Phase
+0 that crosses a downgrade gets its sketch challenged below the tier that drew
+it, and nothing catches that.
+
+**A mid-session tier downgrade is the same discontinuity as a handoff**, so
+[§ AR-5](#ar-5-pre-merge-review) fires on it — while obliging none of a
+handoff's other artifacts. You cannot detect the switch yourself: the
+environment block goes stale at exactly this event, so you learn it when the
+human says so, or when an unpinned subagent reports a tier you did not expect.
+When you learn it, **re-run the repo-root `CLAUDE.md` router** — a tier change
+can move a session off the qualifying list, and then a different governance file
+binds it than the one it read at session start. An upgrade needs none of this:
+the next review is stronger, not weaker. The human's half — reaching a clean
+boundary before switching — is
+[HUMANS.md § Model selection rules](./HUMANS.md#model-selection-rules).
+
+**A downgrade recommendation is permitted; a silent one is not.** Proposing a
+cheaper session model proposes two cheaper judgment reviews — say so in the same
+breath. No gate is removed, so this is not what [§ ceremony](#ceremony) forbids;
+what drops is the tier the gates run at, and nobody consents to a cost that was
+never named. Every reviewer opens its report with the tier it ran as, so the
+drop is visible even when no one announced it. This repo's handoffs named the
+consequence unprompted before it was a rule
+(`git grep -n "ar-2/ar-5 then inherit"`).
+
 ### AR-1: Design Challenge
 
 **Trigger:** During Phase 0, after the README (0.1) and the twin (0.2), before
@@ -2311,12 +2353,14 @@ used
 ### AR-5: Pre-Merge Review
 
 **Trigger:** After all increments complete, before the final commit and the push
-prompt, **or at the last commit before a handoff, whichever comes first**.
-**Skip:** Only when the human explicitly opts out. The second disjunct AR-1
-through AR-4 carry — "when the declared ceremony level does not include this
-review" — **can never be true here**: [§ ceremony](#ceremony) states that **no
-value removes AR-5**. An agent reading only this section's Trigger and Skip
-lines, which is what
+prompt, **or at the last commit before a handoff, whichever comes first**. **A
+mid-session tier downgrade with unreviewed work standing fires it the same way**
+— see [§ Sub-model dispatch](#sub-model-dispatch) for why, what you can and
+cannot detect, and what else a tier change moves. **Skip:** Only when the human
+explicitly opts out. The second disjunct AR-1 through AR-4 carry — "when the
+declared ceremony level does not include this review" — **can never be true
+here**: [§ ceremony](#ceremony) states that **no value removes AR-5**. An agent
+reading only this section's Trigger and Skip lines, which is what
 [AGENTS.principal.md § Adversarial Review Protocol](./AGENTS.principal.md#adversarial-review-protocol)
 tells it to do, must not find a ceremony-shaped escape hatch on the one review
 that has none.
