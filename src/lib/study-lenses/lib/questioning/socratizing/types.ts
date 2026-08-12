@@ -13,37 +13,15 @@
  * Also defines the internal analyzer function signatures the category files in
  * `analyzers/` implement, and the configuration `analyzeMicroDecisions` consumes.
  * See `./README.md` for the catalog, the registers, and the framework tags.
+ * The BLOCK-model grid types (`BlockCell`, `Level`) are the questioning
+ * parent's — imported from `../types.js`, never re-exported (see
+ * `../DOCS.md` § Decisions).
  */
 
 import type * as acorn from 'acorn';
 
 import type { ScopeUsage } from '../../scoping/types.js';
-
-/**
- * The three dimensions of the BLOCK model (Schulte 2008).
- *
- * - `text-surface`: the written code — syntax, layout, naming
- * - `execution`: what happens at runtime — data flow, state
- * - `purpose`: why the code exists — intent, design rationale
- */
-export type BlockDimension = 'text-surface' | 'execution' | 'purpose';
-
-/**
- * The four levels of the BLOCK model.
- *
- * - `atom`: individual language elements (a single statement, operator, or
- *   identifier)
- * - `block`: a coherent group of statements achieving a sub-task
- * - `relation`: connections between blocks (data / control flow)
- * - `macro`: the overall program
- */
-export type BlockLevel = 'atom' | 'block' | 'relation' | 'macro';
-
-/** A single cell in the BLOCK model matrix. */
-export type BlockCell = {
-	readonly dimension: BlockDimension;
-	readonly level: BlockLevel;
-};
+import type { BlockCell, Level } from '../types.js';
 
 /**
  * The four levels of the PBSI framework — the curriculum's vocabulary for
@@ -111,24 +89,6 @@ export type Feature =
 	| 'functions'
 	| 'userInteraction'
 	| 'reading';
-
-/**
- * The pedagogical level of a question, linearized from the BLOCK model's 12-cell
- * matrix into five named levels matching the curriculum's skill progression. A
- * single question can span multiple levels.
- *
- * - `syntax`: "the code" — text surface at the atom level
- * - `semantics`: "how it works" — execution at atom/block level
- * - `connections`: "relations between parts" — data / control flow
- * - `goals`: "purpose and big picture" — macro-level purpose
- * - `userExperience`: "the user's perspective" — behavior audience
- */
-export type Level =
-	| 'syntax'
-	| 'semantics'
-	| 'connections'
-	| 'goals'
-	| 'userExperience';
 
 /**
  * The register of a Socratic question — how a learning environment implements
