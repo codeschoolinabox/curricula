@@ -217,6 +217,25 @@ worded said "for the strip"; this widens it, which is also what
 `DEV.md § ceremony`'s uniformity rule wants — one level per campaign, applied to
 every increment under it equally.
 
+**HR-8 — silence at the ask means `none`** (human ruling 2026-08-11). If the
+developer does not answer beat 1, the step **proceeds** and records
+`twin-doc: none`. It does not block, and it does not invent a fifth value.
+Rationale: that is exactly today's default, so the near-universal path is
+unchanged and a non-answer owes nothing new; and it keeps HR-3's promise that
+the axis's values are untouched, so the **97** commit bodies already carrying
+one stay readable [measured 2026-08-11:
+`git log --all --format=%B | grep -cE "twin-doc: [a-z]+"` → 97, rising].
+
+> **The accepted cost, recorded so it is not rediscovered as a defect.** Under
+> HR-8 a skipped question and a deliberate "no" are **indistinguishable in the
+> record** — which is the same sameness that disqualified superseded exit (a).
+> The maintainer accepted it knowingly, and the trade is different in one
+> respect worth naming: under (a) the silence was structural and permanent,
+> whereas here it is the fallback on a path where the question was at least
+> **asked**. `DEV.md` § ceremony resolves the analogous case the other way
+> (silence ships `unset`); this rule deliberately diverges from that precedent,
+> so **do not "fix" the divergence** by copying § ceremony's wording across.
+
 ### Where each ruling ends up — a destination per ruling, not one mandate
 
 This brief is **scheduled for deletion by doctrine** [read: `DEV.md` § What goes
@@ -227,11 +246,11 @@ repo-wide at `7c93080c`, so there is no fallback home. A ruling with no named
 destination therefore dies with this file. **They do not all go to the same
 place:**
 
-| Ruling                 | End-state home                                                        | What "moved" looks like                                                                                                                                                                                                                                                         |
-| ---------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **HR-1 + HR-3 + HR-6** | `DEV.md` § Phase 0 (the step-0.2 line), § twin-doc, and § Who decides | **One** dated statement of the reshaped ask — the question, both branches, both value sets, where the answer lands — with HR-1/HR-3/HR-6 as its provenance line. They are one rule with two branches; transcribing them apart is how the "bare yes/no" wording goes over-broad. |
-| **HR-2 + HR-5**        | discharged by the strip's own edits                                   | Durable trace is the surviving rewritten prose in `screening/README.md` plus the closing commit body's loss ledger. Nothing to promote into `DEV.md`.                                                                                                                           |
-| **HR-4 + HR-7**        | commit bodies, campaign-scoped                                        | **Do NOT promote into `DEV.md` as a general rule** — it is this campaign's level, not a new universal. Optionally record the third use against § ceremony's "two campaigns used it" gap.                                                                                        |
+| Ruling                        | End-state home                                                        | What "moved" looks like                                                                                                                                                                                                                                                                                  |
+| ----------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **HR-1 + HR-3 + HR-6 + HR-8** | `DEV.md` § Phase 0 (the step-0.2 line), § twin-doc, and § Who decides | **One** dated statement of the reshaped ask — the question, both branches, both value sets, what silence means, where the answer lands — with HR-1/HR-3/HR-6/HR-8 as its provenance line. They are one rule with two branches; transcribing them apart is how the "bare yes/no" wording goes over-broad. |
+| **HR-2 + HR-5**               | discharged by the strip's own edits                                   | Durable trace is the surviving rewritten prose in `screening/README.md` plus the closing commit body's loss ledger. Nothing to promote into `DEV.md`.                                                                                                                                                    |
+| **HR-4 + HR-7**               | commit bodies, campaign-scoped                                        | **Do NOT promote into `DEV.md` as a general rule** — it is this campaign's level, not a new universal. Optionally record the third use against § ceremony's "two campaigns used it" gap.                                                                                                                 |
 
 **Agent 2's closing commit body enumerates what went where**, which
 [DEV.md § Ruling provenance](../../DEV.md#ruling-provenance) already requires —
@@ -546,9 +565,10 @@ documents, never the history behind them.
    Where each ruling ends up instead of this sentence.** It predates HR-3..HR-7
    and names only two rulings, and it is **wrong about HR-2**, which the table
    marks as discharged by the strip's own edits with nothing to promote into
-   `DEV.md`. Only **HR-1 + HR-3 + HR-6** are promoted. The original sentence:
-   **Moving HR-1 and HR-2 into `DEV.md` is part of agent 2's changeset, not
-   optional cleanup**, and the closing commit body enumerates what went where.
+   `DEV.md`. Only **HR-1 + HR-3 + HR-6 + HR-8** are promoted. The original
+   sentence: **Moving HR-1 and HR-2 into `DEV.md` is part of agent 2's
+   changeset, not optional cleanup**, and the closing commit body enumerates
+   what went where.
 
 ## Coordination and traps
 
