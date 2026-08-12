@@ -16,7 +16,11 @@
 This brief hands off to **two** agents, not one:
 
 1. **The design agent** reads this, takes the open question in § The design
-   question to the maintainer, and **stops**. It edits nothing. Per
+   question to the maintainer, and **stops**. It edits nothing **except this
+   brief**, where it records the rulings — required by
+   [DEV.md § Ruling provenance](../../DEV.md#ruling-provenance)'s
+   record-in-the-same-turn rule, and the reason `15d428db` and its successor
+   exist. It touches no governance surface. Per
    [AGENTS.principal.md § Context Discipline](../../AGENTS.principal.md#context-discipline),
    a design unit surfacing mid-execution goes to a fresh session
    unconditionally.
@@ -95,8 +99,11 @@ a good trigger from either.
    considered the mental model and handed it to the JEJ validator" from "we
    never thought about it", a real distinction with a named failure behind it in
    `spiralearn/frogramming-and-vibetoading/ontology.md` § 4 (_twin ignored_).
-   **If any part survives, it is this one.** Whether it survives is the
-   maintainer's call — ask, do not assume.
+   **If any part survives, it is this one.** Whether it survives was the
+   maintainer's call — **and it was answered: HR-1 says it does not survive.**
+   The ask names no delegate. This reasoning is kept because it is what the
+   recorded objection to HR-1 rests on; it is **not** a live instruction to ask,
+   and re-opening it is exactly what HR-1's objection block forbids.
 2. **A standing design ruling taken in the same conversation** — absence is a
    safer baseline than recommendation, and recommendation is a later layer on
    top of the bare absence information (human ruling 2026-08-06, now a
@@ -113,12 +120,14 @@ reasoning, not as a live choice.
 **HR-1 — step 0.2 becomes an ask** (human ruling 2026-08-11). It is an optional
 stage, discharged by asking rather than by an artifact: the step opens by asking
 the developer whether any twin docs are required, then proceeds or skips on the
-answer. **The ask is a bare yes/no; no delegate is named.** This supersedes
-`DEV.md` § Who decides for `twin-doc` specifically: that value moves from
-agent-**stated** to human-**asked**. It is a fifth exit, not one of (a)–(d) — it
-keeps step 0.2 (so no renumbering, and non-`none` `twin-doc` values still have a
-producing step) while removing the `## Epistemology` block as the discharge
-mechanism, because the recorded answer _is_ the discharge.
+answer. **The ask is a bare yes/no _on the "no" branch_ — no delegate is named**
+(HR-3 adds a second beat on "yes"; do not transcribe "bare yes/no" as the whole
+rule, because it is false on the yes branch). This supersedes `DEV.md` § Who
+decides for `twin-doc` specifically: that value moves from agent-**stated** to
+human-**asked**. It is a fifth exit, not one of (a)–(d) — it keeps step 0.2 (so
+no renumbering, and non-`none` `twin-doc` values still have a producing step)
+while removing the `## Epistemology` block as the discharge mechanism, because
+the recorded answer _is_ the discharge.
 
 > **Objection recorded and overruled.** Agent 1 argued the ask should be
 > two-part — _"required? and if not, who holds the twin instead?"_ — on the
@@ -129,26 +138,104 @@ mechanism, because the recorded answer _is_ the discharge.
 > legitimate case from it. The maintainer chose the bare yes/no with that
 > objection in view. **Recorded as made; agent 2 does not re-litigate it.**
 
-**HR-2 — the convention is deleted; the one live instance survives as prose**
-(human ruling 2026-08-11). The `## Epistemology` convention is removed from
-`DEV.md`, from every recital of it, and from `ar-1.md` / `ar-5.md`.
-`src/lib/study-lenses/lib/screening/README.md` **keeps its content as plain
-prose** under a non-fixed heading — only the fixed `## Epistemology` heading and
-the three-field form go. This resolves § The one live instance's contingency the
-cheap way: the paragraph opening on the bare anaphor "The delegation" keeps its
-antecedent, so **that opening needs no rewrite**.
+**HR-2 — the convention is deleted** (human ruling 2026-08-11). The
+`## Epistemology` convention is removed from `DEV.md`, from every recital of it,
+and from `ar-1.md` / `ar-5.md`.
 
-**Where these rulings live, and why here rather than in `DEV.md`.** Obligation 3
-below says this brief "carries the question, never the ruling", and that the
-answer belongs in `DEV.md` at the section it changes. That still holds as the
-**end state** — but `DEV.md` is governance surface, and editing it _is_ the
-strip: agent 2's scope, under a ceremony level the maintainer has not yet set.
-So the rulings ride the campaign's own durable artifact in the meantime, exactly
-as [DEV.md § Ruling provenance](../../DEV.md#ruling-provenance) provides — _"A
-ruling whose end-state home does not exist yet rides its campaign's own durable
-artifact — a spec, a ledger, a brief — and moves into that document when it is
-written"_. **Agent 2 moves them into `DEV.md`, dated, as part of the strip, and
-its closing commit body enumerates what went where.**
+> **⚠️ HR-2's clause about the one live instance is SUPERSEDED by HR-5.** As
+> first recorded, HR-2 said `screening/README.md` "keeps its content as plain
+> prose" and that the anaphor "needs no rewrite". **HR-5 reverses both.** The
+> superseded wording is preserved here rather than deleted because agent 2 will
+> otherwise read HR-5 as gratuitous.
+
+**HR-3 — on "yes", a second beat asks which reader** (human ruling 2026-08-11).
+HR-1's bare yes/no settles that no _delegate_ is named; it does not say which
+twin doc is owed when the answer is yes. It is asked in two beats: _"Any twin
+docs required?"_ and, only if yes, _"which reader?"_ — the menu branching on
+work kind per HR-6. **`twin-doc` keeps all its values**, so the commit-body
+settings line keeps its vocabulary and the **88 commit bodies** already carrying
+one stay readable [measured 2026-08-11:
+`git log --all --format=%B | grep -cE "twin-doc: [a-z]+"` → 88; 87 `none`, 1
+`machine`. **Re-run it — this count rises with every commit**, and an earlier
+draft of this line said 42, which was a different measurement entirely]. The
+second beat fires only in the rare case; the near-universal path is still one
+question with a one-word answer.
+
+**HR-4 — ceremony is `full`** (human ruling 2026-08-11). Its docs-only gate set
+is named: **AR-1 · AR-2 · AR-5**. AR-3 and AR-4 are **n/a** — they have no
+inputs on a documentation changeset, since AR-3 needs a failing test and AR-4 an
+implementation file. Naming the set explicitly is required rather than optional
+[read: `DEV.md` § ceremony — _"A documentation-only campaign running `full` must
+name its real gate set explicitly rather than assume one."_]. **This set is not
+novel — it is the repo's recorded docs-only precedent, and this campaign is its
+third use** [read: `DEV.md` § ceremony — _"The gate set docs-only work has
+actually used, twice, and may adopt by citing it"_ (human ruling 2026-07-30,
+followed 2026-08-05)]. Citing it is what that sentence invites, and the third
+use is worth recording, because the same section carries a standing gap saying
+the set is _"a precedent, not a ruling. Two campaigns used it."_ The settings
+line is therefore:
+
+```text
+work: software · twin-doc: none · ceremony: full (AR-3, AR-4 n/a) · prospective
+```
+
+**AR-2's input artifact, named so agent 2 does not have to invent one.** The
+recorded precedent fires AR-2 only "where a sketch or structural artifact is
+among the changed files", and this changeset has no `DOCS.md` sketch and no
+`types.ts` — which is what `ar-2.md`'s own Provide-line asks for. The structural
+artifact here is **the rewritten Phase 0 artifact-order block in `DEV.md` §
+Phase 0**, together with `AGENTS.md` invariant 2's recital of the same chain.
+Hand the reviewer those two.
+
+**HR-5 — the whole block goes; only the rationale paragraph survives, and it
+DOES need its opening rewritten** (human ruling 2026-08-11). In
+`src/lib/study-lenses/lib/screening/README.md`, the `## Epistemology` heading
+**and all three fields** are deleted. What survives is the paragraph below it —
+the two-consumers argument that is the module's best statement of why it is
+domain-blind. **That paragraph opens on the bare anaphor "The delegation", whose
+antecedent is the deleted block, so its opening must be rewritten** to state the
+two-different-language-models claim without referring back. This **supersedes**
+HR-2's "keeps its content as plain prose" and its "needs no rewrite", and it
+re-opens § The one live instance's contingency, which HR-2 had closed the cheap
+way. Every deleted field is enumerated in the loss ledger.
+
+**HR-6 — the menu branches on work kind** (human ruling 2026-08-11). The second
+beat's options are not one list: `twin-doc` carries **two** value sets, not one
+[read: `DEV.md` § twin-doc — software work `machine · user · both · none`;
+curriculum work `learner · teacher · both · none`]. So the second beat offers
+**`machine`/`user`/`both` for software work** and **`learner`/`teacher`/`both`
+for curriculum work**. The agent does not ask which kind — kind is derived from
+the path mechanically [read: `DEV.md` § Software work and curriculum work —
+_"The kind is **derived from the path**, mechanically. It is not chosen, argued,
+or declared by preference"_] — so it offers the right menu without a third
+question.
+
+**HR-7 — HR-4 is campaign-wide, not strip-only** (human ruling 2026-08-11).
+`ceremony: full` covers **every** commit in the epistemology-strip campaign,
+including the brief-recording increments that precede the strip. HR-4 as first
+worded said "for the strip"; this widens it, which is also what
+`DEV.md § ceremony`'s uniformity rule wants — one level per campaign, applied to
+every increment under it equally.
+
+### Where each ruling ends up — a destination per ruling, not one mandate
+
+This brief is **scheduled for deletion by doctrine** [read: `DEV.md` § What goes
+in docs vs. plans vs. handoffs — _"Handoffs are transitional scaffolding,
+deleted when their migration completes (git history retains them); they are
+never a durable source of truth"_], and every campaign `AR-LOG.md` was deleted
+repo-wide at `7c93080c`, so there is no fallback home. A ruling with no named
+destination therefore dies with this file. **They do not all go to the same
+place:**
+
+| Ruling                 | End-state home                                                        | What "moved" looks like                                                                                                                                                                                                                                                         |
+| ---------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **HR-1 + HR-3 + HR-6** | `DEV.md` § Phase 0 (the step-0.2 line), § twin-doc, and § Who decides | **One** dated statement of the reshaped ask — the question, both branches, both value sets, where the answer lands — with HR-1/HR-3/HR-6 as its provenance line. They are one rule with two branches; transcribing them apart is how the "bare yes/no" wording goes over-broad. |
+| **HR-2 + HR-5**        | discharged by the strip's own edits                                   | Durable trace is the surviving rewritten prose in `screening/README.md` plus the closing commit body's loss ledger. Nothing to promote into `DEV.md`.                                                                                                                           |
+| **HR-4 + HR-7**        | commit bodies, campaign-scoped                                        | **Do NOT promote into `DEV.md` as a general rule** — it is this campaign's level, not a new universal. Optionally record the third use against § ceremony's "two campaigns used it" gap.                                                                                        |
+
+**Agent 2's closing commit body enumerates what went where**, which
+[DEV.md § Ruling provenance](../../DEV.md#ruling-provenance) already requires —
+_"the campaign's closing commit body enumerates what went where"_.
 
 **One collision agent 2 must not silently absorb.** HR-1 reverses a standing
 sentence [read: `DEV.md` § Who decides, and where the answers are recorded —
@@ -256,12 +343,23 @@ the bare anaphor **"The delegation"**, whose antecedent is the block. Delete the
 block alone and it dangles; delete the whole section and the module loses its
 best statement of why it exists.
 
-**The instruction here is contingent on the design answer** and must not be
-guessed: under (a) or (b) the block goes and this paragraph needs a new home and
-a rewritten opening; under (c) the block is _edited_, not deleted; under (d) it
-may stay untouched. Do not treat "removing the block also removes the
-self-falsifying sentence" as the whole edit — it is true of the sentence and
-false of the file.
+**ANSWERED by HR-5 — and it landed on the expensive branch, not the cheap one.**
+The `## Epistemology` heading **and all three fields** are deleted; the
+paragraph below survives, **and its opening must be rewritten** because "The
+delegation" loses its antecedent. That is the branch this section describes as
+"(a) or (b)": _the block goes and this paragraph needs a new home and a
+rewritten opening_. An earlier ruling (HR-2) had closed this the cheap way and
+HR-5 reversed it — so if you are working from a summary that says the opening
+needs no rewrite, that summary is stale.
+
+The original contingency table is kept below for its reasoning. **It is not a
+live choice** — do not read it as a decision still to be made:
+
+> under (a) or (b) the block goes and this paragraph needs a new home and a
+> rewritten opening; under (c) the block is _edited_, not deleted; under (d) it
+> may stay untouched. Do not treat "removing the block also removes the
+> self-falsifying sentence" as the whole edit — it is true of the sentence and
+> false of the file.
 
 ### OUT of scope — do not sweep
 
@@ -274,12 +372,23 @@ documents, never the history behind them.
 
 ## Obligations the executing agent owes
 
-1. **A loss ledger is mandatory, and this changeset is nothing but removal.**
-   [read: `DEV.md` § Documentation migration discipline — _"an edit that removes
-   content from a `README.md`, `DOCS.md`, or `types.ts` follows the same
-   enumeration"_, and _"a staleness deletion is enumerated in the loss ledger
-   like any other removal"_]. Every removed clause is enumerated in the commit
-   body with its justification. AR-5's Loss lens fires on its absence.
+1. **A loss ledger is mandatory.** [read: `DEV.md` § Documentation migration
+   discipline — _"an edit that removes content from a `README.md`, `DOCS.md`, or
+   `types.ts` follows the same enumeration"_, and _"a staleness deletion is
+   enumerated in the loss ledger like any other removal"_]. Every removed clause
+   is enumerated in the commit body with its justification. AR-5's Loss lens
+   fires on its absence.
+
+   > **⚠️ This obligation used to read "and this changeset is nothing but
+   > removal." That is FALSE under HR-1 and HR-3, and the correction matters
+   > more than the sentence it replaces.** The strip removes the block **and
+   > adds a workflow behavior** — an ask at step 0.2, in two beats, whose answer
+   > is recorded. So agent 2 is writing a new step behavior, not running a
+   > sweep: what is asked, when it fires, where the answer lands, and what "yes"
+   > obligates all have to be _specified_, and that is what AR-1 challenges.
+   > Reading this changeset as subtraction is the single most likely way to get
+   > it wrong.
+
 2. **`HUMANS.md` has a procedure written for exactly this change — use it.**
    [read: `HUMANS.md` § Update triggers — _"a workflow step changing shape —
    renamed, renumbered, merged, reordered, or gaining or losing a gate"_ is a
@@ -309,12 +418,32 @@ documents, never the history behind them.
   unrelated campaign and all six files were clean [measured: `git status
   --short` on them → empty]. **Re-measure before starting**, and prefer one
   commit so the window is small.
-- **⚠️ `.claude/settings.json` carries an uncommitted removal of the
-  `pinned-guard.py` `Edit|Write` hook** — someone else's in-flight change to
-  governance surface, still live [measured 2026-08-06: `git status --short --
-  .claude/settings.json` reports it modified; `git diff` shows the block
-  removed]. A `git commit -a` would silently land a disabled safety hook.
-  **Always commit with an explicit pathspec.** Never edit or revert that file.
+
+  **⚠️ That "all clean" reading is 2026-08-06 and is FALSE as of 2026-08-11.**
+  Three of the eight in-scope files carry foreign in-flight edits right now —
+  `DEV.md`, `.claude/agents/ar-2.md` and `.claude/agents/ar-5.md` [measured
+  2026-08-11: `git status --short --` on all eight]. The edits do **not** touch
+  `Epistemology`, `0.2` or `twin` [measured: `git diff --` on those three,
+  filtered on those tokens → no hits], so there is no content conflict — but
+  agent 2 should not open those files while a peer has them open. **Wait for
+  them to go clean, and re-measure rather than trusting this paragraph**, which
+  has now been wrong once.
+
+- **⚠️ SUPERSEDED 2026-08-11 — the `pinned-guard.py` hook removal is no longer
+  uncommitted; it LANDED.** This bullet used to warn that
+  `.claude/settings.json` carried the removal as someone else's in-flight
+  change. It does not any more: the file is **clean** and the hook is **absent
+  from HEAD**, committed at `90c31797`, a commit titled `checkpoint` [measured
+  2026-08-11: `git status --short -- .claude/settings.json` → empty; `grep -c
+  "pinned-guard" .claude/settings.json` → 0; `git log --oneline -3 --
+  .claude/settings.json`]. **The pathspec discipline still stands for every
+  other reason** (this worktree is shared and peers stage concurrently — agent
+  1's own commit had a foreign file already staged in the index and excluded it
+  by pathspec). But the specific hazard named here is gone, and what replaced it
+  is a standing governance fact worth its own attention: **the hook that made a
+  human sign off before an agent could erase a `PINNED()` test ruling is no
+  longer registered.** Out of this campaign's scope; surfaced because a reader
+  of this bullet would otherwise conclude the opposite.
 - **Edit the two `ar-*.md` files LAST.** Their `Epistemology` mentions sit in
   the YAML frontmatter `description:` fields, which are the live agent-roster
   text. Editing them mid-session does not refresh the roster — an AR spawned
@@ -326,6 +455,48 @@ documents, never the history behind them.
   `### The Epistemology block` heading breaks no cross-file link.
 - **Expect advisory hook output on nearly every edit** — six of the seven
   in-scope files are in the governance-advisory corpus. Non-blocking.
+
+### Findings the design agent measured that this brief did not originally carry
+
+Added 2026-08-11 by agent 1, because they lived only in a session plan file and
+[DEV.md § Ruling provenance](../../DEV.md#ruling-provenance) is explicit that
+`~/.claude/plans/` is not a place a later reader can find anything.
+
+- **An EIGHTH in-scope file this brief never named: `.claude/agents/ar-2.md`**
+  [measured: `grep -c "ar-2"` on this brief's pre-2026-08-11 text → 0]. Its live
+  YAML frontmatter `description` cites _"inside Phase 0 step 0.3"_ and its body
+  cites steps 0.1 and 0.3 [read: `.claude/agents/ar-2.md`, frontmatter and the
+  focus-area bullets]. Under HR-1 nothing renumbers, so it should need no edit —
+  **verify that rather than inherit the assumption**, and note it is governance
+  surface and live roster text like the other two `ar-*.md` files.
+- **`scripts/lib/check-governance/roster.mjs` requires every `### AR-N:` section
+  to open with a `**Trigger:**` line**, and errors if one does not [read: that
+  file — _"section ${section.text} does not open with a **Trigger:** line"_].
+  AR-1's Trigger line is being rewritten; keep the prefix.
+- **`prettier`'s `proseWrap: always` hides mandatory sites from the obvious
+  grep, and this fired live.** `**Falsified if**` is wrapped as
+  `**Falsified\n if**` in `DEV.md`'s AR-5 focus area, so `grep "Falsified if"`
+  misses the highest-consequence site in the repo; `HUMANS.md` says _"three
+  **things**"_, not "three fields", so `grep "three fields"` misses that
+  recital. **Search on opening tokens, never whole phrases.** Agent 1 hit this
+  on its own commit: the `(human ruling 2026-08-11)` marker on HR-1 was reflowed
+  across a line break and vanished from the very grep that was supposed to prove
+  the ruling existed.
+- **AR-5 will review a diff that rewrites AR-5's own contract.** `ar-5.md` and
+  `DEV.md § AR-5` are both in the changeset. Decide knowingly whether the
+  reviewer applies the old contract or the new one, and say which in the prompt.
+- **Two `DEV.md` sites appeared AFTER this brief's 2026-08-06 inventory** — the
+  count moved from 10 to 12 [measured 2026-08-11: `git grep -c "Epistemology" --
+  DEV.md`]:
+  - the **`## Epistemology` block is cited as the model** for a gap `ceremony`
+    has not closed — _"has a **Falsified if** field for exactly this shape;
+    `ceremony` has no counterpart"_, inside § ceremony's recorded-gaps list.
+    Deleting the block **orphans that citation**; rewrite the bullet, do not
+    delete around it.
+  - the **"Phase 0 is new-module establishment work"** scoping was promoted out
+    of `HUMANS.md` into `DEV.md`, and it names the block. Good news for HR-1: it
+    fixes the ask's frequency at **once per new module**, not once per commit,
+    which is what makes the ask cheap.
 
 ## Gates, and what "done" means
 
@@ -345,5 +516,9 @@ teaches the old one. The grep is a necessary check, not a sufficient one.
   dated records and history only — no end-state document should still teach the
   stripped convention
 - Re-read every step-0.2 site from Surface 2 and confirm none dangles
-- Ceremony is the maintainer's to set and is **not yet set** for this work. Ask.
+- Ceremony **is set**: `full`, gate set **AR-1 · AR-2 · AR-5** (AR-3, AR-4 n/a)
+  — HR-4. Do not ask again, and do not lower it. AR-1 challenges the reshaped
+  Phase 0 **design**, which under HR-1/HR-3 is a new workflow behavior and not a
+  sweep; AR-2 challenges the shape the rewritten § Phase 0 states; AR-5 runs the
+  Loss lens over the whole changeset.
 - Commit with an explicit pathspec; this worktree is shared. **Never push.**
