@@ -869,23 +869,23 @@ context.
 fan-out is one where a deterministic script spawns and sequences the workers
 instead of you — the harness's "ultracode" mode. It is not available, and your
 answer when asked for one is no until it is. **This leaves ordinary fan-out
-untouched**: that stays the default above, with the human overriding to
-synchronous. Five things are unmeasured, and the block is what keeps them from
-being discovered in production: whether a script can set its workers' agent type
-to `tdd-worker` at all — without that, nothing carries the pathspec commit form
-into a shared index
+untouched**: that stays your default, on your judgment, with the human
+overriding to synchronous. Five things are unmeasured, and the block is what
+keeps them from being discovered in production: whether a script can set its
+workers' agent type to `tdd-worker` at all — without that, nothing carries the
+pathspec commit form into a shared index
 ([DEV.md § Shared-worktree git mechanics](./DEV.md#shared-worktree-git-mechanics));
 whether a script can deliver the brief `tdd-worker` requires, measured
 foreign-debt baselines included, or every worker reports BLOCKED on arrival;
-whether a script-spawned worker can spawn `ar-3`/`ar-4` itself, and whether that
-contract's pause-and-report fallback works mid-script; whether pathspec commits
-and the `index.lock` retry hold at a script's concurrency, having been sized for
-hand-launched waves; and whether per-agent worktree isolation is usable at all
-under "no branches, commit to main". **`harness-probe` measures none of these
-today** — closing the block needs it _extended_, and the first script-driven
-launch is itself that probe: no real work, human opt-in, scoped to measuring
-what a hand-launched session cannot reach. Nothing mechanical enforces this; the
-guard hooks match command shapes, not spawn modes.
+whether a script-spawned worker can spawn `ar-3`/`ar-4` itself, and whether the
+AR-dispatch fallback's pause-and-resume works mid-script; whether pathspec
+commits and the `index.lock` retry hold at a script's concurrency, having been
+sized for hand-launched waves; and whether per-agent worktree isolation is
+usable at all under "no branches, commit to main". **`harness-probe` measures
+none of these today** — closing the block needs it _extended_, and the first
+script-driven launch is itself that probe: no real work, human opt-in, scoped to
+measuring what a hand-launched session cannot reach. Nothing mechanical enforces
+this; the guard hooks match command shapes, not spawn modes.
 
 **Governance surface (invariant):** `CLAUDE.md`, `.claude/agents/*.md`,
 `.claude/skills/**`, `.claude/hooks/**`, `.claude/settings.json`, `DEV.md`, and

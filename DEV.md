@@ -1299,30 +1299,45 @@ file routed it — this worktree is shared, and concurrent sessions stage into t
 same index. Both `AGENTS.md` and `AGENTS.principal.md` point in; neither
 restates.
 
-- **Concurrent commits share one worktree — commit with a pathspec.**
-  `git add <explicit paths>` → `git diff --staged --name-only` →
-  `git commit -m "…" -- <your paths>`. **The pathspec is the protection, not a
-  clean index.** A peer staging into the same index is normal and is not yours
-  to fix: never unstage their files, and never treat their presence as a reason
-  to stop. Read the staged list to see what you are about to commit and to catch
-  your own over-staging — it is a check on your pathspec, not a precondition on
-  the whole index, because "the staged set is exclusively mine" is not something
-  a shared tree can offer. On an `index.lock` collision, wait briefly and retry.
-  The same discipline is restated once more, in `.claude/agents/tdd-worker.md`'s
-  commit-form paragraph, because a worker's brief cannot assume it read this
-  file; keep the two commands identical when either changes.
+- **Concurrent commits share one worktree — commit with a pathspec.** Stage and
+  commit in ONE shell invocation, so a peer's `git add` cannot land between your
+  add and your commit: `git add <explicit paths>` →
+  `git diff --staged --name-only` → `git commit -m "…" -- <your paths>`. **The
+  pathspec is the protection, not a clean index.** A peer staging into the same
+  index is normal and is not yours to fix: never unstage their files, and never
+  treat their presence as a reason to stop. Read the staged list to see what you
+  are about to commit and to catch your own over-staging — it is a check on your
+  pathspec, not a precondition on the whole index, because "the staged set is
+  exclusively mine" is not something a shared tree can offer. On an `index.lock`
+  collision, wait briefly and retry. **The pathspec protects other files, never
+  another agent's edits to yours** — a file a peer has modified or staged cannot
+  be committed by you without taking their work with it, so leave it and say so.
 - **When a peer's files are staged, `git commit --no-verify` is the right
   call.** The pre-commit hook's lint-staged runs over the whole staged set, not
   your pathspec, so it would rewrite a peer's work as a side effect of your
   commit. Run the per-file checkpoints yourself first — that is what
-  `--no-verify` costs you here, and the Git Policy permits it for exactly this
-  shape. Expect transient stash entries from the hook's stash cycle; never clean
-  them up.
+  `--no-verify` costs you here. It is permitted as a standing allowance by
+  [AGENTS.md § Git: Additive Actions Only](./AGENTS.md#git-additive-actions-only),
+  or [AGENTS.principal.md § Git Policy](./AGENTS.principal.md#git-policy) if
+  that is the file `CLAUDE.md` routed you to — as a repo carrying hook debt,
+  which covers this without naming it. Expect transient stash entries from the
+  hook's stash cycle; never clean them up.
+- **This rule has copies, and only one pair is kept in sync.**
+  `.claude/agents/tdd-worker.md`'s commit-form paragraph is the canonical
+  partner — a worker's brief cannot assume it read this file, so keep the two
+  identical when either changes. Launch briefs under `.planning-handoffs/` and
+  `START-HERE-*.md` carry their own paraphrases and several still teach the
+  retired "staged diff must be exclusively yours" precondition; reconcile on
+  contact rather than trusting them
+  (`git grep -niE "exclusively (yours|mine)"`).
 - **A script-driven fan-out inherits this form only through the worker
   contract.** Workers spawned by a workflow script carry the pathspec discipline
   because they are spawned as `tdd-worker`, not because a script is driving
-  them; a fan-out whose agents are anything else is loose in this index. Both
-  AGENTS files carry the rest of that rule under § Orchestrated delegation.
+  them; a fan-out whose agents are anything else is loose in this index. The
+  rest of that rule is
+  [AGENTS.md § Orchestrated delegation](./AGENTS.md#orchestrated-delegation), or
+  [AGENTS.principal.md § Execution mechanics](./AGENTS.principal.md#execution-mechanics)
+  if that is the file `CLAUDE.md` routed you to.
 - **Honest quality gates in a shared tree.** Capture the repo's foreign-debt
   baselines (typecheck error count and locations; failing test files) before
   starting, and — under fan-out — bake the numbers into every worker brief. The
@@ -2013,10 +2028,15 @@ After all increments are complete, before prompting the human to commit:
 ### Session Handoff
 
 Ending a work session is not three bookkeeping steps. The protocol — RESUMPTION
-POINT contents, the boundary to stop at, the mandatory context-free validation
-pass, and naming the model the next session opens on — is
-[AGENTS.principal.md § Cold-start handoffs](./AGENTS.principal.md#cold-start-handoffs),
-and the `handoff` skill executes it. Neither is restated here; this heading
+POINT contents, the boundary to stop at, and the mandatory context-free
+validation pass — is
+[AGENTS.md § Cold-start handoffs](./AGENTS.md#cold-start-handoffs-prefer-over-riding-compaction),
+or
+[AGENTS.principal.md § Cold-start handoffs](./AGENTS.principal.md#cold-start-handoffs)
+if that is the file `CLAUDE.md` routed you to. **Naming the model the next
+session opens on is a separate obligation**, and lives in
+[AGENTS.principal.md § Handoff agency](./AGENTS.principal.md#handoff-agency--the-agent-owns-the-call);
+the `handoff` skill executes both. None of it is restated here — this heading
 exists so a reader who arrives at it is sent somewhere real rather than shown a
 shorter, older shape of the same thing.
 

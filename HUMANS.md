@@ -368,9 +368,11 @@ Quick reference for the tools you can fire (or that I can fire on your behalf).
   `harness-probe` measures none of them today — the block lifts when the probe
   is _extended_ and run, and the first script-driven launch is that probe.
   Details, and why each precondition matters:
-  [AGENTS.principal.md § Orchestrated delegation](./AGENTS.principal.md#orchestrated-delegation).
-  Whether this mode is even available on your plan is not something this repo
-  can verify — check before spending a session on it.
+  [AGENTS.principal.md § Execution mechanics](./AGENTS.principal.md#execution-mechanics),
+  or [AGENTS.md § Orchestrated delegation](./AGENTS.md#orchestrated-delegation)
+  for the copy an agent off the qualifying list reads. Whether this mode is even
+  available on your plan is not something this repo can verify — check before
+  spending a session on it.
 
 **Remote tools (don't burn 5-hour limit, run in cloud):**
 
@@ -563,9 +565,15 @@ file read). The agent claims confidence; you confirm reality.
 timer under 30 minutes, finish your current commit and stop — starting a new
 increment under that timer means rushing into compaction.
 
-**What the model indicator is and is not telling you.** A subagent showing the
-parent's model is usually **correct**: AR-2 and AR-5 inherit by design, and so
-does anything else with no `model:` line
+**Watch your OWN model indicator; it is your only detector for a tier change.**
+The agent cannot see one — its environment block goes stale at exactly that
+event — so if the statusline changes and you do not say so, nothing in the
+system notices ([§ Model selection rules](#model-selection-rules) has what to
+tell it, and why).
+
+**What a SUBAGENT's indicator is and is not telling you.** A subagent showing
+the parent's model is usually **correct**: AR-2 and AR-5 inherit by design, and
+so does anything else with no `model:` line
 ([DEV.md § Sub-model dispatch](./DEV.md#sub-model-dispatch)). The tell worth
 chasing is the opposite one — a **pinned** reviewer running off its pin (ar-1
 not on opus, ar-3 or ar-4 not on sonnet), which means the pin did not take and
@@ -715,7 +723,7 @@ cheaper one" appears in:
   the other three must not disagree with this one;
 - [AGENTS.principal.md § Handoff agency](./AGENTS.principal.md#handoff-agency--the-agent-owns-the-call),
   in the "operating instructions" clause;
-- [`.claude/skills/handoff/SKILL.md`](./.claude/skills/handoff/SKILL.md) § 4
+- [.claude/skills/handoff/SKILL.md § 4. Hand the swap to the human](./.claude/skills/handoff/SKILL.md#4-hand-the-swap-to-the-human--an-agent-never-hands-itself-off),
   item 1 — the one an agent actually executes from, and therefore where a stale
   copy does the most damage;
 - [DEV.md § Sub-model dispatch](./DEV.md#sub-model-dispatch) — **different in
