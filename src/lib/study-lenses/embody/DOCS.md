@@ -123,6 +123,13 @@ flowchart TD
   consumer follows that key into the source⇄tree binding and reaches the name's
   place, neighbors, and children — one more expression of the shared identity,
   not a second copy of it.
+- **Plain data, nothing callable.** Every published value is plain objects,
+  arrays, and primitives — no methods, no getters, no accessor API (E1).
+- **No `Map`s or `Set`s at the public surface.** Published indexes are `Record`s
+  and published sequences are arrays (E3).
+- **Failures publish as tagged stages.** Every derived fact is one value — `ok`
+  with the stage's value, or a structured `StageCause` — never a flag beside a
+  payload, and never a throw (E7).
 - **Loud versus graceful.** A learner program that does not parse is quiet data;
   a defect in embody's own machinery is loud — an entwine or scope-analysis
   failure raises a development-mode report, and a throwing gate degrades to
@@ -151,6 +158,88 @@ flowchart TD
   honestly frozen; see DEV.md § 13).
 - **Sync and pure throughout.** No I/O, no async, no shared mutable state: the
   same snippet and roster produce the same embodiment.
+
+## Embodiment decisions
+
+Settled decisions on the shape of the embodiment itself — what it publishes,
+what it guarantees, and what it refuses to know (human ruling 2026-08-12). Tests
+pin these behaviors (`tests/index.test.ts`), though none yet cites an entry by
+short id; each entry — **E1** through **E8** — grounds a structural constraint
+above: the constraint states the rule, the entry states why this shape rather
+than its alternatives.
+
+- **E1 — Pure frozen plain data.** Everything the region publishes is plain
+  objects, arrays, and primitives — no methods, no getters, no accessor API.
+  Pedagogy depends on observability: a lens that must call methods to reach
+  state becomes an API user instead of a data reader, and the two kinds of
+  consumer drift apart. Anything a consumer needs to "do" is spelled as
+  iteration and filtering over the data — and plain data is the only surface a
+  deep freeze can honestly guarantee end to end.
+- **E2 — Deep freeze as a hard guarantee.** The graph is built mutably during
+  derivation, so cross-references can be wired, and frozen once at the end —
+  deeply. LLM agents and human collaborators cannot trust each other not to
+  mutate returned data; the freeze is a hard guarantee, not a politeness. It is
+  also what makes sharing cheap: a frozen graph passes by reference to every
+  consumer with no defensive copies.
+- **E3 — No Maps or Sets at the public surface.** `Object.freeze` cannot reach a
+  `Map`'s entries — `.clear()` on a frozen holder silently succeeds — so a
+  published `Map` would be a hole in the hard guarantee; and plain `Record`s and
+  arrays are the ground-truth shapes a learner's own mental model of data reads
+  directly. The rule inverts internally exactly where the need is real: the
+  parse's paren record travels between derivations as a `ReadonlyMap` keyed by
+  node identity (`ParenSpansByNode`) — transient, never frozen, never published.
+- **E4 — Freeze-what-you-own, with ownership as sole reference.** A deep freeze
+  is an irreversible mutation of the objects it reaches, so its reach must equal
+  the region's right to mutate. Attached lens refs are other modules' property —
+  freezing them would rewrite contracts their owners hold; borrowed
+  process-global singletons likewise (acorn's token types, shared by every parse
+  in the process). The inverse also holds: the syntax and scope objects the
+  facts index are frozen although a foreign library allocated them, because the
+  region holds the sole reference — allocated fresh per derivation, held by
+  nobody else. The net effect a consumer can rely on: anything mutable reachable
+  from the embodiment is, by construction, someone else's object carrying that
+  owner's contract.
+- **E5 — Per-instance, no shared state.** No module-level cache, no
+  cross-instance communication: one derivation knows nothing of others. Each
+  settle's embodiment must be a function of the snippet, not of history;
+  concurrent embodiments — the live editor beside a frozen excursion — must not
+  leak into each other; and purity stays checkable without reasoning about cache
+  identity.
+- **E6 — Reference equality within one embodiment — none across.** Within one
+  embodiment, graph identity is stable (the indexing constraint above states
+  it). Across two embodiments no identity holds, even for identical source: each
+  derivation allocates its own graph. So consumers hold references for at most
+  one embodiment's lifetime, and persist paths, never objects, across settles —
+  the stability the path contract exists to provide (**Q2**,
+  [§ Parse decisions](#parse-decisions)).
+- **E7 — The tagged-stage envelope.** Every derived fact is published as one
+  value that is either the stage's value or its structured cause — rather than a
+  payload beside a separate success flag, because a flag apart from its payload
+  leaves their tie a convention the type system cannot check; narrowing `ok` IS
+  the availability proof. A failure is data with shape (`StageCause`: the
+  failing stage, the machine's own words, the place) because the failure grammar
+  renders failures to learners, and an absence renders nothing. The flag model's
+  one virtue — no ceremony to narrow — is kept exactly where narrowing would be
+  empty: the given stages type as success-only, so a branch that cannot occur is
+  never guarded. And the envelope is per-stage, not per-embodiment: a single
+  "which gate failed" discriminant would couple every consumer to the whole
+  chain of derivations, where per-stage envelopes localize failure to the stage
+  that owns it and let phase accessibility be derived mechanically from the
+  stages. One envelope, six stages: a consumer learns one narrowing pattern, and
+  everything under it stays plain, postMessage-safe, honestly freezable.
+- **E8 — Level-blindness.** No level knowledge in the region's data or pipeline,
+  because every consumer above relies on the facts meaning the same thing
+  whatever level is selected. Enforcement-as-mask — the package's "Mask, not
+  filter" rule
+  ([../DOCS.md § Structural constraints](../DOCS.md#structural-constraints)) —
+  is honest only if fit computation never varies with the level; a level field
+  anywhere in the Facts would privilege one registered level's vocabulary inside
+  the shared truth; the no-level study-bench posture
+  ([../README.md § The story](../README.md#the-story)) works only because
+  nothing in the data layer needs a level; and one parse truth requires the
+  parse facts to be consumable by a validator this region does not know exists.
+  A level gate inside the pipeline would make the facts a function of the level
+  — the facts would stop being what is TRUE and start becoming what is ALLOWED.
 
 ## Parse decisions
 

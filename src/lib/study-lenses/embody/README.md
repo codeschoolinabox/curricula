@@ -2,41 +2,29 @@
 
 # embody
 
-The embodiment factory. This region owns one derivation: given a snippet and a
-lens roster, build the frozen **embodiment** — facts + fit + accessibility —
-that every other region renders or consults. The derivation is synchronous and
-pure, and it is **level-blind**: nothing in this region knows what a language
-level is.
+The embodiment factory. Every region that renders or consults the program works
+from one question — _what is true about this program?_ — and this region is
+where the answer is built. Given a snippet (the raw text a learner or host
+brings, plus whether to read it as a script or a module) and a lens roster,
+`embody()` derives the program's facts, works out which lifecycle phases those
+facts leave reachable, attaches the lenses that fit, and freezes the result: the
+**embodiment** — facts + fit + accessibility — that every other region renders
+or consults.
+
+Embody decides nothing about pedagogy. The contract is _accuracy_: the region
+publishes the machine's own reading of the program — the tokenizer's tokens, the
+parser's tree, the analyzer's scopes — and the few truths it derives itself are
+marked as its own, documented at the field that carries them. Lenses choose what
+to teach; embody guarantees that what they teach from is true.
+
+The derivation is synchronous and pure, and it is **level-blind**: nothing in
+this region knows what a language level is. A program that does not parse is not
+an error here, either — a failed derivation is itself a fact, carried as data
+and studied in place, never thrown.
 
 The package [README](../README.md) owns what these words mean; this document
-owns how the embodiment is built and where this region's boundary lies.
-
-## What lives here
-
-```text
-embody/
-  README.md                 this file — the region's domain model + navigation
-  DOCS.md                   the architectural sketch
-  types.ts                  the keystone contracts — Snippet · Facts · Gateable · Embodiment
-  index.ts                  the factory's boundary — embody()
-  derive-facts.ts           the six fact stages, threaded once in dependency order
-  derive-tokens.ts          token stream + set-aside comments
-  derive-ast.ts             the syntax tree + the parse's grouping-paren record
-  derive-entwined.ts        the source⇄tree binding
-  derive-environment.ts     the static scope structure
-  derive-accessibility.ts   the per-phase accessibility map
-  gate-lenses.ts            run each phase-declaring applicability, wrapped
-  attach-lenses.ts          group fitting lenses under their declared phases
-  join-study.ts             join accessibility + attachments into the study layer
-  ecma-version.ts           the one shared numeric language year
-  is-node.ts                the membership rule every generic walk here shares
-  lifecycle-phase-order.ts  the five phases, in specification order
-  to-stage-cause.ts         parser error → structured StageCause
-  sandbox.html              permanent dev page — renders byPath wrappers for inspection
-  tests/                    the region's unit tests
-```
-
-The contract, compactly (the full doc-commented version is
+owns how the embodiment is built and where this region's boundary lies. The
+contract, compactly (the full doc-commented version is
 [`types.ts`](./types.ts)):
 
 ```ts
@@ -46,6 +34,38 @@ type Embodiment = {
 };
 // the factory's boundary: embody(code, { type, lenses }) → frozen Embodiment
 ```
+
+## Why an embodiment
+
+Every settle re-embodies the program — the package
+[README § How a program is studied](../README.md#how-a-program-is-studied) owns
+that story. At each settle a dozen lenses may need the same truths about the
+same program: where its tokens sit, what shape its tree takes, how its names
+resolve. If each lens parsed for itself, one program would have as many readings
+as it has lenses — and two lenses telling the learner subtly different things
+about one program is not a glitch, it is a reason to stop trusting the
+instrument.
+
+So the region derives the truths once, indexes them generously, freezes them
+hard, and shares them by reference:
+
+```mermaid
+flowchart LR
+    snip["a snippet —<br/>any JavaScript, even broken"]
+    emb["one frozen embodiment<br/>(derived once per settle)"]
+    read["🔬 a lens that annotates"]
+    ex["🔬 a lens that exercises"]
+    run["🔬 a lens that runs"]
+    snip -->|"embody, pure"| emb
+    emb -->|"the same facts, by reference"| read
+    emb -->|"the same facts, by reference"| ex
+    emb -->|"the same facts, by reference"| run
+```
+
+The freeze is what makes the sharing safe — no consumer can bend the shared
+truth for the next reader. And "even broken" is load-bearing: a program that
+does not parse still embodies, its failed stages carried as structured causes
+into the phases that own them. Study material, not an error.
 
 ## The boundary
 
@@ -62,38 +82,132 @@ level's validator consumes this region's parse facts, and that consumption
 happens outside embody — one parse truth); evaluator knowledge (evaluation-phase
 lenses import their own evaluators; the embodiment carries no execution
 handles); roster composition and the configuration cascade (the composition
-root's); learner-facing display labels (presentation, owned by the
-orchestrator's UI).
+root's — embody receives the finished roster); learner-facing display labels
+(presentation, owned by the orchestrator's UI).
+
+## Load-bearing principles
+
+Six promises every consumer may build on. Their grounds — why each is this way
+and not otherwise — are recorded by id in
+[DOCS.md § Embodiment decisions](./DOCS.md#embodiment-decisions).
+
+1. **Pure frozen plain data** (E1 · E2 · E3). Everything published is plain
+   objects, arrays, and primitives — deep-frozen, with no methods, no getters,
+   nothing to call; indexes are `Record`s and sequences are arrays — never a
+   `Map` or `Set` at the public surface, which a freeze cannot honestly reach. A
+   lens reads data; it never operates an API.
+2. **Failures are data** (E7). Every derivation failure is a value carrying a
+   structured cause; nothing the embodiment publishes ever throws at a reader.
+3. **One tree, shared by reference** (E6). Within one embodiment, every fact
+   holds the same node objects by reference — identity followed from one fact
+   into another lands on the same node. Across embodiments no identity holds:
+   persist paths, never objects.
+4. **Per-instance, no shared state** (E5). One embodiment knows nothing of
+   another — no module-level cache, no cross-instance communication.
+5. **Level-blind** (E8). Nothing in the region's data or pipeline knows what a
+   language level is; a lens's gate may consult a level privately, and embody
+   neither knows nor cares.
+6. **Freeze-what-you-own** (E4). The freeze reaches everything the embodiment
+   holds the sole reference to — the wrappers and indices it built, and the tree
+   and scope objects the facts index — and stops at objects with other owners:
+   attached lens refs, and the process-global singletons the derivation borrowed
+   (acorn's token types). Anything mutable reachable from the embodiment is, by
+   construction, someone else's object carrying that owner's contract.
 
 ## The build
 
-Five steps, in order; each step's output is the next step's input.
+Five steps, in order; each step's output is the next step's input. The walk is
+synchronous and pure: the same snippet and roster always build the same
+embodiment.
 
 1. **Derive the fact stages.** Each of the six Facts — source, tokens, ast,
-   entwined, environment, type — is derived as a tagged stage: its value, or a
-   structured cause of failure. The tokens stage carries the token stream
-   together with the comments the tokenizer sets aside. A failed stage is data,
-   not an exception; its failure renders inside the lifecycle phase that owns
-   the stage.
+   entwined, environment, type — is published as a tagged stage: its value, or a
+   structured cause of failure. The given stages — source and type — restate the
+   snippet; the derived stages derive once, leaning on one another in dependency
+   order — the tokens spell out the source, the tree resolves the tokens, the
+   binding ties tree back to text, the scope structure reads tree, binding, and
+   snippet type together. A failure never stops the walk: a stage whose input is
+   missing fails carrying the upstream cause, its origin still named inside it.
+   A learner's typo stops nothing — the failed stage is itself a fact, rendered
+   inside the lifecycle phase that owns it. The tokens stage carries the token
+   stream together with the comments the tokenizer sets aside — they emerge from
+   one pass, so they travel as one value.
 2. **Derive phase accessibility.** From the tagged stages, each of the five
-   lifecycle phases gets its accessibility: `source` and `tokens` are always
-   accessible — a tokens-stage failure renders inside the `tokens` phase itself;
-   `ast` is barred only when the tokens stage failed — an ast-stage grammar
-   error leaves the `ast` phase accessible and renders there; `environment` and
-   `evaluation` are barred when tokens, ast, or entwining failed. A barred phase
-   carries the upstream cause with it.
+   lifecycle phases learns whether it can open. The rules are fixed and follow
+   dependency: a phase is never barred by its own stage's failure, only by a
+   failure it depends on. `source` and `tokens` are always accessible — a
+   tokens-stage failure renders inside the `tokens` phase itself, where a
+   learner can study it; `ast` is barred only when the tokens stage failed — a
+   grammar error leaves the `ast` phase accessible and renders there;
+   `environment` and `evaluation` are barred when tokens, ast, or entwining
+   failed. A barred phase carries the upstream cause with it, so what a learner
+   meets at a closed door is the reason it is closed.
 3. **Gate the phase-declaring lenses.** Every roster lens that declares a
-   lifecycle phase has its applicability run over the Facts — wrapped: a gate
-   that throws is treated as not-applicable, with a loud development-mode
-   report. Panel-excluded lenses (no declared phase) are not consulted here;
-   they mount only by explicit request — the orchestrator's concern.
-4. **Attach what fits.** Fitting lenses are attached to their declared phases as
-   refs — the lens objects themselves, never pre-bound wrappers — so
-   configuration can resolve at render time and each module stays owned by where
-   it was defined.
-5. **Freeze.** The embodiment freezes what it built and only what it built: the
-   stages, the accessibility, the per-phase lists. Attached lens refs sit
-   outside the freeze boundary — freeze-what-you-own.
+   lifecycle phase has its applicability run once over the Facts. The call is
+   wrapped: a gate that throws is treated as not-applicable — the learner's
+   surface degrades gracefully — with a loud development-mode report, because a
+   throwing gate is a lens defect, not a program state. Panel-excluded lenses
+   (no declared phase) are not consulted here; they mount only by explicit
+   request — the orchestrator's concern.
+4. **Attach what fits.** Fitting lenses attach to their declared phases as refs
+   — the lens objects themselves, never pre-bound wrappers — so configuration
+   can resolve at render time and each module stays owned by where it was
+   defined.
+5. **Freeze.** The embodiment freezes deeply — the stages, the accessibility
+   map, the per-phase lists, and the tree and scope objects the facts index —
+   and stops where ownership ends (principle 6): attached lens refs and acorn's
+   process-global token types stay outside the freeze boundary, and whatever
+   immutability they promise is their defining modules' contract, not embody's.
+
+## Entwining — the source⇄tree binding
+
+The parser answers what a program says; it does not answer where. A lens almost
+always needs both directions at once: the learner's cursor sits at offset 41 —
+which node is that? this `if` statement — which tokens does it own, and what
+exact slice of the source is it? that name the scope analysis flagged — where
+does it get highlighted? **Entwining** is the region's verb for building the
+answer once: the derivation stage that ties the source text, the token stream,
+and the syntax tree into one navigable graph — the **entwined** binding, the
+fourth fact stage.
+
+The graph has one wrapper per node path — each wrapper holding its node, its
+`path`, its parent, its children, and the tokens and comments whose starts its
+span contains. Ties follow containment, and nothing else; the normative
+statement of the rule lives at the tokens contract in [`types.ts`](./types.ts),
+and the [glossary's entwining entry](#glossary--region-terms) summarizes it.
+Tokens and comments are wrapped once and shared — two wrappers' token sets may
+overlap, but the graph never copies. And the binding's token side is
+first-class: each token wrapper carries its stream neighbors (`previous` /
+`next`) and the innermost node whose span covers its start, so "which token
+comes next" and "which node holds this token" are one property read each —
+comments ride the same geometry.
+
+Four members give the binding its reach — two entry points, one source-side
+index, and one record:
+
+- **`root`** — the wrapped Program node: the canonical entry point for walking
+  the whole graph top-down.
+- **`byPath`** — from a carried identity to its node. A `NodePath` names exactly
+  one node, survives `postMessage`, and is the one identity consumers persist
+  and compare; `byPath` resolves it back in O(1).
+- **`byOffset`** — from a place in the text to the deepest node whose span
+  covers it. Every offset in the source resolves — never a hole — so "what is
+  under the cursor" is one array read.
+- **`parenSpans`** — not an entry point but a record about the source: where the
+  parser recorded grouping parentheses, keyed by the path of the node each pair
+  wrapped. The published tree is ESTree-shaped and carries no parenthesis nodes;
+  this record preserves what the parser saw without bending the tree's shape.
+
+This binding is where mechanics turn into explanation. Why does `1 + 2 * 3` read
+as `1 + (2 * 3)`? The tree already says so — the multiplication sits deeper —
+and the binding ties each node to its exact span, so a lens can show the
+grouping in the learner's own source rather than assert it. The same walk
+answers highlighting, token ownership, and "what did the parser see here" — one
+graph, built once per embodiment, under every lens gesture that points at the
+source.
+
+> The sections above tell the region's story. The sections from here down state
+> its contract precisely — what a contributor checks a change against.
 
 ## Level-blind, by structure
 
@@ -139,6 +253,30 @@ rule:
   validator consumes is `facts.tokens.value` and `facts.ast.value` — never this
   region's stage envelope.
 
+## What lives here
+
+| File                       | Audience       | What it is                                                               |
+| -------------------------- | -------------- | ------------------------------------------------------------------------ |
+| `README.md` (this)         | contributors   | the region's domain model + navigation                                   |
+| [`DOCS.md`](./DOCS.md)     | developers     | the architectural sketch, structural constraints, and decisions          |
+| [`types.ts`](./types.ts)   | every consumer | the keystone contracts — `Snippet` · `Facts` · `Gateable` · `Embodiment` |
+| `index.ts`                 | consumers      | the factory's boundary — `embody()`                                      |
+| `derive-facts.ts`          | implementers   | the six fact stages, threaded once in dependency order                   |
+| `derive-tokens.ts`         | implementers   | token stream + set-aside comments                                        |
+| `derive-ast.ts`            | implementers   | the syntax tree + the parse's grouping-paren record                      |
+| `derive-entwined.ts`       | implementers   | the source⇄tree binding                                                  |
+| `derive-environment.ts`    | implementers   | the static scope structure                                               |
+| `derive-accessibility.ts`  | implementers   | the per-phase accessibility map                                          |
+| `gate-lenses.ts`           | implementers   | run each phase-declaring applicability, wrapped                          |
+| `attach-lenses.ts`         | implementers   | group fitting lenses under their declared phases                         |
+| `join-study.ts`            | implementers   | join accessibility + attachments into the study layer                    |
+| `ecma-version.ts`          | implementers   | the one shared numeric language year                                     |
+| `is-node.ts`               | implementers   | the membership rule every generic walk here shares                       |
+| `lifecycle-phase-order.ts` | implementers   | the five phases, in specification order                                  |
+| `to-stage-cause.ts`        | implementers   | parser error → structured StageCause                                     |
+| `sandbox.html`             | developers     | permanent dev page — renders byPath wrappers for inspection              |
+| `tests/`                   | implementers   | the region's unit tests                                                  |
+
 ## Glossary — region terms
 
 The package glossary owns the shared meanings; these entries add the mechanics
@@ -151,11 +289,13 @@ this region owns.
   each syntax-tree node to its exact place in the source text. Built at
   embodiment time, in this region. A tie is containment: a node ties every token
   and comment whose start lies in its half-open span, through one shared wrapper
-  each; a node the parse reuses at two paths carries one wrapper per path.
-  Beside its node, token, and comment ties, the binding carries the parse's own
-  record of grouping parentheses: for each node the parentheses wrapped, its
-  paren spans, keyed by that node's path — path-keyed data, so it lives here,
-  where paths are born.
+  each; a node the parse reuses at two paths carries one wrapper per path, and a
+  zero-width span ties none. (This entry summarizes the rule; its normative
+  statement, with ordering and edge cases, is at the tokens contract in
+  [`types.ts`](./types.ts).) Beside its node, token, and comment ties, the
+  binding carries the parse's own record of grouping parentheses: for each node
+  the parentheses wrapped, its paren spans, keyed by that node's path —
+  path-keyed data, so it lives here, where paths are born.
 - **grouping parentheses** — the parentheses the parser itself records around an
   expression (`(1 + 2) * 3`), as distinct from the parentheses that belong to a
   call, a parameter list, or a control head. Some are load-bearing — `(a?.b).c`
@@ -207,9 +347,10 @@ this region owns.
   applicability over the Facts, and optionally declared phase(s). No main
   operation — embody never types or loads a component. The lens kind extends
   this contract in its own region.
-- **freeze boundary** — the embodiment freezes the structure it built; attached
-  refs sit outside embody's immutability contract — whatever guarantees they
-  carry are their defining module's business.
+- **freeze boundary** — the deep freeze reaches what the embodiment holds the
+  sole reference to; attached lens refs and borrowed process-global singletons
+  (acorn's token types) sit outside embody's immutability contract — whatever
+  guarantees they carry are their defining modules' business.
 - **Snippet** — the raw program passed in: source text plus snippet type.
 - **Embodiment** — the frozen output: the Facts plus the five phase payloads.
 
