@@ -1,4 +1,4 @@
-<!-- cspell:ignore goldfishbrained socratizing Epistem checkability anaphor -->
+<!-- cspell:ignore goldfishbrained socratizing Epistem Epistemolog checkability anaphor -->
 
 # Brief — strip the `## Epistemology` block convention
 
@@ -237,13 +237,92 @@ place:**
 [DEV.md § Ruling provenance](../../DEV.md#ruling-provenance) already requires —
 _"the campaign's closing commit body enumerates what went where"_.
 
-**One collision agent 2 must not silently absorb.** HR-1 reverses a standing
-sentence [read: `DEV.md` § Who decides, and where the answers are recorded —
-_"The agent states the other three — the kind of work (derived from the path),
-`twin-doc`, and prospective/retrospective — because each has a safe default and
-a question whose answer is almost always the default is friction on a path that
-should have none."_]. That sentence exists specifically to prevent the friction
-HR-1 introduces, so the strip must amend it rather than leave the two in
+## Execution order — read this before the ripple inventory
+
+**The rest of this brief is organized by topic, not by sequence, and the natural
+reading order is the wrong execution order.** A context-free agent handed this
+file planned "sweep all seven files → then run the ARs → commit", which inverts
+AR-1: its trigger is _before_ the contract locks [read: `DEV.md` § AR-1 —
+_"During Phase 0, after the README (0.1) and the twin (0.2), before `types.ts`
+locks the contract"_], and under HR-1 the **design** is the reshaped ask, while
+the other ~25 sites are merely recitals of it. An AR-1 PAUSE arriving after
+propagation means re-editing seven files, four of them governance surface in a
+shared tree.
+
+1. **Re-measure.** § Coordination's procedure, plus the three greps in § Gates.
+2. **Draft the reshaped ask in `DEV.md` only** — the step-0.2 line in § Phase 0,
+   with § twin-doc and § Who decides amended to match. This is the design.
+3. **AR-1.** Hand it the drafted DEV.md sections. Resolve before propagating.
+4. **Propagate to every recital** — `AGENTS.md`, `AGENTS.principal.md`,
+   `HUMANS.md`'s four recitals, and **the four collision sites above**.
+5. **`screening/README.md`** — HR-5's deletion plus the paragraph rewrite.
+6. **`ar-1.md` / `ar-5.md` LAST among content edits** — but see the ordering
+   conflict resolved below.
+7. **AR-2**, then **AR-5** over the whole changeset, then commit by pathspec.
+
+**Three placements this brief previously left to guesswork. These are agent-side
+calls, made here so agent 2 does not re-decide them; overrule if you disagree.**
+
+- **Where the reshaped ask is HOSTED** (it is cited from three sections, but one
+  must hold it): **`DEV.md` § Phase 0, the step-0.2 line.** § twin-doc and § Who
+  decides carry a pointer to it, not a copy. Rationale: it is a step _behavior_,
+  and § Ruling provenance says a ruling lives "in the document the ruling
+  governs" — here, the step it governs. One statement, two pointers, so the
+  three cannot drift apart.
+- **Where HR-5's surviving paragraph GOES:** fold it into
+  `screening/README.md`'s existing **`## Why this module exists`**. Deleting the
+  `## Epistemology` heading would otherwise leave it as untitled prose dangling
+  after a bulleted `## Conventions` list. Rationale: it argues why the module
+  exists domain-blind, which is that heading's subject.
+- **The `ar-*.md`-LAST vs Loss-lens conflict.** § Coordination says edit them
+  last; § Gates says AR-5 runs the Loss lens over the whole changeset. Both
+  cannot hold, and `.claude/agents/ar-5.md` carries one of the largest single
+  deletions in the strip. **Resolution: edit them BEFORE AR-5** so the Loss lens
+  sees those deletions, and **accept the roster mismatch knowingly** — which §
+  Coordination already offers as the alternative. A stale in-session agent
+  description costs one session; a deletion no reviewer saw is permanent.
+
+### ⛔ FOUR collisions, and three are invisible to both prescribed greps
+
+**This is the highest-risk item in the whole changeset, because agent 2's own
+done-check confirms the bug.** HR-1 reverses "the agent states `twin-doc`". That
+sentence is recited in **four** places, and **none of the four contains
+`Epistemology` or `0.2`** [measured 2026-08-11: `grep -rInE "states the other
+three|state three of the four|other three answers" --include="*.md" .` → 4 hits;
+the same list filtered on `Epistemolog|0\.2` → **0**]:
+
+| Site                      | Text                                                                           |
+| ------------------------- | ------------------------------------------------------------------------------ |
+| `DEV.md:1279`             | "The agent states the other three — … `twin-doc`, and prospective/…"           |
+| `DEV.md:1190`             | "An agent may state the other three answers, because their defaults are safe…" |
+| `AGENTS.md:1040`          | "**You state three of the four answers; you never state `ceremony`.**"         |
+| `AGENTS.principal.md:868` | "**You state three of the four answers; you never state `ceremony`.**"         |
+
+Surface 1 does not reach them. Surface 2 does not reach them. So an agent 2 that
+finishes the sweep, runs both greps clean and declares done per § Gates ships
+`AGENTS.md` and `AGENTS.principal.md` still teaching _state it_ while `DEV.md`
+says _ask_. **And `CLAUDE.md` routes each agent to only ONE of those two
+files**, so the contradiction would not even be visible to any single reader —
+half the agent population would silently keep the old behavior, and HR-1 would
+be recorded as executed while being un-executed in practice.
+
+**The third grep that catches them, which § Gates now requires:**
+
+```bash
+grep -rInE "states the other three|state three of the four|other three answers" --include="*.md" .
+```
+
+**Line numbers above will drift** — this file is edited daily. Re-run the grep;
+do not navigate by the numbers.
+
+**The original single-collision note, kept because its citation is the one that
+explains WHY these sites are wrong:** HR-1 reverses a standing sentence [read:
+`DEV.md` § Who decides, and where the answers are recorded — _"The agent states
+the other three — the kind of work (derived from the path), `twin-doc`, and
+prospective/retrospective — because each has a safe default and a question whose
+answer is almost always the default is friction on a path that should have
+none."_]. That sentence exists specifically to prevent the friction HR-1
+introduces, so the strip must amend it rather than leave the two in
 contradiction.
 
 ## The design question — ANSWERED 2026-08-11; kept for its reasoning
@@ -294,11 +373,28 @@ convention was adopted.
 
 ### Surface 1 — the literal string
 
-[measured 2026-08-06: `git grep -c "Epistemology" -- .`] 36 mentions across 10
-files. `git grep` searches tracked files only; an untracked sweep returns the
-same set [measured: `grep -rIl "Epistemology" . --exclude-dir=node_modules
---exclude-dir=.git --exclude-dir=build --exclude-dir=.docusaurus`], so the
-inventory is complete.
+> **⚠️ STALE, AND IT UNDERSTATES THE WORK TWICE OVER. Re-measure; do not size
+> the job from this table.**
+>
+> 1. **The numbers moved.** This says 36 across 10 files; measured 2026-08-11 it
+>    is **50 across 8** [measured: `git grep -c "Epistemology" -- .`], of which
+>    **23 are in this brief itself** — which did not exist when the table was
+>    written. The table's own six rows also sum to 24, not 36, and it omits
+>    `src/lib/study-lenses/lib/screening/README.md`, the one live instance and
+>    the highest-value target (§ The one live instance covers it separately).
+> 2. **A token count is not an edit count.** The prose that must go is mostly
+>    grep-invisible. `.claude/agents/ar-5.md` shows 4 mentions but the real
+>    target is a **13-line focus-area block**, only two lines of which carry the
+>    token — the rest reads _"Confirm the block is present and all three fields
+>    are still filled: **Twin not built**, **Delegated to**, **Falsified
+>    if**…"_. `DEV.md`'s block-format spec is ~15 lines behind 2 token hits; its
+>    AR-5 focus area ~7 lines behind 1. **An agent sizing this as a token sweep
+>    discovers mid-flight that it is rewriting three reviewer contracts.**
+
+`git grep` searches tracked files only; an untracked sweep returns the same set
+[measured: `grep -rIl "Epistemology" . --exclude-dir=node_modules
+--exclude-dir=.git --exclude-dir=build --exclude-dir=.docusaurus`], so the file
+list is complete even where the counts are not.
 
 | File                     | Mentions |
 | ------------------------ | -------- |
@@ -419,15 +515,22 @@ documents, never the history behind them.
   --short` on them → empty]. **Re-measure before starting**, and prefer one
   commit so the window is small.
 
-  **⚠️ That "all clean" reading is 2026-08-06 and is FALSE as of 2026-08-11.**
-  Three of the eight in-scope files carry foreign in-flight edits right now —
-  `DEV.md`, `.claude/agents/ar-2.md` and `.claude/agents/ar-5.md` [measured
-  2026-08-11: `git status --short --` on all eight]. The edits do **not** touch
-  `Epistemology`, `0.2` or `twin` [measured: `git diff --` on those three,
-  filtered on those tokens → no hits], so there is no content conflict — but
-  agent 2 should not open those files while a peer has them open. **Wait for
-  them to go clean, and re-measure rather than trusting this paragraph**, which
-  has now been wrong once.
+  **⚠️ Do NOT wait for a clean tree — it never comes, and an earlier draft of
+  this bullet told you to wait.** This paragraph has named the dirty set twice
+  and been wrong **both** times, in different directions: first `DEV.md` +
+  `ar-2.md` + `ar-5.md`; hours later `AGENTS.md` + `AGENTS.principal.md` +
+  `DEV.md` + `HUMANS.md`, with both `ar-*.md` gone clean [measured 2026-08-11,
+  twice]. **Never navigate by a named dirty set. Run the procedure:**
+  1. `git status --short --` on the eight in-scope files. Whatever it returns is
+     the truth; this paragraph is not.
+  2. For each dirty file, test for a **content** conflict — the only kind that
+     matters:
+     `git diff -- <file> | grep -nE "Epistemolog|0\.2|twin|other three"`.
+  3. **No hits → PROCEED.** A peer editing a different region of the same file
+     is the normal state of this worktree, and the pathspec commit form is what
+     makes that safe. Both times this was measured, the answer was no hits.
+  4. **Hits → serialize that file only**, never the wave. Finish the others,
+     come back, re-measure.
 
 - **⚠️ SUPERSEDED 2026-08-11 — the `pinned-guard.py` hook removal is no longer
   uncommitted; it LANDED.** This bullet used to warn that
@@ -514,11 +617,39 @@ teaches the old one. The grep is a necessary check, not a sufficient one.
   `0 errors, 62 advisories` on 2026-08-06, and the delta was foreign
 - `git grep -c "Epistemology" -- .` afterwards: the remaining hits should be
   dated records and history only — no end-state document should still teach the
-  stripped convention
-- Re-read every step-0.2 site from Surface 2 and confirm none dangles
+  stripped convention. **This grep alone CANNOT pass** while this brief exists:
+  it is tracked and carries 23 mentions of its own [measured 2026-08-11]. See
+  the open question below before treating a non-empty result as failure.
+- **THE THIRD GREP, and the one that catches the silent failure** — the four
+  collision sites carry neither `Epistemology` nor `0.2`, so the two greps above
+  return clean while `AGENTS.md` and `AGENTS.principal.md` still teach the old
+  rule. Run it, and confirm every hit now says the human is asked:
+
+  ```bash
+  grep -rInE "states the other three|state three of the four|other three answers" --include="*.md" .
+  ```
+
+- Re-read every step-0.2 site from Surface 2 and confirm none dangles. **Surface
+  2's `DEV.md` list is short by at least two** — `git grep -n "0\.2" -- DEV.md`
+  returned **8** lines on 2026-08-11 against the six enumerated, and the missing
+  one includes the artifact-order line _"0.1 → 0.2 → 0.3 → the human gate, at
+  every level"_, which carries no `Epistemology` token. Re-derive the list from
+  the grep rather than working the enumeration. (Run the grep scoped to the
+  governance files — unscoped over `*.md` it returns ~27 files, mostly
+  `0.1 + 0.2 !== 0.3` float examples and a DOI.)
+
 - Ceremony **is set**: `full`, gate set **AR-1 · AR-2 · AR-5** (AR-3, AR-4 n/a)
   — HR-4. Do not ask again, and do not lower it. AR-1 challenges the reshaped
   Phase 0 **design**, which under HR-1/HR-3 is a new workflow behavior and not a
   sweep; AR-2 challenges the shape the rewritten § Phase 0 states; AR-5 runs the
   Loss lens over the whole changeset.
 - Commit with an explicit pathspec; this worktree is shared. **Never push.**
+
+**⛔ OPEN — the maintainer's call, and agent 2 must not decide it alone: is this
+brief DELETED at campaign close?** `DEV.md` § What goes in docs vs. plans vs.
+handoffs says handoffs are "deleted when their migration completes", and the
+`Epistemology` gate above cannot pass while this file lives. But deleting it
+destroys the campaign's only record of the rulings and the recorded objection —
+and per the disposition table, HR-4 + HR-7 have **no** `DEV.md` destination, so
+they would survive only in commit bodies. **Ask before deleting.** If the answer
+is delete, the loss ledger obligation covers the whole file.
