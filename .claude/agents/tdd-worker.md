@@ -39,10 +39,15 @@ reviewer's input paths — the orchestrator dispatches the review and resumes yo
 with the verdict.
 
 **Commit form, verbatim** (the worktree is shared with peer sessions):
-`git add <your explicit paths>` → verify `git diff --cached --name-only` in a
-SEPARATE call (the staged set must be exclusively yours) →
-`git commit -m "..." -- <the same paths>`. Never push, never branch, never
-amend. Announce each commit as it lands (full SHA + message).
+`git add <your explicit paths>` → `git diff --staged --name-only` →
+`git commit -m "..." -- <the same paths>`. **The pathspec is the protection, not
+a clean index** — a peer's files staged alongside yours are normal, are not
+yours to unstage, and are no reason to stop; read the staged list to check your
+own pathspec, not the whole index. If a peer's files are staged, commit with
+`--no-verify` and run the per-file checkpoints yourself, because lint-staged
+would rewrite their work. Never push, never branch, never amend. Announce each
+commit as it lands (full SHA + message). Canonical copy:
+`DEV.md § Shared-worktree git mechanics` — keep the two identical.
 
 **Quality bar** (honest gates in a shared tree): your own directory's test run
 fully green — show the vitest summary lines verbatim — and zero NEW failures

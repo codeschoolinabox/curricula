@@ -1299,13 +1299,25 @@ file routed it — this worktree is shared, and concurrent sessions stage into t
 same index. Both `AGENTS.md` and `AGENTS.principal.md` point in; neither
 restates.
 
-- **Concurrent commits share one worktree — commit with a pathspec.** Stage and
-  commit in ONE shell invocation: `git add <explicit paths>` →
-  `git diff --staged --stat` (the staged diff must be exclusively yours) →
-  `git commit -m "…" -- <your paths>`. The pathspec keeps a peer's
-  concurrently-staged files out of your commit. On an `index.lock` collision,
-  wait briefly and retry. The pre-commit hook's lint-staged stash cycle runs per
-  commit — expect transient stash entries, never clean them up.
+- **Concurrent commits share one worktree — commit with a pathspec.**
+  `git add <explicit paths>` → `git diff --staged --name-only` →
+  `git commit -m "…" -- <your paths>`. **The pathspec is the protection, not a
+  clean index.** A peer staging into the same index is normal and is not yours
+  to fix: never unstage their files, and never treat their presence as a reason
+  to stop. Read the staged list to see what you are about to commit and to catch
+  your own over-staging — it is a check on your pathspec, not a precondition on
+  the whole index, because "the staged set is exclusively mine" is not something
+  a shared tree can offer. On an `index.lock` collision, wait briefly and retry.
+  The same discipline is restated once more, in `.claude/agents/tdd-worker.md`'s
+  commit-form paragraph, because a worker's brief cannot assume it read this
+  file; keep the two commands identical when either changes.
+- **When a peer's files are staged, `git commit --no-verify` is the right
+  call.** The pre-commit hook's lint-staged runs over the whole staged set, not
+  your pathspec, so it would rewrite a peer's work as a side effect of your
+  commit. Run the per-file checkpoints yourself first — that is what
+  `--no-verify` costs you here, and the Git Policy permits it for exactly this
+  shape. Expect transient stash entries from the hook's stash cycle; never clean
+  them up.
 - **A script-driven fan-out inherits this form only through the worker
   contract.** Workers spawned by a workflow script carry the pathspec discipline
   because they are spawned as `tdd-worker`, not because a script is driving
@@ -2000,11 +2012,13 @@ After all increments are complete, before prompting the human to commit:
 
 ### Session Handoff
 
-Before ending a work session:
-
-1. Update plan file with current state, what's done, what's left
-2. Commit all completed increments
-3. Note any blockers or open questions
+Ending a work session is not three bookkeeping steps. The protocol — RESUMPTION
+POINT contents, the boundary to stop at, the mandatory context-free validation
+pass, and naming the model the next session opens on — is
+[AGENTS.principal.md § Cold-start handoffs](./AGENTS.principal.md#cold-start-handoffs),
+and the `handoff` skill executes it. Neither is restated here; this heading
+exists so a reader who arrives at it is sent somewhere real rather than shown a
+shorter, older shape of the same thing.
 
 ### Atomic Commits
 

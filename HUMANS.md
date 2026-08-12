@@ -1,4 +1,4 @@
-<!-- cspell:ignore ultracode -->
+<!-- cspell:ignore ultracode ultrareview -->
 
 # HUMANS.md — Operating Manual for the Human in the Loop
 
@@ -377,10 +377,14 @@ Quick reference for the tools you can fire (or that I can fire on your behalf).
 - **`/schedule`** — cron remote agents. Useful for nightly doc audits, scheduled
   branch reviews, or "remind me to check X tomorrow." Runs against committed
   state only — no in-flight work visibility.
-- **`/ultrareview`** — multi-agent cloud review of current branch or PR.
-  _Currently outside your subscription tier._ If you upgrade, this could replace
-  AR-5 entirely (commit final increment → fire `/ultrareview` → walk away →
-  resume next session reading the report).
+- **`/code-review ultra`** — multi-agent cloud review of the current branch, or
+  of a GitHub PR with `/code-review ultra <PR#>`. `/ultrareview` is a deprecated
+  alias for the same command. **Available to you, and billed.** The no-argument
+  form bundles the local branch and needs no GitHub remote, but it does need a
+  git repository. **You fire it; the agent cannot** — it is user-triggered, so
+  an agent that offers to run one is offering something it has no way to do.
+  Workable as an AR-5 substitute if you want one: commit the final increment →
+  fire it → walk away → read the report next session.
 
 **Configuration (skills + agents):**
 
@@ -555,11 +559,19 @@ you and you can't tell who's right: ask for the agent's reasoning chain in
 writing, then verify a specific claim with a single command (test run, grep,
 file read). The agent claims confidence; you confirm reality.
 
-**Statusline thresholds.** Stop at ~75% context, not 80%. Watch for the
-Sonnet/Opus indicator switching unexpectedly (subagents inheriting the parent
-model when they shouldn't). If you see a 5-hour timer under 30 minutes, finish
-your current commit and stop — starting a new increment under that timer means
-rushing into compaction.
+**Statusline thresholds.** Stop at ~75% context, not 80%. If you see a 5-hour
+timer under 30 minutes, finish your current commit and stop — starting a new
+increment under that timer means rushing into compaction.
+
+**What the model indicator is and is not telling you.** A subagent showing the
+parent's model is usually **correct**: AR-2 and AR-5 inherit by design, and so
+does anything else with no `model:` line
+([DEV.md § Sub-model dispatch](./DEV.md#sub-model-dispatch)). The tell worth
+chasing is the opposite one — a **pinned** reviewer running off its pin (ar-1
+not on opus, ar-3 or ar-4 not on sonnet), which means the pin did not take and
+the roster is describing something that is not happening. Each reviewer now
+opens its report with the tier it ran as, so you can read that off the report
+instead of the statusline.
 
 **VSCode explorer suddenly empty + agent reporting EPERM in Documents.** That is
 a macOS TCC revocation, not data loss (metadata still stats; files are intact).
@@ -637,9 +649,12 @@ Some things are yours to do. Don't outsource these:
 - **Pruning plan-file clutter.** The agent generates the clutter; you prune it.
   The agent's pruning bias is to keep "for context" — yours should be to keep
   only what's live.
-- **Deciding whether to upgrade subscription tiers.** `/ultrareview` is outside
-  your tier today. The agent can describe what it would do for you; it can't
-  decide whether it's worth the cost.
+- **Deciding what a billed run is worth.** `/code-review ultra` is available and
+  billed, and firing it is yours alone — the agent cannot trigger one
+  ([§ Tool inventory](#tool-inventory)). It can describe what the run would
+  cover; it cannot decide whether this changeset is worth the spend, and under
+  [DEV.md § Sub-model dispatch](./DEV.md#sub-model-dispatch) it may name the
+  cost but never argue you into fewer gates.
 - **Memory file curation.** The agent writes memory entries; you periodically
   review them for staleness. Memories about file paths, function names, or
   architectural decisions decay as the codebase evolves. Prune annually.
