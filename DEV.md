@@ -1306,6 +1306,11 @@ restates.
   concurrently-staged files out of your commit. On an `index.lock` collision,
   wait briefly and retry. The pre-commit hook's lint-staged stash cycle runs per
   commit — expect transient stash entries, never clean them up.
+- **A script-driven fan-out inherits this form only through the worker
+  contract.** Workers spawned by a workflow script carry the pathspec discipline
+  because they are spawned as `tdd-worker`, not because a script is driving
+  them; a fan-out whose agents are anything else is loose in this index. Both
+  AGENTS files carry the rest of that rule under § Orchestrated delegation.
 - **Honest quality gates in a shared tree.** Capture the repo's foreign-debt
   baselines (typecheck error count and locations; failing test files) before
   starting, and — under fan-out — bake the numbers into every worker brief. The
@@ -2190,6 +2195,19 @@ drop is visible even when no one announced it. This repo's handoffs named the
 consequence unprompted before it was a rule
 (`git grep -n "ar-2/ar-5 then inherit"`).
 
+**The line under all of it: you may state anything whose worst case is more
+expense, and never anything whose worst case is fewer gates.** That is why the
+session's model is yours to name and `ceremony` is not — a wrong tier costs
+money, a wrong level costs a gate that never fired. Naming a model is therefore
+a resource call, required at a handoff (`.claude/skills/handoff/SKILL.md`
+step 4) and permitted any time. What stays forbidden is the route, not the
+destination: **you never reason from _"this increment is mechanical"_ to a
+cheaper anything**, because that classification is the move
+[§ ceremony](#ceremony) forbids, whatever it is then used to justify. Reasoning
+effort is the human's too, and is deliberately not covered by any of this — it
+is not modeled here, and
+[HUMANS.md § Model selection rules](./HUMANS.md#model-selection-rules) says why.
+
 ### AR-1: Design Challenge
 
 **Trigger:** During Phase 0, after the README (0.1) and the twin (0.2), before
@@ -2354,9 +2372,9 @@ used
 
 **Trigger:** After all increments complete, before the final commit and the push
 prompt, **or at the last commit before a handoff, whichever comes first**. **A
-mid-session tier downgrade with unreviewed work standing fires it the same way**
-— see [§ Sub-model dispatch](#sub-model-dispatch) for why, what you can and
-cannot detect, and what else a tier change moves. **Skip:** Only when the human
+mid-session tier downgrade with work not yet reviewed fires it the same way** —
+see [§ Sub-model dispatch](#sub-model-dispatch) for why, what you can and cannot
+detect, and what else a tier change moves. **Skip:** Only when the human
 explicitly opts out. The second disjunct AR-1 through AR-4 carry — "when the
 declared ceremony level does not include this review" — **can never be true
 here**: [§ ceremony](#ceremony) states that **no value removes AR-5**. An agent

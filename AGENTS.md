@@ -1,3 +1,5 @@
+<!-- cspell:ignore ultracode -->
+
 # AI Agent Context
 
 This file provides specific context for AI assistants working with this
@@ -863,6 +865,28 @@ points, ending in the human's last-mile instructions; the `btw` skill answers
 side-questions in a subagent so research never floods the orchestrator's
 context.
 
+**Script-driven fan-out is blocked pending measurement.** A _script-driven_
+fan-out is one where a deterministic script spawns and sequences the workers
+instead of you — the harness's "ultracode" mode. It is not available, and your
+answer when asked for one is no until it is. **This leaves ordinary fan-out
+untouched**: that stays the default above, with the human overriding to
+synchronous. Five things are unmeasured, and the block is what keeps them from
+being discovered in production: whether a script can set its workers' agent type
+to `tdd-worker` at all — without that, nothing carries the pathspec commit form
+into a shared index
+([DEV.md § Shared-worktree git mechanics](./DEV.md#shared-worktree-git-mechanics));
+whether a script can deliver the brief `tdd-worker` requires, measured
+foreign-debt baselines included, or every worker reports BLOCKED on arrival;
+whether a script-spawned worker can spawn `ar-3`/`ar-4` itself, and whether that
+contract's pause-and-report fallback works mid-script; whether pathspec commits
+and the `index.lock` retry hold at a script's concurrency, having been sized for
+hand-launched waves; and whether per-agent worktree isolation is usable at all
+under "no branches, commit to main". **`harness-probe` measures none of these
+today** — closing the block needs it _extended_, and the first script-driven
+launch is itself that probe: no real work, human opt-in, scoped to measuring
+what a hand-launched session cannot reach. Nothing mechanical enforces this; the
+guard hooks match command shapes, not spawn modes.
+
 **Governance surface (invariant):** `CLAUDE.md`, `.claude/agents/*.md`,
 `.claude/skills/**`, `.claude/hooks/**`, `.claude/settings.json`, `DEV.md`, and
 `AGENTS*.md` are governance surface — agents never edit them without explicit
@@ -900,6 +924,12 @@ Project-specific reinforcements that always apply when working in this codebase:
   are; the tag says what you are sure _from_ — and the failures this repo has
   actually shipped were confident, not uncertain. Full rule and the audit
   command: [DEV.md § Sourced claims](./DEV.md#sourced-claims).
+- **You may say anything whose worst case is more expense. You may never say
+  anything whose worst case is fewer gates.** Naming a model is a resource call
+  and is yours to make; `ceremony` is not. Full rule — including what a
+  downgrade must name, and why "this increment is mechanical" is a banned route
+  rather than a banned conclusion:
+  [DEV.md § Sub-model dispatch](./DEV.md#sub-model-dispatch).
 
 Certainty quantification is mandatory in: AR verdict reporting, plan-mode
 proposals, commit-message proposals, and any technical claim about whether

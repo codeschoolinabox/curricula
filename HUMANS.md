@@ -1,3 +1,5 @@
+<!-- cspell:ignore ultracode -->
+
 # HUMANS.md — Operating Manual for the Human in the Loop
 
 > **Audience: you, the human collaborator.** This file is your protocol; the
@@ -111,7 +113,9 @@ quality cliff is small or absent.
 
 - AR-3 (Test Strategy Challenge) — implementation correctness
 - AR-4 (Implementation Audit) — implementation correctness
-- TDD increment work where the path is clear
+- Post-gate TDD increment work (the phase boundary, not a judgment about how
+  clear the path looks — that judgment is the self-classification
+  [DEV.md § ceremony](./DEV.md#ceremony) distrusts)
 - Lint / format cleanup
 - Single-file fixes
 - Routine doc edits inside an established structure
@@ -154,7 +158,7 @@ re-runs the router. An upgrade needs neither: the next review is stronger.
 Nothing in the roster models it — the dispatch mechanism is the `model:`
 frontmatter key and nothing else — and **whether a spawned subagent inherits
 your effort setting has never been measured here**. Until `harness-probe` is
-extended to report it, treat effort as unmodelled: no rule in this corpus keys
+extended to report it, treat effort as not modeled: no rule in this corpus keys
 off it, and none should until there is a measurement to key off.
 
 ---
@@ -302,6 +306,12 @@ considered choice:
   refactor design). Agent skips test-writing and code-output expectations.
 - **"explore only, no edits"** — research session. Agent reads and reports; must
   not produce code changes.
+- **"script fan-out, my call"** — authorize a script-driven fan-out, which is
+  otherwise blocked pending measurement ([§ Tool inventory](#tool-inventory)).
+  The first such launch is a probe run — no real work — because two of its five
+  unmeasured preconditions can only be measured from inside the mode. This
+  phrase does not lift the block; it authorizes the run that produces the
+  measurement that lifts it.
 
 If you find yourself needing an override phrase that isn't here, it's worth
 adding to this file rather than improvising — the agent doesn't recognize ad-hoc
@@ -351,6 +361,16 @@ Quick reference for the tools you can fire (or that I can fire on your behalf).
   ([DEV.md § Sub-model dispatch](./DEV.md#sub-model-dispatch)). AR-1/3/4 pin
   opus/sonnet/sonnet via their agent definitions; AR-2/5 inherit. Never pass a
   `model` parameter.
+- **Script-driven fan-out ("ultracode")** — a deterministic script spawns and
+  sequences the workers instead of the agent. **Blocked pending measurement**,
+  and the agent's answer is no until then; ordinary fan-out is unaffected and
+  stays the agent's default. Five preconditions are unmeasured and
+  `harness-probe` measures none of them today — the block lifts when the probe
+  is _extended_ and run, and the first script-driven launch is that probe.
+  Details, and why each precondition matters:
+  [AGENTS.principal.md § Orchestrated delegation](./AGENTS.principal.md#orchestrated-delegation).
+  Whether this mode is even available on your plan is not something this repo
+  can verify — check before spending a session on it.
 
 **Remote tools (don't burn 5-hour limit, run in cloud):**
 
@@ -671,3 +691,28 @@ is stale and you do not get to pick which. If you ever add a fifth recital, add
 it to this list. (`npm run check:governance` verifies these four links resolve,
 so a renamed heading fails loudly — but it cannot tell you whether the prose
 under them still says the right thing. That part is yours.)
+
+**The tier-per-phase mapping is the same hazard, in four places, and it had no
+list until now.** "Design tracks the strongest tier, post-gate TDD runs on a
+cheaper one" appears in:
+
+- [§ Model selection rules](#model-selection-rules) — the copy that **owns** it;
+  the other three must not disagree with this one;
+- [AGENTS.principal.md § Handoff agency](./AGENTS.principal.md#handoff-agency--the-agent-owns-the-call),
+  in the "operating instructions" clause;
+- [`.claude/skills/handoff/SKILL.md`](./.claude/skills/handoff/SKILL.md) § 4
+  item 1 — the one an agent actually executes from, and therefore where a stale
+  copy does the most damage;
+- [DEV.md § Sub-model dispatch](./DEV.md#sub-model-dispatch) — **different in
+  kind**: it recites the design half only, and _argues from_ it rather than
+  instructing with it. The paragraph explaining why AR-2 has no boundary guard
+  rests on "Phase 0 design work is assigned to the strongest tier". Change that
+  and you do not stale a recital, you falsify an argument.
+
+When you change which tier suits which phase, change all four. The checker
+catches a renamed file or heading behind these links; it cannot tell you whether
+the prose under them still agrees — that part is yours. The first time this list
+was written, three of the four already disagreed: two recitals said the cheaper
+tier was "proven" where this section claimed nothing of the sort, and this
+section keyed on "where the path is clear" where they keyed on the phase
+boundary. The list is worth having because that is what it found on day one.

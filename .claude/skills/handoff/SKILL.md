@@ -50,12 +50,12 @@ the swap two keystrokes. That message MUST contain all three of:
 
 1. **Exactly what to do next, including the model.** Open a fresh session (or
    `/clear`), select the NAMED model — design phases track the strongest
-   available tier, post-gate TDD runs on a proven cheaper one; write the model's
-   actual name, never "a strong one" — and note which gates the human will hold
-   in the next phase. **If it is a downgrade, name what it costs in the same
-   breath**: `ar-2` and `ar-5` carry no model pin, so they inherit the tier you
-   just named (`DEV.md § Sub-model dispatch`). A cheaper tier is yours to
-   recommend; a silent one is not.
+   available tier, post-gate TDD runs on a cheaper one; write the model's actual
+   name, never "a strong one" — and note which gates the human will hold in the
+   next phase. **If it is a downgrade, name what it costs in the same breath**:
+   `ar-2` and `ar-5` carry no model pin, so they inherit the tier you just named
+   (`DEV.md § Sub-model dispatch`). A cheaper tier is yours to recommend; a
+   silent one is not.
 2. **The validated launch prompt, printed verbatim in a fenced markdown block in
    the chat**, ready to copy-paste as the new session's first message. Print the
    POST-validation version — the one the context-free agent's must-fix findings
