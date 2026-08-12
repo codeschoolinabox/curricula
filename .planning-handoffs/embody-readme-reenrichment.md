@@ -36,7 +36,7 @@ transport verbatim.
 - Ceremony (human ruling 2026-08-12, revising a same-day "full" — the later
   ruling governs): **medium** — AR-1 on the content, AR-5 over the unit's own
   SHA list. Settings line per commit:
-  `work: software · twin-doc: none · ceremony: medium · prospective`. **Pre-empt
+  `work: software · twin-doc: none · ceremony: medium · prospective`. **Preempt
   one stale finding in your AR prompts:** `ar-1.md`/`ar-5.md`'s own definitions
   still recite the deleted `## Epistemology` convention — state in each dispatch
   that HR-2 (2026-08-11) killed it, so the reviewer does not flag the missing
