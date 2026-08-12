@@ -725,11 +725,32 @@ teaches the old one. The grep is a necessary check, not a sufficient one.
   Loss lens over the whole changeset.
 - Commit with an explicit pathspec; this worktree is shared. **Never push.**
 
-**⛔ OPEN — the maintainer's call, and agent 2 must not decide it alone: is this
-brief DELETED at campaign close?** `DEV.md` § What goes in docs vs. plans vs.
-handoffs says handoffs are "deleted when their migration completes", and the
-`Epistemology` gate above cannot pass while this file lives. But deleting it
-destroys the campaign's only record of the rulings and the recorded objection —
-and per the disposition table, HR-4 + HR-7 have **no** `DEV.md` destination, so
-they would survive only in commit bodies. **Ask before deleting.** If the answer
-is delete, the loss ledger obligation covers the whole file.
+**HR-9 — delete this brief** (human ruling 2026-08-11), verbatim: **"when the
+handoff is done"**. That resolves what was an open question here, and follows
+doctrine [read: `DEV.md` § What goes in docs vs. plans vs. handoffs — _"Handoffs
+are transitional scaffolding, deleted when their migration completes (git
+history retains them); they are never a durable source of truth"_], and it is
+also what lets the `Epistemology` gate above finally pass: this file is tracked
+and carries ~27 mentions of its own, so while it lives the grep can never come
+back clean.
+
+**The precondition, and it is what makes this a migration rather than a loss.**
+Delete only after **verifying, ruling by ruling against the disposition table,
+that every one has reached its named destination** — HR-1 + HR-3 + HR-6 + HR-8
+as one dated statement in `DEV.md`; HR-2 + HR-5 discharged by the strip's own
+edits and traceable in the surviving `screening/README.md` prose; HR-4 + HR-7 in
+commit bodies, which is their **only** home, since the table gives them no
+`DEV.md` destination. A ruling that has not landed dies with this file,
+permanently.
+
+**What the loss ledger owes on the deletion.** Migration is transport, so the
+enumeration is the transport record, not a catalogue of 700 lines: name each
+ruling and where it went, plus anything in this brief that is **not** migrating
+— the recorded-and-overruled objection to HR-1, the superseded-exit reasoning
+kept for its trade-offs, and the ripple measurements. Those die here by design;
+say so rather than implying they moved. `git history retains them` is the honest
+mitigation and doctrine names it explicitly.
+
+**Order it last.** The deletion is the campaign's closing act, after AR-5 has
+run over the committed SHA — not before, or AR-5 loses the document its
+scope-vs-spec check reads against.
