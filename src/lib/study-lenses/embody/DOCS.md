@@ -40,9 +40,10 @@ abstraction.
    the README narrates it as gate, then attach. Input: the Facts + the roster.
    Output: per-phase fitting-lens lists.
 
-4. **Freeze** (sync) — the built structure — stages, map, lists — is frozen, and
-   only that structure: attached refs are never recursed into. Input: the three
-   prior outputs. Output: the frozen `Embodiment`.
+4. **Freeze** (sync) — the built structure — stages, map, lists — is frozen
+   deeply, to the freeze-what-you-own boundary the constraints state: attached
+   lens refs and borrowed process-global singletons are never recursed into.
+   Input: the three prior outputs. Output: the frozen `Embodiment`.
 
 ## Data flow
 
@@ -163,10 +164,9 @@ flowchart TD
 
 Settled decisions on the shape of the embodiment itself — what it publishes,
 what it guarantees, and what it refuses to know (human ruling 2026-08-12). Tests
-pin these behaviors (`tests/index.test.ts`), though none yet cites an entry by
-short id; each entry — **E1** through **E8** — grounds a structural constraint
-above: the constraint states the rule, the entry states why this shape rather
-than its alternatives.
+pin these behaviors (`tests/index.test.ts`). Each entry — **E1** through **E8**
+— grounds a structural constraint above: the constraint states the rule, the
+entry states why this shape rather than its alternatives.
 
 - **E1 — Pure frozen plain data.** Everything the region publishes is plain
   objects, arrays, and primitives — no methods, no getters, no accessor API.

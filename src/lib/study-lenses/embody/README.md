@@ -358,6 +358,7 @@ this region owns.
 
 - Package root: [`../README.md`](../README.md) — the domain model and the
   package glossary.
-- [`DOCS.md`](./DOCS.md) — this region's architectural sketch.
+- [`DOCS.md`](./DOCS.md) — this region's architectural sketch, structural
+  constraints, and decisions.
 - [`types.ts`](./types.ts) — the keystone contracts: `Snippet`, `Facts`, the
   lifecycle vocabulary, `Gateable`, `Embodiment`.
