@@ -236,6 +236,78 @@ one stay readable [measured 2026-08-11:
 > (silence ships `unset`); this rule deliberately diverges from that precedent,
 > so **do not "fix" the divergence** by copying § ceremony's wording across.
 
+**HR-10 — the artifact-naming ruling of 2026-08-04 is NARROWED** (human ruling
+2026-08-13). `DEV.md` § Phase 0 says **"The three steps are named for the
+artifact each produces"** (human ruling 2026-08-04), "so a step number and a
+deliverable are the same thing". At `twin-doc: none` step 0.2 now produces no
+file, and that is **110 of 111** recorded increments [measured 2026-08-13: `git
+log --all --format=%B | grep -cE "^work: "` → 111; `twin-doc: none` → 110,
+`machine` → 1]. So the ruling is narrowed rather than left standing false: **0.2
+is still named for its artifact and produces the twin wherever one is owed; at
+`none` the recorded answer discharges it and there is no file.** The artifact
+**order** still binds — the ask happens before types lock.
+
+> **Why this needed a ruling at all, recorded so it is not read as scope
+> creep.** Agent 2's first resolution was that the recorded answer simply _is_
+> the deliverable, so nothing needed narrowing. A design pass falsified it: that
+> scores the commit body as sufficient here while HR-12 concedes it is not a
+> document home — the same fact with opposite signs. Narrowing another dated
+> ruling is not agent-side work, and HR-1 names exactly one supersession (§ Who
+> decides, for `twin-doc`) which is not this one. Asking the maintainer to
+> ratify a **consequence** of HR-1 is not re-litigating HR-1.
+>
+> **This is a five-site edit, not one.** `AGENTS.md` and `AGENTS.principal.md`
+> each recite "Three artifact-named steps" **and** "What binds unconditionally
+> is the artifact order" inside **non-negotiable invariant 2** — and `CLAUDE.md`
+> routes each agent to only one of the two files. Fixing `DEV.md` alone leaves
+> half the agent population learning the old invariant, which is the same
+> silent-half-population failure this brief flags for the four collision sites.
+
+**HR-11 — the answer is re-asked, not remembered** (human ruling 2026-08-13).
+The ask is answered at 0.2; the settings line is written when the increment
+commits, one or two steps later. `DEV.md` § Ruling provenance requires recording
+a confirmed ruling **in the same turn**, and rules that a plan file is not a
+record — so there is no place for the answer to wait. **If a session ends
+between the ask and the commit, the ask is re-asked, not recalled from a plan
+file.** `HUMANS.md` § Session sizing rules ("Default to one Phase 0 increment
+per session, then `/clear`") makes that gap routine rather than exotic. This
+closes a timing hole none of HR-1..HR-9 addresses.
+
+**HR-12 — the missing end-state home is recorded as an accepted cost, not
+re-opened** (human ruling 2026-08-13). After the strip, a `twin-doc: none`
+decision leaves **only** the commit-body settings line, and § Ruling provenance
+says a commit-body-only record is _"findable but not readable where it binds"_.
+Recorded inline at the new statement so the next reader does not rediscover it
+as a defect and re-open HR-1.
+
+**The rationale, corrected — the obvious framing is wrong.** This is **not**
+"the same objection the maintainer already overruled": agent 1's objection was
+about the ask's **content** (a bare "no" names no holder); this one is about the
+answer's **home**. Different axes, and asserting otherwise is the sentence a
+reviewer would catch. Three things make it not a new defect class:
+
+1. The commit body is **already** the declared home for all four axes [read:
+   `DEV.md` § Who decides — _"**Where:** the **commit body**"_]. `ceremony` —
+   which `DEV.md` explicitly calls a ruling — has lived only there for its
+   entire existence, so the tension with § Ruling provenance already exists,
+   unreconciled. `twin-doc: none` enrols in an arrangement the repo already
+   tolerates; it does not create one.
+2. The block was step 0.2's **discharge artifact**, never the home of the
+   `twin-doc` value. The value has always been recorded in the commit body.
+3. **The home was never populated — 1 of 242 tracked READMEs ever carried a
+   block** [measured 2026-08-13: `git ls-files` over `*README.md` → 242, of
+   which `git grep -l` for the block heading → 1].
+
+**One consequence that is genuinely new and needs a REWRITE, not a recording:**
+`HUMANS.md` § Verification rituals says **"Find step 0.2. Either a twin document
+exists, or the README carries an `## Epistemology` block"**. That is the
+maintainer's own post-Phase-0 **gate** instruction, and under HR-1 nothing in
+the working tree can satisfy it at the default. It degrades the human gate
+itself, in a different file — which is why it was not in view when HR-1 was
+ruled. Replacement: find the settings line in the commit body; at
+`twin-doc: none` that recorded answer is the whole of step 0.2 and there is
+nothing in the tree to look for.
+
 ### Where each ruling ends up — a destination per ruling, not one mandate
 
 This brief is **scheduled for deletion by doctrine** [read: `DEV.md` § What goes
@@ -246,11 +318,14 @@ repo-wide at `7c93080c`, so there is no fallback home. A ruling with no named
 destination therefore dies with this file. **They do not all go to the same
 place:**
 
-| Ruling                        | End-state home                                                        | What "moved" looks like                                                                                                                                                                                                                                                                                  |
-| ----------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **HR-1 + HR-3 + HR-6 + HR-8** | `DEV.md` § Phase 0 (the step-0.2 line), § twin-doc, and § Who decides | **One** dated statement of the reshaped ask — the question, both branches, both value sets, what silence means, where the answer lands — with HR-1/HR-3/HR-6/HR-8 as its provenance line. They are one rule with two branches; transcribing them apart is how the "bare yes/no" wording goes over-broad. |
-| **HR-2 + HR-5**               | discharged by the strip's own edits                                   | Durable trace is the surviving rewritten prose in `screening/README.md` plus the closing commit body's loss ledger. Nothing to promote into `DEV.md`.                                                                                                                                                    |
-| **HR-4 + HR-7**               | commit bodies, campaign-scoped                                        | **Do NOT promote into `DEV.md` as a general rule** — it is this campaign's level, not a new universal. Optionally record the third use against § ceremony's "two campaigns used it" gap.                                                                                                                 |
+| Ruling                        | End-state home                                                                         | What "moved" looks like                                                                                                                                                                                                                                                                                  |
+| ----------------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **HR-1 + HR-3 + HR-6 + HR-8** | `DEV.md` § Phase 0 (the step-0.2 line), § twin-doc, and § Who decides                  | **One** dated statement of the reshaped ask — the question, both branches, both value sets, what silence means, where the answer lands — with HR-1/HR-3/HR-6/HR-8 as its provenance line. They are one rule with two branches; transcribing them apart is how the "bare yes/no" wording goes over-broad. |
+| **HR-2 + HR-5**               | discharged by the strip's own edits                                                    | Durable trace is the surviving rewritten prose in `screening/README.md` plus the closing commit body's loss ledger. Nothing to promote into `DEV.md`.                                                                                                                                                    |
+| **HR-4 + HR-7**               | commit bodies, campaign-scoped                                                         | **Do NOT promote into `DEV.md` as a general rule** — it is this campaign's level, not a new universal. Optionally record the third use against § ceremony's "two campaigns used it" gap.                                                                                                                 |
+| **HR-10**                     | `DEV.md` § Phase 0 **and non-negotiable invariant 2 in BOTH `AGENTS` files**           | The narrowed artifact-naming sentence plus the artifact-order sentence, dated. **Five sites, not one** — `CLAUDE.md` routes each agent to only one `AGENTS` file, so a `DEV.md`-only fix leaves half the agent population on the old invariant.                                                          |
+| **HR-11**                     | `DEV.md` § Phase 0, inside the step-0.2 statement                                      | One clause on the statement HR-1 hosts: if a session ends between the ask and the commit, the ask is re-asked. Not a separate rule — it is the ask's own continuity condition.                                                                                                                           |
+| **HR-12**                     | `DEV.md` § Phase 0 (the accepted-cost note) **and `HUMANS.md` § Verification rituals** | The `DEV.md` half is a recording. The `HUMANS.md` half is a **rewrite** and is not optional: "Find step 0.2" is the human gate's own instruction and nothing in the tree can satisfy it at the default.                                                                                                  |
 
 **Agent 2's closing commit body enumerates what went where**, which
 [DEV.md § Ruling provenance](../../DEV.md#ruling-provenance) already requires —
