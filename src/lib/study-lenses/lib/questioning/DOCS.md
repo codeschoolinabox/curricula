@@ -84,35 +84,8 @@ they transform nothing; at this abstraction the engines are the transformations.
 
 ## The 3D Block Model space (recommender extension)
 
-Transported from the deprecated architecture as shared truth (human ruling
-2026-08-11 — the transport was widened to include this section). The Block Model
-of Program Comprehension (Schulte 2008) — referenced in the curriculum's
-`exercise-types.md` — describes comprehension across two dimensions; the
-deprecated recommender extended it to **three** as its organizing space:
-
-1. **Level** — text surface → program execution → function/purpose
-2. **Scope** — atoms → blocks → relations → macro
-3. **NM components** — the 10 step categories from the syntax tracer's step
-   vocabulary (`expression`, `resolve`, `statement`, `scope`, `control-flow`,
-   `initialization`, `for-init`, `write`, `emit`, `error`). **Unordered set** —
-   no ordinal "level" is derived from this dimension.
-
-The third dimension is unordered for a deliberate reason: NM components don't
-compose into a single learning progression. A snippet with `expression` +
-`resolve` isn't "earlier" than one with `scope` + `control-flow`; they're
-different teaching opportunities. The spiral comes from **(a)** lens-config
-variation across snippets (a `blanks` lens configured for keywords vs. operators
-vs. control-flow reads differently at each configuration) and **(b)**
-curriculum-author-imposed ordering of category-filtered recommendations, chosen
-pedagogically rather than enforced by the NM model.
-
-**Vocabulary bridge** (newly stated here, because the axis words collide): the
-space's "Level" runs over the same ground as the grid's **dimension** axis, and
-the space's "Scope" over the grid's **level** axis. That axis-name swap is one
-reason the space's cell type (`BlockModelCell`, dropped with the deprecated
-recommender) relates to this region's `BlockCell` by mapping, never by rename.
-No type for the 3D space is minted here; it is carried documentation truth for
-the future recommender layer.
+The space's treatment lives with the package's pedagogy theory:
+[PEDAGOGY.md § The 3D Block Model space (recommender extension)](../../PEDAGOGY.md#the-3d-block-model-space-recommender-extension).
 
 ## Carried collateral (unbuilt)
 

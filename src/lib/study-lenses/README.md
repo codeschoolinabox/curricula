@@ -181,7 +181,8 @@ configuration).
 | Crafted paths          | —                                           | the full curriculum             |
 | Monitored learning     | —                                           | grading, reports, integrity     |
 
-Three principles from the paper are load-bearing:
+Three of the paper's principles are load-bearing, here in this package's own
+applied rendering:
 
 - **Skill transfer** — learn where you'll work. Lenses live in the same editing
   environment learners use for real code, not a separate school tool.
