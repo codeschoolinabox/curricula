@@ -638,6 +638,34 @@ Every source directory under `src/` has both a `README.md` and a `DOCS.md`:
 - Public functions have JSDoc/TSDoc in source; no generated-docs pipeline is
   currently wired
 
+**Twin documents live beside the module's other DDD artifacts, and are named
+after the twin they hold** (human ruling 2026-08-13). A twin sits in the module
+directory next to `README.md`, `DOCS.md` and `types.ts` — not in a separate
+tree, not under a docs root. **This codifies what the repo already does rather
+than introducing anything** — the machine twin is already written as a
+notional-machine document beside its module's README and DOCS in two live
+modules, and both link to it
+([`src/lib/study-lenses/language-levels/jej/notional-machine.md`](./src/lib/study-lenses/language-levels/jej/notional-machine.md)
+is one; `src/lib/embody/language-levels/just-enough-javascript/` holds the
+other) [measured 2026-08-13: `git ls-files | grep -i notional-machine` → four
+files, a `.md` and an `.svg` under each of those two directories].
+
+| `twin-doc`           | The document it names                                |
+| -------------------- | ---------------------------------------------------- |
+| `machine`            | a notional-machine document, `.md` beside the README |
+| `user`               | a user-docs directory — **name and contents PARKED** |
+| `learner`, `teacher` | **unnamed** — no instance has ever been owed         |
+| `both`               | the two documents that kind of work names            |
+| `none`               | nothing; the recorded answer discharges 0.2          |
+
+**The parked rows are parked deliberately.** The candidates for the user twin
+are wire-frames and personas; nothing has been written, and no commit has ever
+recorded `user`, `learner` or `teacher`. Naming a document nobody has written
+yet is how a convention gets invented ahead of its use — which is precisely what
+the stripped `## Epistemology` block demonstrated, one instance and
+self-falsifying. **Name each one when the first is owed, and date the ruling
+here.**
+
 **No README block is owed at `twin-doc: none`** (human ruling 2026-08-11, the
 epistemology strip). The `## Epistemology` block that used to sit here — a fixed
 heading naming the twin not built, its delegate, and what would falsify that
@@ -1964,15 +1992,15 @@ leave a twin in the tree contradicting `twin-doc: none` in the record. That is
 not the same-record cost accepted below, which is about a default nobody
 objected to, not about an affirmative answer being overwritten.
 
-⚠ **This bound is only as good as your ability to find the document, and no
-convention fixes where a twin lives** (gap recorded 2026-08-13, open). The
-settings line records the **reader** (`machine`), never a path, and nothing in
-this file names a filename or a location for a twin document. So "does a twin
-exist?" is today a search rather than a lookup — answerable in practice, because
-whoever re-asks is working in the module, but not mechanically. Closing it means
-choosing a home (the module README's `## Navigation` block, beside the `DOCS.md`
-link, is the obvious candidate since that pattern already exists); that is a new
-convention and wants a ruling, not an agent's choice.
+**Finding the twin is a lookup, not a search** (human ruling 2026-08-13). A twin
+document lives in the module directory beside `README.md`, `DOCS.md` and
+`types.ts`, named after the twin it holds —
+[§ Directory Documentation Convention](#directory-documentation-convention)
+carries the naming table. So "does a twin exist?" is answered by looking in one
+place. (This closes a gap recorded earlier the same day, when nothing fixed a
+twin's location and the bound above was therefore inert. Two of the table's rows
+are still deliberately unnamed; the bound holds for `machine`, which is the only
+value any module has ever owed.)
 
 **The accepted cost, recorded so it is not rediscovered as a defect** (human
 ruling 2026-08-13). Four things are true and were in view when this was ruled:
