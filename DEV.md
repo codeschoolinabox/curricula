@@ -1145,12 +1145,20 @@ not restated here, so the two cannot drift apart.
 **The curriculum row is defined and currently unexercised.** Phase 0's artifacts
 are a module `README.md`, `types.ts`, a `DOCS.md` sketch and a test suite, none
 of which a curriculum document has — and no commit has yet recorded
-`work: curriculum` [measured 2026-08-13: `git log --all --format=%B | grep -cE
-"^work: .*twin-doc:.*ceremony:.*spective"` → **97** settings lines carry all
-four keys; the same list filtered on `^work: software` → **97**, and `grep -c
+`work: curriculum` [measured 2026-08-13: `git log --all --format=%B | grep -c
 "work: curriculum"` → **0**]. How curriculum work reaches the twin ask is
 therefore an open seam, recorded here rather than answered; the values above are
 what it is offered when it does.
+
+**Why this claim carries no corpus size, deliberately.** Two drafts of this
+paragraph shipped a count of the settings lines and both were wrong, in opposite
+directions, because **a settings line wraps** — prettier breaks it mid-line, so
+every single-line `grep` for all four keys counts too few, and the "honest"
+four-key rewrite was further from the truth than the loose count it replaced.
+The claim above needs no denominator, and the substring it does use is
+wrap-immune. This is the hazard [§ Sourced claims](#sourced-claims) already
+names for tags; it applies to the settings line itself, and it is recorded here
+because it cost two corrections.
 
 > **Declaring a `twin-doc` names which reader is owed a document. It never
 > asserts that the author holds that twin.** The taught term for producing the
@@ -1247,13 +1255,16 @@ defects** (raised 2026-08-05, still open):
   condition under which a standing delegation stopped holding, stripped with the
   rest of that convention on 2026-08-11. The model it named is gone; the gap is
   not, and a level chosen while a module was peripheral still keeps applying
-  silently once it is not. Worth recording **why** that model was no better than
-  the gap it was cited against: **Falsified if** was the one field of the three
-  that could not be written correctly at authoring time — a condition broad
-  enough to be true fires the moment the module is used, and one narrow enough
-  not to fire is decoration. A `ceremony` re-review trigger inherits that
-  difficulty exactly, which is why "give `ceremony` a Falsified-if" was never
-  the cheap fix it looked like.
+  silently once it is not. Worth carrying forward **why** that model was no
+  better than the gap it was cited against — this is the strip campaign's own
+  recorded diagnosis, not a fresh argument (2026-08-11): **Falsified if** was
+  the one field of the three that could not be written correctly at authoring
+  time, because a condition broad enough to be true fires the moment the module
+  is used and one narrow enough not to fire is decoration, and nothing at write
+  time tells the two apart. The repo's single instance demonstrated it — the
+  block was self-falsifying four and a half hours after the convention landed. A
+  `ceremony` re-review trigger inherits that difficulty exactly, which is why
+  "give `ceremony` a Falsified-if" was never the cheap fix it looked like.
 - **Nothing records the GROUND for a sub-maximum level.** This section's own
   lead says low ceremony "is earned by a strong twin" — a claim no artifact can
   support or refute, since no `twin-doc` value asserts that anyone holds a twin.
@@ -1801,7 +1812,7 @@ AR gates sit between them:
 
 ```text
 0.1  README          — incl. the ubiquitous-language glossary
-0.2  the twin ask    — is a twin owed? the twin itself only where one is
+0.2  the twin ask    — is a twin owed? the twin only where one is owed
      → AR-1            challenges the README, and the twin where one is owed
 0.3  types.ts + DOCS.md sketch + tests
      → AR-2            challenges the sketch against the types

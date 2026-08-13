@@ -1048,9 +1048,10 @@ What you need before reading it:
   and prospective/retrospective. You never state `ceremony`. You _ask_ for
   `twin-doc`, and record `none` if no answer comes** (human ruling 2026-08-11).
   `ceremony` is the human's; `twin-doc` is a third category, asked of the human
-  at Phase 0 step 0.2 and recorded by you. Outside Phase 0 nothing is asked —
-  the commit carries the module's standing value, and `none` where none was ever
-  established.
+  at Phase 0 step 0.2 — **the twin ask**, which is a different question from
+  `ceremony`'s and resolves its silence the other way — and recorded by you.
+  **Outside Phase 0 nothing is asked**: the commit carries the module's standing
+  value, and `none` where none was ever established (human ruling 2026-08-13).
 - Record the answers in the **commit body**. A plan file is not a record.
 
 ```text

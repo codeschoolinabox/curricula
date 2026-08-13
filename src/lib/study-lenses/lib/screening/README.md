@@ -305,10 +305,13 @@ rules:
   replacement, a fix-it — is a different concern with different authority, and
   it composes on top of an absence report rather than replacing it. A leaf that
   recommends has silently taken a domain position about what the writer wanted.
-- **Never acquires a severity, an ordering by importance, or a default table.**
-  Each is a claim about the language or its reader, and each belongs to the
-  caller's curation — a leaf holding one has taken the domain position the
-  domain-blind rule above forbids. (Stated as a standing rule 2026-08-13, when
+- **Never acquires a severity, an ordering by importance, a default table, or a
+  message a consumer is expected to show a reader unedited.** Each is a claim
+  about the language or its reader, and each belongs to the caller's curation —
+  a leaf holding one has taken the domain position the domain-blind rule above
+  forbids. The last clause is the one that distinguishes this leaf's
+  **machine-worded** message, which is the shipped contract, from a
+  reader-facing one, which is not. (Stated as a standing rule 2026-08-13, when
   the `## Epistemology` convention that used to carry it as a falsification
   condition was stripped repo-wide; the constraint is older than this wording
   and is why the pre-greenfield copy of this walk, which carries a severity,
