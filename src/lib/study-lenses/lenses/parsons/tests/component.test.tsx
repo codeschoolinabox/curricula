@@ -59,7 +59,8 @@ function makeDataTransfer(): {
 }
 
 function elements<E extends Element>(list: ArrayLike<E>): E[] {
-	// eslint-disable-next-line unicorn/prefer-spread -- spreading a NodeList needs lib DOM.Iterable, which this tsconfig omits; Array.from is the workaround
+	// `Array.from`, not spread: spreading a NodeList needs lib DOM.Iterable,
+	// which this tsconfig omits.
 	return Array.from(list);
 }
 

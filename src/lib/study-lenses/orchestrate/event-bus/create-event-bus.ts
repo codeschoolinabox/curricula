@@ -93,7 +93,10 @@ export default function createEventBus(): EventBus {
 			// the in-flight loop. Re-entrant dispatches take their own
 			// snapshot at inner-dispatch time, so the depth-first contract
 			// holds per-call rather than per-root.
-			// eslint-disable-next-line unicorn/prefer-spread -- Docusaurus/Babel mistranspiles `[...<Set>]` to `[<Set>]`; Array.from survives.
+			// `Array.from`, never `[...<Set>]`: Docusaurus/Babel compiles
+			// spread in loose mode to `[].concat(x)`, which would make the
+			// snapshot a one-element array holding the Set itself and invoke
+			// it as a listener on every dispatch.
 			const listeners = Array.from(
 				listenersByEvent[name] as Set<EventListener<Name>>,
 			);

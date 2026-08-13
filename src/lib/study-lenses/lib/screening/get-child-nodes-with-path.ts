@@ -53,7 +53,7 @@ function segmentedChildren(
 		return isNode(value) ? [{ child: value, segment: key }] : [];
 	}
 
-	return [...value.entries()]
+	return Array.from(value.entries())
 		.filter((entry): entry is [number, Node] => isNode(entry[1]))
 		.map(([index, child]) => ({ child, segment: `${key}.${index}` }));
 }

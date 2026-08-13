@@ -194,7 +194,7 @@ describe('deepClone', () => {
 		it('cloned Set contains cloned items', () => {
 			const original = new Set([1, 2, 3]);
 			const cloned = deepClone(original);
-			expect([...cloned]).toEqual([1, 2, 3]);
+			expect(Array.from(cloned)).toEqual([1, 2, 3]);
 		});
 
 		it('cloned Set is not same reference', () => {

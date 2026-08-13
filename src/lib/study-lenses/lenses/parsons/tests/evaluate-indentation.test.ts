@@ -13,9 +13,9 @@ function placed(
 describe('evaluateIndentation', () => {
 	describe('Zero — nothing order-correct to grade', () => {
 		it('returns an empty map when matchedModelIndex is empty', () => {
-			expect([
-				...evaluateIndentation(placed(['p0', 0]), new Map(), [0, 1]),
-			]).toEqual([]);
+			expect(
+				Array.from(evaluateIndentation(placed(['p0', 0]), new Map(), [0, 1])),
+			).toEqual([]);
 		});
 	});
 
@@ -39,17 +39,19 @@ describe('evaluateIndentation', () => {
 
 	describe('Many — mixed correct / wrong', () => {
 		it('grades each order-correct line independently against its model level', () => {
-			expect([
-				...evaluateIndentation(
-					placed(['p0', 0], ['p1', 2], ['p2', 0]),
-					new Map([
-						['p0', 0],
-						['p1', 1],
-						['p2', 2],
-					]),
-					[0, 1, 0],
+			expect(
+				Array.from(
+					evaluateIndentation(
+						placed(['p0', 0], ['p1', 2], ['p2', 0]),
+						new Map([
+							['p0', 0],
+							['p1', 1],
+							['p2', 2],
+						]),
+						[0, 1, 0],
+					),
 				),
-			]).toEqual([
+			).toEqual([
 				['p0', 'correct'],
 				['p1', 'wrong-indent'],
 				['p2', 'correct'],
@@ -57,17 +59,19 @@ describe('evaluateIndentation', () => {
 		});
 
 		it('routes each line via matchedModelIndex, NOT placed position', () => {
-			expect([
-				...evaluateIndentation(
-					placed(['p0', 1], ['p1', 2], ['p2', 0]),
-					new Map([
-						['p0', 2],
-						['p1', 0],
-						['p2', 1],
-					]),
-					[2, 0, 1],
+			expect(
+				Array.from(
+					evaluateIndentation(
+						placed(['p0', 1], ['p1', 2], ['p2', 0]),
+						new Map([
+							['p0', 2],
+							['p1', 0],
+							['p2', 1],
+						]),
+						[2, 0, 1],
+					),
 				),
-			]).toEqual([
+			).toEqual([
 				['p0', 'correct'],
 				['p1', 'correct'],
 				['p2', 'correct'],
@@ -105,17 +109,19 @@ describe('evaluateIndentation', () => {
 
 	describe('Boundaries — duplicate lines graded at their own matched depth', () => {
 		it('grades the second copy of a duplicate against ITS model index, not the first', () => {
-			expect([
-				...evaluateIndentation(
-					placed(['p0', 0], ['p1', 1], ['p2', 1]),
-					new Map([
-						['p0', 0],
-						['p1', 1],
-						['p2', 2],
-					]),
-					[0, 1, 1],
+			expect(
+				Array.from(
+					evaluateIndentation(
+						placed(['p0', 0], ['p1', 1], ['p2', 1]),
+						new Map([
+							['p0', 0],
+							['p1', 1],
+							['p2', 2],
+						]),
+						[0, 1, 1],
+					),
 				),
-			]).toEqual([
+			).toEqual([
 				['p0', 'correct'],
 				['p1', 'correct'],
 				['p2', 'correct'],
@@ -139,16 +145,18 @@ describe('evaluateIndentation', () => {
 
 	describe('Interfaces / Exceptions', () => {
 		it('only grades ids present in matchedModelIndex (skips wrong-order / distractor lines)', () => {
-			expect([
-				...evaluateIndentation(
-					placed(['p0', 0], ['p1', 5], ['p2', 1]),
-					new Map([
-						['p0', 0],
-						['p2', 1],
-					]),
-					[0, 1],
-				).keys(),
-			]).toEqual(['p0', 'p2']);
+			expect(
+				Array.from(
+					evaluateIndentation(
+						placed(['p0', 0], ['p1', 5], ['p2', 1]),
+						new Map([
+							['p0', 0],
+							['p2', 1],
+						]),
+						[0, 1],
+					).keys(),
+				),
+			).toEqual(['p0', 'p2']);
 		});
 
 		it('treats a model IndentationError sentinel (-1) as wrong-indent for learner level 0', () => {

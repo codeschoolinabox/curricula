@@ -672,7 +672,7 @@ function stampFor(outcomes: readonly Outcome[]): string {
 	const resolved = outcomes.flatMap((outcome) =>
 		outcome.kind === 'refusal' ? [] : [outcome.model],
 	);
-	const distinct = [...new Set(resolved)].toSorted((left, right) =>
+	const distinct = Array.from(new Set(resolved)).toSorted((left, right) =>
 		left.localeCompare(right, 'en-US'),
 	);
 

@@ -173,20 +173,20 @@ function foldFile(
 			// the cascade rather than replacing. Dedupe preserves first-
 			// occurrence order, so a prefix declared at the root survives
 			// a child that also lists it.
-			ignorePrefixes: [
-				...new Set([
+			ignorePrefixes: Array.from(
+				new Set([
 					...base.embedSiblings.ignorePrefixes,
 					...(fileEmbedSiblings.ignorePrefixes ?? []),
 				]),
-			],
+			),
 		},
 		lenses: mergeLenses(base.lenses, file.lenses ?? {}),
-		exerciseSetPrefixes: [
-			...new Set([
+		exerciseSetPrefixes: Array.from(
+			new Set([
 				...base.exerciseSetPrefixes,
 				...(file.exerciseSetPrefixes ?? []),
 			]),
-		],
+		),
 	};
 }
 

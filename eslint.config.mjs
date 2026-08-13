@@ -10,6 +10,7 @@ import eslintPluginUnicorn from 'eslint-plugin-unicorn';
 import tseslint from 'typescript-eslint';
 
 import newspaperOrder from './eslint-rules/newspaper-order.mjs';
+import noIterableSpread from './eslint-rules/no-iterable-spread.mjs';
 
 const STUDY_LENSES_SUBSYSTEMS = [
 	'embody',
@@ -158,6 +159,18 @@ export default tseslint.config(
 			unicorn: eslintPluginUnicorn,
 			sonarjs: eslintPluginSonarJS,
 			security: eslintPluginSecurity,
+			// `local` is defined here, for all of src/, because
+			// `no-iterable-spread` guards the whole bundled tree — utils/,
+			// embody/ and plugins/ included, not just study-lenses/. A flat
+			// config may define a plugin name only once per file, so the
+			// study-lenses block below enables `local/newspaper-order` from
+			// this same definition rather than declaring its own.
+			local: {
+				rules: {
+					'newspaper-order': newspaperOrder,
+					'no-iterable-spread': noIterableSpread,
+				},
+			},
 		},
 		languageOptions: {
 			parserOptions: {
@@ -258,6 +271,30 @@ export default tseslint.config(
 			'unicorn/prefer-switch': 'off',
 			'unicorn/switch-case-braces': 'off',
 			'unicorn/prefer-ternary': 'off',
+			// The hazard `local/no-iterable-spread` exists to catch, from the
+			// detection side. `prefer-spread` is its mirror image: it fires
+			// ONLY on `Array.from(x)`, never on a raw `[...x]`, so it reported
+			// the correct form as the violation and its auto-fix rewrote
+			// working code into the bug. Off, and the local rule does the real
+			// work — the two are a pair, not alternatives.
+			'local/no-iterable-spread': 'error',
+
+			// `prefer-spread`: OFF for bundled source, and this one is a
+			// correctness rule rather than a style preference. The
+			// Docusaurus/Babel browser pipeline compiles spread in loose mode
+			// to `[].concat(x)`, which WRAPS a non-array iterable instead of
+			// draining it — so `[...someSet]`, `[...someMap]` and
+			// `[...someIterator]` all silently produce a one-element array in
+			// the shipped site while staying correct under vitest (esbuild),
+			// tsc and jsdom. `Array.from` survives the transpile, so this rule
+			// was reporting the CORRECT form as the violation, and its
+			// auto-fix rewrote working code into the bug. That has cost this
+			// repo two production defects: the event-bus dispatch snapshot
+			// (`95d0e66`, 2026-06-11) and the tokens fact stage, which
+			// reported `ok` for source that does not lex because the wrapped
+			// tokenizer never ran and so never threw. Turning it off is what
+			// stops a third.
+			'unicorn/prefer-spread': 'off',
 			// `prevent-abbreviations`: keep ON but allowList the Node/React
 			// conventions this codebase legitimately uses (fs APIs: dir/ext;
 			// React: props; docs/refs/etc). The previous 'off' here used the
@@ -452,7 +489,6 @@ export default tseslint.config(
 	{
 		files: ['src/lib/study-lenses/**/*.ts', 'src/lib/study-lenses/**/*.tsx'],
 		plugins: {
-			local: { rules: { 'newspaper-order': newspaperOrder } },
 			'@eslint-community/eslint-comments': eslintComments,
 		},
 		// Flag eslint-disable directives that outlived their violation, so stale

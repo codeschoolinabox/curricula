@@ -22,13 +22,14 @@ export default function deriveTokens(snippet: Snippet): FactStage<Tokens> {
 	// below walks the tokenizer; fresh per call, so no shared mutable state.
 	const comments: Comment[] = [];
 	try {
-		// This bites harder here than at the Set/Map sites: a
-		// wrapped tokenizer is never DRAINED, so it never throws, so this
-		// stage reports `ok` for source that does not lex — and every phase
-		// barred by a tokens failure silently reopens. No test in this repo's
-		// harness can see it (vitest/esbuild, tsc and jsdom all compile the
-		// spread correctly); only the bundled site does.
-		// eslint-disable-next-line unicorn/prefer-spread -- Docusaurus/Babel mistranspiles `[...<iterable>]` to `[<iterable>]`; Array.from survives.
+		// `Array.from`, never `[...tokenizer(…)]`: Docusaurus/Babel compiles
+		// spread in loose mode to `[].concat(x)`, which wraps a non-array
+		// iterable instead of draining it. That bites harder here than at the
+		// Set/Map sites — a wrapped tokenizer is never DRAINED, so it never
+		// throws, so this stage reports `ok` for source that does not lex and
+		// every phase barred by a tokens failure silently reopens. No test in
+		// this repo's harness can see it (vitest/esbuild, tsc and jsdom all
+		// compile the spread correctly); only the bundled site does.
 		const tokens = Array.from(
 			tokenizer(snippet.source, {
 				sourceType: snippet.type,

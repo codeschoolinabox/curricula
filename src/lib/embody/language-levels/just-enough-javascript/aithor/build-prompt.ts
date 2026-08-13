@@ -80,7 +80,7 @@ export default function buildPrompt(
  */
 function renderVary(softHolds: readonly SoftAspect[]): string {
 	const held = new Set<SoftAspect>(softHolds);
-	const instructions = [...VARY_PHRASING]
+	const instructions = Array.from(VARY_PHRASING)
 		.filter(([aspect]) => held.has(aspect))
 		.map(([, phrasing]) => `- ${phrasing}`);
 
@@ -225,7 +225,7 @@ function renderComplexityClause(size: SizeBounds): string {
 function renderList(features: readonly FeatureName[]): string {
 	const wanted = new Set<FeatureName>(features);
 
-	return [...FEATURE_PHRASING]
+	return Array.from(FEATURE_PHRASING)
 		.filter(([feature]) => wanted.has(feature))
 		.map(([, phrasing]) => phrasing)
 		.join(', ');

@@ -964,9 +964,9 @@ type AcornRunResult =
 function runAcorn(code: string): AcornRunResult {
 	let tokens: ReadonlyArray<unknown> = [];
 	try {
-		tokens = [
-			...acornTokenizer(code, { ecmaVersion: 'latest', sourceType: 'module' }),
-		];
+		tokens = Array.from(
+			acornTokenizer(code, { ecmaVersion: 'latest', sourceType: 'module' }),
+		);
 	} catch (tokenizeError: unknown) {
 		return { ok: false, tokenizeFailed: true, error: tokenizeError };
 	}

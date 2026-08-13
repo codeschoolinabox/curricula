@@ -58,7 +58,9 @@ export default async function probeCapabilities(): Promise<DeviceCapabilities> {
 					maxBufferBytes: adapter.limits.maxBufferSize,
 					maxStorageBufferBindingBytes:
 						adapter.limits.maxStorageBufferBindingSize,
-					// eslint-disable-next-line unicorn/prefer-spread -- Docusaurus/Babel mistranspiles `[...<Set>]` to `[<Set>]`; Array.from survives.
+					// `Array.from`, never `[...<Set>]`: Docusaurus/Babel
+					// compiles spread in loose mode to `[].concat(x)`, which
+					// would report the Set itself as the one feature present.
 					webgpuFeatures: Array.from(adapter.features),
 				}),
 		...(deviceMemory === undefined

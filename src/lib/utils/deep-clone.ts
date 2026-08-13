@@ -54,13 +54,15 @@ export default function deepClone<T>(
 	// Handle Set — construct from mapped spread
 	if (value instanceof Set) {
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-return -- Generic utility pattern
-		return new Set([...value].map((item) => deepClone(item, visited))) as T;
+		return new Set(
+			Array.from(value).map((item) => deepClone(item, visited)),
+		) as T;
 	}
 
 	// Handle Map — construct from mapped entries
 	if (value instanceof Map) {
 		return new Map(
-			[...value.entries()].map(([k, v]) => [
+			Array.from(value.entries()).map(([k, v]) => [
 				deepClone(k, visited),
 				deepClone(v, visited),
 			]),

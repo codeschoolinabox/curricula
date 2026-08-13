@@ -109,8 +109,8 @@ export default function deepEqual(
 			a instanceof Set &&
 			b instanceof Set &&
 			a.size === b.size &&
-			[...a].every((itemA) =>
-				[...b].some((itemB) => deepEqual(itemA, itemB, seenA, seenB)),
+			Array.from(a).every((itemA) =>
+				Array.from(b).some((itemB) => deepEqual(itemA, itemB, seenA, seenB)),
 			);
 	}
 	// Step 10: Map
@@ -119,7 +119,7 @@ export default function deepEqual(
 			a instanceof Map &&
 			b instanceof Map &&
 			a.size === b.size &&
-			[...a.entries()].every(
+			Array.from(a.entries()).every(
 				([key, value]) =>
 					b.has(key) && deepEqual(value, b.get(key), seenA, seenB),
 			);

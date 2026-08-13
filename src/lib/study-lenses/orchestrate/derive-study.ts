@@ -97,7 +97,9 @@ function collectProposals(
 	embodiment: Embodiment,
 	lenses: JoinedLensRoster,
 ): ReadonlyArray<Recommendation> {
-	// eslint-disable-next-line unicorn/prefer-spread -- Docusaurus/Babel mistranspiles `[...<Set>]` to `[<Set>]`; Array.from survives.
+	// `Array.from`, never `[...<Set>]`: Docusaurus/Babel compiles spread in
+	// loose mode to `[].concat(x)`, which would make this union a single
+	// element holding the Set — every lens would then fail to recover.
 	const attachedUnion = Array.from(
 		new Set(Object.values(embodiment.study).flatMap((phase) => phase.lenses)),
 	);
