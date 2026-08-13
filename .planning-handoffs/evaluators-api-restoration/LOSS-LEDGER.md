@@ -660,6 +660,18 @@ execution and never holds one alone.
   the quarry AND the deprecated port both serving as references. The deprecated
   region stays in tsc and vitest, frozen — compile-and-green only; its exit
   condition is danger's future migration onto the new kind.
+- **The `nodeAtSpan` helper is this campaign's own unit, and the campaign MAY
+  edit greenfield `embody/` for it (human ruling 2026-08-13, HR-22).** This
+  REVERSES the 2026-08-11 pivot that routed W1.c to the session owning
+  `src/lib/study-lenses/embody/`: nothing needs the helper yet — its only
+  consumer is the intercept enrichment increment, waves out — so rather than
+  carrying it as an outstanding obligation on another session, it folds back
+  into this campaign's own wave plan and lands when its consumer does. The
+  ratified contract survives the reversal unchanged and is spec'd in full at
+  `~/.claude/plans/node-at-span-embody-handoff.md` (total function,
+  exact-span-or-`null`, ascent from `byOffset[start]`, three mandatory tests
+  including the empirically-verified identical-span-ancestor case). That file is
+  now a CONTRACT SOURCE for a campaign unit, not a request to a sibling session.
 - **Full JavaScript is the target (human ruling 2026-08-12, HR-18).** Design
   against all of JavaScript: **the shared evaluator signature and the engine are
   LEVEL-BLIND.** JEJ — or any other level — is a per-tracer scoping concern,
