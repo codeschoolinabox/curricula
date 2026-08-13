@@ -10,6 +10,20 @@ against the implementation it replaced, so no gate could catch the loss; its
 per-increment discharge rule is the campaign's anti-failure mechanism (plan § 1:
 every Phase-1 increment names the rows it discharges).
 
+**The discharge rule extends to PHASE 0 (human ruling 2026-08-12, HR-21).**
+Phase 1 was never the only place a contract can be authored thin. Every Phase-0
+unit's artifacts must NAME what they encode: which rulings of record, which of
+the fourteen tracer forward-compatibility requirements
+(`git show a8a0128d:<this directory>/research-digests-2026-08-05.json`, key
+`.result.tracers`), and which classification rows (by member name) and FLAGs the
+design answers — carried as a `## Discharges` section in the unit's README, so
+the check is whether every identifier in it resolves. A Phase 0 that cannot cite
+what it discharges is thin by definition, and `ar-1`/`ar-2` check that citation
+IN ADDITION TO the judgment their focus areas call for — a complete citation
+list is necessary, never sufficient. The rule exists because a design gate can
+pass on a plausible-looking artifact that silently drops the nuance its inputs
+carried — the same failure as the original port, one phase earlier.
+
 **Classification vocabulary** (HR-4): `restore` (the default — the member
 returns, reference-faithful) · `supersede` (a port-side or new design wins —
 ONLY with a named strength argument) · `drop` (the member does not return — ONLY
@@ -646,6 +660,20 @@ execution and never holds one alone.
   the quarry AND the deprecated port both serving as references. The deprecated
   region stays in tsc and vitest, frozen — compile-and-green only; its exit
   condition is danger's future migration onto the new kind.
+- **Full JavaScript is the target (human ruling 2026-08-12, HR-18).** Design
+  against all of JavaScript: **the shared evaluator signature and the engine are
+  LEVEL-BLIND.** JEJ — or any other level — is a per-tracer scoping concern,
+  settled per tracer and later; it must not shape the kind, the shared
+  signature, or the engine. A design argument that rests on what JEJ admits or
+  forbids is out of order at this layer.
+- **Instrumentation is assumed sound (human ruling 2026-08-12, HR-19).** The
+  design premise is that instrumentation introduces no errors of its own; tracer
+  authors carry that guarantee. The kind does not optimize for detecting
+  instrumentation defects, and no contract surface exists to report them — the
+  machinery-defect kind (HR-8) does not reach them, because an
+  instrumentation-injected throw is indistinguishable from a learner throw at
+  the halt boundary. The cost is stated so it is not rediscovered as a surprise:
+  when the premise is violated, the failure presents as the learner's own.
 
 ### The contract
 
@@ -732,6 +760,54 @@ execution and never holds one alone.
   plus `git show <sha>:<path>`) and may cite `SHA:path` as reference evidence;
   the kind must not foreclose that config richness; and the semantics port's
   future audit opens with this archaeology.
+- **Refusal, never a throw at the learner (human ruling 2026-08-12, HR-17).** An
+  evaluator that cannot serve a spec returns a STRUCTURED REFUSAL. This settles
+  the throw-versus-refuse tension the W1.b audit flagged (the quarry's variables
+  tracer throws synchronously at its gate; the region's own stated posture is
+  refusal-as-data). Note the ratified forward-compat requirement that typed sync
+  throws stay _permitted_ at the kind level: that permission is not withdrawn,
+  but this campaign's evaluators refuse.
+- **Evaluators evaluate (human ruling 2026-08-12, refined 2026-08-13, HR-20).**
+  An evaluator does NO lifecycle-phase work: it runs the program and reports
+  errors as a bare runtime would. **Its error phase discriminant is exactly two
+  values — `'creation' | 'evaluation'`** (human ruling 2026-08-13): did the
+  program fail before it ran, or while running. Nuance WITHIN creation belongs
+  to the embodiment and the main orchestrator, which already hold it; the
+  evaluator neither mirrors, translates, nor re-derives it, and carries no
+  lifecycle-stage vocabulary of its own.
+  - This **refines rather than retires** the ratified `phase` row and E2 (§ run
+    — result and error taxonomy; § The ratification): the split stands and is
+    still its own engine increment. What changed is the second value's spelling
+    — `'evaluation'`, matching the JS lifecycle
+    `source → tokens → ast → environment → evaluation`
+    `[read: src/lib/study-lenses/embody/types.ts — "The five flat phases, in the specification's own order"; LifecyclePhaseOrder]`,
+    rather than the reference's `'execution'`. A deliberate departure from
+    HR-8's reference-names default, ruled by the human.
+  - ⚠ Citation hazard, met once already: `embody/types.ts` matches TWO files.
+    The greenfield region is `src/lib/study-lenses/embody/`; the read-only
+    quarry `src/lib/embody/` still carries a SUPERSEDED lifecycle
+    (`'realm' | 'parse:tokenize' | 'parse:ast' | 'creation' | 'evaluation'`)
+    which cannot be corrected in place because the quarry is copy-never-modify.
+    Cite the greenfield region by full path.
+  - **Consequence carried OPEN, and it is P0-K's to resolve** (P0-K — the
+    Phase-0 unit for the shared kind and handle contract): "as a bare runtime
+    would" is not satisfied by the engine's **`'function'` execution path** for
+    a **`script`** snippet. That path runs learner code as a function body
+    (`new Function(...names, body)`, engine `worker/bootstrap.ts`) under an
+    injected `"use strict"` prefix, while `facts.type` declares the parse goal a
+    script — so top-level `var` and function declarations become locals rather
+    than globals, a top-level `return` is legal where a real script would be a
+    SyntaxError, and the prefix itself changes semantics a bare script would
+    not. (The `'module'` path already runs a genuine ES module; the axis is the
+    lens's to set and is deliberately distinct from `facts.type`.) Reaching true
+    script semantics does NOT require solving globals injection — indirect eval
+    `(0, eval)(code)` runs in global scope and takes globals by assignment. The
+    live constraints: strict-mode eval gets its own variable environment;
+    `importScripts` needs a classic worker the ESM bootstrap forbids; and
+    per-run blob WORKER SCRIPTS were ratified out (§ run — protocol and
+    infrastructure), though the module path's per-run blob URL for learner code
+    is a different object and is live. Unresolved; HR-20 ratifies no execution
+    path.
 
 ### Ceremony and sandboxes
 
