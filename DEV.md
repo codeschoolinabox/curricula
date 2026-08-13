@@ -638,22 +638,18 @@ Every source directory under `src/` has both a `README.md` and a `DOCS.md`:
 - Public functions have JSDoc/TSDoc in source; no generated-docs pipeline is
   currently wired
 
-**`## Epistemology` block format** (for README.md, whenever `twin-doc: none` —
-which is the default, so this is the near-universal case). The heading name is
-fixed, because it is the one rule in
-[§ Work routing and ceremony](#work-routing-and-ceremony) that a check can find:
-
-```markdown
-## Epistemology
-
-**Twin not built:** the notional machine this module runs on. **Delegated to:**
-the JEJ validator and the eslint-scope analyzer. **Falsified if:** either stops
-being authoritative for scoping — then this module owes its own NM document.
-```
-
-Three fields, all required. A block that records only the gap describes the
-taught failure _twin ignored_; the **Delegated to** field is what makes the
-default a declared position instead.
+**No README block is owed at `twin-doc: none`** (human ruling 2026-08-11, the
+epistemology strip). The `## Epistemology` block that used to sit here — a fixed
+heading naming the twin not built, its delegate, and what would falsify that
+delegation — was removed, and the step it discharged is now
+[§ Phase 0](#phase-0-documentation-specification-before-any-code)'s twin ask. It
+had claimed to be "the one rule in § Work routing and ceremony that a check can
+find"; that was never true — nothing under `scripts/` ever looked for it
+[measured 2026-08-13: `grep -rIn "Epistem" scripts/ .claude/hooks/` → no
+matches]. **So [§ Work routing and ceremony](#work-routing-and-ceremony) now
+contains no rule a check can find**, which is a description of the status quo
+and not a regression: building a checker for the settings line would be new
+ground, not restored parity.
 
 **Architectural sketch format** (for DOCS.md, written prospectively in Phase 0):
 
@@ -1139,34 +1135,28 @@ whole reason they are two kinds:**
 | software work   | `machine` · `user` · `both` · **`none`**    |
 | curriculum work | `learner` · `teacher` · `both` · **`none`** |
 
+**The value is settled by asking — the twin ask, at Phase 0 step 0.2** (human
+ruling 2026-08-11, the epistemology strip). The question, both of its branches,
+which values each kind of work is offered, what silence means, and where the
+answer is recorded are stated once, in
+[§ Phase 0](#phase-0-documentation-specification-before-any-code)'s twin ask —
+not restated here, so the two cannot drift apart.
+
+**The curriculum row is defined and currently unexercised.** Phase 0's artifacts
+are a module `README.md`, `types.ts`, a `DOCS.md` sketch and a test suite, none
+of which a curriculum document has — and no commit has yet recorded
+`work: curriculum` [measured 2026-08-13: `git log --all --format=%B | grep -cE
+"^work: .*twin-doc:.*ceremony:.*spective"` → **97** settings lines carry all
+four keys; the same list filtered on `^work: software` → **97**, and `grep -c
+"work: curriculum"` → **0**]. How curriculum work reaches the twin ask is
+therefore an open seam, recorded here rather than answered; the values above are
+what it is offered when it does.
+
 > **Declaring a `twin-doc` names which reader is owed a document. It never
 > asserts that the author holds that twin.** The taught term for producing the
 > artifact of a practice without the stance behind it is
 > _ceremony-without-twin_, and it is a failure symptom. No `twin-doc` value is
 > evidence of twinning, and neither is any ceremony value.
-
-### The Epistemology block
-
-At `twin-doc: none` — the default — the obligation is discharged by a
-`## Epistemology` block in the module README. **It has three fields, and the
-second is the one that does the work:**
-
-1. **which twin is not built**;
-2. **to whom or what it is delegated** — a named holder: a validator, a linter,
-   an upstream library's own documentation, a peer module;
-3. **what would falsify that delegation** — the condition under which this
-   module starts owing its own twin.
-
-> _"The NM twin is delegated to the JEJ validator and the eslint-scope analyzer;
-> if either stops being authoritative for scoping, this module owes its own NM
-> document."_
-
-Field 2 is not bookkeeping. `spiralearn/frogramming-and-vibetoading/ontology.md`
-§ 4 treats building without a twin as legitimate **when a twin is intentionally
-delegated** — and treats a bare absence as _twin ignored_, the first of its
-named failures. A block that records only the gap describes the failure; a block
-that names the delegate describes the legitimate case. Format and heading name:
-[§ Directory Documentation Convention](#directory-documentation-convention).
 
 ### ceremony
 
@@ -1187,8 +1177,16 @@ trigger already missed it.
 **Ceremony is the human's to set, per increment or per campaign — the agent
 never states it and never lowers it** (human ruling 2026-08-04). This is the
 same rule as "no agent-side lightening"; what changed is that the level is now
-explicit rather than assumed. An agent may state the other three answers,
-because their defaults are safe by construction. It may not state this one.
+explicit rather than assumed. An agent may state **two** of the other three
+answers — the kind of work and prospective/retrospective — because their
+defaults are safe by construction. **It may not state `ceremony`.** `twin-doc`
+it **asks** for and records, including the default when no answer comes
+([§ Phase 0](#phase-0-documentation-specification-before-any-code)'s twin ask).
+When no answer comes to the ceremony question, the settings line ships
+`ceremony` unset rather than filled: unlike `twin-doc`, this axis has no safe
+**record** default to fall back on, and it is the human's alone. The two
+unanswered questions therefore resolve differently on purpose, argued where the
+twin ask is stated.
 
 **Uniformity now means uniform _within a declared level_.** An agent may not
 classify one increment "mechanical" and thin its reviews: the catch distribution
@@ -1244,42 +1242,87 @@ record either way.
 defects** (raised 2026-08-05, still open):
 
 - **No re-review trigger exists for work that landed at a low level and later
-  became load-bearing.** The `## Epistemology` block has a **Falsified if**
-  field for exactly this shape; `ceremony` has no counterpart, so a level chosen
-  while a module was peripheral keeps applying silently once it is not.
+  became load-bearing.** This gap was first stated against a model that no
+  longer exists: the `## Epistemology` block's **Falsified if** field, a named
+  condition under which a standing delegation stopped holding, stripped with the
+  rest of that convention on 2026-08-11. The model it named is gone; the gap is
+  not, and a level chosen while a module was peripheral still keeps applying
+  silently once it is not. Worth recording **why** that model was no better than
+  the gap it was cited against: **Falsified if** was the one field of the three
+  that could not be written correctly at authoring time — a condition broad
+  enough to be true fires the moment the module is used, and one narrow enough
+  not to fire is decoration. A `ceremony` re-review trigger inherits that
+  difficulty exactly, which is why "give `ceremony` a Falsified-if" was never
+  the cheap fix it looked like.
 - **Nothing records the GROUND for a sub-maximum level.** This section's own
   lead says low ceremony "is earned by a strong twin" — a claim no artifact can
   support or refute, since no `twin-doc` value asserts that anyone holds a twin.
   As written it is aspirational, not checkable.
-- **The docs-only set above is a precedent, not a ruling.** Two campaigns used
-  it; nobody has ruled it universal, which is why the name-it-in-your-own-record
-  sentence stands rather than a bare citation.
+- **The docs-only set above is a precedent, not a ruling.** **Three** campaigns
+  have now used it — the two recorded 2026-07-30 and 2026-08-05, and the
+  epistemology strip on 2026-08-13, which cited the precedent rather than
+  inventing a set. Nobody has ruled it universal, which is why the
+  name-it-in-your-own-record sentence stands rather than a bare citation; a
+  third use is evidence, not a ruling.
 
 ### Prospective and retrospective documentation
 
 **`prospective`** — the default — means the 0.1–0.3 artifacts are written
-**before** the code and constrain it. The word is already this repo's, for the
-DOCS.md sketch "written prospectively in Phase 0"; using it for the whole
+**before** the code and constrain it, and that 0.2's answer is settled before
+types lock even where it produces no file. The word is already this repo's, for
+the DOCS.md sketch "written prospectively in Phase 0"; using it for the whole
 artifact set is a deliberate **widening** of its extension, stated here rather
 than assumed.
 
 **`retrospective`** means the documentation is produced after the code exists.
 
 > ⛔ **`retrospective` is blocked and may not be used.** Under it, 0.1, 0.2 and
-> the DOCS half of 0.3 all defer, so **AR-1 has neither of its inputs** and
-> Phase 0 reduces to types plus tests — which collides with the Phase-0-before-
-> Phase-1 invariant. Resolving that collision needs a human ruling that has not
-> been made. **Its price, whatever the resolution: the Refactor step loses its
-> structural target**, because there is no sketch to hold the implementation
-> against. Saying that plainly is what lets the documentation be asked for
-> without pretending the design discipline happened.
+> the DOCS half of 0.3 all defer, so **AR-1 has no inputs at all** — not the
+> README, and not the twin where one is owed — and Phase 0 reduces to types plus
+> tests, which collides with the Phase-0-before-Phase-1 invariant. (That is a
+> different condition from the ordinary `twin-doc: none` path, where AR-1 has
+> the README and the twin is not owed; a review with one input is a review, a
+> review with none is a scheduling error.) Resolving that collision needs a
+> human ruling that has not been made. **Its price, whatever the resolution: the
+> Refactor step loses its structural target**, because there is no sketch to
+> hold the implementation against. Saying that plainly is what lets the
+> documentation be asked for without pretending the design discipline happened.
 
 ### Who decides, and where the answers are recorded
 
-**Who:** the human sets `ceremony`. The agent states the other three — the kind
-of work (derived from the path), `twin-doc`, and prospective/retrospective —
-because each has a safe default and a question whose answer is almost always the
-default is friction on a path that should have none.
+**Who:** four answers, three kinds of owner.
+
+- **The agent states two of them** — the kind of work (derived from the path)
+  and prospective/retrospective — because each has a safe default, and a
+  question whose answer is almost always the default is friction on a path that
+  should have none.
+- **The human sets `ceremony`**, and the agent never states it and never lowers
+  it.
+- **`twin-doc` is `asked`** — a third category alongside stated and set (human
+  ruling 2026-08-11, the epistemology strip): **asked of the human, recorded by
+  the agent, and agent-statable only at its default.** Phase 0 step 0.2 puts the
+  question; the agent records what comes back, **including `none` when nothing
+  does**. The question, its branches, and what silence means are stated once, at
+  [§ Phase 0](#phase-0-documentation-specification-before-any-code)'s twin ask.
+
+**Outside Phase 0 there is no twin ask** (human ruling 2026-08-13). The settings
+line is recorded on **every** commit, but the twin ask fires only where Phase 0
+does — and a trivial fix, a single-file edit with no public-API surface, or a
+correction inside an existing contract is not Phase-0 work in the first place.
+On those increments **the value is not re-decided: the commit carries the
+module's standing value from when it was established, and `none` where none was
+ever established.** Nothing is asked, and the agent is not stating a new answer
+— it is transcribing an existing one, which is why this does not reopen the
+category above. Where a changeset spans modules that were established at
+different values, the increment's own subject module governs.
+
+**Why `twin-doc` moved, given the friction argument above.** That argument still
+holds and is the reason the other two stayed put — so the twin ask is shaped to
+owe almost nothing: it fires **once per Phase-0 increment, not once per
+commit**; the near-universal answer is one word; and silence resolves to the
+same default the agent would have supplied anyway. What it buys for that price
+is that the default becomes a **recorded answer** instead of an assumption
+nobody was ever asked to confirm.
 
 **Where:** the **commit body**. It is reachable through `git log --grep`,
 immutable once written, and bound to the exact changeset the answers govern. A
@@ -1414,8 +1457,9 @@ aspirational gate — restore it as the per-commit gate once the lint debt clear
 - [ ] Throw on invalid input at boundaries; fail fast for critical errors
 - [ ] Errors handled gracefully past the boundary check
 - [ ] `README.md` exists and is current in every modified directory
-- [ ] `## Epistemology` block present in every module README at `twin-doc: none`
-      (three fields: twin not built · delegated to · falsified if)
+- [ ] Phase 0 step 0.2 discharged and recorded: the commit body carries the
+      work-routing settings line, and at any `twin-doc` other than `none` the
+      named twin document exists and is current
 - [ ] `DOCS.md` written (new module) or updated (structural change); reflects
       actual implementation phases and constraints
 - [ ] JSDoc/TSDoc on public functions; `@remarks` for consumer-facing "why"
@@ -1738,22 +1782,27 @@ writing before a single type is defined.
 
 **What Phase 0 governs, stated so the do-not-skip rule above is not read wider
 than it is:** Phase 0 is **new-module establishment work** — the README with the
-ubiquitous-language glossary inside it, the twin or the `## Epistemology` block
-that discharges it, and `types.ts` with the DOCS.md sketch and the test suite. A
-trivial fix, a single-file edit with no public-API surface, or a correction
-inside an existing contract is not Phase-0 work in the first place, so it is not
-an exception to the rule and needs no waiver. The rule bites where a module, a
-contract, or a region is being established or reshaped — and there it does not
-bend.
+ubiquitous-language glossary inside it, the twin wherever one is owed, and
+`types.ts` with the DOCS.md sketch and the test suite. A trivial fix, a
+single-file edit with no public-API surface, or a correction inside an existing
+contract is not Phase-0 work in the first place, so it is not an exception to
+the rule and needs no waiver. The rule bites where a module, a contract, or a
+region is being established or reshaped — and there it does not bend.
 
 **The three steps are named for the artifact each produces** (human ruling
-2026-08-04), so a step number and a deliverable are the same thing. The AR gates
-sit between them:
+2026-08-04, **narrowed** 2026-08-13), so a step number and a deliverable are the
+same thing **at 0.1 and 0.3**. **Step 0.2 is the exception, and at
+`twin-doc: none` — the near-universal case — it produces no file at all**; what
+discharges it there is the recorded answer to the twin ask below. The step is
+still _named_ for its artifact, because it produces the twin wherever one is
+owed. But "a step number and a deliverable are the same thing" is false on the
+default path, and saying so is what keeps the rest of the sentence usable. The
+AR gates sit between them:
 
 ```text
 0.1  README          — incl. the ubiquitous-language glossary
-0.2  the twin        — or the ## Epistemology block that discharges it
-     → AR-1            challenges the README AND the twin, together
+0.2  the twin ask    — is a twin owed? the twin itself only where one is
+     → AR-1            challenges the README, and the twin where one is owed
 0.3  types.ts + DOCS.md sketch + tests
      → AR-2            challenges the sketch against the types
      → review, resolve, commit
@@ -1763,8 +1812,11 @@ sit between them:
 **The chain above draws the gates at `ceremony: full`.** Which of AR-1 and AR-2
 actually fire is set by the declared level — each `### AR-N` section's **Skip:**
 line carries that caveat ([§ ceremony](#ceremony)). What binds unconditionally
-is the **artifact order**: 0.1 → 0.2 → 0.3 → the human gate, at every level.
-Reading a missing AR as license to reorder or drop an artifact inverts
+is the **artifact order**: 0.1 → 0.2 → 0.3 → the human gate, at every level —
+**even where a step's deliverable is a recorded answer rather than a file**
+(human ruling 2026-08-13). The order is about sequence, not about what each step
+leaves in the tree: you ask before types lock. Reading a missing AR — or a step
+that produced no file — as license to reorder or drop an artifact inverts
 [non-negotiable invariant 2](./AGENTS.principal.md#non-negotiable-invariants).
 
 **0.1. README.md — and the ubiquitous language inside it.** The README is the
@@ -1795,22 +1847,141 @@ resolved, validated options passed to a tracer. Not the same as user-provided
 options (UserOptions), which may be partial.
 ```
 
-> **The step number that changed meaning.** Under the previous scheme `0.1`
-> meant _establish the ubiquitous language_ and `0.2` meant _README_. It now
-> means _README, with the glossary inside it_. Every other retired step number
-> names a step that no longer exists, and so fails loudly; this one silently
-> means something else. A plan or handoff written before 2026-08-04 that says
-> "step 0.1" means the glossary alone.
+> **The step numbers that changed meaning — there are two of them now.** Under
+> the scheme before 2026-08-04, `0.1` meant _establish the ubiquitous language_
+> and `0.2` meant _README_; `0.1` now means _README, with the glossary inside
+> it_. On 2026-08-13 `0.2` changed meaning as well and also kept its number: it
+> meant _the twin, or the block that discharged it_, and it now means _the ask
+> that settles whether a twin is owed, and the twin wherever one is owed_. Every
+> other retired step number names a step that no longer exists, and so fails
+> loudly; **these two silently mean something else.** A plan or handoff written
+> before 2026-08-04 that says "step 0.1" means the glossary alone. One written
+> before 2026-08-13 that says "step 0.2" expects an artifact in the working tree
+> at `twin-doc: none` — **there is none, and its absence is not a skipped
+> step.** The discharge is the recorded answer, on the commit body's settings
+> line.
 
-**0.2. The twin — or the block that discharges it.** What this step produces is
-set by the work's `twin-doc` value
-([§ Work routing and ceremony](#work-routing-and-ceremony)). At `twin-doc: none`
-— the default — the step is discharged by the `## Epistemology` block in the
-README, which names the twin **not** built, its delegate, and what would falsify
-that delegation. At any other value it produces the twin document itself.
+**0.2. The twin — and the twin ask that settles whether one is owed** (human
+ruling 2026-08-11, the epistemology strip). **This is the twin ask's full
+statement, and it governs on conflict.** Other sections name single facts about
+it where their own argument needs one — [§ twin-doc](#twin-doc) for how the
+value is set, [§ ceremony](#ceremony) to contrast its silence rule,
+[§ Who decides](#who-decides-and-where-the-answers-are-recorded) for its
+ownership category, and both `AGENTS` files plus `HUMANS.md` in one line each.
+Those are pointers carrying a fact, not second statements: **where one disagrees
+with this section, this section is right and the other is stale.**
 
-**→ AR-1 fires here, and it challenges the README and the twin together** (human
-ruling 2026-08-04). Spawn the registered `ar-1` reviewer. See
+The step opens by putting one question to **the human** — **the twin ask**,
+named so it is never confused with [§ ceremony](#ceremony)'s: _are any twin docs
+required?_
+
+- **On "no", that is the entire twin ask.** No delegate is named, nothing is
+  written into the README, and the step is discharged by the recorded answer
+  itself.
+- **On "yes", a second question asks _which reader_**, offering the value set
+  for this work's kind — `machine` · `user` · `both` for software work,
+  `learner` · `teacher` · `both` for curriculum work. **The kind is never
+  asked**: it is derived from the path, mechanically
+  ([§ Software work and curriculum work](#software-work-and-curriculum-work)),
+  so the right values are offered without a third question.
+- **At any value other than `none`, the step produces the twin document
+  itself.** `twin-doc` keeps every value it has.
+
+**This is an ask, not a gate.** It does not block, and it does not add a second
+human gate — Phase 0 still has exactly one, at the end. It fires **once per
+Phase-0 increment, not once per commit** — which is not the same as once per
+module, because Phase 0 also runs when a module, contract or region is
+**reshaped**, and because the re-ask below fires again across a session
+boundary. **Increments that are not Phase-0 work carry the module's standing
+value and ask nothing** — stated at
+[§ Who decides](#who-decides-and-where-the-answers-are-recorded), because it is
+a rule about the record rather than about this step.
+
+**Silence resolves to `none`, and the divergence from [§ ceremony](#ceremony) is
+deliberate** (human ruling 2026-08-11). If no answer has arrived by the time the
+increment commits, the settings line records `twin-doc: none`; no fifth value is
+invented. § ceremony resolves its own unanswered question the **other** way —
+`ceremony` ships marked unset rather than filled — and **the two must not be
+harmonized.** Two asymmetries make that difference correct, and both are
+checkable rather than asserted:
+
+1. **Record-default versus work-default.** § ceremony separates them explicitly:
+   silence answers for the _work_ (it runs at `medium`) but not for the
+   _record_, so its record has no safe default and an honest greppable gap beats
+   an invented value. `twin-doc`'s work-default and record-default are the same
+   value, `none`, so recording it invents nothing.
+2. **The silence window differs by an order of magnitude.** The ceremony ask
+   fires at the moment of recording, so its window is one turn. The twin ask
+   fires at 0.2 and the record is written a step or two later, possibly across a
+   session boundary. Two questions whose windows differ that much cannot resolve
+   silence identically.
+
+Underneath both: `ceremony` is the human's **alone**, so filling it after
+silence would attribute to them a decision they never made. `twin-doc` has
+always been agent-statable at its default, and this ruling puts an ask in front
+of it **without transferring sole authority** — which is the only reason the
+same ruling can direct the agent to record `none` when nobody answered. **An
+editor who wants these two rules to agree must first establish that `twin-doc`
+became a human-only axis, and this rule's own silence fallback denies it.**
+
+**Where the answer lands:** the commit body's settings line
+([§ Who decides](#who-decides-and-where-the-answers-are-recorded)) — the same
+place the other three settings values are recorded, and now the only place this
+one is.
+
+**The answer is re-asked, not remembered** (human ruling 2026-08-13). The twin
+ask happens at 0.2; the settings line is written when the increment commits, one
+or two steps later. If a session ends in between, **ask again** — do not carry
+the answer in a plan file, which [§ Ruling provenance](#ruling-provenance) says
+is not a record at all.
+
+**The answer window closes at AR-1, not at the commit.** An answer that arrives
+before `ar-1` spawns is the answer. One that arrives later **re-opens 0.2**:
+produce the twin, and re-run AR-1 before 0.3 closes. The window has to close
+somewhere, and it closes here for two reasons — at any value other than `none`
+the step still owes a **document**, so a later answer would produce 0.2's
+artifact after 0.3 and invert the order this section calls unconditional; and
+AR-1's input set is fixed by this value, so an answer arriving after AR-1 has
+already run leaves the design gate reviewed against the wrong contract.
+
+**Where a twin already exists, the tree is the answer.** Silence resolves to
+`none` only where **no** twin document exists. If 0.2 has already produced one —
+in an earlier session, or at an earlier establishment of the same module — the
+re-ask confirms it and silence leaves it standing. Without this bound, a session
+boundary plus one non-answer would silently reverse a human's explicit "yes" and
+leave a twin in the tree contradicting `twin-doc: none` in the record. That is
+not the same-record cost accepted below, which is about a default nobody
+objected to, not about an affirmative answer being overwritten.
+
+⚠ **This bound is only as good as your ability to find the document, and no
+convention fixes where a twin lives** (gap recorded 2026-08-13, open). The
+settings line records the **reader** (`machine`), never a path, and nothing in
+this file names a filename or a location for a twin document. So "does a twin
+exist?" is today a search rather than a lookup — answerable in practice, because
+whoever re-asks is working in the module, but not mechanically. Closing it means
+choosing a home (the module README's `## Navigation` block, beside the `DOCS.md`
+link, is the obvious candidate since that pattern already exists); that is a new
+convention and wants a ruling, not an agent's choice.
+
+**The accepted cost, recorded so it is not rediscovered as a defect** (human
+ruling 2026-08-13). Four things are true and were in view when this was ruled:
+at `twin-doc: none` a deliberate "no" and an unanswered ask are
+**indistinguishable in the record**; so, for the same reason, are an ask that
+was put and one that was **never put at all**, which makes a skipped 0.2
+invisible to any check reading only the record — the human who was or was not
+asked is the observation channel that still discriminates, which is why
+[HUMANS.md § Verification rituals](./HUMANS.md#verification-rituals) asks them
+that first; the working tree carries **no artifact for the step at all**, so
+[§ Ruling provenance](#ruling-provenance)'s "the body is the timestamp, the
+document is the home" bites here; and the stripped block's **Falsified if**
+field was this repo's only falsification-condition mechanism, so the vocabulary
+for "the condition under which a standing decision stops holding" leaves with
+it. None is re-opened by finding it again; re-opening takes a new ruling.
+
+**→ AR-1 fires here.** It challenges the README, plus the twin wherever one is
+owed. At `twin-doc: none` the recorded answer discharges 0.2 and AR-1 challenges
+the README alone — and that is its **complete** input set at the default, not
+half of one. Spawn the registered `ar-1` reviewer. See
 [§ Adversarial Review Protocol](#adversarial-review-protocol).
 
 **0.3. types.ts, the DOCS.md sketch, and the tests.** Three artifacts, one step,
@@ -2244,10 +2415,13 @@ is not modeled here, and
 
 ### AR-1: Design Challenge
 
-**Trigger:** During Phase 0, after the README (0.1) and the twin (0.2), before
+**Trigger:** During Phase 0, after the README (0.1) and step 0.2's ask, before
 `types.ts` locks the contract (0.3). It challenges the README **and** the twin
-together. **Skip:** Only when the human explicitly opts out, or when the
-declared ceremony level does not include this review.
+together **wherever a twin is owed**; at `twin-doc: none` the recorded answer
+discharges 0.2 and this reviewer challenges the README alone — which is its
+complete input set at that value, not half of one. **Skip:** Only when the human
+explicitly opts out, or when the declared ceremony level does not include this
+review.
 
 <strong>Focus areas:</strong>
 
@@ -2269,11 +2443,11 @@ declared ceremony level does not include this review.
   unnecessarily?
 - Are the types over- or under-specified?
 
-**Provide to agent:** README updates **and the twin** — or, at `twin-doc: none`,
-the `## Epistemology` block inside the README that discharges step 0.2 — any
-design notes, existing codebase patterns. AR-1 challenges the README and the
-twin together, so handing over the README alone gives this reviewer half its
-inputs.
+**Provide to agent:** README updates, **the twin wherever one is owed**, any
+design notes, existing codebase patterns. At `twin-doc: none` there is no twin
+to hand over and the README is this reviewer's complete input; at any other
+value, AR-1 challenges the README and the twin together, so handing over the
+README alone gives it half its inputs.
 
 ### AR-2: Architectural Sketch Challenge
 
@@ -2317,7 +2491,12 @@ review.
   library nodes or the prop/callback edge labels as violations: the
   node-and-identifier bans are suspended for that diagram mode.
 
-**Provide to agent:** DOCS.md architectural sketch, README.md, types.ts
+**Provide to agent:** DOCS.md architectural sketch, README.md, types.ts. **On a
+documentation-only changeset there is neither a sketch nor a `types.ts`** —
+there the structural artifact is whatever workflow-shaping block the change
+rewrites, and the dispatching agent **names it in the prompt**. A reviewer left
+to invent its own input reviews something nobody chose (recorded 2026-08-13, the
+third docs-only campaign to hit this).
 
 ### AR-3: Test Strategy Challenge
 
@@ -2421,15 +2600,14 @@ that has none.
 
 - Cross-file consistency: do naming, patterns, and conventions align?
 - Documentation sync: do README, DOCS.md, types, JSDoc, and tests all agree?
-  Include Phase 0 step 0.2 — the twin, or at `twin-doc: none` the
-  `## Epistemology` block inside the README. Its three fields must still be
-  filled, the **Delegated to** holder must still resolve to something real (a
-  holder you cannot find is the same defect as a blank field), and **Falsified
-  if** must be read against the changeset: if these increments met the stated
-  condition, the module now owes its own twin and the block is stale. Judge
-  whether the delegation is still _true_, not whether it was ever _wise_ — the
-  latter is AR-1's question, and re-opening it here turns the merge gate into a
-  second design review.
+  Include Phase 0 step 0.2. At `twin-doc: none` there is no document to audit —
+  the discharge is the recorded answer, so the check is that the commit body
+  carries a settings line at all. At any other value the named twin document
+  must exist, describe what was built, and still name the right reader; if these
+  increments changed who this work owes an account to, the value is stale.
+  **Judge whether the recorded answer is still _true_ of the changeset, not
+  whether it was ever _wise_** — the latter is AR-1's question, and re-opening
+  it here turns the merge gate into a second design review.
 - Missing test scenarios: are there untested code paths?
 - Convention compliance: does the full changeset follow DEV.md conventions?
 - Architecture: does this fit cleanly into the existing layer stack? Does the
@@ -2463,12 +2641,13 @@ that has none.
 **Provide to agent:** the baseline SHA (recorded at plan approval via
 `git rev-parse HEAD`) and the modified file paths — the reviewer runs
 `git diff <baseline>..HEAD` itself — plus the original task description and the
-**Phase 0 spec paths** for modified modules: `README.md` (which carries the
-twin, or the `## Epistemology` block that discharges it), `types.ts`, and
-`DOCS.md`. **Not `DOCS.md` alone** — the spec is those artifacts read together,
-so a reviewer handed one of them runs its scope-vs-spec check against a third of
-the spec. Pass paths, not pasted contents: the reviewer has Read and Bash —
-`git grep` covers search — and pulls its own inputs.
+**Phase 0 spec paths** for modified modules: `README.md`, `types.ts`, `DOCS.md`,
+**and the twin document wherever one is owed** — at `twin-doc: none` there is
+none, and the commit body's settings line is what discharges 0.2. **Not
+`DOCS.md` alone** — the spec is those artifacts read together, so a reviewer
+handed one of them runs its scope-vs-spec check against a fraction of the spec.
+Pass paths, not pasted contents: the reviewer has Read and Bash — `git grep`
+covers search — and pulls its own inputs.
 
 ## Linting Conventions
 

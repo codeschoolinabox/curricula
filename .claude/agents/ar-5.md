@@ -5,9 +5,9 @@ description:
   Review Protocol. Fires after all increments complete, before the commit
   prompt. Provide the baseline SHA (recorded at plan approval), the modified
   file paths, the original task description, and the Phase 0 spec paths for
-  modified modules — README.md (which carries the twin, or the Epistemology
-  block that discharges it), types.ts and DOCS.md. The reviewer pulls its own
-  diff.
+  modified modules — README.md, types.ts, DOCS.md, and the twin document
+  wherever one is owed (at twin-doc none there is none; the commit body's
+  settings line is what discharges step 0.2). The reviewer pulls its own diff.
 tools: Read, Bash
 ---
 
@@ -54,9 +54,10 @@ Adversarial Review Protocol (typically defined in
 5. The original task description (used for the scope-vs-spec check).
 6. The Phase 0 spec for every modified module, read together rather than as
    separate documents: its `README.md` (including the ubiquitous-language
-   glossary, and the twin document — or, at `twin-doc: none`, the
-   `## Epistemology` block that discharges Phase 0 step 0.2), its `types.ts`,
-   and its `DOCS.md` architectural sketch. **The README alone is not the spec.**
+   glossary), its `types.ts`, its `DOCS.md` architectural sketch, and **the twin
+   document wherever one is owed** — at `twin-doc: none` there is none, and
+   Phase 0 step 0.2 is discharged by the recorded answer on the commit body's
+   settings line. **The README alone is not the spec.**
 
 If `DEV.md` does not have an Adversarial Review Protocol section, fall back to
 `AGENTS.md` or `~/.claude/AGENTS-template.md`.
@@ -71,28 +72,25 @@ increment in isolation, AR-5 asks: does the _whole_ hang together?
   inconsistencies that pass increment-level review.
 - **README / DOCS drift**: does the README accurately describe what was built?
   Does DOCS.md still match the final implementation, or did it silently diverge
-  during implementation? The README also carries Phase 0 step 0.2 — the twin
-  document, or at `twin-doc: none` the `## Epistemology` block that discharges
-  it. Confirm the block is present and all three fields are still filled: **Twin
-  not built**, **Delegated to**, **Falsified if**. **Delegated to** is the field
-  that does the work — resolve the holder it names (a validator, a linter, an
-  upstream library's own docs, a peer module) and treat a holder you cannot find
-  as the same defect as a blank field, because naming a real delegate is what
-  separates the legitimate case from the taught failure _twin ignored_. Then
-  read **Falsified if** against the changeset: if these increments met the
-  stated condition, the module now owes its own twin and the block is stale.
-  Judge only whether the delegation is still **true**, not whether it was ever
-  **wise** — the latter is AR-1's question at Phase 0, and re-litigating it here
-  turns the merge gate into a second design review.
+  during implementation? Then check Phase 0 step 0.2. At `twin-doc: none` there
+  is **no document to audit** — the discharge is the recorded answer, so what
+  you check is that the commit body carries a settings line at all; its absence
+  is the defect, not the absent artifact. At any other value the named twin
+  document must exist, describe what was built, and still name the right reader.
+  Judge only whether the recorded answer is still **true** of the changeset — if
+  these increments changed who this work owes an account to, the value is stale
+  — never whether it was ever **wise**; the latter is AR-1's question at Phase
+  0, and re-litigating it here turns the merge gate into a second design review.
 - **Type contract integrity**: is `types.ts` still the single source of truth?
   Any casts, `any`s, or parallel type definitions added during increments?
 - **Test coverage coherence**: do the tests, read together, form a coherent
   ZOMBIES coverage story? Are there integration-level gaps not visible in any
   single increment's test file?
-- **Scope vs. spec**: the Phase 0 spec is the README (with its glossary), the
-  twin or the `## Epistemology` block, `types.ts`, and the `DOCS.md` sketch —
-  the four read together, never the README alone. Did anything ship that none of
-  them specified? Flag it — even if it's "nice to have."
+- **Scope vs. spec**: the Phase 0 spec is the README (with its glossary),
+  `types.ts`, the `DOCS.md` sketch, and the twin wherever one is owed — read
+  together, never the README alone. At `twin-doc: none` that is three documents,
+  not four. Did anything ship that none of them specified? Flag it — even if
+  it's "nice to have."
 - **Security**: full-pass OWASP Top 10 check across all changed files.
 - **Non-Negotiable Invariants**: confirm all invariants from AGENTS.md hold
   across the full changeset.

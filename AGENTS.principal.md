@@ -66,19 +66,22 @@ encouragement. They cannot be overridden by momentum.
    session. The harness enforces this mechanically for tracked edits; it remains
    policy for every path around the tooling.
 2. **Phase 0 before Phase 1** — work through Phase 0 in order: **0.1 README**
-   (with the ubiquitous-language glossary inside it) → **0.2 the twin**, or the
-   `## Epistemology` block that discharges it → **AR-1**, which challenges the
-   README and the twin together → **0.3 types.ts + the DOCS.md sketch + the
-   tests**, written for real and committed skipped → **AR-2** → review, resolve,
-   commit → **human gate**. Three artifact-named steps, not seven numbered ones
+   (with the ubiquitous-language glossary inside it) → **0.2 the twin**, asked
+   for and produced only where one is owed → **AR-1**, which challenges the
+   README and any twin owed → **0.3 types.ts + the DOCS.md sketch + the tests**,
+   written for real and committed skipped → **AR-2** → review, resolve, commit →
+   **human gate**. Three artifact-named steps, not seven numbered ones — though
+   at `twin-doc: none`, the near-universal case, step 0.2 produces no file and
+   its discharge is the recorded answer (human ruling 2026-08-13)
    ([DEV.md § Phase 0](./DEV.md#phase-0-documentation-specification-before-any-code)).
    The pull to skip this under time pressure is real for every agent generation.
-   Do not skip it. **What binds unconditionally is the artifact order**; the
-   chain above draws the gates at `ceremony: full`, and which of AR-1 and AR-2
+   Do not skip it. **What binds unconditionally is the artifact order**, even
+   where a step's deliverable is a recorded answer rather than a file; the chain
+   above draws the gates at `ceremony: full`, and which of AR-1 and AR-2
    actually fire is set by the declared level — each `### AR-N` section's
    **Skip:** line carries that caveat ([DEV.md § ceremony](./DEV.md#ceremony)).
-   Reading a missing AR as license to reorder or drop an artifact inverts this
-   invariant.
+   Reading a missing AR — or a step that produced no file — as license to
+   reorder or drop an artifact inverts this invariant.
 3. **Plan before implementing** — enter plan mode for anything beyond a trivial
    fix. Exception: user explicitly says "skip plan mode."
 4. **One increment at a time** — complete Red → Green → Refactor → Lint before
@@ -299,13 +302,14 @@ All development uses TDD with atomic increments. Full process:
 **Phase 0 — Documentation specification** (all three steps, in order, before any
 code): **0.1 README** — the domain model in prose and its bounded context, with
 the ubiquitous-language glossary **inside it**, not as a separate step → **0.2
-the twin**, or the `## Epistemology` block that discharges it at
-`twin-doc: none` → **AR-1**, which challenges the README **and the twin**
-together → **0.3 types.ts + the architectural sketch in DOCS.md** (with the
-**Mermaid `## Data flow` diagram**) **+ the tests, written for real and
-committed skipped** → **AR-2** → review, resolve, and commit Phase 0 artifacts.
-Phase 1 un-skips one test at a time in ZOMBIES order, and AR-3 fires on each
-un-skip. Phase 1 does not start until the human approves the Phase 0 commit.
+the twin**, asked for and produced only where one is owed; at `twin-doc: none`
+the recorded answer discharges the step and no file is written → **AR-1**, which
+challenges the README **and any twin owed** → **0.3 types.ts + the architectural
+sketch in DOCS.md** (with the **Mermaid `## Data flow` diagram**) **+ the tests,
+written for real and committed skipped** → **AR-2** → review, resolve, and
+commit Phase 0 artifacts. Phase 1 un-skips one test at a time in ZOMBIES order,
+and AR-3 fires on each un-skip. Phase 1 does not start until the human approves
+the Phase 0 commit.
 
 **Phase 1 — per increment**: JSDoc → stub → ONE failing test in ZOMBIES order →
 **AR-3** → implement (Fake It is legitimate for the first test; it expires when
@@ -861,8 +865,13 @@ What you need before reading it:
 - The default is **software work · `twin-doc: none` · `ceremony: medium` ·
   `prospective`**. Unnamed paths are software work. The default is a declared
   position, not a lapse — and the declaration is what makes it one.
-- **You state three of the four answers; you never state `ceremony`.** The kind
-  of work is derived from the path, mechanically. `ceremony` is the human's.
+- **You state two of the four answers — the kind of work (derived from the path)
+  and prospective/retrospective. You never state `ceremony`. You _ask_ for
+  `twin-doc`, and record `none` if no answer comes** (human ruling 2026-08-11).
+  `ceremony` is the human's; `twin-doc` is a third category, asked of the human
+  at Phase 0 step 0.2 and recorded by you. Outside Phase 0 nothing is asked —
+  the commit carries the module's standing value, and `none` where none was ever
+  established.
 - Record the answers in the **commit body**. A plan file is not a record.
 
 ```text

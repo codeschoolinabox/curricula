@@ -270,6 +270,16 @@ one such drift: an independently-evolved copy of this walk lives in the
 pre-greenfield tree, carrying a third node-rule state and violations that carry
 a severity, and it cannot be substituted for this one.
 
+They need the same walk and **hold different notional machines**, and that is
+why the leaf is domain-blind rather than merely generic. A language level's
+curriculum position and a generator's screening of a candidate are different
+models of what a node type _means_, which constructs are worth refusing, and
+what a refusal should cost a reader — so it is not that a language model was too
+costly to build here, but that there is no single one to build: a leaf holding
+either would be wrong for the other. Those judgments belong to the caller's
+curation, which owns the node-rule table and the ruling on what a violation is
+worth; what node types exist and what shape they take belong to the parser.
+
 Factoring the walk into one domain-blind leaf keeps a single screening truth,
 and — because the walk's soundness is parse-relative — puts the settings it is
 sound against in the same place, so the pairing cannot drift apart.
@@ -295,6 +305,14 @@ rules:
   replacement, a fix-it — is a different concern with different authority, and
   it composes on top of an absence report rather than replacing it. A leaf that
   recommends has silently taken a domain position about what the writer wanted.
+- **Never acquires a severity, an ordering by importance, or a default table.**
+  Each is a claim about the language or its reader, and each belongs to the
+  caller's curation — a leaf holding one has taken the domain position the
+  domain-blind rule above forbids. (Stated as a standing rule 2026-08-13, when
+  the `## Epistemology` convention that used to carry it as a falsification
+  condition was stripped repo-wide; the constraint is older than this wording
+  and is why the pre-greenfield copy of this walk, which carries a severity,
+  cannot be substituted for it.)
 - **Never parses — the shipped graph's acorn import is type-only.** The leaf
   publishes the settings and takes a parsed tree. A parser call inside this leaf
   would make it the second parse configuration it exists to prevent, and the
@@ -318,24 +336,6 @@ rules:
 - **The violation shape is a cross-consumer contract.** Its four fields are what
   every consumer reads; widening it is an inter-module contract change, not a
   local edit.
-
-## Epistemology
-
-**Twin not built:** the notional machine of the language being screened — what a
-node type _means_, which constructs are worth refusing, and what a refusal
-should cost a reader. **Delegated to:** the caller's curation, which owns the
-node-rule table and the ruling on what a violation is worth, and the parser,
-which is authoritative for what node types exist and what shape they take.
-**Falsified if:** this leaf ever acquires a severity, an ordering by importance,
-a default table, or a message a consumer is expected to show a reader unedited —
-each of those is a claim about the language or its reader, and holding one means
-this module owes its own notional-machine document.
-
-The delegation is why the module is domain-blind rather than merely generic: it
-is not that a language model was too costly to build here, but that two
-consumers hold different ones — a language level's curriculum position, and a
-generator's screening of a candidate — and a single leaf holding either would be
-wrong for the other.
 
 ## Navigation
 

@@ -2,11 +2,11 @@
 name: ar-1
 description:
   Use to run an AR-1 (Design Challenge) review per a project's Adversarial
-  Review Protocol. Fires during Phase 0, after the README (0.1) and the twin
-  (0.2) — it challenges both together — and before types.ts locks the contract.
-  Provide the README updates and the twin (at twin-doc none, the Epistemology
-  block inside the README), design notes, and pointers to existing codebase
-  patterns.
+  Review Protocol. Fires during Phase 0, after the README (0.1) and step 0.2's
+  twin ask, and before types.ts locks the contract. Provide the README updates,
+  the twin wherever one is owed (at twin-doc none there is none — the recorded
+  answer discharges 0.2 and the README is the complete input), design notes, and
+  pointers to existing codebase patterns.
 model: opus
 tools: Read, Bash
 ---
@@ -27,11 +27,13 @@ project's AGENTS.md / AGENTS-template.md).
    agent prompt structure, verdict definitions, resolution rules.
 2. The project's `DEV.md` § AR-1: Design Challenge — the full focus areas list.
    Use these as the criteria for your review.
-3. The README updates being reviewed, **including the twin** — or, at
-   `twin-doc: none`, the `## Epistemology` block inside the README that
-   discharges Phase 0 step 0.2. You challenge the README and the twin
-   **together**; an AR-1 handed only the README has reviewed half of what its
-   own trigger names.
+3. The README updates being reviewed, **including the twin wherever one is
+   owed**. At `twin-doc: none` there is no twin and no block — Phase 0 step 0.2
+   is discharged by the recorded answer on the commit body's settings line, and
+   the README **is** your complete input; do not report the missing document as
+   a defect. At any other `twin-doc` value you challenge the README and the twin
+   **together**, and an AR-1 handed only the README has reviewed half of what
+   its own trigger names.
 4. Any design notes the implementing agent provides.
 5. Existing codebase patterns the implementer says this design should align
    with.

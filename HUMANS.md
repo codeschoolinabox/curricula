@@ -55,13 +55,13 @@ Long sessions decay. Plan for it.
 
 **Default to one Phase 0 increment per session, then `/clear`.** Phase 0 (DDD:
 0.1 the README, with the ubiquitous-language glossary inside it → 0.2 the twin,
-or the `## Epistemology` block that discharges it → AR-1, on the README and the
-twin together → 0.3 types.ts + the DOCS.md sketch + the ZOMBIES suite, written
-for real and committed skipped → AR-2 → review, resolve, commit → your gate) is
-heavy context — the suite at 0.3 makes it heavier than the step count suggests.
-Phase 0 + Phase 1 in one session is where context decay starts to bite. After
-Phase 0 commits land, the natural break point is now. The agent should remind
-you of this when Phase 0 finishes; you decide whether to push through.
+asked for and produced only where one is owed → AR-1, on the README and any twin
+owed → 0.3 types.ts + the DOCS.md sketch + the ZOMBIES suite, written for real
+and committed skipped → AR-2 → review, resolve, commit → your gate) is heavy
+context — the suite at 0.3 makes it heavier than the step count suggests. Phase
+0 + Phase 1 in one session is where context decay starts to bite. After Phase 0
+commits land, the natural break point is now. The agent should remind you of
+this when Phase 0 finishes; you decide whether to push through.
 
 **Commit between increments, not at session end.** Each passing TDD cycle is one
 atomic commit. If you finish three increments before committing, you have three
@@ -96,10 +96,10 @@ quality cliff is small or absent.
 **Use Opus for:**
 
 - Phase 0 design work — the DDD thinking, across all three steps: the README and
-  the ubiquitous-language glossary inside it; the twin, or the `## Epistemology`
-  block that discharges it; and types.ts with the architectural sketch in
-  DOCS.md **and the ZOMBIES suite** — 0.3 is three artifacts, and the suite is
-  the one that makes it expensive
+  the ubiquitous-language glossary inside it; the twin ask, and the twin itself
+  wherever one is owed; and types.ts with the architectural sketch in DOCS.md
+  **and the ZOMBIES suite** — 0.3 is three artifacts, and the suite is the one
+  that makes it expensive
   ([DEV.md § Phase 0](./DEV.md#phase-0-documentation-specification-before-any-code))
 - AR-1 (Design Challenge) — drift / cross-cutting (the one pinned judgment
   review; AR-2 and AR-5 are deliberately NOT pinned — they inherit the session's
@@ -245,23 +245,44 @@ that is the signal it is rationalizing skipping ceremony and must instead
 surface the friction explicitly. ARs are mandatory; only the human's explicit
 invocation flips that.
 
-**One thing the agent may ask you, and only this** — read it as the "surface the
-friction explicitly" half of the rule above rather than an exception to it. When
-a record is about to claim you chose a ceremony level and you never set one, the
-agent asks instead of supplying a value. **Your silence answers for the work,
-not for the record:** say nothing and the work runs at `medium`, and the agent
-must not interrupt you to confirm that — but a level in a commit body is a
-ruling, and a ruling nobody made is not one. The mechanics, including what the
-agent writes if you don't answer, are canonical in
+**Two things the agent may ask you, and only these** (the second added
+2026-08-13) — read them as the "surface the friction explicitly" half of the
+rule above rather than an exception to it.
+
+**The ceremony ask.** When a record is about to claim you chose a ceremony level
+and you never set one, the agent asks instead of supplying a value. **Your
+silence answers for the work, not for the record:** say nothing and the work
+runs at `medium`, and the agent must not interrupt you to confirm that — but a
+level in a commit body is a ruling, and a ruling nobody made is not one. The
+mechanics, including what the agent writes if you don't answer, are canonical in
 [DEV.md § ceremony](./DEV.md#ceremony).
+
+**The twin ask.** At Phase 0 step 0.2 the agent asks whether any twin docs are
+required, and on "yes" asks which reader. **Here your silence answers for the
+record too:** say nothing and it records `twin-doc: none`, which is the same
+value it would otherwise have supplied — so a non-answer costs you nothing and
+blocks nothing. That is the opposite of the ceremony rule above, deliberately;
+the two axes differ in who owns them, not in whether they have a safe default.
+Canonical in
+[DEV.md § Phase 0](./DEV.md#phase-0-documentation-specification-before-any-code)'s
+twin ask.
 
 **What is yours here is telling a permitted ask from a banned one**, because
 that judgement is coaching and nothing mechanical makes it. The contrast pair:
 _"you haven't set a ceremony level for this campaign — what should the commit
 body say?"_ is permitted; _"shall we run this one light?"_ is not, and the only
 difference is that the second named a value. An agent that proposes a level,
-argues one is appropriate here, or offers you a menu is drafting your phrase,
-and the rule above catches it — **push back on that one; answer the other.**
+argues one is appropriate here, or offers you a menu is drafting your phrase —
+**push back on that one; answer the other.**
+
+**The one carve-out, so the test above does not misfire.** Offering you a menu
+is part of the banned pattern **for ceremony** and is exactly right **for the
+twin ask's second question**, which offers `machine` · `user` · `both` for
+software work and `learner` · `teacher` · `both` for curriculum work. The
+difference is that those are the axis's whole closed value set, fixed in
+`DEV.md` and selected by a path the agent does not choose — so it is reading you
+the options, not drafting your answer. A ceremony menu is drafting, because the
+agent picks which levels to put in front of you.
 
 **Phrases below are listed verbatim.** The agent should accept close paraphrases
 ("skip the alignment check" for "skip alignment check") but reject
@@ -294,9 +315,8 @@ considered choice:
 - **"trivial fix mode"** — for typo fixes, lint cleanup, format-only changes, or
   other edits that touch a single file with no public-API surface. Phase 0 is
   **not bypassed** — Phase 0 governs _new module establishment work_: the README
-  with the ubiquitous-language glossary inside it, the twin or the
-  `## Epistemology` block that discharges it, and types.ts with the DOCS.md
-  sketch and the test suite
+  with the ubiquitous-language glossary inside it, the twin ask and the twin
+  wherever one is owed, and types.ts with the DOCS.md sketch and the test suite
   ([DEV.md § Phase 0](./DEV.md#phase-0-documentation-specification-before-any-code)).
   Trivial fixes aren't Phase 0 work in the first place. If the change touches a
   public type, an exported function signature, a peer-file contract, or a
@@ -445,20 +465,30 @@ agent claims things are done; you verify they actually are.
 - **Find the glossary inside the README.** The ubiquitous language is step 0.1's
   own content, not a separate deliverable — a README with no glossary is an
   incomplete 0.1, not a complete step with another one still to come.
-- **Find step 0.2.** Either a twin document exists, or the README carries an
-  `## Epistemology` block — and that block names three things: the twin **not**
-  built, the named holder it is delegated to, and what would falsify that
-  delegation. A block that records only the gap describes the failure mode; it
-  does not discharge the step.
+- **Find step 0.2 — in the conversation first, then in the commit body**
+  (changed 2026-08-13; before that it was a `## Epistemology` block in the
+  README). **Were you actually asked?** If no question about twin docs ever
+  reached you, 0.2 was skipped, and a `twin-doc: none` on the settings line is
+  recording an answer nobody gave. **You are the only check on this** — a
+  skipped ask and an unanswered one are identical in the record, so nothing
+  downstream can catch it. Then: if you said yes, the named twin document exists
+  and this is where you read it. If you said no — **or said nothing, which
+  records `none`** — the recorded answer on the settings line **is** the whole
+  of step 0.2 and **there is nothing in the working tree to look for**; an
+  absent artifact here is not a skipped step. Last, check a settings line is
+  present at all: an increment that ships without one ships without it forever,
+  since amend is forbidden.
 - **Verify the ARs your ceremony level actually fires** (check for the spawned
   agents in conversation history). At `full` that is AR-1 **and** AR-2; at
   `medium` — the default — it is **AR-1 only**, and a missing AR-2 is correct,
   not a lapse; at `light` neither fires and AR-5 carries the whole gate. Check
   the level before you check the agents, or you will flag a compliant agent for
   skipping a review its level never asked for.
-- Whichever fired, verify **AR-1 was handed the twin as well as the README** —
-  it challenges both together, so an AR-1 that only saw the README reviewed half
-  of what it is for.
+- Whichever fired, verify **AR-1 was handed the twin as well as the README
+  wherever a twin was owed** — it challenges both together, so at any `twin-doc`
+  other than `none` an AR-1 that only saw the README reviewed half of what it is
+  for. At `twin-doc: none` there is no twin to hand over and the README **is**
+  its complete input; do not flag that as a half-fed review.
 - **Ask to see the skipped test suite.** The full ZOMBIES suite is written for
   real at 0.3 and committed in a skipped state; Phase 1 un-skips one at a time.
   The tests should report as skipped, not as absent — a Phase 0 with no suite
@@ -693,27 +723,39 @@ its live-fire probes, `npm run test:hooks`). Audit at ~400 lines.
 **A step that keeps its number and changes its meaning is the dangerous case**,
 because nothing fails loudly — every other kind of change leaves a dangling
 reference that something eventually trips over. Watch for that one specifically.
+**Step 0.2 has now done it twice** — it meant _README_ before 2026-08-04, then
+_the twin or the block discharging it_, and since 2026-08-13 _the twin ask, and
+the twin wherever one is owed_. Both changes kept the number.
 
-**When a workflow step changes shape, this file recites that workflow in four
+**When a workflow step changes shape, this file recites that workflow in six
 places and they are not next to each other.** That is why a stale recital
-survives here: you fix the section you happened to be editing, and three others
-keep teaching the old shape. Re-read all four against the changed step:
+survives here: you fix the section you happened to be editing, and five others
+keep teaching the old shape. Re-read all six against the changed step:
 
 - the Phase 0 chain in [§ Session sizing rules](#session-sizing-rules);
 - the Phase 0 bullet in [§ Model selection rules](#model-selection-rules);
 - the "Phase 0 is not bypassed" clause inside "trivial fix mode" in
   [§ Override grammar](#override-grammar);
+- **the twin ask, in the permitted-asks pair in
+  [§ Override grammar](#override-grammar)** — a second, separate recital in the
+  same section as the one above, added 2026-08-13; the carve-out about menus
+  lives with it;
 - the "After a Phase 0" checklist in
   [§ Verification rituals](#verification-rituals) — the one you actually run at
-  the gate, and therefore the one where a stale recital costs the most.
+  the gate, and therefore the one where a stale recital costs the most;
+- **the AR-1-was-handed-the-twin check**, a few bullets below that checklist in
+  the same section — it states what AR-1's inputs are, so it goes stale whenever
+  step 0.2 changes what exists to hand over.
 
 The source of truth is
 [DEV.md § Phase 0](./DEV.md#phase-0-documentation-specification-before-any-code);
 both AGENTS files carry a summary of it, so if the three disagree, one of them
-is stale and you do not get to pick which. If you ever add a fifth recital, add
-it to this list. (`npm run check:governance` verifies these four links resolve,
+is stale and you do not get to pick which. If you ever add a seventh recital,
+add it to this list. (`npm run check:governance` verifies these links resolve,
 so a renamed heading fails loudly — but it cannot tell you whether the prose
-under them still says the right thing. That part is yours.)
+under them still says the right thing. That part is yours, and the last two
+entries are here because a strip in 2026-08 found them by reading rather than by
+grep.)
 
 **The tier-per-phase mapping is the same hazard, in four places, and it had no
 list until now.** "Design tracks the strongest tier, post-gate TDD runs on a
