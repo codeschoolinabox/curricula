@@ -527,22 +527,27 @@ Never ran. Dead code with obvious learner intent. Under R-2's base rule that is
 wrote down why, in two places:
 
 > _"ships a **cursor-scoped, on-demand, positional** hints panel per
-> user-directed redesign. **The legacy 3-tier system
-> (`'auto' | 'easy' | 'medium' | 'hard'` controlling rendered richness) is
-> gone** — replaced by:"_ … _"The 3-tier system coupled scaffolding intensity to
+> user-directed redesign. The legacy 3-tier system
+> (`'auto' | 'easy' | 'medium' | 'hard'` controlling rendered richness) is gone
+> — replaced by:"_ … _The 3-tier system coupled scaffolding intensity to
 > difficulty, but the user's pedagogical goal is the inverse: the learner
-> chooses how much help to ask for, blank by blank. **The 'tier' is now
-> emergent** — how many blanks the learner chooses to peek at across a session
-> is itself the scaffolding gradient."_
+> chooses how much help to ask for, blank by blank. The "tier" is now emergent —
+> how many blanks the learner chooses to peek at across a session is itself the
+> scaffolding gradient._
+>
+> (The second fragment is set in italics without outer quote marks because the
+> source's own double quotes around "tier" would nest. Emphasis in both
+> fragments is the source's: only `cursor-scoped, on-demand, positional` carries
+> it.)
 >
 > — Gen-2 `blanks/README.md` § Hints panel contract
 >
 > ---
 >
 > _"An earlier design (now reversed) auto-derived a 3-tier hints config from the
-> difficulty slider … **User-directed redesign rejected this coupling on
-> pedagogical grounds: the learner, not the slider, should control
-> scaffolding.**"_
+> difficulty slider … User-directed redesign rejected this coupling on
+> pedagogical grounds: **the learner, not the slider, should control
+> scaffolding**."_
 >
 > — Gen-2 `blanks/DOCS.md` § Why hints are orthogonal to difficulty
 
@@ -572,9 +577,9 @@ array's first entry is a comment].
 Same shape as case 1: dead, designed, obviously intended. But walk Gen-2 and the
 answer inverts:
 
-> _"Tool extensions — `arrow` and `circle` were stubbed in the prior art
-> ('coming soon'); **the line-level `highlight` tool was half-implemented and
-> dropped at migration. Restoration is its own increment per tool.**"_
+> _"**Tool extensions** — `arrow` and `circle` were stubbed in the prior art
+> ("coming soon"); the line-level `highlight` tool was half-implemented and
+> dropped at migration. Restoration is its own increment per tool."_
 >
 > — Gen-2 `annotate/README.md` § Future direction
 
@@ -782,12 +787,13 @@ Recorded so they are not rediscovered.
 - **Summing incomparable counts.** Channel A lines and channel B guards measure
   different things. A roll-up that adds them is worse than one that reports
   neither, because it looks precise.
-- **A `revive` cleared by a heading grep.** The first draft of § The calibration
-  trio wrote it as a _pair_, cleared Gen-2 with _"no hint-level heading exists
-  there"_, and proposed reviving a coupling a human had explicitly reversed. The
-  ruling lives under `## Why hints are orthogonal to difficulty` — a heading
-  containing none of the feature's Gen-1 vocabulary. **This is why `walked` is a
-  required column and not advice.**
+- **A `revive` cleared by a heading grep.** The first draft of
+  [§ The calibration cases](#the-calibration-cases) wrote it as a _pair_,
+  cleared Gen-2 with _"no hint-level heading exists there"_, and proposed
+  reviving a coupling a human had explicitly reversed. The ruling lives under
+  `## Why hints are orthogonal to difficulty` — a heading containing none of the
+  feature's Gen-1 vocabulary. **This is why `walked` is a required column and
+  not advice.**
 - **An `[measured:]` tag naming the wrong instrument.** That same draft
   attributed the hints panel's styling to the orphan-CSS lister, whose output
   says the opposite: the classes are referenced, just from inside a falsy guard

@@ -54,11 +54,11 @@ and then `git show <that sha>^:<that path>`.
 
 ## The three generations
 
-| Gen                   | Where                                                                                                                                                  | What it is authoritative **for**                                                                                                                                                                                                                                                             |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Gen 1 — ORIGINALS** | `/Users/master/Documents/0-teach-code/0-spiralearn/0-study-lenses-committee/zz--oldd-clauding-and-context-dump/0--study-lenses--it-begins/src/lenses/` | **Visual and pedagogical intent.** Preact, flat `XxxLens.jsx` + `XxxLens.module.css` pairs. 12 render lenses + 6 action lenses, 14,377 lines. Rich CSS; much of its best design never shipped.                                                                                               |
-| **Gen 2 — QUARRY**    | `src/lib/study-lenses--deprecated-architecture/lenses/`                                                                                                | **Structure and tests.** Eight lens directories, seven of them implemented (`socratize` is documentation and types only), on a two-layer `core.ts` + wrapper architecture with excellent documentation. The ninth directory is `lib/`, which is not a lens. READ-ONLY — it still ships live. |
-| **Gen 3 — TARGET**    | `src/lib/study-lenses/lenses/`                                                                                                                         | **The contract.** Three lenses landed and wired.                                                                                                                                                                                                                                             |
+| Gen                   | Where                                                                                                                                                  | What it is authoritative **for**                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Gen 1 — ORIGINALS** | `/Users/master/Documents/0-teach-code/0-spiralearn/0-study-lenses-committee/zz--oldd-clauding-and-context-dump/0--study-lenses--it-begins/src/lenses/` | **Visual and pedagogical intent.** Preact, flat `XxxLens.jsx` + `XxxLens.module.css` pairs. 12 render lenses + 6 action lenses. **The 30 lens files total 14,075 lines** — 18 `.jsx` at 8,161 plus 12 `.module.css` at 5,914; the 14,377 an earlier revision published additionally counted `index.js` (179) and `__tests__/unified-api.test.js` (123), which are not lenses [all measured 2026-08-14: `wc -l`]. Rich CSS; much of its best design never shipped. |
+| **Gen 2 — QUARRY**    | `src/lib/study-lenses--deprecated-architecture/lenses/`                                                                                                | **Structure and tests.** Eight lens directories, seven of them implemented (`socratize` is documentation and types only), on a two-layer `core.ts` + wrapper architecture with excellent documentation. The ninth directory is `lib/`, which is not a lens. READ-ONLY — it still ships live.                                                                                                                                                                      |
+| **Gen 3 — TARGET**    | `src/lib/study-lenses/lenses/`                                                                                                                         | **The contract.** Three lenses landed and wired.                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
 Gen 1 and Gen 2 are both read-only quarries: **copy, never modify.** Verify a
 copy against the current HEAD blob rather than against a remembered revision —
@@ -336,6 +336,14 @@ sizing anything.**
 | **delimiters**        | ✗            | ✗               | **✅**       | `delimiter`        |
 | **comments**          | ✗            | **✅**          | ✗            | _outside the five_ |
 
+**✅ means _offered as a content type_, not _enabled by default_** — the two
+differ, and Gen-1's own defaults are uneven: `BlanksLens` ships all four of its
+types on, two of them with the author's comment _"Enable … by default for
+testing"_, while `DropDownsLens` ships `keywords`, `identifiers` and `comments`
+on but `operators` and `primitives` **off** [measured 2026-08-14: the
+`contentTypes` `useState` call in each]. **✗ means the type has no key at all**
+— which is why neither Gen-1 lens has a delimiter row to switch on.
+
 [read: `BlanksLens.jsx` and `DropDownsLens.jsx` `contentTypes` state; Gen-2
 `blanks/core.ts` defaults, `blanks/types.ts` `ContentType`,
 `blanks/lib/blankenate.ts` flag→category pairs, `blanks/README.md` § Toolbar
@@ -389,9 +397,18 @@ rolls a bare `Math.random()` per token, so blanks re-roll on every settings
 change … v1 keeps that behavior; a seeded RNG is deferred"_, with the one-line
 injection path named (`Math.random()` → an injected `random()`) [read: Gen-2
 `blanks/DOCS.md` § Why drop the seeded RNG]. Under R-2 qualification 1 the
-disposition is determined: **`restore — DEFERRED`**, carrying Gen-2's quoted
-deferral and its injection path. This paragraph exists because an earlier draft
-listed it as open and attributed the re-roll to Gen-1 alone.
+disposition is determined: **`restore`, gated `P1`** in the blanks lens session,
+carrying Gen-2's quoted deferral and its injection path.
+
+**It is deliberately NOT `restore — DEFERRED`** (human ruling 2026-08-14). That
+value means _"discharged by the named future **campaign**"_, and a blanks lens
+session is a scheduled unit of _this_ campaign — so the deferral parenthetical
+an earlier review asked for is not fillable here without inventing an owner. A
+row this campaign will itself build is a `restore` with a gate, and it stays
+**in** the open count until it is built, which a deferral would not.
+
+This paragraph exists because an earlier draft listed determinism as open and
+attributed the re-roll to Gen-1 alone.
 
 **The `comments` gap is a Gate-1 blocker, not this family's to settle.** Gen-1
 dropdowns ships `comments: true` as a default content type, but
