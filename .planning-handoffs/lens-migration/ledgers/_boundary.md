@@ -61,15 +61,28 @@ to the shared vocabulary and the recipient does not hold it; the handoff carries
 its definition
 ([FIDELITY-METHOD.md § The one addition](../FIDELITY-METHOD.md#the-one-addition--revive)).
 
-### `bnd-002` — the citation this campaign breaks
+### `bnd-002` — the citation this campaign broke, and repaired
 
 **Recipient:** the socratize-quiz re-enrichment campaign. **Status:** ⬜ **not
 yet acknowledged.**
 
-`.planning-handoffs/socratize-quiz-reenrichment/SPEC.md` carries
-`[read: MIGRATION-PLAYBOOK.md locked decision (1)]` as sourced evidence, and
-lists the playbook in a directory inventory. **This campaign retires that
-file**, so the citation will dangle.
+`.planning-handoffs/socratize-quiz-reenrichment/SPEC.md` carried
+`[read: MIGRATION-PLAYBOOK.md locked decision (1)]` as sourced evidence. **This
+campaign has now deleted that file** — recover it with
+`git log --diff-filter=D -- 'src/lib/study-lenses/lenses/MIGRATION-PLAYBOOK.md'`
+— and, because the break was its own act, **has re-pointed the citation** at
+[SPEC.md § Standing exclusions](../SPEC.md#standing-exclusions) rather than
+leaving it to dangle.
+
+**That repair does not close this row.** Per § Close conditions, a row closes on
+a commit in the recipient's own tree whose body cites the row id. Re-pointing a
+pointer is something this campaign can do alone; being held is not. **Status
+stays ⬜.**
+
+The sibling's **other** mention — the playbook's filename inside a dated
+`[measured: ls … 2026-08-12]` directory inventory — is deliberately left
+untouched. The deletion makes that measurement **stale, not false**, and
+rewriting another session's dated measurement would falsify their record.
 
 Two things the recipient needs, and they point in opposite directions:
 
@@ -79,7 +92,7 @@ Two things the recipient needs, and they point in opposite directions:
 - Decision (1)'s **socratize exception** — that socratize stays un-colorized —
   is **restored verbatim** and restated in
   [SPEC.md § Standing exclusions](../SPEC.md#standing-exclusions), which is
-  where the citation should now point.
+  where the citation now points.
 
 **This row exists because of this campaign's own act**, which makes it an
 obligation rather than an observation. Retiring a document while arguing that

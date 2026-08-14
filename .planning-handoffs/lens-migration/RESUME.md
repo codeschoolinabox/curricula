@@ -70,13 +70,10 @@ exemption, and the register check. Land them in `SPEC.md` and
 method after eight ledgers exist means either re-cutting rows or living with two
 generations of them.
 
-**And retire the playbook.** `src/lib/study-lenses/lenses/MIGRATION-PLAYBOOK.md`
-is **still present and still tracked at 571 lines** [measured: `git ls-files`,
-`wc -l`], while `SPEC.md`'s third paragraph asserts in the present tense that it
-"supersedes and retires" it and `_playbook.md` says it "retires now". It still
-tells agents `built-in-lenses.ts` is empty. The transport ledger is written; the
-deletion is not done. A live stale control panel is the hazard the campaign
-opens by naming, and it is currently the campaign's own.
+**The playbook is retired.** Deleted 2026-08-14; its transport ledger was
+corrected first, because it certified four module names as transported that
+measurably were not. Both acts are recorded in § What is committed. Nothing here
+is owed.
 
 1. **`ledgers/<lens>.md` — the seeded per-lens ledgers.** Pass 1 (mechanical
    seeding) has been _run_ but not _written up_; its outputs are gone with the

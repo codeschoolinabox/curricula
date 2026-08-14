@@ -525,8 +525,17 @@ view get syntax coloring?":
   verbatim] — highlighting OFF so the lens's own decorations carry the ONLY
   meaning.
 - The lens playbook, universally: "coloring = a shared facts-driven read-only
-  highlighter" [read: MIGRATION-PLAYBOOK.md locked decision (1)] — while its own
-  locked decision (2) excludes socratize from the playbook's porting scope.
+  highlighter" — while its own locked decision (2) excludes socratize from the
+  playbook's porting scope. **The playbook was deleted 2026-08-14 by the lens
+  migration campaign, which re-pointed this citation as its own obligation**
+  (`bnd-002`): the standing statement is now [read:
+  `.planning-handoffs/lens-migration/SPEC.md` § Standing exclusions]. Two things
+  that campaign's R-1 changed, and they point opposite ways — decision (1)'s
+  **mechanism** is superseded (coloring is now three producers with a semantic
+  default and a Prism fallback, not one read-only highlighter), while its
+  **socratize exception is restored verbatim**, which is the half this argument
+  rests on. The deleted source is recoverable with
+  `git log --diff-filter=D -- 'src/lib/study-lenses/lenses/MIGRATION-PLAYBOOK.md'`.
 
 **Ruling R-4 (human, 2026-08-05/06): the un-colorized pedagogy WINS for
 socratize.** The Stage-4 build keeps highlighting OFF; and BECAUSE a centralized
