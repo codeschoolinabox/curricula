@@ -1,3 +1,5 @@
+<!-- cspell:ignore colouring colours spellme wireframes -->
+
 # orchestrate
 
 The orchestrator — the one component the host mounts. It renders the study
@@ -17,6 +19,7 @@ orchestrate/
   README.md       this file — the host surface + the orchestrator's mechanics
   DOCS.md         the region's architectural sketch
   types.ts        the host surface, plus region-internal shared vocabulary
+  ux/             the user twin — who meets this instrument, and how it is arranged
   index.tsx       the top component — the composition root the host mounts
   use-settled-snippet.ts   the settle hook — debounced edits, immediate type toggle
   derive-study.ts          the one derive composition per settle
@@ -357,6 +360,31 @@ this region owns.
   displays as `plain JavaScript`. The labels live keyed by phase name — a record
   zipped against embody's runtime order constant, never a positional list, so
   the phase order keeps exactly one truth.
+- **instrument token** — a house CSS custom property naming one of the
+  instrument's own presentation concepts: a surface, a text weight, a hairline,
+  the focus ring, the inert dim, the mask scrim, or a fit mark's role. Declared
+  on the instrument root and inherited, so a lens adopts one by writing
+  `var(--sl-…, its-own-current-value)` and declines by writing nothing — no
+  import edge exists either way, and declining is a byte-for-byte no-op. Two
+  rules keep the vocabulary from spreading: an instrument token names a **house**
+  concept and never a single lens's, and it names a **role** and binds no hue —
+  the hue is the tone's to supply, following the precedent the scanning lens set
+  when it named _attested_ and _diverging_ and deferred their colours. The
+  instrument colours the instrument; the program's own colouring belongs to the
+  colorizing leaf, and a token that changes how a character the learner typed
+  looks is that leaf's, not this one's. Deliberately not "chrome token":
+  **chrome** already names a code surface's CodeMirror frame elsewhere in this
+  package, and one word for two unrelated things is the homonym this glossary
+  exists to prevent.
+- **tone** — which rendering of the instrument token vocabulary is in force,
+  light or dark. Resolved by a cascade and never by a prop, in this order: an
+  explicit surface declaration, then the host's `data-theme`, then the operating
+  system's preference **only** where no `data-theme` is present at all — the
+  embedded, non-Docusaurus host. The instrument never asks the host for a tone
+  and the host never passes one. The order is load-bearing rather than tidy: a
+  stylesheet keyed on the operating system alone goes dark while a host whose
+  own switch says light stays light, which is the split this package has already
+  shipped once.
 - **composed study configuration** — (package glossary owns the meaning) the
   mechanics here: rosters joined once at mount, loudly; the cascade re-resolved
   per lens name as any layer changes, the learner's layer final.
@@ -366,6 +394,15 @@ this region owns.
 - Package root: [`../README.md`](../README.md) — the domain model and the
   package glossary.
 - [`DOCS.md`](./DOCS.md) — this region's architectural sketch.
+- The user twin: [`ux/`](./ux/) — `personas.md`, `user-journeys.md`, and
+  `wireframes.md`. All three are written because this region is where the
+  package's readers meet an interface at all: the scanning lens's own twin
+  records that "personas were not written because the reader in front of this
+  lens is the package's, not this lens's"
+  ([`../lenses/spellme/README.md`](../lenses/spellme/README.md)), and that debt
+  is paid here rather than at the package root, because the orchestrator is what
+  gives the package a user experience. The directory is named for the concern
+  its menu serves rather than for one modeled thing (human ruling 2026-08-14).
 - [`types.ts`](./types.ts) — the host surface: `StudyLensesProperties`,
   `FitMark`.
 - The rendered surfaces and derivation libraries document themselves in their
