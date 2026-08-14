@@ -41,6 +41,11 @@ it qualifies as a leaf in its own right.
   and quizzing (the closed register: questions a machine grades) — holding the
   BLOCK-model grid types and the shared pedagogy documentation both engines tag
   their questions with.
+- [scanning/](./scanning/README.md) — the specification's own reading of a token
+  stream: one frozen `InputElement` per span (kind, half-open span, verbatim
+  slice, and the indices of the parser tokens it wraps) folded from embody's
+  tokens fact, tiling the source exactly, for consumers that must account for
+  every character rather than every token.
 - [scoping/](./scoping/README.md) — a flat, per-declaration usage view of a
   program's variables: one frozen `VariableUsage` per `let`/`const` binding
   (name, kind, post-declaration read/write counts, declared identifier node, and
