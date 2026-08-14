@@ -60,10 +60,12 @@ and were corrected rather than adopted. Re-measure before you write.
 list**, never `baseline..HEAD` — the tree is shared and foreign commits
 interleave.
 
-Measured 2026-08-14 after `633dd4b1`: `markdownlint 0`, `cspell 0`, `prettier`
-clean on all five canon documents; lens suite unchanged at **559 passed / 8
-todo** across 18 files; `tsc --noEmit` 0. Re-measure before you rely on any of
-it.
+Measured 2026-08-14 at the end of step 0: `markdownlint 0`, `cspell 0`,
+`prettier` clean on all **six** canon documents; lens suite **562 passed / 79
+skipped / 8 todo** across 19 passed + 1 skipped files; `tsc --noEmit` 0. The
+drift from the 559/18 an earlier revision published is entirely the concurrent
+`spellme` session's untracked tests — foreign, not this campaign's. Re-measure
+before you rely on any of it.
 
 ## What is not written yet
 
@@ -150,6 +152,14 @@ agenda explicitly.)_
   end-state module doc under `src/`, which `DEV.md`'s end-state rules do bind,
   and editing it from a campaign commit is scope creep. **Owner: unassigned** —
   it needs a session that owns the lenses region.
+- **`src/lib/study-lenses/MVP-ROADMAP.md` carries a claim this campaign's
+  deletion made false**: it says the tree-wide roadmap was deleted and "the only
+  surviving strategy doc — `lenses/MIGRATION-PLAYBOOK.md` — covers `lenses/`
+  alone". That file is now gone. Same disposition and same reason as the item
+  above — an end-state doc under `src/`, **owner: unassigned**. (A concurrent
+  session has an uncommitted deletion of that file in the working tree; that is
+  theirs, does not repair the committed state, and is not something this
+  campaign relies on.)
 - Everything else on the round-3 cleanup list landed in the quotation-fidelity
   commit; see that commit's body for the enumeration.
 
@@ -168,11 +178,28 @@ agenda explicitly.)_
   `git commit … -- <paths>`, and a pathspec commit takes _working-tree_ content,
   so run `git status --short -- <paths>` first and confirm every listed change
   is yours.
-- **Run all four gates before every commit**:
-  `npx markdownlint-cli2 --no-globs`, `npx cspell`, `npx prettier --check`, and
-  `npx tsc --noEmit` if you touch source. Prettier was missed for three AR
-  rounds; it is enforced at pre-commit and it reflows, which invalidates
-  line-number citations.
+- **Run all four gates before every commit, and each one needs your paths:**
+
+  ```bash
+  npx prettier --write "$FILES"        # FIRST -- it reflows
+  npx markdownlint-cli2 --no-globs "$FILES"
+  npx cspell --words-only --unique "$FILES"
+  npx prettier --check "$FILES"
+  npx tsc --noEmit                      # only if you touched source
+  ```
+
+  ⚠️ **`npx markdownlint-cli2 --no-globs` with no path argument lints ZERO files
+  and prints `Summary: 0 error(s)`** — a green report over nothing [measured
+  2026-08-14: `Linting: 0 file(s)`]. `--no-globs` disables the config's
+  `**/*.md`, so the paths are not optional. The other two fail loudly when run
+  bare, which is why this is the one that gets copied forward broken; an earlier
+  revision of this very bullet shipped the no-op form. Repo-wide is
+  `npm run lint:md`.
+
+  Prettier runs first because it reflows, which invalidates line-number
+  citations; it is also enforced at pre-commit, and it was missed for three AR
+  rounds.
+
 - **cspell**: diff the unknown-word _set_ (`npx cspell --words-only --unique`),
   never grep for words you expect. Add genuinely-new terms to an inline
   `<!-- cspell:ignore … -->` at the top of the file — the house pattern, see

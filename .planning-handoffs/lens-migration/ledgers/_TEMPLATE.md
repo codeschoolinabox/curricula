@@ -29,7 +29,7 @@ grep -nE '@remarks|^type |^\s+readonly ' "$REF/types.ts"
 <!-- paste the output here, verbatim -->
 
 **Gen-1 source**, for the provenance negative every non-G1 row owes
-([§ The exemption needs evidence too](../FIDELITY-METHOD.md#the-minimum-walk-set)):
+([§ The exemption needs evidence too](../FIDELITY-METHOD.md#the-exemption-needs-evidence-too)):
 
 <!-- either the Gen-1 file pair, or the literal words:
      no Gen-1 source: <lens> has no Gen-1 file -->
@@ -74,8 +74,9 @@ block the commit.
 
 ## Close conditions
 
-- Every `restore` and `revive` row has a non-empty `discharged by` that
-  **resolves** ([§ At AR-5](../FIDELITY-METHOD.md#at-ar-5)).
+- **Every** row has a non-empty `discharged by` that **resolves** — on any
+  disposition (human ruling 2026-08-14);
+  [§ At AR-5](../FIDELITY-METHOD.md#at-ar-5) is the single definition.
 - **Open rows = 0**, under § At AR-5's single four-part definition — which
   includes an empty `walked` or `found` on any row those columns are required
   on, and an unrebutted quotation on a `revive` row.

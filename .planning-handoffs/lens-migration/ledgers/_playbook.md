@@ -72,7 +72,7 @@ date forward would be worse than carrying none.
 
 ### `## Context & paths (agents read this first)`
 
-**TRANSPORTED** into SPEC.md § Paths, with four changes, each recorded:
+**TRANSPORTED** into SPEC.md § Paths, with five changes, each recorded:
 
 - The path-convention paragraph (bare region refs resolve under
   `src/lib/study-lenses/`; `study-lenses--deprecated-architecture/` refs are
@@ -88,6 +88,12 @@ date forward would be worse than carrying none.
   `Environment`). **`supersede`** — R-1 makes the semantic producer's input
   `lib/classifying`, not raw tokens. SPEC.md's row names both.
 - "Every path above was confirmed present 2026-07-22" → re-measured 2026-08-13.
+- The **roster seam** row pointed at `join-level-roster.ts` as the mirror to
+  follow; SPEC.md names `join-lens-roster.ts`. Both files exist [measured
+  2026-08-14: `ls orchestrate/lib/composing/`], so this is a **`supersede`** —
+  the lens roster is the right seam for a lens — but the playbook's
+  _instruction_ ("mirror the level-roster join") is not carried, and a porting
+  session that wants the pattern should read the level roster anyway.
 
 ### `## The situation in one screen`
 
@@ -265,18 +271,21 @@ marks each ⛔ SUPERSEDED with a human ruling of 2026-08-11 and says "do not
 dispatch". Carrying void prompts into a successor is how a superseded
 instruction gets executed by a reader who skims the banner.
 
-Two facts inside them survive and are transported, because they are measurements
-rather than instructions:
+Two facts inside them survive as **forward promises, not completed transports**
+— the distinction this ledger learned the hard way one section below, and it
+applies here too:
 
 - **E2's residue** — webpack worker-chunk emission is proven live by
   `src/pages/trace-debugging-smoke.tsx`, but that path imports the
   deprecated-architecture engine copy, not `study-lenses/lib/engine`; and
   **COOP/COEP is configured for the dev server only**, so production isolation
-  is open. → SPEC.md § Family F.
+  is open. → **owed to** SPEC.md § Family F; not there yet [measured 2026-08-14:
+  `grep -rn 'COOP\|COEP' .planning-handoffs/lens-migration/` hits this file
+  only].
 - **E3's warning** — the Gen-2 trace-debugging projections are written against
   the OLD tracer shape (`event.event`, five outcomes) and will not lift
-  verbatim. → a Family F ledger row, so the rebuild's consumer does not
-  rediscover it.
+  verbatim. → **owed to** a Family F ledger row; `ledgers/_family-f.md` does not
+  exist yet [measured 2026-08-14: `ls ledgers/`].
 
 E1's detailed re-source inventory (11 non-engine imports over 8 names across
 `scope/`, `validating/`, `parse-old/`) is **`already survives`** — it is the

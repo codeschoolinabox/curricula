@@ -123,25 +123,41 @@ lister 4] — a second body of design intent that never rendered.
 session belongs to. Naming them is a Gate-1 item. **Status:** ⬜ **not yet
 acknowledged.**
 
-`src/lib/study-lenses/lenses/spellme/` (README + `user-docs/`) and
-`src/lib/study-lenses/lib/scanning/` are both **untracked** and were created
-2026-08-13, while this campaign's canon was being written. `spellme` is a
-`tokens`-phase drive-the-scanner exercise; `lib/scanning` derives its element
-sequence from the tokens fact.
+`src/lib/study-lenses/lenses/spellme/` and `src/lib/study-lenses/lib/scanning/`
+are both **untracked** and were created 2026-08-13, while this campaign's canon
+was being written. `spellme` is a `tokens`-phase drive-the-scanner exercise;
+`lib/scanning` derives its element sequence from the tokens fact. Since then
+`spellme` has grown a full Phase-0 shape — `README.md`, `DOCS.md`, `types.ts`,
+`core.ts`, `index.tsx`, `tests/` and a `ux/` twin directory [measured
+2026-08-14: `ls src/lib/study-lenses/lenses/spellme/`].
 
 Neither has a Gen-1 or Gen-2 source, so neither is this campaign's to migrate.
 Two seams make them a boundary rather than a footnote:
 
-- **`spellme` declares its own Wong palette** — _"blue `#0072B2` for an attested
-  element, vermilion `#D55E00` for a diverging claim"_ [read:
-  `spellme/README.md` § the colour-blind-safe palette note]. Those two hues
-  already mean _correct/wrong_ in parsons and _even/odd blank parity_ in Gen-2
-  blanks. Three surfaces, three meanings, two hues — the coloring foundation
-  cannot pick a syntax palette without knowing this.
+- **`spellme` has already ruled the palette question this campaign was about to
+  raise with it, and ruled it the same way.** Its README states **"The roles are
+  named here; the hues are not"** (human ruling 2026-08-14), because Wong's blue
+  and vermilion "already carry correct/wrong in parsons and blank parity in the
+  lens-migration campaign's blanks work, so a third meaning for the same pair is
+  a package-wide question this lens does not get to settle alone" [read:
+  `spellme/README.md`, the paragraph under § UI structure]. Its DOCS repeats it
+  under § Out of scope. So the lens names two semantic roles — attested element,
+  diverging claim — and binds neither to a hue, leaving both to CSS custom
+  properties. **That is an unsolicited handoff _to_ the coloring foundation, not
+  a conflict with it**, and it makes the foundation's palette decision binding
+  on a third surface whose author has already deferred to it.
 - **`lib/scanning` is a third `facts.tokens` derivation** on the same leaf tier
   `lib/colorizing` is headed for, beside `lib/classifying`. Whether three
   siblings should derive from one fact independently is a bounded-context
   question this campaign answers for two of the three.
+
+> **An earlier revision of this row got the first seam backwards**, and the
+> correction is recorded rather than quietly applied. It asserted that `spellme`
+> "declares its own Wong palette", quoting hex codes in quotation marks and
+> citing a heading that does not exist. Measured 2026-08-14: `#0072B2` and
+> `#D55E00` appear **nowhere** in the lens, and the README rules the opposite. A
+> handed-across row whose next act is to be shown to that author must not
+> misquote them — and this campaign's own `evidence` rule binds its quotations.
 
 **This row exists because the campaign's register went stale within minutes of
 being written** — an earlier draft named this lens `scanning` and called a
@@ -185,13 +201,14 @@ model widens, these rows are the resume point.
 
 ## Dropped
 
-| #         | Lens    | Gen-1 inventory                                                                             | Ground                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| --------- | ------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bnd-008` | `print` | `PrintLens.jsx` 542 + `PrintLens.module.css` 515, **6 orphan classes** [measured: lister 4] | **R-6 — YAGNI; build it if and when it is needed** (human ruling 2026-08-13). It was a read-only code view optimized for printing, always applicable, consuming Gen-1's `useColorize()` over the shared `CodeBlock`. Nothing blocks it technically: once the coloring foundation lands it is among the easiest lenses in the tree, since it needs no interaction model at all. That is exactly why deferring it is cheap. |
+| #         | Lens    | Gen-1 inventory                                                                                                                                                                                                        | Ground                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| --------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bnd-008` | `print` | `PrintLens.jsx` 542 + `PrintLens.module.css` 515, **5 orphan classes** [measured: lister 4] plus `bwMode` by direct check [measured: `grep -c "styles\.bwMode" PrintLens.jsx` → 0], which lister 4 structurally misses | **R-6 — YAGNI; build it if and when it is needed** (human ruling 2026-08-13). It was a read-only code view optimized for printing, always applicable, consuming Gen-1's `useColorize()` over the shared `CodeBlock`. Nothing blocks it technically: once the coloring foundation lands it is among the easiest lenses in the tree, since it needs no interaction model at all. That is exactly why deferring it is cheap. |
 
 **Gen-1 print already designed two things it never shipped**, and both are
-directly on the resume path [measured: lister 4 — the six orphans are `actions`,
-`bwMode`, `codeLine`, `lineContent`, `lineNumber`, `withLineNumbers`]:
+directly on the resume path [measured: lister 4 — `actions`, `codeLine`,
+`lineContent`, `lineNumber`, `withLineNumbers`; `bwMode` by direct check, per §
+4's own caveat]:
 
 - **`.bwMode` — a black-and-white print mode** that flattens every token colour
   to a single grey (`PrintLens.module.css` styles `:global(.keyword)`,
@@ -242,7 +259,9 @@ This ledger closes when:
   that act itself — which is why each row needs a **named human owner for the
   ask**, assigned at Gate 1.
 - `bnd-001` and `bnd-002` have acknowledged recipients by that definition.
-- `bnd-003` and `bnd-004` either have a named recipient or a human ruling that
-  they stay unassigned. Neither can close by an agent's action alone.
+- `bnd-003`, `bnd-004` and `bnd-009` either have a named recipient or a human
+  ruling that they stay unassigned. None can close by an agent's action alone.
+  (`bnd-009`'s recipient is the `spellme` author — a live session, so this is
+  the one unassigned row with an obvious owner to name at Gate 1.)
 - Every refused and dropped row still carries its measured inventory,
   re-verified at close, since the quarry can move underneath a stale number.
