@@ -653,18 +653,30 @@ files, a `.md` and an `.svg` under each of those two directories].
 | `twin-doc`           | The document it names                                |
 | -------------------- | ---------------------------------------------------- |
 | `machine`            | a notional-machine document, `.md` beside the README |
-| `user`               | a user-docs directory — **name and contents PARKED** |
+| `user`               | a user-docs directory beside the README — see below  |
 | `learner`, `teacher` | **unnamed** — no instance has ever been owed         |
 | `both`               | the two documents that kind of work names            |
 | `none`               | nothing; the recorded answer discharges 0.2          |
 
-**The parked rows are parked deliberately.** The candidates for the user twin
-are wire-frames and personas; nothing has been written, and no commit has ever
-recorded `user`, `learner` or `teacher`. Naming a document nobody has written
-yet is how a convention gets invented ahead of its use — which is precisely what
-the stripped `## Epistemology` block demonstrated, one instance and
-self-falsifying. **Name each one when the first is owed, and date the ruling
-here.**
+**The user twin is a directory, and which documents it holds is the module's own
+call** (human ruling 2026-08-13, given the first time a `user` twin was owed —
+the scanning lens under the study-lenses region). It is a conventionally-named
+sub-directory sitting beside the module's README, like every other twin; the
+name recorded as the candidate when the row was parked, user-docs, is confirmed.
+What goes inside is a **menu, not a fixture**: personas, wire-frames, user
+journeys, user stories, and whatever else the case calls for. Which of them
+exist is decided per module and justified where that module documents itself — a
+surface whose risk is pacing owes a journey, one whose risk is arrangement owes
+wire-frames, and a module may owe both. Pinning a fixed set here would invent
+the convention ahead of its second use, which is the same error the parking was
+guarding against.
+
+**`learner` and `teacher` stay parked, deliberately.** Neither has ever been
+owed [measured 2026-08-13: no commit body records either value]. Naming a
+document nobody has written yet is how a convention gets invented ahead of its
+use — which is precisely what the stripped `## Epistemology` block demonstrated,
+one instance and self-falsifying. **Name each one when the first is owed, and
+date the ruling here.**
 
 **No README block is owed at `twin-doc: none`** (human ruling 2026-08-11, the
 epistemology strip). The `## Epistemology` block that used to sit here — a fixed
@@ -1998,9 +2010,9 @@ document lives in the module directory beside `README.md`, `DOCS.md` and
 [§ Directory Documentation Convention](#directory-documentation-convention)
 carries the naming table. So "does a twin exist?" is answered by looking in one
 place. (This closes a gap recorded earlier the same day, when nothing fixed a
-twin's location and the bound above was therefore inert. Two of the table's rows
-are still deliberately unnamed; the bound holds for `machine`, which is the only
-value any module has ever owed.)
+twin's location and the bound above was therefore inert. One row — `learner` and
+`teacher` — is still deliberately unnamed; the bound holds for `machine` and for
+`user`, the only two values any module has ever owed.)
 
 **The accepted cost, recorded so it is not rediscovered as a defect** (human
 ruling 2026-08-13). Four things are true and were in view when this was ruled:
