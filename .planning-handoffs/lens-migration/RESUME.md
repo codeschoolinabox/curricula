@@ -46,17 +46,18 @@ and were corrected rather than adopted. Re-measure before you write.
 
 ## What is committed
 
-| SHA        | What                                                                                                                                           |
-| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `92ae22e2` | The campaign canon — `SPEC.md`, `FIDELITY-METHOD.md`, `ledgers/_playbook.md`, `ledgers/_boundary.md`. 2120 insertions, no source file touched. |
-| `28763bdc` | Family A's open-questions list, struck rather than rebutted.                                                                                   |
-| `245555c6` | This resumption point.                                                                                                                         |
-| `9c5ec699` | The transport ledger stops certifying a transport that did not happen — four module names carried into SPEC's source inventories.              |
-| `633dd4b1` | `MIGRATION-PLAYBOOK.md` deleted (571 lines); four citation repairs; the sibling campaign's citation re-pointed.                                |
-| `d6192465` | The four structural amendments — the walk set, the deferral carve-out, the per-ledger exemption, the register check.                           |
-| `8e22a1c7` | Four quotations stop wearing emphasis the source never had, plus the round-3 cleanup list.                                                     |
-| `f7ea553f` | AR-2's fix pass — the resolve helper, eight heading classes, one open-row definition, and `ledgers/_TEMPLATE.md`.                              |
-| `f28fe23e` | AR-5's fix pass — the register check stops matching itself, `bnd-009` stops misquoting `spellme`, the gate command stops linting zero files.   |
+| SHA        | What                                                                                                                                                |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `92ae22e2` | The campaign canon — `SPEC.md`, `FIDELITY-METHOD.md`, `ledgers/_playbook.md`, `ledgers/_boundary.md`. 2120 insertions, no source file touched.      |
+| `28763bdc` | Family A's open-questions list, struck rather than rebutted.                                                                                        |
+| `245555c6` | This resumption point.                                                                                                                              |
+| `9c5ec699` | The transport ledger stops certifying a transport that did not happen — four module names carried into SPEC's source inventories.                   |
+| `633dd4b1` | `MIGRATION-PLAYBOOK.md` deleted (571 lines); four citation repairs; the sibling campaign's citation re-pointed.                                     |
+| `d6192465` | The four structural amendments — the walk set, the deferral carve-out, the per-ledger exemption, the register check.                                |
+| `8e22a1c7` | Four quotations stop wearing emphasis the source never had, plus the round-3 cleanup list.                                                          |
+| `f7ea553f` | AR-2's fix pass — the resolve helper, eight heading classes, one open-row definition, and `ledgers/_TEMPLATE.md`.                                   |
+| `f28fe23e` | AR-5's fix pass — the register check stops matching itself, `bnd-009` stops misquoting `spellme`, the gate command stops linting zero files.        |
+| `cb5eeedc` | The context-free validation's fix pass — the register check runs verbatim, the `spellme` correction reaches its third file, Tier-1 is two families. |
 
 **AR-5 baseline for this campaign: `6d1a811f`.** Review by **explicit SHA
 list**, never `baseline..HEAD` — the tree is shared and foreign commits
@@ -67,7 +68,7 @@ its own SHA, so the commit that adds a row is never in the row it adds. Before
 dispatching AR-5, close the gap:
 
 ```bash
-git log --oneline f28fe23e..HEAD -- .planning-handoffs/ src/lib/study-lenses/lenses/
+git log --oneline cb5eeedc..HEAD -- .planning-handoffs/ src/lib/study-lenses/lenses/
 ```
 
 Anything it returns whose body carries this campaign's settings line is a commit
