@@ -217,6 +217,8 @@ own rule an unacknowledged boundary row is an OPEN row at close.
 **Six lenses are built. Everything else is named with its ground.** Nothing
 vanishes silently; that is the whole point of the campaign.
 
+<!-- register:start -->
+
 | Lens                                                                                                                        | Disposition                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Family |
 | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
 | `blanks`                                                                                                                    | **build** — port Gen-2 + Gen-1 union                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | A      |
@@ -234,6 +236,8 @@ vanishes silently; that is the whole point of the campaign.
 | **`spellme`**                                                                                                               | **out of scope, and a live coordination boundary.** A concurrent session is building it — `lenses/spellme/` (README + `user-docs/`), untracked, created 2026-08-13, a `tokens`-phase "drive-the-scanner" exercise, not yet in `built-in-lenses.ts`. No Gen-1 and no Gen-2 source, so nothing to migrate. **But it renders classed code elements and declares its own Wong palette** — blue for an attested element, vermilion for a diverging claim — making it a third claimant on two hues this region already overloads. Carried as `bnd-009`. | —      |
 | **`lib/scanning`**                                                                                                          | **not a lens** — an untracked sibling library of `lib/classifying`, created the same night, deriving an element sequence from the tokens fact for `spellme`. It matters here because it is a **third `facts.tokens` derivation on the tier `lib/colorizing` will land in**, and the foundation's Phase 0 owes that seam a look.                                                                                                                                                                                                                   | —      |
 | **error-interpreting lens**                                                                                                 | **out of scope** — greenfield design with no Gen-1 or Gen-2 source, so there is nothing to migrate. Named in `lenses/README.md` § The roster as the lens that "speaks the parser's voice across both parse phases"; the `tokens` and `ast` phases hold no lens today. Its own campaign, not this one.                                                                                                                                                                                                                                             | —      |
+
+<!-- register:end -->
 
 **Every name the three trees and the wired roster produce must have exactly one
 row above — and that is a check, not an assertion.** An earlier revision stated
@@ -257,8 +261,10 @@ Run it; do not read it.
 GEN1="…/0--study-lenses--it-begins/src/lenses"   # § Paths carries the full path
 ROSTER=src/lib/study-lenses/orchestrate/lib/composing/built-in-lenses.ts
 SPEC=.planning-handoffs/lens-migration/SPEC.md
-# flattened, because prettier wraps and a line-based grep would miss a name
-FLAT=$(tr '\n' ' ' < "$SPEC")
+# ONLY the register region, HTML comments stripped, then flattened. Both steps
+# are load-bearing -- see gap 4 below.
+FLAT=$(sed -n '/<!-- register:start -->/,/<!-- register:end -->/p' "$SPEC" \
+       | sed 's/<!--[^>]*-->//g' | tr '\n' ' ')
 {
   ls -d src/lib/study-lenses/lenses/*/ | xargs -n1 basename                # Gen 3
   ls -d src/lib/study-lenses--deprecated-architecture/lenses/*/ \
@@ -288,6 +294,16 @@ zero unregistered].
 - **The roster arm excludes `types`** by matching only `lenses/<name>/index`.
   The looser pattern reports `types.js`'s import as a lens — not hypothetical,
   it is the first version of this command.
+- **It matches anywhere in the extracted region, so the region must be the
+  register and nothing else.** An earlier revision matched the whole file, and a
+  name deleted from the register still passed on the strength of this file's own
+  `<!-- cspell:ignore … -->` line — which lists `spellme`, `dropdowns`,
+  `writeme`, `parsons`, `qasm` and `socratize` today. Not an incidental hole:
+  [RESUME.md](./RESUME.md) § Operating instructions directs every session to add
+  genuinely-new terms to exactly that line, so **the convention would have
+  masked precisely the new lens names this check exists to catch** [measured
+  2026-08-14: with every `spellme` mention removed except the cspell line, the
+  whole-file form reported zero unregistered].
 
 Arm 3 is unavailable when the `0-study-lenses-committee` tree is not mounted;
 the `[ -d ]` guard makes that a partial run rather than a silent skip.
@@ -541,7 +557,8 @@ and its own Phase 0 design it as **a game, not an inspector**: what the learner
 is trying to do, what tells them they did it, and what a wrong answer teaches.
 Treating the scope graph as a read-out to render is the shape this ruling
 excludes. Recorded here because the lens has no README yet;
-`DEV.md § Ruling provenance` moves it into that document when one exists.
+[DEV.md § Ruling provenance](../../DEV.md#ruling-provenance) moves it into that
+document when one exists.
 
 **This subordinates the mechanic below to the affordance above it.**
 Hover-highlighting a binding's declaration and every reference to it is **one
@@ -1053,8 +1070,11 @@ supposed to be _visible_ here — that is what this table is for.
 | variables          | **4,5**                                   | —    | —         | —        | —          | —    | [ledgers/variables.md](./ledgers/variables.md)     |
 | debug-props        | 1–5                                       | —    | —         | —        | —          | —    | [ledgers/debug-props.md](./ledgers/debug-props.md) |
 | Family F (7)       | **4,5** (1–5 for `trace-debugging` alone) | —    | —         | —        | —          | —    | [ledgers/\_family-f.md](./ledgers/_family-f.md)    |
-| boundary           | n/a                                       | —    | —         | —        | —          | —    | [ledgers/\_boundary.md](./ledgers/_boundary.md)    |
-| playbook transport | n/a                                       | —    | —         | —        | —          | n/a  | [ledgers/\_playbook.md](./ledgers/_playbook.md)    |
+| boundary           | n/a                                       | —    | n/a       | n/a      | n/a        | —    | [ledgers/\_boundary.md](./ledgers/_boundary.md)    |
+| playbook transport | n/a                                       | —    | n/a       | n/a      | n/a        | n/a  | [ledgers/\_playbook.md](./ledgers/_playbook.md)    |
+
+Every per-lens ledger is cut from
+[ledgers/\_TEMPLATE.md](./ledgers/_TEMPLATE.md).
 
 **`instruments`** names which of the five listers could run on this ledger
 ([FIDELITY-METHOD.md § The five listers](./FIDELITY-METHOD.md#the-five-listers)).

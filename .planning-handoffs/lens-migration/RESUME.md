@@ -53,6 +53,8 @@ and were corrected rather than adopted. Re-measure before you write.
 | `245555c6` | This resumption point.                                                                                                                         |
 | `9c5ec699` | The transport ledger stops certifying a transport that did not happen — four module names carried into SPEC's source inventories.              |
 | `633dd4b1` | `MIGRATION-PLAYBOOK.md` deleted (571 lines); four citation repairs; the sibling campaign's citation re-pointed.                                |
+| `d6192465` | The four structural amendments — the walk set, the deferral carve-out, the per-ledger exemption, the register check.                           |
+| `8e22a1c7` | Four quotations stop wearing emphasis the source never had, plus the round-3 cleanup list.                                                     |
 
 **AR-5 baseline for this campaign: `6d1a811f`.** Review by **explicit SHA
 list**, never `baseline..HEAD` — the tree is shared and foreign commits
