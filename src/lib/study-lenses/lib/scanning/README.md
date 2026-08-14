@@ -407,6 +407,11 @@ now to keep that door open is the one above: publishing indices rather than
 token references, because a fact on the embodiment must survive embody's own
 deep freeze, and token references would not.
 
+The measured ground for that question, and the argument on both sides, is
+collected in this repo's planning handoffs under `embody-derivation-facts` —
+named in prose because a path that has not been written yet is not a claim this
+document should make.
+
 ## Conventions
 
 - **Pure-sync only.** No async, no I/O, no side effects, no randomness.
