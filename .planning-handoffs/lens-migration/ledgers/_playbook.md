@@ -11,9 +11,23 @@ Per `DEV.md § Documentation migration discipline`: the transport of
 or replacement is enumerated here with its justification.
 
 **Method.** A heading-by-heading walk over all 22 of the playbook's headings
-[measured: `grep -n '^#\{1,4\} '`], with the file read end to end this session.
+[measured 2026-08-14: `grep -cE '^#{1,4} '
+src/lib/study-lenses/lenses/MIGRATION-PLAYBOOK.md` → 22, each cross-checked
+against this ledger's § By heading subsections], with the file read end to end.
 Not from recollection — the socratize-quiz campaign's AR-1 rejected a
 recollection-built ledger, and that precedent binds here.
+
+**The mechanical lister was run, and it corroborates rather than discharges.**
+`node scripts/check-governance.mjs --migration <playbook>@HEAD ../SPEC.md _playbook.md`
+reports every heading and every bold term as a candidate loss, because it
+matches exact text and this transport was a deliberate reword — the change §
+What this transport did NOT preserve already enumerates. Per
+`DEV.md § Documentation migration discipline`, **no mechanical listing
+discharges a ledger in either direction**: an empty one is evidence about the
+grep, and a full one is evidence about the reword. What discharges this ledger
+is the walk below, and the walk is what caught the false transport claim under §
+`## WAVE 1` — a defect no lister reported, because the names it certified were
+present in the ledger's own sentence.
 
 **Why the playbook retires rather than sitting beside the SPEC.** Two control
 panels is how stale facts survive: the playbook currently instructs agents that
@@ -26,7 +40,21 @@ into its successor.
 ([FIDELITY-METHOD.md](../FIDELITY-METHOD.md#disposition-vocabulary)), with the
 transport senses: `restore` = transported, `supersede` = replaced by a ruling or
 a measurement, `drop` = omitted with sign-off, `already survives` = the content
-lives elsewhere unchanged.
+lives elsewhere unchanged, and **`ADDITION` = content SPEC.md carries that the
+playbook did not**.
+
+`ADDITION`'s transport sense is **not**
+[§ Disposition vocabulary](../FIDELITY-METHOD.md#disposition-vocabulary)'s
+affordance sense — it is an addition to the _transport_, not an enrichment
+neither reference had — so [§ Columns](../FIDELITY-METHOD.md#columns)'
+`walked`/`found` requirement does not reach it: there is no Gen-2 lens document
+in which a written judgment about a transport decision could live. Declared
+because this list named four values and used a fifth: `ADDITION` appears four
+times in this file, of which **two are row dispositions** (the `lib/colorizing`
+path row and the `index.tsx` entry-point row); one is a classification this
+ledger explicitly _rejected_, and one is prose counting SPEC's
+Definition-of-Done additions [measured 2026-08-14: `grep -n 'ADDITION'
+ledgers/_playbook.md` → 4 lines, read in place].
 
 ---
 
@@ -190,19 +218,41 @@ handoff that carries strictly more — measured inventories, the ledger, the rul
 cross-lens decisions, named sandbox checkpoints, and foreign-debt baselines.
 Their load-bearing content is not lost; specifically transported:
 
-- blanks: the `lib/` engine names (`blankenate`, `evaluate-correctness`,
-  `no-paste-extension`), the `lib/classifying` dependency, CodeMirror for the
-  editable surface, and _"the load-bearing pedagogy (NOT a shell)"_.
-- annotate: the `prism-react-renderer` → shared-coloring instruction
-  (**`supersede`**d in mechanism by R-1, which keeps Prism as the fallback), the
-  `js2flowchart` retention, and the **injection-safety constraint — never pass a
-  debug-mode print config**, which is transported into SPEC.md § Family B as a
-  named constraint rather than left in a prompt.
+- blanks: the `lib/` engine names — `blankenate.ts` 172,
+  `evaluate-correctness.ts` 236, `no-paste-extension.ts` 57 — into SPEC.md §
+  Family A's source inventory, plus the `lib/classifying` dependency, CodeMirror
+  for the editable surface, and _"the load-bearing pedagogy (NOT a shell)"_.
+- annotate: the module names `render-code.ts` 67 and `render-flowchart.ts` 55
+  into SPEC.md § Family B's source inventory; the `prism-react-renderer` →
+  shared-coloring instruction (**`supersede`**d in mechanism by R-1, which keeps
+  Prism as the fallback); the `js2flowchart` retention; and the
+  **injection-safety constraint — never pass a debug-mode print config**, which
+  is transported into SPEC.md § Family B as a named constraint rather than left
+  in a prompt.
 - variables: _"do NOT re-run scope analysis — the fact holds it, with
   positions"_, and the `Scope`/`ScopeVariable`/`ScopeReference`/`resolved` shape
   pointer.
 - dropdowns: _"classify from `facts.tokens`, do not re-tokenize"_, distractors,
   and a difficulty control.
+
+> **This entry was false when first written, and the correction is recorded
+> rather than quietly applied.** It asserted these five module names were
+> "specifically transported" while four of them were not: `evaluate-correctness`
+> and `no-paste-extension` appeared exactly once in the whole campaign directory
+> — inside the sentence claiming they had been transported — and `render-code`
+> and `render-flowchart` appeared nowhere at all, though the playbook names both
+> [measured 2026-08-14: `grep -rn '<term>' .planning-handoffs/lens-migration/`,
+>
+> > per term, before the fix]. Only `blankenate` was genuinely carried, by
+> > golden rule 2. They are transported now, with their measured line counts
+> > [measured: `wc -l` over the Gen-2 `blanks/lib/` and `annotate/render-*.ts`].
+>
+> **A false ledger entry is worse than a missing one**, because a missing one
+> invites a reader to look and a false one stops them. This ledger licenses the
+> deletion of its source; an unverified "specifically transported" is exactly
+> the silent loss `DEV.md § Documentation migration discipline` calls a defect
+> of the same severity as a failing test. Found by AR-1 round 4, before the
+> deletion landed.
 
 The **annotate decision-to-make** — adopt `js2flowchart` for the flowchart or
 defer the flowchart and ship colored-view-only first — is **`restore`d** as an

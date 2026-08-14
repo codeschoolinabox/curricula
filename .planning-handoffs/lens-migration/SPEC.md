@@ -252,10 +252,10 @@ session and teaches a lens session to look for coupling that is not there.
 
 _Remove syntax elements from the program; the learner restores them._
 
-|             | Gen 1                             | Gen 2                                                                 | Gen 3 |
-| ----------- | --------------------------------- | --------------------------------------------------------------------- | ----- |
-| `blanks`    | `BlanksLens.jsx` 914 + css 650    | **8212** total (README 664, DOCS 521, index.tsx 1048, tests **4913**) | —     |
-| `dropdowns` | `DropDownsLens.jsx` 734 + css 449 | —                                                                     | —     |
+|             | Gen 1                             | Gen 2                                                                                                                                                                  | Gen 3 |
+| ----------- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| `blanks`    | `BlanksLens.jsx` 914 + css 650    | **8212** total (README 664, DOCS 521, index.tsx 1048, tests **4913**); `lib/` engines `blankenate.ts` 172 · `evaluate-correctness.ts` 236 · `no-paste-extension.ts` 57 | —     |
+| `dropdowns` | `DropDownsLens.jsx` 734 + css 449 | —                                                                                                                                                                      | —     |
 
 **Why one unit.** They share the _model_, not the surface. Both select what to
 occlude from the house category taxonomy; both use
@@ -349,9 +349,9 @@ qualifications are live in it at once. See
 
 _The code is rendered read-only and a layer goes on top._
 
-|            | Gen 1                             | Gen 2                                                                               | Gen 3 |
-| ---------- | --------------------------------- | ----------------------------------------------------------------------------------- | ----- |
-| `annotate` | `HighlightLens.jsx` 853 + css 536 | 3424 total (README 289, DOCS 334, index.tsx 487, 6 annotation reducers, tests 1576) | —     |
+|            | Gen 1                             | Gen 2                                                                                                                               | Gen 3 |
+| ---------- | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| `annotate` | `HighlightLens.jsx` 853 + css 536 | 3424 total (README 289, DOCS 334, index.tsx 487, `render-code.ts` 67 + `render-flowchart.ts` 55, 6 annotation reducers, tests 1576) | —     |
 
 A family of one, and deliberately so: `print` was its only plausible sibling and
 R-6 dropped it. What the two would have shared — the read-only colorized surface
