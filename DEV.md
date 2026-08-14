@@ -653,7 +653,7 @@ files, a `.md` and an `.svg` under each of those two directories].
 | `twin-doc`           | The document it names                                |
 | -------------------- | ---------------------------------------------------- |
 | `machine`            | a notional-machine document, `.md` beside the README |
-| `user`               | a user-docs directory beside the README — see below  |
+| `user`               | a ux directory beside the README — see below         |
 | `learner`, `teacher` | **unnamed** — no instance has ever been owed         |
 | `both`               | the two documents that kind of work names            |
 | `none`               | nothing; the recorded answer discharges 0.2          |
@@ -661,8 +661,19 @@ files, a `.md` and an `.svg` under each of those two directories].
 **The user twin is a directory, and which documents it holds is the module's own
 call** (human ruling 2026-08-13, given the first time a `user` twin was owed —
 the scanning lens under the study-lenses region). It is a conventionally-named
-sub-directory sitting beside the module's README, like every other twin; the
-name recorded as the candidate when the row was parked, user-docs, is confirmed.
+sub-directory sitting beside the module's README, like every other twin.
+
+**Its name is ux** (human ruling 2026-08-14), superseding the user-docs name
+confirmed the day before. Two grounds, and the second is the general one:
+user-docs reads as documentation _for_ users, which is close to the opposite of
+what a twin is; and a wire-frame — one of the menu items below — models the
+interface the user meets rather than the user, so no name claiming to be a model
+of the user is true of the whole directory. **A user twin is therefore named for
+the concern its menu serves, not for the thing it models**, which is where this
+row and the machine row part company: a notional-machine document names what it
+models because it is one document about one thing, and a directory holding a
+menu cannot.
+
 What goes inside is a **menu, not a fixture**: personas, wire-frames, user
 journeys, user stories, and whatever else the case calls for. Which of them
 exist is decided per module and justified where that module documents itself — a
@@ -2006,13 +2017,16 @@ objected to, not about an affirmative answer being overwritten.
 
 **Finding the twin is a lookup, not a search** (human ruling 2026-08-13). A twin
 document lives in the module directory beside `README.md`, `DOCS.md` and
-`types.ts`, named after the twin it holds —
+`types.ts`, under the name its own row gives it —
 [§ Directory Documentation Convention](#directory-documentation-convention)
-carries the naming table. So "does a twin exist?" is answered by looking in one
-place. (This closes a gap recorded earlier the same day, when nothing fixed a
-twin's location and the bound above was therefore inert. One row — `learner` and
-`teacher` — is still deliberately unnamed; the bound holds for `machine` and for
-`user`, the only two values any module has ever owed.)
+carries the naming table. (That row is what to read, not a rule of thumb about
+it: the machine row names the thing it models and the user row names the concern
+its menu serves, so no single formula covers both.) So "does a twin exist?" is
+answered by looking in one place. (This closes a gap recorded earlier the same
+day, when nothing fixed a twin's location and the bound above was therefore
+inert. One row — `learner` and `teacher` — is still deliberately unnamed; the
+bound holds for `machine` and for `user`, the only two values any module has
+ever owed.)
 
 **The accepted cost, recorded so it is not rediscovered as a defect** (human
 ruling 2026-08-13). Four things are true and were in view when this was ruled:
