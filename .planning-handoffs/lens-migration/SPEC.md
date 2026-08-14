@@ -307,16 +307,23 @@ with inline `<select>` widgets replacing spans mid-stream.
 1. Is there **one** occlusion model (classified tokens + enabled categories +
    probability + seed → occlusion set) or two cores? If one, it is a **type
    edge** and serializes before both consumers.
-2. **Determinism.** Gen-1 re-rolls the occlusion on every render. A stable
-   per-attempt seed is a behavior change that must be ruled, not slid in.
-3. **Distractors.** Same-category tokens drawn from elsewhere in the same
+2. **Distractors.** Same-category tokens drawn from elsewhere in the same
    program (Gen-1 dropdowns' approach, and the better one), a fixed pool, or
    both?
-4. **Two surfaces, one grading contract.** Typed answers versus chosen answers
+3. **Two surfaces, one grading contract.** Typed answers versus chosen answers
    grade differently; the pure core should not care which.
-5. **Delimiter occlusion** — new ground (above). Is it offered at all, and if so
-   does it occlude by category, by role, or by matched pair (`lib/classifying`
-   supplies `partner` links)?
+4. **How does delimiter occlusion select?** Gen-2 blanks buckets every delimiter
+   blank under one type and files a richer taxonomy under Future direction. By
+   category, by role, or by matched pair (`lib/classifying` supplies `partner`
+   links)? _(Whether delimiters are offered at all is **not** open — Gen-2 ships
+   them on by default; see the content-type table above.)_
+5. **Three channels on one span.** Gen-2 blanks already paints per-blank parity
+   tints and carries correctness on outline style, on the same editable spans
+   the house `code-token-*` classes will land on. This is Gate-1 question 4's
+   shape; if the answer constrains the vocabulary it belongs at Gate 1, not
+   here.
+
+_(Determinism is **not** on this list. Gen-2 ruled it — see below.)_
 
 **Determinism is not an open question — Gen-2 already ruled it.** _"`blankenate`
 rolls a bare `Math.random()` per token, so blanks re-roll on every settings
