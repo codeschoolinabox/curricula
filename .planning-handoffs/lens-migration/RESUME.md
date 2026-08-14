@@ -55,17 +55,35 @@ and were corrected rather than adopted. Re-measure before you write.
 | `633dd4b1` | `MIGRATION-PLAYBOOK.md` deleted (571 lines); four citation repairs; the sibling campaign's citation re-pointed.                                |
 | `d6192465` | The four structural amendments — the walk set, the deferral carve-out, the per-ledger exemption, the register check.                           |
 | `8e22a1c7` | Four quotations stop wearing emphasis the source never had, plus the round-3 cleanup list.                                                     |
+| `f7ea553f` | AR-2's fix pass — the resolve helper, eight heading classes, one open-row definition, and `ledgers/_TEMPLATE.md`.                              |
+| `f28fe23e` | AR-5's fix pass — the register check stops matching itself, `bnd-009` stops misquoting `spellme`, the gate command stops linting zero files.   |
 
 **AR-5 baseline for this campaign: `6d1a811f`.** Review by **explicit SHA
 list**, never `baseline..HEAD` — the tree is shared and foreign commits
 interleave.
 
+⚠️ **This table is one commit behind by construction** — a commit cannot carry
+its own SHA, so the commit that adds a row is never in the row it adds. Before
+dispatching AR-5, close the gap:
+
+```bash
+git log --oneline f28fe23e..HEAD -- .planning-handoffs/ src/lib/study-lenses/lenses/
+```
+
+Anything it returns whose body carries this campaign's settings line is a commit
+missing from the list above. **The pathspec is deliberately wider than
+`lens-migration/`** — `633dd4b1` touched the deleted playbook under `src/` and
+the sibling campaign's SPEC, so a directory-scoped search would have missed it.
+The one time this was skipped, AR-5 was nearly dispatched without the commit
+that had redefined what a ledger row is.
+
 Measured 2026-08-14 at the end of step 0: `markdownlint 0`, `cspell 0`,
-`prettier` clean on all **six** canon documents; lens suite **562 passed / 79
-skipped / 8 todo** across 19 passed + 1 skipped files; `tsc --noEmit` 0. The
-drift from the 559/18 an earlier revision published is entirely the concurrent
-`spellme` session's untracked tests — foreign, not this campaign's. Re-measure
-before you rely on any of it.
+`prettier` clean on all **six** canon documents; lens suite **562 passed / 82
+skipped / 8 todo** across 19 passed + 1 skipped files [measured: `npx vitest run
+src/lib/study-lenses/lenses`]; `tsc --noEmit` 0. The drift from the 559/18 an
+earlier revision published is entirely the concurrent `spellme` session's
+untracked tests — foreign, not this campaign's. Re-measure before you rely on
+any of it.
 
 ## What is not written yet
 
@@ -104,11 +122,14 @@ is owed.
 
 2. **`handoffs/foundation.md`** — the coloring foundation. This is the keystone
    and it gates most of the rest.
-3. **`families/{A,C,F}.md`** — Tier-1 handoffs. **Only three**: A (occlusion), C
-   (the landed cohort), F (ledger only). `annotate` and `variables` are
-   singletons and get Tier-2 handoffs directly — see SPEC § The two handoff
-   tiers for why, and note that their vocabulary requirements are already Gate-1
-   questions 4 and 5.
+3. **`families/{A,C}.md`** — Tier-1 handoffs. **Only two**, matching
+   [SPEC.md § The two handoff tiers](./SPEC.md#the-two-handoff-tiers): A
+   (occlusion) and C (the landed cohort). **Family F gets no handoff at all** —
+   its deliverable is a completed ledger and nothing else, so there is no
+   `families/F.md` to write. `annotate` and `variables` are singletons and get
+   Tier-2 handoffs directly, and their vocabulary requirements are already
+   Gate-1 questions 4 and 5. **Five handoffs in total**: foundation, A, C,
+   annotate, variables.
 4. **`handoffs/{annotate,variables}.md`** — Tier-2, direct.
 5. **Context-free validation of every handoff** (invariant 12) before any is
    final.
@@ -213,15 +234,21 @@ agenda explicitly.)_
 
 ## Two live coordination facts
 
-- **`lenses/spellme/` and `lib/scanning/` are untracked and being built right
-  now** by another session. `spellme` declares the same two Wong hues that
-  already mean _correct/wrong_ in parsons and _even/odd blank parity_ in Gen-2
-  blanks — three surfaces, three meanings, two hues. The coloring foundation
-  cannot choose a palette without reaching that author. Carried as `bnd-009`.
+- **`lenses/spellme/` and `lib/scanning/` are now COMMITTED** by the concurrent
+  session — 9 and 5 tracked files [measured 2026-08-14: `git ls-files`]. Earlier
+  revisions of this file called them untracked and said `spellme` "declares the
+  same two Wong hues"; **both statements are false and the second one inverts
+  the fact.** `spellme` names two semantic roles and binds **no hue to either**,
+  deferring the pair to this package precisely because parsons and Gen-2 blanks
+  already overload it [read: `spellme/README.md` — _"The roles are named here;
+  the hues are not"_ (human ruling 2026-08-14)]. So the coloring foundation does
+  **not** owe that author a blocking coordination round — it has already been
+  handed the decision. Full row: `bnd-009`.
 - **`lib/scanning` is a third `facts.tokens` derivation** on the tier
-  `lib/colorizing` is headed for. Whether three siblings should derive from one
-  fact independently is a bounded-context question this campaign answers for two
-  of the three.
+  `lib/colorizing` is headed for, and it is now committed beside
+  `lib/classifying`. Whether three siblings should derive from one fact
+  independently is a bounded-context question this campaign answers for two of
+  the three.
 
 ## The one thing not to lose
 
