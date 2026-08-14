@@ -3,7 +3,7 @@ FIDELITY-METHOD.md and everything under ledgers/, families/ and handoffs/, when
 the last lens lands and its ledger closes. What survives the retirement is each
 lens's own README/DOCS and its `## What this lens does NOT do` section. -->
 <!-- cspell:ignore blankenate parsonizer socratize socratizing reenrichment Wong okaidia lezer stepthroughs qasm dropdowns writeme parsons blankenated colorizing Infima deuteranopia Gateable jsdom -->
-<!-- cspell:ignore colour colours distractor distractors ledgered Leitner WCAG clauding oldd throughs reloadable ordinally spellme -->
+<!-- cspell:ignore colour colours distractor distractors ledgered Leitner WCAG clauding oldd throughs reloadable ordinally spellme gamified -->
 
 # Lens migration — campaign canon
 
@@ -235,13 +235,68 @@ vanishes silently; that is the whole point of the campaign.
 | **`lib/scanning`**                                                                                                          | **not a lens** — an untracked sibling library of `lib/classifying`, created the same night, deriving an element sequence from the tokens fact for `spellme`. It matters here because it is a **third `facts.tokens` derivation on the tier `lib/colorizing` will land in**, and the foundation's Phase 0 owes that seam a look.                                                                                                                                                                                                                   | —      |
 | **error-interpreting lens**                                                                                                 | **out of scope** — greenfield design with no Gen-1 or Gen-2 source, so there is nothing to migrate. Named in `lenses/README.md` § The roster as the lens that "speaks the parser's voice across both parse phases"; the `tokens` and `ast` phases hold no lens today. Its own campaign, not this one.                                                                                                                                                                                                                                             | —      |
 
-Every name that appears anywhere in this campaign, in `lenses/README.md`, in
-either quarry tree, **or in the Gen-3 target tree** has exactly one row above.
+**Every name the three trees and the wired roster produce must have exactly one
+row above — and that is a check, not an assertion.** An earlier revision stated
+it as a fact about the current tree. It was false within minutes:
+`lenses/spellme/` and `lib/scanning/` appeared between drafts, and a totality
+claim about a tree under concurrent edit cannot hold. See
+[The register check](#the-register-check).
+
 The target tree is in the domain deliberately: it is where new lenses arrive
 while this campaign runs, and a register that excluded it would be complete by
 construction — which is the failure this campaign is named after. That is the
-register behind "nothing vanishes silently", and a name with two rows is as much
-a defect as a name with none.
+register behind "nothing vanishes silently", and **a name with two rows is as
+much a defect as a name with none** — a rule the check enforces in one direction
+and a reader in the other.
+
+### The register check
+
+Run it; do not read it.
+
+```bash
+GEN1="…/0--study-lenses--it-begins/src/lenses"   # § Paths carries the full path
+ROSTER=src/lib/study-lenses/orchestrate/lib/composing/built-in-lenses.ts
+SPEC=.planning-handoffs/lens-migration/SPEC.md
+# flattened, because prettier wraps and a line-based grep would miss a name
+FLAT=$(tr '\n' ' ' < "$SPEC")
+{
+  ls -d src/lib/study-lenses/lenses/*/ | xargs -n1 basename                # Gen 3
+  ls -d src/lib/study-lenses--deprecated-architecture/lenses/*/ \
+    | xargs -n1 basename                                                   # Gen 2
+  [ -d "$GEN1" ] && ls "$GEN1"/*.jsx | xargs -n1 basename | sed 's/\.jsx$//'
+  grep -oE "lenses/[a-z-]+/index" "$ROSTER" \
+    | sed -E 's#lenses/([a-z-]+)/index#\1#'                                # roster
+} | grep -v '^lib$' | sort -u | while read -r n; do
+  case "$FLAT" in *"$n"*) ;; *) echo "UNREGISTERED: $n";; esac
+done
+```
+
+It prints nothing when the register is complete [measured 2026-08-14: 27 names,
+zero unregistered].
+
+**Three things it does not do, stated so nobody reads it as total:**
+
+- **The Gen-1 arm emits file stems, not lens names.** `HighlightLens` is the
+  Gen-1 source for `annotate`, `DropDownsLens` for `dropdowns`; those renames
+  live in this document's prose, not in any tree. The check asks only that each
+  stem appear _somewhere_ in this file — it cannot confirm the stem is attached
+  to the right row.
+- **`lenses/README.md` § The roster names lenses in prose** — _"the run lens
+  staffs the `evaluation` phase"_ — so it is not enumerable and is checked by
+  eye. Its spellings need not match the register's; that divergence is live
+  today, where the register's row is `run-javascript`.
+- **The roster arm excludes `types`** by matching only `lenses/<name>/index`.
+  The looser pattern reports `types.js`'s import as a lens — not hypothetical,
+  it is the first version of this command.
+
+Arm 3 is unavailable when the `0-study-lenses-committee` tree is not mounted;
+the `[ -d ]` guard makes that a partial run rather than a silent skip.
+
+**It runs at Gate 1 and again at campaign close.** Automating it as a `scripts/`
+checker is a follow-on, **owner unassigned** — and it would land beside an
+untracked `scripts/lib/check-tables/` a concurrent session is building [measured
+2026-08-14: `git ls-files scripts/lib/check-tables/` → 0 tracked], so it needs
+coordination rather than a free slot.
 
 ---
 
@@ -464,12 +519,28 @@ the greenfield re-sources to `facts.environment`, the one eslint-scope graph,
 already computed with positions — **read it, do not re-analyze**.
 `lib/scoping`'s README already anticipates it in the abstract.
 
-**It is the foundation's hardest consumer, which is exactly why it is separate
-rather than absent.** Its coloring is semantic in a _second, orthogonal_ sense:
-span-per-binding-identity, not span-per-category. Hovering an identifier
-highlights that binding's declaration and every reference to it — scattered,
+**`variables` is a gamified lens** (human ruling 2026-08-14). Its Tier-2 handoff
+and its own Phase 0 design it as **a game, not an inspector**: what the learner
+is trying to do, what tells them they did it, and what a wrong answer teaches.
+Treating the scope graph as a read-out to render is the shape this ruling
+excludes. Recorded here because the lens has no README yet;
+`DEV.md § Ruling provenance` moves it into that document when one exists.
+
+**This subordinates the mechanic below to the affordance above it.**
+Hover-highlighting a binding's declaration and every reference to it is **one
+mechanic the game may use — it is not the affordance**, and a session that ships
+the hover and calls the lens done has built the inspector the ruling excludes.
+
+**It is still the foundation's hardest consumer, which is exactly why it is
+separate rather than absent.** Its coloring is semantic in a _second,
+orthogonal_ sense: span-per-binding-identity, not span-per-category — scattered,
 non-adjacent tokens sharing an identity. Two colorings composing on one surface
-is a real question the vocabulary must answer at the foundation's Phase 0.
+is a real question the vocabulary must answer at the foundation's Phase 0, and
+**the gamification ruling does not dissolve it**: whatever the game does, it
+still needs a way to mark binding identity on a span that already carries a
+category class. Gate-1 question 4 therefore **survives the ruling unchanged**.
+What the ruling does change is that question 4's answer is an input to a game's
+design rather than the design itself.
 
 **So variables also skips Tier 1 and gets a Tier-2 handoff directly** — and for
 a sharper reason than annotate's. Scheduling a Family-D session after Gate 2
@@ -756,7 +827,7 @@ flowchart TD
     HAND["6 handoffs, each context-free validated"]
     SPEC --> SEED --> HAND
   end
-  G1{{"GATE 1 — scope, method, and the five open questions"}}
+  G1{{"GATE 1 — scope, method, the register check, and the five open questions"}}
   HAND --> G1
 
   subgraph FND["FOUNDATION — lib/colorizing"]
@@ -873,10 +944,15 @@ recipient is an OPEN row at campaign close.** Full rows live in
 
 ## Open questions for Gate 1
 
-Five. Questions 1 to 3 are rulings only a human can make; questions 4 and 5 are
-requirements the coloring foundation must discharge at its Phase 0, listed here
-so Gate 1 knows they exist and that **Gate 2 freezes the class names before
-either can otherwise be raised**. _(A sixth question — widening
+**Gate 1 also runs [the register check](#the-register-check)** and names owners
+for the unassigned boundary rows (`bnd-003`, `bnd-004`, `bnd-009`) — neither is
+an open question, but both are things Gate 1 must actually do, and a gate whose
+agenda omits them leaves those rows open at close by construction.
+
+Five questions. Questions 1 to 3 are rulings only a human can make; questions 4
+and 5 are requirements the coloring foundation must discharge at its Phase 0,
+listed here so Gate 1 knows they exist and that **Gate 2 freezes the class names
+before either can otherwise be raised**. _(A sixth question — widening
 `ClassifyInput.ast` to nullable — was **dissolved** by R-1's producer split:
 when there is no AST the surface uses Prism, so `classifying` is never called
 without one and its frozen public shape is never touched.)_
@@ -935,8 +1011,12 @@ Apply before accepting any lens. Transported from the playbook and extended.
   phase's `<select>`).
 - Retired vocabulary grep clean.
 - **`## What this lens does NOT do` present and complete** (R-5).
-- **Ledger open rows = 0**, or each remaining one carries a named deferral
+- **Ledger open rows = 0.** A `restore — DEFERRED` row is **not** open — it is
+  discharged by its named owner and checked against its ruling citation
+  ([FIDELITY-METHOD.md § At AR-5](./FIDELITY-METHOD.md#at-ar-5)), and its `gate`
+  cell reads `deferred`. Any other remaining row must carry a named deferral
   owner.
+- **The register check runs clean** ([The register check](#the-register-check)).
 - Full AR cycle complete; the DDD → TDD human gate honored.
 
 ---
@@ -946,18 +1026,31 @@ Apply before accepting any lens. Transported from the playbook and extended.
 Counts per lens, filled as ledgers complete. A suspiciously small ledger is
 supposed to be _visible_ here — that is what this table is for.
 
-| Lens               | rows | `restore` | `revive` | `ADDITION` | open | ledger                                             |
-| ------------------ | ---- | --------- | -------- | ---------- | ---- | -------------------------------------------------- |
-| blanks             | —    | —         | —        | —          | —    | [ledgers/blanks.md](./ledgers/blanks.md)           |
-| dropdowns          | —    | —         | —        | —          | —    | [ledgers/dropdowns.md](./ledgers/dropdowns.md)     |
-| annotate           | —    | —         | —        | —          | —    | [ledgers/annotate.md](./ledgers/annotate.md)       |
-| parsons            | —    | —         | —        | —          | —    | [ledgers/parsons.md](./ledgers/parsons.md)         |
-| writeme            | —    | —         | —        | —          | —    | [ledgers/writeme.md](./ledgers/writeme.md)         |
-| variables          | —    | —         | —        | —          | —    | [ledgers/variables.md](./ledgers/variables.md)     |
-| debug-props        | —    | —         | —        | —          | —    | [ledgers/debug-props.md](./ledgers/debug-props.md) |
-| Family F (7)       | —    | —         | —        | —          | —    | [ledgers/\_family-f.md](./ledgers/_family-f.md)    |
-| boundary           | —    | —         | —        | —          | —    | [ledgers/\_boundary.md](./ledgers/_boundary.md)    |
-| playbook transport | —    | —         | —        | —          | —    | [ledgers/\_playbook.md](./ledgers/_playbook.md)    |
+| Lens               | instruments                               | rows | `restore` | `revive` | `ADDITION` | open | ledger                                             |
+| ------------------ | ----------------------------------------- | ---- | --------- | -------- | ---------- | ---- | -------------------------------------------------- |
+| blanks             | 1–5 (1–3 ref→src)                         | —    | —         | —        | —          | —    | [ledgers/blanks.md](./ledgers/blanks.md)           |
+| dropdowns          | **4,5**                                   | —    | —         | —        | —          | —    | [ledgers/dropdowns.md](./ledgers/dropdowns.md)     |
+| annotate           | 1–5 (1–3 ref→src)                         | —    | —         | —        | —          | —    | [ledgers/annotate.md](./ledgers/annotate.md)       |
+| parsons            | 1–5                                       | —    | —         | —        | —          | —    | [ledgers/parsons.md](./ledgers/parsons.md)         |
+| writeme            | 1–5                                       | —    | —         | —        | —          | —    | [ledgers/writeme.md](./ledgers/writeme.md)         |
+| variables          | **4,5**                                   | —    | —         | —        | —          | —    | [ledgers/variables.md](./ledgers/variables.md)     |
+| debug-props        | 1–5                                       | —    | —         | —        | —          | —    | [ledgers/debug-props.md](./ledgers/debug-props.md) |
+| Family F (7)       | **4,5** (1–5 for `trace-debugging` alone) | —    | —         | —        | —          | —    | [ledgers/\_family-f.md](./ledgers/_family-f.md)    |
+| boundary           | n/a                                       | —    | —         | —        | —          | —    | [ledgers/\_boundary.md](./ledgers/_boundary.md)    |
+| playbook transport | n/a                                       | —    | —         | —        | —          | n/a  | [ledgers/\_playbook.md](./ledgers/_playbook.md)    |
+
+**`instruments`** names which of the five listers could run on this ledger
+([FIDELITY-METHOD.md § The five listers](./FIDELITY-METHOD.md#the-five-listers)).
+**A thin ledger at `4,5` is an instrument limit; a thin ledger at `1–5` is a
+finding.** Without this column the two are indistinguishable, and this table
+exists precisely to make a suspiciously small ledger visible — so a column that
+lets a reader mistake a blind spot for a clean bill of health would defeat it.
+`ref→src` marks the two ledgers whose listers 1–3 run Gen-2-reference against
+Gen-1-source, because their Gen-3 port does not exist yet.
+
+**`boundary` keeps its `open` count** and `playbook transport` does not: the
+boundary ledger's only close condition is about open rows
+([FIDELITY-METHOD.md § The two narrative ledgers, per ledger](./FIDELITY-METHOD.md#the-two-narrative-ledgers-per-ledger)).
 
 ---
 
