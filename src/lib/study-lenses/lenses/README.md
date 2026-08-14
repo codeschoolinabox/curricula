@@ -1,4 +1,4 @@
-<!-- cspell:ignore Gateable -->
+<!-- cspell:ignore Gateable spellme -->
 
 # lenses
 
@@ -132,9 +132,17 @@ design — not by the kind contract here.
 ## The roster
 
 Lenses such as annotate, blanks, parsons, writeme, and quiz serve the `source`
-phase; the error-interpreting lens speaks the parser's voice across both parse
+phase; spellme serves the `tokens` phase, putting the learner where the scanner
+stands; the error-interpreting lens speaks the parser's voice across both parse
 phases; the run lens staffs the `evaluation` phase, driving the evaluators. Each
 lens documents itself in its own directory.
+
+**The parse phases are not only an error channel.** The package's phase table
+glosses `tokens` by what goes wrong there, which was true while the
+error-interpreting lens was the only candidate. spellme is the first lens of
+those phases that is not about an error, and the family it opens — the
+goal-symbol question, the scanner's stopping point, one-character sabotage — is
+not either.
 
 ## Glossary — region terms
 
