@@ -162,28 +162,31 @@ lives inside a React component.
 ## Enforcement — the mask
 
 Three surface classes: the editor is class 1 — never masked while mounted, and
-structurally absent during any excursion; meta-level controls — the selector,
-the strict toggle, the snippet-type toggle, the guide, and the Edit code button
-— are class 2, never masked, so the way back to the editor is alive under every
-posture; everything else — the study panel and its lenses, and the generator
-view with its opening button — is class 3, covered under strict while the code
-is out of level. The mask is an inert overlay — a covered surface keeps its
-state beneath it — and the blocked state names the level and the first
-violation, or the type-admission cause. Every mask input — source, type, level,
-posture — is frozen during an excursion (each commit disposes it first), so
-enforcement arises in editor mode, where the masked strip bars opening lenses.
-Two paths can mount a lens under an active mask: the honored focus, and a
-flush-at-open whose absorbed keystrokes settle out-of-level code (the strip was
-live when clicked); on both, the mask applies to the mounted lens identically.
-The full class-3 block applies while the selected level's fit mark is
-does-not-fit or not-applicable-for-type — once the code parses. While it does
-not parse, the mark is undetermined and that carve-out wins regardless of type
-admission: the mask names no violation, and the parse phases' panel nodes and
-their error lenses stay uncovered — the supports a broken program needs are
-never the price of a wrong toggle. Under warn, nothing is blocked anywhere —
-which is also what lets the generator open freely over out-of-level code.
-Enforcement is mask, not filter — it never edits fit or accessibility — and
-recommendation rendering passes through the same mask.
+structurally absent during any excursion; class 2 is the meta-level **nodes**
+that must survive every posture — the selector, the strict toggle, the
+snippet-type toggle, the guide and the Edit code button, all of them controls,
+together with the announcer, which is not a control but must never go inert —
+never masked, so the way back to the editor stays alive under every posture and
+the region never falls silent (human ruling 2026-08-15); everything else — the
+study panel and its lenses, and the generator view with its opening button — is
+class 3, covered under strict while the code is out of level. The mask is an
+inert overlay — a covered surface keeps its state beneath it — and the blocked
+state names the level and the first violation, or the type-admission cause.
+Every mask input — source, type, level, posture — is frozen during an excursion
+(each commit disposes it first), so enforcement arises in editor mode, where the
+masked strip bars opening lenses. Two paths can mount a lens under an active
+mask: the honored focus, and a flush-at-open whose absorbed keystrokes settle
+out-of-level code (the strip was live when clicked); on both, the mask applies
+to the mounted lens identically. The full class-3 block applies while the
+selected level's fit mark is does-not-fit or not-applicable-for-type — once the
+code parses. While it does not parse, the mark is undetermined and that
+carve-out wins regardless of type admission: the mask names no violation, and
+the parse phases' panel nodes and their error lenses stay uncovered — the
+supports a broken program needs are never the price of a wrong toggle. Under
+warn, nothing is blocked anywhere — which is also what lets the generator open
+freely over out-of-level code. Enforcement is mask, not filter — it never edits
+fit or accessibility — and recommendation rendering passes through the same
+mask.
 
 The generator carries its class-3 membership at two elements, because those
 elements sit in different containers. The view renders inside the maskable
@@ -348,9 +351,15 @@ this region owns.
   fit marks are reachable. Injected-only — never on the built-in roster.
 - **surface classes** — the mask's three-way split: class 1 = editor-based
   (never masked while mounted; absent during an excursion) · class 2 =
-  meta-level controls including the Edit code button (never masked) · class 3 =
-  everything else, the generator view and its Generate code button included
-  (covered under strict while out of level).
+  meta-level **nodes** that must survive every posture — the meta-level
+  controls, the Edit code button among them, together with the announcer, which
+  is not a control but must never go inert (never masked) · class 3 = everything
+  else, the generator view and its Generate code button included (covered under
+  strict while out of level). Class 2 enumerates **nodes** rather than controls
+  because the split is exhaustive: the announcer is not a control and not class
+  3, and leaving it outside the taxonomy would make it maskable — the one thing
+  it cannot be, since `inert` removes a subtree from the accessibility tree and
+  a silenced announcer is worse than none (human ruling 2026-08-15).
 - **focus request** — the `lens` prop: a request honored through fit and
   accessibility, never a bypass.
 - **display labels** — the five phases' learner-facing labels and the
@@ -391,9 +400,12 @@ this region owns.
   so the pane is a named place a learner moves between rather than a box whose
   contents change without comment.
 - **announcer** — the permanently-mounted, visually-hidden live region that
-  speaks what a sighted learner reads off the rail. It renders outside both
+  speaks what a sighted learner reads off the rail. **Class 2**, the only member
+  of that class that is not a control: it restores nothing, but it must survive
+  every posture for the same reason the controls do. It renders outside both
   maskable containers, because `inert` removes a subtree from the accessibility
-  tree and a silenced announcer is worse than none. Its utterances are
+  tree and a silenced announcer is worse than none — and its class is what makes
+  that placement a requirement rather than a preference. Its utterances are
   enumerated, not open: the pane's occupant changing, a transition into or out
   of the blocked state, and the barring edge moving — **never a settle**, which
   fires whenever typing pauses. It is the single voice for the blocked state's
@@ -410,16 +422,15 @@ this region owns.
   and never a single lens's — the moment one names a lens's palette the seam is
   gone. It names a **role** and binds no hue, following the precedent the
   `spellme` lens set when it named _attested_ and _diverging_ and deferred their
-  colours to custom properties. And it colours the **surround**,
-  never the program: a token that changes how a character the learner typed
-  looks belongs to the colorizing leaf, not here. Deliberately not "chrome
-  token" — **chrome** already names a code surface's CodeMirror frame elsewhere
-  in this package. Deliberately not "instrument token" either: this region calls
-  itself _the instrument_ in its own prose, but a language level's
-  notional-machine document already calls the NM _the mechanical instrument_,
-  and spelling that collision into a hundred identifiers would make it
-  permanent. The region's existing usage is left alone; the token vocabulary
-  declines to deepen it.
+  colours to custom properties. And it colours the **surround**, never the
+  program: a token that changes how a character the learner typed looks belongs
+  to the colorizing leaf, not here. Deliberately not "chrome token" — **chrome**
+  already names a code surface's CodeMirror frame elsewhere in this package.
+  Deliberately not "instrument token" either: this region calls itself _the
+  instrument_ in its own prose, but a language level's notional-machine document
+  already calls the NM _the mechanical instrument_, and spelling that collision
+  into a hundred identifiers would make it permanent. The region's existing
+  usage is left alone; the token vocabulary declines to deepen it.
 - **house token defaulting** — how a house token resolves against the embedding
   site. Each is declared once with a fallback chain that ends in a literal, so
   the vocabulary is total: where a host ships Infima the token defaults from the

@@ -81,9 +81,12 @@ Three facts about that data shape every drawing below:
 - **the announcer** — a permanently-mounted, visually-hidden live region that
   speaks the transitions a sighted learner reads off the rail. The rail's
   stations are controls, so the rail cannot itself be a live region; the
-  announcer is what pays that debt. Three things fix it, and they are stated as
-  rules rather than as a surface class, because the region's class-2 list
-  enumerates **controls** and the announcer is not one:
+  announcer is what pays that debt. It is **class 2** — the one member of that
+  class that is not a control. The split is exhaustive, so the only alternative
+  was class 3, which would put it inert under strict and silence the very thing
+  its placement exists to keep speaking; class 2 therefore widened from
+  meta-level _controls_ to the meta-level **nodes** that must survive every
+  posture (human ruling 2026-08-15). Three rules fix the rest of it:
   - **Placement.** It renders outside both maskable containers — not because it
     is a control that must stay reachable, but because `inert` removes a subtree
     from the accessibility tree entirely, and a silenced announcer is worse than
@@ -568,7 +571,9 @@ Recorded rather than re-argued, with what the choice costs and what it does not:
    the strip's none entry has no analogue; the open lens's tray entry takes its
    place. The dispose enumeration changes, and 0.3 should amend it deliberately.
 3. **The announcer is a new permanent element** with no precedent in this region
-   and no home in the current DOM. It is class 2 by argument, not by ruling.
+   and no home in the current DOM. Its class is settled — class 2 by ruling
+   (2026-08-15), which widened that class from controls to nodes — but where it
+   mounts is not.
 4. **Journey 4's trap is a component-decomposition question**, not a layout one.
    It is named here so it is not mistaken for something the band's order can
    fix.

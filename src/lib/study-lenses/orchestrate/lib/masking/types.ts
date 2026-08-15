@@ -11,9 +11,15 @@ import type { SnippetType, Violation } from '../../../language-levels/types.js';
  * The mask's three-way split of rendered surfaces — VOCABULARY ONLY: the
  * classification is a static fact of the render tree (containment decides,
  * no runtime consumer types against this). A surface's class is a static
- * fact of what it IS: editor-based surfaces are always alive;
- * meta-level controls (the selector, both toggles, the guide) are never
- * masked; everything else is maskable under strict.
+ * fact of what it IS: editor-based surfaces are always alive; the
+ * meta-level NODES that must survive every posture are never masked — the
+ * meta-level controls, and the announcer, which is not a control but must
+ * never go inert; everything else is maskable under strict.
+ *
+ * The roster of class-2 nodes lives in the region README, not here: this
+ * type is vocabulary, and an enumeration kept in two places drifts.
+ * `'meta-control'` under-names the class it labels, which admits one node
+ * that is not a control.
  */
 export type SurfaceClass = 'editor-based' | 'meta-control' | 'maskable';
 

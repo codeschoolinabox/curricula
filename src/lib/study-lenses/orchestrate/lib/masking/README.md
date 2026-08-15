@@ -33,17 +33,22 @@ validates or repairs it (no re-derivation, in either direction).
 ## The three surface classes
 
 Class 1, editor-based: never masked while mounted — and structurally absent
-during any excursion, when the ways back to it are class 2. Class 2, meta-level
-controls — the selector, the strict toggle, the snippet-type toggle, the guide,
-the edit-return button: never masked, because each can itself restore
-conformance or the path to it (and help is never withheld). Class 3, everything
-else — the study panel and its lenses, and the generator view together with the
-button that opens it: covered under strict while the code is out of level, as an
-inert overlay; a covered surface keeps its state beneath it. The class of a
-surface is a static fact of what the surface IS — nothing derives it at runtime,
-and it does not follow from which container the surface renders in: the Generate
-code button sits outside every maskable container and still carries class 3 at
-its own element.
+during any excursion, when the ways back to it are class 2. Class 2, the
+meta-level **nodes** that must survive every posture — the selector, the strict
+toggle, the snippet-type toggle, the guide and the edit-return button, all of
+them controls, together with the announcer, which is not a control at all: never
+masked, because each control can itself restore conformance or the path to it
+(and help is never withheld), and because `inert` would remove the announcer
+from the accessibility tree entirely, which is worse than not announcing (human
+ruling 2026-08-15). The class enumerates nodes rather than controls because the
+split is exhaustive, and a class-less announcer would fall to class 3 — the one
+class it cannot carry. Class 3, everything else — the study panel and its
+lenses, and the generator view together with the button that opens it: covered
+under strict while the code is out of level, as an inert overlay; a covered
+surface keeps its state beneath it. The class of a surface is a static fact of
+what the surface IS — nothing derives it at runtime, and it does not follow from
+which container the surface renders in: the Generate code button sits outside
+every maskable container and still carries class 3 at its own element.
 
 ## Navigation
 

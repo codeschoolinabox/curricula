@@ -112,10 +112,11 @@ flowchart TD
   writes. Every derived state re-derives per settle.
 - **Append-only composition, loud collisions.** Built-ins are never replaced or
   shadowed; failure happens at mount, at the author's desk.
-- **Class-2 controls never mask.** Any control whose availability restores what
-  the learner needs stays alive under every posture: conformance for the
-  selector and both toggles, orientation for the guide, the way home for the
-  Edit code button.
+- **Class-2 nodes never mask.** Any control whose availability restores what the
+  learner needs stays alive under every posture: conformance for the selector
+  and both toggles, orientation for the guide, the way home for the Edit code
+  button. The announcer joins them without being a control — `inert` would take
+  it out of the accessibility tree, and a silenced announcer is worse than none.
 - **The undetermined carve-out wins.** While the code does not parse, the mask
   names no violation and the parse phases' supports stay uncovered — regardless
   of type admission.
