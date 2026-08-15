@@ -4,7 +4,7 @@ the last lens lands and its ledger closes. What survives the retirement is each
 lens's own README/DOCS and its `## What this lens does NOT do` section. -->
 <!-- cspell:ignore blankenate parsonizer socratize socratizing reenrichment Wong okaidia lezer stepthroughs qasm dropdowns writeme parsons blankenated colorizing Infima deuteranopia Gateable jsdom -->
 <!-- cspell:ignore colour colours distractor distractors ledgered Leitner WCAG clauding oldd throughs reloadable ordinally spellme gamified -->
-<!-- cspell:ignore behaviour behaviours pointcut -->
+<!-- cspell:ignore behaviour behaviours pointcut unbuilt -->
 
 # Lens migration — campaign canon
 
@@ -118,12 +118,12 @@ class-reference test that reads string literals and `class="…"` attributes, an
 a switched-off-code test for pre-module JavaScript. Until it exists, no ledger
 may claim its Gen-1 side was instrumented.
 
-> **An earlier revision of this section claimed `ledgers/_TEMPLATE.md` already
-> carried a widened form. It did not.** Every `GEN1=` in the campaign ends
-> `/src/lenses` [measured 2026-08-15: `grep -n 'GEN1='` across all seven > > >
-> documents]. The claim is struck rather than left standing beside its
-> correction, and it is recorded because it was published in **two** documents
-> at once — a reader who checked one would have been reassured by the other.
+**An earlier revision of this section claimed `ledgers/_TEMPLATE.md` already
+carried a widened form. It did not.** Every `GEN1=` assignment in the campaign
+ends `/src/lenses` [measured 2026-08-15: `grep -n GEN1=` across all seven
+documents]. The claim is struck rather than left standing beside its correction,
+and it is recorded here because it was published in **two** documents at once —
+a reader who checked one would have been reassured by the other.
 
 [FIDELITY-METHOD § 4](./FIDELITY-METHOD.md#4--orphan-css)'s published orphan
 command is written for the `src/lenses/` pair and is correct for it; the method

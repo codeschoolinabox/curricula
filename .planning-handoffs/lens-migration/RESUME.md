@@ -2,7 +2,7 @@
 closes; nothing here is end-state documentation. -->
 <!-- cspell:ignore socratize reenrichment dropdowns writeme parsons colorizing spellme lezer blankenate -->
 <!-- cspell:ignore colour distractor distractors ledgered throughs -->
-<!-- cspell:ignore firstblock glossterm parsonizer -->
+<!-- cspell:ignore firstblock glossterm parsonizer parsonize -->
 
 # RESUME — where this campaign stands and what comes next
 
