@@ -87,6 +87,10 @@ describe('deriveInputElements', () => {
 				[8, 9],
 			]);
 		});
+
+		it.skip('indexes into the caller token array rather than its own output', () => {
+			expect(elements('let x = 1')[2]?.tokenIndices).toEqual([1]);
+		});
 	});
 
 	describe('Boundaries — tiling', () => {
@@ -158,6 +162,10 @@ describe('deriveInputElements', () => {
 			expect(kinds('if')).toEqual(['IdentifierName']);
 		});
 
+		it.skip('names an operator-shaped reserved word an IdentifierName', () => {
+			expect(kinds('typeof x')[0]).toBe('IdentifierName');
+		});
+
 		it.skip('names a contextual keyword an IdentifierName', () => {
 			expect(kinds('let')).toEqual(['IdentifierName']);
 		});
@@ -188,6 +196,10 @@ describe('deriveInputElements', () => {
 
 		it.skip('keeps a different compound assignment of the same token type a Punctuator', () => {
 			expect(kinds('x**=2')[1]).toBe('Punctuator');
+		});
+
+		it.skip('keeps a two-character compound assignment a Punctuator', () => {
+			expect(kinds('a += b')[2]).toBe('Punctuator');
 		});
 
 		it.skip('names a brace outside a template a RightBracePunctuator', () => {
@@ -236,6 +248,10 @@ describe('deriveInputElements', () => {
 				'IdentifierName',
 				'TemplateSubstitutionTail',
 			]);
+		});
+
+		it.skip('absorbs a zero-width chunk into the token indices of its run', () => {
+			expect(elements('`${a}${b}`')[0]?.tokenIndices).toEqual([0, 1, 2]);
 		});
 
 		it.skip('folds a nested template into five elements', () => {
