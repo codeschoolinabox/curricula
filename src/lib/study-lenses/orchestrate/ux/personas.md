@@ -68,9 +68,10 @@ prediction against what the phase shows. The lifecycle is not navigation to them
 - **Distinguishing _nothing to study here_ from _the machine stopped here_.**
   These are different facts about their program and today they render almost
   identically.
-- **Reading the break once.** A break bars a suffix, never a scatter — one
-  break, one cause, everything downstream waiting — and an arrangement that
-  repeats the cause per barred phase is telling them a single truth four times.
+- **Reading the barring edge once.** It bars a suffix, never a scatter — one
+  barring edge, one cause, everything downstream waiting — and an arrangement
+  that repeats the cause per barred phase is telling them a single truth four
+  times.
 - **Predicting before opening.** Anything that opens a study surface as a
   side-effect of navigating toward it destroys the prediction they came to make.
 

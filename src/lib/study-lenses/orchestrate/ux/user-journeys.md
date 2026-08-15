@@ -54,8 +54,8 @@ lifecycle. They have an error and they want its location.
 > came for help, and no arrangement fixes that — it is copy that has to be
 > written, by someone who knows what the parser means.
 
-**0:35 — they fix it.** The band settles back. Whatever it said about the break
-goes away.
+**0:35 — they fix it.** The band settles back. Whatever it said about where the
+machine stopped goes away.
 
 **1:10 — they leave.** They never opened a phase, never selected a level, never
 read the guide. **This is a complete and successful journey**, and any
@@ -63,9 +63,9 @@ arrangement that makes it feel incomplete — a progress affordance, an unopened
 phase drawn as an omission, a nudge — has broken the package's own rule that the
 fade is pull and not push.
 
-**What this journey asks of an arrangement:** that the break is legible to
-someone who never read the band, and that nothing in the band implies the
-learner owes it attention.
+**What this journey asks of an arrangement:** that where the machine stopped is
+legible to someone who never read the band, and that nothing in the band implies
+the learner owes it attention.
 
 ## Journey 2 — the empty middle
 

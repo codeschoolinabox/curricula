@@ -1,9 +1,10 @@
-<!-- cspell:ignore actioned affordances checkpointed cutover respecified spellme unbuilt wireframes -->
+<!-- cspell:ignore actioned affordances checkpointed cutover parentheticals respecified spellme ugrep unbuilt undercounted unretired wireframes -->
 
 # orchestrate ux — resumption point
 
-**State: Phase 0 step 0.2 is written and NOT closed. AR-1 is at round 3 with a
-PAUSE and SEVEN open findings.** Do not start 0.3 until they close.
+**State: Phase 0 step 0.2 is written and NOT closed. All seven of AR-1 round 3's
+findings are RESOLVED, in two commits; AR-1 round 4 has not yet run.** Do not
+start 0.3 until it clears.
 
 **Read the governance chain first**, before this file's task list: the repo-root
 `CLAUDE.md` is a router — check your model id against its qualifying list and
@@ -37,12 +38,32 @@ form.
 
 The tree is shared with concurrent sessions; scope every claim to these SHAs.
 
-| SHA        | What                                                                                      |
-| ---------- | ----------------------------------------------------------------------------------------- |
-| `bf36ab49` | 0.1 — README registers `ux/`, adds the first glossary terms                               |
-| `dafcffd4` | 0.2 — the three-document twin + the selection pass                                        |
-| `a1f4d132` | AR-1 round 1 resolution — CP1 restructure, `house token` rename, the Rail override        |
-| `8cc4bc15` | AR-1 round 2 resolution — empty-station copy restored, `barring edge`, station retirement |
+| SHA        | What                                                                                       |
+| ---------- | ------------------------------------------------------------------------------------------ |
+| `bf36ab49` | 0.1 — README registers `ux/`, adds the first glossary terms                                |
+| `dafcffd4` | 0.2 — the three-document twin + the selection pass                                         |
+| `a1f4d132` | AR-1 round 1 resolution — CP1 restructure, `house token` rename, the Rail override         |
+| `8cc4bc15` | AR-1 round 2 resolution — empty-station copy restored, `barring edge`, station retirement  |
+| `5300c39d` | this resumption point lands (it had been untracked)                                        |
+| `929d9086` | AR-1 round 3, **finding 2 alone** — class 2 widens to nodes; a rule amendment, ships alone |
+| _next_     | AR-1 round 3, findings 1 · 3 · 4 · 5 · 6 · 7, and this file's corrections                  |
+
+**Carry-forwards this pass created**, none of them blocking round 4:
+
+- `lib/masking/types.ts` still says the classification is "a static fact of the
+  render tree (**containment decides**…)" while `lib/masking/README.md` says a
+  class "does not follow from which container the surface renders in". A direct
+  contradiction, pre-existing, left in place because the human's scope ruling
+  was the four homes rather than the drifts — and named in `929d9086` because it
+  is the same issue as the rail's class-3 re-grounding, which deliberately does
+  **not** ground on containment.
+- `SurfaceClass`'s member `'meta-control'` now under-names its class. Zero
+  consumers [measured], so the rename is free, but it reshapes another module's
+  contract — 0.3.
+- `station` has a **third, live, unretired sense** in the same package:
+  `PEDAGOGY.md` uses "the stations" for the curriculum's five chain-points. The
+  glossary now says the region neither claims nor retires it. `PEDAGOGY.md` is
+  foreign-dirty — do not edit it.
 
 Baseline for AR-5: **`80306ad9`**.
 
@@ -84,7 +105,39 @@ All 2026-08-14 unless noted.
 7 below. `DEV.md § Ruling provenance`: "A ruling recorded only in a commit body
 is findable but not readable where it binds."
 
-## THE SEVEN OPEN FINDINGS — the next session's first task
+## THE SEVEN FINDINGS — ALL RESOLVED 2026-08-15; READ THIS BANNER FIRST
+
+**Everything in this section below the banner is the round-3 report as written,
+kept because the reasoning is auditable. It is no longer a task list.** The
+resolution is in two commits, and their bodies are the record — this file points
+rather than restates:
+
+- `929d9086` — finding 2 alone. Class 2 widened from meta-level _controls_ to
+  meta-level **nodes**, so the announcer has a class. A **rule amendment**, and
+  [DEV.md § Atomic Commits](../../DEV.md) requires one to ship alone.
+- the commit that follows it — findings 1, 3, 4, 5, 6, 7.
+
+**Three of the seven were wrong as the reviewer stated them, and one of this
+file's own tools was the reason.** Re-verify anything here before relying on it:
+
+| finding | as stated                        | as measured 2026-08-15                                                                                                                                                      |
+| ------- | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1       | counts via `\bbreaks?\b`         | correct, but that pattern is **blind to `broke`/`broken`/`breakage`** — 13 further hits, one of them live in-drawing copy, a third undecidable case the finding never named |
+| 2       | four definitional homes          | four, **plus `DOCS.md`**, which carries two `class-2` references and whose line 115 was definitional and became false                                                       |
+| 3       | the list lives in three handoffs | **four**                                                                                                                                                                    |
+| 4b      | "one full frame of three"        | **one of four** — the omitted frame is `## Strict, covering — with a lens already open`, which has no station-mark row at all                                               |
+| 4c      | "when spellme lands, say three"  | too small — the count is **derived per settle** from accessible-and-empty phases, so it is two in the barred state the document already draws                               |
+| 5       | four dependent sites             | **five** — the fifth was invisible to this file's own unwrap command (see § Mechanics)                                                                                      |
+
+**The human ruled three things on 2026-08-15**: `station` takes neutral wording
+and its shape defers to 0.3; class 2 widens rather than the announcer escaping
+it; and all four class-2 homes are edited now, `lib/masking/` included. The two
+naming rulings are dated **2026-08-15**, not 08-14 — `8cc4bc15` recorded them
+undated and landed 08-15 09:55, and the two parentheticals already in the tree
+saying 08-14 were corrected. The **Rail selection** is genuinely 2026-08-14
+[measured: `git show -s --format=%ci a1f4d132`].
+
+### The round-3 report, as written
 
 **Findings 1–5 are AR-1 round 3's, independently verified, all holding. Findings
 6 and 7 are AR-1's lower-severity items promoted by the outgoing session; they
@@ -344,10 +397,17 @@ the per-file checkpoint results; and a justification if you used `--no-verify`.
 - **Pathspec-commit always**: `git commit -F <msg> -- <paths>`. A pathspec
   commit takes WORKING-TREE content of those paths. Verify with
   `git status --short -- <paths>` first.
-- **`--no-verify` is licensed here AND it obliges you.** `orchestrate/README.md`
-  carries eight lines of pre-existing tab-to-space fence drift; lint-staged
-  would also reformat the peer's staged files. Because you are bypassing the
-  hook, run the per-file checkpoints by hand — every one, on every changed file.
+- **`--no-verify` is licensed here AND it obliges you.** The reason is the
+  peer's staged files: lint-staged runs over the whole staged set rather than
+  your pathspec, so the hook would reformat another session's work into your
+  commit. An earlier revision of this file gave a different reason — "eight
+  lines of pre-existing tab-to-space fence drift" in `orchestrate/README.md` —
+  and that reason was **false**: those eight were the markdownlint-from-the-
+  wrong-directory artifact described above, and prettier _wants_ those tabs.
+  (There was one genuine pre-existing prettier drift, a nine-line prose rewrap
+  in the `house token` glossary entry; `929d9086` normalized it and declared
+  it.) Because you are bypassing the hook, run the per-file checkpoints by hand
+  — every one, on every changed file, **from the repo root**.
 - **Per-file checkpoints** (the compound script does not forward file args):
   `npx markdownlint-cli2 --no-globs "<file>"` · `npx cspell "<file>"` ·
   `npx prettier --check "<file>"`. New files: `--write` is safe. Pre-existing
@@ -356,8 +416,33 @@ the per-file checkpoint results; and a justification if you used `--no-verify`.
   header. British spellings and coinages need it; check what each target file
   already registers before assuming a word is new.
 - **`git grep` and single-line greps LIE on this repo's prettier-wrapped
-  markdown.** Unwrap first: `tr '\n' ' ' < file | grep -o "…"`. This campaign
-  has been bitten twice.
+  markdown.** Unwrap first — and **`tr '\n' ' '` is NOT enough**, which is the
+  form an earlier revision of this file prescribed. It replaces the newline but
+  leaves the wrap's leading indent, so a phrase spanning a wrap becomes
+  `stations are<3 spaces>controls` and a literal grep misses it. Squeeze:
+
+  ```bash
+  tr -s '[:space:]' ' ' < file | grep -ioE ".{0,60}<pattern>.{0,60}"
+  ```
+
+  [measured 2026-08-15: `stations? are controls` → **2** hits under the old
+  form, **3** under the squeezed one. The missed hit was finding 5's fifth
+  dependent site — the defect in this file's own tool is what hid the site this
+  file's own finding undercounted.] Single-token patterns (`\bbreaks?\b`) are
+  immune; multi-word ones are not. Note also that `grep` here is ugrep, which
+  rejects `.{0,70}` context windows around multi-byte characters with "exceeds
+  complexity limits" — for wide context, use python's `re` over
+  `re.sub(r'\s+',' ',text)` instead.
+
+- **`markdownlint-cli2` resolves its config from the CURRENT WORKING
+  DIRECTORY**, not from the linted file's tree. Run it from the **repo root** or
+  it silently falls back to default rules and invents failures: from
+  `orchestrate/` it reports **8** errors on `README.md`; from the repo root it
+  reports **0** [measured 2026-08-15, both]. Those 8 are MD010 hard-tab hits on
+  the `StudyLensesProperties` fence, and `.prettierrc.json` sets
+  `"useTabs": true` — so they are not debt, they are an artifact of running the
+  linter from the wrong directory. This nearly put false checkpoint numbers into
+  an immutable commit body.
 
 ## Sandbox checkpoints owed at Phase 1
 

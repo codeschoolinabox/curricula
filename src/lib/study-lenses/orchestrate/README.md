@@ -372,27 +372,64 @@ this region owns.
   copy is display labelling too**, and takes the same discipline: keyed by the
   mark it renders, zipped against the mark vocabulary, never a positional list.
   A mark is machine vocabulary — a learner reads that their code _steps outside_
-  a level, never that it is `does-not-fit`.
+  a level, never that it is `does-not-fit`. **The empty station's reason is
+  display labelling too.** A phase that is accessible and has no fitting lens
+  carries its own reason — `Tokens, spelling: nothing studies this phase yet` —
+  keyed by phase name and zipped against the same order constant, and a single
+  collective line names how many such phases there are. The spoken form is not
+  the printed one: the label's `·` becomes a comma, because a spoken label may
+  be longer and plainer than a printed one and the two are not obliged to be the
+  same string. **That count is derived, never written.** It is the number of
+  phases that are both accessible and empty of fitting lenses, evaluated per
+  settle — so it is not a property of the roster: a phase whose only lens fails
+  its applicability on this program is empty too, and a **barred** phase is
+  excluded entirely, because it carries a cause instead. The line takes the
+  singular at one and does not render at zero. **And display copy never carries
+  contract vocabulary** — the rule the marks already follow, and the reason the
+  sentence a learner reads when the machine stops says _the grammar broke here_
+  rather than naming **the barring edge**. The contract term names the thing for
+  this package; the copy names it for the learner, and the two are allowed to
+  differ.
 - **the rail** — the lifecycle rendered as the machine's own conveyor: a line
   carrying one **station** per phase in the machine's fixed order, with the
   **barring edge** between the last reachable station and the first waiting one.
   **Supersedes the lifecycle strip**, the row of per-phase selects this region
   shipped first; the strip's own vocabulary is retired with it. Designed in
   [`ux/wireframes.md`](./ux/wireframes.md) and drawn there through every state.
-- **station** — the rail's per-phase control: its name, its mark, and its tray
-  where the phase has one. **Never the phase itself** — the phase is data, the
-  station is what renders it. The word is reclaimed rather than minted: a
-  retired architecture used `station` as a synonym for `phase`, and that sense
-  is formally retired (human ruling 2026-08-14) rather than left to collide
-  silently, because the two are one-to-one and a reader carrying the old meaning
-  would be right by accident forever.
-- **the barring edge** — where the machine stopped, rendered between stations
-  rather than on one, because a phase's own failure never bars it. Deliberately
-  not "the break": this package teaches `break` as a language construct and uses
-  it again as a scope-pop reason, this glossary already says **barred** for the
+- **station** — the rail's per-phase element: one per phase, in the machine's
+  fixed order, carrying its name, its mark, and its tray where the phase has
+  one. **Never the phase itself** — the phase is data, the station is what
+  renders it. Whether a station with a tray and a station with nothing to open
+  are one shape or two is the first question `types.ts` answers, and this entry
+  deliberately leaves it open: four of five phases have nothing to open, so the
+  empty case is the ordinary one, and a definition that assumed a control would
+  be wrong four fifths of the time. The word is reclaimed rather than minted,
+  and it is reclaimed against two other senses. A retired architecture used
+  `station` as a synonym for `phase`; that sense is formally retired (human
+  ruling 2026-08-15) rather than left to collide silently, because the two are
+  one-to-one and a reader carrying the old meaning would be right by accident
+  forever. The word also sits on a banned-term list that several campaign
+  handoffs instruct agents to grep by hand — nothing mechanized enforces it —
+  and the same ruling lifts that ban for this region. Elsewhere in the package
+  `stations` names the curriculum's five chain-points, a live sense this region
+  neither claims nor retires.
+- **the barring edge** — the boundary between the last reachable phase and the
+  first waiting one: where the machine stopped. Rendered between stations rather
+  than on one, because a phase's own failure never bars it. The definition is
+  phase-level and the rendering is its consequence, so a document that holds no
+  position can still name the thing. Deliberately not "the break" (human ruling
+  2026-08-15): this package teaches `break` as a language construct and uses it
+  again as a scope-pop reason, this glossary already says **barred** for the
   mechanism, and `break` cannot be a binding name in JavaScript — so the term
   would be renamed at every call site and the document's name would drift from
-  the code's.
+  the code's. **The rename is part-of-speech-scoped**, because every one of
+  those reasons is a reason a contract NOUN cannot be spelled that way and none
+  of them reaches a verb: only the noun naming this boundary becomes
+  `barring edge`, while a parse that _breaks_, a split that would _break_, and a
+  learner who _breaks_ their program all keep the word. Two registers sit either
+  side of the term — a learner's perception narrated back takes the gloss _where
+  the machine stopped_, and learner-facing display copy takes neither, per
+  **display labels**.
 - **tray** — one station's kit, disclosed beneath the rail and pushing the pane
   down rather than covering it. A station whose phase has no fitting lenses has
   no tray and no disclosure control — not a disabled one.

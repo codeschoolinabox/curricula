@@ -40,12 +40,13 @@ proposals         0 … N ranked recommendations of a next lens
 
 Three facts about that data shape every drawing below:
 
-- **A break bars a suffix, never a scatter.** Exactly three shapes: everything
-  open; grammar broken (source, tokens and ast stay open, the last two wait);
-  spelling broken (source and tokens stay open, the last three wait). `source`
-  and `tokens` are always reachable, and **a phase's own error never bars it** —
-  a grammar error leaves the grammar phase open, because that is where the
-  grammar error is studied. So **one break, one cause, drawn once.**
+- **The barring edge bars a suffix, never a scatter.** Exactly three shapes:
+  everything open; grammar broken (source, tokens and ast stay open, the last
+  two wait); spelling broken (source and tokens stay open, the last three wait).
+  `source` and `tokens` are always reachable, and **a phase's own error never
+  bars it** — a grammar error leaves the grammar phase open, because that is
+  where the grammar error is studied. So **one barring edge, one cause, drawn
+  once.**
 - **`0` is the ordinary number of lenses on a phase**, not an edge case. Four of
   five phases have none today, and an arrangement that treats zero as a
   degenerate case of one will be wrong four fifths of the time.
@@ -59,34 +60,54 @@ Three facts about that data shape every drawing below:
 - **the rail** — the lifecycle drawn as the machine's own conveyor: a line, one
   **station** per phase in the machine's order, and the **barring edge** drawn
   between two stations rather than on either of them.
-- **station** — the rail's per-phase control: its name, its mark, and its tray
+- **station** — the rail's per-phase element: its name, its mark, and its tray
   if it has one. **Never the phase itself** — the phase is the data, the station
-  is what renders it. The word is reclaimed rather than minted: a retired
-  architecture used `station` as a synonym for `phase`, and that sense is
-  formally retired here (human ruling 2026-08-14) rather than left to collide
-  silently, because the two are one-to-one and a reader carrying the old meaning
-  would be right by accident forever.
-- **the barring edge** — where the machine stopped, drawn on the line between
-  the last reachable station and the first waiting one. Deliberately not "the
-  break": this package teaches `break` as a language construct and uses it again
-  as a scope-pop reason, the region already says **barred** for exactly this
-  mechanism, and `break` cannot be a binding name in JavaScript at all — so a
-  contract term spelled that way would be renamed at every call site and the
-  name in the document would drift from the name in the code.
+  is what renders it. **Not defined as a control**, because four of five have
+  nothing to open and carry no control at all; whether the two cases are one
+  shape or two is 0.3's question, and the drawings below are deliberately
+  readable under either answer. The word is reclaimed rather than minted, and it
+  is reclaimed against two other senses. A retired architecture used `station`
+  as a synonym for `phase`; that sense is formally retired here (human ruling
+  2026-08-15) rather than left to collide silently, because the two are
+  one-to-one and a reader carrying the old meaning would be right by accident
+  forever. The word also sits on a banned-term list that several campaign
+  handoffs instruct agents to grep by hand — nothing mechanized enforces it —
+  and the same ruling lifts that ban for this region. Elsewhere in the package
+  `stations` names the curriculum's five chain-points, a live sense this region
+  neither claims nor retires.
+- **the barring edge** — the boundary between the last reachable phase and the
+  first waiting one: where the machine stopped. Drawn on the line between their
+  two stations, because a phase's own failure never bars it — the definition is
+  phase-level and the drawing is its consequence, which is what lets
+  [`personas.md`](./personas.md) name the thing without acquiring a position.
+  Deliberately not "the break" (human ruling 2026-08-15): this package teaches
+  `break` as a language construct and uses it again as a scope-pop reason, the
+  region already says **barred** for exactly this mechanism, and `break` cannot
+  be a binding name in JavaScript at all — so a contract term spelled that way
+  would be renamed at every call site and the name in the document would drift
+  from the name in the code. **The rename is part-of-speech-scoped**: only the
+  noun naming this boundary becomes `barring edge`. Every reason above is a
+  reason a contract NOUN cannot be spelled that way and none of them reaches a
+  verb, so a parse that _breaks_, a split that would _break_, and a learner who
+  _breaks_ their program all keep the word — and so does the drawn sentence a
+  learner reads, which is copy rather than contract.
 - **the tray** — one station's kit, opening downward beneath the rail and
   pushing the pane down rather than covering it. Absent entirely where a phase
   has nothing to open.
 - **the nameplate** — a line above the pane that always names what the pane is
   holding, so the pane is a named place rather than a box whose contents change.
 - **the announcer** — a permanently-mounted, visually-hidden live region that
-  speaks the transitions a sighted learner reads off the rail. The rail's
-  stations are controls, so the rail cannot itself be a live region; the
-  announcer is what pays that debt. It is **class 2** — the one member of that
-  class that is not a control. The split is exhaustive, so the only alternative
-  was class 3, which would put it inert under strict and silence the very thing
-  its placement exists to keep speaking; class 2 therefore widened from
-  meta-level _controls_ to the meta-level **nodes** that must survive every
-  posture (human ruling 2026-08-15). Three rules fix the rest of it:
+  speaks the transitions a sighted learner reads off the rail. The rail cannot
+  itself be that live region: it goes inert under strict, and `inert` removes a
+  subtree from the accessibility tree entirely — so a live region on the rail
+  would fall silent under the exact posture whose transition most needs
+  announcing. The announcer is what pays that debt. It is **class 2** — the one
+  member of that class that is not a control. The split is exhaustive, so the
+  only alternative was class 3, which would put it inert under strict and
+  silence the very thing its placement exists to keep speaking; class 2
+  therefore widened from meta-level _controls_ to the meta-level **nodes** that
+  must survive every posture (human ruling 2026-08-15). Three rules fix the rest
+  of it:
   - **Placement.** It renders outside both maskable containers — not because it
     is a control that must stay reachable, but because `inert` removes a subtree
     from the accessibility tree entirely, and a silenced announcer is worse than
@@ -134,12 +155,37 @@ studies this phase yet" under each empty column, and the Rail cannot fit four
 copies on one line — but the requirement behind the copy is Journey 6's, that an
 empty phase give a reason, and dropping the words to fit the geometry would have
 failed it. Saying it once is also the Rail's own discipline, the same one that
-draws one break and one cause.
+draws one barring edge and one cause. **The strings themselves are not this
+document's**: the region README owns every learner-facing string and owns this
+one's derivation with it — including the fact that the count is derived per
+settle and is not four by definition. The drawings say where it sits.
 
-**Each empty station carries the same reason in its accessible name** — "Tokens,
-spelling: nothing studies this phase yet" — because the line beneath the rail is
-positional and a reader traversing station by station never reaches it. This is
-the one place the spoken surface says more than the drawn one, deliberately.
+**Each empty station carries the same reason as visually-hidden text of its
+own** — "Tokens, spelling: nothing studies this phase yet". Deliberately **not
+an accessible name**: an accessible name is computed for an element that has a
+role, and an empty station has no control to carry one. And the reason is not
+that the collective line is out of reach — a reader browsing the document
+reaches it perfectly well. It is that the collective line **names no station**,
+so a reader moving through them linearly hears one sentence about four phases
+and cannot attach it to the one they just passed. This is the one place the
+spoken surface says more than the drawn one, deliberately.
+
+**Under strict, neither reader gets it, and that is a second unpaid cost.** The
+reason sits beneath the rail, inside the maskable container, and it restores
+nothing — so it is class 3 and dims with the rail. `inert` then empties that
+subtree out of the accessibility tree, which is the same fact that keeps the
+announcer outside both maskable containers, so the spoken copy goes dark with
+the drawn copy. It belongs in the same ledger as the orientation cost recorded
+under [Strict, covering](#strict-covering--editor-mode), and it is no better
+paid.
+
+**The mark row and the reason line travel together.** A drawing that runs the
+whole instrument top to bottom and shows the rail's per-station marks shows the
+reason line too; one that abbreviates the rail to a bare line shows neither, and
+the band excerpts further down crop it along with everything else they crop —
+none of them is a claim that the line is gone. Where a barring edge is drawn the
+cause line takes that slot instead. That is the rule to check these drawings
+against, and it is two greps rather than a re-reading.
 
 **No mark is shown, because no level is selected.** The selector's closed face
 reads `plain JavaScript` — the none-state's display string — and generic
@@ -211,6 +257,14 @@ same statement in geometry that the sentence makes in words, so a learner who
 reads neither still sees it. **One cause, drawn once**, rather than the same
 parser sentence repeated per waiting phase.
 
+**And where a barring edge is drawn, the cause line owns the slot beneath the
+rail — the empty-count line yields.** Two sentences competing for one slot at
+the exact moment Journey 1 is hunting for the first would be a worse failure
+than a missing count. The count would also read differently here, which is the
+clearest demonstration that it is derived rather than fixed: the phases that
+wait are not accessible, and a barred phase carries a cause instead of a reason,
+so what is empty in this drawing is `ast` — alone.
+
 **And the AST station is empty, which is the honest and uncomfortable drawing.**
 The argument for leaving that phase open is that it is where the grammar error
 is studied — and nothing studies it: no lens on the built-in roster declares the
@@ -264,8 +318,9 @@ state is the covered one has designed for the exception.
 │ [Generate code]  [module]                                    │ ← Generate: dim + inert
 │         [Just Enough JavaScript · steps outside ▾]  (•) strict│   at its own element
 ├──────────────────────────────────────────────────────────────┤
-│  Source ─── Tokens ─── AST ─── Environment ─── Evaluation    │ ← the rail: dim + inert
-│   ▾ 2         ·          ·          ·             ·          │
+│  Source ─── Tokens ─── AST ─── Environment ─── Evaluation    │ ← the rail: dim + inert,
+│   ▾ 2         ·          ·          ·             ·          │   and the reason line
+│  four phases have nothing to open yet                        │   dims with it
 ├──────────────────────────────────────────────────────────────┤
 │  your code                                                   │
 │  ┌────────────────────────────────────────────────────────┐  │ ← never covered
@@ -288,10 +343,16 @@ to reach than the repair, and the sentence is the one place the arrangement can
 push back on its own geometry.
 
 **The rail dims whole, and this is the Rail's own answer to a question the other
-candidates left open.** Because its stations are controls, the rail is
-unambiguously class 3 — there is no control-free part of it to argue should stay
-lit. It also drops into the maskable container the phases panel already
-occupies, so the dimming needs no new mechanism.
+candidates left open.** The rail is class 3 because of what it is: it is the
+study layer's opening surface and it **supersedes the lifecycle strip**, which
+is class 3 already — membership inherited from what the surface is, never from
+which container it happens to render in, which is the rule the mask states for
+every surface. And it dims **whole** rather than in parts because partial
+dimming of a lifecycle line would read as a machine state — one phase gone dark
+— rather than as a posture. Both halves survive a kit of zero, which the earlier
+argument did not: that one rested on the stations being controls, and four of
+five carry none. It also drops into the maskable container the phases panel
+already occupies, so the dimming needs no new mechanism.
 
 **The cost is that orientation goes dark under strict, and it is not fully
 paid.** The announcer keeps speaking, because it renders outside both maskable
@@ -338,6 +399,7 @@ in the row**; the two are never both present.
 ├──────────────────────────────────────────────────────────────┤
 │  Source ─── Tokens ─── AST ─── Environment ─── Evaluation    │
 │   ▾ 2 ●       ·          ·          ·             ·          │
+│  four phases have nothing to open yet                        │
 ├──────────────────────────────────────────────────────────────┤
 │  the pane holds: write it from memory · a way to study Source│
 │  ┌────────────────────────────────────────────────────────┐  │
@@ -488,8 +550,9 @@ Kept because the reasoning is auditable and because the doubts recorded against
 each candidate transfer to whatever borrows from it.
 
 **The Rail** — drawn above. Order becomes a mark on the page rather than a
-reading convention; a break becomes a property of an edge, which is what the
-data says; the kit's size never perturbs the lifecycle's geometry.
+reading convention; where the machine stopped becomes a property of an edge,
+which is what the data says; the kit's size never perturbs the lifecycle's
+geometry.
 
 **The Bench** split orientation from navigation: a control-free readout, one
 grouped opener, a nameplate. Its argument: a readout that is also a set of
@@ -512,7 +575,7 @@ Seven journeys through three candidates, Journey 2 first.
 |                                        | Rail                                                        | Bench                                                           | Drawer                                                         |
 | -------------------------------------- | ----------------------------------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------- |
 | **2 · the empty middle** (the decider) | machine drawn whole; only the trays are thin                | reports five open phases — and **hides** that four are unserved | says "nothing studies this yet" four times on the first screen |
-| **1 · never leaves the editor**        | break on the edge, cause below                              | same, **and the readout can speak it**                          | break as a rule, cause below                                   |
+| **1 · never leaves the editor**        | on the edge, cause below                                    | same, **and the readout can speak it**                          | as a drawn rule, cause below                                   |
 | **5 · by keyboard**                    | stations, plus a tray when open                             | **one stop to everything**                                      | every entry is a stop, forever                                 |
 | **6 · through a screen reader**        | stations give structure; an empty one needs a spoken reason | uniquely able to be a live region; navigation weakest           | **strongest** — named groups, every state already text         |
 | **3 · the excursion**                  | —                                                           | —                                                               | —                                                              |
@@ -542,19 +605,21 @@ each part, and drawn through none of its own states.
 
 ### The override — the Rail, by the human
 
-**The maintainer selected the Rail directly, superseding the pass's synthesis.**
-Recorded rather than re-argued, with what the choice costs and what it does not:
+**The maintainer selected the Rail directly, superseding the pass's synthesis**
+(human ruling 2026-08-14). Recorded rather than re-argued, with what the choice
+costs and what it does not:
 
 - **It does not overturn the pass's main finding.** The Rail satisfies Journey
   2's decisive property — health and richness in separate channels — which is
   why it was a candidate at all. The pass preferred the Bench on its
   **secondary** criteria, Journeys 5 and 6.
 - **Journey 6's cost is real and cheaply paid.** The Bench's unique advantage
-  was that its readout could itself be a live region; the Rail's stations are
-  controls, so it cannot. **The announcer** — a permanently-mounted,
-  visually-hidden class-2 live region — pays that debt, and is arguably the
-  better mechanism regardless, since it also carries the pane swap and the
-  blocked state, neither of which the Bench's readout would have announced.
+  was that its readout could itself be a live region; the Rail's line cannot,
+  because it goes inert under strict and `inert` empties a subtree out of the
+  accessibility tree. **The announcer** — a permanently-mounted, visually-hidden
+  class-2 live region — pays that debt, and is arguably the better mechanism
+  regardless, since it also carries the pane swap and the blocked state, neither
+  of which the Bench's readout would have announced.
 - **Journey 5's cost is a real regression against the Bench** and is not paid:
   reaching the far end of the band costs more stops under the Rail than under a
   single opener, and the cost grows with the kit when a tray is open.
