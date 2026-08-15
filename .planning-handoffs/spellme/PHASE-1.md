@@ -16,14 +16,23 @@ this file deliberately does not restate them.
 | `9eea31a3` | the user twin is named for its concern — DEV.md, the `ux/` name |
 | `349d2f99` | `lib/scanning` Phase 0                                          |
 | `80306ad9` | `spellme` Phase 0 — cites `bnd-009`                             |
+| `da7cb376` | this document, `EMBODY-FLAGS.md`, and the deferred brief        |
+| `7e083de2` | the Phase-0 top-up — four fixtures, suite 63 → 67               |
 
-⚠ **Foreign commits interleave those four**, one of them landing _between_
+⚠ **Foreign commits interleave those six**, one of them landing _between_
 `9eea31a3` and `349d2f99`. **Do not trust a count here — recompute it**, because
 it moves within minutes: `git rev-list --count 6d1a811f..HEAD` minus this
 campaign's own commits. It read 13 total / 9 foreign when this document was
-written and 17 / 13 about two hours later, with HEAD moving three times during a
-single cold read of this file. `baseline..HEAD` has never been this changeset.
-AR-5 takes the SHA list above plus whatever Phase 1 adds.
+written, 17 / 13 about two hours later, and 18 total / 13 foreign on 2026-08-14
+— with HEAD moving three times during a single cold read of this file and eight
+times during one planning session. `baseline..HEAD` has never been this
+changeset. AR-5 takes the SHA list above plus whatever Phase 1 adds.
+
+⚠ **This table did not list `da7cb376` until 2026-08-15** — the commit that
+wrote this document was missing from the document's own record, so an AR-5
+dispatched from it verbatim would have reviewed four commits instead of five. A
+handoff's SHA list is written last and is exactly where the author's own last
+commit goes missing.
 
 **Gates at the close of Phase 0** [all measured 2026-08-14]: `npx tsc --noEmit`
 0 errors · 148 tests, 145 skipped and 3 passing · cspell 0 · prettier clean ·
@@ -53,10 +62,15 @@ is an honest burn-down.
 - `src/lib/study-lenses/lenses/spellme/index.tsx` — the component throws; the
   frozen lens object is real and its three tests already pass.
 
-**`lib/scanning` cluster order** (file order is ZOMBIES order): Zero · One ·
-Many · Boundaries–tiling · The vocabulary · Template folding · Right-brace
-disambiguation · Trivia · Comments and the hashbang · Interfaces–frozen, pure
-and deterministic · Exceptions · Simple–the recorded departures. 63 tests.
+**`lib/scanning` un-skip order** — file order **except** that Boundaries–tiling
+moves to just before Interfaces (human ruling 2026-08-14, § Rulings of record):
+Zero · One · Many · The vocabulary · Template folding · Right-brace
+disambiguation · Trivia · Comments and the hashbang · **Boundaries–tiling** ·
+Interfaces–frozen, pure and deterministic · Exceptions · Simple–the recorded
+departures. **67 tests** since the Phase-0 top-up [measured 2026-08-15: `grep -c
+"it\.skip"` on the test file], not the 63 this document first recorded. Wave 1
+owns the first 33, through Template folding; the launch brief is
+[`./WAVE-1-BRIEF.md`](./WAVE-1-BRIEF.md).
 
 The first un-skip is `Zero/returns nothing for an empty source`, at
 `tests/derive-input-elements.test.ts`; the file to edit is
@@ -76,48 +90,52 @@ reading_) is a guard clause and phase 4 (_Interleave the set-aside_) is a merge
 — both stay inline in the export rather than becoming named helpers. The
 Refactor step is held against the **phases**, not against a helper list.
 
-## ⚠ Two questions for the human before the first increment
+## Rulings of record
 
-### 1. AR-3 fires per un-skip. That is **145 invocations**. Is that accepted?
+The two questions this document used to hold were put to the human and answered.
+These are this campaign's process rulings, recorded here because their end-state
+home does not exist — a ceremony decision governs no module document — and
+because a ruling that cannot be found by `git grep` does not exist (DEV.md §
+Ruling provenance).
 
-**The governance is not ambiguous here, and an earlier draft of this handoff
-wrongly presented it as a tie.** Three statements, all saying per-un-skip:
-
-- DEV.md § Phase 0 — "Phase 1 un-skips **one at a time**, in ZOMBIES order, and
-  **AR-3 fires on each un-skip**".
-- DEV.md § Phase 1 — "exactly one test goes red per increment, **and AR-3 fires
-  on it**".
-- DEV.md § AR-3 **Trigger** — "After the first failing test is written for an
-  increment — **which, under tests-committed-skipped, is each un-skip.**" That
-  clause was written for exactly this situation.
-
-145 tests are skipped across the two modules [measured 2026-08-14: 148 total, 3
-already passing], so the literal reading is **145 AR-3 invocations**.
-
-**So the question is not "which reading?" — it is "do you want to reduce
-ceremony?"** That is legitimate, it is yours alone, and it has exactly two
-sanctioned forms: lower the campaign's level, or issue a per-review opt-out.
-`ceremony: full` is currently recorded on all three Phase-0 commits.
-
-**The agent must not answer this by preferring the cheaper reading.** If it goes
-unanswered, AR-3 fires per un-skip. Note for honesty that `AGENTS.principal.md`
-(**not** DEV.md) § Orchestrated delegation describes a worker as owning "one
-complete triangulated unit (a function + its ZOMBIES cluster), running the full
-cycle (ZOMBIES → `ar-3` → implement → refactor → `ar-4`)" — that is a compressed
-label for the cycle a worker owns, not a count of firings, and reading it as a
-count is how the earlier draft went wrong.
-
-### 2. Solo, or fan out?
-
-`AGENTS.principal.md` § Orchestrated delegation: "After Phase 0, absent explicit
-human prompting, a session fans out … The human may override to synchronous."
-**No override is recorded**, so the default is fan-out and a solo session is the
-thing needing permission, not the other way round.
-
-What the DAG allows: `lib/scanning` is one public export and does not decompose
-— it is one worker. `spellme`'s `core.ts` carries eight functions, most of which
-are independent of each other once `types.ts` is fixed. `lib/scanning` must
-finish before `spellme` starts, because its `types.ts` is a type edge.
+- **AR-3 is opted out for un-skips** (human ruling 2026-08-14). `ceremony: full`
+  still stands and remains recorded on all three Phase-0 commits; this is the
+  per-review opt-out, which is a separate mechanism from the level. AR-4 and
+  AR-5 are untouched, and the opt-out does not extend to them. The literal
+  reading it replaces was 145 AR-3 invocations across the two modules.
+- **Phase 1 fans out, and every decomposition is validated context-free before
+  its launch** (human ruling 2026-08-14). `lib/scanning` is one public export
+  and does not decompose — one worker's cluster, split into sequential waves at
+  committed boundaries. `spellme`'s `core.ts` carries eight largely independent
+  functions and is the real fan-out; it must not start until `lib/scanning` is
+  green, because its `types.ts` is a type edge.
+- **Four fixtures were added to the committed Phase-0 suite** (human ruling
+  2026-08-14). Two pin the token-index join key — which no fixture pinned, so an
+  implementation indexing into its own output rather than the caller's token
+  array passed every test. Two close accidental generalizations in the naming
+  rule. Suite 63 → 67; landed in `7e083de2`.
+- **The `Boundaries — tiling` block un-skips out of file order** (human ruling
+  2026-08-14), immediately before `Interfaces` rather than at its file position.
+  Its five tests sweep the whole pipeline over a 22-item corpus; un-skipped
+  early they license two structural fakes — a zero-width filter standing in for
+  the template fold, and "a non-whitespace gap is a Comment" standing in for the
+  comment merge — that leave no hardcoded value for the Refactor step to find.
+  ZOMBIES order survives: the blocks it moves past are unlettered.
+- **An increment is bounded by exactly one red event** (human ruling
+  2026-08-15). An earlier decomposition carried increments with no red test at
+  all, justified by an appeal to the human's approval of the decomposition's
+  shape — an authority that was never given and could not be cited. Those
+  increments are merged into the driver that precedes them, so DEV.md § Phase 1
+  step 5 holds unamended and no departure needs defending. Un-skips still happen
+  one at a time; a test that arrives green rides into the open increment with a
+  one-line record of what it would have caught.
+- **AR-5 is the orchestrator's, not the worker's.** Its inputs — the
+  plan-approval baseline SHA and the campaign's whole SHA list — are things no
+  worker holds, and its cross-increment-coherence focus spans waves. It fires at
+  each wave boundary as well as at the end of Phase 1, because DEV.md's trigger
+  includes "the last commit before a handoff" and a worker handing back to a
+  fresh worker is one. This adds a firing rather than removing one. No
+  governance text assigned it; this line is the assignment.
 
 ## Traps, each of which has already cost something
 
@@ -179,11 +197,14 @@ Never pass a `model` parameter when spawning an `ar-N`.
 - The Phase-1 → Phase-2 boundary.
 - `ar-5`, scoped by the SHA list above plus Phase 1's own commits.
 - **The push, and it is far larger than this campaign.** `main` has **no
-  upstream configured** [measured 2026-08-14: `git rev-parse --abbrev-ref
+  upstream configured** [measured 2026-08-15: `git rev-parse --abbrev-ref
   main@{upstream}` → "fatal: no upstream configured"], and `origin/main..HEAD`
-  is **81 commits**. Four of them are this campaign's. Do not present the push
-  as "four commits" — whoever holds that gate is deciding about eighty-one, most
-  of them other sessions' work.
+  is **91 commits** [measured 2026-08-15: `git rev-list --count
+  origin/main..HEAD`]. Six of them are this campaign's. Do not present the push
+  as "six commits" — whoever holds that gate is deciding about ninety-one, most
+  of them other sessions' work. **This number climbs on its own**: it read 81 on
+  2026-08-14, and a peer's own commit body that day said "'unpushed' turns out
+  to mean 83 commits, not 8". Re-measure it at the gate; never quote this line.
 
 ## Deferred, and recorded elsewhere
 
