@@ -58,25 +58,39 @@ and were corrected rather than adopted. Re-measure before you write.
 | `f7ea553f` | AR-2's fix pass — the resolve helper, eight heading classes, one open-row definition, and `ledgers/_TEMPLATE.md`.                                   |
 | `f28fe23e` | AR-5's fix pass — the register check stops matching itself, `bnd-009` stops misquoting `spellme`, the gate command stops linting zero files.        |
 | `cb5eeedc` | The context-free validation's fix pass — the register check runs verbatim, the `spellme` correction reaches its third file, Tier-1 is two families. |
+| `d0b71810` | The launch prompt's cold read — `instruments` corrected for two ledgers; the worked-row ids and Family F's shape ruled.                             |
 
 **AR-5 baseline for this campaign: `6d1a811f`.** Review by **explicit SHA
 list**, never `baseline..HEAD` — the tree is shared and foreign commits
-interleave.
+interleave. Five landed between this session's own commits.
+
+⚠️ **Nothing here is pushed, and "unpushed" is far bigger than this campaign.**
+`main` has **no upstream configured**, so `git log @{u}..HEAD` returns 0 and
+reads as clean. Measured against the remote, local `main` is **83 commits ahead
+of `origin/main`**, of which **12 are this campaign's**; the rest belong to
+other campaigns and concurrent sessions [measured 2026-08-14: `git rev-list
+--count origin/main..HEAD`]. **A push publishes all 83.** Whoever holds that
+gate is deciding for every campaign in the tree, not just this one.
 
 ⚠️ **This table is one commit behind by construction** — a commit cannot carry
 its own SHA, so the commit that adds a row is never in the row it adds. Before
 dispatching AR-5, close the gap:
 
 ```bash
-git log --oneline cb5eeedc..HEAD -- .planning-handoffs/ src/lib/study-lenses/lenses/
+git log --oneline d0b71810..HEAD -- .planning-handoffs/lens-migration/
 ```
 
-Anything it returns whose body carries this campaign's settings line is a commit
-missing from the list above. **The pathspec is deliberately wider than
-`lens-migration/`** — `633dd4b1` touched the deleted playbook under `src/` and
-the sibling campaign's SPEC, so a directory-scoped search would have missed it.
-The one time this was skipped, AR-5 was nearly dispatched without the commit
-that had redefined what a ledger row is.
+Anything it returns is a campaign commit missing from the list above.
+
+**Do not filter by the settings line.** `ceremony: full (AR-3, AR-4 n/a)` is the
+docs-only-campaign convention, not this campaign's signature — it matches **19**
+commits ahead of `origin/main`, only 9 of them this session's; the other 10 are
+the epistemology-strip campaign's [measured 2026-08-14]. **Touching
+`.planning-handoffs/lens-migration/` is the discriminator**, and it suffices:
+`633dd4b1` also reached the deleted playbook under `src/` and the sibling
+campaign's SPEC, but it touched three files here too. The one time this check
+was skipped, AR-5 was nearly dispatched without the commit that had redefined
+what a ledger row is.
 
 Measured 2026-08-14 at the end of step 0: `markdownlint 0`, `cspell 0`,
 `prettier` clean on all **six** canon documents; lens suite **562 passed / 82
