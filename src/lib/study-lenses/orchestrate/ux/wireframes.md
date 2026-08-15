@@ -1,4 +1,4 @@
-<!-- cspell:ignore spellme undrawn wireframes -->
+<!-- cspell:ignore affordances spellme undrawn wireframes -->
 
 # wireframes — orchestrate
 
@@ -57,8 +57,22 @@ Three facts about that data shape every drawing below:
 ## The parts
 
 - **the rail** — the lifecycle drawn as the machine's own conveyor: a line, one
-  **station** per phase in the machine's order, and a **break** drawn on the
-  line's edge rather than on either station beside it.
+  **station** per phase in the machine's order, and the **barring edge** drawn
+  between two stations rather than on either of them.
+- **station** — the rail's per-phase control: its name, its mark, and its tray
+  if it has one. **Never the phase itself** — the phase is the data, the station
+  is what renders it. The word is reclaimed rather than minted: a retired
+  architecture used `station` as a synonym for `phase`, and that sense is
+  formally retired here (human ruling 2026-08-14) rather than left to collide
+  silently, because the two are one-to-one and a reader carrying the old meaning
+  would be right by accident forever.
+- **the barring edge** — where the machine stopped, drawn on the line between
+  the last reachable station and the first waiting one. Deliberately not "the
+  break": this package teaches `break` as a language construct and uses it again
+  as a scope-pop reason, the region already says **barred** for exactly this
+  mechanism, and `break` cannot be a binding name in JavaScript at all — so a
+  contract term spelled that way would be renamed at every call site and the
+  name in the document would drift from the name in the code.
 - **the tray** — one station's kit, opening downward beneath the rail and
   pushing the pane down rather than covering it. Absent entirely where a phase
   has nothing to open.
@@ -67,7 +81,23 @@ Three facts about that data shape every drawing below:
 - **the announcer** — a permanently-mounted, visually-hidden live region that
   speaks the transitions a sighted learner reads off the rail. The rail's
   stations are controls, so the rail cannot itself be a live region; the
-  announcer is what pays that debt.
+  announcer is what pays that debt. Three things fix it, and they are stated as
+  rules rather than as a surface class, because the region's class-2 list
+  enumerates **controls** and the announcer is not one:
+  - **Placement.** It renders outside both maskable containers — not because it
+    is a control that must stay reachable, but because `inert` removes a subtree
+    from the accessibility tree entirely, and a silenced announcer is worse than
+    none.
+  - **Utterances, exhaustively.** It speaks exactly three things: the pane's
+    occupant changing, a transition into or out of the blocked state, and the
+    barring edge moving. **It never speaks a settle.** The settle fires whenever
+    typing pauses, and a region that narrates every pause is noise a learner
+    will route around.
+  - **One voice for one sentence.** The blocked state's cause is spoken here,
+    which means the existing enforcement-cause node stops claiming to announce
+    it and becomes plain text. Two live regions for one sentence is either a
+    double utterance or a silent contradiction; this is the seam where that gets
+    decided rather than discovered.
 
 Their names are proposed here and become contract at 0.3, alongside the types.
 
@@ -83,6 +113,7 @@ No level selected, two lenses on `source`, nothing open.
 ├──────────────────────────────────────────────────────────────┤
 │  Source ─── Tokens ─── AST ─── Environment ─── Evaluation    │
 │   ▾ 2         ·          ·          ·             ·          │
+│  four phases have nothing to open yet                        │
 ├──────────────────────────────────────────────────────────────┤
 │  your code                                                   │
 │  ┌────────────────────────────────────────────────────────┐  │
@@ -93,6 +124,19 @@ No level selected, two lenses on `source`, nothing open.
 │  [Guide ▾]                                                   │
 └──────────────────────────────────────────────────────────────┘
 ```
+
+**An empty station says why, and says it once.** The line beneath the rail is
+the Kit Drawer's contribution, kept and relocated: that candidate wrote "nothing
+studies this phase yet" under each empty column, and the Rail cannot fit four
+copies on one line — but the requirement behind the copy is Journey 6's, that an
+empty phase give a reason, and dropping the words to fit the geometry would have
+failed it. Saying it once is also the Rail's own discipline, the same one that
+draws one break and one cause.
+
+**Each empty station carries the same reason in its accessible name** — "Tokens,
+spelling: nothing studies this phase yet" — because the line beneath the rail is
+positional and a reader traversing station by station never reaches it. This is
+the one place the spoken surface says more than the drawn one, deliberately.
 
 **No mark is shown, because no level is selected.** The selector's closed face
 reads `plain JavaScript` — the none-state's display string — and generic
@@ -149,7 +193,7 @@ four legible states, drawn below, not one control with four strings.
 
 ```text
 │  Source ─── Tokens ─── AST ──╳╌╌ Environment ╌╌╌╌ Evaluation │
-│   ▾ 2         ·         ▾ 1        waiting         waiting   │
+│   ▾ 2         ·          ·         waiting         waiting   │
 │                                                              │
 │  the grammar broke here — Unexpected token (2:8).            │
 │  the last two phases wait for it.                            │
@@ -157,12 +201,23 @@ four legible states, drawn below, not one control with four strings.
 │              [Just Enough JavaScript · can't tell yet ▾]     │
 ```
 
-**The break is drawn on the edge, not on a station**, because that is what the
-data says: the phase where it broke stays open — it is where the grammar error
-is studied — and what waits is downstream of it. The dashed line makes the same
-statement in geometry that the sentence makes in words, so a learner who reads
-neither still sees it. **One break, one cause, once**, rather than the same
+**The barring edge is drawn between stations, not on one**, because that is what
+the data says: the phase where it broke stays open — it is where the grammar
+error is studied — and what waits is downstream of it. The dashed line makes the
+same statement in geometry that the sentence makes in words, so a learner who
+reads neither still sees it. **One cause, drawn once**, rather than the same
 parser sentence repeated per waiting phase.
+
+**And the AST station is empty, which is the honest and uncomfortable drawing.**
+The argument for leaving that phase open is that it is where the grammar error
+is studied — and nothing studies it: no lens on the built-in roster declares the
+`ast` phase. So Journey 1's decisive moment lands the learner on an open station
+with no tray, and Journey 2's empty middle arrives at the worst possible moment.
+An earlier revision drew a lens here that does not exist, which made the drawing
+read better and concealed exactly the finding the twin exists to surface. **This
+is the strongest argument the document can make for someone owing the parse
+phases their error lenses**, and it belongs in a drawing rather than in a
+complaint.
 
 Two separate truths, drawn separately: **the machine stopped somewhere**, and
 **the level declines to judge.** The mark is not "does not fit" — a typo is
@@ -232,10 +287,18 @@ push back on its own geometry.
 **The rail dims whole, and this is the Rail's own answer to a question the other
 candidates left open.** Because its stations are controls, the rail is
 unambiguously class 3 — there is no control-free part of it to argue should stay
-lit. The cost is that orientation goes dark under strict; the mitigation is that
-**the announcer is class 2 and keeps speaking**, so the state the rail stops
-showing is still available to anyone who asks for it. Whether a sighted learner
-needs the same is a checkpoint question.
+lit. It also drops into the maskable container the phases panel already
+occupies, so the dimming needs no new mechanism.
+
+**The cost is that orientation goes dark under strict, and it is not fully
+paid.** The announcer keeps speaking, because it renders outside both maskable
+containers — but a visually-hidden region is by construction unavailable to the
+sighted learner whose orientation just went dark. **So the mitigation reaches a
+different reader than the one who lost something**, and saying otherwise would
+be the kind of accounting that makes a cost look settled when it is not. What a
+sighted learner keeps under strict is the blocked sentence and the live control
+row; whether that is enough orientation is a checkpoint question and nothing in
+this document can answer it.
 
 ## Strict, covering — with a lens already open
 
@@ -305,6 +368,16 @@ for the open lens is its own close affordance** — pressed while open, released
 to close. That replaces a contract-named dispose raiser and changes the region's
 dispose enumeration; it is named here so 0.3 amends the contract deliberately
 rather than discovering it.
+
+**And it collides with a contract edge pointing the other way**, which 0.3 must
+settle rather than inherit. The region deliberately allows the OPEN lens to be
+re-opened: a proposal may target it, and doing so re-resolves its configuration
+in place and announces a fresh open without moving the embodiment. So under this
+arrangement the same lens has two affordances with opposite meanings — its tray
+entry closes it, a proposal re-opens it. A learner who wants to restart the
+surface they are on reaches for the nearer one and gets a dispose. This is a
+state-machine question, not a layout one, and it is the kind that is cheap now
+and expensive once the types are written.
 
 ## The generator in the pane
 
@@ -390,10 +463,13 @@ rearrangement here:
 > ⚠ **doubt, and it is the Rail's largest.** Five stations plus four connectors
 > is not a phone layout. Wrapping the line destroys the meaning the line
 > carries; scrolling it horizontally hides stops. The honest degradation is a
-> vertical list — which is to say the Rail's small-screen form is a different
-> arrangement, and the project would maintain two. A second, quieter version of
-> the same worry: a drawn line is the first thing to break under an unfamiliar
-> host's font stack and under right-to-left text.
+> vertical list — a second **geometry**, and deliberately not a second contract:
+> it has the same parts in the same order, one station per phase, an optional
+> tray per station, and the barring edge between two of them. Only the direction
+> of the line changes, so this is a stylesheet debt rather than a second type
+> set, and 0.3 should not read it as two arrangements to model. A second,
+> quieter version of the same worry: a drawn line is the first thing to break
+> under an unfamiliar host's font stack and under right-to-left text.
 >
 > **A second doubt, smaller and self-resolving.** At today's kit, four of five
 > stations have no tray, so the disclosure mechanism — the thing that makes the

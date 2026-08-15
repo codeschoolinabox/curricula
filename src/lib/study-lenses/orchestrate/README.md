@@ -359,18 +359,58 @@ this region owns.
   `AST · grammar` · `Environment · names` · `Evaluation · run`; the none-state
   displays as `plain JavaScript`. The labels live keyed by phase name — a record
   zipped against embody's runtime order constant, never a positional list, so
-  the phase order keeps exactly one truth.
+  the phase order keeps exactly one truth. **The four fit marks' learner-facing
+  copy is display labelling too**, and takes the same discipline: keyed by the
+  mark it renders, zipped against the mark vocabulary, never a positional list.
+  A mark is machine vocabulary — a learner reads that their code _steps outside_
+  a level, never that it is `does-not-fit`.
+- **the rail** — the lifecycle rendered as the machine's own conveyor: a line
+  carrying one **station** per phase in the machine's fixed order, with the
+  **barring edge** between the last reachable station and the first waiting one.
+  **Supersedes the lifecycle strip**, the row of per-phase selects this region
+  shipped first; the strip's own vocabulary is retired with it. Designed in
+  [`ux/wireframes.md`](./ux/wireframes.md) and drawn there through every state.
+- **station** — the rail's per-phase control: its name, its mark, and its tray
+  where the phase has one. **Never the phase itself** — the phase is data, the
+  station is what renders it. The word is reclaimed rather than minted: a
+  retired architecture used `station` as a synonym for `phase`, and that sense
+  is formally retired (human ruling 2026-08-14) rather than left to collide
+  silently, because the two are one-to-one and a reader carrying the old meaning
+  would be right by accident forever.
+- **the barring edge** — where the machine stopped, rendered between stations
+  rather than on one, because a phase's own failure never bars it. Deliberately
+  not "the break": this package teaches `break` as a language construct and uses
+  it again as a scope-pop reason, this glossary already says **barred** for the
+  mechanism, and `break` cannot be a binding name in JavaScript — so the term
+  would be renamed at every call site and the document's name would drift from
+  the code's.
+- **tray** — one station's kit, disclosed beneath the rail and pushing the pane
+  down rather than covering it. A station whose phase has no fitting lenses has
+  no tray and no disclosure control — not a disabled one.
+- **nameplate** — the line above the surface pane naming its current occupant,
+  so the pane is a named place a learner moves between rather than a box whose
+  contents change without comment.
+- **announcer** — the permanently-mounted, visually-hidden live region that
+  speaks what a sighted learner reads off the rail. It renders outside both
+  maskable containers, because `inert` removes a subtree from the accessibility
+  tree and a silenced announcer is worse than none. Its utterances are
+  enumerated, not open: the pane's occupant changing, a transition into or out
+  of the blocked state, and the barring edge moving — **never a settle**, which
+  fires whenever typing pauses. It is the single voice for the blocked state's
+  cause; no other node claims to announce that sentence.
 - **house token** — a CSS custom property, prefix `--sl-`, naming one of this
   package's own presentation concepts: a surface, a text weight, a hairline, the
   focus ring, the inert dim, the mask scrim, or a fit mark's role. _House_ is
   this tree's established modifier for what is ours rather than the framework's
-  — house rule, house taxonomy, house style — and it is the word the colorizing
-  leaf already uses for the code surface's palette, so the two read as one
-  family with two scopes. Three rules keep the vocabulary from spreading. A
-  house token names a **house** concept and never a single lens's — the moment
-  one names a lens's palette the seam is gone. It names a **role** and binds no
-  hue, following the precedent the scanning lens set when it named _attested_
-  and _diverging_ and deferred their colours. And it colours the **surround**,
+  — house rule, house taxonomy, house style — and a planned coloring foundation
+  is expected to use it the same way for the program's own palette, so the two
+  would read as one family with two scopes. That foundation does not exist yet;
+  the modifier is borrowed from this tree's own usage, not from it. Three rules
+  keep the vocabulary from spreading. A house token names a **house** concept
+  and never a single lens's — the moment one names a lens's palette the seam is
+  gone. It names a **role** and binds no hue, following the precedent the
+  `spellme` lens set when it named _attested_ and _diverging_ and deferred their
+  colours to custom properties. And it colours the **surround**,
   never the program: a token that changes how a character the learner typed
   looks belongs to the colorizing leaf, not here. Deliberately not "chrome
   token" — **chrome** already names a code surface's CodeMirror frame elsewhere
@@ -415,7 +455,7 @@ this region owns.
 - [`DOCS.md`](./DOCS.md) — this region's architectural sketch.
 - The user twin: [`ux/`](./ux/) — `personas.md`, `user-journeys.md`, and
   `wireframes.md`. All three are written because this region is where the
-  package's readers meet an interface at all: the scanning lens's own twin
+  package's readers meet an interface at all: the `spellme` lens's own twin
   records that "personas were not written because the reader in front of this
   lens is the package's, not this lens's"
   ([`../lenses/spellme/README.md`](../lenses/spellme/README.md)), and that debt

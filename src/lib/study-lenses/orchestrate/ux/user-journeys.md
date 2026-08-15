@@ -20,8 +20,11 @@ believe his own design are marked **⚠ doubt**.
 only where that control is already contract — the editor, the Edit code button,
 the Generate code button, the level selector, the two toggles, the guide. Where
 a learner reaches for a way to study a phase, the journey says so and does not
-say what they touch, because that is precisely what the wire-frames are choosing
-and a journey that presumed it could not be used to judge between them.
+say what they touch. That began as a requirement of the comparison — a journey
+that presumed a shape could not have judged between candidates — and the
+comparison is now over. It is kept for the reason that outlives it: these
+journeys describe what a learner is trying to do, so they stay usable against
+whatever the region becomes, and they can judge the next arrangement too.
 
 Seven journeys. Two of them — the keyboard and the screen reader — exist because
 this region has three recorded defects that only those readers meet.

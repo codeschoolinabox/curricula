@@ -11,7 +11,7 @@ This document holds no clock and no screen. A persona that acquires a timeline
 has become a journey; one that acquires a position has become a wire-frame. Both
 are sibling documents here.
 
-**Why this region owes personas at all.** The scanning lens declined to write
+**Why this region owes personas at all.** The `spellme` lens declined to write
 them, and said why: _"personas were not written because the reader in front of
 this lens is the package's, not this lens's"_
 ([`../../lenses/spellme/README.md`](../../lenses/spellme/README.md)). That hands
