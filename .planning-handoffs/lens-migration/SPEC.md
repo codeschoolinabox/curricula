@@ -4,7 +4,7 @@ the last lens lands and its ledger closes. What survives the retirement is each
 lens's own README/DOCS and its `## What this lens does NOT do` section. -->
 <!-- cspell:ignore blankenate parsonizer socratize socratizing reenrichment Wong okaidia lezer stepthroughs qasm dropdowns writeme parsons blankenated colorizing Infima deuteranopia Gateable jsdom -->
 <!-- cspell:ignore colour colours distractor distractors ledgered Leitner WCAG clauding oldd throughs reloadable ordinally spellme gamified -->
-<!-- cspell:ignore behaviour behaviours -->
+<!-- cspell:ignore behaviour behaviours pointcut -->
 
 # Lens migration — campaign canon
 

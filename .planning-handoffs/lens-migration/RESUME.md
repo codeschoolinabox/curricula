@@ -2,6 +2,7 @@
 closes; nothing here is end-state documentation. -->
 <!-- cspell:ignore socratize reenrichment dropdowns writeme parsons colorizing spellme lezer blankenate -->
 <!-- cspell:ignore colour distractor distractors ledgered throughs -->
+<!-- cspell:ignore firstblock glossterm parsonizer -->
 
 # RESUME — where this campaign stands and what comes next
 
@@ -119,11 +120,12 @@ corrected first, because it certified four module names as transported that
 measurably were not. Both acts are recorded in § What is committed. Nothing here
 is owed.
 
-1. **`ledgers/<lens>.md` — the seeded per-lens ledgers.** Pass 1 (mechanical
-   seeding) has been _run_ but not _written up_; its outputs are gone with the
-   session that produced them, so re-run the listers. Population: `blanks`,
-   `dropdowns`, `annotate`, `parsons`, `writeme`, `variables`, `debug-props`,
-   plus `_family-f.md` covering the seven evaluator-gated lenses.
+1. **`ledgers/<lens>.md` — the seeded per-lens ledgers.** **One of eight is
+   seeded and it needs re-seeding** — see
+   [§ Seeding wave status](#seeding-wave-status), which supersedes this item and
+   is where you start. Remaining population: `blanks`, `dropdowns`, `annotate`,
+   `writeme`, `variables`, `debug-props`, plus `_family-f.md` covering the seven
+   evaluator-gated lenses.
 
    **The lister question is ruled (human, 2026-08-14) — do not re-ask it.**
    Which listers run on which ledger is now stated in
@@ -149,6 +151,109 @@ is owed.
 5. **Context-free validation of every handoff** (invariant 12) before any is
    final.
 6. **AR-5** over the SHA list, then the push prompt. Nothing is pushed.
+
+## Seeding wave status
+
+**Session of 2026-08-15. Five commits, all gated, nothing pushed.** Start here.
+
+| SHA        | What                                                                                         |
+| ---------- | -------------------------------------------------------------------------------------------- |
+| `68a99d14` | `_TEMPLATE.md` — `## Source inventory`, the no-Gen-2 `else` branch, two published extractors |
+| `1393ec0e` | `_TEMPLATE.md` — the Pass-1 gate stops counting the prose that describes it                  |
+| `c0bd56a6` | `ledgers/parsons.md` — the first ledger. 47 rows, zero dispositions                          |
+| `df6bb319` | `_TEMPLATE.md` — the gate survives mutation tests on all six checks; Gen-1 grows a root      |
+| `25ad7ab1` | `SPEC.md` — § The three generations and § Paths record the second Gen-1 root                 |
+
+Measured at the end of the session: `markdownlint 0`, `cspell 0`, `prettier`
+clean over all **seven** campaign documents; campaign dir clean in the working
+tree; the register check still runs clean at 27 names. **94 commits ahead of
+`origin/main`** [measured 2026-08-15: `git rev-list --count origin/main..HEAD`]
+— it was 87 at session start, so 5 are this session's and 2 are foreign.
+Re-measure everything here before relying on it.
+
+### Six standing rulings this session took
+
+1. **`affordance` is a sentence bound to its quote.** `evidence` carries the
+   cited section's first block, extracted by the published `firstblock`. The
+   binding rule: **the sentence may contain no claim its quote does not
+   support.**
+2. **Full census, not diff-only.** Every reference heading, named decision and
+   glossary term opens a row — survivors included, disposition empty.
+3. **The template is amended before a ledger is cut**, and every ledger commit
+   cites the template SHA it was cut from.
+4. **Exemplar → gate → fan out**, rather than fanning eight at once.
+5. **Gen-1 source is TWO roots** — `src/lenses/` and `public/static/`. Recorded
+   in `SPEC.md` § Gen 1's second root and `_TEMPLATE.md` § The Gen-1 quarry
+   root.
+6. **`writeme` is the second exemplar**, before the remaining six. It is the
+   fidelity control and it exercises the measured-zero path `parsons` cannot.
+
+### Where to start — in order
+
+1. **Fix `ledgers/parsons.md`.** AR-1 and AR-2 both returned PAUSE on
+   `c0bd56a6`; the template-level findings are fixed in `df6bb319`, the
+   **leaf-level ones are not**. Open, all reproduced against source:
+   - the § Rows preamble certifies that every quotation came from `firstblock`.
+     **False for 14 of 47 rows** — the 11 glossary cells were hand-cut at the
+     source's line wrap, and the 3 cluster rows cite no heading. Re-derive the
+     glossary cells with `glossterm` (now published in the template).
+   - `absent from the port` appears ~20 times undefined. The template now
+     defines it as a statement about the heading set only; apply the wording.
+   - the `G3` exact-match rule is stated in the ledger; it now lives in the
+     template. Cite, do not restate.
+   - **`parsons-047` is wrong about its own evidence.** `.fallbackContainer` is
+     live (`ParsonsLens.jsx:52`, 3 CSS defs), so a styled fallback **does**
+     render; and `codeContainer` is the in-page parsonizer integration layer,
+     not fallback styling. Split the row.
+   - **`parsons-045` performs the reading it says it defers** and covers 4 of
+     its 20 classes. Rewrite as a statement about the stylesheet, per the
+     template's new cluster-row rule.
+   - **`parsons-011`** asserts the learner is not told the distractor count; the
+     source says the collapsed summary is spoiler-free and the count **is**
+     revealed on expand.
+   - **`parsons-012`** says "session"; `parsons-027` in the same ledger quotes
+     "Cross-mount persistence … or history". Use "since this lens mounted".
+   - four evidence cells carry authored judgments the template now fences to
+     three annotation classes — `parsons-014`, `-021`, and the three "candidate
+     successor" notes are fine; "mandatory under R-5" and "a policy question,
+     not a loss finding" are not.
+   - the whole-file `UNSETTLED` count is **51**, not 50.
+2. **RE-SEED `parsons` against the widened root.** Listers 4 and 5 have never
+   run over `public/static/parsonizer/` — `parsons.js` 1367, `component.js` 574,
+   `lis.js` 148, plus `public/parsons-iframe.html` 586. The ledger currently has
+   **zero `G1-live` rows**; that is what the ruling exists to fix. **Append ids
+   from `parsons-048`; never renumber 001–047.**
+3. **Cut `writeme`** as the second exemplar, then **`_family-f.md`'s inventory
+   shape alone** as a probe before its rows.
+4. **Fan out the remaining six** — `blanks`, `annotate`, `dropdowns`,
+   `variables`, `debug-props`, and Family F's rows.
+5. **AR-5** over the SHA list above plus whatever this session adds, then the
+   push prompt.
+
+### Owed to FIDELITY-METHOD, deliberately not edited from here
+
+RESUME says do not re-derive the method, so these are reported rather than
+fixed. All three reproduced [measured 2026-08-15]:
+
+- **§ 4's "the orphan counts are a lower bound" runs both ways.** Computed
+  access makes false **positives** possible — `styles[status]` at
+  `BlanksLens.jsx:735`, `styles[feedback.type]` at `WritemeLens.jsx:710` — and
+  kebab-case classes are unreachable by `styles.<name>` at all (`ParsonsLens`
+  has six).
+- **§ At AR-5's four-part open-row definition has no clause for an empty
+  `disposition`, `gate`, `evidence` or `affordance`.** A row with only an id and
+  a resolving `discharged by` counts as closed — and Pass-1 ledgers make that
+  the starting shape of every row.
+- **§ The one addition — `revive` says the pre-commit hook would block an MD024
+  collision. It would not.** The hook runs `prettier --write` and no linter
+  [read: `.husky/pre-commit` → `npx lint-staged`; `package.json` `lint-staged`
+  `*.md`]. Run markdownlint yourself, path-scoped, before every commit.
+- **§ 4's orphan command is written for the `src/lenses/` pair** and does not
+  reach the second Gen-1 root. `_TEMPLATE.md` carries the widened form.
+
+A fourth, for Gate 1 rather than the method: SPEC § Roll-up's `instruments`
+column cannot express a **third** reason for thinness — _unfinished_. A one-cell
+`pass` column (`1` · `2` · `3` · `closed`) would close it.
 
 ## AR-1 rounds 3 and 4 — what is still open
 

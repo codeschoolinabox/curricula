@@ -5,7 +5,7 @@
 <!-- cspell:ignore firstblock orphanclusters oldd clauding -->
 <!-- cspell:ignore gsub RSTART RLENGTH -->
 <!-- cspell:ignore glossterm normalised normalisation parsonizer -->
-<!-- cspell:ignore behaviour behaviours affordances -->
+<!-- cspell:ignore behaviour behaviours affordances pointcut QASM -->
 
 # `<lens>` — fidelity ledger
 
