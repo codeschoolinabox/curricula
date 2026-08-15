@@ -3,26 +3,26 @@
 # wireframes — orchestrate
 
 The spatial third of the user twin. [`personas.md`](./personas.md) says who is
-in front of the instrument; [`user-journeys.md`](./user-journeys.md) says what
-happens to them and in what order; this says **where things sit, and what each
+in front of this region; [`user-journeys.md`](./user-journeys.md) says what
+happens to them and in what order; this says **where things sit, and what the
 arrangement is claiming by putting them there.**
 
-**One claim every candidate below rests on:** the band above the pane is the
-instrument's only sentence about the machine, and it is read by people who did
-not come to read it. What it can say without being read is the whole design
-problem.
+**One claim the whole arrangement rests on:** the band above the pane is the
+region's only sentence about the machine, and it is read by people who did not
+come to read it. What it can say without being read is the whole design problem.
 
-**Three candidates, drawn and not ranked.** Choosing between them is
-[the selection pass](#the-selection-pass)'s job, and it is done by walking the
-journeys through each — not by preferring one here. They are deliberately not
-three shades of one idea: they disagree about whether the kit is visible at
-rest, and that disagreement is the decision.
+**One arrangement — the Rail — drawn through its states in the order a learner
+meets them.** Three candidates were drawn and compared first; that comparison,
+the pass that resolved it, and the human's override of that pass are kept in
+[the appendix](#appendix--the-candidates-the-pass-and-the-override). An earlier
+revision made the three candidates the spine of this document and then selected
+a fourth thing drawn through none of its states; a review caught it, and this
+structure is the repair.
 
-## What every candidate must render
+## What the region must render
 
-This is the projection contract, and it is the same for all three. The
-instrument is handed exactly this, per settle, and may draw nothing that is not
-here:
+The projection contract. The region is handed exactly this, per settle, and may
+draw nothing that is not here:
 
 ```text
 per phase, in the machine's fixed order:
@@ -30,45 +30,61 @@ per phase, in the machine's fixed order:
     label         learner-facing display copy, this region's to choose
     accessible    → true,  plus the lenses that fit it   (0 … N of them)
                   → false, plus one cause               (the parser's message)
-the open surface  a lens name · the generator · or the editor
+levels            0 … N registered; one selected, or the none-state
+the selected      fits · does not fit · not applicable for this type ·
+  level's mark      undetermined while unparsed
+the posture       warn (default) or strict
+the pane          the editor · one open lens · or the generator
+proposals         0 … N ranked recommendations of a next lens
 ```
 
-Two facts about that data shape every drawing below:
+Three facts about that data shape every drawing below:
 
-- **A break bars a suffix, never a scatter.** There are exactly three shapes:
-  everything open; grammar broken (source, tokens and ast stay open, the last
-  two wait); spelling broken (source and tokens stay open, the last three wait).
-  `source` and `tokens` are always reachable, and **a phase's own error never
-  bars it** — a grammar error leaves the grammar phase open, because that is
-  where the grammar error is studied. So **one break, one cause, drawn once.**
+- **A break bars a suffix, never a scatter.** Exactly three shapes: everything
+  open; grammar broken (source, tokens and ast stay open, the last two wait);
+  spelling broken (source and tokens stay open, the last three wait). `source`
+  and `tokens` are always reachable, and **a phase's own error never bars it** —
+  a grammar error leaves the grammar phase open, because that is where the
+  grammar error is studied. So **one break, one cause, drawn once.**
 - **`0` is the ordinary number of lenses on a phase**, not an edge case. Four of
   five phases have none today, and an arrangement that treats zero as a
   degenerate case of one will be wrong four fifths of the time.
+- **The none-state is the default.** No level is selected unless the embedding
+  site names one, so the first screen most learners meet shows no level mark at
+  all. Every drawing that shows a mark is showing a state the learner opted
+  into.
 
-## The contested surface
+## The parts
 
-Per [`personas.md`](./personas.md): the Frogrammer needs the band to be an
-instrument panel legible at rest; the Vibetoader needs it out of the way. Both
-demands land on the same strip of pixels. **Each candidate below spends that
-surface differently, and that is the only real difference between them.**
+- **the rail** — the lifecycle drawn as the machine's own conveyor: a line, one
+  **station** per phase in the machine's order, and a **break** drawn on the
+  line's edge rather than on either station beside it.
+- **the tray** — one station's kit, opening downward beneath the rail and
+  pushing the pane down rather than covering it. Absent entirely where a phase
+  has nothing to open.
+- **the nameplate** — a line above the pane that always names what the pane is
+  holding, so the pane is a named place rather than a box whose contents change.
+- **the announcer** — a permanently-mounted, visually-hidden live region that
+  speaks the transitions a sighted learner reads off the rail. The rail's
+  stations are controls, so the rail cannot itself be a live region; the
+  announcer is what pays that debt.
+
+Their names are proposed here and become contract at 0.3, alongside the types.
 
 ---
 
-## Candidate A — the Rail
+## Fresh mount — the default state
 
-_The lifecycle drawn as the machine's own conveyor. Phases are stations on a
-line; each station's kit is behind a tray that opens downward._
-
-### Fresh mount
+No level selected, two lenses on `source`, nothing open.
 
 ```text
 ┌──────────────────────────────────────────────────────────────┐
-│ [Generate code]  [module]  [Just Enough JavaScript ✓ fits ▾] │
-│                                                     ( ) strict│
+│ [Generate code]  [module]  [plain JavaScript ▾]     ( ) strict│
 ├──────────────────────────────────────────────────────────────┤
-│  source ──── tokens ──── ast ──── environment ──── evaluation│
-│   ▾ 2          ·           ·           ·               ·     │
+│  Source ─── Tokens ─── AST ─── Environment ─── Evaluation    │
+│   ▾ 2         ·          ·          ·             ·          │
 ├──────────────────────────────────────────────────────────────┤
+│  your code                                                   │
 │  ┌────────────────────────────────────────────────────────┐  │
 │  │ 1  const greeting = "hello";                           │  │
 │  │ 2  console.log(greeting);                              │  │
@@ -78,48 +94,123 @@ line; each station's kit is behind a tray that opens downward._
 └──────────────────────────────────────────────────────────────┘
 ```
 
-### A way to study, open
+**No mark is shown, because no level is selected.** The selector's closed face
+reads `plain JavaScript` — the none-state's display string — and generic
+JavaScript editing applies. This is the screen Journeys 1 and 2 both occupy, and
+an arrangement that only looks right with a level selected is one tested in a
+state most learners never enter.
+
+**Where levels are registered at all** is the host's choice: with none
+registered, the selector and the strict toggle are both absent and the control
+row is two items shorter. The rail does not move.
+
+**The line is unbroken and complete, and four of its stations offer nothing.**
+That is the arrangement's central claim about Journey 2: the machine is whole —
+five phases, all reachable — and the toolkit is thin. Health and richness are
+drawn in different channels, so "nothing to open here" cannot be misread as
+"this is broken".
+
+**One label vocabulary, everywhere.** The rail and the trays both use the
+region's display labels, never the phases' data names. Where width demands it
+the rail shows the label's first word — `Tokens`, not `Tokens · spelling` — and
+the tray shows the full label; it never switches vocabulary. An arrangement that
+shows `tokens` in one place and `Tokens · spelling` in another has given the
+learner two names for one thing.
+
+## A station's tray, open
 
 ```text
-│  source ──── tokens ──── ast ──── environment ──── evaluation│
-│   ▾ 2 ●        ·           ·           ·               ·     │
-│  ┌ ways to study the source ─────────────────────────────┐   │
+│  Source ─── Tokens ─── AST ─── Environment ─── Evaluation    │
+│   ▾ 2 ●       ·          ·          ·             ·          │
+│  ┌ ways to study the Source ─────────────────────────────┐   │
 │  │  [ rebuild the order ]   [ write it from memory ]     │   │
-│  │                            ▲ open                     │   │
 │  └───────────────────────────────────────────────────────┘   │
-├──────────────────────────────────────────────────────────────┤
-│  write it from memory — over your code as it stood           │
-│  ┌────────────────────────────────────────────────────────┐  │
-│  │  (the surface)                                         │  │
-│  └────────────────────────────────────────────────────────┘  │
-│                                            [Edit code]       │
 ```
 
-### The machine stopped
+The tray **pushes the pane down** rather than covering it: the surface visibly
+grows a requirement rather than swapping one in. Choosing a phase is a small
+act; choosing a way to study is a large one — the geometry makes the small one
+small.
+
+A station with nothing to open has **no tray and no disclosure control at all**.
+It is not a disabled tray; there is nothing there to be disabled. What the
+station carries instead is its name and a mark saying the phase is reachable.
+
+## A level selected, and the code fits
 
 ```text
-│  source ──── tokens ──── ast ──╳╌╌ environment ╌╌╌╌ evaluation│
-│    ·           ·          ▾ 1        waiting        waiting  │
+│ [Generate code]  [module]  [Just Enough JavaScript · fits ▾] ( ) strict│
+```
+
+The mark rides its own visible channel and never hue alone. Its four values are
+four legible states, drawn below, not one control with four strings.
+
+## The parse breaks — the machine stopped
+
+```text
+│  Source ─── Tokens ─── AST ──╳╌╌ Environment ╌╌╌╌ Evaluation │
+│   ▾ 2         ·         ▾ 1        waiting         waiting   │
 │                                                              │
-│  ⚠ the grammar broke here — Unexpected token (2:8)           │
-│    the last two phases wait for it                           │
+│  the grammar broke here — Unexpected token (2:8).            │
+│  the last two phases wait for it.                            │
+├──────────────────────────────────────────────────────────────┤
+│              [Just Enough JavaScript · can't tell yet ▾]     │
 ```
 
-The break glyph sits **on the line between two stations**, not on a station,
-because that is what the data says: the phase where it broke stays open, and
-what waits is downstream of it. The dashed line downstream makes the same
+**The break is drawn on the edge, not on a station**, because that is what the
+data says: the phase where it broke stays open — it is where the grammar error
+is studied — and what waits is downstream of it. The dashed line makes the same
 statement in geometry that the sentence makes in words, so a learner who reads
-neither still sees it.
+neither still sees it. **One break, one cause, once**, rather than the same
+parser sentence repeated per waiting phase.
 
-### Strict, covering
+Two separate truths, drawn separately: **the machine stopped somewhere**, and
+**the level declines to judge.** The mark is not "does not fit" — a typo is
+never a level violation, and the mark says so in the learner's words rather than
+reporting `undetermined`.
+
+> ⚠ **doubt.** The rail carries the parser's own message verbatim, which Journey
+> 1 flags as its worst moment: a learner who came for help meets machine text.
+> The learner-worded explanation the package promises does not exist, and no
+> arrangement supplies it. The drawing is honest about that rather than
+> pretending a better sentence exists.
+
+## The level does not admit this snippet type
 
 ```text
-│ [Generate code]  [module]  [JEJ ✗ steps outside ▾] (•) strict│  ← Generate dim+inert
+│ [Generate code]  [script]  [Scaffold · modules only ▾]  ( ) strict│
+```
+
+The fourth mark, and the one most easily collapsed into "does not fit". It is a
+statement about the **type toggle**, not about the code — so the copy names the
+control that resolves it, and the toggle sits beside it.
+
+## The code steps outside, under warn — the default posture
+
+```text
+│         [Just Enough JavaScript · steps outside ▾]  ( ) strict│
 ├──────────────────────────────────────────────────────────────┤
-│  source ──── tokens ──── ast ──── environment ──── evaluation│  ← dim + inert
-│   ▾ 2          ·           ·           ·               ·     │
+│  Source ─── Tokens ─── AST ─── Environment ─── Evaluation    │
+│   ▾ 2         ·          ·          ·             ·          │
+```
+
+**Nothing is covered and nothing is taken away.** This is the default posture
+and the one most learners will only ever see: the mark changes, the rail does
+not, the trays still open. Drawn because an arrangement whose only level-aware
+state is the covered one has designed for the exception.
+
+## Strict, covering — editor mode
+
+```text
+┌──────────────────────────────────────────────────────────────┐
+│ [Generate code]  [module]                                    │ ← Generate: dim + inert
+│         [Just Enough JavaScript · steps outside ▾]  (•) strict│   at its own element
 ├──────────────────────────────────────────────────────────────┤
-│  ┌────────────────────────────────────────────────────────┐  │  ← never covered
+│  Source ─── Tokens ─── AST ─── Environment ─── Evaluation    │ ← the rail: dim + inert
+│   ▾ 2         ·          ·          ·             ·          │
+├──────────────────────────────────────────────────────────────┤
+│  your code                                                   │
+│  ┌────────────────────────────────────────────────────────┐  │ ← never covered
 │  │ 1  debugger;                                           │  │
 │  └────────────────────────────────────────────────────────┘  │
 ├──────────────────────────────────────────────────────────────┤
@@ -133,478 +224,286 @@ neither still sees it.
 └──────────────────────────────────────────────────────────────┘
 ```
 
-### At 0, 1 and many
+The blocked sentence orders the three ways out deliberately: **fix the code
+first, lift the guardrail last.** Journey 4's trap is that the escape is easier
+to reach than the repair, and the sentence is the one place the arrangement can
+push back on its own geometry.
+
+**The rail dims whole, and this is the Rail's own answer to a question the other
+candidates left open.** Because its stations are controls, the rail is
+unambiguously class 3 — there is no control-free part of it to argue should stay
+lit. The cost is that orientation goes dark under strict; the mitigation is that
+**the announcer is class 2 and keeps speaking**, so the state the rail stops
+showing is still available to anyone who asks for it. Whether a sighted learner
+needs the same is a checkpoint question.
+
+## Strict, covering — with a lens already open
+
+Two paths reach this state: an honored focus request at mount, and a
+flush-at-open whose absorbed keystrokes settle out-of-level code. It is the
+state where "the way home is never covered" carries the most weight.
 
 ```text
-0 ─  tokens          the station is a bare mark on the line; no tray, no
-       ·             disclosure. The phase is named and present; nothing
-                     claims to be openable.
-
-1 ─  tokens          one tray entry.
-       ▾ 1
-
-6 ─  tokens          the tray wraps inside its own box; the line above
-       ▾ 6           does not move a pixel.
-```
-
-**The rail's structural advantage is exactly this:** the size of the kit never
-perturbs the lifecycle's geometry, because they are drawn in different places.
-
-### The argument
-
-The rail is the only candidate where **order is a mark on the page** rather than
-a reading convention, and the only one where a break is a property of an
-**edge** rather than of the stations either side of it — which is what the data
-actually says. It is the most literal possible answer to "the phases are the
-interaction model": it draws the machine.
-
-The tray opening downward borrows the scanning lens's own argument — the surface
-visibly grows a requirement rather than swapping one in. Choosing a phase is a
-small act; choosing a way to study is a large one; the geometry makes the small
-one small.
-
-### Costs
-
-- **Keyboard** — good if each station is a real disclosure: focusable even at
-  zero lenses, nothing commits on traversal, and open/close is native.
-- **Screen reader** — the connectors are decoration and must be silent; the
-  break has to be carried by the sentence, not the glyph. A station's spoken
-  name has to include its state, because its visual state is a mark.
-- **Narrow viewport** — **this is the rail's weakness and it is real.** Five
-  stations and four connectors do not fit a phone. Wrapping destroys the line's
-  meaning; scrolling hides stops. The honest fallback is that under a breakpoint
-  the rail becomes a vertical list — which is to say, it becomes a different
-  candidate.
-- **Embedding** — the connectors can be drawn characters, which survive any host
-  theme, or borders, which look better and break more.
-
-> ⚠ **doubt.** The rail's whole appeal is a line, and a line is the first thing
-> to break under a host's font stack, a narrow column, and right-to-left text.
-> Worse: at today's kit, four of five stations have no tray at all, so the
-> disclosure mechanism — the thing that makes the rail an interaction and not a
-> diagram — is paying rent on one station. And a tray that pushes the pane down
-> moves the editor while the learner may be looking at it.
-
----
-
-## Candidate B — the Bench
-
-_Split the band's two jobs. A permanent readout answers "where is the machine",
-carries no controls at all, and can therefore speak. One opener holds the whole
-kit. A nameplate always says what the pane is holding._
-
-### Fresh mount
-
-```text
-┌──────────────────────────────────────────────────────────────┐
-│ [Study this program ▾] [Generate code] [module]              │
-│                        [Just Enough JavaScript ✓ fits ▾] ( )s│
+│ [Edit code]  [module]                                        │ ← class 2, never covered,
+│         [Just Enough JavaScript · steps outside ▾]  (•) strict│   leading in the row
 ├──────────────────────────────────────────────────────────────┤
-│  source ● tokens ● ast ● environment ● evaluation ●          │
-│  all five phases are open                                    │
+│  Source ─── Tokens ─── AST ─── Environment ─── Evaluation    │ ← dim + inert
 ├──────────────────────────────────────────────────────────────┤
-│  the pane holds: your code                                   │
-│  ┌────────────────────────────────────────────────────────┐  │
-│  │ 1  const greeting = "hello";                           │  │
-│  │ 2  console.log(greeting);                              │  │
-│  └────────────────────────────────────────────────────────┘  │
+│  the pane holds: write it from memory · a way to study Source│
+│ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ │
+│ ░ Just Enough JavaScript: debugger statements are outside  ░ │ ← the lens is covered
+│ ░ this level. Fix the code, pick another level, or turn    ░ │   where it renders
+│ ░ strict off.                                              ░ │
+│ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ │
 ├──────────────────────────────────────────────────────────────┤
 │  [Guide ▾]                                                   │
 └──────────────────────────────────────────────────────────────┘
 ```
 
-The opener, opened:
+**The editor is absent, not covered** — it is structurally away during any
+excursion, which is why the class-2 way home has to be a control in the live row
+rather than the returning editor itself. **Edit code takes Generate code's place
+in the row**; the two are never both present.
+
+## An excursion open — the nameplate and the proposals
 
 ```text
-│ [Study this program ▴]                                       │
-│ ┌ ways to study this program ───────────────────────────────┐│
-│ │ source — the text itself                                  ││
-│ │     [ rebuild the order ]  [ write it from memory ]       ││
-│ │ tokens · spelling — nothing studies this phase yet        ││
-│ │ ast · grammar — nothing studies this phase yet            ││
-│ │ environment · names — nothing studies this phase yet      ││
-│ │ evaluation · run — nothing studies this phase yet         ││
-│ └───────────────────────────────────────────────────────────┘│
-```
-
-### A way to study, open
-
-```text
-│ [Study this program ▾] [Edit code] [module] [JEJ ✓ fits ▾]   │
+│ [Edit code]  [module]  [plain JavaScript ▾]                  │
 ├──────────────────────────────────────────────────────────────┤
-│  source ● tokens ● ast ● environment ● evaluation ●          │
+│  Source ─── Tokens ─── AST ─── Environment ─── Evaluation    │
+│   ▾ 2 ●       ·          ·          ·             ·          │
 ├──────────────────────────────────────────────────────────────┤
-│  the pane holds: write it from memory · a way to study source│
+│  the pane holds: write it from memory · a way to study Source│
 │  ┌────────────────────────────────────────────────────────┐  │
 │  │  (the surface, over your code as it stood)             │  │
 │  └────────────────────────────────────────────────────────┘  │
-```
-
-### The machine stopped
-
-```text
-│  source ● tokens ● ast ● environment ○ evaluation ○          │
-│  ⚠ the grammar broke — Unexpected token (2:8). The last two  │
-│    phases wait for it.                                       │
-```
-
-…and inside the opener, the same fact where the learner is choosing:
-
-```text
-│ │ ast · grammar                                             ││
-│ │     [ read the grammar error ]                            ││
-│ │ environment · names — waiting for the code to parse       ││
-│ │ evaluation · run — waiting for the code to parse          ││
-```
-
-### Strict, covering
-
-```text
-│ [Study this program ▾] [Generate code] [module]              │ ← both dim + inert
-│                        [JEJ ✗ steps outside ▾]  (•) strict   │   at their own elements
-├──────────────────────────────────────────────────────────────┤
-│  source ● tokens ● ast ● environment ● evaluation ●          │ ← see the doubt
-├──────────────────────────────────────────────────────────────┤
-│  the pane holds: your code                                   │
-│  ┌────────────────────────────────────────────────────────┐  │ ← never covered
-│  │ 1  debugger;                                           │  │
-│  └────────────────────────────────────────────────────────┘  │
-├──────────────────────────────────────────────────────────────┤
-│ ░ Just Enough JavaScript: debugger statements are outside  ░ │
-│ ░ this level. Fix the code, pick another level, or turn    ░ │
-│ ░ strict off.                                              ░ │
-├──────────────────────────────────────────────────────────────┤
+│  next, you could:  [ study the source ]                      │ ← proposals: below the
+├──────────────────────────────────────────────────────────────┤   pane, in every mode
 │  [Guide ▾]                                                   │
 └──────────────────────────────────────────────────────────────┘
 ```
 
-### At 0, 1 and many
+**The open lens's station keeps its mark while the tray is closed**, so the rail
+answers "where am I" without the tray being open — which is the whole reason the
+rail can afford to hide the kit.
+
+**Proposals render below the pane in every mode, including editor mode.** They
+are a second lens-opening affordance and the arrangement owns that rather than
+claiming a single door: a tray is the door a learner goes looking for; a
+proposal is one the region offers unasked. Drawn below the pane and phrased as
+an invitation, they read as the fade-is-pull the package argues for — a
+suggestion that costs nothing to ignore. Drawn on the rail, they would compete
+with the stations and read as instruction.
+
+They render through the mask like any other study surface, and a proposal whose
+target lens does not resolve never reaches the drawing at all — it is dropped
+before ranking.
+
+**Closing the open lens.** Today a lens is closed either by the Edit code button
+or by the strip's none entry. This arrangement has no strip, so **the tray entry
+for the open lens is its own close affordance** — pressed while open, released
+to close. That replaces a contract-named dispose raiser and changes the region's
+dispose enumeration; it is named here so 0.3 amends the contract deliberately
+rather than discovering it.
+
+## The generator in the pane
 
 ```text
-0 ─  the readout is unchanged — a phase's dot reports accessibility,
-     never how much is in it. Inside the opener the phase keeps its
-     line and says nothing studies it yet.
-
-1 ─  one entry under that phase's heading in the opener.
-
-6 ─  six entries under that heading. The opener grows; the band does
-     not. This is the only candidate whose permanent chrome is the
-     same size at 30 lenses as at zero.
-```
-
-### The argument
-
-Today's band conflates **orientation** — where is the machine, is it healthy —
-with **navigation** — take me somewhere. The bench separates them, and the
-separation is what buys everything else:
-
-- The readout has no controls, so it can be a live region that speaks on settle:
-  _"the grammar broke — the last two phases are waiting."_ **No other candidate
-  can be that**, because in the others the phases are also buttons.
-- Navigation becomes one commit affordance, which matches the settled pedagogy
-  exactly: leaving the editor is a real, exclusive decision, and there is one
-  door to it.
-- The nameplate names the pane's occupant permanently, which is the cheapest
-  available answer to Journey 3's swap.
-
-### Costs
-
-- **Keyboard** — the cheapest by a wide margin: one stop to the whole kit.
-- **Screen reader** — the strongest summary of the three, and the weakest
-  navigation: "which lens is open" now lives in two places, the nameplate and
-  the opener, and they can disagree.
-- **Narrow viewport** — the best. One button and one line of text.
-- **Embedding** — needs a real popover or a block that pushes content down.
-
-> ⚠ **doubt, and it is serious.** The bench hides the kit, and the package's
-> whole claim is that the phases are the interaction model. A learner who never
-> opens the opener learns that there is a "study this" button — not that their
-> program has five phases. That is the hand-curated-toolbar failure the revamp
-> is trying to escape, reached from the opposite direction. The readout is meant
-> to compensate; a row of dots with no affordance may read as decoration.
->
-> **A second, unresolved doubt:** the readout's mask class is genuinely unclear.
-> It is not an opening affordance, which argues class 2 and staying alive; it is
-> a projection of the study layer, which argues class 3 and dimming. Drawn alive
-> above. If it is class 3, orientation goes dark exactly when the learner is
-> most confused — the opposite of why class 2 exists.
-
----
-
-## Candidate C — the Kit Drawer
-
-_Five columns, left to right in the machine's order. Each column is its phase's
-kit as a vertical list. Nothing is hidden; the shape of the kit is the picture._
-
-### Fresh mount
-
-```text
-┌──────────────────────────────────────────────────────────────┐
-│ [Generate code]  [module]  [Just Enough JavaScript ✓ fits ▾] │
-│                                                     ( ) strict│
+│ [Edit code]  [module]                                        │
 ├──────────────────────────────────────────────────────────────┤
-│ source        tokens      ast         environment  evaluation│
-│ ───────────   ─────────   ─────────   ───────────  ──────────│
-│ rebuild the   nothing     nothing     nothing      nothing   │
-│   order       studies     studies     studies      studies   │
-│ write it      this yet    this yet    this yet     this yet  │
-│   from memory                                                │
+│  Source ─── Tokens ─── AST ─── Environment ─── Evaluation    │
+│   ▾ 2         ·          ·          ·             ·          │
 ├──────────────────────────────────────────────────────────────┤
+│  the pane holds: writing a program with you                  │
 │  ┌────────────────────────────────────────────────────────┐  │
-│  │ 1  const greeting = "hello";                           │  │
-│  └────────────────────────────────────────────────────────┘  │
-├──────────────────────────────────────────────────────────────┤
-│  [Guide ▾]                                                   │
-└──────────────────────────────────────────────────────────────┘
-```
-
-### A way to study, open
-
-```text
-│ source        tokens      ast         environment  evaluation│
-│ ───────────   ─────────   ─────────   ───────────  ──────────│
-│ rebuild the   nothing     nothing     nothing      nothing   │
-│   order       studies     studies     studies      studies   │
-│ ▪write it▪    this yet    this yet    this yet     this yet  │
-│ ▪from memory▪                                                │
-├──────────────────────────────────────────────────────────────┤
-│  ┌────────────────────────────────────────────────────────┐  │
-│  │  (the surface)                          [Edit code]    │  │
+│  │  (the generator — seed, prompt, preview, accept)       │  │
 │  └────────────────────────────────────────────────────────┘  │
 ```
 
-### The machine stopped
+The generator is a pane occupant like any lens, and the nameplate names it like
+any other. No station is marked, because the generator belongs to no phase.
+**Its interior is not this document's** — the wait, the cancel's cost and the
+refusal's wording are the generator's own surface, and Journey 7's three asks
+are handed to it explicitly rather than left ownerless here.
+
+## The kit at 0, 1 and many
 
 ```text
-│ source        tokens      ast         │ environment evaluation│
-│ ───────────   ─────────   ─────────   │ ╌╌╌╌╌╌╌╌╌╌╌ ╌╌╌╌╌╌╌╌╌│
-│ rebuild the   nothing     read the    │  waiting     waiting  │
-│   order       studies     grammar     │                       │
-│ write it      this yet      error     │                       │
-│   from memory                         │                       │
-│                                       │                       │
-│ ⚠ the grammar broke — Unexpected token (2:8)                 │
+0 ─  Tokens        a bare mark on the line. No tray, no disclosure
+        ·          control, nothing disabled. The phase is named and
+                   reachable; nothing claims to be openable.
+
+1 ─  Tokens        one tray entry.
+      ▾ 1
+
+6 ─  Tokens        the tray wraps to two rows inside its own box.
+      ▾ 6          The line above does not move a pixel.
 ```
 
-The break is a **vertical rule across the columns**, which is the suffix drawn
-exactly: everything to its right waits. One cause, once, beneath.
+**This is the Rail's structural advantage**: the size of the kit never perturbs
+the lifecycle's geometry, because the machine and the kit are drawn in different
+places.
 
-### Strict, covering
+## What the arrangement never changes
 
-```text
-│ [Generate code]  [module]  [JEJ ✗ steps outside ▾] (•) strict│ ← Generate dim+inert
-├──────────────────────────────────────────────────────────────┤
-│ source        tokens      ast         environment  evaluation│ ← whole drawer
-│ ───────────   ─────────   ─────────   ───────────  ──────────│   dim + inert
-│ rebuild the   nothing     nothing     nothing      nothing   │
-│ …                                                            │
-├──────────────────────────────────────────────────────────────┤
-│  ┌────────────────────────────────────────────────────────┐  │ ← never covered
-│  │ 1  debugger;                                           │  │
-│  └────────────────────────────────────────────────────────┘  │
-├──────────────────────────────────────────────────────────────┤
-│ ░ Just Enough JavaScript: debugger statements are outside  ░ │
-│ ░ this level. Fix the code, pick another level, or turn    ░ │
-│ ░ strict off.                                              ░ │
-└──────────────────────────────────────────────────────────────┘
-```
+Settled elsewhere, respected in every drawing above, and not open for
+rearrangement here:
 
-### At 0, 1 and many
-
-```text
-0 ─  the column says, in words, that nothing studies this phase yet.
-     The column is still there, still named, still the same width.
-
-1 ─  one entry.
-
-6 ─  the column is six entries tall and the drawer is as tall as its
-     tallest column. Uneven columns are the normal state, and the
-     unevenness is information.
-```
-
-### The argument
-
-The drawer is the only candidate that makes **the shape of the kit** visible —
-and the shape of the kit is currently a true and uncomfortable fact about this
-project: the source phase is rich and the middle of the machine is empty. A
-learner sees at a glance where the tool can help them and where it cannot yet.
-
-It is also the only candidate with **nothing hidden and nothing to discover**:
-no disclosure state, no widget to learn, no affordance that has to announce
-itself. Every one of the Frogrammer's needs is met at rest without an action.
-
-### Costs
-
-- **Keyboard** — every entry is a stop, in reading order, and the count grows
-  with the kit. Reaching the guide gets more expensive as the project succeeds.
-- **Screen reader** — strong: each column is a named group, each state is text.
-- **Narrow viewport** — **the worst of the three, structurally.** Five columns
-  is not a phone layout, and unlike the rail there is no obvious degradation
-  that preserves the idea.
-- **Embedding** — the most style-hungry option, in a region with no stylesheet
-  at all. Uneven columns of aligned width is exactly the layout that goes wrong
-  in an unfamiliar host.
-
-> ⚠ **doubt.** The drawer ages best and reads worst today: at the current kit it
-> is one populated column and four that say "nothing studies this yet", which is
-> honest and may still look like a broken product on a first screen. It also
-> repeats that sentence four times, and Journey 2 is precisely about whether
-> that repetition teaches or alarms. The author suspects the answer depends on
-> the wording far more than on the layout — which, if true, means this candidate
-> is being judged on copy and not on arrangement.
-
----
-
-## What no candidate changes
-
-Drawn into all three above, and not open for rearrangement here:
-
-- **Chrome above the pane; the guide last.** No orchestrator control renders
-  below the surface pane.
-- **The pane holds exactly one thing** — the editor, one way to study, or the
-  generator — and the editor is structurally absent while either of the others
-  is open.
-- **One visual pane, two slots.** The editor is never covered while mounted and
-  renders outside the maskable containers; a study surface and the generator
-  render inside one. A single shared slot would break that split. Every drawing
-  above shows one bordered pane, which is the learner-facing abstraction over
-  both, and a shared frame is not a shared slot.
+- **Controls above the pane; proposals below it; the guide last.** The controls
+  and the rail sit above the surface pane, the ranked proposals render below it
+  in every mode, and the guide is the region's final child.
+- **The pane holds exactly one thing** — the editor, one open lens, or the
+  generator — and the editor is structurally absent while either other is open.
+- **One visual pane, two slots.** The editor renders outside both maskable
+  containers and is never covered while mounted; an open lens and the generator
+  render inside one. A single shared slot would break that split; a shared
+  visual frame is not a shared slot.
 - **The controls that restore conformance are never covered** — the level
-  selector, the strict toggle, the snippet-type toggle, the guide, and the way
-  back to the editor. Under strict they stay at full strength while the study
-  surfaces dim.
-- **Generate code carries the covered treatment at its own element**, even
-  though it sits in the live control row, because it opens a covered surface. It
-  and Edit code are never both present: the editor is away exactly when an
-  excursion is open.
-- **No new headings.** The instrument's only headings belong to the guide, so a
-  host may mount it under any shallow context. Every column head, station name
-  and phase label above is inline text.
+  selector, the strict toggle, the snippet-type toggle, the guide, and the Edit
+  code button. Under strict they stay at full strength while the rail and the
+  study surfaces dim.
+- **Edit code is in the control row, leading, whenever an excursion is open**,
+  and it is the guaranteed way home. It is never drawn inside the pane and never
+  below it: a class-2 control inside the maskable container would be covered by
+  the very state it exists to escape.
+- **Generate code carries the covered treatment at its own element**, though it
+  sits in the live control row, because it opens a covered surface. It and Edit
+  code are never both present.
+- **No new headings.** The region's only headings belong to the guide, so a host
+  may mount it under any shallow context. Every station name and tray label is
+  inline text, and the structure a screen reader traverses comes from named
+  regions and groups rather than from a heading outline — which is the only
+  route left once the outline is spent, and it is owed at 0.3.
 
 ## What has no wireframe, deliberately
-
-Three things are left undrawn because ASCII would settle them wrongly:
 
 - **The transition into and out of an excursion.** Whether the pane swap reads
   as commitment or as loss is a question about motion, height and focus, and
   Journey 3 is explicit that the two seconds around it are what matters. It
   wants a running dev server, not a picture.
-- **The covered state's weight.** How dim is dim enough to read as _paused_
-  rather than _broken_ was settled once before by a human looking at a
-  screenshot, and it will be settled that way again.
-- **The tone flip.** Light and dark are not two drawings; they are one cascade
-  with a bug already documented elsewhere in this package. Drawing them here
-  would imply a choice that belongs in the stylesheet.
+- **The covered state's weight.** How dim reads as _paused_ rather than _broken_
+  was settled once by a human looking at a screenshot, and will be again.
+- **The tone flip.** Light and dark are one cascade, not two drawings.
+- **The narrow-viewport rail.** See the doubt below: nobody has drawn the
+  degradation, and drawing it in ASCII would imply it is settled.
 
-## The selection pass
+> ⚠ **doubt, and it is the Rail's largest.** Five stations plus four connectors
+> is not a phone layout. Wrapping the line destroys the meaning the line
+> carries; scrolling it horizontally hides stops. The honest degradation is a
+> vertical list — which is to say the Rail's small-screen form is a different
+> arrangement, and the project would maintain two. A second, quieter version of
+> the same worry: a drawn line is the first thing to break under an unfamiliar
+> host's font stack and under right-to-left text.
+>
+> **A second doubt, smaller and self-resolving.** At today's kit, four of five
+> stations have no tray, so the disclosure mechanism — the thing that makes the
+> rail an interaction rather than a diagram — is paying rent on one station.
+> That resolves itself as lenses arrive, and it is the state the region ships in
+> until they do.
 
-The journeys were walked through each candidate, Journey 2 first. Three of the
-seven turned out not to discriminate at all, and saying so is part of the
-result.
+---
 
-|                                        | Rail                                                        | Bench                                                                      | Drawer                                                         |
-| -------------------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| **2 · the empty middle** (the decider) | the machine is drawn whole; only the trays are thin         | truthfully reports five open phases — and **hides** that four are unserved | says "nothing studies this yet" four times on the first screen |
-| **1 · never leaves the editor**        | break on the edge, cause below                              | same, **and the readout can speak it**                                     | break as a rule, cause below                                   |
-| **5 · by keyboard**                    | stations, plus a tray when open                             | **one stop to everything**                                                 | every entry is a stop, forever                                 |
-| **6 · through a screen reader**        | stations give structure; an empty one needs a spoken reason | uniquely able to be a live region; navigation weakest                      | **strongest** — named groups, every state already text         |
-| **3 · the excursion**                  | —                                                           | —                                                                          | —                                                              |
-| **4 · strict**                         | —                                                           | —                                                                          | —                                                              |
-| **7 · the generator's wait**           | —                                                           | —                                                                          | —                                                              |
+## Appendix — the candidates, the pass, and the override
 
-### What the non-discriminating journeys revealed
+Kept because the reasoning is auditable and because the doubts recorded against
+each candidate transfer to whatever borrows from it.
 
-- **Journey 3 does not choose, because its answer is stealable.** The nameplate
-  that turns the pane from an anonymous box into a named place is one line of
-  text above the pane; it is drawn into the Bench and belongs in whichever
-  arrangement wins.
-- **Journey 4 does not choose, and that is a finding.** All three put the strict
-  toggle immediately beside the level selector, so in all three **the way out of
-  the guardrail is nearer to hand than the way back into conformance.** The trap
-  Journey 4 names lives in the control row's composition, not in the strip — it
-  is a separate decision this pass cannot make and the review should be asked
-  for directly.
-- **Journey 7 does not choose**, because the generator is a pane occupant and no
-  strip arrangement touches it.
+**The Rail** — drawn above. Order becomes a mark on the page rather than a
+reading convention; a break becomes a property of an edge, which is what the
+data says; the kit's size never perturbs the lifecycle's geometry.
 
-### What Journey 2 actually decided
+**The Bench** split orientation from navigation: a control-free readout, one
+grouped opener, a nameplate. Its argument: a readout that is also a set of
+buttons cannot be a live region, and one door matches a commitment that removes
+the editor. Its recorded doubt: it hides the kit, so a learner who never opens
+the opener learns there is a "study this" button rather than that their program
+has five phases.
 
-Not a candidate — **a property.** The empty middle stops reading as breakage
-exactly when the arrangement puts **the machine's health and the kit's richness
-in different visual channels**, so that "four phases have nothing in them" is
-visibly a statement about the toolkit rather than about the program or the
-instrument.
+**The Kit Drawer** drew five columns, each a phase's kit as a vertical list,
+with the barred suffix as a shaded region to the right. Its argument: the shape
+of the kit becomes visible as a landscape, which is a true and uncomfortable
+fact about this project. Its recorded doubts: at today's kit it is one populated
+column and four saying "nothing studies this yet"; and it may be a copy question
+wearing a layout costume.
 
-The Rail does that with a line and trays. The Bench does it more cleanly still,
-because its readout carries no controls at all. **The Drawer cannot**: a column
-is simultaneously the phase and its kit, which is precisely why its empty state
-is loud enough to alarm.
+### The pass
 
-### The selection
+Seven journeys through three candidates, Journey 2 first.
 
-**The Bench's structure, carrying the Rail's line as its readout, and the
-Drawer's sentence as the empty-phase copy inside the opener.**
+|                                        | Rail                                                        | Bench                                                           | Drawer                                                         |
+| -------------------------------------- | ----------------------------------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------- |
+| **2 · the empty middle** (the decider) | machine drawn whole; only the trays are thin                | reports five open phases — and **hides** that four are unserved | says "nothing studies this yet" four times on the first screen |
+| **1 · never leaves the editor**        | break on the edge, cause below                              | same, **and the readout can speak it**                          | break as a rule, cause below                                   |
+| **5 · by keyboard**                    | stations, plus a tray when open                             | **one stop to everything**                                      | every entry is a stop, forever                                 |
+| **6 · through a screen reader**        | stations give structure; an empty one needs a spoken reason | uniquely able to be a live region; navigation weakest           | **strongest** — named groups, every state already text         |
+| **3 · the excursion**                  | —                                                           | —                                                               | —                                                              |
+| **4 · strict**                         | —                                                           | —                                                               | —                                                              |
+| **7 · the generator's wait**           | —                                                           | —                                                               | —                                                              |
 
-Each borrowing is traceable to the journey that demanded it:
+**Journey 2 decided a property, not a candidate.** The empty middle stops
+reading as breakage exactly when the arrangement puts the machine's **health**
+and the kit's **richness** in different visual channels. The Rail does that with
+a line and trays; the Bench does it more cleanly, because its readout carries no
+controls at all; the Drawer structurally cannot, because a column is
+simultaneously the phase and its kit.
 
-- **Orientation separated from navigation** — Journey 2's decision, and the only
-  route to Journey 6's speakable readout, since a readout that is also a set of
-  buttons cannot be a live region.
-- **The readout draws the machine's order, with the break on an edge** — the
-  Rail's contribution, because Journey 2's Frogrammer needs the lifecycle
-  legible as a machine at rest, and a row of undifferentiated dots is the thing
-  their own doubt block warns reads as decoration.
-- **One opener, grouped by phase** — Journey 5's O(1) traversal, and Journey 2's
-  requirement that the kit's size never perturb the band.
-- **"Nothing studies this phase yet", inside the opener** — the Drawer's copy,
-  kept and relocated. Journey 6 needs an empty phase to give a reason; the
-  Drawer's own doubt block suspects it was being judged on that sentence rather
-  than on its layout, and this is that suspicion taken seriously: **keep the
-  sentence, drop the five columns.**
-- **The nameplate** — Journey 3, stolen as noted above.
+**Three journeys did not discriminate, and one of those is a finding.** Journey
+3's answer is stealable — the nameplate is one line of text and belongs in
+whichever arrangement wins. Journey 7 cannot discriminate, because the generator
+is a pane occupant no arrangement of the band touches. And **Journey 4's trap
+belongs to neither the band nor the control row**: the strict toggle and the
+level selector are rendered by one component, so their adjacency is a component
+boundary and no arrangement could have changed it. Separating them means
+decomposing that component into two exported controls with new props and new
+tests — a different phase of work, correctly identified before it became types.
 
-### This is a synthesis, not a pick, and that needs ratifying
+**The pass selected** the Bench's structure carrying the Rail's line and the
+Drawer's empty-phase copy: a synthesis, traceable to the journeys that demanded
+each part, and drawn through none of its own states.
 
-The three candidates were drawn to be chosen between and the journeys did not
-choose one. That is a legitimate outcome of the method — a journey selects a
-property, and properties can be assembled — but it means **no drawing above is
-the selected arrangement**, and the synthesis has never itself been drawn at 0,
-1 and many. Until it is, it inherits its predecessors' doubts without having
-earned their evidence.
+### The override — the Rail, by the human
 
-Two of those doubts transfer directly and remain open:
+**The maintainer selected the Rail directly, superseding the pass's synthesis.**
+Recorded rather than re-argued, with what the choice costs and what it does not:
 
-- **The readout's mask class is still unresolved.** Adding the Rail's line to it
-  does not settle whether orientation dims under strict.
-- **The Bench's central objection survives the borrowing.** A learner who never
-  opens the opener still learns there is a "study this" button. The Rail's line
-  in the readout is the mitigation, and it is a mitigation, not an answer.
+- **It does not overturn the pass's main finding.** The Rail satisfies Journey
+  2's decisive property — health and richness in separate channels — which is
+  why it was a candidate at all. The pass preferred the Bench on its
+  **secondary** criteria, Journeys 5 and 6.
+- **Journey 6's cost is real and cheaply paid.** The Bench's unique advantage
+  was that its readout could itself be a live region; the Rail's stations are
+  controls, so it cannot. **The announcer** — a permanently-mounted,
+  visually-hidden class-2 live region — pays that debt, and is arguably the
+  better mechanism regardless, since it also carries the pane swap and the
+  blocked state, neither of which the Bench's readout would have announced.
+- **Journey 5's cost is a real regression against the Bench** and is not paid:
+  reaching the far end of the band costs more stops under the Rail than under a
+  single opener, and the cost grows with the kit when a tray is open.
+- **The narrow-viewport failure is inherited undischarged**, and it is the
+  largest open question in this document.
 
 ## What this document is asking of the design review
 
-1. **The three candidates disagree about one thing — is the kit visible at
-   rest** — and every other difference follows from it. If the reviewer has a
-   view on that question directly, it settles more than the drawings do.
-2. **The rail's narrow-viewport failure is not a detail.** Its honest
-   degradation is "become a different candidate", which may mean the project
-   ends up maintaining two arrangements.
-3. **The bench's readout has an unresolved mask class**, and getting it wrong
-   makes the instrument go quiet exactly when it is most needed.
-4. **The drawer may be a copy question wearing a layout costume.** If "nothing
-   studies this phase yet" is the right sentence, the drawer is honest; if it is
-   the wrong sentence, no arrangement saves it.
-5. **All three are drawn at a kit of two lenses on one phase, which is today.**
-   None has been drawn against the instrument this project intends to have, and
-   the candidate that wins today may not be the one that wins at thirty lenses.
-6. **The selection pass produced a synthesis rather than a pick**, which is a
-   legitimate outcome of the method and also means the thing it selected has
-   never been drawn. It should be ratified — or rejected in favour of one of the
-   three as drawn — before anything is specified against it.
-7. **Journey 4's trap belongs to the control row, not to any candidate.** The
-   strict toggle sits beside the level selector in all three, so the escape is
-   always nearer than the repair. That is a live question this pass could not
-   answer and did not.
-8. **No drawing here has been seen by anyone who is not its author.**
+1. **The narrow-viewport degradation is undrawn and unowned.** The Rail's honest
+   small-screen form is a vertical list, which is a second arrangement. Either
+   it is drawn and accepted as such, or the Rail needs a fallback that preserves
+   the line's meaning, and nobody has proposed one.
+2. **The arrangement replaces a contract-named dispose raiser.** With no strip,
+   the strip's none entry has no analogue; the open lens's tray entry takes its
+   place. The dispose enumeration changes, and 0.3 should amend it deliberately.
+3. **The announcer is a new permanent element** with no precedent in this region
+   and no home in the current DOM. It is class 2 by argument, not by ruling.
+4. **Journey 4's trap is a component-decomposition question**, not a layout one.
+   It is named here so it is not mistaken for something the band's order can
+   fix.
+5. **Proposals are a second door and the arrangement admits it.** If the review
+   thinks one door is worth preserving as a principle, the proposals surface has
+   to go somewhere else or stop opening lenses.
+6. **Every drawing is at a kit of two lenses on one phase, which is today.**
+   None is drawn against the region this project intends to have.
+7. **No drawing here has been seen by anyone who is not its author**, and the
+   one question that decides the revamp — whether four empty phases teach or
+   alarm — cannot be answered by any of them.
 
 ## Navigation
 
@@ -612,4 +511,4 @@ Two of those doubts transfer directly and remain open:
   the constraints these drawings respect.
 - Sibling twin documents: [`personas.md`](./personas.md) — whose competing
   demands the band is spending; [`user-journeys.md`](./user-journeys.md) — the
-  journeys these arrangements are chosen against.
+  journeys this arrangement was chosen against.

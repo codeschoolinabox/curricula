@@ -360,31 +360,50 @@ this region owns.
   displays as `plain JavaScript`. The labels live keyed by phase name — a record
   zipped against embody's runtime order constant, never a positional list, so
   the phase order keeps exactly one truth.
-- **instrument token** — a house CSS custom property naming one of the
-  instrument's own presentation concepts: a surface, a text weight, a hairline,
-  the focus ring, the inert dim, the mask scrim, or a fit mark's role. Declared
-  on the instrument root and inherited, so a lens adopts one by writing
-  `var(--sl-…, its-own-current-value)` and declines by writing nothing — no
-  import edge exists either way, and declining is a byte-for-byte no-op. Two
-  rules keep the vocabulary from spreading: an instrument token names a **house**
-  concept and never a single lens's, and it names a **role** and binds no hue —
-  the hue is the tone's to supply, following the precedent the scanning lens set
-  when it named _attested_ and _diverging_ and deferred their colours. The
-  instrument colours the instrument; the program's own colouring belongs to the
-  colorizing leaf, and a token that changes how a character the learner typed
-  looks is that leaf's, not this one's. Deliberately not "chrome token":
-  **chrome** already names a code surface's CodeMirror frame elsewhere in this
-  package, and one word for two unrelated things is the homonym this glossary
-  exists to prevent.
-- **tone** — which rendering of the instrument token vocabulary is in force,
-  light or dark. Resolved by a cascade and never by a prop, in this order: an
-  explicit surface declaration, then the host's `data-theme`, then the operating
-  system's preference **only** where no `data-theme` is present at all — the
-  embedded, non-Docusaurus host. The instrument never asks the host for a tone
-  and the host never passes one. The order is load-bearing rather than tidy: a
-  stylesheet keyed on the operating system alone goes dark while a host whose
-  own switch says light stays light, which is the split this package has already
-  shipped once.
+- **house token** — a CSS custom property, prefix `--sl-`, naming one of this
+  package's own presentation concepts: a surface, a text weight, a hairline, the
+  focus ring, the inert dim, the mask scrim, or a fit mark's role. _House_ is
+  this tree's established modifier for what is ours rather than the framework's
+  — house rule, house taxonomy, house style — and it is the word the colorizing
+  leaf already uses for the code surface's palette, so the two read as one
+  family with two scopes. Three rules keep the vocabulary from spreading. A
+  house token names a **house** concept and never a single lens's — the moment
+  one names a lens's palette the seam is gone. It names a **role** and binds no
+  hue, following the precedent the scanning lens set when it named _attested_
+  and _diverging_ and deferred their colours. And it colours the **surround**,
+  never the program: a token that changes how a character the learner typed
+  looks belongs to the colorizing leaf, not here. Deliberately not "chrome
+  token" — **chrome** already names a code surface's CodeMirror frame elsewhere
+  in this package. Deliberately not "instrument token" either: this region calls
+  itself _the instrument_ in its own prose, but a language level's
+  notional-machine document already calls the NM _the mechanical instrument_,
+  and spelling that collision into a hundred identifiers would make it
+  permanent. The region's existing usage is left alone; the token vocabulary
+  declines to deepen it.
+- **house token defaulting** — how a house token resolves against the embedding
+  site. Each is declared once with a fallback chain that ends in a literal, so
+  the vocabulary is total: where a host ships Infima the token defaults from the
+  matching `--ifm-*` value, and where it ships nothing the literal carries. This
+  is the pattern the editor's own theme already uses — its custom properties
+  resolve in the host page and its fallbacks carry any other host — and it is
+  what lets one stylesheet serve both Docusaurus and an embedded host. **A lens
+  adopts by writing `var(--sl-…, its-own-current-value)` and declines by writing
+  nothing**; no import edge exists either way, and declining is a byte-for-byte
+  no-op.
+- **tone** — which rendering of the house token vocabulary is in force on **this
+  region's own surfaces**, light or dark. Resolved by a cascade and never by a
+  prop, in this order: an explicit surface declaration, then the host's
+  `data-theme`, then the operating system's preference **only** where no
+  `data-theme` is present at all — the embedded, non-Docusaurus host. The region
+  never asks the host for a tone and the host never passes one. The order is
+  load-bearing rather than tidy: a stylesheet keyed on the operating system
+  alone goes dark while a host whose own switch says light stays light, which is
+  the split this package has already shipped once. **The scope is deliberate and
+  the limit is honest** — a lens that keys its own dark block on the operating
+  system is not reachable by a custom-property cascade, so this entry states
+  what binds here and cannot state what binds there. Making the cascade
+  package-wide is a migration with named files, owed to whichever campaign
+  claims it, not a rule this region can declare on another's behalf.
 - **composed study configuration** — (package glossary owns the meaning) the
   mechanics here: rosters joined once at mount, loudly; the cascade re-resolved
   per lens name as any layer changes, the learner's layer final.

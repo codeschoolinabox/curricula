@@ -1,4 +1,4 @@
-<!-- cspell:ignore spellme wireframes -->
+<!-- cspell:ignore colour spellme wireframes -->
 
 # personas — orchestrate
 
@@ -36,6 +36,23 @@ Those are not two preferences to be balanced by a sensible middle. They are
 **opposite demands on the same surface**, and an arrangement satisfies one by
 spending the other. Naming the trade is this document's whole load; the
 wire-frames are where it gets spent, deliberately, in the open.
+
+**One correction to that claim, because the package already answers half of
+it.** The Vibetoader is not served only by a small band — they are served by the
+**initial-focus request**, a mount-time prop that drops a learner straight into
+a study surface with the pane already occupied. Under a run-first focus the band
+is scenery a learner passes on their way back to the editor, and its size
+matters far less. So the trade is real but **asymmetric**: an arrangement that
+spends the band on the Frogrammer costs the Vibetoader something the host can
+already refund, while an arrangement that spends it on the Vibetoader costs the
+Frogrammer something nothing refunds. That asymmetry is a reason to weight the
+band toward orientation, and it is the strongest argument this document makes
+about the arrangement.
+
+Two honest limits on it. The refund is the **host's** to issue, not the
+learner's, so it does not reach a learner who pasted their own code — the
+package's central case. And the focus request's natural target is the run lens,
+which does not exist yet, so today the refund cannot be issued at all.
 
 ## 🔬 The Frogrammer
 
@@ -125,9 +142,11 @@ where sight does the work.
   an accident, and today's picker does exactly that.
 - **Landing somewhere after the pane swaps.** Focus currently falls to the
   document body, so the way back is a full traversal from the top.
-- **A visible focus ring, in both tones.** The region has no focus styling at
-  all today; it survives on browser defaults, and a stylesheet is precisely when
-  those get removed.
+- **A visible focus ring, in both tones.** One already exists and is the
+  precedent to extend, not to replace: the editor draws a focus outline keyed to
+  the host's own primary colour, with a written rationale beside it. Every other
+  control in the region survives on browser defaults — and a stylesheet is
+  precisely the moment those get removed by a blanket reset.
 - **A traversal cost that does not grow with the kit.** Reaching the guide
   should not cost more keystrokes because someone added lenses.
 
@@ -162,9 +181,15 @@ category error rather than a feature:
 - **The sequencer.** Nothing here says what to study next _after_ this program.
   A recommendation inside the instrument proposes a next **lens**, never a next
   **snippet**.
-- **The observer.** Nothing leaves. No telemetry channel, and no session choice
-  outlives the session — so no arrangement may depend on remembering what this
-  learner did last time.
+- **The observer.** Nothing leaves this region, and no session choice outlives
+  the session — so no arrangement may depend on remembering what this learner
+  did last time, and none may render an affordance whose only purpose is to be
+  reported. Stated as a constraint on the arrangement rather than on the
+  package: a sibling region exists whose stated job is to gather and report use
+  patterns, and reconciling that with the package's own "no telemetry channel
+  leaves the study surface" is not this twin's to do. What binds here is
+  narrower and unaffected by how that resolves — **the band answers to the
+  learner in front of it, never to a reader elsewhere.**
 
 ## The four audiences — readers of the output, not users of the instrument
 

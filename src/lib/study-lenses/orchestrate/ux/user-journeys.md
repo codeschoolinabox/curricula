@@ -148,6 +148,27 @@ want to stay inside it.
 
 **0:00 — fits.** The selector says so.
 
+**0:10 — they look for it where they are working, and it is not there.** They
+selected a level to be told when they leave it, so they look at the code they
+are typing. Nothing is marked. The mark lives in one place — the selector's
+closed face, up in the band, away from the text it is a verdict about — and the
+learner has to keep glancing at a control to learn something about a line.
+
+This is the region's documented design and it is not yet built: the level's
+violations are supposed to reach the editor's gutter as markers, orchestrator-
+supplied, beside the code they judge. The seam that would carry them exists in
+the documentation and not in the editor's contract, which today accepts only a
+source string and an edit callback.
+
+> ⚠ **doubt, and it bears on the arrangement rather than on the gap.** If the
+> gutter existed, the band's mark would be a summary of something the learner
+> can already see, and the case for spending band space on it would weaken
+> considerably. **The arrangement is being chosen in the absence of the surface
+> that would most change what the band is for**, and no drawing can compensate
+> for that. Recorded here rather than in the wire-frames because it is a
+> statement about what the learner does not receive, which is a journey's
+> business.
+
 **0:30 — they write something the level does not admit.** The study surfaces
 cover. The editor stays live, as does every control whose change could restore
 conformance.
@@ -190,14 +211,22 @@ which is also the order the machine works in, which is a small piece of luck the
 arrangement should not squander.
 
 **0:12 — the accident.** Moving through the controls that offer ways to study a
-phase, **the instrument opens one.** Not on a choice — on the traversal itself.
-The editor goes away. They were not going there.
+phase, **a study surface opens.** Not on a choice — on the traversal itself. The
+editor goes away. They were not going there.
 
-This is the defect this journey exists to record. Opening a study surface is
+This is a defect of the scaffolding standing today, not a property any
+arrangement has to inherit: the current pickers are native selects, whose value
+changes as they are traversed, and each change commits. **Every candidate
+abolishes that control**, so none of them can be scored against this moment —
+which is exactly why it is written as a requirement below rather than as a
+comparison. It is recorded because it is real, because it is live right now, and
+because it is a defect only this reader meets: with a mouse the same control
+commits only on a choice.
+
+The requirement it produces outlives the defect. Opening a study surface is
 called an explicit pedagogical commitment throughout this region's
-documentation, and a control that commits while being passed over turns that
-sentence into a fiction. It is also a defect only this reader meets: with a
-mouse the same control commits only on a choice.
+documentation, and any control that commits while being passed over turns that
+sentence into a fiction.
 
 **0:20 — they get back.** Edit code, which is where it should be — never
 covered, always present while the editor is away.
@@ -300,9 +329,13 @@ saying what produced it. They accept, and it lands in the editor through the
 same intake their own typing uses — so everything re-derives from it exactly as
 if they had written it.
 
-**What this journey asks of an arrangement:** that a wait of unknown length is
-drawn as one, that cancelling names what it costs, and that a refusal is a fact
-rather than an error.
+**What this journey asks, and of whom:** that a wait of unknown length is drawn
+as one, that cancelling names what it costs, and that a refusal is a fact rather
+than an error. **None of the three is the band's** — they belong to the
+generator's own surface, which documents itself. They are stated here because
+this twin is where the learner's experience of waiting is written down, and
+handed across explicitly so they are not left ownerless by a document that
+cannot act on them.
 
 ## One thing every journey above assumes, which is not currently true
 
