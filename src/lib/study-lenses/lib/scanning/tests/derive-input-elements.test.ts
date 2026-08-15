@@ -46,19 +46,19 @@ describe('deriveInputElements', () => {
 	});
 
 	describe('One', () => {
-		it.skip('names a lone identifier', () => {
+		it('names a lone identifier', () => {
 			expect(kinds('x')).toEqual(['IdentifierName']);
 		});
 
-		it.skip('spans a lone identifier over the whole source', () => {
+		it('spans a lone identifier over the whole source', () => {
 			expect(spans('x')).toEqual([[0, 1]]);
 		});
 
-		it.skip('carries the verbatim source slice', () => {
+		it('carries the verbatim source slice', () => {
 			expect(elements('x')[0]?.text).toBe('x');
 		});
 
-		it.skip('carries the index of the token it wraps', () => {
+		it('carries the index of the token it wraps', () => {
 			expect(elements('x')[0]?.tokenIndices).toEqual([0]);
 		});
 	});

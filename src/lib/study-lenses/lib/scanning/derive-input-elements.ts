@@ -13,8 +13,15 @@ import type { InputElement, ScanInput } from './types.js';
  *   absent — callers gate on a successful tokens stage first (see
  *   `./README.md` § Public API).
  */
-export default function deriveInputElements(
-	_input: ScanInput,
-): readonly InputElement[] {
-	return [];
+export default function deriveInputElements({
+	code,
+	tokens,
+}: ScanInput): readonly InputElement[] {
+	return tokens.map((token, index) => ({
+		kind: 'IdentifierName',
+		start: token.start,
+		end: token.end,
+		text: code.slice(token.start, token.end),
+		tokenIndices: [index],
+	}));
 }
