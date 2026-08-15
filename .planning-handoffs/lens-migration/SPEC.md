@@ -98,11 +98,36 @@ Two consequences worth stating so they are not rediscovered:
 - **The register check does not widen.** Its Gen-1 arm enumerates lens **names**
   from `src/lenses/*.jsx`, and `public/static/` holds no lens file — widening it
   would inject engine filenames into the register.
-  [FIDELITY-METHOD § 4](./FIDELITY-METHOD.md#4--orphan-css)'s published orphan
-  command is likewise written for the `src/lenses/` `.jsx`/`.module.css` pair;
-  [`ledgers/_TEMPLATE.md` § The Gen-1 quarry root](./ledgers/_TEMPLATE.md)
-  carries the widened form, and the method is owed the correction rather than
-  edited from here.
+
+⚠️ **The second root has a ruled scope and an unbuilt instrument.** Listers 4
+and 5 cannot simply be pointed at it — both are written for a React + CSS-module
+pair, and the engines are neither. Measured 2026-08-15 against
+`public/static/parsonizer/parsons.js`, a 1367-line jQuery IIFE:
+
+- **lister 4's orphan test can never succeed there.** It asks whether a class is
+  referenced as `styles.<name>`; the file contains **0** such references and
+  names classes as string literals (`'sortable-code'`). Its stylesheet,
+  `parsonizer/parsons.css`, holds 19 class definitions the published command
+  would report as 19 orphans — every one of them false.
+- **lister 5 channel B returns a vacuous zero.** It greps
+  `// export const render|execute|renderConfig` and `{false &&` — React idioms a
+  jQuery file cannot contain. **0** hits, and that zero means nothing.
+
+Building the widened instrument is **design work, not a re-run**: it needs a
+class-reference test that reads string literals and `class="…"` attributes, and
+a switched-off-code test for pre-module JavaScript. Until it exists, no ledger
+may claim its Gen-1 side was instrumented.
+
+> **An earlier revision of this section claimed `ledgers/_TEMPLATE.md` already
+> carried a widened form. It did not.** Every `GEN1=` in the campaign ends
+> `/src/lenses` [measured 2026-08-15: `grep -n 'GEN1='` across all seven > > >
+> documents]. The claim is struck rather than left standing beside its
+> correction, and it is recorded because it was published in **two** documents
+> at once — a reader who checked one would have been reassured by the other.
+
+[FIDELITY-METHOD § 4](./FIDELITY-METHOD.md#4--orphan-css)'s published orphan
+command is written for the `src/lenses/` pair and is correct for it; the method
+is owed a note about the second root rather than an edit from here.
 
 **Neither older generation is the judge of appeal** — see
 [R-2](#rulings-of-record).

@@ -73,9 +73,13 @@ other campaigns and concurrent sessions [measured 2026-08-14: `git rev-list
 --count origin/main..HEAD`]. **A push publishes all 83.** Whoever holds that
 gate is deciding for every campaign in the tree, not just this one.
 
-⚠️ **This table is one commit behind by construction** — a commit cannot carry
-its own SHA, so the commit that adds a row is never in the row it adds. Before
-dispatching AR-5, close the gap:
+⚠️ **This table and the 83 above are both stale, and the gap is bigger than one
+commit.** The gap-check below returns **seven** rows as of 2026-08-15 —
+`346cb845` plus the six in [§ Seeding wave status](#seeding-wave-status), which
+is the current state and supersedes the numbers in this section. A commit cannot
+carry its own SHA, so the commit that adds a row is never in the row it adds —
+but that explains one missing row, not seven. Before dispatching AR-5, close the
+gap from the command and never from the table:
 
 ```bash
 git log --oneline d0b71810..HEAD -- .planning-handoffs/lens-migration/
@@ -165,11 +169,31 @@ is owed.
 | `25ad7ab1` | `SPEC.md` — § The three generations and § Paths record the second Gen-1 root                 |
 
 Measured at the end of the session: `markdownlint 0`, `cspell 0`, `prettier`
-clean over all **seven** campaign documents; campaign dir clean in the working
-tree; the register check still runs clean at 27 names. **94 commits ahead of
-`origin/main`** [measured 2026-08-15: `git rev-list --count origin/main..HEAD`]
-— it was 87 at session start, so 5 are this session's and 2 are foreign.
-Re-measure everything here before relying on it.
+clean over all **seven** campaign documents — `SPEC.md`, `FIDELITY-METHOD.md`,
+this file, and `ledgers/{_TEMPLATE,_boundary,_playbook,parsons}.md` — with the
+campaign dir clean in the working tree and the register check clean at 27 names.
+
+**Do not trust any commit count printed here.** HEAD moved four times during
+this session and twice more during its own handoff validation. Run the numbers
+rather than reading them:
+
+```bash
+git rev-list --count origin/main..HEAD                              # NEVER @{u}..HEAD
+git rev-list --count origin/main..68a99d14^                         # before this session
+git log --oneline 68a99d14^..HEAD -- .planning-handoffs/lens-migration/   # this session's
+git log --oneline 68a99d14^..HEAD                                   # everything, incl. foreign
+```
+
+For calibration only, and stale by the time you read it: **88** before the
+session, **6** campaign commits, **3** foreign, **97** total [all measured
+2026-08-15 at `1c6736c9`]. An earlier revision of this paragraph published "94 …
+5 this session's and 2 foreign" — wrong on the count of my own commits, and
+wrong in a way no reader could have caught without re-running it.
+
+⚠️ **The gap-check command in § What is committed returns SEVEN commits, not
+one.** `346cb845` is a real campaign commit missing from that table as well as
+this session's six, so the table is **two** generations behind, not "one commit
+behind by construction". Close the gap from the command, never from the table.
 
 ### Six standing rulings this session took
 
@@ -204,7 +228,10 @@ Re-measure everything here before relying on it.
    - **`parsons-047` is wrong about its own evidence.** `.fallbackContainer` is
      live (`ParsonsLens.jsx:52`, 3 CSS defs), so a styled fallback **does**
      render; and `codeContainer` is the in-page parsonizer integration layer,
-     not fallback styling. Split the row.
+     not fallback styling. **Rewrite it as a statement about the stylesheet,
+     exactly as `parsons-045` below** — do **not** split it. One row per cluster
+     is the Pass-1 rule and splitting is a Pass-2 act; an earlier revision of
+     this bullet said "split the row", which no Pass-1 session may do.
    - **`parsons-045` performs the reading it says it defers** and covers 4 of
      its 20 classes. Rewrite as a statement about the stylesheet, per the
      template's new cluster-row rule.
@@ -213,27 +240,69 @@ Re-measure everything here before relying on it.
      revealed on expand.
    - **`parsons-012`** says "session"; `parsons-027` in the same ledger quotes
      "Cross-mount persistence … or history". Use "since this lens mounted".
-   - four evidence cells carry authored judgments the template now fences to
-     three annotation classes — `parsons-014`, `-021`, and the three "candidate
-     successor" notes are fine; "mandatory under R-5" and "a policy question,
-     not a loss finding" are not.
-   - the whole-file `UNSETTLED` count is **51**, not 50.
-2. **RE-SEED `parsons` against the widened root.** Listers 4 and 5 have never
-   run over `public/static/parsonizer/` — `parsons.js` 1367, `component.js` 574,
-   `lis.js` 148, plus `public/parsons-iframe.html` 586. The ledger currently has
-   **zero `G1-live` rows**; that is what the ruling exists to fix. **Append ids
-   from `parsons-048`; never renumber 001–047.**
-3. **Cut `writeme`** as the second exemplar, then **`_family-f.md`'s inventory
+   - **two evidence cells carry authored judgments** the template now fences to
+     three annotation classes. **Strip these two phrases**: `parsons-014`'s "and
+     mandatory under SPEC § R-5", and `parsons-021`'s "⚠️ `DEV.md` bans status
+     content from end-state docs, so this row's disposition is a policy
+     question, not a loss finding". Both pre-argue a disposition. **The five
+     "candidate successor / candidate rename" notes stay** — `parsons-001`,
+     `-005`, `-029`, `-030`, `-031` — they are a permitted annotation class.
+     _(An earlier revision of this bullet said "four cells", listed `-014` and
+     `-021` among the ones that are fine, and counted three candidate-successor
+     notes. All three numbers were wrong and the sentence contradicted itself.)_
+   - the whole-file `UNSETTLED` count in `parsons.md:366` is **51**, not 50.
+   - **`parsons.md`'s § Reference inventory still certifies "instruments
+     **1–5**, and all five **ran**"** while the ledger carries **zero `G1-live`
+     rows**. That sentence is the reason the widened-root ruling exists and it
+     must not survive the fix pass: until the second root has an instrument
+     (item 2), the honest form names what ran over `src/lenses/` and states that
+     the engines were not reached.
+   - **after any of the above, re-run the Pass-1 gate and update
+     `### Seed census`.** The gate asserts `rows == CENSUS`, so a changed row
+     count fails it until the census total and the affected instrument row are
+     edited too.
+2. **BUILD THE WIDENED INSTRUMENT — this is design work, not a re-run.** The
+   second Gen-1 root is a ruled scope with **no runnable lister**, and pointing
+   the existing ones at it produces false numbers rather than no numbers
+   [measured 2026-08-15 against `public/static/parsonizer/parsons.js`, a
+   1367-line jQuery IIFE]:
+   - **lister 4 can never succeed there.** It tests for `styles.<name>`; the
+     file has **0** such references and names classes as string literals
+     (`'sortable-code'`). Its stylesheet `parsonizer/parsons.css` holds 19 class
+     definitions the published command would call 19 orphans — all false.
+   - **lister 5 channel B returns a vacuous zero.** It greps
+     `// export const render|execute|renderConfig` and `{false &&` — React
+     idioms a jQuery file cannot contain.
+
+   So this step needs a class-reference test that reads string literals and
+   `class="…"` attributes, and a switched-off-code test for pre-module
+   JavaScript. Files in scope for `parsons`: `parsonizer/parsons.js` 1367,
+   `component.js` 574, `lis.js` 148, `parsons.css` (19 class defs),
+   `parsonize-selection.js`, and `public/parsons-iframe.html` 586 [all measured
+   2026-08-15]. **Do not skip to seeding.** § Failure modes' whole point is that
+   a number from an inapplicable instrument is worse than an admitted gap.
+
+   > **Two documents claimed `_TEMPLATE.md` already carried a widened orphan
+   > command. It does not** — every `GEN1=` in the campaign ends `/src/lenses`
+   > [measured 2026-08-15: `grep -n 'GEN1='` across all seven documents]. Struck
+   > here and in `SPEC.md` rather than left standing.
+
+3. **THEN re-seed `parsons`** with that instrument. The ledger currently has
+   **zero `G1-live` rows**; that is what the ruling exists to fix. **Append;
+   never renumber `001`–`047`.** Take the next id from the ledger as it stands
+   when you start — item 1 may itself have appended — not from a number written
+   here.
+4. **Cut `writeme`** as the second exemplar, then **`_family-f.md`'s inventory
    shape alone** as a probe before its rows.
-4. **Fan out the remaining six** — `blanks`, `annotate`, `dropdowns`,
+5. **Fan out the remaining six** — `blanks`, `annotate`, `dropdowns`,
    `variables`, `debug-props`, and Family F's rows.
-5. **AR-5** over the SHA list above plus whatever this session adds, then the
+6. **AR-5** over the SHA list above plus whatever this session adds, then the
    push prompt.
 
 ### Owed to FIDELITY-METHOD, deliberately not edited from here
 
 RESUME says do not re-derive the method, so these are reported rather than
-fixed. All three reproduced [measured 2026-08-15]:
+fixed. All four reproduced [measured 2026-08-15]:
 
 - **§ 4's "the orphan counts are a lower bound" runs both ways.** Computed
   access makes false **positives** possible — `styles[status]` at
@@ -249,7 +318,10 @@ fixed. All three reproduced [measured 2026-08-15]:
   [read: `.husky/pre-commit` → `npx lint-staged`; `package.json` `lint-staged`
   `*.md`]. Run markdownlint yourself, path-scoped, before every commit.
 - **§ 4's orphan command is written for the `src/lenses/` pair** and does not
-  reach the second Gen-1 root. `_TEMPLATE.md` carries the widened form.
+  reach the second Gen-1 root, and **no widened form exists anywhere** — every
+  `GEN1=` in the campaign ends `/src/lenses` [measured 2026-08-15: `grep -n
+  'GEN1='` across all seven documents]. An earlier revision of this line said
+  the template carried one. Building it is item 2 above.
 
 A fourth, for Gate 1 rather than the method: SPEC § Roll-up's `instruments`
 column cannot express a **third** reason for thinness — _unfinished_. A one-cell
