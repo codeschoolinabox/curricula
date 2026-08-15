@@ -40,7 +40,7 @@ function spans(code: string): Array<[number, number]> {
 
 describe('deriveInputElements', () => {
 	describe('Zero', () => {
-		it.skip('returns nothing for an empty source', () => {
+		it('returns nothing for an empty source', () => {
 			expect(elements('')).toEqual([]);
 		});
 	});

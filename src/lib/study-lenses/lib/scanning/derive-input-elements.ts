@@ -16,5 +16,5 @@ import type { InputElement, ScanInput } from './types.js';
 export default function deriveInputElements(
 	_input: ScanInput,
 ): readonly InputElement[] {
-	throw new Error('deriveInputElements: not implemented');
+	return [];
 }
