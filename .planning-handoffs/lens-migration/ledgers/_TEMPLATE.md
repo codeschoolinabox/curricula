@@ -362,15 +362,39 @@ block the commit.
 close conditions rather than a weaker version of them — `open == rows`, and
 every judgment cell still empty. Run it on the ledger, not from memory:
 
+⚠️ **Slice the row table first. A whole-file grep matches this document's own
+prose about the check** — every ledger cut from this template explains
+`UNSETTLED` and names the banner in running text, so a bare
+`grep -c 'UNSETTLED'` counts those too. Measured on the first ledger seeded:
+**50 against 47 rows**, and the banner counted **2** [measured 2026-08-15:
+`ledgers/parsons.md`, whole-file vs row-scoped]. That is the same defect
+[SPEC.md § The register check](../SPEC.md#the-register-check) already records
+twice — _a check embedded in the document it checks must not match on text it
+itself contains_ — and the first version published here had it.
+
 ```bash
 L=.planning-handoffs/lens-migration/ledgers/<lens>.md
-grep -c '^| `<lens>-[0-9]\{3\}`' "$L"   # row count — must match the census and the id range
-grep -c 'UNSETTLED' "$L"                 # must EQUAL the row count
-grep -c 'PASS 1 — SEEDED' "$L"           # 1 — the banner
-grep -c '| — |' "$L"                     # 0 — an em dash is not a value
-grep -cE '\*\*`(walked|found)`\*\*|Design owed' "$L"                  # 0 at Pass 1
-grep -cE '`(restore|supersede|drop|revive|already survives)`' "$L"    # 0 inside ## Rows
+LENS=<lens>
+rows() { awk '/^## Rows/{on=1;next} /^## Close conditions/{on=0} on' "$1" \
+         | grep "^| \`$LENS-[0-9]\{3\}\`"; }
+n=$(rows "$L" | wc -l | tr -d ' '); echo "rows: $n"
+[ "$(rows "$L" | grep -c 'UNSETTLED')" = "$n" ] || echo "FAIL: a row claims a settled provenance set"
+[ "$(rows "$L" | grep -c '| — |')" = 0 ] || echo "FAIL: em dash used as a value"
+[ "$(rows "$L" | grep -cE '`(restore|supersede|drop|revive|already survives|drop-as-loss|restore-as-doc)`')" = 0 ] || echo "FAIL: a row is closed"
+[ "$(rows "$L" | grep -cE '\*\*`(walked|found)`\*\*|Design owed')" = 0 ] || echo "FAIL: walk columns written at Pass 1"
+[ "$(grep -c '^> \*\*PASS 1 — SEEDED' "$L")" = 1 ] || echo "FAIL: banner missing or duplicated"
+rows "$L" | grep -oE "^\| \`$LENS-([0-9]{3})\`" | grep -oE '[0-9]{3}' \
+  | awk 'NR!=$1+0{print "FAIL: id gap or duplicate at position "NR": "$0}'
 ```
+
+The banner check is anchored to `^> **PASS 1 — SEEDED` — the blockquote form —
+precisely so the close-conditions bullet below, which names the same string in
+prose, does not satisfy it.
+
+**Mutation-test it before trusting it.** A gate that prints nothing is
+indistinguishable from a gate that matched nothing: plant a disposition in one
+row of a scratch copy and confirm the closed-row line fires [measured
+2026-08-15: planted `**\`restore\`**` in `parsons-001` → 1 hit, check fires].
 
 Then, per row, every heading token in `evidence` must `resolve` to exactly `1`
 against the **source file**, not against the inventory — a mis-transcription
@@ -385,11 +409,13 @@ The conditions below are for **campaign close**, not for the seeding commit.
 - **Every** row has a non-empty `discharged by` that **resolves** — on any
   disposition (human ruling 2026-08-14);
   [§ At AR-5](../FIDELITY-METHOD.md#at-ar-5) is the single definition.
-- **No `UNSETTLED` survives.** `grep -c 'UNSETTLED' <ledger>` → 0. Until it is
-  zero, an unsettled provenance set can reach AR-5 dressed as a settled one, and
-  no gate check would see it.
+- **No `UNSETTLED` survives** — `rows "$L" | grep -c 'UNSETTLED'` → 0, using the
+  slice helper above and **not** a whole-file grep, which this very bullet would
+  otherwise satisfy forever. Until it is zero, an unsettled provenance set can
+  reach AR-5 dressed as a settled one and no gate check would see it.
 - **The pass banner has been replaced**, not merely outgrown —
-  `grep -c 'PASS 1 — SEEDED' <ledger>` → 0.
+  `grep -c '^> \*\*PASS 1 — SEEDED' <ledger>` → 0. Anchored to the blockquote
+  form for the same reason.
 - **Open rows = 0**, under § At AR-5's single four-part definition — which
   includes an empty `walked` or `found` on any row those columns are required
   on, and an unrebutted quotation on a `revive` row.
