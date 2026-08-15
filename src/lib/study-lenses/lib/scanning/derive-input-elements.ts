@@ -30,9 +30,11 @@ const tt = acorn.tokTypes;
 // table is CURRENTLY treated as a `Punctuator`, which is §12.8's catch-all
 // once the productions carrying their own rows are taken out of it — but
 // several absent types have their own production and are simply not
-// triangulated yet. Two of those productions can never be reached by a row
-// here at all: `/=` shares one token type with every other compound
-// assignment, so the source slice decides, as phase 3 of the sketch says.
+// triangulated yet. Two of them will never be plain rows, for two different
+// reasons: `/=` shares one token type with every other compound assignment,
+// so the source slice decides and no row can ever settle it; `}` shares one
+// token type between a block closer and a template continuation, so it
+// becomes a row only once the fold has taken the template braces away.
 const KIND_BY_TOKEN_TYPE = new Map<acorn.TokenType, InputElementKind>([
 	[tt.name, 'IdentifierName'],
 	[tt.num, 'NumericLiteral'],
@@ -47,12 +49,25 @@ function nameElement(
 	code: string,
 ): InputElement {
 	return {
-		kind: KIND_BY_TOKEN_TYPE.get(token.type) ?? 'Punctuator',
+		kind: elementKind(token),
 		start: token.start,
 		end: token.end,
 		text: code.slice(token.start, token.end),
 		tokenIndices: [index],
 	};
+}
+
+/**
+ * The production one token's own type names. Every reserved word carries a
+ * keyword on its type — thirty-five of them — and all thirty-five name the
+ * identifier production, so the collapse is one test rather than a list.
+ * The contextual keywords never reach it: the parser already types `let`
+ * and its family as plain identifiers.
+ */
+function elementKind(token: acorn.Token): InputElementKind {
+	if (typeof token.type.keyword === 'string') return 'IdentifierName';
+
+	return KIND_BY_TOKEN_TYPE.get(token.type) ?? 'Punctuator';
 }
 
 /**

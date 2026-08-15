@@ -158,27 +158,27 @@ describe('deriveInputElements', () => {
 	});
 
 	describe('The vocabulary', () => {
-		it.skip('names a reserved word an IdentifierName', () => {
+		it('names a reserved word an IdentifierName', () => {
 			expect(kinds('if')).toEqual(['IdentifierName']);
 		});
 
-		it.skip('names an operator-shaped reserved word an IdentifierName', () => {
+		it('names an operator-shaped reserved word an IdentifierName', () => {
 			expect(kinds('typeof x')[0]).toBe('IdentifierName');
 		});
 
-		it.skip('names a contextual keyword an IdentifierName', () => {
+		it('names a contextual keyword an IdentifierName', () => {
 			expect(kinds('let')).toEqual(['IdentifierName']);
 		});
 
-		it.skip('names null an IdentifierName rather than a literal', () => {
+		it('names null an IdentifierName rather than a literal', () => {
 			expect(kinds('null')).toEqual(['IdentifierName']);
 		});
 
-		it.skip('names true an IdentifierName rather than a literal', () => {
+		it('names true an IdentifierName rather than a literal', () => {
 			expect(kinds('true')).toEqual(['IdentifierName']);
 		});
 
-		it.skip('names false an IdentifierName rather than a literal', () => {
+		it('names false an IdentifierName rather than a literal', () => {
 			expect(kinds('false')).toEqual(['IdentifierName']);
 		});
 
