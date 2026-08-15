@@ -4,6 +4,8 @@
 <!-- cspell:ignore colour distractor distractors ledgered throughs unrebutted -->
 <!-- cspell:ignore firstblock orphanclusters oldd clauding -->
 <!-- cspell:ignore gsub RSTART RLENGTH -->
+<!-- cspell:ignore glossterm normalised normalisation parsonizer -->
+<!-- cspell:ignore behaviour behaviours affordances -->
 
 # `<lens>` — fidelity ledger
 
@@ -49,11 +51,32 @@ the id is this ledger's to assign.
 
 Family F is **seven lenses in one ledger** (human ruling 2026-08-14), because
 SPEC § Roll-up counts it as one row with one link. It therefore differs from
-this template in exactly three ways and no others:
+this template as follows — **not "in exactly three ways", which was true before
+`## Source inventory` existed and is not true now**:
 
-- **Seven `## Reference inventory` blocks**, one per member, each with its own
-  `REF=` (or its own Gen-1 file pair), its own Gen-1-source line, and its own
-  `instruments` value — they are not uniform, and one member has none at all.
+- **Seven per-member inventory blocks**, each with its own `REF=` (or its own
+  Gen-1 file pair), its own Gen-1-source line, and its own `instruments` value —
+  they are not uniform, and one member has none at all.
+
+  ⚠️ **Their headings must be disambiguated per member** —
+  `## Reference inventory — step-throughs`,
+  `## Source inventory — step-throughs` — because seven identical
+  `## Reference inventory` H2s are siblings and `MD024 siblings_only` fires on
+  them [measured 2026-08-15: three sibling copies → **2 errors**; the
+  disambiguated form → **0**]. This is the same collision the `Design owed` rule
+  below avoids at label granularity, one level up. It also gives each member's
+  `### Lister 4` / `### Lister 5` a distinct parent, which they need for the
+  same reason.
+
+- **Six per-member `### Lister 5` blocks and two `### Lister 4` blocks**, per
+  SPEC § Roll-up's Family F table — `step-throughs` and `tracing` have a
+  `.module.css`; the four action lenses do not; `trace-debugging` has neither.
+- **`### Seed census` carries non-contiguous id ranges per instrument**, because
+  seven members interleave in one `fam-f` namespace. The one-range-per-row shape
+  below cannot express that — add a member column.
+- **Fix the seeding order across members before the first id is assigned.**
+  Member-major or instrument-major is a free choice exactly once: under _append,
+  never renumber_ it is permanent from `fam-f-001` onward.
 - **Row ids are `fam-f-NNN`**, one namespace across the whole ledger. The member
   is named in the `affordance` cell, not in the id — a reader seeing `fam-f-012`
   must be able to tell which ledger to open, which a per-member prefix defeats.
@@ -102,8 +125,11 @@ structurally unavailable** on such a lens, and listers 1–3 cannot run.
 **Instruments that could run**, matching this lens's row in
 [SPEC.md § Roll-up](../SPEC.md#roll-up):
 
-<!-- 1–5 · 1–5 (1–3 ref→src) · 4,5 — and say which, so a thin ledger below reads
-     as an instrument limit rather than as a clean bill of health -->
+<!-- One of the eight values SPEC § Roll-up actually uses:
+       1–5 · 1–5 (1–3 ref→src) · 1–3 · 4,5 · 5 · none · mixed — see below · n/a
+     Say which, so a thin ledger below reads as an instrument limit rather than
+     as a clean bill of health. `1–3` is debug-props; `5` and `none` are Family
+     F members; `mixed` is Family F itself. -->
 
 ---
 
@@ -123,6 +149,42 @@ was skipped?" a set difference instead of a re-derivation.
 A lens with no Gen-1 file writes the literal words
 `no Gen-1 source: <lens> has no Gen-1 file` once, here, and both listers report
 `n/a`.
+
+### ⚠️ The Gen-1 quarry root is TWO directories, not one
+
+**Human ruling 2026-08-15.** Gen-1 source is
+`…/0--study-lenses--it-begins/src/lenses/` **and**
+`…/0--study-lenses--it-begins/public/static/`. Listers 4 and 5 run over both.
+
+The `src/lenses/` file is frequently a **shell**; the pedagogy is in
+`public/static/`. Measured 2026-08-15:
+
+| lens                         | shell in `src/lenses/`    | engine in `public/static/`                                                                                         |
+| ---------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `parsons`                    | `ParsonsLens.jsx` **181** | `parsonizer/parsons.js` **1367** · `component.js` **574** · `lis.js` **148**; `public/parsons-iframe.html` **586** |
+| `blanks`                     | `BlanksLens.jsx` 914      | `blanks/blankenate.js`                                                                                             |
+| `tables-universal`           | 134                       | `wc-trace-table/`                                                                                                  |
+| `tracing`                    | `TracingLens.jsx` 313     | `aran-build.js`, `advice/`, `pointcut.js`, `shadowing/`, `trace-*.js`                                              |
+| `ask-javascript` (`bnd-001`) | 412                       | `ask/component/ask-questions.js`                                                                                   |
+| the coloring foundation      | —                         | `prism/`                                                                                                           |
+
+[measured 2026-08-15: `grep -ohE '(public\|static\|/static)/[A-Za-z0-9_./-]+'`
+over `src/lenses/*.jsx`, and `wc -l` on the parsonizer set]
+
+**Seven of the eighteen Gen-1 lens files reference an iframe** (`EditorLens`,
+`ParsonsLens`, `TracingLens`, `StepThroughsLens`, `QASMEditorLens`,
+`run-javascript`, `debug-javascript`) [measured 2026-08-15: `grep -lE
+'iframe'`], so "the Gen-1 lens file" is routinely not where the lens lived.
+
+**Why this is a ruling and not a note:** a ledger scoped to `src/lenses/` alone
+reports the shell and calls it Gen-1. The first ledger seeded did exactly that —
+47 rows, **zero `G1-live`**, `instruments 1–5, all five ran` — while three of
+its own rows quoted `component.js` and `lis.js` by name. R-2 sets the fidelity
+target as the union of Gen-1 and Gen-2 behaviours, and a shell is not the
+behaviour.
+
+**Use `dist/` for nothing.** It is a build output of `public/` and duplicates it
+[measured 2026-08-15: both trees carry the same parsonizer file set].
 
 ### Lister 4 — orphan CSS
 
@@ -154,6 +216,28 @@ reproducible rather than a judgment. Canon itself reads `ParsonsLens`'s 27 as
 **one** thing ("a complete drag-and-drop board that never rendered"), so a rule
 emitting 27 rows would contradict the sentence the instrument was written from.
 
+⚠️ **A cluster row states the stylesheet, not the learner.** This is the one
+place where "the unit is the affordance" and "one row per cluster" pull against
+each other, and the resolution is that **at Pass 1 the unit is the cluster,
+honestly labelled**; Pass 2 turns it into affordances by appending ids. So
+write:
+
+> _Twenty class definitions in the stylesheet's pre-banner region —
+> `blocksPanel`, `solutionPanel`, `insertZone`, … — describe UI surfaces the
+> shipped 181-line `<iframe>` shell never renders._
+
+and **not** _"The learner can drag blocks from a pool panel into a solution
+panel"_. The second infers behaviour from class names, is not falsifiable by
+opening one named file, and silently bundles three affordances (a board, a
+control bar, a feedback pair) into one row while naming only the first.
+
+**Before writing any cluster row, check the `.jsx` for a live sibling.** An
+orphan often has a renamed live twin, and a row asserting the learner cannot see
+something they can see is worse than no row [measured 2026-08-15:
+`ParsonsLens`'s `parsons-fallback` is an orphan, but `.fallbackContainer` is
+referenced at `ParsonsLens.jsx:52` and defined 3× — a styled fallback **does**
+render].
+
 ⚠️ **Two limits, both of which must be recorded in this section rather than
 discovered later:**
 
@@ -168,9 +252,19 @@ discovered later:**
   the result, empty or not:
 
   ```bash
-  grep -n 'styles\[' "$JSX"                                  # computed access
-  awk '{print $2}' <orphan list> | grep -E '\-'              # kebab-case orphans
+  grep -n 'styles\[' "$JSX"                     # computed access -> false POSITIVES
+  <the orphan command above> | cut -f2 | grep -- '-'   # kebab-case -> unverifiable
   ```
+
+  A kebab-case orphan cannot be confirmed by the lister at all, because
+  `styles.parsons-modal` is not expressible — direct-check each one by name and
+  record the result. And **a lister that ran and found nothing writes
+  `measured zero — <command> → 0`, never silence**: the census row reads `0`
+  rather than being omitted. This is what keeps the campaign's fidelity control
+  honest — `WritemeLens` has **0** orphans [measured 2026-08-15], and a blank
+  section there is indistinguishable from an instrument that could not run,
+  which is the exact confusion SPEC § Roll-up's `instruments` column exists to
+  prevent.
 
   Measured on today's tree: `BlanksLens.jsx:735` and `WritemeLens.jsx:710` use
   computed access; `ParsonsLens` carries six kebab-case orphans. Every orphan a
@@ -284,8 +378,35 @@ It matches a **literal prefix**, exactly as
 [§ The minimum walk set](../FIDELITY-METHOD.md#the-minimum-walk-set)'s `resolve`
 does — so parentheses and `+` are text, truncating a heading stays legal, and
 `Why two views one lens` returns empty against `Why two views, one lens`
-[measured 2026-08-15: both forms run against `annotate/DOCS.md`]. It escapes `|`
-for the table cell, which is the one permitted transport modification.
+[measured 2026-08-15: both forms run against `annotate/DOCS.md`].
+
+**`firstblock` covers heading-seeded rows only.** Glossary rows take
+`glossterm`, and lister-4 / lister-5 rows cite no heading at all and take
+neither. Say which rule produced which cell; a blanket "every quotation was
+extracted by `firstblock`" is false the moment a ledger has a glossary, and
+every Gen-2 lens has one (8 of 8).
+
+```bash
+glossterm() { # glossterm <file> <bold term as written>
+  awk -v n="$2" '$0 ~ "^- \\*\\*" n "\\*\\* —" { print $0 "…"; exit }' "$1"
+}
+```
+
+**Three transport modifications are sanctioned, and none of them is authored:**
+
+- **`|` → `\|`**, which `firstblock` applies so the cell survives the table.
+- **prettier's whitespace collapse**, which flattens a quoted table row's column
+  padding to single spaces.
+- **prettier's
+  `**`→`\*\*`escape at a truncation point.** A 240-character cut can land inside an emphasis span, leaving an unmatched`**`that prettier escapes to keep the markdown valid [measured 2026-08-15: 5 of`parsons.md`'s
+  47 rows]. **Read it as a signal, not damage\*\* — it marks a quote truncated
+  mid-emphasis, and the fix is to lengthen or re-cut the quote, not to unescape
+  it by hand.
+
+So "re-run and diff" means **diff normalised**: unescape `\*\*`→`**`, `\_`→`_`,
+`\|`→`|` and collapse space runs on both sides first. Comparing raw bytes makes
+a formatter normalisation indistinguishable from a mis-transcription, which is
+the one thing this check exists to tell apart.
 
 **`UNSETTLED` is how a partial provenance set stays visibly partial.** No lister
 reads both sides of R-2's union — listers 1–3 compare document sets, 4 and 5
@@ -295,11 +416,36 @@ difference between an empty cell and an answered one is this ledger's whole
 subject. One per row: a row with none has claimed a settled set. It is a close
 condition.
 
-| seed class                          | may witness at Pass 1              | never                       |
-| ----------------------------------- | ---------------------------------- | --------------------------- |
-| lister 1/3 heading or glossary term | `G2-doc`; `G3` where a port exists | `G1-*`, `G2-code`           |
-| lister 4 orphan cluster             | `G1-dead`                          | any `G2-*`, `G3`, `G1-live` |
-| lister 5 channel B                  | `G1-dead`                          | any `G2-*`, `G3`, `G1-live` |
+| seed class                          | may witness at Pass 1                     | never                       |
+| ----------------------------------- | ----------------------------------------- | --------------------------- |
+| lister 1/3 heading or glossary term | `G2-doc`; `G3` on an **exact name match** | `G1-*`, `G2-code`           |
+| lister 4 orphan cluster             | `G1-dead`                                 | any `G2-*`, `G3`, `G1-live` |
+| lister 5 channel B                  | `G1-dead`                                 | any `G2-*`, `G3`, `G1-live` |
+
+**`G3` is witnessed only on an exact heading-name match, level-insensitive** —
+`### Data flow` against `## Data flow` counts, `## Public API` against
+`## The lens object` does not. **A rename is a reading**, so a candidate
+successor is recorded in `evidence` and left for Pass 2 rather than tagged.
+Without this, "a port exists" would license `G3` on every heading row and eight
+ledgers would each pick their own threshold, making SPEC § Roll-up's columns
+incomparable.
+
+**`absent from the port` is a statement about the heading set and nothing
+else.** It means no port heading carries this name. It says **nothing** about
+whether the behaviour survived — that is Pass 2's to settle. The distinction is
+not pedantic: FIDELITY-METHOD § Worked rows' `parsons-018` is the case where the
+documentation was lost and the behaviour **grew** (`lib/extract-hints.ts` 59 →
+69 lines), so a row can be honestly `absent from the port` and still be
+`restore-as-doc`. Prefer the unambiguous phrase
+**`heading absent from the port`** in new ledgers.
+
+**Three annotation classes are permitted in an `evidence` cell, and no others**
+— they are the seeder's, not the source's, so they are fenced rather than free:
+`candidate successor: <heading>` · `candidate rename: <heading>` · an
+**instrument caveat** (what the lister structurally could not see). Anything
+that pre-argues a disposition — "mandatory under R-5", "this is a policy
+question, not a loss finding" — is Pass 2's judgment written into a Pass-1 cell,
+and the gate cannot catch it.
 
 **Seeding order**, so eight sessions produce the same id for the same seed:
 reference README headings in file order → DOCS headings in file order → glossary
@@ -321,10 +467,17 @@ belong to**, because those cells are prose and the table is already wide. Both
 carry the **same eight class labels in the same order**; a class with no member
 in this lens is `empty`.
 
-`## Design owed` on a `revive` row is an **inline bolded label on its own line
+`Design owed` on a `revive` row is an **inline bolded label on its own line
 under the row**, never a heading — two `revive` rows in one ledger would
-otherwise collide under `MD024 siblings_only` and the pre-commit hook would
-block the commit.
+otherwise collide under `MD024 siblings_only`.
+
+⚠️ **And nothing would stop you committing it.** The pre-commit hook runs
+`prettier --write` and no linter at all [read: `.husky/pre-commit` → `npx
+lint-staged`; `package.json` `lint-staged` `*.md` → `prettier --write`], so an
+`MD024` collision lands committed and surfaces later at `npm run lint:md`, in
+someone else's repo-wide run. Run the markdownlint gate yourself, path-scoped,
+before every commit. (FIDELITY-METHOD § The one addition — `revive` states the
+rule with the same false mechanism; it is owed a correction there.)
 
 | #            | affordance | provenance | evidence | disposition | discharged by | gate |
 | ------------ | ---------- | ---------- | -------- | ----------- | ------------- | ---- |
@@ -366,35 +519,62 @@ every judgment cell still empty. Run it on the ledger, not from memory:
 prose about the check** — every ledger cut from this template explains
 `UNSETTLED` and names the banner in running text, so a bare
 `grep -c 'UNSETTLED'` counts those too. Measured on the first ledger seeded:
-**50 against 47 rows**, and the banner counted **2** [measured 2026-08-15:
-`ledgers/parsons.md`, whole-file vs row-scoped]. That is the same defect
+**51 against 47 rows**, and the banner counted **2** [measured 2026-08-15: `git
+show c0bd56a6:…/parsons.md | grep -c 'UNSETTLED'`]. That is the same defect
 [SPEC.md § The register check](../SPEC.md#the-register-check) already records
 twice — _a check embedded in the document it checks must not match on text it
-itself contains_ — and the first version published here had it.
+itself contains_ — and the first version published here had it. **The 51st hit
+is the sentence reporting the number**, which is why an earlier revision of this
+paragraph said 50: it was measured before it was written.
+
+**Run every command from the repository root.** `L=` and `REF=` are
+repo-relative; `GEN1=` is absolute.
 
 ```bash
-L=.planning-handoffs/lens-migration/ledgers/<lens>.md
-LENS=<lens>
-rows() { awk '/^## Rows/{on=1;next} /^## Close conditions/{on=0} on' "$1" \
-         | grep "^| \`$LENS-[0-9]\{3\}\`"; }
+L=.planning-handoffs/lens-migration/ledgers/<ledger-file>.md
+LENS=<row-id-prefix>   # NOT the file stem -- for `_family-f.md` this is `fam-f`
+CENSUS=<the ### Seed census total>
+slice() { awk '/^## Rows/{on=1;next} /^## Close conditions/{on=0} on' "$1"; }
+rows()  { slice "$1" | grep "^| \`$LENS-[0-9]\{3\}\`"; }
 n=$(rows "$L" | wc -l | tr -d ' '); echo "rows: $n"
+[ "$n" -gt 0 ] || echo "FAIL: zero rows matched -- LENS must be the id prefix, not the file stem"
+[ "$n" = "$CENSUS" ] || echo "FAIL: row count does not match the seed census total"
 [ "$(rows "$L" | grep -c 'UNSETTLED')" = "$n" ] || echo "FAIL: a row claims a settled provenance set"
-[ "$(rows "$L" | grep -c '| — |')" = 0 ] || echo "FAIL: em dash used as a value"
-[ "$(rows "$L" | grep -cE '`(restore|supersede|drop|revive|already survives|drop-as-loss|restore-as-doc)`')" = 0 ] || echo "FAIL: a row is closed"
-[ "$(rows "$L" | grep -cE '\*\*`(walked|found)`\*\*|Design owed')" = 0 ] || echo "FAIL: walk columns written at Pass 1"
+[ "$(rows "$L" | grep -cE '\|[[:space:]]*—[[:space:]]*\|')" = 0 ] || echo "FAIL: em dash used as a value"
+[ "$(rows "$L" | grep -cE '`(restore|supersede|drop|revive|already survives|drop-as-loss|restore-as-doc)( [^`]*)?`')" = 0 ] || echo "FAIL: a row is closed"
+[ "$(slice "$L" | grep -cE '^\|.*(\*\*`(walked|found)`\*\*|Design owed)')" = 0 ] || echo "FAIL: walk columns written at Pass 1"
 [ "$(grep -c '^> \*\*PASS 1 — SEEDED' "$L")" = 1 ] || echo "FAIL: banner missing or duplicated"
 rows "$L" | grep -oE "^\| \`$LENS-([0-9]{3})\`" | grep -oE '[0-9]{3}' \
-  | awk 'NR!=$1+0{print "FAIL: id gap or duplicate at position "NR": "$0}'
+  | awk 'NR!=$1+0{print "FAIL: id gap or duplicate at position "NR": "$0; exit}'
 ```
+
+Five of those lines exist because the first published version of this gate was
+**half dead**, and only one of its six checks had been mutation-tested. Each fix
+is a measurement, not a precaution [all measured 2026-08-15 against
+`ledgers/parsons.md` plus a planted mutation]:
+
+| line                      | why it is written that way                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LENS=<row-id-prefix>`    | the file stem and the id prefix differ for `_family-f.md`. With `LENS=_family-f` the old gate printed `rows: 0` and **not one FAIL** over a real 47-row ledger.                                                                                                                                                                                                                                                                                                                                           |
+| `[ "$n" -gt 0 ]`          | without it, a wrong `LENS` makes every remaining check trivially true.                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `[ "$n" = "$CENSUS" ]`    | restores the "must match the census" assertion, which was silently dropped when this gate was corrected.                                                                                                                                                                                                                                                                                                                                                                                                  |
+| em dash, padded           | prettier runs on every staged `.md` and **pads table cells to column width**, so the literal `\| — \|` never survives to the commit. Planted em dashes: **1 hit before prettier, 0 after**; the padded form finds **4**. The check died at exactly the moment the file became committable.                                                                                                                                                                                                                |
+| `( [^`]\*)?` on the value | `restore — DEFERRED (<owner>, <ruling>)` is a real disposition, and both the bare pattern **and** a `( — DEFERRED)?` suffix miss it, because the parenthetical sits inside the backticks. The trailing-space anchor is what stops `` `dropMessage` `` — a CSS class in a lister-4 evidence cell — tripping the `drop` alternative: an unanchored `[^`]\*` scores **1 false positive on the clean exemplar**. Planted one at a time, all eight vocabulary values are caught and the clean ledger scores 0. |
+| walk check on `slice`     | `walked`/`found` are written as **continuation lines whose first cell is empty** (see the COMPLETED specimen above), so `rows()` never sees them. Planted continuation line: `rows()`-scoped **0**, `slice`-scoped **1**.                                                                                                                                                                                                                                                                                 |
+| `exit` on the awk         | one missing row otherwise prints a FAIL for every later row — 44 lines for one defect.                                                                                                                                                                                                                                                                                                                                                                                                                    |
+
+Note a deliberate consequence of the `slice`-scoped walk check: it also fires if
+the template's specimens are left undeleted. That is intended — delete them.
 
 The banner check is anchored to `^> **PASS 1 — SEEDED` — the blockquote form —
 precisely so the close-conditions bullet below, which names the same string in
 prose, does not satisfy it.
 
-**Mutation-test it before trusting it.** A gate that prints nothing is
-indistinguishable from a gate that matched nothing: plant a disposition in one
-row of a scratch copy and confirm the closed-row line fires [measured
-2026-08-15: planted `**\`restore\`**` in `parsons-001` → 1 hit, check fires].
+**Mutation-test every check before trusting the gate, not one of them.** A gate
+that prints nothing is indistinguishable from a gate that matched nothing, and
+publishing this one after testing a single check is how five of its six lines
+shipped dead. Plant one mutation per check in a scratch copy under `/tmp` and
+confirm each fires.
 
 Then, per row, every heading token in `evidence` must `resolve` to exactly `1`
 against the **source file**, not against the inventory — a mis-transcription
