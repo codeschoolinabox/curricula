@@ -38,6 +38,7 @@ const tt = acorn.tokTypes;
 const KIND_BY_TOKEN_TYPE = new Map<acorn.TokenType, InputElementKind>([
 	[tt.name, 'IdentifierName'],
 	[tt.num, 'NumericLiteral'],
+	[tt.privateId, 'PrivateIdentifier'],
 ]);
 
 /**

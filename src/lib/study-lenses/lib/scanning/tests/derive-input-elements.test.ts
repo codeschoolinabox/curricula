@@ -182,7 +182,7 @@ describe('deriveInputElements', () => {
 			expect(kinds('false')).toEqual(['IdentifierName']);
 		});
 
-		it.skip('names a private name a PrivateIdentifier', () => {
+		it('names a private name a PrivateIdentifier', () => {
 			expect(kinds('class C { #x }')[6]).toBe('PrivateIdentifier');
 		});
 
