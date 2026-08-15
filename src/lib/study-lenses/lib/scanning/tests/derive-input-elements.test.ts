@@ -64,7 +64,7 @@ describe('deriveInputElements', () => {
 	});
 
 	describe('Many', () => {
-		it.skip('names every element of a short declaration', () => {
+		it('names every element of a short declaration', () => {
 			expect(kinds('let x = 1')).toEqual([
 				'IdentifierName',
 				'WhiteSpace',
@@ -76,7 +76,7 @@ describe('deriveInputElements', () => {
 			]);
 		});
 
-		it.skip('spans every element of a short declaration', () => {
+		it('spans every element of a short declaration', () => {
 			expect(spans('let x = 1')).toEqual([
 				[0, 3],
 				[3, 4],
@@ -88,7 +88,7 @@ describe('deriveInputElements', () => {
 			]);
 		});
 
-		it.skip('indexes into the caller token array rather than its own output', () => {
+		it('indexes into the caller token array rather than its own output', () => {
 			expect(elements('let x = 1')[2]?.tokenIndices).toEqual([1]);
 		});
 	});
