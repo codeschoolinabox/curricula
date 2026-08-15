@@ -186,7 +186,7 @@ describe('deriveInputElements', () => {
 			expect(kinds('class C { #x }')[6]).toBe('PrivateIdentifier');
 		});
 
-		it.skip('names a lone slash a DivPunctuator', () => {
+		it('names a lone slash a DivPunctuator', () => {
 			expect(kinds('a / b')[2]).toBe('DivPunctuator');
 		});
 
