@@ -1073,18 +1073,18 @@ Apply before accepting any lens. Transported from the playbook and extended.
 Counts per lens, filled as ledgers complete. A suspiciously small ledger is
 supposed to be _visible_ here — that is what this table is for.
 
-| Lens               | instruments                               | rows | `restore` | `revive` | `ADDITION` | open | ledger                                             |
-| ------------------ | ----------------------------------------- | ---- | --------- | -------- | ---------- | ---- | -------------------------------------------------- |
-| blanks             | 1–5 (1–3 ref→src)                         | —    | —         | —        | —          | —    | [ledgers/blanks.md](./ledgers/blanks.md)           |
-| dropdowns          | **4,5**                                   | —    | —         | —        | —          | —    | [ledgers/dropdowns.md](./ledgers/dropdowns.md)     |
-| annotate           | 1–5 (1–3 ref→src)                         | —    | —         | —        | —          | —    | [ledgers/annotate.md](./ledgers/annotate.md)       |
-| parsons            | 1–5                                       | —    | —         | —        | —          | —    | [ledgers/parsons.md](./ledgers/parsons.md)         |
-| writeme            | 1–5                                       | —    | —         | —        | —          | —    | [ledgers/writeme.md](./ledgers/writeme.md)         |
-| variables          | **4,5**                                   | —    | —         | —        | —          | —    | [ledgers/variables.md](./ledgers/variables.md)     |
-| debug-props        | 1–5                                       | —    | —         | —        | —          | —    | [ledgers/debug-props.md](./ledgers/debug-props.md) |
-| Family F (7)       | **4,5** (1–5 for `trace-debugging` alone) | —    | —         | —        | —          | —    | [ledgers/\_family-f.md](./ledgers/_family-f.md)    |
-| boundary           | n/a                                       | —    | n/a       | n/a      | n/a        | —    | [ledgers/\_boundary.md](./ledgers/_boundary.md)    |
-| playbook transport | n/a                                       | —    | n/a       | n/a      | n/a        | n/a  | [ledgers/\_playbook.md](./ledgers/_playbook.md)    |
+| Lens               | instruments           | rows | `restore` | `revive` | `ADDITION` | open | ledger                                             |
+| ------------------ | --------------------- | ---- | --------- | -------- | ---------- | ---- | -------------------------------------------------- |
+| blanks             | 1–5 (1–3 ref→src)     | —    | —         | —        | —          | —    | [ledgers/blanks.md](./ledgers/blanks.md)           |
+| dropdowns          | **4,5**               | —    | —         | —        | —          | —    | [ledgers/dropdowns.md](./ledgers/dropdowns.md)     |
+| annotate           | 1–5 (1–3 ref→src)     | —    | —         | —        | —          | —    | [ledgers/annotate.md](./ledgers/annotate.md)       |
+| parsons            | 1–5                   | —    | —         | —        | —          | —    | [ledgers/parsons.md](./ledgers/parsons.md)         |
+| writeme            | 1–5                   | —    | —         | —        | —          | —    | [ledgers/writeme.md](./ledgers/writeme.md)         |
+| variables          | **4,5**               | —    | —         | —        | —          | —    | [ledgers/variables.md](./ledgers/variables.md)     |
+| debug-props        | **1–3**               | —    | —         | —        | —          | —    | [ledgers/debug-props.md](./ledgers/debug-props.md) |
+| Family F (7)       | **mixed — see below** | —    | —         | —        | —          | —    | [ledgers/\_family-f.md](./ledgers/_family-f.md)    |
+| boundary           | n/a                   | —    | n/a       | n/a      | n/a        | —    | [ledgers/\_boundary.md](./ledgers/_boundary.md)    |
+| playbook transport | n/a                   | —    | n/a       | n/a      | n/a        | n/a  | [ledgers/\_playbook.md](./ledgers/_playbook.md)    |
 
 Every per-lens ledger is cut from
 [ledgers/\_TEMPLATE.md](./ledgers/_TEMPLATE.md).
@@ -1097,6 +1097,26 @@ exists precisely to make a suspiciously small ledger visible — so a column tha
 lets a reader mistake a blind spot for a clean bill of health would defeat it.
 `ref→src` marks the two ledgers whose listers 1–3 run Gen-2-reference against
 Gen-1-source, because their Gen-3 port does not exist yet.
+
+**`debug-props` is `1–3`, not `1–5`** — it has **no Gen-1 file of any name**
+[measured 2026-08-14: `ls "$GEN1"` matches only `debug-javascript.jsx`, which is
+a different lens and a Family F member]. Listers 4 and 5 read a Gen-1 source
+only, so neither can run.
+
+**Family F is mixed, and one member has no runnable lister at all.** A single
+cell cannot carry it [all measured 2026-08-14: `ls "$GEN1"` for the Gen-1 files;
+`ls src/lib/study-lenses/lenses/` for the port]:
+
+| Family F member                                                              | instruments | why                                                                                                        |
+| ---------------------------------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------- |
+| `step-throughs` (`StepThroughsLens`), `tracing` (`TracingLens`)              | **4,5**     | Gen-1 `.jsx` **and** `.module.css`; no Gen-2, no Gen-3                                                     |
+| `run-javascript`, `debug-javascript`, `trace-javascript`, `tables-universal` | **5**       | Gen-1 `.jsx` only — **no `.module.css`**, so lister 4 has nothing to read                                  |
+| `trace-debugging`                                                            | **none**    | Gen-2 directory only: no Gen-1 source for listers 4–5, and no Gen-3 port and no Gen-1 side for listers 1–3 |
+
+**`trace-debugging` seeds entirely from Pass 2** — a whole-file read of its
+Gen-2 documents — and its ledger says so rather than reading as a thin result.
+An earlier revision of this table had it exactly backwards, listing it as the
+one Family F member with all five.
 
 **`boundary` keeps its `open` count** and `playbook transport` does not: the
 boundary ledger's only close condition is about open rows

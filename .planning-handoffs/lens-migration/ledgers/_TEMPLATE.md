@@ -11,6 +11,30 @@ first row. Scope and disposition: [SPEC.md](../SPEC.md).
 **Row ids are stable forever.** Append; never renumber, never re-sort. Handoffs
 cite these ids, and a renumber silently re-points every citation.
 
+**Start at `<lens>-001`** (human ruling 2026-08-14). FIDELITY-METHOD § Worked
+rows exhibits five ids that look real — `blanks-041`, `annotate-007` and the
+rest. They are **illustrative and their ids are not reserved**: do not
+transcribe them, and do not leave a gap for them. Their `walked`, `found` and
+quoted evidence may be lifted if this ledger reaches the same affordance, but
+the id is this ledger's to assign.
+
+## `_family-f.md` is the one exception to everything below
+
+Family F is **seven lenses in one ledger** (human ruling 2026-08-14), because
+SPEC § Roll-up counts it as one row with one link. It therefore differs from
+this template in exactly three ways and no others:
+
+- **Seven `## Reference inventory` blocks**, one per member, each with its own
+  `REF=` (or its own Gen-1 file pair), its own Gen-1-source line, and its own
+  `instruments` value — they are not uniform, and one member has none at all.
+- **Row ids are `fam-f-NNN`**, one namespace across the whole ledger. The member
+  is named in the `affordance` cell, not in the id — a reader seeing `fam-f-012`
+  must be able to tell which ledger to open, which a per-member prefix defeats.
+- **`trace-debugging` has no runnable lister**
+  ([SPEC.md § Roll-up](../SPEC.md#roll-up)). Its rows come from Pass 2 — a
+  whole-file read of its Gen-2 documents — and its inventory block says so, so a
+  thin result reads as an instrument limit rather than as a finding.
+
 ---
 
 ## Reference inventory
