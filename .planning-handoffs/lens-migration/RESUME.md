@@ -2,7 +2,7 @@
 closes; nothing here is end-state documentation. -->
 <!-- cspell:ignore socratize reenrichment dropdowns writeme parsons colorizing spellme lezer blankenate -->
 <!-- cspell:ignore colour distractor distractors ledgered throughs -->
-<!-- cspell:ignore firstblock glossterm parsonizer parsonize -->
+<!-- cspell:ignore firstblock glossterm parsonizer parsonize errormsg recognises -->
 
 # RESUME — where this campaign stands and what comes next
 
@@ -74,12 +74,13 @@ other campaigns and concurrent sessions [measured 2026-08-14: `git rev-list
 gate is deciding for every campaign in the tree, not just this one.
 
 ⚠️ **This table and the 83 above are both stale, and the gap is bigger than one
-commit.** The gap-check below returns **seven** rows as of 2026-08-15 —
-`346cb845` plus the six in [§ Seeding wave status](#seeding-wave-status), which
-is the current state and supersedes the numbers in this section. A commit cannot
-carry its own SHA, so the commit that adds a row is never in the row it adds —
-but that explains one missing row, not seven. Before dispatching AR-5, close the
-gap from the command and never from the table:
+commit.** As of 2026-08-15 the gap-check below returns **`346cb845` plus every
+commit of the 2026-08-15 session** — count them from the command, not from any
+number written here or in [§ Seeding wave status](#seeding-wave-status), whose
+SHA table was written mid-session and is short by the commits that followed it.
+A commit cannot carry its own SHA, so the commit that adds a row is never in the
+row it adds — but that explains one missing row, not seven. Before dispatching
+AR-5, close the gap from the command and never from the table:
 
 ```bash
 git log --oneline d0b71810..HEAD -- .planning-handoffs/lens-migration/
@@ -266,10 +267,15 @@ behind by construction". Close the gap from the command, never from the table.
    the existing ones at it produces false numbers rather than no numbers
    [measured 2026-08-15 against `public/static/parsonizer/parsons.js`, a
    1367-line jQuery IIFE]:
-   - **lister 4 can never succeed there.** It tests for `styles.<name>`; the
-     file has **0** such references and names classes as string literals
-     (`'sortable-code'`). Its stylesheet `parsonizer/parsons.css` holds 19 class
-     definitions the published command would call 19 orphans — all false.
+   - **lister 4 can never succeed there.** It tests for `styles.<name>`;
+     `parsons.js` has **0** such references and names classes as string literals
+     — `class='errormsg'`, `class='expected output'`. Run against the
+     `parsonizer/parsons.css` + `parsons.js` pair it recognises **1** class
+     definition out of the stylesheet's **17** unique class tokens and calls it
+     an orphan — and it is not one: `sortable-code` is referenced from
+     `parsons-iframe.html` and `component.js`, which a pair-shaped lister never
+     opens. **The instrument's single result here is false**, not merely
+     incomplete [all measured 2026-08-15].
    - **lister 5 channel B returns a vacuous zero.** It greps
      `// export const render|execute|renderConfig` and `{false &&` — React
      idioms a jQuery file cannot contain.

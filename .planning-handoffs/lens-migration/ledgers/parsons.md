@@ -363,11 +363,12 @@ rename is a reading, so `parsons-005`'s candidate successor is recorded in
 the **row-scoped** form in
 [`_TEMPLATE.md` § Close conditions](./_TEMPLATE.md#close-conditions), never a
 whole-file grep: this ledger explains the marker and names the banner in running
-prose, so an unscoped `grep -c 'UNSETTLED'` returns **50** against 47 rows and
+prose, so an unscoped `grep -c 'UNSETTLED'` returns **51** against 47 rows and
 the banner counts **2** [measured 2026-08-15 — this ledger is what found that
-defect in the check as first published]. Row-scoped, all six pass: 47 rows, 47
-carrying `UNSETTLED`, banner once, zero `—` cells, zero disposition values, zero
-`walked`/`found`/`Design owed`, ids `001–047` with no gap or duplicate.
+defect in the check as first published]. Row-scoped, all eight checks pass: 47
+rows, 47 carrying `UNSETTLED`, banner once, zero `—` cells, zero disposition
+values, zero `walked`/`found`/`Design owed`, ids `001–047` with no gap or
+duplicate.
 
 Campaign-close conditions, none of which this ledger yet meets:
 

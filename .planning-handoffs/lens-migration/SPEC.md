@@ -4,7 +4,7 @@ the last lens lands and its ledger closes. What survives the retirement is each
 lens's own README/DOCS and its `## What this lens does NOT do` section. -->
 <!-- cspell:ignore blankenate parsonizer socratize socratizing reenrichment Wong okaidia lezer stepthroughs qasm dropdowns writeme parsons blankenated colorizing Infima deuteranopia Gateable jsdom -->
 <!-- cspell:ignore colour colours distractor distractors ledgered Leitner WCAG clauding oldd throughs reloadable ordinally spellme gamified -->
-<!-- cspell:ignore behaviour behaviours pointcut unbuilt -->
+<!-- cspell:ignore behaviour behaviours pointcut unbuilt errormsg recognises -->
 
 # Lens migration — campaign canon
 
@@ -105,10 +105,15 @@ pair, and the engines are neither. Measured 2026-08-15 against
 `public/static/parsonizer/parsons.js`, a 1367-line jQuery IIFE:
 
 - **lister 4's orphan test can never succeed there.** It asks whether a class is
-  referenced as `styles.<name>`; the file contains **0** such references and
-  names classes as string literals (`'sortable-code'`). Its stylesheet,
-  `parsonizer/parsons.css`, holds 19 class definitions the published command
-  would report as 19 orphans — every one of them false.
+  referenced as `styles.<name>`; `parsons.js` contains **0** such references and
+  names classes as string literals — `class='errormsg'`,
+  `class='expected output'`. Run against the `parsonizer/parsons.css` +
+  `parsons.js` pair, the published command recognises **1** class definition out
+  of the stylesheet's **17** unique class tokens, and reports that one as an
+  orphan. It is **not** an orphan: `sortable-code` is referenced from
+  `parsons-iframe.html` and `component.js`, which the pair-shaped lister never
+  opens. So the instrument does not merely under-report here — **its single
+  result is false** [all measured 2026-08-15].
 - **lister 5 channel B returns a vacuous zero.** It greps
   `// export const render|execute|renderConfig` and `{false &&` — React idioms a
   jQuery file cannot contain. **0** hits, and that zero means nothing.
