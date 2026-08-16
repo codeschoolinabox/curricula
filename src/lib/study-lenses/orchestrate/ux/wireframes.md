@@ -263,7 +263,12 @@ the exact moment Journey 1 is hunting for the first would be a worse failure
 than a missing count. The count would also read differently here, which is the
 clearest demonstration that it is derived rather than fixed: the phases that
 wait are not accessible, and a barred phase carries a cause instead of a reason,
-so what is empty in this drawing is `ast` — alone.
+so what is empty in this drawing is `tokens` and `ast` — two, where the unbarred
+drawings show four. The count is **not** "the stations with no tray": it is the
+phases that are **both** reachable and unserved, which is why `source` never
+counts however thin the rest gets, and why `environment` and `evaluation` stop
+counting the moment the edge moves in front of them. Two predicates, and a
+worked example that exercised only one of them would teach the wrong evaluation.
 
 **And the AST station is empty, which is the honest and uncomfortable drawing.**
 The argument for leaving that phase open is that it is where the grammar error
