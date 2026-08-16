@@ -1,4 +1,4 @@
-<!-- cspell:ignore colouring colours spellme wireframes -->
+<!-- cspell:ignore behaviour colouring colours spellme wireframes -->
 
 # orchestrate
 
@@ -468,6 +468,33 @@ this region owns.
   down rather than covering it. A station whose phase has no fitting lenses has
   no tray and no disclosure control — not a disabled one. Lives in `rail/` with
   the station that discloses it (human ruling 2026-08-15).
+- **kit** — the lenses that fit, **scoped by what precedes the word**. _A
+  station's kit_ or _this phase's kit_ is the lenses fitting that one phase, and
+  it is the sense every geometry claim uses: a tray discloses one, and _a
+  station with nothing to open_ is a kit of zero. _The kit_ unqualified is the
+  learner's whole roster across all five phases — the package README's sense,
+  and the one in "at today's kit, four of five stations have no tray". The two
+  are not interchangeable and the difference has bitten this region once
+  already: **an acceptance test written as "survives a kit of zero" names two
+  different tests** — a design that holds when one phase is unserved, which is
+  today's ordinary case, versus one that holds when nothing is registered at
+  all, which is a degenerate mount. **Where the scope carries weight, say
+  which**, as the wireframes' "a kit of two lenses on one phase" already does.
+- **band** — the horizontal region above the surface pane holding everything the
+  region renders that is not the program: the **control row** and the **rail**.
+  Named because it is one contested surface and its size is what the personas
+  compete over — not a container with behaviour of its own. The band is not a
+  mask boundary: its two parts carry different classes, which is the whole
+  reason the next entry exists.
+- **control row** — the row of controls at the top of the band: the level
+  selector, the strict toggle, the snippet-type toggle, the Edit code button,
+  and the Generate code button. **It is a mask boundary object, and membership
+  in it decides nothing about class** — the row sits OUTSIDE both maskable
+  containers, yet the Generate code button is class 3 and takes the covered
+  treatment at its own element while every other control in the row is class 2
+  and stays live. Sibling order within the row is presentation; which class each
+  member carries is contract. A reader who takes the row for a class is reading
+  the one container in this region that deliberately mixes them.
 - **nameplate** — the line above the surface pane naming its current occupant,
   so the pane is a named place a learner moves between rather than a box whose
   contents change without comment. Rendered by the **top component**, not by the
