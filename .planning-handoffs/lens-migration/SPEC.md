@@ -4,7 +4,7 @@ the last lens lands and its ledger closes. What survives the retirement is each
 lens's own README/DOCS and its `## What this lens does NOT do` section. -->
 <!-- cspell:ignore blankenate parsonizer socratize socratizing reenrichment Wong okaidia lezer stepthroughs qasm dropdowns writeme parsons blankenated colorizing Infima deuteranopia Gateable jsdom -->
 <!-- cspell:ignore colour colours distractor distractors ledgered Leitner WCAG clauding oldd throughs reloadable ordinally spellme gamified -->
-<!-- cspell:ignore behaviour behaviours pointcut unbuilt errormsg recognises parentheticals -->
+<!-- cspell:ignore behaviour behaviours pointcut unbuilt errormsg recognises parentheticals personas wireframes zakey -->
 
 # Lens migration — campaign canon
 
@@ -256,6 +256,86 @@ YAGNI. Build it if and when it is needed. Its Gen-1 source is inventoried in
 [ledgers/\_boundary.md](./ledgers/_boundary.md) so the drop has a resume point.
 
 ---
+
+### R-7 — every lens this campaign builds owes a `ux/` twin
+
+**`twin-doc: user` for every lens session, not `none`** (human ruling
+2026-08-15). Each lens's Phase 0 step 0.2 produces a `ux/` directory beside its
+README, and the recorded answer no longer discharges the step.
+
+`user` is the value; **`ux` is the directory that value names**
+([DEV.md § Work routing and ceremony](../../DEV.md#work-routing-and-ceremony) —
+_"Its name is ux (human ruling 2026-08-14)"_).
+
+**What goes inside is a menu, not a fixture** — DEV.md declines to pin one, on
+the ground that fixing a set before its second use invents the convention. This
+campaign is that second use, six times over, so the menu is written out here and
+the **selection stays per lens**:
+
+| item                 | what it models                                           | owed when the lens's risk is…                                      |
+| -------------------- | -------------------------------------------------------- | ------------------------------------------------------------------ |
+| **personas**         | who arrives, and what they already believe               | a lens serving readers who differ in what they can already do      |
+| **user journeys**    | one learner's path through a session, in order           | **pacing** — reveal order, hint ladders, what a wrong answer earns |
+| **wireframes**       | the interface met at each state, not the user            | **arrangement** — panels, toolbars, what sits beside what          |
+| **user stories**     | one capability, with Given/When/Then acceptance criteria | a capability whose done-ness is arguable                           |
+| **story sequencing** | which capability must exist before which                 | a build whose increments are not obviously ordered                 |
+
+Two references, and they answer different questions. **For the shape of a
+finished twin**, the in-repo instance is the concurrent `spellme` lens —
+`ux/user-journeys.md` 224 lines over five journeys, `ux/wireframes.md` 186 over
+five states [measured 2026-08-15: `git ls-files` + `wc -l`]. **For the form of
+personas and stories**, which `spellme` did not need, this org's own curriculum
+carries the templates it teaches:
+`0-zakey/0-planning-and-collaborating/06-user-personas.md` (a persona is Bio /
+Needs-Goals / Frustrations / Scenario) and `07-backlog.md` (a story is _"As a
+[type of user] I want to [do something] so that [I achieve some goal]"_ with
+Given/When/Then, bucketed Must / Should / Could).
+
+**Use the curriculum's forms rather than inventing house ones.** These lenses
+teach the people who are taught those templates; a twin written in a private
+vocabulary is one more thing between the lens and the learner it models.
+
+**Neither reference is a required set.** `spellme` owes journeys and wireframes
+because its risk is pacing and arrangement. A lens whose risk is who-arrives
+owes personas and may owe no journey at all. **The lens's README says which
+items it chose and why** — that sentence is the twin's own justification and is
+what AR-1 challenges.
+
+**Why this campaign in particular.** Every lens here is an interaction surface
+whose losses are interaction losses — a hint ladder, a reveal order, a legend
+that keys feedback, a board that never rendered. Those are exactly what a README
+records badly and a journey or wire-frame records well, and three generations of
+them went missing without anyone noticing. A fidelity ledger catches what the
+old documents said; a `ux/` twin is what stops the next generation losing it the
+same way.
+
+**Four consequences, none of them optional:**
+
+1. **AR-1's input set grows.** It challenges the README **and the twin owed** —
+   at `none` it saw the README alone. A lens session that runs AR-1 without the
+   `ux/` directory has run the wrong review.
+2. **The settings line changes for lens sessions only** — `twin-doc: user`.
+   **Tier-0 and Tier-1 commits keep `none`**: seeding a ledger and planning a
+   family are not a lens's Phase 0, and no twin is owed there.
+3. **Every Tier-2 handoff must say the twin is owed**, or a cold lens session
+   asks the twin question, gets no answer, and records `none` — which is exactly
+   how the ruling would evaporate. See
+   [The two handoff tiers](#the-two-handoff-tiers).
+4. **`ceremony` does not move.** DEV.md notes that ceremony and `twin-doc` move
+   inversely — _"Low ceremony is earned by a strong twin"_ — but `ceremony` is
+   the human's and no agent lowers it on the strength of a twin it just wrote.
+
+**The two landed lenses owe one too.** `parsons` and `writeme` are already wired
+and green, so their Phase 0 is a re-enrichment rather than a fresh build — but a
+shipped lens with no user twin is the gap this ruling closes, not an exception
+to it. If that proves wrong for `writeme`, whose migration this repository
+already agrees was faithful, it is a cheap reversal: drop its `ux/` and record
+why.
+
+**The machine twin stays delegated upward**, so this is `user` and not `both`. A
+per-lens notional machine would duplicate
+`language-levels/jej/notional-machine.md`, which models the language the lenses
+display rather than any one lens.
 
 ## Standing exclusions
 
@@ -1064,15 +1144,18 @@ pathspec commits, the `index.lock` retry, measured foreign-debt baselines, and
 the reminder that **`ceremony` is the human's and is never stated by an agent**
 while **`twin-doc` is asked at each lens's own Phase 0 step 0.2**.
 
-**Tier 2 — a per-lens handoff** must let a cold session reach its Phase-0 gate
-from that file alone. It carries: the lens in the learner's voice; sources
-ranked with what each is authoritative _for_; the completed ledger with P0-gated
-row ids inline; **the family's ruled decisions restated, each tagged with the
-row ids it settles** — the load-bearing section, because it is what stops a lens
-session re-opening the family's design; the contract deltas; the gate schedule
-written as steps where the work happens; **named sandbox checkpoints** with a
-specific action and a specific expected observation; the Definition of Done; and
-foreign-debt baselines measured at handoff time.
+**Tier 2 — a per-lens handoff** must state that **`twin-doc: user` is owed**
+([R-7](#r-7--every-lens-this-campaign-builds-owes-a-ux-twin)) — a handoff silent
+on it lets the lens session ask the twin question, get no answer, and record
+`none`. It must let a cold session reach its Phase-0 gate from that file alone.
+It carries: the lens in the learner's voice; sources ranked with what each is
+authoritative _for_; the completed ledger with P0-gated row ids inline; **the
+family's ruled decisions restated, each tagged with the row ids it settles** —
+the load-bearing section, because it is what stops a lens session re-opening the
+family's design; the contract deltas; the gate schedule written as steps where
+the work happens; **named sandbox checkpoints** with a specific action and a
+specific expected observation; the Definition of Done; and foreign-debt
+baselines measured at handoff time.
 
 **Every handoff is context-free validated before it is final.** A fresh agent
 holding only the handoff reports where it would stumble, guess or block;
@@ -1177,7 +1260,11 @@ Apply before accepting any lens. Transported from the playbook and extended.
   2026-08-14). A `restore — DEFERRED` row is not open: it resolves against its
   named owner and its ruling citation, and its `gate` cell reads `deferred`.
 - **The register check runs clean** ([The register check](#the-register-check)).
-- Full AR cycle complete; the DDD → TDD human gate honored.
+- **A `ux/` directory beside the README**
+  ([R-7](#r-7--every-lens-this-campaign-builds-owes-a-ux-twin)), with the
+  documents that lens's own risks call for and its README saying why those.
+- Full AR cycle complete **with AR-1 having seen the twin, not the README
+  alone**; the DDD → TDD human gate honored.
 
 ---
 
