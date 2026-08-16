@@ -398,11 +398,18 @@ this region owns.
   its applicability on this program is empty too, and a **barred** phase is
   excluded entirely, because it carries a cause instead. The line takes the
   singular at one and does not render at zero. **And display copy never carries
-  contract vocabulary** — the rule the marks already follow, and the reason the
-  sentence a learner reads when the machine stops says _the grammar broke here_
-  rather than naming **the barring edge**. The contract term names the thing for
-  this package; the copy names it for the learner, and the two are allowed to
-  differ.
+  a machine token or a term this package coined** — the rule the marks already
+  follow, and the reason the sentence a learner reads when the machine stops
+  says _the grammar broke here_ rather than naming **the barring edge**. The ban
+  is that narrow deliberately, and the region's own copy is why: the empty-count
+  line says "four **phases** have nothing to open yet", and `phase` is package
+  glossary vocabulary. A broader rule — _no contract vocabulary at all_ — would
+  be falsified by the very string it is meant to govern. What a learner must
+  never read is a token the machine uses to talk to itself (`does-not-fit`) or a
+  word this package minted for its own contract (**barring edge**, **station**);
+  an ordinary word that the glossary also happens to define is fine, and often
+  the plainest available. The contract term names the thing for this package;
+  the copy names it for the learner, and the two are allowed to differ.
 - **the rail** — the lifecycle rendered as the machine's own conveyor: a line
   carrying one **station** per phase in the machine's fixed order, with the
   **barring edge** between the last reachable station and the first waiting one.
