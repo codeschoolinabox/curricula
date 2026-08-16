@@ -97,17 +97,23 @@ Three facts about that data shape every drawing below:
 - **the nameplate** — a line above the pane that always names what the pane is
   holding, so the pane is a named place rather than a box whose contents change.
 - **the announcer** — a permanently-mounted, visually-hidden live region that
-  speaks the transitions a sighted learner reads off the rail. The rail cannot
-  itself be that live region: it goes inert under strict, and `inert` removes a
-  subtree from the accessibility tree entirely — so a live region on the rail
-  would fall silent under the exact posture whose transition most needs
-  announcing. The announcer is what pays that debt. It is **class 2** — the one
-  member of that class that is not a control. The split is exhaustive, so the
-  only alternative was class 3, which would put it inert under strict and
-  silence the very thing its placement exists to keep speaking; class 2
-  therefore widened from meta-level _controls_ to the meta-level **nodes** that
-  must survive every posture (human ruling 2026-08-15). Three rules fix the rest
-  of it:
+  speaks the transitions a sighted learner reads off the rail. **The rail cannot
+  itself be that live region, and the reason does not depend on the posture.**
+  Two of the three things that must be spoken are not on the rail at all — the
+  pane's occupant changing, and the blocked state — so a live region is owed
+  somewhere else whatever the rail does; a rail that spoke would be a second one
+  beside it. The third, the barring edge moving, **is** on the rail, and _one
+  voice for one sentence_ below then decides which of the two says it: the one
+  that can say all three. The posture makes the same point a second time and
+  independently — the rail goes inert under strict, and `inert` removes a
+  subtree from the accessibility tree entirely, so a live region there would
+  fall silent under the exact posture whose transition most needs announcing.
+  The announcer is what pays that debt. It is **class 2** — the one member of
+  that class that is not a control. The split is exhaustive, so the only
+  alternative was class 3, which would put it inert under strict and silence the
+  very thing its placement exists to keep speaking; class 2 therefore widened
+  from meta-level _controls_ to the meta-level **nodes** that must survive every
+  posture (human ruling 2026-08-15). Three rules fix the rest of it:
   - **Placement.** It renders outside both maskable containers — not because it
     is a control that must stay reachable, but because `inert` removes a subtree
     from the accessibility tree entirely, and a silenced announcer is worse than
@@ -554,13 +560,28 @@ rearrangement here:
 Kept because the reasoning is auditable and because the doubts recorded against
 each candidate transfer to whatever borrows from it.
 
+> **† Correction, 2026-08-15 — one premise the pass ran on has been retired, and
+> the record below is annotated rather than rewritten** (human ruling
+> 2026-08-15). Three sentences below, each marked **†**, rest on the claim that
+> a readout carrying controls cannot be a live region and that the Bench's could
+> therefore speak. **No such rule exists.** Nothing bars controls inside a live
+> region; what actually disqualifies a surface from being the region's voice is
+> stated in [the parts](#the-parts) — it cannot say all three of the things that
+> must be said, and it goes inert under strict. **The Bench's readout fails both
+> tests exactly as the Rail's line does**: it is control-free, but it is still a
+> study surface, still class 3, and still inert under strict; and two of the
+> three utterances are not on it either. So the Bench had **no** Journey-6
+> advantage, and the Rail concedes nothing there. The sentences stay as written
+> because what a candidate was argued on is a fact about the pass; the marks
+> stop a reader from taking a retired premise for a live one.
+
 **The Rail** — drawn above. Order becomes a mark on the page rather than a
 reading convention; where the machine stopped becomes a property of an edge,
 which is what the data says; the kit's size never perturbs the lifecycle's
 geometry.
 
 **The Bench** split orientation from navigation: a control-free readout, one
-grouped opener, a nameplate. Its argument: a readout that is also a set of
+grouped opener, a nameplate. Its argument **†**: a readout that is also a set of
 buttons cannot be a live region, and one door matches a commitment that removes
 the editor. Its recorded doubt: it hides the kit, so a learner who never opens
 the opener learns there is a "study this" button rather than that their program
@@ -580,9 +601,9 @@ Seven journeys through three candidates, Journey 2 first.
 |                                        | Rail                                                        | Bench                                                           | Drawer                                                         |
 | -------------------------------------- | ----------------------------------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------- |
 | **2 · the empty middle** (the decider) | machine drawn whole; only the trays are thin                | reports five open phases — and **hides** that four are unserved | says "nothing studies this yet" four times on the first screen |
-| **1 · never leaves the editor**        | on the edge, cause below                                    | same, **and the readout can speak it**                          | as a drawn rule, cause below                                   |
+| **1 · never leaves the editor**        | on the edge, cause below                                    | same, **and the readout can speak it** **†**                    | as a drawn rule, cause below                                   |
 | **5 · by keyboard**                    | stations, plus a tray when open                             | **one stop to everything**                                      | every entry is a stop, forever                                 |
-| **6 · through a screen reader**        | stations give structure; an empty one needs a spoken reason | uniquely able to be a live region; navigation weakest           | **strongest** — named groups, every state already text         |
+| **6 · through a screen reader**        | stations give structure; an empty one needs a spoken reason | uniquely able to be a live region **†**; navigation weakest     | **strongest** — named groups, every state already text         |
 | **3 · the excursion**                  | —                                                           | —                                                               | —                                                              |
 | **4 · strict**                         | —                                                           | —                                                               | —                                                              |
 | **7 · the generator's wait**           | —                                                           | —                                                               | —                                                              |
@@ -617,14 +638,21 @@ costs and what it does not:
 - **It does not overturn the pass's main finding.** The Rail satisfies Journey
   2's decisive property — health and richness in separate channels — which is
   why it was a candidate at all. The pass preferred the Bench on its
-  **secondary** criteria, Journeys 5 and 6.
-- **Journey 6's cost is real and cheaply paid.** The Bench's unique advantage
-  was that its readout could itself be a live region; the Rail's line cannot,
-  because it goes inert under strict and `inert` empties a subtree out of the
-  accessibility tree. **The announcer** — a permanently-mounted, visually-hidden
-  class-2 live region — pays that debt, and is arguably the better mechanism
-  regardless, since it also carries the pane swap and the blocked state, neither
-  of which the Bench's readout would have announced.
+  **secondary** criteria, Journeys 5 and 6 — though only the Journey 5
+  preference survives scrutiny, for the reason recorded in the next bullet.
+- **Journey 6's cost was never a cost** — this is a correction to the pass, not
+  a concession by the override. The pass recorded the Bench as "uniquely able to
+  be a live region", and that premise is retired (see the **†** correction
+  opening this appendix): the Bench's readout is control-free, but it is still a
+  study surface, still class 3, and still inert under strict, exactly like the
+  Rail's line — and two of the three utterances are not on a readout at all.
+  **Neither candidate could have carried the voice.** So **the announcer** — a
+  permanently-mounted, visually-hidden class-2 live region — is not a debt the
+  Rail incurred and the Bench would have avoided; it is required under either
+  arrangement, and it carries the pane swap and the blocked state besides. On
+  Journey 6's three actual asks the Rail is the stronger of the two, not the
+  weaker: its stations supply the structure that journey asks to traverse, which
+  one grouped opener does not.
 - **Journey 5's cost is a real regression against the Bench** and is not paid:
   reaching the far end of the band costs more stops under the Rail than under a
   single opener, and the cost grows with the kit when a tray is open.
