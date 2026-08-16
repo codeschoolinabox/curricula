@@ -182,17 +182,20 @@ together with the announcer, which is not a control but must never go inert —
 never masked, so the way back to the editor stays alive under every posture and
 the region never falls silent (human ruling 2026-08-15); everything else — the
 study panel and its lenses, and the generator view with its opening button — is
-class 3, covered under strict while the code is out of level. The mask is an
-inert overlay — a covered surface keeps its state beneath it — and the blocked
-state names the level and the first violation, or the type-admission cause.
-Every mask input — source, type, level, posture — is frozen during an excursion
-(each commit disposes it first), so enforcement arises in editor mode, where the
-masked strip bars opening lenses. Two paths can mount a lens under an active
-mask: the honored focus, and a flush-at-open whose absorbed keystrokes settle
-out-of-level code (the strip was live when clicked); on both, the mask applies
-to the mounted lens identically. The full class-3 block applies while the
-selected level's fit mark is does-not-fit or not-applicable-for-type — once the
-code parses. While it does not parse, the mark is undetermined and that
+class 3, covered under strict while the code is out of level. **The mask makes
+the covered surfaces inert and lays a NON-inert overlay over them** — `inert`
+sits on the maskable containers and never on the overlay, because the overlay
+carries the blocked sentence and that sentence is the one thing a covered region
+must still be able to say. A covered surface keeps its state beneath it. The
+blocked state names the level and the first violation, or the type-admission
+cause. Every mask input — source, type, level, posture — is frozen during an
+excursion (each commit disposes it first), so enforcement arises in editor mode,
+where the masked strip bars opening lenses. Two paths can mount a lens under an
+active mask: the honored focus, and a flush-at-open whose absorbed keystrokes
+settle out-of-level code (the strip was live when clicked); on both, the mask
+applies to the mounted lens identically. The full class-3 block applies while
+the selected level's fit mark is does-not-fit or not-applicable-for-type — once
+the code parses. While it does not parse, the mark is undetermined and that
 carve-out wins regardless of type admission: the mask names no violation, and
 the parse phases' panel nodes and their error lenses stay uncovered — the
 supports a broken program needs are never the price of a wrong toggle. Under
@@ -352,8 +355,11 @@ this region owns.
   lens as fresh props and announce nothing. No other component holds a session
   choice.
 - **blocked state** — the learner-facing face of a masked surface under strict:
-  an inert overlay naming the level and the first violation — or the
-  type-admission cause — while the covered surface keeps its state beneath.
+  an overlay naming the level and the first violation — or the type-admission
+  cause — while the covered surface keeps its state beneath. **The overlay is
+  not inert; the surface under it is.** Marking the overlay inert would take the
+  blocked sentence out of the accessibility tree, which is the one thing this
+  state exists to say.
 - **built-in roster** — the package-shipped default rosters, one of lenses and
   one of levels: constants in the composing library that the mount-time joins
   extend. Injection appends to them and never replaces or shadows them, and the

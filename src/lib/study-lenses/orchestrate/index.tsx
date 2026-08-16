@@ -330,8 +330,10 @@ export default function StudyLenses({
 	// 6. The render projection — phases zipped against embody's runtime
 	// order constant; the selector mounts only when levels are registered;
 	// the mask projects the SELECTED level's assessment crossed with the
-	// posture over the class-3 surfaces (an inert overlay — everything
-	// beneath stays mounted). ONE VISUAL PANE, TWO DOM SLOTS: the class-1
+	// posture over the class-3 surfaces (the covered containers go inert;
+	// the overlay laid over them does NOT, or the blocked sentence it
+	// carries would leave the accessibility tree — everything beneath
+	// stays mounted). ONE VISUAL PANE, TWO DOM SLOTS: the class-1
 	// editor renders in its own slot OUTSIDE both maskable containers; both
 	// excursion arms — the open lens and the generator — render INSIDE the
 	// maskable content region (class 3) — the pane swap must never merge the
