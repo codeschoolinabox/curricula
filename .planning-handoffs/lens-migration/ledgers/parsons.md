@@ -147,9 +147,17 @@ it never rendered — which is what makes lister 4 the load-bearing instrument
 here.
 
 **Instruments that could run**, matching this lens's row in
-[SPEC.md § Roll-up](../SPEC.md#roll-up): **1–5**, and all five **ran**. Lister 5
-found nothing to open a row with, and that is a measured zero rather than an
-instrument limit — see [§ Seed census](#seed-census).
+[SPEC.md § Roll-up](../SPEC.md#roll-up): **1–5, over `src/lenses/` only.** All
+five ran over the `ParsonsLens.jsx` / `.module.css` pair; **none has run over
+Gen-1's second root**, `public/static/parsonizer/` — no lister can read that
+shape yet, and building one is design work
+([SPEC.md § Gen 1's second root](../SPEC.md#gen-1s-second-root--the-lens-file-is-often-only-a-shell)).
+
+That is why this ledger carries **zero `G1-live` rows** while its own
+`parsons-010`, `-028` and `-031` quote `component.js` and `lis.js` by name. The
+gap is stated rather than left to be inferred from a thin result. Lister 5's
+zero over `src/lenses/` is separately a **measured zero** rather than a limit —
+see [§ Seed census](#seed-census).
 
 ---
 

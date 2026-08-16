@@ -80,6 +80,14 @@ this template as follows — **not "in exactly three ways", which was true befor
 - **Row ids are `fam-f-NNN`**, one namespace across the whole ledger. The member
   is named in the `affordance` cell, not in the id — a reader seeing `fam-f-012`
   must be able to tell which ledger to open, which a per-member prefix defeats.
+- ⚠️ **In this ledger, "instrument" means a lister and never Aran.** Family F is
+  the one ledger where the ambiguity bites: `tracing`'s Gen-1 engine IS an
+  instrumentation library (`aran-build.js`, `advice/`, `pointcut.js`,
+  `shadowing/`), and `trace-debugging`'s Gen-2 tests carry `instrumentBoundary`
+  and `instrumentVariables` [measured 2026-08-15]. The repo's established sense
+  is code instrumentation — `embody/README.md`'s _"NM-instrumented tiers"_ — and
+  this campaign's is a measuring device. Write "lister" wherever the sentence
+  would otherwise carry both senses at once.
 - **`trace-debugging` has no runnable lister**
   ([SPEC.md § Roll-up](../SPEC.md#roll-up)). Its rows come from Pass 2 — a
   whole-file read of its Gen-2 documents — and its inventory block says so, so a

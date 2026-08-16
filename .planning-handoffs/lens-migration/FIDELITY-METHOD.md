@@ -5,6 +5,7 @@ method exists to make complete. -->
 <!-- cspell:ignore colour colours distractor distractors ledgered Leitner throughs unfilled -->
 <!-- cspell:ignore PRNG affordances assertable unrenderable reopenable unrebutted bwMode QASM -->
 <!-- cspell:ignore socratizing ontract oldd clauding -->
+<!-- cspell:ignore recognises firstblock glossterm -->
 
 # The fidelity method
 
@@ -299,8 +300,15 @@ generation whose best ideas were switched off.
 > be decided before it can be built, and it **cannot be discharged by a diff.**
 > Write it as a **bolded inline label on its own line under the row, never as a
 > heading** — two `revive` rows in one ledger would collide under markdownlint's
-> `MD024 siblings_only` and the pre-commit hook would block the commit.
-> [`ledgers/_TEMPLATE.md`](./ledgers/_TEMPLATE.md) shows the form.
+> `MD024 siblings_only`. [`ledgers/_TEMPLATE.md`](./ledgers/_TEMPLATE.md) shows
+> the form.
+
+⚠️ **Nothing would stop you committing that collision, and an earlier revision
+of the note above said otherwise.** The pre-commit hook runs `prettier --write`
+and no linter, so an `MD024` collision lands committed and surfaces later in
+someone else's repo-wide run. Run the markdownlint gate yourself, path-scoped,
+before every commit [read: `.husky/pre-commit` → `npx lint-staged`;
+`package.json` `lint-staged` `*.md` → `prettier --write`].
 
 This value exists to stop the campaign's most likely sizing failure: a family
 session reading "port the dead code" as transport and finding greenfield.
@@ -378,18 +386,41 @@ worse than no audit because it licenses confidence.
 
 ## The five listers
 
+> **Two notes added 2026-08-15, after the first ledger was seeded.**
+>
+> **An inapplicable lister returns FALSE output, not absent output — and that is
+> the dangerous case.** A lister that cannot run is visible in the `instruments`
+> cell; a lister that _runs on the wrong source shape_ returns a confident
+> number nobody questions. Measured against Gen-1's second root
+> ([SPEC.md § Gen 1's second root](./SPEC.md#gen-1s-second-root--the-lens-file-is-often-only-a-shell)):
+> lister 4 over `parsonizer/parsons.css` + `parsons.js` recognises **1** class
+> of the stylesheet's 17 and reports it as an orphan — **and it is not one**;
+> lister 5 channel B returns **0** because it greps React idioms a jQuery file
+> cannot contain. Neither result is a finding. **Before running any lister on a
+> source shape it was not written for, say so and stop** — § Failure modes'
+> standing rule is that a false entry is worse than a missing one.
+>
+> **Pass 1's operative rules live in
+> [`ledgers/_TEMPLATE.md`](./ledgers/_TEMPLATE.md), not here.** The pass banner,
+> the Pass-1 gate, the `firstblock` and `glossterm` extractors, the seed-class
+> provenance table, the `UNSETTLED` marker, the annotation-class fence and the
+> cluster-row rule are all specified there. This document remains the authority
+> on **what a row is**; the template is the authority on **what Pass 1 writes
+> into one**. Read both before seeding — "read this in full before the first
+> row" is necessary and no longer sufficient.
+
 Pass-1 mechanics. Each finds a class of loss the others cannot.
 
 **Listers 1–3 are comparative and need a document on both sides; 4 and 5 read
 one source.** Which of them can run is a property of the lens's population, and
 it is stated per ledger rather than assumed:
 
-| ledger                              | listers 1–3                                                                    |
-| ----------------------------------- | ------------------------------------------------------------------------------ |
-| `parsons`, `writeme`, `debug-props` | run as specified — Gen-2 reference against the landed Gen-3 port               |
-| `blanks`, `annotate`                | run **reference-to-source** — see below (human ruling 2026-08-14)              |
-| `dropdowns`, `variables`            | **cannot run** — no Gen-2 directory, and the Gen-1 tree holds zero `.md` files |
-| `_family-f.md` (7 members)          | **six cannot run** — only `trace-debugging` has a Gen-2 directory              |
+| ledger                              | listers 1–3                                                                            |
+| ----------------------------------- | -------------------------------------------------------------------------------------- |
+| `parsons`, `writeme`, `debug-props` | run as specified — Gen-2 reference against the landed Gen-3 port                       |
+| `blanks`, `annotate`                | run **reference-to-source** — see below (human ruling 2026-08-14)                      |
+| `dropdowns`, `variables`            | **cannot run** — no Gen-2 directory, and neither lens has a Gen-1 `.md` on either root |
+| `_family-f.md` (7 members)          | **six cannot run** — only `trace-debugging` has a Gen-2 directory                      |
 
 **`blanks` and `annotate`: Gen-2 documents as the reference, the Gen-1
 `.jsx`/`.module.css` pair as the source side** (human ruling 2026-08-14). Their

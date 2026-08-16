@@ -4,7 +4,7 @@ the last lens lands and its ledger closes. What survives the retirement is each
 lens's own README/DOCS and its `## What this lens does NOT do` section. -->
 <!-- cspell:ignore blankenate parsonizer socratize socratizing reenrichment Wong okaidia lezer stepthroughs qasm dropdowns writeme parsons blankenated colorizing Infima deuteranopia Gateable jsdom -->
 <!-- cspell:ignore colour colours distractor distractors ledgered Leitner WCAG clauding oldd throughs reloadable ordinally spellme gamified -->
-<!-- cspell:ignore behaviour behaviours pointcut unbuilt errormsg recognises -->
+<!-- cspell:ignore behaviour behaviours pointcut unbuilt errormsg recognises parentheticals -->
 
 # Lens migration — campaign canon
 
@@ -118,10 +118,25 @@ pair, and the engines are neither. Measured 2026-08-15 against
   `// export const render|execute|renderConfig` and `{false &&` — React idioms a
   jQuery file cannot contain. **0** hits, and that zero means nothing.
 
-Building the widened instrument is **design work, not a re-run**: it needs a
+Building the widened lister is **design work, not a re-run**: it needs a
 class-reference test that reads string literals and `class="…"` attributes, and
-a switched-off-code test for pre-module JavaScript. Until it exists, no ledger
-may claim its Gen-1 side was instrumented.
+a switched-off-code test for pre-module JavaScript. **Until such a lister
+exists, no ledger records a lister result for the `public/static/` root** — and
+a ledger whose Gen-1 side is `src/lenses/` only says so in its `instruments`
+cell rather than leaving the scope to be assumed.
+
+⚠️ **"Instrument" here always means a lister, never Aran.** An earlier revision
+of this section wrote "no ledger may claim its Gen-1 side was **instrumented**"
+— a participle this campaign had never used, and one that collides head-on with
+the repo's established sense: `embody/README.md` speaks of _"NM-instrumented
+tiers (`intercept`, `trace.*`)"_ and `embody/lib/evaluating/trace/` carries
+`instrument-variables.ts` and `instrument.test.ts` [read: those files]. The
+collision is not hypothetical — **`tracing`'s Gen-1 engine is an instrumentation
+library** (`aran-build.js`, `advice/`, `pointcut.js`, `shadowing/`) and
+**`trace-debugging`'s Gen-2 tests carry `instrumentBoundary` and
+`instrumentVariables`**, and both are Family F ledger members [measured
+2026-08-15]. The noun `instrument` is FIDELITY-METHOD's own and stays; the
+participle is struck.
 
 **An earlier revision of this section claimed `ledgers/_TEMPLATE.md` already
 carried a widened form. It did not.** Every `GEN1=` assignment in the campaign
@@ -935,6 +950,34 @@ not dropped.
 
 ## Sequencing and gates
 
+### Pass-1 seeding rulings
+
+Four rulings taken 2026-08-15 that govern how a ledger is seeded, recorded here
+with dated parentheticals because `DEV.md` § Ruling provenance makes
+`git grep -n 'human ruling'` the canonical lookup and a bullet in a resumption
+point is not findable by it. The two other rulings of the same date — the second
+Gen-1 root and the pass banner — are recorded where they govern, in
+[Gen 1's second root](#gen-1s-second-root--the-lens-file-is-often-only-a-shell)
+and `ledgers/_TEMPLATE.md`.
+
+- **A ledger seeds the full reference census, not the diff** (human ruling
+  2026-08-15). Every reference heading, named decision and glossary term opens a
+  row — survivors included, `disposition` left empty. A diff-only seed closes by
+  omission every affordance that survived and cannot show what it examined,
+  which is the complete-by-construction failure this campaign is named after.
+- **`ledgers/_TEMPLATE.md` is amended before a ledger is cut from it** (human
+  ruling 2026-08-15), in its own commit, and every ledger commit cites the
+  template SHA it was cut from. Eight sessions each improvising a section is the
+  harm the template exists to prevent.
+- **Seeding runs exemplar → human gate → fan-out**, never eight at once (human
+  ruling 2026-08-15). `parsons` is the first exemplar and `writeme` the second —
+  `writeme` is the fidelity control and exercises the measured-zero path
+  `parsons` cannot, since it has 0 orphan CSS and `## Why` 10→10.
+- **The `affordance` cell is a sentence bound to its quote** (human ruling
+  2026-08-15): it may contain no claim its `evidence` quotation does not
+  support. That is what makes an interpretive cell reviewable — a reader holds
+  the two side by side and needs nothing else.
+
 ```mermaid
 flowchart TD
   subgraph T0["TIER 0 — establishment"]
@@ -1148,7 +1191,7 @@ supposed to be _visible_ here — that is what this table is for.
 | blanks             | 1–5 (1–3 ref→src)     | —    | —         | —        | —          | —    | [ledgers/blanks.md](./ledgers/blanks.md)           |
 | dropdowns          | **4,5**               | —    | —         | —        | —          | —    | [ledgers/dropdowns.md](./ledgers/dropdowns.md)     |
 | annotate           | 1–5 (1–3 ref→src)     | —    | —         | —        | —          | —    | [ledgers/annotate.md](./ledgers/annotate.md)       |
-| parsons            | 1–5                   | —    | —         | —        | —          | —    | [ledgers/parsons.md](./ledgers/parsons.md)         |
+| parsons            | 1–5 (`src/lenses/`)   | —    | —         | —        | —          | —    | [ledgers/parsons.md](./ledgers/parsons.md)         |
 | writeme            | 1–5                   | —    | —         | —        | —          | —    | [ledgers/writeme.md](./ledgers/writeme.md)         |
 | variables          | **4,5**               | —    | —         | —        | —          | —    | [ledgers/variables.md](./ledgers/variables.md)     |
 | debug-props        | **1–3**               | —    | —         | —        | —          | —    | [ledgers/debug-props.md](./ledgers/debug-props.md) |
@@ -1159,7 +1202,12 @@ supposed to be _visible_ here — that is what this table is for.
 Every per-lens ledger is cut from
 [ledgers/\_TEMPLATE.md](./ledgers/_TEMPLATE.md).
 
-**`instruments`** names which of the five listers could run on this ledger
+**`instruments`** names which of the five listers could run on this ledger,
+**and over which Gen-1 root** where that is not the whole of Gen 1 (human ruling
+2026-08-15). A parenthesised root means the listers ran over that directory and
+no other — see
+[Gen 1's second root](#gen-1s-second-root--the-lens-file-is-often-only-a-shell).
+Without the qualifier a reader takes `1–5` to mean the whole source was read
 ([FIDELITY-METHOD.md § The five listers](./FIDELITY-METHOD.md#the-five-listers)).
 **A thin ledger at `4,5` is an instrument limit; a thin ledger at `1–5` is a
 finding.** Without this column the two are indistinguishable, and this table
