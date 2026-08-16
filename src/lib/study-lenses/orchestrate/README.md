@@ -256,15 +256,19 @@ this region owns.
 - **level verdict** — what one memoized validate produces for one level over the
   settled code: undetermined while the code does not parse, else validated,
   carrying the level's violations (possibly none). The shared truth the
-  selector, the gutter, and the mask all project. Three near-homonyms, three
+  selector, the gutter, and the mask all project. **Four** near-homonyms, four
   owners — keep them apart: the **level verdict** is the validator's answer
   about the code; a **fit mark** is the four-valued label an **assessment**
   carries, derived in the marking library from that verdict plus type admission
   (the verdict itself encodes the parse status), projected by the selector and
   the mask; lens **fit** is embody's applicability outcome for a lens, and no
-  level is involved in it. (The package sketch's verdicts node compresses
-  verdict and type admission into one label; this region splits them — the
-  verdict is the validator's alone.)
+  level is involved in it; and a station's **standing** is the rail's
+  three-valued indicator — openable · bare · waiting — a projection of
+  reachability and kit, in which no level is involved either. **Only the fit
+  mark is exported**, as `FitMark`, so it is the one an implementer will reach
+  for by reflex and the one the other three must not be mistaken for. (The
+  package sketch's verdicts node compresses verdict and type admission into one
+  label; this region splits them — the verdict is the validator's alone.)
 - **settle loop** — the region's edit-to-derivation cycle: the editor emits one
   edit event per document change; the top component debounces them
   trailing-edge; when typing settles, the snippet is re-embodied and every
@@ -436,23 +440,42 @@ this region owns.
   is why it is recorded here and grounds nothing. Designed in
   [`ux/wireframes.md`](./ux/wireframes.md) and drawn there through every state.
 - **station** — the rail's per-phase element: one per phase, in the machine's
-  fixed order, carrying its name, its mark, and its tray where the phase has
-  one. Lives in `rail/` with the line it sits on (human ruling 2026-08-15).
-  **Never the phase itself** — the phase is data, the station is what renders
-  it. Whether a station with a tray and a station with nothing to open are one
-  shape or two is the first question `types.ts` answers, and this entry
-  deliberately leaves it open: four of five phases have nothing to open, so the
-  empty case is the ordinary one, and a definition that assumed a control would
-  be wrong four fifths of the time. The word is reclaimed rather than minted,
-  and it is reclaimed against two other senses. A retired architecture used
-  `station` as a synonym for `phase`; that sense is formally retired (human
-  ruling 2026-08-15) rather than left to collide silently, because the two are
-  one-to-one and a reader carrying the old meaning would be right by accident
-  forever. The word also sits on a banned-term list that several campaign
-  handoffs instruct agents to grep by hand — nothing mechanized enforces it —
-  and the same ruling lifts that ban for this region. Elsewhere in the package
-  `stations` names the curriculum's five chain-points, a live sense this region
-  neither claims nor retires.
+  fixed order, carrying **four** things, named here because `Station` is the
+  first type 0.3 writes and three of the four were previously collapsed into
+  "its name and its mark":
+  - the **phase** — the data name, the key everything else zips against. Never
+    drawn.
+  - the **label** and the **short label** — the two learner-facing strings from
+    **display labels**. The tray draws the full label (`Tokens · spelling`); the
+    rail draws the short label where width demands it (`Tokens`). Two strings,
+    not one truncated at render, because truncation is not a vocabulary choice.
+  - the **standing** — the three-valued indicator the rail draws beside the
+    name: **openable** (the phase is reachable and something fits it, drawn with
+    its count), **bare** (reachable, nothing fits — the ordinary case at four of
+    five phases), **waiting** (barred, downstream of the barring edge).
+  - the **tray**, where the phase has one.
+
+  **`standing` is deliberately not called a mark.** A **fit mark** is a level's
+  four-valued classification of the code and rides the exported `FitMark` type;
+  a standing is a projection of reachability and kit, and **no level is involved
+  in it at all**. They would have been the fourth and fifth near-homonyms in a
+  glossary that already keeps three apart. Lives in `rail/` with the line it
+  sits on (human ruling 2026-08-15). **Never the phase itself** — the phase is
+  data, the station is what renders it. Whether a station with a tray and a
+  station with nothing to open are one shape or two is the first question
+  `types.ts` answers, and this entry deliberately leaves it open: four of five
+  phases have nothing to open, so the empty case is the ordinary one, and a
+  definition that assumed a control would be wrong four fifths of the time. The
+  word is reclaimed rather than minted, and it is reclaimed against two other
+  senses. A retired architecture used `station` as a synonym for `phase`; that
+  sense is formally retired (human ruling 2026-08-15) rather than left to
+  collide silently, because the two are one-to-one and a reader carrying the old
+  meaning would be right by accident forever. The word also sits on a
+  banned-term list that several campaign handoffs instruct agents to grep by
+  hand — nothing mechanized enforces it — and the same ruling lifts that ban for
+  this region. Elsewhere in the package `stations` names the curriculum's five
+  chain-points, a live sense this region neither claims nor retires.
+
 - **the barring edge** — the boundary between the last reachable phase and the
   first waiting one: where the machine stopped. Rendered between stations rather
   than on one, because a phase's own failure never bars it. The definition is

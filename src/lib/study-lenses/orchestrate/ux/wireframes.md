@@ -60,21 +60,25 @@ Three facts about that data shape every drawing below:
 - **the rail** — the lifecycle drawn as the machine's own conveyor: a line, one
   **station** per phase in the machine's order, and the **barring edge** drawn
   between two stations rather than on either of them.
-- **station** — the rail's per-phase element: its name, its mark, and its tray
-  if it has one. **Never the phase itself** — the phase is the data, the station
-  is what renders it. **Not defined as a control**, because four of five have
-  nothing to open and carry no control at all; whether the two cases are one
-  shape or two is 0.3's question, and the drawings below are deliberately
-  readable under either answer. The word is reclaimed rather than minted, and it
-  is reclaimed against two other senses. A retired architecture used `station`
-  as a synonym for `phase`; that sense is formally retired here (human ruling
-  2026-08-15) rather than left to collide silently, because the two are
-  one-to-one and a reader carrying the old meaning would be right by accident
-  forever. The word also sits on a banned-term list that several campaign
-  handoffs instruct agents to grep by hand — nothing mechanized enforces it —
-  and the same ruling lifts that ban for this region. Elsewhere in the package
-  `stations` names the curriculum's five chain-points, a live sense this region
-  neither claims nor retires.
+- **station** — the rail's per-phase element: its **phase**, its **label** and
+  **short label**, its **standing**, and its tray if it has one. The region
+  README enumerates all four and says why `standing` is deliberately not called
+  a mark — a **fit mark** is a level's classification and is exported; a
+  standing is openable · bare · waiting, and no level is involved in it. **Never
+  the phase itself** — the phase is the data, the station is what renders it.
+  **Not defined as a control**, because four of five have nothing to open and
+  carry no control at all; whether the two cases are one shape or two is 0.3's
+  question, and the drawings below are deliberately readable under either
+  answer. The word is reclaimed rather than minted, and it is reclaimed against
+  two other senses. A retired architecture used `station` as a synonym for
+  `phase`; that sense is formally retired here (human ruling 2026-08-15) rather
+  than left to collide silently, because the two are one-to-one and a reader
+  carrying the old meaning would be right by accident forever. The word also
+  sits on a banned-term list that several campaign handoffs instruct agents to
+  grep by hand — nothing mechanized enforces it — and the same ruling lifts that
+  ban for this region. Elsewhere in the package `stations` names the
+  curriculum's five chain-points, a live sense this region neither claims nor
+  retires.
 - **the barring edge** — the boundary between the last reachable phase and the
   first waiting one: where the machine stopped. Drawn on the line between their
   two stations, because a phase's own failure never bars it — the definition is
