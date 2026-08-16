@@ -660,7 +660,7 @@ files, a `.md` and an `.svg` under each of those two directories].
 
 **The user twin is a directory, and which documents it holds is the module's own
 call** (human ruling 2026-08-13, given the first time a `user` twin was owed —
-the scanning lens under the study-lenses region). It is a conventionally-named
+the `spellme` lens under the study-lenses region). It is a conventionally-named
 sub-directory sitting beside the module's README, like every other twin.
 
 **Its name is ux** (human ruling 2026-08-14), superseding the user-docs name
