@@ -42,9 +42,39 @@ discipline held.** Where you pick up, measured 2026-08-16:
 | `7046bc01` | a right brace continuing a template opens the run that closes it |
 
 Suite: **32 passing, 39 skipped (71)**; `npx tsc --noEmit` 0; eslint exit 0.
-Sketch phase 2 (`foldTemplateRuns`) now exists. Phases 1 and 4 still do not. So
-§ Inherited state's 22-green/25-red table below is measured at `2989d9e1` and is
-now **stale by two increments** — re-measure before planning.
+Sketch phase 2 (`foldTemplateRuns`) now exists. Phases 1 and 4 still do not.
+
+⚠ **Everything measured at `2989d9e1` is stale by two increments — the table
+below AND every forward prediction built on it.** Re-measured at HEAD
+(`7046bc01`), the 39 still-skipped tests stand at **25 green / 14 red**:
+
+| Block                      | Green | Red   |
+| -------------------------- | ----- | ----- |
+| Template folding           | 1     | 1     |
+| Right-brace disambiguation | **3** | **0** |
+| Trivia                     | 7     | 3     |
+| Comments and the hashbang  | 0     | 6     |
+| Boundaries — tiling        | 5     | 0     |
+| Interfaces                 | 4     | 3     |
+| Exceptions                 | 2     | 1     |
+| Simple                     | 3     | 0     |
+
+**Expect roughly 14 increments, not 25**, and **there are THREE all-green sets,
+not one** — Right-brace, Boundaries and Simple. The brief below calls Boundaries
+"the all-green set" in the singular; that is wrong, and the rule it attaches
+there applies to all three. It also predicted Right-brace would arrive 2/1 with
+the object-literal brace still red; measured, that one went green first at
+`065afc16` and the block is now wholly green.
+
+**Re-measure before planning. Trust no arrival-state prediction in this
+document, including this one.**
+
+Concretely, your next increment spans three describe blocks: driver
+`folds a chunk carrying a tag-only escape` (red) →
+`carries every token a folded run spans` (green) → all three Right-brace
+assertions (green) → the first two Trivia (green) →
+`collapses a carriage return and line feed into one line terminator` (**red —
+this opens the next increment**).
 
 **Your next increment is `folds a chunk carrying a tag-only escape`**, and it is
 not a small one. `isTemplateChunk` recognizes `tt.template` but not
@@ -65,11 +95,18 @@ reports the reviewer's input paths; the orchestrator dispatches the registered
 agent and resumes the worker with the verdict."]
 
 So: **try to spawn `ar-4` yourself. If it fails or stalls, do not retry it and
-do not skip it.** Stop at the trigger and report — with the increment's
-description, the exact pathspec of the uncommitted change, and the Phase-0 spec
-paths. The orchestrator dispatches and returns the verdict. The gate always
-fires; only its dispatcher moves. **Never commit an increment whose AR-4 has not
-returned.**
+do not skip it.** Stop at the trigger and **report BLOCKED** — that is the
+channel; a resumable pause is still "cannot finish" and there is no fourth
+channel. The report carries the increment's description, the exact pathspec of
+the uncommitted change, and the Phase-0 spec paths. **Leave your change in the
+working tree, unstaged, and do not commit it** — the orchestrator dispatches the
+review and commits from your verified tree, or resumes you with the verdict.
+Pass "strictly read-only — no writes, moves, or deletes" along in the reviewer's
+input paths, because the orchestrator's prompt must carry it too: an `ar-4` in
+this campaign attempted to overwrite the implementation file, and another left
+`probe-adhoc.mjs.tmp` at the repo root, where it still sits untracked. The gate
+always fires; only its dispatcher moves. **Never commit an increment whose AR-4
+has not returned.**
 
 ## First act — governance, before anything else
 
@@ -97,9 +134,9 @@ Router-text reach into a spawned worker has been measured both present
 ### What exists, and what does not
 
 Sketch phases **3** (`nameElement` / `elementKind`) and **5** (`fillGaps` /
-`gapElement`) exist as named helpers and are correct. Phases **1**, **2** and
-**4** do not exist at all. The export is currently `tokens.map(nameElement)` →
-`fillGaps`.
+`gapElement`) exist as named helpers and are correct. **Phase 2 now exists too**
+(`foldTemplateRuns`, as of `065afc16`); phases **1** and **4** do not. The
+export is `foldTemplateRuns` → `map(nameElement)` → `fillGaps`.
 
 ⚠ **Five phases does NOT mean five helpers, and this is a recorded decision.**
 [read: PHASE-1.md § What Phase 1 is — "**Five phases, three named helpers, and
@@ -113,13 +150,13 @@ new file only at two or more. Do not extract five.
 
 ### Three structural carry-forwards, each with its citation
 
-1. **`nameElement` must widen from a token to a group.** Today it is
-   `nameElement(token, index, code)` inside a 1:1 `tokens.map`. A folded run
-   spans many tokens and is named by its **opener** [read: DOCS.md § Execution
-   phases, phase 3 — "A folded run takes its name from its opener"]. Phase 2
-   replaces the `map` with a stateful one-token-lookahead walk emitting
-   **fewer** elements than tokens — the mirror of `fillGaps`, which already
-   emits more.
+1. **~~`nameElement` must widen from a token to a group.~~ DONE in `065afc16`**
+   — it is now `nameElement(span, code)` over a `TokenSpan`. Kept for the
+   record; carry-forwards 2 and 3 remain open. A folded run spans many tokens
+   and is named by its **opener** [read: DOCS.md § Execution phases, phase 3 —
+   "A folded run takes its name from its opener"]. Phase 2 replaces the `map`
+   with a stateful one-token-lookahead walk emitting **fewer** elements than
+   tokens — the mirror of `fillGaps`, which already emits more.
 2. **`fillGaps` must return an array per gap, not one element.** Splitting and
    naming are one act [read: DOCS.md § Execution phases, phase 5 — "Splitting
    and naming are **one act** here, because which kind a run is decides where it
@@ -217,9 +254,9 @@ Re-measure this table yourself before trusting it; the tree moves.
 
 | Fact                             | Value                                                                                                                                                                                                                                                                                                                                             |
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Last commit touching your module | `2989d9e1`                                                                                                                                                                                                                                                                                                                                        |
+| Last commit touching your module | `7046bc01` (was `2989d9e1` when this table was written)                                                                                                                                                                                                                                                                                           |
 | `npx tsc --noEmit`               | **0 errors.** Any error you see is yours                                                                                                                                                                                                                                                                                                          |
-| Your module's tests              | 71 total, 24 passing, 47 skipped                                                                                                                                                                                                                                                                                                                  |
+| Your module's tests              | 71 total, **32 passing, 39 skipped** (24/47 when written)                                                                                                                                                                                                                                                                                         |
 | markdownlint, repo-wide          | **8113 errors** across 861 files [measured 2026-08-15: `npm run lint:md`] — **not your gate**, and you touch no `.md`. An earlier draft said 82, from `repo-facts.mjs`'s 24-hour cache. A peer added a local notes directory to `.gitignore` uncommitted, and markdownlint's glob does not honor `.gitignore`, so its 132 `.md` files are counted |
 | Node                             | v20.11.0 against engines `>=22.11.0` — below minimum, everything runs anyway. Proceed; do not upgrade anything                                                                                                                                                                                                                                    |
 | HEAD                             | **moves under you**, many times an hour. Re-measure; never cache                                                                                                                                                                                                                                                                                  |
@@ -409,8 +446,8 @@ File order, **except** `Boundaries — tiling` which un-skips just before
 correct):
 
 1. **The vocabulary straggler** — the legacy-octal test. Green; ride it.
-2. **Template folding** (9, all red) — creates phase 2. The wave's structural
-   core; take it first and take it whole.
+2. **Template folding** (9) — **7 landed, 1 green, 1 red.** Phase 2 exists; the
+   one red is the tag-only escape, and it is your next driver.
 3. **Right-brace disambiguation** (3) — **2 green / 1 red by the time you
    arrive** (the table's 1/2 is measured at HEAD, before your fold). Two of this
    block's three assertions are verbatim duplicates of vocabulary and folding
@@ -422,8 +459,8 @@ correct):
 6. **Boundaries — tiling** (5) — **5 green / 0 red by the time you arrive.**
    `publishes nothing of zero width` goes green the moment the fold lands, since
    every zero-width element wraps a `template` token and phase 2 absorbs exactly
-   those. This is the all-green set: do not close an increment here — keep
-   un-skipping into `Interfaces`, whose first freeze test is the driver.
+   those. One of **three** all-green sets (with Right-brace and Simple): do not
+   close an increment here — keep un-skipping until a red opens one.
 7. **Interfaces** (7) — 4 green; the three freeze assertions are red.
 8. **Exceptions** (3) — 2 green, **and see the phase-1 trap above.**
 9. **Simple** (3) — all green; recorded-departure guards.
