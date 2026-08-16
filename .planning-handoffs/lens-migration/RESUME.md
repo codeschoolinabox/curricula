@@ -251,13 +251,10 @@ behind by construction". Close the gap from the command, never from the table.
      _(An earlier revision of this bullet said "four cells", listed `-014` and
      `-021` among the ones that are fine, and counted three candidate-successor
      notes. All three numbers were wrong and the sentence contradicted itself.)_
-   - the whole-file `UNSETTLED` count in `parsons.md:366` is **51**, not 50.
-   - **`parsons.md`'s § Reference inventory still certifies "instruments
-     **1–5**, and all five **ran**"** while the ledger carries **zero `G1-live`
-     rows**. That sentence is the reason the widened-root ruling exists and it
-     must not survive the fix pass: until the second root has an instrument
-     (item 2), the honest form names what ran over `src/lenses/` and states that
-     the engines were not reached.
+   - **`parsons-046`** is the third cluster row in learner voice and AR-5 found
+     it missing from this list. Rewrite as a stylesheet statement like `-045`
+     and `-047`. Its facts are fine — `ParsonsLens.jsx` uses ten `styles.*`
+     classes and none is a modal — only its form is wrong.
    - **after any of the above, re-run the Pass-1 gate and update
      `### Seed census`.** The gate asserts `rows == CENSUS`, so a changed row
      count fails it until the census total and the affected instrument row are
@@ -319,10 +316,10 @@ fixed. All four reproduced [measured 2026-08-15]:
   `disposition`, `gate`, `evidence` or `affordance`.** A row with only an id and
   a resolving `discharged by` counts as closed — and Pass-1 ledgers make that
   the starting shape of every row.
-- **§ The one addition — `revive` says the pre-commit hook would block an MD024
-  collision. It would not.** The hook runs `prettier --write` and no linter
-  [read: `.husky/pre-commit` → `npx lint-staged`; `package.json` `lint-staged`
-  `*.md`]. Run markdownlint yourself, path-scoped, before every commit.
+- ~~§ The one addition's pre-commit-hook claim~~ and ~~§ The five listers' "zero
+  `.md` files" premise~~ — **both corrected in place, `83bd304b`.** The human
+  ruled that correcting a measurably false sentence is not re-deriving the
+  method.
 - **§ 4's orphan command is written for the `src/lenses/` pair** and does not
   reach the second Gen-1 root, and **no widened form exists anywhere** — every
   `GEN1=` in the campaign ends `/src/lenses` [measured 2026-08-15: `grep -n
