@@ -1,25 +1,30 @@
-<!-- cspell:ignore actioned affordances checkpointed cutover authorised finditer misdescribes organise parentheticals respecified spellme ugrep unbuilt undercounted undercounts unretired wireframes -->
+<!-- cspell:ignore actioned affordances checkpointed cutover authorised finditer misdescribes organise organised parentheticals respecified spellme ugrep unbuilt undercounted undercounts unretired unrun wireframes -->
 
 # orchestrate ux — resumption point
 
-**State: Phase 0 step 0.2 is written and NOT closed. Round 3's seven findings
-are RESOLVED in two commits. AR-1 ROUND 4 HAS RUN AND RETURNED PAUSE — three
-blockers, six IMPORTANT, four MINOR.** Do not start 0.3 until they close.
+**State: Phase 0 step 0.2 is written and NOT closed. ROUND 4 IS FULLY RESOLVED
+IN NINE COMMITS — all 3 blockers, all 6 IMPORTANT, and the one recorded MINOR.
+AR-1 ROUND 5 HAS NOT RETURNED A VERDICT.** Running it is the open work, and 0.2
+does not close until it returns PROCEED or CONSIDER. Do not start 0.3 before
+that.
 
-**Blocker counts by round: 3 → 4 → 5 → 3.** The first decline, but the shape
-persists: **two of round 4's three blockers were created by round 3's fixes.**
-Read § The process failure to not repeat before you touch anything — it is still
-the most useful paragraph in this file.
+**Round 5 was dispatched once and died in the harness** — the subagent stalled
+with no output and its watchdog killed it at 600s. Two Plan subagents died the
+same session on `API Error: Connection closed mid-response`. **This is
+infrastructure, not a verdict — read no signal into it, and do not record the
+review as having run.** If your own dispatch dies too, say so plainly rather
+than proceeding as though 0.2 were closed; an unrun AR is the one thing this
+campaign cannot paper over.
 
-**Your first task is § ROUND 4 below.** Findings 1 and 2 there are verified and
-mechanical-ish; finding 3 is design and shapes the first type.
+**Blocker counts by round: 3 → 4 → 5 → 3 → ?.** Read § The process failure to
+not repeat before you touch anything — it is still the most useful paragraph in
+this file, and the pass just executed was organised entirely around it.
 
-**Run the design work on the strongest available model tier.** The outgoing
-session handed off here rather than fixing round 4 because all three of
-`AGENTS.principal.md` § Handoff agency's tests fired — most sharply the
-same-mistake-twice one: it wrote the prettier-wrap grep correction into this
-file, then an hour later verified a finding with a line-based grep and missed a
-site for exactly that reason.
+**Three human rulings were taken 2026-08-15 and are recorded in the documents
+they govern** — see the rulings table below, rows R-A/R-B/R-C. They are binding
+and are not to be re-litigated.
+
+**Run the design work on the strongest available model tier.**
 
 **Read the governance chain first**, before this file's task list: the repo-root
 `CLAUDE.md` is a router — check your model id against its qualifying list and
@@ -30,11 +35,20 @@ read whichever of `AGENTS.principal.md` / `AGENTS.md` matches. Both point into
 semantics and the AR protocol (§ Adversarial Review Protocol), and the settings
 line.
 
-Everything below is measured or read at **`bdf5077c`** unless tagged otherwise —
-an earlier revision said `8cc4bc15`, and two commits have landed since. **The
-tree moves under you**: HEAD advanced six times during the session that wrote
-this, none of it under `orchestrate/`. Re-measure HEAD before every commit and
-quote the SHA you actually measured.
+**Line numbers below are measured at `bdf5077c` and the round-4 pass has since
+moved them.** The `orchestrate/` tree was byte-identical to `bdf5077c` when that
+pass opened [measured: `git diff --stat bdf5077c..HEAD --
+src/lib/study-lenses/orchestrate/` → empty, run at HEAD `542d4771`], so anything
+below tagged with a line number is now stale by the nine commits in the table.
+**The passages are still findable by their quoted phrases; re-measure the
+numbers.**
+
+**The tree moves under you.** HEAD advanced six times during the session that
+wrote this file, and **eight more times during the pass that resolved round 4**
+— none of it under `orchestrate/`, and one foreign commit landed _inside_ that
+pass's own SHA range. Scope every claim to the SHAs in the table, never to a
+commit range. Re-measure HEAD before every commit and quote the SHA you
+measured.
 
 This document has been validated by a context-free agent twice [relayed: the two
 outgoing sessions that ran them]. The first pass found four factual errors. The
@@ -72,6 +86,55 @@ The tree is shared with concurrent sessions; scope every claim to these SHAs.
 | `5300c39d` | this resumption point lands (it had been untracked)                                        |
 | `929d9086` | AR-1 round 3, **finding 2 alone** — class 2 widens to nodes; a rule amendment, ships alone |
 | `bdf5077c` | AR-1 round 3, findings 1 · 3 · 4 · 5 · 6 · 7, and this file's corrections                  |
+
+**The round-4 resolution — nine commits, 2026-08-15.** Organised BY PASSAGE, not
+by finding, which is why the finding numbers scatter across them. Each commit
+body carries its own sweep results and loss ledger; this table points rather
+than restates.
+
+| SHA        | What                                                                                             |
+| ---------- | ------------------------------------------------------------------------------------------------ |
+| `d33aef0a` | **blocker 3** — the five nouns get module homes; the rail's class enters a definitional home     |
+| `c2e1651e` | **blocker 1** — the derived count's worked example, plus the inclusion predicate it never taught |
+| `ca7e2ccf` | **blocker 2** — the rail's silence re-grounded on necessity; **four** citations swept, not three |
+| `0c78c63c` | IMPORTANT 1 — the rail's class 3 re-grounded on exhaustion. **Blocked on `ca7e2ccf`**            |
+| `e3961368` | IMPORTANT 2 — `containment decides` retired. **RULE AMENDMENT, ships alone**                     |
+| `d7e2e2bf` | IMPORTANT 6 — the display-copy vocabulary ban narrowed. **RULE AMENDMENT, ships alone**          |
+| `1e7b1540` | IMPORTANT 3 — the empty count's three rules share one home                                       |
+| `a80b39e2` | IMPORTANT 4 + 5 — `kit`, `band` and `control row` enter the glossary                             |
+| `0173b1c2` | the recorded MINOR — the mask is what goes inert, not the overlay                                |
+
+**Why the order was load-bearing, and the trap for anyone re-doing this.** The
+announcer's necessity was argued FROM the rail going inert under strict — that
+is, from the rail being class 3. Grounding the rail's class 3 on "the announcer
+carries the voice" therefore closes a CIRCLE unless the announcer is re-grounded
+first. `ca7e2ccf` removed posture and class from the announcer's premise;
+`0c78c63c` was blocked on it. Landed in the other order this pass would have
+shipped a circular argument and called it a fix.
+
+**Three findings were larger than round 4 stated**, each verified before being
+acted on:
+
+- **Blocker 2's citation set is FOUR, not three.** The fourth is the pass
+  table's Journey-1 Bench cell, "same, **and the readout can speak it**" — and
+  **no phrase-grep for `live region` can find it**, because the sentence never
+  says those words. It was found by reading the table. A grep is necessary and
+  not sufficient; read tables and fenced drawings by eye.
+- **`kit` carries two live senses inside `wireframes.md` alone**, not merely
+  twin versus package. The author had already hand-patched one site ("a kit of
+  two lenses **on one phase**"), which is what made the case for a glossary
+  entry rather than a rename.
+- **IMPORTANT 2 had a fifth site**, in `lib/masking/DOCS.md` — "a static fact of
+  the render tree", the same false rule in different words, in a file no ruling
+  had authorised. Corrected as the same subject rather than deferred; the call
+  is declared in `e3961368`'s body, and that hunk is the one to drop if the
+  human disagrees.
+
+**One orphan this pass created and caught in its own sweep**: rewriting § The
+override's Journey-6 bullet falsified the bullet above it ("The pass preferred
+the Bench on its secondary criteria, Journeys 5 and 6"). Amended inside the same
+commit. That is the discipline working once, on the exact failure mode that
+produced rounds 3 and 4.
 
 **Carry-forwards this pass created**, none of them blocking round 4:
 
@@ -135,15 +198,54 @@ Rail selection is genuinely 08-14 [measured: same command on `a1f4d132`].
 | **2026-08-15** · all four class-2 definitional homes are edited now, `lib/masking/` included — not two now and two carried                                              |
 | **2026-08-15** · the two naming rulings are dated **2026-08-15**, and the two existing 08-14 parentheticals are corrected rather than propagated                        |
 
-**Two of these have no dated home in the documents they bind** — that is finding
-7 below. `DEV.md § Ruling provenance`: "A ruling recorded only in a commit body
-is findable but not readable where it binds."
+**Three further rulings, 2026-08-15, taken during the round-4 resolution.** Each
+is recorded with a dated `(human ruling 2026-08-15)` parenthetical in the
+document it governs, per `DEV.md § Ruling provenance` — not only in a commit
+body.
 
-## ROUND 4 — PAUSE, 2026-08-15. THIS IS THE OPEN WORK
+| #   | Ruling                                                                                                                                                                                                                              | Home                                                               |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| R-A | **Module homes take AR-1's split.** `rail/` owns the line, the stations, the trays and the barring edge; the **nameplate** and the **announcer** live with the top component. `rail/` replaces `phases-panel/` in § What lives here | `orchestrate/README.md`, § What lives here + five glossary entries |
+| R-B | **A recorded argument is ANNOTATED; live reasoning is REWRITTEN**                                                                                                                                                                   | `ux/wireframes.md` § Appendix, the `†` correction                  |
+| R-C | **`lib/masking/README.md` may be edited for the inert-overlay correction**, notwithstanding that the class-2 ruling authorised only the class-2 homes                                                                               | `lib/masking/README.md`                                            |
 
-Full verdict: re-read it by spawning `ar-1` again if you need the prose, or work
-from this summary, which the outgoing session verified independently rather than
-relaying. **Two of the three blockers were created by round 3's own fixes.**
+R-A's warrant is structural and measured, not stylistic: **both**
+`data-maskable` containers are rendered by the top component's own return [read:
+`orchestrate/index.tsx` — `<div data-maskable inert={mask.masked || undefined}>`
+at `:429` and `:447`], so only the composition root can guarantee the announcer
+sits outside both. Mounted from `rail/`, the placement rule would be a claim
+about containers that directory does not own.
+
+**Two of the earlier rulings had no dated home in the documents they bind** —
+that was round 3's finding 7, since resolved. `DEV.md § Ruling provenance`: "A
+ruling recorded only in a commit body is findable but not readable where it
+binds."
+
+## ROUND 4 — ALL RESOLVED 2026-08-15 IN NINE COMMITS; READ THIS BANNER FIRST
+
+**Everything below this banner is the round-4 report as written, kept because
+the reasoning is auditable. It is NO LONGER A TASK LIST.** All three blockers,
+all six IMPORTANT and the one recorded MINOR are closed; the resolution table
+and the three corrections to this verdict are in § Commits above, and the nine
+commit bodies are the record.
+
+**Its line numbers are stale** — they were measured at `bdf5077c` and the
+resolution has moved them. Find passages by their quoted phrases.
+
+**Two cautions that outlive the round.** First, this verdict's own blocker-2
+citation set was **incomplete**: it named three sites and there were four, the
+missed one being a table cell no phrase-grep could reach. Second, three of its
+findings were **understated** — see § Commits. An AR verdict is itself a claim.
+
+**The three MINOR that were lost stayed lost.** Re-running `ar-1` produces a new
+review against the current tree, not round 4's prose. Round 5's verdict is the
+complete list from here.
+
+---
+
+### The round-4 report, as written
+
+**Two of the three blockers were created by round 3's own fixes.**
 
 ### Blocker 1 — the derived count's worked example contradicts its own rule
 
@@ -667,36 +769,42 @@ this document. Run the grep; it is mechanical and does not depend on judgment.
 
 ## Recommended opening move
 
-**Read § ROUND 4 first — that is the open work.** Then, in this order:
+**Round 4 is closed. `ar-1` round 5 has been dispatched and its verdict is the
+open item.** In this order:
 
-1. **Fix blockers 1 and 2**, which are verified and bounded. Blocker 2 needs the
-   three appendix sites swept together with the argument they cite — sweeping
-   the argument and not its citations is exactly how rounds 2, 3 and 4 each made
-   the next round's findings.
-2. **Put blocker 3 to the human.** It is a design decision, it shapes `Station`
-   — the first type 0.3 writes — and AR-1 has raised it in every round. Take
-   AR-1's counter-proposal as the starting position, not as the answer.
-3. **Batch the six IMPORTANT into the same commit** (`DEV.md` § Adversarial
-   Review Protocol: fix all unless one is out of scope). Two of them —
-   `containment decides`, and the class-3 warrant — are the same issue seen
-   twice, and one of them is now a live footgun in the file 0.3 opens next.
-4. **Re-run `ar-1`** (registered agent, **no `model` parameter**, strictly
-   read-only) over `orchestrate/README.md` plus all three `ux/*.md`, and name
-   `lib/masking/README.md`, `lib/masking/types.ts` and `DOCS.md` as
-   changed-in-cycle context — finding 2's "done when" spans all of them and a
-   reviewer given only the four contract files cannot verify it. Give it a
-   `## Changes since round 4` orientation with the SHAs, so it spends its budget
-   on the delta.
+1. **Read round 5's verdict.** If it was lost with the session that dispatched
+   it, re-run `ar-1` — registered agent, **no `model` parameter**, strictly
+   read-only — over `orchestrate/README.md` plus all three `ux/*.md`, naming
+   `lib/masking/README.md`, `lib/masking/types.ts`, `lib/masking/DOCS.md` and
+   `DOCS.md` as changed-in-cycle context. Several findings' "done when" spans
+   those, and a reviewer given only the four contract files cannot verify them.
+   Give it a `## Changes since round 4` orientation listing the nine SHAs so it
+   spends its budget on the delta.
+2. **On PROCEED or CONSIDER: 0.2 closes.** CONSIDER means document a response to
+   each concern and continue — it does not mean another round.
+3. **On PAUSE: present to the human. Do not self-resolve a fifth round.** And
+   check the shape before proposing anything: if round 5's blockers are again
+   traceable to the round-4 pass's own fixes, that is the handoff signal, not
+   the fix-again signal. Four rounds have now been spent on a document nobody
+   outside its author has read, which is itself finding 7 of the wireframes' own
+   review asks.
+4. **Whatever the verdict, `git status --short` this file and commit it if it
+   shows at all** — see § Mechanics.
 
-**Organise the work BY PASSAGE, not by finding.** That was round 4's one clear
-success: the definitional homes agreed, the dates held, the vocabulary rulings
-applied consistently, and the drawing rule verified mechanically. Where the pass
-still failed was the two places a rewritten ARGUMENT left a citing passage
-behind. So: for every sentence you rewrite, grep the distinctive noun phrase you
+**Organise the work BY PASSAGE, not by finding.** The round-4 resolution was run
+this way end to end and it is the reason the nine commits scatter the finding
+numbers. For every sentence you rewrite, grep the distinctive noun phrase you
 REMOVED across all seven files before you move on. Derive that phrase list
 mechanically rather than from memory —
 `git diff --word-diff=porcelain -- <paths> | grep '^-'` gives you the removed
 words and your loss-ledger entries in one command.
+
+**And then read what the grep cannot reach.** The round-4 resolution caught one
+orphan it had itself created (§ Commits), which is the discipline working — but
+the fourth blocker-2 citation was in a **table cell that never used the phrase
+being retired**, and no grep of any form would have surfaced it. After the
+mechanical sweep, read the pass table and every fenced drawing by eye. The
+mechanical half is necessary; it has never been sufficient in this campaign.
 
 **Two mechanical aids this campaign built and you should use:**
 
