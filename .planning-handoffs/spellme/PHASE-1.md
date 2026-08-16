@@ -1,4 +1,4 @@
-<!-- cspell:ignore spellme lookaheads tokenizer -->
+<!-- cspell:ignore spellme lookaheads tokenizer ZWNBSP -->
 
 # Phase 1 — `lib/scanning`, then `spellme`
 
@@ -136,6 +136,28 @@ Ruling provenance).
   includes "the last commit before a handoff" and a worker handing back to a
   fresh worker is one. This adds a firing rather than removing one. No
   governance text assigned it; this line is the assignment.
+- **DEV.md's first-`user`-twin citation names `spellme`** (human ruling
+  2026-08-15, given as explicit instruction to edit governance surface). It had
+  said "the scanning lens", a module that does not exist: at HEAD `scanning` is
+  a domain-blind leaf recording `twin-doc: none`, while the twin lives in
+  `spellme/ux/`. Landed in `542d4771`, one phrase, with `cspell.json` gaining
+  `spellme` beside its sibling lens names because naming the module correctly
+  introduced a new unknown word.
+- **Four more suite gaps close with fixtures** (human ruling 2026-08-15), the
+  same class of decision as the four-fixture ruling the day before. AR-5 found
+  the `StringLiteral`-keeps-its-quotes FLAG confirmed and three more of the same
+  shape: numeric-separator text, the extent of `WhiteSpace` and `LineTerminator`
+  — README promises tab, NBSP, ZWNBSP, U+2028 and U+2029 and the suite had
+  **zero** fixtures for any of them — and trivia carrying no token index, which
+  no assertion touched, so an implementation stamping a gap with its neighbour's
+  index passed all 67 tests.
+- **The test helpers' `sourceType` parameter is kept and justified rather than
+  deleted** (human ruling 2026-08-15). It was dead scaffolding — no fixture ever
+  passed it. The fixture that earns it is a legacy octal: `0755` tokenizes as a
+  `NumericLiteral` under `script` and **throws** under `module` [measured
+  2026-08-15], so the test can only be written in script mode. It is also
+  precisely this module's stated reason to exist — a program that lexes but does
+  not parse under strict.
 
 ## Traps, each of which has already cost something
 

@@ -115,8 +115,13 @@ describe('deriveInputElements', () => {
 			'x = /ab+c/gi',
 			'#priv',
 			'\r\n\r\n',
-			'  x',
+			'  x',
 			'async function f(){ await /re/ }',
+			"'hi'",
+			'1_000',
+			'x\ty',
+			'x\u2028y',
+			'x\u00A0y',
 		];
 
 		it.skip('starts every sequence at offset zero or leaves it empty', () => {
@@ -221,6 +226,10 @@ describe('deriveInputElements', () => {
 		it('names a single-quoted string a StringLiteral', () => {
 			expect(kinds("'hi'")).toEqual(['StringLiteral']);
 		});
+
+		it.skip('names a legacy octal literal a NumericLiteral', () => {
+			expect(kinds('0755', 'script')).toEqual(['NumericLiteral']);
+		});
 	});
 
 	describe('Template folding', () => {
@@ -319,6 +328,18 @@ describe('deriveInputElements', () => {
 
 		it.skip('publishes a whitespace-only source as trivia alone', () => {
 			expect(kinds('   ')).toEqual(['WhiteSpace']);
+		});
+
+		it.skip('wraps no token in a trivia element', () => {
+			expect(elements('let x = 1')[1]?.tokenIndices).toEqual([]);
+		});
+
+		it.skip('collapses a tab into a whitespace run', () => {
+			expect(kinds('x\ty')[1]).toBe('WhiteSpace');
+		});
+
+		it.skip('names a line separator a LineTerminator', () => {
+			expect(kinds('x\u2028y')[1]).toBe('LineTerminator');
 		});
 	});
 
