@@ -51,6 +51,7 @@ flowchart TD
 ## Out of scope
 
 - Rendering the overlay and classifying concrete surfaces (the top component's
-  render — a surface's class is a static fact of the render tree).
+  render — a surface's class is a static fact of what the surface IS, and no
+  runtime derivation or containment decides it).
 - The assessment's derivation (the marking library's).
 - Session posture state (the top component owns session choices).
