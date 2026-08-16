@@ -332,10 +332,20 @@ to it. If that proves wrong for `writeme`, whose migration this repository
 already agrees was faithful, it is a cheap reversal: drop its `ux/` and record
 why.
 
-**The machine twin stays delegated upward**, so this is `user` and not `both`. A
-per-lens notional machine would duplicate
-`language-levels/jej/notional-machine.md`, which models the language the lenses
-display rather than any one lens.
+**This is `user` and not `both`, and the reason is narrower than it first
+looks.** DEV.md holds that software work owes a machine twin and a user twin.
+What this ruling settles is that **every lens owes the user twin**; whether any
+lens also owes a machine twin is **not settled here and has not been asked**.
+
+An earlier revision of this paragraph justified the omission by saying a
+per-lens machine twin would duplicate `language-levels/jej/notional-machine.md`.
+**That argument was wrong** (human correction 2026-08-15): a machine twin is a
+notional-machine document for whatever machine the module embodies, and JEJ is
+one instance of a notional machine, not what the value means. A lens that turns
+out to embody a machine of its own — an evaluator-gated lens modelling
+execution, say — could owe one on its own merits, and nothing here forecloses
+that. **A lens session that believes it owes a machine twin raises it at its own
+step 0.2** rather than reading `user` as a ruling that it does not.
 
 ## Standing exclusions
 

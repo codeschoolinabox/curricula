@@ -1,3 +1,5 @@
+<!-- cspell:ignore wireframes zakey -->
+
 # Developer Guide
 
 Internal architecture, conventions, and implementation details for contributors.
@@ -674,13 +676,37 @@ row and the machine row part company: a notional-machine document names what it
 models because it is one document about one thing, and a directory holding a
 menu cannot.
 
-What goes inside is a **menu, not a fixture**: personas, wire-frames, user
-journeys, user stories, and whatever else the case calls for. Which of them
-exist is decided per module and justified where that module documents itself — a
-surface whose risk is pacing owes a journey, one whose risk is arrangement owes
-wire-frames, and a module may owe both. Pinning a fixed set here would invent
-the convention ahead of its second use, which is the same error the parking was
-guarding against.
+What goes inside is a **menu, not a fixture**. Which items exist is decided per
+module and justified where that module documents itself; **the menu below names
+what each item models and when it is owed, and nothing on it is required**
+(human ruling 2026-08-15, given when the lens-migration campaign owed eight at
+once — an earlier revision declined to name the menu at all, on the ground that
+pinning a set ahead of its second use invents the convention).
+
+| item                 | what it models                                           | owed when the module's risk is…                                   |
+| -------------------- | -------------------------------------------------------- | ----------------------------------------------------------------- |
+| **personas**         | who arrives, and what they already believe               | serving readers who differ in what they can already do            |
+| **user journeys**    | one person's path through a session, in order            | **pacing** — sequence, what a wrong turn earns, when help appears |
+| **wireframes**       | the interface met at each state, not the person          | **arrangement** — panels, controls, what sits beside what         |
+| **user stories**     | one capability, with Given/When/Then acceptance criteria | a capability whose done-ness is arguable                          |
+| **story sequencing** | which capability must exist before which                 | a build whose increments are not obviously ordered                |
+
+**Naming the menu is not pinning it.** A surface whose risk is pacing owes a
+journey, one whose risk is arrangement owes wire-frames, a module may owe both,
+and a module may owe something not listed — the row that fits nothing here is a
+reason to add a row, dated, not a reason to force one of these.
+
+**Two reference shapes, answering different questions.** For a finished twin,
+`src/lib/study-lenses/lenses/spellme/ux/` — `user-journeys.md` over five
+journeys and `wireframes.md` over five states [measured 2026-08-15: `wc -l` →
+224 and 186]. For the **form** of personas and stories, which `spellme` did not
+need, this org's own curriculum carries the templates it teaches:
+`0-zakey/0-planning-and-collaborating/06-user-personas.md` (Bio / Needs-Goals /
+Frustrations / Scenario) and `07-backlog.md` (_"As a [type of user] I want to
+[do something] so that [I achieve some goal]"_, Given/When/Then, bucketed Must /
+Should / Could). **Prefer the curriculum's forms to inventing house ones** where
+the module's audience is taught them — a twin in a private vocabulary is one
+more thing between the module and the people it models.
 
 **`learner` and `teacher` stay parked, deliberately.** Neither has ever been
 owed [measured 2026-08-13: no commit body records either value]. Naming a
