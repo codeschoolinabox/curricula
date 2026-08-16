@@ -20,13 +20,15 @@ orchestrate/
   DOCS.md         the region's architectural sketch
   types.ts        the host surface, plus region-internal shared vocabulary
   ux/             the user twin — who meets this instrument, and how it is arranged
-  index.tsx       the top component — the composition root the host mounts
+  index.tsx       the top component — the composition root the host mounts,
+                  and the home of the nameplate and the announcer
   use-settled-snippet.ts   the settle hook — debounced edits, immediate type toggle
   derive-study.ts          the one derive composition per settle
   display-labels.ts        the phases' display labels, keyed by phase name
   editor/         the editing surface — where the learner authors the source
   generator/      the AI-authoring view — the pane's third occupant
-  phases-panel/   the five-phase study panel — the study layer, rendered
+  rail/           the lifecycle drawn as the machine's own conveyor — the line,
+                  its stations, their trays, and the barring edge between two
   level-ui/       the level selector and the strict toggle
   guide/          the embedded guide — help never withheld
   event-bus/      the internal per-instance event bus
@@ -42,6 +44,17 @@ orchestrate/
 Each sub-directory documents itself; the derivation libraries under `lib/` hold
 every level-aware and roster-aware computation as pure functions, and the
 rendered surfaces stay thin over them.
+
+**Why the arrangement's five parts do not all live in one directory** (human
+ruling 2026-08-15). `rail/` owns the parts that are the lifecycle — the line,
+its stations, their trays, and the barring edge — because they are one surface
+with one geometry and one class. The **nameplate** and the **announcer** are the
+top component's, because each is a claim about the whole composition rather than
+about the lifecycle: the nameplate names whatever occupies the pane, and the
+pane occupant is the top component's own state; and the announcer must render
+outside **both** maskable containers, which only the root that renders both can
+guarantee. A leaf directory asserting where it sits relative to containers it
+does not own would be a rule nothing could enforce.
 
 ## The host surface
 
@@ -393,14 +406,22 @@ this region owns.
 - **the rail** — the lifecycle rendered as the machine's own conveyor: a line
   carrying one **station** per phase in the machine's fixed order, with the
   **barring edge** between the last reachable station and the first waiting one.
+  Lives in `rail/` with its stations, their trays and the edge (human ruling
+  2026-08-15). **Class 3**, and by exhaustion rather than by lineage: it is not
+  editor-based, and it is not a meta-level node that must survive every posture,
+  because it neither restores conformance nor carries the region's voice — the
+  announcer does that. So it dims **whole** under strict, partial dimming of a
+  lifecycle line reading as a machine state rather than as a posture.
   **Supersedes the lifecycle strip**, the row of per-phase selects this region
-  shipped first; the strip's own vocabulary is retired with it. Designed in
+  shipped first; the strip's own vocabulary is retired with it — lineage, which
+  is why it is recorded here and grounds nothing. Designed in
   [`ux/wireframes.md`](./ux/wireframes.md) and drawn there through every state.
 - **station** — the rail's per-phase element: one per phase, in the machine's
   fixed order, carrying its name, its mark, and its tray where the phase has
-  one. **Never the phase itself** — the phase is data, the station is what
-  renders it. Whether a station with a tray and a station with nothing to open
-  are one shape or two is the first question `types.ts` answers, and this entry
+  one. Lives in `rail/` with the line it sits on (human ruling 2026-08-15).
+  **Never the phase itself** — the phase is data, the station is what renders
+  it. Whether a station with a tray and a station with nothing to open are one
+  shape or two is the first question `types.ts` answers, and this entry
   deliberately leaves it open: four of five phases have nothing to open, so the
   empty case is the ordinary one, and a definition that assumed a control would
   be wrong four fifths of the time. The word is reclaimed rather than minted,
@@ -432,21 +453,29 @@ this region owns.
   **display labels**.
 - **tray** — one station's kit, disclosed beneath the rail and pushing the pane
   down rather than covering it. A station whose phase has no fitting lenses has
-  no tray and no disclosure control — not a disabled one.
+  no tray and no disclosure control — not a disabled one. Lives in `rail/` with
+  the station that discloses it (human ruling 2026-08-15).
 - **nameplate** — the line above the surface pane naming its current occupant,
   so the pane is a named place a learner moves between rather than a box whose
-  contents change without comment.
+  contents change without comment. Rendered by the **top component**, not by the
+  rail (human ruling 2026-08-15): what it names is the **pane occupant**, and
+  that is the top component's own state — a nameplate elsewhere would have to be
+  told what the pane holds by the one component that already knows.
 - **announcer** — the permanently-mounted, visually-hidden live region that
   speaks what a sighted learner reads off the rail. **Class 2**, the only member
   of that class that is not a control: it restores nothing, but it must survive
   every posture for the same reason the controls do. It renders outside both
   maskable containers, because `inert` removes a subtree from the accessibility
   tree and a silenced announcer is worse than none — and its class is what makes
-  that placement a requirement rather than a preference. Its utterances are
-  enumerated, not open: the pane's occupant changing, a transition into or out
-  of the blocked state, and the barring edge moving — **never a settle**, which
-  fires whenever typing pauses. It is the single voice for the blocked state's
-  cause; no other node claims to announce that sentence.
+  that placement a requirement rather than a preference. **Rendered by the top
+  component, not by the rail** (human ruling 2026-08-15), and the placement rule
+  is the reason: only the composition root renders both maskable containers, so
+  only it can guarantee a node sits outside both. Mounted from `rail/`, the
+  guarantee would be a claim about containers that directory does not own. Its
+  utterances are enumerated, not open: the pane's occupant changing, a
+  transition into or out of the blocked state, and the barring edge moving —
+  **never a settle**, which fires whenever typing pauses. It is the single voice
+  for the blocked state's cause; no other node claims to announce that sentence.
 - **house token** — a CSS custom property, prefix `--sl-`, naming one of this
   package's own presentation concepts: a surface, a text weight, a hairline, the
   focus ring, the inert dim, the mask scrim, or a fit mark's role. _House_ is
