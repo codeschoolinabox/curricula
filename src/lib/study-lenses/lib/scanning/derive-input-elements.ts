@@ -44,6 +44,7 @@ const KIND_BY_TOKEN_TYPE = new Map<acorn.TokenType, InputElementKind>([
 	// fold takes the continuation braces away first, and what is left here
 	// is always a block closer.
 	[tt.braceR, 'RightBracePunctuator'],
+	[tt.regexp, 'RegularExpressionLiteral'],
 ]);
 
 /**

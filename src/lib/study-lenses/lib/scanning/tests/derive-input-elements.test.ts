@@ -210,11 +210,11 @@ describe('deriveInputElements', () => {
 			expect(kinds('a?.b')[1]).toBe('Punctuator');
 		});
 
-		it.skip('names a regular expression literal', () => {
+		it('names a regular expression literal', () => {
 			expect(kinds('x = /ab+c/gi')[4]).toBe('RegularExpressionLiteral');
 		});
 
-		it.skip('names a numeric separator literal a NumericLiteral', () => {
+		it('names a numeric separator literal a NumericLiteral', () => {
 			expect(kinds('1_000')).toEqual(['NumericLiteral']);
 		});
 
