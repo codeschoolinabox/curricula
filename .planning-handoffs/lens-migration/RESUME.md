@@ -196,6 +196,24 @@ one.** `346cb845` is a real campaign commit missing from that table as well as
 this session's six, so the table is **two** generations behind, not "one commit
 behind by construction". Close the gap from the command, never from the table.
 
+### R-7 — `ux/` twins, and what it does NOT change
+
+**Human ruling 2026-08-15: every lens this campaign builds owes a `ux/` twin.**
+Full text and the menu table are
+[SPEC.md § R-7](./SPEC.md#r-7--every-lens-this-campaign-builds-owes-a-ux-twin);
+do not restate it from here.
+
+⚠️ **It does not change the settings line for seeding or family work.** A ledger
+seeding session and a family-planning session are **Tier 0 and Tier 1** — no
+lens Phase 0 runs, so no twin is owed and `twin-doc: none` stays correct. The
+ruling binds at **Tier 2**, at each lens's own step 0.2. Writing
+`twin-doc: user` on a ledger commit would be as wrong as writing `none` on a
+lens commit.
+
+The two places it bites before any lens session starts: **every Tier-2 handoff
+must say the twin is owed**, and **AR-1's input set at each lens grows** to the
+README plus the twin.
+
 ### Six standing rulings this session took
 
 1. **`affordance` is a sentence bound to its quote.** `evidence` carries the
