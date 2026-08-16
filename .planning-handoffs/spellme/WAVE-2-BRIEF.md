@@ -12,10 +12,13 @@ You finish `src/lib/study-lenses/lib/scanning/`. Wave 1 landed 24 of the suite's
 **You own the remaining 47.**
 
 Process rulings governing this campaign are in
-[`./PHASE-1.md` § Rulings of record](./PHASE-1.md) — nine, all cited and dated,
-findable via `git grep -n "human ruling" -- .planning-handoffs/spellme/` (which
-returns 13 hits across 2 files — 8 of the 9 bullets carry the phrase; the ninth,
-AR-5 ownership, is the orchestrator's own assignment and says so). Read that
+[`./PHASE-1.md` § Rulings of record](./PHASE-1.md) — nine bullets, eight of them
+human rulings and the ninth an orchestrator assignment, findable via
+`git grep -n "human ruling" -- .planning-handoffs/spellme/PHASE-1.md` — scoped
+deliberately, because the unscoped form also matches the briefs that cite the
+rulings, this one included, so its count is not a constant. Eight of the nine
+bullets carry the phrase; the ninth, AR-5 ownership, is the orchestrator's own
+assignment and says so rather than borrowing the human's authority. Read that
 section. Do not re-litigate any of them; if one seems wrong, report FLAG.
 
 ⚠ **Only `PHASE-1.md` § Rulings of record is live.** That file was written
@@ -146,14 +149,26 @@ will have built by the time you reach them. Both are consequences of the fold:
 - **`Right-brace disambiguation` will be 2 green / 1 red**, because its
   continuation-brace assertion is byte-identical to a Template-folding one.
 
-**When a whole set arrives green there is no driver and no increment.** Do not
-manufacture a red by weakening the implementation, and do not leave the un-skips
-sitting in the working tree. Un-skip the set, verify each one green with its
-one-line record, and commit it as a **coverage commit** — `add:` prefix, body
-stating plainly that no test went red, which earlier increment forced each, and
-that the block is therefore a regression guard. It still gets an AR-4; what that
-review audits is whether the standing implementation is coherent with the
-newly-live tests, and the body says so.
+**When a whole set arrives green there is no driver, and therefore no increment
+— so do not close one.** The standing ruling already decides this: [read:
+PHASE-1.md § Rulings of record — "An increment is bounded by exactly one red
+event … Those increments are **merged into the driver that precedes them**"].
+Cycle step 1's Green branch already implements it — "record … then repeat step
+1" walks straight out of an all-green set into the next set's first test. So:
+
+> **A set that arrives all-green does not close an increment. Keep un-skipping
+> into the next set until a red opens one.** The greens ride that increment's
+> commit and its AR-4, each with its one-line record.
+
+**The tail is the one case forward-merge cannot serve.** `Simple` is last, is
+3-green now, and stays green — its three fixtures contain no template, no
+comment and no mixed-kind gap, so nothing in phases 2, 4 or 5 moves its element
+indices. There is nothing after it to open an increment. For that one the
+ruling's literal words apply: merge **backward** — do not close the `Exceptions`
+increment until you have walked to the end of the file.
+
+Do not invent a commit category for either case, and do not manufacture a red by
+weakening the implementation.
 
 Re-measure this table yourself before trusting it; the tree moves.
 
@@ -169,8 +184,8 @@ Re-measure this table yourself before trusting it; the tree moves.
 | HEAD                             | **moves under you**, many times an hour. Re-measure; never cache                                                                                                                                                                                                                                                                                  |
 
 **Failing-test baseline — repo-wide, all foreign** [measured 2026-08-15: `vitest
-run --project unit` → `8 failed | 414 passed | 2 skipped (424)`, `41 failed |
-9586 passed`]:
+run --project unit` → `8 failed | 415 passed | 1 skipped (424)`, `41 failed |
+9610 passed`]:
 
 ```text
 scripts/lib/check-tables/tests/find-table-defects.test.ts
@@ -256,9 +271,10 @@ An increment owns a set of un-skips; work strictly in file order within it.
    surface than the stub implied, discard and re-implement fresh.
 5. Continue step 1 through the rest of the set.
 6. `npx eslint <impl-file>`
-7. **Refactor against the DOCS.md sketch** — phases present, named and distinct?
-   Concerns separated? Any Fake It past its triangulation point? Ephemeral
-   Mermaid for your own reasoning.
+7. **Refactor against the DOCS.md sketch** — all five phases present and
+   distinct _as phases_, three of them as named helpers with the guard and the
+   merge inline? Concerns separated? Any Fake It past its triangulation point?
+   Ephemeral Mermaid for your own reasoning.
 8. Self-review — both checklists in your governance file.
 9. **AR-4**, with the implementation, the test file, `types.ts` and the DOCS.md
    sketch including its Mermaid diagram.
@@ -354,16 +370,19 @@ correct):
 1. **The vocabulary straggler** — the legacy-octal test. Green; ride it.
 2. **Template folding** (9, all red) — creates phase 2. The wave's structural
    core; take it first and take it whole.
-3. **Right-brace disambiguation** (3) — 1 green. The two red ones are the
-   lookahead's cases; note that two of this block's three assertions are
-   verbatim duplicates of vocabulary and folding assertions.
+3. **Right-brace disambiguation** (3) — **2 green / 1 red by the time you
+   arrive** (the table's 1/2 is measured at HEAD, before your fold). Two of this
+   block's three assertions are verbatim duplicates of vocabulary and folding
+   assertions, and the continuation-brace one goes green with the fold.
 4. **Trivia** (10) — 7 green. The three red ones build the run split.
 5. **Comments and the hashbang** (6, all red) — creates phase 4. The hashbang is
    position **and** opening characters; `// x` at offset 0 must stay a
    `Comment`.
-6. **Boundaries — tiling** (5) — 4 green. `publishes nothing of zero width` is
-   the red one and it **cannot be faked now**: the fold exists, so absorption is
-   the only thing that can pass it.
+6. **Boundaries — tiling** (5) — **5 green / 0 red by the time you arrive.**
+   `publishes nothing of zero width` goes green the moment the fold lands, since
+   every zero-width element wraps a `template` token and phase 2 absorbs exactly
+   those. This is the all-green set: do not close an increment here — keep
+   un-skipping into `Interfaces`, whose first freeze test is the driver.
 7. **Interfaces** (7) — 4 green; the three freeze assertions are red.
 8. **Exceptions** (3) — 2 green, **and see the phase-1 trap above.**
 9. **Simple** (3) — all green; recorded-departure guards.

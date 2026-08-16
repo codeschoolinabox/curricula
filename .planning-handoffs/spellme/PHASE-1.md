@@ -8,9 +8,12 @@ and DOCS.md sketches, and this file deliberately does not restate them.
 ⚠ **Only § Rulings of record is maintained.** Everything below describing what
 Phase 1 _will_ do was written before it began and has not been kept current —
 treat it as the campaign's opening statement, not its status. The live status
-lives in the wave briefs: [`./WAVE-1-BRIEF.md`](./WAVE-1-BRIEF.md) (complete, 24
-tests, 10 commits) and [`./WAVE-2-BRIEF.md`](./WAVE-2-BRIEF.md) (the remaining
-47, including Template folding, which wave 1 did **not** reach).
+lives in [`./WAVE-2-BRIEF.md`](./WAVE-2-BRIEF.md) — the remaining 47 tests,
+including Template folding, which wave 1 did **not** reach.
+[`./WAVE-1-BRIEF.md`](./WAVE-1-BRIEF.md) is a **historical record, not live
+status**: it briefed a wave that planned 33 un-skips and stopped at 24 by
+design, and its own numbers (33-of-67, six rulings) were true when written and
+are not now.
 
 ## Where things stand
 
@@ -127,11 +130,12 @@ Ruling provenance).
   rule. Suite 63 → 67; landed in `7e083de2`.
 - **The `Boundaries — tiling` block un-skips out of file order** (human ruling
   2026-08-14), immediately before `Interfaces` rather than at its file position.
-  Its five tests sweep the whole pipeline over a 22-item corpus; un-skipped
-  early they license two structural fakes — a zero-width filter standing in for
-  the template fold, and "a non-whitespace gap is a Comment" standing in for the
-  comment merge — that leave no hardcoded value for the Refactor step to find.
-  ZOMBIES order survives: the blocks it moves past are unlettered.
+  Its five tests sweep the whole pipeline over a 27-item corpus (22 when this
+  ruling was taken; `d2688fd8` added five); un-skipped early they license two
+  structural fakes — a zero-width filter standing in for the template fold, and
+  "a non-whitespace gap is a Comment" standing in for the comment merge — that
+  leave no hardcoded value for the Refactor step to find. ZOMBIES order
+  survives: the blocks it moves past are unlettered.
 - **An increment is bounded by exactly one red event** (human ruling
   2026-08-15). An earlier decomposition carried increments with no red test at
   all, justified by an appeal to the human's approval of the decomposition's

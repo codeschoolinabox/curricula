@@ -7,6 +7,13 @@
 
 # tdd-worker launch brief — `lib/scanning` Phase 1, Wave 1
 
+> **HISTORICAL RECORD — not live status.** This briefed a wave that planned 33
+> un-skips and stopped at 24 by design, before Template folding. Its numbers
+> were true when written and are not now: the suite holds 71 tests, not 67; §
+> Rulings of record holds nine bullets, not six; and the exit gate below
+> (33-of-67) was superseded, not met. Live status is
+> [`./WAVE-2-BRIEF.md`](./WAVE-2-BRIEF.md).
+
 You own the first 33 of this module's 67 committed-skipped tests. Phase 0 is
 committed and human-approved. You are one worker in an orchestrated fan-out; an
 orchestrator holds the spine, reads the seam after you, and owns AR-5.
