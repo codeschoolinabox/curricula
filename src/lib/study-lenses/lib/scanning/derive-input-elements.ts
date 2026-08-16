@@ -50,11 +50,13 @@ function nameElement(
 	index: number,
 	code: string,
 ): InputElement {
+	const text = code.slice(token.start, token.end);
+
 	return {
-		kind: elementKind(token),
+		kind: elementKind(token, text),
 		start: token.start,
 		end: token.end,
-		text: code.slice(token.start, token.end),
+		text,
 		tokenIndices: [index],
 	};
 }
@@ -65,9 +67,19 @@ function nameElement(
  * identifier production, so the collapse is one test rather than a list.
  * The contextual keywords never reach it: the parser already types `let`
  * and its family as plain identifiers.
+ *
+ * Where one type serves several productions the source slice decides, and
+ * that is the whole reason this takes the text as well as the token.
  */
-function elementKind(token: acorn.Token): InputElementKind {
+function elementKind(token: acorn.Token, text: string): InputElementKind {
 	if (typeof token.type.keyword === 'string') return 'IdentifierName';
+
+	// Every compound assignment shares one token type, so `/=` is separated
+	// from `+=`, `**=` and `??=` by the characters its own span points at —
+	// not by its length, and not by anything the type can be asked.
+	if (token.type === tt.assign) {
+		return text === '/=' ? 'DivPunctuator' : 'Punctuator';
+	}
 
 	return KIND_BY_TOKEN_TYPE.get(token.type) ?? 'Punctuator';
 }

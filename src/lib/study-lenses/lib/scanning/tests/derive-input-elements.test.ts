@@ -190,15 +190,15 @@ describe('deriveInputElements', () => {
 			expect(kinds('a / b')[2]).toBe('DivPunctuator');
 		});
 
-		it.skip('names a division assignment a DivPunctuator despite its shared token type', () => {
+		it('names a division assignment a DivPunctuator despite its shared token type', () => {
 			expect(kinds('a /= b')[2]).toBe('DivPunctuator');
 		});
 
-		it.skip('keeps a different compound assignment of the same token type a Punctuator', () => {
+		it('keeps a different compound assignment of the same token type a Punctuator', () => {
 			expect(kinds('x**=2')[1]).toBe('Punctuator');
 		});
 
-		it.skip('keeps a two-character compound assignment a Punctuator', () => {
+		it('keeps a two-character compound assignment a Punctuator', () => {
 			expect(kinds('a += b')[2]).toBe('Punctuator');
 		});
 
