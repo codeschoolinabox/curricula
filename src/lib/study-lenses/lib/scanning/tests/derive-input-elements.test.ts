@@ -218,7 +218,7 @@ describe('deriveInputElements', () => {
 			expect(kinds('1_000')).toEqual(['NumericLiteral']);
 		});
 
-		it.skip('names a single-quoted string a StringLiteral', () => {
+		it('names a single-quoted string a StringLiteral', () => {
 			expect(kinds("'hi'")).toEqual(['StringLiteral']);
 		});
 	});

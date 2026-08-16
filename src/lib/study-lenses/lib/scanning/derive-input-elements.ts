@@ -45,6 +45,7 @@ const KIND_BY_TOKEN_TYPE = new Map<acorn.TokenType, InputElementKind>([
 	// is always a block closer.
 	[tt.braceR, 'RightBracePunctuator'],
 	[tt.regexp, 'RegularExpressionLiteral'],
+	[tt.string, 'StringLiteral'],
 ]);
 
 /**
