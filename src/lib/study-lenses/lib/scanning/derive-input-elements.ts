@@ -26,23 +26,14 @@ export default function deriveInputElements({
 
 const tt = acorn.tokTypes;
 
-// The productions a token type names on its own. Every type absent from this
-// table is CURRENTLY treated as a `Punctuator`, which is §12.8's catch-all
-// once the productions carrying their own rows are taken out of it — but
-// several absent types have their own production and are simply not
-// triangulated yet. Exactly one will never be a row at all: `/=` shares one
-// token type with every other compound assignment, so the source slice
-// decides and no row can settle it. `}` shares its type between a block
-// closer and a template continuation, but it IS a row here — one holding
-// only until the fold exists to claim the continuations; see the note at it.
+// The production a token type names on its own. A type absent from this table
+// is a `Punctuator` — §12.8's catch-all once the productions carrying their
+// own rows are taken out of it.
 const KIND_BY_TOKEN_TYPE = new Map<acorn.TokenType, InputElementKind>([
 	[tt.name, 'IdentifierName'],
 	[tt.num, 'NumericLiteral'],
 	[tt.privateId, 'PrivateIdentifier'],
 	[tt.slash, 'DivPunctuator'],
-	// Unconditional only while no template run exists to claim a brace. The
-	// fold takes the continuation braces away first, and what is left here
-	// is always a block closer.
 	[tt.braceR, 'RightBracePunctuator'],
 	[tt.regexp, 'RegularExpressionLiteral'],
 	[tt.string, 'StringLiteral'],
