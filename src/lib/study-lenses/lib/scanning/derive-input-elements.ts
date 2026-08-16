@@ -19,7 +19,8 @@ export default function deriveInputElements({
 	code,
 	tokens,
 }: ScanInput): readonly InputElement[] {
-	const named = tokens.map((token, index) => nameElement(token, index, code));
+	const folded = foldTemplateRuns(tokens);
+	const named = folded.map((span) => nameElement(span, code));
 
 	return fillGaps(named, code);
 }
@@ -40,45 +41,127 @@ const KIND_BY_TOKEN_TYPE = new Map<acorn.TokenType, InputElementKind>([
 ]);
 
 /**
+ * A token-channel span before it is named: where it sits in the source, the
+ * positions of the tokens it wraps, and the token it opens with — which is
+ * what names it. A folded template run wraps several tokens; every other span
+ * wraps exactly one.
+ */
+type TokenSpan = {
+	readonly opener: acorn.Token;
+	readonly start: number;
+	readonly end: number;
+	readonly tokenIndices: ReadonlyArray<number>;
+};
+
+/**
+ * Phase 2 — fold each template run into one span, fixing the element list for
+ * the token channel before anything is named. A backtick opens a run of
+ * `opener · chunk · closer`; every other token spans itself. Nesting needs no
+ * stack: the walk resumes past a run's closer, so an inner run is reached
+ * only after the run containing it has closed.
+ */
+/* eslint-disable functional/immutable-data -- local accumulator, never escapes until returned */
+function foldTemplateRuns(
+	tokens: ReadonlyArray<acorn.Token>,
+): ReadonlyArray<TokenSpan> {
+	const everyIndex = Array.from(tokens.keys());
+	const spans: TokenSpan[] = [];
+	let index = 0;
+
+	while (index < tokens.length) {
+		const opener = tokens[index];
+		const end = opensTemplateRun(opener) ? runEnd(tokens, index) : index + 1;
+
+		spans.push({
+			opener,
+			start: opener.start,
+			end: tokens[end - 1].end,
+			tokenIndices: everyIndex.slice(index, end),
+		});
+		index = end;
+	}
+
+	return spans;
+}
+/* eslint-enable functional/immutable-data -- scoped mutation confined to the block above */
+
+/**
+ * One past the closer of a template run opened at `openerIndex`. The parser
+ * emits exactly one chunk between a run's delimiters — zero-width where the
+ * template has no text there — so the search stops at the first token that is
+ * not a chunk and takes that one as the closer.
+ *
+ * A run whose closer never arrives cannot come from a source the tokenizer
+ * accepted, so the no-closer answer is the end of the array rather than a
+ * throw: this phase stays total, and the boundary keeps the only throw site.
+ */
+function runEnd(
+	tokens: ReadonlyArray<acorn.Token>,
+	openerIndex: number,
+): number {
+	const chunkCount = tokens
+		.slice(openerIndex + 1)
+		.findIndex((token) => !isTemplateChunk(token));
+
+	return chunkCount === -1 ? tokens.length : openerIndex + chunkCount + 2;
+}
+
+// A backtick opens a template run.
+function opensTemplateRun(token: acorn.Token): boolean {
+	return token.type === tt.backQuote;
+}
+
+// The text run between a template's delimiters, as the parser emits it.
+function isTemplateChunk(token: acorn.Token): boolean {
+	return token.type === tt.template;
+}
+
+/**
  * Phase 3 — name one token-channel element and attach its verbatim slice.
  */
-function nameElement(
-	token: acorn.Token,
-	index: number,
-	code: string,
-): InputElement {
-	const text = code.slice(token.start, token.end);
+function nameElement(span: TokenSpan, code: string): InputElement {
+	const text = code.slice(span.start, span.end);
 
 	return {
-		kind: elementKind(token, text),
-		start: token.start,
-		end: token.end,
+		kind: elementKind(span, text),
+		start: span.start,
+		end: span.end,
 		text,
-		tokenIndices: [index],
+		tokenIndices: span.tokenIndices,
 	};
 }
 
 /**
- * The production one token's own type names. Every reserved word carries a
+ * The production a span names. A folded run takes its name from its opener; a
+ * lone token takes its name from its own type. Every reserved word carries a
  * keyword on its type — thirty-five of them — and all thirty-five name the
  * identifier production, so the collapse is one test rather than a list.
  * The contextual keywords never reach it: the parser already types `let`
  * and its family as plain identifiers.
  *
  * Where one type serves several productions the source slice decides, and
- * that is the whole reason this takes the text as well as the token.
+ * that is the whole reason this takes the text as well as the span.
  */
-function elementKind(token: acorn.Token, text: string): InputElementKind {
-	if (typeof token.type.keyword === 'string') return 'IdentifierName';
+function elementKind(span: TokenSpan, text: string): InputElementKind {
+	if (isFoldedRun(span)) return 'Template';
+
+	const { opener } = span;
+
+	if (typeof opener.type.keyword === 'string') return 'IdentifierName';
 
 	// Every compound assignment shares one token type, so `/=` is separated
 	// from `+=`, `**=` and `??=` by the characters its own span points at —
 	// not by its length, and not by anything the type can be asked.
-	if (token.type === tt.assign) {
+	if (opener.type === tt.assign) {
 		return text === '/=' ? 'DivPunctuator' : 'Punctuator';
 	}
 
-	return KIND_BY_TOKEN_TYPE.get(token.type) ?? 'Punctuator';
+	return KIND_BY_TOKEN_TYPE.get(opener.type) ?? 'Punctuator';
+}
+
+// Only a folded template run wraps more than one token.
+function isFoldedRun(span: TokenSpan): boolean {
+	return span.tokenIndices.length > 1;
 }
 
 /**

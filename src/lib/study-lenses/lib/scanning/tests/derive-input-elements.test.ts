@@ -227,21 +227,21 @@ describe('deriveInputElements', () => {
 			expect(kinds("'hi'")).toEqual(['StringLiteral']);
 		});
 
-		it.skip('names a legacy octal literal a NumericLiteral', () => {
+		it('names a legacy octal literal a NumericLiteral', () => {
 			expect(kinds('0755', 'script')).toEqual(['NumericLiteral']);
 		});
 	});
 
 	describe('Template folding', () => {
-		it.skip('folds a template with no substitution into one element', () => {
+		it('folds a template with no substitution into one element', () => {
 			expect(kinds('`a`')).toEqual(['Template']);
 		});
 
-		it.skip('folds a template head into one element', () => {
+		it('folds a template head into one element', () => {
 			expect(kinds('`a${b}c`')[0]).toBe('Template');
 		});
 
-		it.skip('spans a template head from backtick through the opening brace', () => {
+		it('spans a template head from backtick through the opening brace', () => {
 			expect(spans('`a${b}c`')[0]).toEqual([0, 4]);
 		});
 
