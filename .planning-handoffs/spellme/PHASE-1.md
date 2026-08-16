@@ -2,24 +2,36 @@
 
 # Phase 1 — `lib/scanning`, then `spellme`
 
-**Phase 0 is closed and committed. Phase 1 has not started.** This document is
-the resumption point; the canon is the in-repo READMEs and DOCS.md sketches, and
-this file deliberately does not restate them.
+**Phase 0 is closed. Phase 1 is UNDER WAY.** The canon is the in-repo READMEs
+and DOCS.md sketches, and this file deliberately does not restate them.
+
+⚠ **Only § Rulings of record is maintained.** Everything below describing what
+Phase 1 _will_ do was written before it began and has not been kept current —
+treat it as the campaign's opening statement, not its status. The live status
+lives in the wave briefs: [`./WAVE-1-BRIEF.md`](./WAVE-1-BRIEF.md) (complete, 24
+tests, 10 commits) and [`./WAVE-2-BRIEF.md`](./WAVE-2-BRIEF.md) (the remaining
+47, including Template folding, which wave 1 did **not** reach).
 
 ## Where things stand
 
 **This campaign's commits — a SHA LIST, never a range.**
 
-| SHA        | What                                                            |
-| ---------- | --------------------------------------------------------------- |
-| `a38cc03f` | the user twin gets its name (DEV.md)                            |
-| `9eea31a3` | the user twin is named for its concern — DEV.md, the `ux/` name |
-| `349d2f99` | `lib/scanning` Phase 0                                          |
-| `80306ad9` | `spellme` Phase 0 — cites `bnd-009`                             |
-| `da7cb376` | this document, `EMBODY-FLAGS.md`, and the deferred brief        |
-| `7e083de2` | the Phase-0 top-up — four fixtures, suite 63 → 67               |
+| SHA                     | What                                                                             |
+| ----------------------- | -------------------------------------------------------------------------------- |
+| `a38cc03f`              | the user twin gets its name (DEV.md)                                             |
+| `9eea31a3`              | the user twin is named for its concern — DEV.md, the `ux/` name                  |
+| `349d2f99`              | `lib/scanning` Phase 0                                                           |
+| `80306ad9`              | `spellme` Phase 0 — cites `bnd-009`                                              |
+| `da7cb376`              | this document, `EMBODY-FLAGS.md`, and the deferred brief                         |
+| `7e083de2`              | the Phase-0 top-up — four fixtures, suite 63 → 67                                |
+| `a5fb4a08`              | § Rulings of record, and the wave-1 brief lands in-repo                          |
+| `1c6736c9` … `803f4642` | **wave 1 — ten increment commits**, see [`./WAVE-1-BRIEF.md`](./WAVE-1-BRIEF.md) |
+| `542d4771`              | DEV.md's first-user-twin ruling names `spellme`                                  |
+| `d2688fd8`              | second Phase-0 top-up — four more fixtures, suite 67 → 71                        |
+| `2989d9e1`              | the naming table stops carrying a contradicting second spec                      |
+| `<wave 2>`              | the remaining 47, per [`./WAVE-2-BRIEF.md`](./WAVE-2-BRIEF.md)                   |
 
-⚠ **Foreign commits interleave those six**, one of them landing _between_
+⚠ **Foreign commits interleave all of those**, one of them landing _between_
 `9eea31a3` and `349d2f99`. **Do not trust a count here — recompute it**, because
 it moves within minutes: `git rev-list --count 6d1a811f..HEAD` minus this
 campaign's own commits. It read 13 total / 9 foreign when this document was
@@ -56,8 +68,9 @@ is an honest burn-down.
 **The stubs to replace:**
 
 - `src/lib/study-lenses/lib/scanning/derive-input-elements.ts` — one exported
-  function, currently throwing. In-file hoisted helpers, no new files: the fold,
-  the naming and the gap split each have one call site.
+  function. **Implemented through the naming rule and the gap fill as of
+  `2989d9e1`**; the fold does not exist yet. In-file hoisted helpers, no new
+  files: the fold, the naming and the gap split each have one call site.
 - `src/lib/study-lenses/lenses/spellme/core.ts` — eight functions, all throwing.
 - `src/lib/study-lenses/lenses/spellme/index.tsx` — the component throws; the
   frozen lens object is real and its three tests already pass.
@@ -67,14 +80,12 @@ moves to just before Interfaces (human ruling 2026-08-14, § Rulings of record):
 Zero · One · Many · The vocabulary · Template folding · Right-brace
 disambiguation · Trivia · Comments and the hashbang · **Boundaries–tiling** ·
 Interfaces–frozen, pure and deterministic · Exceptions · Simple–the recorded
-departures. **67 tests** since the Phase-0 top-up [measured 2026-08-15: `grep -c
-"it\.skip"` on the test file], not the 63 this document first recorded. Wave 1
-owns the first 33, through Template folding; the launch brief is
-[`./WAVE-1-BRIEF.md`](./WAVE-1-BRIEF.md).
+departures. **71 tests** since the second Phase-0 top-up (`d2688fd8`) [measured
+2026-08-15], not the 63 this document first recorded. **Wave 1 stopped after 24,
+before Template folding**, which is wave 2's.
 
-The first un-skip is `Zero/returns nothing for an empty source`, at
-`tests/derive-input-elements.test.ts`; the file to edit is
-`derive-input-elements.ts`, whose whole body is currently a throw.
+The first un-skip was `Zero/returns nothing for an empty source`; it landed in
+`1c6736c9`. The file to edit is `derive-input-elements.ts`.
 
 Fake It is legitimate there and **expires at `One`**. DEV.md § Phase 1 says Fake
 It expires when the next test is _written_, and here every test is already
