@@ -245,11 +245,11 @@ describe('deriveInputElements', () => {
 			expect(spans('`a${b}c`')[0]).toEqual([0, 4]);
 		});
 
-		it.skip('names the run after an interpolation a TemplateSubstitutionTail', () => {
+		it('names the run after an interpolation a TemplateSubstitutionTail', () => {
 			expect(kinds('`a${b}c`')[2]).toBe('TemplateSubstitutionTail');
 		});
 
-		it.skip('absorbs the zero-width chunk between adjacent interpolations', () => {
+		it('absorbs the zero-width chunk between adjacent interpolations', () => {
 			expect(kinds('`${a}${b}`')).toEqual([
 				'Template',
 				'IdentifierName',
@@ -259,11 +259,11 @@ describe('deriveInputElements', () => {
 			]);
 		});
 
-		it.skip('absorbs a zero-width chunk into the token indices of its run', () => {
+		it('absorbs a zero-width chunk into the token indices of its run', () => {
 			expect(elements('`${a}${b}`')[0]?.tokenIndices).toEqual([0, 1, 2]);
 		});
 
-		it.skip('folds a nested template into five elements', () => {
+		it('folds a nested template into five elements', () => {
 			expect(kinds('`a${`n${q}`}c`')).toHaveLength(5);
 		});
 

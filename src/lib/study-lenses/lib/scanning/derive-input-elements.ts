@@ -55,10 +55,12 @@ type TokenSpan = {
 
 /**
  * Phase 2 — fold each template run into one span, fixing the element list for
- * the token channel before anything is named. A backtick opens a run of
- * `opener · chunk · closer`; every other token spans itself. Nesting needs no
- * stack: the walk resumes past a run's closer, so an inner run is reached
- * only after the run containing it has closed.
+ * the token channel before anything is named. A backtick, or a right brace
+ * continuing a template, opens a run of `opener · chunk · closer`; every other
+ * token spans itself. Nesting needs no stack: the walk resumes past a run's
+ * closer, so an inner run is reached only after the run containing it has
+ * closed — and the same property is what keeps a run's own closing backtick
+ * from being read as the opener of a new one.
  */
 /* eslint-disable functional/immutable-data -- local accumulator, never escapes until returned */
 function foldTemplateRuns(
@@ -70,7 +72,9 @@ function foldTemplateRuns(
 
 	while (index < tokens.length) {
 		const opener = tokens[index];
-		const end = opensTemplateRun(opener) ? runEnd(tokens, index) : index + 1;
+		const end = opensTemplateRun(tokens, index)
+			? runEnd(tokens, index)
+			: index + 1;
 
 		spans.push({
 			opener,
@@ -91,9 +95,12 @@ function foldTemplateRuns(
  * template has no text there — so the search stops at the first token that is
  * not a chunk and takes that one as the closer.
  *
- * A run whose closer never arrives cannot come from a source the tokenizer
- * accepted, so the no-closer answer is the end of the array rather than a
- * throw: this phase stays total, and the boundary keeps the only throw site.
+ * A run whose closer never arrives is reported as ending at the end of the
+ * array rather than throwing: this phase stays total, and the boundary keeps
+ * the only throw site. That branch is reachable today, not theoretical — a
+ * chunk type this module does not yet recognize breaks the search, and the run
+ * it opened then finds no closer. It is dead only once every template-chunk
+ * type is admitted below.
  */
 function runEnd(
 	tokens: ReadonlyArray<acorn.Token>,
@@ -106,14 +113,39 @@ function runEnd(
 	return chunkCount === -1 ? tokens.length : openerIndex + chunkCount + 2;
 }
 
-// A backtick opens a template run.
-function opensTemplateRun(token: acorn.Token): boolean {
-	return token.type === tt.backQuote;
+/**
+ * A backtick opens a template run, and so does a right brace whose immediate
+ * successor is a template chunk — the parser emits a chunk directly after a
+ * backtick or a continuation brace and nowhere else, which is what makes one
+ * token of lookahead exact. Every other right brace closes a block, an object
+ * or an interpolation, and is a `RightBracePunctuator`.
+ */
+function opensTemplateRun(
+	tokens: ReadonlyArray<acorn.Token>,
+	index: number,
+): boolean {
+	const token = tokens[index];
+
+	if (token.type === tt.backQuote) return true;
+
+	return token.type === tt.braceR && isTemplateChunk(tokens[index + 1]);
 }
 
-// The text run between a template's delimiters, as the parser emits it.
-function isTemplateChunk(token: acorn.Token): boolean {
-	return token.type === tt.template;
+/**
+ * The text run between a template's delimiters, as the parser emits it. The
+ * successor of the last token is absent, and absent is not a chunk — which is
+ * what lets the lookahead read past the end of the array without a bounds
+ * test at each call site.
+ *
+ * Two token types carry a chunk, and only one is recognized here. The other —
+ * the type the parser gives a chunk carrying an escape the language permits
+ * only under a tag — is not yet triangulated by a live test, and until it is,
+ * a tagged template carrying such an escape is read wrongly: its `}` is named
+ * a `RightBracePunctuator`, its closing backtick is mistaken for an opener,
+ * and the span that opener starts swallows whatever follows the template.
+ */
+function isTemplateChunk(token: acorn.Token | undefined): boolean {
+	return token?.type === tt.template;
 }
 
 /**
@@ -143,9 +175,17 @@ function nameElement(span: TokenSpan, code: string): InputElement {
  * that is the whole reason this takes the text as well as the span.
  */
 function elementKind(span: TokenSpan, text: string): InputElementKind {
-	if (isFoldedRun(span)) return 'Template';
-
 	const { opener } = span;
+
+	// A run opened by a backtick is a `Template`; one opened by a continuation
+	// brace is a `TemplateSubstitutionTail`. Each kind covers two of the
+	// specification's productions, distinguished only by which closer ended
+	// the run — a distinction this module deliberately does not publish.
+	if (isFoldedRun(span)) {
+		return opener.type === tt.backQuote
+			? 'Template'
+			: 'TemplateSubstitutionTail';
+	}
 
 	if (typeof opener.type.keyword === 'string') return 'IdentifierName';
 
