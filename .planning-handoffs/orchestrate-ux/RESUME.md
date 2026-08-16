@@ -1,10 +1,25 @@
-<!-- cspell:ignore actioned affordances checkpointed cutover parentheticals respecified spellme ugrep unbuilt undercounted unretired wireframes -->
+<!-- cspell:ignore actioned affordances checkpointed cutover authorised finditer misdescribes organise parentheticals respecified spellme ugrep unbuilt undercounted undercounts unretired wireframes -->
 
 # orchestrate ux — resumption point
 
-**State: Phase 0 step 0.2 is written and NOT closed. All seven of AR-1 round 3's
-findings are RESOLVED, in two commits; AR-1 round 4 has not yet run.** Do not
-start 0.3 until it clears.
+**State: Phase 0 step 0.2 is written and NOT closed. Round 3's seven findings
+are RESOLVED in two commits. AR-1 ROUND 4 HAS RUN AND RETURNED PAUSE — three
+blockers, six IMPORTANT, four MINOR.** Do not start 0.3 until they close.
+
+**Blocker counts by round: 3 → 4 → 5 → 3.** The first decline, but the shape
+persists: **two of round 4's three blockers were created by round 3's fixes.**
+Read § The process failure to not repeat before you touch anything — it is still
+the most useful paragraph in this file.
+
+**Your first task is § ROUND 4 below.** Findings 1 and 2 there are verified and
+mechanical-ish; finding 3 is design and shapes the first type.
+
+**Run the design work on the strongest available model tier.** The outgoing
+session handed off here rather than fixing round 4 because all three of
+`AGENTS.principal.md` § Handoff agency's tests fired — most sharply the
+same-mistake-twice one: it wrote the prettier-wrap grep correction into this
+file, then an hour later verified a finding with a line-based grep and missed a
+site for exactly that reason.
 
 **Read the governance chain first**, before this file's task list: the repo-root
 `CLAUDE.md` is a router — check your model id against its qualifying list and
@@ -15,10 +30,20 @@ read whichever of `AGENTS.principal.md` / `AGENTS.md` matches. Both point into
 semantics and the AR protocol (§ Adversarial Review Protocol), and the settings
 line.
 
-Everything below is measured or read at `8cc4bc15` unless tagged otherwise. This
-document was validated by a context-free agent, which found four factual errors
-in its first draft; those are corrected here, and the exercise is why you should
-still re-measure anything you rely on.
+Everything below is measured or read at **`bdf5077c`** unless tagged otherwise —
+an earlier revision said `8cc4bc15`, and two commits have landed since. **The
+tree moves under you**: HEAD advanced six times during the session that wrote
+this, none of it under `orchestrate/`. Re-measure HEAD before every commit and
+quote the SHA you actually measured.
+
+This document has been validated by a context-free agent twice [relayed: the two
+outgoing sessions that ran them]. The first pass found four factual errors. The
+second found four more that would have burned a session — a prescribed grep that
+silently undercounts, a false claim in blocker 3, a measurement reproducible
+only at a SHA the file no longer names, and a "commit this file" instruction
+guarding the wrong condition. **All four are fixed above, and the pattern is the
+point: each validation found errors the author could not see.** Re-measure
+anything here you intend to rely on, including the counts in § ROUND 4.
 
 ## What this campaign is
 
@@ -46,7 +71,7 @@ The tree is shared with concurrent sessions; scope every claim to these SHAs.
 | `8cc4bc15` | AR-1 round 2 resolution — empty-station copy restored, `barring edge`, station retirement  |
 | `5300c39d` | this resumption point lands (it had been untracked)                                        |
 | `929d9086` | AR-1 round 3, **finding 2 alone** — class 2 widens to nodes; a rule amendment, ships alone |
-| _next_     | AR-1 round 3, findings 1 · 3 · 4 · 5 · 6 · 7, and this file's corrections                  |
+| `bdf5077c` | AR-1 round 3, findings 1 · 3 · 4 · 5 · 6 · 7, and this file's corrections                  |
 
 **Carry-forwards this pass created**, none of them blocking round 4:
 
@@ -73,8 +98,9 @@ src/lib/study-lenses/orchestrate`].
 
 **The repo-wide run is red and most of it is not yours.** [measured 2026-08-15:
 `npx vitest run --project unit` → **8 files failed, 41 tests failed**, 414 files
-passed]. The failing files: `scripts/lib/check-tables/` (a test importing a
-`find-table-defects.mjs` that does not exist), `src/plugins/study-lenses/`,
+passed; 414 in an earlier revision, harmless drift]. The failing files:
+`scripts/lib/check-tables/` (a test importing a `find-table-defects.mjs` that
+does not exist), `src/plugins/study-lenses/`,
 `src/lib/embody/lib/evaluating/shared/guard-loops/`, and five under
 `src/lib/study-lenses--deprecated-architecture/`. **`lenses/spellme/` does NOT
 fail** — an earlier draft of this file said it did, and that was wrong. None of
@@ -83,29 +109,168 @@ against the repo-wide number.
 
 ## Human rulings — binding, do not re-litigate
 
-All 2026-08-14 unless noted.
+All 2026-08-14 unless noted. **The two naming rulings at the foot of this table
+are 2026-08-15, not 08-14** — `8cc4bc15` recorded them undated and landed
+2026-08-15 09:55 [measured: `git show -s --format=%ci 8cc4bc15`], and the two
+parentheticals in the tree that said 08-14 were corrected in `bdf5077c`. The
+Rail selection is genuinely 08-14 [measured: same command on `a1f4d132`].
 
-| Ruling                                                                                                                                 |
-| -------------------------------------------------------------------------------------------------------------------------------------- |
-| `twin-doc: user`; the twin is three documents — personas, user-journeys, wireframes                                                    |
-| The twin sits at `orchestrate/ux/`, not package level — "the orchestrator is what gives it a UX"                                       |
-| `ceremony: full`                                                                                                                       |
-| "Visible, explicit and **KISS**"; open mind for entirely new UX                                                                        |
-| **"The UI renders what the embodiment suggests"** — faithful projection, 0→N lenses per phase, no redesign                             |
-| Empty phases are acceptable; **lens-building is out of scope**                                                                         |
-| `lib/colorizing` (planned, not built) owns the code surface; this campaign owns the house token vocabulary; lens adoption is voluntary |
-| Absorb the three accessibility defects into this campaign                                                                              |
-| The deprecated tree's 737 lines of orchestrator CSS are **wholly superseded** — nothing ported                                         |
-| **The arrangement is the Rail** (candidate A), overriding the selection pass's synthesis                                               |
-| `break` → **the barring edge**                                                                                                         |
-| `station` is **kept**, and its retired sense (a synonym for `phase`) is formally retired                                               |
-| Fix the blockers, then hand off                                                                                                        |
+| Ruling                                                                                                                                                                  |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `twin-doc: user`; the twin is three documents — personas, user-journeys, wireframes                                                                                     |
+| The twin sits at `orchestrate/ux/`, not package level — "the orchestrator is what gives it a UX"                                                                        |
+| `ceremony: full`                                                                                                                                                        |
+| "Visible, explicit and **KISS**"; open mind for entirely new UX                                                                                                         |
+| **"The UI renders what the embodiment suggests"** — faithful projection, 0→N lenses per phase, no redesign                                                              |
+| Empty phases are acceptable; **lens-building is out of scope**                                                                                                          |
+| `lib/colorizing` (planned, not built) owns the code surface; this campaign owns the house token vocabulary; lens adoption is voluntary                                  |
+| Absorb the three accessibility defects into this campaign                                                                                                               |
+| The deprecated tree's 737 lines of orchestrator CSS are **wholly superseded** — nothing ported                                                                          |
+| **The arrangement is the Rail** (candidate A), overriding the selection pass's synthesis                                                                                |
+| `break` → **the barring edge**                                                                                                                                          |
+| `station` is **kept**, and its retired sense (a synonym for `phase`) is formally retired                                                                                |
+| Fix the blockers, then hand off                                                                                                                                         |
+| **2026-08-15** · `station` takes **neutral wording** — "the rail's per-phase element" — and whether the openable and bare cases are one shape or two is deferred to 0.3 |
+| **2026-08-15** · surface class 2 **widens** from meta-level _controls_ to meta-level **nodes**, so the announcer has a class; `SurfaceClass` keeps three members        |
+| **2026-08-15** · all four class-2 definitional homes are edited now, `lib/masking/` included — not two now and two carried                                              |
+| **2026-08-15** · the two naming rulings are dated **2026-08-15**, and the two existing 08-14 parentheticals are corrected rather than propagated                        |
 
 **Two of these have no dated home in the documents they bind** — that is finding
 7 below. `DEV.md § Ruling provenance`: "A ruling recorded only in a commit body
 is findable but not readable where it binds."
 
-## THE SEVEN FINDINGS — ALL RESOLVED 2026-08-15; READ THIS BANNER FIRST
+## ROUND 4 — PAUSE, 2026-08-15. THIS IS THE OPEN WORK
+
+Full verdict: re-read it by spawning `ar-1` again if you need the prose, or work
+from this summary, which the outgoing session verified independently rather than
+relaying. **Two of the three blockers were created by round 3's own fixes.**
+
+### Blocker 1 — the derived count's worked example contradicts its own rule
+
+`ux/wireframes.md:266` says "so what is empty in this drawing is `ast` — alone."
+**It is `tokens` AND `ast` — two.** The drawing above it gives Tokens and AST
+both a bare `·`, both are accessible, and `spellme` (`phase: 'tokens'`) is not
+on the built-in roster [measured, this session]. `bdf5077c`'s own body says "the
+honest number is TWO, not four" — so the artifact contradicts the record that
+authored it. This is the one passage added to prove the count is derived, and it
+teaches the wrong evaluation: it silently drops accessible-and-empty phases that
+sit **upstream** of the barring edge.
+
+**Fix:** "…is `tokens` and `ast` — two, where the unbarred drawings show four."
+That demonstrates derivation better than one does. VERIFIED, not relayed.
+
+### Blocker 2 — the collapsed live-region argument leaked, and lost a property
+
+`bdf5077c` re-grounded "the rail cannot be a live region" from _stations are
+controls_ onto _it goes inert under strict_. Two problems.
+
+**(a) The new argument is posture-conditional; the old one was categorical.** It
+bites only under strict, so read literally it licenses a rail live region that
+merely goes quiet under strict — which collides with the announcer's third
+utterance, "the barring edge moving", giving two live regions for one event
+under warn. **(b) It is no longer rail-specific**, so it voids the Bench's
+recorded advantage — and **three appendix sites still assert the retired
+premise** [verified this session, all three]:
+
+- § Appendix, The Bench — "a readout that is also a set of buttons cannot be a
+  live region" (**this one is prettier-wrapped — a line-based grep will not find
+  it**; that is how the outgoing session missed it first pass)
+- the pass table, Journey 6 / Bench cell — "uniquely able to be a live region"
+- § The override — "The Bench's unique advantage was that its readout could
+  itself be a live region"
+
+**Sites, with line numbers measured at `bdf5077c` — re-measure, prettier moves
+them.** The argument: `ux/wireframes.md:100-104`. The three citations: `:559` (§
+Appendix, The Bench), `:580` (pass table, Journey 6 / Bench cell), `:617` (§ The
+override). **Two open scope questions the outgoing session did not resolve for
+you:** (a) `:559` and `:617` are HISTORICAL prose about a rejected candidate
+("Its argument: …", "was that its readout could…") — decide whether a recorded
+argument gets rewritten or annotated, and say which in the commit body; (b)
+`README.md`'s `announcer` glossary entry carries the same claim structure and is
+NOT obviously in blocker 2's scope. The 2026-08-15 ruling authorised editing
+`lib/masking/` for the **class-2 homes only** — blocker 2 is a different
+subject, so ask before reaching into that module again.
+
+**Fix:** restore a categorical claim that does not use the retired premise — _a
+live region whose content changes under the learner's hands, and whose subtree
+can go inert, cannot be the region's voice_ — then sweep all three appendix
+sites. The Bench's real advantage was **navigation**, not live-region
+capability: its readout is control-free, but it is still class 3 and still goes
+inert.
+
+### Blocker 3 — the five nouns still have no module home. DESIGN. FRESH SESSION
+
+**No `rail/` or `station/` directory exists, and nothing states where any of the
+five nouns mount.** (An earlier revision said they "appear nowhere outside the
+README glossary and the twin" — that is FALSE and `929d9086` is what falsified
+it: `announcer` is now in `DOCS.md`, `lib/masking/README.md` and
+`lib/masking/types.ts`, and `rail`/`station`/`announcer` all appear in
+non-glossary README prose. The module-home gap is the real claim; the
+absent-everywhere one is not.) `README.md § What lives here` still lists
+`phases-panel/ the five-phase study panel — the study layer, rendered`, which
+the glossary's `the rail` entry retires. **`Station` is the first type 0.3
+writes**, so 0.3 cannot start until this is decided.
+
+**AR-1's fourth-round point, and it is the sharp one:** the rail's class is
+argued only in the twin and is absent from all four definitional homes — which
+is the announcer's pre-`929d9086` position exactly. Here the class-3 residual
+happens to give the right answer, so no bug ships; but the campaign spent a
+standalone rule-amendment commit establishing that this arrangement is a defect,
+then reproduced it one surface over.
+
+**AR-1's counter-proposal:** `rail/` owns the line, stations, trays and the
+barring edge; the **nameplate** and the **announcer** live with the top
+component, because only the composition root can guarantee the announcer renders
+outside both maskable containers. That also answers wireframes' review-ask 3.
+
+### The six IMPORTANT — batch these into the same commit
+
+1. **The class-3 warrant misdescribes itself.** Rejecting AR-1 round 3's
+   containment ground was RIGHT [confirmed by round 4]. But the substitute —
+   supersession of the strip — is a fact about **lineage**, not about what the
+   surface IS, while the sentence's own gloss claims the latter. It also cites a
+   surface 0.3 may abolish. **Better ground: exhaustion** — not editor-based,
+   not a node that must survive every posture (it restores nothing and silences
+   nothing, since the announcer carries the voice), so class 3 is what is left.
+   Kit-independent, lineage-independent, container-independent.
+2. **`containment decides` is now ACTIVELY harmful**, not merely carried. Before
+   the widening it had one loud counterexample (the Generate code button). After
+   it, the announcer is class 2 **and** outside both containers — so the false
+   rule just gained a confirming instance, in the file 0.3 opens next. Delete
+   the four-word parenthetical; zero consumers.
+3. **The barred-precedence rule lives only in the twin** while the zero- and
+   singular-rules live in the README's `display labels`. Same contract, split
+   homes. One clause fixes it.
+4. **`kit` silently redefines a package term** — the package README uses it for
+   the learner's whole roster, the twin for one phase's lenses. And "survives a
+   kit of zero" is the acceptance test BOTH re-grounded arguments are declared
+   to pass, so the two readings are not the same test.
+5. **`band` (34 uses) and `control row` (8) have no glossary entry**, and
+   `control row` is a mask-boundary object. This is the missing-concepts lens
+   four rounds have not covered.
+6. **"R2" is this file's label, not the artifact's — the sentence carries no
+   such name.** It is in `README.md`'s `display labels` glossary entry (around
+   `:387`, prettier-wrapped and invisible to a line-grep): "**And display copy
+   never carries contract vocabulary**". It is stated too broadly and the
+   region's own copy falsifies it. "Display copy never carries contract
+   vocabulary" — but the copy says "four **phases** have nothing to open yet",
+   and `phase` is package glossary vocabulary. Narrow it to machine tokens and
+   coined contract terms.
+
+**Four MINOR were returned and only ONE is recorded here — the other three are
+LOST.** Re-running `ar-1` will NOT recover them: that produces a new review
+against the current tree, not round 4's prose. Either accept the loss or treat
+round 5's verdict as the complete list. The one recorded, and it is worth taking
+on sight: **"The mask is an inert overlay" is backwards in the live DOM** — four
+sites, `README.md:173`, `README.md:342`, `lib/masking/README.md:47`, and the
+comment at `index.tsx:333` — `inert` sits on the two `data-maskable` containers
+and the overlay carrying the blocked sentence is a non-inert sibling. An
+implementer taking it literally removes the most important sentence in the
+instrument from the accessibility tree.
+
+---
+
+## ROUND 3's SEVEN FINDINGS — ALL RESOLVED 2026-08-15; READ THIS BANNER FIRST
 
 **Everything in this section below the banner is the round-3 report as written,
 kept because the reasoning is auditable. It is no longer a task list.** The
@@ -385,9 +550,12 @@ the per-file checkpoint results; and a justification if you used `--no-verify`.
 
 ## Mechanics that will bite you
 
-- **COMMIT THIS FILE.** It was untracked when written — the deferral's "only
-  durable home" was one `git clean -fd` from gone. If you find it untracked
-  again, commit it before anything else.
+- **COMMIT THIS FILE IF `git status --short` SHOWS IT AT ALL** — untracked OR
+  modified. An earlier revision guarded only _untracked_, which does not fire
+  once the file is tracked; it has since sat dirty with two hundred uncommitted
+  lines that were the only record of a whole AR round. It was untracked when
+  written — the deferral's "only durable home" was one `git clean -fd` from
+  gone. If you find it untracked again, commit it before anything else.
 - **Shared worktree, and it moves during your session.** Three files staged by a
   concurrent session sit in the index and are not yours. There are also
   **unstaged foreign modifications including a DELETION** (`MVP-ROADMAP.md`
@@ -415,24 +583,45 @@ the per-file checkpoint results; and a justification if you used `--no-verify`.
 - **cspell registration is per-file**, via an inline `<!-- cspell:ignore … -->`
   header. British spellings and coinages need it; check what each target file
   already registers before assuming a word is new.
-- **`git grep` and single-line greps LIE on this repo's prettier-wrapped
-  markdown.** Unwrap first — and **`tr '\n' ' '` is NOT enough**, which is the
-  form an earlier revision of this file prescribed. It replaces the newline but
-  leaves the wrap's leading indent, so a phrase spanning a wrap becomes
-  `stations are<3 spaces>controls` and a literal grep misses it. Squeeze:
+- **THREE SEPARATE GREP TRAPS, and the third one bit this campaign hardest.**
+  1. **`git grep` and single-line greps LIE on prettier-wrapped markdown.** A
+     phrase spanning a wrap is never on one line. Unwrap first.
+  2. **`tr '\n' ' '` is NOT a sufficient unwrap**, which is the form an earlier
+     revision of this file prescribed. It replaces the newline but leaves the
+     wrap's leading indent, so the phrase becomes
+     `stations are<3 spaces>controls` and a literal grep still misses it.
+     Squeeze whitespace instead: `tr -s '[:space:]' ' '`. [measured **at
+     `8cc4bc15`**, via `git show 8cc4bc15:<path> | tr …`: `stations? are
+     controls` → **2** hits under the old form, **3** under the squeezed one,
+     and the missed one was finding 5's fifth dependent site. **It reproduces
+     only at that SHA** — `bdf5077c` removed the phrase, so at HEAD you get 0/0
+     and would wrongly conclude the defect is imaginary.]
+  3. **NEVER COUNT WITH A CONTEXT WINDOW.** An earlier revision prescribed
+     `grep -oE ".{0,60}<pat>.{0,60}"` for everything. `grep -o` **consumes
+     overlapping matches**, so two hits closer together than the window collapse
+     into one and the count comes back SILENTLY LOW [measured 2026-08-15:
+     `barring edge` in `ux/personas.md` → the context form reports **1**; the
+     truth is **2**]. Separately, `grep` here is **ugrep**, which rejects wide
+     windows over multi-byte text with "exceeds complexity limits" — piped to
+     `wc -l` that also prints a clean-looking `0`. Both failures look like
+     success.
+
+  **So use two different commands and do not mix them up:**
 
   ```bash
-  tr -s '[:space:]' ' ' < file | grep -ioE ".{0,60}<pattern>.{0,60}"
+  # COUNT — bare pattern, no context window, no overlap loss
+  tr -s '[:space:]' ' ' < file | grep -oiE '<pattern>' | wc -l
+
+  # READ the hits — python consumes no overlaps and has no complexity limit
+  python3 -c "
+  import re,sys
+  t = re.sub(r'\s+', ' ', open(sys.argv[1]).read())
+  for m in re.finditer(sys.argv[2], t, re.I):
+      print(f'…{t[max(0, m.start()-70):m.end()+70]}…')" <file> '<pattern>'
   ```
 
-  [measured 2026-08-15: `stations? are controls` → **2** hits under the old
-  form, **3** under the squeezed one. The missed hit was finding 5's fifth
-  dependent site — the defect in this file's own tool is what hid the site this
-  file's own finding undercounted.] Single-token patterns (`\bbreaks?\b`) are
-  immune; multi-word ones are not. Note also that `grep` here is ugrep, which
-  rejects `.{0,70}` context windows around multi-byte characters with "exceeds
-  complexity limits" — for wide context, use python's `re` over
-  `re.sub(r'\s+',' ',text)` instead.
+  Single-token patterns (`\bbreaks?\b`) are immune to trap 2 but **not** to
+  trap 3.
 
 - **`markdownlint-cli2` resolves its config from the CURRENT WORKING
   DIRECTORY**, not from the linted file's tree. Run it from the **repo root** or
@@ -478,15 +667,48 @@ this document. Run the grep; it is mechanical and does not depend on judgment.
 
 ## Recommended opening move
 
-Commit this file if untracked. Then fix findings 1, 3, 4, 6 and 7 (mechanical),
-and decide 2 and 5 — putting 5 to the human. Verify each with a grep for every
-sentence citing what you touched. Then re-run `ar-1` (registered agent, **no
-`model` parameter**, strictly read-only) over `orchestrate/README.md` plus all
-three `ux/*.md` together. Commit the fixes before re-running, so the reviewer
-reads a committed artifact.
+**Read § ROUND 4 first — that is the open work.** Then, in this order:
 
-When it clears, 0.2 closes and 0.3 opens: `types.ts`, the `DOCS.md` sketch
-amendment, the vocabulary migration above, and the tests written for real and
-committed skipped — then `ar-2`, then the human gate.
+1. **Fix blockers 1 and 2**, which are verified and bounded. Blocker 2 needs the
+   three appendix sites swept together with the argument they cite — sweeping
+   the argument and not its citations is exactly how rounds 2, 3 and 4 each made
+   the next round's findings.
+2. **Put blocker 3 to the human.** It is a design decision, it shapes `Station`
+   — the first type 0.3 writes — and AR-1 has raised it in every round. Take
+   AR-1's counter-proposal as the starting position, not as the answer.
+3. **Batch the six IMPORTANT into the same commit** (`DEV.md` § Adversarial
+   Review Protocol: fix all unless one is out of scope). Two of them —
+   `containment decides`, and the class-3 warrant — are the same issue seen
+   twice, and one of them is now a live footgun in the file 0.3 opens next.
+4. **Re-run `ar-1`** (registered agent, **no `model` parameter**, strictly
+   read-only) over `orchestrate/README.md` plus all three `ux/*.md`, and name
+   `lib/masking/README.md`, `lib/masking/types.ts` and `DOCS.md` as
+   changed-in-cycle context — finding 2's "done when" spans all of them and a
+   reviewer given only the four contract files cannot verify it. Give it a
+   `## Changes since round 4` orientation with the SHAs, so it spends its budget
+   on the delta.
 
-Design work should open on the strongest available model tier.
+**Organise the work BY PASSAGE, not by finding.** That was round 4's one clear
+success: the definitional homes agreed, the dates held, the vocabulary rulings
+applied consistently, and the drawing rule verified mechanically. Where the pass
+still failed was the two places a rewritten ARGUMENT left a citing passage
+behind. So: for every sentence you rewrite, grep the distinctive noun phrase you
+REMOVED across all seven files before you move on. Derive that phrase list
+mechanically rather than from memory —
+`git diff --word-diff=porcelain -- <paths> | grep '^-'` gives you the removed
+words and your loss-ledger entries in one command.
+
+**Two mechanical aids this campaign built and you should use:**
+
+- `node scripts/check-governance.mjs --migration "<file>@HEAD" "<file>"` — the
+  repo's own loss-lister. It catches vanished headings, bold terms and
+  backticked tokens. Blind to plain sentences, table cells and fence bodies.
+- The drawing invariant: every full frame carrying a mark row must carry the
+  reason line; one that abbreviates the rail carries neither; band excerpts are
+  exempt. Two greps, not a re-reading.
+
+When AR-1 clears, 0.2 closes and 0.3 opens: `types.ts`, the `DOCS.md` sketch
+amendment, the `strip` vocabulary migration recorded above, and the tests
+written for real and committed skipped — then `ar-2`, then the human gate.
+
+**Design work runs on the strongest available model tier.**
