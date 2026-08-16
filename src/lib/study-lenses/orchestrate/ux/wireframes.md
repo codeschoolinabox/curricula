@@ -354,16 +354,24 @@ to reach than the repair, and the sentence is the one place the arrangement can
 push back on its own geometry.
 
 **The rail dims whole, and this is the Rail's own answer to a question the other
-candidates left open.** The rail is class 3 because of what it is: it is the
-study layer's opening surface and it **supersedes the lifecycle strip**, which
-is class 3 already — membership inherited from what the surface is, never from
-which container it happens to render in, which is the rule the mask states for
-every surface. And it dims **whole** rather than in parts because partial
-dimming of a lifecycle line would read as a machine state — one phase gone dark
-— rather than as a posture. Both halves survive a kit of zero, which the earlier
-argument did not: that one rested on the stations being controls, and four of
-five carry none. It also drops into the maskable container the phases panel
-already occupies, so the dimming needs no new mechanism.
+candidates left open.** The rail is class 3 because of what it is — and because
+the split is exhaustive, what it is can be read off the two classes it is not.
+It is not editor-based, so not class 1. Class 2 is the meta-level nodes that
+must survive every posture, and a node earns that place one of two ways: by
+restoring conformance, or by carrying the region's voice. The rail does neither.
+It narrates where the machine is, and narration is not restoration; the voice is
+the announcer's, for reasons stated above that have nothing to do with posture.
+So class 3 is the residue — and it is the right residue, because that is exactly
+what an orientation surface a posture may withdraw should be. Membership follows
+from what the surface is, never from which container it happens to render in,
+which is the rule the mask states for every surface. And it dims **whole**
+rather than in parts because partial dimming of a lifecycle line would read as a
+machine state — one phase gone dark — rather than as a posture. **Both halves
+survive a station with nothing to open**, which is the test the earlier
+arguments failed: the first rested on the stations being controls, and four of
+five carry none; the second rested on the rail being the study layer's _opening_
+surface, and a rail whose stations open nothing opens nothing. Neither ground
+above mentions a control, a tray, or a surface this design may abolish.
 
 **The cost is that orientation goes dark under strict, and it is not fully
 paid.** The announcer keeps speaking, because it renders outside both maskable
