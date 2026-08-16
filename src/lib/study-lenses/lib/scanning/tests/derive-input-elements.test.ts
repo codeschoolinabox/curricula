@@ -202,11 +202,11 @@ describe('deriveInputElements', () => {
 			expect(kinds('a += b')[2]).toBe('Punctuator');
 		});
 
-		it.skip('names a brace outside a template a RightBracePunctuator', () => {
+		it('names a brace outside a template a RightBracePunctuator', () => {
 			expect(kinds('{ }')[2]).toBe('RightBracePunctuator');
 		});
 
-		it.skip('names an optional chain a Punctuator', () => {
+		it('names an optional chain a Punctuator', () => {
 			expect(kinds('a?.b')[1]).toBe('Punctuator');
 		});
 
