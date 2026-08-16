@@ -396,9 +396,45 @@ every Gen-2 lens has one (8 of 8).
 
 ```bash
 glossterm() { # glossterm <file> <bold term as written>
-  awk -v n="$2" '$0 ~ "^- \\*\\*" n "\\*\\* —" { print $0 "…"; exit }' "$1"
+  awk -v n="$2" 'index($0, "- **" n "** —") == 1 { print $0 "…"; exit }' "$1"
 }
 ```
+
+⚠️ **`glossterm` matched a regex until 2026-08-16, and returned nothing for any
+term containing a metacharacter.** The published form interpolated the term into
+`$0 ~ "…"`, so `Diff (toggle)` was read as `Diff` followed by a **group**
+matching the literal `toggle` — the parentheses vanished, the space with them,
+and it searched for a run-together term that appears nowhere. It reported the
+term absent from **both** sides, which reads as a definitional loss and is not
+one [measured 2026-08-16 against `writeme/README.md`, where the term is defined
+on line 133: regex form → empty; literal-prefix form → the bullet].
+
+**This is the third helper in this campaign to carry that defect, and the other
+two were already fixed.** `resolve` and `firstblock` both match with `index()`
+for exactly this reason — see
+[FIDELITY-METHOD § The minimum walk set](../FIDELITY-METHOD.md#the-minimum-walk-set),
+where five of the six `does NOT do` headings carry a parenthetical and one
+carries a `+`, so `grep -E` returns 0 on precisely the class the rule exists
+for. `glossterm` was the one that kept the regex. It now matches a **literal
+prefix**, like its two siblings.
+
+**Blast radius, measured rather than assumed** [measured 2026-08-16 across the
+eight Gen-2 lens glossaries, then each hit read in place]: **two terms** —
+`writeme`'s `Diff (toggle)` and `trace-debugging`'s `Admission error (text)`.
+`writeme`'s ledger already carries the caveat on `writeme-038` and was seeded
+with the corrected form, so **`trace-debugging` is the one still ahead**: it is
+a Family F member, so `_family-f.md` must be cut with this form and not the old
+one.
+
+**A first count of four was wrong, and the two it over-counted are a different
+defect worth its own line.** `quiz`'s `Mastery` and `socratize`'s `Register`
+bullets put the whole phrase **inside** the bold span with no `—` separator
+after it — `- **Mastery — two channels.** Per-…` — so they do not match
+`glossterm`'s contract under **any** matching strategy, literal or regex. That
+is a source-convention divergence, not a helper defect, and it bites this
+campaign nowhere: both lenses are excluded
+([SPEC.md § Standing exclusions](../SPEC.md#standing-exclusions)). A ledger that
+ever does seed one of them extracts those two terms by hand and says so.
 
 **Three transport modifications are sanctioned, and none of them is authored:**
 
