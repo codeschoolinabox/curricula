@@ -1,28 +1,42 @@
-<!-- cspell:ignore actioned affordances checkpointed cutover authorised finditer misdescribes organise organised parentheticals respecified spellme ugrep unbuilt undercounted undercounts unretired unrun wireframes -->
+<!-- cspell:ignore acyclicity actioned affordances behaviour behavioural checkpointed codemod cutover authorised finditer misdescribes organise organised parentheticals respecified spellme ugrep unbuilt undercounted undercounts unretired unrun wireframes -->
 
 # orchestrate ux — resumption point
 
-**State: Phase 0 step 0.2 is written and NOT closed. ROUND 4 IS FULLY RESOLVED
-IN NINE COMMITS — all 3 blockers, all 6 IMPORTANT, and the one recorded MINOR.
-AR-1 ROUND 5 HAS NOT RETURNED A VERDICT.** Running it is the open work, and 0.2
-does not close until it returns PROCEED or CONSIDER. Do not start 0.3 before
-that.
+**State: Phase 0 step 0.2 is written and NOT closed. Round 4 is fully resolved
+in nine commits. AR-1 ROUND 5 HAS RUN AND RETURNED PAUSE — 4 blockers, 8
+IMPORTANT, 4 MINOR. Two of its blockers (B1, B2) are RESOLVED in `bbcfc9e5`; the
+other FOURTEEN findings are yours.** Do not start 0.3 until a round returns
+PROCEED or CONSIDER.
 
-**Round 5 was dispatched once and died in the harness** — the subagent stalled
-with no output and its watchdog killed it at 600s. Two Plan subagents died the
-same session on `API Error: Connection closed mid-response`. **This is
-infrastructure, not a verdict — read no signal into it, and do not record the
-review as having run.** If your own dispatch dies too, say so plainly rather
-than proceeding as though 0.2 were closed; an unrun AR is the one thing this
-campaign cannot paper over.
+**Your first task is § ROUND 5 below.** It is the open work and it is the only
+task list in this file.
 
-**Blocker counts by round: 3 → 4 → 5 → 3 → ?.** Read § The process failure to
-not repeat before you touch anything — it is still the most useful paragraph in
-this file, and the pass just executed was organised entirely around it.
+**Read § What round 5 says about this campaign's method before you fix
+anything.** Four of round 5's findings were created by round 4's own fixes, and
+one by its author mis-scoping a deferral. That is the fifth consecutive round in
+which the pass generated the next round's findings, and round 5's reviewer names
+the instrument that would break the cycle. Reaching for another grep sweep is
+the predictable wrong move.
 
-**Three human rulings were taken 2026-08-15 and are recorded in the documents
-they govern** — see the rulings table below, rows R-A/R-B/R-C. They are binding
-and are not to be re-litigated.
+**A ruling is already in hand for blocker 3 — see R-D.** It is a rule amendment,
+it ships alone, and **its home list is not the obvious one — read R-D's block in
+§ ROUND 5 before writing it.**
+
+**ONE ORDERING, and it overrides every other "first" in this file:** (0) if
+`git status --short` shows THIS FILE at all, commit it before anything else — §
+Mechanics explains why, and it has already happened twice; (1) write the
+decision list; (2) land R-D; (3) B4; then the rest. § Recommended opening move
+is the long form.
+
+**Blocker counts by round: 3 → 4 → 5 → 3 → 4.** It went back UP. Read § The
+process failure to not repeat, and then § What round 5 says about this
+campaign's method — the second supersedes the first as the more useful of the
+two.
+
+**Four human rulings are in hand — R-A/R-B/R-C (2026-08-15) and R-D
+(2026-08-16)** — see the rulings table. R-A/B/C are recorded in the documents
+they govern; **R-D is NOT yet written into its homes and that is your first
+commit.** All four are binding and none is to be re-litigated.
 
 **Run the design work on the strongest available model tier.**
 
@@ -39,7 +53,8 @@ line.
 moved them.** The `orchestrate/` tree was byte-identical to `bdf5077c` when that
 pass opened [measured: `git diff --stat bdf5077c..HEAD --
 src/lib/study-lenses/orchestrate/` → empty, run at HEAD `542d4771`], so anything
-below tagged with a line number is now stale by the nine commits in the table.
+below tagged with a line number is now stale by the ELEVEN commits in the tables
+— `bbcfc9e5` alone moved `README.md` by ~65 lines and `ux/wireframes.md` by ~34.
 **The passages are still findable by their quoted phrases; re-measure the
 numbers.**
 
@@ -57,7 +72,8 @@ silently undercounts, a false claim in blocker 3, a measurement reproducible
 only at a SHA the file no longer names, and a "commit this file" instruction
 guarding the wrong condition. **All four are fixed above, and the pattern is the
 point: each validation found errors the author could not see.** Re-measure
-anything here you intend to rely on, including the counts in § ROUND 4.
+anything here you intend to rely on, including the counts in § ROUND 4 and §
+ROUND 5.
 
 ## What this campaign is
 
@@ -103,6 +119,8 @@ than restates.
 | `1e7b1540` | IMPORTANT 3 — the empty count's three rules share one home                                       |
 | `a80b39e2` | IMPORTANT 4 + 5 — `kit`, `band` and `control row` enter the glossary                             |
 | `0173b1c2` | the recorded MINOR — the mask is what goes inert, not the overlay                                |
+| `ab9e92f8` | this resumption point catches up with the nine above                                             |
+| `bbcfc9e5` | **round 5's B1 + B2** — a station carries four named things, none of them a fit mark             |
 
 **Why the order was load-bearing, and the trap for anyone re-doing this.** The
 announcer's necessity was argued FROM the rail going inert under strict — that
@@ -203,11 +221,12 @@ is recorded with a dated `(human ruling 2026-08-15)` parenthetical in the
 document it governs, per `DEV.md § Ruling provenance` — not only in a commit
 body.
 
-| #   | Ruling                                                                                                                                                                                                                              | Home                                                               |
-| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| R-A | **Module homes take AR-1's split.** `rail/` owns the line, the stations, the trays and the barring edge; the **nameplate** and the **announcer** live with the top component. `rail/` replaces `phases-panel/` in § What lives here | `orchestrate/README.md`, § What lives here + five glossary entries |
-| R-B | **A recorded argument is ANNOTATED; live reasoning is REWRITTEN**                                                                                                                                                                   | `ux/wireframes.md` § Appendix, the `†` correction                  |
-| R-C | **`lib/masking/README.md` may be edited for the inert-overlay correction**, notwithstanding that the class-2 ruling authorised only the class-2 homes                                                                               | `lib/masking/README.md`                                            |
+| #   | Ruling                                                                                                                                                                                                                              | Home                                                                                  |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| R-A | **Module homes take AR-1's split.** `rail/` owns the line, the stations, the trays and the barring edge; the **nameplate** and the **announcer** live with the top component. `rail/` replaces `phases-panel/` in § What lives here | `orchestrate/README.md`, § What lives here + five glossary entries                    |
+| R-B | **A recorded argument is ANNOTATED; live reasoning is REWRITTEN**                                                                                                                                                                   | `ux/wireframes.md` § Appendix, the `†` correction                                     |
+| R-C | **`lib/masking/README.md` may be edited for the inert-overlay correction**, notwithstanding that the class-2 ruling authorised only the class-2 homes                                                                               | `lib/masking/README.md`                                                               |
+| R-D | **The nameplate takes class 2**, by widening that class a SECOND time: a third way to earn it — _naming where the learner is_ — beside restoring conformance and carrying the voice. **Rule amendment, ships alone.** 2026-08-16    | the four class-2 definitional homes — NOT YET WRITTEN, this table is its interim home |
 
 R-A's warrant is structural and measured, not stylistic: **both**
 `data-maskable` containers are rendered by the top component's own return [read:
@@ -220,6 +239,171 @@ about containers that directory does not own.
 that was round 3's finding 7, since resolved. `DEV.md § Ruling provenance`: "A
 ruling recorded only in a commit body is findable but not readable where it
 binds."
+
+## ROUND 5 — PAUSE, 2026-08-16. THIS IS THE OPEN WORK
+
+`ar-1`, run at the `opus` pin, reported reading every input in full. **B1 and B2
+are RESOLVED in `bbcfc9e5`** (a station carries `phase`, `label`, `short label`,
+`standing`, `tray`; `standing` deliberately not called a mark, because `FitMark`
+is exported and means something else). **The other fourteen are open.**
+
+The outgoing session verified B1, B3, B4, I1, I2, I5, I7 and M1 independently
+rather than relaying them; all held. The rest are relayed [relayed: `ar-1` round
+5] and are **not** independently verified — re-measure before acting.
+
+### Blockers
+
+- **B3 · The nameplate has no surface class, anywhere** [measured: 5 mentions in
+  `README.md`, 5 in `ux/wireframes.md`, 0 assign a class]. The split is declared
+  exhaustive, and that exhaustiveness is the load-bearing premise of the two
+  arguments round 4 re-grounded. Run it on the nameplate and it falls to class 3
+  — so the pane's name goes `inert` under strict, leaving the accessibility tree
+  in the state the twin calls where "the way home is never covered" carries most
+  weight, and killing Journey 3's whole ask. **This is the pre-`929d9086`
+  announcer defect, one element over.** The twin's drawing already contradicts
+  it: the _Strict, covering — with a lens already open_ frame annotates the rail
+  "dim + inert" and the lens "covered", and draws the nameplate between them
+  unmarked.
+
+  **RULING R-D IS ALREADY TAKEN — see the rulings table. Class 2, by widening it
+  a SECOND time**: a third way to earn the class, _naming where the learner is_,
+  beside restoring conformance and carrying the voice. **This is a rule
+  amendment and ships alone** [read: `DEV.md` § Atomic Commits].
+
+  **R-D HAS SIX HOMES, NOT FOUR, AND ONE OF THEM IS A COLLISION.** An earlier
+  revision of this file said "the four class-2 definitional sites, the same set
+  `929d9086` edited" — wrong on both counts, and a context-free validation
+  caught it. `929d9086` touched **five files** [measured: `git show --stat
+  929d9086` → `DOCS.md`, `README.md`, `lib/masking/README.md`,
+  `lib/masking/types.ts`, `ux/wireframes.md`], while round 3's "four homes" are
+  four sites across three files. The two sets were never the same. The full set
+  for R-D:
+
+  | home                                                                                                     | what R-D does                   |
+  | -------------------------------------------------------------------------------------------------------- | ------------------------------- |
+  | `README.md` § Enforcement                                                                                | add the third earning route     |
+  | `README.md` glossary, `surface classes`                                                                  | same                            |
+  | `lib/masking/README.md` § The three surface classes                                                      | same                            |
+  | `lib/masking/types.ts`, the `SurfaceClass` JSDoc                                                         | same                            |
+  | `DOCS.md` — **Class-2 nodes never mask** (definitional; `929d9086` already had to correct this one once) | same                            |
+  | `ux/wireframes.md` — the rail's class-3 exhaustion argument                                              | **not a copy edit — see below** |
+
+  **THE COLLISION, AND IT IS DESIGN RATHER THAN WORDING.** `ux/wireframes.md`
+  grounds the rail's class 3 on exhaustion like this [read, verbatim]: "a node
+  earns that place **one of two ways**: by restoring conformance, or by carrying
+  the region's voice. The rail does neither. **It narrates where the machine
+  is**, and narration is not restoration". R-D's third route is _naming where
+  the learner is_. Those two predicates are one word apart. Landing R-D as a
+  copy edit leaves that argument saying "two ways" when there are three, **and**
+  resting on a distinction R-D has narrowed to almost nothing.
+
+  **Settle it before writing the amendment, and write the answer INTO the
+  argument.** The candidate distinction: the rail narrates the MACHINE's
+  position; the nameplate names WHICH SURFACE THE LEARNER IS ON. If that holds,
+  say so explicitly in the exhaustion argument — it is now load-bearing and it
+  is currently implicit. If it does not hold, R-D's route needs different
+  wording and the rail's class-3 ground needs re-examining, which reopens
+  `0c78c63c`. **This is the exact shape that produced rounds 3, 4 and 5's
+  blockers. It is written down here so round 6 does not have to discover it.**
+
+- **B4 · ORPHAN — `README.md` § What renders still specifies the STRIP's
+  behaviour.** "a barred phase renders barred with its cause; an accessible
+  phase lists its fitting lenses" [read, verbatim]. Both clauses are false of
+  the Rail: the Rail draws **one cause, once** (repeating it per barred phase is
+  named a failure in `personas.md`), and it **hides** the kit behind trays.
+  **The outgoing session declared this out of scope and was wrong** — the
+  deferral to 0.3 covers the `strip` VOCABULARY migration, and this is
+  BEHAVIOUR, in the section 0.3 reads to know what to render. No grep for
+  `strip` or `rail` reaches it, because it says neither.
+
+### The eight IMPORTANT
+
+**I1, I2, I5 and I7 were created by round 4's own fixes** [measured against
+`bdf5077c`]:
+
+- **I1 · The acyclicity claim is false in the artifact.** `ux/wireframes.md`
+  says the posture argument holds "a second time and **independently**". It does
+  not: _rail goes inert_ ⇐ _rail is class 3_ ⇐ _the voice is the announcer's_ ⇐
+  the announcer's own necessity. `0c78c63c`'s body asserted one-way dependency
+  that the shipped text does not have. The argument still stands on its first
+  ground alone; the word must go, and the sentence should be recast as a
+  downstream consequence so a later editor cannot leave a closed loop.
+- **I2 · ORPHAN — the twin still asks the review to settle where the announcer
+  mounts.** R-A settled it 2026-08-15 and the README records it. Left standing,
+  it invites 0.3 to re-open a ruling.
+- **I5 · The narrowed display-copy ban's own test contradicts the glossary.** It
+  forbids "a term this package **coined**" and cites `station` — while the
+  `station` entry says "The word is **reclaimed rather than minted**". Round 4
+  narrowed a rule falsified by the region's copy into one falsified by its
+  glossary. Reviewer's proposal: drop the minted/coined predicate for the
+  operational test — _would a learner who never read the glossary understand
+  it?_
+- **I7 · The `band` entry is falsified by three of the region's own elements.**
+  It claims to hold "everything the region renders that is not the program: the
+  control row and the rail" — but the guide, the proposals and the nameplate are
+  all rendered, all not the program, and all outside those two. Second, smaller:
+  `control row` calls itself "the one container that deliberately mixes" classes
+  while the `band` entry says the band mixes too.
+
+Not round 4's, and all four are contract-shaped:
+
+- **I3 · The blocked sentence's ORDERING rule lives only in the twin** — "fix
+  the code first, lift the guardrail last", which the twin calls the one place
+  the arrangement can push back on its own geometry. The README claims copy
+  ownership and states no ordering. Same split-homes defect `1e7b1540` closed
+  for the empty count.
+- **I4 · The README's copy inventory does not match the copy the twin draws**,
+  so the twin's claim that the README owns the copy overreaches (**the phrase
+  "owns every learner-facing string" is NOT in the README — do not grep for
+  it**; the actual `display labels` entry claims only "the five phases'
+  learner-facing labels and the none-state's display string"). Drawn with no
+  README home: the nameplate in two forms (`your code` / `the pane holds: …`)
+  with no rule for which applies, `waiting`, `ways to study the Source`,
+  `next, you could:`, and two of the four fit-mark strings.
+- **I6 · The `dispose` enumeration is knowingly stale in three definitional
+  homes** — `README.md`, `DOCS.md`, and `event-bus/README.md` all still
+  enumerate the strip's none entry as a live raiser; only the twin records that
+  the arrangement replaces it.
+- **I8 · The announcer has no channel, and two of its three utterances have no
+  event.** The bus taxonomy is six events; the blocked state has none (the mask
+  derives at render) and the barring edge has none (it changes inside a settle,
+  which the announcer is forbidden to speak). Both are edge-triggered and need a
+  remembered previous value that appears in no state-residency row — and any new
+  effect lands beside a **pinned** registration order. This is the announcer's
+  whole implementation and it is unspecified.
+
+### The four MINOR
+
+- **M1 · `SurfaceClass`'s class-2 literal is `'meta-control'`**, which its own
+  JSDoc concedes under-names the class. Independently re-measured: **1 consumer,
+  the declaration itself**. One line today, a codemod after 0.3.
+- **M2** the twin's never-covered list omits the announcer · **M3** unqualified
+  `kit` breaks the new entry's own default at `## The kit at 0, 1 and many` and
+  in `personas.md` · **M4** `DOCS.md` places the strip "beside the control row"
+  while the README puts the control row at the top of the band (AR-2's ground).
+
+### What round 5 says about this campaign's method — READ THIS BEFORE FIXING
+
+**Do not open round 6 as another sweep.** Five rounds of phrase-greps have now
+missed one orphan each, and BOTH misses this round (B4, I2) are in prose that
+never uses the retired term — no grep of any form reaches them. The reviewer's
+counter-proposal, and it is the most valuable thing in the verdict:
+
+> write the list of the arrangement's **decisions**, and check, per decision,
+> which sections assert something about it.
+
+That list is cheap to write once and is the instrument this campaign has been
+missing. Write it before the next fix pass, not after.
+
+Two further counter-proposals worth taking: fix nothing else before B3's
+amendment lands, since it is the only finding on the accessibility-tree critical
+path; and **give the slot beneath the rail a name** — three unnamed nouns
+compete for it ("the mark row", "the reason line"/"the count line", "the cause
+line") and the contract governing them is a _precedence_ rule, which is the tell
+that they are one element with two arms. Naming it settles B4's residue, I3's
+home question, and one of 0.3's types at once.
+
+---
 
 ## ROUND 4 — ALL RESOLVED 2026-08-15 IN NINE COMMITS; READ THIS BANNER FIRST
 
@@ -615,10 +799,15 @@ abolishes. Whether that directory survives at all is 0.3's question.
 
 ### Other 0.3 carry-forwards
 
-- **Module homes for the five new nouns** — rail, station, tray, nameplate,
-  announcer. `README.md § What lives here` is untouched and still lists
-  `phases-panel/ the five-phase study panel`. Nothing says where any of them
-  live. This is AR-1's primary lens and four rounds have not touched it.
+- ~~**Module homes for the five new nouns**~~ — **RESOLVED by `d33aef0a` (ruling
+  R-A). Every clause that stood here is now FALSE at HEAD**: § What lives here
+  lists `rail/`, `phases-panel/` is gone from the manifest, and `index.tsx` is
+  documented as the nameplate's and announcer's home. Kept struck rather than
+  deleted, because a reader who remembers this as open needs to see it closed.
+  **One residue nobody has filed:** `phases-panel/` still EXISTS on disk while
+  no longer appearing in the manifest. Listed-but-unbuilt `rail/` is correct
+  under `prospective`; unlisted-but-existing is a gap against `DEV.md` §
+  Directory Documentation Convention. Round 5 did not catch it.
 - **The editor-mode scrim geometry.** `wireframes.md` draws a full-width blocked
   sentence below the code in editor mode. In the live DOM the overlay is
   `position:absolute; inset:0` inside a wrapper whose only children are the
@@ -769,27 +958,49 @@ this document. Run the grep; it is mechanical and does not depend on judgment.
 
 ## Recommended opening move
 
-**Round 4 is closed. `ar-1` round 5 has been dispatched and its verdict is the
-open item.** In this order:
+**Round 5 returned PAUSE. Fourteen findings are open; B1 and B2 are done.** In
+this order:
 
-1. **Read round 5's verdict.** If it was lost with the session that dispatched
-   it, re-run `ar-1` — registered agent, **no `model` parameter**, strictly
-   read-only — over `orchestrate/README.md` plus all three `ux/*.md`, naming
-   `lib/masking/README.md`, `lib/masking/types.ts`, `lib/masking/DOCS.md` and
-   `DOCS.md` as changed-in-cycle context. Several findings' "done when" spans
-   those, and a reviewer given only the four contract files cannot verify them.
-   Give it a `## Changes since round 4` orientation listing the nine SHAs so it
-   spends its budget on the delta.
-2. **On PROCEED or CONSIDER: 0.2 closes.** CONSIDER means document a response to
-   each concern and continue — it does not mean another round.
-3. **On PAUSE: present to the human. Do not self-resolve a fifth round.** And
-   check the shape before proposing anything: if round 5's blockers are again
-   traceable to the round-4 pass's own fixes, that is the handoff signal, not
-   the fix-again signal. Four rounds have now been spent on a document nobody
-   outside its author has read, which is itself finding 7 of the wireframes' own
-   review asks.
-4. **Whatever the verdict, `git status --short` this file and commit it if it
-   shows at all** — see § Mechanics.
+1. **Write the decision list FIRST, before any fix.** See § What round 5 says
+   about this campaign's method. Five rounds of greps have missed one orphan
+   each; both of round 5's misses are in prose that never uses the retired term.
+   The list of the arrangement's decisions, checked per decision against which
+   sections assert something about it, is the instrument that catches those. It
+   is cheap once. Doing another grep sweep instead is the predictable wrong move
+   and it has failed five times.
+2. **Land R-D — the nameplate's class 2 widening.** It is the only open finding
+   on the accessibility-tree critical path, the ruling is already taken, and it
+   is a **rule amendment, so it ships alone**. Its four homes are the class-2
+   definitional sites `929d9086` edited. Until it lands, R-D lives only in this
+   file's rulings table, which `DEV.md § Ruling provenance` calls findable but
+   not readable where it binds.
+3. **Then B4**, which is a scope correction as much as an edit: the behavioural
+   half of the strip migration comes forward; the vocabulary half stays
+   deferred. Say which in the commit body, because the last session got exactly
+   this line wrong.
+4. **Then the eight IMPORTANT.** Four are round 4's own damage (I1, I2, I5, I7)
+   and are small. I8 is not small — the announcer has no channel and two of its
+   three utterances have no event, which is a `types.ts` question, not a prose
+   one, and it may belong to 0.3 rather than here. **Decide that explicitly
+   rather than by omission.**
+5. **The four MINOR.** M1 is one line and free today.
+6. **Re-run `ar-1`.** Registered agent, **no `model` parameter**, read-only.
+   Inputs: `orchestrate/README.md` plus all three `ux/*.md`, naming
+   `lib/masking/{README,DOCS,types}`, `DOCS.md`, `event-bus/` and `index.tsx` as
+   changed-in-cycle context. Give it a `## Changes since round 5` orientation
+   with the SHAs.
+
+**On the next PAUSE, do not open round 7 alone — put it to the human.** Rounds
+have now gone 3 → 4 → 5 → 3 → 4 blockers with every pass generating some of the
+next round's findings. Round 5's own reviewer says a sixth sweep is the wrong
+instrument.
+
+**A note on the harness, because it cost the last session hours.** Four subagent
+dispatches failed before one succeeded — two Plan agents and two `ar-1` runs, on
+`API Error: Connection closed mid-response` and one 600s stall. The one that
+worked was **resumed from its own dead transcript** via a follow-up message
+rather than relaunched cold, which preserved ~150k tokens of reading. If a
+reviewer dies mid-run, try resuming it before you spend the budget again.
 
 **Organise the work BY PASSAGE, not by finding.** The round-4 resolution was run
 this way end to end and it is the reason the nine commits scatter the finding
