@@ -30,6 +30,47 @@ holds 71, the module is implemented through the naming rule, and `1c6736c9`
 landed the first un-skip. Where that file and this brief disagree outside §
 Rulings of record, this brief is current.
 
+## ⚠ Resume here — two increments are already done
+
+This brief launched once. The worker landed two increments and then died three
+times on harness faults, twice at the identical call. **Nothing was lost; the
+discipline held.** Where you pick up, measured 2026-08-16:
+
+| SHA        | Increment                                                        |
+| ---------- | ---------------------------------------------------------------- |
+| `065afc16` | a backtick opens a template run that folds into one element      |
+| `7046bc01` | a right brace continuing a template opens the run that closes it |
+
+Suite: **32 passing, 39 skipped (71)**; `npx tsc --noEmit` 0; eslint exit 0.
+Sketch phase 2 (`foldTemplateRuns`) now exists. Phases 1 and 4 still do not. So
+§ Inherited state's 22-green/25-red table below is measured at `2989d9e1` and is
+now **stale by two increments** — re-measure before planning.
+
+**Your next increment is `folds a chunk carrying a tag-only escape`**, and it is
+not a small one. `isTemplateChunk` recognizes `tt.template` but not
+`tt.invalidTemplate`, and AR-4 established that this is not merely a missing
+triangulation — it corrupts output today on a program `acorn.parse` accepts
+[measured 2026-08-16]: on ``tag`a${x}\unicode`;let z = 1`` the closing backtick
+is mistaken for an opener and the span it starts **swallows the semicolon after
+the template** into a fabricated `Template` element. The fix is one line in
+`isTemplateChunk`, with two call sites and no other change needed; `7046bc01`'s
+body carries the full finding.
+
+### ⚠ AR dispatch — standing arrangement, not a one-off
+
+**A worker in this campaign could not spawn `ar-4`: three stalls, two of them at
+exactly that call.** [read: AGENTS.principal.md § Execution mechanics — "A
+worker that cannot spawn the registered reviewers pauses at the trigger and
+reports the reviewer's input paths; the orchestrator dispatches the registered
+agent and resumes the worker with the verdict."]
+
+So: **try to spawn `ar-4` yourself. If it fails or stalls, do not retry it and
+do not skip it.** Stop at the trigger and report — with the increment's
+description, the exact pathspec of the uncommitted change, and the Phase-0 spec
+paths. The orchestrator dispatches and returns the verdict. The gate always
+fires; only its dispatcher moves. **Never commit an increment whose AR-4 has not
+returned.**
+
 ## First act — governance, before anything else
 
 Read the repo-root `CLAUDE.md` router. Check your own model id against its
