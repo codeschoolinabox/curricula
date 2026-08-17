@@ -116,17 +116,23 @@ Three facts about that data shape every drawing below:
   somewhere else whatever the rail does; a rail that spoke would be a second one
   beside it. The third, the barring edge moving, **is** on the rail, and _one
   voice for one sentence_ below then decides which of the two says it: the one
-  that can say all three. The posture makes the same point a second time and
-  independently — the rail goes inert under strict, and `inert` removes a
-  subtree from the accessibility tree entirely, so a live region there would
-  fall silent under the exact posture whose transition most needs announcing.
-  The announcer is what pays that debt. It is **class 2**, and one of the two
-  members of that class that are not controls — the nameplate is the other. The
-  split is exhaustive, so the only alternative was class 3, which would put it
-  inert under strict and silence the very thing its placement exists to keep
-  speaking; class 2 therefore widened from meta-level _controls_ to the
-  meta-level **nodes** that must survive every posture (human ruling
-  2026-08-15). Three rules fix the rest of it:
+  that can say all three. The posture makes the same point again, **downstream
+  rather than independently** — the rail goes inert under strict, and `inert`
+  removes a subtree from the accessibility tree entirely, so a live region there
+  would fall silent under the exact posture whose transition most needs
+  announcing. That the rail goes inert follows from its being class 3, and the
+  class-3 argument below rests in part on the voice already being the
+  announcer's, so this paragraph is a **consequence** of the ground above and
+  not a second proof of it. Stated that way deliberately: an earlier revision
+  called it independent, which would have left a later editor free to close the
+  loop. **The first ground stands alone and does the work** — two of the three
+  utterances are not on the rail at any posture. The announcer is what pays that
+  debt. It is **class 2**, and one of the two members of that class that are not
+  controls — the nameplate is the other. The split is exhaustive, so the only
+  alternative was class 3, which would put it inert under strict and silence the
+  very thing its placement exists to keep speaking; class 2 therefore widened
+  from meta-level _controls_ to the meta-level **nodes** that must survive every
+  posture (human ruling 2026-08-15). Three rules fix the rest of it:
   - **Placement.** It renders outside both maskable containers — not because it
     is a control that must stay reachable, but because `inert` removes a subtree
     from the accessibility tree entirely, and a silenced announcer is worse than
@@ -725,10 +731,18 @@ costs and what it does not:
 2. **The arrangement replaces a contract-named dispose raiser.** With no strip,
    the strip's none entry has no analogue; the open lens's tray entry takes its
    place. The dispose enumeration changes, and 0.3 should amend it deliberately.
-3. **The announcer is a new permanent element** with no precedent in this region
-   and no home in the current DOM. Its class is settled — class 2 by ruling
-   (2026-08-15), which widened that class from controls to nodes — but where it
-   mounts is not.
+3. **The announcer is a new permanent element** with no precedent in this
+   region, and what is open about it is no longer its class or its home. Both
+   are settled: class 2 by ruling (2026-08-15, widening the class from controls
+   to nodes; 2026-08-17, widening it again and stating the four routes), and the
+   **top component** renders it, outside both maskable containers, by ruling
+   (2026-08-15) — the region README records both. **What is still owed is its
+   channel.** The bus taxonomy is six events, and two of the announcer's three
+   utterances have none: the blocked state derives at render, and the barring
+   edge changes inside a settle, which the announcer is forbidden to speak. Both
+   are edge-triggered and need a remembered previous value that appears in no
+   state-residency row, beside a pinned registration order. That is 0.3's, and
+   it is the announcer's whole implementation.
 4. **Journey 4's trap is a component-decomposition question**, not a layout one.
    It is named here so it is not mistaken for something the band's order can
    fix.
