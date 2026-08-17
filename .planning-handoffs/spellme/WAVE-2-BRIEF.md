@@ -8,8 +8,9 @@
 # tdd-worker launch brief — `lib/scanning` Phase 1, Wave 2
 
 You finish `src/lib/study-lenses/lib/scanning/`. Wave 1 landed 24 of the suite's
-71 tests across ten commits and stopped deliberately before the template fold.
-**You own the remaining 47.**
+71 tests across ten commits and stopped deliberately before the template fold;
+wave 2 has since landed 8 more. **You own the remaining 39** — the "47" this
+line carried was wave 2's opening figure and is two increments out of date.
 
 Process rulings governing this campaign are in
 [`./PHASE-1.md` § Rulings of record](./PHASE-1.md) — nine bullets, eight of them
@@ -21,14 +22,30 @@ bullets carry the phrase; the ninth, AR-5 ownership, is the orchestrator's own
 assignment and says so rather than borrowing the human's authority. Read that
 section. Do not re-litigate any of them; if one seems wrong, report FLAG.
 
-⚠ **Only `PHASE-1.md` § Rulings of record is live.** That file was written
-before Phase 1 began and its other sections have not been updated: they still
-say wave 1 owns Template folding, that the suite holds 67 tests, that
-`derive-input-elements.ts` is "currently throwing", and that the first un-skip
-is still ahead. All four are stale — Template folding is **yours**, the suite
-holds 71, the module is implemented through the naming rule, and `1c6736c9`
-landed the first un-skip. Where that file and this brief disagree outside §
-Rulings of record, this brief is current.
+⚠ **Read three sections of `PHASE-1.md`, not one: § Rulings of record, § Traps,
+and § What Phase 1 is.** All three are live and this brief depends on all three.
+
+- **§ Traps** carries items this brief does not duplicate — plant no new
+  `PINNED(` markers, the per-file markdownlint form is `--no-globs "<file>"`,
+  and `repo-facts.mjs` caches its markdownlint number for 24 hours.
+- **§ What Phase 1 is** carries two rulings this brief cites but does not
+  restate: **five phases, three named helpers** (the guard and the merge stay
+  inline), and **Fake It expires at `One`** — under tests-committed-skipped,
+  DEV.md's "when the next test is written" means "when the next test is
+  un-skipped".
+- **§ Where things stand** carries this campaign's SHA list, which AR-5 takes.
+
+⚠ **An earlier draft of this brief told you the rest of that file was stale, and
+named four claims it does not make. That was false, and it cost this document
+its own credibility.** [measured 2026-08-16: `PHASE-1.md` line 12 — "Template
+folding, which wave 1 did **not** reach"; line 86 — "**71 tests** since the
+second Phase-0 top-up"; line 74 — "**Implemented through the naming rule and the
+gap fill as of `2989d9e1`**"; line 90 — "The first un-skip was … it landed in
+`1c6736c9`".] All four are current in that file. Its only "throwing" line is
+about `spellme/core.ts`, and that one is **true**. Treat `PHASE-1.md` as
+accurate. Where it and this brief disagree about **arrival state** — which tests
+are green today — this brief is the later measurement; that is a freshness
+difference, not an error in that file.
 
 ## ⚠ Resume here — two increments are already done
 
@@ -44,9 +61,10 @@ discipline held.** Where you pick up, measured 2026-08-16:
 Suite: **32 passing, 39 skipped (71)**; `npx tsc --noEmit` 0; eslint exit 0.
 Sketch phase 2 (`foldTemplateRuns`) now exists. Phases 1 and 4 still do not.
 
-⚠ **Everything measured at `2989d9e1` is stale by two increments — the table
-below AND every forward prediction built on it.** Re-measured at HEAD
-(`7046bc01`), the 39 still-skipped tests stand at **25 green / 14 red**:
+⚠ **Everything measured at `2989d9e1` is stale by two increments — that means §
+Inherited state's 22-of-47 table far below, and every forward prediction built
+on it, NOT the table that follows this line.** Re-measured at HEAD (`7046bc01`),
+the 39 still-skipped tests stand at **25 green / 14 red**:
 
 | Block                      | Green | Red   |
 | -------------------------- | ----- | ----- |
@@ -59,12 +77,18 @@ below AND every forward prediction built on it.** Re-measured at HEAD
 | Exceptions                 | 2     | 1     |
 | Simple                     | 3     | 0     |
 
+That table has since been confirmed by a second, stronger instrument [measured
+2026-08-16: all 39 `it.skip(` un-skipped in the working tree, the suite run with
+`--reporter=verbose`, then the file restored and proven byte-identical via `git
+hash-object` (`77117228398e9a769a41d87c000943f7b999d0ea` before and after) — `14
+failed | 57 passed (71)`, block for block identical to the `esbuild
+--external:acorn` replay above]. Two independent instruments now agree.
+**Re-measure anyway**; the numbers below age the moment you commit.
+
 **Expect roughly 14 increments, not 25**, and **there are THREE all-green sets,
-not one** — Right-brace, Boundaries and Simple. The brief below calls Boundaries
-"the all-green set" in the singular; that is wrong, and the rule it attaches
-there applies to all three. It also predicted Right-brace would arrive 2/1 with
-the object-literal brace still red; measured, that one went green first at
-`065afc16` and the block is now wholly green.
+not one** — Right-brace, Boundaries and Simple. The do-not-close-an-increment
+rule applies to each of the three, and § Un-skip order below now says so at each
+one.
 
 **Re-measure before planning. Trust no arrival-state prediction in this
 document, including this one.**
@@ -82,31 +106,134 @@ not a small one. `isTemplateChunk` recognizes `tt.template` but not
 triangulation — it corrupts output today on a program `acorn.parse` accepts
 [measured 2026-08-16]: on ``tag`a${x}\unicode`;let z = 1`` the closing backtick
 is mistaken for an opener and the span it starts **swallows the semicolon after
-the template** into a fabricated `Template` element. The fix is one line in
-`isTemplateChunk`, with two call sites and no other change needed; `7046bc01`'s
-body carries the full finding.
+the template** into a fabricated `Template` element. The predicate change is one
+line in `isTemplateChunk`, which has two call sites; `7046bc01`'s body carries
+the full finding.
+
+⚠ **An earlier draft of this brief said "no other change needed". That was
+wrong, and taking it literally ships two false comments.** Two JSDoc blocks in
+`derive-input-elements.ts` encode campaign status that goes **false the moment
+your predicate change lands** [read: `derive-input-elements.ts`,
+`isTemplateChunk` — "Two token types carry a chunk, and only one is recognized
+here. The other … is not yet triangulated by a live test, and until it is, a
+tagged template carrying such an escape is read wrongly"; and `runEnd` — "That
+branch is reachable today, not theoretical … It is dead only once every
+template-chunk type is admitted below"]. Both are in your increment's scope.
+This is the exact failure wave 1 already paid for — `2989d9e1` had to remove a
+comment claiming something the tests could not hold — and § No status hedging in
+source below forbids it: **a comment no test can hold is an unversioned second
+spec.**
+
+`runEnd`'s comment also poses a live question rather than merely aging: once
+both chunk types are admitted, is that `chunkCount === -1` branch still
+reachable? **Here is what is actually measured, and it is less than it looks**
+[measured 2026-08-16, `acorn.tokenizer` at `ecmaVersion: 2024`, `sourceType:
+'module'`, forced with `Array.from`]:
+
+```text
+"`abc"       -> THROWS "Unterminated template (1:1)"
+"tag`a${x}"  -> tokenizes, 6 tokens
+"`a${b}"     -> tokenizes, 5 tokens
+```
+
+So "an unterminated template always throws" is **false** — two of three
+unterminated shapes tokenize cleanly. Neither leaves an _unclosed run_ (each
+ends on a `}` whose successor is absent, and absent is not a chunk, so no run
+opens), but three probes do not exhaust the space, and a one-shape probe
+certainly does not.
+
+**Your direction: keep the branch, rewrite the comment.** Say what the branch
+guarantees — this phase stays total, so the boundary keeps the only throw site —
+with no claim about what is reachable today and no campaign status. Do not
+delete it on an unproven reachability argument: with the guard gone,
+`openerIndex + chunkCount + 2` at `chunkCount === -1` evaluates to
+`openerIndex + 1`, so `tokens[end - 1]` silently returns the opener's own span
+instead of crashing — a wrong answer where there is now a total one.
+
+If you still conclude deletion is right, **put the question and your evidence in
+the AR-4 prompt explicitly and abide by the verdict.** Do not delete it
+silently: it is a structural decision no test in this suite can hold either way,
+which is exactly what the gate is for.
 
 ### ⚠ AR dispatch — standing arrangement, not a one-off
 
 **A worker in this campaign could not spawn `ar-4`: three stalls, two of them at
-exactly that call.** [read: AGENTS.principal.md § Execution mechanics — "A
-worker that cannot spawn the registered reviewers pauses at the trigger and
-reports the reviewer's input paths; the orchestrator dispatches the registered
-agent and resumes the worker with the verdict."]
+exactly that call.**
 
-So: **try to spawn `ar-4` yourself. If it fails or stalls, do not retry it and
-do not skip it.** Stop at the trigger and **report BLOCKED** — that is the
+**The rule, stated here rather than only cited.** A worker that cannot spawn the
+registered reviewers pauses at the trigger and reports the reviewer's input
+paths; the orchestrator dispatches the registered agent and resumes the worker
+with the verdict. That text is [read: AGENTS.principal.md § Execution mechanics
+— "A worker that cannot spawn the registered reviewers pauses at the trigger and
+reports the reviewer's input paths; the orchestrator dispatches the registered
+agent and resumes the worker with the verdict."], and **your own agent
+definition carries it too** [read: `.claude/agents/tdd-worker.md` — "If a
+registered reviewer will not spawn, pause at the trigger and report the
+reviewer's input paths — the orchestrator dispatches the review and resumes
+you"]. What it is **not** in is `AGENTS.md` [measured 2026-08-16: `grep -n
+"pauses at the trigger\|cannot spawn the registered" AGENTS.md` → no match; the
+same grep against `AGENTS.principal.md` → line 720]. So if the router sent you
+to `AGENTS.md`, do not go looking for it there and do not conclude it does not
+bind you.
+
+⚠ **DEV.md offers a third option and this campaign overrides it.** [read: DEV.md
+§ Adversarial Review Protocol — "Fall back to a general-purpose subagent with
+the prompt structure pasted in only where the registered agents are
+unavailable."] **Do not take that fallback.** The reviewer roster's model pins
+live in the `ar-N` frontmatter, and a general-purpose subagent carries none of
+them — it would run the audit at whatever tier you happen to be, which is a
+silent change to a gate. The orchestrator can spawn `ar-4` when you cannot, so
+the pinned reviewer is available; it is only unavailable _to you_. Report
+BLOCKED and let it be dispatched.
+
+So: **try to spawn `ar-4` yourself, once. If it fails or stalls, do not retry it
+and do not skip it.** Stop at the trigger and **report BLOCKED** — that is the
 channel; a resumable pause is still "cannot finish" and there is no fourth
-channel. The report carries the increment's description, the exact pathspec of
-the uncommitted change, and the Phase-0 spec paths. **Leave your change in the
-working tree, unstaged, and do not commit it** — the orchestrator dispatches the
-review and commits from your verified tree, or resumes you with the verdict.
+channel.
+
+**Your BLOCKED report carries six things**, because your context is not a safe
+place to keep any of them — this wave has already died three times:
+
+1. The increment's one-line description, and which test drove it.
+2. The exact pathspec of the uncommitted change.
+3. The Phase-0 spec paths the reviewer needs: the implementation, the test file,
+   `types.ts`, and the DOCS.md sketch **including its Mermaid diagram**.
+4. **The commit body you drafted, verbatim** — settings line, sourced claims and
+   all. It is the increment's only record of why the change is what it is.
+5. **The one-line green-arrival records** for every test that rode in green:
+   what it would have caught, and which earlier increment forced it. The cycle
+   mandates these and they exist nowhere but in your head until you write them
+   down.
+6. The three vitest summary lines from your scoped run, plus `npx tsc --noEmit`.
+
+**Leave your change in the working tree, unstaged. Do not commit it, and do not
+discard it.** Before you report, snapshot it: `git diff -- <your two paths>`
+into your report, and record `git hash-object` for each modified file. **On
+resume, re-verify those hashes before you commit** — this is a shared worktree
+and the round-trip is not instantaneous. If a hash has moved, report FLAG rather
+than committing over a peer.
+
+**Who commits, settled:** on **PROCEED** or **CONSIDER**, _you_ commit when the
+verdict reaches you — you hold the drafted body and the green records, so the
+commit is yours to land. The orchestrator commits from your tree **only** if you
+are gone. An earlier draft of this brief said the orchestrator "commits from
+your verified tree" as the normal path; that was ambiguous, and two agents
+committing one tree is worse than either.
+
+**On PAUSE: report BLOCKED with the concerns verbatim, commit nothing, and
+discard nothing.** DEV.md's discard-and-re-implement is the _default proposal to
+the human_, not an action you take on your own — the human decides, and they
+cannot decide about a tree you already deleted.
+
 Pass "strictly read-only — no writes, moves, or deletes" along in the reviewer's
 input paths, because the orchestrator's prompt must carry it too: an `ar-4` in
-this campaign attempted to overwrite the implementation file, and another left
-`probe-adhoc.mjs.tmp` at the repo root, where it still sits untracked. The gate
-always fires; only its dispatcher moves. **Never commit an increment whose AR-4
-has not returned.**
+this campaign attempted to overwrite the implementation file, and another wrote
+a scratch probe file into the repo root. (An earlier draft said that file "still
+sits untracked". It does not — someone removed it [measured 2026-08-16: `find .
+-maxdepth 2 -name "probe-adhoc*"` and `git status --porcelain -uall | grep -i
+probe` both empty]. The rule stands; only its exhibit is gone.) The gate always
+fires; only its dispatcher moves. **Never commit an increment whose AR-4 has not
+returned.**
 
 ## First act — governance, before anything else
 
@@ -168,10 +295,23 @@ new file only at two or more. Do not extract five.
 ### ⚠ The phase-1 trap — the sketch's only throw site has no red test to force it
 
 Two of the three `Exceptions` tests **already pass**, through incidental
-`TypeError`s raised deep inside phase 3: `tokens.map` on `undefined`, and
-`code.slice` inside `nameElement`. So the module already violates [read: DOCS.md
-§ Structural constraints — "**Fail loudly at the boundary, never inside.**"],
-and the only test that will go red is the `comments` one.
+`TypeError`s raised deep inside the pipeline. **Name the reach sites from the
+tree, not from this paragraph's history** — an earlier draft called them
+"`tokens.map` … deep inside phase 3", and at HEAD there is no `tokens.map` at
+all and one of the two is in phase 2 [measured 2026-08-16: `grep -n
+"tokens\.map" derive-input-elements.ts` → no match]. The three sites today:
+
+| Absent field | Where it is reached                                        | Phase |
+| ------------ | ---------------------------------------------------------- | ----- |
+| `tokens`     | `Array.from(tokens.keys())` in `foldTemplateRuns`, line 69 | 2     |
+| `code`       | `code.slice(…)` in `nameElement`, line 155                 | 3     |
+| `code`       | `code.length` in `fillGaps`, lines 227–228                 | 5     |
+
+`comments` reaches nothing — it is not even destructured from `ScanInput`
+[measured 2026-08-16: `grep -n comments derive-input-elements.ts` → JSDoc lines
+10 and 14 only]. So the module already violates [read: DOCS.md § Structural
+constraints — "**Fail loudly at the boundary, never inside.**"], and the only
+test that will go red is the `comments` one.
 
 The minimum-work-to-green answer to a single red `comments` test is a single
 `comments` check. That leaves phase 1 permanently half-built, leaves the throw
@@ -188,7 +328,12 @@ fields and that the result is "deeply frozen". Neither is true at HEAD. The
 freeze half is self-correcting — the three `Interfaces` freeze tests are red and
 will force it. The throws half is not.
 
-### 22 of your 47 are already green — measured, not relayed
+### ⚠ SUPERSEDED TABLE — measured at `2989d9e1`, two increments behind
+
+**The current arrival state is the § Resume table at the top of this brief: 25
+green / 14 red of the 39 still skipped.** The table below is kept because its
+method note is still worth reading, and because the fixture-level detail in its
+last column has no equivalent elsewhere. **Do not plan from its counts.**
 
 [measured 2026-08-15: the committed implementation built with `esbuild
 --format=esm --bundle --external:acorn` and every skipped assertion replayed
@@ -198,34 +343,37 @@ lookup misses, and 22 green reads as 19. That is the same
 process-global-singleton hazard README § Public API cites for publishing indices
 rather than token references.]
 
-| Block                      | Green  | Red    | The red ones                                                                                                 |
-| -------------------------- | ------ | ------ | ------------------------------------------------------------------------------------------------------------ |
-| The vocabulary (straggler) | 1      | 0      | —                                                                                                            |
-| Template folding           | 0      | 9      | all                                                                                                          |
-| Right-brace disambiguation | 1      | 2      | object-literal brace in an interpolation; continuation brace — **but see below: 2/1 by the time you arrive** |
-| Trivia                     | 7      | 3      | CRLF as one `LineTerminator`; never merges WS with LT; U+2028 is a `LineTerminator`                          |
-| Comments and the hashbang  | 0      | 6      | all                                                                                                          |
-| Boundaries — tiling        | 4      | 1      | publishes nothing of zero width — **but see below: 5/0 by the time you arrive**                              |
-| Interfaces                 | 4      | 3      | the three freeze assertions                                                                                  |
-| Exceptions                 | 2      | 1      | throws when the comment array is absent — **see the trap above**                                             |
-| Simple                     | 3      | 0      | —                                                                                                            |
-| **Total**                  | **22** | **25** |                                                                                                              |
+| Block                      | Green  | Red    | The red ones                                                                                        |
+| -------------------------- | ------ | ------ | --------------------------------------------------------------------------------------------------- |
+| The vocabulary (straggler) | 1      | 0      | —                                                                                                   |
+| Template folding           | 0      | 9      | all                                                                                                 |
+| Right-brace disambiguation | 1      | 2      | object-literal brace in an interpolation; continuation brace — **both green now: the block is 3/0** |
+| Trivia                     | 7      | 3      | CRLF as one `LineTerminator`; never merges WS with LT; U+2028 is a `LineTerminator`                 |
+| Comments and the hashbang  | 0      | 6      | all                                                                                                 |
+| Boundaries — tiling        | 4      | 1      | publishes nothing of zero width — **green now: the block is 5/0**                                   |
+| Interfaces                 | 4      | 3      | the three freeze assertions                                                                         |
+| Exceptions                 | 2      | 1      | throws when the comment array is absent — **see the trap above**                                    |
+| Simple                     | 3      | 0      | —                                                                                                   |
+| **Total**                  | **22** | **25** |                                                                                                     |
 
 **A green un-skip is not a broken increment.** The increment boundary is the red
 event (human ruling 2026-08-15). A test that arrives green rides into the open
 increment with a one-line record of what it would have caught and which earlier
-increment forced it. Expect roughly **25 increments**.
+increment forced it. **Expect roughly 14 increments** — the "roughly 25" this
+paragraph carried was computed off the superseded table above it.
 
-⚠ **Two blocks will arrive with FEWER reds than this table shows, because your
-own earlier work turns them green** — the table measures HEAD, not the tree you
-will have built by the time you reach them. Both are consequences of the fold:
+⚠ **Both blocks below have ALREADY arrived green** — this section's table
+measures `2989d9e1`, and the fold that turns them green landed at `065afc16` and
+`7046bc01`. The § Resume table at the top of this brief is the current one.
 
-- **`Boundaries — tiling` will be 5 green / 0 red.** Every zero-width element
-  the current implementation publishes wraps a `template` token, and phase 2
-  absorbs exactly those — so `publishes nothing of zero width` passes the moment
-  the fold lands.
-- **`Right-brace disambiguation` will be 2 green / 1 red**, because its
-  continuation-brace assertion is byte-identical to a Template-folding one.
+- **`Boundaries — tiling` is 5 green / 0 red.** Every zero-width element the old
+  implementation published wrapped a `template` token, and phase 2 absorbs
+  exactly those — so `publishes nothing of zero width` went green when the fold
+  landed.
+- **`Right-brace disambiguation` is 3 green / 0 red**, not the "2 green / 1 red"
+  an earlier draft predicted here. Its continuation-brace assertion is
+  byte-identical to a Template-folding one, and the object-literal brace it
+  expected to stay red went green first, at `065afc16`.
 
 **When a whole set arrives green there is no driver, and therefore no increment
 — so do not close one.** The standing ruling already decides this: [read:
@@ -276,10 +424,21 @@ src/lib/study-lenses--deprecated-architecture/embody/tests/embody-trace-variable
 src/plugins/study-lenses/tests/remark-study-lenses.test.ts
 ```
 
-None is in `lib/scanning`. Your gate is your own directory green plus zero NEW
-failures outside that list — never whole-repo green. ⚠ The first is **untracked
-peer work in progress**; if a peer moves or fixes it, that baseline shifts
-through no action of yours. Judge by path against the other seven.
+⚠ **A ninth path joins that list intermittently, and it is FLAKY, not newly
+broken** — `src/lib/study-lenses/orchestrate/tests/index.test.tsx`, at
+`the recommendations (Boundaries) > keys duplicate-target proposals safely`. In
+a full-project run on 2026-08-16 it failed
+(`9 failed | 414 passed | 1 skipped (424)`, `42 failed | 9617 passed`); a second
+full run the same day did not (`8 failed | 415 passed`); run alone it passes
+**three times out of three** (`128 passed (128)`) [all measured 2026-08-16]. It
+is foreign by path, owned by the orchestrate campaign, and contains zero
+references to `scanning` [measured: `grep -c scanning` → 0]. **If you see it
+red, it is not yours and it is not new.**
+
+None of the nine is in `lib/scanning`. Your gate is your own directory green
+plus zero NEW failures outside that list — never whole-repo green. ⚠ The first
+is **untracked peer work in progress**; if a peer moves or fixes it, that
+baseline shifts through no action of yours. Judge by path.
 
 ## Commit form — verbatim, non-negotiable
 
@@ -313,10 +472,12 @@ prompt.** In wave 1 an `ar-4` accidentally attempted to overwrite the
 implementation file and was stopped only by the sandbox. Verify the tree with
 `git diff` before staging, every time.
 
-**AR-4 verdict routing:** PROCEED → commit. CONSIDER → document your response to
-each concern in the commit body, then continue. PAUSE → **report BLOCKED with
-the concerns verbatim, do not commit**; DEV.md's default there is discard and
-re-implement, not patch-in-place.
+**AR-4 verdict routing:** PROCEED → cycle step 10's checks, then commit.
+CONSIDER → document your response to each concern in the commit body, then step
+10 and commit. PAUSE → **report BLOCKED with the concerns verbatim, commit
+nothing, and discard nothing — see § AR dispatch.** DEV.md's discard-and-
+re-implement is the default _proposal to the human_, not an action you take on
+your own; they cannot decide about a tree you already deleted.
 
 Every commit body carries this settings line verbatim:
 
@@ -335,7 +496,13 @@ the literal string `n|r`, so it could never have fired.
 
 ## Your cycle
 
-An increment owns a set of un-skips; work strictly in file order within it.
+An increment owns a set of un-skips; work in file order within it — **with the
+one documented exception: `Boundaries — tiling` sits at test-file line 96,
+before `The vocabulary`, and the human ruling moves it to just before
+`Interfaces`** (2026-08-14, § Rulings of record; § Un-skip order below is the
+sequence to follow). Walking literal file order out of
+`Comments and the hashbang` lands you in `Interfaces` and silently leaves
+Boundaries skipped — which only the exit gate would catch, at the very end.
 
 1. **Un-skip the next single test and run it.** Never a whole set at once.
    - **Green** → record in one sentence what it would have caught and which
@@ -423,9 +590,11 @@ acorn 8.16.0, `ecmaVersion: 2024`, `sourceType: 'module'`, `ranges: true`,
 - **`Array.from(...)`, never `[...iterable]`** — `local/no-iterable-spread`.
 - **Never run `eslint --fix`** — severity-blind, a known landmine. Wave 1 hit
   `unicorn/escape-case` and fixed it by hand.
-- **`git grep -c "it.skip"` unscoped matches 17 files**, including
-  `scanning/README.md`'s prose and both `spellme` suites — whose counts are the
-  ones most likely to corrupt a burn-down. Scope it to your test file.
+- **`git grep -c "it.skip"` unscoped matches 18 files** (17 when that count was
+  taken — it climbs, and this brief is one of the matches, so the number counts
+  itself), including `scanning/README.md`'s prose and both `spellme` suites —
+  whose counts are the ones most likely to corrupt a burn-down. Scope it to your
+  test file.
 
 ## Lint constraints
 
@@ -445,13 +614,17 @@ File order, **except** `Boundaries — tiling` which un-skips just before
 `Interfaces` (human ruling 2026-08-14, § Rulings of record — not a mistake to
 correct):
 
-1. **The vocabulary straggler** — the legacy-octal test. Green; ride it.
+1. ~~**The vocabulary straggler** — the legacy-octal test.~~ **DONE.** It went
+   live in `065afc16` and is not skipped [measured 2026-08-16: `grep -n "legacy
+   octal" tests/derive-input-elements.test.ts` → line 230, `it(` not
+   `it.skip(`]. Do not go looking for it.
 2. **Template folding** (9) — **7 landed, 1 green, 1 red.** Phase 2 exists; the
    one red is the tag-only escape, and it is your next driver.
-3. **Right-brace disambiguation** (3) — **2 green / 1 red by the time you
-   arrive** (the table's 1/2 is measured at HEAD, before your fold). Two of this
-   block's three assertions are verbatim duplicates of vocabulary and folding
-   assertions, and the continuation-brace one goes green with the fold.
+3. **Right-brace disambiguation** (3) — **3 green / 0 red. The whole block is
+   already green** [measured 2026-08-16: all three assertions un-skipped and
+   run]. An earlier draft predicted "2 green / 1 red" here and named the wrong
+   survivor; the object-literal brace went green first at `065afc16`. This is
+   one of **three** all-green sets — do not close an increment here.
 4. **Trivia** (10) — 7 green. The three red ones build the run split.
 5. **Comments and the hashbang** (6, all red) — creates phase 4. The hashbang is
    position **and** opening characters; `// x` at offset 0 must stay a
@@ -463,7 +636,15 @@ correct):
    close an increment here — keep un-skipping until a red opens one.
 7. **Interfaces** (7) — 4 green; the three freeze assertions are red.
 8. **Exceptions** (3) — 2 green, **and see the phase-1 trap above.**
-9. **Simple** (3) — all green; recorded-departure guards.
+9. **Simple** (3) — all green; recorded-departure guards. The third all-green
+   set, and **the one case forward-merge cannot serve**: nothing follows it to
+   open an increment, so merge **backward** — do not close the `Exceptions`
+   increment until you have walked to the end of the file.
+
+⚠ **Two of those block names are abbreviated here and will not match a grep.**
+The `describe` strings in the file are
+`Interfaces — frozen, pure and deterministic` and
+`Simple — the recorded departures`. The other seven are verbatim.
 
 ## Your exit gate
 
@@ -475,9 +656,11 @@ Report DONE only when all hold, each with its command output:
 - All five sketch phases are present and distinct **as phases** — three of them
   as named helpers, the guard and the merge inline (see § Inherited state)
 - The guard is at the top of the export. With any of the three fields absent,
-  **no code past the guard runs** — not `tokens.map`, not `code.slice` inside
-  `nameElement`, and not `code.length` inside `fillGaps`, which is a third reach
-  site an earlier draft of this gate missed
+  **no code past the guard runs** — none of the three reach sites tabulated in
+  the phase-1 trap above, and none of whatever the increments after it add.
+  Verify by reaching for them in the tree, not by matching this list: an earlier
+  draft of this gate named `tokens.map`, which does not exist at HEAD, and a
+  worker grepping for it finds nothing and mis-reads the gate as already met
 - Every commit announced with its full SHA
 
 The orchestrator then fires AR-5 and presents to the human. **`spellme` is NOT
