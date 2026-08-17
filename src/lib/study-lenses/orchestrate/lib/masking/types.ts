@@ -19,10 +19,11 @@ import type { SnippetType, Violation } from '../../../language-levels/types.js';
  *
  * The roster of class-2 nodes lives in the region README, not here: this
  * type is vocabulary, and an enumeration kept in two places drifts.
- * `'meta-control'` under-names the class it labels, which admits two
- * nodes that are not controls — the announcer and the nameplate.
+ * `'meta-node'` rather than `'meta-control'`: two of the class's members
+ * are not controls — the announcer and the nameplate — so the older
+ * literal under-named what it labelled.
  */
-export type SurfaceClass = 'editor-based' | 'meta-control' | 'maskable';
+export type SurfaceClass = 'editor-based' | 'meta-node' | 'maskable';
 
 /**
  * Why the maskable surfaces are covered: the first violation, or the
