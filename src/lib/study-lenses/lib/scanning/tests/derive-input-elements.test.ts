@@ -267,7 +267,7 @@ describe('deriveInputElements', () => {
 			expect(kinds('`a${`n${q}`}c`')).toHaveLength(5);
 		});
 
-		it.skip('folds a chunk carrying a tag-only escape', () => {
+		it('folds a chunk carrying a tag-only escape', () => {
 			expect(kinds('tag`a${x}\\unicode`')).toEqual([
 				'IdentifierName',
 				'Template',
@@ -276,31 +276,31 @@ describe('deriveInputElements', () => {
 			]);
 		});
 
-		it.skip('carries every token a folded run spans', () => {
+		it('carries every token a folded run spans', () => {
 			expect(elements('`a`')[0]?.tokenIndices).toHaveLength(3);
 		});
 	});
 
 	describe('Right-brace disambiguation', () => {
-		it.skip('names a block-closing brace a RightBracePunctuator', () => {
+		it('names a block-closing brace a RightBracePunctuator', () => {
 			expect(kinds('{ }')[2]).toBe('RightBracePunctuator');
 		});
 
-		it.skip('names an object-literal brace inside an interpolation a RightBracePunctuator', () => {
+		it('names an object-literal brace inside an interpolation a RightBracePunctuator', () => {
 			expect(kinds('`${ {a:1} }`')[6]).toBe('RightBracePunctuator');
 		});
 
-		it.skip('names a template-continuation brace part of its tail run', () => {
+		it('names a template-continuation brace part of its tail run', () => {
 			expect(kinds('`a${b}c`')[2]).toBe('TemplateSubstitutionTail');
 		});
 	});
 
 	describe('Trivia', () => {
-		it.skip('collapses a run of spaces into one element', () => {
+		it('collapses a run of spaces into one element', () => {
 			expect(kinds('x   y')[1]).toBe('WhiteSpace');
 		});
 
-		it.skip('spans a run of spaces as one element', () => {
+		it('spans a run of spaces as one element', () => {
 			expect(spans('x   y')[1]).toEqual([1, 4]);
 		});
 

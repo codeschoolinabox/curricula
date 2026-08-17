@@ -96,11 +96,10 @@ function foldTemplateRuns(
  * not a chunk and takes that one as the closer.
  *
  * A run whose closer never arrives is reported as ending at the end of the
- * array rather than throwing: this phase stays total, and the boundary keeps
- * the only throw site. That branch is reachable today, not theoretical — a
- * chunk type this module does not yet recognize breaks the search, and the run
- * it opened then finds no closer. It is dead only once every template-chunk
- * type is admitted below.
+ * array rather than throwing. That is what keeps this phase total, so the
+ * boundary stays the module's only throw site — and the guard earns its keep
+ * arithmetically: without it the end expression would resolve to one past the
+ * opener, and the span would silently take the opener's own extent instead.
  */
 function runEnd(
 	tokens: ReadonlyArray<acorn.Token>,
@@ -137,15 +136,15 @@ function opensTemplateRun(
  * what lets the lookahead read past the end of the array without a bounds
  * test at each call site.
  *
- * Two token types carry a chunk, and only one is recognized here. The other —
- * the type the parser gives a chunk carrying an escape the language permits
- * only under a tag — is not yet triangulated by a live test, and until it is,
- * a tagged template carrying such an escape is read wrongly: its `}` is named
- * a `RightBracePunctuator`, its closing backtick is mistaken for an opener,
- * and the span that opener starts swallows whatever follows the template.
+ * Two token types carry a chunk and both are admitted: the parser types a
+ * chunk carrying an escape the language permits only under a tag differently
+ * from an ordinary one, rather than refusing the program. Admitting only the
+ * ordinary type would name the `}` before such a chunk a `RightBracePunctuator`
+ * and leave the template's own closing backtick opening a run instead of
+ * ending one.
  */
 function isTemplateChunk(token: acorn.Token | undefined): boolean {
-	return token?.type === tt.template;
+	return token?.type === tt.template || token?.type === tt.invalidTemplate;
 }
 
 /**
