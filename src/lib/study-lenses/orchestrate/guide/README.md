@@ -5,7 +5,7 @@ static authored topics about the study environment itself: what the five phases
 are, what a language level is, what warn and strict mean, what the snippet-type
 toggle changes. Collapsed behind a reveal by default; alive under every posture.
 
-The region sketch ([../DOCS.md](../DOCS.md)) owns the class-2 criterion the
+The region [README](../README.md) § Enforcement owns the class-2 criterion the
 guide exists under — **explaining the boundary**: the guide's topics include
 what warn and strict mean, so a posture may not withdraw its own explanation
 (human ruling 2026-08-17). Deliberately not the broader _orientation_, which the

@@ -173,8 +173,10 @@ source string and an edit callback.
 > business.
 
 **0:30 — they write something the level does not admit.** The study surfaces
-cover. The editor stays live, as does every control whose change could restore
-conformance.
+cover. The editor stays live, and so does every class-2 node — which is not the
+same set as "every control that could restore conformance", and the difference
+is this journey's own subject: the strict toggle stays live too, and it does not
+restore conformance, it lifts the guardrail.
 
 **The question is whether _covered_ reads as paused or as broken.** The design's
 whole claim is guardrail-up rather than scaffolding-down: nothing was taken

@@ -235,10 +235,12 @@ drawn in different channels, so "nothing to open here" cannot be misread as
 
 **One label vocabulary, everywhere.** The rail and the trays both use the
 region's display labels, never the phases' data names. Where width demands it
-the rail shows the label's first word — `Tokens`, not `Tokens · spelling` — and
-the tray shows the full label; it never switches vocabulary. An arrangement that
-shows `tokens` in one place and `Tokens · spelling` in another has given the
-learner two names for one thing.
+the rail draws the phase's **short label** — `Tokens`, not `Tokens · spelling` —
+and the tray draws the full one; it never switches vocabulary. **The short label
+is authored, not the full label's first word**: the README owns both strings and
+says why truncation is not a vocabulary choice. An arrangement that shows
+`tokens` in one place and `Tokens · spelling` in another has given the learner
+two names for one thing.
 
 ## A station's tray, open
 

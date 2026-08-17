@@ -1,4 +1,4 @@
-<!-- cspell:ignore renderable affordances unrepresentable keyspace -->
+<!-- cspell:ignore renderable affordances behaviour unrepresentable keyspace -->
 
 # orchestrate — Architecture & Decisions
 
@@ -112,18 +112,15 @@ flowchart TD
   writes. Every derived state re-derives per settle.
 - **Append-only composition, loud collisions.** Built-ins are never replaced or
   shadowed; failure happens at mount, at the author's desk.
-- **Class-2 nodes never mask.** Four routes in, and no posture withdraws any of
-  them (human ruling 2026-08-17). **Acting on the boundary**: the selector and
-  the strict toggle change which boundary applies and whether it bites, the
-  snippet-type toggle can move the code inside it, and the Edit code button is
-  the path back to where the code is fixed. **Explaining the boundary**: the
-  guide — stated this narrowly rather than as _orientation_, because a posture
-  may not withdraw its own explanation while the rail is an orientation surface
-  the posture may. **Carrying the region's voice**: the announcer. **Naming the
-  pane's occupant**: the nameplate. The last two are not controls, and both
-  render outside both maskable containers — `inert` would take the announcer out
-  of the accessibility tree, and would strip the pane of its name at the moment
-  the pane is covered.
+- **Class-2 nodes never mask.** Seven nodes, four routes in, and no posture
+  withdraws any of them (human ruling 2026-08-17). The routes and the roster are
+  stated once, in [README.md](./README.md) § Enforcement, and are not restated
+  here — a sketch that re-enumerates a contract acquires a second home that
+  drifts, which is what happened to the previous enumeration. What this sketch
+  constrains is structural: **two of the seven are not controls** — the
+  announcer and the nameplate — and both must render **outside both maskable
+  containers**, which only the composition root can guarantee, so their
+  placement is a fact about the component tree rather than about styling.
 - **The undetermined carve-out wins.** While the code does not parse, the mask
   names no violation and the parse phases' supports stay uncovered — regardless
   of type admission.
@@ -241,16 +238,27 @@ verdicts without consulting a level twice.
   against embody's runtime order constant at the point of use; never a
   positional list.
 - The panel receives its ordered phase list built from that constant plus the
-  labels, and renders it as the horizontal lifecycle strip ABOVE the surface
-  pane and BENEATH the control row, which sits at the top of the band (the Edit
-  code button — leading, while an excursion is open — then the Generate code
-  button, the type toggle and the level surfaces; sibling order within the row
-  is presentation, not contract) — controls and lifecycle in one band, the
-  surface pane beneath: the editor when no excursion is open, the open lens or
-  the generator in its place. The nameplate renders between the band and the
-  pane, naming the occupant. Recommendations render below the pane in every
-  mode. The strip renders no headings; the guide's `h4` topic titles are the
-  instrument's only headings, and the guide renders last in DOM order.
+  labels, and renders it as **the rail** ABOVE the surface pane and BENEATH the
+  control row, which sits at the top of the band (the Edit code button —
+  leading, while an excursion is open — OR the Generate code button, which takes
+  its place in editor mode and is never present beside it; then the type toggle
+  and the level surfaces; sibling order within the row is presentation, not
+  contract) — controls and lifecycle in one band, the surface pane beneath: the
+  editor when no excursion is open, the open lens or the generator in its place.
+  **One station per phase, one barring edge, one cause drawn once; a station's
+  fitting lenses are disclosed in its tray rather than listed on the line.** The
+  nameplate renders between the band and the pane, naming the occupant.
+  Recommendations render below the pane in every mode. The rail renders no
+  headings; the guide's `h4` topic titles are the instrument's only headings,
+  and the guide renders last in DOM order.
+
+  > **`strip` below names the surface the Rail supersedes.** Its remaining uses
+  > in this section are the retired vocabulary, not a second surface, and the
+  > vocabulary migration is 0.3's (human ruling 2026-08-16). **Behaviour here is
+  > the Rail's** — the two halves were split deliberately, and this note is what
+  > makes the split legible to a reader who never opens the campaign's own
+  > records.
+
 - ONE VISUAL PANE, TWO DOM SLOTS — the mask-membership rule: the editor renders
   OUTSIDE both maskable regions (class 1, never masked while mounted); the
   mounted lens and the generator view both render INSIDE the maskable content

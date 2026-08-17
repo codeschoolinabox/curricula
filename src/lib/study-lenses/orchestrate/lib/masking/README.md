@@ -34,31 +34,26 @@ validates or repairs it (no re-derivation, in either direction).
 
 Class 1, editor-based: never masked while mounted — and structurally absent
 during any excursion, when the ways back to it are class 2. Class 2, the
-meta-level **nodes** that must survive every posture, earned one of **four**
-ways (human ruling 2026-08-17): **acting on the boundary** — the selector, the
-strict toggle, the snippet-type toggle and the edit-return button, which
-respectively change which boundary applies, whether it bites, whether the code
-sits inside it, and how the learner reaches the surface where it is fixed;
-**explaining the boundary** — the guide, because a posture may not withdraw its
-own explanation of itself; **carrying the region's voice** — the announcer; and
-**naming the pane's occupant** — the nameplate. None of the four is ever masked.
-The class enumerates **nodes** rather than controls because the split is
-exhaustive and **two of the four routes are taken by nodes that are not
-controls** — the announcer and the nameplate — and either falling to class 3
-would be the one class it cannot carry: `inert` would remove the announcer from
-the accessibility tree entirely, which is worse than not announcing (human
-ruling 2026-08-15), and it would take the pane's name with the pane. Both
-therefore render outside both maskable containers, which only the composition
-root can guarantee. Class 3, everything else — the study panel and its lenses,
-and the generator view together with the button that opens it: covered under
-strict while the code is out of level — the covered surfaces go inert and a
-NON-inert overlay is laid over them, never the reverse: the overlay carries the
-blocked sentence, and marking it inert would remove that sentence from the
-accessibility tree. A covered surface keeps its state beneath it. The class of a
-surface is a static fact of what the surface IS — nothing derives it at runtime,
-and it does not follow from which container the surface renders in: the Generate
-code button sits outside every maskable container and still carries class 3 at
-its own element.
+meta-level **nodes** that must survive every posture — **seven of them, earned
+one of four ways, and none of the seven is ever masked.** The four routes, the
+roster, and the argument for each are stated once, in the region
+[README](../../README.md) § Enforcement, and are deliberately **not restated
+here**: this library projects the classification, it does not define it, and an
+enumeration kept in two places is exactly what let the previous one go stale
+(human ruling 2026-08-17). Two of the seven are not controls — the announcer and
+the nameplate — and both render outside both maskable containers, which only the
+composition root can guarantee. Class 3, everything else — the study panel and
+its lenses, and the generator view together with the button that opens it:
+covered under strict while the code is out of level — the covered surfaces go
+inert and a NON-inert overlay is laid over them, never the reverse: the overlay
+carries the blocked sentence, and marking it inert would remove that sentence
+from the accessibility tree. The overlay is the mask's **apparatus** rather than
+a classified surface; the region README states that carve-out and why the
+three-way split is still exhaustive without it. A covered surface keeps its
+state beneath it. The class of a surface is a static fact of what the surface IS
+— nothing derives it at runtime, and it does not follow from which container the
+surface renders in: the Generate code button sits outside every maskable
+container and still carries class 3 at its own element.
 
 ## Navigation
 
