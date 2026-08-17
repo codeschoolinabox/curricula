@@ -9,8 +9,8 @@
 
 You finish `src/lib/study-lenses/lib/scanning/`. Wave 1 landed 24 of the suite's
 71 tests across ten commits and stopped deliberately before the template fold;
-wave 2 has since landed 8 more. **You own the remaining 39** — the "47" this
-line carried was wave 2's opening figure and is two increments out of date.
+wave 2 has since landed 22 more. **You own the remaining 25** — the "47" this
+line carried was wave 2's opening figure and is five increments out of date.
 
 Process rulings governing this campaign are in
 [`./PHASE-1.md` § Rulings of record](./PHASE-1.md) — nine bullets, eight of them
@@ -47,24 +47,55 @@ accurate. Where it and this brief disagree about **arrival state** — which tes
 are green today — this brief is the later measurement; that is a freshness
 difference, not an error in that file.
 
-## ⚠ Resume here — two increments are already done
+## ⚠ Resume here — FIVE increments are already done
 
-This brief launched once. The worker landed two increments and then died three
-times on harness faults, twice at the identical call. **Nothing was lost; the
-discipline held.** Where you pick up, measured 2026-08-16:
+This brief has launched several times. Workers have landed five increments
+between them and **six sessions have died** — three harness stalls at the `ar-4`
+call, one weekly-quota wall at the same call, one `529` during the reading phase
+before touching anything, and one `500` two increments deep. **No death has ever
+cost committed work**, because the rule below holds: leave the change unstaged,
+commit nothing, discard nothing, never commit an increment whose AR-4 has not
+returned.
 
-| SHA        | Increment                                                        |
-| ---------- | ---------------------------------------------------------------- |
-| `065afc16` | a backtick opens a template run that folds into one element      |
-| `7046bc01` | a right brace continuing a template opens the run that closes it |
+Where you pick up, measured 2026-08-17:
 
-Suite: **32 passing, 39 skipped (71)**; `npx tsc --noEmit` 0; eslint exit 0.
-Sketch phase 2 (`foldTemplateRuns`) now exists. Phases 1 and 4 still do not.
+| SHA        | Increment                                                          |
+| ---------- | ------------------------------------------------------------------ |
+| `065afc16` | a backtick opens a template run that folds into one element        |
+| `7046bc01` | a right brace continuing a template opens the run that closes it   |
+| `26eba4a5` | both template-chunk token types open and close a folded run        |
+| `9d719f17` | a carriage return and line feed pair collapses into one terminator |
+| `25449442` | a gap holding both trivia kinds splits into one element per run    |
 
-⚠ **Everything measured at `2989d9e1` is stale by two increments — that means §
-Inherited state's 22-of-47 table far below, and every forward prediction built
-on it, NOT the table that follows this line.** Re-measured at HEAD (`7046bc01`),
-the 39 still-skipped tests stand at **25 green / 14 red**:
+Suite: **46 passing, 25 skipped (71)**; `npx tsc --noEmit` 0; eslint, prettier
+and cspell exit 0 [all measured 2026-08-17]. Sketch phases 2, 3 and 5 exist and
+phase 5's split is real. **Phases 1 and 4 still do not exist** — the boundary
+guard and the comment merge are the work ahead.
+
+**Your next driver is `names a line separator a LineTerminator`** — the last
+Trivia red. `LINE_TERMINATORS` holds `\n` and `\r` only; the kind table names
+U+2028 and U+2029 too, and this fixture is what forces them. After it,
+`Comments and the hashbang` (6 reds) builds phase 4.
+
+**11 reds remain**: that one, Comments and the hashbang ×6, Interfaces ×3 (the
+freeze assertions), Exceptions ×1. `Boundaries — tiling` and `Simple` arrive
+wholly green and close no increment.
+
+⚠ **Everything below this section that predicts an arrival state is written
+against an earlier tree.** The block table, the un-skip order's per-block
+counts, and § Inherited state all pre-date these five commits. Their _rules_
+bind; their _numbers_ do not. Re-measure.
+
+## History — landed increments, kept for their findings
+
+⚠ **Everything from here to § AR dispatch describes work that is DONE.** It is
+kept because its measurements and lessons still teach; **nothing in it is an
+instruction to you.** The live state is § Resume above.
+
+⚠ **Everything measured at `2989d9e1` is stale — that means § Inherited state's
+22-of-47 table far below, and every forward prediction built on it, NOT the
+table that follows this line.** Re-measured at `7046bc01`, the 39 then-skipped
+tests stood at **25 green / 14 red**:
 
 | Block                      | Green | Red   |
 | -------------------------- | ----- | ----- |
@@ -93,15 +124,17 @@ one.
 **Re-measure before planning. Trust no arrival-state prediction in this
 document, including this one.**
 
-Concretely, your next increment spans three describe blocks: driver
+That increment spanned three describe blocks and landed at `26eba4a5`: driver
 `folds a chunk carrying a tag-only escape` (red) →
 `carries every token a folded run spans` (green) → all three Right-brace
-assertions (green) → the first two Trivia (green) →
-`collapses a carriage return and line feed into one line terminator` (**red —
-this opens the next increment**).
+assertions (green) → the first two Trivia (green), stopping before
+`collapses a carriage return and line feed into one line terminator`, which
+opened the increment after it (`9d719f17`). The prediction held exactly, which
+is the one arrival-state forecast in this document that did.
 
-**Your next increment is `folds a chunk carrying a tag-only escape`**, and it is
-not a small one. `isTemplateChunk` recognizes `tt.template` but not
+**That increment — `folds a chunk carrying a tag-only escape` — was not a small
+one**, and the reasoning is kept because the next reader of `isTemplateChunk`
+needs it. `isTemplateChunk` recognizes `tt.template` but not
 `tt.invalidTemplate`, and AR-4 established that this is not merely a missing
 triangulation — it corrupts output today on a program `acorn.parse` accepts
 [measured 2026-08-16]: on ``tag`a${x}\unicode`;let z = 1`` the closing backtick
@@ -157,8 +190,18 @@ which is exactly what the gate is for.
 
 ### ⚠ AR dispatch — standing arrangement, not a one-off
 
-**A worker in this campaign could not spawn `ar-4`: three stalls, two of them at
-exactly that call.**
+⚠ **Correction, 2026-08-17: a worker in this campaign DID spawn `ar-4`
+successfully**, ran the gate itself, and landed `9d719f17` complete — verdict, a
+documented decline of the reviewer's IMPORTANT concern, and a CONSIDER carried
+forward. Earlier drafts of this section told you the spawn "could not" be done,
+on the evidence of three stalls plus a quota death at that call. **That framing
+was wrong and it matters: a worker who expects the gate to be broken reports
+BLOCKED without really trying, and every such report costs a full orchestrator
+round-trip.**
+
+**So: genuinely attempt `ar-4`. It works.** The fallback below is a contingency
+for real failure, not the expected path. (A peer's finding the same week: `ar-N`
+deaths cluster on wide large-model reads, and a scoped prompt goes through.)
 
 **The rule, stated here rather than only cited.** A worker that cannot spawn the
 registered reviewers pauses at the trigger and reports the reviewer's input
@@ -618,14 +661,17 @@ correct):
    live in `065afc16` and is not skipped [measured 2026-08-16: `grep -n "legacy
    octal" tests/derive-input-elements.test.ts` → line 230, `it(` not
    `it.skip(`]. Do not go looking for it.
-2. **Template folding** (9) — **7 landed, 1 green, 1 red.** Phase 2 exists; the
-   one red is the tag-only escape, and it is your next driver.
+2. **Template folding** (9) — **DONE, all nine live.** The last red, the
+   tag-only escape, landed at `26eba4a5`.
 3. **Right-brace disambiguation** (3) — **3 green / 0 red. The whole block is
    already green** [measured 2026-08-16: all three assertions un-skipped and
    run]. An earlier draft predicted "2 green / 1 red" here and named the wrong
    survivor; the object-literal brace went green first at `065afc16`. This is
    one of **three** all-green sets — do not close an increment here.
-4. **Trivia** (10) — 7 green. The three red ones build the run split.
+4. **Trivia** (10) — **9 live; one red left**,
+   `names a line separator a LineTerminator`, and it is your next driver. Two of
+   the three reds built the run split (`9d719f17`, `25449442`); this one forces
+   U+2028 and U+2029 into `LINE_TERMINATORS`, which holds `\n` and `\r` only.
 5. **Comments and the hashbang** (6, all red) — creates phase 4. The hashbang is
    position **and** opening characters; `// x` at offset 0 must stay a
    `Comment`.
