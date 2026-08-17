@@ -42,11 +42,21 @@ Reproduced independently before designing anything:
 
 ## Two environment facts that bind every command published here
 
-- **`/usr/bin/grep` on this machine is `ugrep 7.5.0`, not GNU grep** [measured
-  2026-08-16: `grep --version`]. It **rejects ERE backreferences** and
-  **warns-and-ignores `--include=`**, and the warning goes where nobody reads
-  it. Two draft commands died on this. Published commands therefore extract with
-  `perl`, whose behaviour is identical on a reviewer's machine.
+- **`grep` in an agent's shell is a harness-injected bash _function_, not the
+  binary on disk** [measured 2026-08-17: `type -a grep` → `grep is a function`].
+  It rejects ERE backreferences and **warns-and-ignores `--include=`**,
+  silently; two draft commands died on that. Published commands therefore
+  extract with `perl`.
+
+  ⚠️ **The commit that created this document (`a4a90e0f`) says `/usr/bin/grep`
+  "is ugrep 7.5.0, not GNU grep". That is FALSE and is struck here** — its body
+  is immutable, so this is the correction of record. `/usr/bin/grep` is genuine
+  **BSD grep 2.6.0-FreeBSD**, `--include=` works there, and **no `ugrep` binary
+  exists on this machine** [measured 2026-08-17: `/usr/bin/grep --version`;
+  `command -v ugrep` → empty]. The quirks are a property of the agent's shell,
+  not of the system's grep, and they vanish when the binary is called by
+  absolute path. Do not go looking for a ugrep install.
+
 - **The engine set is heterogeneous, not uniformly pre-module.** `parsonizer/`
   is a jQuery IIFE while `wc-trace-table/configurable-button.js` opens with
   `import`/`export class` [relayed: plan-agent]. A "pre-module JavaScript" test

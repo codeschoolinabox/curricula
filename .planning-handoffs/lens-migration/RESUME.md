@@ -239,10 +239,18 @@ Each would produce a **false** row if the brief omitted it:
 
 ### Two environment facts that bite every published command
 
-- **`/usr/bin/grep` here is `ugrep 7.5.0`, not GNU grep** [measured 2026-08-16:
-  `grep --version`]. It **rejects ERE backreferences** and **warns-and-ignores
-  `--include=`**, and that warning goes where nobody reads it. Prefer `perl` for
-  anything a reviewer must reproduce.
+- **`grep` in an agent's shell is not the `grep` on disk, and an earlier
+  revision of this bullet had it backwards.** It said `/usr/bin/grep` here is
+  `ugrep 7.5.0`. **That is false** — `/usr/bin/grep` is genuine **BSD grep
+  2.6.0-FreeBSD**, `--include=` works there, and **no `ugrep` binary exists on
+  this machine at all** [measured 2026-08-17: `/usr/bin/grep --version`;
+  `command -v ugrep` → empty]. What is true: **`grep` is a bash _function_ the
+  harness injects** [measured 2026-08-17: `type -a grep` → `grep is a
+  function`], and its quirks are real for any agent using the Bash tool — it
+  **rejects ERE backreferences** and **warns-and-ignores `--include=`**,
+  silently. They vanish when the binary is called by absolute path. Prefer
+  `perl` for anything a reviewer must reproduce, and **never conclude a pattern
+  is unsupported without testing it against `/usr/bin/grep` too**.
 - **The registered `ar-1` agent failed seven times** on harness errors, always
   as a large agent doing wide read sweeps; a trivial Haiku probe proved the
   harness was up. What worked: narrow the reviewer's input set (the dispatcher's

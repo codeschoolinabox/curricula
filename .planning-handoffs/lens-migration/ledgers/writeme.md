@@ -392,10 +392,18 @@ blanket fact about the ledger:**
 that is a defect this ledger carries rather than one it has fixed.** An earlier
 revision of this line claimed it did. Measured 2026-08-16 by re-running
 `firstblock` for every cited heading and diffing normalised: **13 of the 33
-heading rows** quote less than the extractor returns, the seeder having cut
-earlier by hand and appended a `…` the tool never produced — `004`, `006`,
-`009`, `011`, `013`, `015`, `018`, `020`, `023`, `025`, `028`, `029`, `032`.
-**The glossary rows are clean: 0 of 12 diverge** from today's `glossterm`.
+heading rows** quote less than the extractor returns, the seeder having cut by
+hand and inserted a `…` the tool never produced — `004`, `006`, `009`, `011`,
+`013`, `015`, `018`, `020`, `023`, `025`, `028`, `029`, `032`.
+
+⚠️ **The cut is not always trailing, and an earlier revision of this paragraph
+said it was.** `writeme-004`'s Gen-3 cell **opens** with a `…` and the word
+"Toggling", dropping the section's entire first sentence — the one naming the
+two view-toggle buttons and the `data-view-mode` attribute they set [measured
+2026-08-17: `firstblock` over the port's § Toolbar contract, diffed against the
+stored cell]. So a re-cut cannot be done by extending the end of a cell:
+**replace each cell wholesale with the extractor's output.** **The glossary rows
+are clean: 0 of 12 diverge** from today's `glossterm`.
 
 `writeme-011` is the sharpest case: `firstblock` on the port's § Two-layer
 module returns a complete **240-character** block ending in `:` and makes **no
