@@ -460,19 +460,32 @@ this region owns.
   are one contract: a count that renders at zero, that reads plural at one, or
   that competes with the cause for the slot beneath the rail is wrong in the
   same way, and an implementer reading only two of the three would ship the
-  third defect. **And display copy never carries a machine token or a term this
-  package coined** — the rule the marks already follow, and the reason the
-  sentence a learner reads when the machine stops says _the grammar broke here_
-  rather than naming **the barring edge**. The ban is that narrow deliberately,
-  and the region's own copy is why: the empty-count line says "four **phases**
-  have nothing to open yet", and `phase` is package glossary vocabulary. A
-  broader rule — _no contract vocabulary at all_ — would be falsified by the
-  very string it is meant to govern. What a learner must never read is a token
-  the machine uses to talk to itself (`does-not-fit`) or a word this package
-  minted for its own contract (**barring edge**, **station**); an ordinary word
-  that the glossary also happens to define is fine, and often the plainest
-  available. The contract term names the thing for this package; the copy names
-  it for the learner, and the two are allowed to differ.
+  third defect. **Display copy never carries a machine token, and never needs
+  this glossary to be legible** (human ruling 2026-08-17) — the rule the marks
+  already follow, and the reason the sentence a learner reads when the machine
+  stops says _the grammar broke here_ rather than naming **the barring edge**.
+  Two tests, and the second is **operational rather than etymological**. A
+  machine token is a string the machine uses to talk to itself — `does-not-fit`,
+  `not-applicable-for-type` — and none of those ever surfaces. Everything else
+  is settled by one question: **would a learner who never read this glossary
+  understand it?** `barring edge` fails it, naming a boundary the copy never
+  introduced. `phase` passes, which is why the empty-count line may say "four
+  **phases** have nothing to open yet" even though `phase` is package glossary
+  vocabulary — and a broader rule, _no contract vocabulary at all_, would be
+  falsified by the very string it is meant to govern.
+
+  **The retired form of this rule asked who MINTED the word, and this glossary
+  falsified it.** It banned "a word this package minted for its own contract
+  (**barring edge**, **station**)" — while the `station` entry says the word is
+  "reclaimed rather than minted", so the rule cited as its own example a word
+  its own predicate excluded. Etymology was the wrong question regardless:
+  **waiting** is an ordinary word this region reclaimed as a contract value for
+  a station's **standing**, and it is drawn on the rail as display copy
+  precisely because a learner understands it cold. What matters is whether the
+  learner needs the glossary, never who coined the word. The contract term names
+  the thing for this package; the copy names it for the learner, and the two are
+  allowed to differ.
+
 - **the rail** — the lifecycle rendered as the machine's own conveyor: a line
   carrying one **station** per phase in the machine's fixed order, with the
   **barring edge** between the last reachable station and the first waiting one.
