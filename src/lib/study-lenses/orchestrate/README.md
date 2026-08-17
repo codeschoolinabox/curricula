@@ -51,8 +51,9 @@ its stations, their trays, and the barring edge — because they are one surface
 with one geometry and one class. The **nameplate** and the **announcer** are the
 top component's, because each is a claim about the whole composition rather than
 about the lifecycle: the nameplate names whatever occupies the pane, and the
-pane occupant is the top component's own state; and the announcer must render
-outside **both** maskable containers, which only the root that renders both can
+pane occupant is the top component's own state. And **both** must render outside
+**both** maskable containers (human ruling 2026-08-17 gave the nameplate the
+rule the announcer already carried), which only the root that renders both can
 guarantee. A leaf directory asserting where it sits relative to containers it
 does not own would be a rule nothing could enforce.
 
@@ -176,33 +177,63 @@ lives inside a React component.
 
 Three surface classes: the editor is class 1 — never masked while mounted, and
 structurally absent during any excursion; class 2 is the meta-level **nodes**
-that must survive every posture — the selector, the strict toggle, the
-snippet-type toggle, the guide and the Edit code button, all of them controls,
-together with the announcer, which is not a control but must never go inert —
-never masked, so the way back to the editor stays alive under every posture and
-the region never falls silent (human ruling 2026-08-15); everything else — the
-study panel and its lenses, and the generator view with its opening button — is
-class 3, covered under strict while the code is out of level. **The mask makes
-the covered surfaces inert and lays a NON-inert overlay over them** — `inert`
-sits on the maskable containers and never on the overlay, because the overlay
-carries the blocked sentence and that sentence is the one thing a covered region
-must still be able to say. A covered surface keeps its state beneath it. The
-blocked state names the level and the first violation, or the type-admission
-cause. Every mask input — source, type, level, posture — is frozen during an
-excursion (each commit disposes it first), so enforcement arises in editor mode,
-where the masked strip bars opening lenses. Two paths can mount a lens under an
-active mask: the honored focus, and a flush-at-open whose absorbed keystrokes
-settle out-of-level code (the strip was live when clicked); on both, the mask
-applies to the mounted lens identically. The full class-3 block applies while
-the selected level's fit mark is does-not-fit or not-applicable-for-type — once
-the code parses. While it does not parse, the mark is undetermined and that
-carve-out wins regardless of type admission: the mask names no violation, and
-the parse phases' panel nodes and their error lenses stay uncovered — the
-supports a broken program needs are never the price of a wrong toggle. Under
-warn, nothing is blocked anywhere — which is also what lets the generator open
-freely over out-of-level code. Enforcement is mask, not filter — it never edits
-fit or accessibility — and recommendation rendering passes through the same
-mask.
+that must survive every posture — **never masked**, so the way back to the
+editor stays alive under every posture and the region never falls silent — and a
+node earns that place one of **four** ways (human ruling 2026-08-15 widened the
+class from meta-level _controls_ to **nodes**; human ruling 2026-08-17 widened
+it a second time and stated the routes); everything else — the study panel and
+its lenses, and the generator view with its opening button — is class 3, covered
+under strict while the code is out of level.
+
+**The four routes into class 2, and the seven nodes that take them.** The routes
+are enumerated rather than derived from one principle, because no single
+principle covers all four — an earlier revision compressed them to two and the
+region's own roster falsified it.
+
+- **Acting on the boundary** — the **level selector** and the **strict toggle**
+  change which boundary applies and whether it bites; the **snippet-type
+  toggle** can move the code inside it; the **Edit code button** is the path
+  back to the surface where the code is fixed. Restoring conformance and leaving
+  the boundary are deliberately one route and deliberately not one act: the
+  blocked sentence orders them, fix first and lift last.
+- **Explaining the boundary** — the **guide**. Its topics include what warn and
+  strict mean, so **a posture may not withdraw its own explanation**. Stated
+  this narrowly on purpose: _orientation_ alone would sweep the rail in, since
+  the rail is an orientation surface too.
+- **Carrying the region's voice** — the **announcer**, which is not a control at
+  all but must never go inert, because `inert` removes a subtree from the
+  accessibility tree and a silenced announcer is worse than none.
+- **Naming the pane's occupant** — the **nameplate** (human ruling 2026-08-17).
+  It always names what the pane holds; nothing else does. The announcer speaks
+  the three transitions and nothing speaks the standing state, so a learner who
+  arrives already inside one — an honored focus request at mount — is told what
+  they are on by the nameplate or by nothing.
+
+**Two of the seven are not controls** — the announcer and the nameplate — which
+is why the class enumerates **nodes**. Both render **outside both maskable
+containers**, and for the same reason: only the composition root renders both,
+so only it can guarantee a node sits outside each (human ruling 2026-08-17). A
+class-2 assignment without that placement rule would be unenforceable. **The
+mask makes the covered surfaces inert and lays a NON-inert overlay over them** —
+`inert` sits on the maskable containers and never on the overlay, because the
+overlay carries the blocked sentence and that sentence is the one thing a
+covered region must still be able to say. A covered surface keeps its state
+beneath it. The blocked state names the level and the first violation, or the
+type-admission cause. Every mask input — source, type, level, posture — is
+frozen during an excursion (each commit disposes it first), so enforcement
+arises in editor mode, where the masked strip bars opening lenses. Two paths can
+mount a lens under an active mask: the honored focus, and a flush-at-open whose
+absorbed keystrokes settle out-of-level code (the strip was live when clicked);
+on both, the mask applies to the mounted lens identically. The full class-3
+block applies while the selected level's fit mark is does-not-fit or
+not-applicable-for-type — once the code parses. While it does not parse, the
+mark is undetermined and that carve-out wins regardless of type admission: the
+mask names no violation, and the parse phases' panel nodes and their error
+lenses stay uncovered — the supports a broken program needs are never the price
+of a wrong toggle. Under warn, nothing is blocked anywhere — which is also what
+lets the generator open freely over out-of-level code. Enforcement is mask, not
+filter — it never edits fit or accessibility — and recommendation rendering
+passes through the same mask.
 
 The generator carries its class-3 membership at two elements, because those
 elements sit in different containers. The view renders inside the maskable
@@ -374,15 +405,26 @@ this region owns.
   fit marks are reachable. Injected-only — never on the built-in roster.
 - **surface classes** — the mask's three-way split: class 1 = editor-based
   (never masked while mounted; absent during an excursion) · class 2 =
-  meta-level **nodes** that must survive every posture — the meta-level
-  controls, the Edit code button among them, together with the announcer, which
-  is not a control but must never go inert (never masked) · class 3 = everything
-  else, the generator view and its Generate code button included (covered under
-  strict while out of level). Class 2 enumerates **nodes** rather than controls
-  because the split is exhaustive: the announcer is not a control and not class
-  3, and leaving it outside the taxonomy would make it maskable — the one thing
-  it cannot be, since `inert` removes a subtree from the accessibility tree and
-  a silenced announcer is worse than none (human ruling 2026-08-15).
+  meta-level **nodes** that must survive every posture, earned one of **four**
+  ways — acting on the boundary (the selector, the strict toggle, the
+  snippet-type toggle, the Edit code button) · explaining it (the guide) ·
+  carrying the region's voice (the announcer) · naming the pane's occupant (the
+  nameplate) — all of them never masked · class 3 = everything else, the
+  generator view and its Generate code button included (covered under strict
+  while out of level). The routes and their roster live in § Enforcement; this
+  entry names them and does not restate the arguments.
+
+  Class 2 enumerates **nodes** rather than controls because the split is
+  exhaustive and **two of its seven members are not controls** — the announcer
+  and the nameplate. Leaving either outside the taxonomy would make it maskable,
+  which neither can be: `inert` removes a subtree from the accessibility tree, a
+  silenced announcer is worse than none, and a pane whose name goes with it
+  leaves the learner covered and unplaced at once. Both therefore render outside
+  both maskable containers, and their class is what makes that placement a
+  requirement rather than a preference (human ruling 2026-08-15 widened the
+  class to nodes; human ruling 2026-08-17 widened it again, stated the four
+  routes, and gave the nameplate the announcer's placement rule).
+
 - **focus request** — the `lens` prop: a request honored through fit and
   accessibility, never a bypass.
 - **display labels** — the five phases' learner-facing labels and the
@@ -529,22 +571,34 @@ this region owns.
   contents change without comment. Rendered by the **top component**, not by the
   rail (human ruling 2026-08-15): what it names is the **pane occupant**, and
   that is the top component's own state — a nameplate elsewhere would have to be
-  told what the pane holds by the one component that already knows.
+  told what the pane holds by the one component that already knows. **Class 2**,
+  and the second member of that class that is not a control, by **naming the
+  pane's occupant** (human ruling 2026-08-17). It **always** names what the pane
+  holds, and nothing else does: the announcer speaks the three transitions and
+  nothing speaks the standing state, so a learner who arrives already inside one
+  — an honored focus request at mount — is told what they are on by the
+  nameplate or by nothing. The rail does not do this job: it names a **phase**,
+  and marks no occupant at all when the pane holds the editor or the generator.
+  Like the announcer it renders **outside both maskable containers**, and its
+  class is what makes that placement a requirement rather than a preference — a
+  learner under strict whose pane is covered and whose pane has no name has lost
+  both the surface and its address.
 - **announcer** — the permanently-mounted, visually-hidden live region that
-  speaks what a sighted learner reads off the rail. **Class 2**, the only member
-  of that class that is not a control: it restores nothing, but it must survive
-  every posture for the same reason the controls do. It renders outside both
-  maskable containers, because `inert` removes a subtree from the accessibility
-  tree and a silenced announcer is worse than none — and its class is what makes
-  that placement a requirement rather than a preference. **Rendered by the top
-  component, not by the rail** (human ruling 2026-08-15), and the placement rule
-  is the reason: only the composition root renders both maskable containers, so
-  only it can guarantee a node sits outside both. Mounted from `rail/`, the
-  guarantee would be a claim about containers that directory does not own. Its
-  utterances are enumerated, not open: the pane's occupant changing, a
-  transition into or out of the blocked state, and the barring edge moving —
-  **never a settle**, which fires whenever typing pauses. It is the single voice
-  for the blocked state's cause; no other node claims to announce that sentence.
+  speaks what a sighted learner reads off the rail. **Class 2**, and one of the
+  two members of that class that are not controls — the nameplate is the other:
+  it restores nothing, but it must survive every posture for the same reason the
+  controls do. It renders outside both maskable containers, because `inert`
+  removes a subtree from the accessibility tree and a silenced announcer is
+  worse than none — and its class is what makes that placement a requirement
+  rather than a preference. **Rendered by the top component, not by the rail**
+  (human ruling 2026-08-15), and the placement rule is the reason: only the
+  composition root renders both maskable containers, so only it can guarantee a
+  node sits outside both. Mounted from `rail/`, the guarantee would be a claim
+  about containers that directory does not own. Its utterances are enumerated,
+  not open: the pane's occupant changing, a transition into or out of the
+  blocked state, and the barring edge moving — **never a settle**, which fires
+  whenever typing pauses. It is the single voice for the blocked state's cause;
+  no other node claims to announce that sentence.
 - **house token** — a CSS custom property, prefix `--sl-`, naming one of this
   package's own presentation concepts: a surface, a text weight, a hairline, the
   focus ring, the inert dim, the mask scrim, or a fit mark's role. _House_ is

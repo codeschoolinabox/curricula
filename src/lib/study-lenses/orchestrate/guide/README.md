@@ -6,9 +6,11 @@ are, what a language level is, what warn and strict mean, what the snippet-type
 toggle changes. Collapsed behind a reveal by default; alive under every posture.
 
 The region sketch ([../DOCS.md](../DOCS.md)) owns the class-2 criterion the
-guide exists under — a control whose availability restores what the learner
-needs, here orientation, is never masked; this document owns the rendered
-contract.
+guide exists under — **explaining the boundary**: the guide's topics include
+what warn and strict mean, so a posture may not withdraw its own explanation
+(human ruling 2026-08-17). Deliberately not the broader _orientation_, which the
+rail also supplies and which a posture may withdraw. This document owns the
+rendered contract.
 
 One disambiguation this surface owes the package: the package prose calls
 language levels "guides" (opt-in guides, never gatekeepers) — a metaphor about

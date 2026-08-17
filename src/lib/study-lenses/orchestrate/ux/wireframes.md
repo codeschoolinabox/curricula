@@ -100,6 +100,14 @@ Three facts about that data shape every drawing below:
   has nothing to open.
 - **the nameplate** — a line above the pane that always names what the pane is
   holding, so the pane is a named place rather than a box whose contents change.
+  **Class 2**, by **naming the pane's occupant** (human ruling 2026-08-17), and
+  the second member of that class that is not a control. The word _always_ is
+  the whole of it: the announcer speaks the three transitions and nothing speaks
+  the standing state, so a learner who arrives already inside one — an honored
+  focus request at mount — is told what they are on by the nameplate or by
+  nothing. Like the announcer it renders **outside both maskable containers**,
+  because a learner whose pane is covered and whose pane has no name has lost
+  the surface and its address at once.
 - **the announcer** — a permanently-mounted, visually-hidden live region that
   speaks the transitions a sighted learner reads off the rail. **The rail cannot
   itself be that live region, and the reason does not depend on the posture.**
@@ -112,12 +120,13 @@ Three facts about that data shape every drawing below:
   independently — the rail goes inert under strict, and `inert` removes a
   subtree from the accessibility tree entirely, so a live region there would
   fall silent under the exact posture whose transition most needs announcing.
-  The announcer is what pays that debt. It is **class 2** — the one member of
-  that class that is not a control. The split is exhaustive, so the only
-  alternative was class 3, which would put it inert under strict and silence the
-  very thing its placement exists to keep speaking; class 2 therefore widened
-  from meta-level _controls_ to the meta-level **nodes** that must survive every
-  posture (human ruling 2026-08-15). Three rules fix the rest of it:
+  The announcer is what pays that debt. It is **class 2**, and one of the two
+  members of that class that are not controls — the nameplate is the other. The
+  split is exhaustive, so the only alternative was class 3, which would put it
+  inert under strict and silence the very thing its placement exists to keep
+  speaking; class 2 therefore widened from meta-level _controls_ to the
+  meta-level **nodes** that must survive every posture (human ruling
+  2026-08-15). Three rules fix the rest of it:
   - **Placement.** It renders outside both maskable containers — not because it
     is a control that must stay reachable, but because `inert` removes a subtree
     from the accessibility tree entirely, and a silenced announcer is worse than
@@ -181,13 +190,15 @@ and cannot attach it to the one they just passed. This is the one place the
 spoken surface says more than the drawn one, deliberately.
 
 **Under strict, neither reader gets it, and that is a second unpaid cost.** The
-reason sits beneath the rail, inside the maskable container, and it restores
-nothing — so it is class 3 and dims with the rail. `inert` then empties that
-subtree out of the accessibility tree, which is the same fact that keeps the
-announcer outside both maskable containers, so the spoken copy goes dark with
-the drawn copy. It belongs in the same ledger as the orientation cost recorded
-under [Strict, covering](#strict-covering--editor-mode), and it is no better
-paid.
+reason earns none of the four class-2 routes — it acts on no boundary, explains
+no boundary, is not the region's voice, and names no occupant — so it is class 3
+and dims with the rail it belongs to. (Its ground is exhaustion, not
+containment: that it sits inside the maskable container is a consequence of its
+class, never the reason for it.) `inert` then empties that subtree out of the
+accessibility tree, which is the same fact that keeps the announcer outside both
+maskable containers, so the spoken copy goes dark with the drawn copy. It
+belongs in the same ledger as the orientation cost recorded under
+[Strict, covering](#strict-covering--editor-mode), and it is no better paid.
 
 **The mark row and the reason line travel together.** A drawing that runs the
 whole instrument top to bottom and shows the rail's per-station marks shows the
@@ -363,21 +374,49 @@ push back on its own geometry.
 candidates left open.** The rail is class 3 because of what it is — and because
 the split is exhaustive, what it is can be read off the two classes it is not.
 It is not editor-based, so not class 1. Class 2 is the meta-level nodes that
-must survive every posture, and a node earns that place one of two ways: by
-restoring conformance, or by carrying the region's voice. The rail does neither.
-It narrates where the machine is, and narration is not restoration; the voice is
-the announcer's, for reasons stated above that have nothing to do with posture.
+must survive every posture, and a node earns that place one of **four** ways
+(human ruling 2026-08-17) — the rail earns none of them:
+
+- **Acting on the boundary.** The rail changes no level, no posture and no
+  snippet type — no mask input passes through it — and the blocked sentence
+  names no rail affordance among the ways out. This holds at a kit of zero,
+  where the rail offers nothing at all, exactly as it holds at a full one.
+- **Explaining the boundary.** The guide's route, and it is narrow on purpose: a
+  posture may not withdraw its own explanation of itself. The rail explains the
+  **machine**, not the boundary.
+- **Carrying the region's voice.** The announcer's, for reasons stated above
+  that have nothing to do with posture.
+- **Naming the pane's occupant.** The nameplate's, and this is the route the
+  rail comes nearest to taking — so the distinction is stated here rather than
+  left implicit, because it is load-bearing. The rail names a **phase**; the
+  nameplate names an **occupant**. Where the two coincide the rail's answer is a
+  by-product: it marks the open lens's station, which is why the rail can afford
+  to hide the kit. But it marks **no occupant at all** in two of the three
+  occupant states — nothing is marked in editor mode, and no station is marked
+  when the pane holds the generator, which belongs to no phase. A surface that
+  answers "where am I" for one occupant out of three, on a mark strict has just
+  made unreachable, is not the thing that names where the learner is standing.
+
 So class 3 is the residue — and it is the right residue, because that is exactly
-what an orientation surface a posture may withdraw should be. Membership follows
-from what the surface is, never from which container it happens to render in,
-which is the rule the mask states for every surface. And it dims **whole**
-rather than in parts because partial dimming of a lifecycle line would read as a
-machine state — one phase gone dark — rather than as a posture. **Both halves
-survive a station with nothing to open**, which is the test the earlier
-arguments failed: the first rested on the stations being controls, and four of
-five carry none; the second rested on the rail being the study layer's _opening_
-surface, and a rail whose stations open nothing opens nothing. Neither ground
-above mentions a control, a tray, or a surface this design may abolish.
+what an orientation surface a posture may withdraw should be.
+
+**An earlier revision of this argument ran on two routes rather than four, and
+the region's own class-2 roster falsified it**: the guide earns the class by
+neither of the two, and the strict toggle earns it by lifting the boundary
+rather than conforming to it. The conclusion never moved — the rail earns no
+route under either enumeration — but an exhaustion argument is only as strong as
+its list, so the list is now the region's actual one.
+
+Membership follows from what the surface is, never from which container it
+happens to render in, which is the rule the mask states for every surface. And
+it dims **whole** rather than in parts because partial dimming of a lifecycle
+line would read as a machine state — one phase gone dark — rather than as a
+posture. **Both halves survive a station with nothing to open**, which is the
+test the earlier arguments failed: the first rested on the stations being
+controls, and four of five carry none; the second rested on the rail being the
+study layer's _opening_ surface, and a rail whose stations open nothing opens
+nothing. Neither ground above mentions a control, a tray, or a surface this
+design may abolish.
 
 **The cost is that orientation goes dark under strict, and it is not fully
 paid.** The announcer keeps speaking, because it renders outside both maskable
@@ -401,8 +440,8 @@ state where "the way home is never covered" carries the most weight.
 ├──────────────────────────────────────────────────────────────┤
 │  Source ─── Tokens ─── AST ─── Environment ─── Evaluation    │ ← dim + inert
 ├──────────────────────────────────────────────────────────────┤
-│  the pane holds: write it from memory · a way to study Source│
-│ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ │
+│  the pane holds: write it from memory · a way to study Source│ ← class 2, never covered:
+│ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ │   the pane keeps its name
 │ ░ Just Enough JavaScript: debugger statements are outside  ░ │ ← the lens is covered
 │ ░ this level. Fix the code, pick another level, or turn    ░ │   where it renders
 │ ░ strict off.                                              ░ │
@@ -521,10 +560,14 @@ rearrangement here:
   containers and is never covered while mounted; an open lens and the generator
   render inside one. A single shared slot would break that split; a shared
   visual frame is not a shared slot.
-- **The controls that restore conformance are never covered** — the level
-  selector, the strict toggle, the snippet-type toggle, the guide, and the Edit
-  code button. Under strict they stay at full strength while the rail and the
-  study surfaces dim.
+- **The class-2 nodes are never covered** — the level selector, the strict
+  toggle, the snippet-type toggle, the Edit code button, the guide, the
+  announcer, and the nameplate. Under strict they stay at full strength while
+  the rail and the study surfaces dim. Titled by the class rather than by one of
+  its four routes, because an earlier revision headed this list "the controls
+  that restore conformance" and its own members falsified it twice: the guide
+  restores nothing, and the strict toggle lifts the boundary rather than
+  conforming to it. Two of the seven are not controls at all.
 - **Edit code is in the control row, leading, whenever an excursion is open**,
   and it is the guaranteed way home. It is never drawn inside the pane and never
   below it: a class-2 control inside the maskable container would be covered by

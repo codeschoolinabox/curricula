@@ -3,7 +3,11 @@
 The level selector and the strict toggle — pure presentation of the level
 surfaces. The selector is permanent whenever levels are registered: it is the
 discovery and self-assessment channel. Both controls are surface class 2: never
-masked, because each can itself restore conformance.
+masked, because both **act on the boundary** — the selector changes which
+level's boundary applies, and the strict toggle changes whether it bites. Only
+the first of those restores conformance; the toggle **lifts the guardrail**,
+which the blocked sentence's own ordering treats as the opposite act — fix the
+code first, lift the guardrail last (human ruling 2026-08-17).
 
 The region [README](../README.md) owns what fit marks and assessments mean; the
 package [README](../../README.md) owns the none-state and strict/warn. This

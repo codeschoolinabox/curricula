@@ -112,11 +112,18 @@ flowchart TD
   writes. Every derived state re-derives per settle.
 - **Append-only composition, loud collisions.** Built-ins are never replaced or
   shadowed; failure happens at mount, at the author's desk.
-- **Class-2 nodes never mask.** Any control whose availability restores what the
-  learner needs stays alive under every posture: conformance for the selector
-  and both toggles, orientation for the guide, the way home for the Edit code
-  button. The announcer joins them without being a control — `inert` would take
-  it out of the accessibility tree, and a silenced announcer is worse than none.
+- **Class-2 nodes never mask.** Four routes in, and no posture withdraws any of
+  them (human ruling 2026-08-17). **Acting on the boundary**: the selector and
+  the strict toggle change which boundary applies and whether it bites, the
+  snippet-type toggle can move the code inside it, and the Edit code button is
+  the path back to where the code is fixed. **Explaining the boundary**: the
+  guide — stated this narrowly rather than as _orientation_, because a posture
+  may not withdraw its own explanation while the rail is an orientation surface
+  the posture may. **Carrying the region's voice**: the announcer. **Naming the
+  pane's occupant**: the nameplate. The last two are not controls, and both
+  render outside both maskable containers — `inert` would take the announcer out
+  of the accessibility tree, and would strip the pane of its name at the moment
+  the pane is covered.
 - **The undetermined carve-out wins.** While the code does not parse, the mask
   names no violation and the parse phases' supports stay uncovered — regardless
   of type admission.

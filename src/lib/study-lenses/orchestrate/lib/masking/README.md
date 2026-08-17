@@ -34,19 +34,26 @@ validates or repairs it (no re-derivation, in either direction).
 
 Class 1, editor-based: never masked while mounted — and structurally absent
 during any excursion, when the ways back to it are class 2. Class 2, the
-meta-level **nodes** that must survive every posture — the selector, the strict
-toggle, the snippet-type toggle, the guide and the edit-return button, all of
-them controls, together with the announcer, which is not a control at all: never
-masked, because each control can itself restore conformance or the path to it
-(and help is never withheld), and because `inert` would remove the announcer
-from the accessibility tree entirely, which is worse than not announcing (human
-ruling 2026-08-15). The class enumerates nodes rather than controls because the
-split is exhaustive, and a class-less announcer would fall to class 3 — the one
-class it cannot carry. Class 3, everything else — the study panel and its
-lenses, and the generator view together with the button that opens it: covered
-under strict while the code is out of level — the covered surfaces go inert and
-a NON-inert overlay is laid over them, never the reverse: the overlay carries
-the blocked sentence, and marking it inert would remove that sentence from the
+meta-level **nodes** that must survive every posture, earned one of **four**
+ways (human ruling 2026-08-17): **acting on the boundary** — the selector, the
+strict toggle, the snippet-type toggle and the edit-return button, which
+respectively change which boundary applies, whether it bites, whether the code
+sits inside it, and how the learner reaches the surface where it is fixed;
+**explaining the boundary** — the guide, because a posture may not withdraw its
+own explanation of itself; **carrying the region's voice** — the announcer; and
+**naming the pane's occupant** — the nameplate. None of the four is ever masked.
+The class enumerates **nodes** rather than controls because the split is
+exhaustive and **two of the four routes are taken by nodes that are not
+controls** — the announcer and the nameplate — and either falling to class 3
+would be the one class it cannot carry: `inert` would remove the announcer from
+the accessibility tree entirely, which is worse than not announcing (human
+ruling 2026-08-15), and it would take the pane's name with the pane. Both
+therefore render outside both maskable containers, which only the composition
+root can guarantee. Class 3, everything else — the study panel and its lenses,
+and the generator view together with the button that opens it: covered under
+strict while the code is out of level — the covered surfaces go inert and a
+NON-inert overlay is laid over them, never the reverse: the overlay carries the
+blocked sentence, and marking it inert would remove that sentence from the
 accessibility tree. A covered surface keeps its state beneath it. The class of a
 surface is a static fact of what the surface IS — nothing derives it at runtime,
 and it does not follow from which container the surface renders in: the Generate
