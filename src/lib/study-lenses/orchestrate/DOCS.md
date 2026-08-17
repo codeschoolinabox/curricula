@@ -242,14 +242,15 @@ verdicts without consulting a level twice.
   positional list.
 - The panel receives its ordered phase list built from that constant plus the
   labels, and renders it as the horizontal lifecycle strip ABOVE the surface
-  pane, beside the control row (the Edit code button — leading, while an
-  excursion is open — then the Generate code button, the type toggle and the
-  level surfaces; sibling order within the row is presentation, not contract) —
-  controls and lifecycle in one band, the surface pane beneath: the editor when
-  no excursion is open, the open lens or the generator in its place.
-  Recommendations render below the pane in every mode. The strip renders no
-  headings; the guide's `h4` topic titles are the instrument's only headings,
-  and the guide renders last in DOM order.
+  pane and BENEATH the control row, which sits at the top of the band (the Edit
+  code button — leading, while an excursion is open — then the Generate code
+  button, the type toggle and the level surfaces; sibling order within the row
+  is presentation, not contract) — controls and lifecycle in one band, the
+  surface pane beneath: the editor when no excursion is open, the open lens or
+  the generator in its place. The nameplate renders between the band and the
+  pane, naming the occupant. Recommendations render below the pane in every
+  mode. The strip renders no headings; the guide's `h4` topic titles are the
+  instrument's only headings, and the guide renders last in DOM order.
 - ONE VISUAL PANE, TWO DOM SLOTS — the mask-membership rule: the editor renders
   OUTSIDE both maskable regions (class 1, never masked while mounted); the
   mounted lens and the generator view both render INSIDE the maskable content

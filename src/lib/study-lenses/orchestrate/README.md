@@ -1,4 +1,4 @@
-<!-- cspell:ignore behaviour colouring colours spellme wireframes -->
+<!-- cspell:ignore behaviour colouring colours generalise spellme wireframes -->
 
 # orchestrate
 
@@ -613,12 +613,17 @@ this region owns.
   today's ordinary case, versus one that holds when nothing is registered at
   all, which is a degenerate mount. **Where the scope carries weight, say
   which**, as the wireframes' "a kit of two lenses on one phase" already does.
-- **band** — the horizontal region above the surface pane holding everything the
-  region renders that is not the program: the **control row** and the **rail**.
-  Named because it is one contested surface and its size is what the personas
-  compete over — not a container with behaviour of its own. The band is not a
-  mask boundary: its two parts carry different classes, which is the whole
-  reason the next entry exists.
+- **band** — the horizontal region directly above the surface pane, holding the
+  **control row** and the **rail**. Named because it is one contested surface
+  and its size is what the personas compete over — not a container with
+  behaviour of its own. **It is not everything the region renders that is not
+  the program**, and the entry says so because an earlier revision claimed it
+  was: the **nameplate** sits between the band and the pane and belongs to the
+  pane it names; the **proposals** and the **guide** render below the pane
+  entirely; and the **announcer** renders outside both maskable containers,
+  where it has no position on the page at all. The band is not a mask boundary
+  either: its two parts carry different classes, which is the whole reason the
+  next entry exists.
 - **control row** — the row of controls at the top of the band: the level
   selector, the strict toggle, the snippet-type toggle, the Edit code button,
   and the Generate code button. **It is a mask boundary object, and membership
@@ -627,7 +632,10 @@ this region owns.
   treatment at its own element while every other control in the row is class 2
   and stays live. Sibling order within the row is presentation; which class each
   member carries is contract. A reader who takes the row for a class is reading
-  the one container in this region that deliberately mixes them.
+  a container whose members deliberately differ — deliberately not "the **one**
+  container that mixes them", because the band spans two classes as well; what
+  is particular to the row is that the mixing happens among **siblings**, at one
+  level, where a reader is most likely to generalise from a neighbour.
 - **nameplate** — the line above the surface pane naming its current occupant,
   so the pane is a named place a learner moves between rather than a box whose
   contents change without comment. Rendered by the **top component**, not by the

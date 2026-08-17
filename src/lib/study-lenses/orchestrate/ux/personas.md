@@ -25,12 +25,15 @@ The package README names two hats and says the environment never forces one. It
 does not say what that costs. **It costs a band of pixels, and there is only
 one.**
 
-Everything the orchestrator renders that is not the program sits above the
-surface pane: the controls, the lifecycle, the level surfaces. The Frogrammer
-needs that band to be an instrument panel — legible at rest, ordered, all five
-phases present whether or not anything can be opened in them. The Vibetoader
-needs it to be out of the way, because every element they must read before
-reaching a result is friction between them and the result.
+Most of what the orchestrator renders that is not the program sits above the
+surface pane: the controls, the lifecycle, the level surfaces. Not all of it —
+the proposals and the guide render below the pane, and the pane's own nameplate
+sits between the band and the pane it names. But the band is the part with a
+fixed cost at the top of every screen, which is what makes it the contested one.
+The Frogrammer needs that band to be an instrument panel — legible at rest,
+ordered, all five phases present whether or not anything can be opened in them.
+The Vibetoader needs it to be out of the way, because every element they must
+read before reaching a result is friction between them and the result.
 
 Those are not two preferences to be balanced by a sensible middle. They are
 **opposite demands on the same surface**, and an arrangement satisfies one by
