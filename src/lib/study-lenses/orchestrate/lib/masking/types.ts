@@ -9,18 +9,20 @@ import type { SnippetType, Violation } from '../../../language-levels/types.js';
 
 /**
  * The mask's three-way split of rendered surfaces — VOCABULARY ONLY: no
- * runtime consumer types against this. A surface's class is a static
- * fact of what it IS, and containment decides nothing: editor-based
- * surfaces are always alive; the
- * meta-level NODES that must survive every posture are never masked;
- * everything else is maskable under strict.
+ * runtime consumer types against this. A surface's class is a static fact
+ * of what it IS, and containment decides nothing: editor-based surfaces
+ * are always alive; the meta-level NODES that must survive every posture
+ * are never masked; every other surface the mask ACTS ON is maskable
+ * under strict.
+ *
+ * The blocked overlay is the mask's apparatus rather than a surface it
+ * acts on, and carries no class — so this type needs no fourth member.
  *
  * The class-2 roster AND the four routes into it live in the region
  * README § Enforcement, not here: this type is vocabulary, and an
- * enumeration kept in two places drifts — which is what happened to the
- * previous one. `'meta-node'` rather than `'meta-control'`: two of the
- * class's members are not controls — the announcer and the nameplate — so
- * the older literal under-named what it labelled.
+ * enumeration kept in two places drifts. `'meta-node'` names the class
+ * honestly because two of its members are not controls — the announcer
+ * and the nameplate.
  */
 export type SurfaceClass = 'editor-based' | 'meta-node' | 'maskable';
 

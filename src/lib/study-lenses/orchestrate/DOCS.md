@@ -112,13 +112,12 @@ flowchart TD
   writes. Every derived state re-derives per settle.
 - **Append-only composition, loud collisions.** Built-ins are never replaced or
   shadowed; failure happens at mount, at the author's desk.
-- **Class-2 nodes never mask.** Seven nodes, four routes in, and no posture
-  withdraws any of them (human ruling 2026-08-17). The routes and the roster are
-  stated once, in [README.md](./README.md) § Enforcement, and are not restated
-  here — a sketch that re-enumerates a contract acquires a second home that
-  drifts, which is what happened to the previous enumeration. What this sketch
-  constrains is structural: **two of the seven are not controls** — the
-  announcer and the nameplate — and both must render **outside both maskable
+- **Class-2 nodes never mask**, and no posture withdraws any of them (human
+  ruling 2026-08-17). The routes, the roster and its size are stated once, in
+  [README.md](./README.md) § Enforcement, and are not restated here — a sketch
+  that re-enumerates a contract acquires a second home that drifts. What this
+  sketch constrains is structural: **the two members that are not controls** —
+  the announcer and the nameplate — must render **outside both maskable
   containers**, which only the composition root can guarantee, so their
   placement is a fact about the component tree rather than about styling.
 - **The undetermined carve-out wins.** While the code does not parse, the mask
@@ -236,7 +235,14 @@ verdicts without consulting a level twice.
 
 - The five phases' display labels live in one record keyed by phase name, zipped
   against embody's runtime order constant at the point of use; never a
-  positional list.
+  positional list. Each phase carries TWO authored strings — the full label and
+  the short label the rail draws — so the record's value is a pair, never a
+  string plus a truncation rule.
+- A **station** is what renders one phase on the rail, and carries four things:
+  the phase (the key everything zips against, never drawn), the label and short
+  label, the standing (`openable` · `bare` · `waiting`), and its tray where it
+  has one. Whether the openable and bare cases are one shape or two is the first
+  question `types.ts` answers.
 - The panel receives its ordered phase list built from that constant plus the
   labels, and renders it as **the rail** ABOVE the surface pane and BENEATH the
   control row, which sits at the top of the band (the Edit code button —
@@ -251,13 +257,6 @@ verdicts without consulting a level twice.
   Recommendations render below the pane in every mode. The rail renders no
   headings; the guide's `h4` topic titles are the instrument's only headings,
   and the guide renders last in DOM order.
-
-  > **`strip` below names the surface the Rail supersedes.** Its remaining uses
-  > in this section are the retired vocabulary, not a second surface, and the
-  > vocabulary migration is 0.3's (human ruling 2026-08-16). **Behaviour here is
-  > the Rail's** — the two halves were split deliberately, and this note is what
-  > makes the split legible to a reader who never opens the campaign's own
-  > records.
 
 - ONE VISUAL PANE, TWO DOM SLOTS — the mask-membership rule: the editor renders
   OUTSIDE both maskable regions (class 1, never masked while mounted); the

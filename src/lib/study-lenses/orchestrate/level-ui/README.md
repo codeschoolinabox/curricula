@@ -2,8 +2,9 @@
 
 The level selector and the strict toggle — pure presentation of the level
 surfaces. The selector is permanent whenever levels are registered: it is the
-discovery and self-assessment channel. Both controls are surface class 2: never
-masked, because both **act on the boundary** — the selector changes which
+discovery and self-assessment channel. Both controls are surface class 2 — the
+routes and the roster live in the region [README](../README.md) § Enforcement —
+never masked, because both **act on the boundary** — the selector changes which
 level's boundary applies, and the strict toggle changes whether it bites. Only
 the first of those restores conformance; the toggle **lifts the guardrail**,
 which the blocked sentence's own ordering treats as the opposite act — fix the

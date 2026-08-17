@@ -273,13 +273,13 @@ four legible states, drawn below, not one control with four strings.
 ## The parse breaks — the machine stopped
 
 ```text
+│         [Just Enough JavaScript · can't tell yet ▾]          │
+├──────────────────────────────────────────────────────────────┤
 │  Source ─── Tokens ─── AST ──╳╌╌ Environment ╌╌╌╌ Evaluation │
 │   ▾ 2         ·          ·         waiting         waiting   │
 │                                                              │
 │  the grammar broke here — Unexpected token (2:8).            │
 │  the last two phases wait for it.                            │
-├──────────────────────────────────────────────────────────────┤
-│              [Just Enough JavaScript · can't tell yet ▾]     │
 ```
 
 **The barring edge is drawn between stations, not on one**, because that is what
@@ -385,8 +385,10 @@ push back on its own geometry.
 candidates left open.** The rail is class 3 because of what it is — and because
 the split is exhaustive, what it is can be read off the two classes it is not.
 It is not editor-based, so not class 1. Class 2 is the meta-level nodes that
-must survive every posture, and a node earns that place one of **four** ways
-(human ruling 2026-08-17) — the rail earns none of them:
+must survive every posture, and a node earns that place one of **four** ways —
+the routes' home of record is the region README § Enforcement, and this section
+walks them because an exhaustion argument cannot be made by citation alone
+(human ruling 2026-08-17). The rail earns none of them:
 
 - **Acting on the boundary.** The rail changes no level, no posture and no
   snippet type — no mask input passes through it — and the blocked sentence

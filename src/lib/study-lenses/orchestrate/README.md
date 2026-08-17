@@ -123,13 +123,6 @@ changes. And the one visual pane is two DOM slots: the editor renders in its own
 never-masked slot; the open lens and the generator render within the maskable
 content region, so the class-1/class-3 split survives the swap.
 
-> **`strip` in this document names the surface the Rail supersedes.** The
-> glossary's `the rail` entry retires that vocabulary; the body has not yet
-> migrated, and the migration is 0.3's (human ruling 2026-08-16). **Behaviour is
-> already the Rail's** — the behavioural half came forward and the vocabulary
-> half did not, deliberately. Read a remaining `strip` as the retired name for
-> the rail, never as a second surface.
-
 - **The editor (home base)** — the surface the learner authors in, and the only
   place typing enters the program's source; every derived state re-derives from
   its settles. Mounted whenever the pane holds no excursion; structurally absent
@@ -194,14 +187,14 @@ that must survive every posture — **never masked**, so the way back to the
 editor stays alive under every posture and the region never falls silent — and a
 node earns that place one of **four** ways (human ruling 2026-08-15 widened the
 class from meta-level _controls_ to **nodes**; human ruling 2026-08-17 widened
-it a second time and stated the routes); everything else — the study panel and
-its lenses, and the generator view with its opening button — is class 3, covered
-under strict while the code is out of level.
+it a second time and stated the routes); every other surface the mask acts on —
+the study panel and its lenses, and the generator view with its opening button —
+is class 3, covered under strict while the code is out of level. The blocked
+overlay takes no class at all; see the carve-out below.
 
 **The four routes into class 2, and the seven nodes that take them.** The routes
 are enumerated rather than derived from one principle, because no single
-principle covers all four — an earlier revision compressed them to two and the
-region's own roster falsified it.
+principle covers all four.
 
 - **Acting on the boundary** — the **level selector** and the **strict toggle**
   change which boundary applies and whether it bites; the **snippet-type
@@ -233,36 +226,35 @@ containers**, and for the same reason: only the composition root renders both,
 so only it can guarantee a node sits outside each (human ruling 2026-08-17). A
 class-2 assignment without that placement rule would be unenforceable.
 
-**The blocked overlay is the mask's apparatus, not a classified surface** — the
-one carve-out in an otherwise total split, stated because a taxonomy with an
-unstated exception is not exhaustive. The three classes partition the surfaces
-the mask acts **on**; the overlay is what the mask acts **with**. It cannot be
-class 3, because class 3 means _covered under strict_ and the overlay **is** the
-cover; it is not editor-based; and it is not class 2, because it does not
-survive every posture — it exists only while the mask is up, which is the exact
-inverse of the class-2 test. Its one binding rule is already stated above and
-does not come from a class: `inert` sits on the maskable containers and never on
-the overlay. `SurfaceClass` therefore needs no fourth member, and 0.3 should not
-add one. **The mask makes the covered surfaces inert and lays a NON-inert
-overlay over them** — `inert` sits on the maskable containers and never on the
-overlay, because the overlay carries the blocked sentence and that sentence is
-the one thing a covered region must still be able to say. A covered surface
-keeps its state beneath it. The blocked state names the level and the first
-violation, or the type-admission cause. Every mask input — source, type, level,
-posture — is frozen during an excursion (each commit disposes it first), so
-enforcement arises in editor mode, where the masked strip bars opening lenses.
-Two paths can mount a lens under an active mask: the honored focus, and a
-flush-at-open whose absorbed keystrokes settle out-of-level code (the strip was
-live when clicked); on both, the mask applies to the mounted lens identically.
-The full class-3 block applies while the selected level's fit mark is
-does-not-fit or not-applicable-for-type — once the code parses. While it does
-not parse, the mark is undetermined and that carve-out wins regardless of type
-admission: the mask names no violation, and the parse phases' panel nodes and
-their error lenses stay uncovered — the supports a broken program needs are
-never the price of a wrong toggle. Under warn, nothing is blocked anywhere —
-which is also what lets the generator open freely over out-of-level code.
-Enforcement is mask, not filter — it never edits fit or accessibility — and
-recommendation rendering passes through the same mask.
+**The blocked overlay is the mask's apparatus, and carries no class** — the one
+carve-out in an otherwise total split, stated because a taxonomy with an
+unstated exception is not exhaustive. The decisive test is that **it does not
+survive every posture: it exists only while the mask is up**, which is the exact
+inverse of what class 2 requires. It cannot be class 3 either, because class 3
+means _covered under strict_ and the overlay **is** the cover; and it is not
+editor-based. Its one binding rule does not come from a class, and is stated
+below with the mask's own mechanics: `inert` sits on the maskable containers,
+never on the overlay. `SurfaceClass` therefore needs no fourth member. **The
+mask makes the covered surfaces inert and lays a NON-inert overlay over them** —
+`inert` sits on the maskable containers and never on the overlay, because the
+overlay carries the blocked sentence and that sentence is the one thing a
+covered region must still be able to say. A covered surface keeps its state
+beneath it. The blocked state names the level and the first violation, or the
+type-admission cause. Every mask input — source, type, level, posture — is
+frozen during an excursion (each commit disposes it first), so enforcement
+arises in editor mode, where the masked strip bars opening lenses. Two paths can
+mount a lens under an active mask: the honored focus, and a flush-at-open whose
+absorbed keystrokes settle out-of-level code (the strip was live when clicked);
+on both, the mask applies to the mounted lens identically. The full class-3
+block applies while the selected level's fit mark is does-not-fit or
+not-applicable-for-type — once the code parses. While it does not parse, the
+mark is undetermined and that carve-out wins regardless of type admission: the
+mask names no violation, and the parse phases' panel nodes and their error
+lenses stay uncovered — the supports a broken program needs are never the price
+of a wrong toggle. Under warn, nothing is blocked anywhere — which is also what
+lets the generator open freely over out-of-level code. Enforcement is mask, not
+filter — it never edits fit or accessibility — and recommendation rendering
+passes through the same mask.
 
 The generator carries its class-3 membership at two elements, because those
 elements sit in different containers. The view renders inside the maskable
@@ -418,12 +410,13 @@ this region owns.
   committed changes other surfaces react to — configuration tweaks reach their
   lens as fresh props and announce nothing. No other component holds a session
   choice.
-- **blocked state** — the learner-facing face of a masked surface under strict:
-  an overlay naming the level and the first violation — or the type-admission
-  cause — while the covered surface keeps its state beneath. **The overlay is
-  not inert; the surface under it is.** Marking the overlay inert would take the
-  blocked sentence out of the accessibility tree, which is the one thing this
-  state exists to say.
+- **blocked state** — the learner-facing face of a masked surface under strict,
+  rendered by the mask's overlay, which is apparatus and carries no surface
+  class (§ Enforcement): an overlay naming the level and the first violation —
+  or the type-admission cause — while the covered surface keeps its state
+  beneath. **The overlay is not inert; the surface under it is.** Marking the
+  overlay inert would take the blocked sentence out of the accessibility tree,
+  which is the one thing this state exists to say.
 - **built-in roster** — the package-shipped default rosters, one of lenses and
   one of levels: constants in the composing library that the mount-time joins
   extend. Injection appends to them and never replaces or shadows them, and the
@@ -438,10 +431,12 @@ this region owns.
   ways — acting on the boundary (the selector, the strict toggle, the
   snippet-type toggle, the Edit code button) · explaining it (the guide) ·
   carrying the region's voice (the announcer) · naming the pane's occupant (the
-  nameplate) — all of them never masked · class 3 = everything else, the
-  generator view and its Generate code button included (covered under strict
-  while out of level). The routes and their roster live in § Enforcement; this
-  entry names them and does not restate the arguments.
+  nameplate) — all of them never masked · class 3 = every other surface the mask
+  acts on, the generator view and its Generate code button included (covered
+  under strict while out of level) · and **no class** for the blocked overlay,
+  which is the mask's apparatus rather than a surface it acts on (§
+  Enforcement). The routes and their roster live in § Enforcement; this entry
+  names them and does not restate the arguments.
 
   Class 2 enumerates **nodes** rather than controls because **two of its seven
   members are not controls** — the announcer and the nameplate — and both must
@@ -450,6 +445,16 @@ this region owns.
   2026-08-17 widened it again, stated the four routes, and gave the nameplate
   the announcer's placement rule).
 
+- **recommendation** — a lens's proposal of a next study step, and **the
+  contract term**: the exported type is `Recommendation`, so the prose follows
+  the type rather than the other way round. Three things share the word and are
+  kept apart here because the glossary already keeps four near-homonyms of
+  _mark_ apart: a **recommendation** is one item; the **ranked recommendations**
+  are the collection this region derives per settle; and the **proposals
+  surface** is where they render, below the pane in every mode. _Proposal_
+  survives only in that surface's name and in the `candidate` entry's contrast,
+  where it names the same thing a recommendation does — everywhere else in this
+  region's prose the contract term is the one to use.
 - **focus request** — the `lens` prop: a request honored through fit and
   accessibility, never a bypass.
 - **display labels** — the five phases' learner-facing labels and the
@@ -466,15 +471,12 @@ this region owns.
   entry's own discipline: truncation is not a vocabulary choice, and a rule that
   happens to work on five labels would silently return the whole string for the
   sixth that carries no separator — `Source` already exercises that case. **The
-  shipped `display-labels.ts` still carries one string per phase**; widening its
-  value shape is 0.3's, because it has a live consumer, which is what
-  distinguishes it from the `SurfaceClass` rename that had none. **The four fit
-  marks' learner-facing copy is display labelling too**, and takes the same
-  discipline: keyed by the mark it renders, zipped against the mark vocabulary,
-  never a positional list. The four strings: `fits` · `steps outside` ·
-  `modules only` · `can't tell yet`. A mark is machine vocabulary — a learner
-  reads that their code _steps outside_ a level, never that it is
-  `does-not-fit`.
+  four fit marks' learner-facing copy is display labelling too**, and takes the
+  same discipline: keyed by the mark it renders, zipped against the mark
+  vocabulary, never a positional list. The four strings: `fits` ·
+  `steps outside` · `modules only` · `can't tell yet`. A mark is machine
+  vocabulary — a learner reads that their code _steps outside_ a level, never
+  that it is `does-not-fit`.
 
   **What else this entry owns, enumerated so the inventory is checkable.** The
   twin draws learner-facing copy this entry did not name, which made the twin's
@@ -510,8 +512,6 @@ this region owns.
     off_. Journey 4's trap is that the escape is easier to reach than the
     repair, and this sentence is the one place the arrangement can push back on
     its own geometry — a sentence offering strict-off first would teach escape.
-    The rule lived only in the twin until now, which is the same split-homes
-    defect the empty count's three rules already closed.
 
   **What this entry does NOT own, so the inventory has an edge.** A control's
   own label belongs to the surface that renders it and is documented there —
@@ -534,36 +534,37 @@ this region owns.
   this program is empty too, and a **barred** phase is excluded entirely,
   because it carries a cause instead. The line takes the singular at one and
   does not render at zero — **and it yields the slot entirely wherever a barring
-  edge is drawn, where the cause line renders instead.** Three rules for one
-  line, and they live together here because they are one contract: a count that
-  renders at zero, that reads plural at one, or that competes with the cause for
-  the slot beneath the rail is wrong in the same way, and an implementer reading
-  only two of the three would ship the third defect. **Display copy never
-  carries a machine token, and never needs this glossary to be legible** (human
-  ruling 2026-08-17) — the rule the marks already follow, and the reason the
-  sentence a learner reads when the machine stops says _the grammar broke here_
-  rather than naming **the barring edge**. Two tests, and the second is
-  **operational rather than etymological**. A machine token is a string the
-  machine uses to talk to itself — `does-not-fit`, `not-applicable-for-type` —
-  and none of those ever surfaces. Everything else is settled by one question:
-  **would a learner who never read this glossary understand it?** `barring edge`
-  fails it, naming a boundary the copy never introduced. `phase` passes, which
-  is why the empty-count line may say "four **phases** have nothing to open yet"
-  even though `phase` is package glossary vocabulary — and a broader rule, _no
-  contract vocabulary at all_, would be falsified by the very string it is meant
-  to govern.
+  edge is drawn, where the cause line renders instead.** **And an open tray
+  never takes that slot.** A tray opens BETWEEN the rail and the slot, pushing
+  the line down along with the pane — it never replaces it, because the tray
+  describes one station while the line describes the rail as a whole. So the
+  slot beneath the rail holds exactly one line at a time and the precedence is
+  total: the cause line wherever a barring edge is drawn, else the count line,
+  else nothing. Four rules for one line, and they live together here because
+  they are one contract: a count that renders at zero, that reads plural at one,
+  or that competes with the cause for the slot beneath the rail is wrong in the
+  same way, and an implementer reading only two of the three would ship the
+  third defect. **Display copy never carries a machine token, and never needs
+  this glossary to be legible** (human ruling 2026-08-17) — the rule the marks
+  already follow, and the reason the sentence a learner reads when the machine
+  stops says _the grammar broke here_ rather than naming **the barring edge**.
+  Two tests, and the second is **operational rather than etymological**. A
+  machine token is a string the machine uses to talk to itself — `does-not-fit`,
+  `not-applicable-for-type` — and none of those ever surfaces. Everything else
+  is settled by one question: **would a learner who never read this glossary
+  understand it?** `barring edge` fails it, naming a boundary the copy never
+  introduced. `phase` passes, which is why the empty-count line may say "four
+  **phases** have nothing to open yet" even though `phase` is package glossary
+  vocabulary — and a broader rule, _no contract vocabulary at all_, would be
+  falsified by the very string it is meant to govern.
 
-  **The retired form of this rule asked who MINTED the word, and this glossary
-  falsified it.** It banned "a word this package minted for its own contract
-  (**barring edge**, **station**)" — while the `station` entry says the word is
-  "reclaimed rather than minted", so the rule cited as its own example a word
-  its own predicate excluded. Etymology was the wrong question regardless:
-  **waiting** is an ordinary word this region reclaimed as a contract value for
-  a station's **standing**, and it is drawn on the rail as display copy
-  precisely because a learner understands it cold. What matters is whether the
-  learner needs the glossary, never who coined the word. The contract term names
-  the thing for this package; the copy names it for the learner, and the two are
-  allowed to differ.
+  **Etymology is the wrong question**, which is why the test above is
+  operational rather than historical: **waiting** is an ordinary word this
+  region reclaimed as a contract value for a station's **standing**, and it is
+  drawn on the rail as display copy precisely because a learner understands it
+  cold. What matters is whether the learner needs the glossary, never who coined
+  the word. The contract term names the thing for this package; the copy names
+  it for the learner, and the two are allowed to differ.
 
 - **the rail** — the lifecycle rendered as the machine's own conveyor: a line
   carrying one **station** per phase in the machine's fixed order, with the
@@ -572,21 +573,16 @@ this region owns.
   2026-08-15). **Class 3, by exhaustion against all four class-2 routes** — it
   takes none of them. The derivation is not restated here: it lives in
   [`ux/wireframes.md`](./ux/wireframes.md) § Strict, covering — editor mode, and
-  the routes themselves live in § Enforcement above. An earlier revision argued
-  this entry's class from a two-route enumeration that the amendment of
-  2026-08-17 retired, and the restatement is what let it go stale — so this
-  entry now cites rather than argues. **Not by lineage** either: superseding the
-  strip is a fact about where the rail came from, never about what it is. So it
-  dims **whole** under strict, partial dimming of a lifecycle line reading as a
-  machine state rather than as a posture. **Supersedes the lifecycle strip**,
-  the row of per-phase selects this region shipped first; the strip's own
-  vocabulary is retired with it — lineage, which is why it is recorded here and
-  grounds nothing. Designed in [`ux/wireframes.md`](./ux/wireframes.md) and
-  drawn there through every state.
+  the routes themselves live in § Enforcement above. **Not by lineage** either:
+  superseding the strip is a fact about where the rail came from, never about
+  what it is. So it dims **whole** under strict, partial dimming of a lifecycle
+  line reading as a machine state rather than as a posture. **Supersedes the
+  lifecycle strip**, the row of per-phase selects this region shipped first; the
+  strip's own vocabulary is retired with it — lineage, which is why it is
+  recorded here and grounds nothing. Designed in
+  [`ux/wireframes.md`](./ux/wireframes.md) and drawn there through every state.
 - **station** — the rail's per-phase element: one per phase, in the machine's
-  fixed order, carrying **four** things, named here because `Station` is the
-  first type 0.3 writes and three of the four were previously collapsed into
-  "its name and its mark":
+  fixed order, carrying **four** things:
   - the **phase** — the data name, the key everything else zips against. Never
     drawn.
   - the **label** and the **short label** — the two learner-facing strings from
@@ -620,6 +616,12 @@ this region owns.
   this region. Elsewhere in the package `stations` names the curriculum's five
   chain-points, a live sense this region neither claims nor retires.
 
+- **standing** — a station's three-valued indicator: **openable** (reachable and
+  something fits it, drawn with its count) · **bare** (reachable, nothing fits —
+  the ordinary case at four of five phases) · **waiting** (barred, downstream of
+  the barring edge). A projection of reachability and kit, in which **no level
+  is involved at all** — which is why it is deliberately not called a mark, and
+  why it is not keyed like one: only `waiting` has a drawn string.
 - **the barring edge** — the boundary between the last reachable phase and the
   first waiting one: where the machine stopped. Rendered between stations rather
   than on one, because a phase's own failure never bars it. The definition is
@@ -657,13 +659,12 @@ this region owns.
   **control row** and the **rail**. Named because it is one contested surface
   and its size is what the personas compete over — not a container with
   behaviour of its own. **It is not everything the region renders that is not
-  the program**, and the entry says so because an earlier revision claimed it
-  was: the **nameplate** sits between the band and the pane and belongs to the
-  pane it names; the **proposals** and the **guide** render below the pane
-  entirely; and the **announcer** renders outside both maskable containers,
-  where it has no position on the page at all. The band is not a mask boundary
-  either: its two parts carry different classes, which is the whole reason the
-  next entry exists.
+  the program**: the **nameplate** sits between the band and the pane and
+  belongs to the pane it names; the **proposals** and the **guide** render below
+  the pane entirely; and the **announcer** renders outside both maskable
+  containers, where it has no position on the page at all. The band is not a
+  mask boundary either: its two parts carry different classes, which is the
+  whole reason the next entry exists.
 - **control row** — the row of controls at the top of the band: the level
   selector, the strict toggle, the snippet-type toggle, the Edit code button,
   and the Generate code button. **It is a mask boundary object, and membership

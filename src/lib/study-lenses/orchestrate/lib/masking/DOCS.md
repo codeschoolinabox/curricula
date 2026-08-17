@@ -50,8 +50,9 @@ flowchart TD
 
 ## Out of scope
 
-- Rendering the overlay and classifying concrete surfaces (the top component's
-  render — a surface's class is a static fact of what the surface IS, and no
-  runtime derivation or containment decides it).
+- Rendering the overlay — which is the mask's apparatus and carries no surface
+  class — and classifying concrete surfaces (the top component's render — a
+  surface's class is a static fact of what the surface IS, and no runtime
+  derivation or containment decides it).
 - The assessment's derivation (the marking library's).
 - Session posture state (the top component owns session choices).
