@@ -3,7 +3,7 @@ closes; nothing here is end-state documentation. -->
 <!-- cspell:ignore socratize reenrichment dropdowns writeme parsons colorizing spellme lezer blankenate -->
 <!-- cspell:ignore colour distractor distractors ledgered throughs -->
 <!-- cspell:ignore firstblock glossterm parsonizer parsonize errormsg recognises -->
-<!-- cspell:ignore unbuilt ugrep affordances -->
+<!-- cspell:ignore unbuilt ugrep affordances behaviour -->
 
 # RESUME — where this campaign stands and what comes next
 
@@ -239,18 +239,48 @@ Each would produce a **false** row if the brief omitted it:
 
 ### Two environment facts that bite every published command
 
-- **`grep` in an agent's shell is not the `grep` on disk, and an earlier
-  revision of this bullet had it backwards.** It said `/usr/bin/grep` here is
-  `ugrep 7.5.0`. **That is false** — `/usr/bin/grep` is genuine **BSD grep
-  2.6.0-FreeBSD**, `--include=` works there, and **no `ugrep` binary exists on
-  this machine at all** [measured 2026-08-17: `/usr/bin/grep --version`;
-  `command -v ugrep` → empty]. What is true: **`grep` is a bash _function_ the
-  harness injects** [measured 2026-08-17: `type -a grep` → `grep is a
-  function`], and its quirks are real for any agent using the Bash tool — it
-  **rejects ERE backreferences** and **warns-and-ignores `--include=`**,
-  silently. They vanish when the binary is called by absolute path. Prefer
-  `perl` for anything a reviewer must reproduce, and **never conclude a pattern
-  is unsupported without testing it against `/usr/bin/grep` too**.
+- **`grep` in an agent's shell is ugrep, and the two previous accounts of this
+  were each wrong in a different direction.** The function body settles it
+  [measured 2026-08-17: `type grep`]:
+
+  ```bash
+  exec -a ugrep "$_cc_bin" -G --ignore-files --hidden -I --exclude-dir=.git … "$@"
+  ```
+
+  Agent `grep` is the **`claude` binary exec'd under `argv[0]=ugrep`**, running
+  embedded **ugrep 7.5.0** — `grep --version` says so. `/usr/bin/grep` is a
+  different program, **BSD grep 2.6.0-FreeBSD**. So the first account ("
+  `/usr/bin/grep` here is ugrep") was wrong about the **path**; the second ("no
+  `ugrep` binary exists on this machine at all") was wrong about **existence** —
+  `command -v ugrep` is empty because it is exec'd under an aliased `argv[0]`,
+  never installed, and absence from `PATH` is not absence.
+
+  **What actually differs, all measured 2026-08-17 against `/usr/bin/grep`:**
+
+  | behaviour                  | agent `grep`                          | `/usr/bin/grep` |
+  | -------------------------- | ------------------------------------- | --------------- |
+  | ERE backreference `(ab)\1` | errors — `ugrep: error at position 9` | matches         |
+  | `grep -- '-' file`         | **silently returns nothing**          | matches         |
+  | `grep -e '-' file`         | matches                               | matches         |
+  | a path under `.gitignore`  | **silently skipped**                  | searched        |
+  | `--include='*.md'`         | **honoured, no warning**              | honoured        |
+
+  ⚠️ **`--include=` is NOT ignored, and an earlier revision said it was.** All
+  three spellings return the binary's exact result set with nothing on stderr.
+  **The flag that actually drops files is the injected `--ignore-files`**: in a
+  directory whose `.gitignore` holds `node_modules/`, agent `grep -rl needle .`
+  returns `keep.txt` alone while the binary returns `keep.txt` **and**
+  `node_modules/x.txt`. A command that "died on `--include=`" was almost
+  certainly dying on this — same symptom, different cause, and the fix is
+  different too.
+
+  **No command this campaign publishes is affected** [measured 2026-08-17: the
+  row-count, id-extraction, closed-row and banner-scan forms all return results
+  identical to the binary]. The exposure is future commands, and the two rules
+  are: use `-e` rather than `--` for a pattern that looks like a flag, and call
+  `/usr/bin/grep` by absolute path whenever a result must be reproducible or
+  must not honour ignore-files.
+
 - **The registered `ar-1` agent failed seven times** on harness errors, always
   as a large agent doing wide read sweeps; a trivial Haiku probe proved the
   harness was up. What worked: narrow the reviewer's input set (the dispatcher's

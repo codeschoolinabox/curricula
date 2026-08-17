@@ -1,6 +1,6 @@
 <!-- TRANSITIONAL — a DESIGN awaiting a human ruling and its own AR cycle. It
 amends nothing yet. Fold into FIDELITY-METHOD.md §§ 4-5 when ruled, then delete. -->
-<!-- cspell:ignore parsonizer ugrep classref switchoff blankenate socratize dropdowns writeme parsons -->
+<!-- cspell:ignore parsonizer ugrep classref switchoff blankenate socratize dropdowns writeme parsons behaviour -->
 <!-- cspell:ignore behaviour oldd clauding jsparson qlcjs pointcut -->
 <!-- cspell:ignore generalisation -->
 <!-- a Gen-1 class name and the deliberate substring M-A2 plants against it;
@@ -42,20 +42,47 @@ Reproduced independently before designing anything:
 
 ## Two environment facts that bind every command published here
 
-- **`grep` in an agent's shell is a harness-injected bash _function_, not the
-  binary on disk** [measured 2026-08-17: `type -a grep` → `grep is a function`].
-  It rejects ERE backreferences and **warns-and-ignores `--include=`**,
-  silently; two draft commands died on that. Published commands therefore
-  extract with `perl`.
+- **`grep` in an agent's shell is ugrep, and the two previous accounts of this
+  were each wrong in a different direction.** The function body settles it
+  [measured 2026-08-17: `type grep`]:
 
-  ⚠️ **The commit that created this document (`a4a90e0f`) says `/usr/bin/grep`
-  "is ugrep 7.5.0, not GNU grep". That is FALSE and is struck here** — its body
-  is immutable, so this is the correction of record. `/usr/bin/grep` is genuine
-  **BSD grep 2.6.0-FreeBSD**, `--include=` works there, and **no `ugrep` binary
-  exists on this machine** [measured 2026-08-17: `/usr/bin/grep --version`;
-  `command -v ugrep` → empty]. The quirks are a property of the agent's shell,
-  not of the system's grep, and they vanish when the binary is called by
-  absolute path. Do not go looking for a ugrep install.
+  ```bash
+  exec -a ugrep "$_cc_bin" -G --ignore-files --hidden -I --exclude-dir=.git … "$@"
+  ```
+
+  Agent `grep` is the **`claude` binary exec'd under `argv[0]=ugrep`**, running
+  embedded **ugrep 7.5.0** — `grep --version` says so. `/usr/bin/grep` is a
+  different program, **BSD grep 2.6.0-FreeBSD**. So the first account ("
+  `/usr/bin/grep` here is ugrep") was wrong about the **path**; the second ("no
+  `ugrep` binary exists on this machine at all") was wrong about **existence** —
+  `command -v ugrep` is empty because it is exec'd under an aliased `argv[0]`,
+  never installed, and absence from `PATH` is not absence.
+
+  **What actually differs, all measured 2026-08-17 against `/usr/bin/grep`:**
+
+  | behaviour                  | agent `grep`                          | `/usr/bin/grep` |
+  | -------------------------- | ------------------------------------- | --------------- |
+  | ERE backreference `(ab)\1` | errors — `ugrep: error at position 9` | matches         |
+  | `grep -- '-' file`         | **silently returns nothing**          | matches         |
+  | `grep -e '-' file`         | matches                               | matches         |
+  | a path under `.gitignore`  | **silently skipped**                  | searched        |
+  | `--include='*.md'`         | **honoured, no warning**              | honoured        |
+
+  ⚠️ **`--include=` is NOT ignored, and an earlier revision said it was.** All
+  three spellings return the binary's exact result set with nothing on stderr.
+  **The flag that actually drops files is the injected `--ignore-files`**: in a
+  directory whose `.gitignore` holds `node_modules/`, agent `grep -rl needle .`
+  returns `keep.txt` alone while the binary returns `keep.txt` **and**
+  `node_modules/x.txt`. A command that "died on `--include=`" was almost
+  certainly dying on this — same symptom, different cause, and the fix is
+  different too.
+
+  **No command this campaign publishes is affected** [measured 2026-08-17: the
+  row-count, id-extraction, closed-row and banner-scan forms all return results
+  identical to the binary]. The exposure is future commands, and the two rules
+  are: use `-e` rather than `--` for a pattern that looks like a flag, and call
+  `/usr/bin/grep` by absolute path whenever a result must be reproducible or
+  must not honour ignore-files.
 
 - **The engine set is heterogeneous, not uniformly pre-module.** `parsonizer/`
   is a jQuery IIFE while `wc-trace-table/configurable-button.js` opens with
@@ -250,8 +277,10 @@ Each is a generalisation of a defect this campaign has actually shipped:
 **The design session produced four commands that returned confident false
 output** — a `$tok{$_}`/`$tok{$1}` slip reporting 12 orphans, a `[[:quote:]]`
 non-class silently voiding an ERE and printing 0, a `local $/` slurp corrupting
-every path, and ugrep's ignored `--include` [relayed: plan-agent]. Each looked
-correct; each was caught only because the expected answer was already known.
+every path, and a path set silently trimmed by ugrep's injected `--ignore-files`
+(recorded at the time as an ignored `--include`) [relayed: plan-agent]. Each
+looked correct; each was caught only because the expected answer was already
+known.
 
 That is the empirical case for mutation-testing every check **before**
 publication — and the reason the tables above report mutant output rather than
