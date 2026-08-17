@@ -40,6 +40,8 @@ const KIND_BY_TOKEN_TYPE = new Map<acorn.TokenType, InputElementKind>([
 	[tt.string, 'StringLiteral'],
 ]);
 
+const LINE_TERMINATORS = new Set(['\n', '\r']);
+
 /**
  * A token-channel span before it is named: where it sits in the source, the
  * positions of the tokens it wraps, and the token it opens with — which is
@@ -231,13 +233,23 @@ function fillGaps(
 /**
  * One trivia element covering a gap. It wraps no parser token, so it
  * carries no token index.
+ *
+ * `<CR><LF>` is one element here rather than the two the specification
+ * reads, which is this module's stated run-collapsing departure.
  */
 function gapElement(start: number, end: number, code: string): InputElement {
+	const text = code.slice(start, end);
+
 	return {
-		kind: 'WhiteSpace',
+		kind: isLineTerminatorRun(text) ? 'LineTerminator' : 'WhiteSpace',
 		start,
 		end,
-		text: code.slice(start, end),
+		text,
 		tokenIndices: [],
 	};
+}
+
+// A gap is named by the characters it holds, never by the tokens around it.
+function isLineTerminatorRun(text: string): boolean {
+	return Array.from(text).every((character) => LINE_TERMINATORS.has(character));
 }

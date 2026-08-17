@@ -304,7 +304,7 @@ describe('deriveInputElements', () => {
 			expect(spans('x   y')[1]).toEqual([1, 4]);
 		});
 
-		it.skip('collapses a carriage return and line feed into one line terminator', () => {
+		it('collapses a carriage return and line feed into one line terminator', () => {
 			expect(kinds('x\r\ny')[1]).toBe('LineTerminator');
 		});
 
