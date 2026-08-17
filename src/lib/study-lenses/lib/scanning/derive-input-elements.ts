@@ -40,7 +40,10 @@ const KIND_BY_TOKEN_TYPE = new Map<acorn.TokenType, InputElementKind>([
 	[tt.string, 'StringLiteral'],
 ]);
 
-const LINE_TERMINATORS = new Set(['\n', '\r']);
+// ECMA-262 §12.3 (15th edition) gives LineTerminator exactly these four
+// characters. The parser skips the last two the same way it skips a tab, so
+// nothing but this table separates them from whitespace.
+const LINE_TERMINATORS = new Set(['\n', '\r', '\u2028', '\u2029']);
 
 /**
  * A token-channel span before it is named: where it sits in the source, the

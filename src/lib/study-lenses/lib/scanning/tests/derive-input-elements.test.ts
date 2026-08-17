@@ -338,7 +338,7 @@ describe('deriveInputElements', () => {
 			expect(kinds('x\ty')[1]).toBe('WhiteSpace');
 		});
 
-		it.skip('names a line separator a LineTerminator', () => {
+		it('names a line separator a LineTerminator', () => {
 			expect(kinds('x\u2028y')[1]).toBe('LineTerminator');
 		});
 	});
