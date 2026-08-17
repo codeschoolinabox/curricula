@@ -441,38 +441,82 @@ this region owns.
   the phase order keeps exactly one truth. **The four fit marks' learner-facing
   copy is display labelling too**, and takes the same discipline: keyed by the
   mark it renders, zipped against the mark vocabulary, never a positional list.
-  A mark is machine vocabulary — a learner reads that their code _steps outside_
-  a level, never that it is `does-not-fit`. **The empty station's reason is
-  display labelling too.** A phase that is accessible and has no fitting lens
-  carries its own reason — `Tokens, spelling: nothing studies this phase yet` —
-  keyed by phase name and zipped against the same order constant, and a single
-  collective line names how many such phases there are. The spoken form is not
-  the printed one: the label's `·` becomes a comma, because a spoken label may
-  be longer and plainer than a printed one and the two are not obliged to be the
-  same string. **That count is derived, never written.** It is the number of
-  phases that are both accessible and empty of fitting lenses, evaluated per
-  settle — so it is not a property of the roster: a phase whose only lens fails
-  its applicability on this program is empty too, and a **barred** phase is
-  excluded entirely, because it carries a cause instead. The line takes the
-  singular at one and does not render at zero — **and it yields the slot
-  entirely wherever a barring edge is drawn, where the cause line renders
-  instead.** Three rules for one line, and they live together here because they
-  are one contract: a count that renders at zero, that reads plural at one, or
-  that competes with the cause for the slot beneath the rail is wrong in the
-  same way, and an implementer reading only two of the three would ship the
-  third defect. **Display copy never carries a machine token, and never needs
-  this glossary to be legible** (human ruling 2026-08-17) — the rule the marks
-  already follow, and the reason the sentence a learner reads when the machine
-  stops says _the grammar broke here_ rather than naming **the barring edge**.
-  Two tests, and the second is **operational rather than etymological**. A
-  machine token is a string the machine uses to talk to itself — `does-not-fit`,
-  `not-applicable-for-type` — and none of those ever surfaces. Everything else
-  is settled by one question: **would a learner who never read this glossary
-  understand it?** `barring edge` fails it, naming a boundary the copy never
-  introduced. `phase` passes, which is why the empty-count line may say "four
-  **phases** have nothing to open yet" even though `phase` is package glossary
-  vocabulary — and a broader rule, _no contract vocabulary at all_, would be
-  falsified by the very string it is meant to govern.
+  The four strings: `fits` · `steps outside` · `modules only` ·
+  `can't tell yet`. A mark is machine vocabulary — a learner reads that their
+  code _steps outside_ a level, never that it is `does-not-fit`.
+
+  **What else this entry owns, enumerated so the inventory is checkable.** The
+  twin draws learner-facing copy this entry did not name, which made the twin's
+  claim that the README owns every such string an overreach rather than a fact.
+  The strings, and the rule each needs:
+  - **The nameplate's two forms, and which applies.** The form follows the **arm
+    of the pane occupant**, never the posture: on the editor arm it names the
+    program (`your code`); on the lens and generator arms it names the occupant
+    (`the pane holds: …`). One form per arm, so the rule is total and a posture
+    change never rewrites the line.
+  - **A station's standing, spoken and drawn.** `waiting` is the drawn form of
+    the **waiting** standing; **openable** draws as its tray affordance and its
+    count, and **bare** draws as a bare mark with no word at all. Only one of
+    the three has a string, which is why the standing is not keyed like a fit
+    mark.
+  - **The tray's own heading** — `ways to study the <label>`, keyed against the
+    same phase-name record as the labels, so a tray never names a phase
+    differently from the station that discloses it.
+  - **The proposals' heading** — `next, you could:`, one string, invariant.
+  - **The barred phase's cause line** — the parser's own message, framed by this
+    region: `the grammar broke here — <the parser's message>`, and beneath it
+    the count of what waits. The framing is this region's; the message inside it
+    is the parser's and is never rewritten. The package promises a
+    learner-worded explanation beside it and none exists yet — the twin records
+    that as its sharpest open cost, and this entry is where the copy will land
+    when someone writes it.
+  - **The blocked sentence's three ways out are ORDERED, and the order is
+    contract**: _fix the code_, then _pick another level_, then _turn strict
+    off_. Journey 4's trap is that the escape is easier to reach than the
+    repair, and this sentence is the one place the arrangement can push back on
+    its own geometry — a sentence offering strict-off first would teach escape.
+    The rule lived only in the twin until now, which is the same split-homes
+    defect the empty count's three rules already closed.
+
+  **What this entry does NOT own, so the inventory has an edge.** A control's
+  own label belongs to the surface that renders it and is documented there —
+  `Edit code` and `Generate code` at the top component, the level and posture
+  strings in [`level-ui/`](./level-ui/README.md), the snippet-type strings with
+  the toggle, the reveal's label in [`guide/`](./guide/README.md), and the
+  generator's interior copy in [`generator/`](./generator/README.md). This entry
+  owns the copy that is **derived or keyed** — anything zipped against a
+  vocabulary, counted per settle, or chosen between forms by a rule. **The empty
+  station's reason is display labelling too.** A phase that is accessible and
+  has no fitting lens carries its own reason —
+  `Tokens, spelling: nothing studies this phase yet` — keyed by phase name and
+  zipped against the same order constant, and a single collective line names how
+  many such phases there are. The spoken form is not the printed one: the
+  label's `·` becomes a comma, because a spoken label may be longer and plainer
+  than a printed one and the two are not obliged to be the same string. **That
+  count is derived, never written.** It is the number of phases that are both
+  accessible and empty of fitting lenses, evaluated per settle — so it is not a
+  property of the roster: a phase whose only lens fails its applicability on
+  this program is empty too, and a **barred** phase is excluded entirely,
+  because it carries a cause instead. The line takes the singular at one and
+  does not render at zero — **and it yields the slot entirely wherever a barring
+  edge is drawn, where the cause line renders instead.** Three rules for one
+  line, and they live together here because they are one contract: a count that
+  renders at zero, that reads plural at one, or that competes with the cause for
+  the slot beneath the rail is wrong in the same way, and an implementer reading
+  only two of the three would ship the third defect. **Display copy never
+  carries a machine token, and never needs this glossary to be legible** (human
+  ruling 2026-08-17) — the rule the marks already follow, and the reason the
+  sentence a learner reads when the machine stops says _the grammar broke here_
+  rather than naming **the barring edge**. Two tests, and the second is
+  **operational rather than etymological**. A machine token is a string the
+  machine uses to talk to itself — `does-not-fit`, `not-applicable-for-type` —
+  and none of those ever surfaces. Everything else is settled by one question:
+  **would a learner who never read this glossary understand it?** `barring edge`
+  fails it, naming a boundary the copy never introduced. `phase` passes, which
+  is why the empty-count line may say "four **phases** have nothing to open yet"
+  even though `phase` is package glossary vocabulary — and a broader rule, _no
+  contract vocabulary at all_, would be falsified by the very string it is meant
+  to govern.
 
   **The retired form of this rule asked who MINTED the word, and this glossary
   falsified it.** It banned "a word this package minted for its own contract

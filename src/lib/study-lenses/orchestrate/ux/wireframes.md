@@ -181,9 +181,12 @@ copies on one line — but the requirement behind the copy is Journey 6's, that 
 empty phase give a reason, and dropping the words to fit the geometry would have
 failed it. Saying it once is also the Rail's own discipline, the same one that
 draws one barring edge and one cause. **The strings themselves are not this
-document's**: the region README owns every learner-facing string and owns this
-one's derivation with it — including the fact that the count is derived per
-settle and is not four by definition. The drawings say where it sits.
+document's**: the region README owns every **derived or keyed** string —
+anything zipped against a vocabulary, counted per settle, or chosen between
+forms by a rule — and owns this one's derivation with it, including the fact
+that the count is derived per settle and is not four by definition. A control's
+own label belongs to the surface that renders it. The drawings say where it all
+sits and name nothing they do not draw.
 
 **Each empty station carries the same reason as visually-hidden text of its
 own** — "Tokens, spelling: nothing studies this phase yet". Deliberately **not
