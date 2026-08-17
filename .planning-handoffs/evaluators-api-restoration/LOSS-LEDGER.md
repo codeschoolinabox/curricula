@@ -1,5 +1,5 @@
 <!-- TRANSITIONAL — pruned when the restoration campaign completes. -->
-<!-- cspell:ignore arities astless backpressure codegen desugars disjointness Embedder empts extensioned instrumentable instrumenter lifecycles mistrace mistracing numstat retarget rethrowing thunked uncoerced unproduced unrun -->
+<!-- cspell:ignore arities astless backpressure codegen desugars disjointness Embedder empts extensioned instrumentable instrumenter lifecycles mistrace mistracing numstat retarget rethrowing thunked unbuilt uncoerced unproduced unrun -->
 
 # Evaluator public-API restoration — LOSS LEDGER
 
@@ -841,6 +841,22 @@ execution and never holds one alone.
   overridden. And the DEPRECATED port's sandbox pages are fidelity targets
   alongside the reference's — both lineages' page features are inventoried in
   this ledger's sandbox section, and the rebuilt pages carry the union.
+
+- **E2 slots as the W4b run chain's opener (human ruling 2026-08-17).** The
+  ratification's "joins the engine chain after W1.a" left the increment unowned
+  once W1.a landed; it now opens the W4b run chain, beside its consumers (the
+  run settlement mapping reads `phase`), per HR-22's own build-beside-consumer
+  logic. P0-K declares only the two-value vocabulary (HR-20); the engine's
+  try/catch split and the worker stop record's discriminant land at W4b with
+  their own AR pair.
+- **W2's Phase-0 🔍 override (human ruling 2026-08-17).** P0-K's artifacts are
+  types, docs, and a type-contract test — no user-loadable surface — but its
+  README carries two GFM tables and the table-integrity checker (CP-b) is
+  unbuilt, so the human eyeballs the RENDERED README (VS Code markdown preview
+  or an equivalent GFM renderer) between quality checks and the Phase-0 commit
+  and confirms both tables render as tables, not paragraphs; a broken render
+  blocks the commit. markdownlint's MD056 only inspects rows inside a recognized
+  table, so this failure class is invisible to every mechanical gate.
 
 ### The ratification, and what it settled (human ruling 2026-08-06)
 
