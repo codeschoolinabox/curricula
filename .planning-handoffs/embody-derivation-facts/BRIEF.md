@@ -156,6 +156,17 @@ edit.
 
 ## Pointers
 
+- **`src/lib/study-lenses/embody/DOCS.md` § Structural constraints — the
+  RATIFIED fact-admission constraint** ("A fact is common, generic, and needed
+  across consumers", with its (a)/(b)/(c) test for facts the region derives
+  itself) **and § Embodiment decisions (E1–E8), the grounds register.** Design
+  task 1's admission line does not start from a blank page: the candidate
+  replacement above closely parallels this standing constraint without citing
+  it. Reconcile with it — or amend it, with the maintainer's approval — never
+  parallel-invent. (Pointer added 2026-08-17 by the session that authored the
+  constraint's current wording; note that scanning and classifying are
+  _derivations over facts_, not analyzer projections, so the constraint's
+  derived-fact tier with its (a)/(b)/(c) conditions is the one that binds.)
 - `src/lib/study-lenses/lib/scanning/` — README (the coherence precondition and
   the join-key argument), DOCS.md § Out of scope, types.ts.
 - `src/lib/study-lenses/lib/scanning/README.md` § Why this module exists —
