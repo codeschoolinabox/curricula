@@ -546,10 +546,12 @@ export type Gateable = {
  * carries the phase-named stages — the study layer is what a phase adds beyond
  * its fact value.
  *
- * Freeze-what-you-own: the structure embody built is frozen; attached lens
- * refs sit outside this immutability contract, owned by their defining
- * modules. The embodiment is level-blind — no field of it knows what a
- * language level is.
+ * Freeze-what-you-own: everything the embodiment holds the sole reference to
+ * is deep-frozen; attached lens refs and acorn's process-global token-type
+ * singletons sit outside this immutability contract — owned by their defining
+ * modules and shared by every parse in the process, respectively (DOCS.md
+ * § Embodiment decisions, E4). The embodiment is level-blind — no field of it
+ * knows what a language level is.
  */
 export type Embodiment = {
 	readonly facts: Facts;
