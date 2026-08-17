@@ -1,6 +1,6 @@
 <!-- cspell:ignore socratizing quizzing socratize Schulte unbuilt -->
 <!-- cspell:ignore reenrichment linearization PBSI PBIS deixis -->
-<!-- cspell:ignore Explorotron liminality foundationally denepo Cutts -->
+<!-- cspell:ignore Explorotron liminality foundationally denepo Cutts Begel -->
 
 # Loss ledger — the questioning-parent transport
 
@@ -62,15 +62,15 @@ the space is kind-agnostic recommender truth, homed with the theory). The DOCS
 heading stays, over a one-line pointer, so existing section citations keep
 resolving. Deviations, under the relocation's explicit reword license:
 
-| Source content                                        | Disposition | Destination                                                    | Justification                                                                                                                        |
-| ----------------------------------------------------- | ----------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| The whole section body                                | MOVED       | PEDAGOGY.md § The 3D Block Model space (recommender extension) | Near-verbatim; deviations below.                                                                                                     |
-| Opening transport/ruling-status sentence              | DROPPED     | —                                                              | End-state docs carry no status; the ruling record lives in SPEC decision 8 and the transport commit body (licensed drop).            |
-| "(newly stated here, because the axis words collide)" | REWORDED    | same section                                                   | "newly stated here" is transport-status voice; the parenthetical keeps only the collision fact.                                      |
-| "this region's `BlockCell`"                           | REWORDED    | same section                                                   | Region deixis false at package root — the questioning region is named explicitly (licensed fix).                                     |
-| "No type for the 3D space is minted here"             | REWORDED    | same section                                                   | "here" shifted referent at package root — restated as "no type … exists in the package".                                             |
-| "the deprecated recommender extended it"              | REWORDED    | same section                                                   | "the deprecated architecture's recommender" — the bare adjective dangled at package root.                                            |
-| "(Schulte 2008)" in the opening sentence              | DROPPED     | —                                                              | The model and its citation are introduced two sections above in the same document; repeating the cite inside one page duplicates it. |
+| Source content                                                                        | Disposition | Destination                                                    | Justification                                                                                                                                                                                                                       |
+| ------------------------------------------------------------------------------------- | ----------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The whole section body                                                                | MOVED       | PEDAGOGY.md § The 3D Block Model space (recommender extension) | Near-verbatim; deviations below.                                                                                                                                                                                                    |
+| Opening transport/ruling-status sentence                                              | DROPPED     | —                                                              | End-state docs carry no status; the ruling record lives in SPEC decision 8 and the transport commit body (licensed drop).                                                                                                           |
+| "(newly stated here, because the axis words collide)"                                 | REWORDED    | same section                                                   | "newly stated here" is transport-status voice; the parenthetical keeps only the collision fact.                                                                                                                                     |
+| "this region's `BlockCell`"                                                           | REWORDED    | same section                                                   | Region deixis false at package root — the questioning region is named explicitly (licensed fix).                                                                                                                                    |
+| "No type for the 3D space is minted here"                                             | REWORDED    | same section                                                   | "here" shifted referent at package root — restated as "no type … exists in the package".                                                                                                                                            |
+| "the deprecated recommender extended it"                                              | REWORDED    | same section                                                   | "the deprecated architecture's recommender" — the bare adjective dangled at package root.                                                                                                                                           |
+| Opening "The Block Model of Program Comprehension (Schulte 2008)" → "The Block Model" | REWORDED    | same section                                                   | The full name and its citation are introduced two sections above in the same document; repeating them inside one page duplicates them. (Row widened per the AR-5 enumeration audit, 2026-08-13 — it first named only the citation.) |
 
 ## Source: `spiralearn/frogramming-and-vibetoading/pedagogy.md` (PEDAGOGY.md transport)
 
@@ -94,7 +94,7 @@ bullet).
 | (newly authored)                                                                                     | ADDED       | PEDAGOGY.md § Two axes, four quadrants                       | The guided quadrants' questioner/recommender affordance — human ruling 2026-08-11 ("can inspire a good questioner"), written as timeless prose and scoped per the package boundary (snippet-scope shape vs curricular-scope sequencing).                                                                                                                                                              |
 | §8: "From `effective-learning/05-being-in-between.md` and Meyer/Land"                                | REWORDED    | PEDAGOGY.md § Threshold concepts and liminality              | The cited path is stale, but the material lives in-repo at `spiralearn/welcome-to-programming/-1-getting-started/to-use/study-tips-inspiration/denepo-05-being-in-between.md` (AR-1 catch — the first justification here over-generalized a too-narrow `find`); attribution restored dual: Meyer & Land for the framework, the curriculum's study-tips material for the list and the liminal framing. |
 | §8: "cited by the user"                                                                              | REWORDED    | PEDAGOGY.md § Threshold concepts and liminality              | Authoring voice; the list survives as "an incomplete list".                                                                                                                                                                                                                                                                                                                                           |
-| § PBIS through the metaphor: "From `narrative/README.md` §15" + "Perspective stacking (ontology §7)" | REWORDED    | PEDAGOGY.md § PBSI — flexible vocabulary, not a sequence     | Curriculum cross-file pointers resolved to prose ("the curriculum's perspective-stacking practice … performance metaphor"); "through the metaphor" heading reworded — "the metaphor" dangled at package root; "all four layers" → "all four scopes" (disambiguation against the L0–L4 layers).                                                                                                        |
+| § PBIS through the metaphor: "From `narrative/README.md` §15" + "Perspective stacking (ontology §7)" | REWORDED    | PEDAGOGY.md § PBSI — flexible vocabulary, not a sequence     | Curriculum cross-file pointers resolved to prose ("the curriculum's perspective-stacking practice … performance metaphor"); "through the metaphor" heading reworded and demoted to a bold lead-in — "the metaphor" dangled at package root; "all four layers" → "all four scopes" (disambiguation against the L0–L4 layers).                                                                          |
 | § Static vs Dynamic: "(Ch0 introduces it, on the greeter)"                                           | DROPPED     | —                                                            | Chapter deixis; the distinction is stated foundationally.                                                                                                                                                                                                                                                                                                                                             |
 
 ## Source: `spiralearn/frogramming-and-vibetoading/ontology.md` (PEDAGOGY.md transport)
@@ -103,19 +103,21 @@ Sections transported: §5 The 5-tier ATT, §6 The 5 layers (summarized around th
 L4 anchor), §13 Computational vocabulary axes (inclusion judged — it grounds the
 3D space's third axis; the judgment is recorded in the transport commit body).
 
-| Source content                                               | Disposition | Destination                                 | Justification                                                                                                                                             |
-| ------------------------------------------------------------ | ----------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| §5 tier table, bridging practices, artifact-speak faces      | TRANSPORTED | PEDAGOGY.md § The 5-tier ATT                | Verbatim by default; "§3" pointers into the ontology resolved to inline glosses (chain-points, trading zone); "this course" → "the curriculum" (×2).      |
-| (newly authored)                                             | ADDED       | PEDAGOGY.md § The 5-tier ATT                | One sentence mapping V/F to the package's Vibetoader/Frogrammer hats — bare "V"/"F" are undefined at package root.                                        |
-| §6 L0–L4 table, exit-point framing, intellectual-agency note | TRANSPORTED | PEDAGOGY.md § The 5 layers                  | The table is load-bearing for the 5×5 SOLO reading, `Level.userExperience`, and L4-as-questioning — transported verbatim.                                 |
-| §6 agency blockquote's guides sentence                       | DROPPED     | —                                           | "connects the layers to the guides (`guide.{…}.md`)" — curriculum-file pointer with no package referent.                                                  |
-| §6 L4-by-strand table                                        | SUMMARIZED  | PEDAGOGY.md § The 5 layers                  | One sentence naming the five strand-to-tradition pairings; the full open-ended table lives with the curriculum (summarized-around-the-L4-anchor mandate). |
-| §6 per-layer data-thread table                               | OMITTED     | —                                           | The red thread is curriculum narrative apparatus, not theory a study utility consumes.                                                                    |
-| §6 substrate-is-not-inert note                               | OMITTED     | —                                           | An embody design claim, not layer theory; embody's own docs carry the substrate stance.                                                                   |
-| §6 layer-architecture rendering-rules blockquote             | OMITTED     | —                                           | Markdown-rendering rules for the curriculum's chapter files; not package theory.                                                                          |
-| §13 axes table, orthogonality test, JS-one-NM subsection     | TRANSPORTED | PEDAGOGY.md § Computational vocabulary axes | Verbatim by default.                                                                                                                                      |
-| §13 table's "In F&V" column                                  | DROPPED     | —                                           | Chapter-sequencing cells (Ch0–Ch4) — curriculum deixis with no package referent.                                                                          |
-| (newly authored)                                             | ADDED       | PEDAGOGY.md § Computational vocabulary axes | One sentence linking one-NM to the 3D space's unordered third axis — the structural reason §13 earns its place in the foundation.                         |
+| Source content                                                                                       | Disposition | Destination                                 | Justification                                                                                                                                              |
+| ---------------------------------------------------------------------------------------------------- | ----------- | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| §5 tier table, bridging practices, artifact-speak faces                                              | TRANSPORTED | PEDAGOGY.md § The 5-tier ATT                | Verbatim by default; "§3" pointers into the ontology resolved to inline glosses (chain-points, trading zone); "this course" → "the curriculum" (×2).       |
+| (newly authored)                                                                                     | ADDED       | PEDAGOGY.md § The 5-tier ATT                | One sentence mapping V/F to the package's Vibetoader/Frogrammer hats — bare "V"/"F" are undefined at package root.                                         |
+| §6 L0–L4 table, exit-point framing, intellectual-agency note                                         | TRANSPORTED | PEDAGOGY.md § The 5 layers                  | The table is load-bearing for the 5×5 SOLO reading, `Level.userExperience`, and L4-as-questioning — transported verbatim.                                  |
+| §6's two framing sentences ("Each chapter runs ALL 5 layers." / "The layers are engagement depths…") | MERGED      | PEDAGOGY.md § The 5 layers                  | One sentence carrying both propositions, order swapped; the bolded ALL flattens to "all five".                                                             |
+| §6 L0 row's "event-based JEJ NM"                                                                     | REWORDED    | PEDAGOGY.md § The 5 layers                  | "event-based JS NM" — maintainer working-tree edit observed 2026-08-17, kept: the package-root reader needn't resolve the JEJ acronym for the row to read. |
+| §6 agency blockquote's guides sentence                                                               | DROPPED     | —                                           | "connects the layers to the guides (`guide.{…}.md`)" — curriculum-file pointer with no package referent.                                                   |
+| §6 L4-by-strand table                                                                                | SUMMARIZED  | PEDAGOGY.md § The 5 layers                  | One sentence naming the five strand-to-tradition pairings; the full open-ended table lives with the curriculum (summarized-around-the-L4-anchor mandate).  |
+| §6 per-layer data-thread table                                                                       | OMITTED     | —                                           | The red thread is curriculum narrative apparatus, not theory a study utility consumes.                                                                     |
+| §6 substrate-is-not-inert note                                                                       | OMITTED     | —                                           | An embody design claim, not layer theory; embody's own docs carry the substrate stance.                                                                    |
+| §6 layer-architecture rendering-rules blockquote                                                     | OMITTED     | —                                           | Markdown-rendering rules for the curriculum's chapter files; not package theory.                                                                           |
+| §13 axes table, orthogonality test, JS-one-NM subsection                                             | TRANSPORTED | PEDAGOGY.md § Computational vocabulary axes | Verbatim by default.                                                                                                                                       |
+| §13 table's "In F&V" column                                                                          | DROPPED     | —                                           | Chapter-sequencing cells (Ch0–Ch4) — curriculum deixis with no package referent.                                                                           |
+| (newly authored)                                                                                     | ADDED       | PEDAGOGY.md § Computational vocabulary axes | One sentence linking one-NM to the 3D space's unordered third axis — the structural reason §13 earns its place in the foundation.                          |
 
 ## PEDAGOGY.md transport — systematic rewords and authored apparatus
 
@@ -125,7 +127,16 @@ L4 anchor), §13 Computational vocabulary axes (inclusion judged — it grounds 
   liminality"; "Static vs Dynamic" → "Static and dynamic"; "§7 The Explorotron
   framework" → "Meeting the learner: the Explorotron framework"; "§5 The 5-tier
   ATT" and "§6 The 5 layers" → `§` numbers stripped; "JS as multi-paradigmatic
-  over one NM" demoted from heading to bold lead-in.
+  over one NM" demoted from heading to bold lead-in. Widened per the AR-5
+  enumeration audit (2026-08-13): the two ATT subsection headings ("Bridging
+  practices traverse tier-subsets", "Artifact-speak's static and dynamic faces")
+  likewise demoted to bold lead-ins (the PBSI-metaphor demotion is recorded in
+  its source row above); three Explorotron spans promoted to `###` headings with
+  reworded titles ("Two axes" → "Two axes, four quadrants"; "Pyramid" → "The
+  pyramid"; "Three load-bearing principles"). The section's fourth heading,
+  "Structuring learning, both ways", is NOT a promotion — it is authored at the
+  destination over the kept "Begel & Ko (2019) both-yes answer" bold lead-in
+  (see the ADDED bullet).
 - Curriculum deixis normalized throughout: "this course" → "the curriculum";
   chapter references (Ch0–Ch4) dropped or glossed.
 - Navigation and bridging apparatus authored at the destination (ADDED): the
@@ -133,7 +144,13 @@ L4 anchor), §13 Computational vocabulary axes (inclusion judged — it grounds 
   language-level note in § Three vocabularies, two axes; the ATT primary-source
   citation with the three-vs-five tier distinction (Cutts et al. 2012 names
   three levels; the five-tier extension is the curriculum's); the SOLO
-  conceptual-integration gloss.
+  conceptual-integration gloss; the "Structuring learning, both ways" heading
+  over the kept Begel & Ko lead-in; the two `##` container headings
+  ("Progression: layers, depth, thresholds", "Vocabularies: registers and
+  reading frames") and the four-part regrouping of the transported sections; the
+  pyramid-figure embed (alt text shared with the package README); the
+  deployed-Study-Lenses reference link in § Meeting the learner (human-directed,
+  2026-08-13).
 - § The BLOCK model of program comprehension is authored at the destination,
   drawing on `references/README.md`'s Schulte entry and this directory's README
   § The BLOCK model + § Leveling; the dimension/level gloss tables are copied

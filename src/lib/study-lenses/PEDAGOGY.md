@@ -3,7 +3,7 @@
 <!-- cspell:ignore Malaise Signer Sweller Vibetoader Frogrammer -->
 <!-- cspell:ignore Carsten granularities linearization automaticity -->
 <!-- cspell:ignore affordances Yoshi wireframes PBIS operationalized -->
-<!-- cspell:ignore prestructural Cutts Esper Fecho -->
+<!-- cspell:ignore prestructural Cutts Esper Fecho denepo -->
 
 # The pedagogical foundation
 
@@ -150,7 +150,7 @@ re-encounters at L4 finds more again.** Each layer is a complete exit point.
 
 | Layer  | Frame                | Meta-objective (intellectual agency over…) | Primary objective                                                                                                                                            | Learned through                                                                                               |
 | ------ | -------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
-| **L0** | Embody / Mastery     | …the notional machine                      | Predictive mastery of the event-based JEJ NM                                                                                                                 | embody + predictive lenses                                                                                    |
+| **L0** | Embody / Mastery     | …the notional machine                      | Predictive mastery of the event-based JS NM                                                                                                                  | embody + predictive lenses                                                                                    |
 | **L1** | Apply / Rhetoric     | …communicative production                  | Context-aware comprehension, discussion, production across three audiences                                                                                   | embody + static and analytical lenses, reflection questions, program comparison, case studies, process guides |
 | **L2** | Switch / Methodology | …methodology choice                        | Switch comfortably between V and F hats; comfort with design + computational thinking                                                                        | process guides, case studies, open-ended exercises, discussion questions, external resources                  |
 | **L3** | Explore / Snippetry  | …the medium itself                         | Programming automaticity; exploring concepts/domains _through_ programming; self-directed exploration                                                        | snippetry, remixing, esoteric prompts (quines, wuzzles, cross-medium translations)                            |
@@ -222,7 +222,9 @@ vs context); OOP; Asynchronous Execution.
 Yoshi Malaise and Beat Signer (2023), _Explorotron: An IDE Extension for Guided
 and Independent Code Exploration and Learning_
 ([PDF](https://wise.vub.ac.be/sites/default/files/publications/Malaise_KoliCalling2023.pdf))
-— the academic framework this package realizes at snippet scope.
+— the academic framework this package realizes at snippet scope. The deployed
+Study Lenses ([denepo.js.org/study-lenses](https://denepo.js.org/study-lenses))
+is the framework's working realization.
 
 ### Two axes, four quadrants
 
