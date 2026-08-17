@@ -78,7 +78,7 @@ prediction against what the phase shows. The lifecycle is not navigation to them
 - **Predicting before opening.** Anything that opens a study surface as a
   side-effect of navigating toward it destroys the prediction they came to make.
 
-**What they can afford:** a click to reach the kit. Their attention is already
+**What they can afford:** a click to reach a station's kit. Their attention is
 on the band; a disclosure costs them little.
 
 ## 🎨 The Vibetoader

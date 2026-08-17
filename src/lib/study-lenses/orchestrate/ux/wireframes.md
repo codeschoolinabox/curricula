@@ -537,7 +537,7 @@ any other. No station is marked, because the generator belongs to no phase.
 refusal's wording are the generator's own surface, and Journey 7's three asks
 are handed to it explicitly rather than left ownerless here.
 
-## The kit at 0, 1 and many
+## A station's kit at 0, 1 and many
 
 ```text
 0 ─  Tokens        a bare mark on the line. No tray, no disclosure
@@ -551,9 +551,9 @@ are handed to it explicitly rather than left ownerless here.
       ▾ 6          The line above does not move a pixel.
 ```
 
-**This is the Rail's structural advantage**: the size of the kit never perturbs
-the lifecycle's geometry, because the machine and the kit are drawn in different
-places.
+**This is the Rail's structural advantage**: a station's kit can be any size and
+never perturbs the lifecycle's geometry, because the machine and the kit are
+drawn in different places.
 
 ## What the arrangement never changes
 
@@ -721,7 +721,7 @@ costs and what it does not:
   one grouped opener does not.
 - **Journey 5's cost is a real regression against the Bench** and is not paid:
   reaching the far end of the band costs more stops under the Rail than under a
-  single opener, and the cost grows with the kit when a tray is open.
+  single opener, and the cost grows with a station's kit when its tray is open.
 - **The narrow-viewport failure is inherited undischarged**, and it is the
   largest open question in this document.
 
