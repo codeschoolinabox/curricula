@@ -308,7 +308,7 @@ describe('deriveInputElements', () => {
 			expect(kinds('x\r\ny')[1]).toBe('LineTerminator');
 		});
 
-		it.skip('never merges whitespace with a line terminator', () => {
+		it('never merges whitespace with a line terminator', () => {
 			expect(kinds('x \n y')).toEqual([
 				'IdentifierName',
 				'WhiteSpace',
@@ -318,23 +318,23 @@ describe('deriveInputElements', () => {
 			]);
 		});
 
-		it.skip('publishes a leading gap', () => {
+		it('publishes a leading gap', () => {
 			expect(kinds('  x')[0]).toBe('WhiteSpace');
 		});
 
-		it.skip('publishes a trailing gap', () => {
+		it('publishes a trailing gap', () => {
 			expect(kinds('x  ')[1]).toBe('WhiteSpace');
 		});
 
-		it.skip('publishes a whitespace-only source as trivia alone', () => {
+		it('publishes a whitespace-only source as trivia alone', () => {
 			expect(kinds('   ')).toEqual(['WhiteSpace']);
 		});
 
-		it.skip('wraps no token in a trivia element', () => {
+		it('wraps no token in a trivia element', () => {
 			expect(elements('let x = 1')[1]?.tokenIndices).toEqual([]);
 		});
 
-		it.skip('collapses a tab into a whitespace run', () => {
+		it('collapses a tab into a whitespace run', () => {
 			expect(kinds('x\ty')[1]).toBe('WhiteSpace');
 		});
 

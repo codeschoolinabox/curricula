@@ -220,18 +220,63 @@ function fillGaps(
 		const previousEnd = named[index - 1]?.end ?? 0;
 
 		return element.start > previousEnd
-			? [gapElement(previousEnd, element.start, code), element]
+			? gapElements(previousEnd, element.start, code).concat(element)
 			: [element];
 	});
 	const lastEnd = named.at(-1)?.end ?? 0;
 
 	return lastEnd < code.length
-		? gapped.concat(gapElement(lastEnd, code.length, code))
+		? gapped.concat(gapElements(lastEnd, code.length, code))
 		: gapped;
 }
 
 /**
- * One trivia element covering a gap. It wraps no parser token, so it
+ * Cut one gap into maximal runs of a single kind, one element each. Splitting
+ * and naming are one act: which kind a run is decides where it ends, so a gap
+ * holding both kinds yields one element per run rather than one per gap.
+ */
+/* eslint-disable functional/immutable-data -- local accumulator, never escapes until returned */
+function gapElements(
+	start: number,
+	end: number,
+	code: string,
+): readonly InputElement[] {
+	const elements: InputElement[] = [];
+	let runStart = start;
+
+	while (runStart < end) {
+		const nextRunStart = endOfGapRun(runStart, end, code);
+
+		elements.push(gapElement(runStart, nextRunStart, code));
+		runStart = nextRunStart;
+	}
+
+	return elements;
+}
+/* eslint-enable functional/immutable-data -- scoped mutation confined to the block above */
+
+/**
+ * One past the last character of the maximal same-kind run opening at `start`.
+ * The two trivia kinds never merge, so the run ends at the first character
+ * that answers the line-terminator question differently from its opener.
+ */
+function endOfGapRun(start: number, end: number, code: string): number {
+	const opensWithLineTerminator = LINE_TERMINATORS.has(code[start]);
+	let position = start + 1;
+
+	while (
+		position < end &&
+		LINE_TERMINATORS.has(code[position]) === opensWithLineTerminator
+	) {
+		position += 1;
+	}
+
+	return position;
+}
+
+/**
+ * One trivia element covering one same-kind run within a gap — a whole gap
+ * only when the gap holds a single kind. It wraps no parser token, so it
  * carries no token index.
  *
  * `<CR><LF>` is one element here rather than the two the specification
