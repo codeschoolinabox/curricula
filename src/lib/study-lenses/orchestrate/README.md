@@ -145,10 +145,15 @@ content region, so the class-1/class-3 split survives the swap.
   returns the buffer untouched, and the unmount retires any in-flight ask.
   Generation is an excursion from the home base, never a co-equal surface; the
   view documents itself in [`./generator/`](./generator/README.md).
-- **The five-phase study panel** — the mechanical render of the embodiment: a
-  barred phase renders barred with its cause; an accessible phase lists its
-  fitting lenses. The phases' learner-facing display labels are this region's UI
-  concern — their data names live in embody.
+- **The five-phase study panel** — the mechanical render of the embodiment,
+  arranged as **the rail**: one station per phase in the machine's fixed order,
+  the **barring edge** drawn between the last reachable station and the first
+  waiting one, and **one cause, drawn once** — never repeated per waiting phase,
+  which `ux/personas.md` names as telling the learner a single truth four times.
+  A station's fitting lenses are **disclosed in its tray**, not listed on the
+  line: the kit is hidden by default, which is what keeps the lifecycle's
+  geometry independent of the kit's size. The phases' learner-facing display
+  labels are this region's UI concern — their data names live in embody.
 - **The level UI** — the selector, permanent whenever levels are registered: its
   closed face shows the selected level's state, its open list shows a fit mark
   per registered level, hover surfaces the level's docs. Beside it: the
