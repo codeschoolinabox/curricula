@@ -264,6 +264,42 @@ that standing ruling 3 then also binds before the cut; and committing the shape
 together with its first rows is precisely what this gate exists to prevent — the
 last two dispatches each collapsed it into a wave.
 
+### The `parsons` twin pilot — UNBLOCKED, and it does not wait on the amendments
+
+**Human ruling 2026-08-18: twin `parsons` alone, as a pilot**, before any other
+lens gets one. Two reasons, and the second is the load-bearing one:
+
+- It is the campaign's patient and its richest measured loss — README 705→242,
+  DOCS 505→199, **4 of 4 named decisions gone**, and 27 of 37 stylesheet classes
+  describing a drag-and-drop board the shipped `<iframe>` never rendered. If a
+  twin cannot demonstrate understanding here it cannot anywhere.
+- **The twin gate has never been run.** Every mechanism published this session
+  that was not exercised turned out to be broken. One pilot proves the gate
+  before six sessions ride on it.
+
+**SCOPE IT TO ONE CLAIM.** The human's ruling carries two — _"you understood the
+existing behavior in past-gen lenses"_ and _"you preserved and extended it"_.
+Only the first is provable at Pass 1: a Pass-1 ledger is a mechanical census
+with verbatim quotations and **no dispositions** (§ Pass 1 closes none, by
+contract). So the pilot twin says **what Gen-1 and Gen-2 did, every item citing
+a `parsons-NNN` row id**, and does **not** say what the port will do. Saying the
+second from a Pass-1 ledger is the confabulation this whole exercise exists to
+catch.
+
+⚠️ **It is NOT blocked by the three template amendments above, and an earlier
+reading of the sequencing said it was** [measured 2026-08-18]. Those amendments
+gate **cutting a new ledger**. The pilot cuts none: `parsons`' ledger is seeded,
+47 rows, gate-clean and passing the transport check; its Gen-1 pair, Gen-2 docs
+and landed Gen-3 port all exist, and it is wired in `built-in-lenses.ts`, so the
+twin can be checked against a running lens. **It can run in parallel with the
+amendment work, or before it.**
+
+Take it in a **fresh session** —
+[AGENTS.principal.md § Handoff agency](../../AGENTS.principal.md#handoff-agency--the-agent-owns-the-call)
+sends a design-ahead unit to one unconditionally, and a twin drafted from a
+context full of transport-check debugging is the wrong instrument for reading a
+lens.
+
 ### This session's commits
 
 | SHA        | What                                                                                                    |
