@@ -472,6 +472,22 @@ this region owns.
   survives only in that surface's name and in the `candidate` entry's contrast,
   where it names the same thing a recommendation does — everywhere else in this
   region's prose the contract term is the one to use.
+- **apparatus** — what the mask uses to DO its work, as against the surfaces it
+  acts ON. The blocked overlay is the region's one piece of apparatus: it is
+  laid over the covered surfaces, it is deliberately NOT inert so the blocked
+  sentence stays in the accessibility tree, and it takes no surface class at
+  all. That is why `SurfaceClass` has three members and needs no fourth — the
+  split is exhaustive over the surfaces the mask acts on, and apparatus sits
+  outside it by construction rather than by omission. Named here because a
+  category that exists to fall outside an exhaustive taxonomy is exactly the
+  kind a reader assumes was forgotten.
+- **the instrument** — this region, seen from the learner's side: the whole
+  assembled study environment rather than any one of its surfaces. It is the
+  twin's primary subject noun and it is deliberately NOT resolved against a
+  language level's **mechanical instrument**, which names the notional machine.
+  The collision is real and the two are scoped by context rather than renamed:
+  this region's prose says _the instrument_ for the thing on screen, a level's
+  says it for the machine being taught. Neither owns the word outright.
 - **focus request** — the `lens` prop: a request honored through fit and
   accessibility, never a bypass.
 - **display labels** — the five phases' learner-facing labels and the

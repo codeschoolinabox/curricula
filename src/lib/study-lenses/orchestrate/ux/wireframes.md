@@ -477,6 +477,7 @@ flush-at-open whose absorbed keystrokes settle out-of-level code. It is the
 state where "the way home is never covered" carries the most weight.
 
 ```text
+┌──────────────────────────────────────────────────────────────┐
 │ [Edit code]  [module]                                        │ ← class 2, never covered,
 │         [Just Enough JavaScript · steps outside ▾]  (•) strict│   leading in the row
 ├──────────────────────────────────────────────────────────────┤
@@ -501,6 +502,7 @@ in the row**; the two are never both present.
 ## An excursion open — the nameplate and the proposals
 
 ```text
+┌──────────────────────────────────────────────────────────────┐
 │ [Edit code]  [module]  [plain JavaScript ▾]                  │
 ├──────────────────────────────────────────────────────────────┤
 │  Source ─── Tokens ─── AST ─── Environment ─── Evaluation    │
@@ -609,7 +611,9 @@ rearrangement here:
   its four routes, because an earlier revision headed this list "the controls
   that restore conformance" and its own members falsified it twice: the guide
   restores nothing, and the strict toggle lifts the boundary rather than
-  conforming to it. Two of the seven are not controls at all.
+  conforming to it. Two of them are not controls at all — the roster and its
+  size live in `README.md` § Enforcement, which this list cites rather than
+  restates.
 - **Edit code is in the control row, leading, whenever an excursion is open**,
   and it is the guaranteed way home. It is never drawn inside the pane and never
   below it: a class-2 control inside the maskable container would be covered by

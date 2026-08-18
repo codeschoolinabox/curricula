@@ -42,18 +42,18 @@ does not define it, and an enumeration kept in two places is exactly what let
 the previous one go stale (human ruling 2026-08-17). Two of them are not
 controls — the announcer and the nameplate — and both render outside both
 maskable containers, which only the composition root can guarantee. Class 3,
-everything else — the study panel and its lenses, and the generator view
-together with the button that opens it: covered under strict while the code is
-out of level — the covered surfaces go inert and a NON-inert overlay is laid
-over them, never the reverse: the overlay carries the blocked sentence, and
-marking it inert would remove that sentence from the accessibility tree. The
-overlay is the mask's **apparatus** rather than a classified surface; the region
-README states that carve-out and why the three-way split is still exhaustive
-without it. A covered surface keeps its state beneath it. The class of a surface
-is a static fact of what the surface IS — nothing derives it at runtime, and it
-does not follow from which container the surface renders in: the Generate code
-button sits outside every maskable container and still carries class 3 at its
-own element.
+every surface the mask ACTS ON that is not class 1 or class 2 — the study panel
+and its lenses, and the generator view together with the button that opens it:
+covered under strict while the code is out of level — the covered surfaces go
+inert and a NON-inert overlay is laid over them, never the reverse: the overlay
+carries the blocked sentence, and marking it inert would remove that sentence
+from the accessibility tree. The overlay is the mask's **apparatus** rather than
+a classified surface; the region README states that carve-out and why the
+three-way split is still exhaustive without it. A covered surface keeps its
+state beneath it. The class of a surface is a static fact of what the surface IS
+— nothing derives it at runtime, and it does not follow from which container the
+surface renders in: the Generate code button sits outside every maskable
+container and still carries class 3 at its own element.
 
 ## Navigation
 
