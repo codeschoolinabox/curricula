@@ -154,7 +154,7 @@ describe('deriveTokens', () => {
 			expect(stage.ok && stage.value.inputElements).toEqual([]);
 		});
 
-		it.skip('a spelling failure publishes only its cause — no sequence anywhere', () => {
+		it('a spelling failure publishes only its cause — no sequence anywhere', () => {
 			const stage = deriveTokens({ source: '01', type: 'module' });
 			expect(
 				!stage.ok && !('value' in stage) && !('inputElements' in stage),
