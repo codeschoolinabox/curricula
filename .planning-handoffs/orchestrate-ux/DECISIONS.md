@@ -1,4 +1,4 @@
-<!-- cspell:ignore affordance affordances authorised behaviour codemod finditer organised restor spellme unbuilt undercount undrawn unfiled unretired wireframes -->
+<!-- cspell:ignore affordance affordances authorised behaviour codemod codepoint finditer organised restor spellme unbuilt undercount undrawn unfiled unretired wireframes -->
 
 # the arrangement's decisions — and who asserts them
 
@@ -425,12 +425,17 @@ Honest limits, so a reader does not mistake it for a totality:
   rather than trusting it.
 - **It carries no drawn-copy inventory.** C10 is the row that would need one,
   and the note under § C explains why no pattern produces it.
-- **It carries one unmeasured finding.** AR-1 round 7 reported four fenced
-  control-row lines in `ux/wireframes.md` overhanging their frame by one column,
-  all ending `strict│`. A re-measure this session flagged ten lines of wildly
-  varying widths — an instrument confounded by the trailing `←` annotations — so
-  the finding is **recorded rather than acted on**. Fixing ASCII alignment
-  against a measure known to be wrong is how a drawing gets quietly broken.
+- **One finding it recorded as unmeasurable was simply mis-measured.** An
+  earlier revision said AR-1 round 7's overhanging-fenced-line finding could not
+  be reproduced. **That was wrong, and the instrument was the fault**: measuring
+  LINE LENGTH is confounded by the trailing `←` annotations. Measuring the
+  **codepoint index of the frame's closing vertical** settles it in one pass —
+  every framed line closes at index 63 except exactly four, which close at 64
+  [measured 2026-08-17]: `ux/wireframes.md` lines **161, 342, 358, 452**, all
+  ending `strict│`, exactly as round 7 reported. Three sit in blocks whose
+  siblings all close at 63, so the misalignment renders. Left open as a MINOR,
+  now with a working instrument attached.
+
 - **It says nothing about the code.** Every row above is a documentation
   decision. What `index.tsx` actually renders today is the strip, and the gap
   between the two is what Phase 1 closes.

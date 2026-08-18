@@ -2,78 +2,161 @@
 
 # orchestrate ux — resumption point
 
-**State: Phase 0 step 0.2 is written and NOT closed. Round 4 is fully resolved
-in nine commits. AR-1 ROUND 5 HAS RUN AND RETURNED PAUSE — 4 blockers, 8
-IMPORTANT, 4 MINOR. Two of its blockers (B1, B2) are RESOLVED in `bbcfc9e5`; the
-other FOURTEEN findings are yours.** Do not start 0.3 until a round returns
-PROCEED or CONSIDER.
+**STATE: Phase 0 step 0.2. AR-1 ROUND 8 HAS RUN AND RETURNED PAUSE — 3 blockers,
+5 IMPORTANT, 6 MINOR. Rounds 5, 6 and 7 are ALL RESOLVED, in fifteen commits.
+Round 8's three blockers are your open work.**
 
-**Your first task is § ROUND 5 below.** It is the open work and it is the only
-task list in this file.
+**Read [`DECISIONS.md`](./DECISIONS.md) before this file's task list.** It is
+the campaign's decision index — one row per arrangement decision, its home of
+record, and every site that asserts it — plus **§ 0.3 entry conditions**, which
+is the deferrals' home by ruling. Round 8's BLOCKER 1 was that _nothing in the
+tree pointed at it_ [measured 2026-08-17: `grep -rn "DECISIONS"` over `src/`,
+`.planning-handoffs/`, `AGENTS.principal.md`, `DEV.md` → **0** inbound hits].
+This paragraph is that pointer. Do not remove it.
 
-**Read § What round 5 says about this campaign's method before you fix
-anything.** Four of round 5's findings were created by round 4's own fixes, and
-one by its author mis-scoping a deferral. That is the fifth consecutive round in
-which the pass generated the next round's findings, and round 5's reviewer names
-the instrument that would break the cycle. Reaching for another grep sweep is
-the predictable wrong move.
+## The one thing round 8 changed most
 
-**A ruling is already in hand for blocker 3 — see R-D.** It is a rule amendment,
-it ships alone, and **its home list is not the obvious one — read R-D's block in
-§ ROUND 5 before writing it.**
+**The class-2 / four-routes / overlay subject is CLOSED. Do not re-review it.**
+AR-1 round 8 attacked it independently across fifteen files and could not
+falsify it [relayed: `ar-1` round 8 — the carve-out reaches every enumeration,
+the four routes and the seven-node roster agree at every site, and the rail's
+exhaustion argument no longer runs on the retired two-route list]. That subject
+drove rounds 3 through 8. It is done.
 
-**ONE ORDERING, and it overrides every other "first" in this file:** (0) if
-`git status --short` shows THIS FILE at all, commit it before anything else — §
-Mechanics explains why, and it has already happened twice; (1) write the
-decision list; (2) land R-D; (3) B4; then the rest. § Recommended opening move
-is the long form.
+**And the recurrence is a FILING failure, not a detection failure.** Every
+recurring round-8 finding traces to a skipped filing step — a decision taken
+without opening a row, sites discovered by the census without being filed into
+every row they assert, a closed row whose column was widened without re-opening
+it. The reviewer's explicit warning: **do not build a fifth instrument.** Four
+exist (phrase greps → the decisions list → the receipt rule → the region census)
+and each caught its predecessor's blind spot. What is missing is a two-line
+intake checklist, not a new tool.
 
-**Blocker counts by round: 3 → 4 → 5 → 3 → 4.** It went back UP. Read § The
-process failure to not repeat, and then § What round 5 says about this
-campaign's method — the second supersedes the first as the more useful of the
-two.
+## ROUND 8 — PAUSE, 2026-08-17. THIS IS THE OPEN WORK
 
-**Four human rulings are in hand — R-A/R-B/R-C (2026-08-15) and R-D
-(2026-08-16)** — see the rulings table. R-A/B/C are recorded in the documents
-they govern; **R-D is NOT yet written into its homes and that is your first
-commit.** All four are binding and none is to be re-litigated.
+All three blockers were verified against the tree this session, not relayed.
 
-**Run the design work on the strongest available model tier.**
+### B1 · The deferral record has storage without retrieval — HALF FIXED HERE
 
-**Read the governance chain first**, before this file's task list: the repo-root
-`CLAUDE.md` is a router — check your model id against its qualifying list and
-read whichever of `AGENTS.principal.md` / `AGENTS.md` matches. Both point into
-`DEV.md`, which defines every term this document uses as if shared:
-`prospective` (§ Prospective and retrospective documentation), `ceremony` and
-`twin-doc` (§ Work routing and ceremony), "step 0.2" (§ Phase 0), PAUSE
-semantics and the AR protocol (§ Adversarial Review Protocol), and the settings
-line.
+Three parts. **The pointer at the top of this file fixes part one.** Still open:
 
-**Line numbers below are measured at `bdf5077c` and the round-4 pass has since
-moved them.** The `orchestrate/` tree was byte-identical to `bdf5077c` when that
-pass opened [measured: `git diff --stat bdf5077c..HEAD --
-src/lib/study-lenses/orchestrate/` → empty, run at HEAD `542d4771`], so anything
-below tagged with a line number is now stale by the ELEVEN commits in the tables
-— `bbcfc9e5` alone moved `README.md` by ~65 lines and `ux/wireframes.md` by ~34.
-**The passages are still findable by their quoted phrases; re-measure the
-numbers.**
+- **This file's § DEFERRED TO 0.3 still claims to be "the deferral's only
+  durable home"**, while `DECISIONS.md § 0.3 entry conditions` claims the same
+  by ruling (R-M). Two files, one claim, different memberships. **Collapse them
+  into one table** — two sections both claiming to be the home is the exact
+  defect this campaign spent five rounds removing from the region.
+- **§ 0.3 entry conditions carries five rows where § DEFERRED TO 0.3 carries
+  eight.** Missing there: the `strip` vocabulary migration as its own item, the
+  editor-mode scrim geometry, the narrow-viewport degradation. **Missing from
+  BOTH: the accessibility-structure obligation** [read: `ux/wireframes.md` §
+  What the arrangement never changes — "the structure a screen reader traverses
+  comes from named regions and groups rather than from a heading outline … **it
+  is owed at 0.3**"]. That is a deliverable owed to the reader Journeys 5 and 6
+  exist for, with no row and no entry condition.
 
-**The tree moves under you.** HEAD advanced six times during the session that
-wrote this file, and **eight more times during the pass that resolved round 4**
-— none of it under `orchestrate/`, and one foreign commit landed _inside_ that
-pass's own SHA range. Scope every claim to the SHAs in the table, never to a
-commit range. Re-measure HEAD before every commit and quote the SHA you
-measured.
+### B2 · The docs assert a live `strip` — RULING TAKEN, EXECUTE IT
 
-This document has been validated by a context-free agent twice [relayed: the two
-outgoing sessions that ran them]. The first pass found four factual errors. The
-second found four more that would have burned a session — a prescribed grep that
-silently undercounts, a false claim in blocker 3, a measurement reproducible
-only at a SHA the file no longer names, and a "commit this file" instruction
-guarding the wrong condition. **All four are fixed above, and the pattern is the
-point: each validation found errors the author could not see.** Re-measure
-anything here you intend to rely on, including the counts in § ROUND 4 and §
-ROUND 5.
+`README.md` says, present tense: "the strip's none entry closes an open lens too
+**whenever the strip itself is not masked**" and "where the **masked strip**
+bars opening lenses" — while the same file retires that vocabulary and the twin
+says "**This arrangement has no strip**" [all three read verbatim, 2026-08-17].
+
+**R-N (human ruling 2026-08-17): discharge it NOW, in present tense.** The
+deferral's recorded reason — that the enumeration cannot be rewritten without
+`Station`'s shape — **does not hold**: the twin already names the replacement
+[read: `ux/wireframes.md` — "the tray entry for the open lens is its own close
+affordance"], the tray is settled (B5, B6, glossary · tray), and a station with
+a tray is openable by construction, so the tray entry exists under either answer
+to B10. Rewrite `README.md` glossary · dispose, `DOCS.md` (×3) and
+`event-bus/README.md` as _raised by the open lens's tray entry, the Edit code
+button, …_. Pure end-state prose — it satisfies `DEV.md` rather than needing the
+note `DEV.md` forbids.
+
+**Why this is not just tidying** [read: `DEV.md` § Phase 0 — "Can you read
+`types.ts`, `README.md` and `DOCS.md` together and **fully predict** what the
+implementation will do…? If not … resolve it now"]. Today those three documents
+do not answer whether the region has a strip.
+
+### B3 · The barred cause line is one constant for TWO barring shapes
+
+The contract states one string [read: `README.md` glossary · display labels —
+"**The barred phase's cause line** — the parser's own message, framed by this
+region: `the grammar broke here — <the parser's message>`"]. The data has two
+shapes: grammar-broken AND **spelling-broken**, where the barring edge sits
+between `tokens` and `ast`, the cause is the tokenizer's, and **"the grammar
+broke here" is false** — nothing reached the grammar.
+
+It is the only copy family specified as a **constant** rather than keyed, and it
+is constant only if there is one shape. **Key it**, exactly as the empty-station
+reason is keyed: `the <barring phase> broke here — <the parser's message>`, two
+authored framings, zipped against the same order constant. Authored rather than
+derived for the short-label reason — deriving from the label gives "the Tokens ·
+spelling broke here". Then restate the machine-token rule's worked example,
+which uses this string, and **draw the spelling-broken shape in the twin** — it
+is asserted and never drawn, which is why this survived eight rounds.
+
+### The five IMPORTANT and six MINOR
+
+Recorded in `DECISIONS.md`. The three worth knowing before you start:
+
+- **The census discovered sites and nothing filed them.** `editor/README.md`
+  asserts A1, two A2 roster members with their grounds, AND D6 — it was filed in
+  A1 only. `index.tsx` asserts A6 ×2, A7, A8 and D2 — filed in A1 only. Five
+  newly-found files are in no row at all.
+- **Two more receipt-rule holes**, both mechanical: a receipt block may narrow
+  its own scope ("all THREE sites" against a seven-entry column), and **widening
+  a closed row's column does not re-open the row** — which a census guarantees
+  will happen. Fix: receipts reproduce the row's column verbatim; a widened
+  column re-opens its row.
+- **I10's `recommendation` settlement reached the glossary and nothing else** —
+  and no row was opened for it, against this instrument's own intake rule. Two
+  violations sit in `README.md` above the entry forbidding them; the twin is
+  12:1 on the retired synonym.
+
+## Recommended opening move
+
+1. **Finish B1** — collapse the two deferral tables into one and add the
+   accessibility-structure row. Cheap, and it is the thing a cold 0.3 reader
+   depends on.
+2. **B2**, per R-N. The ruling is taken; execute it.
+3. **B3**, which is design rather than copy-editing — it decides a keyed-vs-
+   constant contract 0.3 locks.
+4. **The filing checklist**, appended to `DECISIONS.md § How to maintain it`:
+   _did this commit take a decision? open a row. did it discover a site? file it
+   into every row it asserts, and re-open those rows._ Two lines. **Not a fifth
+   instrument.**
+5. Then the IMPORTANTs and MINORs, and re-run `ar-1` — registered agent, **no
+   `model` parameter**.
+
+**Round 8's reviewer says 0.2 IS closeable, and that the residue stops
+regenerating once the one-home discipline is applied to the two subjects that
+have not had it: the copy (seven keyed families, one manifest slot) and the
+`recommendation` vocabulary.**
+
+**On the next PAUSE, do not open round 10 alone — put it to the human.**
+
+## Rulings taken 2026-08-16 / 2026-08-17 — binding, do not re-litigate
+
+`DECISIONS.md § Rulings this list produced` carries R-E … R-I in full. Added
+since:
+
+| #   | ruling                                                                                                                                   |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| R-J | The class-2 story gets ONE home (`README.md` § Enforcement); every other site **cites** rather than restates. Six restatements were cut. |
+| R-K | **The receipt rule** — closing decision row _X_ requires quoting the post-fix sentence at **every** site in _X_'s `also asserts` column. |
+| R-L | Keep fixing rather than closing 0.2 with a declared residue.                                                                             |
+| R-M | **`DEV.md` wins over round 6's counter-proposal C** — status/migration/revision narration comes OUT of `README`/`DOCS`/`types.ts`.       |
+| R-N | **Discharge the dispose enumeration NOW**, in present tense; its recorded dependency on `Station`'s shape does not hold.                 |
+| R-O | Hand off at this boundary; a fresh session opens on round 8's blockers.                                                                  |
+
+---
+
+# ARCHIVE — rounds 3, 4 and 5, and the campaign's standing mechanics
+
+**Everything below is kept because the reasoning is auditable. Rounds 3, 4 and 5
+are ALL RESOLVED — none of it is a task list.** § Mechanics that will bite you,
+§ Commit form, § Sandbox checkpoints and § The process failure to not repeat are
+still live and still bind.
 
 ## What this campaign is
 
@@ -240,10 +323,13 @@ that was round 3's finding 7, since resolved. `DEV.md § Ruling provenance`: "A
 ruling recorded only in a commit body is findable but not readable where it
 binds."
 
-## ROUND 5 — PAUSE, 2026-08-16. THIS IS THE OPEN WORK
+## ROUND 5 — ALL RESOLVED 2026-08-16/17 (ARCHIVE — NOT A TASK LIST)
 
-`ar-1`, run at the `opus` pin, reported reading every input in full. **B1 and B2
-are RESOLVED in `bbcfc9e5`** (a station carries `phase`, `label`, `short label`,
+**All sixteen of round 5's findings are closed or deferred by ruling; rounds 6
+and 7 are closed too. The report is kept because the reasoning is auditable.**
+
+`ar-1`, run at the `opus` pin, reported reading every input in full. B1 and B2
+were resolved in `bbcfc9e5` (a station carries `phase`, `label`, `short label`,
 `standing`, `tray`; `standing` deliberately not called a mark, because `FitMark`
 is exported and means something else). **The other fourteen are open.**
 
@@ -765,7 +851,13 @@ it does not serve.
 either glossary entry, and **the Rail selection** — the campaign's most
 consequential ruling — is undated and not in the greppable form.
 
-## DEFERRED TO 0.3 — this record is the deferral's only durable home
+## DEFERRED TO 0.3 — SUPERSEDED; see [`DECISIONS.md`](./DECISIONS.md) § 0.3 entry conditions
+
+**This section is NO LONGER the deferral's home** (human ruling 2026-08-17,
+R-M): `DECISIONS.md § 0.3 entry conditions` is. Round 8's BLOCKER 1 is that the
+two disagree on membership — **collapse them into one table before relying on
+either.** Kept here until that merge lands, because this list is currently the
+longer of the two.
 
 `8cc4bc15` split AR-1's B3 against the reviewer's counter-proposal: the
 **glossary** gained the new vocabulary immediately; the **prose migration** was
@@ -956,7 +1048,7 @@ Both of round 3's worst findings would have died in a five-minute grep for the
 term being replaced. The same failure produced the stale `strip` count inside
 this document. Run the grep; it is mechanical and does not depend on judgment.
 
-## Recommended opening move
+## Recommended opening move — ROUND 5's, SUPERSEDED BY § ROUND 8 ABOVE
 
 **Round 5 returned PAUSE. Fourteen findings are open; B1 and B2 are done.** In
 this order:
