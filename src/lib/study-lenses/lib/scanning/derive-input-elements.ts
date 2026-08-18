@@ -18,11 +18,19 @@ import type { InputElement, InputElementKind, ScanInput } from './types.js';
 export default function deriveInputElements({
 	code,
 	tokens,
+	comments,
 }: ScanInput): readonly InputElement[] {
 	const folded = foldTemplateRuns(tokens);
 	const named = folded.map((span) => nameElement(span, code));
 
-	return fillGaps(named, code);
+	// Phase 4 — interleave the channel the tokenizer set aside. A comment never
+	// overlaps a token, and each channel is already ascending on its own, so
+	// ordering the two together by where they start is all the interleaving takes.
+	const interleaved = named
+		.concat(comments.map((comment) => commentElement(comment, code)))
+		.toSorted((left, right) => left.start - right.start);
+
+	return fillGaps(interleaved, code);
 }
 
 const tt = acorn.tokTypes;
@@ -206,6 +214,22 @@ function elementKind(span: TokenSpan, text: string): InputElementKind {
 // Only a folded template run wraps more than one token.
 function isFoldedRun(span: TokenSpan): boolean {
 	return span.tokenIndices.length > 1;
+}
+
+/**
+ * One element for a comment the tokenizer set aside. It wraps no parser token,
+ * so it carries no token index, and it takes its verbatim slice as it is built
+ * — as a gap run takes its own when phase 5 cuts it — so that every published
+ * element carries its text by the time the sequence is complete.
+ */
+function commentElement(comment: acorn.Comment, code: string): InputElement {
+	return {
+		kind: 'Comment',
+		start: comment.start,
+		end: comment.end,
+		text: code.slice(comment.start, comment.end),
+		tokenIndices: [],
+	};
 }
 
 /**

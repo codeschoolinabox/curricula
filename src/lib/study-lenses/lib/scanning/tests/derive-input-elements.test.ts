@@ -344,15 +344,15 @@ describe('deriveInputElements', () => {
 	});
 
 	describe('Comments and the hashbang', () => {
-		it.skip('names a line comment', () => {
+		it('names a line comment', () => {
 			expect(kinds('// hi')).toEqual(['Comment']);
 		});
 
-		it.skip('names a block comment', () => {
+		it('names a block comment', () => {
 			expect(kinds('/* hi */')).toEqual(['Comment']);
 		});
 
-		it.skip('names a block comment carrying a line terminator', () => {
+		it('names a block comment carrying a line terminator', () => {
 			expect(kinds('/* a\nb */')).toEqual(['Comment']);
 		});
 
