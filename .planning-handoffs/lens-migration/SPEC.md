@@ -5,6 +5,7 @@ lens's own README/DOCS and its `## What this lens does NOT do` section. -->
 <!-- cspell:ignore blankenate parsonizer socratize socratizing reenrichment Wong okaidia lezer stepthroughs qasm dropdowns writeme parsons blankenated colorizing Infima deuteranopia Gateable jsdom -->
 <!-- cspell:ignore colour colours distractor distractors ledgered Leitner WCAG clauding oldd throughs reloadable ordinally spellme gamified -->
 <!-- cspell:ignore behaviour behaviours pointcut unbuilt errormsg recognises parentheticals personas wireframes zakey -->
+<!-- cspell:ignore affordances enshittifying -->
 
 # Lens migration — campaign canon
 
@@ -267,6 +268,55 @@ README, and the recorded answer no longer discharges the step.
 ([DEV.md § Work routing and ceremony](../../DEV.md#work-routing-and-ceremony) —
 _"Its name is ux (human ruling 2026-08-14)"_).
 
+#### What the twin is FOR — the agent drafts, the human ratifies
+
+**Human ruling 2026-08-18**, and it supersedes any reading of this section as a
+UX-design exercise:
+
+> _"This is your opportunity to prove to me that you've fully understood the
+> existing behavior in past-gen lenses, and that you have thoughtfully preserved
+> and extended their behavior instead of LLM-enshittifying it."_
+
+So the twin is a **fidelity demonstration surface**, and it is the coordination
+artifact between the human and the agent. Its question is not _is this good
+interaction design_ — it is **did the learner-facing behavior of Gen 1 and Gen 2
+survive, and where it changed, was that a decision or a drift.** The human
+ratifies that; nobody else can, because they are the only party who remembers
+what the old lenses did.
+
+**Therefore the twin is DERIVED FROM THE COMPLETED LEDGER, and cites its row
+ids.** This is not a stylistic preference. The ledger enumerates the affordances
+one abstraction below the twin, and two documents stating the same facts in two
+places is this campaign's own recorded failure mode — _a rule with two
+statements has no statement_. A journey step that restates `parsons-011` without
+citing it will drift from it. **Cite the id; do not re-derive the affordance.**
+
+**The twin gate is its own gate, named, and it fires between 0.2 and AR-1:**
+
+```text
+0.1 README  →  0.2 the agent DRAFTS ux/  →  ⛔ TWIN GATE (human ratifies,
+corrects intent in place)  →  AR-1 challenges README + the CORRECTED twin  →
+0.3 types + sketch + tests  →  AR-2  →  Phase-0 commit gate
+```
+
+Two things follow that an agent must not quietly drop:
+
+- **AR-1 fires on the ratified twin, not the drafted one.** Running AR-1 on an
+  unratified draft spends the review on text the human is about to change, and
+  it lets the agent's own reading of the past generations pass unchallenged by
+  the only party who can challenge it.
+- **A draft that cannot cite the ledger is not ready for the gate.** If the
+  ledger's rows do not yet support the journey being drawn, that is a finding
+  about the ledger — raise it, do not paper over it in the twin.
+
+⚠️ **Measured 2026-08-18, so the size of the gap is on the record**: **zero** of
+the lenses this campaign owns carry a `ux/` directory — `parsons`, `writeme` and
+`debug-props` all lack one, and the only `lenses/*/ux/` in the tree belongs to
+`spellme`, which is out of scope. And the sole mechanism carrying this ruling to
+a lens session is the Tier-2 handoff, of which **zero are written**. Until one
+is, R-7 has no carrier: a cold lens session would ask the twin question, get no
+answer, and record `none`.
+
 **What goes inside is a menu, not a fixture** — DEV.md declines to pin one, on
 the ground that fixing a set before its second use invents the convention. This
 campaign is that second use, six times over, so the menu is written out here and
@@ -309,11 +359,13 @@ them went missing without anyone noticing. A fidelity ledger catches what the
 old documents said; a `ux/` twin is what stops the next generation losing it the
 same way.
 
-**Four consequences, none of them optional:**
+**Five consequences, none of them optional:**
 
-1. **AR-1's input set grows.** It challenges the README **and the twin owed** —
-   at `none` it saw the README alone. A lens session that runs AR-1 without the
-   `ux/` directory has run the wrong review.
+1. **AR-1's input set grows, and its position moves.** It challenges the README
+   **and the ratified twin** — at `none` it saw the README alone. A lens session
+   that runs AR-1 without the `ux/` directory has run the wrong review; one that
+   runs it before the twin gate has reviewed a draft the human was about to
+   correct.
 2. **The settings line changes for lens sessions only** — `twin-doc: user`.
    **Tier-0 and Tier-1 commits keep `none`**: seeding a ledger and planning a
    family are not a lens's Phase 0, and no twin is owed there.
@@ -1157,7 +1209,12 @@ while **`twin-doc` is asked at each lens's own Phase 0 step 0.2**.
 **Tier 2 — a per-lens handoff** must state that **`twin-doc: user` is owed**
 ([R-7](#r-7--every-lens-this-campaign-builds-owes-a-ux-twin)) — a handoff silent
 on it lets the lens session ask the twin question, get no answer, and record
-`none`. It must let a cold session reach its Phase-0 gate from that file alone.
+`none`. **It must also carry the twin gate as a step where the work happens**,
+between 0.2 and AR-1, and say what the human is ratifying: that the Gen-1 and
+Gen-2 learner-facing behavior survived, with each item citing the ledger row ids
+it rests on. A handoff that mentions the twin but not its gate produces an
+agent-authored twin nobody ratified, which is the artifact R-7 exists to
+prevent. It must let a cold session reach its Phase-0 gate from that file alone.
 It carries: the lens in the learner's voice; sources ranked with what each is
 authoritative _for_; the completed ledger with P0-gated row ids inline; **the
 family's ruled decisions restated, each tagged with the row ids it settles** —
@@ -1272,9 +1329,13 @@ Apply before accepting any lens. Transported from the playbook and extended.
 - **The register check runs clean** ([The register check](#the-register-check)).
 - **A `ux/` directory beside the README**
   ([R-7](#r-7--every-lens-this-campaign-builds-owes-a-ux-twin)), with the
-  documents that lens's own risks call for and its README saying why those.
-- Full AR cycle complete **with AR-1 having seen the twin, not the README
-  alone**; the DDD → TDD human gate honored.
+  documents that lens's own risks call for and its README saying why those —
+  **each item citing the ledger row ids it rests on**, and **ratified at the
+  twin gate** rather than merely written. An unratified twin does not close this
+  line: the whole point of the artifact is that the human, who is the only party
+  who remembers the past generations, has confirmed the behavior survived.
+- Full AR cycle complete **with AR-1 having seen the ratified twin, not the
+  README alone and not an unratified draft**; the DDD → TDD human gate honored.
 
 ---
 
