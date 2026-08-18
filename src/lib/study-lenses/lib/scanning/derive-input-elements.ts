@@ -223,13 +223,33 @@ function isFoldedRun(span: TokenSpan): boolean {
  * element carries its text by the time the sequence is complete.
  */
 function commentElement(comment: acorn.Comment, code: string): InputElement {
+	const text = code.slice(comment.start, comment.end);
+
 	return {
-		kind: 'Comment',
+		kind: isHashbang(comment.start, text) ? 'HashbangComment' : 'Comment',
 		start: comment.start,
 		end: comment.end,
-		text: code.slice(comment.start, comment.end),
+		text,
 		tokenIndices: [],
 	};
+}
+
+/**
+ * The one thing this module corrects about the comment channel: the parser
+ * reports a hashbang typed as a line comment, where the specification gives it
+ * its own production, legal at offset zero alone.
+ *
+ * Reading the opening characters is the half the suite forces: a program
+ * opening `// x` also produces a line comment starting at offset zero, and
+ * position alone would mis-name it. The offset test is the half no fixture can
+ * force — the parser refuses a hashbang anywhere but offset zero, and every
+ * other comment slice opens with a slash, so the characters already decide it.
+ * It is kept because the production is defined at offset zero, and this module
+ * checks that its inputs are present rather than that they came from one
+ * reading of one source. Nothing else on the channel is corrected.
+ */
+function isHashbang(start: number, text: string): boolean {
+	return start === 0 && text.startsWith('#!');
 }
 
 /**

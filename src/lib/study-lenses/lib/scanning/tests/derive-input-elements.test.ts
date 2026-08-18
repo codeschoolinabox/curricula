@@ -356,17 +356,17 @@ describe('deriveInputElements', () => {
 			expect(kinds('/* a\nb */')).toEqual(['Comment']);
 		});
 
-		it.skip('names a hashbang at offset zero a HashbangComment', () => {
+		it('names a hashbang at offset zero a HashbangComment', () => {
 			expect(kinds('#!/usr/bin/env node\nlet x = 1')[0]).toBe(
 				'HashbangComment',
 			);
 		});
 
-		it.skip('leaves a line comment at offset zero a Comment', () => {
+		it('leaves a line comment at offset zero a Comment', () => {
 			expect(kinds('// x\nlet a = 1')[0]).toBe('Comment');
 		});
 
-		it.skip('places a comment between the elements that surround it', () => {
+		it('places a comment between the elements that surround it', () => {
 			expect(kinds('x // hi')).toEqual([
 				'IdentifierName',
 				'WhiteSpace',
