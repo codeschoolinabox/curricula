@@ -29,7 +29,7 @@ per phase, in the machine's fixed order:
     name          source · tokens · ast · environment · evaluation
     label         learner-facing display copy, this region's to choose
     accessible    → true,  plus the lenses that fit it   (0 … N of them)
-                  → false, plus one cause               (the parser's message)
+                  → false, plus one cause     (whose stage names the framing)
 levels            0 … N registered; one selected, or the none-state
 the selected      fits · does not fit · not applicable for this type ·
   level's mark      undetermined while unparsed

@@ -472,6 +472,18 @@ this region owns.
   survives only in that surface's name and in the `candidate` entry's contrast,
   where it names the same thing a recommendation does — everywhere else in this
   region's prose the contract term is the one to use.
+- **the caption** — the one line beneath the rail, and the object the four
+  count-line rules govern. It holds the **cause line** wherever a barring edge
+  is drawn, else the **count line**, else nothing: one slot, two producers, a
+  total order between them. Named because it is a contract object with a
+  precedence rule and, until now, only a seven-word phrase — "the slot beneath
+  the rail" — in two documents that had to stay in sync. A tray never takes it:
+  a tray opens BETWEEN the rail and the caption, pushing it down along with the
+  pane, because a tray describes one station while the caption describes the
+  rail as a whole. Deliberately not "the reason line" or "the count line": those
+  name its two ARMS, and naming the slot after one arm is what made the
+  precedence rule read as a competition between two objects rather than a total
+  order over one.
 - **apparatus** — what the mask uses to DO its work, as against the surfaces it
   acts ON. The blocked overlay is the region's one piece of apparatus: it is
   laid over the covered surfaces, it is deliberately NOT inert so the blocked
@@ -535,15 +547,18 @@ this region owns.
   - **The proposals' heading** — `next, you could:`, one string, invariant.
   - **The barred phase's cause line** — the parser's own message, framed by this
     region, and beneath it the count of what waits. The framing is this
-    region's; the message inside it is the parser's and is never rewritten.
-    **The framing is keyed by the stage that failed, not by the phase that is
-    barred** (human ruling 2026-08-18) — the cause carries its own origin, so
-    the key is a field read rather than a derivation. Two framings are authored:
+    region's; the message inside it belongs to whatever produced it — the parser
+    at `tokens` and `ast`, the embodiment's own guard otherwise — and is never
+    rewritten. **The framing is keyed by the stage that failed, not by the phase
+    that is barred** (human ruling 2026-08-18) — the cause carries its own
+    origin, so the key is a field read rather than a derivation. Three framings
+    are authored, one per reachable origin:
 
-    | the stage that failed | the framing                                        |
-    | --------------------- | -------------------------------------------------- |
-    | `tokens`              | `the spelling broke here — <the parser's message>` |
-    | `ast`                 | `the grammar broke here — <the parser's message>`  |
+    | the stage that failed      | the framing                                                         |
+    | -------------------------- | ------------------------------------------------------------------- |
+    | `tokens`                   | `the spelling broke here — <the parser's message>`                  |
+    | `ast`                      | `the grammar broke here — <the parser's message>`                   |
+    | `entwined` · `environment` | `the machinery broke here, not your code — <the machine's message>` |
 
     **One constant cannot serve both, and the constant this entry used to carry
     was the `ast` one.** A `tokens` failure never reached the grammar, so _the
@@ -554,12 +569,14 @@ this region owns.
     at `entwined`, which is not a lifecycle phase at all and therefore has no
     phase name to key against — the reason the key is the failing STAGE rather
     than the barred phase. `entwined` and `environment` fail only as guarded
-    defects of the embodiment, reported loudly, so they take **one shared
-    framing that names a fault in the instrument rather than in the learner's
-    program**. Copy that blames the program for the instrument's bug is the one
-    outcome this split exists to prevent. `environment` cannot originate a
-    rendered cause at all — nothing it bars is drawn — so it is reachable only
-    through that same branch.
+    defects of the embodiment, reported loudly, so they share a **third authored
+    framing** —
+    `the machinery broke here, not your code — <the machine's message>` — which
+    names a fault in the instrument rather than in the learner's program. Copy
+    that blames the program for the instrument's bug is the one outcome this
+    split exists to prevent. `environment` cannot originate a rendered cause at
+    all — nothing it bars is drawn — so it is reachable only through that same
+    branch.
 
     **The framings are authored, not derived**, for the reason the short labels
     are: deriving from the phase label yields
