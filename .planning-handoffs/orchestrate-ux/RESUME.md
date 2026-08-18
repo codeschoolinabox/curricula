@@ -332,7 +332,7 @@ The governance hook that makes this a blocker rather than a taste question is Ph
 
 **Where:** `README.md:504` (glossary · display labels), `README.md:550` (the machine-token rule's worked example), `ux/wireframes.md:281` (drawn), against `ux/wireframes.md:43-45`.
 
-**What.** The copy contract [read: `README.md:503-505` — "**The barred phase's cause line** — the parser's own message, framed by this region: `the grammar broke here — &lt;the parser's message&gt;`"]. One string, stated as invariant framing.
+**What.** The copy contract [read: `README.md:503-505` — "**The barred phase's cause line** — the parser's own message, framed by this region: `the grammar broke here — <the parser's message>`"]. One string, stated as invariant framing.
 
 The data shape says otherwise [read: `ux/wireframes.md:43-45` — "**Exactly three shapes**: everything open; **grammar broken** (source, tokens and ast stay open, the last two wait); **spelling broken** (source and tokens stay open, the last three wait)"].
 
@@ -416,7 +416,7 @@ Neither is the surface name nor the candidate contrast. The twin is almost entir
 
 **Where:** `README.md:530-547` vs `DOCS.md` § The render projection.
 
-**What** [measured: `tr '\n' ' ' &lt; DOCS.md | grep -oiE '.{80}(nothing to open|count line|reason line|empty).{80}'` → **0 hits**]. The four rules — derived per settle, singular at one, absent at zero, yields the slot to the cause line, and an open tray never takes the slot — appear in `README.md` glossary · display labels and nowhere in the architectural sketch.
+**What** [measured: `tr '\n' ' ' < DOCS.md | grep -oiE '.{80}(nothing to open|count line|reason line|empty).{80}'` → **0 hits**]. The four rules — derived per settle, singular at one, absent at zero, yields the slot to the cause line, and an open tray never takes the slot — appear in `README.md` glossary · display labels and nowhere in the architectural sketch.
 
 The entry itself argues these are one indivisible contract: "an implementer reading only two of the three would ship the third defect". The sketch reader gets **zero of four**. `49b90dba`'s I11 correctly added the short label and a station's four parts to `DOCS.md`; the slot precedence was not carried with them, and it is the more implementation-shaped of the two.
 
@@ -444,7 +444,7 @@ So a 0.3 implementer inherits a copy contract with seven families and a manifest
 
 #### MINOR 10 — I7's roster numeral survives at one non-home site
 
-`49b90dba` claims "the numeral is dropped at **both** non-home sites". Measured across the SHAs [`git show &lt;sha&gt;:&lt;file&gt; | grep -oic seven`]: `lib/masking/README.md` 3→**0**, `DOCS.md` 2→**0**, `ux/wireframes.md` **2→2**. One of the two is "Seven journeys" (unrelated); the other is `ux/wireframes.md` § What the arrangement never changes — "**Two of the seven are not controls at all**", a roster-size statement at a non-home site, in the file the same commit edited. The size has gone 5→6→7 in three days by the commit's own account. Recurrence, same drift, 2 of 3. Certainty: high.
+`49b90dba` claims "the numeral is dropped at **both** non-home sites". Measured across the SHAs [`git show <sha>:<file> | grep -oic seven`]: `lib/masking/README.md` 3→**0**, `DOCS.md` 2→**0**, `ux/wireframes.md` **2→2**. One of the two is "Seven journeys" (unrelated); the other is `ux/wireframes.md` § What the arrangement never changes — "**Two of the seven are not controls at all**", a roster-size statement at a non-home site, in the file the same commit edited. The size has gone 5→6→7 in three days by the commit's own account. Recurrence, same drift, 2 of 3. Certainty: high.
 
 #### MINOR 11 — M14 is real, is measurable, and your instrument was the problem (you asked me to say if the call was wrong)
 
@@ -491,7 +491,7 @@ Certainty: high on the measurements; medium on whether `apparatus` and `the slot
 `DEV.md` explicitly permits this: handoff files are where "process info, ordered steps, phase splits, status snapshots … all live" [read: `DEV.md:921-926`]. So (i) refresh `RESUME.md`'s banner to round 8 and point it at `DECISIONS.md` in the first ten lines; (ii) delete `RESUME.md` § DEFERRED TO 0.3's "only durable home" claim or make it a pointer; (iii) collapse `DECISIONS.md` § Deferred to 0.3 and § 0.3 entry conditions into **one** table — two sections in one file both claiming to be the deferrals' home is the same defect the campaign has spent five rounds removing from the region; (iv) add the accessibility-structure obligation as a row.
 
 **CP-C — Key the cause line, exactly like the empty-station reason.**
-`the &lt;phase-that-barred&gt; broke here — &lt;the parser's message&gt;`, keyed by the barring phase name and zipped against the same order constant. Two authored framings (`the spelling broke here` / `the grammar broke here`), by the same argument that made the short labels authored rather than derived: a derivation from the phase label would produce "the Tokens · spelling broke here". Draw the spelling-broken shape in the twin so the third shape stops being asserted-only. And restate `README.md:550`'s worked example against the keyed form.
+`the <phase-that-barred> broke here — <the parser's message>`, keyed by the barring phase name and zipped against the same order constant. Two authored framings (`the spelling broke here` / `the grammar broke here`), by the same argument that made the short labels authored rather than derived: a derivation from the phase label would produce "the Tokens · spelling broke here". Draw the spelling-broken shape in the twin so the third shape stops being asserted-only. And restate `README.md:550`'s worked example against the keyed form.
 
 **CP-D — Two more receipt-rule amendments, both mechanical.**
 3. **Receipts are keyed to row IDs and reproduce the row's column verbatim.** No scoping phrase ("the class-3 statement", "the sites that lacked one") may narrow the printed set; a genuinely narrower fix prints the full column with `— NO RECEIPT: unchanged, this fix does not touch it` on the rest. This closes the sub-claim hole with the vocabulary amendment 2 already introduced.
