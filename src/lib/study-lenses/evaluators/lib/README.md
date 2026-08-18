@@ -22,4 +22,8 @@ explains rather than contradicts (it publishes types and has no engine seam).
 - [`execution-handle/`](./execution-handle/README.md) — the execution-handle
   library: the factory that constructs the kind's handles, so the consumption
   laws every evaluator promises are built once and obeyed structurally.
+- [`iteration-guard/`](./iteration-guard/README.md) — the engine-backed
+  evaluators' shared iteration-guard semantics: the spliced guard/reset call
+  text, the worker-side counter helpers behind it, and structural classification
+  of the guard's marked throw.
 - Region root: [`../README.md`](../README.md)

@@ -20,7 +20,7 @@ A **peer-independent** module under [`lib/`][lib], a sibling of
 - **danger** ([`evaluators-deprecated/danger/`][danger]) — the same-origin
   iframe runner — imports it directly from its [backend runner][dangerrun].
 - **the engine-backed evaluators** (run, intercept) — through the region's
-  shared iteration-guard (`evaluators-deprecated/lib/iteration-guard/`), the
+  shared iteration-guard (`evaluators/lib/iteration-guard/`), the
   closure-counter form [Seam 4][interceptseam] pins.
 
 ### Why this module exists

@@ -28,9 +28,10 @@ evaluators/
 ├── run/         plain execution: program in, result out, io mocks answered
 ├── intercept/   step-through execution: live event stream, generator surface,
 │                entwined enrichment, pending interactions
-├── lib/         the execution-handle library the evaluators build handles on —
-│                region-level because only evaluators consume it; machinery
-│                consumed beyond this region lives in the package lib/
+├── lib/         the region-internal shared libraries the evaluators build
+│                on (execution-handle, iteration-guard) — region-level
+│                because only evaluators consume them; machinery consumed
+│                beyond this region lives in the package lib/
 └── tests/       the kind's type-contract assertions
 ```
 
@@ -492,8 +493,8 @@ belong to the units that build those surfaces.
   `EvaluationSpec`, `ExecutionBase`, `Execution`, `EvaluationOutcome`,
   `EvaluatorRefusal`, `ErrorPhase`, `ExecutionAxis`, `MachineryDefectKind`,
   `PendingInteraction`
-- Region-internal machinery: [`lib/`](./lib/README.md) — the execution-handle
-  library the evaluators build handles on
+- Region-internal machinery: [`lib/`](./lib/README.md) — the shared libraries
+  the evaluators build on: execution-handle and iteration-guard
 - The engine beneath: [`../lib/engine/README.md`](../lib/engine/README.md)
 - The frozen previous region:
   [`../evaluators-deprecated/README.md`](../evaluators-deprecated/README.md)
