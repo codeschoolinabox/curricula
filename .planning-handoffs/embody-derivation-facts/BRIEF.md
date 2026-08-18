@@ -132,6 +132,17 @@ paragraph; its "the whole embodiment closes" phrase (superseded embody-side by
 "the phases below tokens close"); and the package README glossary's
 notional-machine entry.
 
+**Gate record (human, 2026-08-18):** the Phase-0 human gate is APPROVED — all
+three flagged calls ratified: the optional member stands; the vi.mock defect-pin
+file is KEPT ("keep if it helps" — it is the defect arm's only executable pin,
+so it helps and stays, un-skipped last); the twin-shadow is acknowledged.
+Condition (b) measured MET in the gate session [measured 2026-08-18: `npx vitest
+run --project unit src/lib/study-lenses/lib/scanning` → 72 passed (72), nothing
+skipped; scanning porcelain empty] — the Phase-1 session still re-measures at
+its own start per the standing rule. Phase 1 runs in a FRESH session from the
+validated resumption point; ceremony: full; the session tier stays the design
+tier, so AR-5 inherits it at campaign close.
+
 ---
 
 ## The question
