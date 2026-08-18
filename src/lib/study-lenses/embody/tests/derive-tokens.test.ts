@@ -184,7 +184,7 @@ describe('deriveTokens', () => {
 			).toBe(source);
 		});
 
-		it.skip('the sequence carries trivia the stream skips', () => {
+		it('the sequence carries trivia the stream skips', () => {
 			const stage = deriveTokens({ source: 'let x = 1', type: 'script' });
 			expect(
 				stage.ok &&
