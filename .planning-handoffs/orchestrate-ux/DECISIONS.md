@@ -155,6 +155,32 @@ first use did not.
    amendment 1's de-indirection, not a widening, and it added no site A1 did not
    already carry.] A1's status is set to `open (census)` in this commit.
 
+5. **The block is TIERED by column size, because a rule nobody runs is not a
+   rule** (human ruling 2026-08-18, after AR-1 round 9). Columns of **six sites
+   or fewer** print the full quoted block, one line per site, misses included.
+   Columns **larger than six** print a walk line instead —
+   `column walked: N sites · M receipted · K declared — <the declared ones, named>`
+   — plus quotations for the sites the fix actually touched.
+
+   **This is a campaign-artifact format, not a ceremony gate.** No review is
+   lightened; `DEV.md § Work routing and ceremony` is untouched.
+
+   **The evidence that forced it.** Amendments 1–4 hardened this rule, and it
+   then ran in **one of six** row-closing commits [measured 2026-08-18: `git log
+   -1 --format='%B' <sha> | grep -c RECEIPT` across the thirteen commits of the
+   round-8 resolution — only `aceac00b` carries a real block]. Worse, `bf6866bb`
+   closed A2 by receipting the **seven** sites that entered this round against a
+   **sixteen**-entry column — amendment 3's banned move, committed five commits
+   after amendment 3 landed. A four-amendment rule that demands sixteen quoted
+   lines is expensive enough that five of six commits substituted narrative for
+   it, and that is a property of the rule, not of the commits.
+
+   The honest limit, recorded so this is not oversold: **neither of round 9's
+   blockers would have been caught by a correctly-run block**, because in both
+   cases the column does not name the site. Tiering makes the discipline
+   affordable; it does not make it sufficient. See § What this list does not
+   cover on column construction.
+
 **Rows whose `home of record` is `none` are the other trap.** For A13 and C11
 the column IS the whole set, and the reflex was to receipt the new home and
 stop. When a row has no home, receipt every site in the column and the new home.
