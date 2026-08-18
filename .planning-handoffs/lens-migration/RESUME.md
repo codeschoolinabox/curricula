@@ -5,6 +5,7 @@ closes; nothing here is end-state documentation. -->
 <!-- cspell:ignore firstblock glossterm parsonizer parsonize errormsg recognises -->
 <!-- cspell:ignore unbuilt ugrep affordances behaviour -->
 <!-- cspell:ignore normalisation unrunnable -->
+<!-- cspell:ignore loosenings capitalisation enshittifying -->
 
 # RESUME — where this campaign stands and what comes next
 
@@ -130,7 +131,7 @@ is owed.
 1. **`ledgers/<lens>.md` — the seeded per-lens ledgers.** **Two of eight are
    seeded** — `parsons` (47 rows, repaired at `dae045f3`) and `writeme` (45
    rows, the fidelity control). **You start at
-   [the AR-2 PAUSE section](#-start-here--the-ar-2-pause-is-closed-the-next-deliverable-is-_family-fmds-inventory-shape)
+   [the AR-2 PAUSE section](#-start-here--a-round-3-pause-is-open-so-do-not-cut-_family-fmd-yet)
    at the top of this file, not here and not at § Seeding wave status.**
    ~~`writeme` owes 13 cell re-cuts~~ — **DONE at `c734b5ad`**; `parsons` still
    owes its second-root re-seed. Remaining population: `blanks`, `dropdowns`,
@@ -162,26 +163,97 @@ is owed.
    final.
 6. **AR-5** over the SHA list, then the push prompt. Nothing is pushed.
 
-## ⛔ START HERE — the AR-2 PAUSE is CLOSED; the next deliverable is `_family-f.md`'s inventory shape
+## ⛔ START HERE — a ROUND-3 PAUSE is open, so do NOT cut `_family-f.md` yet
 
-**Session of 2026-08-18.** The three AR-2 blockers below are **resolved at
-`74590c5a`**, together with a **fourth** the review had not found and five
-batch-fixed non-blocking findings. Every one was re-measured before it was
-fixed, and three of the review's own numbers did not reproduce — see
-[§ What the 2026-08-18 session measured](#what-the-2026-08-18-session-measured).
+**Session of 2026-08-18, five commits, nothing pushed.** The original three AR-2
+blockers are closed. **Two new ones are open**, both found independently by AR-1
+and AR-2 on the fix for the fix, both reproduced here before being acted on, and
+**both marked ⛔ in `_TEMPLATE.md` at the point of use** so nothing is cut
+against them.
 
-**The next deliverable is
-[`_family-f.md`'s inventory shape ALONE](#where-to-start--in-order), no rows.**
-It is a gate, and the last two dispatches each collapsed it into a wave.
+### Your first task is NOT `_family-f.md` — it is these two designs
 
-| SHA        | What                                                                                                                                                  |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `74590c5a` | `_TEMPLATE.md` + `FIDELITY-METHOD.md` — the four blockers, the per-member invocation form, and five batch-fixes. **This is the current template SHA** |
+Both are **already designed and measured**. Neither was applied, and the reason
+is a rule rather than fatigue — see § Why round 4 goes to a fresh session.
 
-⚠️ **Do not read that SHA as current on trust** — it has moved three times in
-one day and two stale copies shipped inside the warning against exactly that.
-Re-derive it every time:
+1. **The Family F invocation is a census, not a floor** — `_TEMPLATE.md`, the
+   8th bullet of § `_family-f.md` is the one exception, under its ⛔ banner.
+   Seven `FAIL` lines exit 0; inner failures degrade to a silent `0` via
+   `${r:-0}`; and `covered:` prints a number beside a `$n` that is not in scope,
+   so it asserts nothing. **And a correctly seeded Pass-1 ledger is guaranteed
+   red**: `trace-debugging` seeds entirely from Pass 2, contributes zero rows,
+   and is the only member of seven with a real `REF` — so the floor FAILs on it
+   naming three causes that are all false, which trains a seeder to ignore FAIL
+   lines everywhere else. **Designed fix, measured working in both directions:**
+   an `EXPECT` fifth argument making `rows=0` an assertion for declared-empty
+   members and a breach for everyone else, plus a wrapper that accumulates
+   status, takes the Pass-1 gate's `$n` as an argument, asserts `total == n`,
+   and exits non-zero.
+
+2. **The mutation corpus is not a sufficient amendment gate** — `_TEMPLATE.md` §
+   The amendment gate, under its ⛔ banner. Loosenings pass the whole corpus
+   **and** both regressions byte-identically; two reproduced here — case-folding
+   and stripping the truncation ellipsis — and case-folding hides a real
+   capitalisation mis-transcription. Only two corpus rows exercise `norm()` at
+   all and both are single-point plants, so it catches only loosenings that
+   intersect its points. **Designed fix:** pair every sanctioned modification
+   with its mis-transcription — six pairs, twelve assertions, the sanctioned
+   form must be SILENT and the mis-transcribed span must be DIVERGENT. A
+   loosening is _defined_ as making a mis-transcription silent, so the gate has
+   to contain mis-transcriptions and not only fabrications.
+
+**Then** `_family-f.md`'s inventory shape ALONE, no rows. It is a gate and the
+last two dispatches each collapsed it into a wave.
+
+### This session's commits
+
+| SHA        | What                                                                                                     |
+| ---------- | -------------------------------------------------------------------------------------------------------- |
+| `74590c5a` | `_TEMPLATE.md` + `FIDELITY-METHOD.md` — four blockers, the per-member invocation form, five batch-fixes  |
+| `5c807630` | `RESUME.md` — four stale claims struck                                                                   |
+| `2ed6af19` | The round-1/2 AR fix pass — six blockers                                                                 |
+| `e1c88969` | `SPEC.md` — **R-7 amended: the `ux/` twin gate** (human ruling 2026-08-18)                               |
+| `1da6763c` | The `lead` reversion, the second false overshoot claim struck, both ⛔ markers. **Current template SHA** |
+
+⚠️ **Do not read that SHA as current on trust** — it moved five times in one day
+and two stale copies shipped inside the warning against exactly that. Re-derive
+it every time:
 `git log --oneline -1 -- .planning-handoffs/lens-migration/ledgers/_TEMPLATE.md`
+
+### Two human rulings of 2026-08-18, neither yet fully carried
+
+- **The `ux/` twin is the coordination artifact between human and agent**, and
+  the place a port proves it understood the lens it replaces rather than
+  degrading it. Landed in `SPEC.md` § R-7 at `e1c88969`: the agent drafts at
+  step 0.2, **a named twin gate fires before AR-1**, the human ratifies, and the
+  twin **cites ledger row ids** instead of restating them. ⚠️ **Measured
+  2026-08-18: zero lenses this campaign owns have a `ux/`, and zero Tier-2
+  handoffs exist — so the ruling has no carrier yet.** `parsons` and `writeme`
+  both owe one.
+- **`_TEMPLATE.md` is to be marked `[COPY]` / `[METHOD]` per section**, with the
+  header rule changed to match what both seeded ledgers already do — copy the
+  COPY sections, cite the METHOD sections by link. **NOT YET APPLIED.** AR-1
+  measured five of twelve sections never surviving a cut, over ~1100 lines,
+  under a header that says "delete nothing structural". The split itself is a
+  deferred follow-on; the marking is not.
+
+### Why round 4 goes to a fresh session
+
+**Three consecutive rounds of same-session fixes each introduced the defect they
+removed.** Round 1 shipped a check with no parse floor. Round 2 shipped a census
+and called it a floor. Round 3 shipped a false overshoot claim inside the
+paragraph retracting a false overshoot claim.
+[AGENTS.principal.md § Handoff agency](../../AGENTS.principal.md#handoff-agency--the-agent-owns-the-call)
+names this exactly — _"a learned lesson repeats as an error → hand off at the
+next clean boundary"_. A fourth round would be an agent anchored to its own
+design reviewing its own fix.
+
+**A reviewer's count is a hypothesis in both directions.** Of the numbers the
+two AR rounds supplied, three did not reproduce: the `<em>` predicate's "3×" is
+6×; the lone-`\*` blast radius has now returned three different values from
+three instruments; and AR-2's "four measured bypasses" reproduced as **two**.
+All three are recorded rather than adopted — and the two that did reproduce were
+fixed.
 
 ### The historical PAUSE record, kept for its reasoning
 
@@ -382,7 +454,7 @@ re-cutting thirteen cells that were re-cut the day before** — this canon's own
 recorded failure mode, found by the context-free validation of this very file.
 The live order is [§ Where to start](#where-to-start--in-order), and the live
 status is the
-[AR-2 PAUSE section](#-start-here--the-ar-2-pause-is-closed-the-next-deliverable-is-_family-fmds-inventory-shape).
+[AR-2 PAUSE section](#-start-here--a-round-3-pause-is-open-so-do-not-cut-_family-fmd-yet).
 
 1. ~~**13 of `writeme`'s 33 heading cells are owed a re-cut**~~ — **DONE**
    (`c734b5ad`). The published transport check now reports **0 divergent** on
@@ -552,7 +624,7 @@ re-derive it from here.
 1. ~~**Re-cut `writeme`'s 13 hand-truncated `evidence` cells.**~~ **DONE**
    (`c734b5ad`), and `parsons-031`'s equivalent with it (`d68eae89`). Struck
    rather than ticked. Both ledgers now pass the published transport check — see
-   [the AR-2 PAUSE section](#-start-here--the-ar-2-pause-is-closed-the-next-deliverable-is-_family-fmds-inventory-shape),
+   [the AR-2 PAUSE section](#-start-here--a-round-3-pause-is-open-so-do-not-cut-_family-fmd-yet),
    which is where a fresh session starts.
 
 2. ~~**RESOLVE THE THREE AR-2 BLOCKERS FIRST.**~~ **DONE at `74590c5a`** — four
