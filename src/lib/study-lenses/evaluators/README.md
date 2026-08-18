@@ -492,6 +492,8 @@ belong to the units that build those surfaces.
   `EvaluationSpec`, `ExecutionBase`, `Execution`, `EvaluationOutcome`,
   `EvaluatorRefusal`, `ErrorPhase`, `ExecutionAxis`, `MachineryDefectKind`,
   `PendingInteraction`
+- Region-internal machinery: [`lib/`](./lib/README.md) — the execution-handle
+  library the evaluators build handles on
 - The engine beneath: [`../lib/engine/README.md`](../lib/engine/README.md)
 - The frozen previous region:
   [`../evaluators-deprecated/README.md`](../evaluators-deprecated/README.md)
