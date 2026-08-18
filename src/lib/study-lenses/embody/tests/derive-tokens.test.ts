@@ -175,7 +175,7 @@ describe('deriveTokens', () => {
 			]);
 		});
 
-		it.skip('the element texts join to the exact source', () => {
+		it('the element texts join to the exact source', () => {
 			const source = 'let a = 1; // one\nlet b = 2;';
 			const stage = deriveTokens({ source, type: 'script' });
 			expect(
