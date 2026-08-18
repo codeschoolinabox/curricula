@@ -6,6 +6,7 @@
 <!-- cspell:ignore gsub RSTART RLENGTH -->
 <!-- cspell:ignore glossterm normalised normalisation parsonizer -->
 <!-- cspell:ignore behaviour behaviours affordances pointcut QASM -->
+<!-- cspell:ignore towc multibyte Normalising -->
 
 # `<lens>` — fidelity ledger
 
@@ -154,9 +155,22 @@ was run and its outputs died with the session that produced them; committing the
 instrument output beside the rows it produced is what makes a reviewer's "what
 was skipped?" a set difference instead of a re-derivation.
 
-A lens with no Gen-1 file writes the literal words
-`no Gen-1 source: <lens> has no Gen-1 file` once, here, and both listers report
-`n/a`.
+⚠️ **The `no Gen-1 source` line lives in `## Reference inventory`, NOT here, and
+this sentence used to say the opposite.** Both documents said "once", in two
+different places:
+[FIDELITY-METHOD § The exemption needs evidence too](../FIDELITY-METHOD.md#the-exemption-needs-evidence-too)
+puts it in `## Reference inventory`; an earlier revision of this section put it
+"once, **here**". Resolved toward the method, because both committed ledgers
+already do it that way and the alternative would have split one fact across two
+sections in eight ledgers [read: `parsons.md` and `writeme.md`, each carrying
+their **Gen-1 source** line under `## Reference inventory`].
+
+A lens with no Gen-1 file therefore writes the literal words
+`no Gen-1 source: <lens> has no Gen-1 file` **once, in
+`## Reference inventory`**, and both listers report `n/a` here, citing it rather
+than repeating it. This bites hardest in [`_family-f.md`](./_family-f.md): six
+of its seven members have no Gen-2 reference and one has no Gen-1 source, so the
+placement decides seven blocks rather than one.
 
 ### ⚠️ The Gen-1 quarry root is TWO directories, not one
 
@@ -246,8 +260,23 @@ something they can see is worse than no row [measured 2026-08-15:
 referenced at `ParsonsLens.jsx:52` and defined 3× — a styled fallback **does**
 render].
 
-⚠️ **Two limits, both of which must be recorded in this section rather than
+⚠️ **Three limits, all of which must be recorded in this section rather than
 discovered later:**
+
+- **A class referenced ONLY from commented-out JSX reports as LIVE.** This is
+  the lister's false-**negative** mode and it is the dangerous direction: the
+  two limits below make an orphan list too long or unverifiable, and a reader
+  checks. This one makes it too **short**, so a dead affordance never opens a
+  row at all and nothing signals the omission. `grep -q "styles\.<name>"` cannot
+  tell a live reference from one inside `{/* … */}`. Measured 2026-08-17 on
+  `DropDownsLens.jsx`: `styles.distractorsLabel` (`:669`) and
+  `styles.actionButtons` (`:713`) are each referenced exactly once, both inside
+  commented-out JSX, and both report as live — so that lens's distractors and
+  reset affordances are switched off by commenting, invisible to channel B
+  (which greps `{false &&` and module-boundary exports, not JSX comments) and
+  uncountable by channel A (which emits a reading list and never a verdict).
+  **Before accepting a clean orphan result, grep the `.jsx` for `styles.` inside
+  comment blocks** and carry what you find to Pass 2.
 
 - **The partition is reproducible, not semantic.** Measured on `ParsonsLens`, 20
   of 27 orphans fall before the first banner and land in one undifferentiated
@@ -388,6 +417,22 @@ does — so parentheses and `+` are text, truncating a heading stays legal, and
 `Why two views one lens` returns empty against `Why two views, one lens`
 [measured 2026-08-15: both forms run against `annotate/DOCS.md`].
 
+⚠️ **Run both extractors under `LC_ALL=C`, and treat that as part of the command
+rather than as advice.** BSD `awk` aborts on a byte it cannot convert in a UTF-8
+locale, and it aborts **to stderr while printing nothing to stdout** — so inside
+`$(firstblock …)` the failure is invisible and the caller captures an empty
+string. Measured 2026-08-17 over every heading in the four `writeme` documents:
+exactly **one** heading differs between locales — the port README's
+`§ Navigation` returns **242 bytes** under `LC_ALL=C` and **0 bytes** under
+`LC_ALL=en_US.UTF-8`, with `awk: towc: multibyte conversion failure` on stderr.
+All four files are valid UTF-8, so the abort is the tool's, not the source's.
+
+The consequence is the one this campaign keeps re-learning: a reviewer who
+re-runs "the published extractor" in an ordinary UTF-8 shell gets `""`, sees no
+error, and concludes the cell was **invented**. That is the silent-failure class
+[SPEC.md § The register check](../SPEC.md#the-register-check) already records
+three times over — a check that reports success, or absence, over nothing.
+
 **`firstblock` covers heading-seeded rows only.** Glossary rows take
 `glossterm`, and lister-4 / lister-5 rows cite no heading at all and take
 neither. Say which rule produced which cell; a blanket "every quotation was
@@ -436,21 +481,65 @@ campaign nowhere: both lenses are excluded
 ([SPEC.md § Standing exclusions](../SPEC.md#standing-exclusions)). A ledger that
 ever does seed one of them extracts those two terms by hand and says so.
 
-**Three transport modifications are sanctioned, and none of them is authored:**
+**Five transport modifications are sanctioned, and none of them is authored.**
+Every one is forced by the formatter or the linter — a cell that refused them
+would not survive `prettier --write` or would fail the markdownlint gate. **A
+sixth is not yours to invent**: if the extractor's output cannot be pasted, say
+so in the row and raise it here rather than quietly reshaping the quote.
 
-- **`|` → `\|`**, which `firstblock` applies so the cell survives the table.
-- **prettier's whitespace collapse**, which flattens a quoted table row's column
-  padding to single spaces.
-- **prettier's
-  `**`→`\*\*`escape at a truncation point.** A 240-character cut can land inside an emphasis span, leaving an unmatched`**`that prettier escapes to keep the markdown valid [measured 2026-08-15: 5 of`parsons.md`'s
-  47 rows]. **Read it as a signal, not damage\*\* — it marks a quote truncated
-  mid-emphasis, and the fix is to lengthen or re-cut the quote, not to unescape
-  it by hand.
+1. `|` → `\|`, which `firstblock` applies so the cell survives the table.
+2. prettier's whitespace collapse, which flattens a quoted table row's column
+   padding to single spaces.
+3. prettier's escape of an emphasis marker at a truncation point. A
+   240-character cut can land inside an emphasis span, leaving an unmatched
+   marker that prettier escapes to keep the markdown valid [measured 2026-08-15:
+   5 of `parsons.md`'s 47 rows]. Read it as a signal, not damage — it marks a
+   quote truncated mid-emphasis, and the fix is to lengthen or re-cut the quote,
+   never to unescape it by hand.
+4. **Backticks around an extracted line that is markup.** `firstblock` takes a
+   fence's first line, and for a JSX or HTML fence that line is a tag —
+   `<div data-lens="writeme"`. Pasted bare it is inline HTML, which `MD033`
+   rejects for any element outside its allowed list. Wrap it in a code span.
+   **This modification is visible in the ledger and must be, so it is named in
+   the row's annotation** — the existing form
+   `(a fence; the extractor takes its first line)` is where it goes. A fence
+   whose first line is not markup — `flowchart TD` — takes no backticks, and a
+   table row takes none either.
+5. **Escaping `[` and `]` inside a quoted intra-document link.** A quote
+   carrying `[Text](#fragment)` resolves against the **ledger**, not the source,
+   so `MD051/link-fragments` fires unless the brackets are escaped [measured
+   2026-08-17 on `writeme-006`: unescaped → 1 MD051 error; escaped → 0]. A
+   **path** link — `[../README.md](../README.md)` — needs no escape and takes
+   none.
 
-So "re-run and diff" means **diff normalised**: unescape `\*\*`→`**`, `\_`→`_`,
-`\|`→`|` and collapse space runs on both sides first. Comparing raw bytes makes
-a formatter normalisation indistinguishable from a mis-transcription, which is
-the one thing this check exists to tell apart.
+⚠️ **Number 3 has bitten this very paragraph.** An earlier revision wrote bullet
+3 with a code span containing asterisks nested inside a bold span, and prettier
+elided the spaces around every later code span in it and escaped the closing
+marker — the published rule was itself unreadable for two revisions. Which is
+the general hazard: **a code span containing `_` or `*`, nested inside an
+emphasis span, breaks prettier's pairing for the remainder of the cell**
+[measured 2026-08-17 by isolation: two table rows differing only in that code
+span, one byte-identical after `prettier --write`, the other rewritten].
+
+**Where that hazard lands in an evidence cell, wrap the quotation in `<em>`
+instead of `_…_`.** The cell content then round-trips byte-identically and `em`
+is already on `MD033`'s allowed list, so no config changes [measured 2026-08-17:
+fixture round-trip; read: `.markdownlint-cli2.jsonc` `MD033.allowed_elements`].
+This is a **rendering** choice, not a sixth transport modification — the quoted
+characters are unchanged, which is the whole point.
+
+So "re-run and diff" means **diff normalised**: unescape `\*\*` to `**`, `\_` to
+`_`, `\|` to `|`, and collapse space runs on both sides first. Comparing raw
+bytes makes a formatter normalisation indistinguishable from a
+mis-transcription, which is the one thing this check exists to tell apart.
+
+⚠️ **Normalising is not the same as being blind, and the difference is a close
+condition.** A normalisation that also ignored backticks would hide modification
+4; one that ignored whitespace near a code span would hide the number-3 hazard.
+Both were tried on `writeme` and both produced a smaller, friendlier divergence
+count over a ledger whose own prose described the defects they hid. **The check
+below is the published one; widening it to make a ledger pass is the failure it
+exists to prevent.**
 
 **`UNSETTLED` is how a partial provenance set stays visibly partial.** No lister
 reads both sides of R-2's union — listers 1–3 compare document sets, 4 and 5
@@ -627,6 +716,80 @@ copied into both passes a check that compares them to each other. Use
 and **not `grep -E`**: five of the six `does NOT do` headings carry a
 parenthetical and one carries a `+`, so the regex form returns 0 on exactly the
 class this rule exists for.
+
+### The transport check
+
+**The Pass-1 gate above checks SHAPE. This checks TRANSPORT**, which is the only
+thing Pass 1 can get wrong — § What Pass 1 writes says _"Pass 1 transports; it
+does not author"_, and until this existed, nothing mechanical held a ledger to
+it. It re-runs the published extractors for every citation a ledger makes and
+diffs the stored quotation against the output.
+
+**Publish the number by publishing the command.** A ledger that states a
+divergence count without the command that produced it launders an unstated
+method into a citable fact — which is exactly what happened on `writeme` and is
+why this section exists.
+
+```bash
+# transport-check.sh <ledger.md> <gen2-dir> <gen3-dir-or-NONE>
+# Prints one line per finding. Silent means clean.
+set -u
+LC_ALL=C; export LC_ALL          # both extractors abort on UTF-8; see above
+L="$1"; REF="$2"; PORT="${3:-NONE}"
+# firstblock() and glossterm() -- paste verbatim from § What Pass 1 writes.
+
+# The normalisation is EXACTLY the sanctioned transport modifications, one
+# clause per numbered item, and nothing else. A modification the template
+# sanctions is normalised away because the seeder had no choice; anything else
+# stays visible. The prettier code-span hazard is deliberately absent -- it is a
+# hazard to avoid with <em>, not a modification to permit.
+norm() { perl -pe 's/\\\*\\\*/**/g; s/\\_/_/g; s/\\\|/|/g; s/\\\[/[/g; s/\\\]/]/g;
+                   s/\s+/ /g; s/^ +//; s/ +$//'; }
+# Modification 4, applied to the STORED side only and only where the extractor's
+# own output is markup, so it cannot launder backticks onto a prose quote.
+unwrap_markup() { case "$1" in '<'*) printf '%s' "$2" | perl -pe 's/^`(.*)`$/$1/';;
+                               *) printf '%s' "$2";; esac; }
+
+perl -ne '
+  next unless /^\| `([a-z0-9-]+-\d{3})`/; my $id = $1; my $n = 0;
+  while (/Gen-([23])\s*`([A-Za-z.]+\.md)`\s*§\s*(.*?):\s*(?:_"(.*?)"_|<em>"(.*?)"<\/em>)/g) {
+    my $q = defined $4 ? $4 : $5;
+    print join("\t", $id, "G$1", $2, $3, $q), "\n"; $n++;
+  }
+  my $cited = () = /Gen-[23]\s*`[A-Za-z.]+\.md`\s*§/g;
+  print join("\t", $id, "-", "-", "!UNQUOTED", "$n of $cited cited"), "\n" if $cited > $n;
+' "$L" | while IFS=$'\t' read -r id side file head stored; do
+  [ "$head" = "!UNQUOTED" ] && { echo "$id UNQUOTED ($stored)"; continue; }
+  case "$side" in G2) src="$REF/$file";; G3) [ "$PORT" = NONE ] && continue; src="$PORT/$file";; esac
+  [ -f "$src" ] || { echo "$id $side MISSING-SOURCE $src"; continue; }
+  if [ "$head" = "Glossary" ]; then
+    term=$(printf '%s' "$stored" | perl -ne 'print $1 if /^- \*\*(.+?)\*\* —/')
+    out=$(glossterm "$src" "$term")
+  else out=$(firstblock "$src" "$head"); fi
+  [ -z "$out" ] && { echo "$id $side EMPTY-EXTRACT ($head)"; continue; }
+  [ "$(printf '%s' "$out" | norm)" = "$(unwrap_markup "$out" "$stored" | norm)" ] \
+    || echo "$id $side DIVERGENT"
+done
+```
+
+**Three properties are load-bearing and each cost a bug to find:**
+
+- **Exact diff, never containment.** A containment test sees content the seeder
+  _dropped_ and is blind to content they _added_, so it cannot see modification
+  4 at all. The first version of this check was a containment test and reported
+  a ledger clean that had backticks the extractor never emitted.
+- **Whitespace around the citation's backticks and `§` is optional**, because
+  the prettier hazard deletes exactly those characters — a strict pattern stops
+  matching the very cell the hazard damaged, and the row is skipped in silence.
+- **The invariant is `parsed == cited`, not `parsed > 0`.** A row whose second
+  citation is unreadable while its first is fine otherwise passes half-checked.
+  That is how `writeme-028` hid its Gen-3 half behind a closing marker prettier
+  had escaped, through two revisions of this check.
+
+**Mutation-test it before trusting it**, per the same rule the Pass-1 gate
+carries: plant a truncated quote, an added word, a mis-transcribed heading, a
+mangled citation, and backticks on a prose quote, and confirm each fires. All
+five were planted and caught on `writeme` [measured 2026-08-17].
 
 The conditions below are for **campaign close**, not for the seeding commit.
 
