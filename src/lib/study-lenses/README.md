@@ -1,4 +1,4 @@
-<!-- cspell:ignore Explorotron Koli consultable Yoshi -->
+<!-- cspell:ignore Explorotron consultable Chiaburu Marinova Begel -->
 
 # study-lenses
 
@@ -160,12 +160,12 @@ line of their program is talking to.
 
 ## Pedagogical grounding
 
-This package implements the middle layers of the framework described in Yoshi
-Malaise and Beat Signer (2023), _Explorotron: An IDE Extension for Guided and
-Independent Code Exploration and Learning_, Proc. of Koli Calling '23
-([PDF](https://wise.vub.ac.be/sites/default/files/publications/Malaise_KoliCalling2023.pdf)).
-
-![Figure 2 from Malaise & Signer (2023): (a) Quadrants of learning along curated/uncurated × guided/unguided axes; (b) Layered pyramid of learning tools, from progress modelling at the base to monitored learning at the top.](./explorotron-quadrants-and-pyramid.png)
+This package implements the middle layers of the Explorotron framework (Malaise
+& Signer 2023). The framework's own treatment — the full citation, the
+quadrants, the pyramid figure, and the paper's principles with their citations —
+is package pedagogy truth:
+[PEDAGOGY.md § Meeting the learner: the Explorotron framework](./PEDAGOGY.md#meeting-the-learner-the-explorotron-framework).
+What this section carries is the package's applied rendering.
 
 The framework's curated/uncurated × guided/unguided axes apply at two scopes:
 this package owns the **snippet scope** (one mounted instance), the embedding
@@ -196,6 +196,18 @@ applied rendering:
   phases' lenses. Level scaffolding follows the same grain — in warn posture
   nothing is ever blocked; strict is a visible, learner-liftable guardrail that
   keeps code where the level's lenses can serve it.
+
+How the bullets relate to the paper's concepts
+([PEDAGOGY.md § Three load-bearing principles](./PEDAGOGY.md#three-load-bearing-principles)
+and
+[§ Structuring learning, both ways](./PEDAGOGY.md#structuring-learning-both-ways)):
+
+| Paper concept                                               | The package's applied form                                                                                                      |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Skill transfer (Chiaburu & Marinova 2005)                   | kept by name — learn where you'll work                                                                                          |
+| Lifelong-learning autonomy                                  | rendered structurally as the second bullet: nothing curated can confine what a learner may reach                                |
+| Expertise reversal (Sweller et al. 2003)                    | scaffolding that helps beginners hurts experts — ANSWERED by the third bullet's pull-fade, a design response, not a restatement |
+| The Begel & Ko both-yes (§ Structuring learning, both ways) | folded into the second bullet's closing sentence: educators and learners structure through the same component                   |
 
 ## What this package does not own
 

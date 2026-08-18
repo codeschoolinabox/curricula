@@ -224,7 +224,9 @@ and Independent Code Exploration and Learning_
 ([PDF](https://wise.vub.ac.be/sites/default/files/publications/Malaise_KoliCalling2023.pdf))
 — the academic framework this package realizes at snippet scope. The deployed
 Study Lenses ([denepo.js.org/study-lenses](https://denepo.js.org/study-lenses))
-is the framework's working realization.
+is the framework's working realization, and
+[the package README § Pedagogical grounding](./README.md#pedagogical-grounding)
+carries the package's applied rendering of the principles at its two scopes.
 
 ### Two axes, four quadrants
 

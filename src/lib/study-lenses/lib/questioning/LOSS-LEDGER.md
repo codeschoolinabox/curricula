@@ -15,8 +15,9 @@ region the campaign establishes. **This file is a burn-down** (human ruling
 2026-08-11): rows retire as their points are resolved in discussion or restored
 in content; whoever empties it deletes it — and in the same commit removes the
 two references to it in this directory's README (the tree figure and §
-Navigation). Scope: this campaign's transport program — the questioning parent
-AND the `PEDAGOGY.md` transport add rows here; the Stage-3 quizzing-docs
+Navigation). Scope: this campaign's transport program — the questioning parent,
+the `PEDAGOGY.md` transport, and the campaign's pedagogy-home wiring increments
+(package README ↔ PEDAGOGY.md) add rows here; the Stage-3 quizzing-docs
 transport owes its own ledger in its own directory. Source paths cite the
 read-only quarry (`src/lib/study-lenses--deprecated-architecture/`) and the
 greenfield open engine at its pre-move path
@@ -132,12 +133,6 @@ L4 anchor), §13 Computational vocabulary axes (inclusion judged — it grounds 
   three-vocabularies lineage table are newly authored. No source content was
   removed.
 
-## Owed forward (burn-down)
-
-| Debt                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Owed to                                                                              |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| The package README § Pedagogical grounding and PEDAGOGY.md § Meeting the learner both carry the Malaise & Signer citation and figure; the README's principle bullets are the package's applied renderings (its intro line now says so — human-licensed edit, 2026-08-13) while PEDAGOGY.md carries the paper's own triple. Full reconciliation (which copy keeps the figure; an explicit applied-to-paper principle mapping; any pointer) is tier-wiring work. | The questioning-DDD session (session 2), which owns discovery wiring to PEDAGOGY.md. |
-
 ## Source: greenfield `lib/socratizing/` (pre-move path)
 
 | Source content                                         | Disposition                           | Destination                                          | Justification                                                                                                                                                                              |
@@ -202,3 +197,20 @@ recorded in DOCS.md § Decisions). Rewords executing that ruling:
 | types.ts JSDoc "ask is pure, synchronous, and deterministic"                                 | REWORDED    | types.ts                                 | The sync signature stated as a mechanical fact of today's type; the dynamic seam named as an open Phase-0 question.                                                  |
 | ux J2 "determinism — the same snippet must ask the same question"                            | REWORDED    | ux/user-journeys.md                      | Stable re-encounter is the journey's need; the kind does not require determinism.                                                                                    |
 | (newly authored)                                                                             | ADDED       | README § Static and dynamic ground truth | The dynamic designation, the full-coverage requirement, the evaluator case-in-point (not a boundary), and the dynamic Phase-0 seams.                                 |
+
+## Pedagogy-home reconciliation (2026-08-18): package README ↔ PEDAGOGY.md
+
+Rows:
+
+| Source content                                                       | Disposition | Destination                            | Justification                                                                                                                                                                                                                                                                                                                                                                                  |
+| -------------------------------------------------------------------- | ----------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Package README § Pedagogical grounding: full citation + figure embed | REMOVED     | — (PEDAGOGY.md § Meeting the learner)  | Decision 8: the paper's own treatment (citation, figure, principle triple) is theory, stated once in PEDAGOGY.md; the README points up and keeps its applied rendering (two-scope table + three renderings). The PNG stays; one embed remains within this package's own docs (PEDAGOGY.md) — the aithor README and the read-only quarry carry their own [measured: grep repo-wide → 3 embeds]. |
+| (newly authored)                                                     | ADDED       | Package README § Pedagogical grounding | The explicit applied-to-paper principle mapping (skill transfer by name; lifelong-learning autonomy → structural; expertise reversal → pull-fade).                                                                                                                                                                                                                                             |
+| (newly authored)                                                     | ADDED       | PEDAGOGY.md § Meeting the learner      | One discovery-wiring sentence pointing at the README's applied rendering — the divergent triples now name each other in both directions.                                                                                                                                                                                                                                                       |
+| Ledger § Owed forward, last row (the Explorotron divergence)         | RETIRED     | —                                      | Discharged by this section; the Owed-forward register itself stays open below.                                                                                                                                                                                                                                                                                                                 |
+
+## Owed forward (burn-down)
+
+| Debt                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Owed to                               |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| The aithor README (its Explorotron treatment and closing pointer) and aithor DOCS still name the package README as the canonical Explorotron treatment; decision 8 moved that home to PEDAGOGY.md, and the README no longer carries the figure, the full citation, or the paper's principle names. Their quad link also resolves to `src/lib/README.md`, which is empty [measured: ls -la → 0 bytes] — a pre-existing defect recorded while in view. | Whoever next touches the aithor docs. |
