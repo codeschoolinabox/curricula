@@ -168,7 +168,7 @@ describe('deriveTokens', () => {
 			);
 		});
 
-		it.skip("its indices point at the stream's only token", () => {
+		it("its indices point at the stream's only token", () => {
 			const stage = deriveTokens({ source: '1', type: 'script' });
 			expect(stage.ok && stage.value.inputElements?.[0]?.tokenIndices).toEqual([
 				0,
