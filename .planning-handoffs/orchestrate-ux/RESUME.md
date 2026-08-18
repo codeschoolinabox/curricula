@@ -1,4 +1,4 @@
-<!-- cspell:ignore acyclicity actioned affordances behaviour behavioural checkpointed codemod cutover authorised finditer misdescribes organise organised parentheticals respecified spellme ugrep unbuilt undercounted undercounts unretired unrun wireframes -->
+<!-- cspell:ignore acyclicity actioned affordances behaviour behavioural checkpointed codemod cutover authorised failable finditer misdescribes organise organised parentheticals respecified spellme ugrep unbuilt undercounted undercounts unactioned undrawn unretired unrun wireframes -->
 
 # orchestrate ux — resumption point
 
@@ -36,23 +36,44 @@ intake checklist, not a new tool.
 
 All three blockers were verified against the tree this session, not relayed.
 
-### B1 · The deferral record has storage without retrieval — HALF FIXED HERE
+### B1 · The deferral record has storage without retrieval — PART ONE FIXED HERE
 
-Three parts. **The pointer at the top of this file fixes part one.** Still open:
+**The pointer at the top of this file fixes part one** [measured 2026-08-17:
+before it, `grep -rn "DECISIONS"` over `src/`, `.planning-handoffs/`,
+`AGENTS.principal.md` and `DEV.md` → **0** inbound hits].
 
-- **This file's § DEFERRED TO 0.3 still claims to be "the deferral's only
-  durable home"**, while `DECISIONS.md § 0.3 entry conditions` claims the same
-  by ruling (R-M). Two files, one claim, different memberships. **Collapse them
-  into one table** — two sections both claiming to be the home is the exact
-  defect this campaign spent five rounds removing from the region.
-- **§ 0.3 entry conditions carries five rows where § DEFERRED TO 0.3 carries
-  eight.** Missing there: the `strip` vocabulary migration as its own item, the
-  editor-mode scrim geometry, the narrow-viewport degradation. **Missing from
-  BOTH: the accessibility-structure obligation** [read: `ux/wireframes.md` §
-  What the arrangement never changes — "the structure a screen reader traverses
-  comes from named regions and groups rather than from a heading outline … **it
-  is owed at 0.3**"]. That is a deliverable owed to the reader Journeys 5 and 6
-  exist for, with no row and no entry condition.
+**The remaining work is INSIDE `DECISIONS.md`, not between the two files.** A
+context-free validation caught an earlier revision of this section pairing the
+wrong tables — read this carefully, because the arithmetic is easy to misfile:
+
+- `DECISIONS.md` has **two** deferral sections: § Deferred to 0.3 (**8 rows**)
+  and § 0.3 entry conditions (**5 rows** — I6, I8, C11, B10, F3). Missing from
+  the second: the `strip` vocabulary migration, the editor-mode scrim geometry,
+  the narrow-viewport degradation.
+- **`RESUME.md` § DEFERRED TO 0.3 is NOT one of the two tables.** It holds a
+  `strip` file-count table and six prose carry-forward bullets, and it already
+  disclaims being the home. Do not go looking there for a deferral table.
+
+**Three things must be ruled before the merge — it is not mechanical:**
+
+1. **Which `DECISIONS.md` section survives?** R-M ruled the deferrals live in
+   that file; it did not rule which of its two sections. Three home-claims
+   currently form a loop (§ Deferred to 0.3 calls itself the index and points at
+   `RESUME.md` for reasoning; § 0.3 entry conditions calls itself the only
+   home).
+2. **Five items need per-item rulings.** Four live only in `RESUME.md` §
+   DEFERRED TO 0.3's bullets — the tray-entry/re-open collision, the undrawn
+   editor-mode proposals and masked generator, the embody JEJ README
+   `station`/`parse` staleness, and the deliberately-unactioned `l1-picker.tsx`
+   comment. And **D7 is marked `0.3` in its row and appears in neither list.**
+3. **The accessibility obligation is NOT a cheap add.** [read:
+   `ux/wireframes.md` § What the arrangement never changes — "the structure a
+   screen reader traverses comes from named regions and groups … **it is owed at
+   0.3**"]. It has no decision id, `DECISIONS.md` has zero hits for it, and its
+   home sentence is the **same bullet** that is G4's home of record — and **G4
+   is `settled`**. So adding it means opening a new row AND re-opening a settled
+   one, which is exactly the "widening a closed row does not re-open it" hole
+   named below.
 
 ### B2 · The docs assert a live `strip` — RULING TAKEN, EXECUTE IT
 
@@ -67,71 +88,121 @@ deferral's recorded reason — that the enumeration cannot be rewritten without
 [read: `ux/wireframes.md` — "the tray entry for the open lens is its own close
 affordance"], the tray is settled (B5, B6, glossary · tray), and a station with
 a tray is openable by construction, so the tray entry exists under either answer
-to B10. Rewrite `README.md` glossary · dispose, `DOCS.md` (×3) and
-`event-bus/README.md` as _raised by the open lens's tray entry, the Edit code
-button, …_. Pure end-state prose — it satisfies `DEV.md` rather than needing the
-note `DEV.md` forbids.
+to B10.
 
-**Why this is not just tidying** [read: `DEV.md` § Phase 0 — "Can you read
+**THE SITE LIST — five files, and `DECISIONS.md` I6 is the authority, not this
+paragraph.** An earlier revision here listed four and omitted
+`editor/README.md`, which does carry it [read, verbatim: "The strip's none entry
+closes an open lens too, but the strip is class 3 and inert while masked — which
+is exactly why the class-2 button exists."]. Under the receipt rule an omitted
+site is an empty receipt, so **walk I6's column, not this list**: `README.md`
+glossary · dispose · `DOCS.md` (resolve the count by reading — it has 7 `strip`
+occurrences and at least four dispose-relevant sentences; "×3" was an unverified
+shorthand) · `event-bus/README.md` · `editor/README.md`.
+
+**`DECISIONS.md` CONTRADICTS R-N AND MUST BE UPDATED IN THE SAME COMMIT.** It
+still records the deferral with the disproven reason in two places (§ Deferred
+to 0.3 and § 0.3 entry conditions · I6), and D6's status is still `0.3`. A
+reader who follows the instruction to read `DECISIONS.md` first will defer B2.
+
+**Why this is not tidying** [read: `DEV.md` § Phase 0 — "Can you read
 `types.ts`, `README.md` and `DOCS.md` together and **fully predict** what the
-implementation will do…? If not … resolve it now"]. Today those three documents
-do not answer whether the region has a strip.
+implementation will do…? If not … resolve it now"]. Today those three do not
+answer whether the region has a strip.
 
-### B3 · The barred cause line is one constant for TWO barring shapes
+### B3 · The barred cause line is one constant, and the data has THREE origins
 
 The contract states one string [read: `README.md` glossary · display labels —
-"**The barred phase's cause line** — the parser's own message, framed by this
-region: `the grammar broke here — <the parser's message>`"]. The data has two
-shapes: grammar-broken AND **spelling-broken**, where the barring edge sits
-between `tokens` and `ast`, the cause is the tokenizer's, and **"the grammar
-broke here" is false** — nothing reached the grammar.
+"`the grammar broke here — <the parser's message>`"].
 
-It is the only copy family specified as a **constant** rather than keyed, and it
-is constant only if there is one shape. **Key it**, exactly as the empty-station
-reason is keyed: `the <barring phase> broke here — <the parser's message>`, two
-authored framings, zipped against the same order constant. Authored rather than
-derived for the short-label reason — deriving from the label gives "the Tokens ·
-spelling broke here". Then restate the machine-token rule's worked example,
-which uses this string, and **draw the spelling-broken shape in the twin** — it
-is asserted and never drawn, which is why this survived eight rounds.
+**Round 8 said two barring shapes. The code says more, and this is design rather
+than copy** [measured 2026-08-17]:
 
-### The five IMPORTANT and six MINOR
+- `src/lib/study-lenses/embody/types.ts` —
+  `FailableStageName = 'tokens' | 'ast' | 'entwined' | 'environment'`.
+- `src/lib/study-lenses/embody/derive-accessibility.ts` — "`ast` is barred
+  **only by a tokens failure**; `environment` and `evaluation` are barred by a
+  **tokens, ast, or entwining** failure."
 
-Recorded in `DECISIONS.md`. The three worth knowing before you start:
+So a cause at a barring edge can originate at `tokens`, `ast`, or `entwined`.
+**"the grammar broke here" is false whenever the origin is `tokens`** — nothing
+reached the grammar.
+
+**And the obvious fix does not work.** Keying `the <barring phase> broke here`
+against the five-phase order constant has **no key for `entwined`**, which is
+not a lifecycle phase name at all (the five are
+`source · tokens · ast · environment · evaluation`). Deriving from the label is
+also out — it yields "the Tokens · spelling broke here", the reason the short
+labels are authored.
+
+**So B3 is a design question, not a rewrite**, and it is worth putting to the
+human: key by **failable stage** rather than by phase, and decide what an
+`entwined`-origin cause says to a learner. Mitigating but not rescuing:
+`entwined`/`environment` "fail only as guarded embody defects, reported loudly".
+**Also draw the spelling-broken shape in the twin** — it is asserted and never
+drawn, which is how this survived eight rounds.
+
+### The five IMPORTANT and six MINOR — NOT YET IN THE DECISION RECORD
+
+**Read `ar-1` round 8's verdict for the full text; it is not transcribed
+anywhere** [measured: `grep -ic "round 8"` on `DECISIONS.md` → **0**]. This is
+the round-4 "three MINOR stayed lost" failure repeating, and **transcribing them
+into `DECISIONS.md` is part of the next session's first commit**. The three
+worth knowing before you start:
 
 - **The census discovered sites and nothing filed them.** `editor/README.md`
-  asserts A1, two A2 roster members with their grounds, AND D6 — it was filed in
-  A1 only. `index.tsx` asserts A6 ×2, A7, A8 and D2 — filed in A1 only. Five
+  asserts A1, two A2 roster members with their grounds, AND D6 — filed in A1
+  only. `index.tsx` asserts A6 ×2, A7, A8 and D2 — filed in A1 only. Five
   newly-found files are in no row at all.
-- **Two more receipt-rule holes**, both mechanical: a receipt block may narrow
-  its own scope ("all THREE sites" against a seven-entry column), and **widening
-  a closed row's column does not re-open the row** — which a census guarantees
-  will happen. Fix: receipts reproduce the row's column verbatim; a widened
-  column re-opens its row.
-- **I10's `recommendation` settlement reached the glossary and nothing else** —
-  and no row was opened for it, against this instrument's own intake rule. Two
-  violations sit in `README.md` above the entry forbidding them; the twin is
-  12:1 on the retired synonym.
+- **Two more receipt-rule holes**: a receipt block may narrow its own scope
+  ("all THREE sites" against a seven-entry column), and **widening a closed
+  row's column does not re-open the row** — which a census guarantees will
+  happen.
+- **The `recommendation` settlement (round 7's IMPORTANT 10) reached the
+  glossary and nothing else, and no row was opened for it.** `README.md`
+  glossary · recommendation makes `recommendation` the contract term and retires
+  `proposal` except in the proposals surface's name and the `candidate`
+  contrast. Two uses in `README.md` itself violate that rule (§ The composition
+  root's "that proposal's opening overrides", and § What this region does not
+  own's "ranks the proposals"); the twin measures 12 `proposal` to 1
+  `recommendation`.
 
 ## Recommended opening move
 
-1. **Finish B1** — collapse the two deferral tables into one and add the
-   accessibility-structure row. Cheap, and it is the thing a cold 0.3 reader
-   depends on.
-2. **B2**, per R-N. The ruling is taken; execute it.
-3. **B3**, which is design rather than copy-editing — it decides a keyed-vs-
-   constant contract 0.3 locks.
-4. **The filing checklist**, appended to `DECISIONS.md § How to maintain it`:
-   _did this commit take a decision? open a row. did it discover a site? file it
-   into every row it asserts, and re-open those rows._ Two lines. **Not a fifth
-   instrument.**
-5. Then the IMPORTANTs and MINORs, and re-run `ar-1` — registered agent, **no
-   `model` parameter**.
+**A context-free agent validated this handoff and returned ten must-fix
+findings; they are applied above.** Two of its findings are the reason this
+order is what it is: the filing checklist must land BEFORE any decision is
+taken, and steps 1–3 each need rulings the previous revision assumed away.
+
+1. **Land the filing checklist first** — two lines appended to
+   `DECISIONS.md § How to maintain it`: _did this commit take a decision? open a
+   row. did it discover a site? file it into every row it asserts, and re-open
+   those rows._ It is two lines and everything after it takes decisions. **Not a
+   fifth instrument** — round 8's reviewer is explicit that a fifth would find a
+   fifth blind spot.
+2. **Transcribe round 8's five IMPORTANT and six MINOR into `DECISIONS.md`.**
+   They exist only in the AR-1 verdict today, and an AR verdict is not durable.
+   Do this before the fixes so the rows exist to receipt against.
+3. **B1**, which needs three rulings before any merge — see § B1. Put them to
+   the human together rather than one at a time.
+4. **B2**, per R-N. Walk I6's column for the site list, and update
+   `DECISIONS.md`'s two contradicting records in the same commit.
+5. **B3**, which is design and worth putting to the human: keying by failable
+   stage rather than by phase, and what an `entwined`-origin cause says.
+6. Then the rest, and re-run `ar-1` — registered agent, **no `model`
+   parameter**.
+
+**One structural risk the validation named and nobody has ruled on:** the only
+inbound pointer to `DECISIONS.md` in the whole tree is this file [measured
+2026-08-17]. `.planning-handoffs/` is documented as transitional scaffolding
+that prunes — so when this file is pruned at 0.2 close, the decision record goes
+unreachable again, while § 0.3 entry conditions asserts "whoever opens 0.3 reads
+this list first". **That needs a durable home or a durable pointer before 0.2
+closes.**
 
 **Round 8's reviewer says 0.2 IS closeable, and that the residue stops
-regenerating once the one-home discipline is applied to the two subjects that
-have not had it: the copy (seven keyed families, one manifest slot) and the
-`recommendation` vocabulary.**
+regenerating once the one-home discipline reaches the two subjects that have not
+had it: the copy and the `recommendation` vocabulary.**
 
 **On the next PAUSE, do not open round 10 alone — put it to the human.**
 
