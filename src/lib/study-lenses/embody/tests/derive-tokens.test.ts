@@ -161,7 +161,7 @@ describe('deriveTokens', () => {
 			).toBe(true);
 		});
 
-		it.skip('a one-token program → one NumericLiteral element', () => {
+		it('a one-token program → one NumericLiteral element', () => {
 			const stage = deriveTokens({ source: '1', type: 'script' });
 			expect(stage.ok && stage.value.inputElements?.[0]?.kind).toBe(
 				'NumericLiteral',
