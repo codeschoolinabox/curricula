@@ -933,8 +933,9 @@ why this section exists.
 # if the row pattern matched nothing. NO OUTPUT AT ALL means the check itself
 # died -- that is the only silence, and it is never clean.
 #
-# The FAIL is the `[ "$n" -gt 0 ]` floor the Pass-1 gate 47 lines above already
-# carries. This check shipped without it; an earlier revision then shipped a
+# The FAIL is the `[ "$n" -gt 0 ]` floor § Close conditions' Pass-1 gate already
+# carries (cited by section, never by line count -- "47 lines above" was 67 by
+# the next day). This check shipped without it; an earlier revision then shipped a
 # CENSUS line and called THAT the floor, which it is not -- `rows=0` printed a
 # tidy line and exited 0 [measured 2026-08-18, AR-2]. A census reports; a floor
 # refuses. § The register check's class -- a check that reports success, or

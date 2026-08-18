@@ -5,7 +5,7 @@ closes; nothing here is end-state documentation. -->
 <!-- cspell:ignore firstblock glossterm parsonizer parsonize errormsg recognises -->
 <!-- cspell:ignore unbuilt ugrep affordances behaviour -->
 <!-- cspell:ignore normalisation unrunnable -->
-<!-- cspell:ignore loosenings capitalisation enshittifying -->
+<!-- cspell:ignore loosenings capitalisation enshittifying keyable -->
 
 # RESUME — where this campaign stands and what comes next
 
@@ -220,7 +220,7 @@ and two stale copies shipped inside the warning against exactly that. Re-derive
 it every time:
 `git log --oneline -1 -- .planning-handoffs/lens-migration/ledgers/_TEMPLATE.md`
 
-### Two human rulings of 2026-08-18, neither yet fully carried
+### Two human rulings of 2026-08-18, and where each sits in the order
 
 - **The `ux/` twin is the coordination artifact between human and agent**, and
   the place a port proves it understood the lens it replaces rather than
@@ -228,14 +228,37 @@ it every time:
   step 0.2, **a named twin gate fires before AR-1**, the human ratifies, and the
   twin **cites ledger row ids** instead of restating them. ⚠️ **Measured
   2026-08-18: zero lenses this campaign owns have a `ux/`, and zero Tier-2
-  handoffs exist — so the ruling has no carrier yet.** `parsons` and `writeme`
-  both owe one.
+  handoffs exist — so the ruling has no carrier yet.**
+
+  **Position in the order: NO ACTION THIS SESSION.** The twin binds at **Tier
+  2**, at each lens's own step 0.2, and Tier 0 / Tier 1 commits keep
+  `twin-doc: none` — so seeding a ledger and planning a family owe nothing. It
+  becomes a mandatory checklist line the moment the first Tier-2 handoff is
+  written, and that is where `parsons`' and `writeme`'s own twins get scheduled
+  too. Writing `twin-doc: user` on a ledger commit would be as wrong as writing
+  `none` on a lens commit.
+
 - **`_TEMPLATE.md` is to be marked `[COPY]` / `[METHOD]` per section**, with the
   header rule changed to match what both seeded ledgers already do — copy the
-  COPY sections, cite the METHOD sections by link. **NOT YET APPLIED.** AR-1
-  measured five of twelve sections never surviving a cut, over ~1100 lines,
-  under a header that says "delete nothing structural". The split itself is a
-  deferred follow-on; the marking is not.
+  COPY sections, cite the METHOD sections by link. **NOT YET APPLIED, and it is
+  a BLOCKER ON `_family-f.md`**: standing ruling 3 says the template is amended
+  before a ledger is cut from it, and this is a template amendment. **Do it in
+  the same commit group as the two ⛔ designs, before the ledger.** AR-1's "five
+  of twelve sections" is its count and did not reproduce against a naive heading
+  grep — **derive the partition yourself** rather than transcribing either
+  number:
+
+  ```bash
+  grep -nE '^#{2,3} ' .planning-handoffs/lens-migration/ledgers/_TEMPLATE.md
+  grep -n '_TEMPLATE.md#' .planning-handoffs/lens-migration/ledgers/parsons.md \
+    .planning-handoffs/lens-migration/ledgers/writeme.md
+  ```
+
+  The second command is the empirical answer: **the sections both seeded ledgers
+  cite by link are exactly the `[METHOD]` set.** The header rule to change is
+  the HTML comment on lines 1-2, _"Copy it to `<lens>.md`, fill it, and delete
+  nothing structural."_ The split into a sibling file is a deferred follow-on;
+  the marking is not.
 
 ### Why round 4 goes to a fresh session
 
@@ -265,7 +288,7 @@ until three AR-2 blockers are resolved.~~ — **closed at `74590c5a`.**
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `3df1c727` | `_TEMPLATE.md` — seven amendments: the transport check published, five sanctioned transport modifications, `LC_ALL=C`, lister 4's third limit, the `no Gen-1 source` placement |
 | `c734b5ad` | `ledgers/writeme.md` — every quotation is now its extractor's own output                                                                                                       |
-| `d68eae89` | `ledgers/parsons.md` + `_TEMPLATE.md` — AR-1's re-check findings. **This is the current template SHA**                                                                         |
+| `d68eae89` | `ledgers/parsons.md` + `_TEMPLATE.md` — AR-1's re-check findings. ~~the current template SHA~~ — **superseded; re-derive it, never read it here**                              |
 
 **Measured 2026-08-17 at `2c02e94a`:** 181 ahead of `origin/main`; 26 campaign
 commits since `346cb845`; campaign dir clean. **Both numbers were already stale
@@ -278,7 +301,7 @@ sentence said "nine … only three are mine", which reproduces under no reading 
 caught by the cold read. This is why AR-5 reviews an explicit SHA list and never
 a range.
 
-### The AR-2 PAUSE — three blockers, all verified, all binding `_family-f.md`
+### ~~The AR-2 PAUSE — three blockers, all verified, all binding `_family-f.md`~~ — CLOSED at `74590c5a`, kept for its reasoning
 
 Full report is not restated here; these are the three that block. **Each was
 reproduced by measurement, not relayed.**
@@ -291,9 +314,13 @@ reproduced by measurement, not relayed.**
    nothing** [measured 2026-08-17, and reproduced independently by the cold
    read]. This is the silent-failure class the same commit cites as _"already
    recorded three times over"_, and the Pass-1 gate **47 lines above in the same
-   file** already carries the `[ "$n" -gt 0 ]` floor that catches it
-   (`_TEMPLATE.md:682` against `:729` — an earlier revision of this line said
-   "ten lines above" and was wrong).
+   file** already carries the `[ "$n" -gt 0 ]` floor that catches it (**cite the
+   sections, not line numbers — both of these rotted within a day: `:682`/`:729`
+   were already `869`/`916` on 2026-08-18** [measured]. An earlier revision of
+   this line said "ten lines above"; the correction to "47" is also wrong, and
+   the real distance was 67 when last measured. This is the third rotted
+   line-number citation in one paragraph, which is why § Columns bans citing by
+   line number at all.)
 
    ⚠️ **It gates WAVE 2 as well as Family F, and the first draft of this section
    said only Family F.** `dropdowns`, `variables` and six of Family F's seven
@@ -313,15 +340,18 @@ reproduced by measurement, not relayed.**
    still lists seven bullets and never mentions the check). **Fix:** an eighth
    exception bullet, plus a way for the check to resolve seven references.
 
-   ⚠️ **The two candidate designs are NOT equivalent, and choosing between them
-   is a HUMAN GATE rather than an agent's pick.** The cold read stalled at
-   exactly this fork, which is what it was run to find. A **member-qualified
-   citation form** (`Gen-2 <member>/README.md § …`) changes the citation grammar
-   every future ledger writes, and would make `_family-f.md` the only ledger
-   whose rows do not look like the other seven's. A **published seven-invocation
-   form** leaves the grammar alone and costs a per-member marker the check can
-   key on. Put both to the human with that trade named; do not pick one and
-   proceed.
+   ⛔ **RULED 2026-08-18 — do NOT re-ask this.** The human chose the **published
+   per-member invocation form**: citation grammar unchanged, all eight ledgers
+   keep one row shape, and the accepted cost is a keyable member marker. It is
+   recorded where it governs, in `_TEMPLATE.md` § `_family-f.md` is the one
+   exception, 8th bullet. The rest of this item is the reasoning that produced
+   the fork, kept because it is still right about the trade: A
+   **member-qualified citation form** (`Gen-2 <member>/README.md § …`) changes
+   the citation grammar every future ledger writes, and would make
+   `_family-f.md` the only ledger whose rows do not look like the other seven's.
+   A **published seven-invocation form** leaves the grammar alone and costs a
+   per-member marker the check can key on. Put both to the human with that trade
+   named; do not pick one and proceed.
 
 3. **Amendment 7 gives Family F an instruction it cannot follow.** It rules the
    `no Gen-1 source` line goes _"once, in `## Reference inventory`"_ — but the
@@ -342,18 +372,26 @@ overstated invariant in a template is worse than a stated one — the next
 reviewer stops looking. Also: the `<em>` trigger is undecidable as written
 (over-predicts 3×, and missed `parsons-031`); replace the content predicate with
 the empirical procedure that actually found it — paste, `prettier --write`,
-`git diff`, and every cell prettier rewrote switches to `<em>`. Also: **THREE
-dangling `./_family-f.md` links, not the one an earlier revision of this line
-claimed** — `_TEMPLATE.md:171` (introduced by `3df1c727`, and the template is
-copied eight times), `SPEC.md:1295` and `FIDELITY-METHOD.md:888`, both
-pre-existing [measured 2026-08-17 by the cold read, re-verified here]. **Nothing
-gates them: markdownlint returns 0 errors over all nine documents, because
-`MD051` checks fragments and not paths.** They resolve the moment `_family-f.md`
-is cut, which is why they survived — a forward reference and a broken one look
-identical until someone clicks. Also: `FIDELITY-METHOD.md` § Columns still says
-a quotation _"transports verbatim"_ and knows nothing of the five sanctioned
-modifications — the same template/method conflict amendment 7 closed, one size
-larger.
+`git diff`, and every cell prettier rewrote switches to `<em>`. Also: ~~**THREE
+dangling `./_family-f.md` links**~~ — **FOUR, and all three line numbers
+transcribed here had rotted by the next day** [measured 2026-08-18 by the
+context-free validation]. `_TEMPLATE.md` § Source inventory now publishes the
+derivation and forbids transcribing the list, in the same words this paragraph
+disobeyed: _"Do not transcribe the site list — derive it, because an earlier
+revision enumerated three sites while the same commit was adding a fourth."_ Run
+it rather than reading a list:
+
+```bash
+grep -rnoE '\]\((\./)?(ledgers/)?_family-f\.md\)' \
+  .planning-handoffs/lens-migration --include='*.md'
+```
+
+**Nothing gates them: markdownlint returns 0 errors over all nine documents,
+because `MD051` checks fragments and not paths.** is cut, which is why they
+survived — a forward reference and a broken one look identical until someone
+clicks. Also: `FIDELITY-METHOD.md` § Columns still says a quotation _"transports
+verbatim"_ and knows nothing of the five sanctioned modifications — the same
+template/method conflict amendment 7 closed, one size larger.
 
 **Two things the cold read had to guess, now stated.** The transport check's
 third argument has no published value anywhere in the campaign — it is
@@ -452,9 +490,10 @@ Its item 1 was done at `c734b5ad` and its item 2 is blocked by the AR-2 PAUSE.
 that says "in the order it should be taken", and would have spent a session
 re-cutting thirteen cells that were re-cut the day before** — this canon's own
 recorded failure mode, found by the context-free validation of this very file.
-The live order is [§ Where to start](#where-to-start--in-order), and the live
-status is the
-[AR-2 PAUSE section](#-start-here--a-round-3-pause-is-open-so-do-not-cut-_family-fmd-yet).
+**The live order and the live status are both
+[§ START HERE](#-start-here--a-round-3-pause-is-open-so-do-not-cut-_family-fmd-yet)**
+— it is the only authority on what comes next. § Where to start is kept for the
+reasoning in its struck items and defers to it.
 
 1. ~~**13 of `writeme`'s 33 heading cells are owed a re-cut**~~ — **DONE**
    (`c734b5ad`). The published transport check now reports **0 divergent** on
@@ -572,10 +611,12 @@ session, **6** campaign commits, **3** foreign, **97** total [all measured
 5 this session's and 2 foreign" — wrong on the count of my own commits, and
 wrong in a way no reader could have caught without re-running it.
 
-⚠️ **The gap-check command in § What is committed returns SEVEN commits, not
-one.** `346cb845` is a real campaign commit missing from that table as well as
-this session's six, so the table is **two** generations behind, not "one commit
-behind by construction". Close the gap from the command, never from the table.
+⚠️ **The gap-check command in § What is committed returns FAR more than one, and
+any number written here rots within a day.** It said "SEVEN" on 2026-08-15 and
+returned **35** on 2026-08-18 — with **18 campaign commits appearing nowhere in
+this file at all** [measured 2026-08-18 by the context-free validation]. The
+table is generations behind, not "one commit behind by construction". **Close
+the gap from the command and never from any number, including this sentence's.**
 
 ### R-7 — `ux/` twins, and what it does NOT change
 
@@ -629,25 +670,40 @@ re-derive it from here.
 
 2. ~~**RESOLVE THE THREE AR-2 BLOCKERS FIRST.**~~ **DONE at `74590c5a`** — four
    blockers, not three, plus five batch-fixed findings. Struck rather than
-   ticked. The reasoning that produced them lives in that commit body; the
-   template is now stable and `_family-f.md` can be cut from it.
+   ticked. ~~The template is now stable and `_family-f.md` can be cut from it.~~
+   — **FALSE, and struck: a ROUND-3 PAUSE opened on the fix pass.** Two blockers
+   are open and both are marked ⛔ in `_TEMPLATE.md` at the point of use.
 
-3. **`_family-f.md`'s inventory shape alone**, as a probe before its rows. It is
+3. **THE TWO OPEN ⛔ DESIGNS**, before any ledger — the Family F invocation is a
+   census rather than a floor, and the mutation corpus is not a sufficient
+   amendment gate. Both are stated with their measurements in
+   [§ START HERE](#-start-here--a-round-3-pause-is-open-so-do-not-cut-_family-fmd-yet),
+   which is the authority on order. Under standing ruling 3 the template is
+   amended before a ledger is cut from it, so this is a rule and not a
+   preference.
+
+4. **`_family-f.md`'s inventory shape alone**, as a probe before its rows. It is
    a **gate** — the last two dispatches each collapsed it into a wave. Its
-   per-member values are measured and tabulated in the plan file this session
-   wrote; re-measure rather than transcribe them.
+   per-member values must be re-measured, never transcribed.
 
-4. **Wave 2 — `dropdowns`, `variables`, `debug-props`**, in parallel; none
+   ⚠️ **Open question the next session must settle before cutting it: a
+   shape-only ledger has ZERO rows, and zero rows currently FAIL both gates** —
+   the Pass-1 gate's `[ "$n" -gt 0 ]` and the transport check's floor, the
+   latter exiting 1 [measured 2026-08-18 by the context-free validation]. Either
+   a shape-only cut is exempt from both and says so, or the inventory shape is
+   committed together with its first rows. Nothing in the canon rules it today.
+
+5. **Wave 2 — `dropdowns`, `variables`, `debug-props`**, in parallel; none
    touches Gen-1's second root, so none waits on the unbuilt lister [measured
    2026-08-16]. ~~Two of them require a template amendment first, in its own
    commit.~~ — **neither does any more**: both amendments landed (`3df1c727`,
    `74590c5a`) and § Wave-2 traps records which. Their measured traps are in
    [§ Wave-2 traps](#wave-2-traps-measured-2026-08-16-so-the-briefs-carry-them).
 
-5. **Then `blanks` and `annotate`** — the two that run listers 1–3
+6. **Then `blanks` and `annotate`** — the two that run listers 1–3
    reference-to-source.
 
-6. **THE WIDENED INSTRUMENT IS DESIGNED, NOT BUILT, AND STILL EMBARGOED.**
+7. **THE WIDENED INSTRUMENT IS DESIGNED, NOT BUILT, AND STILL EMBARGOED.**
    [`LISTERS-6-7-DESIGN.md`](./LISTERS-6-7-DESIGN.md) (`a4a90e0f`) carries two
    checks with nine mutation tests, and reproduces both of the false results
    that motivated it. It amends nothing yet. Before it runs it owes a **human
@@ -657,12 +713,12 @@ re-derive it from here.
    struck. **Building it goes to a fresh session unconditionally**
    ([AGENTS.principal.md § Handoff agency](../../AGENTS.principal.md#handoff-agency--the-agent-owns-the-call)).
 
-7. **THEN re-seed `parsons`** against the widened root. The ledger still has
+8. **THEN re-seed `parsons`** against the widened root. The ledger still has
    **zero `G1-live` rows**; that is what the second-root ruling exists to fix.
    **Append; never renumber `001`–`047`.** Take the next id from the ledger as
    it stands when you start, not from a number written here.
 
-8. **AR-5** over the campaign SHA list — never `baseline..HEAD`, foreign commits
+9. **AR-5** over the campaign SHA list — never `baseline..HEAD`, foreign commits
    interleave — then the push prompt. **Pass 2 and Pass 3 remain owed on every
    ledger**, `parsons` and `writeme` included; the Pass-1 transcription
    counter-check run on `writeme` is **not** Pass 3 and its commit body says so.
