@@ -1,4 +1,4 @@
-<!-- cspell:ignore socratizing quizzing -->
+<!-- cspell:ignore socratizing quizzing unbuilt -->
 
 # lib
 
@@ -13,16 +13,23 @@ levels, and lenses built on those facts. This is a widening of the original "no
 package region even for types" rule, scoped to structural fact-types a leaf
 genuinely projects.
 
-One entry below is a parent directory, not a leaf: `questioning/` holds the two
-question engines plus, in the parent itself, only their shared truth (the
-BLOCK-model grid, taxonomies, leveling) as documentation and types. It is
-admissible on this tier's own terms: the tier's "no levels" bar means **language
-levels**, and the questioning parent and both engines are language-level-blind,
-lifecycle-blind, and lens-blind. The tier's existing leaves already carry
-pedagogical domain models (classifying's `Category`/`Role`, socratizing's
-framework stack), so the parent changes the tier's depth, not its kind — and it
-adds no machinery: it composes nothing and runs nothing, and each engine inside
-it qualifies as a leaf in its own right.
+One entry below is a parent directory, not a leaf: `questioning/` holds a family
+of one kind — questioners — plus, in the parent itself, only the kind's
+definition and shared truth (the `Questioner` envelope, the BLOCK-model grid,
+taxonomies, leveling) as documentation and types. It is admissible on this
+tier's own terms: the tier's "no levels" bar means **language levels**, and the
+questioning parent and every questioner under it are language-level-blind and
+lens-blind, and read no lifecycle payload — the embodiment's study layer crosses
+the kind's type boundary, and a law of the kind bars any questioner from reading
+it. The tier's existing leaves already carry pedagogical domain models
+(classifying's `Category`/`Role`, socratizing's framework stack), so the parent
+changes the tier's depth, not its kind. The parent itself adds no machinery — it
+composes nothing and runs nothing — and what may live inside is governed by the
+family's admission rule: every child implements `Questioner`. Leaf questioners
+qualify as tier leaves in their own right; a higher-order questioner
+(designated, unbuilt) consumes its sibling questioners as its internal strategy,
+and that reach never leaves the family — composition stays inside the parent
+directory, off the tier's shared surface.
 
 - [classifying/](./classifying/README.md) — exhaustive, selection-free
   syntax-element classification: one frozen `ClassifiedToken` per source token
@@ -36,11 +43,12 @@ it qualifies as a leaf in its own right.
   finds each guarded loop and splices caller-supplied guard/reset call text into
   it without moving a line, returning the rewritten source and a count of loops
   guarded.
-- [questioning/](./questioning/README.md) — the shared parent of the two
-  question engines — socratizing (the open register: questions a human judges)
-  and quizzing (the closed register: questions a machine grades) — holding the
-  BLOCK-model grid types and the shared pedagogy documentation both engines tag
-  their questions with.
+- [questioning/](./questioning/README.md) — a family of one kind, questioners:
+  machinery turning embodiment facts into frozen, grid-tagged question items.
+  The parent defines the kind (the `Questioner` envelope, the BLOCK-model grid
+  types) and carries questioning's application of the package pedagogy; today's
+  questioners are socratizing (the open register: questions a human judges) and
+  quizzing (the closed register: questions a machine grades).
 - [scanning/](./scanning/README.md) — the specification's own reading of a token
   stream: one frozen `InputElement` per span (kind, half-open span, verbatim
   slice, and the indices of the parser tokens it wraps) folded from embody's

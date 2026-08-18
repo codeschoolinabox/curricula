@@ -1,10 +1,16 @@
+// cspell:ignore Schulte omittable bivariant
+
 /**
- * @file Shared grid types of the questioning parent — the BLOCK-model
- * vocabulary both question engines tag their items with. Documentation truth
- * lives in ./README.md (the grid, the registers, the glossary); this file is
- * its type expression. Zero imports, zero runtime exports: the parent
- * compiles away entirely.
+ * @file Shared types of the questioning parent — the BLOCK-model grid
+ * vocabulary every questioner's items are tagged with, and the `Questioner`
+ * envelope every child of this directory implements. Documentation truth
+ * lives in ./README.md (the family, the grid, the registers, the glossary);
+ * this file is its type expression. Zero runtime exports, and exactly one
+ * import — embody's structural types, type-only — so the parent compiles
+ * away entirely.
  */
+
+import type { Embodiment, Facts } from '../../embody/types.js';
 
 /**
  * The three dimensions of the BLOCK model (Schulte 2008).
@@ -53,3 +59,63 @@ export type Level =
 	| 'connections'
 	| 'goals'
 	| 'userExperience';
+
+/**
+ * The pinned refusal arm of a questioner's ask — refusal as data, shared
+ * across the family so every consumer narrows it the same way. It matches
+ * the open engine's landed refusal arm exactly. `offset` is the failing
+ * stage's source offset when the parser reports one; compare it to
+ * `undefined`, never truthiness — offset 0 is a real position.
+ */
+export type QuestionerRefusal = {
+	readonly ok: false;
+	readonly error: {
+		readonly message: string;
+		readonly offset?: number;
+	};
+};
+
+/**
+ * The questioner kind's envelope — what every child of `lib/questioning/`
+ * implements (the family's admission rule; README § The questioner family).
+ *
+ * `TAnswer` is the implementor's own success shape, carrying its items: the
+ * family deliberately unifies no item type — merging item models is a
+ * higher-order questioner's job at its own boundary. `TConfig` is the
+ * implementor's own config shape; config is declarative and serializable as
+ * a law of the kind (stated in the README, not encoded here), and there is
+ * deliberately NO learner-model parameter — consumers map learner models
+ * onto config from outside.
+ *
+ * The generic defaults matter: bare `Questioner` types a heterogeneous
+ * roster a higher-order questioner can hold, drive, AND narrow —
+ * `TConfig`'s `never` default makes config omittable-only on a bare
+ * roster, and `TAnswer`'s ok-true default lets a bare-roster answer
+ * narrow to the pinned refusal by its `ok` discriminant alone. That
+ * default is the family's one extension of the refusal pin (human ruling
+ * 2026-08-18): a child's success shape carries `ok: true` to ride a bare
+ * roster — the landed open engine already does. The readonly
+ * function-property syntax (never method shorthand) is deliberate: method
+ * parameters are bivariant in TypeScript, and the roster variance above
+ * relies on strict checking.
+ *
+ * Laws of the kind this contract carries (README § The questioner family,
+ * § Ownership boundary): `serves` is a pure options-list answer over the
+ * facts, not a total pre-check — serves-true followed by a refusal at ask
+ * is a legal pairing; the read-bound — a questioner reads
+ * `embodiment.facts` and never `embodiment.study`, so the lifecycle payload
+ * crosses this type boundary unread; ask is pure, synchronous, and
+ * deterministic, emitted values arrive frozen, and refusal is the pinned
+ * data shape, never a throw and never a half-result.
+ */
+export type Questioner<TAnswer = { readonly ok: true }, TConfig = never> = {
+	/** The questioner's stable name — the family's roster identity. */
+	readonly name: string;
+	/** May this questioner serve this code? Pure, boolean, no cause. */
+	readonly serves: (facts: Facts) => boolean;
+	/** The main operation: embodiment in, frozen items out — or refusal. */
+	readonly ask: (
+		embodiment: Embodiment,
+		config?: TConfig,
+	) => TAnswer | QuestionerRefusal;
+};
