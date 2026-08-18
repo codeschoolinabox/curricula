@@ -2,12 +2,61 @@
 
 # orchestrate ux — resumption point
 
-**STATE: Phase 0 step 0.2. ROUND 8 IS RESOLVED — all 3 blockers, all 5 IMPORTANT
-and all 6 MINOR, in thirteen commits (2026-08-18). Rounds 5, 6 and 7 were
-resolved before it. THE NEXT STEP IS `ar-1` ROUND 9**, which is 0.2's acceptance
-test. One decision is deliberately still open and is named below.\*\*
+**STATE: Phase 0 step 0.2. ROUNDS 8 AND 9 ARE BOTH RESOLVED** — round 8's
+fourteen findings in thirteen commits, round 9's eleven in seven more. **THE
+NEXT STEP IS `ar-1` ROUND 10.** Nothing is deliberately held open any more; the
+one decision round 8's resolution deferred (naming the caption) was ruled and
+landed.
 
-## What this pass did, and the SHA list
+## Round 9 — PAUSE, resolved 2026-08-18
+
+Round 9 found what nine rounds of instruments could not, and its diagnosis is
+the one worth carrying: **every instrument this campaign built is region-scoped
+and, in practice, column-scoped.** All three of its serious findings sat outside
+that radius.
+
+| SHA        | what                                                                          |
+| ---------- | ----------------------------------------------------------------------------- |
+| `20301899` | receipt amendment 5 — the block TIERS by column size · RULE                   |
+| `f5824926` | **BLOCKER 1** — six behavioural `strip` sentences, four of them in the sketch |
+| `da4328d1` | **BLOCKER 2** — the `recommendation` census re-run at REGION scope            |
+| `964ec315` | IMPORTANT 4 + **the caption is named**                                        |
+| `61aeeb1f` | a checkpoint claim in the commit above was false; corrected                   |
+| `e6525c53` | IMPORTANT 5 + 6 — the gutter's home and class, the copy contract's scope      |
+| `7f8f1372` | MINOR 7, 8, 9, 11 — package collisions declared, the four overhangs fixed     |
+
+**Thirteen commits sit between `01be0e58` and HEAD and only these seven are the
+campaign's** [measured 2026-08-18]. Suite unchanged at **622 passing in 22
+files**; `npx tsc --noEmit` exit 0.
+
+### The three lessons round 9 bought
+
+1. **Scope the census to the DECISION, not to the campaign.** H6 closed after
+   sweeping four files; the term was live in sixteen, including `types.ts` and
+   the sketch of the library whose whole job is ranking recommendations. The
+   instrument was right and its scope parameter was the failure. **Before any
+   vocabulary row closes, run the term over every `.md`/`.ts`/`.tsx` under
+   `orchestrate/` and file the result into the column FIRST.**
+2. **The failure has moved from FILING to COLUMN CONSTRUCTION.** Two of round
+   9's findings are at sites no row's column names — so the receipt rule was
+   structurally unable to catch them, however well run. A column built by
+   reading is scoped to what the column already says.
+3. **A declaration must ENUMERATE.** The `strip` residue table declared a
+   category and never listed its members, and six behavioural sentences walked
+   through it. A declaration that omits a site is an empty receipt.
+
+### And a process failure worth more than any of them
+
+`964ec315`'s body claims markdownlint returned 0 errors. **It did not.** I ran
+the checkpoints and the commit in one `&&` chain; the checks print, they do not
+gate; the error was on screen while I wrote the opposite. Corrected in
+`61aeeb1f`, and the false line stays in the immutable body.
+
+**Run checkpoints as their own step and write the number the run printed.** Not
+chained. `DEV.md § Sourced claims` exists because this repo's shipped falsehoods
+were confident, not uncertain.
+
+## What round 8's resolution did, and its SHA list
 
 **Take the SHAs, never a range.** Eighteen commits sit between the baseline
 `10cec890` and HEAD and only these thirteen are the campaign's [measured
