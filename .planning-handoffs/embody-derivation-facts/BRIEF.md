@@ -5,10 +5,10 @@
 **This file is `.planning-handoffs/embody-derivation-facts/BRIEF.md`.** Cite it
 by that path.
 
-**Status: not started. This is a design brief, not a plan.** It exists so a
-future session starts from measured ground instead of rediscovering it. Two
-things _are_ settled — the sequencing, and the 2026-08-17 ruling below; the
-design questions remain open.
+**Status: Phase 0 executed 2026-08-18** — the dated Settled blocks below carry
+the rulings; Phase 1 is gated on human approval of the Phase-0 commit plus a
+fresh trigger re-measure. (This file began as a design brief; it is now the
+campaign's durable record.)
 
 ## Before reading further
 
