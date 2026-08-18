@@ -1,5 +1,5 @@
 <!-- cspell:ignore socratizing quizzing socratize Schulte unbuilt -->
-<!-- cspell:ignore reenrichment linearization Gateable -->
+<!-- cspell:ignore reenrichment linearization Gateable gradability -->
 
 # lib/questioning — Architecture & Decisions
 
@@ -10,12 +10,13 @@ questioner under it obeys; each child's own DOCS zooms into that child.
 ## Why a shared parent, not a shared orchestrator
 
 The two engines are each complete and each bounded: the closed register's
-charter is static decidability (every item is machine-gradable) and it excludes
-open Socratic questions; the open register is reflective and has no answer key.
-Merging their internals would break both charters. The deprecated architecture
-reconciled them in a composition lib above both — the question-orchestrator —
-which was retired (locked decision 3 of the question-register campaign,
-maintainer-ratified 2026-07-22).
+charter is machine-gradability (a machine grades every item; today's engine
+derives every key statically) and it excludes open Socratic questions; the open
+register is reflective and has no answer key. Merging their internals would
+break both charters. The deprecated architecture reconciled them in a
+composition lib above both — the question-orchestrator — which was retired
+(locked decision 3 of the question-register campaign, maintainer-ratified
+2026-07-22).
 
 What the retirement kept is the **shared truth**: one `BlockCell` grid
 vocabulary, one anchor coordinate system, the one-grid curriculum commitment,
@@ -36,18 +37,19 @@ directory admits children by contract rather than by roster.
 
 ### Shared questioner shape
 
-Every questioner under this parent is a pure, synchronous transformation from an
-embodiment to frozen, grid-tagged items, behind the kind's envelope: a name, a
-boolean serve-check over the facts, and one ask entry that either produces items
-or refuses as data in the family's pinned refusal shape. The serve-check is an
-options-list answer, not a total pre-check — serve-true followed by a refusal at
-ask is a legal pairing. A questioner that cannot serve a snippet refuses as data
-rather than returning a half-analyzed result; emitting zero items on a snippet
-that fits no form is normal operation, not refusal. Ground truth is static: no
-questioner evaluates the snippet. The read-bound is a law of the kind: a
-questioner reads the embodiment's facts and never its lifecycle payload. This
-sketch constrains no child's internals — each child's own DOCS carries its
-sketch.
+Every questioner under this parent turns an embodiment into frozen, grid-tagged
+items behind the kind's envelope: a name, a boolean serve-check over the facts,
+and one ask entry that either produces items or refuses as data in the family's
+pinned refusal shape. The serve-check is an options-list answer, not a total
+pre-check — serve-true followed by a refusal at ask is a legal pairing. A
+questioner that cannot serve a snippet refuses as data rather than returning a
+half-analyzed result; emitting zero items on a snippet that fits no form is
+normal operation, not refusal. Ground truth — the static text or the program's
+actual execution — is the questioner's own choice (README § Static and dynamic
+ground truth): the kind constrains the envelope and the assessment boundary,
+never the means. The read-bound is a law of the kind: a questioner reads the
+embodiment's facts and never its lifecycle payload. This sketch constrains no
+child's internals — each child's own DOCS carries its sketch.
 
 A leaf questioner fronts an engine; a higher-order questioner consumes other
 questioners behind the same envelope. Composition therefore lives only inside a
@@ -58,8 +60,8 @@ child of the family, never in the parent and never in a leaf.
 ```mermaid
 flowchart TD
     F["embodiment facts"]
-    F -->|"open-register analysis, pure"| OQ["open questions<br/>carrying grid cells"]
-    F -->|"closed-register generation, pure"| CI["closed items carrying grid cells,<br/>with answer keys"]
+    F -->|"open-register analysis"| OQ["open questions<br/>carrying grid cells"]
+    F -->|"closed-register generation"| CI["closed items carrying grid cells,<br/>with answer keys"]
     F -->|"either analysis, when a required<br/>fact stage failed"| RF["refusal data —<br/>the family's one pinned shape"]
 ```
 
@@ -221,6 +223,21 @@ collateral) until it retires.
   closed-roster phrasing, and this rewrite re-glossed it (engine = the machinery
   a leaf questioner fronts). The spec file itself is transitional and is not
   edited.
+- **The kind is permissive about ground truth and determinism** (human ruling
+  2026-08-18, at the Phase-0 gate): questioners may run the code — open or
+  closed questions about runtime facts (the QLC family's variable-trace MCQs are
+  the reference case) — and dynamic questions are REQUIRED for full
+  execution-dimension coverage; questioner developers are not tied to the
+  package's evaluators (a tested case-in-point with tracers, not a boundary);
+  generation need not be deterministic (nondeterministic programs; deliberate
+  randomization of wording or order). This overruled the
+  never-runs/static-only/deterministic laws an earlier draft of these docs
+  codified, and supersedes in detail the campaign spec's decision-9 headline
+  "pure and stateless" — its content (assessment as data; no learner state)
+  stands; blanket generation-purity does not. Grading determinism was NOT
+  loosened. The dynamic questioner's open seams (the sync-typed ask;
+  runtime-facts shape; tier placement if it consumes the evaluators region) are
+  recorded in README § Static and dynamic ground truth.
 - **No open/closed register type is minted.** No forward code discriminates on
   the register; minting a discriminant with no consumer would be the first step
   of reviving the orchestrator.

@@ -104,9 +104,13 @@ export type QuestionerRefusal = {
  * facts, not a total pre-check — serves-true followed by a refusal at ask
  * is a legal pairing; the read-bound — a questioner reads
  * `embodiment.facts` and never `embodiment.study`, so the lifecycle payload
- * crosses this type boundary unread; ask is pure, synchronous, and
- * deterministic, emitted values arrive frozen, and refusal is the pinned
- * data shape, never a throw and never a half-result.
+ * crosses this type boundary unread; emitted values arrive frozen, and refusal is the pinned
+ * data shape, never a throw and never a half-result. The signature types
+ * ask as synchronous — a mechanical fact of today's type, not a law of the
+ * kind: how a dynamic questioner (runtime ground truth; README § Static
+ * and dynamic ground truth) meets this seam is its own Phase-0 question,
+ * and a promise-shaped answer cannot ride the bare roster's ok-true
+ * default.
  */
 export type Questioner<TAnswer = { readonly ok: true }, TConfig = never> = {
 	/** The questioner's stable name — the family's roster identity. */

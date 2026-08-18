@@ -64,9 +64,10 @@ advance would hide the model the item exists to surface.
 
 **What this demands of questioners:** distractors authored FROM known
 misconceptions (curated-bank territory: the copy is authored, the key is
-machine-derived), execution-dimension items that force prediction, and
-determinism — the same snippet must ask the same question on re-encounter, or
-the learner cannot test their repaired model against it.
+machine-derived), execution-dimension items that force prediction, and a stable
+re-encounter — the learner must be able to meet the same question again to test
+their repaired model (the landed engine's determinism provides this; a
+randomizing questioner owes its own re-encounter story).
 
 ## J3 — Crossing into the open register
 

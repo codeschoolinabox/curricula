@@ -1,5 +1,5 @@
 <!-- cspell:ignore socratizing quizzing socratize Schulte unbuilt -->
-<!-- cspell:ignore linearization unleveled -->
+<!-- cspell:ignore linearization unleveled gradability -->
 
 # lib/questioning
 
@@ -82,16 +82,58 @@ reflective). The two registers deliberately share one `BlockCell` vocabulary —
 this region's — so a learning environment can place both registers on one grid.
 
 The closed register is confined to the text-surface and execution dimensions,
-under its charter of **static decidability**: every closed item's correct answer
-is machine-derivable from the snippet, even where its prompt or option copy is
-authored. The open register spans all three dimensions; the purpose dimension is
-open-register-exclusive, because purpose questions — why code exists, design
-rationale, intent — have no machine-derivable answer for a grader to check. The
-registers do not partition the grid: they overlap on text-surface and execution.
+under its charter of **machine-gradability**: every closed item carries a
+machine-derived answer key — derived statically, from an execution trace, or
+however the questioner obtained its ground truth — even where its prompt or
+option copy is authored. (Today's closed engine derives every key statically —
+**static decidability**, its own mode of the charter.) The open register spans
+all three dimensions; the purpose dimension is open-register-exclusive, because
+purpose questions — why code exists, design rationale, intent — have no
+machine-derivable answer for a grader to check. The registers do not partition
+the grid: they overlap on text-surface and execution.
 
 Each engine is complete within its register, and no layer composes them:
 socratizing has no answer key, no grading, no mastery; quizzing has all three.
 They share the grid vocabulary and nothing else.
+
+## Static and dynamic ground truth
+
+The theory's static/dynamic distinction
+([PEDAGOGY.md § Static and dynamic](../../PEDAGOGY.md#static-and-dynamic))
+crosses the registers rather than aligning with them: a questioner's ground
+truth is its own choice.
+
+- **Static ground truth** — the text as parsed. Today's leaf questioners read it
+  from the embodiment's facts and never run the program.
+- **Dynamic ground truth** — what the program actually does when run: variable
+  values through execution, call order, output. A **dynamic questioner** runs
+  the code to get it, and serves either register: closed items with
+  trace-derived answer keys (the QLC family's variable-trace MCQs are the
+  reference case), and open questions — including deliberately undecidable ones
+  — about what happened at runtime.
+
+None is built yet; the kind admits them, and the grid requires them: **full
+coverage of the execution dimension needs dynamic questions** — static analysis
+reaches execution cells only by inference from the text.
+
+How a dynamic questioner runs the code is its own business: itself, through the
+in-tier sandboxed evaluator ([../engine/](../engine/README.md)), or through the
+package's evaluator kind — the tested path with tracers built for exactly this
+data, and a case-in-point rather than a requirement (the evaluators live in a
+package region the lib tier's import law does not admit, so an
+evaluators-consuming questioner's own Phase 0 also settles its tier placement).
+Nondeterminism is likewise its own business: a nondeterministic program yields
+nondeterministic runtime facts, and any questioner may deliberately randomize
+wording or option order. The kind's laws are elsewhere — the envelope,
+assessment as data, cells and anchors on every item — never in the means.
+
+What a dynamic questioner's own Phase 0 settles: the ask seam (the envelope's
+ask is synchronous as typed, and a promise-shaped answer cannot ride the bare
+roster — the honest paths are runtime facts computed upstream and delivered as
+facts, an embody design event, or an async widening of the envelope, a family
+design event); the shape its runtime facts take; and its re-encounter story
+under randomization. The `serves` gate stays static either way: a pure,
+synchronous predicate over the parsed facts — gate on statics, run inside ask.
 
 ## One grid (the curriculum commitment)
 
@@ -180,10 +222,10 @@ structure. A **curated-bank** item is authored copy keyed to a named language
 concept, instantiated against an anchor in the snippet but with hand-written
 prompt/options/feedback. Both grade identically; the distinction is only where
 the content comes from. Either way the correct answer is machine-determined
-(which curated card applies to this anchor is statically decided); only the
-prose is authored. The bank is un-bounded: it grows toward all of JavaScript,
-and whether a questioner can serve a given snippet is its `serves` predicate's
-answer, never a concept-set bound.
+(which curated card applies to this anchor is machine-decided — statically, in
+today's bank); only the prose is authored. The bank is un-bounded: it grows
+toward all of JavaScript, and whether a questioner can serve a given snippet is
+its `serves` predicate's answer, never a concept-set bound.
 
 **Family vs Feature.** Quizzing's `Family` — the syntax-element domain a form
 belongs to (`variables`, `operators`, `literals`, `keywords`, `delimiters`,
@@ -223,9 +265,9 @@ those -speaks, and the choice is a design decision, not an accident of phrasing.
 
 ## Assessment is data
 
-Questioners are pure and stateless; whatever assessment machinery a register
-owns, it is delivered as data on the item or as a pure function of item and
-response, never as held state:
+Questioners are stateless about the learner; whatever assessment machinery a
+register owns, it is delivered as data on the item or as a pure function of item
+and response, never as held state:
 
 - **Answer keys ride the item** — a closed item carries its own machine-derived
   ground truth.
@@ -258,9 +300,10 @@ parent owns.
   envelope. One is designated and unbuilt ([DOCS.md](./DOCS.md) § Carried
   collateral).
 - **engine** — the machinery a leaf questioner fronts: socratizing's analyzers,
-  quizzing's generators. Pure, synchronous machinery that turns an embodiment
-  into items; rendering belongs to lenses. An engine is not a roster slot — any
-  future leaf questioner fronts an engine of its own.
+  quizzing's generators. The machinery that turns an embodiment into items —
+  reading the program, running it, or both; rendering belongs to lenses. An
+  engine is not a roster slot — any future leaf questioner fronts an engine of
+  its own.
 - **serves** — the questioner kind's gate predicate: may this questioner serve
   this code? Deliberately NOT named `applicability`: the package's study-utility
   envelope names that field for embody's gate-time offering, and a questioner is
@@ -305,9 +348,12 @@ parent owns.
   rung, engine-local; hazard: the token `open` legitimately appears in both
   senses with different meanings), and roster _registration_ of a lens — a
   lens-layer term, not a question-engine term at all.
-- **static decidability** — the closed register's charter: a closed item's
-  correct answer is derivable from the snippet's static structure alone. Its
-  boundary is shared by both engines: no engine ever evaluates the snippet.
+- **static decidability** — the mode of the closed charter today's closed engine
+  works in: every one of its answer keys is derivable from the snippet's static
+  structure alone, and neither landed leaf ever evaluates the snippet. The
+  charter itself is machine-gradability — a dynamic closed item's key is
+  machine-derived from an execution trace instead, and open questions from trace
+  data may be deliberately undecidable (§ Static and dynamic ground truth).
 - **answer key / mastery** — closed-register machinery: the machine-derivable
   correct answer, and the accumulated evidence a learner has demonstrated a
   form. Neither exists in the open register (charter law, § Ownership boundary).
@@ -358,12 +404,13 @@ lives at [socratizing/](./socratizing/README.md).
 
 Positive invariants — true of every questioner under this parent:
 
-- Pure, synchronous, and deterministic; returned values are frozen.
+- Returned values arrive frozen.
 - Items anchor as half-open character-offset ranges into the source — one
   coordinate system across both registers.
-- Ground truth is static: no engine ever evaluates the snippet. Anything that
-  needs the program to run belongs to the runtime trace layer, not to a question
-  engine.
+- No learner in view: a questioner holds no learner state between calls (§
+  Assessment is data). Ground truth, by contrast, is unconstrained — static
+  reading or actual execution, the questioner's own choice (§ Static and dynamic
+  ground truth).
 - Leaf questioners never import each other; consuming another questioner is
   exclusively a higher-order questioner's role, and composition never lives in a
   leaf. The rest of the import law, per counterpart: the parent's types —
@@ -383,7 +430,7 @@ higher-order questioner ([DOCS.md](./DOCS.md) § Carried collateral).
 Two charter laws bind every future change:
 
 - Never widen the closed register's item model with an open mode — it breaks the
-  closed charter of static decidability.
+  closed charter: a machine grades every closed item.
 - Never add grading, mastery, or verdicts to the open register.
 
 ## Conventions
