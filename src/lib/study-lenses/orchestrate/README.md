@@ -130,8 +130,8 @@ disposable practice surface over the program exactly as it stood at the open;
 opening the generator replaces it with the AI-authoring view over the same
 frozen seed. Returning remounts the editor seeded from the live source — edits
 survive every excursion. The Edit code button (rendered whenever the editor is
-away, never masked) is the guaranteed way home; the strip's none entry closes an
-open lens too whenever the strip itself is not masked. During any excursion the
+away, never masked) is the guaranteed way home; the open lens's tray entry
+closes it too, whenever the rail itself is not masked. During any excursion the
 band, the strip, the level UI, the guide, and the recommendations all stay
 rendered — frozen, like every derivation input — only the pane's occupant
 changes. And the one visual pane is two DOM slots: the editor renders in its own
@@ -369,18 +369,19 @@ this region owns.
   undone back to identical text), the settled identity is retained and nothing
   re-derives.
 - **dispose** — closing the pane's open excursion (a lens or the generator) back
-  to editor mode. Raised by the strip's none entry (lens only), the Edit code
-  button, the generator's own accept and discard, every derivation-context
+  to editor mode. Raised by the open lens's tray entry (lens only), the Edit
+  code button, the generator's own accept and discard, every derivation-context
   commit (type, level, posture — the close precedes the change event on the
   bus), opening one surface over another, and the orphan defense (lens only).
   The close announces per arm: `lens-opened: null` for a lens,
   `generator-opened {open: false}` for the generator — and a generator dispose
   also cancels its in-flight job via the unmount. A commit with nothing open
-  disposes nothing and announces nothing. The strip's none entry is a lens
-  affordance in fact as well as in name: during a generator excursion every
-  strip select already sits at its none entry, so there is nothing left to
-  select and the affordance cannot fire. The generator's ways home are the Edit
-  code button, Accept, Discard, and any derivation-context commit.
+  disposes nothing and announces nothing. The tray entry is a lens affordance by
+  construction rather than by convention: it is an entry in an open lens's own
+  tray, so during a generator excursion it has no referent at all — the
+  generator belongs to no phase, no station is marked, and no tray carries an
+  open-lens entry to press. The generator's ways home are the Edit code button,
+  Accept, Discard, and any derivation-context commit.
 - **edit-return** — the distinguished way home: the Edit code button, rendered
   whenever the editor is away (a lens or the generator open), class 2 (never
   masked).

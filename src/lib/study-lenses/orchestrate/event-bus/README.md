@@ -37,7 +37,7 @@ completed derivation:
 | `level-selected`   | the selected level key changed (`''` = none-state)                                                                                                                                                       |
 | `posture-toggled`  | the enforcement posture changed (strict on or off)                                                                                                                                                       |
 | `type-toggled`     | the snippet type changed                                                                                                                                                                                 |
-| `lens-opened`      | the open-lens choice changed (a name; `null` when closed — the strip's none entry, the Edit code button, a derivation-context commit's dispose, or the orphan defense)                                   |
+| `lens-opened`      | the open-lens choice changed (a name; `null` when closed — the open lens's tray entry, the Edit code button, a derivation-context commit's dispose, or the orphan defense)                               |
 | `generator-opened` | the generator excursion opened or closed (`{ open: boolean }`) — open by the Generate code button; close by accept, discard, Edit code, a derivation-context commit's dispose, or a lens opening over it |
 | `settled`          | a settle completed; derived state is fresh                                                                                                                                                               |
 

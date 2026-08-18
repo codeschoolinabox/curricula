@@ -51,9 +51,9 @@ abstraction; each rendered surface and derivation library zooms in below.
      settle and replaces the editor; the lens mounts over the frozen embodiment
      and its resolved config, the generator over the same frozen pair as its
      seed.
-   - **Closing one** — the strip's none entry, the Edit code button, the orphan
-     defense, or the generator's own accept and discard remount the editor,
-     seeded from the live source.
+   - **Closing one** — the open lens's tray entry, the Edit code button, the
+     orphan defense, or the generator's own accept and discard remount the
+     editor, seeded from the live source.
    - **Accepting a candidate** — re-enters Derive immediately through the edit
      intake, batched with the dispose that ends its excursion.
    - **Committing derivation context** — the snippet-type toggle, level
@@ -213,7 +213,7 @@ stateDiagram-v2
     Excursion --> Excursion: lens over the generator (same settled pair —<br/>generator-opened false, THEN lens-opened name)
     Excursion --> Settling: generator accept (the candidate enters the edit intake —<br/>immediate absorb-settle, batched with the dispose)
     Excursion --> Idle: generator accept, candidate equals the seed —<br/>identity retained, nothing derives
-    Excursion --> Idle: dispose — none entry (lens) · Edit code · generator discard ·<br/>type/level/posture commit · orphan defense (lens)
+    Excursion --> Idle: dispose — tray entry (lens) · Edit code · generator discard ·<br/>type/level/posture commit · orphan defense (lens)
     note right of Excursion: frozen against TYPING —<br/>the editor is absent, so no<br/>keystroke can raise an edit
 ```
 
@@ -271,11 +271,11 @@ verdicts without consulting a level twice.
   opens a class-3 study surface, so it takes that class with it. It renders in
   editor mode only, and as a button rather than a select, so the strip's
   every-select assertions keep their meaning.
-- The strip's selects track the committed open lens; the none entry over the
-  open lens is a close affordance — the close commits at the top component and
-  announces `lens-opened: null` (the bus arm shipped reserved, now real). The
-  class-2 Edit code button is the GUARANTEED way home: the strip is class 3 and
-  inert under a mask.
+- The rail's trays track the committed open lens; the open lens's own tray entry
+  is its close affordance — the close commits at the top component and announces
+  `lens-opened: null` (the bus arm shipped reserved, now real). The class-2 Edit
+  code button is the GUARANTEED way home: the strip is class 3 and inert under a
+  mask.
 - Coherence invariants at EVERY excursion-arm render, loud in dev AND prod: the
   settled pair must field-equal the occupant's `openedAt` (source and type) —
   the generator arm included, since its anchor does the same job as the lens

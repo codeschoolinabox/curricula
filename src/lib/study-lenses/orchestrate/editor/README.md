@@ -53,10 +53,10 @@ Any excursion — a lens, or the generator — unmounts this surface entirely
 lives in the region's live-source slot, not in this component, and each mount
 seeds from it. What the postures must keep alive is the PATH back — and the
 guaranteed way home is the Edit code button: class 2, alive under every posture.
-The strip's none entry closes an open lens too, but the strip is class 3 and
-inert while masked — which is exactly why the class-2 button exists. A mount
-failure never takes the page down — the component renders a fallback carrying a
-data attribute in place of the surface.
+The open lens's tray entry closes it too, but the rail is class 3 and inert
+while masked — which is exactly why the class-2 button exists. A mount failure
+never takes the page down — the component renders a fallback carrying a data
+attribute in place of the surface.
 
 ## Navigation
 

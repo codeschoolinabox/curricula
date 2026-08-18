@@ -766,7 +766,8 @@ costs and what it does not:
    the line's meaning, and nobody has proposed one.
 2. **The arrangement replaces a contract-named dispose raiser.** With no strip,
    the strip's none entry has no analogue; the open lens's tray entry takes its
-   place. The dispose enumeration changes, and 0.3 should amend it deliberately.
+   place. The dispose enumeration changes, and it is amended in the region's own
+   documents (human ruling 2026-08-18) rather than deferred.
 3. **The announcer is a new permanent element** with no precedent in this
    region, and what is open about it is no longer its class or its home. Both
    are settled: class 2 by ruling (2026-08-15, widening the class from controls
