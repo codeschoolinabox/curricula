@@ -894,6 +894,28 @@ execution and never holds one alone.
   result-only `ExecutionBase` handle (the kind designs this in: "a result-only
   evaluator is a legal evaluator"). The region NM names danger's blackbox
   opening (an iframe, not the engine sandbox) alongside run's and intercept's.
+- **P0-E design rulings (human rulings 2026-08-18, at the unit's design review —
+  four ar-1 rounds, verdicts PAUSE ×3 then CONSIDER, all resolved).** The batch
+  drain's home is the LIBRARY: one internal drainer behind every batch ignition,
+  relieving backpressure and exiting on events-exhaustion or the settle,
+  whichever first; ask policy stays evaluator-side, read from the mode the
+  source learns at `start(mode)`. The memoized settle IS the source's `result`
+  promise, defect-routed. The mode latch: the ignition touch fixes the
+  consumption mode for the handle's life (an after-batch iterator is already
+  ended; a post-iterate batch touch subscribes to the settle). The library
+  installs the widening (extras built over `{ cancel }` controls; descriptors
+  and freeze order are the factory's; four reserved keys compile-checked). One
+  factory, overloads over two named source types (`events` required vs
+  `events?: never`). Disposal of the source's iterator on a settle is
+  BEST-EFFORT — attempted once, never awaited (the out-of-band teardown pins
+  name the suspended-pull deadlock route). Two HR-4 exceptions, each with its
+  strength argument: `stop()` is NOT called on a post-settlement cancel (the
+  quarry still invoked its cancelFunction after a natural end; here the settle
+  route owns resource release, and a second teardown door would double-release)
+  and NOT on an inert cancel (nothing started, nothing to stop; the quarry's
+  fixture pinned the opposite on a never-started execution, and the transported
+  assertion re-targets to a post-ignition cancel). Recorded here per HR-21;
+  encoded at `src/lib/study-lenses/evaluators/lib/execution-handle/README.md`.
 
 ### The ratification, and what it settled (human ruling 2026-08-06)
 
