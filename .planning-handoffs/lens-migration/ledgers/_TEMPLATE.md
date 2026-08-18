@@ -8,6 +8,7 @@
 <!-- cspell:ignore behaviour behaviours affordances pointcut QASM -->
 <!-- cspell:ignore towc multibyte Normalising -->
 <!-- cspell:ignore keyable legitimise nocite quotemeta mktemp licence unrun -->
+<!-- cspell:ignore capitalisation loosenings -->
 
 # `<lens>` — fidelity ledger
 
@@ -128,13 +129,39 @@ this template as follows — **not "in exactly three ways", which was true befor
   makes `NONE`-as-an-assertion load-bearing here: without it, six of seven
   invocations are no-ops and this marker buys nothing.
 
+  ⛔ **THIS INVOCATION IS NOT READY. Do not cut `_family-f.md` against it.**
+  AR-1 and AR-2 independently measured two defects in the form below,
+  2026-08-18, and both are open:
+  1. **It is a census, not a floor** — the exact defect the check itself was
+     amended to remove, reintroduced one level up by its own caller. The loop
+     never inspects the per-member exit status and ends on an `echo`, so **seven
+     `FAIL` lines still exit 0**. Every inner failure also degrades to a silent
+     `0` in the sum via `${r:-0}`. And `covered:` prints a number beside a `$n`
+     that is not in scope — **it asserts nothing.**
+  2. **A correctly-seeded Pass-1 ledger is guaranteed red.** `trace-debugging`
+     has `instruments: none` and seeds entirely from Pass 2, so it contributes
+     **zero rows at Pass 1** — and it is the only member of the seven with a
+     real `REF`. The floor therefore FAILs on it, naming three causes that are
+     all false. A routine FAIL trains the seeder to ignore FAIL lines, which is
+     what kills a floor everywhere else.
+
+  **The fix is designed and measured but deliberately not applied here**,
+  because three consecutive rounds of same-session fixes each introduced the
+  defect they removed. It goes to a fresh session: a published zero-row roster
+  so `rows=0` is an _assertion_ for its declared members and a _breach_ for
+  everyone else (an `EXPECT` argument was built and measured working in both
+  directions), plus a wrapper that accumulates status, takes the Pass-1 gate's
+  `$n` as an argument, asserts `total == n`, and exits non-zero.
+
   ⚠️ **No heredoc.** This fence sits inside a list item, so every line carries a
   two-space indent — and an indented `EOF` does **not** terminate `<<EOF`. Under
   the raw extraction an agent in this repo actually uses (`sed -n '<range>p'`),
   the terminator and the `covered:` line are swallowed as heredoc **data**: two
   bogus member runs are injected, the sum assertion never executes, and nothing
   reaches stderr [measured 2026-08-18, AR-2 — the swallowed form ran and printed
-  `member=EOF` and `member=echo`]. The `for` loop below has no such edge.
+  `member=EOF` and `member=echo`]. The `for` loop below has no such edge, and
+  that half of it is verified: raw extraction now runs seven members and prints
+  `covered:`.
 
   ```bash
   L=.planning-handoffs/lens-migration/ledgers/_family-f.md
@@ -171,13 +198,23 @@ this template as follows — **not "in exactly three ways", which was true befor
   | marker **deleted**    | falls to 3 | `UNMARKED-ROW` names the row                                                                                                                                                                                     |
   | marker **misspelled** | falls to 3 | `UNMARKED-ROW` names the row — **only because the roster is the acceptance set**; under a `[a-z][a-z-]*` character class it was **silent**, and a short sum with a clean preflight is a diagnosis-free shortfall |
 
-  ⚠️ **An earlier revision justified running both by claiming a duplicated
-  marker "overshoots the sum". It does not, and the claim did not reproduce**
-  [measured 2026-08-18, both reviewers independently]: the perl filter anchors
-  `\Q$M\E` to the first cell position, so each row is claimable by at most one
-  member and a second slug in the same cell changes nothing. A duplicated **row
-  id** does overshoot, and the Pass-1 gate's id-gap `awk` already catches that.
-  The real reason both instruments run is the misspelling case above.
+  ⚠️ **Two successive revisions justified running both instruments with an
+  overshoot claim, and NEITHER reproduced.** First "a duplicated **marker**
+  overshoots the sum" — it does not: the perl filter anchors `\Q$M\E` to the
+  first cell position, so each row is claimable by at most one member. Then its
+  replacement, "a duplicated **row id** does overshoot" — it does not either:
+  the id increments the perl `$rows` counter and the Pass-1 `rows()` count
+  identically, measured **5 = 5** on a fixture with `fam-f-002` duplicated
+  [measured 2026-08-18]. The second claim shipped inside the paragraph
+  retracting the first, which is this canon's recorded failure mode committed
+  one revision later.
+
+  **The case that does reproduce is slice asymmetry.** A `fam-f` row placed
+  **outside** the `## Rows`…`## Close conditions` slice is counted by the perl
+  filter, which does not slice, and is invisible to the preflight, which does:
+  **covered 5 against a sliced `n` of 4, preflight silent** [measured
+  2026-08-18]. That is the real "the sum catches what the preflight cannot"
+  case, and it is why both run.
 
   ⚠️ **The marker proves membership, not correctness, and that cost is accepted
   rather than hidden.** Six of the seven members run with `REF=NONE PORT=NONE`,
@@ -949,7 +986,7 @@ perl -ne '
   }
   $parsed += $n;
   my $cited = () = /Gen-[23]\s*`[A-Za-z.]+\.md`\s*§/g;
-  my $lead  = () = /Gen-[23]\s*`?[A-Za-z0-9._\/-]+\.(?:md|ts|tsx|jsx|css|json)`?/g;
+  my $lead  = () = /Gen-[23]\s*`?[A-Za-z0-9._\/-]+\.md`?/g;
   print join("\t",$id,"-","-","!MALFORMED","$cited of $lead leads parse"),"\n" if $lead > $cited;
   print join("\t",$id,"-","-","!UNQUOTED", "$n of $cited cited"),"\n"          if $cited > $n;
   if ($n == 0) { $nocite++;
@@ -1019,15 +1056,36 @@ literal-prefix discipline `firstblock`, `glossterm` and `resolve` all carry.
   either: the mutant reported **57 citations across 49 rows** against the clean
   **57 across 47** — citations flat, only the row count moved.
 - **Three counters, and the strict one is never widened.**
-  `parsed ⊆ cited ⊆ lead`, and each inequality names a different defect: `lead`
-  matches a Gen-2/3 pointer at **any** `.md` path, so `lead > cited` is a
-  citation the published grammar cannot read. Widening `cited` to accept a path
-  would legitimise an unsanctioned citation form; adding a looser **counter**
-  whose only output is `MALFORMED-CITATION` can produce more findings and never
-  fewer. **That is the opposite of widening the check**, and it is said here
-  because a reviewer applying that rule mechanically will otherwise reject it.
-  Publication gate, run before this shipped: `lead > cited` scores **0** on both
-  clean ledgers [measured 2026-08-18].
+  `parsed ⊆ cited ⊆ lead`. `lead` matches a Gen-2/3 pointer at a **`.md`** path,
+  backticked or not, so `lead > cited` is a heading citation the published
+  grammar cannot read. Widening `cited` to accept a path would legitimise an
+  unsanctioned citation form; adding a looser **counter** whose only output is
+  `MALFORMED-CITATION` can produce more findings and never fewer. **That is the
+  opposite of widening the check**, and it is said here because a reviewer
+  applying that rule mechanically will otherwise reject it.
+
+  ⚠️ **`lead` is NOT the outer bound of "citations the grammar cannot read", and
+  its residual is stated rather than left to be discovered.** Measured
+  2026-08-18, each planted beside a good citation: an **extension-less**
+  reference (``Gen-2 `README` § …``) and a **bare** one (`Gen-2 § …`) are
+  **totally silent** through all three counters. An unbackticked reference that
+  keeps its extension does fire, which is why no fourth counter is added — the
+  optional `` `? `` already covers it, and an unbackticked counter was measured
+  firing on **8** `writeme` rows carrying ordinary prose like "Gen-2 block".
+
+  ⚠️ **`lead` stays `.md`-only, and an attempt to widen it to code files was
+  reverted the same day.** `.ts` in the extension class makes a **legitimate**
+  `G2-code` citation a finding: FIDELITY-METHOD § Worked rows' own `parsons-018`
+  cites _"Gen-2 `lib/extract-hints.ts` is 59 lines"_, and under the widened form
+  that row reports `MALFORMED-CITATION` [measured 2026-08-18]. The publication
+  gate did not catch it because it was run on the two seeded ledgers — and
+  `G2-code` is in the **never** column for every Pass-1 seed class, so a Pass-1
+  ledger structurally cannot carry a code citation. **A false-positive rate
+  measured only where the false positive is impossible is not a measurement**;
+  it is the same circularity struck three sections above for the `<em>`
+  predicate. Any future widening is gated on a corpus that can exhibit the
+  failure — § Worked rows is one.
+
 - **`NONE` is an assertion, on both arms.** `G3) [ "$PORT" = NONE ] && continue`
   was a silent skip of the same class as the missing floor, three lines away and
   live on **100 % of Family F's rows**, which have no Gen-3 port at all. `NONE`
@@ -1090,12 +1148,37 @@ could make that edit, pass every gate this section published, and cite the
 licence.
 
 **So the gate is the mutation corpus, not the regressions.** After any change to
-`norm()`, `unwrap_markup()`, `parsed`, `cited` or `lead`, **every row of both
-tables above must still fire**, and then the two regressions must hold. The
-corpus is the only artifact here that scores non-zero, so it is the only one a
-loosening can move. The modification-4 row exists because its absence is what
-let the widening through: published `norm()` → `parsons-001 G2 DIVERGENT`,
-widened → silent.
+`norm()`, `unwrap_markup()`, `firstblock`, `glossterm`, `parsed`, `cited` or
+`lead`, **every row of both tables above must still fire**, and then the two
+regressions must hold. (`firstblock` and `glossterm` are named because they
+supply half the comparison and are pasted in from another section, so editing
+them does not look like editing the check.) The modification-4 row exists
+because its absence is what let one widening through: published `norm()` →
+`parsons-001 G2 DIVERGENT`, widened → silent.
+
+⛔ **AND THE CORPUS IS STILL NOT SUFFICIENT. Do not read the paragraph above as
+a closed gate.** AR-2 measured loosenings that pass the whole corpus **and**
+both regressions byte-identically; two reproduced independently here — folding
+case (`$_=lc $_`) and stripping the truncation ellipsis [measured 2026-08-18;
+two of AR-2's four did not reproduce under this harness, so the count is two,
+not four, and the disagreement is itself recorded rather than resolved by
+preference]. Case-folding hides a real capitalisation mis-transcription.
+
+**Why a corpus of plants cannot be the gate.** Of its rows, only two exercise
+`norm()` at all, and both are single-point plants — so it detects only
+loosenings that intersect its points. It is a **regression suite wearing a
+gate's name**, which is structurally the same failure as the zero baseline it
+replaced, just scoring non-zero somewhere other than where the loosening lands.
+
+**The design that closes it, measured but deliberately not applied here** (three
+consecutive same-session fix rounds each introduced the defect they removed;
+this goes to a fresh session): pair every sanctioned modification with its
+mis-transcription. For each of modifications 1–5 plus the truncation ellipsis, a
+**fixture pair** — the sanctioned form, which must be SILENT, and the same span
+mis-transcribed, which must be DIVERGENT. Twelve assertions. A loosening is
+_defined_ as making a mis-transcription silent, so the gate has to contain
+mis-transcriptions and not only fabrications. Every bypass above dies on the
+second half of its pair.
 
 ### When this check runs — it had no trigger for seven of the eight ledgers
 
