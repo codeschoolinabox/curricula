@@ -1,5 +1,7 @@
 import * as acorn from 'acorn';
 
+import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
+
 import type { InputElement, InputElementKind, ScanInput } from './types.js';
 
 /**
@@ -20,6 +22,26 @@ export default function deriveInputElements({
 	tokens,
 	comments,
 }: ScanInput): readonly InputElement[] {
+	// Phase 1 — confirm the reading. The module's only throw site, standing at
+	// the top so that no later phase reaches for a part that is not there: the
+	// caller gates on a successful tokens stage first, so an absence here is its
+	// bug to surface rather than a state to absorb.
+	//
+	// The source is type-checked, as the sibling leaf checks its own; the two
+	// arrays are checked for presence alone, because `Array.isArray` would
+	// narrow them to `any[]` for the rest of the function. Whether the three
+	// parts came from one reading of one source is provenance, which this
+	// module does not establish either way.
+	const isReadingPresent =
+		typeof code === 'string' &&
+		[tokens, comments].every((part) => part !== undefined && part !== null);
+
+	if (!isReadingPresent) {
+		throw new TypeError(
+			'deriveInputElements needs a source text, a token array and a comment array',
+		);
+	}
+
 	const folded = foldTemplateRuns(tokens);
 	const named = folded.map((span) => nameElement(span, code));
 
@@ -254,8 +276,14 @@ function isHashbang(start: number, text: string): boolean {
 
 /**
  * Phase 5 — fill every gap the token channel left, so the sequence tiles
- * the source. A gap before the first element and one after the last are
- * the same case as a gap between two, which is why neither is special.
+ * the source, then freeze. A gap before the first element and one after the
+ * last are the same case as a gap between two, which is why neither is special.
+ *
+ * The freeze is in place rather than over a clone: every element here was built
+ * by this module, so freezing reaches nothing it does not own. That is what the
+ * published contract of indices rather than token references buys — a token's
+ * type is a process-global the parser shares across every parse, and a deep
+ * freeze that reached one would reach it for the whole process.
  */
 function fillGaps(
 	named: readonly InputElement[],
@@ -271,10 +299,12 @@ function fillGaps(
 			: [element];
 	});
 	const lastEnd = named.at(-1)?.end ?? 0;
+	const tiled =
+		lastEnd < code.length
+			? gapped.concat(gapElements(lastEnd, code.length, code))
+			: gapped;
 
-	return lastEnd < code.length
-		? gapped.concat(gapElements(lastEnd, code.length, code))
-		: gapped;
+	return deepFreezeInPlace(tiled);
 }
 
 /**

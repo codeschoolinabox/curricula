@@ -124,19 +124,19 @@ describe('deriveInputElements', () => {
 			'x\u00A0y',
 		];
 
-		it.skip('starts every sequence at offset zero or leaves it empty', () => {
+		it('starts every sequence at offset zero or leaves it empty', () => {
 			for (const code of corpus) {
 				expect(elements(code)[0]?.start ?? 0).toBe(0);
 			}
 		});
 
-		it.skip('ends every sequence at the source length', () => {
+		it('ends every sequence at the source length', () => {
 			for (const code of corpus) {
 				expect(elements(code).at(-1)?.end ?? 0).toBe(code.length);
 			}
 		});
 
-		it.skip('leaves no gap and no overlap between consecutive elements', () => {
+		it('leaves no gap and no overlap between consecutive elements', () => {
 			for (const code of corpus) {
 				const result = elements(code);
 				for (const [index, element] of result.entries()) {
@@ -145,7 +145,7 @@ describe('deriveInputElements', () => {
 			}
 		});
 
-		it.skip('publishes nothing of zero width', () => {
+		it('publishes nothing of zero width', () => {
 			for (const code of corpus) {
 				for (const element of elements(code)) {
 					expect(element.end).toBeGreaterThan(element.start);
@@ -153,7 +153,7 @@ describe('deriveInputElements', () => {
 			}
 		});
 
-		it.skip('makes every text the verbatim slice of its own span', () => {
+		it('makes every text the verbatim slice of its own span', () => {
 			for (const code of corpus) {
 				for (const element of elements(code)) {
 					expect(element.text).toBe(code.slice(element.start, element.end));
@@ -376,42 +376,42 @@ describe('deriveInputElements', () => {
 	});
 
 	describe('Interfaces — frozen, pure and deterministic', () => {
-		it.skip('freezes the returned sequence', () => {
+		it('freezes the returned sequence', () => {
 			expect(Object.isFrozen(elements('let x = 1'))).toBe(true);
 		});
 
-		it.skip('freezes every element', () => {
+		it('freezes every element', () => {
 			expect(Object.isFrozen(elements('let x = 1')[0])).toBe(true);
 		});
 
-		it.skip('freezes the token-index array of an element', () => {
+		it('freezes the token-index array of an element', () => {
 			expect(Object.isFrozen(elements('x')[0]?.tokenIndices)).toBe(true);
 		});
 
-		it.skip('leaves the caller token objects unfrozen', () => {
+		it('leaves the caller token objects unfrozen', () => {
 			const input = read('let x = 1');
 			deriveInputElements(input);
 			expect(Object.isFrozen(input.tokens[0])).toBe(false);
 		});
 
-		it.skip('leaves the parser token-type singletons unfrozen', () => {
+		it('leaves the parser token-type singletons unfrozen', () => {
 			deriveInputElements(read('let x = 1'));
 			expect(Object.isFrozen(acorn.tokTypes.name)).toBe(false);
 		});
 
-		it.skip('does not mutate the input token array', () => {
+		it('does not mutate the input token array', () => {
 			const input = read('let x = 1');
 			deriveInputElements(input);
 			expect(input.tokens).toHaveLength(4);
 		});
 
-		it.skip('returns the same sequence for the same source', () => {
+		it('returns the same sequence for the same source', () => {
 			expect(kinds('let x = 1')).toEqual(kinds('let x = 1'));
 		});
 	});
 
 	describe('Exceptions', () => {
-		it.skip('throws when the source text is absent', () => {
+		it('throws when the source text is absent', () => {
 			const input = read('x');
 			expect(() =>
 				deriveInputElements({
@@ -421,7 +421,7 @@ describe('deriveInputElements', () => {
 			).toThrow(TypeError);
 		});
 
-		it.skip('throws when the token array is absent', () => {
+		it('throws when the token array is absent', () => {
 			const input = read('x');
 			expect(() =>
 				deriveInputElements({
@@ -431,7 +431,7 @@ describe('deriveInputElements', () => {
 			).toThrow(TypeError);
 		});
 
-		it.skip('throws when the comment array is absent', () => {
+		it('throws when the comment array is absent', () => {
 			const input = read('x');
 			expect(() =>
 				deriveInputElements({
@@ -443,11 +443,11 @@ describe('deriveInputElements', () => {
 	});
 
 	describe('Simple — the recorded departures', () => {
-		it.skip('publishes one element for a whitespace run rather than one per character', () => {
+		it('publishes one element for a whitespace run rather than one per character', () => {
 			expect(elements('    ')).toHaveLength(1);
 		});
 
-		it.skip('yields three elements where the language has one regular expression after await', () => {
+		it('yields three elements where the language has one regular expression after await', () => {
 			expect(kinds('async function f(){ await /re/ }').slice(11, 14)).toEqual([
 				'DivPunctuator',
 				'IdentifierName',
@@ -455,7 +455,7 @@ describe('deriveInputElements', () => {
 			]);
 		});
 
-		it.skip('still tiles the source it reads wrongly after await', () => {
+		it('still tiles the source it reads wrongly after await', () => {
 			const code = 'async function f(){ await /re/ }';
 			expect(elements(code).at(-1)?.end).toBe(code.length);
 		});
