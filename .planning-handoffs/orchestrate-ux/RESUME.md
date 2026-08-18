@@ -1002,6 +1002,13 @@ omission, merge or reword with its justification (silent loss is treated as
 severity-equal to a failing test — say "LOSS LEDGER: NO REMOVALS" when true);
 the per-file checkpoint results; and a justification if you used `--no-verify`.
 
+**And before it lands, answer
+[`DECISIONS.md` § How to maintain it](./DECISIONS.md)'s two intake questions** —
+did this commit take a decision, and did it discover a site. They are cited here
+rather than restated, because one rule with two homes is the defect this
+campaign has spent six rounds removing from the region. This template is the
+thing that actually fires; the checklist is what it fires.
+
 ## Mechanics that will bite you
 
 - **COMMIT THIS FILE IF `git status --short` SHOWS IT AT ALL** — untracked OR

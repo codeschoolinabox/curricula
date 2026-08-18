@@ -35,6 +35,39 @@ would have surfaced it.
 is reviewed. A row whose site list you had to correct is a row that was catching
 something — say so in the commit body.
 
+**THE INTAKE CHECKLIST — two questions every commit answers before it lands**
+(human ruling 2026-08-17, after AR-1 round 8).
+
+1. **Did this commit take a decision? Open a row, in the same commit.**
+2. **Did it discover a site? File it into every row it asserts** — plural, and
+   the plural is the point. Then see receipt-rule amendment 4 for what that does
+   to a closed row.
+
+Neither is a new rule. The paragraph directly above already says a decision gets
+a row when it is taken; **the delta is that it is now a question asked of the
+commit rather than a property described of the file.** A rule stated as a
+description of the artifact has no moment at which it fires, and this one did
+not fire: the `recommendation` settlement reached `README.md` glossary and no
+row was opened for it, so the round-6 failure reproduced on a decision the index
+could not see (AR-1 round 8, IMPORTANT 6). Line 2's plural has the same
+provenance — `editor/README.md` asserts A1, two A2 roster members with their
+grounds, **and** D6, and the census filed it in A1 alone (IMPORTANT 4).
+
+**Why this is a checklist and not a fifth instrument.** Round 8's reviewer is
+explicit that the campaign has built four (phrase greps → this list → the
+receipt rule → the region census), that each caught its predecessor's blind
+spot, and that **"a fifth instrument will find a fifth blind spot"** — because
+the measured evidence is that _the instruments work and the intake does not_.
+Every recurring finding in that round traces to a skipped filing step, not a
+missed detection.
+
+And the honest limit, so nobody mistakes this for a fix: **nothing enforces a
+checklist.** Its value is narrower than "it closes the intake" — it turns an
+unstated expectation into a line a review can cite, so the next round can name a
+broken rule rather than a broken norm. That is worth two lines. It is not worth
+believing it fires on its own; the thing that actually fires is the commit-body
+template in [`RESUME.md`](./RESUME.md) § Commit form, which now points here.
+
 **THE RECEIPT RULE — the closing discipline, and it is not optional** (human
 ruling 2026-08-17). A commit that closes row _X_ must **quote the post-fix
 sentence at every site in _X_'s `also asserts` column**, in its own body. Not a
