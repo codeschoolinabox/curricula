@@ -1,0 +1,208 @@
+// ported from src/lib/study-lenses--deprecated-architecture/lib/quizzing/tests/v6-kind-semantics.test.ts
+// @ blob 59eb23688109cb8da9208d1e9ebdf74561ffb5a9
+// rewires: embody-facts fixtures, classifying depth, classify-from-facts, why-comment vocabulary
+// cspell:ignore misimplementation reassignable
+import { describe, expect, it } from 'vitest';
+
+import embody from '../../../../embody/index.js';
+import type { Facts } from '../../../../embody/types.js';
+import classifyTokens from '../../../classifying/classify-tokens.js';
+import type { ClassifiedToken } from '../../../classifying/types.js';
+import buildContext from '../context/build-context.js';
+import v6KindSemantics from '../generators/v6-kind-semantics.js';
+import runGenerators from '../run-generators.js';
+import type { McqQuizItem } from '../types.js';
+
+function classifyOf(facts: Facts): readonly ClassifiedToken[] {
+	if (!facts.tokens.ok || !facts.ast.ok) {
+		throw new Error('classifyOf requires parsed facts');
+	}
+	return classifyTokens({
+		code: facts.source.value,
+		tokens: facts.tokens.value.tokens,
+		ast: facts.ast.value,
+	});
+}
+
+function v6ItemsOf(code: string): readonly McqQuizItem[] {
+	const facts = embody(code).facts;
+	const items = runGenerators(buildContext(facts, classifyOf(facts)), [
+		v6KindSemantics,
+	]);
+	return items.filter((item): item is McqQuizItem => item.mode === 'mcq');
+}
+
+describe('v6KindSemantics', () => {
+	describe('Zero', () => {
+		it('emits nothing for an empty snippet', () => {
+			expect(v6ItemsOf('')).toEqual([]);
+		});
+
+		it('emits nothing for an undeclared identifier (no resolvable binding)', () => {
+			expect(v6ItemsOf('x;')).toEqual([]);
+		});
+	});
+
+	describe('One', () => {
+		it('emits one item for a single binding', () => {
+			expect(v6ItemsOf('let x = 1;')).toHaveLength(1);
+		});
+
+		it('tags the item with the V6 form and variables family', () => {
+			const item = v6ItemsOf('let x = 1;')[0];
+			expect(item?.form).toBe('V6');
+			expect(item?.family).toBe('variables');
+		});
+
+		it('anchors the item at the declaration occurrence', () => {
+			expect(v6ItemsOf('let x = 1;')[0]?.anchorRange).toEqual([4, 5]);
+		});
+
+		it('places the item in the execution × atom cell', () => {
+			expect(v6ItemsOf('let x = 1;')[0]?.cells).toEqual([
+				{ dimension: 'execution', level: 'atom' },
+			]);
+		});
+
+		it('keys the propagation group on the binding identity', () => {
+			expect(v6ItemsOf('let x = 1;')[0]?.groupKey).toBe('binding:4-5');
+		});
+
+		it('gives the item a binding-flavored id', () => {
+			expect(v6ItemsOf('let x = 1;')[0]?.id).toBe('V6/binding:x@4-5');
+		});
+
+		it('names the binding in the prompt', () => {
+			expect(v6ItemsOf('let x = 1;')[0]?.prompt).toContain('x');
+		});
+
+		it('answers yes for a let binding', () => {
+			expect(v6ItemsOf('let x = 1;')[0]?.answerOptionIds).toEqual(['yes']);
+		});
+
+		it('answers with an option that exists in the pool', () => {
+			const item = v6ItemsOf('let x = 1;')[0];
+			const ids = item?.options.map((option) => option.id) ?? [];
+			expect(item !== undefined && ids.includes(item.answerOptionIds[0])).toBe(
+				true,
+			);
+		});
+	});
+
+	describe('Many', () => {
+		it('emits exactly one item per binding, not per occurrence', () => {
+			// three occurrences of x (declared, assigned, read) — one V6 item.
+			expect(v6ItemsOf('let x = 1; x = 2; x;')).toHaveLength(1);
+		});
+
+		it('anchors the one item at the declaration, not a later occurrence', () => {
+			expect(v6ItemsOf('let x = 1; x = 2; x;')[0]?.anchorRange).toEqual([4, 5]);
+		});
+
+		it('emits one item for a const binding with multiple occurrences', () => {
+			const items = v6ItemsOf('const c = 1; c; c;');
+			expect(items).toHaveLength(1);
+			expect(items[0]?.answerOptionIds).toEqual(['no']);
+		});
+
+		it('answers each binding by its own kind', () => {
+			const items = v6ItemsOf('let a = 1; const b = 2;');
+			expect(items.map((item) => item.answerOptionIds)).toEqual([
+				['yes'],
+				['no'],
+			]);
+		});
+	});
+
+	describe('Boundaries', () => {
+		it('answers no for a const binding', () => {
+			expect(v6ItemsOf('const x = 1;')[0]?.answerOptionIds).toEqual(['no']);
+		});
+
+		it('emits one item for a let declaration with no initializer', () => {
+			const items = v6ItemsOf('let x;');
+			expect(items).toHaveLength(1);
+			expect(items[0]?.answerOptionIds).toEqual(['yes']);
+		});
+
+		it('keys shadowing bindings on their own identities with their own kinds', () => {
+			const items = v6ItemsOf('let x = 1; { const x = 2; x; }');
+			expect(items.map((item) => item.groupKey)).toEqual([
+				'binding:4-5',
+				'binding:19-20',
+			]);
+			expect(items.map((item) => item.anchorRange)).toEqual([
+				[4, 5],
+				[19, 20],
+			]);
+			expect(items.map((item) => item.answerOptionIds)).toEqual([
+				['yes'],
+				['no'],
+			]);
+		});
+
+		it('does not fire on a property name (never anchored)', () => {
+			// `o.x`'s `x` is excluded from the descent, so only the `o` binding fires.
+			const items = v6ItemsOf('let o = {}; o.x;');
+			expect(items).toHaveLength(1);
+			expect(items[0]?.anchorRange).toEqual([4, 5]);
+		});
+
+		it('emits nothing for a var binding (non-JeJ, but parseable)', () => {
+			// `var` is outside JeJ, but quizzing gates on parsed facts, not
+			// validated ones, so a `var` snippet reaches the generators; the forest
+			// launders its declaration kind into the `'let' | 'const'`-typed field, so V6
+			// must guard defensively rather than mis-grade `var` as non-reassignable.
+			expect(v6ItemsOf('var x = 1; x = 2; x;')).toEqual([]);
+		});
+
+		it('emits nothing for a var binding with no reassignment', () => {
+			expect(v6ItemsOf('var x = 1; x;')).toEqual([]);
+		});
+
+		it('emits nothing for a var binding with no initializer', () => {
+			expect(v6ItemsOf('var x;')).toEqual([]);
+		});
+
+		it('skips only the var binding in a mixed let/var facts (guard is per-binding)', () => {
+			// A snippet-level "contains var → bail" misimplementation would drop `a` too;
+			// the per-binding guard fires for the `let a` and skips only the `var b`.
+			const items = v6ItemsOf('let a = 1; var b = 2; a; b;');
+			expect(items).toHaveLength(1);
+			expect(items[0]?.id).toBe('V6/binding:a@4-5');
+			expect(items[0]?.answerOptionIds).toEqual(['yes']);
+		});
+	});
+
+	describe('Interfaces', () => {
+		it('emits only mcq items', () => {
+			const snippet = embody('let x = 1;').facts;
+			const items = runGenerators(buildContext(snippet, classifyOf(snippet)), [
+				v6KindSemantics,
+			]);
+			expect(items.every((item) => item.mode === 'mcq')).toBe(true);
+		});
+
+		it('carries a frozen two-option pool, distinct per-kind feedback, no unlocks', () => {
+			const letItem = v6ItemsOf('let x = 1;')[0];
+			const constItem = v6ItemsOf('const x = 1;')[0];
+			expect(letItem?.options).toHaveLength(2);
+			expect(letItem !== undefined && Object.isFrozen(letItem.options)).toBe(
+				true,
+			);
+			// Both feedbacks must exist (a `var` reaching buildV6Item would yield
+			// `undefined` feedback — the guard prevents it).
+			expect(letItem?.feedback).toBeTruthy();
+			expect(constItem?.feedback).toBeTruthy();
+			expect(letItem?.feedback).not.toBe(constItem?.feedback);
+			expect(letItem?.unlocks).toBeUndefined();
+			expect(letItem?.anchorPath).toBeUndefined();
+		});
+	});
+
+	describe('Simple', () => {
+		it('is deterministic for the same facts', () => {
+			expect(v6ItemsOf('let x = 1;')).toEqual(v6ItemsOf('let x = 1;'));
+		});
+	});
+});
