@@ -4,6 +4,7 @@ closes; nothing here is end-state documentation. -->
 <!-- cspell:ignore colour distractor distractors ledgered throughs -->
 <!-- cspell:ignore firstblock glossterm parsonizer parsonize errormsg recognises -->
 <!-- cspell:ignore unbuilt ugrep affordances behaviour -->
+<!-- cspell:ignore normalisation unrunnable -->
 
 # RESUME — where this campaign stands and what comes next
 
@@ -160,10 +161,98 @@ is owed.
    final.
 6. **AR-5** over the SHA list, then the push prompt. Nothing is pushed.
 
+## ⛔ START HERE — an AR-2 PAUSE is open and it blocks the next ledger
+
+**Session of 2026-08-17. Three commits, all gated, nothing pushed. Both seeded
+ledgers now pass a published transport check. `_family-f.md` CANNOT be cut until
+three AR-2 blockers are resolved.**
+
+| SHA        | What                                                                                                                                                                           |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `3df1c727` | `_TEMPLATE.md` — seven amendments: the transport check published, five sanctioned transport modifications, `LC_ALL=C`, lister 4's third limit, the `no Gen-1 source` placement |
+| `c734b5ad` | `ledgers/writeme.md` — every quotation is now its extractor's own output                                                                                                       |
+| `d68eae89` | `ledgers/parsons.md` + `_TEMPLATE.md` — AR-1's re-check findings. **This is the current template SHA**                                                                         |
+
+**Measured 2026-08-17 at `2c02e94a`:** 181 ahead of `origin/main`; 26 campaign
+commits since `346cb845`; campaign dir clean. **Nine commits landed between my
+first and HEAD and only three are mine** — re-derive everything, transcribe
+nothing.
+
+### The AR-2 PAUSE — three blockers, all verified, all binding `_family-f.md`
+
+Full report is not restated here; these are the three that block. **Each was
+reproduced by measurement, not relayed.**
+
+1. **The published transport check has NO PARSE FLOOR, and its header says
+   "Silent means clean."** A citation whose filename carries a path
+   (`` `lib/README.md` ``) or which omits the `§` matches neither the numerator
+   nor the `$cited` denominator, so `parsed == cited` holds at `0 == 0` and the
+   row passes. **A wholly fabricated citation was planted and the check said
+   nothing** [measured 2026-08-17]. This is the silent-failure class the same
+   commit cites as _"already recorded three times over"_, and the Pass-1 gate
+   ten lines above already carries the `[ "$n" -gt 0 ]` floor that catches it.
+   It bites hardest exactly where the next ledgers are: `dropdowns`, `variables`
+   and six of Family F's seven have **no Gen-2 side**, so the G2 arm is a
+   structural no-op indistinguishable from a clean bill. **Fix:** an
+   unconditional census line (`parsed N citations across M rows`) plus a
+   `FAIL: zero citations parsed` floor; delete "Silent means clean".
+2. **The check is structurally unrunnable on `_family-f.md`.** It takes ONE
+   reference root; Family F is seven members with seven references, six absent.
+   Per-member invocation is blocked by a second template rule — ids are
+   `fam-f-NNN` in one namespace with the member named in the `affordance` cell,
+   so there is no id prefix to filter on. **Two template rules collide**, and
+   `_TEMPLATE.md` § `_family-f.md` is the one exception was not amended (it
+   still lists seven bullets and never mentions the check). **Fix:** an eighth
+   exception bullet, plus either a member-qualified citation form the check can
+   resolve or a published seven-invocation form.
+3. **Amendment 7 gives Family F an instruction it cannot follow.** It rules the
+   `no Gen-1 source` line goes _"once, in `## Reference inventory`"_ — but the
+   Family F exception mandates **disambiguated per-member headings**
+   (`## Reference inventory — step-throughs`), so that heading never exists
+   there. Right for the seven single-lens ledgers, undetermined for the one it
+   names as hardest. **Fix:** add "in that member's own
+   `## Reference inventory — <member>` block".
+
+**Also open, not blocking:** the claim _"the normalisation is EXACTLY the
+sanctioned modifications"_ is false **in both directions** — `norm()` misses a
+lone `\*` (prettier escapes it; 2 Gen-2 docs carry single-asterisk emphasis) and
+over-forgives by unescaping path-link brackets item 5 says take no escape.
+AR-2's recommendation, which is the right one: **restate it as a named
+approximation with its edges listed**, because an overstated invariant in a
+template is worse than a stated one — the next reviewer stops looking. Also: the
+`<em>` trigger is undecidable as written (over-predicts 3×, and missed
+`parsons-031`); replace the content predicate with the empirical procedure that
+actually found it — paste, `prettier --write`, `git diff`, and every cell
+prettier rewrote switches to `<em>`. Also: a dangling `./_family-f.md` link
+introduced in `3df1c727`, which the template copies eight times. Also:
+`FIDELITY-METHOD.md` § Columns still says a quotation _"transports verbatim"_
+and knows nothing of the five sanctioned modifications — the same
+template/method conflict amendment 7 closed, one size larger.
+
+### What this session settled, struck rather than ticked
+
+- **`writeme`'s hand-cut cells are re-cut.** The published check reports **0
+  divergent, 1 unquoted** against it; at `0f9257c8` the same command reports
+  **14 divergent halves across 12 rows and 11 unquoted**. The survivor is
+  `writeme-019`, where `firstblock` genuinely returns empty — the check reports
+  it rather than being taught to ignore it.
+- **The count of 13 was NOT revised.** `0f9257c8` measured 13 under a check with
+  no concept of a sanctioned modification; under the five the template now
+  names, `writeme-006` is reclassified, not recounted.
+- **`parsons-031` was damaged and shipped**, found by the check on its first run
+  against the sibling ledger — by AR-1 and AR-2 independently. Fixed in
+  `d68eae89`. The process lesson is the point: a check was published and
+  immediately not run against the corpus it governs.
+- **Owed to Pass 2, named rather than rediscovered:** `writeme`'s eleven
+  glossary rows carry a `G3` tag with no port-side quotation. `glossterm`
+  returns a bullet for 11 of the 12 terms, so it is a deferral by choice.
+
+---
+
 ## Seeding wave status
 
 **Session of 2026-08-16. Six commits, all gated, nothing pushed. TWO of eight
-ledgers are now seeded.** Start here.
+ledgers are now seeded.**
 
 | SHA        | What                                                                                                   |
 | ---------- | ------------------------------------------------------------------------------------------------------ |
@@ -354,28 +443,37 @@ completed item left on a start list is this canon's own recorded failure mode.
 `0f9257c8`). What each fix actually was lives in those commit bodies; do not
 re-derive it from here.
 
-1. **Re-cut `writeme`'s 13 hand-truncated `evidence` cells** —
-   `004 006 009 011 013 015 018 020 023 025 028 029 032`. See
-   [§ Seeding wave status](#seeding-wave-status) for what the defect is and why
-   it was named rather than rushed. **Re-run `firstblock` per row and paste its
-   output verbatim.** This is transcription, not authorship: if you find
-   yourself improving a sentence, stop.
+1. ~~**Re-cut `writeme`'s 13 hand-truncated `evidence` cells.**~~ **DONE**
+   (`c734b5ad`), and `parsons-031`'s equivalent with it (`d68eae89`). Struck
+   rather than ticked. Both ledgers now pass the published transport check — see
+   [the AR-2 PAUSE section](#-start-here--an-ar-2-pause-is-open-and-it-blocks-the-next-ledger),
+   which is where a fresh session starts.
 
-2. **`_family-f.md`'s inventory shape alone**, as a probe before its rows. It is
-   cheap, and it is a **gate** — the last dispatch collapsed it and the one
-   before it into a single wave.
+2. **RESOLVE THE THREE AR-2 BLOCKERS FIRST.** They are template defects, they
+   were introduced by `3df1c727`, and **every one of them binds `_family-f.md`
+   specifically** — the parse floor, the single-reference-root limit, and the
+   `## Reference inventory` placement that Family F's own heading rule forbids.
+   Cutting `_family-f.md` before they are fixed means cutting the campaign's
+   largest ledger against a check that cannot run on it and a rule it cannot
+   follow. Under standing ruling 3 the template is amended before a ledger is
+   cut from it, so this ordering is not a preference.
 
-3. **Wave 2 — `dropdowns`, `variables`, `debug-props`**, in parallel; none
+3. **`_family-f.md`'s inventory shape alone**, as a probe before its rows. It is
+   a **gate** — the last two dispatches each collapsed it into a wave. Its
+   per-member values are measured and tabulated in the plan file this session
+   wrote; re-measure rather than transcribe them.
+
+4. **Wave 2 — `dropdowns`, `variables`, `debug-props`**, in parallel; none
    touches Gen-1's second root, so none waits on the unbuilt lister [measured
    2026-08-16]. Their measured traps are in
    [§ Wave-2 traps](#wave-2-traps-measured-2026-08-16-so-the-briefs-carry-them),
    and two of them require a **template amendment first**, in its own commit,
    under the amend-before-cut ruling.
 
-4. **Then `blanks` and `annotate`** — the two that run listers 1–3
+5. **Then `blanks` and `annotate`** — the two that run listers 1–3
    reference-to-source.
 
-5. **THE WIDENED INSTRUMENT IS DESIGNED, NOT BUILT, AND STILL EMBARGOED.**
+6. **THE WIDENED INSTRUMENT IS DESIGNED, NOT BUILT, AND STILL EMBARGOED.**
    [`LISTERS-6-7-DESIGN.md`](./LISTERS-6-7-DESIGN.md) (`a4a90e0f`) carries two
    checks with nine mutation tests, and reproduces both of the false results
    that motivated it. It amends nothing yet. Before it runs it owes a **human
@@ -385,12 +483,12 @@ re-derive it from here.
    struck. **Building it goes to a fresh session unconditionally**
    ([AGENTS.principal.md § Handoff agency](../../AGENTS.principal.md#handoff-agency--the-agent-owns-the-call)).
 
-6. **THEN re-seed `parsons`** against the widened root. The ledger still has
+7. **THEN re-seed `parsons`** against the widened root. The ledger still has
    **zero `G1-live` rows**; that is what the second-root ruling exists to fix.
    **Append; never renumber `001`–`047`.** Take the next id from the ledger as
    it stands when you start, not from a number written here.
 
-7. **AR-5** over the campaign SHA list — never `baseline..HEAD`, foreign commits
+8. **AR-5** over the campaign SHA list — never `baseline..HEAD`, foreign commits
    interleave — then the push prompt. **Pass 2 and Pass 3 remain owed on every
    ledger**, `parsons` and `writeme` included; the Pass-1 transcription
    counter-check run on `writeme` is **not** Pass 3 and its commit body says so.
