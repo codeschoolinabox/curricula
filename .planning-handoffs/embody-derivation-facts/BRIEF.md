@@ -6,8 +6,9 @@
 by that path.
 
 **Status: not started. This is a design brief, not a plan.** It exists so a
-future session starts from measured ground instead of rediscovering it. Nothing
-here is ruled; the one thing that _is_ settled is the sequencing.
+future session starts from measured ground instead of rediscovering it. Two
+things _are_ settled — the sequencing, and the 2026-08-17 ruling below; the
+design questions remain open.
 
 ## Before reading further
 
@@ -33,6 +34,21 @@ here is ruled; the one thing that _is_ settled is the sequencing.
 built and green. The derivation code is identical whether a lens calls it or the
 embodiment factory does — only the call site moves — so a built leaf answers the
 question better than either argument can beforehand.
+
+**Settled (human, 2026-08-17):** the scanning integration **will happen**, and
+**non-destructively**: it is built into embody **without deleting or modifying
+the existing `lib/scanning/`** — the leaf stays byte-untouched and embody
+becomes a caller. This rules § What a Phase 0 here must settle, item 6, for
+scanning (the both-answer: leaf stays, embody publishes by calling it). Two
+consequences the executing session inherits: any closing of the input-coherence
+hole is recorded on the **embody side** (the leaf's own DOCS § Out of scope
+stays as written unless a separate human-approved edit reopens it), and the tier
+README rewrite (item 4) is untouched by this constraint — `lib/README.md` is not
+under `scanning/`. The trigger was still unmet at transcription time [measured
+2026-08-17: `npx vitest run --project unit src/lib/study-lenses/lib/scanning` →
+50 passed | 21 skipped (71)] — this ruling does not lift the sequencing ruling
+above. Classifying is NOT covered by this ruling; its question stays open as
+written.
 
 ---
 
@@ -75,6 +91,24 @@ more than one consumer, and (c) either invariant-bearing or expensive enough
 that deriving it per-consumer is waste. That admits both, and it is checkable —
 but it also admits `scoping` and `screening`, so whoever adopts it should say
 out loud whether that is intended.
+
+**A second candidate, from the session that authored embody's current DOCS
+register (2026-08-17, offered as one session's position, not a ruling): the
+vocabulary-authority line.** Embody's own opener states it — "embody publishes
+the machine's own reading … Embody decides nothing about pedagogy." Ask in whose
+vocabulary the derivation is expressed. Scanning's fourteen kinds are ECMA-262's
+own productions — the specification's reading of the same source, a third
+authoritative machine-reading beside the tokenizer's and the parser's — so it
+qualifies, and the coherence invariant seals the residence argument.
+Classifying's five categories are, by its own README, "the house taxonomy …
+semantic, by what the element does in the NM" with authored judgment calls — a
+chosen teaching vocabulary, which is exactly what the accuracy-not-pedagogy
+contract leaves outside the Facts, independent of its current
+zero-live-consumers state. This line admits scanning alone, answers scoping
+(already a fact: environment) and screening (judge by whose vocabulary), and
+predicts the search for a line admitting both fails on principle. Weigh it
+against the candidate above; the anchoring caveat is real — its author also
+wrote the contract wording it appeals to.
 
 ---
 
@@ -139,11 +173,14 @@ edit.
    with its justification. Whether "moving the call site" counts as a port is
    itself a question — but if any of classifying's contract changes shape in the
    process, the ledger is owed.
-6. **Whether the leaves stay.** The recommendation on the table is **both**:
-   embody publishes the fact _by calling the leaf_, so the derivation stays a
-   pure, independently-testable function with its own suite and embody becomes
-   its one production caller and thereby the guarantor of coherence. That is not
-   "leaf or fact" and nothing built so far is wasted.
+6. **Whether the leaves stay — RULED for scanning (human, 2026-08-17, above):
+   the leaf stays untouched; embody integrates non-destructively by calling
+   it.** For classifying the question stays open. The original recommendation,
+   which the ruling confirms for scanning, was **both**: embody publishes the
+   fact _by calling the leaf_, so the derivation stays a pure,
+   independently-testable function with its own suite and embody becomes its one
+   production caller and thereby the guarantor of coherence. That is not "leaf
+   or fact" and nothing built so far is wasted.
 
 ## What this campaign is not
 
