@@ -570,9 +570,7 @@ re-derive it from here.
    2026-08-16]. ~~Two of them require a template amendment first, in its own
    commit.~~ — **neither does any more**: both amendments landed (`3df1c727`,
    `74590c5a`) and § Wave-2 traps records which. Their measured traps are in
-   [§ Wave-2 traps](#wave-2-traps-measured-2026-08-16-so-the-briefs-carry-them),
-   and two of them require a **template amendment first**, in its own commit,
-   under the amend-before-cut ruling.
+   [§ Wave-2 traps](#wave-2-traps-measured-2026-08-16-so-the-briefs-carry-them).
 
 5. **Then `blanks` and `annotate`** — the two that run listers 1–3
    reference-to-source.

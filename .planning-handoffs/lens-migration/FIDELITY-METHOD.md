@@ -228,21 +228,20 @@ mechanical catches an omitted G1 tag.
 negative** naming what was searched: the lister-4 or lister-5 output it came
 from, or the literal words `no Gen-1 source: <lens> has no Gen-1 file`. Where
 the lens has no Gen-1 file at all, that line is stated **once per inventory
-block** and cited, not repeated across forty rows — once per ledger in a
-single-lens ledger, in `## Reference inventory`, and **once per affected
-member** in [`ledgers/_family-f.md`](./ledgers/_family-f.md), in that member's
-own `## Reference inventory — <member>`. In a multi-member ledger `<lens>` in
-the literal words is the **member's** slug, never `fam-f`.
+block** and cited, not repeated across forty rows.
 
-⚠️ **"once per ledger" was wrong for the one ledger it matters most in, and it
-named a heading that does not exist there.**
-[`ledgers/_TEMPLATE.md`](./ledgers/_TEMPLATE.md) § `_family-f.md` is the one
-exception mandates disambiguated per-member headings, so no bare
-`## Reference inventory` exists in that ledger at all [measured 2026-08-18: six
-of Family F's seven members have no Gen-2 reference and exactly one,
-`trace-debugging`, owes the Gen-1 line]. Corrected here rather than reported,
-under the standing ruling that correcting a measurably false sentence is not
-re-deriving the method.
+**Which block, and how the `<lens>` token is substituted in a multi-member
+ledger, are stated once — in
+[`ledgers/_TEMPLATE.md` § Source inventory](./ledgers/_TEMPLATE.md#source-inventory),
+the document a seeder actually cuts from — and this section deliberately does
+not restate the clauses.** An earlier revision said "once per ledger, in
+`## Reference inventory`", which was wrong for
+[`ledgers/_family-f.md`](./ledgers/_family-f.md) in both halves: the cardinality
+is per member there, and its disambiguated per-member headings mean no bare
+`## Reference inventory` exists in that ledger at all. Correcting it in place
+produced two full statements of one rule in two files — **and a rule with two
+statements has no statement**, which is this campaign's own ruling one document
+over. So the template owns the rule and this is a pointer.
 
 Without this the walk requirement is opt-out by omission, and the opt-out is
 invisible. (The worked exemption holds on its merits: `blanks-042` is

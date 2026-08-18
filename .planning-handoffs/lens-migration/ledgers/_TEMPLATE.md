@@ -7,7 +7,7 @@
 <!-- cspell:ignore glossterm normalised normalisation parsonizer -->
 <!-- cspell:ignore behaviour behaviours affordances pointcut QASM -->
 <!-- cspell:ignore towc multibyte Normalising -->
-<!-- cspell:ignore keyable legitimise nocite quotemeta -->
+<!-- cspell:ignore keyable legitimise nocite quotemeta mktemp licence unrun -->
 
 # `<lens>` — fidelity ledger
 
@@ -128,40 +128,56 @@ this template as follows — **not "in exactly three ways", which was true befor
   makes `NONE`-as-an-assertion load-bearing here: without it, six of seven
   invocations are no-ops and this marker buys nothing.
 
+  ⚠️ **No heredoc.** This fence sits inside a list item, so every line carries a
+  two-space indent — and an indented `EOF` does **not** terminate `<<EOF`. Under
+  the raw extraction an agent in this repo actually uses (`sed -n '<range>p'`),
+  the terminator and the `covered:` line are swallowed as heredoc **data**: two
+  bogus member runs are injected, the sum assertion never executes, and nothing
+  reaches stderr [measured 2026-08-18, AR-2 — the swallowed form ran and printed
+  `member=EOF` and `member=echo`]. The `for` loop below has no such edge.
+
   ```bash
   L=.planning-handoffs/lens-migration/ledgers/_family-f.md
   G2=src/lib/study-lenses--deprecated-architecture/lenses
+  MEMBERS='step-throughs tracing run-javascript debug-javascript trace-javascript tables-universal trace-debugging'
 
-  # Preflight: every row carries a member marker. Names the offender.
+  # Preflight: every row carries a marker naming ONE OF THE SEVEN. The roster is
+  # the acceptance set, not a character class -- a shape-valid misspelling is
+  # the likelier failure and a character class cannot see it.
+  ALT=$(printf '%s' "$MEMBERS" | tr ' ' '|')
   awk '/^## Rows/{on=1;next} /^## Close conditions/{on=0} on' "$L" \
     | grep '^| `fam-f-[0-9]\{3\}`' \
-    | grep -v '^| `fam-f-[0-9]\{3\}` *| *`[a-z][a-z-]*` — ' \
+    | grep -vE "^\| \`fam-f-[0-9]{3}\` *\| *\`($ALT)\` — " \
     | awk '{print "UNMARKED-ROW: " $2}'
 
   # One run per member. NONE is an ASSERTION, not an absence.
   total=0
-  while read -r member ref; do
-    out=$(sh transport-check.sh "$L" "$ref" NONE "$member"); printf '%s\n' "$out"
-    r=$(printf '%s\n' "$out" | grep -o 'rows=[0-9]*' | grep -o '[0-9]*')
+  for member in $MEMBERS; do
+    ref=NONE; [ "$member" = trace-debugging ] && ref="$G2/trace-debugging"
+    sh transport-check.sh "$L" "$ref" NONE "$member" > /tmp/fam-f-$member.out
+    cat /tmp/fam-f-$member.out
+    r=$(sed -n 's/^CENSUS .*rows=\([0-9]*\) .*/\1/p' /tmp/fam-f-$member.out)
     total=$(( total + ${r:-0} ))
-  done <<EOF
-  step-throughs    NONE
-  tracing          NONE
-  run-javascript   NONE
-  debug-javascript NONE
-  trace-javascript NONE
-  tables-universal NONE
-  trace-debugging  $G2/trace-debugging
-  EOF
+  done
   echo "covered: $total rows -- must equal the Pass-1 gate's \$n"
   ```
 
   **The sum is the assertion and the preflight is the diagnosis** — neither
-  alone suffices. A row whose marker is missing or misspelled belongs to no run
-  and the sum falls short; the preflight says which row. A **duplicated** marker
-  passes the preflight and overshoots the sum, which is why both run [measured
-  2026-08-18 on a four-row fixture: intact → 2 + 1 + 1 = 4; one marker deleted →
-  3, with `UNMARKED-ROW` naming it].
+  alone suffices, and the reason is measured rather than assumed [all measured
+  2026-08-18 on a four-row fixture, intact → 2 + 1 + 1 = 4]:
+
+  | fault                 | sum        | preflight                                                                                                                                                                                                        |
+  | --------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | marker **deleted**    | falls to 3 | `UNMARKED-ROW` names the row                                                                                                                                                                                     |
+  | marker **misspelled** | falls to 3 | `UNMARKED-ROW` names the row — **only because the roster is the acceptance set**; under a `[a-z][a-z-]*` character class it was **silent**, and a short sum with a clean preflight is a diagnosis-free shortfall |
+
+  ⚠️ **An earlier revision justified running both by claiming a duplicated
+  marker "overshoots the sum". It does not, and the claim did not reproduce**
+  [measured 2026-08-18, both reviewers independently]: the perl filter anchors
+  `\Q$M\E` to the first cell position, so each row is claimable by at most one
+  member and a second slug in the same cell changes nothing. A duplicated **row
+  id** does overshoot, and the Pass-1 gate's id-gap `awk` already catches that.
+  The real reason both instruments run is the misspelling case above.
 
   ⚠️ **The marker proves membership, not correctness, and that cost is accepted
   rather than hidden.** Six of the seven members run with `REF=NONE PORT=NONE`,
@@ -259,12 +275,20 @@ members have no Gen-2 reference and exactly **one** (`trace-debugging`) owes the
 Gen-1 line — so the placement decides seven blocks rather than one, and gets one
 of them wrong under the old wording.
 
-**`_family-f.md` is not yet cut, and three documents forward-link it** — this
-line, `SPEC.md` § Roll-up, and `FIDELITY-METHOD.md` § The two narrative ledgers.
-All three resolve the moment it lands, and **nothing gates them meanwhile**:
-`MD051` checks fragments, not paths, so markdownlint stays at 0 over a link that
-goes nowhere. That is the cut commit's checklist, recorded here because this is
-the document its author is reading.
+**`_family-f.md` is not yet cut, and several documents forward-link it.** They
+all resolve the moment it lands, and **nothing gates them meanwhile**: `MD051`
+checks fragments, not paths, so markdownlint stays at 0 over a link that goes
+nowhere. **Do not transcribe the site list — derive it**, because an earlier
+revision enumerated three sites while the same commit was adding a fourth:
+
+```bash
+grep -rnoE '\]\((\./)?(ledgers/)?_family-f\.md\)' \
+  .planning-handoffs/lens-migration --include='*.md'
+```
+
+That is the cut commit's checklist, recorded here because this is the document
+its author is reading — and published as a command for the same reason every
+other count in this file is.
 
 ### ⚠️ The Gen-1 quarry root is TWO directories, not one
 
@@ -623,10 +647,19 @@ This is a **rendering** choice, not a sixth transport modification — the quote
 characters are unchanged, which is the whole point.
 
 ⚠️ **The paragraph above is the mechanism, and the mechanism is NOT the
-trigger.** Read as a content predicate — _a code span containing
-`_`or`\*`, nested inside an emphasis span_ — it has **no discriminating power whatever** [measured 2026-08-18]: on `parsons.md`it fires on **6** rows, **none** of which use`<em>`, and it is **silent on `parsons-031`**, the one row that actually needed it; on `writeme.md`
-it fires on 6 against 1 actual. Nought for one on true positives. **Ask
-prettier; do not predict.**
+trigger.** Read as a content predicate it over-fires badly on rows needing no
+<em>…</em> at all, and no published regex for it has ever reproduced: two
+readings taken the same day on the same file returned **6** hits and **14**.
+**Publish no count here.** § Publish the number by publishing the command
+forbids stating one without a settled method, and an earlier revision of this
+paragraph shipped a bare number anyway — then had its own spaces eaten by
+prettier, in the paragraph teaching that hazard, for the third recorded time.
+
+<em>The predicate cannot even be evaluated on the row that motivated it.</em>
+`parsons-031` already carries <em>…</em>, so a predicate scoped to underscore
+cells is silent on it **because the fix is applied**, not because the predicate
+is blind. An earlier revision published that silence as evidence; the reasoning
+was circular. **Ask prettier; do not predict.**
 
 ```bash
 # Does this cell need <em>? Isolate it -- a whole-ledger diff also shows
@@ -859,16 +892,21 @@ why this section exists.
 ```bash
 # transport-check.sh <ledger.md> <ref-root|NONE> <port-root|NONE> [member|all]
 #
-# Prints one line per finding, then ALWAYS a final `CENSUS ...` line.
-# SILENCE IS NOT CLEAN. Silence means the row pattern matched nothing -- the
-# exact failure this check exists to catch. **No CENSUS line is a FAIL.**
-# This is the `[ "$n" -gt 0 ]` floor the Pass-1 gate 47 lines above already
-# carries; this check shipped without it, and § The register check's class --
-# a check that reports success, or absence, over nothing -- is now recorded a
-# fourth time, by the check written to enforce it.
+# Prints one line per finding, then a `CENSUS ...` line, then FAILs and exits 1
+# if the row pattern matched nothing. NO OUTPUT AT ALL means the check itself
+# died -- that is the only silence, and it is never clean.
+#
+# The FAIL is the `[ "$n" -gt 0 ]` floor the Pass-1 gate 47 lines above already
+# carries. This check shipped without it; an earlier revision then shipped a
+# CENSUS line and called THAT the floor, which it is not -- `rows=0` printed a
+# tidy line and exited 0 [measured 2026-08-18, AR-2]. A census reports; a floor
+# refuses. § The register check's class -- a check that reports success, or
+# absence, over nothing -- is now recorded a fifth time, twice by the check
+# written to enforce it.
 set -u
 LC_ALL=C; export LC_ALL          # both extractors abort on UTF-8; see above
 L="$1"; REF="$2"; PORT="${3:-NONE}"; MEMBER="${4:-all}"; export REF PORT MEMBER
+REC=$(mktemp); OUT=$(mktemp); trap 'rm -f "$REC" "$OUT"' EXIT
 # firstblock() and glossterm() -- paste verbatim from § What Pass 1 writes.
 
 # norm() is a NAMED APPROXIMATION of the sanctioned transport modifications --
@@ -911,7 +949,7 @@ perl -ne '
   }
   $parsed += $n;
   my $cited = () = /Gen-[23]\s*`[A-Za-z.]+\.md`\s*§/g;
-  my $lead  = () = /Gen-[23]\s*`?[A-Za-z0-9._\/-]+\.md`?/g;
+  my $lead  = () = /Gen-[23]\s*`?[A-Za-z0-9._\/-]+\.(?:md|ts|tsx|jsx|css|json)`?/g;
   print join("\t",$id,"-","-","!MALFORMED","$cited of $lead leads parse"),"\n" if $lead > $cited;
   print join("\t",$id,"-","-","!UNQUOTED", "$n of $cited cited"),"\n"          if $cited > $n;
   if ($n == 0) { $nocite++;
@@ -919,7 +957,12 @@ perl -ne '
   END { print join("\t","-","-","-","!CENSUS",
         "member=$M ref=$ENV{REF} rows=".($rows+0)
         ." parsed=".($parsed+0)." nocite=".($nocite+0)),"\n" }
-' "$L" | while IFS=$'\t' read -r id side file head stored; do
+' "$L" > "$REC"
+
+# NOT `$(while ... case ...)`: the `)` closing a case pattern terminates the
+# command substitution, and the whole loop dies with `syntax error near ;;`
+# [measured 2026-08-18 -- it did]. Redirect to a file instead.
+while IFS=$'\t' read -r id side file head stored; do
   case "$head" in
     '!CENSUS')      echo "CENSUS $stored";                   continue;;
     '!UNQUOTED')    echo "$id UNQUOTED ($stored)";           continue;;
@@ -940,7 +983,14 @@ perl -ne '
   [ -z "$out" ] && { echo "$id $side EMPTY-EXTRACT ($head)"; continue; }
   [ "$(printf '%s' "$out" | norm)" = "$(unwrap_markup "$out" "$stored" | norm)" ] \
     || echo "$id $side DIVERGENT"
-done
+done < "$REC" > "$OUT"
+cat "$OUT"
+
+# THE FLOOR -- a refusal, not a report. Without it a wrong ledger path, a wrong
+# MEMBER, or a moved id prefix all print one tidy census line and exit 0.
+n=$(sed -n 's/^CENSUS .*rows=\([0-9]*\) .*/\1/p' "$OUT")
+[ -n "$n" ] || { echo "FAIL: no CENSUS line -- the check did not complete"; exit 1; }
+[ "$n" -gt 0 ] || { echo "FAIL: zero rows matched -- wrong ledger path, wrong MEMBER, or the id prefix moved"; exit 1; }
 ```
 
 The four sentinel arms must `continue` **before** `case "$side"`, or `set -u`
@@ -1000,7 +1050,7 @@ confirmed to fire [all measured 2026-08-18]:
 | mutation                                            | expected                                                                                                                       |
 | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | run it against **this template**                    | `rows=0 parsed=0` — the specimen ids are `` `<lens>-001` `` and `<` is outside the id class. Without the census: total silence |
-| fabrication whose filename carries a path           | that id under **both** `MALFORMED-CITATION (0 of 1 leads parse)` and `NO-CITATION`; `parsons` nocite 3 → 5                     |
+| fabrication whose filename carries a path           | that id under **both** `MALFORMED-CITATION (0 of 1 leads parse)` and `NO-CITATION`; `parsons` nocite 3 → **4**                 |
 | fabrication omitting the `§`                        | the same pair                                                                                                                  |
 | baseline `NO-CITATION` set, nothing planted         | `parsons` = `045`,`046`,`047`; `writeme` = none                                                                                |
 | fabrication **beside** a good citation, path form   | `MALFORMED-CITATION (1 of 2 leads parse)`; nocite **stays 3** — the floor alone is blind here, which is why `lead` exists      |
@@ -1013,12 +1063,54 @@ confirmed to fire [all measured 2026-08-18]:
 | member filter with one marker deleted               | the sum falls **short** (3 of 4) and the preflight names `UNMARKED-ROW`                                                        |
 | `norm()`'s fragment-targeted bracket clause         | an escaped **path** link → `DIVERGENT`; `writeme-006`'s escaped **fragment** link stays clean                                  |
 
-Two regressions bound the whole amendment, and both held: `writeme` still
-reports exactly `writeme-019 UNQUOTED (1 of 2 cited)` with **0 divergent**, and
-`parsons` still reports **0 divergent** [measured 2026-08-18]. A DIVERGENT count
-that moves when `norm()` is amended means the amendment changed what the check
-believes, not what it can see — ship the documentation-only form instead and
-open a measured follow-up.
+Four more rows, each added because a reviewer broke the check in that exact
+place [all measured 2026-08-18]:
+
+| mutation                                                                      | expected                                                                                 |
+| ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| **modification 4** — backticks laundered onto a prose quotation               | `DIVERGENT`. The row whose absence made the amendment gate blind; see below              |
+| a fabrication citing a **non-`.md`** file (`types.ts`) beside a good citation | `MALFORMED-CITATION (1 of 2 leads parse)`. Under a `.md`-only `lead`, **no line at all** |
+| the row pattern matches nothing — wrong path, wrong `MEMBER`, moved prefix    | `FAIL: zero rows matched`, **exit 1**. A `CENSUS` line alone is a report, not a floor    |
+| Family F preflight, marker misspelled into a **shape-valid** slug             | `UNMARKED-ROW`. Under a `[a-z][a-z-]*` character class it was **silent**                 |
+
+### The amendment gate — the two clean regressions are NOT it
+
+`writeme` must still report exactly `writeme-019 UNQUOTED (1 of 2 cited)` with
+**0 divergent**, and `parsons` **0 divergent** [measured 2026-08-18]. Necessary,
+and **nowhere near sufficient** — an earlier revision published them as the
+whole gate.
+
+⚠️ **A zero baseline cannot detect a loosening.** Both regressions sit at 0
+divergent, so widening `norm()` leaves 0 at 0. AR-2 performed the exact widening
+§ Normalising is not the same as being blind forbids — adding a clause that
+ignores backticks, which hides modification 4 by name — and **both published
+regressions came back byte-identical** [measured 2026-08-18]. A future author
+could make that edit, pass every gate this section published, and cite the
+`lead` bullet's _"adding a looser counter is the opposite of widening"_ as
+licence.
+
+**So the gate is the mutation corpus, not the regressions.** After any change to
+`norm()`, `unwrap_markup()`, `parsed`, `cited` or `lead`, **every row of both
+tables above must still fire**, and then the two regressions must hold. The
+corpus is the only artifact here that scores non-zero, so it is the only one a
+loosening can move. The modification-4 row exists because its absence is what
+let the widening through: published `norm()` → `parsons-001 G2 DIVERGENT`,
+widened → silent.
+
+### When this check runs — it had no trigger for seven of the eight ledgers
+
+⚠️ **Until now the only ledger with a stated trigger was the one that cannot use
+the single-lens form.** The check appeared in this document's Family F bullet
+and nowhere else — not in the Pass-1 gate, not in the close conditions, and
+nowhere in `FIDELITY-METHOD.md` § Gate checks [measured 2026-08-18, AR-2]. **A
+mutation-tested check nobody is required to run is worth what an unrun check is
+worth**, which is this campaign's founding complaint about its own predecessors.
+
+**It runs twice on every ledger:** once at the **seeding commit**, beside the
+Pass-1 gate — that gate checks SHAPE and this one checks TRANSPORT, and neither
+substitutes for the other — and again at **campaign close**, below. Paste its
+output into the commit body; a stated count without the command that produced it
+is what § Publish the number by publishing the command forbids.
 
 The conditions below are for **campaign close**, not for the seeding commit.
 
@@ -1040,3 +1132,6 @@ The conditions below are for **campaign close**, not for the seeding commit.
 - Pass 3's counter-ledger has been run and can no longer answer either question
   ([§ Pass 3](../FIDELITY-METHOD.md#pass-3--the-counter-ledger)).
 - This lens's row in [SPEC.md § Roll-up](../SPEC.md#roll-up) has no blank cells.
+- [§ The transport check](#the-transport-check) has been re-run at close and its
+  output pasted — **exit 0, and every finding line accounted for in the ledger's
+  own prose**. A `FAIL` line, or no output at all, closes nothing.
