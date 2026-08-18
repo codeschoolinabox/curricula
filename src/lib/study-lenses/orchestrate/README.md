@@ -257,9 +257,9 @@ covered region must still be able to say. A covered surface keeps its state
 beneath it. The blocked state names the level and the first violation, or the
 type-admission cause. Every mask input — source, type, level, posture — is
 frozen during an excursion (each commit disposes it first), so enforcement
-arises in editor mode, where the masked strip bars opening lenses. Two paths can
+arises in editor mode, where the masked rail bars opening lenses. Two paths can
 mount a lens under an active mask: the honored focus, and a flush-at-open whose
-absorbed keystrokes settle out-of-level code (the strip was live when clicked);
+absorbed keystrokes settle out-of-level code (the rail was live when clicked);
 on both, the mask applies to the mounted lens identically. The full class-3
 block applies while the selected level's fit mark is does-not-fit or
 not-applicable-for-type — once the code parses. While it does not parse, the

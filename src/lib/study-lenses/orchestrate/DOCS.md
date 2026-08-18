@@ -126,9 +126,9 @@ flowchart TD
 - **Recommendations are vetted at collection.** A recommendation whose target
   lens does not resolve on the mount roster is dropped at collection, before
   ranking — gracefully, with a loud report at the author's desk. Every open path
-  is therefore vetted before the pane: the strip offers only attached lenses,
-  the honor path runs applicability at mount, and a surviving recommendation
-  names a roster lens the reachability judgment can classify.
+  is therefore vetted before the pane: the rail's trays offer only attached
+  lenses, the honor path runs applicability at mount, and a surviving
+  recommendation names a roster lens the reachability judgment can classify.
 - **One reachability judgment, two projections.** The pane's render gate and the
   orphan defense project a single classification of the open lens over the
   CURRENT derivation — phase-declared: attached to an accessible phase;
@@ -291,12 +291,12 @@ verdicts without consulting a level twice.
   up, like the strip's selects. A surface's class is a fact about what the
   surface is, never about which container it happens to render in; the button
   opens a class-3 study surface, so it takes that class with it. It renders in
-  editor mode only, and as a button rather than a select, so the strip's
-  every-select assertions keep their meaning.
+  editor mode only, and as a button rather than a select, so the rail's
+  every-tray-entry assertions keep their meaning.
 - The rail's trays track the committed open lens; the open lens's own tray entry
   is its close affordance — the close commits at the top component and announces
   `lens-opened: null` (the bus arm shipped reserved, now real). The class-2 Edit
-  code button is the GUARANTEED way home: the strip is class 3 and inert under a
+  code button is the GUARANTEED way home: the rail is class 3 and inert under a
   mask.
 - Coherence invariants at EVERY excursion-arm render, loud in dev AND prod: the
   settled pair must field-equal the occupant's `openedAt` (source and type) —
@@ -319,7 +319,7 @@ verdicts without consulting a level twice.
   component's render (in-file until a second call site exists). Every mask input
   is frozen during an excursion (the dispose rule), so mask state is fixed per
   mount; a mount can begin masked two ways — the honored focus, or a
-  flush-at-open that settles out-of-level code the strip or the Generate code
+  flush-at-open that settles out-of-level code the rail or the Generate code
   button offered against the pre-flush facts.
 - The honor resolution runs once at mount, mapping fallback → the editor arm and
   honored → the lens arm (`openedAt` = the initial settled pair); the lazy
