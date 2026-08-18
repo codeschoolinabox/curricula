@@ -87,9 +87,9 @@ sequenceDiagram
    renders per audience — dialogs speak to the learner-as-user, the console to
    the developer — and a run can be canceled. Opening the lens replaced the
    editor and fixed the program for the excursion; returning to edit — the Edit
-   code button, or the strip's none entry — disposes the lens and cancels the
-   in-flight run, and the next open mounts fresh against the code as edited:
-   every excursion is a fresh program.
+   code button, or the open lens's own tray entry — disposes the lens and
+   cancels the in-flight run, and the next open mounts fresh against the code as
+   edited: every excursion is a fresh program.
 6. **The kit leaves with the learner.** Nothing above depended on the snippet
    being curated — the same environment, phases, and lenses serve whatever code
    they meet next.
