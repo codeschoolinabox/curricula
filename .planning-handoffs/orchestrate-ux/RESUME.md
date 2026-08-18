@@ -2,11 +2,99 @@
 
 # orchestrate ux — resumption point
 
-**STATE: Phase 0 step 0.2. ROUNDS 8 AND 9 ARE BOTH RESOLVED** — round 8's
-fourteen findings in thirteen commits, round 9's eleven in seven more. **THE
-NEXT STEP IS `ar-1` ROUND 10.** Nothing is deliberately held open any more; the
-one decision round 8's resolution deferred (naming the caption) was ruled and
-landed.
+**STATE: Phase 0 step 0.2. AR-1 ROUND 10 HAS RUN AND RETURNED PAUSE — 2
+BLOCKERS, 5 IMPORTANT, 4 MINOR. Rounds 8 and 9 are fully resolved (13 + 7
+commits). Round 10's BLOCKER 1 and IMPORTANT 6 are DONE at `f6a03e69`; its
+BLOCKER 2 and the rest are YOUR OPEN WORK.**
+
+**Read [`DECISIONS.md`](./DECISIONS.md) first** — the decision index, its § 0.3
+entry conditions (the deferrals' only home), and now **§ The campaign's
+RADIUS**, which is what closing 0.2 actually claims.
+
+## The one thing round 10 changed most
+
+**The recurrence IS structural, and round 8 was wrong to say it is not — but it
+is EXHAUSTIBLE, which is the useful half.** The mechanism, in round 10's words:
+
+> The instruments are scoped by **container** (a file list, then a directory).
+> The decisions are scoped by **concept**. Concepts cross containers. Each round
+> therefore finds its defects at the boundary the previous round's instrument
+> stopped at.
+
+Round 8 fixed a hand-written file list and round 9 found the region; round 9
+fixed the region and round 10 found the package. **Above the package this
+region's terms stop being asserted at all** [measured 2026-08-18:
+`class [123]|surface class` → **0** files outside `orchestrate/`; `--sl-` →
+**0**, `.css` included]. So there is one ring left and it is empty.
+
+**And the column-construction problem is SOLVED, not conceded.** I reported it
+as unanswerable without a fifth instrument. It was answerable: the census was
+pointed at the campaign's directory when **each row's own `home of record`
+column already names the scope it should use**. Same instrument, different root
+argument. For assertions carrying no term token at all — the package README
+states this region's class-2 roster with no class token in the sentence — the
+instrument is a **reading list**, and the list is that same column.
+
+## ROUND 10 — PAUSE. THIS IS THE OPEN WORK
+
+Its verdict is archived verbatim below (§ ROUND 10'S VERDICT). **Do not
+re-derive it; read it.** What `f6a03e69` already closed: BLOCKER 1 (declared as
+the radius, plus `WORKFLOWS.md`'s live dispose raiser fixed) and IMPORTANT 6
+(A1's false status; C12's malformed row).
+
+### BLOCKER 2 · `the caption` was named and never migrated — START HERE
+
+I named the object to end a two-document synchronisation problem and then left
+both documents using the phrase. [measured 2026-08-18, squeezed unwrap: `the
+caption` → `README.md` **3**, `DOCS.md` **2**, `ux/wireframes.md` **0**; `slot
+beneath the rail` → README **3**, twin **1**; `reason line` → twin **3**.]
+
+- `README.md`'s own **home-of-record paragraph** for the four rules still says
+  "the slot beneath the rail holds exactly one line at a time".
+- The twin never learned the word, and uses **the reason line** for the count
+  arm — the name the caption entry explicitly rejects. `DECISIONS.md` row **A9**
+  is titled with that rejected name too.
+- `the caption` is a 0.3 TYPE name. An implementer reading the twin will not
+  find it.
+
+This is the round-6 pattern (sweep to zero, leave the home of record arguing the
+retired position) reproduced on this pass's headline decision.
+
+### The rest, in round 10's numbering
+
+- **IMPORTANT 3** — the caption is specified as ONE line and drawn as TWO at the
+  state that motivates it (cause + "the last two phases wait for it"). Decide in
+  prose whether the arm is a block or the waiting count is a second slot; the
+  sketch says the shape is a union, and a union of `string`/`string` is wrong if
+  one arm is a pair.
+- **IMPORTANT 4** — the third framing
+  (`the machinery broke here, not your code`) is **asserted and never drawn**,
+  against a rule this pass wrote in the same commit range. And
+  `ux/wireframes.md:43` still says "**exactly three shapes**" binding shape to
+  framing one-to-one, while an `entwined` failure has the grammar case's
+  geometry with a different framing. Also: the stage-keying is not in the
+  sketch, and `display-labels.ts` now keys against **two** embody vocabularies
+  without saying so.
+- **IMPORTANT 5** — G7's `home of record` is `editor/README.md`, which does not
+  contain the decision; it is stated in `orchestrate/README.md`, listed as an
+  asserting site. Invert them, and file the class claim into an A-row.
+- **IMPORTANT 7** — the design inverts Journey 6's own complaint and nothing
+  records it: the empty station gets per-station hidden text, the barred one
+  gets a collective caption that names no station. A real cost, unbooked.
+- **MINOR 8–11** — the checkpoint ledger's two treatments; "the count of what
+  waits" is a second unnamed count (and needs no singular rule — the suffix is
+  always 2 or 3); the projection contract labels a datum `proposals`; the strip
+  residue table disagrees with its own measured line.
+
+## What is still open beyond round 10
+
+1. **AR-5 has NEVER run** — `ab9e92f8`'s own subject line says so, and no
+   ceremony level removes it. **Ruled 2026-08-18: it runs at 0.2 CLOSE, not
+   before** — 0.2 is not closeable yet, so it would review a changeset about to
+   grow. Hand it the **SHA list, never a range**: 13–18 foreign commits
+   interleave each pass.
+2. **The push gate.** 22 campaign commits unpushed.
+3. Everything in `DECISIONS.md § 0.3 entry conditions`.
 
 ## Round 9 — PAUSE, resolved 2026-08-18
 
