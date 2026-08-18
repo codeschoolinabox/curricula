@@ -23,7 +23,9 @@ design questions remain open.
 - **This campaign's trigger has a check:**
   `npx vitest run --project unit src/lib/study-lenses/lib/scanning` reports
   fully green, with nothing skipped. Until then, do not start — the sequencing
-  ruling below is the reason.
+  ruling below is the reason. (This environment's node sits below the engines
+  minimum and vitest runs anyway; an engines-shaped failure is an environment
+  problem, not the trigger being unmet.)
 - **`ceremony` is the human's** and is not carried forward from the campaign
   that wrote this brief. Ask.
 - **Commit by explicit pathspec, in one shell invocation, with `--no-verify`.**
@@ -48,7 +50,13 @@ under `scanning/`. The trigger was still unmet at transcription time [measured
 2026-08-17: `npx vitest run --project unit src/lib/study-lenses/lib/scanning` →
 50 passed | 21 skipped (71)] — this ruling does not lift the sequencing ruling
 above. Classifying is NOT covered by this ruling; its question stays open as
-written.
+written. **Provenance of this ruling:** "without deleting or modifying the
+existing `scanning/`" covers all of `scanning/`, including the README paragraph
+that carries the residence question as deliberately unresolved — so this ruling
+RIDES THIS BRIEF (the campaign's durable artifact, per DEV.md § Ruling
+provenance) and the write-back into `scanning/README.md` § Why this module
+exists happens at campaign close, as a separate human-approved edit the closing
+commit body enumerates. Do not edit the leaf's README to record it before then.
 
 ---
 
@@ -94,21 +102,23 @@ out loud whether that is intended.
 
 **A second candidate, from the session that authored embody's current DOCS
 register (2026-08-17, offered as one session's position, not a ruling): the
-vocabulary-authority line.** Embody's own opener states it — "embody publishes
-the machine's own reading … Embody decides nothing about pedagogy." Ask in whose
-vocabulary the derivation is expressed. Scanning's fourteen kinds are ECMA-262's
-own productions — the specification's reading of the same source, a third
-authoritative machine-reading beside the tokenizer's and the parser's — so it
-qualifies, and the coherence invariant seals the residence argument.
-Classifying's five categories are, by its own README, "the house taxonomy …
-semantic, by what the element does in the NM" with authored judgment calls — a
-chosen teaching vocabulary, which is exactly what the accuracy-not-pedagogy
-contract leaves outside the Facts, independent of its current
-zero-live-consumers state. This line admits scanning alone, answers scoping
-(already a fact: environment) and screening (judge by whose vocabulary), and
-predicts the search for a line admitting both fails on principle. Weigh it
-against the candidate above; the anchoring caveat is real — its author also
-wrote the contract wording it appeals to.
+vocabulary-authority line.** The opener of
+`src/lib/study-lenses/embody/README.md` states it — "Embody decides nothing
+about pedagogy. The contract is _accuracy_: the region publishes the machine's
+own reading of the program." Ask in whose vocabulary the derivation is
+expressed. Scanning's fourteen kinds are ECMA-262's own productions — the
+specification's reading of the same source, a third authoritative
+machine-reading beside the tokenizer's and the parser's — so it qualifies, and
+the coherence invariant seals the residence argument. Classifying's five
+categories are, by its own README, "the house taxonomy … semantic, by what the
+element does in the NM" with authored judgment calls — a chosen teaching
+vocabulary, which is exactly what the accuracy-not-pedagogy contract leaves
+outside the Facts, independent of its current zero-live-consumers state. This
+line admits scanning alone, answers scoping (already a fact: environment) and
+screening (judge by whose vocabulary), and predicts the search for a line
+admitting both fails on principle. Weigh it against the candidate above; the
+anchoring caveat is real — its author also wrote the contract wording it appeals
+to.
 
 ---
 
@@ -158,9 +168,11 @@ edit.
    the next projection has no answer.
 2. **Eager or lazy.** `derive-facts.ts` builds stages eagerly, so every
    embodiment would pay for both derivations whether or not anything reads them.
-   Either that is cheap enough to ignore — measure it — or embody needs a lazy
-   stage, which is a **new pattern in embody** and a substantially bigger change
-   than it sounds.
+   Either that is cheap enough to ignore — measure it (a workable instrument:
+   wall-clock both derivations over the existing test corpora, per settle; a
+   suggested bar, not a ruling: low single-digit milliseconds) — or embody needs
+   a lazy stage, which is a **new pattern in embody** and a substantially bigger
+   change than it sounds.
 3. **The fact/phase seam.** `Facts` already carries six stages against five
    `LifecyclePhaseName`s, and the two sets are not the same — `entwined` and
    `type` are facts but not phases, `evaluation` is a phase but not a fact. Two
