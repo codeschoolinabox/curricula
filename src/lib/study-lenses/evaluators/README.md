@@ -22,6 +22,9 @@ frozen previous region kept beside it as a second reference.
 evaluators/
 ├── types.ts     the kind contract: Evaluator, the spec, the handle base,
 │                the refusal, the shared vocabulary types
+├── notional-machine.md
+│                the machine twin: the handle's consumption surface and the
+│                shared kind signature; evaluation is its black box
 ├── run/         plain execution: program in, result out, io mocks answered
 ├── intercept/   step-through execution: live event stream, generator surface,
 │                entwined enrichment, pending interactions
@@ -431,9 +434,11 @@ keep evaluator-owned config trees representable); HR-17 (refusal-as-data, with
 the typed-throw permission retained as kind-legal); HR-18 (level-blind); HR-19
 (instrumentation assumed sound, cost stated); HR-20 (two-value error phase
 declared; the script-semantics gap named at the axis; no execution path ratified
-— explicit deferral); HR-21 (this section). NOT discharged here, named for
-honesty: HR-5 and HR-7 (intercept's generator surface and drain-cancel —
-P0-I's), HR-15 (sandbox cadence — the evaluator chains').
+— explicit deferral); HR-21 (this section); HR-1 with its 2026-08-18
+reaffirmation (danger's deferral and target signature — encoded in the machine
+twin § The black box, and who opens it, per the G1 NM-twin lattice ruling). NOT
+discharged here, named for honesty: HR-5 and HR-7 (intercept's generator surface
+and drain-cancel — P0-I's), HR-15 (sandbox cadence — the evaluator chains').
 
 **Forward-compatibility requirements discharged:** 1 (base
 intersection-widenable), 2 (eager fields legal at creation), 3 (results fully
@@ -479,6 +484,10 @@ belong to the units that build those surfaces.
 
 - Package root: [`../README.md`](../README.md)
 - Architecture and decisions: [`DOCS.md`](./DOCS.md)
+- The machine twin: [`notional-machine.md`](./notional-machine.md) — the
+  region's notional machine: the handle's consumption surface and the shared
+  kind signature; how code is actually evaluated is its black box, and each
+  evaluator's own model opens it
 - The contract in types: [`types.ts`](./types.ts) — `Evaluator`,
   `EvaluationSpec`, `ExecutionBase`, `Execution`, `EvaluationOutcome`,
   `EvaluatorRefusal`, `ErrorPhase`, `ExecutionAxis`, `MachineryDefectKind`,
