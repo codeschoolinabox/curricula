@@ -97,6 +97,31 @@ first use did not.
    wrong and the seven is right [measured, both, at the two SHAs]. An AR verdict
    is itself a claim; the amendment stands on the measured numbers.
 
+4. **Widening a closed row's `also asserts` column RE-OPENS the row** (human
+   ruling 2026-08-17, after AR-1 round 8). Its status goes to `open (census)`
+   until the new sites are receipted like any other.
+
+   Amendments 1–3 all govern the moment a row **closes**. Nothing governed what
+   happens **after**, and a region-wide census exists specifically to produce
+   that event: `8f820355` added two sites to A1's closed column and wrote
+   "RECEIPTS: none owed". That was true under the rule as written and it is the
+   hole — a row whose site set grows after closure is a row whose new sites were
+   never checked against the closed claim.
+
+   **This amendment is scoped, deliberately.** It applies from here forward, and
+   retroactively to **the columns the census itself widened, and nothing else**
+   — the instances round 8 names, and the only ones enumerable in one command.
+   Applied without a scope it would re-open every row whose column ever grew
+   after closure, a set nobody has counted; an amendment whose reach is left to
+   the reader is the next finding waiting to be written.
+
+   **The retroactive set is one row.** [measured: `git show 8f820355` against
+   `8f820355^`, `also asserts` cells compared per row — **A1** alone gained
+   sites while `settled`, namely `editor/README.md` and `index.tsx`. **A2** also
+   changed, but from `all four A1 sites` to the enumeration itself: that is
+   amendment 1's de-indirection, not a widening, and it added no site A1 did not
+   already carry.] A1's status is set to `open (census)` in this commit.
+
 **Rows whose `home of record` is `none` are the other trap.** For A13 and C11
 the column IS the whole set, and the reflex was to receipt the new home and
 stop. When a row has no home, receipt every site in the column and the new home.
@@ -108,6 +133,8 @@ stop. When a row has no home, receipt every site in the column and the new home.
 - **also asserts** — every other site that states, cites, or depends on it.
   These are what a fix orphans.
 - **status** — `settled` · `open (<finding>)` · `0.3` (deferred) · `unfiled`.
+  `open (census)` is the value amendment 4 writes when a closed row's column is
+  widened.
 
 Paths are relative to `src/lib/study-lenses/orchestrate/`. Section names are
 `§ heading`; glossary entries are `glossary · term`.
@@ -137,7 +164,7 @@ dispose raiser, the thing the Rail abolishes — while carrying the retired
 
 | #   | decision                                                                                                         | home of record                                      | also asserts                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | status                                                                                                                                                                                              |
 | --- | ---------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A1  | Three classes, exhaustive over the surfaces the mask ACTS ON; the overlay is apparatus and takes no class        | `README.md` § Enforcement                           | `README.md` glossary · surface classes; `lib/masking/README.md` § The three surface classes; `lib/masking/types.ts` `SurfaceClass`; `ux/wireframes.md` § The parts, § Strict, covering — editor mode; **`editor/README.md`**; `index.tsx`                                                                                                                                                                                                                                                 | settled                                                                                                                                                                                             |
+| A1  | Three classes, exhaustive over the surfaces the mask ACTS ON; the overlay is apparatus and takes no class        | `README.md` § Enforcement                           | `README.md` glossary · surface classes; `lib/masking/README.md` § The three surface classes; `lib/masking/types.ts` `SurfaceClass`; `ux/wireframes.md` § The parts, § Strict, covering — editor mode; **`editor/README.md`**; `index.tsx`                                                                                                                                                                                                                                                 | **`open (census)`** — `editor/README.md` and `index.tsx` entered this column after it closed (`8f820355`); amendment 4 re-opens it until both are receipted                                         |
 | A2  | The class-2 **roster**, and the routes by which a node earns the class                                           | `README.md` § Enforcement                           | `README.md` glossary · surface classes; `lib/masking/README.md` § The three surface classes; `lib/masking/types.ts` `SurfaceClass`; `ux/wireframes.md` § The parts; `ux/wireframes.md` § Strict, covering — editor mode; `DOCS.md` § Structural constraints · Class-2 nodes never mask; `ux/wireframes.md` § What the arrangement never changes; `guide/README.md`; `level-ui/README.md` — **enumerated rather than referring to "the A1 sites", per the receipt rule's first amendment** | **SETTLED** `90166bc7` — the routes have ONE home (§ Enforcement); the other 7 sites cite it                                                                                                        |
 | A3  | The **rail is class 3**, argued from **exhaustion** (not lineage, not containment)                               | `ux/wireframes.md` § Strict, covering — editor mode | `README.md` glossary · the rail                                                                                                                                                                                                                                                                                                                                                                                                                                                           | **SETTLED** `90166bc7` — both of this row's sites receipted; `README.md` glossary · the rail now CITES rather than argues. (An earlier revision said "all 10 sites" — that count is A2's, not A3's) |
 | A4  | The **nameplate is class 2**, by a fourth route — _naming the pane's occupant_                                   | `README.md` § Enforcement + glossary · nameplate    | `README.md` glossary · nameplate + § What lives here; `lib/masking/README.md`; `lib/masking/types.ts`; `DOCS.md`; `ux/wireframes.md` § The parts + the lens-open drawing. Was **zero of ten mentions** before `b9a534c7`                                                                                                                                                                                                                                                                  | **SETTLED** `b9a534c7` — R-D's wording narrowed by ruling; see below                                                                                                                                |
