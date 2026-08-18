@@ -130,7 +130,7 @@ is owed.
 1. **`ledgers/<lens>.md` — the seeded per-lens ledgers.** **Two of eight are
    seeded** — `parsons` (47 rows, repaired at `dae045f3`) and `writeme` (45
    rows, the fidelity control). **You start at
-   [the AR-2 PAUSE section](#-start-here--an-ar-2-pause-is-open-and-it-blocks-the-next-ledger)
+   [the AR-2 PAUSE section](#-start-here--the-ar-2-pause-is-closed-the-next-deliverable-is-_family-fmds-inventory-shape)
    at the top of this file, not here and not at § Seeding wave status.**
    ~~`writeme` owes 13 cell re-cuts~~ — **DONE at `c734b5ad`**; `parsons` still
    owes its second-root re-seed. Remaining population: `blanks`, `dropdowns`,
@@ -162,11 +162,32 @@ is owed.
    final.
 6. **AR-5** over the SHA list, then the push prompt. Nothing is pushed.
 
-## ⛔ START HERE — an AR-2 PAUSE is open and it blocks the next ledger
+## ⛔ START HERE — the AR-2 PAUSE is CLOSED; the next deliverable is `_family-f.md`'s inventory shape
+
+**Session of 2026-08-18.** The three AR-2 blockers below are **resolved at
+`74590c5a`**, together with a **fourth** the review had not found and five
+batch-fixed non-blocking findings. Every one was re-measured before it was
+fixed, and three of the review's own numbers did not reproduce — see
+[§ What the 2026-08-18 session measured](#what-the-2026-08-18-session-measured).
+
+**The next deliverable is
+[`_family-f.md`'s inventory shape ALONE](#where-to-start--in-order), no rows.**
+It is a gate, and the last two dispatches each collapsed it into a wave.
+
+| SHA        | What                                                                                                                                                  |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `74590c5a` | `_TEMPLATE.md` + `FIDELITY-METHOD.md` — the four blockers, the per-member invocation form, and five batch-fixes. **This is the current template SHA** |
+
+⚠️ **Do not read that SHA as current on trust** — it has moved three times in
+one day and two stale copies shipped inside the warning against exactly that.
+Re-derive it every time:
+`git log --oneline -1 -- .planning-handoffs/lens-migration/ledgers/_TEMPLATE.md`
+
+### The historical PAUSE record, kept for its reasoning
 
 **Session of 2026-08-17. Three commits, all gated, nothing pushed. Both seeded
-ledgers now pass a published transport check. `_family-f.md` CANNOT be cut until
-three AR-2 blockers are resolved.**
+ledgers now pass a published transport check.** ~~`_family-f.md` CANNOT be cut
+until three AR-2 blockers are resolved.~~ — **closed at `74590c5a`.**
 
 | SHA        | What                                                                                                                                                                           |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -288,6 +309,35 @@ is scratch and **not** authoritative: **re-measure them, never transcribe.**
   glossary rows carry a `G3` tag with no port-side quotation. `glossterm`
   returns a bullet for 11 of the 12 terms, so it is a deferral by choice.
 
+## What the 2026-08-18 session measured
+
+Every AR-2 blocker reproduced. **Three of the review's own numbers did not**,
+and that is the point of re-measuring rather than relaying — a reviewer's count
+is a hypothesis, and this campaign has now corrected six of them.
+
+| the review said                                                           | measured 2026-08-18                                                                                                                                                        |
+| ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| the `<em>` trigger "over-predicts 3×, and missed `parsons-031`"           | it over-predicts **6×** on `parsons` and **6×** on `writeme`, and **is silent on `parsons-031`** — nought for one on true positives. It has no discriminating power at all |
+| the lone-`\*` blast radius is **2** Gen-2 docs (a cold reader said **4**) | a third regex says **5 of 8 doc pairs**, counts 1–8 each. Three instruments, three answers — **no count is published**, the edge is named instead                          |
+| Family F is "seven members with seven references, six absent"             | **one** member (`trace-debugging`) has a Gen-2 directory, and Family F has no Gen-3 port — so the check has exactly **one** reference root to resolve                      |
+
+**Two findings the review did not have**, both reproduced:
+
+- **A per-row zero-citation floor — the fix RESUME proposed — is breakable in
+  one mutation.** A fabrication placed _beside_ a good citation leaves
+  `parsed == cited == 1` and `parsed > 0`, so the invariant and the floor are
+  both silent. A third, looser counter (`lead`) is what closes it, and it scores
+  **0 false positives** on both clean ledgers.
+- **A fourth blocker in the same section**: `G3) [ "$PORT" = NONE ] && continue`
+  was a silent skip live on **100 %** of Family F's rows.
+
+**The instrument caught its own author twice**, which is the strongest thing
+that can be said for it: prettier ate the significant spaces out of the new
+member marker's inline code span — the exact hazard the template documents, in
+the bullet specifying the marker — and a mutation aimed at the Pass-1 gate
+landed outside the row slice and returned a false 0. Both were found by
+re-running, neither by re-reading.
+
 ---
 
 ## Seeding wave status
@@ -332,7 +382,7 @@ re-cutting thirteen cells that were re-cut the day before** — this canon's own
 recorded failure mode, found by the context-free validation of this very file.
 The live order is [§ Where to start](#where-to-start--in-order), and the live
 status is the
-[AR-2 PAUSE section](#-start-here--an-ar-2-pause-is-open-and-it-blocks-the-next-ledger).
+[AR-2 PAUSE section](#-start-here--the-ar-2-pause-is-closed-the-next-deliverable-is-_family-fmds-inventory-shape).
 
 1. ~~**13 of `writeme`'s 33 heading cells are owed a re-cut**~~ — **DONE**
    (`c734b5ad`). The published transport check now reports **0 divergent** on
@@ -362,18 +412,21 @@ Each would produce a **false** row if the brief omitted it:
   only the _CSS class_ is unreferenced. That is 1 of that ledger's 3 rows. The
   template's live-sibling rule covers it — a row asserting the learner cannot
   see something they can see is worse than no row.
-- **`dropdowns` — lister 4 has an unrecorded false-NEGATIVE mode.**
+- **`dropdowns` — lister 4 has a false-NEGATIVE mode.**
   `styles.distractorsLabel` (`:669`) and `styles.actionButtons` (`:713`) are
   referenced **only from commented-out JSX**, which `grep -q` matches, so both
   report as live. Its distractors and reset affordances are switched off by
-  commenting — invisible to channel B and uncountable by channel A. `_TEMPLATE`
-  § Lister 4's limits block is owed a third bullet, and under amend-before-cut
-  that lands **before** `dropdowns.md` is cut.
-- **`debug-props` — two canon documents give the `no Gen-1 source` line two
-  different, mutually exclusive homes**, both saying "once": `_TEMPLATE` §
-  Source inventory says there, FIDELITY-METHOD § The exemption needs evidence
-  too says `## Reference inventory`. Resolve as a template amendment before
-  cutting, or hand an explicit cited instruction plus a FLAG obligation.
+  commenting — invisible to channel B and uncountable by channel A.
+  ~~`_TEMPLATE` § Lister 4's limits block is owed a third bullet, and under
+  amend-before-cut that lands before `dropdowns.md` is cut.~~ — **the bullet
+  ALREADY LANDED in `3df1c727`**, carrying this exact measurement [read:
+  `_TEMPLATE.md` § Lister 4, the first of its three limits]. **No amendment is
+  owed; the brief cites the template rather than re-deriving it.**
+- ~~**`debug-props` — two canon documents give the `no Gen-1 source` line two
+  different, mutually exclusive homes.**~~ — **RESOLVED in `3df1c727` and
+  refined at `74590c5a`.** Both documents now say `## Reference inventory`, and
+  the cardinality is "once per inventory block" so `_family-f.md`'s per-member
+  headings are reachable. **No amendment is owed before `debug-props` is cut.**
 - **`quiz` and `socratize` glossary bullets are unreachable by `glossterm` under
   any matching strategy** — they put the whole phrase inside the bold span with
   no `—` separator. Both lenses are excluded, so it bites nowhere; do not
@@ -499,17 +552,13 @@ re-derive it from here.
 1. ~~**Re-cut `writeme`'s 13 hand-truncated `evidence` cells.**~~ **DONE**
    (`c734b5ad`), and `parsons-031`'s equivalent with it (`d68eae89`). Struck
    rather than ticked. Both ledgers now pass the published transport check — see
-   [the AR-2 PAUSE section](#-start-here--an-ar-2-pause-is-open-and-it-blocks-the-next-ledger),
+   [the AR-2 PAUSE section](#-start-here--the-ar-2-pause-is-closed-the-next-deliverable-is-_family-fmds-inventory-shape),
    which is where a fresh session starts.
 
-2. **RESOLVE THE THREE AR-2 BLOCKERS FIRST.** They are template defects, they
-   were introduced by `3df1c727`, and **every one of them binds `_family-f.md`
-   specifically** — the parse floor, the single-reference-root limit, and the
-   `## Reference inventory` placement that Family F's own heading rule forbids.
-   Cutting `_family-f.md` before they are fixed means cutting the campaign's
-   largest ledger against a check that cannot run on it and a rule it cannot
-   follow. Under standing ruling 3 the template is amended before a ledger is
-   cut from it, so this ordering is not a preference.
+2. ~~**RESOLVE THE THREE AR-2 BLOCKERS FIRST.**~~ **DONE at `74590c5a`** — four
+   blockers, not three, plus five batch-fixed findings. Struck rather than
+   ticked. The reasoning that produced them lives in that commit body; the
+   template is now stable and `_family-f.md` can be cut from it.
 
 3. **`_family-f.md`'s inventory shape alone**, as a probe before its rows. It is
    a **gate** — the last two dispatches each collapsed it into a wave. Its
@@ -518,7 +567,9 @@ re-derive it from here.
 
 4. **Wave 2 — `dropdowns`, `variables`, `debug-props`**, in parallel; none
    touches Gen-1's second root, so none waits on the unbuilt lister [measured
-   2026-08-16]. Their measured traps are in
+   2026-08-16]. ~~Two of them require a template amendment first, in its own
+   commit.~~ — **neither does any more**: both amendments landed (`3df1c727`,
+   `74590c5a`) and § Wave-2 traps records which. Their measured traps are in
    [§ Wave-2 traps](#wave-2-traps-measured-2026-08-16-so-the-briefs-carry-them),
    and two of them require a **template amendment first**, in its own commit,
    under the amend-before-cut ruling.
