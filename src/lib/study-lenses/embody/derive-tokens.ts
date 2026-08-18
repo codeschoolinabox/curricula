@@ -8,7 +8,8 @@ import type { FactStage, Snippet, Tokens } from './types.js';
 /**
  * Derive the tokens fact stage from a snippet: the token stream together with
  * the comments the tokenizer sets aside, tokenized from the source at the
- * snippet's parse goal.
+ * snippet's parse goal. On success the value also carries the
+ * input-element sequence — the field's contract lives in types.ts.
  *
  * @remarks
  * The snippet type selects acorn's `sourceType` — spelling is goal-sensitive
@@ -44,7 +45,7 @@ export default function deriveTokens(snippet: Snippet): FactStage<Tokens> {
 			}),
 		);
 
-		return { ok: true, value: { tokens, comments } };
+		return { ok: true, value: { tokens, comments, inputElements: [] } };
 	} catch (error) {
 		return { ok: false, cause: toStageCause(error, 'tokens') };
 	}
