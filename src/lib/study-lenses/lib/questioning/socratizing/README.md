@@ -8,8 +8,12 @@ metadata from three pedagogical frameworks.
 
 Socratizing **asks**; it never grades. It surfaces that a `let` is never
 reassigned and asks "what does `let` signal here?" — it never marks the choice
-wrong. Grading, mastery, and verdicts belong to a consuming lens; this engine
-produces the open, reflective register a human judges.
+wrong. Grading, mastery, and verdicts belong to the closed register's machinery
+and the consuming environment above — never here; this directory produces the
+open, reflective register a human judges. In the questioning family it is the
+open register's **leaf questioner**: `socratizing-questioner.ts` fronts this
+engine behind the family's `Questioner` envelope ([../README.md](../README.md) §
+The questioner family).
 
 ## What is a micro-decision?
 
@@ -325,7 +329,8 @@ lib/questioning/socratizing/
   README.md               (this — orientation + catalog + public API)
   DOCS.md                 architectural sketch + Mermaid data flow + pedagogical grounding
   types.ts                CodeQuestion, Question, Category, MicroDecisionResult, …
-  analyze-micro-decisions.ts   the single public export
+  analyze-micro-decisions.ts   the engine entry (public)
+  socratizing-questioner.ts    the family's Questioner envelope over the entry (public)
   create-code-question.ts      factory: builds and freezes each question
   extract-location.ts          offset range from an acorn node
   filter-questions.ts          config-based filtering (post-generation)
@@ -345,6 +350,11 @@ lib/questioning/socratizing/
 import analyzeMicroDecisions from './analyze-micro-decisions.js';
 
 const result: MicroDecisionResult = analyzeMicroDecisions(embodiment, config?);
+
+import socratizingQuestioner from './socratizing-questioner.js';
+
+socratizingQuestioner.serves(embodiment.facts); // boolean gate
+const same: MicroDecisionResult = socratizingQuestioner.ask(embodiment, config?);
 ```
 
 Pure function. It reads **two** required fact stages: the AST from
@@ -356,6 +366,11 @@ comes from `facts.source.value`. If **either** stage failed — the AST (an
 unparseable program) or the environment (a guarded embody defect) — it returns
 `{ ok: false, error }` drawn from whichever stage's `cause` (message + source
 offset). No side effects, no state, works in Node and browsers.
+
+Two public surfaces, one machinery — both equally pure: the envelope's `ask` IS
+`analyzeMicroDecisions` — identity, test-pinned — and its `serves` mirrors the
+entry's two refusal arms, so serves-false predicts exactly the inputs ask would
+refuse.
 
 ```ts
 // Success — questions is a frozen array (may be empty)
@@ -486,6 +501,8 @@ analyzeMicroDecisions(embodiment, { count: 3 });
   Socratic study surface: an overview shelf, per-element cards, and the
   open→pointed→comparative Feedback Ladder. It consumes `analyzeMicroDecisions`
   directly — there is no orchestrator between engine and lens.
+- **Family consumers** (a future higher-order questioner) reach the same
+  machinery through the `socratizingQuestioner` envelope instead.
 
 ## Why this module exists
 
