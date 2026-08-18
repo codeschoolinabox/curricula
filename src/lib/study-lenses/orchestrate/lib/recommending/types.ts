@@ -8,7 +8,7 @@
 import type { Recommendation } from '../../../lenses/types.js';
 
 /**
- * Collected proposals, ordered for rendering: relevance descending on the
+ * Collected recommendations, ordered for rendering: relevance descending on the
  * lens contract's shared 0–1 scale; equal relevance keeps the collected
  * order (stable ties). Frozen. Ranking trusts the scale — an out-of-range
  * relevance is the proposing lens's contract bug, never repaired here.

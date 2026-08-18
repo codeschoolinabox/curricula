@@ -164,7 +164,7 @@ export type UseSettledSnippetResult = {
 /**
  * What one derive pass produces for one settled snippet: the frozen
  * embodiment, every registered level's verdict, every level's assessment,
- * and the fitting lenses' proposals, ranked. Region-internal — the top
+ * and the fitting lenses' recommendations, ranked. Region-internal — the top
  * component holds one and the rendered surfaces project from it.
  *
  * @remarks
@@ -191,8 +191,7 @@ export type StudyDerivation = {
  * mount; the buffer itself lives in the settle hook's live-source slot). The
  * lens arm carries everything a mount needs frozen for its lifetime: the open
  * lens's name, the settled pair it opened over (the coherence anchor the
- * render invariants compare against), and the opened layer's overrides (a
- * recommendation-opened mount's proposal). The generator arm carries only the
+ * render invariants compare against), and the opened layer's overrides (a * recommendation-opened mount's recommendation). The generator arm carries only the
  * settled pair it opened over — one field doing the same two jobs as the lens
  * arm's: the seed the view remixes, and the coherence anchor.
  *

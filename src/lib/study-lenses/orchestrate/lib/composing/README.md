@@ -32,15 +32,15 @@ lens, then the learner's session tweaks — the learner layer is always final. T
 opened layer exists because a recommendation's overrides enter the cascade below
 the learner's own tweaks (canon: `Recommendation.config` in
 [`../../../lenses/types.ts`](../../../lenses/types.ts)) — folding them into the
-learner layer would let a proposal overwrite a tweak the learner already made.
-Resolution runs through the lens's own `config` factory when the lens declares
-one, else through the shared deep-merge; both paths are canon (`Lens.config`,
-same file), not a design choice made here. An override key present with value
-`undefined` is treated as absent; `null` is a value. The opened layer carries at
-most the open lens's proposal overrides — its lifecycle (set at a
-recommendation-opened mount, cleared with the open-lens choice) is the
-session-choice owner's, like every layer's contents: this library resolves the
-layers it is handed and holds nothing between calls.
+learner layer would let a recommendation overwrite a tweak the learner already
+made. Resolution runs through the lens's own `config` factory when the lens
+declares one, else through the shared deep-merge; both paths are canon
+(`Lens.config`, same file), not a design choice made here. An override key
+present with value `undefined` is treated as absent; `null` is a value. The
+opened layer carries at most the open lens's recommendation overrides — its
+lifecycle (set at a recommendation-opened mount, cleared with the open-lens
+choice) is the session-choice owner's, like every layer's contents: this library
+resolves the layers it is handed and holds nothing between calls.
 
 ## Renderable-lens recovery
 
