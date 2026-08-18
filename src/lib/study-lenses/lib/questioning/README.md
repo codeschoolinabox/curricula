@@ -162,9 +162,9 @@ forward, unbuilt — [DOCS.md](./DOCS.md) § Carried collateral records the carr
 Three vocabularies share the word "level"; this region resolves them once:
 
 - **Language level** — the package's dominant sense: a curated slice of
-  JavaScript owned by the language-levels region. This parent and both engines
-  are language-level-blind; the lib tier's "no levels" admission rule means
-  these levels, and this region does not touch them.
+  JavaScript owned by the language-levels region. This parent and every
+  questioner under it are language-level-blind; the lib tier's "no levels"
+  admission rule means these levels, and this region does not touch them.
 - The BLOCK **level** axis — atom, block, relation, macro — is the grid's own
   ordinal, concrete to abstract. Unqualified "level" in this region means this
   axis.
