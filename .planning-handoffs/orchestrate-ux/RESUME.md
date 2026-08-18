@@ -2,9 +2,67 @@
 
 # orchestrate ux — resumption point
 
-**STATE: Phase 0 step 0.2. AR-1 ROUND 8 HAS RUN AND RETURNED PAUSE — 3 blockers,
-5 IMPORTANT, 6 MINOR. Rounds 5, 6 and 7 are ALL RESOLVED, in fifteen commits.
-Round 8's three blockers are your open work.**
+**STATE: Phase 0 step 0.2. ROUND 8 IS RESOLVED — all 3 blockers, all 5 IMPORTANT
+and all 6 MINOR, in thirteen commits (2026-08-18). Rounds 5, 6 and 7 were
+resolved before it. THE NEXT STEP IS `ar-1` ROUND 9**, which is 0.2's acceptance
+test. One decision is deliberately still open and is named below.\*\*
+
+## What this pass did, and the SHA list
+
+**Take the SHAs, never a range.** Eighteen commits sit between the baseline
+`10cec890` and HEAD and only these thirteen are the campaign's [measured
+2026-08-18: `git log --oneline 10cec890..HEAD` → 18; the same with the campaign
+pathspecs → 13].
+
+| SHA        | what                                                                      |
+| ---------- | ------------------------------------------------------------------------- |
+| `c9a06eac` | receipt amendment 3 — a receipt prints the row's whole column · RULE      |
+| `b8c8e72e` | receipt amendment 4 — widening a closed row re-opens it · RULE            |
+| `dcc06ac4` | the intake checklist — two questions a commit answers · RULE              |
+| `4c1a6213` | **round 8's verdict recovered, archived verbatim, all 14 findings filed** |
+| `be818f9d` | a context-free audit of the above found 6 MUST-FIX; corrected             |
+| `bf6866bb` | the census's sites enter every row they assert (I4, I5)                   |
+| `d8caab89` | **BLOCKER 1** — the two deferral sections collapse to one home            |
+| `e66c09d0` | **IMPORTANT 8** — one file owns the copy                                  |
+| `664f4bde` | **BLOCKER 3** — the cause line keyed by the failing stage · RULE          |
+| `aceac00b` | **BLOCKER 2** — the dispose enumeration discharged in present tense       |
+| `3b12dfbb` | **IMPORTANT 6** — `recommendation` reaches the prose · RULE               |
+| `b086afe6` | **IMPORTANT 7** — the sketch gains the slot contract                      |
+| `8c35c977` | the six MINOR; two drawings get the top rule they never had               |
+
+**Green baseline holds exactly: 622 passing in 22 files** [measured 2026-08-18:
+`npx vitest run --project unit src/lib/study-lenses/orchestrate`]. This was a
+documentation pass and should have moved no test; it did not.
+
+## What is still open
+
+1. **`ar-1` round 9** — the acceptance test for closing 0.2. Registered agent,
+   **no `model` parameter**. Tell it round 8's class-2 subject was verified at
+   fifteen files, **as evidence rather than as a no-go zone**: telling a
+   reviewer what not to review is how a real regression walks through.
+2. **Naming the slot beneath the rail** (row C12's M12 half). Deliberately NOT
+   done here: naming it shapes one of 0.3's types, and round 5's reviewer argues
+   it settles B4's residue and I3's home question at the same time. That makes
+   it a design decision, not a MINOR. **Put it to the human.**
+3. **AR-5 is owed and has never run.** `ab9e92f8`'s own subject line says so.
+   AR-5 fires at the last commit before a handoff and **no ceremony level
+   removes it** [read: `DEV.md` § AR-5]. Whether the debt is discharged at 0.2
+   close is the human's call — it is named here so it stops being invisible.
+4. **Everything in `DECISIONS.md` § 0.3 entry conditions**, which is now the
+   deferrals' only home.
+
+## Rulings taken 2026-08-18 — binding, do not re-litigate
+
+| #   | ruling                                                                                                                                                     |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R-P | **Search for a "lost" verdict before writing it off.** It was fully recoverable. See § Mechanics, trap 4.                                                  |
+| R-Q | **`DECISIONS.md` § 0.3 entry conditions is the deferrals' home**; § Deferred to 0.3 deleted outright, no pointer stub.                                     |
+| R-R | The barred cause line is **keyed by the failable stage**, not by the lifecycle phase — `entwined` is not a phase.                                          |
+| R-S | The durable-home question for `DECISIONS.md` is **ruled at 0.2 close**. `DEV.md § Ruling provenance` already supplies the mechanism; no new ruling needed. |
+| R-T | R-R narrowed: **two authored framings** (`tokens`, `ast`) plus one shared instrument-fault branch. `environment` can never originate a rendered cause.     |
+| R-U | B2's split: `README.md` § The host surface's `strip` mention is **vocabulary**, deferred with a declared non-receipt.                                      |
+| R-V | The copy's home is **`display-labels.ts` widened**, not a new `copy/` directory.                                                                           |
+| R-W | **`DOCS.md` may take the slot contract** — the two-tier-autonomy trigger, approved.                                                                        |
 
 **Read [`DECISIONS.md`](./DECISIONS.md) before this file's task list.** It is
 the campaign's decision index — one row per arrangement decision, its home of
@@ -1401,6 +1459,43 @@ thing that actually fires; the checklist is what it fires.
 
   Single-token patterns (`\bbreaks?\b`) are immune to trap 2 but **not** to
   trap 3.
+
+- **A SUBAGENT'S REPORT IS NOT WHERE YOU WILL LOOK FOR IT, AND THIS COST TWO
+  AGENTS A FALSE CONCLUSION.** An AR verdict returned by a spawned reviewer is
+  **not in the repo** and **not in the session's own `.jsonl`**. It is in
+  `~/.claude/projects/<project-slug>/<session-id>/subagents/*.jsonl` — a
+  directory a top-level `*.jsonl` glob does not descend into. Round 8's verdict
+  was declared lost on exactly that basis [measured 2026-08-18: `grep -ril
+  "round 8" .` → this file only; `find . -iname "*AR-LOG*"` → nothing], and both
+  searches were correct about the repo and wrong about the machine. **Do not
+  conclude a verdict is unrecoverable until you have looked there.** Recover it
+  with `json.loads` over the session `.jsonl`, pulling the `<result>` block out
+  of the `task-notification`; splice it programmatically rather than retyping,
+  so it is verbatim by construction.
+
+  **And unescape it.** The transcript stores the reviewer's text HTML-escaped,
+  so `<the parser's message>` arrives as `&lt;…&gt;` and renders literally
+  inside code spans. Byte-identity to a transcript is not fidelity to what the
+  reviewer wrote — that mistake shipped once here and was corrected in
+  `be818f9d`.
+
+- **The markdownlint `enable` directive RE-ENABLES RULES THE PROJECT CONFIG
+  TURNED OFF**, not merely the ones you disabled. Using it to close a disabled
+  region took this file from 0 to **86** errors, all in pre-existing content.
+  Use the `capture` / `disable` / `restore` trio instead, which restores the
+  configured state rather than the default one.
+
+  **And do not write those directives out in full in prose — they FIRE.** They
+  are HTML comments, and markdownlint parses them wherever they appear,
+  including inside backticks. Writing this very bullet with the comment
+  delimiters intact enabled `MD013` from that point on and produced a
+  line-length error a thousand lines later, in a table nobody had touched. Name
+  the directives by their bare words, as above.
+
+- **prettier is NON-IDEMPOTENT on some block quotes.** One written here gained a
+  nesting level per `--write` and had stray `>` injected into its prose. If
+  `--check` still fails right after a `--write`, that is the tell: stop fighting
+  it and use plain paragraphs. Verify by running `--write` twice and diffing.
 
 - **`markdownlint-cli2` resolves its config from the CURRENT WORKING
   DIRECTORY**, not from the linted file's tree. Run it from the **repo root** or
