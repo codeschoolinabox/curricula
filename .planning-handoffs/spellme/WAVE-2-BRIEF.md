@@ -5,12 +5,23 @@
 <!-- cspell:ignore TemplateSubstitutionTail HashbangComment LineTerminator -->
 <!-- cspell:ignore DivPunctuator RightBracePunctuator pathspec worktree ZWNBSP -->
 
-# tdd-worker launch brief — `lib/scanning` Phase 1, Wave 2
+# `lib/scanning` Phase 1, Wave 2 — closed record (was a tdd-worker launch brief)
 
-You finish `src/lib/study-lenses/lib/scanning/`. Wave 1 landed 24 of the suite's
-71 tests across ten commits and stopped deliberately before the template fold;
-wave 2 has since landed 22 more. **You own the remaining 25** — the "47" this
-line carried was wave 2's opening figure and is five increments out of date.
+> # ⛔ CLOSED — this brief has no work left in it
+>
+> **`lib/scanning` Phase 1 is complete: 71 of 71 passing, 0 skipped, closed at
+> `10cec890`** [measured 2026-08-18]. Wave 1 landed 24 tests across ten commits;
+> wave 2 landed the remaining 47 across nine. **Nobody is to execute from this
+> document.** Everything below is a record — kept for its measurements, its
+> traps and its lessons, all of which still teach. The live campaign record is
+> [`./PHASE-1.md`](./PHASE-1.md) § Rulings of record, § Traps and § Where things
+> stand.
+>
+> This banner exists because a false live-status document is the defect this
+> campaign has paid for three times — `38fee403`, `6ecb22e9` and now this
+> commit, and a cold read of the stale version once returned twelve must-fix
+> findings across two passes. AR-5 at the Phase-1 close ruled that shipping it
+> stale a fourth time, knowingly, would escalate its verdict to PAUSE.
 
 Process rulings governing this campaign are in
 [`./PHASE-1.md` § Rulings of record](./PHASE-1.md) — nine bullets, eight of them
@@ -47,50 +58,57 @@ accurate. Where it and this brief disagree about **arrival state** — which tes
 are green today — this brief is the later measurement; that is a freshness
 difference, not an error in that file.
 
-## ⚠ Resume here — FIVE increments are already done
+## Wave 2 — COMPLETE, nine increments
 
-This brief has launched several times. Workers have landed five increments
-between them and **six sessions have died** — three harness stalls at the `ar-4`
-call, one weekly-quota wall at the same call, one `529` during the reading phase
-before touching anything, and one `500` two increments deep. **No death has ever
-cost committed work**, because the rule below holds: leave the change unstaged,
+This brief launched several times. **Seven agent sessions died** — three harness
+stalls at the `ar-4` call, one weekly-quota wall at the same call, one `529`
+during the reading phase before touching anything, one `500` two increments
+deep, and one session limit that took an AR-5 before it read a line. **No death
+ever cost committed work**, because the rule held: leave the change unstaged,
 commit nothing, discard nothing, never commit an increment whose AR-4 has not
-returned.
+returned. Two deaths cost a drafted commit body and its green-arrival records,
+which had to be reconstructed from the assertions; one hid a landed commit from
+the orchestrator, whose own "next driver" was a full increment stale until the
+un-skip arithmetic failed to reconcile.
 
-Where you pick up, measured 2026-08-17:
+The nine, in order, each with its own AR-4 before landing:
 
-| SHA        | Increment                                                          |
-| ---------- | ------------------------------------------------------------------ |
-| `065afc16` | a backtick opens a template run that folds into one element        |
-| `7046bc01` | a right brace continuing a template opens the run that closes it   |
-| `26eba4a5` | both template-chunk token types open and close a folded run        |
-| `9d719f17` | a carriage return and line feed pair collapses into one terminator |
-| `25449442` | a gap holding both trivia kinds splits into one element per run    |
+| SHA        | Increment                                                                   |
+| ---------- | --------------------------------------------------------------------------- |
+| `065afc16` | a backtick opens a template run that folds into one element                 |
+| `7046bc01` | a right brace continuing a template opens the run that closes it            |
+| `26eba4a5` | both template-chunk token types open and close a folded run                 |
+| `9d719f17` | a carriage return and line feed pair collapses into one terminator          |
+| `25449442` | a gap holding both trivia kinds splits into one element per run             |
+| `2200c512` | a line separator names a LineTerminator rather than whitespace              |
+| `c9d8d40a` | the set-aside comment channel merges into source order                      |
+| `f63b7b2a` | a hashbang is corrected off the comment channel by position and opening     |
+| `10cec890` | the published sequence freezes, and the boundary guard confirms the reading |
 
-Suite: **46 passing, 25 skipped (71)**; `npx tsc --noEmit` 0; eslint, prettier
-and cspell exit 0 [all measured 2026-08-17]. Sketch phases 2, 3 and 5 exist and
-phase 5's split is real. **Phases 1 and 4 still do not exist** — the boundary
-guard and the comment merge are the work ahead.
+**Final state** [all measured 2026-08-18]: **71 passing, 0 skipped (71)**;
+`npx tsc --noEmit` 0; eslint, prettier and cspell exit 0 on both paths;
+repo-wide `8 failed | 416 passed | 1 skipped (425)`, exactly the known-foreign
+baseline, nothing from `scanning`. **All five sketch phases exist** — the
+boundary guard and the comment merge inline in the export, the fold, the naming
+and the gap split as the three named helpers, per the standing ruling.
 
-**Your next driver is `names a line separator a LineTerminator`** — the last
-Trivia red. `LINE_TERMINATORS` holds `\n` and `\r` only; the kind table names
-U+2028 and U+2029 too, and this fixture is what forces them. After it,
-`Comments and the hashbang` (6 reds) builds phase 4.
+⚠ **Three FLAGs are open and none is an agent's to close.** They are the human's
+at the push gate: the boundary guard type-checks `code` but presence-checks the
+two arrays, so a present-but-wrong-typed array still fails _inside_ — and
+`DOCS.md` contradicts itself about whether that is allowed; the guard has no
+regression lock, because all three `Exceptions` fixtures assert
+`.toThrow(TypeError)` and stay green if the guard is deleted; and U+2029 and
+ZWNBSP sit in the kind table with no fixture. The last two are suite changes,
+which this campaign twice put to the human rather than let an agent take.
 
-**11 reds remain**: that one, Comments and the hashbang ×6, Interfaces ×3 (the
-freeze assertions), Exceptions ×1. `Boundaries — tiling` and `Simple` arrive
-wholly green and close no increment.
-
-⚠ **Everything below this section that predicts an arrival state is written
-against an earlier tree.** The block table, the un-skip order's per-block
-counts, and § Inherited state all pre-date these five commits. Their _rules_
-bind; their _numbers_ do not. Re-measure.
+⚠ **Everything below predicts an arrival state against a tree that no longer
+exists.** Its _rules_ still teach; its _numbers_ are history.
 
 ## History — landed increments, kept for their findings
 
 ⚠ **Everything from here to § AR dispatch describes work that is DONE.** It is
 kept because its measurements and lessons still teach; **nothing in it is an
-instruction to you.** The live state is § Resume above.
+instruction to you.** The final state is § Wave 2 — COMPLETE above.
 
 ⚠ **Everything measured at `2989d9e1` is stale — that means § Inherited state's
 22-of-47 table far below, and every forward prediction built on it, NOT the

@@ -32,7 +32,18 @@ are not now.
 | `542d4771`              | DEV.md's first-user-twin ruling names `spellme`                                  |
 | `d2688fd8`              | second Phase-0 top-up — four more fixtures, suite 67 → 71                        |
 | `2989d9e1`              | the naming table stops carrying a contradicting second spec                      |
-| `<wave 2>`              | the remaining 47, per [`./WAVE-2-BRIEF.md`](./WAVE-2-BRIEF.md)                   |
+| `065afc16` … `10cec890` | **wave 2 — nine increment commits**, listed individually below                   |
+
+**Wave 2's nine, as a list — never as a range** (`065afc16..10cec890` spans
+dozens of foreign commits): `065afc16` `7046bc01` `26eba4a5` `9d719f17`
+`25449442` `2200c512` `c9d8d40a` `f63b7b2a` `10cec890`. Phase 1 closed at the
+last of them, 71 of 71 passing, 0 skipped [measured 2026-08-18]. The four
+handoff-doc commits that ride with them: `6e1926c3` `38fee403` `eacae342`
+`6ecb22e9`.
+
+⚠ This row read `` `<wave 2>` | the remaining 47 `` until 2026-08-18 — a
+placeholder left standing after the work landed, which is precisely what this
+table's own warning below predicts about a SHA list written last.
 
 ⚠ **Foreign commits interleave all of those**, one of them landing _between_
 `9eea31a3` and `349d2f99`. **Do not trust a count here — recompute it**, because
