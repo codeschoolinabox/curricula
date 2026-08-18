@@ -1,4 +1,4 @@
-<!-- cspell:ignore behaviour behavioural colouring colours generalise spellme wireframes -->
+<!-- cspell:ignore behaviour behavioural colouring colours generalise neighbourhood spellme wireframes -->
 
 # orchestrate
 
@@ -28,7 +28,9 @@ orchestrate/
                            derives — the phase labels and short labels, the fit
                            marks, the nameplate's two forms, the tray and
                            proposals headings, the empty-station reason with its
-                           count line, and the barred phase's cause line
+                           count line, the barred phase's cause line, the
+                           standing's drawn word, and the blocked sentence with
+                           its ordered three ways out
   editor/         the editing surface — where the learner authors the source
   generator/      the AI-authoring view — the pane's third occupant
   rail/           the lifecycle drawn as the machine's own conveyor — the line,
@@ -171,8 +173,12 @@ content region, so the class-1/class-3 split survives the swap.
   labels are this region's UI concern — their data names live in embody.
 - **The level UI** — the selector, permanent whenever levels are registered: its
   closed face shows the selected level's state, its open list shows a fit mark
-  per registered level, hover surfaces the level's docs. Beside it: the
-  selected-level-only gutter and the strict toggle.
+  per registered level, hover surfaces the level's docs. Beside it in the
+  control row: the **strict toggle**. The **gutter** is not here — it is the
+  editor's own surface, class 1 with the editor, annotated for the selected
+  level only and fed by the same memoized validate. It is named in this bullet's
+  neighbourhood only because the three surfaces project one truth; it does not
+  render in the band.
 - **The snippet-type toggle and the embedded guide** — alive under every
   posture: the toggle because its change can itself restore conformance, the
   guide because a posture may not withdraw its own explanation of itself. The

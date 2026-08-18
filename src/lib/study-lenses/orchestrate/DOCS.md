@@ -135,9 +135,13 @@ flowchart TD
   panel-excluded: its applicability holds over the current facts. A divergence
   would mean a blank-pane deadlock or a one-frame totality violation; one
   judgment makes both impossible.
-- **Display labels live here.** The five phases' learner-facing labels and the
-  none-state's display string are this region's presentation concern; the data
-  names are the other regions'.
+- **Display copy lives here.** Every learner-facing string this region keys or
+  derives is its presentation concern — the phase labels and short labels, the
+  fit marks, the nameplate's two forms, the tray and proposals headings, the
+  empty-station reason with its count line, the barred phase's cause line, the
+  standing's drawn word, and the blocked sentence with its ordered three ways
+  out. `display-labels.ts` is their one home. The data names are the other
+  regions'.
 
 ## The top component — state and the settle loop
 
