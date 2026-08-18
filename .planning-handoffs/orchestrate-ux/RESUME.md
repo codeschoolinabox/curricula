@@ -1,4 +1,4 @@
-<!-- cspell:ignore actioned acyclicity affordances authorised behaviour behavioural brok checkability checkpointed codemod codepoint cutover failable finditer generalises homehood misdescribes organise organised parentheticals respecified scriptable spellme synchronisation ugrep unactioned unbuilt undercount undercounted undercounts undrawn unmigrated unretired unrun wireframes -->
+<!-- cspell:ignore actioned acyclicity affordances authorised behaviour behavioural brok checkability checkpointed codemod codepoint cutover failable finditer generalises homehood misdescribes neighbouring organise organised parentheticals pathspec respecified scriptable spellme synchronisation ugrep unactioned unbuilt undercount undercounted undercounts undrawn unmigrated unretired unrun wireframes -->
 
 # orchestrate ux — resumption point
 
@@ -45,20 +45,54 @@ the radius, plus `WORKFLOWS.md`'s live dispose raiser fixed) and IMPORTANT 6
 ### BLOCKER 2 · `the caption` was named and never migrated — START HERE
 
 I named the object to end a two-document synchronisation problem and then left
-both documents using the phrase. [measured 2026-08-18, squeezed unwrap: `the
-caption` → `README.md` **3**, `DOCS.md` **2**, `ux/wireframes.md` **0**; `slot
-beneath the rail` → README **3**, twin **1**; `reason line` → twin **3**.]
+both documents using the phrase.
 
-- `README.md`'s own **home-of-record paragraph** for the four rules still says
-  "the slot beneath the rail holds exactly one line at a time".
-- The twin never learned the word, and uses **the reason line** for the count
-  arm — the name the caption entry explicitly rejects. `DECISIONS.md` row **A9**
-  is titled with that rejected name too.
-- `the caption` is a 0.3 TYPE name. An implementer reading the twin will not
-  find it.
+**The entry's own arm-naming was self-contradictory and is FIXED first
+(2026-08-18), because round 10's suggested fix rested on misreading it.** Round
+10 said the entry "explicitly rejects 'the reason line'". It did not — it
+rejected `the reason line` and `the count line` as names for the SLOT, while one
+sentence earlier calling the arms _cause line / count line_ and the closing
+sentence calling them _reason line / count line_. The entry now says it once:
+**the arms are the cause line and the count line**, `the reason line` and
+`the empty-count line` are retired for both, and what is rejected is naming the
+slot after an arm. **Do not re-derive the arm names from round 10's verdict — it
+reproduces the contradiction.**
 
-This is the round-6 pattern (sweep to zero, leave the home of record arguing the
-retired position) reproduced on this pass's headline decision.
+**The measurements, and the earlier revision of this section hid one of them**
+[measured 2026-08-18, squeezed unwrap]:
+
+| phrase                  | `README.md` | `DOCS.md` | `ux/wireframes.md` |
+| ----------------------- | ----------- | --------- | ------------------ |
+| `the caption`           | **3**       | 2         | **0**              |
+| `slot beneath the rail` | **3**       | 0         | 1                  |
+| `the reason line`       | **1**       | 0         | 3                  |
+| `the empty-count line`  | **1**       | 0         | 1                  |
+
+**All three `the caption` hits in `README.md` are inside the entry that DEFINES
+it** — the term has zero uptake outside its own definition. And the README
+carries a `reason line` and an `empty-count line` of its own; an earlier
+revision of this section reported only the twin's three and would have sent you
+grepping one file.
+
+**The work:**
+
+- `README.md`'s **home-of-record paragraph** for the four rules still says "the
+  slot beneath the rail holds exactly one line at a time". Rewrite it, and the
+  two neighbouring `slot` references, in the caption's terms.
+- Migrate the twin's three `reason line` and one `empty-count line` to **the
+  count line**, and its one `slot beneath the rail` to **the caption**.
+- Retire the README's own one `reason line` and one `empty-count line`.
+- Retitle `DECISIONS.md` row **A9**, which is titled with a retired arm name.
+- **The twin is THREE documents** — `personas.md`, `user-journeys.md`,
+  `wireframes.md`. Only `wireframes.md` carries any of these phrases [measured:
+  the other two are 0 for all four]. Say so in the receipt rather than implying
+  one file.
+- Then add `ux/wireframes.md` to C12's column **for the naming half** — the
+  column lists it for the precedence half only, which reads as already-filed.
+
+`the caption` is a 0.3 TYPE name. An implementer reading the twin will not find
+it. This is the round-6 pattern — sweep to zero, leave the home of record
+arguing the retired position — reproduced on this pass's headline decision.
 
 ### The rest, in round 10's numbering
 
@@ -93,7 +127,20 @@ retired position) reproduced on this pass's headline decision.
    before** — 0.2 is not closeable yet, so it would review a changeset about to
    grow. Hand it the **SHA list, never a range**: 13–18 foreign commits
    interleave each pass.
-2. **The push gate.** 22 campaign commits unpushed.
+2. **The push gate — and there is no upstream to measure against.** [measured
+   2026-08-18: `git rev-parse --abbrev-ref main@{u}` → _no upstream
+   configured_.] The frontier is `origin/main` (`cf0316bd`), against which
+   **63** commits touch campaign paths — most of them rounds 1–7, from earlier
+   sessions. **This session's work is 24**, `10cec890..HEAD` with the campaign
+   pathspec. Quote the pathspec with any count; it is
+   `src/lib/study-lenses/orchestrate .planning-handoffs/orchestrate-ux src/lib/study-lenses/WORKFLOWS.md`.
+
+   ⚠ **Each round's SHA table below omits its own closing commit**, because the
+   table was written before that commit existed. Round 8 is **14**, not 13 (add
+   `01be0e58`); round 9 is **8**, not 7 (add `85dfbf74`). An AR-5 SHA list
+   assembled literally from those tables drops the three commits that ARE the
+   decision record.
+
 3. Everything in `DECISIONS.md § 0.3 entry conditions`.
 
 ## Round 9 — PAUSE, resolved 2026-08-18
@@ -171,7 +218,14 @@ pathspecs → 13].
 `npx vitest run --project unit src/lib/study-lenses/orchestrate`]. This was a
 documentation pass and should have moved no test; it did not.
 
-## What is still open
+## What is still open — ROUND 8'S LIST, SUPERSEDED
+
+**Discharged. Do not work from this section.** Its item 1 was "`ar-1` round 9 —
+the acceptance test"; rounds 9 AND 10 have both run. Its AR-5 item said the
+timing was "the human's call"; **it was ruled 2026-08-18 — AR-5 fires at 0.2
+close, not before** (see the live § What is still open beyond round 10, above).
+Its item on naming the caption is done (`964ec315`). Kept because the reasoning
+is auditable.
 
 1. **`ar-1` round 9** — the acceptance test for closing 0.2. Registered agent,
    **no `model` parameter**. Tell it round 8's class-2 subject was verified at
@@ -375,7 +429,14 @@ session judged load-bearing, and that judgment is itself a datum:
   own's "ranks the proposals"); the twin measures 12 `proposal` to 1
   `recommendation`.
 
-## Recommended opening move
+## Recommended opening move — ROUND 8'S, SUPERSEDED
+
+**Every step below has landed. Do not work from this section.** Step 1 (the
+filing checklist) is `dcc06ac4`; step 2 (transcribe round 8's findings) is
+`4c1a6213`; steps 3–5 are `d8caab89`, `aceac00b`, `664f4bde`; step 6 ("re-run
+`ar-1`") has run twice, as rounds 9 and 10. Its closing line — "on the next
+PAUSE, do not open round 10 alone" — is discharged; round 10 was put to the
+human and ran by ruling. **The live opening move is § ROUND 10, at the top.**
 
 **A context-free agent validated this handoff and returned ten must-fix
 findings; they are applied above.** Two of its findings are the reason this

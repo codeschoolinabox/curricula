@@ -491,10 +491,12 @@ this region owns.
   the rail" — in two documents that had to stay in sync. A tray never takes it:
   a tray opens BETWEEN the rail and the caption, pushing it down along with the
   pane, because a tray describes one station while the caption describes the
-  rail as a whole. Deliberately not "the reason line" or "the count line": those
-  name its two ARMS, and naming the slot after one arm is what made the
-  precedence rule read as a competition between two objects rather than a total
-  order over one.
+  rail as a whole. **Its two arms are the cause line and the count line**, and
+  those are the only names either arm takes — `the reason line` and
+  `the empty-count line` are retired for both. **What is rejected is naming the
+  SLOT after an arm**: calling the whole object "the reason line" is what made a
+  total order read as a competition between two objects, which is the defect
+  this entry exists to end.
 - **apparatus** — what the mask uses to DO its work, as against the surfaces it
   acts ON. **This narrows a package term and the narrowing is load-bearing**:
   the package glossary defines the enforcement mask AS "the strict-posture
