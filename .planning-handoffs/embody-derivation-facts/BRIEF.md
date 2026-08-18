@@ -209,6 +209,8 @@ edit.
 - `src/lib/study-lenses/lib/scanning/README.md` § Why this module exists —
   carries this question as a dated open question, which is its canonical home.
 - `src/lib/study-lenses/lib/classifying/` — README, DOCS.md, types.ts.
+- `src/lib/study-lenses/embody/README.md` — the opener carrying the
+  accuracy-not-pedagogy contract the second candidate line appeals to.
 - `src/lib/study-lenses/embody/` — `derive-facts.ts` (stage construction),
   `index.ts` § `freezeExceptions` (the process-global guard), `types.ts`
   (`Facts`, `FactStage`, `LifecyclePhaseName`).
