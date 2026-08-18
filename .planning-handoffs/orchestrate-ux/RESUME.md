@@ -1,4 +1,4 @@
-<!-- cspell:ignore acyclicity actioned affordances behaviour behavioural checkpointed codemod cutover authorised failable finditer misdescribes organise organised parentheticals respecified spellme ugrep unbuilt undercounted undercounts unactioned undrawn unretired unrun wireframes -->
+<!-- cspell:ignore actioned acyclicity affordances authorised behaviour behavioural brok checkpointed codemod codepoint cutover failable finditer homehood misdescribes organise organised parentheticals respecified spellme ugrep unactioned unbuilt undercount undercounted undercounts undrawn unretired unrun wireframes -->
 
 # orchestrate ux — resumption point
 
@@ -142,13 +142,26 @@ human: key by **failable stage** rather than by phase, and decide what an
 **Also draw the spelling-broken shape in the twin** — it is asserted and never
 drawn, which is how this survived eight rounds.
 
-### The five IMPORTANT and six MINOR — NOT YET IN THE DECISION RECORD
+### The five IMPORTANT and six MINOR — RECOVERED AND TRANSCRIBED
 
-**Read `ar-1` round 8's verdict for the full text; it is not transcribed
-anywhere** [measured: `grep -ic "round 8"` on `DECISIONS.md` → **0**]. This is
-the round-4 "three MINOR stayed lost" failure repeating, and **transcribing them
-into `DECISIONS.md` is part of the next session's first commit**. The three
-worth knowing before you start:
+**THIS SECTION'S ALARM IS DISCHARGED — the alarm was right and its conclusion
+was wrong.** An earlier revision said "Read `ar-1` round 8's verdict for the
+full text; **it is not transcribed anywhere**", and treated the eight findings
+not summarized below as the round-4 "three MINOR stayed lost" failure repeating.
+That was true of the **repo** and false of the machine [measured 2026-08-18:
+`grep -ril "round 8" .` → this file only; `find . -iname "*AR-LOG*"` → nothing].
+**The complete verdict was recovered and is archived verbatim in this file** —
+see § ROUND 8'S VERDICT, AS RETURNED — and all fourteen findings are now rows in
+[`DECISIONS.md`](./DECISIONS.md).
+
+**The reason every search missed it is worth more than the findings.** A
+subagent's report is neither in the repo nor in the session's own `.jsonl`; it
+is in `<session-id>/subagents/*.jsonl`, which a top-level `*.jsonl` glob does
+not descend into. That is now recorded as a fourth trap in § Mechanics that will
+bite you. **Do not conclude a verdict is lost until you have looked there.**
+
+The three summarized here are kept because they were the three the outgoing
+session judged load-bearing, and that judgment is itself a datum:
 
 - **The census discovered sites and nothing filed them.** `editor/README.md`
   asserts A1, two A2 roster members with their grounds, AND D6 — filed in A1
@@ -219,6 +232,298 @@ since:
 | R-M | **`DEV.md` wins over round 6's counter-proposal C** — status/migration/revision narration comes OUT of `README`/`DOCS`/`types.ts`.       |
 | R-N | **Discharge the dispose enumeration NOW**, in present tense; its recorded dependency on `Station`'s shape does not hold.                 |
 | R-O | Hand off at this boundary; a fresh session opens on round 8's blockers.                                                                  |
+
+---
+
+# ROUND 8'S VERDICT, AS RETURNED — ARCHIVE, NOT A TASK LIST
+
+**The task list is § ROUND 8 above. This is the source it was written from**,
+kept verbatim because the reasoning is auditable and because this campaign has
+twice discovered that an AR verdict's own summary loses findings — round 4's
+three MINOR, and round 8's eight.
+
+**Provenance, and it is not repo state.** Recovered 2026-08-18 from the outgoing
+session's subagent transcript at
+`~/.claude/projects/-Users-master-…-0-curricula/b064dad5-5193-40a6-91bb-a41621faf5ff/subagents/agent-a1e392afa05d8202e.jsonl`,
+spliced into this file programmatically rather than retyped, so it is verbatim
+by construction. Two independent agents located the same report and its
+signature is tight: exactly three `BLOCKER n`, five `IMPORTANT n`, six
+`MINOR n`, self-identifying as "Round 8, AR-1 Design Challenge". **A transcript
+is never `[read:]` evidence for repo state** [read: `DEV.md` § Sourced claims] —
+every claim below is `[relayed: ar-1 round 8]` until re-measured, and the rows
+in `DECISIONS.md` carry that tag.
+
+**Five of its claims were re-measured at HEAD 2026-08-18 and all five
+reproduce** — I6's four count pairs exactly, I7's zero hits, M9's one, M10's
+two, M13's eight. **Two of its claims were re-measured and found UNDERSTATED**,
+both recorded in the rows rather than here: M14 names one drawing missing its
+`┌` and there are two, and M11's instrument reports two false positives unless
+single-line band excerpts are excluded.
+
+<!-- prettier-ignore-start -->
+<!-- markdownlint-capture -->
+<!-- markdownlint-disable -->
+
+Reviewed as: claude-opus-5[1m] | UNDETERMINED
+
+(The `opus` pin took — `claude-opus-5[1m]` is opus-family. Round 8, AR-1 Design Challenge, `work: software · twin-doc: user · ceremony: full · prospective`. Twin present and reviewed with the README, per `DEV.md § AR-1`.)
+
+---
+
+### What I verified independently before judging
+
+| claim | result |
+| --- | --- |
+| Region-wide class census, 15 files | **Reproduces exactly**, case-insensitively [measured: per-file `tr '\n' ' ' \| tr -s ' ' \| grep -oiE 'class 1\|class 2\|class 3\|class-[123]'` over every `.md`/`.ts`/`.tsx` under `orchestrate/` → `README.md` 26 · `ux/wireframes.md` 22 · `index.tsx` 8 · `DOCS.md` 7 · `lib/masking/README.md` 5 · `editor/README.md` 4 · `PHASE-1-CHECKPOINT-LEDGER.md` 2 · nine files at 1]. Case-sensitively it is 15 files with lower counts — the census's numbers are the case-insensitive ones. |
+| BLOCKER 1's carve-out reaches every three-way enumeration | **Confirmed.** Four full enumerations exist (`README.md` ×2, `lib/masking/README.md`, `lib/masking/types.ts`); all four name the carve-out [measured: `grep -oiE '.{60}every other surface.{110}'` and `'.{90}everything else.{90}'` region-wide]. No site omits the exception. |
+| Four routes / seven nodes agree across sites | **Confirmed.** `ux/wireframes.md` § The parts, § Strict covering, § What the arrangement never changes, § Fresh mount, `guide/README.md`, `level-ui/README.md`, `lib/masking/*` all carry the four-route form; the strict-toggle falsehood is gone from `level-ui/README.md` [read: `level-ui/README.md` — "never masked, because both **act on the boundary** … Only the first of those restores conformance"]. |
+| M15 (`DEV.md` is an F3 site) | **Confirmed** [read: `DEV.md:776-777` — "`orchestrate/phases-panel/`, `orchestrate/dock/`"; measured: `find src -type d -name dock` → only `study-lenses--deprecated-architecture/orchestrate/dock`]. |
+| M14 (four overhanging fenced lines) | **Confirmed and now measurable** — see MINOR 11. Your call not to fix was defensible; the finding itself was right. |
+
+The subject rounds 3–8 have all been about — class 2, the routes, the overlay — is **clean**. I could not falsify it at any of the 15 sites. What follows is elsewhere.
+
+---
+
+### Concerns
+
+#### BLOCKER 1 — R-M's relocation put the deferral record where nothing points, and § 0.3 entry conditions is a strict subset of the deferrals it claims to own
+
+**Where:** `.planning-handoffs/orchestrate-ux/DECISIONS.md:400-413` (§ 0.3 entry conditions), `.planning-handoffs/orchestrate-ux/RESUME.md:3-34, 768`.
+
+**What.** Three measured facts, each independently sufficient:
+
+1. **Nothing anywhere references `DECISIONS.md`** [measured: `grep -rn "DECISIONS" --include='*.md' --include='*.ts' --include='*.tsx' src/ .planning-handoffs/ AGENTS.principal.md DEV.md` excluding the file itself → **0 hits**]. Not `RESUME.md`, not the region, not governance. The section says "**whoever opens 0.3 reads this list first**" and no artifact in the tree tells them it exists.
+2. **`RESUME.md` — the campaign's canonical resumption record, and the one a handoff points at — is stale at round 5 and claims the homehood R-M gave away.** [read: `RESUME.md:5-12` — "AR-1 **ROUND 5** HAS RUN AND RETURNED PAUSE … **Your first task is § ROUND 5 below.** It is the open work and it is the only task list in this file"; `RESUME.md:768` — "## DEFERRED TO 0.3 — **this record is the deferral's only durable home**"]. Compare `DECISIONS.md:400` — "**the deferrals' only home, by ruling**". Two files, same claim, different memberships, and the reachable one is three rounds out of date [measured: `git log --oneline -3 -- .planning-handoffs/orchestrate-ux/RESUME.md` → `9601606f` "round 5's PAUSE lands"].
+3. **§ 0.3 entry conditions carries five rows where § Deferred to 0.3 carries eight**, and at least one 0.3 obligation is in neither. Missing from the entry conditions: the strip vocabulary migration (as its own item), the editor-mode scrim geometry, the narrow-viewport degradation. Missing from **both**: the accessibility-structure obligation [read: `ux/wireframes.md` § What the arrangement never changes — "the structure a screen reader traverses comes from named regions and groups rather than from a heading outline — which is the only route left once the outline is spent, and **it is owed at 0.3**"]. That is a deliverable owed to the reader Journeys 5 and 6 exist for, with no row and no entry condition.
+
+**Why it matters.** This is the direct answer to your question 1, and it is no: the new section is not sufficient for someone opening 0.3 cold, because a cold reader cannot find it, and if they find it they get five of at least nine obligations. R-M's premise — "NOTHING IS LOST — all of it is carried by DECISIONS.md, RESUME.md and the commit bodies" [read: `49b90dba` body] — holds for *storage* and fails for *retrieval*. The removed DOCS.md block quote named this exact reader: "this note is what makes the split legible to **a reader who never opens the campaign's own records**" [read: `git show 49b90dba` diff, `DOCS.md` removed lines]. R-M deleted the note and moved its content into a campaign record.
+
+**Certainty:** high on all three measurements; high that this blocks a cold 0.3 open.
+
+**Fix:** see CP-B.
+
+---
+
+#### BLOCKER 2 — The end-state docs assert a live `strip`, the design abolishes it, and the only in-tree marker was removed
+
+**Where:** `README.md` § What renders (l.119), § Enforcement (l.247), glossary · dispose (l.359), glossary · edit-return, glossary · the rail (l.581); `DOCS.md` § Execution phases 4 (l.54), § The render projection (l.274-278); against `README.md` § What lives here (l.18-42) and `ux/wireframes.md:509` .
+
+**What.** `strip` counts at HEAD [measured: squeezed-unwrap `grep -oE 'strip'` per file]: `README.md` **13** · `DOCS.md` **7** · `PHASE-1-CHECKPOINT-LEDGER.md` 6 · `editor/README.md` 2 · `event-bus/README.md` 1 · `generator/README.md` 1 · `phases-panel/**` 17 · `tests/index.test.tsx` 13.
+
+The contradiction is inside one document:
+
+- `README.md` § What lives here lists `rail/` and no strip.
+- `README.md` glossary · the rail: "**Supersedes the lifecycle strip** … the strip's own vocabulary is **retired** with it".
+- `README.md` § What renders, three hundred lines earlier: "the strip's none entry closes an open lens too **whenever the strip itself is not masked**" — present tense, normative, describing a surface the same document retires.
+- `README.md` § Enforcement: "enforcement arises in editor mode, **where the masked strip bars opening lenses**".
+- `ux/wireframes.md` § An excursion open: "**This arrangement has no strip**".
+
+`49b90dba` removed the two block quotes that reconciled these, on the grounds that `DEV.md` forbids migration-phase notes in end-state docs. **The reading is textually right and applies the rule to the wrong sentence.** `DEV.md § What goes in docs vs. plans vs. handoffs` forbids "migration-phase notes" — but under `prospective`, *the strip prose itself* is the status narration: it describes where the work currently stands, not what the region IS. The correct application removes the **strip**, not the **label on the strip**. R-M removed the mitigation and left the larger violation.
+
+The governance hook that makes this a blocker rather than a taste question is Phase 0's own closing test [read: `DEV.md:2108-2110` — "Can you read `types.ts`, `README.md` and `DOCS.md` together and **fully predict** what the implementation will do and what shape it will take? If not, the ambiguity will surface as a bug or a structural mess — **resolve it now**"]. Today those three documents do not answer whether the region has a strip.
+
+**On judging R-M's reversal on its merits, as asked:** the *ruling* stands — I am not re-litigating R-G's deferral or R-M's scope. What I am reporting is that the deferral's **stated reason has been falsified by the twin**, so the deferral is cheaper to discharge than the record says. See CP-A.
+
+**Certainty:** high that the contradiction is live and unmarked; high that DEV.md's read-together test fails on it; medium on my claim that the deferral is dischargeable now (CP-A gives the argument).
+
+---
+
+#### BLOCKER 3 — The barred-phase cause line is one authored string for two barring shapes, and one of them is false
+
+**Where:** `README.md:504` (glossary · display labels), `README.md:550` (the machine-token rule's worked example), `ux/wireframes.md:281` (drawn), against `ux/wireframes.md:43-45`.
+
+**What.** The copy contract [read: `README.md:503-505` — "**The barred phase's cause line** — the parser's own message, framed by this region: `the grammar broke here — &lt;the parser's message&gt;`"]. One string, stated as invariant framing.
+
+The data shape says otherwise [read: `ux/wireframes.md:43-45` — "**Exactly three shapes**: everything open; **grammar broken** (source, tokens and ast stay open, the last two wait); **spelling broken** (source and tokens stay open, the last three wait)"].
+
+Under *spelling broken* the barring edge sits between `tokens` and `ast`, the cause is the tokenizer's, and **"the grammar broke here" is false** — the grammar did not break; nothing has reached it. The twin's own journeys record the spelling-failure path as live [read: `ux/user-journeys.md` § One thing every journey above assumes — "when the spelling stage fails, the contract and a passing unit test both say the grammar phase is barred too"].
+
+**Why it is a blocker and not a copy nit.** This is a **shape** decision, and 0.3 locks it. Every other piece of copy in this entry is settled as *keyed or derived* against a vocabulary — the phase labels, the fit marks, the empty-station reason, the tray heading. The cause line is the one specified as a **constant**, and it is constant only if there is one barring shape. There are two. The entry's own discipline names the failure mode exactly: "a rule that happens to work on five labels would silently return the whole string for the sixth that carries no separator" [read: `README.md:471-473`]. Same defect, one entry down.
+
+It also contaminates the machine-token rule, whose worked example is this string [read: `README.md:548-550` — "the reason the sentence a learner reads when the machine stops says _the grammar broke here_ rather than naming **the barring edge**"].
+
+Secondary: the twin draws **1 of 3** barring shapes [measured: `grep -rn "grammar broke"` → 4 hits; `grep -rni "spelling brok"` → 1 hit, and it is the enumeration, not a drawing]. Drawing the spelling shape is what would have surfaced this.
+
+**Certainty:** high that the two shapes exist and the string is wrong in one; high that it is a keyed-vs-constant decision.
+
+**Fix:** CP-C.
+
+---
+
+#### IMPORTANT 4 — The census found the sites; the rows absorbed two of seven, each into one row
+
+**Where:** `DECISIONS.md:119` (A1), `:120` (A2), `:284` (D6), `:124` (A6), `:125` (A7).
+
+**What.** The census's own headline finding is `editor/README.md`, and `8f820355`'s body states precisely what it asserts: "one paragraph there asserts **A1**, **two A2 roster members with their grounds**, AND **D6**". It was then filed in **A1 only** [read: `DECISIONS.md:119` — A1's column carries `**editor/README.md**`; `:120` — A2's column ends at `guide/README.md`; `level-ui/README.md`; `:284` — D6's column is `README.md` glossary · dispose; `DOCS.md` ×2; `event-bus/README.md`].
+
+The paragraph asserts all three [read: `editor/README.md:49-57` — "The editor is surface class 1 … the guaranteed way home is the Edit code button: **class 2**, alive under every posture. **The strip's none entry closes an open lens too**, but the strip is class 3 and inert while masked"].
+
+Same for `index.tsx`: filed in A1, while its comments assert **A6** twice, **A7**, **A8**, and **D2** [read: `index.tsx:552-558` — "A surface's class is a fact about what the surface IS, never about which container it happens to render in"; `:336-340` — "ONE VISUAL PANE, TWO DOM SLOTS"]. Only A8's column names it.
+
+Five newly-found asserting files are in **no** row at all: `PHASE-1-CHECKPOINT-LEDGER.md` (2 class assertions, 20 mask assertions, 6 `strip`), `editor/DOCS.md`, `guide/DOCS.md`, `level-ui/DOCS.md`, `tests/index.test.tsx`. `ux/user-journeys.md` asserts A2's roster semantics and is in no A-row either — I checked its claim and it is **not** stale [read: Journey 4 — "every class-2 node — which is not the same set as 'every control that could restore conformance'"].
+
+**Why it matters.** When 0.3 closes D6 under the amended receipt rule, the block walks D6's column, prints four receipts, and misses `editor/README.md` — the exact miss the census was run to end, reproduced in the commit that ran the census. The census is a **discovery** instrument; nothing in the process converts a discovery into a row-membership, and this round shows the conversion is where the loss now happens.
+
+**Classification (your Q5):** recurrence, same drift, **new location** — and mechanically fixable, not inherent.
+
+**Certainty:** high.
+
+---
+
+#### IMPORTANT 5 — A third structure defeats the receipt rule, and a fourth event has no trigger at all
+
+**Where:** `49b90dba` body (RECEIPTS block), `8f820355` body ("RECEIPTS: none owed"), `DECISIONS.md:58-81`.
+
+**Would the amended form have caught rounds 6 and 7?** Yes to both, and I checked the mechanism rather than accepting it. Round 6 (`b9a534c7` left `README.md` glossary · the rail on the retired enumeration while A3's column named it): the original rule already catches it — the quotation comes up empty. Round 7 (fifteen quotations, nineteen sites): amendment 2 catches it by construction. Amendment 1 (no indirection) closes the `all four A1 sites` hole. The rule is sound as far as it goes.
+
+**The third structure — sub-claim scoping.** `49b90dba`'s block is keyed to *claims*, not *rows*: "**A1 the class-3 statement — all THREE sites**". A1's column names **six** also-assert entries (seven after the census) plus a home. The completeness claim is true of the narrowed scope and false of the row, and a reader auditing the commit against `DECISIONS.md` sees "all THREE" beside a seven-entry column. This is amendment 1's banned indirection re-entering on the other axis: instead of the column pointing elsewhere, **the receipt block redefines what the column is**. (Strictly, A1 was already `settled`, so no rule was broken — which is precisely why it is worth flagging: the structure is available and nothing prohibits it.)
+
+**The fourth event — column widening.** The receipt rule fires on *closing* a row. `8f820355` **added two sites to A1's closed column** and wrote "RECEIPTS: none owed". A row whose site set grows after closure is a row whose new sites were never checked against the closed claim — and a region-wide census exists specifically to produce that event. The rule has no trigger for it.
+
+Concretely, one of the two added sites carries a ground the campaign retired elsewhere: `editor/README.md` grounds class 1 as "never masked while mounted, **because editing is how conformance is restored**" — the conformance-restoration framing R-E declared insufficient and which was rewritten out of `level-ui/README.md` in the same session.
+
+**Classification:** recurrence of the same subject (receipts vs. coverage), **new mechanism**. Fixable — CP-D.
+
+**Certainty:** high on the two structures; medium on whether `editor/README.md`'s class-1 ground is stale enough to be called false (it is not false, it is off-vocabulary).
+
+---
+
+#### IMPORTANT 6 — I10's `recommendation` settlement reached the glossary and nothing else, and no row was opened for it
+
+**Where:** `README.md:448-457` (glossary · recommendation), against the rest of the region.
+
+**What** [measured: squeezed-unwrap counts]: `README.md` proposal **9** / recommendation 13 · `DOCS.md` proposal **8** / recommendation 8 · `ux/wireframes.md` proposal **12** / recommendation **1** · `ux/personas.md` 1/1.
+
+The rule the new entry states: "_Proposal_ survives **only** in that surface's name and in the `candidate` entry's contrast … **everywhere else in this region's prose the contract term is the one to use**".
+
+Two violations are in the home document itself, above the entry that forbids them:
+- § The composition root: "for a lens opened by a recommendation — **that proposal's** opening overrides".
+- § What this region does not own: "this region only **ranks the proposals** and renders them".
+
+Neither is the surface name nor the candidate contrast. The twin is almost entirely on the retired synonym (12 : 1).
+
+**And no `DECISIONS.md` row was opened for the decision**, against the file's own maintenance rule [read: `DECISIONS.md:34` — "A new decision gets a row **when it is taken**, not when it is reviewed"] and its own stated limit [read: `:419-421` — "It indexes decisions, not sentences. A sentence asserting no decision on this list is invisible to it. **When you find one, the decision is missing — add the row**"].
+
+**Why it matters.** This is *exactly* the round-6 failure the receipt rule was built for — old words everywhere, new claim at one site — reproduced on a decision that never entered the instrument. The instrument is sound; the intake is not.
+
+**Classification:** recurrence of the round-6 pattern on a **new** decision, caused by a skipped intake step.
+
+**Certainty:** high on the counts; high that the two README uses violate the stated rule.
+
+---
+
+#### IMPORTANT 7 — The slot-beneath-the-rail contract lives only in a glossary entry; the sketch AR-2 will challenge does not contain it
+
+**Where:** `README.md:530-547` vs `DOCS.md` § The render projection.
+
+**What** [measured: `tr '\n' ' ' &lt; DOCS.md | grep -oiE '.{80}(nothing to open|count line|reason line|empty).{80}'` → **0 hits**]. The four rules — derived per settle, singular at one, absent at zero, yields the slot to the cause line, and an open tray never takes the slot — appear in `README.md` glossary · display labels and nowhere in the architectural sketch.
+
+The entry itself argues these are one indivisible contract: "an implementer reading only two of the three would ship the third defect". The sketch reader gets **zero of four**. `49b90dba`'s I11 correctly added the short label and a station's four parts to `DOCS.md`; the slot precedence was not carried with them, and it is the more implementation-shaped of the two.
+
+`DEV.md` makes the sketch, not the glossary, the document the Refactor is held against [read: `DEV.md:2101-2106` — "The sketch is the **single most consequential document in the workflow** — it is what the entire Refactor step is held against"].
+
+**Certainty:** high (measured absence).
+
+---
+
+#### IMPORTANT 8 — Copy now has a contract and no module home
+
+**Where:** `README.md` § What lives here (l.17-42) vs glossary · display labels (l.460-559).
+
+**What.** The entry enumerates **seven** derived-or-keyed copy families: the five phase labels, the five short labels, the four fit-mark strings, the nameplate's two forms, the tray heading, the proposals heading, the barred cause line, the empty-station reason + its count line. The manifest names **one** file: `display-labels.ts`, "the phases' display labels, keyed by phase name" — and it holds one string per phase today [read: `display-labels.ts`; measured: live consumer at `index.tsx:654`].
+
+So a 0.3 implementer inherits a copy contract with seven families and a manifest slot for one, and no ruling names homes for the other six. This is the same gap R-A closed for the five new nouns (rows F1–F3) — and it was never asked for the copy, which grew across rounds 6 and 7 into the largest single entry in the README (~100 lines for one glossary term).
+
+**Certainty:** high on the enumeration and the manifest; medium on severity — it is arguably 0.3's question, but R-A establishes that module homes are 0.2's in this campaign.
+
+---
+
+#### MINOR 9 — One class-3 definition still reads "everything else"
+
+`lib/masking/README.md` § The three surface classes: "**Class 3, everything else** — the study panel and its lenses…". The carve-out **is** stated two sentences later, so nothing is omitted and your Q2 answer is genuinely clean. But the wording BLOCKER 1 retired at three sites survives at the fourth, in the library that owns the derivation [measured: `'.{90}everything else.{90}'` region-wide → this is the only class-3 instance; the other six hits are unrelated prose]. Certainty: high.
+
+#### MINOR 10 — I7's roster numeral survives at one non-home site
+
+`49b90dba` claims "the numeral is dropped at **both** non-home sites". Measured across the SHAs [`git show &lt;sha&gt;:&lt;file&gt; | grep -oic seven`]: `lib/masking/README.md` 3→**0**, `DOCS.md` 2→**0**, `ux/wireframes.md` **2→2**. One of the two is "Seven journeys" (unrelated); the other is `ux/wireframes.md` § What the arrangement never changes — "**Two of the seven are not controls at all**", a roster-size statement at a non-home site, in the file the same commit edited. The size has gone 5→6→7 in three days by the commit's own account. Recurrence, same drift, 2 of 3. Certainty: high.
+
+#### MINOR 11 — M14 is real, is measurable, and your instrument was the problem (you asked me to say if the call was wrong)
+
+The call to not fix against a bad measure was **right**. The finding is **also right**, and there is a clean instrument: measure the codepoint index of the frame's **closing vertical**, not the line length — line length is what the trailing `←` annotations confound.
+
+[measured: python, per fenced block, index of each `│┌┐└┘├┤`] Every framed line closes at index **63** except exactly **four**, which close at **64**:
+
+| line | content |
+| --- | --- |
+| `ux/wireframes.md:161` | `│ [Generate code]  [module]  [plain JavaScript ▾]     ( ) strict│` |
+| `ux/wireframes.md:342` | `│         [Just Enough JavaScript · steps outside ▾]  ( ) strict│` |
+| `ux/wireframes.md:358` | `│         [Just Enough JavaScript · steps outside ▾]  (•) strict│` |
+| `ux/wireframes.md:452` | `│         [Just Enough JavaScript · steps outside ▾]  (•) strict│` |
+
+Four lines, all closing `strict│` — round 7's count and description, exactly. Three of the four sit in blocks where every sibling closes at 63, so the misalignment renders. `DECISIONS.md:428-433`'s "**one unmeasured finding**" is now false, and should say so. Certainty: high (ambiguous-width characters run the *other* way — these lines carry more of them, so a wide rendering makes the overhang larger, not smaller).
+
+#### MINOR 12 — Three concepts the module works with that the glossary never names
+
+AR-1's second focus bullet. All three are load-bearing:
+- **apparatus** — the category that exists solely to sit outside an exhaustive taxonomy, and the justification for `SurfaceClass` having three members. Defined inline in § Enforcement, referenced from glossary · blocked state, glossary · surface classes and `lib/masking/types.ts`. A glossary that keeps four near-homonyms of *mark* apart across three paragraphs does not name the one category deliberately outside its own split.
+- **the instrument** — the twin's primary subject noun [measured: `ux/personas.md` 13 · `ux/user-journeys.md` 14 · `README.md` 6]. The README *names its own collision* and declines to resolve it [read: glossary · house token — "this region calls itself _the instrument_ in its own prose, but a language level's notional-machine document already calls the NM _the mechanical instrument_"]. A homonym identified in prose and left unresolved is the case § 0.1 says to settle in the glossary, not in code review.
+- **the slot beneath the rail** — a contract object with a *total* precedence rule (cause line › count line › nothing), referenced by that phrase in both README and twin, with no name.
+
+Certainty: high on the measurements; medium on whether `apparatus` and `the slot` warrant entries versus inline definition.
+
+#### MINOR 13 — F3's site count undercounts by two
+
+`DECISIONS.md:313` and `:413` say "four sibling READMEs … plus `index.tsx`, plus `DEV.md`" = six. [measured: `grep -rln "phases-panel"` excluding the directory itself → **eight**: adds `PHASE-1-CHECKPOINT-LEDGER.md` and `tests/index.test.tsx`.] Same undercount pattern, in the row the census's own commit edited. Certainty: high.
+
+#### MINOR 14 — Two drawing observations
+
+`ux/wireframes.md:451-464` (§ Strict, covering — with a lens already open) closes with `└` and has no `┌`; every other full drawing has both. And the "mark row and reason line travel together" invariant [read: `:213-218`] **holds** across all drawings under its stated scope — I checked each block by eye and by frame index; the generator and warn crops are exempt as excerpts. Noting it because it is the one invariant this document offers as "two greps", and it survives. Certainty: high.
+
+**Empty tier:** none. All three tiers carry findings.
+
+---
+
+### Counter-proposals
+
+**CP-A — Discharge I6 now with a present-tense rewrite; the stated dependency does not hold.**
+`DECISIONS.md:366` says the dispose enumeration "cannot be rewritten without naming what replaces the strip's none entry, and that is `Station`'s shape — 0.3's first type". The twin already names the replacement [read: `ux/wireframes.md:509-511` — "the tray entry for the open lens is its own close affordance — pressed while open, released to close"], and the **tray** is settled (B5, B6, glossary · tray), not deferred. B10 asks whether *openable and bare* stations are one shape or two — a station with a tray is openable by construction, so the tray entry exists under either answer. Writing `README.md` glossary · dispose as "*Raised by the open lens's tray entry, the Edit code button, …*" is pure present-tense end-state prose, adds no migration narration, and clears BLOCKER 2's core at the sites that matter most. If the human prefers the deferral to stand, the *reason* recorded for it should be corrected, because it is currently a dependency that is not there.
+
+**CP-B — Give the record a reachable pointer, and merge the two deferral tables.**
+`DEV.md` explicitly permits this: handoff files are where "process info, ordered steps, phase splits, status snapshots … all live" [read: `DEV.md:921-926`]. So (i) refresh `RESUME.md`'s banner to round 8 and point it at `DECISIONS.md` in the first ten lines; (ii) delete `RESUME.md` § DEFERRED TO 0.3's "only durable home" claim or make it a pointer; (iii) collapse `DECISIONS.md` § Deferred to 0.3 and § 0.3 entry conditions into **one** table — two sections in one file both claiming to be the deferrals' home is the same defect the campaign has spent five rounds removing from the region; (iv) add the accessibility-structure obligation as a row.
+
+**CP-C — Key the cause line, exactly like the empty-station reason.**
+`the &lt;phase-that-barred&gt; broke here — &lt;the parser's message&gt;`, keyed by the barring phase name and zipped against the same order constant. Two authored framings (`the spelling broke here` / `the grammar broke here`), by the same argument that made the short labels authored rather than derived: a derivation from the phase label would produce "the Tokens · spelling broke here". Draw the spelling-broken shape in the twin so the third shape stops being asserted-only. And restate `README.md:550`'s worked example against the keyed form.
+
+**CP-D — Two more receipt-rule amendments, both mechanical.**
+3. **Receipts are keyed to row IDs and reproduce the row's column verbatim.** No scoping phrase ("the class-3 statement", "the sites that lacked one") may narrow the printed set; a genuinely narrower fix prints the full column with `— NO RECEIPT: unchanged, this fix does not touch it` on the rest. This closes the sub-claim hole with the vocabulary amendment 2 already introduced.
+4. **Widening a closed row's `also asserts` column re-opens it.** Status goes to `open (census)` until the new sites are receipted. Without this, every future census silently adds unchecked sites to settled rows — and the census is the instrument this campaign just committed to.
+
+**CP-E — Name a copy home before 0.3.**
+Either widen `display-labels.ts` into a `display-copy.ts` owning all seven keyed/derived families, or add a `copy/` entry to § What lives here. This is the F-row question (module homes) applied to the thing that grew fastest across rounds 6–7, and it is cheaper to answer in prose than after `types.ts` scatters seven records across five directories.
+
+**CP-F — Stop building instruments.** The campaign has built four (phrase greps → decisions list → receipt rule → region census) and each caught its predecessor's blind spot. The measured evidence this round is that **the instruments work and the intake does not**: A2's one-home fix is clean at 9 citer sites (verified), the census reproduces exactly, the receipt rule would have caught rounds 6 and 7. Every finding above that is a *recurrence* traces to a skipped filing step — a decision taken without a row (I10), sites discovered without being filed (census → A1 only), a closed row widened without re-opening. A fifth instrument will find a fifth blind spot. A two-line checklist appended to `DECISIONS.md § How to maintain it` — *did this commit take a decision? open a row. did it discover a site? file it in every row it asserts, then re-open those rows* — is the whole remaining gap.
+
+---
+
+### Verdict: **PAUSE**
+
+**Is 0.2 closeable? Yes — but not at HEAD, and the reason is not the subject you have been fighting.**
+
+Say plainly, per your question 5: the class-2 / route / overlay subject that has driven rounds 3 through 8 is **closed**. I attacked it independently at fifteen files and could not falsify it. The carve-out reaches every enumeration; the four routes agree at every site; the roster agrees at every site; A3's exhaustion argument is sound and no longer runs on the retired list. That subject should not be re-reviewed.
+
+The three blockers above are **not that subject**:
+
+- **BLOCKER 1 is new**, and it was created this round by R-M's relocation. Storage without retrieval.
+- **BLOCKER 2 is new as a defect** though old as a deferral — round 6 told you to make it legible, round 7 told you `DEV.md` forbids the form you chose, and the resolution removed the marker instead of the thing marked. Both reviews were right; the synthesis was not attempted.
+- **BLOCKER 3 is new subject matter entirely** — the copy inventory has never been checked against the data shape it renders, and the first check finds a string that is false in one of two cases.
+
+**Is the recurrence structural?** No — and I want to be precise, because "structural" would license closing 0.2 with a shrug. Every recurring finding this round (IMPORTANT 4, 5, 6, MINOR 10, 13) is a **filing** failure, not a detection failure, and all five are closed by CP-D and CP-F, which are checklist items rather than a fifth instrument. What *is* structural is the ratio: fifteen files assert the class decision and one document owns it. You have been reducing that ratio deliberately since `90166bc7` and it is working. Keep applying it to the two subjects where it has not been applied — the copy (CP-E) and the `recommendation` vocabulary (IMPORTANT 6) — and the residue stops regenerating.
+
+**What I would gate on.** BLOCKER 1 and BLOCKER 3 must be resolved before 0.3; both are small and neither needs a ruling. BLOCKER 2 needs either CP-A or an explicit human ruling that the strip contradiction rides into 0.3 unmarked, recorded with `DEV.md:2108`'s read-together test named as the thing being waived — because that test is Phase 0's own closing condition and waiving it silently is the one move that would make round 9 inevitable.
+
+**Files:** `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/study-lenses/orchestrate/README.md`, `.../DOCS.md`, `.../ux/personas.md`, `.../ux/user-journeys.md`, `.../ux/wireframes.md`, `.../lib/masking/README.md`, `.../lib/masking/types.ts`, `.../editor/README.md`, `.../index.tsx`, `.../display-labels.ts`, `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/.planning-handoffs/orchestrate-ux/DECISIONS.md`, `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/.planning-handoffs/orchestrate-ux/RESUME.md`.
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
 
 ---
 
