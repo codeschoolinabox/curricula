@@ -55,7 +55,7 @@ an empty receipt is a missed site.
 
 A row you cannot produce receipts for is not closed, whatever the sweep says.
 
-**Two mechanical amendments, because the rule's FIRST USE already failed them**
+**Mechanical amendments, because the rule's FIRST USE already failed them**
 (human ruling 2026-08-17, after AR-1 round 7). `90166bc7` printed fifteen
 accurate quotations where the closed rows named **nineteen** sites, and
 `4d9a5e1b` then transcribed the completeness claim into this file. Nothing false
@@ -75,6 +75,27 @@ first use did not.
    construction**. It also gives the rule a vocabulary it lacked: a legitimate
    non-receipt — `display-labels.ts` is unchanged because its widening is
    deferred — is now _stated_ rather than silently missing.
+3. **A receipt block is keyed to the ROW, and reproduces its column verbatim**
+   (human ruling 2026-08-17, after AR-1 round 8). No scoping phrase may narrow
+   the printed set. A fix that genuinely touches less than the whole row still
+   prints the whole column, with
+   `— NO RECEIPT: unchanged, this fix does not touch it` against the rest.
+
+   Amendment 1 banned the column pointing elsewhere. This bans the receipt
+   **redefining what the column is** — the same indirection on the other axis.
+   `49b90dba`'s block is keyed to a claim rather than a row: **"A1 the class-3
+   statement — all THREE sites"**, against a column that named **five**
+   [measured: `git show 49b90dba:<this file>`, A1's `also asserts` — four
+   semicolon groups, one of which names two sections of `ux/wireframes.md`]. The
+   completeness claim is true of the narrowed scope and false of the row, and a
+   reader auditing that commit against this file today sees `all THREE` beside a
+   **seven**-entry column. Nothing false shipped — A1 was already `settled` —
+   which is exactly why it is written down: the structure was available and
+   nothing prohibited it.
+
+   AR-1 round 8 reported this as "six … (seven after the census)". The six is
+   wrong and the seven is right [measured, both, at the two SHAs]. An AR verdict
+   is itself a claim; the amendment stands on the measured numbers.
 
 **Rows whose `home of record` is `none` are the other trap.** For A13 and C11
 the column IS the whole set, and the reflex was to receipt the new home and
