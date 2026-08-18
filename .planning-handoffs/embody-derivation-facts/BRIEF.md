@@ -95,6 +95,31 @@ addendum at the Phase-0 commit), 3 (seam untouched) and 6-for-scanning settle
 at that gate; item 4 (the tier README rewrite) executes when the peer session
 holding `lib/README.md` lands its work.
 
+**Settled (human, 2026-08-18, later the same session — the AR-1 PAUSE
+round):** AR-1 (design challenge) returned PAUSE with four blockers; all were
+resolved the same day and the fix set applied before types locked. Three
+rulings came out of the round:
+
+1. **The member is OPTIONAL** on the tokens stage's value — absent exactly
+   when the enrichment derivation itself defects; the defect degrades the
+   enrichment alone, loudly (embody README § Failure grammar carries the
+   arm).
+2. **E7 latitude:** E7's failures-are-data rule targets errors in the
+   processed program; an embody-internal error may be caught into a data
+   payload or may acceptably crash — the author's choice. This campaign
+   chooses catch → loud report → absent member, for consistency with the
+   region's guarded-defect pattern.
+3. **The machine twin is embody's, not the scanner's alone** (AR-1
+   counter-proposal A, adopted): `embody/notional-machine.md` models the
+   factory briefly and the scanner in full, and a future stage reshape
+   extends the file rather than inheriting it.
+
+The campaign-close write-back list now has four entries: `scanning/README.md`
+§ Why this module exists; `scanning/README.md` § Public API's
+consumer-boundary paragraph; `lib/README.md`'s admission rule (if still
+peer-held at commit time); the package README glossary's notional-machine
+entry ("NM content lives with its level" — widened by embody's twin).
+
 ---
 
 ## The question
