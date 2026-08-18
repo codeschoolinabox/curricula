@@ -24,7 +24,11 @@ orchestrate/
                   and the home of the nameplate and the announcer
   use-settled-snippet.ts   the settle hook — debounced edits, immediate type toggle
   derive-study.ts          the one derive composition per settle
-  display-labels.ts        the phases' display labels, keyed by phase name
+  display-labels.ts        every learner-facing string this region keys or
+                           derives — the phase labels and short labels, the fit
+                           marks, the nameplate's two forms, the tray and
+                           proposals headings, the empty-station reason with its
+                           count line, and the barred phase's cause line
   editor/         the editing surface — where the learner authors the source
   generator/      the AI-authoring view — the pane's third occupant
   rail/           the lifecycle drawn as the machine's own conveyor — the line,
@@ -44,6 +48,17 @@ orchestrate/
 Each sub-directory documents itself; the derivation libraries under `lib/` hold
 every level-aware and roster-aware computation as pure functions, and the
 rendered surfaces stay thin over them.
+
+**One file owns the copy** (human ruling 2026-08-18). `display-labels.ts` is the
+home for every string the glossary's `display labels` entry governs — not the
+phase labels alone. The copy contract is a set of families that share one
+discipline (keyed or derived against a constant, never authored at the render
+site), and a contract with one discipline and eight homes is a contract nobody
+can hold. A surface that renders a string imports it; it does not spell it.
+
+The alternative — a `copy/` directory beside `rail/` and `guide/` — was
+considered and declined: these are values, not a surface, and the region's other
+value file (`derive-study.ts`) is likewise flat.
 
 **Why the arrangement's five parts do not all live in one directory** (human
 ruling 2026-08-15). `rail/` owns the parts that are the lifecycle — the line,
