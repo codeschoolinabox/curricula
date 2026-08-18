@@ -243,6 +243,28 @@ verdicts without consulting a level twice.
   label, the standing (`openable` · `bare` · `waiting`), and its tray where it
   has one. Whether the openable and bare cases are one shape or two is the first
   question `types.ts` answers.
+- **The slot beneath the rail holds exactly one line, and its precedence is
+  total**: the cause line wherever a barring edge is drawn, else the count line,
+  else nothing. Four rules govern that one line and they are one contract, not
+  four — an implementer who reads some of them ships the rest as defects.
+  1. **The count is derived per settle, never written** — the number of phases
+     that are both accessible and EMPTY of fitting lenses. Not a property of the
+     roster: a phase whose only lens fails applicability on this program is
+     empty too, and a **barred** phase is excluded entirely, because it carries
+     a cause instead.
+  2. **Singular at one.**
+  3. **Absent at zero** — it does not render.
+  4. **It yields the slot entirely wherever a barring edge is drawn**, where the
+     cause line renders instead. And **an open tray never takes the slot**: a
+     tray opens BETWEEN the rail and the slot, pushing the line down along with
+     the pane, because a tray describes one station while the line describes the
+     rail as a whole.
+
+  The strings themselves are `display-labels.ts`'s (§ What lives here); what is
+  structural — and therefore belongs here rather than only in the glossary — is
+  that ONE slot is fed by TWO producers with a total order between them, so the
+  render path resolves the precedence before it has a line to draw.
+
 - The panel receives its ordered phase list built from that constant plus the
   labels, and renders it as **the rail** ABOVE the surface pane and BENEATH the
   control row, which sits at the top of the band (the Edit code button —
