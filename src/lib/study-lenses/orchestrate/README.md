@@ -330,19 +330,24 @@ this region owns.
 - **level verdict** — what one memoized validate produces for one level over the
   settled code: undetermined while the code does not parse, else validated,
   carrying the level's violations (possibly none). The shared truth the
-  selector, the gutter, and the mask all project. **Four** near-homonyms, four
-  owners — keep them apart: the **level verdict** is the validator's answer
-  about the code; a **fit mark** is the four-valued label an **assessment**
-  carries, derived in the marking library from that verdict plus type admission
-  (the verdict itself encodes the parse status), projected by the selector and
-  the mask; lens **fit** is embody's applicability outcome for a lens, and no
-  level is involved in it; and a station's **standing** is the rail's
-  three-valued indicator — openable · bare · waiting — a projection of
-  reachability and kit, in which no level is involved either. **Only the fit
-  mark is exported**, as `FitMark`, so it is the one an implementer will reach
-  for by reflex and the one the other three must not be mistaken for. (The
-  package sketch's verdicts node compresses verdict and type admission into one
-  label; this region splits them — the verdict is the validator's alone.)
+  selector, the gutter, and the mask all project. **And the package GLOSSARY
+  says the mask's trigger is the selected level's _verdict_ while this region
+  says its _assessment_** — the divergence was declared against the package
+  sketch and not against the glossary, which is the term's home of record. The
+  region's split is the finer one and stands; the reconciliation is H8's.
+  **Four** near-homonyms, four owners — keep them apart: the **level verdict**
+  is the validator's answer about the code; a **fit mark** is the four-valued
+  label an **assessment** carries, derived in the marking library from that
+  verdict plus type admission (the verdict itself encodes the parse status),
+  projected by the selector and the mask; lens **fit** is embody's applicability
+  outcome for a lens, and no level is involved in it; and a station's
+  **standing** is the rail's three-valued indicator — openable · bare · waiting
+  — a projection of reachability and kit, in which no level is involved either.
+  **Only the fit mark is exported**, as `FitMark`, so it is the one an
+  implementer will reach for by reflex and the one the other three must not be
+  mistaken for. (The package sketch's verdicts node compresses verdict and type
+  admission into one label; this region splits them — the verdict is the
+  validator's alone.)
 - **settle loop** — the region's edit-to-derivation cycle: the editor emits one
   edit event per document change; the top component debounces them
   trailing-edge; when typing settles, the snippet is re-embodied and every
@@ -491,14 +496,20 @@ this region owns.
   precedence rule read as a competition between two objects rather than a total
   order over one.
 - **apparatus** — what the mask uses to DO its work, as against the surfaces it
-  acts ON. The blocked overlay is the region's one piece of apparatus: it is
-  laid over the covered surfaces, it is deliberately NOT inert so the blocked
-  sentence stays in the accessibility tree, and it takes no surface class at
-  all. That is why `SurfaceClass` has three members and needs no fourth — the
-  split is exhaustive over the surfaces the mask acts on, and apparatus sits
-  outside it by construction rather than by omission. Named here because a
-  category that exists to fall outside an exhaustive taxonomy is exactly the
-  kind a reader assumes was forgotten.
+  acts ON. **This narrows a package term and the narrowing is load-bearing**:
+  the package glossary defines the enforcement mask AS "the strict-posture
+  overlay across the maskable surfaces", where _overlay_ names the whole
+  covering. Here _the overlay_ is the one node laid over the covered surfaces,
+  and A13's argument — that it takes no class and `SurfaceClass` needs no fourth
+  member — depends on that reading being total. Declared rather than assumed;
+  the upward reconciliation is H8's. The blocked overlay is the region's one
+  piece of apparatus: it is laid over the covered surfaces, it is deliberately
+  NOT inert so the blocked sentence stays in the accessibility tree, and it
+  takes no surface class at all. That is why `SurfaceClass` has three members
+  and needs no fourth — the split is exhaustive over the surfaces the mask acts
+  on, and apparatus sits outside it by construction rather than by omission.
+  Named here because a category that exists to fall outside an exhaustive
+  taxonomy is exactly the kind a reader assumes was forgotten.
 - **the instrument** — this region, seen from the learner's side: the whole
   assembled study environment rather than any one of its surfaces. It is the
   twin's primary subject noun and it is deliberately NOT resolved against a
@@ -546,7 +557,11 @@ this region owns.
     the **waiting** standing; **openable** draws as its tray affordance and its
     count, and **bare** draws as a bare mark with no word at all. Only one of
     the three has a string, which is why the standing is not keyed like a fit
-    mark.
+    mark. **The consequence, recorded because 0.3's types lock it**: that string
+    IS the union member, so renaming the `standing` union rewrites learner copy
+    — in the one region whose display-copy discipline exists so that cannot
+    happen by accident. The two are the same string today deliberately; a rename
+    is a copy change and takes the copy's review.
   - **The tray's own heading** — `ways to study the <label>`, keyed against the
     same phase-name record as the labels, so a tray never names a phase
     differently from the station that discloses it.

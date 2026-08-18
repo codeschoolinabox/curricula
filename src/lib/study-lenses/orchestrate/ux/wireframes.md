@@ -158,7 +158,7 @@ No level selected, two lenses on `source`, nothing open.
 
 ```text
 ┌──────────────────────────────────────────────────────────────┐
-│ [Generate code]  [module]  [plain JavaScript ▾]     ( ) strict│
+│ [Generate code]  [module]  [plain JavaScript ▾]    ( ) strict│
 ├──────────────────────────────────────────────────────────────┤
 │  Source ─── Tokens ─── AST ─── Environment ─── Evaluation    │
 │   ▾ 2         ·          ·          ·             ·          │
@@ -368,7 +368,7 @@ control that resolves it, and the toggle sits beside it.
 ## The code steps outside, under warn — the default posture
 
 ```text
-│         [Just Enough JavaScript · steps outside ▾]  ( ) strict│
+│        [Just Enough JavaScript · steps outside ▾]  ( ) strict│
 ├──────────────────────────────────────────────────────────────┤
 │  Source ─── Tokens ─── AST ─── Environment ─── Evaluation    │
 │   ▾ 2         ·          ·          ·             ·          │
@@ -384,7 +384,7 @@ state is the covered one has designed for the exception.
 ```text
 ┌──────────────────────────────────────────────────────────────┐
 │ [Generate code]  [module]                                    │ ← Generate: dim + inert
-│         [Just Enough JavaScript · steps outside ▾]  (•) strict│   at its own element
+│        [Just Enough JavaScript · steps outside ▾]  (•) strict│   at its own element
 ├──────────────────────────────────────────────────────────────┤
 │  Source ─── Tokens ─── AST ─── Environment ─── Evaluation    │ ← the rail: dim + inert,
 │   ▾ 2         ·          ·          ·             ·          │   and the reason line
@@ -479,7 +479,7 @@ state where "the way home is never covered" carries the most weight.
 ```text
 ┌──────────────────────────────────────────────────────────────┐
 │ [Edit code]  [module]                                        │ ← class 2, never covered,
-│         [Just Enough JavaScript · steps outside ▾]  (•) strict│   leading in the row
+│        [Just Enough JavaScript · steps outside ▾]  (•) strict│   leading in the row
 ├──────────────────────────────────────────────────────────────┤
 │  Source ─── Tokens ─── AST ─── Environment ─── Evaluation    │ ← dim + inert
 ├──────────────────────────────────────────────────────────────┤
