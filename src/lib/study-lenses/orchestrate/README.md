@@ -114,12 +114,12 @@ and a lens-name collision or a level-key collision fails loudly, at the author's
 desk. The joined lens roster passes to embody as an argument; embody imports no
 roster. Continuously, the configuration cascade re-resolves per lens name over
 the layers this region sees: the `configs` prop, then — for a lens opened by a
-recommendation — that proposal's opening overrides, then the learner's session
-tweaks, always final. Whatever upstream layers the embedding site composes — its
-own defaults, per-snippet metadata — arrive already folded into the `configs`
-value; the orchestrator never reads them itself. Each merged record reaches its
-lens through that lens's own factory — or through the shared merge when the lens
-declares none.
+recommendation — that recommendation's opening overrides, then the learner's
+session tweaks, always final. Whatever upstream layers the embedding site
+composes — its own defaults, per-snippet metadata — arrive already folded into
+the `configs` value; the orchestrator never reads them itself. Each merged
+record reaches its lens through that lens's own factory — or through the shared
+merge when the lens declares none.
 
 ## What renders
 
@@ -298,10 +298,11 @@ affordance, not a restoring control.
 ## What this region does not own
 
 Fit and accessibility (embody derives both); lens internals and the production
-of recommendations (the lenses region — this region only ranks the proposals and
-renders them, the rendering through the mask); level content (each level's own);
-evaluators (never touched here — evaluation-phase lenses import their own);
-learner identity, progress, and grading (the embedding LMS's).
+of recommendations (the lenses region — this region only ranks the
+recommendations and renders them, the rendering through the mask); level content
+(each level's own); evaluators (never touched here — evaluation-phase lenses
+import their own); learner identity, progress, and grading (the embedding
+LMS's).
 
 ## Glossary — region terms
 
@@ -461,7 +462,7 @@ this region owns.
   2026-08-17 widened it again, stated the four routes, and gave the nameplate
   the announcer's placement rule).
 
-- **recommendation** — a lens's proposal of a next study step, and **the
+- **recommendation** — what a lens offers as a next study step, and **the
   contract term**: the exported type is `Recommendation`, so the prose follows
   the type rather than the other way round. Three things share the word and are
   kept apart here because the glossary already keeps four near-homonyms of

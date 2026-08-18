@@ -28,8 +28,8 @@ abstraction; each rendered surface and derivation library zooms in below.
    the embodiment's stage values; one memoized validate runs per registered
    level; the fit marks derive from those verdicts, the levels' admitted snippet
    types, and the current type (the verdict itself encodes the parse status);
-   the fitting lenses' proposals are collected and ranked. All of it in pure
-   functions — level logic never lives inside a React component. Input: the
+   the fitting lenses' recommendations are collected and ranked. All of it in
+   pure functions — level logic never lives inside a React component. Input: the
    settled snippet + the composed study configuration. Output: the study
    derivation — the frozen embodiment, the level verdicts, the assessments, and
    the ranked recommendations.
@@ -72,7 +72,7 @@ flowchart TD
     EMB["frozen embodiment"]
     VER["level verdicts<br/>(one memoized validate per settle + level)"]
     MARKS["assessments by level<br/>(mark + cause, per settle)"]
-    RECS["ranked recommendations<br/>(fitting lenses' proposals, per settle)"]
+    RECS["ranked recommendations<br/>(fitting lenses' recommendations, per settle)"]
     SUR["rendered study environment<br/>(surface pane: editor XOR one excursion — open lens or generator ·<br/>panel · level UI · mask)"]
     CANDIDATE["candidate program<br/>(the accept-eligible arm of one generative ask)"]
     PROPS -->|"join rosters at mount, loud collisions"| CFG
@@ -87,8 +87,8 @@ flowchart TD
     EMB -->|"render, mechanical"| SUR
     VER -->|"annotate the editor's gutter, selected level only"| SUR
     MARKS -->|"selector marks · mask = selected assessment × strict posture"| SUR
-    EMB -->|"the fitting lenses' proposals, collected + ranked"| RECS
-    RECS -->|"rendered through the mask; opening carries the proposal's overrides into the cascade"| SUR
+    EMB -->|"the fitting lenses' recommendations, collected + ranked"| RECS
+    RECS -->|"rendered through the mask; opening carries the recommendation's overrides into the cascade"| SUR
     CFG -->|"posture + resolved configs"| SUR
     SUR -->|"edits debounced to the settle · type toggle and excursion-open settle immediately"| SNP
     SUR -->|"level · posture · config tweaks, session-scoped (the open excursion lives in the pane occupant)"| CFG
@@ -123,12 +123,12 @@ flowchart TD
 - **The undetermined carve-out wins.** While the code does not parse, the mask
   names no violation and the parse phases' supports stay uncovered — regardless
   of type admission.
-- **Proposals are vetted at collection.** A recommendation whose target lens
-  does not resolve on the mount roster is dropped at collection, before ranking
-  — gracefully, with a loud report at the author's desk. Every open path is
-  therefore vetted before the pane: the strip offers only attached lenses, the
-  honor path runs applicability at mount, and a surviving proposal names a
-  roster lens the reachability judgment can classify.
+- **Recommendations are vetted at collection.** A recommendation whose target
+  lens does not resolve on the mount roster is dropped at collection, before
+  ranking — gracefully, with a loud report at the author's desk. Every open path
+  is therefore vetted before the pane: the strip offers only attached lenses,
+  the honor path runs applicability at mount, and a surviving recommendation
+  names a roster lens the reachability judgment can classify.
 - **One reachability judgment, two projections.** The pane's render gate and the
   orphan defense project a single classification of the open lens over the
   CURRENT derivation — phase-declared: attached to an accessible phase;
@@ -222,7 +222,7 @@ stateDiagram-v2
 One pure derive composition runs per settle: the embodiment factory over the
 settled source and type with the joined lens roster, then the validating
 library's assembly and memoized validates, then the marking library's
-assessments, then the recommendation walk — the fitting lenses' proposals
+assessments, then the recommendation walk — the fitting lenses' recommendations
 collected by the composition and ranked by the recommending library — into one
 frozen `StudyDerivation`. The top component calls the composition with the
 settled snippet, the joined levels, the joined lens roster, and the per-instance
@@ -289,9 +289,9 @@ verdicts without consulting a level twice.
   CURRENT derivation — a flush-at-open can do this, since the offer was made
   against pre-flush facts — the pane renders nothing that frame; the orphan
   defense (the same judgment's other projection) then disposes and announces.
-  With collection-vetted proposals, a lens's `main` never mounts against an
-  embodiment its applicability rejected — unreachable by construction, which is
-  what lets the invariants throw loud in prod.
+  With collection-vetted recommendations, a lens's `main` never mounts against
+  an embodiment its applicability rejected — unreachable by construction, which
+  is what lets the invariants throw loud in prod.
 - The mask projects the masking library's state — the selected level's
   assessment crossed with the posture; the blocked overlay is part of the top
   component's render (in-file until a second call site exists). Every mask input

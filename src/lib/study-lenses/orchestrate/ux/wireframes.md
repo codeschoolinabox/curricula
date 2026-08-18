@@ -524,14 +524,14 @@ rail can afford to hide the kit.
 **Proposals render below the pane in every mode, including editor mode.** They
 are a second lens-opening affordance and the arrangement owns that rather than
 claiming a single door: a tray is the door a learner goes looking for; a
-proposal is one the region offers unasked. Drawn below the pane and phrased as
-an invitation, they read as the fade-is-pull the package argues for — a
-suggestion that costs nothing to ignore. Drawn on the rail, they would compete
+recommendation is one the region offers unasked. Drawn below the pane and
+phrased as an invitation, they read as the fade-is-pull the package argues for —
+a suggestion that costs nothing to ignore. Drawn on the rail, they would compete
 with the stations and read as instruction.
 
-They render through the mask like any other study surface, and a proposal whose
-target lens does not resolve never reaches the drawing at all — it is dropped
-before ranking.
+They render through the mask like any other study surface, and a recommendation
+whose target lens does not resolve never reaches the drawing at all — it is
+dropped before ranking.
 
 **Closing the open lens.** Today a lens is closed either by the Edit code button
 or by the strip's none entry. This arrangement has no strip, so **the tray entry
@@ -542,13 +542,13 @@ rather than discovering it.
 
 **And it collides with a contract edge pointing the other way**, which 0.3 must
 settle rather than inherit. The region deliberately allows the OPEN lens to be
-re-opened: a proposal may target it, and doing so re-resolves its configuration
-in place and announces a fresh open without moving the embodiment. So under this
-arrangement the same lens has two affordances with opposite meanings — its tray
-entry closes it, a proposal re-opens it. A learner who wants to restart the
-surface they are on reaches for the nearer one and gets a dispose. This is a
-state-machine question, not a layout one, and it is the kind that is cheap now
-and expensive once the types are written.
+re-opened: a recommendation may target it, and doing so re-resolves its
+configuration in place and announces a fresh open without moving the embodiment.
+So under this arrangement the same lens has two affordances with opposite
+meanings — its tray entry closes it, a recommendation re-opens it. A learner who
+wants to restart the surface they are on reaches for the nearer one and gets a
+dispose. This is a state-machine question, not a layout one, and it is the kind
+that is cheap now and expensive once the types are written.
 
 ## The generator in the pane
 
@@ -594,8 +594,8 @@ Settled elsewhere, respected in every drawing above, and not open for
 rearrangement here:
 
 - **Controls above the pane; proposals below it; the guide last.** The controls
-  and the rail sit above the surface pane, the ranked proposals render below it
-  in every mode, and the guide is the region's final child.
+  and the rail sit above the surface pane, the ranked recommendations render
+  below it in every mode, and the guide is the region's final child.
 - **The pane holds exactly one thing** — the editor, one open lens, or the
   generator — and the editor is structurally absent while either other is open.
 - **One visual pane, two slots.** The editor renders outside both maskable
