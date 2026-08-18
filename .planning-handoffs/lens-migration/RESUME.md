@@ -5,7 +5,8 @@ closes; nothing here is end-state documentation. -->
 <!-- cspell:ignore firstblock glossterm parsonizer parsonize errormsg recognises -->
 <!-- cspell:ignore unbuilt ugrep affordances behaviour -->
 <!-- cspell:ignore normalisation unrunnable -->
-<!-- cspell:ignore loosenings capitalisation enshittifying keyable -->
+<!-- cspell:ignore loosenings capitalisation enshittifying keyable unbuildable -->
+<!-- cspell:ignore normalises undercounted -->
 
 # RESUME — where this campaign stands and what comes next
 
@@ -82,8 +83,9 @@ commit of the 2026-08-15 session** — count them from the command, not from any
 number written here or in [§ Seeding wave status](#seeding-wave-status), whose
 SHA table was written mid-session and is short by the commits that followed it.
 A commit cannot carry its own SHA, so the commit that adds a row is never in the
-row it adds — but that explains one missing row, not seven. Before dispatching
-AR-5, close the gap from the command and never from the table:
+row it adds — but that explains one missing row, not the dozens the command
+actually returns. Before dispatching AR-5, close the gap from the command and
+never from the table:
 
 ```bash
 git log --oneline d0b71810..HEAD -- .planning-handoffs/lens-migration/
@@ -165,16 +167,33 @@ is owed.
 
 ## ⛔ START HERE — a ROUND-3 PAUSE is open, so do NOT cut `_family-f.md` yet
 
-**Session of 2026-08-18, five commits, nothing pushed.** The original three AR-2
-blockers are closed. **Two new ones are open**, both found independently by AR-1
-and AR-2 on the fix for the fix, both reproduced here before being acted on, and
-**both marked ⛔ in `_TEMPLATE.md` at the point of use** so nothing is cut
-against them.
+**Session of 2026-08-18, nothing pushed.** ⚠️ **The table below is short by
+construction and has been wrong twice** — a commit cannot carry its own SHA, and
+the last two revisions each omitted their own. Count from the command, never
+from the table:
+`git log --oneline 0281cfa6..HEAD -- .planning-handoffs/lens-migration/`. **And
+do NOT read a template SHA from this table** — re-derive it every time with
+`git log --oneline -1 -- .planning-handoffs/lens-migration/ledgers/_TEMPLATE.md`;
+it moved seven times in one day and three stale copies shipped inside the
+warning against exactly that, the third of them in the commit that struck the
+second. The original three AR-2 blockers are closed. **Two new ones are open**,
+both found independently by AR-1 and AR-2 on the fix for the fix, both
+reproduced here before being acted on, and **both marked ⛔ in `_TEMPLATE.md` at
+the point of use** so nothing is cut against them.
 
-### Your first task is NOT `_family-f.md` — it is these two designs
+### Your first task is NOT `_family-f.md` — it is THREE template amendments
 
-Both are **already designed and measured**. Neither was applied, and the reason
-is a rule rather than fatigue — see § Why round 4 goes to a fresh session.
+**All three are template amendments, and standing ruling 3 binds every one of
+them before a ledger is cut.** The third is the `[COPY]`/`[METHOD]` marking in §
+Two human rulings below — it is easy to miss because it sits under a different
+heading, and the previous two revisions of this section undercounted it.
+
+⚠️ **Read "designed and measured" as DIAGNOSED and measured.** The diagnoses
+below all reproduce and are worth trusting. **The fixes are sketches, not
+specs** — a context-free reader measured that neither can be built from what is
+written, and listed exactly what is missing. Those gaps are named inline below
+rather than papered over, and closing them is design work, which is why it goes
+to a fresh session rather than to another round from the author of the sketch.
 
 1. **The Family F invocation is a census, not a floor** — `_TEMPLATE.md`, the
    8th bullet of § `_family-f.md` is the one exception, under its ⛔ banner.
@@ -202,18 +221,60 @@ is a rule rather than fatigue — see § Why round 4 goes to a fresh session.
    loosening is _defined_ as making a mis-transcription silent, so the gate has
    to contain mis-transcriptions and not only fabrications.
 
+### What the sketches do NOT yet answer — measured by a context-free reader
+
+Four gaps, each of which forces an implementer to invent published data. Settle
+them as part of the amendment rather than in passing:
+
+1. **The declared-empty roster is never published.** `_TEMPLATE.md` promises "a
+   published zero-row roster" and no such list exists. `trace-debugging` is
+   inferable; the other six are **not** — the four action lenses seed from
+   lister 5 channel B alone, and the template separately mandates that a lister
+   finding nothing writes `measured zero → 0`. **Is a measured-zero channel-B
+   member declared-empty, or a breach?** That is the whole question and nothing
+   answers it. Name the new list something other than `roster`: `MEMBERS`
+   already means the seven-member acceptance set, 21 lines away.
+2. **`EXPECT`'s other direction is unstated.** A declared-empty member that
+   returns `rows > 0` — breach, or pass? "Measured working in both directions"
+   describes the measurement, not the semantics.
+3. **`transport-check.sh` has no home.** It is named twice campaign-wide, both
+   times as a bare relative filename. Nothing says whether it is committed or
+   scratch, or that the runnable file is the check's fence **with `firstblock`
+   and `glossterm` spliced in AHEAD of the perl block** — get that order wrong
+   and you get a script that runs and reports nothing.
+4. **The twelve fixture-pair assertions are specified and unlocated**, and one
+   pair looks unbuildable. "The same span mis-transcribed" never says of what;
+   modifications 1, 2 and 3 have no named anchor row. And **modification 2 is
+   prettier's whitespace collapse while `norm()` ends in `s/\s+/ /g`** — so a
+   whitespace-only mis-transcription normalises to the identical string and its
+   "must be DIVERGENT" half can never fire. Either that pair gets a different
+   definition or it gets a stated carve-out.
+
 **Then** `_family-f.md`'s inventory shape ALONE, no rows. It is a gate and the
+last two dispatches each collapsed it into a wave.
+
+⛔ **And it cannot pass its own gates as currently defined.** A shape-only
+ledger has zero rows; zero rows FAIL the Pass-1 gate (by message — that gate
+`echo`s and does not exit) **and** the transport check's floor (exit 1), and the
+published Family F loop emits seven FAILs while exiting 0. All three named
+causes in both FAIL messages are false. **Settle this before cutting**, and note
+both options carry a cost the previous revision did not state: exempting a
+shape-only cut means editing two gates, which is a _fourth_ template amendment
+that standing ruling 3 then also binds before the cut; and committing the shape
+together with its first rows is precisely what this gate exists to prevent — the
 last two dispatches each collapsed it into a wave.
 
 ### This session's commits
 
-| SHA        | What                                                                                                     |
-| ---------- | -------------------------------------------------------------------------------------------------------- |
-| `74590c5a` | `_TEMPLATE.md` + `FIDELITY-METHOD.md` — four blockers, the per-member invocation form, five batch-fixes  |
-| `5c807630` | `RESUME.md` — four stale claims struck                                                                   |
-| `2ed6af19` | The round-1/2 AR fix pass — six blockers                                                                 |
-| `e1c88969` | `SPEC.md` — **R-7 amended: the `ux/` twin gate** (human ruling 2026-08-18)                               |
-| `1da6763c` | The `lead` reversion, the second false overshoot claim struck, both ⛔ markers. **Current template SHA** |
+| SHA        | What                                                                                                    |
+| ---------- | ------------------------------------------------------------------------------------------------------- |
+| `74590c5a` | `_TEMPLATE.md` + `FIDELITY-METHOD.md` — four blockers, the per-member invocation form, five batch-fixes |
+| `5c807630` | `RESUME.md` — four stale claims struck                                                                  |
+| `2ed6af19` | The round-1/2 AR fix pass — six blockers                                                                |
+| `e1c88969` | `SPEC.md` — **R-7 amended: the `ux/` twin gate** (human ruling 2026-08-18)                              |
+| `1da6763c` | The `lead` reversion, the second false overshoot claim struck, both ⛔ markers                          |
+| `9172cb72` | This resumption point re-opened on the round-3 PAUSE                                                    |
+| `7c191507` | The context-free validation's fix pass — a second start list, five stale claims                         |
 
 ⚠️ **Do not read that SHA as current on trust** — it moved five times in one day
 and two stale copies shipped inside the warning against exactly that. Re-derive
@@ -350,8 +411,7 @@ reproduced by measurement, not relayed.**
    the citation grammar every future ledger writes, and would make
    `_family-f.md` the only ledger whose rows do not look like the other seven's.
    A **published seven-invocation form** leaves the grammar alone and costs a
-   per-member marker the check can key on. Put both to the human with that trade
-   named; do not pick one and proceed.
+   per-member marker the check can key on.
 
 3. **Amendment 7 gives Family F an instruction it cannot follow.** It rules the
    `no Gen-1 source` line goes _"once, in `## Reference inventory`"_ — but the
@@ -655,10 +715,14 @@ README plus the twin.
 
 ### Where to start — in order
 
-**Items 1 and 4's first half are DONE and struck rather than ticked** — a
-completed item left on a start list is this canon's own recorded failure mode.
-`ledgers/parsons.md`'s nine leaf-level defects landed in `dae045f3`, and
-`writeme` was cut as the second exemplar in `ec13b412` (+ `35c44796`,
+⚠️ **This list DEFERS to
+[§ START HERE](#-start-here--a-round-3-pause-is-open-so-do-not-cut-_family-fmd-yet),
+which is the sole authority on order.** It is kept because items 5-9 are live
+and duplicated nowhere. **Items 1 and 2 are struck rather than ticked** — a
+completed item left on a start list is this canon's own recorded failure mode —
+and its numbering has been re-derived twice, so trust the strikes and not the
+numbers. `ledgers/parsons.md`'s nine leaf-level defects landed in `dae045f3`,
+and `writeme` was cut as the second exemplar in `ec13b412` (+ `35c44796`,
 `0f9257c8`). What each fix actually was lives in those commit bodies; do not
 re-derive it from here.
 
