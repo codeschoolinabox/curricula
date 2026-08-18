@@ -1,5 +1,5 @@
 <!-- TRANSITIONAL — pruned when the restoration campaign completes. -->
-<!-- cspell:ignore arities astless backpressure codegen desugars disjointness Embedder empts extensioned instrumentable instrumenter lifecycles mistrace mistracing numstat retarget rethrowing thunked unbuilt uncoerced widenings unproduced unrun -->
+<!-- cspell:ignore arities astless backpressure blackbox blackboxing kinding codegen desugars disjointness Embedder empts extensioned instrumentable instrumenter lifecycles mistrace mistracing numstat retarget rethrowing thunked unbuilt uncoerced widenings unproduced unrun -->
 
 # Evaluator public-API restoration — LOSS LEDGER
 
@@ -864,6 +864,36 @@ execution and never holds one alone.
   and confirms both tables render as tables, not paragraphs; a broken render
   blocks the commit. markdownlint's MD056 only inspects rows inside a recognized
   table, so this failure class is invisible to every mechanical gate.
+
+- **G1 passes with the NM-twin lattice (human ruling 2026-08-18).** The Phase-0
+  → Phase-1 gate over P0-K (`45a2b381`) is approved with one adjustment: the
+  region's twin answer revises `none → machine`. The `none` on `45a2b381`'s
+  settings line is the superseded prior record; the twin commit's own settings
+  line carries the new answer. The lattice, human verbatim: "we can have
+  different nm twin docs at each level. the region nm will just cover the
+  generator and shared kind signature, blackboxing how code is actually
+  evaluated. then each evaluator can have its own nm filling in that blackbox
+  and modeling any machinery between the generator and evaluation (like counting
+  iterations, filtering meta-data events from the generator, etc.)."
+  Consequences: the region root owes `notional-machine.md`, bounded at the
+  committed contract (it must not pre-answer P0-E's construction-seam questions
+  — drain-policy ownership stays open); run and intercept each owe their own
+  `notional-machine.md` as their Phase-0 units' 0.2 artifacts, each modeling its
+  own blackbox fill; the retrofit's AR shape is DEV.md's 0.2 re-open rule
+  applied — a scoped ar-1 re-run over README + twin, no ar-2 re-run (sketch and
+  types unchanged).
+- **W3.a mechanics (human rulings 2026-08-18).** The iteration-guard copy
+  executes AFTER P0-E's Phase-0 commit and before P0-R ∥ P0-I; it lands as its
+  own pathspec commit; and creating the region's `lib/` via the copy owes a MINI
+  PHASE-0 PASS — a scoped ar-1 over the copied README before the commit lands.
+  This rules the CP-b-precedent question the plan of record carried open.
+- **Danger's deferral stands; its fit is named (human ruling 2026-08-18).** HR-1
+  and the re-kinding deferral are reaffirmed at the W3 plan review: danger
+  re-kinds in its own named future campaign — the deprecated region's exit
+  condition — and its target signature is the same `Evaluator` envelope, as a
+  result-only `ExecutionBase` handle (the kind designs this in: "a result-only
+  evaluator is a legal evaluator"). The region NM names danger's blackbox
+  opening (an iframe, not the engine sandbox) alongside run's and intercept's.
 
 ### The ratification, and what it settled (human ruling 2026-08-06)
 
