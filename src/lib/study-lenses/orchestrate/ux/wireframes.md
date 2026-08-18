@@ -326,6 +326,35 @@ reporting `undetermined`.
 > arrangement supplies it. The drawing is honest about that rather than
 > pretending a better sentence exists.
 
+## The spelling breaks — the machine stopped earlier
+
+```text
+│         [Just Enough JavaScript · can't tell yet ▾]          │
+├──────────────────────────────────────────────────────────────┤
+│  Source ─── Tokens ──╳╌╌ AST ╌╌╌ Environment ╌╌╌ Evaluation  │
+│   ▾ 2         ·       waiting      waiting       waiting     │
+│                                                              │
+│  the spelling broke here — Invalid or unexpected token.      │
+│  the last three phases wait for it.                          │
+```
+
+**The same instrument, one stage upstream, and the framing changes with it.** A
+`tokens` failure never reached the grammar, so the cause line says _the spelling
+broke here_ — the region README keys the framing by the stage that FAILED rather
+than by the phase that is barred, and this is the second of its two authored
+framings. Drawn here because a shape asserted and never drawn is how the
+single-constant defect survived eight AR-1 rounds.
+
+**Three phases wait, not two**, and the geometry is the only thing that says so:
+a `tokens` failure bars `ast` as well as the two downstream, while the grammar
+case above leaves `ast` open because a phase's own-stage error is studied inside
+it. The count line reads the derived number, so it says _three_ here and _two_
+there without either being authored.
+
+**`Source` and `Tokens` stay open.** The barring edge is still drawn between
+stations rather than on one: `Tokens` is where the error is studied, so it keeps
+its mark and its kit.
+
 ## The level does not admit this snippet type
 
 ```text

@@ -516,12 +516,41 @@ this region owns.
     differently from the station that discloses it.
   - **The proposals' heading** — `next, you could:`, one string, invariant.
   - **The barred phase's cause line** — the parser's own message, framed by this
-    region: `the grammar broke here — <the parser's message>`, and beneath it
-    the count of what waits. The framing is this region's; the message inside it
-    is the parser's and is never rewritten. The package promises a
-    learner-worded explanation beside it and none exists yet — the twin records
-    that as its sharpest open cost, and this entry is where the copy will land
-    when someone writes it.
+    region, and beneath it the count of what waits. The framing is this
+    region's; the message inside it is the parser's and is never rewritten.
+    **The framing is keyed by the stage that failed, not by the phase that is
+    barred** (human ruling 2026-08-18) — the cause carries its own origin, so
+    the key is a field read rather than a derivation. Two framings are authored:
+
+    | the stage that failed | the framing                                        |
+    | --------------------- | -------------------------------------------------- |
+    | `tokens`              | `the spelling broke here — <the parser's message>` |
+    | `ast`                 | `the grammar broke here — <the parser's message>`  |
+
+    **One constant cannot serve both, and the constant this entry used to carry
+    was the `ast` one.** A `tokens` failure never reached the grammar, so _the
+    grammar broke here_ is false of it — and a `tokens` failure is what bars
+    `ast`, the most common barring there is.
+
+    **The remaining origins are not learner copy.** A cause can also originate
+    at `entwined`, which is not a lifecycle phase at all and therefore has no
+    phase name to key against — the reason the key is the failing STAGE rather
+    than the barred phase. `entwined` and `environment` fail only as guarded
+    defects of the embodiment, reported loudly, so they take **one shared
+    framing that names a fault in the instrument rather than in the learner's
+    program**. Copy that blames the program for the instrument's bug is the one
+    outcome this split exists to prevent. `environment` cannot originate a
+    rendered cause at all — nothing it bars is drawn — so it is reachable only
+    through that same branch.
+
+    **The framings are authored, not derived**, for the reason the short labels
+    are: deriving from the phase label yields
+    `the Tokens · spelling broke here`.
+
+    The package promises a learner-worded explanation beside the parser's
+    message and none exists yet — the twin records that as its sharpest open
+    cost, and this entry is where that copy will land when someone writes it.
+
   - **The blocked sentence's three ways out are ORDERED, and the order is
     contract**: _fix the code_, then _pick another level_, then _turn strict
     off_. Journey 4's trap is that the escape is easier to reach than the
@@ -562,9 +591,10 @@ this region owns.
   third defect. **Display copy never carries a machine token, and never needs
   this glossary to be legible** (human ruling 2026-08-17) — the rule the marks
   already follow, and the reason the sentence a learner reads when the machine
-  stops says _the grammar broke here_ rather than naming **the barring edge**.
-  Two tests, and the second is **operational rather than etymological**. A
-  machine token is a string the machine uses to talk to itself — `does-not-fit`,
+  stops says _the grammar broke here_ (or _the spelling broke here_, whichever
+  stage failed) rather than naming **the barring edge**. Two tests, and the
+  second is **operational rather than etymological**. A machine token is a
+  string the machine uses to talk to itself — `does-not-fit`,
   `not-applicable-for-type` — and none of those ever surfaces. Everything else
   is settled by one question: **would a learner who never read this glossary
   understand it?** `barring edge` fails it, naming a boundary the copy never
