@@ -7,6 +7,7 @@
 <!-- cspell:ignore glossterm normalised normalisation parsonizer -->
 <!-- cspell:ignore behaviour behaviours affordances pointcut QASM -->
 <!-- cspell:ignore towc multibyte Normalising -->
+<!-- cspell:ignore keyable legitimise nocite quotemeta -->
 
 # `<lens>` — fidelity ledger
 
@@ -93,6 +94,81 @@ this template as follows — **not "in exactly three ways", which was true befor
   ([SPEC.md § Roll-up](../SPEC.md#roll-up)). Its rows come from Pass 2 — a
   whole-file read of its Gen-2 documents — and its inventory block says so, so a
   thin result reads as an instrument limit rather than as a finding.
+- ⚠️ **Every row carries its member as a keyable marker, and
+  [§ The transport check](#the-transport-check) is run once per member** (human
+  ruling 2026-08-18). The bullet above already says the member "is named in the
+  `affordance` cell"; **named in prose is not keyable**, so this fixes the form:
+  the member's slug, backticked, is the **first token of the `affordance`
+  cell**, separated from the sentence by a spaced em dash. The separator carries
+  significant spaces, so it is shown **only** in the fence below and never in an
+  inline code span — `MD038` forbids the spaces there and prettier silently eats
+  them, which is this template's own recorded hazard and it damaged **this
+  bullet** on its first write:
+
+  ```text
+  | `fam-f-012` | `tracing` — The learner can step one statement at a time … |
+  ```
+
+  The preflight below is the authority on the exact bytes; read the separator
+  off that grep, not off any prose.
+
+  It is a **label, not part of the sentence**, so FIDELITY-METHOD § Columns'
+  _"one sentence, in the voice of the reader it serves"_ and § What Pass 1
+  writes' binding rule both stay true unchanged. It is **Family-F-only** — never
+  copy it into a single-lens ledger; `MEMBER` defaults to `all`, so the other
+  seven ledgers' invocation is byte-unchanged. It does not trip the Pass-1
+  gate's em-dash check, which requires the em dash to sit between two pipes as a
+  cell value [measured 2026-08-18: 4 marked rows → **0**; one planted em-dash
+  cell value → **1**].
+
+  **The check takes ONE reference root, and Family F needs exactly one.**
+  Measured 2026-08-18: of the seven members only **`trace-debugging`** has a
+  Gen-2 directory, and Family F has no Gen-3 port at all — so six of the seven
+  runs assert `NONE` on both sides rather than resolving anything. That is what
+  makes `NONE`-as-an-assertion load-bearing here: without it, six of seven
+  invocations are no-ops and this marker buys nothing.
+
+  ```bash
+  L=.planning-handoffs/lens-migration/ledgers/_family-f.md
+  G2=src/lib/study-lenses--deprecated-architecture/lenses
+
+  # Preflight: every row carries a member marker. Names the offender.
+  awk '/^## Rows/{on=1;next} /^## Close conditions/{on=0} on' "$L" \
+    | grep '^| `fam-f-[0-9]\{3\}`' \
+    | grep -v '^| `fam-f-[0-9]\{3\}` *| *`[a-z][a-z-]*` — ' \
+    | awk '{print "UNMARKED-ROW: " $2}'
+
+  # One run per member. NONE is an ASSERTION, not an absence.
+  total=0
+  while read -r member ref; do
+    out=$(sh transport-check.sh "$L" "$ref" NONE "$member"); printf '%s\n' "$out"
+    r=$(printf '%s\n' "$out" | grep -o 'rows=[0-9]*' | grep -o '[0-9]*')
+    total=$(( total + ${r:-0} ))
+  done <<EOF
+  step-throughs    NONE
+  tracing          NONE
+  run-javascript   NONE
+  debug-javascript NONE
+  trace-javascript NONE
+  tables-universal NONE
+  trace-debugging  $G2/trace-debugging
+  EOF
+  echo "covered: $total rows -- must equal the Pass-1 gate's \$n"
+  ```
+
+  **The sum is the assertion and the preflight is the diagnosis** — neither
+  alone suffices. A row whose marker is missing or misspelled belongs to no run
+  and the sum falls short; the preflight says which row. A **duplicated** marker
+  passes the preflight and overshoots the sum, which is why both run [measured
+  2026-08-18 on a four-row fixture: intact → 2 + 1 + 1 = 4; one marker deleted →
+  3, with `UNMARKED-ROW` naming it].
+
+  ⚠️ **The marker proves membership, not correctness, and that cost is accepted
+  rather than hidden.** Six of the seven members run with `REF=NONE PORT=NONE`,
+  so a `tracing` row mismarked `step-throughs` is checked identically either way
+  and **is invisible**. Only a mismark involving `trace-debugging` surfaces, and
+  only as `EMPTY-EXTRACT`. Pass 2 owns that reading; do not let this section
+  read as though it were covered.
 
 ---
 
@@ -166,11 +242,29 @@ sections in eight ledgers [read: `parsons.md` and `writeme.md`, each carrying
 their **Gen-1 source** line under `## Reference inventory`].
 
 A lens with no Gen-1 file therefore writes the literal words
-`no Gen-1 source: <lens> has no Gen-1 file` **once, in
-`## Reference inventory`**, and both listers report `n/a` here, citing it rather
-than repeating it. This bites hardest in [`_family-f.md`](./_family-f.md): six
-of its seven members have no Gen-2 reference and one has no Gen-1 source, so the
-placement decides seven blocks rather than one.
+`no Gen-1 source: <lens> has no Gen-1 file` **once per inventory block** — once
+per ledger in a single-lens ledger, and **once per affected member** in
+[`_family-f.md`](./_family-f.md), in that member's own
+`## Reference inventory — <member>` — and both listers report `n/a` here, citing
+it rather than repeating it.
+
+⚠️ **The per-member half is not a refinement; without it the rule is impossible
+to follow.** Amendment 7 said "once, in `## Reference inventory`", and the
+Family F exception above mandates **disambiguated per-member headings**, so a
+bare `## Reference inventory` heading **never exists in that ledger at all**.
+The rule named a place that cannot be reached in the one ledger it calls
+hardest. In a multi-member ledger `<lens>` in the literal words is the
+**member's** slug, never `fam-f`. Measured 2026-08-18: six of Family F's seven
+members have no Gen-2 reference and exactly **one** (`trace-debugging`) owes the
+Gen-1 line — so the placement decides seven blocks rather than one, and gets one
+of them wrong under the old wording.
+
+**`_family-f.md` is not yet cut, and three documents forward-link it** — this
+line, `SPEC.md` § Roll-up, and `FIDELITY-METHOD.md` § The two narrative ledgers.
+All three resolve the moment it lands, and **nothing gates them meanwhile**:
+`MD051` checks fragments, not paths, so markdownlint stays at 0 over a link that
+goes nowhere. That is the cut commit's checklist, recorded here because this is
+the document its author is reading.
 
 ### ⚠️ The Gen-1 quarry root is TWO directories, not one
 
@@ -528,6 +622,29 @@ fixture round-trip; read: `.markdownlint-cli2.jsonc` `MD033.allowed_elements`].
 This is a **rendering** choice, not a sixth transport modification — the quoted
 characters are unchanged, which is the whole point.
 
+⚠️ **The paragraph above is the mechanism, and the mechanism is NOT the
+trigger.** Read as a content predicate — _a code span containing
+`_`or`\*`, nested inside an emphasis span_ — it has **no discriminating power whatever** [measured 2026-08-18]: on `parsons.md`it fires on **6** rows, **none** of which use`<em>`, and it is **silent on `parsons-031`**, the one row that actually needed it; on `writeme.md`
+it fires on 6 against 1 actual. Nought for one on true positives. **Ask
+prettier; do not predict.**
+
+```bash
+# Does this cell need <em>? Isolate it -- a whole-ledger diff also shows
+# prettier's column re-padding (modification 2), which is not this hazard.
+CELL='<the finished evidence cell, pasted as a single-quoted argument>'
+F=/tmp/em-probe.md
+printf '| a | b |\n| - | - |\n| x | %s |\n' "$CELL" > "$F"; cp "$F" "$F.orig"
+npx prettier --write "$F" >/dev/null
+diff "$F.orig" "$F" || echo 'prettier rewrote it -> wrap the quotation in <em>'
+```
+
+**Isolation is the load-bearing word.** The original finding was taken exactly
+this way — "by isolation: two table rows differing only in that code span". A
+procedure keyed on a ledger-wide `git diff` would say **every** cell needs
+`<em>`, because prettier re-pads the whole table whenever any cell's width
+changes. The check's parser already accepts `<em>"…"</em>`, so switching a cell
+costs no change to any instrument.
+
 So "re-run and diff" means **diff normalised**, and the normalisation is the
 `norm()` and `unwrap_markup()` in [§ The transport check](#the-transport-check)
 — **one statement of it, in runnable form, and this sentence deliberately does
@@ -740,19 +857,42 @@ method into a citable fact — which is exactly what happened on `writeme` and i
 why this section exists.
 
 ```bash
-# transport-check.sh <ledger.md> <gen2-dir> <gen3-dir-or-NONE>
-# Prints one line per finding. Silent means clean.
+# transport-check.sh <ledger.md> <ref-root|NONE> <port-root|NONE> [member|all]
+#
+# Prints one line per finding, then ALWAYS a final `CENSUS ...` line.
+# SILENCE IS NOT CLEAN. Silence means the row pattern matched nothing -- the
+# exact failure this check exists to catch. **No CENSUS line is a FAIL.**
+# This is the `[ "$n" -gt 0 ]` floor the Pass-1 gate 47 lines above already
+# carries; this check shipped without it, and § The register check's class --
+# a check that reports success, or absence, over nothing -- is now recorded a
+# fourth time, by the check written to enforce it.
 set -u
 LC_ALL=C; export LC_ALL          # both extractors abort on UTF-8; see above
-L="$1"; REF="$2"; PORT="${3:-NONE}"
+L="$1"; REF="$2"; PORT="${3:-NONE}"; MEMBER="${4:-all}"; export REF PORT MEMBER
 # firstblock() and glossterm() -- paste verbatim from § What Pass 1 writes.
 
-# The normalisation is EXACTLY the sanctioned transport modifications, one
-# clause per numbered item, and nothing else. A modification the template
-# sanctions is normalised away because the seeder had no choice; anything else
-# stays visible. The prettier code-span hazard is deliberately absent -- it is a
-# hazard to avoid with <em>, not a modification to permit.
-norm() { perl -pe 's/\\\*\\\*/**/g; s/\\_/_/g; s/\\\|/|/g; s/\\\[/[/g; s/\\\]/]/g;
+# norm() is a NAMED APPROXIMATION of the sanctioned transport modifications --
+# close enough to run, and NOT an equality. Its edges, named so a future reader
+# amends this template rather than patching a run:
+#   under-covers  a lone `\*` is not unescaped, though prettier escapes
+#                 single-asterisk emphasis at a truncation point under
+#                 modification 3. FALSE POSITIVE. **No count is published
+#                 here**: three instruments have returned three different
+#                 counts of single-asterisk emphasis across the eight Gen-2 doc
+#                 pairs, and § Publish the number by publishing the command
+#                 forbids stating one without a settled method. Widening norm()
+#                 to close it is an amendment, measured, in its own commit.
+#   wider than 2  s/\s+/ /g collapses ALL whitespace, not only prettier's
+#                 table-cell padding. It cannot INSERT a separator, so it does
+#                 not hide the code-span hazard's space elision.
+# The bracket clause is FRAGMENT-TARGETED, not unconditional: modification 5
+# sanctions an escape on an intra-document `](#fragment)` link and explicitly
+# says a PATH link takes none, so unescaping both normalised an unsanctioned
+# escape into agreement -- a false negative [measured 2026-08-18: escaping
+# writeme-011's Gen-3 path link -> DIVERGENT under this form, SILENT under the
+# unconditional one; writeme-006's fragment link stays clean under both].
+norm() { perl -pe 's/\\\*\\\*/**/g; s/\\_/_/g; s/\\\|/|/g;
+                   s/\\\[(.*?)\\\]\((#[^)]*)\)/[$1]($2)/g;
                    s/\s+/ /g; s/^ +//; s/ +$//'; }
 # Modification 4, applied to the STORED side only and only where the extractor's
 # own output is markup, so it cannot launder backticks onto a prose quote.
@@ -760,16 +900,38 @@ unwrap_markup() { case "$1" in '<'*) printf '%s' "$2" | perl -pe 's/^`(.*)`$/$1/
                                *) printf '%s' "$2";; esac; }
 
 perl -ne '
-  next unless /^\| `([a-z0-9-]+-\d{3})`/; my $id = $1; my $n = 0;
+  BEGIN { $M = $ENV{MEMBER};
+          $noref = ($ENV{REF} eq "NONE" && $ENV{PORT} eq "NONE"); }
+  next unless /^\| `([a-z0-9-]+-\d{3})`/; my $id = $1;
+  next if $M ne "all" && !/^\| `[a-z0-9-]+-\d{3}` *\| *`\Q$M\E` /;
+  $rows++; my $n = 0;
   while (/Gen-([23])\s*`([A-Za-z.]+\.md)`\s*§\s*(.*?):\s*(?:_"(.*?)"_|<em>"(.*?)"<\/em>)/g) {
     my $q = defined $4 ? $4 : $5;
     print join("\t", $id, "G$1", $2, $3, $q), "\n"; $n++;
   }
+  $parsed += $n;
   my $cited = () = /Gen-[23]\s*`[A-Za-z.]+\.md`\s*§/g;
-  print join("\t", $id, "-", "-", "!UNQUOTED", "$n of $cited cited"), "\n" if $cited > $n;
+  my $lead  = () = /Gen-[23]\s*`?[A-Za-z0-9._\/-]+\.md`?/g;
+  print join("\t",$id,"-","-","!MALFORMED","$cited of $lead leads parse"),"\n" if $lead > $cited;
+  print join("\t",$id,"-","-","!UNQUOTED", "$n of $cited cited"),"\n"          if $cited > $n;
+  if ($n == 0) { $nocite++;
+    print join("\t",$id,"-","-","!NO-CITATION","-"),"\n" unless $noref; }
+  END { print join("\t","-","-","-","!CENSUS",
+        "member=$M ref=$ENV{REF} rows=".($rows+0)
+        ." parsed=".($parsed+0)." nocite=".($nocite+0)),"\n" }
 ' "$L" | while IFS=$'\t' read -r id side file head stored; do
-  [ "$head" = "!UNQUOTED" ] && { echo "$id UNQUOTED ($stored)"; continue; }
-  case "$side" in G2) src="$REF/$file";; G3) [ "$PORT" = NONE ] && continue; src="$PORT/$file";; esac
+  case "$head" in
+    '!CENSUS')      echo "CENSUS $stored";                   continue;;
+    '!UNQUOTED')    echo "$id UNQUOTED ($stored)";           continue;;
+    '!MALFORMED')   echo "$id MALFORMED-CITATION ($stored)"; continue;;
+    '!NO-CITATION') echo "$id NO-CITATION";                  continue;;
+  esac
+  case "$side" in
+    G2) [ "$REF"  = NONE ] && { echo "$id G2 UNEXPECTED-CITATION $file § $head"; continue; }
+        src="$REF/$file";;
+    G3) [ "$PORT" = NONE ] && { echo "$id G3 UNEXPECTED-CITATION $file § $head"; continue; }
+        src="$PORT/$file";;
+  esac
   [ -f "$src" ] || { echo "$id $side MISSING-SOURCE $src"; continue; }
   if [ "$head" = "Glossary" ]; then
     term=$(printf '%s' "$stored" | perl -ne 'print $1 if /^- \*\*(.+?)\*\* —/')
@@ -781,7 +943,13 @@ perl -ne '
 done
 ```
 
-**Three properties are load-bearing and each cost a bug to find:**
+The four sentinel arms must `continue` **before** `case "$side"`, or `set -u`
+aborts on the unset `$src`. `MEMBER`, `REF` and `PORT` reach the perl program
+through `%ENV` rather than by interpolation into its text, so a member slug
+cannot inject; `\Q…\E` is perl's quotemeta, the regex analogue of the `index()`
+literal-prefix discipline `firstblock`, `glossterm` and `resolve` all carry.
+
+**Six properties are load-bearing and each cost a bug to find:**
 
 - **Exact diff, never containment.** A containment test sees content the seeder
   _dropped_ and is blind to content they _added_, so it cannot see modification
@@ -790,15 +958,67 @@ done
 - **Whitespace around the citation's backticks and `§` is optional**, because
   the prettier hazard deletes exactly those characters — a strict pattern stops
   matching the very cell the hazard damaged, and the row is skipped in silence.
-- **The invariant is `parsed == cited`, not `parsed > 0`.** A row whose second
-  citation is unreadable while its first is fine otherwise passes half-checked.
-  That is how `writeme-028` hid its Gen-3 half behind a closing marker prettier
-  had escaped, through two revisions of this check.
+- **`parsed == cited` is necessary and NOT sufficient — it holds at `0 == 0`.**
+  A row whose second citation is unreadable while its first is fine otherwise
+  passes half-checked; that is how `writeme-028` hid its Gen-3 half behind a
+  closing marker prettier had escaped. But both sides are computed by the **same
+  grammar**, so a citation outside that grammar is invisible to both [measured
+  2026-08-18: two wholly fabricated citations planted in a scratch copy of the
+  clean `parsons.md` — one whose filename carried a path, one omitting the `§` —
+  and the check printed **nothing**]. A whole-ledger census does not close it
+  either: the mutant reported **57 citations across 49 rows** against the clean
+  **57 across 47** — citations flat, only the row count moved.
+- **Three counters, and the strict one is never widened.**
+  `parsed ⊆ cited ⊆ lead`, and each inequality names a different defect: `lead`
+  matches a Gen-2/3 pointer at **any** `.md` path, so `lead > cited` is a
+  citation the published grammar cannot read. Widening `cited` to accept a path
+  would legitimise an unsanctioned citation form; adding a looser **counter**
+  whose only output is `MALFORMED-CITATION` can produce more findings and never
+  fewer. **That is the opposite of widening the check**, and it is said here
+  because a reviewer applying that rule mechanically will otherwise reject it.
+  Publication gate, run before this shipped: `lead > cited` scores **0** on both
+  clean ledgers [measured 2026-08-18].
+- **`NONE` is an assertion, on both arms.** `G3) [ "$PORT" = NONE ] && continue`
+  was a silent skip of the same class as the missing floor, three lines away and
+  live on **100 % of Family F's rows**, which have no Gen-3 port at all. `NONE`
+  now means _this ledger cites no heading on that side, and here are the rows I
+  checked_ — which is also what stops `dropdowns` and `variables`, whose whole
+  G2 arm is a structural no-op, reading as a clean bill.
+- **The `NO-CITATION` set is derived, not judged.** With a reference root it
+  must equal the union of the lister-4 and lister-5 id ranges in
+  `### Seed census` — those are the rows § What Pass 1 writes says cite no
+  heading at all. **Both committed ledgers already satisfy it**: `parsons` =
+  `045`–`047`, its three lister-4 clusters; `writeme` = **empty**, because
+  `WritemeLens` has 0 orphans. Publish the derivation and never the number —
+  `writeme` already contradicts any threshold.
 
-**Mutation-test it before trusting it**, per the same rule the Pass-1 gate
-carries: plant a truncated quote, an added word, a mis-transcribed heading, a
-mangled citation, and backticks on a prose quote, and confirm each fires. All
-five were planted and caught on `writeme` [measured 2026-08-17].
+**Mutation-test every changed line before trusting the gate, not one of them.**
+Publishing this check on five plants is how it shipped without a floor. All
+thirteen below were planted one at a time in a `/tmp` scratch copy and each
+confirmed to fire [all measured 2026-08-18]:
+
+| mutation                                            | expected                                                                                                                       |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| run it against **this template**                    | `rows=0 parsed=0` — the specimen ids are `` `<lens>-001` `` and `<` is outside the id class. Without the census: total silence |
+| fabrication whose filename carries a path           | that id under **both** `MALFORMED-CITATION (0 of 1 leads parse)` and `NO-CITATION`; `parsons` nocite 3 → 5                     |
+| fabrication omitting the `§`                        | the same pair                                                                                                                  |
+| baseline `NO-CITATION` set, nothing planted         | `parsons` = `045`,`046`,`047`; `writeme` = none                                                                                |
+| fabrication **beside** a good citation, path form   | `MALFORMED-CITATION (1 of 2 leads parse)`; nocite **stays 3** — the floor alone is blind here, which is why `lead` exists      |
+| fabrication **beside** a good citation, no-`§` form | the same                                                                                                                       |
+| `lead` false-positive gate, both clean ledgers      | **0** rows where `lead > cited`. **Gate publication on this**                                                                  |
+| `REF=NONE` with a well-formed Gen-2 citation        | `UNEXPECTED-CITATION`                                                                                                          |
+| `PORT=NONE` with a well-formed Gen-3 citation       | `UNEXPECTED-CITATION`. Under the pre-amendment form: **silent**                                                                |
+| `REF=NONE PORT=NONE` on a 4-row fixture             | no per-row `NO-CITATION` spam; census carries `rows=4 parsed=1 nocite=3`                                                       |
+| member filter, `MEMBER=<slug>`                      | per-member `rows=` sums to the whole-ledger `rows=` — 2 + 1 + 1 = 4                                                            |
+| member filter with one marker deleted               | the sum falls **short** (3 of 4) and the preflight names `UNMARKED-ROW`                                                        |
+| `norm()`'s fragment-targeted bracket clause         | an escaped **path** link → `DIVERGENT`; `writeme-006`'s escaped **fragment** link stays clean                                  |
+
+Two regressions bound the whole amendment, and both held: `writeme` still
+reports exactly `writeme-019 UNQUOTED (1 of 2 cited)` with **0 divergent**, and
+`parsons` still reports **0 divergent** [measured 2026-08-18]. A DIVERGENT count
+that moves when `norm()` is amended means the amendment changed what the check
+believes, not what it can see — ship the documentation-only form instead and
+open a measured follow-up.
 
 The conditions below are for **campaign close**, not for the seeding commit.
 
