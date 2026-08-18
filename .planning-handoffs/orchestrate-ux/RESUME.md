@@ -1229,11 +1229,24 @@ consequential ruling — is undated and not in the greppable form.
 
 ## DEFERRED TO 0.3 — SUPERSEDED; see [`DECISIONS.md`](./DECISIONS.md) § 0.3 entry conditions
 
-**This section is NO LONGER the deferral's home** (human ruling 2026-08-17,
-R-M): `DECISIONS.md § 0.3 entry conditions` is. Round 8's BLOCKER 1 is that the
-two disagree on membership — **collapse them into one table before relying on
-either.** Kept here until that merge lands, because this list is currently the
-longer of the two.
+**THE MERGE HAS LANDED. This section holds no membership and no deferral** —
+[`DECISIONS.md` § 0.3 entry conditions](./DECISIONS.md) is the only home (R-M
+2026-08-17, and R-Q 2026-08-18 settling which of that file's two sections
+survives). `DECISIONS.md § Deferred to 0.3` was **deleted outright**; a pointer
+stub is a second home in waiting.
+
+Round 8's BLOCKER 1 was that the two lists disagreed on membership while both
+claimed to be the home. The five-item list was a strict subset of the eight-item
+one, so three items had no home at all, `D7` was in neither, and four further
+carry-forwards lived only in this section's prose bullets. **All of them are now
+rows or lines in the merged table**, along with two decisions that had never had
+a row: the editor-mode scrim geometry (**B12**) and the screen-reader structure
+obligation (**G6**).
+
+**What survives below is REASONING, not a task list, and its counts are stale by
+construction** — the `strip` table was measured at `8cc4bc15` and this document
+has already gone stale on that number once. Read it for why the split was drawn,
+then act from `DECISIONS.md`.
 
 `8cc4bc15` split AR-1's B3 against the reviewer's counter-proposal: the
 **glossary** gained the new vocabulary immediately; the **prose migration** was
