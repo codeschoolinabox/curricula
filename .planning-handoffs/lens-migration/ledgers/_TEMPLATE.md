@@ -528,10 +528,19 @@ fixture round-trip; read: `.markdownlint-cli2.jsonc` `MD033.allowed_elements`].
 This is a **rendering** choice, not a sixth transport modification — the quoted
 characters are unchanged, which is the whole point.
 
-So "re-run and diff" means **diff normalised**: unescape `\*\*` to `**`, `\_` to
-`_`, `\|` to `|`, and collapse space runs on both sides first. Comparing raw
-bytes makes a formatter normalisation indistinguishable from a
-mis-transcription, which is the one thing this check exists to tell apart.
+So "re-run and diff" means **diff normalised**, and the normalisation is the
+`norm()` and `unwrap_markup()` in [§ The transport check](#the-transport-check)
+— **one statement of it, in runnable form, and this sentence deliberately does
+not restate the clauses.** Comparing raw bytes makes a formatter normalisation
+indistinguishable from a mis-transcription, which is the one thing this check
+exists to tell apart.
+
+⚠️ **This sentence used to enumerate three unescapes while the code did five**,
+which is the defect it now avoids by pointing rather than listing: the prose a
+reader hits first disagreed with the command that governs, and an ordinary
+reader would have taken the prose. That is the same failure one level down from
+the one that made this check necessary — a ledger publishing a number whose
+method lived somewhere else. **A rule with two statements has no statement.**
 
 ⚠️ **Normalising is not the same as being blind, and the difference is a close
 condition.** A normalisation that also ignored backticks would hide modification
