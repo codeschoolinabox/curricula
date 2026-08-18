@@ -373,6 +373,10 @@ describe('deriveInputElements', () => {
 				'Comment',
 			]);
 		});
+
+		it('wraps no token in a comment element', () => {
+			expect(elements('x // hi')[2]?.tokenIndices).toEqual([]);
+		});
 	});
 
 	describe('Interfaces — frozen, pure and deterministic', () => {
@@ -418,7 +422,7 @@ describe('deriveInputElements', () => {
 					...input,
 					code: undefined,
 				} as unknown as ScanInput),
-			).toThrow(TypeError);
+			).toThrow(/needs a source text/);
 		});
 
 		it('throws when the token array is absent', () => {
@@ -428,7 +432,7 @@ describe('deriveInputElements', () => {
 					...input,
 					tokens: undefined,
 				} as unknown as ScanInput),
-			).toThrow(TypeError);
+			).toThrow(/needs a source text/);
 		});
 
 		it('throws when the comment array is absent', () => {
@@ -438,7 +442,7 @@ describe('deriveInputElements', () => {
 					...input,
 					comments: undefined,
 				} as unknown as ScanInput),
-			).toThrow(TypeError);
+			).toThrow(/needs a source text/);
 		});
 	});
 

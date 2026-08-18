@@ -123,16 +123,38 @@ flowchart TD
   promise keepable.
 - **Run collapsing is the one deliberate departure**, is stated at the field it
   governs, and is reversible by a consumer.
-- **Fail loudly at the boundary, never inside.** An absent input throws; a
+- **Fail loudly at the boundary for an absent part, never inside.** An absent
+  source, token array or comment array throws at the boundary, and all three are
+  checked the same way. A **present but wrong-typed** part is not covered: that
+  is a coherence failure, and it sits out of scope beside provenance below. A
   program the parser refused never reaches this module, because the caller's
   gate closes first.
+
+  This bullet read "Fail loudly at the boundary, never inside" unqualified until
+  an AR-5 measured it false — the guard type-checked `code` while
+  presence-checking the two arrays, so one field was treated unlike its
+  siblings. Asked whether the code should widen to meet the sentence or the
+  sentence should narrow to meet the design, **the human ruled narrow (human
+  ruling 2026-08-18)**, and the type-check came out. The oldest artifact agrees:
+  the phase-1 description above, written at Phase 0 before any implementation,
+  has always said _missing or absent_ — so the type-check was the drift, not the
+  contract.
 
 ### Out of scope
 
 - **Input coherence.** The source text, the token array and the comment array
   must come from one reading of one source. This module validates presence, not
   provenance; a token ending past the end of the source is a caller bug, and it
-  is the one thing that could break the tiling claim above.
+  is the one thing that could break the tiling claim above. **A part of the
+  wrong type is the same class of failure** (human ruling 2026-08-18, the same
+  one recorded under § Structural constraints) — a number where a token array
+  belongs is not an absence, and the boundary does not catch it. It surfaces
+  from wherever the part is first used, which is the one place this module's
+  fail-at-the-boundary rule deliberately does not reach. The sharpest case is
+  not the obvious one: `tokens: 42` fails immediately, but an array of the wrong
+  _contents_ produces spans of `undefined`, and
+  `code.slice(undefined, undefined)` hands every element the whole source before
+  anything throws.
 - **The caller's gate and projection.** Gating on a successful tokens stage, and
   projecting the three values off an embodiment's facts, are the caller's
   one-line boundary and are named in the README rather than done here.

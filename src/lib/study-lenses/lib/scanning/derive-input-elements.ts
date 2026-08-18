@@ -27,14 +27,13 @@ export default function deriveInputElements({
 	// caller gates on a successful tokens stage first, so an absence here is its
 	// bug to surface rather than a state to absorb.
 	//
-	// The source is type-checked, as the sibling leaf checks its own; the two
-	// arrays are checked for presence alone, because `Array.isArray` would
-	// narrow them to `any[]` for the rest of the function. Whether the three
-	// parts came from one reading of one source is provenance, which this
-	// module does not establish either way.
-	const isReadingPresent =
-		typeof code === 'string' &&
-		[tokens, comments].every((part) => part !== undefined && part !== null);
+	// Presence is the whole check, and it is the same check for all three parts.
+	// A present-but-wrong-typed part is a coherence failure, which sits out of
+	// scope beside provenance: the caller's successful-tokens gate is what
+	// excludes it, and this module neither detects nor repairs it.
+	const isReadingPresent = [code, tokens, comments].every(
+		(part) => part !== undefined && part !== null,
+	);
 
 	if (!isReadingPresent) {
 		throw new TypeError(
