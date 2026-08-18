@@ -17,6 +17,8 @@ import type {
 	Token,
 } from 'acorn';
 
+import type { InputElement } from '../lib/scanning/types.js';
+
 // ─────────────────────────────────────────────────────────────────────────────
 // The snippet
 // ─────────────────────────────────────────────────────────────────────────────
@@ -88,12 +90,47 @@ export type FactStage<Value> = StageSuccess<Value> | StageFailure;
 
 /**
  * The tokens stage's value: the token stream plus the comments the
- * tokenizer sets aside. They emerge together, so they travel together —
- * comments never depend on any later stage.
+ * tokenizer sets aside — those two emerge from one pass, so they travel
+ * together and never depend on any later stage — plus, unless its own
+ * derivation defects, the input-element sequence derived over them.
  */
 export type Tokens = {
 	readonly tokens: ReadonlyArray<Token>;
 	readonly comments: ReadonlyArray<Comment>;
+	/**
+	 * DERIVED, by calling the shared scanning leaf (`../lib/scanning/`):
+	 * the same source re-read in the specification's own vocabulary — one
+	 * named element per span, covering `[0, source.length)` with no gaps,
+	 * no overlaps, and nothing of zero width. Present on every successful
+	 * tokenization except when the enrichment derivation itself defected —
+	 * absent exactly then: a loud embody-machinery report in development,
+	 * never a property of the program (human rulings 2026-08-17 and 2026-08-18:
+	 * the leaf stays byte-untouched, embody publishes by calling it, and
+	 * the member is optional with this one absence condition).
+	 *
+	 * This is the normative statement of the coherence guarantee: the
+	 * leaf's one precondition — source, tokens and comments from one
+	 * reading of one source — is satisfied by construction, because the
+	 * derivation that calls the leaf holds the snippet's source and
+	 * produced both arrays in the same tokenizer pass. That closes,
+	 * embody-side, the hole the leaf's DOCS records as input coherence.
+	 *
+	 * Read it with the leaf's recorded limits, repeated here per the
+	 * fact-admission constraint's condition (c): whitespace and
+	 * line-terminator runs are collapsed to maximal runs — the leaf's one
+	 * deliberate departure from the specification, reversible by
+	 * splitting a run's text per character; a slash after `await` can be
+	 * mis-read upstream by the tokenizer, and the published sequence is
+	 * then wrong and still tiles — tiling is a property of the sequence,
+	 * never evidence it is the specification's; the hashbang is corrected
+	 * toward the specification off the comment channel. Each element's
+	 * `tokenIndices` are indices into the sibling `tokens` array —
+	 * indices, never token objects, which is what lets the sequence live
+	 * inside the embodiment's deep freeze (an acorn token's `type` is a
+	 * process-global singleton the freeze must not reach) and what joins
+	 * this sequence to any other derivation over the same stream.
+	 */
+	readonly inputElements?: ReadonlyArray<InputElement>;
 };
 
 /**

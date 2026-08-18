@@ -120,6 +120,19 @@ describe('embody', () => {
 			).toBe(true);
 		});
 
+		it.skip('freezes the input-element sequence deeply', () => {
+			const { facts } = embody('let x = 1');
+			const sequence = facts.tokens.ok
+				? facts.tokens.value.inputElements
+				: undefined;
+			expect(
+				sequence !== undefined &&
+					Object.isFrozen(sequence) &&
+					Object.isFrozen(sequence[0]) &&
+					Object.isFrozen(sequence[0].tokenIndices),
+			).toBe(true);
+		});
+
 		it('freezes the ast program node', () => {
 			const { facts } = embody('let x = 1');
 			expect(facts.ast.ok && Object.isFrozen(facts.ast.value)).toBe(true);

@@ -16,14 +16,15 @@ abstraction.
 
 1. **Derive the fact stages** (sync, pure) — the six stages derive once, in
    dependency order: source and type restated from the snippet; tokens — the
-   token stream plus the set-aside comments — from the source; ast from the
-   tokens; entwined from ast, tokens, and source, together with the parse's own
-   record of where grouping parentheses sat; environment — the static scope
-   structure — from the ast, the source⇄tree binding, and the snippet type.
-   Every result is tagged — a value or a structured cause — and a failure never
-   stops the walk: a stage whose input is missing fails carrying the upstream
-   cause, whose origin stays named inside it. Input: the snippet. Output: the
-   Facts.
+   token stream plus the set-aside comments, and — unless its own derivation
+   defects — the input-element sequence derived over them by calling the shared
+   scanning leaf — from the source; ast from the tokens; entwined from ast,
+   tokens, and source, together with the parse's own record of where grouping
+   parentheses sat; environment — the static scope structure — from the ast, the
+   source⇄tree binding, and the snippet type. Every result is tagged — a value
+   or a structured cause — and a failure never stops the walk: a stage whose
+   input is missing fails carrying the upstream cause, whose origin stays named
+   inside it. Input: the snippet. Output: the Facts.
 
 2. **Derive phase accessibility** (sync, mechanical) — the five lifecycle phases
    get their accessibility from the tagged stages by fixed rules: `source` and
@@ -96,7 +97,19 @@ flowchart TD
   residence of the second: the grouping-parentheses record is the parser's own
   reading — projected authority, nothing derived — and it lives on the entwined
   stage because it is path-keyed data: paths are born in the binding, and the
-  ast fact's value is contractually the bare tree, never an envelope.
+  ast fact's value is contractually the bare tree, never an envelope. The tokens
+  stage carries a third derived enrichment: the input-element sequence, admitted
+  under this test (human ruling 2026-08-18) — (a) computed solely from the
+  source and the stage's own value; (b) wanted by consumers of different kinds,
+  from the lenses that teach in the specification's vocabulary to any surface
+  that must account for every character; (c) its departures documented at the
+  field — with the residence corollary applied as written: a member on the
+  stage's value, no stage of its own, no accessibility bar, no data-flow change.
+  Embody's standing as the derivation's caller is itself part of the ground: it
+  alone satisfies the leaf's input-coherence precondition by construction. The
+  sibling `classifying` leaf is permanently excluded from the Facts (human
+  ruling 2026-08-18): its five categories are a chosen teaching vocabulary — the
+  accuracy-not-pedagogy contract keeps it a consumer's own projection.
 - **Level-blind.** No level knowledge in the region's data or pipeline; level
   logic runs only black-boxed inside individual gates.
 - **Truth, not permission.** This region states what is TRUE about the program;
@@ -139,7 +152,12 @@ flowchart TD
   underpin every later surface, so a tokens, ast, or entwine failure bars the
   phases below it; the scope structure is terminal — no later phase reads it —
   so an environment failure renders inside the `environment` phase alone,
-  leaving `evaluation` reachable.
+  leaving `evaluation` reachable. The input-element enrichment is narrower
+  still: a defect in its derivation reports loudly and the member is simply
+  absent from the tokens value — no stage fails, no phase bars, because nothing
+  downstream reads it. (An internal defect may be caught into data or may
+  acceptably crash — human latitude ruling 2026-08-18; this region catches, for
+  one consistent defect grammar.)
 - **Freeze-what-you-own.** The freeze covers the structure this region built —
   the wrappers and indices — and reaches deeply into the syntax and scope
   objects the facts index: allocated fresh per derivation and held by nobody
@@ -149,14 +167,18 @@ flowchart TD
   here is sole reference, not authorship.
 - **The embodiment knows no consumers.** Lens refs arrive as arguments, typed
   structurally; the region imports no component machinery, no evaluator, no
-  language level. The parser's types are the only foreign vocabulary the region
-  imports — type-only, so ownership can move to the shared parse leaf without
-  touching callers. The scope structure is expressed in the region's own type
-  names, named against the parser's node type; its field vocabulary mirrors the
-  analyzer's, but the analyzer's own types and objects never cross the boundary
-  — the region projects the fields it exposes into its own plain objects (a
-  frozen `Map` is not immutable, so a borrowed analyzer object could not be
-  honestly frozen; see DEV.md § 13).
+  language level. Two foreign vocabularies cross the boundary, and no consumer
+  is among them (widened, human-gated 2026-08-18): the parser's types —
+  type-only, so ownership can move to the shared parse leaf without touching
+  callers — and the scanning leaf's element types, carried on the tokens stage's
+  value and derived by calling the leaf, the region's one runtime dependency on
+  the shared `lib/` tier; that leaf is domain-blind and imports no package
+  region even for types, so no cycle exists. The scope structure is expressed in
+  the region's own type names, named against the parser's node type; its field
+  vocabulary mirrors the analyzer's, but the analyzer's own types and objects
+  never cross the boundary — the region projects the fields it exposes into its
+  own plain objects (a frozen `Map` is not immutable, so a borrowed analyzer
+  object could not be honestly frozen; see DEV.md § 13).
 - **Sync and pure throughout.** No I/O, no async, no shared mutable state: the
   same snippet and roster produce the same embodiment.
 
@@ -240,6 +262,27 @@ entry states why this shape rather than its alternatives.
   parse facts to be consumable by a validator this region does not know exists.
   A level gate inside the pipeline would make the facts a function of the level
   — the facts would stop being what is TRUE and start becoming what is ALLOWED.
+- **E9 — The input-element enrichment, by calling the leaf** (human rulings
+  2026-08-17 and 2026-08-18). The tokens stage's value carries the
+  specification's input-element sequence, derived by calling the shared scanning
+  leaf — the leaf byte-untouched, embody its one production caller and thereby
+  the guarantor of the leaf's input-coherence precondition, which embody
+  satisfies by construction: the derivation holds the snippet's source and
+  produced both arrays in one tokenizer pass, so a foreign or wrong-typed part
+  cannot be constructed — embody passes only values it built itself. Derivation
+  is eager, at the stage — measured (2026-08-18) at a small fraction of the
+  low-single-digit-millisecond bar at snippet scale; the campaign record carries
+  the numbers. The member is optional — absent exactly when the derivation
+  defects, degrading the enrichment alone, loudly — and it is a value member,
+  not a stage: the six-stages/five-phases seam is deliberately untouched.
+  Consumers read `facts.tokens.value.inputElements` rather than calling the
+  leaf. The sequence's element texts jointly reproduce the whole source — a
+  deliberate, measured footprint beside the indexed tree, not a copy of it: the
+  facts-index-never-copy constraint speaks of the tree, and this carries the
+  source's own characters once more, in exchange for tiling. This settles, from
+  the caller's side, the residence question the leaf's README records as
+  deliberately unresolved; closing the leaf's own note is a follow-on owned by
+  the campaign's close, never an edit made here.
 
 ## Parse decisions
 

@@ -7,8 +7,11 @@ any region may import directly. Nothing here knows the package's domain — no
 lifecycle phases, no levels, no lenses; each library states its own contract in
 its own directory. A leaf may consume embody's **structural fact-types** (a
 scope graph, an AST) **type-only** when that structure is the leaf's own
-subject: a type-only import creates no runtime dependency and no import cycle
-(embody imports nothing here), and the leaf stays blind to the lifecycle,
+subject: a type-only import creates no runtime dependency and no import cycle —
+and no cycle can arise from the other direction either, because a leaf never
+runtime-imports a package region, while a region may call a leaf (embody
+runtime-imports one, `scanning/`, to derive its tokens-stage input-element
+sequence — human ruling 2026-08-18). The leaf stays blind to the lifecycle,
 levels, and lenses built on those facts. This is a widening of the original "no
 package region even for types" rule, scoped to structural fact-types a leaf
 genuinely projects.

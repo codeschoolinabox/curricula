@@ -68,57 +68,69 @@ provenance:
    src/lib/study-lenses/lib/scanning` → 53 passed | 18 skipped (71)]. By
    execution start the trigger measured **MET on committed work** [measured
    2026-08-18: same command → 71 passed (71), nothing skipped; scanning
-   porcelain empty; leaf tip `10cec890`], so the lift is moot for Phase 0.
-   Phase 1 still re-measures the trigger fresh at its own start.
+   porcelain empty; leaf tip `10cec890`], so the lift is moot for Phase 0. Phase
+   1 still re-measures the trigger fresh at its own start.
 2. **`classifying` will NEVER become an embodiment fact.** Permanent. This
    settles § What a Phase 0 here must settle item 6 for classifying (the leaf
    stays; no fact), discharges item 5 as not-owed (no port occurs, so no loss
    ledger), and closes § The question's classifying half. The discriminating
-   admission line is the vocabulary-authority line (the second candidate
-   below): classifying's five categories are a chosen teaching vocabulary,
-   which the accuracy-not-pedagogy contract keeps outside the Facts.
+   admission line is the vocabulary-authority line (the second candidate below):
+   classifying's five categories are a chosen teaching vocabulary, which the
+   accuracy-not-pedagogy contract keeps outside the Facts.
 3. **`ceremony: full`** for this campaign — AR-1 and AR-2 fire inside Phase 0;
    AR-3/AR-4 per Phase-1 increment; AR-5 at campaign close.
 4. **`twin-doc: machine`** — Phase 0 step 0.2 produces a notional-machine
-   document beside embody's README, and AR-1 challenges it alongside the
-   README.
+   document beside embody's README, and AR-1 challenges it alongside the README.
 
 **The residence the approved plan executes (2026-08-18; ratification is the
 Phase-0 human gate):** the input-element sequence enters as an **optional
 enrichment member on the tokens stage's value** — no new fact stage, no
 accessibility change, no data-flow change — derived by calling the untouched
 leaf, per embody DOCS.md § Structural constraints' ratified derived-fact test
-and its residence corollary. This is the reconciliation § Pointers asks for:
-the standing constraint is applied, not amended and not parallel-invented.
-Items 1 (admission line), 2 (eager; the timing number lands here in a dated
-addendum at the Phase-0 commit), 3 (seam untouched) and 6-for-scanning settle
-at that gate; item 4 (the tier README rewrite) executes when the peer session
-holding `lib/README.md` lands its work.
+and its residence corollary. This is the reconciliation § Pointers asks for: the
+standing constraint is applied, not amended and not parallel-invented. Items 1
+(admission line), 2 (eager; the timing number lands here in a dated addendum at
+the Phase-0 commit), 3 (seam untouched) and 6-for-scanning settle at that gate;
+item 4 (the tier README rewrite) executes when the peer session holding
+`lib/README.md` lands its work.
 
-**Settled (human, 2026-08-18, later the same session — the AR-1 PAUSE
-round):** AR-1 (design challenge) returned PAUSE with four blockers; all were
-resolved the same day and the fix set applied before types locked. Three
-rulings came out of the round:
+**Settled (human, 2026-08-18, later the same session — the AR-1 PAUSE round):**
+AR-1 (design challenge) returned PAUSE with four blockers; all were resolved the
+same day and the fix set applied before types locked. Three rulings came out of
+the round:
 
-1. **The member is OPTIONAL** on the tokens stage's value — absent exactly
-   when the enrichment derivation itself defects; the defect degrades the
-   enrichment alone, loudly (embody README § Failure grammar carries the
-   arm).
-2. **E7 latitude:** E7's failures-are-data rule targets errors in the
-   processed program; an embody-internal error may be caught into a data
-   payload or may acceptably crash — the author's choice. This campaign
-   chooses catch → loud report → absent member, for consistency with the
-   region's guarded-defect pattern.
+1. **The member is OPTIONAL** on the tokens stage's value — absent exactly when
+   the enrichment derivation itself defects; the defect degrades the enrichment
+   alone, loudly (embody README § Failure grammar carries the arm).
+2. **E7 latitude:** E7's failures-are-data rule targets errors in the processed
+   program; an embody-internal error may be caught into a data payload or may
+   acceptably crash — the author's choice. This campaign chooses catch → loud
+   report → absent member, for consistency with the region's guarded-defect
+   pattern.
 3. **The machine twin is embody's, not the scanner's alone** (AR-1
-   counter-proposal A, adopted): `embody/notional-machine.md` models the
-   factory briefly and the scanner in full, and a future stage reshape
-   extends the file rather than inheriting it.
+   counter-proposal A, adopted): `embody/notional-machine.md` models the factory
+   briefly and the scanner in full, and a future stage reshape extends the file
+   rather than inheriting it.
 
-The campaign-close write-back list now has four entries: `scanning/README.md`
-§ Why this module exists; `scanning/README.md` § Public API's
-consumer-boundary paragraph; `lib/README.md`'s admission rule (if still
-peer-held at commit time); the package README glossary's notional-machine
-entry ("NM content lives with its level" — widened by embody's twin).
+The campaign-close write-back list now has four entries: `scanning/README.md` §
+Why this module exists; `scanning/README.md` § Public API's consumer-boundary
+paragraph; `lib/README.md`'s admission rule (if still peer-held at commit time);
+the package README glossary's notional-machine entry ("NM content lives with its
+level" — widened by embody's twin).
+
+**Phase-0 artifacts committed (2026-08-18):** the commit whose subject is "docs:
+establish embody tokens-stage input-element enrichment (Phase 0)" carries the
+full record — AR-1 ×2 + AR-2 verdicts and dispositions, the loss ledger, and the
+timing evidence the eager ruling rests on [measured 2026-08-18, esbuild-bundled
+bench, leaf complete at 71/71, tokenize cost excluded: mean 0.008ms at 11B;
+0.030ms at 216B typical; 0.203ms at 1.7KB; 2.253ms (p95 2.543ms) at 17KB
+stress]. The tier README rewrite (item 4) landed in the same commit — the peer
+session holding `lib/README.md` landed first, so the clean path applied. The
+campaign-close write-back list stands at: the leaf README's §
+Why-this-module-exists closure note; its § Public API consumer-boundary
+paragraph; its "the whole embodiment closes" phrase (superseded embody-side by
+"the phases below tokens close"); and the package README glossary's
+notional-machine entry.
 
 ---
 

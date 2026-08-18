@@ -77,6 +77,15 @@ embodiment then carries facts and accessibility with nothing attached.
 **Out** — the frozen `Embodiment`: the Facts, each lifecycle phase's
 accessibility, and the fitting lenses attached per phase.
 
+**Depends on** — one shared leaf: the scanning derivation
+([`../lib/scanning/`](../lib/scanning/README.md)), called at the tokens stage to
+derive `inputElements` — this region's first runtime dependency on the `lib/`
+tier. No cycle exists: the leaf imports no package region, not even for types.
+The dependency is also a guarantee only embody can give: the leaf's one
+precondition — source, tokens and comments from one reading of one source — is
+satisfied by construction, because the derivation that calls it holds the
+snippet's source and produced both arrays in a single tokenizer pass.
+
 **Not owned** — rendering (the orchestrator's job); language-level knowledge (a
 level's validator consumes this region's parse facts, and that consumption
 happens outside embody — one parse truth); evaluator knowledge (evaluation-phase
@@ -129,9 +138,14 @@ embodiment.
    snippet type together. A failure never stops the walk: a stage whose input is
    missing fails carrying the upstream cause, its origin still named inside it.
    A learner's typo stops nothing — the failed stage is itself a fact, rendered
-   inside the lifecycle phase that owns it. The tokens stage carries the token
-   stream together with the comments the tokenizer sets aside — they emerge from
-   one pass, so they travel as one value.
+   inside the lifecycle phase that owns it. The tokens stage's value carries the
+   token stream together with the comments the tokenizer sets aside — those two
+   emerge from one pass, so they travel together. On a successful tokenization
+   the value also carries `inputElements`: the same source re-read in the
+   specification's own vocabulary, derived over the stream by calling the shared
+   scanning leaf ([`../lib/scanning/`](../lib/scanning/README.md)) — optional in
+   the contract, absent only when that derivation itself defects
+   ([§ Failure grammar](#failure-grammar)).
 2. **Derive phase accessibility.** From the tagged stages, each of the five
    lifecycle phases learns whether it can open. The rules are fixed and follow
    dependency: a phase is never barred by its own stage's failure, only by a
@@ -237,6 +251,12 @@ the failure also raises a loud development-mode report:
   entwining failure bars the phases below it; the scope structure is terminal —
   no later phase reads it — so an environment failure renders inside the
   `environment` phase alone, leaving `evaluation` reachable.
+- **A defect in the input-element derivation degrades the enrichment alone.**
+  The leaf call is embody machinery: a throw from it raises the same loud
+  development-mode report, the tokens stage still publishes its value, and
+  `inputElements` is simply absent — no stage fails, no phase is barred, because
+  nothing downstream depends on it. Absence of the member and this defect are
+  one and the same state.
 
 ## Reading the embodiment
 
@@ -252,30 +272,36 @@ rule:
 - **The parse facts are values, not envelopes.** What a language level's
   validator consumes is `facts.tokens.value` and `facts.ast.value` — never this
   region's stage envelope.
+- **The input-element sequence narrows on presence.**
+  `facts.tokens.value.inputElements` is optional: present on every successful
+  tokenization except when the derivation itself defected
+  ([§ Failure grammar](#failure-grammar)). A consumer that needs it checks for
+  it; absence is a reported embody defect, never a property of the program.
 
 ## What lives here
 
-| File                       | Audience       | What it is                                                               |
-| -------------------------- | -------------- | ------------------------------------------------------------------------ |
-| `README.md` (this)         | contributors   | the region's domain model + navigation                                   |
-| [`DOCS.md`](./DOCS.md)     | developers     | the architectural sketch, structural constraints, and decisions          |
-| [`types.ts`](./types.ts)   | every consumer | the keystone contracts — `Snippet` · `Facts` · `Gateable` · `Embodiment` |
-| `index.ts`                 | consumers      | the factory's boundary — `embody()`                                      |
-| `derive-facts.ts`          | implementers   | the six fact stages, threaded once in dependency order                   |
-| `derive-tokens.ts`         | implementers   | token stream + set-aside comments                                        |
-| `derive-ast.ts`            | implementers   | the syntax tree + the parse's grouping-paren record                      |
-| `derive-entwined.ts`       | implementers   | the source⇄tree binding                                                  |
-| `derive-environment.ts`    | implementers   | the static scope structure                                               |
-| `derive-accessibility.ts`  | implementers   | the per-phase accessibility map                                          |
-| `gate-lenses.ts`           | implementers   | run each phase-declaring applicability, wrapped                          |
-| `attach-lenses.ts`         | implementers   | group fitting lenses under their declared phases                         |
-| `join-study.ts`            | implementers   | join accessibility + attachments into the study layer                    |
-| `ecma-version.ts`          | implementers   | the one shared numeric language year                                     |
-| `is-node.ts`               | implementers   | the membership rule every generic walk here shares                       |
-| `lifecycle-phase-order.ts` | implementers   | the five phases, in specification order                                  |
-| `to-stage-cause.ts`        | implementers   | parser error → structured StageCause                                     |
-| `sandbox.html`             | developers     | permanent dev page — renders byPath wrappers for inspection              |
-| `tests/`                   | implementers   | the region's unit tests                                                  |
+| File                                           | Audience       | What it is                                                                             |
+| ---------------------------------------------- | -------------- | -------------------------------------------------------------------------------------- |
+| `README.md` (this)                             | contributors   | the region's domain model + navigation                                                 |
+| [`DOCS.md`](./DOCS.md)                         | developers     | the architectural sketch, structural constraints, and decisions                        |
+| [`notional-machine.md`](./notional-machine.md) | contributors   | the machine twin — the factory model, the scanner in full                              |
+| [`types.ts`](./types.ts)                       | every consumer | the keystone contracts — `Snippet` · `Facts` · `Gateable` · `Embodiment`               |
+| `index.ts`                                     | consumers      | the factory's boundary — `embody()`                                                    |
+| `derive-facts.ts`                              | implementers   | the six fact stages, threaded once in dependency order                                 |
+| `derive-tokens.ts`                             | implementers   | token stream + set-aside comments + the input-element sequence (via the scanning leaf) |
+| `derive-ast.ts`                                | implementers   | the syntax tree + the parse's grouping-paren record                                    |
+| `derive-entwined.ts`                           | implementers   | the source⇄tree binding                                                                |
+| `derive-environment.ts`                        | implementers   | the static scope structure                                                             |
+| `derive-accessibility.ts`                      | implementers   | the per-phase accessibility map                                                        |
+| `gate-lenses.ts`                               | implementers   | run each phase-declaring applicability, wrapped                                        |
+| `attach-lenses.ts`                             | implementers   | group fitting lenses under their declared phases                                       |
+| `join-study.ts`                                | implementers   | join accessibility + attachments into the study layer                                  |
+| `ecma-version.ts`                              | implementers   | the one shared numeric language year                                                   |
+| `is-node.ts`                                   | implementers   | the membership rule every generic walk here shares                                     |
+| `lifecycle-phase-order.ts`                     | implementers   | the five phases, in specification order                                                |
+| `to-stage-cause.ts`                            | implementers   | parser error → structured StageCause                                                   |
+| `sandbox.html`                                 | developers     | permanent dev page — renders byPath wrappers for inspection                            |
+| `tests/`                                       | implementers   | the region's unit tests                                                                |
 
 ## Glossary — region terms
 
@@ -285,6 +311,31 @@ this region owns.
 - **fact stage** — one tagged derivation result inside the Facts: either the
   stage's value, or a structured cause of failure. The unit applicability
   predicates test and accessibility reads from.
+- **input elements** — the tokens stage's `inputElements` member: the same
+  source re-read in the specification's own vocabulary — ECMA-262's
+  input-element sequence, one named element per span — present on a successful
+  tokenization and absent only when the derivation itself defects
+  ([§ Failure grammar](#failure-grammar)). Derived at embodiment time by calling
+  the shared scanning leaf ([`../lib/scanning/`](../lib/scanning/README.md)),
+  which owns the vocabulary: the fourteen element kinds and their grounds. Each
+  element carries its element kind, its half-open span, its verbatim source
+  slice, and the indices of the parser tokens it wraps — indices into
+  `facts.tokens.value.tokens`, never token objects, which is what lets the
+  sequence live inside the embodiment's deep freeze (an acorn token's type is a
+  process-global the freeze must not reach) and what joins the two derivations
+  on one stream. The sequence tiles the source; tiling is a property of the
+  sequence, never evidence it is the specification's — the leaf records its one
+  deliberate departure and its one known upstream mis-read (a slash after
+  `await`), and the field's own doc repeats them. In prose say **element kind**
+  for which production an element is — never bare "kind", which the package
+  glossary owns for a kind of study utility (the leaf's published field is
+  `kind`, read inside an element where no ambiguity arises; its type is
+  `InputElementKind`). Embody's own contribution is the coherence guarantee: the
+  leaf's precondition — source, tokens and comments from one reading of one
+  source — is satisfied by construction, because the derivation that calls it
+  holds the snippet's source and produced both arrays in one tokenizer pass.
+  (Summarized here; the normative statement lives at the `inputElements` field
+  in [`types.ts`](./types.ts).)
 - **entwining / entwined** — the derived source⇄tree binding: the stage tying
   each syntax-tree node to its exact place in the source text. Built at
   embodiment time, in this region. A tie is containment: a node ties every token
@@ -360,5 +411,7 @@ this region owns.
   package glossary.
 - [`DOCS.md`](./DOCS.md) — this region's architectural sketch, structural
   constraints, and decisions.
+- [`notional-machine.md`](./notional-machine.md) — the machine twin: the
+  factory's machine model, with the scanner modeled in full.
 - [`types.ts`](./types.ts) — the keystone contracts: `Snippet`, `Facts`, the
   lifecycle vocabulary, `Gateable`, `Embodiment`.
