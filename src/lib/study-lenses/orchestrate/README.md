@@ -59,8 +59,13 @@ site), and a contract with one discipline and eight homes is a contract nobody
 can hold. A surface that renders a string imports it; it does not spell it.
 
 The alternative — a `copy/` directory beside `rail/` and `guide/` — was
-considered and declined: these are values, not a surface, and the region's other
-value file (`derive-study.ts`) is likewise flat.
+considered and declined: these are values, not a surface, and eight tiny value
+files with a barrel to hide them is worse than one file with eight exports. **An
+earlier revision argued this from `derive-study.ts` being "the region's other
+value file" — it is a FUNCTION file** [measured 2026-08-19: one export, `export
+default function deriveStudy(`], and `display-labels.ts` is the region's only
+value file. The conclusion stands on the true premise; the false one is recorded
+so it is not re-derived (round 11 IMPORTANT 5).
 
 **Why the arrangement's five parts do not all live in one directory** (human
 ruling 2026-08-15). `rail/` owns the parts that are the lifecycle — the line,

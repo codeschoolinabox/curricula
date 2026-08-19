@@ -254,8 +254,8 @@ maskable containers, so the spoken copy goes dark with the drawn copy. It
 belongs in the same ledger as the orientation cost recorded under
 [Strict, covering](#strict-covering--editor-mode), and it is no better paid.
 
-**The mark row and the caption travel together.** A drawing that runs the whole
-instrument top to bottom and shows the rail's per-station marks shows the
+**The standing row and the caption travel together.** A drawing that runs the
+whole instrument top to bottom and shows the rail's per-station marks shows the
 caption too; one that abbreviates the rail to a bare line shows neither, and the
 band excerpts further down crop it along with everything else they crop — none
 of them is a claim that the caption is gone. Where a barring edge is drawn the
@@ -266,9 +266,9 @@ rail WITH its caption and nothing else. It is not a band excerpt — the band is
 the control row and the rail, and the caption renders beneath the rail — so it
 crops differently from the two above it, and it exists to draw a framing whose
 geometry is already drawn elsewhere. The pairing rule is what makes it legible:
-because the mark row and the caption travel together, an excerpt carrying the
-caption must carry the mark row, and one carrying neither is an abbreviation
-rather than a claim.
+because the standing row and the caption travel together, an excerpt carrying
+the caption must carry the standing row, and one carrying neither is an
+abbreviation rather than a claim.
 
 That is the rule to check these drawings against, and **checking it means
 reading the drawings by eye**. An earlier revision said "two greps rather than a
@@ -309,7 +309,15 @@ two names for one thing.
 │  ┌ ways to study the Source ─────────────────────────────┐   │
 │  │  [ rebuild the order ]   [ write it from memory ]     │   │
 │  └───────────────────────────────────────────────────────┘   │
+│  four phases have nothing to open yet                        │
 ```
+
+**The caption sits BELOW the open tray**, which is the tray rule drawn rather
+than only asserted: a tray opens BETWEEN the rail and the caption and pushes it
+down along with the pane — it never replaces it. An earlier revision of this
+drawing omitted the caption entirely, in the one state where the count line
+renders, so the only drawing that could exercise the rule contradicted it by
+omission (round 11 BLOCKER 4).
 
 The tray **pushes the pane down** rather than covering it: the surface visibly
 grows a requirement rather than swapping one in. Choosing a phase is a small
@@ -419,16 +427,22 @@ its mark and its kit.
 ## The machinery breaks — the same geometry, a different sentence
 
 The third framing, drawn as a **rail-and-caption excerpt** — the rail with its
-mark row and the caption, and nothing else. Not a band excerpt: the band is the
-control row and the rail, and the caption renders beneath the rail.
+standing row and the caption, and nothing else. Not a band excerpt: the band is
+the control row and the rail, and the caption renders beneath the rail.
 
 ```text
 │  Source ─── Tokens ─── AST ──╳╌╌ Environment ╌╌╌╌ Evaluation │
 │   ▾ 2       ·       ·       not reached       not reached    │
 │                                                              │
-│  the machinery broke here, not your code — entwining failed. │
+│  the machinery broke here, not your code —                   │
+│  the syntax tree does not span its source.                   │
+│                                                              │
 │  the last two phases were not reached.                       │
 ```
+
+**The framed message wraps; the framing is one string.** `not your code` is part
+of the authored framing and is not trimmed to fit a 62-column sketch — the rail
+wraps it, as it will wrap any parser message longer than the frame.
 
 **Compare it to [the grammar case](#the-parse-breaks--the-machine-stopped): the
 geometry is identical, character for character.** Both bar `environment` and

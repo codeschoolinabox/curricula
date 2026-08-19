@@ -286,11 +286,6 @@ verdicts without consulting a level twice.
   named `entwined` at all. So the render path needs `cause.stage`, and a
   projection that carries only the message cannot produce the right sentence.
 
-  **And the projection must therefore carry it.** Today it does not: the panel
-  receives `cause` flattened to its message alone, and the boundary states that
-  discard as an invariant. Widening it is a 0.3 obligation, recorded rather than
-  discovered — see the campaign's 0.3 entry conditions.
-
   **This makes `display-labels.ts` key against TWO embody vocabularies**, not
   one: the lifecycle phase names it already uses for the labels, and the
   failable STAGE names the framings key against. Those sets are not the same —
