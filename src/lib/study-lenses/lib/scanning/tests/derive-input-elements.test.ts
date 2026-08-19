@@ -122,6 +122,8 @@ describe('deriveInputElements', () => {
 			'x\ty',
 			'x\u2028y',
 			'x\u00A0y',
+			'x\u2029y',
+			'x\uFEFFy',
 		];
 
 		it('starts every sequence at offset zero or leaves it empty', () => {
@@ -340,6 +342,18 @@ describe('deriveInputElements', () => {
 
 		it('names a line separator a LineTerminator', () => {
 			expect(kinds('x\u2028y')[1]).toBe('LineTerminator');
+		});
+
+		it('names a paragraph separator a LineTerminator', () => {
+			expect(kinds('x\u2029y')[1]).toBe('LineTerminator');
+		});
+
+		it('names a zero-width no-break space a WhiteSpace', () => {
+			expect(kinds('x\uFEFFy')[1]).toBe('WhiteSpace');
+		});
+
+		it('names a non-breaking space a WhiteSpace', () => {
+			expect(kinds('x\u00A0y')[1]).toBe('WhiteSpace');
 		});
 	});
 
