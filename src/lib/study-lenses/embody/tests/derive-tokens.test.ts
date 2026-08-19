@@ -211,7 +211,7 @@ describe('deriveTokens', () => {
 			);
 		});
 
-		it.skip('an element resolves through its indices to a token with the same span', () => {
+		it('an element resolves through its indices to a token with the same span', () => {
 			const stage = deriveTokens({ source: 'let x = 1', type: 'script' });
 			const element = stage.ok
 				? stage.value.inputElements?.find(
