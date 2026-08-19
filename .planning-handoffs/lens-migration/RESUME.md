@@ -6,7 +6,7 @@ closes; nothing here is end-state documentation. -->
 <!-- cspell:ignore unbuilt ugrep affordances behaviour behavioural flexbox -->
 <!-- cspell:ignore normalisation unrunnable -->
 <!-- cspell:ignore loosenings capitalisation enshittifying keyable unbuildable -->
-<!-- cspell:ignore normalises undercounted oldd clauding zakey -->
+<!-- cspell:ignore normalises undercounted oldd clauding zakey nocite -->
 <!-- a human ruling quoted verbatim; do not translate it and do not "fix" it: -->
 <!-- cspell:ignore séparé -->
 
