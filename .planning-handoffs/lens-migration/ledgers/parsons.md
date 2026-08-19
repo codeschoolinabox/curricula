@@ -343,8 +343,30 @@ here rather than left to be rediscovered:
 - **`parsonize-selection.js` is dead as a whole file**, on three independent
   measurements: no caller anywhere in the tree; every load path resolves under
   `./live-study-static/static-study/parsonizer/`, which does not exist; and the
-  real host loads the parsonizer from a **third** prefix, `/19-07-2025/static/`.
-  Its six affordances are written and never run.
+  real host loads the parsonizer from a **different** prefix. Its six
+  affordances are written and never run.
+
+⚠️ **WHICH Gen-1 root these rows were read from, and the one place the two
+disagree** [all measured 2026-08-19: `diff -q` per file]. The campaign has two
+Gen-1 roots in circulation and does not rule between them: `FIDELITY-METHOD.md`
+§ 4's `GEN1=` names `0--study-lenses--it-begins/`, while `parsons-021` quotes
+Gen-2 naming `zz--…/spiral-lens/`. **These rows were read from `spiral-lens/`.**
+
+Six of the seven files are **byte-identical** across the two roots —
+`parsons.js`, `component.js`, `lis.js`, `parsons.css`, `parsonize-selection.js`
+and `ParsonsLens.jsx` — so every row cut from them holds under either. **The
+seventh, `parsons-iframe.html`, differs**, and only in the asset-path prefix: 8
+lines, `/19-07-2025/static/…` in `spiral-lens/` against `/static/…` in
+`0--study-lenses--it-begins/`. Both are 586 lines and identical otherwise.
+
+**No row depends on the divergence** — `parsons-073` names the eight assets by
+filename and not by path, deliberately. An earlier revision of the bullet above
+published the date-stamped prefix as a flat fact; it is true of one root only,
+and is struck rather than left standing beside this note. **Which root the
+campaign means is a Gate-1 question**, not this ledger's to settle.
+
+**The remainders continue:**
+
 - **`parsons.js`'s dead extension surface** — a custom-grader hook, a fixed
   permutation option, `action_cb`, `skipHighlight`, `colorFeedback`,
   `createHTMLFromHashes`, the toggle-hole query API, a complete Finnish

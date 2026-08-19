@@ -3,10 +3,10 @@ closes; nothing here is end-state documentation. -->
 <!-- cspell:ignore socratize reenrichment dropdowns writeme parsons colorizing spellme lezer blankenate -->
 <!-- cspell:ignore colour distractor distractors ledgered throughs -->
 <!-- cspell:ignore firstblock glossterm parsonizer parsonize errormsg recognises -->
-<!-- cspell:ignore unbuilt ugrep affordances behaviour -->
+<!-- cspell:ignore unbuilt ugrep affordances behaviour behavioural flexbox -->
 <!-- cspell:ignore normalisation unrunnable -->
 <!-- cspell:ignore loosenings capitalisation enshittifying keyable unbuildable -->
-<!-- cspell:ignore normalises undercounted -->
+<!-- cspell:ignore normalises undercounted oldd clauding zakey -->
 
 # RESUME — where this campaign stands and what comes next
 
@@ -64,6 +64,11 @@ and were corrected rather than adopted. Re-measure before you write.
 | `f28fe23e` | AR-5's fix pass — the register check stops matching itself, `bnd-009` stops misquoting `spellme`, the gate command stops linting zero files.        |
 | `cb5eeedc` | The context-free validation's fix pass — the register check runs verbatim, the `spellme` correction reaches its third file, Tier-1 is two families. |
 | `d0b71810` | The launch prompt's cold read — `instruments` corrected for two ledgers; the worked-row ids and Family F's shape ruled.                             |
+| `fd6066b3` | **STEP 1a** — Gen-1's second root read by hand, 3073 lines across seven files; 33 rows appended as `048`–`080`; two stale claims struck.            |
+
+⚠️ **This table is short by every campaign commit that landed between `d0b71810`
+and the row above, and by everything after it.** It is not a register. Close the
+gap from the command in the paragraph below, never from this table.
 
 **AR-5 baseline for this campaign: `6d1a811f`.** Review by **explicit SHA
 list**, never `baseline..HEAD` — the tree is shared and foreign commits
@@ -113,7 +118,12 @@ any of it.
 
 ## What is not written yet
 
-In dependency order. Step 0 is done; nothing below it is started.
+In dependency order. ~~Step 0 is done; nothing below it is started.~~ — **struck
+2026-08-19: STEP 1a has landed at `fd6066b3`**, and item 1's second-root re-seed
+with it.
+[§ START HERE](#-start-here--step-1-is-the-parsons-twin-pilot-step-2-is-the-template-amendments)
+is the sole authority on what comes next; this section is an inventory, not an
+order.
 
 **Step 0 is done.** The four structural findings that changed what a ledger row
 _is_ have landed, so the ledgers below can be seeded against a stable method:
@@ -131,14 +141,14 @@ measurably were not. Both acts are recorded in § What is committed. Nothing her
 is owed.
 
 1. **`ledgers/<lens>.md` — the seeded per-lens ledgers.** **Two of eight are
-   seeded** — `parsons` (47 rows, repaired at `dae045f3`) and `writeme` (45
-   rows, the fidelity control). **You start at
-   [the AR-2 PAUSE section](#-start-here--step-1-is-the-parsons-twin-pilot-step-2-is-the-template-amendments)
+   seeded** — `parsons` (~~47 rows, repaired at `dae045f3`~~ — **80 rows as of
+   `fd6066b3`**) and `writeme` (45 rows, the fidelity control). **You start at
+   [§ START HERE](#-start-here--step-1-is-the-parsons-twin-pilot-step-2-is-the-template-amendments)
    at the top of this file, not here and not at § Seeding wave status.**
-   ~~`writeme` owes 13 cell re-cuts~~ — **DONE at `c734b5ad`**; `parsons` still
-   owes its second-root re-seed. Remaining population: `blanks`, `dropdowns`,
-   `annotate`, `variables`, `debug-props`, plus `_family-f.md` covering the
-   seven evaluator-gated lenses.
+   ~~`writeme` owes 13 cell re-cuts~~ — **DONE at `c734b5ad`**; ~~`parsons`
+   still owes its second-root re-seed~~ — **DONE at `fd6066b3`**. Remaining
+   population: `blanks`, `dropdowns`, `annotate`, `variables`, `debug-props`,
+   plus `_family-f.md` covering the seven evaluator-gated lenses.
 
    **The lister question is ruled (human, 2026-08-14) — do not re-ask it.**
    Which listers run on which ledger is now stated in
@@ -170,10 +180,19 @@ is owed.
 **Two units, in this order, ONE SESSION EACH. The order is ruled — it is not the
 reading session's to re-pick, and neither is collapsing them into one session.**
 
-|            | unit                                                                                                                    | why it sits here                                                                                                                            |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| **STEP 1** | the [`parsons` twin pilot](#step-1--the-parsons-twin-pilot)                                                             | it is the human's quality gate on the whole campaign, and it is **not blocked** — the amendments gate _cutting a ledger_ and this cuts none |
-| **STEP 2** | [three template amendments](#step-2--three-template-amendments-then-_family-fmd), then `_family-f.md`'s inventory shape | the amendments unblock `_family-f.md` and four further ledgers                                                                              |
+|             | unit                                                                                                                    | why it sits here                                                                                     |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| ~~STEP 1a~~ | ~~the Gen-1 second-root read and the ledger append~~                                                                    | **DONE at `fd6066b3`** — 33 rows appended, `048`–`080`. Struck rather than ticked                    |
+| **STEP 1b** | the [`parsons` twin pilot](#step-1--the-parsons-twin-pilot) — **YOU START HERE**                                        | it is the human's quality gate on the whole campaign, and its ledger is now widened                  |
+| **STEP 2**  | [three template amendments](#step-2--three-template-amendments-then-_family-fmd), then `_family-f.md`'s inventory shape | the amendments unblock `_family-f.md` and four further ledgers. **A FOURTH is now owed — see below** |
+
+⚠️ **STEP 1 split into two units on 2026-08-19, by human ruling, and the split
+is not the reading session's to re-collapse.** Two measurements forced it: the
+ledger carried **zero `G1-live` rows**, so a twin could not say what a Gen-1
+learner did without inventing it; and **20** of its rows carry
+`heading absent from the port`, which is a fact about a heading set and not
+about a learner. The human ruled: read `public/static/parsonizer/` first, and
+direct-check Gen-3 source separately. **STEP 1a discharged the first half.**
 
 **Why the twin first** (human ruling 2026-08-19). If a twin cannot demonstrate
 understanding of `parsons` — the lens with the richest measured loss and the
@@ -220,11 +239,72 @@ catch.
 
 ⚠️ **It is NOT blocked by the three template amendments above, and an earlier
 reading of the sequencing said it was** [measured 2026-08-18]. Those amendments
-gate **cutting a new ledger**. The pilot cuts none: `parsons`' ledger is seeded,
-47 rows, gate-clean and passing the transport check; its Gen-1 pair, Gen-2 docs
-and landed Gen-3 port all exist, and it is wired in `built-in-lenses.ts`, so the
-twin can be checked against a running lens. **It can run in parallel with the
-amendment work, or before it.**
+gate **cutting a new ledger**. The pilot cuts none: ~~`parsons`' ledger is
+seeded, 47 rows~~ — **80 rows as of `fd6066b3`**, gate-clean and passing the
+transport check; its Gen-1 pair, Gen-2 docs and landed Gen-3 port all exist, and
+the twin can be checked against a running lens. **It can run in parallel with
+the amendment work, or before it.**
+
+⚠️ **`built-in-lenses.ts` is NOT under `lenses/`, and an earlier revision of
+this bullet implied it was.** The registry is
+`src/lib/study-lenses/orchestrate/lib/composing/built-in-lenses.ts`;
+`src/lib/study-lenses/lenses/built-in-lenses.ts` **does not exist** [measured
+2026-08-19]. `parsonsLens` is imported there and is first in the `builtInLenses`
+array.
+
+**What STEP 1a changed for the twin, and it is the whole reason the split
+happened.** The ledger now carries **33 `G1-live` / `G1-dead` rows cut from a
+whole-file read of Gen-1's second root** (`048`–`080`), so the twin has
+something to cite for what a Gen-1 learner actually met. Read
+[`ledgers/parsons.md` § Seed census](./ledgers/parsons.md) for the per-file map
+and, more importantly, for the **remainders** — the read returned roughly 110
+candidate affordances and STEP 1a opened 33.
+
+⚠️ **Three findings from that read reshape the twin before it is drafted. Do not
+re-derive them; do re-measure any number you intend to publish.**
+
+1. **There are THREE Gen-1 parsons boards and TWO never rendered.**
+   `ParsonsLens.module.css` describes a native React board (rows `045`–`047`);
+   `parsonizer/parsons.css` describes a floated two-column board **overridden at
+   runtime**; `parsons-iframe.html`'s flexbox board is what the learner met. A
+   wire-frame drawn from "the Gen-1 stylesheet" is drawn from the wrong one —
+   and this is what makes wire-frames drawable at all, since
+   `parsons-iframe.html` is literal DOM.
+2. **`parsons-010`'s provenance does not hold up.** Gen-2 says hint blocks were
+   ported from `component.js`; the deployed host never loads that file, and the
+   two paths do **opposite** things with a block comment — `component.js`
+   renders it above the puzzle (`parsons-074`), the deployed host strips it
+   (`parsons-059`).
+3. **Gen-1 shipped the engine over learner source in an iframe with NO sandbox
+   attribute at all** (`parsons-078`). The commented form beside it is strictly
+   _more_ restrictive. Any Gen-2/Gen-3 that adds one is a behavioural change,
+   not a like-for-like port.
+
+**The second half of the human's 2026-08-19 ruling is STEP 1b's to execute:** a
+**Gen-3 direct-check appendix**, tagged apart from the journey body, over the
+**20** rows carrying `heading absent from the port`. It records an observation
+about the port and **never fills a disposition** — that is Pass 2's.
+`parsons-010` is the ledger's own worked warning that documentation and
+behaviour migrate at different rates.
+
+⚠️ **~~21~~ — the number is 20, and the error is this canon's own signature
+defect committed inside the document that warns about it.** A whole-file
+`grep -c` returns **21**; the 21st hit is the `## Rows` preamble sentence that
+_names_ the annotation. Row-scoped it is **20** [measured 2026-08-19 by the
+context-free validation:
+`grep -n 'heading absent from the port' ledgers/parsons.md | grep -cE '^[0-9]+:\| .parsons-'`].
+`_TEMPLATE.md` § Close conditions records exactly this trap — _a check embedded
+in the document it checks must not match on text it itself contains_ — and it
+was quoted in the same session that then published 21 twice under a
+`[measured:]` tag. **Derive this set row-scoped, and never from a bare grep.**
+
+⚠️ **Two traps measured in STEP 1a that will bite the twin session.** **(a) A
+blank line between the last table row and a new one ends the table**, and
+`prettier --write` then reflows the rows into prose — 12 rows were destroyed
+this way and the Pass-1 gate fell from 80 to 49 before it was caught. Quotations
+go in `<em>`, and **paired HTML tags inside an evidence cell end the table too**
+(an opening tag alone is fine — `parsons-003` carries one). **(b) Run every gate
+again AFTER `prettier --write`, not only before.**
 
 Take it in a **fresh session** —
 [AGENTS.principal.md § Handoff agency](../../AGENTS.principal.md#handoff-agency--the-agent-owns-the-call)
@@ -238,6 +318,31 @@ lens.
 them before a ledger is cut.** The third is the `[COPY]`/`[METHOD]` marking in §
 Two human rulings below — it is easy to miss because it sits under a different
 heading, and the previous two revisions of this section undercounted it.
+
+⚠️ **THERE ARE NOW FOUR, and the heading above still says three.** Two were
+added by STEP 1a (`fd6066b3`) and are recorded here rather than absorbed
+silently:
+
+- **AMENDMENT 4 — `_TEMPLATE.md` publishes no citation anchor for a
+  non-markdown, non-test source.** § Columns bans line numbers and offers
+  _heading_ or _test title_; a jQuery IIFE has neither. Rows `048`–`080` cite by
+  **function name, method name or string literal**, extending rows `045`–`047`'s
+  use of the source's own structural marker (the stylesheet's banner comments).
+  Standing ruling 3 binds a ledger **cut**, not an append, so those rows are not
+  blocked — but the grammar is unpublished, and the next ledger that reads a
+  code root will invent its own unless this lands. It also wants a mechanical
+  resolve check, for the reason § The minimum walk set already gives: _the comma
+  is now caught by a grep rather than by a proofreader._
+- **AMENDMENT 5 — the mutation-test procedure cannot tell a live check from a
+  failed plant.** § Close conditions says _"Plant one mutation per check … and
+  confirm each fires"_ — it never says confirm the mutation **landed**. Measured
+  2026-08-19: three of the Pass-1 gate's eight checks first reported as DEAD,
+  and all three plants had silently no-oped because `sed '0,/re/'` is a GNU
+  extension BSD sed ignores. Re-planted with `awk`, **all 8 fire.** A live check
+  read as dead is the same class of error as a dead check read as live, and this
+  procedure produces the first as easily as the gate produced the second. The
+  fix is one line: `diff` the mutant against the clean copy and require a
+  non-empty result before believing the gate's silence.
 
 ⚠️ **Read "designed and measured" as DIAGNOSED and measured.** The diagnoses
 below all reproduce and are worth trusting. **The fixes are sketches, not
@@ -342,13 +447,24 @@ it every time:
   2026-08-18: zero lenses this campaign owns have a `ux/`, and zero Tier-2
   handoffs exist — so the ruling has no carrier yet.**
 
-  **Position in the order: NO ACTION THIS SESSION.** The twin binds at **Tier
+  ~~**Position in the order: NO ACTION THIS SESSION.**~~ — **STRUCK 2026-08-19.
+  It now says the opposite of the ruled order, and a reader landing here instead
+  of at § START HERE would do nothing.** The human's 2026-08-18/19 ruling made
+  the `parsons` twin the **immediate** unit, ahead of the template amendments.
+  [§ START HERE](#-start-here--step-1-is-the-parsons-twin-pilot-step-2-is-the-template-amendments)
+  is the sole authority on order and this paragraph defers to it.
+
+  The reasoning below is kept because it is still right about **where the twin
+  binds in general**, and only wrong about this pilot: the twin binds at **Tier
   2**, at each lens's own step 0.2, and Tier 0 / Tier 1 commits keep
-  `twin-doc: none` — so seeding a ledger and planning a family owe nothing. It
-  becomes a mandatory checklist line the moment the first Tier-2 handoff is
-  written, and that is where `parsons`' and `writeme`'s own twins get scheduled
-  too. Writing `twin-doc: user` on a ledger commit would be as wrong as writing
-  `none` on a lens commit.
+  `twin-doc: none` — so seeding a ledger and planning a family owe nothing. ⚠️
+  **The pilot is neither, and nothing rules it.** It writes a lens's twin with
+  no lens Phase 0 running, so `twin-doc: user` on a ledger commit and `none` on
+  a lens commit are both named as wrong while the pilot's own value is not named
+  at all. **STEP 1b asks the human at its own step 0.2 rather than inferring
+  it** — the twin ask is re-asked, never remembered
+  ([DEV.md § Phase 0](../../DEV.md#phase-0-documentation-specification-before-any-code)).
+  STEP 1a recorded `twin-doc: user` on the human's explicit answer this session.
 
 - **`_TEMPLATE.md` is to be marked `[COPY]` / `[METHOD]` per section**, with the
   header rule changed to match what both seeded ledgers already do — copy the
@@ -789,13 +905,18 @@ re-derive it from here.
    — **FALSE, and struck: a ROUND-3 PAUSE opened on the fix pass.** Two blockers
    are open and both are marked ⛔ in `_TEMPLATE.md` at the point of use.
 
-3. **THE TWO OPEN ⛔ DESIGNS**, before any ledger — the Family F invocation is a
-   census rather than a floor, and the mutation corpus is not a sufficient
-   amendment gate. Both are stated with their measurements in
+3. ~~**THE TWO OPEN ⛔ DESIGNS**~~ — **FIVE open template amendments as of
+   2026-08-19, and this item said two.** The two ⛔ designs (the Family F
+   invocation is a census rather than a floor; the mutation corpus is not a
+   sufficient amendment gate), plus the `[COPY]`/`[METHOD]` marking, plus the
+   two STEP 1a added — the missing citation anchor for a code source, and the
+   mutation-test procedure that cannot tell a live check from a failed plant.
+   **All five are enumerated with their measurements in
    [§ START HERE](#-start-here--step-1-is-the-parsons-twin-pilot-step-2-is-the-template-amendments),
-   which is the authority on order. Under standing ruling 3 the template is
-   amended before a ledger is cut from it, so this is a rule and not a
-   preference.
+   which is the authority on order and on the count.** Under standing ruling 3
+   the template is amended before a ledger is **cut** from it, so this is a rule
+   and not a preference — and it is why STEP 1a, which **appended**, was not
+   blocked by any of them.
 
 4. **`_family-f.md`'s inventory shape alone**, as a probe before its rows. It is
    a **gate** — the last two dispatches each collapsed it into a wave. Its
@@ -828,10 +949,13 @@ re-derive it from here.
    struck. **Building it goes to a fresh session unconditionally**
    ([AGENTS.principal.md § Handoff agency](../../AGENTS.principal.md#handoff-agency--the-agent-owns-the-call)).
 
-8. **THEN re-seed `parsons`** against the widened root. The ledger still has
-   **zero `G1-live` rows**; that is what the second-root ruling exists to fix.
-   **Append; never renumber `001`–`047`.** Take the next id from the ledger as
-   it stands when you start, not from a number written here.
+8. ~~**THEN re-seed `parsons`** against the widened root. The ledger still has
+   **zero `G1-live` rows**~~ — **DONE at `fd6066b3`, struck rather than
+   ticked.** 33 rows appended as `048`–`080` from a whole-file hand-read, not
+   from the embargoed lister. The ledger carries **36** rows tagged `G1-live` or
+   `G1-dead` [measured 2026-08-19, row-scoped]. **Append; never renumber** — and
+   that now means never renumbering `001`–`080`. Take the next id from the
+   ledger as it stands when you start, **not from a number written here**.
 
 9. **AR-5** over the campaign SHA list — never `baseline..HEAD`, foreign commits
    interleave — then the push prompt. **Pass 2 and Pass 3 remain owed on every
@@ -925,6 +1049,30 @@ agenda explicitly.)_
   `/Users/master/Documents/0-teach-code/0-spiralearn/0-study-lenses-committee/`.
   Every Gen-1 reading depends on the second; without it a worker reports BLOCKED
   on its first tool call.
+
+  ⚠️ **That path is the TREE, not the Gen-1 root — it is five directory levels
+  short, and a worker that globs from it finds ELEVEN `parsonizer` directories**
+  [measured 2026-08-19 by the context-free validation: `find … -type d -name
+  parsonizer | wc -l` → **11**, including `dist/` copies SPEC says to use for
+  nothing]. **The campaign has two Gen-1 roots in circulation and rules between
+  them nowhere:**
+
+  ```text
+  …/0-study-lenses-committee/zz--oldd-clauding-and-context-dump/0--study-lenses--it-begins/   # FIDELITY-METHOD § 4's GEN1=
+  …/0-study-lenses-committee/zz--oldd-clauding-and-context-dump/spiral-lens/                  # what Gen-2 names, quoted at parsons-021
+  ```
+
+  **Measured 2026-08-19, per file, with `diff -q`:** six of the seven files STEP
+  1a read are **byte-identical** across the two. The seventh,
+  `public/parsons-iframe.html`, **differs** — 8 lines, only the asset-path
+  prefix (`/19-07-2025/static/…` against `/static/…`), both 586 lines. STEP 1a
+  read `spiral-lens/` and its rows cite assets by **filename, not path**, so
+  none depends on the divergence. **Which root the campaign means is a Gate-1
+  question**, and until it is answered, name the root you read in the ledger.
+  There is also a **third** tree R-7 depends on and neither declaration covers —
+  `0-zakey/0-planning-and-collaborating/` holds the persona and story templates
+  R-7 tells a twin session to use.
+
 - **The tree is shared with a concurrent session.** HEAD moved twice during the
   session that wrote this. **Commit by explicit pathspec** — a hook enforces
   `git commit … -- <paths>`, and a pathspec commit takes _working-tree_ content,
