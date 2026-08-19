@@ -26,7 +26,7 @@ describe('deriveTokens — a defecting enrichment derivation', () => {
 		expect(stage.ok && stage.value.inputElements).toBeUndefined();
 	});
 
-	it.skip('reports the defect loudly', () => {
+	it('reports the defect loudly', () => {
 		const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 		deriveTokens({ source: 'let x = 1', type: 'script' });
 		expect(errorSpy).toHaveBeenCalledTimes(1);
