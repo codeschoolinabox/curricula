@@ -588,14 +588,25 @@ this region owns.
     same phase-name record as the labels, so a tray never names a phase
     differently from the station that discloses it.
   - **The proposals' heading** — `next, you could:`, one string, invariant.
+  - **The waiting count** — the cause arm's second row,
+    `the last two phases wait for it`. A derived, learner-facing string, named
+    here because it had none: it is a **different number over a different
+    predicate** from the count line (what WAITS, downstream of the barring edge
+    — not what is accessible and empty), and the two are never both on screen.
+    **It needs no singular rule, and that is worth writing down rather than
+    leaving to be re-derived**: by the barring rules a suffix of exactly two or
+    three phases waits — a `tokens` failure bars three, an `ast` or `entwined`
+    failure bars two, and `environment` bars nothing at all — so the plural is
+    total and a defensive singular branch would be dead code. [read:
+    [`../embody/derive-accessibility.ts`](../embody/derive-accessibility.ts).]
   - **The barred phase's cause line** — the parser's own message, framed by this
-    region, and beneath it the count of what waits. The framing is this
-    region's; the message inside it belongs to whatever produced it — the parser
-    at `tokens` and `ast`, the embodiment's own guard otherwise — and is never
-    rewritten. **The framing is keyed by the stage that failed, not by the phase
-    that is barred** (human ruling 2026-08-18) — the cause carries its own
-    origin, so the key is a field read rather than a derivation. Three framings
-    are authored, one per reachable origin:
+    region, and beneath it the waiting count. The framing is this region's; the
+    message inside it belongs to whatever produced it — the parser at `tokens`
+    and `ast`, the embodiment's own guard otherwise — and is never rewritten.
+    **The framing is keyed by the stage that failed, not by the phase that is
+    barred** (human ruling 2026-08-18) — the cause carries its own origin, so
+    the key is a field read rather than a derivation. Three framings are
+    authored, one per reachable origin:
 
     | the stage that failed         | the framing                                                         |
     | ----------------------------- | ------------------------------------------------------------------- |

@@ -35,7 +35,8 @@ the selected      fits · does not fit · not applicable for this type ·
   level's mark      undetermined while unparsed
 the posture       warn (default) or strict
 the pane          the editor · one open lens · or the generator
-proposals         0 … N ranked recommendations of a next lens
+recommendations   0 … N ranked recommendations of a next lens
+                  (the SURFACE they render on is the proposals surface)
 ```
 
 Three facts about that data shape every drawing below:
