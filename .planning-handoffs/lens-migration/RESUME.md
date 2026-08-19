@@ -684,7 +684,7 @@ ledgers are now seeded.**
 
 | SHA        | What                                                                                                                                       |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `dae045f3` | `ledgers/parsons.md` — the exemplar's nine leaf-level defects, repaired. Still 47 rows                                                     |
+| `dae045f3` | `ledgers/parsons.md` — the exemplar's nine leaf-level defects, repaired. 47 rows **as of that commit**; 80 since `fd6066b3`                |
 | `ec13b412` | `ledgers/writeme.md` — the fidelity control. **45 rows**, two measured zeros                                                               |
 | `e8f81de8` | `_TEMPLATE.md` — `glossterm` stops matching by regex. ~~the current template SHA~~ — **superseded; see the table at the top of this file** |
 | `a4a90e0f` | `LISTERS-6-7-DESIGN.md` — a design for Gen-1's second root. **Embargo intact; nothing built**                                              |
