@@ -333,10 +333,17 @@ Never pass a `model` parameter when spawning an `ar-N`.
   4. **`lib/loop-guard`'s documented error discriminant is asserted by no
      test.** Its README promises a `reason` of `'parse-failed'` or
      `'multiline-injection'`; `LoopGuardError` is a type alias rather than a
-     class, so `.toThrow(Class)` is unavailable, and `grep -n reason` over its
-     test file returns nothing [relayed: ar-5, 2026-08-19]. A different module
-     and a different campaign's work — recorded so the finding outlives the
-     report.
+     class, so `.toThrow(Class)` is unavailable, and no test mentions the field
+     at all [measured 2026-08-19: `grep -rn "reason"
+     src/lib/study-lenses/lib/loop-guard/tests/` exits 1 with no output, against
+     a README naming the discriminant at lines 203, 204, 212 and 222]. A
+     different module and a different campaign's work — recorded so the finding
+     outlives the report. ⚠ The commit that first recorded this finding put
+     "lines 202 and 262" in its body under a `[measured:]` tag; those were the
+     reviewer's numbers, relayed, and they are wrong. The substance held under
+     re-measurement — the line numbers did not. That body is immutable, which is
+     why the corrected evidence lives here, and it is finding 1's defect
+     committed inside the commit recording finding 1.
 - **Registering `spellme` in the composition root is NOT Phase 1's job.**
   `orchestrate/lib/composing/built-in-lenses.ts` imports parsons and writeme and
   knows nothing of spellme [measured 2026-08-14: spellme appears in no file
