@@ -255,8 +255,8 @@ verdicts without consulting a level twice.
 
   **The two arms are not the same shape** (human ruling 2026-08-19). The count
   line is one line; the **cause line is a block** — the framed message, and
-  beneath it the count of what waits. The caption's occupancy is exactly one;
-  its HEIGHT is not fixed, and every drawing in the twin already renders it that
+  beneath it the unreached count. The caption's occupancy is exactly one; its
+  HEIGHT is not fixed, and every drawing in the twin already renders it that
   way.
   1. **The count is derived per settle, never written** — the number of phases
      that are both accessible and EMPTY of fitting lenses. Not a property of the
@@ -267,12 +267,13 @@ verdicts without consulting a level twice.
   3. **Absent at zero** — it does not render.
   4. **It yields the caption entirely wherever a barring edge is drawn**, where
      the cause line renders instead. **Entirely means gone, not relocated** —
-     the count the cause arm carries beneath its message is a DIFFERENT string
-     over a DIFFERENT predicate (what WAITS, versus what is accessible and
-     empty). Two counts, never both, and neither ever stands in for the other.
-     And **an open tray never takes the caption**: a tray opens BETWEEN the rail
-     and the caption, pushing it down along with the pane, because a tray
-     describes one station while the caption describes the rail as a whole.
+     the unreached count the cause arm carries beneath its message is a
+     DIFFERENT string over a DIFFERENT predicate (what WAITS, versus what is
+     accessible and empty). Two counts, never both, and neither ever stands in
+     for the other. And **an open tray never takes the caption**: a tray opens
+     BETWEEN the rail and the caption, pushing it down along with the pane,
+     because a tray describes one station while the caption describes the rail
+     as a whole.
 
   **The cause line's framing is keyed by the STAGE that failed, never by the
   phase that is barred** — structural, not copy, and therefore owed here rather

@@ -500,10 +500,10 @@ this region owns.
 
   **One slot, one occupant — and the two arms are not the same SHAPE** (human
   ruling 2026-08-19). The count line is one line. The **cause line is a block**:
-  the framed message, and beneath it the count of what waits. So the caption
-  holds exactly one thing at a time, and "one line at a time" — which both this
-  entry and the sketch said until now — was false of the arm that motivates the
-  slot's existence, and drawn as two rows in the only document that draws it.
+  the framed message, and beneath it the unreached count. So the caption holds
+  exactly one thing at a time, and "one line at a time" — which both this entry
+  and the sketch said until now — was false of the arm that motivates the slot's
+  existence, and drawn as two rows in the only document that draws it.
 
   **This does not weaken rule 4, it explains it.** The count line yields the
   caption **entirely** where a barring edge is drawn, and the count the cause
@@ -575,38 +575,60 @@ this region owns.
     **panel-excluded** lens declares no phase and can be the pane's occupant at
     mount through the honored focus, which is the very case this route is
     justified by. With no phase, the occupant's own name is the whole line.
-  - **A station's standing, spoken and drawn.** `waiting` is the drawn form of
-    the **waiting** standing; **openable** draws as its tray affordance and its
-    count, and **bare** draws as a bare mark with no word at all. Only one of
-    the three has a string, which is why the standing is not keyed like a fit
-    mark. **The consequence, recorded because 0.3's types lock it**: that string
-    IS the union member, so renaming the `standing` union rewrites learner copy
-    — in the one region whose display-copy discipline exists so that cannot
-    happen by accident. The two are the same string today deliberately; a rename
-    is a copy change and takes the copy's review.
+  - **A station's standing, spoken and drawn — and the drawn word is NOT the
+    union member** (human ruling 2026-08-19). The `waiting` standing draws as
+    **`not reached`**; **openable** draws as its tray affordance and its count;
+    **bare** draws as a bare mark with no word at all. Only one of the three has
+    a string, which is why the standing is not keyed like a fit mark.
+
+    **The machine value and the learner's word are decoupled, and this entry
+    owns the second one.** `standing` is a union the code branches on; the drawn
+    word is a keyed string here, exactly as a **fit mark**'s machine value
+    `does-not-fit` draws as _steps outside_. So renaming the union cannot
+    rewrite learner copy, and rewording the copy cannot touch the union — which
+    is the whole point of the region having a display-copy discipline at all.
+
+    **An earlier revision asserted the opposite** — "that string IS the union
+    member" — one clause after § What lives here put the standing's drawn word
+    in `display-labels.ts`. Those are different contracts, identity versus
+    coincidence, and an implementer could satisfy neither without choosing.
+
+    **And the coupling was hiding a copy defect.** The `waiting` standing is
+    glossed, in this very README, as _"barred, downstream of the barring edge"_
+    — the definition reaches for the opposite word. A barred phase is not queued
+    behind anything; the machine stopped upstream and never got to it.
+    `not reached` says that, in the past tense a learner can act on. Retiring
+    `waiting` as **copy** costs nothing now precisely because it is no longer
+    the union member; under the old reading it would have meant renaming a type.
+    **The union member's own name is a separate question and is 0.3's**, now
+    that nothing learner-facing depends on it.
+
   - **The tray's own heading** — `ways to study the <label>`, keyed against the
     same phase-name record as the labels, so a tray never names a phase
     differently from the station that discloses it.
   - **The proposals' heading** — `next, you could:`, one string, invariant.
-  - **The waiting count** — the cause arm's second row,
-    `the last two phases wait for it`. A derived, learner-facing string, named
-    here because it had none: it is a **different number over a different
-    predicate** from the count line (what WAITS, downstream of the barring edge
-    — not what is accessible and empty), and the two are never both on screen.
-    **It needs no singular rule, and that is worth writing down rather than
-    leaving to be re-derived**: by the barring rules a suffix of exactly two or
-    three phases waits — a `tokens` failure bars three, an `ast` or `entwined`
-    failure bars two, and `environment` bars nothing at all — so the plural is
-    total and a defensive singular branch would be dead code. [read:
+  - **The unreached count** — the cause arm's second row,
+    `the last two phases were not reached`. A derived, learner-facing string,
+    renamed with the standing it counts (human ruling 2026-08-19); it said
+    `wait for it`, which described the phases as queued rather than as never
+    reached. Named here because it had none: it is a **different number over a
+    different predicate** from the count line (what WAITS, downstream of the
+    barring edge — not what is accessible and empty), and the two are never both
+    on screen. **It needs no singular rule, and that is worth writing down
+    rather than leaving to be re-derived**: by the barring rules a suffix of
+    exactly two or three phases waits — a `tokens` failure bars three, an `ast`
+    or `entwined` failure bars two, and `environment` bars nothing at all — so
+    the plural is total and a defensive singular branch would be dead code.
+    [read:
     [`../embody/derive-accessibility.ts`](../embody/derive-accessibility.ts).]
   - **The barred phase's cause line** — the parser's own message, framed by this
-    region, and beneath it the waiting count. The framing is this region's; the
-    message inside it belongs to whatever produced it — the parser at `tokens`
-    and `ast`, the embodiment's own guard otherwise — and is never rewritten.
-    **The framing is keyed by the stage that failed, not by the phase that is
-    barred** (human ruling 2026-08-18) — the cause carries its own origin, so
-    the key is a field read rather than a derivation. Three framings are
-    authored, one per reachable origin:
+    region, and beneath it the unreached count. The framing is this region's;
+    the message inside it belongs to whatever produced it — the parser at
+    `tokens` and `ast`, the embodiment's own guard otherwise — and is never
+    rewritten. **The framing is keyed by the stage that failed, not by the phase
+    that is barred** (human ruling 2026-08-18) — the cause carries its own
+    origin, so the key is a field read rather than a derivation. Three framings
+    are authored, one per reachable origin:
 
     | the stage that failed         | the framing                                                         |
     | ----------------------------- | ------------------------------------------------------------------- |
@@ -694,7 +716,7 @@ this region owns.
   holds exactly one thing at a time** and the precedence is total: the cause
   line wherever a barring edge is drawn, else the count line, else nothing.
   **One thing, not one line** — the count line is a line and the cause line is a
-  block (its message, and beneath it the count of what waits), so the caption's
+  block (its message, and beneath it the unreached count), so the caption's
   occupants differ in height and the contract is about occupancy rather than
   about rows. Four rules for one caption, and they live together here because
   they are one contract: a count that renders at zero, that reads plural at one,
@@ -749,7 +771,9 @@ this region owns.
   - the **standing** — the three-valued indicator the rail draws beside the
     name: **openable** (the phase is reachable and something fits it, drawn with
     its count), **bare** (reachable, nothing fits — the ordinary case at four of
-    five phases), **waiting** (barred, downstream of the barring edge).
+    five phases), **waiting** (barred, downstream of the barring edge — **drawn
+    as `not reached`**; the union member and the learner's word are deliberately
+    decoupled, see `glossary · display labels`).
   - the **tray**, where the phase has one.
 
   **`standing` is deliberately not called a mark.** A **fit mark** is a level's

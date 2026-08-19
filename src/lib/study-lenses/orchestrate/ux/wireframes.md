@@ -335,18 +335,18 @@ four legible states, drawn below, not one control with four strings.
 │         [Just Enough JavaScript · can't tell yet ▾]          │
 ├──────────────────────────────────────────────────────────────┤
 │  Source ─── Tokens ─── AST ──╳╌╌ Environment ╌╌╌╌ Evaluation │
-│   ▾ 2         ·          ·         waiting         waiting   │
+│   ▾ 2       ·       ·       not reached       not reached    │
 │                                                              │
 │  the grammar broke here — Unexpected token (2:8).            │
-│  the last two phases wait for it.                            │
+│  the last two phases were not reached.                       │
 ```
 
 **The barring edge is drawn between stations, not on one**, because that is what
 the data says: the phase where it broke stays open — it is where the grammar
-error is studied — and what waits is downstream of it. The dashed line makes the
-same statement in geometry that the sentence makes in words, so a learner who
-reads neither still sees it. **One cause, drawn once**, rather than the same
-parser sentence repeated per waiting phase.
+error is studied — and everything downstream of it was never reached. The dashed
+line makes the same statement in geometry that the sentence makes in words, so a
+learner who reads neither still sees it. **One cause, drawn once**, rather than
+the same parser sentence repeated per waiting phase.
 
 **And where a barring edge is drawn, the cause line owns the caption — the count
 line yields.** That is the region README's rule, stated there beside the count's
@@ -393,10 +393,10 @@ reporting `undetermined`.
 │         [Just Enough JavaScript · can't tell yet ▾]          │
 ├──────────────────────────────────────────────────────────────┤
 │  Source ─── Tokens ──╳╌╌ AST ╌╌╌ Environment ╌╌╌ Evaluation  │
-│   ▾ 2         ·       waiting      waiting       waiting     │
+│  ▾ 2     ·    not reached    not reached    not reached      │
 │                                                              │
 │  the spelling broke here — Invalid or unexpected token.      │
-│  the last three phases wait for it.                          │
+│  the last three phases were not reached.                     │
 ```
 
 **The same instrument, one stage upstream, and the framing changes with it.** A
@@ -424,10 +424,10 @@ control row and the rail, and the caption renders beneath the rail.
 
 ```text
 │  Source ─── Tokens ─── AST ──╳╌╌ Environment ╌╌╌╌ Evaluation │
-│   ▾ 2         ·          ·         waiting         waiting   │
+│   ▾ 2       ·       ·       not reached       not reached    │
 │                                                              │
 │  the machinery broke here, not your code — entwining failed. │
-│  the last two phases wait for it.                            │
+│  the last two phases were not reached.                       │
 ```
 
 **Compare it to [the grammar case](#the-parse-breaks--the-machine-stopped): the
@@ -451,8 +451,8 @@ program for the instrument's bug. `environment` cannot originate a rendered
 cause at all: nothing it bars is drawn, so this branch is reachable only through
 `entwined`.
 
-**No count line here either.** The caption holds the cause, and the count of
-what waits is the cause arm's own second row — not the count line returning
+**No count line here either.** The caption holds the cause, and the count of the
+unreached count is the cause arm's own second row — not the count line returning
 under another name.
 
 ## The level does not admit this snippet type
