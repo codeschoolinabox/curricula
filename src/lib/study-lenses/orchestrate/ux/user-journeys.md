@@ -55,7 +55,15 @@ lifecycle. They have an error and they want its location.
 > written, by someone who knows what the parser means.
 
 **0:35 — they fix it.** The band settles back. Whatever it said about where the
-machine stopped goes away.
+machine stopped goes away — **and what replaces it is the other arm, not
+emptiness.** The caption beneath the rail holds the cause line wherever a
+barring edge is drawn, else the count line, else nothing; a fixed parse
+ordinarily leaves phases that are reachable and still have nothing to open, so
+this learner most often lands on Journey 2's "four phases have nothing to open
+yet". **This is the only beat in the twin where both arms of that total order
+are on screen in sequence**, and it is drawn here deliberately: no journey
+composes a barring edge WITH accessible-and-empty phases, so the order itself is
+asserted in the region README and exercised nowhere else.
 
 **1:10 — they leave.** They never opened a phase, never selected a level, never
 read the guide. **This is a complete and successful journey**, and any
@@ -267,9 +275,12 @@ landmark navigation reaches the study surfaces. They arrive by linear traversal
 or not at all.
 
 **0:30 — they reach a phase with nothing in it.** They hear a dead control and
-no reason for it. The _barred_ phase, by contrast, carries its cause. **The
-common case is served worse than the exceptional one**, which is the wrong way
-round.
+no reason for it. A _barred_ phase, by contrast, has a cause to be read —
+**today's build draws one per barred phase; the arrangement draws one, once, in
+the caption**, and this bullet is describing what the learner meets now rather
+than licensing the repetition [`personas.md`](./personas.md) rejects. Either way
+the contrast holds: **the common case is served worse than the exceptional
+one**, which is the wrong way round.
 
 **0:45 — they open a way to study the source.** The editor unmounts; a surface
 mounts elsewhere in the document. **Nothing is announced.** No live region fires

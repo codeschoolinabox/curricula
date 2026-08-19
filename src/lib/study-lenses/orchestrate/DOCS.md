@@ -249,14 +249,14 @@ verdicts without consulting a level twice.
   question `types.ts` answers.
 - **The caption — the one thing beneath the rail — holds exactly one occupant at
   a time, and its precedence is total**: the cause line wherever a barring edge
-  is drawn, else the count line, else nothing. Four rules govern that one slot
-  and they are one contract, not four — an implementer who reads some of them
-  ships the rest as defects.
+  is drawn, else the count line, else nothing. Four rules govern that one
+  caption and they are one contract, not four — an implementer who reads some of
+  them ships the rest as defects.
 
   **The two arms are not the same shape** (human ruling 2026-08-19). The count
   line is one line; the **cause line is a block** — the framed message, and
-  beneath it the count of what waits. The slot's occupancy is exactly one; its
-  HEIGHT is not fixed, and every drawing in the twin already renders it that
+  beneath it the count of what waits. The caption's occupancy is exactly one;
+  its HEIGHT is not fixed, and every drawing in the twin already renders it that
   way.
   1. **The count is derived per settle, never written** — the number of phases
      that are both accessible and EMPTY of fitting lenses. Not a property of the
@@ -265,13 +265,13 @@ verdicts without consulting a level twice.
      a cause instead.
   2. **Singular at one.**
   3. **Absent at zero** — it does not render.
-  4. **It yields the slot entirely wherever a barring edge is drawn**, where the
-     cause line renders instead. **Entirely means gone, not relocated** — the
-     count the cause arm carries beneath its message is a DIFFERENT string over
-     a DIFFERENT predicate (what WAITS, versus what is accessible and empty).
-     Two counts, never both, and neither ever stands in for the other. And **an
-     open tray never takes the slot**: a tray opens BETWEEN the rail and the
-     slot, pushing the caption down along with the pane, because a tray
+  4. **It yields the caption entirely wherever a barring edge is drawn**, where
+     the cause line renders instead. **Entirely means gone, not relocated** —
+     the count the cause arm carries beneath its message is a DIFFERENT string
+     over a DIFFERENT predicate (what WAITS, versus what is accessible and
+     empty). Two counts, never both, and neither ever stands in for the other.
+     And **an open tray never takes the caption**: a tray opens BETWEEN the rail
+     and the caption, pushing it down along with the pane, because a tray
      describes one station while the caption describes the rail as a whole.
 
   The strings themselves are `display-labels.ts`'s (§ What lives here); what is

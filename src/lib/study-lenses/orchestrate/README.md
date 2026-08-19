@@ -506,8 +506,8 @@ this region owns.
   slot's existence, and drawn as two rows in the only document that draws it.
 
   **This does not weaken rule 4, it explains it.** The count line yields the
-  slot **entirely** where a barring edge is drawn, and the count the cause arm
-  carries beneath its message is a **different string over a different
+  caption **entirely** where a barring edge is drawn, and the count the cause
+  arm carries beneath its message is a **different string over a different
   predicate** — what WAITS, not what is empty. Two counts, never both, never one
   standing in for the other. Reading rule 4 as "the count moves inside the
   cause" is the misreading this paragraph exists to prevent.
@@ -655,34 +655,33 @@ this region owns.
   property of the roster: a phase whose only lens fails its applicability on
   this program is empty too, and a **barred** phase is excluded entirely,
   because it carries a cause instead. The line takes the singular at one and
-  does not render at zero — **and it yields the slot entirely wherever a barring
-  edge is drawn, where the cause line renders instead.** **And an open tray
-  never takes that slot.** A tray opens BETWEEN the rail and the slot, pushing
-  the line down along with the pane — it never replaces it, because the tray
-  describes one station while the line describes the rail as a whole. So the
-  slot beneath the rail holds exactly one thing at a time and the precedence is
-  total: the cause line wherever a barring edge is drawn, else the count line,
-  else nothing. **One thing, not one line** — the count line is a line and the
-  cause line is a block (its message, and beneath it the count of what waits),
-  so the slot's occupants differ in height and the contract is about occupancy
-  rather than about rows. Four rules for one slot, and they live together here
-  because they are one contract: a count that renders at zero, that reads plural
-  at one, or that competes with the cause for the slot beneath the rail is wrong
-  in the same way, and an implementer reading only two of the three would ship
-  the third defect. **Display copy never carries a machine token, and never
-  needs this glossary to be legible** (human ruling 2026-08-17) — the rule the
-  marks already follow, and the reason the sentence a learner reads when the
-  machine stops says _the grammar broke here_ (or _the spelling broke here_,
-  whichever stage failed) rather than naming **the barring edge**. Two tests,
-  and the second is **operational rather than etymological**. A machine token is
-  a string the machine uses to talk to itself — `does-not-fit`,
-  `not-applicable-for-type` — and none of those ever surfaces. Everything else
-  is settled by one question: **would a learner who never read this glossary
-  understand it?** `barring edge` fails it, naming a boundary the copy never
-  introduced. `phase` passes, which is why the empty-count line may say "four
-  **phases** have nothing to open yet" even though `phase` is package glossary
-  vocabulary — and a broader rule, _no contract vocabulary at all_, would be
-  falsified by the very string it is meant to govern.
+  does not render at zero — **and it yields the caption entirely wherever a
+  barring edge is drawn, where the cause line renders instead.** **And an open
+  tray never takes the caption**, which is the caption's own rule and is argued
+  once, in `glossary · the caption`, rather than restated here. So **the caption
+  holds exactly one thing at a time** and the precedence is total: the cause
+  line wherever a barring edge is drawn, else the count line, else nothing.
+  **One thing, not one line** — the count line is a line and the cause line is a
+  block (its message, and beneath it the count of what waits), so the caption's
+  occupants differ in height and the contract is about occupancy rather than
+  about rows. Four rules for one caption, and they live together here because
+  they are one contract: a count that renders at zero, that reads plural at one,
+  or that competes with the cause for the caption is wrong in the same way, and
+  an implementer reading only two of the three would ship the third defect.
+  **Display copy never carries a machine token, and never needs this glossary to
+  be legible** (human ruling 2026-08-17) — the rule the marks already follow,
+  and the reason the sentence a learner reads when the machine stops says _the
+  grammar broke here_ (or _the spelling broke here_, whichever stage failed)
+  rather than naming **the barring edge**. Two tests, and the second is
+  **operational rather than etymological**. A machine token is a string the
+  machine uses to talk to itself — `does-not-fit`, `not-applicable-for-type` —
+  and none of those ever surfaces. Everything else is settled by one question:
+  **would a learner who never read this glossary understand it?** `barring edge`
+  fails it, naming a boundary the copy never introduced. `phase` passes, which
+  is why the count line may say "four **phases** have nothing to open yet" even
+  though `phase` is package glossary vocabulary — and a broader rule, _no
+  contract vocabulary at all_, would be falsified by the very string it is meant
+  to govern.
 
   **Etymology is the wrong question**, which is why the test above is
   operational rather than historical: **waiting** is an ordinary word this

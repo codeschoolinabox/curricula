@@ -209,13 +209,27 @@ maskable containers, so the spoken copy goes dark with the drawn copy. It
 belongs in the same ledger as the orientation cost recorded under
 [Strict, covering](#strict-covering--editor-mode), and it is no better paid.
 
-**The mark row and the reason line travel together.** A drawing that runs the
-whole instrument top to bottom and shows the rail's per-station marks shows the
-reason line too; one that abbreviates the rail to a bare line shows neither, and
-the band excerpts further down crop it along with everything else they crop —
-none of them is a claim that the line is gone. Where a barring edge is drawn the
-cause line takes that slot instead. That is the rule to check these drawings
-against, and it is two greps rather than a re-reading.
+**The mark row and the caption travel together.** A drawing that runs the whole
+instrument top to bottom and shows the rail's per-station marks shows the
+caption too; one that abbreviates the rail to a bare line shows neither, and the
+band excerpts further down crop it along with everything else they crop — none
+of them is a claim that the caption is gone. Where a barring edge is drawn the
+caption holds the cause line instead of the count line.
+
+**And there is a third case, added deliberately**: an excerpt that shows the
+rail WITH its caption and nothing else. It is not a band excerpt — the band is
+the control row and the rail, and the caption renders beneath the rail — so it
+crops differently from the two above it, and it exists to draw a framing whose
+geometry is already drawn elsewhere. The pairing rule is what makes it legible:
+because the mark row and the caption travel together, an excerpt carrying the
+caption must carry the mark row, and one carrying neither is an abbreviation
+rather than a claim.
+
+That is the rule to check these drawings against, and **checking it means
+reading the drawings by eye**. An earlier revision said "two greps rather than a
+re-reading", which is false of exactly this artifact: fenced ASCII is the class
+of assertion no grep of any form reaches, and round 4's fourth blocker-2
+citation was a table cell that never used the phrase being retired.
 
 **No mark is shown, because no level is selected.** The selector's closed face
 reads `plain JavaScript` — the none-state's display string — and generic
@@ -289,20 +303,22 @@ same statement in geometry that the sentence makes in words, so a learner who
 reads neither still sees it. **One cause, drawn once**, rather than the same
 parser sentence repeated per waiting phase.
 
-**And where a barring edge is drawn, the cause line owns the slot beneath the
-rail — the empty-count line yields.** That is the region README's rule, stated
-there beside the count's other two, and drawn here rather than owned: two
-sentences competing for one slot at the exact moment Journey 1 is hunting for
-the first would be a worse failure than a missing count. The count would also
-read differently here, which is the clearest demonstration that it is derived
-rather than fixed: the phases that wait are not accessible, and a barred phase
-carries a cause instead of a reason, so what is empty in this drawing is
-`tokens` and `ast` — two, where the unbarred drawings show four. The count is
-**not** "the stations with no tray": it is the phases that are **both**
-reachable and unserved, which is why `source` never counts however thin the rest
-gets, and why `environment` and `evaluation` stop counting the moment the edge
-moves in front of them. Two predicates, and a worked example that exercised only
-one of them would teach the wrong evaluation.
+**And where a barring edge is drawn, the cause line owns the caption — the count
+line yields.** That is the region README's rule, stated there beside the count's
+other two, and drawn here rather than owned: two sentences competing for one
+caption at the exact moment Journey 1 is hunting for the first would be a worse
+failure than a missing count. **The count the cause carries beneath its message
+is not that count coming back** — it counts what WAITS, where the count line
+counts what is accessible and empty. Two numbers over two predicates, and the
+yielding is total. The count would also read differently here, which is the
+clearest demonstration that it is derived rather than fixed: the phases that
+wait are not accessible, and a barred phase carries a cause instead of a reason,
+so what is empty in this drawing is `tokens` and `ast` — two, where the unbarred
+drawings show four. The count is **not** "the stations with no tray": it is the
+phases that are **both** reachable and unserved, which is why `source` never
+counts however thin the rest gets, and why `environment` and `evaluation` stop
+counting the moment the edge moves in front of them. Two predicates, and a
+worked example that exercised only one of them would teach the wrong evaluation.
 
 **And the AST station is empty, which is the honest and uncomfortable drawing.**
 The argument for leaving that phase open is that it is where the grammar error
@@ -387,7 +403,7 @@ state is the covered one has designed for the exception.
 │        [Just Enough JavaScript · steps outside ▾]  (•) strict│   at its own element
 ├──────────────────────────────────────────────────────────────┤
 │  Source ─── Tokens ─── AST ─── Environment ─── Evaluation    │ ← the rail: dim + inert,
-│   ▾ 2         ·          ·          ·             ·          │   and the reason line
+│   ▾ 2         ·          ·          ·             ·          │   and the caption
 │  four phases have nothing to open yet                        │   dims with it
 ├──────────────────────────────────────────────────────────────┤
 │  your code                                                   │

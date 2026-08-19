@@ -122,10 +122,11 @@ using the same instrument through a screen reader.
   sentence explaining why is the most important thing on screen — and it is
   announced by a mechanism that very likely never fires, because the region is
   mounted with its text already in it.
-- **A reason for an empty phase.** A phase with nothing to open should say that,
-  not present as an unexplained dead control. Today the _barred_ phase is better
-  served than the _empty_ one, which is backwards: the empty one is the common
-  case.
+- **A reason for an empty phase** — the station's own visually-hidden text,
+  **not the caption**, which describes the rail as a whole and names no station.
+  A phase with nothing to open should say that, not present as an unexplained
+  dead control. Today the _barred_ phase is better served than the _empty_ one,
+  which is backwards: the empty one is the common case.
 - **Structure they can traverse.** The instrument's only headings are the
   guide's, and one of its regions carries no accessible name at all, so neither
   heading nor landmark navigation reaches the study surfaces.
