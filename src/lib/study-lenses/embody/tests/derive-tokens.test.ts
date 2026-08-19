@@ -242,7 +242,7 @@ describe('deriveTokens', () => {
 			).toBe(true);
 		});
 
-		it.skip('derivation stays quiet on a clean program', () => {
+		it('derivation stays quiet on a clean program', () => {
 			const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 			deriveTokens({ source: 'let x = 1', type: 'script' });
 			expect(errorSpy).toHaveBeenCalledTimes(0);
