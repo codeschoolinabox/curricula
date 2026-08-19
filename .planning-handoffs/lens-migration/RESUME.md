@@ -219,6 +219,36 @@ they removed. Hand off between the steps
 
 ### STEP 1 — the `parsons` twin pilot
 
+⛔ **THE TWIN IS CO-AUTHORED WITH THE HUMAN. It is not drafted alone and handed
+over for approval, and reading it that way produces the artifact R-7 exists to
+prevent.** R-7's words:
+[the twin is _"the coordination artifact between the human and the agent"_](./SPEC.md#r-7--every-lens-this-campaign-builds-owes-a-ux-twin),
+and at the gate the human **_"corrects intent in place"_** — edits the document,
+not a review comment on it. **The human is present from the drafting, not
+summoned at the end.**
+
+Three things follow, and a session that misses them has run the wrong shape:
+
+- **Bring the human the beats as they form**, not a finished document. A twin
+  the human first sees complete has already spent its correction budget on
+  prose.
+- **"Corrects intent in place" means the diff is the record.** Commit the draft
+  before the gate so the corrections land as a legible diff — that diff is the
+  pilot's single most valuable output, the only direct measurement of how far an
+  agent's reading of a past generation drifts from the person who remembers it.
+- **Ratification catches present-and-wrong; it does NOT catch absent.** The
+  human can correct a beat that is on the page and cannot ratify one that was
+  never drafted. That asymmetry is
+  [FIDELITY-METHOD § Pass 3](./FIDELITY-METHOD.md#pass-3--the-counter-ledger)'s
+  own argument one level up, and it is why the re-investigation's readers must
+  be **uncontaminated by what STEP 1a already opened** — brief them on the file,
+  never on the existing rows.
+
+⚠️ **This was stated once in this file, 250 lines below, inside a paragraph that
+is now struck** — so a reader arriving at § START HERE met a _gate_ and not a
+co-authorship. Recorded here, where the work happens (human question,
+2026-08-19).
+
 **Human ruling 2026-08-18: twin `parsons` alone, as a pilot**, before any other
 lens gets one. Two reasons, and the second is the load-bearing one:
 
