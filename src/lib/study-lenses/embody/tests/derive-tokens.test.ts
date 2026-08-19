@@ -248,7 +248,7 @@ describe('deriveTokens', () => {
 			expect(errorSpy).toHaveBeenCalledTimes(0);
 		});
 
-		it.skip('a CRLF pair is one LineTerminator element', () => {
+		it('a CRLF pair is one LineTerminator element', () => {
 			const stage = deriveTokens({
 				source: 'let a = 1\r\nlet b = 2',
 				type: 'script',
