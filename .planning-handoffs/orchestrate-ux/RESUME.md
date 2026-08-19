@@ -42,8 +42,10 @@ ambiguous.)
 **Read [`DECISIONS.md`](./DECISIONS.md) first** — the decision index, its § 0.3
 entry conditions (the deferrals' only home), § Deferred to an eyeball check (two
 round-11 findings ruled into the checkpoints, NOT open), and § The campaign's
-RADIUS, which now has **four rings**. Every row id and `CP-N` cited below is
-defined there; `T*` checkpoints are in § Sandbox checkpoints, in the archive.
+RADIUS, which now has **four rings**. Every **row id** cited below is defined
+there — but **`CP-N` counter-proposals are NOT**: they are defined in this
+file's archived verdicts, below the banner; `T*` checkpoints are in § Sandbox
+checkpoints, in the archive.
 
 ## What round 11 changed, and the FOUR commits that answered it
 
@@ -88,6 +90,22 @@ and is fixed. **The instrument is unbuilt and unruled**, deliberately, because
 building one is a decision. That is the single most likely source of round 12's
 findings.
 
+**CP-α's specification, reproduced here because it lived ONLY below the archive
+banner** [relayed: `ar-1` round 11, § Counter-proposals — quoted, not
+paraphrased]:
+
+> One table, one row per contract clause in `glossary · the caption` +
+> `glossary · display labels` + `glossary · station`, columns `asserted at` /
+> `drawn at` / `undrawn — reason`. It subsumes "asserted and never drawn", it
+> makes the tray/caption gap and the singular-at-one gap visible in one pass,
+> and it is the only instrument in this campaign that detects absence.
+
+That it sat unreachable is the finding, not a footnote: round 12's **primary
+attack instrument** was defined in a section this file's own banner tells a
+reader is not live, while the live block named it and routed the definition to
+`DECISIONS.md`, which has never contained it [measured: `grep -c "CP-γ"` over
+`DECISIONS.md` → **0**; `CP-α` → **1**, and that one is a gloss, not the spec].
+
 **Also unattacked:** the standing rows are now visibly tight — `not reached` is
 11 characters against `waiting`'s 7, and the spelling-break rail draws three of
 them in 62 columns. That is a real layout constraint the drawings surfaced, and
@@ -95,14 +113,15 @@ it is a checkpoint question, not a document one.
 
 ## Baselines — measure these again at session start, do not trust them
 
-| what                   | value                                                                                                                  |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| prior session baseline | **`061af657`** — SHA-pinned                                                                                            |
-| **AR-5's baseline**    | **`80306ad9`** — the campaign's, not any session's. SHA-pinned                                                         |
-| AR-5's SHA list size   | **77 commits** [measured at `ffc59db3`] — **campaign-scoped**, and it is a budget question before AR-5 launches        |
-| green                  | **622 passing in 22 files** · `npx tsc --noEmit` exit **0** [measured at `ffc59db3`] — campaign-scoped                 |
-| upstream               | **none configured** on `main` [measured: `git rev-parse --abbrev-ref main@{upstream}` → fatal]; `origin/main` is ahead |
-| **foreign commits**    | **15** since `061af657` [measured at `ffc59db3`] — **foreign-scoped, so this number is wrong by the time you read it** |
+| what                   | value                                                                                                                                                                                                                                                                                                                                                 |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| prior session baseline | **`061af657`** — SHA-pinned                                                                                                                                                                                                                                                                                                                           |
+| **AR-5's baseline**    | **`80306ad9`** — the campaign's, not any session's. SHA-pinned                                                                                                                                                                                                                                                                                        |
+| AR-5's SHA list size   | **77 commits** [measured at `ffc59db3`] — **campaign-scoped**, and it is a budget question before AR-5 launches                                                                                                                                                                                                                                       |
+| green (orchestrate)    | **622 passing in 22 files** [measured at `ffc59db3`] — campaign-scoped                                                                                                                                                                                                                                                                                |
+| typecheck (repo-wide)  | `npx tsc --noEmit` exit **0** [measured at `ffc59db3`] — **foreign-scoped, NOT campaign-scoped**: it compiles the whole tree, so a peer session breaks it without touching this campaign                                                                                                                                                              |
+| upstream               | **none configured** on `main` [measured: `git rev-parse --abbrev-ref main@{upstream}` → fatal]. **`main` is 293 commits AHEAD of `origin/main` (`cf0316bd`); `origin/main` is ahead by nothing** [measured at `f358910c`] — foreign-scoped. An earlier revision of this row said `origin/main` was ahead. It is backwards, and it feeds the push gate |
+| **foreign commits**    | **15** since `061af657` [measured at `ffc59db3`] — **foreign-scoped, so this number is wrong by the time you read it**                                                                                                                                                                                                                                |
 
 ⚠ **The tree carries other campaigns' work, including a modified
 `AGENTS.principal.md` (governance surface) and untracked directories.** The
@@ -114,7 +133,7 @@ rules: § Mechanics that will bite you, in the archive — that section is LIVE.
 src/lib/study-lenses/orchestrate .planning-handoffs/orchestrate-ux src/lib/study-lenses/WORKFLOWS.md
 ```
 
-## What the ROUND-11 session did — thirteen commits, from `0d9bd6d2`
+## What the ROUND-11 session did — thirteen commits, of which this table names eight
 
 `0d9bd6d2` · `9ab9e419` · `b3c2f0dc` · `99e04692` · `ffb4b0d8` · `fa57a777` ·
 `1f370db6` · `1106c268`
@@ -142,7 +161,7 @@ git log --oneline 80306ad9..HEAD -- \
   src/lib/study-lenses/WORKFLOWS.md
 ```
 
-## The one thing this session changed most
+## The one thing the round-11 session changed most
 
 **CP-2's reading list works, and it is the only instrument that reached the last
 blocker.** Round 10 proposed it and nothing had used it. `ux/personas.md` and
@@ -174,14 +193,14 @@ a correction went stale inside the section written to fix staleness.
 
 **Kept because the pattern is the lesson, not the items.**
 
-| claim                                                                      | measured at HEAD                                                                                                                                                                     |
-| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `DECISIONS.md`: "**two of four** full drawings are missing their top rule" | **FALSE — 4 `┌` and 4 `└`, perfectly paired.** False since `8c35c977`, BEFORE this session's baseline. `0d9bd6d2` repaired the ADJACENT bullet in the same section and left this one |
-| the new § The machinery breaks drawing's message `entwining failed.`       | **FABRICATED — 0 occurrences in the tree.** The real one is `the syntax tree does not span its source` [read: `embody/derive-entwined.ts:73`]                                        |
-| H6's status "27 prose violations across **9** files"                       | the column enumerates **8** paths and **34** occurrences — the headline was left standing beside a note saying it was wrong                                                          |
-| third-ring census cell `the guide → 1 / 1`                                 | **2 files** at the census commit. Conclusion (polysemy) unchanged                                                                                                                    |
-| every `ux/wireframes.md` line citation in `DECISIONS.md`                   | stale — this session added ~35 lines at `99e04692` and did not re-anchor                                                                                                             |
-| pre-existing, live in the reviewed artifact                                | `derive-study.ts` called "the region's other value file" (it is a FUNCTION file); `types.ts:194` carries a mangled JSDoc line from `da4328d1`'s sweep                                |
+| claim                                                                      | what round 11 measured, WHEN IT RAN                                                                                                                                                                                                                                                                                                                                      |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `DECISIONS.md`: "**two of four** full drawings are missing their top rule" | **FALSE — 4 `┌` and 4 `└`, perfectly paired.** False since `8c35c977`, BEFORE this session's baseline. `0d9bd6d2` repaired the ADJACENT bullet in the same section and left this one                                                                                                                                                                                     |
+| the new § The machinery breaks drawing's message `entwining failed.`       | **FABRICATED — 0 occurrences in the tree.** The real one is `the syntax tree does not span its source` [read: `src/lib/study-lenses/embody/derive-entwined.ts:73` — **there are TWO `embody` directories**; it is the one under `study-lenses/`]                                                                                                                         |
+| H6's status "27 prose violations across **9** files"                       | the column enumerates **8** paths and **34** occurrences — the headline was left standing beside a note saying it was wrong                                                                                                                                                                                                                                              |
+| third-ring census cell `the guide → 1 / 1`                                 | **2 files** at the census commit. Conclusion (polysemy) unchanged                                                                                                                                                                                                                                                                                                        |
+| every `ux/wireframes.md` line citation in `DECISIONS.md`                   | stale — this session added ~35 lines at `99e04692` and did not re-anchor                                                                                                                                                                                                                                                                                                 |
+| pre-existing, live in the reviewed artifact                                | **BOTH DISCHARGED at `9e11074f` — do NOT brief round 12 on these.** `derive-study.ts` was called "the region's other value file"; `README.md` now records the correction in place [read, squeezed unwrap: "An earlier revision argued this from `derive-study.ts` being … it is a FUNCTION file"]. `types.ts:194`'s mangled JSDoc line is gone [read: it is clean prose] |
 
 **The pattern is worth more than the items.** Three are corrections that
 themselves went stale or half-landed, in the very sections written to fix
@@ -326,9 +345,10 @@ to falsify the diagnosis**, not merely to apply it.
 
 ## What was still open at round 11 — SUPERSEDED by § THE NEXT GATE
 
-**Actionable:**
+**Actionable — DISCHARGED, every item.**
 
-1. **`ar-1` round 11**, above.
+1. ~~`ar-1` round 11~~ — it RAN, returned PAUSE, and is resolved. The live gate
+   is **round 12**, in § THE NEXT GATE at the top of this file.
 2. **AR-5 has NEVER run**, and no ceremony level removes it. Ruled 2026-08-18:
    it fires at **0.2 CLOSE**, not before. Baseline `80306ad9`; hand it a **SHA
    list from the command above, never a range and never this file's table**.
