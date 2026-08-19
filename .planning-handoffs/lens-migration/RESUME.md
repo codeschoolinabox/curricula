@@ -133,7 +133,7 @@ is owed.
 1. **`ledgers/<lens>.md` — the seeded per-lens ledgers.** **Two of eight are
    seeded** — `parsons` (47 rows, repaired at `dae045f3`) and `writeme` (45
    rows, the fidelity control). **You start at
-   [the AR-2 PAUSE section](#-start-here--two-independent-tracks-take-one-and-name-it-in-your-first-message)
+   [the AR-2 PAUSE section](#-start-here--step-1-is-the-parsons-twin-pilot-step-2-is-the-template-amendments)
    at the top of this file, not here and not at § Seeding wave status.**
    ~~`writeme` owes 13 cell re-cuts~~ — **DONE at `c734b5ad`**; `parsons` still
    owes its second-root re-seed. Remaining population: `blanks`, `dropdowns`,
@@ -165,38 +165,74 @@ is owed.
    final.
 6. **AR-5** over the SHA list, then the push prompt. Nothing is pushed.
 
-## ⛔ START HERE — TWO INDEPENDENT TRACKS, take ONE and name it in your first message
+## ⛔ START HERE — STEP 1 is the `parsons` twin pilot; STEP 2 is the template amendments
 
-**Neither blocks the other** [measured 2026-08-18]. A session that reads this
-file top-down and works linearly will do TRACK A and never reach TRACK B, which
-is why the fork is stated here rather than left to be inferred:
+**Two units, in this order, ONE SESSION EACH. The order is ruled — it is not the
+reading session's to re-pick, and neither is collapsing them into one session.**
 
-|             | what it is                                                       | why it is independent                                                                             |
-| ----------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| **TRACK A** | three template amendments, then `_family-f.md`'s inventory shape | the amendments gate **cutting a ledger**                                                          |
-| **TRACK B** | the `parsons` twin pilot                                         | it **cuts no ledger** — `parsons`' is already seeded, gate-clean, and passing the transport check |
+|            | unit                                                                                                                    | why it sits here                                                                                                                            |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| **STEP 1** | the [`parsons` twin pilot](#step-1--the-parsons-twin-pilot)                                                             | it is the human's quality gate on the whole campaign, and it is **not blocked** — the amendments gate _cutting a ledger_ and this cuts none |
+| **STEP 2** | [three template amendments](#step-2--three-template-amendments-then-_family-fmd), then `_family-f.md`'s inventory shape | the amendments unblock `_family-f.md` and four further ledgers                                                                              |
 
-**If the human did not say which, ASK — do not pick.** They are different kinds
-of work: A is instrument repair and B is a fidelity demonstration the human
-personally ratifies. Both are named below with everything each needs.
+**Why the twin first** (human ruling 2026-08-19). If a twin cannot demonstrate
+understanding of `parsons` — the lens with the richest measured loss and the
+only ledger that is complete, gate-clean and passing the transport check — then
+the migration approach itself needs rethinking, and template mechanics built
+first would be built at risk. It also exercises two untested things at once: the
+twin gate, and **whether a Pass-1 ledger is sufficient to write a twin from at
+all**. If it is not, that is a finding about the ledger method that reshapes
+STEP 2's priorities.
 
-⚠️ **A ROUND-3 PAUSE is open either way, so do NOT cut `_family-f.md` yet.**
+**The cost, stated rather than hidden:** the template stays in its known-broken
+state one session longer. That is tolerable **only** because both defects are
+marked ⛔ in `_TEMPLATE.md` at the point of use, so nothing can be cut against
+them by accident. **Do not cut `_family-f.md` in either step.**
 
-**Session of 2026-08-18, nothing pushed.** ⚠️ **The table below is short by
-construction and has been wrong twice** — a commit cannot carry its own SHA, and
-the last two revisions each omitted their own. Count from the command, never
-from the table:
-`git log --oneline 0281cfa6..HEAD -- .planning-handoffs/lens-migration/`. **And
-do NOT read a template SHA from this table** — re-derive it every time with
-`git log --oneline -1 -- .planning-handoffs/lens-migration/ledgers/_TEMPLATE.md`;
-it moved seven times in one day and three stale copies shipped inside the
-warning against exactly that, the third of them in the commit that struck the
-second. The original three AR-2 blockers are closed. **Two new ones are open**,
-both found independently by AR-1 and AR-2 on the fix for the fix, both
-reproduced here before being acted on, and **both marked ⛔ in `_TEMPLATE.md` at
-the point of use** so nothing is cut against them.
+⚠️ **One session each, and STEP 2 starts from a fresh context.** A twin drafted
+inside a context spent on transport-check shell debugging is the wrong
+instrument for reading a lens, and the reverse is equally true — three
+consecutive same-session fix rounds in this campaign each introduced the defect
+they removed. Hand off between the steps
+([AGENTS.principal.md § Handoff agency](../../AGENTS.principal.md#handoff-agency--the-agent-owns-the-call)).
 
-### TRACK A — three template amendments, then `_family-f.md`
+### STEP 1 — the `parsons` twin pilot
+
+**Human ruling 2026-08-18: twin `parsons` alone, as a pilot**, before any other
+lens gets one. Two reasons, and the second is the load-bearing one:
+
+- It is the campaign's patient and its richest measured loss — README 705→242,
+  DOCS 505→199, **4 of 4 named decisions gone**, and 27 of 37 stylesheet classes
+  describing a drag-and-drop board the shipped `<iframe>` never rendered. If a
+  twin cannot demonstrate understanding here it cannot anywhere.
+- **The twin gate has never been run.** Every mechanism published this session
+  that was not exercised turned out to be broken. One pilot proves the gate
+  before six sessions ride on it.
+
+**SCOPE IT TO ONE CLAIM.** The human's ruling carries two — _"you understood the
+existing behavior in past-gen lenses"_ and _"you preserved and extended it"_.
+Only the first is provable at Pass 1: a Pass-1 ledger is a mechanical census
+with verbatim quotations and **no dispositions** (§ Pass 1 closes none, by
+contract). So the pilot twin says **what Gen-1 and Gen-2 did, every item citing
+a `parsons-NNN` row id**, and does **not** say what the port will do. Saying the
+second from a Pass-1 ledger is the confabulation this whole exercise exists to
+catch.
+
+⚠️ **It is NOT blocked by the three template amendments above, and an earlier
+reading of the sequencing said it was** [measured 2026-08-18]. Those amendments
+gate **cutting a new ledger**. The pilot cuts none: `parsons`' ledger is seeded,
+47 rows, gate-clean and passing the transport check; its Gen-1 pair, Gen-2 docs
+and landed Gen-3 port all exist, and it is wired in `built-in-lenses.ts`, so the
+twin can be checked against a running lens. **It can run in parallel with the
+amendment work, or before it.**
+
+Take it in a **fresh session** —
+[AGENTS.principal.md § Handoff agency](../../AGENTS.principal.md#handoff-agency--the-agent-owns-the-call)
+sends a design-ahead unit to one unconditionally, and a twin drafted from a
+context full of transport-check debugging is the wrong instrument for reading a
+lens.
+
+### STEP 2 — three template amendments, then `_family-f.md`
 
 **All three are template amendments, and standing ruling 3 binds every one of
 them before a ledger is cut.** The third is the `[COPY]`/`[METHOD]` marking in §
@@ -278,42 +314,6 @@ shape-only cut means editing two gates, which is a _fourth_ template amendment
 that standing ruling 3 then also binds before the cut; and committing the shape
 together with its first rows is precisely what this gate exists to prevent — the
 last two dispatches each collapsed it into a wave.
-
-### TRACK B — the `parsons` twin pilot, which does not wait on TRACK A
-
-**Human ruling 2026-08-18: twin `parsons` alone, as a pilot**, before any other
-lens gets one. Two reasons, and the second is the load-bearing one:
-
-- It is the campaign's patient and its richest measured loss — README 705→242,
-  DOCS 505→199, **4 of 4 named decisions gone**, and 27 of 37 stylesheet classes
-  describing a drag-and-drop board the shipped `<iframe>` never rendered. If a
-  twin cannot demonstrate understanding here it cannot anywhere.
-- **The twin gate has never been run.** Every mechanism published this session
-  that was not exercised turned out to be broken. One pilot proves the gate
-  before six sessions ride on it.
-
-**SCOPE IT TO ONE CLAIM.** The human's ruling carries two — _"you understood the
-existing behavior in past-gen lenses"_ and _"you preserved and extended it"_.
-Only the first is provable at Pass 1: a Pass-1 ledger is a mechanical census
-with verbatim quotations and **no dispositions** (§ Pass 1 closes none, by
-contract). So the pilot twin says **what Gen-1 and Gen-2 did, every item citing
-a `parsons-NNN` row id**, and does **not** say what the port will do. Saying the
-second from a Pass-1 ledger is the confabulation this whole exercise exists to
-catch.
-
-⚠️ **It is NOT blocked by the three template amendments above, and an earlier
-reading of the sequencing said it was** [measured 2026-08-18]. Those amendments
-gate **cutting a new ledger**. The pilot cuts none: `parsons`' ledger is seeded,
-47 rows, gate-clean and passing the transport check; its Gen-1 pair, Gen-2 docs
-and landed Gen-3 port all exist, and it is wired in `built-in-lenses.ts`, so the
-twin can be checked against a running lens. **It can run in parallel with the
-amendment work, or before it.**
-
-Take it in a **fresh session** —
-[AGENTS.principal.md § Handoff agency](../../AGENTS.principal.md#handoff-agency--the-agent-owns-the-call)
-sends a design-ahead unit to one unconditionally, and a twin drafted from a
-context full of transport-check debugging is the wrong instrument for reading a
-lens.
 
 ### This session's commits
 
@@ -602,7 +602,7 @@ that says "in the order it should be taken", and would have spent a session
 re-cutting thirteen cells that were re-cut the day before** — this canon's own
 recorded failure mode, found by the context-free validation of this very file.
 **The live order and the live status are both
-[§ START HERE](#-start-here--two-independent-tracks-take-one-and-name-it-in-your-first-message)**
+[§ START HERE](#-start-here--step-1-is-the-parsons-twin-pilot-step-2-is-the-template-amendments)**
 — it is the only authority on what comes next. § Where to start is kept for the
 reasoning in its struck items and defers to it.
 
@@ -767,7 +767,7 @@ README plus the twin.
 ### Where to start — in order
 
 ⚠️ **This list DEFERS to
-[§ START HERE](#-start-here--two-independent-tracks-take-one-and-name-it-in-your-first-message),
+[§ START HERE](#-start-here--step-1-is-the-parsons-twin-pilot-step-2-is-the-template-amendments),
 which is the sole authority on order.** It is kept because items 5-9 are live
 and duplicated nowhere. **Items 1 and 2 are struck rather than ticked** — a
 completed item left on a start list is this canon's own recorded failure mode —
@@ -780,7 +780,7 @@ re-derive it from here.
 1. ~~**Re-cut `writeme`'s 13 hand-truncated `evidence` cells.**~~ **DONE**
    (`c734b5ad`), and `parsons-031`'s equivalent with it (`d68eae89`). Struck
    rather than ticked. Both ledgers now pass the published transport check — see
-   [the AR-2 PAUSE section](#-start-here--two-independent-tracks-take-one-and-name-it-in-your-first-message),
+   [the AR-2 PAUSE section](#-start-here--step-1-is-the-parsons-twin-pilot-step-2-is-the-template-amendments),
    which is where a fresh session starts.
 
 2. ~~**RESOLVE THE THREE AR-2 BLOCKERS FIRST.**~~ **DONE at `74590c5a`** — four
@@ -792,7 +792,7 @@ re-derive it from here.
 3. **THE TWO OPEN ⛔ DESIGNS**, before any ledger — the Family F invocation is a
    census rather than a floor, and the mutation corpus is not a sufficient
    amendment gate. Both are stated with their measurements in
-   [§ START HERE](#-start-here--two-independent-tracks-take-one-and-name-it-in-your-first-message),
+   [§ START HERE](#-start-here--step-1-is-the-parsons-twin-pilot-step-2-is-the-template-amendments),
    which is the authority on order. Under standing ruling 3 the template is
    amended before a ledger is cut from it, so this is a rule and not a
    preference.
