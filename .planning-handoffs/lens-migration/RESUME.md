@@ -507,6 +507,17 @@ them as part of the amendment rather than in passing:
    scratch, or that the runnable file is the check's fence **with `firstblock`
    and `glossterm` spliced in AHEAD of the perl block** — get that order wrong
    and you get a script that runs and reports nothing.
+
+   ✅ **The splice recipe above is now EXERCISED, not just published** [measured
+   2026-08-19]. Assembled exactly as written — `set -u`, `LC_ALL=C`, the arg
+   block, then `firstblock`/`glossterm`/`norm`/`unwrap_markup`, **then** the
+   perl program — it reproduces `_TEMPLATE.md` § The amendment gate's published
+   baseline **to the number**: `parsons` NO-CITATION = `045`,`046`,`047`,
+   `rows=47 parsed=57 nocite=3`, **0 DIVERGENT**, exit 0. So the recipe is
+   right, the file stays scratch, and rebuilding it costs one paste rather than
+   a debugging session. **It still has no home, and that is still the gap** —
+   what is closed is the doubt about whether the recipe works.
+
 4. **The twelve fixture-pair assertions are specified and unlocated**, and one
    pair looks unbuildable. "The same span mis-transcribed" never says of what;
    modifications 1, 2 and 3 have no named anchor row. And **modification 2 is
