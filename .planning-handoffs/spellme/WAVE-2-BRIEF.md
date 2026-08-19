@@ -9,8 +9,9 @@
 
 > # ⛔ CLOSED — this brief has no work left in it
 >
-> **`lib/scanning` Phase 1 is complete: 71 of 71 passing, 0 skipped, closed at
-> `10cec890`** [measured 2026-08-18]. Wave 1 landed 24 tests across ten commits;
+> **`lib/scanning` Phase 1 is complete**: closed at `10cec890` with 71 of 71
+> passing [measured 2026-08-18], and **78 of 78** after the post-AR-5
+> remediation [measured 2026-08-19]. Wave 1 landed 24 tests across ten commits;
 > wave 2 landed the remaining 47 across nine. **Nobody is to execute from this
 > document.** Everything below is a record — kept for its measurements, its
 > traps and its lessons, all of which still teach. The live campaign record is
@@ -24,14 +25,15 @@
 > stale a fourth time, knowingly, would escalate its verdict to PAUSE.
 
 Process rulings governing this campaign are in
-[`./PHASE-1.md` § Rulings of record](./PHASE-1.md) — nine bullets, eight of them
-human rulings and the ninth an orchestrator assignment, findable via
+[`./PHASE-1.md` § Rulings of record](./PHASE-1.md) — ten bullets, nine of them
+human rulings and the other an orchestrator assignment, findable via
 `git grep -n "human ruling" -- .planning-handoffs/spellme/PHASE-1.md` — scoped
 deliberately, because the unscoped form also matches the briefs that cite the
 rulings, this one included, so its count is not a constant. Eight of the nine
-bullets carry the phrase; the ninth, AR-5 ownership, is the orchestrator's own
-assignment and says so rather than borrowing the human's authority. Read that
-section. Do not re-litigate any of them; if one seems wrong, report FLAG.
+bullets carry the phrase; the one that does not, AR-5 ownership, is the
+orchestrator's own assignment and says so rather than borrowing the human's
+authority. Read that section. Do not re-litigate any of them; if one seems
+wrong, report FLAG.
 
 ⚠ **Read three sections of `PHASE-1.md`, not one: § Rulings of record, § Traps,
 and § What Phase 1 is.** All three are live and this brief depends on all three.
@@ -85,21 +87,46 @@ The nine, in order, each with its own AR-4 before landing:
 | `f63b7b2a` | a hashbang is corrected off the comment channel by position and opening     |
 | `10cec890` | the published sequence freezes, and the boundary guard confirms the reading |
 
-**Final state** [all measured 2026-08-18]: **71 passing, 0 skipped (71)**;
-`npx tsc --noEmit` 0; eslint, prettier and cspell exit 0 on both paths;
-repo-wide `8 failed | 416 passed | 1 skipped (425)`, exactly the known-foreign
-baseline, nothing from `scanning`. **All five sketch phases exist** — the
-boundary guard and the comment merge inline in the export, the fold, the naming
-and the gap split as the three named helpers, per the standing ruling.
+**State at the Phase-1 close (`10cec890`)** [measured 2026-08-18]: 71 passing, 0
+skipped (71); `npx tsc --noEmit` 0; eslint, prettier and cspell exit 0 on both
+paths; repo-wide `8 failed | 416 passed | 1 skipped (425)`, exactly the
+known-foreign baseline, nothing from `scanning`. **All five sketch phases
+exist** — the boundary guard and the comment merge inline in the export, the
+fold, the naming and the gap split as the three named helpers, per the standing
+ruling.
 
-⚠ **Three FLAGs are open and none is an agent's to close.** They are the human's
-at the push gate: the boundary guard type-checks `code` but presence-checks the
-two arrays, so a present-but-wrong-typed array still fails _inside_ — and
-`DOCS.md` contradicts itself about whether that is allowed; the guard has no
-regression lock, because all three `Exceptions` fixtures assert
-`.toThrow(TypeError)` and stay green if the guard is deleted; and U+2029 and
-ZWNBSP sit in the kind table with no fixture. The last two are suite changes,
-which this campaign twice put to the human rather than let an agent take.
+**State now** [measured 2026-08-19]: **78 passing, 0 skipped (78)**, after the
+remediation below. `npx tsc --noEmit` 0; both modules clean.
+
+✅ **All three FLAGs this section once listed as open are CLOSED.** They were
+the human's, they were ruled on, and each names the commit that closed it:
+
+- **The guard's asymmetry** — it type-checked `code` while presence-checking the
+  two arrays, and `DOCS.md` contradicted itself about whether that was allowed.
+  **Closed by `237bdd10`**: the human ruled _narrow_ (human ruling 2026-08-18),
+  the type-check came out, and § Structural constraints now says what the guard
+  does. The oldest artifact agreed — `349d2f99`, the Phase-0 sketch, always said
+  "missing or absent".
+- **The guard's missing regression lock** — all three `Exceptions` fixtures
+  asserted `.toThrow(TypeError)` and stayed green with the guard deleted, via
+  incidental TypeErrors from inside. **Closed by `237bdd10`, then repaired by
+  `e7627ccf`**: the first fix swapped the class assertion for a message regex,
+  which silently dropped the class check (a regex-only `toThrow` never tests
+  `instanceof`); the repair pairs both, and each mutation is invisible to the
+  other's assertion.
+- **U+2029 and ZWNBSP had no fixture** — named in the kind table, asserted
+  nowhere. **Closed by `42516f1c`**, human-approved, plus NBSP which a review
+  sweep found in the same hole.
+
+**`lib/classifying` was reconciled in the same pass** (`39e792e9`) — its drift
+ran the opposite way, its DOCS demanding a shape check its guard never
+performed.
+
+⚠ **This section claimed those three were still open until 2026-08-19**, three
+commits after the last of them closed — the fourth occurrence of the staleness
+defect this document's banner was written to stop, caught by the AR-5 addendum
+at the push gate. Recorded rather than quietly corrected, because the pattern is
+the point.
 
 ⚠ **Everything below predicts an arrival state against a tree that no longer
 exists.** Its _rules_ still teach; its _numbers_ are history.

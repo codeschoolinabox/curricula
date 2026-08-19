@@ -25,8 +25,10 @@ import type {
  * Each `categories` is single-element (AST alternates and contextual-keyword
  * re-categorization land later).
  *
- * @throws TypeError when `code`, `tokens`, or `ast` is missing or null —
- *   callers gate on a successful parse (see `./README.md` § Public API).
+ * @throws TypeError when `code` is missing, null or not a string, or when
+ *   `tokens` or `ast` is missing or null — those two are checked for presence
+ *   only, never for shape. Callers gate on a successful parse (see
+ *   `./README.md` § Public API).
  */
 export default function classifyTokens({
 	code,

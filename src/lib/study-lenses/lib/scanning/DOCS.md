@@ -134,10 +134,10 @@ flowchart TD
   an AR-5 measured it false — the guard type-checked `code` while
   presence-checking the two arrays, so one field was treated unlike its
   siblings. Asked whether the code should widen to meet the sentence or the
-  sentence should narrow to meet the design, **the human ruled narrow (human
-  ruling 2026-08-18)**, and the type-check came out. The oldest artifact agrees:
-  the phase-1 description above, written at Phase 0 before any implementation,
-  has always said _missing or absent_ — so the type-check was the drift, not the
+  sentence should narrow to meet the design, the ruling was **narrow**, and the
+  type-check came out. (human ruling 2026-08-18) The oldest artifact agrees: the
+  phase-1 description above, written at Phase 0 before any implementation, has
+  always said _missing or absent_ — so the type-check was the drift, not the
   contract.
 
 ### Out of scope
@@ -150,11 +150,16 @@ flowchart TD
   one recorded under § Structural constraints) — a number where a token array
   belongs is not an absence, and the boundary does not catch it. It surfaces
   from wherever the part is first used, which is the one place this module's
-  fail-at-the-boundary rule deliberately does not reach. The sharpest case is
-  not the obvious one: `tokens: 42` fails immediately, but an array of the wrong
-  _contents_ produces spans of `undefined`, and
-  `code.slice(undefined, undefined)` hands every element the whole source before
-  anything throws.
+  fail-at-the-boundary rule deliberately does not reach. Where it surfaces
+  depends on the part [measured 2026-08-19, the committed module bundled with
+  `esbuild --external:acorn` and called directly]: `tokens: 42` throws from the
+  fold, `tokens.keys is not a function`; an array of the wrong _contents_ gets
+  further, to the naming rule, and throws reading `.keyword` on a token type
+  that is not there. **Nothing is published in either case** — an earlier
+  revision of this bullet claimed the wrong-contents case "hands every element
+  the whole source before anything throws", which is false: the whole-source
+  slice is computed for the first element and dies in the same iteration, so no
+  caller ever sees it.
 - **The caller's gate and projection.** Gating on a successful tokens stage, and
   projecting the three values off an embodiment's facts, are the caller's
   one-line boundary and are named in the README rather than done here.
@@ -168,6 +173,15 @@ flowchart TD
 - **Semantic categories.** What an element _does_ in the notional machine is the
   sibling classifying leaf's question over the same tokens, deliberately
   answered differently.
+- **Matching the sibling leaf's boundary.** This module presence-checks all
+  three of its parts; `lib/classifying` additionally type-checks its `code`
+  [read:
+  [`../classifying/DOCS.md` § Execution phases](../classifying/DOCS.md#execution-phases)].
+  Both match their own Phase-0 sketch and both were ruled on the same day (human
+  ruling 2026-08-18); they do not match each other, and the deferred fold of the
+  two leaves into embody is where that should be settled rather than here. This
+  bullet exists because the only record of the parity was a code comment that
+  came out with the type-check, leaving a reader of this module nothing to find.
 - **The parser's own defects.** They are recorded upstream and worked around
   here where a workaround exists; this module neither detects nor repairs the
   ones that leave no trace.

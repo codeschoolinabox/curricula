@@ -5,13 +5,18 @@
 **Phase 0 is closed. Phase 1 is UNDER WAY.** The canon is the in-repo READMEs
 and DOCS.md sketches, and this file deliberately does not restate them.
 
-⚠ **Only § Rulings of record is maintained.** Everything below describing what
-Phase 1 _will_ do was written before it began and has not been kept current —
-treat it as the campaign's opening statement, not its status. The live status
-lives in [`./WAVE-2-BRIEF.md`](./WAVE-2-BRIEF.md) — the remaining 47 tests,
-including Template folding, which wave 1 did **not** reach.
-[`./WAVE-1-BRIEF.md`](./WAVE-1-BRIEF.md) is a **historical record, not live
-status**: it briefed a wave that planned 33 un-skips and stopped at 24 by
+⚠ **Only § Rulings of record and § Where things stand are maintained.**
+Everything below describing what Phase 1 _will_ do was written before it began
+and has not been kept current — treat it as the campaign's opening statement,
+not its status.
+
+**`lib/scanning` Phase 1 is CLOSED**: 78 of 78 passing, 0 skipped [measured
+2026-08-19]. § Where things stand carries the SHA list; the status lives here,
+not elsewhere. [`./WAVE-2-BRIEF.md`](./WAVE-2-BRIEF.md) is now a **closed
+record** and says so in its own banner — this file used to route readers there
+for live status while that file routed them back here, and each disclaimed
+itself. [`./WAVE-1-BRIEF.md`](./WAVE-1-BRIEF.md) is a **historical record, not
+live status**: it briefed a wave that planned 33 un-skips and stopped at 24 by
 design, and its own numbers (33-of-67, six rulings) were true when written and
 are not now.
 
@@ -33,17 +38,34 @@ are not now.
 | `d2688fd8`              | second Phase-0 top-up — four more fixtures, suite 67 → 71                        |
 | `2989d9e1`              | the naming table stops carrying a contradicting second spec                      |
 | `065afc16` … `10cec890` | **wave 2 — nine increment commits**, listed individually below                   |
+| `0281cfa6` … `e7627ccf` | **post-AR-5 remediation — five commits**, listed individually below              |
 
 **Wave 2's nine, as a list — never as a range** (`065afc16..10cec890` spans
 dozens of foreign commits): `065afc16` `7046bc01` `26eba4a5` `9d719f17`
-`25449442` `2200c512` `c9d8d40a` `f63b7b2a` `10cec890`. Phase 1 closed at the
-last of them, 71 of 71 passing, 0 skipped [measured 2026-08-18]. The four
-handoff-doc commits that ride with them: `6e1926c3` `38fee403` `eacae342`
-`6ecb22e9`.
+`25449442` `2200c512` `c9d8d40a` `f63b7b2a` `10cec890`. Phase 1's un-skips
+closed at the last of them, 71 of 71 passing [measured 2026-08-18].
 
-⚠ This row read `` `<wave 2>` | the remaining 47 `` until 2026-08-18 — a
-placeholder left standing after the work landed, which is precisely what this
-table's own warning below predicts about a SHA list written last.
+**The post-AR-5 remediation, also as a list** — 90 foreign commits landed behind
+`10cec890` alone [measured 2026-08-19: `git rev-list --count 10cec890..HEAD`]:
+
+| SHA        | What                                                                                     |
+| ---------- | ---------------------------------------------------------------------------------------- |
+| `0281cfa6` | the closed brief stops claiming work remains; this table's `<wave 2>` placeholder filled |
+| `237bdd10` | the boundary guard narrows to presence; DOCS follows (human ruling 2026-08-18)           |
+| `42516f1c` | three kind-table locks — U+2029, ZWNBSP, NBSP                                            |
+| `39e792e9` | `lib/classifying`'s mirror-image contract reconciliation                                 |
+| `e7627ccf` | the error-class assertions `237bdd10` dropped are restored                               |
+
+Suite after them: **78 passing, 0 skipped** [measured 2026-08-19]. The six
+handoff-doc commits riding with the campaign: `6e1926c3` `38fee403` `eacae342`
+`6ecb22e9` `0281cfa6`, and the one adding these rows.
+
+⚠ **This table has now failed the same way twice.** It read
+`` `<wave 2>` | the remaining 47 `` until 2026-08-18; then `0281cfa6` filled
+that row and **omitted itself and the four commits after it** until 2026-08-19,
+when an AR-5 addendum caught it. Both are exactly what the warning below
+predicts about a SHA list written last — including that the author's own last
+commit is the one that goes missing.
 
 ⚠ **Foreign commits interleave all of those**, one of them landing _between_
 `9eea31a3` and `349d2f99`. **Do not trust a count here — recompute it**, because
@@ -141,7 +163,7 @@ Ruling provenance).
   rule. Suite 63 → 67; landed in `7e083de2`.
 - **The `Boundaries — tiling` block un-skips out of file order** (human ruling
   2026-08-14), immediately before `Interfaces` rather than at its file position.
-  Its five tests sweep the whole pipeline over a 27-item corpus (22 when this
+  Its five tests sweep the whole pipeline over a 29-item corpus (22 when this
   ruling was taken; `d2688fd8` added five); un-skipped early they license two
   structural fakes — a zero-width filter standing in for the template fold, and
   "a non-whitespace gap is a Comment" standing in for the comment merge — that
@@ -184,6 +206,25 @@ Ruling provenance).
   2026-08-15], so the test can only be written in script mode. It is also
   precisely this module's stated reason to exist — a program that lexes but does
   not parse under strict.
+- **Narrow the contract, not the guard; and three more fixtures land.** (human
+  ruling 2026-08-18) Two decisions on one day, both at the AR-5 that closed
+  `lib/scanning` Phase 1. **First**: the boundary guard type-checked `code`
+  while presence-checking the two arrays, and `DOCS.md` said "fail loudly at the
+  boundary, never inside" unqualified. Asked whether the code should widen or
+  the sentence narrow, the human ruled **narrow** — recorded inline in both
+  leaves' `DOCS.md`, where § Ruling provenance puts it. **Second**: fixtures for
+  U+2029 and ZWNBSP were approved by name; **NBSP was not** — a review sweep
+  found it in the same hole and it landed under the batch-fix rule, disclosed in
+  `42516f1c`'s body. ⚠ That body also asserted this campaign "has required
+  [human approval] of every suite change since 2026-08-14". **No such standing
+  rule exists in the tree** [measured 2026-08-19], and the two commits after it
+  added seven more tests without invoking it. What is true is narrower and is
+  what this bullet records: three specific suite changes were put to the human
+  and approved (2026-08-14, 2026-08-15, 2026-08-18). Whether a general rule
+  should exist — and where the line falls between a new fixture and a regression
+  lock on an already-documented contract — is **an open question for the
+  human**, not a rule an agent may declare. It is recorded here because a claim
+  made in an immutable commit body cannot be corrected there.
 
 ## Traps, each of which has already cost something
 

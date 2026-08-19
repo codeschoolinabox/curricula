@@ -32,11 +32,11 @@ helpers (newspaper anatomy: export first, helpers below).
    This bullet promised "`tokens` a non-null array, `ast` a non-null node" until
    2026-08-18, which the guard has never delivered — it tests both for presence
    and neither for shape. The sentence was narrowed to what the code does rather
-   than the guard widened to what the sentence said (**human ruling
-   2026-08-18**, the same ruling recorded in the sibling
+   than the guard widened to what the sentence said. (human ruling 2026-08-18) —
+   the same ruling recorded in the sibling
    [`../scanning/DOCS.md` § Structural constraints](../scanning/DOCS.md#structural-constraints),
    where the drift ran the other way — that guard checked more than its contract
-   asked for, and the extra check came out).
+   asked for, and the extra check came out.
 
    ⚠ **The two sibling leaves now differ deliberately**, and nothing else in the
    tree records it: this module type-checks `code` because its own Phase-0
@@ -115,7 +115,7 @@ flowchart TD
     Paired["paired tokens<br/>(partner links + closers<br/>inherit opener role)"]
     Out["frozen ClassifiedToken[]<br/>(source-ordered, total, non-overlapping)"]
 
-    In -->|"validate — throws TypeError<br/>on null/missing"| Confirmed
+    In -->|"validate — throws TypeError on a missing<br/>or null part, or a non-string code"| Confirmed
     Confirmed -->|"classify by token type<br/>(pure; element list fixed here)"| Seeded
     Seeded -->|"one AST traversal:<br/>block + paren + operator roles +<br/>generator * re-bin (pure)"| Refined
     Refined -->|"stack pairing +<br/>closer inheritance (pure)"| Paired
