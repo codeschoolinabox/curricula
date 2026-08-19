@@ -429,6 +429,16 @@ describe('deriveInputElements', () => {
 	});
 
 	describe('Exceptions', () => {
+		it('throws a TypeError when the source text is absent', () => {
+			const input = read('x');
+			expect(() =>
+				deriveInputElements({
+					...input,
+					code: undefined,
+				} as unknown as ScanInput),
+			).toThrow(TypeError);
+		});
+
 		it('throws when the source text is absent', () => {
 			const input = read('x');
 			expect(() =>
@@ -439,6 +449,16 @@ describe('deriveInputElements', () => {
 			).toThrow(/needs a source text/);
 		});
 
+		it('throws a TypeError when the token array is absent', () => {
+			const input = read('x');
+			expect(() =>
+				deriveInputElements({
+					...input,
+					tokens: undefined,
+				} as unknown as ScanInput),
+			).toThrow(TypeError);
+		});
+
 		it('throws when the token array is absent', () => {
 			const input = read('x');
 			expect(() =>
@@ -447,6 +467,16 @@ describe('deriveInputElements', () => {
 					tokens: undefined,
 				} as unknown as ScanInput),
 			).toThrow(/needs a source text/);
+		});
+
+		it('throws a TypeError when the comment array is absent', () => {
+			const input = read('x');
+			expect(() =>
+				deriveInputElements({
+					...input,
+					comments: undefined,
+				} as unknown as ScanInput),
+			).toThrow(TypeError);
 		});
 
 		it('throws when the comment array is absent', () => {
