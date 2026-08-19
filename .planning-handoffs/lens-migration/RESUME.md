@@ -133,7 +133,7 @@ is owed.
 1. **`ledgers/<lens>.md` — the seeded per-lens ledgers.** **Two of eight are
    seeded** — `parsons` (47 rows, repaired at `dae045f3`) and `writeme` (45
    rows, the fidelity control). **You start at
-   [the AR-2 PAUSE section](#-start-here--a-round-3-pause-is-open-so-do-not-cut-_family-fmd-yet)
+   [the AR-2 PAUSE section](#-start-here--two-independent-tracks-take-one-and-name-it-in-your-first-message)
    at the top of this file, not here and not at § Seeding wave status.**
    ~~`writeme` owes 13 cell re-cuts~~ — **DONE at `c734b5ad`**; `parsons` still
    owes its second-root re-seed. Remaining population: `blanks`, `dropdowns`,
@@ -165,7 +165,22 @@ is owed.
    final.
 6. **AR-5** over the SHA list, then the push prompt. Nothing is pushed.
 
-## ⛔ START HERE — a ROUND-3 PAUSE is open, so do NOT cut `_family-f.md` yet
+## ⛔ START HERE — TWO INDEPENDENT TRACKS, take ONE and name it in your first message
+
+**Neither blocks the other** [measured 2026-08-18]. A session that reads this
+file top-down and works linearly will do TRACK A and never reach TRACK B, which
+is why the fork is stated here rather than left to be inferred:
+
+|             | what it is                                                       | why it is independent                                                                             |
+| ----------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| **TRACK A** | three template amendments, then `_family-f.md`'s inventory shape | the amendments gate **cutting a ledger**                                                          |
+| **TRACK B** | the `parsons` twin pilot                                         | it **cuts no ledger** — `parsons`' is already seeded, gate-clean, and passing the transport check |
+
+**If the human did not say which, ASK — do not pick.** They are different kinds
+of work: A is instrument repair and B is a fidelity demonstration the human
+personally ratifies. Both are named below with everything each needs.
+
+⚠️ **A ROUND-3 PAUSE is open either way, so do NOT cut `_family-f.md` yet.**
 
 **Session of 2026-08-18, nothing pushed.** ⚠️ **The table below is short by
 construction and has been wrong twice** — a commit cannot carry its own SHA, and
@@ -181,7 +196,7 @@ both found independently by AR-1 and AR-2 on the fix for the fix, both
 reproduced here before being acted on, and **both marked ⛔ in `_TEMPLATE.md` at
 the point of use** so nothing is cut against them.
 
-### Your first task is NOT `_family-f.md` — it is THREE template amendments
+### TRACK A — three template amendments, then `_family-f.md`
 
 **All three are template amendments, and standing ruling 3 binds every one of
 them before a ledger is cut.** The third is the `[COPY]`/`[METHOD]` marking in §
@@ -264,7 +279,7 @@ that standing ruling 3 then also binds before the cut; and committing the shape
 together with its first rows is precisely what this gate exists to prevent — the
 last two dispatches each collapsed it into a wave.
 
-### The `parsons` twin pilot — UNBLOCKED, and it does not wait on the amendments
+### TRACK B — the `parsons` twin pilot, which does not wait on TRACK A
 
 **Human ruling 2026-08-18: twin `parsons` alone, as a pilot**, before any other
 lens gets one. Two reasons, and the second is the load-bearing one:
@@ -587,7 +602,7 @@ that says "in the order it should be taken", and would have spent a session
 re-cutting thirteen cells that were re-cut the day before** — this canon's own
 recorded failure mode, found by the context-free validation of this very file.
 **The live order and the live status are both
-[§ START HERE](#-start-here--a-round-3-pause-is-open-so-do-not-cut-_family-fmd-yet)**
+[§ START HERE](#-start-here--two-independent-tracks-take-one-and-name-it-in-your-first-message)**
 — it is the only authority on what comes next. § Where to start is kept for the
 reasoning in its struck items and defers to it.
 
@@ -752,7 +767,7 @@ README plus the twin.
 ### Where to start — in order
 
 ⚠️ **This list DEFERS to
-[§ START HERE](#-start-here--a-round-3-pause-is-open-so-do-not-cut-_family-fmd-yet),
+[§ START HERE](#-start-here--two-independent-tracks-take-one-and-name-it-in-your-first-message),
 which is the sole authority on order.** It is kept because items 5-9 are live
 and duplicated nowhere. **Items 1 and 2 are struck rather than ticked** — a
 completed item left on a start list is this canon's own recorded failure mode —
@@ -765,7 +780,7 @@ re-derive it from here.
 1. ~~**Re-cut `writeme`'s 13 hand-truncated `evidence` cells.**~~ **DONE**
    (`c734b5ad`), and `parsons-031`'s equivalent with it (`d68eae89`). Struck
    rather than ticked. Both ledgers now pass the published transport check — see
-   [the AR-2 PAUSE section](#-start-here--a-round-3-pause-is-open-so-do-not-cut-_family-fmd-yet),
+   [the AR-2 PAUSE section](#-start-here--two-independent-tracks-take-one-and-name-it-in-your-first-message),
    which is where a fresh session starts.
 
 2. ~~**RESOLVE THE THREE AR-2 BLOCKERS FIRST.**~~ **DONE at `74590c5a`** — four
@@ -777,7 +792,7 @@ re-derive it from here.
 3. **THE TWO OPEN ⛔ DESIGNS**, before any ledger — the Family F invocation is a
    census rather than a floor, and the mutation corpus is not a sufficient
    amendment gate. Both are stated with their measurements in
-   [§ START HERE](#-start-here--a-round-3-pause-is-open-so-do-not-cut-_family-fmd-yet),
+   [§ START HERE](#-start-here--two-independent-tracks-take-one-and-name-it-in-your-first-message),
    which is the authority on order. Under standing ruling 3 the template is
    amended before a ledger is cut from it, so this is a rule and not a
    preference.
