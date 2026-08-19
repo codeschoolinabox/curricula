@@ -234,9 +234,13 @@ const elements: readonly InputElement[] = deriveInputElements({
 ```
 
 `ScanInput` is declared in the parser's own terms — that is what this module
-walks. A consumer holding an `Embodiment` projects the three values off its
-facts behind a successful-tokens check; the projection is the consumer's
-one-line boundary, never this module's concern.
+walks. Since the embody integration (human rulings 2026-08-17 and 2026-08-18), a
+consumer holding an `Embodiment` does not call this module at all: the factory
+calls it once per settle and publishes the result at
+`facts.tokens.value.inputElements`, with the input-coherence precondition closed
+by construction. Direct calls remain for tests and for callers outside the
+embodiment's reach; such a caller projects the three values behind a
+successful-tokens check — its one-line boundary, never this module's concern.
 
 The function **throws** on missing or null input. Deliberate: it is called only
 behind a `facts.tokens.ok` gate, so a null here is a caller bug to surface, not
@@ -352,7 +356,8 @@ characters — is a well-formed `IdentifierName` at this level, and the
 restriction against it is an early error in the syntactic grammar. The tokenizer
 enforces it while reading, so the tokens stage fails and the caller's gate
 closes before this module is called. The consequence is recorded upstream, in
-this campaign's embody flags: the whole embodiment closes on a program V8 runs.
+embody's machine twin (`../../embody/notional-machine.md`): the tokens stage
+fails, and the phases below tokens close — on a program V8 itself runs.
 
 ## Consumers
 
@@ -388,29 +393,29 @@ the result is the whole argument — the same argument
 [`../classifying/`](../classifying/README.md) makes for its own walk.
 
 It is a shared `lib/` leaf rather than lens-local code or an embody enrichment
-(human ruling 2026-08-13). It is a leaf rather than a fact on the embodiment
-because what it produces is a **projection into a chosen vocabulary**, not a new
-truth about the program. Embody publishes the machine's own reading; this module
-re-words that reading in the specification's terms for the consumers that teach
-in them. The parse itself is not repeated, and there is still one parse truth.
+(human ruling 2026-08-13). The argument this module was built under: it is a
+leaf rather than a fact on the embodiment because what it produces is a
+**projection into a chosen vocabulary**, not a new truth about the program.
+Embody publishes the machine's own reading; this module re-words that reading in
+the specification's terms for the consumers that teach in them. The parse itself
+is not repeated, and there is still one parse truth.
 
-**That argument has a live counter-argument, and it is deliberately unresolved**
-(open question raised 2026-08-14). The counter: input elements are not a
-_chosen_ vocabulary at all — they are the **language's own**, and arguably more
-canonical than the parser's token stream, which is one implementation's
-convenience. If that holds, this belongs on the embodiment beside the other
-facts, derived once in the factory and read by every consumer, rather than
-re-derived by each. **The question is not settled here and is not settled by
-building this module**; it is settled better afterwards, by a leaf that exists
-and can simply be called from a different place. The decision this module takes
-now to keep that door open is the one above: publishing indices rather than
-token references, because a fact on the embodiment must survive embody's own
-deep freeze, and token references would not.
+**That argument had a live counter-argument, and it is now resolved** (question
+raised 2026-08-14; settled by human rulings 2026-08-17 and 2026-08-18). The
+counter held: input elements are not a _chosen_ vocabulary — they are the
+**language's own** — and the tiling invariant's one precondition, input
+coherence, is a guarantee only the embodiment's factory can give by
+construction. The resolution takes both sides' ground: this leaf stays exactly
+as built, and embody publishes the sequence by calling it — an optional
+enrichment member on the tokens stage's value
+(`facts.tokens.value.inputElements`), no stage of its own, recorded at embody's
+DOCS.md § Embodiment decisions (E9). The door this module kept open — publishing
+indices rather than token references so the sequence survives embody's deep
+freeze — is the door the integration walked through.
 
-The measured ground for that question, and the argument on both sides, is
+The measured ground for that question, and the record of its resolution, is
 collected in this repo's planning handoffs under `embody-derivation-facts` —
-named in prose because a path that has not been written yet is not a claim this
-document should make.
+named in prose, as a campaign record rather than a load-bearing link.
 
 ## Conventions
 

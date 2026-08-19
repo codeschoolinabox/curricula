@@ -279,10 +279,10 @@ entry states why this shape rather than its alternatives.
   leaf. The sequence's element texts jointly reproduce the whole source — a
   deliberate, measured footprint beside the indexed tree, not a copy of it: the
   facts-index-never-copy constraint speaks of the tree, and this carries the
-  source's own characters once more, in exchange for tiling. This settles, from
-  the caller's side, the residence question the leaf's README records as
-  deliberately unresolved; closing the leaf's own note is a follow-on owned by
-  the campaign's close, never an edit made here.
+  source's own characters once more, in exchange for tiling. This settled, from
+  the caller's side, the residence question the leaf's README recorded as
+  deliberately unresolved until this campaign's close resolved it in place (the
+  leaf README's § Why-this-module-exists now carries the resolution).
 
 ## Parse decisions
 

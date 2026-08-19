@@ -374,9 +374,12 @@ documents, and UI copy use them consistently.
   notional-machine documentation, editor support, and semantic-model builders. A
   level answers when consulted — it is never a plugin and never an actor — and
   levels never ship lenses.
-- **notional machine (NM)** — a language level's semantic model of how
-  JavaScript executes: the bounded conceptual machine a learner can hold in
-  their head. NM content lives with its level.
+- **notional machine (NM)** — a semantic model of how a machine reads or
+  executes a program: the bounded conceptual machine a learner can hold in their
+  head. A language level's NM models how JavaScript executes, and that content
+  lives with its level; a region that models a different machine documents it in
+  its own `notional-machine.md` twin (embody's models the factory and the
+  ECMA-262 scanner; `lib/questioning/` carries its own).
 - **JEJ (Just Enough JavaScript)** — the first language level: just enough
   JavaScript to write imperative, text-and-number interactive programs on a
   precise, bounded notional machine.

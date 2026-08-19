@@ -1,14 +1,13 @@
-<!-- cspell:ignore spellme colorizing colorizer -->
+<!-- cspell:ignore spellme colorizing colorizer retarget -->
 
 # Brief — should `scanning` and `classifying` become embodiment facts?
 
 **This file is `.planning-handoffs/embody-derivation-facts/BRIEF.md`.** Cite it
 by that path.
 
-**Status: Phase 0 executed 2026-08-18** — the dated Settled blocks below carry
-the rulings; Phase 1 is gated on human approval of the Phase-0 commit plus a
-fresh trigger re-measure. (This file began as a design brief; it is now the
-campaign's durable record.)
+**Status: PHASE 1 COMPLETE 2026-08-19 — campaign at AR-5/close.** The dated
+Settled blocks below carry the rulings. (This file began as a design brief; it
+is now the campaign's durable record.)
 
 ## Before reading further
 
@@ -142,6 +141,80 @@ skipped; scanning porcelain empty] — the Phase-1 session still re-measures at
 its own start per the standing rule. Phase 1 runs in a FRESH session from the
 validated resumption point; ceremony: full; the session tier stays the design
 tier, so AR-5 inherits it at campaign close.
+
+**Phase 1 executed COMPLETE (2026-08-19, the foamy-meteor session):** 16
+un-skips, one increment each, full ceremony (AR-3 + AR-4 per increment; every
+verdict and disposition in the increment's own immutable body):
+`2de2ca5e 7257ddec c2130d0f c6d946d3 6145edf5 ab923947 b3210955 d8e2cd7b 7ebbf55e 68c6e71b 22890df2 fbc0b7d9 3711e639 31c39322 c389c7e0 061af657`.
+Embody suite 487 passed (487), zero skipped [measured 2026-08-19 in-session].
+The guard landed at c2130d0f per the AR-4 hold-point; its three residual-risk
+slices closed at increments 14-16. Timing re-measured [measured: scratchpad
+bench, node v20.11.0, same parameters as the Phase-0 bench, denser corpus]: tiny
+9B 0.012ms · typical 208B 0.074ms · large 1.7KB 0.562ms · stress 16.6KB 5.541ms
+mean — the low-single-digit-ms bar holds at snippet scale; EAGER stands.
+
+**Settled (human, 2026-08-19, at the write-back gate):**
+
+1. **Write-backs W1-W4 approved as drafted, plus W5** — an approved extension:
+   `scanning/types.ts` § `ScanInput`'s doc-comment carried the same stale
+   consumer story W2 fixes in the README. All five applied this session;
+   scanning suite green after (78 passed (78) — the leaf gained 6 peer tests
+   since the gate record's 72). **Plus W6, the resolution ripple** (approved at
+   the AR-5 PAUSE, same day): the embody twin's verbatim glossary quote dated
+   (W4 falsified it), DOCS.md E9's tail clause moved to past tense (W1 falsified
+   it), and the leaf README's pre-resolution rationale given its attribution
+   clause ("The argument this module was built under:").
+2. **`scanning/` stays in the shared `lib/` tier** — the move under `embody/`
+   was considered and DECLINED: the 2026-08-13 tier ruling stands; spellme
+   imports `InputElement` from the leaf and the shared tier is what makes that
+   import legal; the leaf's region-blindness grounds its vocabulary authority;
+   classifying keeps the symmetric story. Embody's relationship is caller-ship,
+   never ownership.
+3. **spellme alignment = a docs-mini-campaign FIRST** (its own handoff), then
+   spellme Phase 1 separately. The mini-campaign poses one design question at
+   its start: does spellme's `applicability` gate on the optional member's
+   presence, or is an absent member a caller bug past the tokens-ok gate?
+4. **The review-findings backlog is RECORDED ONLY** (no follow-on edits now;
+   ruling re-confirmed 2026-08-19 over the completed list below). Grouped BY
+   INCREMENT so a missing SHA is visible; each finding's grounds live in the
+   named commit's body:
+   - Z1/Z2 `2de2ca5e`/`7257ddec` — exhaustive Object.keys(['cause','ok']) form
+     for the Z2 envelope pin.
+   - O1 `c2130d0f` — one-token .text/.start/.end companion + toHaveLength(1);
+     defect-T2 'in'-check strengthen; derive-ast.ts's UNGUARDED paren fold vs
+     DOCS "one consistent defect grammar" (the campaign's one CODE finding).
+   - O2 `c6d946d3` — I1 non-zero retarget (B1's own fixture lands tokenIndices
+     [3]); multi-index folded-run referent untested at the embody layer.
+   - M1 `6145edf5` — two-comment fixture reuse; kind-sequence companion on the
+     M1 fixture.
+   - M2 `ab923947` — strengthen-or-rename: the test name promises the
+     stream-skips property (tokenIndices []), the assertion pins kind-presence
+     only (property live-verified, never asserted).
+   - B1 `b3210955` — single-template-fixture scope note (leaf's 11 folding tests
+     carry the matrix).
+   - B2 `d8e2cd7b` — a second reserved word at the embody layer (e.g. `if`); a
+     NAMED plain-identifier pin ('x' → IdentifierName — tt.name covered only by
+     B1's filter side-effect); the identifier-IN-TEMPLATE-CONTEXT kind question
+     STAYS OPEN (no committed increment asserts it).
+   - I1 `7ebbf55e` — (same retarget/multi-index item as O2's, carried at both).
+   - I2 `68c6e71b` — comment-channel cross-reference (Comment element joined to
+     stage.value.comments — embody-only, no layer covers it); two-call isolation
+     pin (E5); the coherence-PIN retitle question (M1 is the stronger observable
+     witness).
+   - E1 `22890df2` — console.warn silence siblings (region pairs error+warn
+     8-for-8; E1 is the singleton) beside E1 AND mirrored in the defect trio.
+   - S1 `fbc0b7d9` — Hashbang/Comment live-call kind pin (+ offset-zero
+     discriminating pair); span-strengthening of the CRLF pin ([9,11], not count
+     alone); ZOMBIES-letter + describe-placement editorials (retrospective).
+   - I3 `3711e639` — .every() widening of the freeze pin; the leaf's own
+     'freezes every element' test carries the same single-index gap under a
+     wider name (leaf-side, needs its own approval path).
+   - T1 `31c39322` — comments-through-degrade pin (fixture with a comment).
+   - T2 `c389c7e0` — bundle-engagement-pairs process heuristic (retrospective).
+   - T3 `061af657` — message-CONTENT pin ('the report names the deriver',
+     stringContaining — region precedent 3-for-3).
+   - Cross-cutting — PINNED-marker retro-seeding when the pinned-guard hook
+     re-arms.
 
 ---
 
@@ -304,7 +377,8 @@ edit.
 - `src/lib/study-lenses/lib/scanning/` — README (the coherence precondition and
   the join-key argument), DOCS.md § Out of scope, types.ts.
 - `src/lib/study-lenses/lib/scanning/README.md` § Why this module exists —
-  carries this question as a dated open question, which is its canonical home.
+  carried this question as a dated open question until the campaign's close
+  (2026-08-19); it now carries the resolution.
 - `src/lib/study-lenses/lib/classifying/` — README, DOCS.md, types.ts.
 - `src/lib/study-lenses/embody/README.md` — the opener carrying the
   accuracy-not-pedagogy contract the second candidate line appeals to.
@@ -312,4 +386,4 @@ edit.
   `index.ts` § `freezeExceptions` (the process-global guard), `types.ts`
   (`Facts`, `FactStage`, `LifecyclePhaseName`).
 - `src/lib/study-lenses/lib/README.md` — the tier admission rule this campaign
-  falsifies.
+  falsified and rewrote (landed at 26ed8286, the clean path).

@@ -14,18 +14,20 @@ tokens stage's `inputElements` member — is modeled in full. The other stages a
 named, not modeled: a later reshape of one of them extends this file with its
 own section rather than inheriting this one.
 
-**Which machine, exactly.** The package glossary defines the term this file's
-name carries: _"**notional machine (NM)** — a language level's semantic model of
-how JavaScript executes: the bounded conceptual machine a learner can hold in
-their head. NM content lives with its level."_ That entry describes the
-level-resident evaluation models (the
-[JEJ NM](../language-levels/jej/notional-machine.md) is one), and the package
-already extends the instrument beyond them:
+**Which machine, exactly.** At this twin's writing the package glossary defined
+the term this file's name carries as _"a language level's semantic model of how
+JavaScript executes: the bounded conceptual machine a learner can hold in their
+head. NM content lives with its level."_ — and the entry has since been widened
+(this campaign's close, 2026-08-19) to say what this file demonstrated: a region
+that models a different machine documents it in its own twin, and the entry now
+names this one. The level-resident evaluation models remain the term's home
+ground (the [JEJ NM](../language-levels/jej/notional-machine.md) is one), and
+the package extends the instrument beyond them:
 [`../lib/questioning/notional-machine.md`](../lib/questioning/notional-machine.md)
-models a utility kind's machine. This document extends it again, to an earlier
-phase of the same machine — the scanner that turns characters into elements
-before any tree exists and before anything runs — and it is level-independent,
-as everything in this region is. One machine; different phases; a bounded model
+models a utility kind's machine. This document extends it to an earlier phase of
+the same machine — the scanner that turns characters into elements before any
+tree exists and before anything runs — and it is level-independent, as
+everything in this region is. One machine; different phases; a bounded model
 each.
 
 **Pedagogy is not decided here.** This document describes what the machine does;

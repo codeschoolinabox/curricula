@@ -42,12 +42,14 @@ export type InputElementKind =
 
 /**
  * Input to `deriveInputElements`, declared in the parser's own terms —
- * what this module walks. A consumer holding an `Embodiment` projects
- * these from its facts (`facts.source.value`,
- * `facts.tokens.value.tokens`, `facts.tokens.value.comments`) behind a
- * successful-tokens check; the narrowing is the caller's one-line
- * boundary. Tests construct the same shapes with a direct
- * `acorn.tokenizer` call.
+ * what this module walks. Since the embody integration (human rulings
+ * 2026-08-17 and 2026-08-18), a consumer holding an `Embodiment` does
+ * not build this input at all: the factory calls the derivation once
+ * per settle and publishes the result at
+ * `facts.tokens.value.inputElements`. A direct caller outside the
+ * embodiment's reach projects these from its facts behind a
+ * successful-tokens check; tests construct the same shapes with a
+ * direct `acorn.tokenizer` call.
  *
  * Deliberately NOT an `Embodiment`: this leaf imports no package region,
  * and acorn is a dependency rather than a region.
