@@ -12,9 +12,9 @@
  *
  * See `./README.md` for the glossary, the bounded context, and this
  * engine's static-decidability mode these types encode, and `./DOCS.md` for
- * the generator-pipeline sketch. The envelope's own two types
- * (`QuizzingAnswer` / `QuizzingConfig`) sit at the bottom, beside — not
- * inside — the ported engine contract.
+ * the generator-pipeline sketch. The envelope's own types
+ * (`QuizzingAnswer` / `QuizzingConfig` / `QuizzingGrader`) sit at the
+ * bottom, beside — not inside — the ported engine contract.
  *
  * Vocabulary borrowed from peers (shared contract — widening is a
  * cross-consumer event): `Category` / `ClassifiedToken` from
@@ -262,19 +262,45 @@ export type GenerateQuiz = (
 export type Grade = (item: QuizItem, response: LearnerResponse) => Verdict;
 
 // ─── The envelope's own types ────────────────────────────────────────────
-// The questioner surface's two minted types — beside the ported engine
+// The questioner surface's minted types — beside the ported engine
 // contract above, not part of it (Stage-3 AR-1, 2026-08-18; DEV.md
 // type-location convention). The engine's entries know nothing of these.
 
 /**
- * The quizzing questioner's success shape — the ok-true arm the family's
- * bare roster narrows on (the parent `Questioner`'s TAnswer default;
- * `../types.ts`). `items` is exactly `generateQuiz`'s output, frozen and
- * deterministic.
+ * The quizzing questioner's grading surface as carried on its answer —
+ * async-capable BY TYPE (human ruling 2026-08-18): the field admits a
+ * deferred verdict so an answer-carried grader may compute off-thread;
+ * async-but-deterministic is the admitted case — grading determinism
+ * stays law (grading the same response twice yields the same verdict).
+ * The VALUE quizzing carries is the engine's own pure, synchronous
+ * `grade`, so awaiting it costs the identity. A consumer that needs a
+ * same-tick verdict (an interaction loop rendering in the same event)
+ * uses the engine's `grade` export directly — the carried field is the
+ * roster-side convenience, and its consumer awaits.
+ */
+export type QuizzingGrader = (
+	item: QuizItem,
+	response: LearnerResponse,
+) => Verdict | Promise<Verdict>;
+
+/**
+ * The quizzing questioner's success shape — assignable to the parent
+ * `Questioner`'s ok-true `TAnswer` default (`../types.ts`; a bare roster
+ * narrows refusals by `ok`, and the concrete fields need this type).
+ * `items` is exactly `generateQuiz`'s output, frozen and
+ * deterministic; `grade` is the engine's own grade, carried so an
+ * answer-holding consumer judges responses without importing the module
+ * (human ruling 2026-08-18). Carrying a function makes the answer
+ * envelope non-structured-cloneable — a worker-crossing consumer sends
+ * `items` and imports the engine `grade` on its own side. The envelope
+ * and its items freeze; the carried function is exempt (the freeze
+ * utilities skip functions) — its property binding is what the freeze
+ * pins.
  */
 export type QuizzingAnswer = Readonly<{
 	ok: true;
 	items: ReadonlyArray<QuizItem>;
+	grade: QuizzingGrader;
 }>;
 
 /**

@@ -92,7 +92,10 @@ deterministic as LAW, total, never throwing. The whole verdict space:
 
 Predict: `grade` never reads the facts, so it cannot know whether a
 clicked range even lies inside the source — a nonsense range is simply
-`incorrect`. An empty-target item meeting an empty selection is
+`incorrect`. The answer carries this machine: `answer.grade` is the same
+function, and awaiting quizzing's sync verdict is the identity — a
+deferred verdict signals a DIFFERENT questioner's grader, never this
+engine's. An empty-target item meeting an empty selection is
 vacuously correct: non-empty targets are a generator invariant, so a
 zero-target item is a generator bug, never `grade`'s to police. Feedback rides the item verbatim on both correct and
 incorrect; the answer key is never echoed.

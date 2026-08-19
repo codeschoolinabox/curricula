@@ -18,8 +18,8 @@ and unlocks are data a consumer folds.
 the text-surface atom level.
 
 **The path:** a V1 item at a clicked token — "what kind of element is
-this?" — four options, one machine-derived answer. The verdict is
-immediate and the feedback explains the answer in notional-machine
+this?" — four options, one machine-derived answer. The verdict arrives
+and the feedback explains the answer in notional-machine
 vocabulary. V2 deepens the same gesture on a declaration keyword: not
 "which category" but "what does `const` do".
 

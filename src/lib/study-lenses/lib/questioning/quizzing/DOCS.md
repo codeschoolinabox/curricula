@@ -158,7 +158,7 @@ flowchart TD
     CT -->|"pre-computed input<br/>(the deliberate asymmetry)"| CTX
     FOREST -->|"joined inside the context helper"| CTX
     CTX -->|"run: registry order, then<br/>stream order, pure"| ITEMS["frozen QuizItem[]<br/>(each carrying its answer key + groupKey)"]
-    ITEMS -->|"{ ok: true, items } — the envelope's answer"| OUT["consumer"]
+    ITEMS -->|"{ ok: true, items, grade } — the envelope's answer"| OUT["consumer"]
 
     OUT -->|"grade: one item + one response —<br/>dispatch on mode, exact set-equality,<br/>one-sided (never reads facts), pure"| VERDICT["frozen Verdict"]
     VERDICT --> OUT
@@ -183,7 +183,8 @@ covers the same three for direct consumers (the seam split).
 - **Two engine entries, joined only by the `QuizItem`.** No shared
   mutable state, no second channel.
 - **The envelope composes; the engine computes.** `ask` is exactly:
-  narrow → classify → `generateQuiz` → ok-wrap. Analysis logic in the
+  narrow → classify → `generateQuiz` → ok-wrap (the items plus the
+  carried engine grade). Analysis logic in the
   wrapper needs a ruling (the adapter-only pin in its test cluster).
   `ask`'s config is NOT forwarded into the engine's `filter` until a
   consumed field exists — the forwarding is part of the filter-build
@@ -316,6 +317,16 @@ rationale.
   are end-state vocabularies; `multi-mcq` is enumerated-not-built;
   `click-line` is graded-not-generated (both under one vacancy:
   offset→line reads).
+- **The answer carries the grading surface** (human ruling 2026-08-18):
+  `QuizzingAnswer.grade` IS the engine's `grade` (identity-pinned at the
+  envelope unit); the field's type (`QuizzingGrader`) is async-capable —
+  the admitted case is a deferred-but-deterministic verdict; grading
+  determinism stays law. Consequences stated where they bind: the answer
+  envelope is not structured-cloneable (README § Public API; a
+  worker-crossing consumer imports the engine grade on its own side),
+  and a same-tick consumer (the reference lens grades inside synchronous
+  handlers) uses the engine export directly rather than awaiting the
+  carried field.
 - **Code-surface modes: one variant per assessment gesture, capture
   mechanics folded within** (carried): `click-token`/`click-line` share
   `CodeSurfaceQuizItem`; the exhaustive `select-in-code` is its own

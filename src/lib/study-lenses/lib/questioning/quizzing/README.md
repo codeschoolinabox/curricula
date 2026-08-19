@@ -218,11 +218,14 @@ homonym, resolved here: lowercase unqualified "family" in this module's
 prose means the questioner family (the parent's kind — "the family
 envelope"); code-voiced `Family` always means this type.
 
-**QuizzingAnswer / QuizzingConfig** — the envelope's two minted types,
-living in `types.ts` beside (not inside) the ported engine contract.
-`QuizzingAnswer` is the ok-true success shape
-(`{ ok: true, items: readonly QuizItem[] }`) the family's bare roster
-narrows on. `QuizzingConfig` is the questioner's config,
+**QuizzingAnswer / QuizzingConfig / QuizzingGrader** — the envelope's
+minted types, living in `types.ts` beside (not inside) the ported engine
+contract. `QuizzingAnswer` is the ok-true success shape
+(`{ ok: true, items, grade }`), assignable to the parent's ok-true
+`TAnswer` default (a bare roster narrows refusals by `ok`; the concrete
+fields need this type) — `grade` carries the engine's own grading
+function (`QuizzingGrader`, async-capable by type, sync by value;
+§ Public API). `QuizzingConfig` is the questioner's config,
 forward-declared as an object whose fields are this questioner's own
 implementation choice — none is consumed yet (human ruling 2026-08-18:
 the family sees config-is-an-object; each questioner owns its fields as
@@ -316,10 +319,21 @@ import quizzingQuestioner from './quizzing-questioner.js';
 
 quizzingQuestioner.serves(embodiment.facts); // boolean gate
 const answer = quizzingQuestioner.ask(embodiment);
-// answer: { ok: true, items: readonly QuizItem[] } | QuestionerRefusal
+// answer: { ok: true, items, grade } | QuestionerRefusal
 // (config is accepted and opaque today — no field is consumed, and ask
 // does not forward it to the engine until one is)
+
+if (answer.ok) {
+	const verdict = await answer.grade(answer.items[0], learnerResponse);
+}
+// the carried grade IS the engine's grade (identity-pinned); awaiting
+// quizzing's sync verdict is the identity — a same-tick consumer uses
+// the engine's `grade` export directly
 ```
+
+Carrying a function makes the answer envelope non-structured-cloneable:
+a worker-crossing consumer sends `items` across the boundary and imports
+the engine `grade` on its own side.
 
 **Input asymmetry (deliberate, engine-side).** `generateQuiz` takes the
 parsed `Facts` *plus* the pre-computed `classified` array — the engine
@@ -408,7 +422,7 @@ a consumer must not expect `{ count: 3 }` to do anything today.
   coexist in one snippet.
 - **Zero items is normal operation, not refusal.** A parseable snippet
   that fits no form generates nothing; the envelope still answers
-  `{ ok: true, items: [] }`.
+  `{ ok: true, items: [], grade }`.
 - **A code-surface item always carries targets.** Non-empty
   `targetRanges` is a generator invariant; `grade` treats an
   empty-target item meeting an empty selection as vacuously correct
@@ -491,7 +505,11 @@ on one grid (parent § One grid).
 Inherits the family conventions ([`../README.md § Conventions`](../README.md#conventions))
 and the repo-wide rules. Module-specific:
 
-- **Pure-sync only.** No async, no I/O, no side effects, no randomness.
+- **Pure-sync engine.** The engine is pure-sync — no async, no I/O, no
+  side effects, no randomness. The ENVELOPE's carried-grader field is
+  async-capable by type (human ruling 2026-08-18) while carrying the
+  sync engine grade as its value; the admitted async case is a
+  deferred-but-deterministic verdict.
 - **Reads through the accessor seam.** Every facts read goes through a
   narrow, domain-named helper (the forest accessor, the context reads) —
   never an inline `facts.*` dereference in a generator or in `grade`.

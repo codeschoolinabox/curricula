@@ -1,5 +1,5 @@
 <!-- cspell:ignore quizzing socratizing unshadowed mcq distractor -->
-<!-- cspell:ignore unbuilt reassignability gradable pointered injectivity gradability -->
+<!-- cspell:ignore unbuilt reassignability gradable pointered injectivity gradability cloneability -->
 
 # Loss ledger — the Stage-3 quizzing transport
 
@@ -55,7 +55,7 @@ projection over `facts.environment` (§ C).
 
 | Item | Disposition | Justification |
 | --- | --- | --- |
-| `types.ts` | conformed in seven enumerated classes | (1) header reword — Snippet residue + borrowed-vocabulary paragraph re-pointed; (2) `import type { Facts, NodePath }` from greenfield embody; (3) `BlockCell` from the parent `../types.js` — NEVER from socratizing (the leaf-import ban is unqualified; the quarry's cross-engine import does not reproduce); (4) `Category`/`ClassifiedToken` from `../../classifying/types.js`; (5) `GenerateQuiz` first param `Snippet → Facts`; (6) JSDoc corrections — the false "applies `filter`" and "source-ordered" clauses struck (Stage-3 AR-1 blocker: the quarry doc promised both; the code does neither — `run-generators` is a flatMap and the filter is a no-op), `QuizFilter.range` doc flipped to zero-indexed half-open offsets (human ruling 2026-08-18), the `(snippet, …)` determinism tuple re-lettered; (7) the appended envelope-types section (`QuizzingAnswer`, `QuizzingConfig`) — new, beside the ported contract |
+| `types.ts` | conformed in seven enumerated classes at Phase 0; the gate round (2026-08-18) added (8) the envelope grading surface (`QuizzingGrader`; `QuizzingAnswer.grade`) — a design-reviewed rule amendment in its own commit | (1) header reword — Snippet residue + borrowed-vocabulary paragraph re-pointed; (2) `import type { Facts, NodePath }` from greenfield embody; (3) `BlockCell` from the parent `../types.js` — NEVER from socratizing (the leaf-import ban is unqualified; the quarry's cross-engine import does not reproduce); (4) `Category`/`ClassifiedToken` from `../../classifying/types.js`; (5) `GenerateQuiz` first param `Snippet → Facts`; (6) JSDoc corrections — the false "applies `filter`" and "source-ordered" clauses struck (Stage-3 AR-1 blocker: the quarry doc promised both; the code does neither — `run-generators` is a flatMap and the filter is a no-op), `QuizFilter.range` doc flipped to zero-indexed half-open offsets (human ruling 2026-08-18), the `(snippet, …)` determinism tuple re-lettered; (7) the appended envelope-types section (`QuizzingAnswer`, `QuizzingConfig`) — new, beside the ported contract |
 | `context/types.ts` | conformed | `ScopeAnalysis` import → local `ScopeForest` (`../resolving/types.js`); classifying depth `../../` → `../../../`; two phase-number cross-references generalized to "§ Execution phases" |
 | `generators/types.ts` | conformed | classifying depth; "Phase 3" cross-reference → "the run phase" |
 | `resolving/types.ts` | re-authored around the carried pair | `Binding` + `Occurrence` port verbatim; their JSDoc's `DeclarationInfo`/`buildScope`/B→C-swap/`status.parsed` references reworded to `TrackedDeclaration`/the projection/parse-gate phrasing; the minted forest types are new (§ C) |
@@ -125,6 +125,17 @@ every quarry heading:
 | `click-line` generation | graded, not generated | an offset→line read no greenfield fact supplies |
 | `anchorPath` construction | declared on the base type, constructed by no form | the future node-anchored form; the constructor rule is a DOCS § Decisions row |
 | Future forms V9 shadow, V12 binding-identity, V13 value-at-a-point, V14 lookup-depth | design canon, unbuilt | all inside the static mode (a static scope walk) |
+
+## The gate round (2026-08-18): envelope amendments
+
+Post-Phase-0-commit rulings at the held gate (design-reviewed; the plan
+carries the review):
+
+| Content | Disposition | Justification |
+| --- | --- | --- |
+| `QuizzingAnswer` | gains `grade: QuizzingGrader` (class 8) | human ruling: the answer carries the grading surface; value = the sync engine grade, type = async-capable (deferred-but-deterministic admitted); non-cloneability and same-tick guidance recorded in DOCS § Decisions |
+| README § Conventions "Pure-sync only" | AMENDED | the engine stays pure-sync; the envelope's carried-grader TYPE admits deferral |
+| ux Q1 "The verdict is immediate" | REWORDED | immediacy is the engine path's property; the carried-grader path awaits |
 
 ## Owed forward
 
