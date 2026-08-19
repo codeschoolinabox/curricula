@@ -204,7 +204,7 @@ describe('deriveTokens', () => {
 			).toEqual(['Template', 'TemplateSubstitutionTail']);
 		});
 
-		it.skip('`const` names the identifier production', () => {
+		it('`const` names the identifier production', () => {
 			const stage = deriveTokens({ source: 'const x = 1', type: 'script' });
 			expect(stage.ok && stage.value.inputElements?.[0]?.kind).toBe(
 				'IdentifierName',
