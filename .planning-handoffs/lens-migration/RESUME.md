@@ -7,6 +7,8 @@ closes; nothing here is end-state documentation. -->
 <!-- cspell:ignore normalisation unrunnable -->
 <!-- cspell:ignore loosenings capitalisation enshittifying keyable unbuildable -->
 <!-- cspell:ignore normalises undercounted oldd clauding zakey -->
+<!-- a human ruling quoted verbatim; do not translate it and do not "fix" it: -->
+<!-- cspell:ignore séparé -->
 
 # RESUME — where this campaign stands and what comes next
 
@@ -260,13 +262,41 @@ something to cite for what a Gen-1 learner actually met. Read
 and, more importantly, for the **remainders** — the read returned roughly 110
 candidate affordances and STEP 1a opened 33.
 
-### ⛔ STEP 1a's rows are weighted toward the WRAPPERS, and the twin is what fixes it
+### ⛔ STEP 1a's rows are weighted toward the WRAPPERS, and the re-investigation fixes it
 
-**Human ruling 2026-08-19:** _"you can re-investigate the parsons nesting doll
-as we create the user-twin, this will also help you cut past the cruft and to
-the value."_ **The re-investigation is not a separate corrective pass — it
-happens inside the twin drafting**, because writing what the learner actually
-got is the instrument that separates cruft from value.
+**Human ruling 2026-08-19, in two parts — the second amends the first and the
+amendment is the operative one:** _"you can re-investigate the parsons nesting
+doll as we create the user-twin, this will also help you cut past the cruft and
+to the value"_ … _"ou en passe séparé, ça va informer le twin-creation."_
+
+~~The re-investigation is not a separate corrective pass — it happens inside the
+twin drafting.~~ — **STRUCK. That was the reading session over-tightening a
+ruling that did not say it.** What is ruled is the **purpose**: the
+re-investigation **informs the twin**. The **sequencing is free** — inside the
+drafting, or as its own pass feeding it. Either shape discharges it.
+
+**What the separate-pass shape buys, since it is now explicitly allowed.** STEP
+1a's own evidence argues for it: the deepest returns came from **fresh agents
+reading one file end to end with no downstream framing**, and a reader who
+already knows which journey beat they are serving finds the affordance that
+serves it. A pass over `parsons.js` that answers only _what could the learner
+do_ is the same instrument that worked, pointed at the core this time. **The
+cost is one more session boundary**, and the campaign's own rule sends
+design-ahead work to a fresh context anyway.
+
+**What does NOT change either way:** the twin still cites `parsons-NNN` ids and
+never re-derives an affordance, so any row the re-investigation opens must land
+in the ledger **before** the twin cites it — appended, never renumbered.
+
+⚠️ **A free sequencing is a fork, and this canon's own lesson is that every
+routing failure here happened where a reader had to choose. So take a default
+rather than a decision:** run the re-investigation **first, as its own pass**,
+and open its rows before drafting. Both shapes are sanctioned; this one is
+recommended, for the reason above and because the ordering constraint runs one
+way — the twin needs rows that exist, and a row invented mid-draft to serve a
+journey beat is the confabulation the whole exercise exists to catch. **A
+session that prefers the other shape takes it and says so; it is not re-opening
+a ruling.**
 
 Gen-1 `parsons` is a nesting doll: `ParsonsLens.jsx` → `<iframe>` →
 `parsons-iframe.html` → `parsons.js` → `lis.js`. **`parsons.js` is the core**;
