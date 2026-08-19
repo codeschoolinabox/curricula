@@ -2,9 +2,24 @@
 
 # orchestrate ux — resumption point
 
-**STATE: Phase 0 step 0.2. ROUND 11 IS FULLY RESOLVED — 3 commits, `e61c7201`,
-`9e11074f`, and this one. `ar-1` ROUND 12 IS THE NEXT GATE and has NOT run. AR-5
-has still never run and fires at 0.2 close.**
+**STATE: Phase 0 step 0.2. `ar-1` ROUND 12 IS THE NEXT GATE and has NOT run.
+AR-5 has still never run and fires at 0.2 close.**
+
+**Round 11 was declared FULLY RESOLVED and was not.** A context-free validation
+run before round 12 found **three of its six "wrong things" still wrong at
+HEAD**, plus a half-landed human ruling in the twin itself. Those are fixed —
+`1e95814e`, `ffc59db3` — and the lesson is the one this file keeps re-learning:
+**a resolution claim is a repo-state claim, and it decays like any other.** Do
+not read "resolved" in this file as measured unless it carries a tag.
+
+**How to read a number in this file.** Every measured claim below is tagged with
+what makes it decay, because the last three sessions each shipped one that had
+gone stale in a different way:
+
+- **SHA-pinned** — measured at a named commit; never decays.
+- **campaign-scoped** — decays when THIS campaign commits.
+- **foreign-scoped** — decays with **zero** campaign commits, because the tree
+  is shared. These are the ones that bite.
 
 **Why a built module is in "Phase 0".** `orchestrate/` ships, has tests and a
 browser checkpoint ledger — and its **interface was never designed**. Phase 0
@@ -30,16 +45,18 @@ round-11 findings ruled into the checkpoints, NOT open), and § The campaign's
 RADIUS, which now has **four rings**. Every row id and `CP-N` cited below is
 defined there; `T*` checkpoints are in § Sandbox checkpoints, in the archive.
 
-## What round 11 changed, and the three commits that answered it
+## What round 11 changed, and the FOUR commits that answered it
 
-Round 11 returned **PAUSE — 4 blockers, 9 important, 7 minor** — and called this
+Round 11 returned **PAUSE — 4 blockers, 9 important, 7 minor** — and called that
 session's work "the strongest of the eleven rounds" while finding **six things
 it had written that were wrong**. Its verdict is archived verbatim below.
 
-| SHA        | what                                                                                         |
-| ---------- | -------------------------------------------------------------------------------------------- |
-| `e61c7201` | **BLOCKER 3** — the drawn word and the union member DECOUPLED; `waiting` → **`not reached`** |
-| `9e11074f` | **BLOCKERs 1, 2, 4** + the six wrong things + the **fourth ring**                            |
+| SHA        | what                                                                                                         |
+| ---------- | ------------------------------------------------------------------------------------------------------------ |
+| `e61c7201` | **BLOCKER 3** — the drawn word and the union member DECOUPLED; the drawn word `waiting` → **`not reached`**  |
+| `9e11074f` | **BLOCKERs 1, 2, 4** + three of the six wrong things + the **fourth ring**                                   |
+| `cb2e3448` | the resumption point opened on round 12 — and shipped the false "ALL SIX FIXED" heading                      |
+| `ffc59db3` | **the other three wrong things**, found by the pre-round-12 context-free validation and fixed a session late |
 
 **Two human rulings drove it** (2026-08-19): the machine value and the learner's
 word are decoupled, so UX vocabulary can be refined later without touching
@@ -55,9 +72,11 @@ this commit.
 
 ## THE NEXT GATE — `ar-1` ROUND 12
 
-Registered agent, **no `model` parameter**. Same brief shape as round 11 (below,
-under § The round-11 brief), with round 11's findings as **evidence of what was
-fixed**. Its verdict is archived verbatim in this file; do not re-derive it.
+Registered agent, **no `model` parameter**. Its brief is **§ THE ROUND-12
+BRIEF**, below — written for round 12, not inherited from round 11. Round 11's
+verdict is archived verbatim in this file under § ROUND 11'S VERDICT; do not
+re-derive it, and do not hand its findings on as a settled fixed-versus-not
+list.
 
 **Tell round 12 what it must attack, because round 11 named it and nobody built
 it: CP-α, the clause × drawing coverage table.** Round 11's diagnosis is that
@@ -76,13 +95,14 @@ it is a checkpoint question, not a document one.
 
 ## Baselines — measure these again at session start, do not trust them
 
-| what                    | value                                                                             |
-| ----------------------- | --------------------------------------------------------------------------------- |
-| this session's baseline | **`061af657`**                                                                    |
-| **AR-5's baseline**     | **`80306ad9`** — the campaign's, not this session's                               |
-| green                   | **622 passing in 22 files** · `npx tsc --noEmit` exit **0** [measured 2026-08-19] |
-| upstream                | **none configured** on `main`; the frontier is `origin/main` = `cf0316bd`         |
-| foreign commits         | **0** since `061af657` [measured 2026-08-19] — but the WORKING TREE is dirty      |
+| what                   | value                                                                                                                  |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| prior session baseline | **`061af657`** — SHA-pinned                                                                                            |
+| **AR-5's baseline**    | **`80306ad9`** — the campaign's, not any session's. SHA-pinned                                                         |
+| AR-5's SHA list size   | **77 commits** [measured at `ffc59db3`] — **campaign-scoped**, and it is a budget question before AR-5 launches        |
+| green                  | **622 passing in 22 files** · `npx tsc --noEmit` exit **0** [measured at `ffc59db3`] — campaign-scoped                 |
+| upstream               | **none configured** on `main` [measured: `git rev-parse --abbrev-ref main@{upstream}` → fatal]; `origin/main` is ahead |
+| **foreign commits**    | **15** since `061af657` [measured at `ffc59db3`] — **foreign-scoped, so this number is wrong by the time you read it** |
 
 ⚠ **The tree carries other campaigns' work, including a modified
 `AGENTS.principal.md` (governance surface) and untracked directories.** The
@@ -94,7 +114,7 @@ rules: § Mechanics that will bite you, in the archive — that section is LIVE.
 src/lib/study-lenses/orchestrate .planning-handoffs/orchestrate-ux src/lib/study-lenses/WORKFLOWS.md
 ```
 
-## What this session did — thirteen commits, `0d9bd6d2..HEAD`
+## What the ROUND-11 session did — thirteen commits, from `0d9bd6d2`
 
 `0d9bd6d2` · `9ab9e419` · `b3c2f0dc` · `99e04692` · `ffb4b0d8` · `fa57a777` ·
 `1f370db6` · `1106c268`
@@ -142,10 +162,17 @@ they assert the decision anyway, and three defects fell out:
 clean.** Every future vocabulary row closes by reading the `home of record`
 column's documents, not by counting.
 
-## What round 11 said was WRONG — ALL SIX FIXED at `9e11074f`
+## What round 11 said was WRONG — three fixed at `9e11074f`, three NOT, all six fixed now
 
-**Discharged; kept because the pattern is the lesson.** Three of the six were
-corrections that had themselves gone stale or half-landed.
+⚠ **This heading read "ALL SIX FIXED at `9e11074f`" and that was false.** A
+context-free validation before round 12 re-measured all six: items 2 and 6 had
+landed, and **items 1, 3, 4 and 5 had not** — the strike that was never applied,
+H6's replacement numeral, `the guide → 1 / 1`, and every line citation. They are
+fixed at `ffc59db3`; the false heading shipped inside the commit that claimed to
+repair round 11's own staleness, which is the fourth consecutive round in which
+a correction went stale inside the section written to fix staleness.
+
+**Kept because the pattern is the lesson, not the items.**
 
 | claim                                                                      | measured at HEAD                                                                                                                                                                     |
 | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -183,46 +210,119 @@ collapses, the shape union evaporates, and `PhaseEntry`'s existing
 `readonly cause: string` stops being a defect. Round 11's CP-γ says settle that
 FIRST and re-derive C14 from the answer.
 
-### The old brief for round 11 — SUPERSEDED, kept because it is reusable
+### THE ROUND-12 BRIEF — write it from here, not from round 11's
 
-Round 12, if the human opens one, uses the same shape: registered agent, **no
-`model` parameter**; the whole twin, never a narrowed scope; round 11's findings
-as evidence of what was fixed, not as a no-go zone.
+⚠ **An earlier revision told round 12 to reuse round 11's brief verbatim.** That
+brief says "round 10" three times, points at § ROUND 10'S VERDICT, and lists the
+subjects of the session BEFORE last. A reviewer briefed from it attacks the
+wrong pass. This section replaces it.
 
-Registered agent, **no `model` parameter** (the frontmatter pins govern; passing
-one silently overrides the roster).
+Registered agent `ar-1`, **no `model` parameter** (the frontmatter pins `opus`;
+passing one silently overrides the roster).
 
 **Inputs to hand it** — `DEV.md § AR-1`'s _Provide to agent_ line, made
-concrete: the region `README.md` and `DOCS.md`; **all three twin documents** at
-the absolute paths above; `types.ts` **as context, not as a review target** (0.3
-locks it, and it is deliberately thin); `DECISIONS.md` in full — round 10's
-IMPORTANT 6 was a defect _inside_ it, so it is reviewable; and the code read as
-evidence (`embody/derive-accessibility.ts`, `display-labels.ts`, `index.tsx`,
-`phases-panel/types.ts`).
+concrete. **Give every path in full; `DECISIONS.md` declares its paths relative
+to `orchestrate/`, and one of these is a SIBLING of that directory, not a
+child:**
+
+```text
+src/lib/study-lenses/orchestrate/README.md
+src/lib/study-lenses/orchestrate/DOCS.md
+src/lib/study-lenses/orchestrate/ux/personas.md
+src/lib/study-lenses/orchestrate/ux/user-journeys.md
+src/lib/study-lenses/orchestrate/ux/wireframes.md
+src/lib/study-lenses/orchestrate/types.ts          ← context, NOT a review target
+src/lib/study-lenses/orchestrate/display-labels.ts
+src/lib/study-lenses/orchestrate/index.tsx
+src/lib/study-lenses/orchestrate/phases-panel/types.ts
+src/lib/study-lenses/embody/derive-accessibility.ts   ← SIBLING of orchestrate/
+.planning-handoffs/orchestrate-ux/DECISIONS.md     ← in full; reviewable, round
+                                                     10's IMPORTANT 6 was a
+                                                     defect inside it
+```
+
+`types.ts` is context because **0.3 locks it and it is deliberately thin** —
+`DEV.md` puts the read-together test at the END of 0.3, and AR-1's own trigger
+is "before `types.ts` locks the contract". Do not let a reviewer treat its
+thinness as a 0.2 defect; round 11 got this right and said so.
 
 **Brief it on the WHOLE twin, never a narrowed scope.** Round 8's lesson is that
 telling a reviewer what not to review is how a real regression walks through.
-Give it round 10's findings as **evidence of what was fixed** — the verdict is
-archived verbatim in this file under § ROUND 10'S VERDICT — not as a no-go zone.
 
-**Tell it the subjects this session touched**, so it attacks rather than
-rediscovers: the caption's name and arm shapes (C12, C14), the three framings
-and the new § The machinery breaks drawing (C13), G7's inverted home and A14,
-C15's recorded asymmetry, C16's waiting count, the sibling ring in H8.
+**Do NOT hand it a fixed-versus-not summary as fact.** Give it round 11's
+verdict — archived verbatim in this file under § ROUND 11'S VERDICT — plus the
+SHA list, and tell it to **determine for itself** what landed. This campaign's
+scoping claims are measurably unreliable: the heading above this one said "ALL
+SIX FIXED" and three were not. State the campaign's belief separately and tag it
+`[relayed: the round-12 pre-pass — falsify it]`.
+
+**Tell it the subjects the PRE-ROUND-12 pass touched**, so it attacks rather
+than rediscovers — and tell it these are **new work under review**, not settled
+ground:
+
+- **C17's half-landed migration** (`1e95814e`) — the drawn word reached the
+  drawings and the README and not § Fresh mount's prose. Restructured, not
+  token-swapped.
+- **C18, opened and deliberately UNRULED** — what a barred station SPEAKS. The
+  twin now contradicts itself about it on purpose (§ Fresh mount draws
+  `not reached` and speaks `waiting`), and checkpoint T10 is deliberately NOT
+  migrated because it is C15's acceptance test.
+- **The citation class** (`ffc59db3`) — every line-number citation into the twin
+  retired in favour of section anchors; C14 widened to its third drawing; H6's
+  aggregate deleted rather than renumbered; `the guide` corrected to 3 / 2.
 
 **And what is deliberately NOT fixed**: everything in § 0.3 entry conditions,
-and every package- and sibling-scope divergence in H8 — declared, not fixed, by
-standing ruling (CP-3).
+and every package-, sibling- and deprecated-ring divergence in H8 — declared,
+not fixed, by standing ruling (CP-3). Also ruled into the checkpoints rather
+than open: the unreached count's justification and the three remaining undrawn
+caption clauses (`DECISIONS.md` § Deferred to an eyeball check).
 
-### When round 11 returns
+### The five questions — ask these, they are the round's comparable output
+
+⚠ **Rounds 9, 10 and 11 all answered "the five questions" and NOBODY EVER WROTE
+THEM DOWN.** Only the answers survive, inside the archived verdicts, which is
+why every round has had to reconstruct them. They are recorded here now.
+
+1. **Is 0.2 closeable now?** If not, what blocks it, and which blockers need a
+   human ruling rather than an edit?
+2. **Is there an un-swept ring, term, or FORM?** The radius claims four rings.
+   The live defect class is **absence in the drawn surface**, and **CP-α — the
+   clause × drawing coverage table — is still unbuilt**.
+3. **Do the decisions this pass touched hold?** C17's decoupling, C18's
+   deliberate non-ruling, C14's widened evidence, H6's deleted aggregate, and
+   the fourth-ring declaration.
+4. **Can `types.ts` be written deterministically from the prose today?** That is
+   0.2's test. The read-together test is 0.3's and is not to be applied here.
+5. **Is anything this pre-pass wrote actually WRONG?** Round 11 found six such
+   things and was right about all six. Assume the same rate.
+
+**And a sixth instruction, which is not a question:** round 11's structural
+diagnosis is that every instrument this campaign owns is a **presence detector**
+while the live defect class is **absence**. Hand it that diagnosis and **ask it
+to falsify the diagnosis**, not merely to apply it.
+
+### When round 12 returns
 
 - **On PAUSE: put it to the human before opening a fix round.** That instruction
   has stood since round 9 and is not discharged.
-- **Archive the verdict verbatim in this file**, under the same banner the three
-  previous rounds use. Splice it **programmatically** and **unescape it** — the
-  transcript stores it HTML-escaped. A verdict that looks lost is recoverable
-  from `~/.claude/projects/<project-slug>/<session-id>/subagents/*.jsonl`, which
-  no repo grep and no top-level `*.jsonl` glob reaches. See § Mechanics, trap 4.
+- **On PROCEED: 0.2 closes**, which fires, in order — **AR-5** against baseline
+  `80306ad9` with a **SHA list from the command below, never a range and never a
+  table** (77 commits at `ffc59db3`, so put its scoping to the human BEFORE
+  launching; `ar-5` carries **no frontmatter model pin** and inherits whatever
+  tier this session runs on) → the settings-line discharge → the **Phase-0 →
+  Phase-1 human gate** → the **push gate**. No upstream is configured on `main`.
+- **Archive the verdict verbatim in this file**, under the same banner the four
+  previous rounds use:
+  `# ROUND 12'S VERDICT, AS RETURNED — ARCHIVE, NOT A TASK LIST`. Splice it
+  **programmatically** and **unescape it** — the transcript stores it
+  HTML-escaped. A verdict that looks lost is recoverable from
+  `~/.claude/projects/<project-slug>/<session-id>/subagents/*.jsonl`, which no
+  repo grep and no top-level `*.jsonl` glob reaches. See § Mechanics that will
+  bite you, the subagent-transcript bullet.
+- **An archived verdict is IMMUTABLE and its citations are allowed to rot.**
+  Every archive below carries "`[relayed: ar-1 round N]` until re-measured", and
+  that is the guard. Do not re-anchor a reviewer's line numbers — you would be
+  editing a record of what they said.
 
 ## What was still open at round 11 — SUPERSEDED by § THE NEXT GATE
 
@@ -260,16 +360,24 @@ produced**, which is the durable home; this table is the convenience copy.
 
 ## Operating instructions for the next session
 
-- **Model**: design work tracks the strongest available tier. Round 11 is a
+- **Model**: design work tracks the strongest available tier. Round 12 is a
   design review; run the orchestrator on an opus-tier model and pass **no**
-  `model` parameter to `ar-1`. A downgrade must be named together with its cost,
-  because `ar-2` and `ar-5` inherit it.
-- **Opens in**: Phase 0 step 0.2, at the round-11 gate.
-- **Gates the human holds**: the round-11 PAUSE decision, the Phase-0 → Phase-1
-  review gate, and the push.
-- **Watch for**: a receipt that counts instead of reads (see § The one thing
-  this session changed most), and any number carried forward without
-  re-measuring.
+  `model` parameter to `ar-1` (its frontmatter pins `opus`). A downgrade must be
+  named together with its cost, because `ar-2` and `ar-5` inherit it — **`ar-5`
+  has no `model:` line in its frontmatter at all** [read:
+  `.claude/agents/ar-5.md`], so it runs on whatever tier spawns it.
+- **Opens in**: Phase 0 step 0.2, at the **round-12** gate. Round 11's gate is
+  CLOSED and ruled — see § ROUND 11'S GATE.
+- **Gates the human holds**: the round-12 PAUSE decision (standing since round
+  9), the Phase-0 → Phase-1 review gate, and the push.
+- **The twin ask is re-asked every session, not remembered** [read: `DEV.md` §
+  Phase 0 — "If a session ends in between, **ask again** — do not carry the
+  answer in a plan file"]. Re-asked and re-confirmed 2026-08-19:
+  `twin-doc: user`.
+- **Watch for**: a receipt that counts instead of reads (see § The one thing the
+  round-11 session changed most); any number carried forward without
+  re-measuring; and **a "resolved" claim taken on trust** — three of round 11's
+  six were not, and the file said they were.
 
 ## The two instruments — RUNNABLE, because an instrument with no command is a rumour
 
@@ -317,10 +425,26 @@ print('histogram:', dict(h), 'outliers:', out or 'none')
 EOF
 ````
 
-**Expected at this commit: `malformed rows: none` and `{63: 77}`, no outliers**
-[measured 2026-08-19]. **The one-line-fence exclusion is not optional** — run
-without it and the scan reports two false outliers (`:267`, `:361`), both
-single-line control-row excerpts, and a next agent chases them.
+**Expected: `malformed rows: none` and `{63: 80}`, no outliers** [measured at
+`ffc59db3`].
+
+⚠ **The histogram figure is CAMPAIGN-SCOPED and has already gone 72 → 77 → 80.**
+An earlier revision of this paragraph documented `{63: 77}`, which was true two
+commits before it was written, so the first thing a fresh agent did — re-measure
+at session start — returned a mismatch with no way to tell whether the tree had
+drifted, the instrument had broken, or the handoff was wrong. **If your run
+prints a different number and reports no outliers, the instrument is fine and
+this line is stale. Update it.**
+
+**The one-line-fence exclusion is not optional** — run without it and the scan
+reports two false outliers, and a next agent chases them. **They are named here
+by CONTENT, because this paragraph previously named them by line number and both
+numbers pointed at prose:** the index-73 line is the control-row excerpt
+`[Generate code]  [module]  [Just Enough JavaScript · fits ▾] ( ) strict` in § A
+level selected, and the code fits; the index-68 line is
+`[Generate code]  [script]  [Scaffold · modules only ▾]  ( ) strict` in § The
+level does not admit this snippet type. Each is the only framed line of its own
+one-line fenced block, so neither has a sibling to misalign against.
 
 ## Mechanics that bit THIS session
 
@@ -340,16 +464,30 @@ is LIVE. These four are additions from this session:
   splices failed on unclosed parens mid-string; writing the script to a file and
   running it is the reliable form.
 
-> **ARCHIVE BELOW THIS LINE — WITH FOUR EXEMPTIONS THAT ARE STILL LIVE.**
+> **ARCHIVE BELOW THIS LINE — WITH SIX EXEMPTIONS THAT ARE STILL LIVE.**
 > Everything from § Round 9 down is a record of rounds already resolved, and
-> **no task list below this point is live.** But four sections below are not
-> records, and they still bind: **§ Commit form** (which `DECISIONS.md` calls
-> "the thing that actually fires"), **§ Mechanics that will bite you**, **§
-> Sandbox checkpoints owed at Phase 1** (the only definition of T1–T10), and **§
-> Human rulings** (the standing `twin-doc: user` / `ceremony: full` declaration
-> and the twin's three paths). An earlier revision of this banner said only "no
-> task list below is live", and a context-free reader obeyed it and lost all
-> four.
+> **no task list below this point is live.** But six sections below are not
+> records, and they still bind:
+>
+> 1. **§ Commit form** — which `DECISIONS.md` calls "the thing that actually
+>    fires".
+> 2. **§ Mechanics that will bite you** — the standing trap list.
+> 3. **§ Sandbox checkpoints owed at Phase 1** — the only definition of T1–T10.
+>    **T10 deliberately carries a retired word; see C18 before you "fix" it.**
+> 4. **§ Human rulings** — the standing `twin-doc: user` / `ceremony: full`
+>    declaration and the twin's three paths.
+> 5. **§ What this campaign is** — cited by the live block at the top of this
+>    file, and exempted by neither of this banner's previous revisions.
+> 6. **§ The process failure to not repeat** — "after any fix pass, verify the
+>    diff: every sentence the fix touched, plus every sentence that CITES it".
+>    Named by the OTHER list and dropped by this one until now, which is the
+>    whole reason there is a single list.
+>
+> **THIS IS THE ONLY EXEMPTION LIST.** A second one used to live further down,
+> at the head of the rounds-3-to-5 archive, and the two named DIFFERENT fours —
+> each omitting one section the other kept. That second list is now a pointer
+> back here. An earlier revision of THIS banner said only "no task list below is
+> live", and a context-free reader obeyed it and lost every exemption.
 
 ## Round 9 — PAUSE, resolved 2026-08-18
 
@@ -454,7 +592,7 @@ is auditable.
 
 | #   | ruling                                                                                                                                                     |
 | --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| R-P | **Search for a "lost" verdict before writing it off.** It was fully recoverable. See § Mechanics, trap 4.                                                  |
+| R-P | **Search for a "lost" verdict before writing it off.** It was fully recoverable. See § Mechanics that will bite you, the subagent-transcript bullet.       |
 | R-Q | **`DECISIONS.md` § 0.3 entry conditions is the deferrals' home**; § Deferred to 0.3 deleted outright, no pointer stub.                                     |
 | R-R | The barred cause line is **keyed by the failable stage**, not by the lifecycle phase — `entwined` is not a phase.                                          |
 | R-S | The durable-home question for `DECISIONS.md` is **ruled at 0.2 close**. `DEV.md § Ruling provenance` already supplies the mechanism; no new ruling needed. |
@@ -1749,9 +1887,14 @@ The three blockers above are **not that subject**:
 # ARCHIVE — rounds 3, 4 and 5, and the campaign's standing mechanics
 
 **Everything below is kept because the reasoning is auditable. Rounds 3, 4 and 5
-are ALL RESOLVED — none of it is a task list.** § Mechanics that will bite you,
-§ Commit form, § Sandbox checkpoints and § The process failure to not repeat are
-still live and still bind.
+are ALL RESOLVED — none of it is a task list.**
+
+**For what is still live below the archive line, see the ARCHIVE banner at the
+top of the archive — it is the ONLY exemption list.** This paragraph used to
+carry a second one, and the two disagreed: this one named § The process failure
+to not repeat and omitted § Human rulings; the other did the reverse. Two
+exemption lists that each drop one section is how a live section gets lost, so
+this one now points rather than enumerates.
 
 ## What this campaign is
 
