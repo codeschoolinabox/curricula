@@ -1,9 +1,19 @@
-<!-- cspell:ignore actioned acyclicity affordances authorised behaviour behavioural brok checkability checkpointed codemod codepoint cutover failable finditer generalises homehood misdescribes neighbouring organise organised parentheticals pathspec respecified scriptable spellme synchronisation ugrep elif endswith findall fullmatch misalign rindex startswith unactioned unbannered unbuilt undercount undercounted undercounts undrawn unmigrated unretired unrun wireframes -->
+<!-- cspell:ignore actioned acyclicity affordances authorised behaviour behavioural brok checkability checkpointed codemod codepoint cutover failable finditer generalises homehood misdescribes neighbouring organise organised parentheticals pathspec respecified scriptable spellme synchronisation ugrep elif endswith findall fullmatch importants keyspace misalign renderable rindex startswith unargued unfiled unfound unglossed unactioned unbannered unbuilt undercount undercounted undercounts undrawn unmigrated unretired unrun wireframes -->
 
 # orchestrate ux — resumption point
 
-**STATE: Phase 0 step 0.2. ROUND 10 IS FULLY RESOLVED. `ar-1` ROUND 11 IS THE
-NEXT GATE and has NOT run. AR-5 still has never run and fires at 0.2 close.**
+**STATE: Phase 0 step 0.2. ROUND 10 IS FULLY RESOLVED. `ar-1` ROUND 11 HAS RUN
+AND RETURNED PAUSE — 4 BLOCKERS, 9 IMPORTANT, 7 MINOR. Its verdict is archived
+verbatim below (§ ROUND 11'S VERDICT). AR-5 has still never run; 0.2 is not
+closeable, so it would review a changeset about to grow.**
+
+⚠ **THE PAUSE IS WITH THE HUMAN AND NO FIX ROUND IS OPEN.** The standing
+instruction since round 9 is that a PAUSE goes to the human before a fix round
+opens; it has never been discharged. **Do not start fixing from the verdict.**
+
+**Round 11 found SIX things this session wrote that are wrong, and three of them
+are corrections to corrections** — read § What round 11 says is wrong, below,
+before trusting any number in the § What this session did table.
 
 **Why a built module is in "Phase 0".** `orchestrate/` ships, has tests and a
 browser checkpoint ledger — and its **interface was never designed**. Phase 0
@@ -98,7 +108,44 @@ they assert the decision anyway, and three defects fell out:
 clean.** Every future vocabulary row closes by reading the `home of record`
 column's documents, not by counting.
 
-## THE NEXT GATE — `ar-1` ROUND 11. START HERE
+## What round 11 says is WRONG — re-verified this session, all confirmed
+
+| claim                                                                      | measured at HEAD                                                                                                                                                                     |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `DECISIONS.md`: "**two of four** full drawings are missing their top rule" | **FALSE — 4 `┌` and 4 `└`, perfectly paired.** False since `8c35c977`, BEFORE this session's baseline. `0d9bd6d2` repaired the ADJACENT bullet in the same section and left this one |
+| the new § The machinery breaks drawing's message `entwining failed.`       | **FABRICATED — 0 occurrences in the tree.** The real one is `the syntax tree does not span its source` [read: `embody/derive-entwined.ts:73`]                                        |
+| H6's status "27 prose violations across **9** files"                       | the column enumerates **8** paths and **34** occurrences — the headline was left standing beside a note saying it was wrong                                                          |
+| third-ring census cell `the guide → 1 / 1`                                 | **2 files** at the census commit. Conclusion (polysemy) unchanged                                                                                                                    |
+| every `ux/wireframes.md` line citation in `DECISIONS.md`                   | stale — this session added ~35 lines at `99e04692` and did not re-anchor                                                                                                             |
+| pre-existing, live in the reviewed artifact                                | `derive-study.ts` called "the region's other value file" (it is a FUNCTION file); `types.ts:194` carries a mangled JSDoc line from `da4328d1`'s sweep                                |
+
+**The pattern is worth more than the items.** Three are corrections that
+themselves went stale or half-landed, in the very sections written to fix
+staleness. `0d9bd6d2`'s subject line — "the three instruments this pass leans on
+were each wrong, and they are repaired before any decision rides them" — was
+true of three bullets and there was a fourth in the same list.
+
+## THE GATE — ROUND 11 IS AT THE HUMAN. WHAT HAPPENS NEXT IS THEIRS
+
+**Round 11's own verdict on cost:** three of its four blockers are cheap —
+delete a three-sentence status clause from `DOCS.md`, rename `the mark row` at
+four sites, add one caption row to the open-tray drawing. **The fourth needs a
+human ruling, not an edit**: the standing's drawn word has two contradictory
+homes, and `types.ts` cannot be written deterministically from the prose as it
+stands.
+
+**And one IMPORTANT is load-bearing enough to reorder the work**: C14 — this
+round's headline decision — exists only because the waiting count exists, and
+nobody has argued that the waiting count should exist. If it goes, C14
+collapses, the shape union evaporates, and `PhaseEntry`'s existing
+`readonly cause: string` stops being a defect. Round 11's CP-γ says settle that
+FIRST and re-derive C14 from the answer.
+
+### The old brief for round 11 — SUPERSEDED, kept because it is reusable
+
+Round 12, if the human opens one, uses the same shape: registered agent, **no
+`model` parameter**; the whole twin, never a narrowed scope; round 11's findings
+as evidence of what was fixed, not as a no-go zone.
 
 Registered agent, **no `model` parameter** (the frontmatter pins govern; passing
 one silently overrides the roster).
@@ -616,6 +663,316 @@ since:
 | R-O | Hand off at this boundary; a fresh session opens on round 8's blockers.                                                                  |
 
 ---
+
+---
+
+# ROUND 11'S VERDICT, AS RETURNED — ARCHIVE, NOT A TASK LIST
+
+**Provenance, and it is not repo state.** Recovered 2026-08-19 from this
+session's subagent transcript at `<session-id>/tasks/afb8f2effa9afeb9b.output`
+and spliced programmatically, so it is verbatim by construction — then
+HTML-unescaped, because the transcript stores `<the parser's message>` as
+`&lt;…&gt;` and byte-identity to a transcript is not fidelity to what the
+reviewer wrote. **Every claim below is `[relayed: ar-1 round 11]` until
+re-measured.**
+
+<!-- prettier-ignore-start -->
+<!-- markdownlint-capture -->
+<!-- markdownlint-disable -->
+
+Reviewed as: claude-opus-5[1m] | UNDETERMINED
+
+*(The environment context states the exact model ID is `claude-opus-5[1m]`. `DEV.md § Sub-model dispatch` pins AR-1 to `opus` — an opus-tier model ran, so the pin took.)*
+
+---
+
+# AR-1 Round 11 — Design Challenge, `orchestrate ux` (the Rail), Phase 0 step 0.2
+
+**Verdict: PAUSE.** Four blockers, nine importants, seven minors. This session's eight commits are the strongest of the eleven rounds — C15's inversion finding, C16's dead-code proof and the third framing's drawing are all correct against the code, and I verified them rather than relaying them. The PAUSE is not a re-litigation of round 10; every blocker below is either **new this session**, **created by this session's own edits**, or **a defect at a boundary no instrument in the campaign points at**.
+
+I read all six documents end to end, plus `DECISIONS.md` in full, plus the four code files, plus `derive-facts.ts`, `derive-entwined.ts`, `derive-environment.ts`, `to-stage-cause.ts` and `embody/types.ts` for the framing claims.
+
+---
+
+## BLOCKERS
+
+### BLOCKER 1 — `DOCS.md` now carries a 0.3 deferral note and a pointer into `.planning-handoffs/`, which R-M/R-Q closed and `DEV.md` forbids outright
+
+`/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/study-lenses/orchestrate/DOCS.md:288-291`:
+
+> **And the projection must therefore carry it.** Today it does not: the panel receives `cause` flattened to its message alone, and the boundary states that discard as an invariant. Widening it is a 0.3 obligation, recorded rather than discovered — see the campaign's 0.3 entry conditions.
+
+Landed at `99e04692` [read: the commit body's §6, "a new § 0.3 entry-conditions row books the widening"].
+
+`DEV.md § What goes in docs vs. plans vs. handoffs` names this exact shape in its forbidden list [read: `DEV.md:894-897` — "Forbidden: status snapshots, migration-phase notes … `implementation begins in phase X`"], and its quick test is "does this describe what the thing IS, or where the work currently STANDS?" — "Today it does not" is unambiguously the latter.
+
+Worse, it re-creates the second home the campaign spent a ruling closing. `DECISIONS.md § 0.3 entry conditions` opens: "R-M (human ruling 2026-08-17) took the deferral notes back OUT of `README.md`/`DOCS.md`/`types.ts` … **R-Q (human ruling 2026-08-18) settled which of this file's two sections is the home: this one.** § Deferred to 0.3 is deleted outright rather than left as a pointer — **a stub is a second home in waiting**" [read: `DECISIONS.md:633-641`]. The clause above is a stub in `DOCS.md`, pointing at a document `R-S` already records as unreachable after 0.2 close ("`.planning-handoffs/` is documented as transitional scaffolding that prunes" [read: `DECISIONS.md:700-702`]). So `DOCS.md` will carry a dangling pointer into a pruned artifact.
+
+**Fix:** delete the three-sentence status clause. Keep the structural claim — "the render path needs `cause.stage`; a projection carrying only the message cannot produce the right sentence", which is already stated at `:284-286` and IS end-state. The obligation stays where R-Q put it.
+
+**Same class, milder:** `README.md:582` — "**The consequence, recorded because 0.3's types lock it**" puts a workflow-phase token in an end-state doc. Reword to "the consequence, because the union member and the drawn string are the same string".
+
+---
+
+### BLOCKER 2 — `the mark row` is a live contract term with no glossary entry, naming the row of **standings** with the one word the glossary spends four near-homonyms keeping off that concept
+
+Four sites, **two of them added this session** [measured: `grep -rn "mark row\|mark-row"` over `orchestrate/` and `.planning-handoffs/orchestrate-ux/`]:
+
+- `ux/wireframes.md:257` — "**The mark row and the caption travel together.**"
+- `ux/wireframes.md:269-270` — "because the mark row and the caption travel together, an excerpt carrying the caption must carry the mark row" *(added `b3c2f0dc`)*
+- `ux/wireframes.md:422` — "the rail with its mark row and the caption" *(added `99e04692`)*
+- `DECISIONS.md:390` — C5's column, "the mark-row/caption invariant"
+
+What that row draws is `▾ 2 · · · waiting waiting` — the **standing** of each station. And the README says, twice:
+
+> **`standing` is deliberately not called a mark.** A **fit mark** is a level's four-valued classification … a standing is a projection of reachability and kit, and **no level is involved in it at all**. They would have been the fourth and fifth near-homonyms in a glossary that already keeps three apart. [read: `README.md:755-759`]
+
+So the twin names the standings row "the mark row", and the same session's own README also writes "**bare** draws as a **bare mark** with no word at all" [read: `README.md:580`]. The word the glossary excludes from the concept is now the twin's name for the row that draws it — and it is load-bearing: the pairing rule is what legitimizes the new § The machinery breaks excerpt's shape.
+
+This is AR-1's first two focus areas landing together: a naming collision *and* a concept the glossary never names. It is also unfiled — no `DECISIONS.md` row owns "what the row of standings is called", so the index cannot see it.
+
+**Fix:** rename to **the standing row** at all four sites, or give `the mark row` a glossary entry that explicitly disclaims the `mark` family. Rename is cheaper and matches the glossary's own discipline. Open the row.
+
+---
+
+### BLOCKER 3 — the standing's drawn word has two contradictory homes, and a `types.ts` cannot be written from the README as it stands
+
+`README.md § What lives here` and `DOCS.md § Structural constraints` both put it in one place:
+
+> `display-labels.ts` … the tray and proposals headings, the empty-station reason with its count line, the barred phase's cause line, **the standing's drawn word**, and the blocked sentence [read: `README.md:29-33`]
+> Display copy lives here. … **the standing's drawn word** … `display-labels.ts` is their one home. [read: `DOCS.md:138-144`]
+
+`README.md § glossary · display labels` puts it somewhere else, in the same file:
+
+> **The consequence, recorded because 0.3's types lock it**: **that string IS the union member**, so renaming the `standing` union rewrites learner copy … **The two are the same string today deliberately** [read: `README.md:578-586`]
+
+"That string IS the union member" and "the two are the same string" are two different contracts — identity versus coincidence — asserted one clause apart, and neither is compatible with `display-labels.ts` being "their one home". An implementer at 0.3 must choose between: (a) `standing: 'openable' | 'bare' | 'waiting'` and the render site spells `waiting` — which the README's own rule forbids ("A surface that renders a string imports it; it does not spell it", `README.md:59`); (b) a `STANDING_LABELS` record in `display-labels.ts` keyed by standing — which contradicts "that string IS the union member" and "why the standing is not keyed like a fit mark"; (c) the union member re-exported from `display-labels.ts` — which nothing describes.
+
+This is F4's whole ruling contradicted inside the file F4 settled. It is 0.2's, not 0.3's: 0.2's deliverable is prose unambiguous enough that types can be written from it.
+
+**Fix:** rule it. The cheapest coherent answer is (b) with the coincidence broken — the union member is a machine token, the drawn word is a keyed string in `display-labels.ts`, and they happen to be spelled the same; that is exactly the discipline the region applies to `fit mark` (`'does-not-fit'` → `steps outside`) and it makes the "renaming the union rewrites learner copy" hazard structurally impossible instead of merely documented.
+
+---
+
+### BLOCKER 4 — the un-swept assertion FORM is **absence in the drawn surface**, and the tray/caption clause is its live instance
+
+*(This is my answer to question 2, and it is the reason I do not think adding a fourth ring closes 0.2.)*
+
+Every instrument this campaign has built is a **presence detector**: greps find tokens that are there; the reading list finds prose that is there; the frame instrument measures lines that are there; the census finds files that contain something. The campaign's own strongest rule is about **absence**:
+
+> a shape asserted and never drawn is how the single-constant defect survived eight AR-1 rounds [read: `ux/wireframes.md:406-407`, and re-invoked at `:442-445` to justify this session's new drawing]
+
+Nothing measures it. The third framing was drawn this session **by hand, one instance**, and no instrument was built — so the same class reproduces immediately, on a clause the same session restated:
+
+**The caption's tray rule is drawn nowhere.** README and DOCS both assert it:
+
+> A tray never takes it: a tray opens BETWEEN the rail and the caption, pushing it down along with the pane [read: `README.md:491-493`]
+> And **an open tray never takes the caption**: a tray opens BETWEEN the rail and the caption, pushing it down along with the pane [read: `DOCS.md:273-275`]
+
+§ A station's tray, open (`ux/wireframes.md:306-312`) is the only drawing of an open tray. It draws the rail, the standing row, and the tray box — and **no caption** [read, the fenced block end to end]. It is drawn in the Fresh-mount state (two lenses on `source`, four empty), which is exactly the state where the count line renders — so the one drawing that could exercise the ordering claim silently contradicts it by omission.
+
+Running the same check across the whole twin [measured: fence-by-fence scan of `ux/wireframes.md`, classifying each block for rail line / standing row / caption]:
+
+| clause | drawn? |
+|---|---|
+| rule 4 — cause line takes the caption where an edge is drawn | ✅ ×3 |
+| the tray opens *between* rail and caption | ❌ **contradicted by omission at `:306-312`** |
+| rule 2 — singular at one | ❌ never drawn |
+| rule 3 — absent at zero | ❌ never drawn |
+| "else nothing" (the caption's empty state) | ❌ never drawn |
+| the caption under a masked rail | ✅ `:484-506` |
+
+Four of the caption's own contract clauses have no drawing, in the round that ruled the caption's shape.
+
+And the **pairing invariant is falsified by three live drawings** that show the standing row and crop the caption: § A station's tray, open (`:306-312`), § The code steps outside, under warn (`:470-475`), § The generator in the pane (`:657-667`). The stated exception covers "band excerpts" — but § The generator crosses the pane and § A station's tray shows a tray, so neither is a band excerpt. The third case added this session (`:264-271`) extends the taxonomy without re-checking the drawings it now classifies.
+
+**Fix:** (a) add the caption row to § A station's tray, open — one line, and it is the clause's only evidence; (b) state the pairing rule as a four-way taxonomy that actually covers the drawings, or drop it to "no excerpt's cropping is a claim that the caption is gone"; (c) build the missing instrument as a table, not a grep: **clause × drawing coverage**, one row per contract clause in `glossary · the caption` and `glossary · display labels`, with the drawing that exercises it or an explicit `undrawn — <reason>`. That is the `also asserts` column's idea rotated onto the axis the drawings live on, and it costs one table.
+
+---
+
+## IMPORTANT
+
+### IMPORTANT 5 — the region README declines a `copy/` directory on a premise that is factually false, and F4's one-file ruling collides with two `DEV.md` conventions
+
+> The alternative — a `copy/` directory beside `rail/` and `guide/` — was considered and declined: these are values, not a surface, and **the region's other value file (`derive-study.ts`) is likewise flat**. [read: `README.md:61-63`]
+
+`derive-study.ts` is a **function** file [measured: `grep -n "export" src/lib/study-lenses/orchestrate/derive-study.ts` → one hit, `:43 export default function deriveStudy(`]. `display-labels.ts` is the region's **only** value file [measured: `git ls-files 'src/lib/study-lenses/**/*labels*'` → 1 file, region-wide]. The sole stated warrant for F4's shape is a false analogy.
+
+And the ruling itself runs against the house conventions. `DEV.md § Conventions Summary` requires **one concept per file, `kebab-case` filename matching the export**, and for value files `const NAME = …; export default NAME` [read: `AGENTS.principal.md:191-206`, restating `DEV.md § 1`]. `display-labels.ts` is now asked to hold nine families — phase labels, short labels, fit marks, nameplate forms, tray heading, proposals heading, empty-station reason, waiting count, three cause framings, the standing word, the blocked sentence — of which the filename names one, and one of which keys against a **second** vocabulary (`FailableStageName`) the file's name does not suggest. That is a new pattern introduced against a stated one, on a false premise.
+
+**Fix:** either re-argue F4 on a true premise (the honest one is "eight tiny value files is worse than one, and no barrel file may hide them"), or accept `copy/` with one file per family and a filename-per-concept — which is what the conventions actually prescribe and what makes the two-keyspace problem legible instead of buried.
+
+### IMPORTANT 6 — the new § The machinery breaks drawing uses a message the machine never emits
+
+`ux/wireframes.md:429` draws `the machinery broke here, not your code — entwining failed.` Its two siblings use real parser output — `Unexpected token (2:8).` (`:340`) and `Invalid or unexpected token.` (`:398`).
+
+There is exactly one producer of a `stage: 'entwined'` cause in the tree [measured: `grep -rn "stage: '" src/lib/study-lenses/embody/*.ts` → one hit outside `types.ts`], and its message is:
+
+```
+message: 'the syntax tree does not span its source'
+```
+[read: `src/lib/study-lenses/embody/derive-entwined.ts:70-75`]
+
+So the drawn sentence a learner would actually meet is *"the machinery broke here, not your code — the syntax tree does not span its source."* — and that is a much harder case for the framing's own promise than the invented sample suggests. The document's stated standard is its own indictment: "An earlier revision drew a lens here that does not exist, which made the drawing read better and concealed exactly the finding the twin exists to surface" (`:373-374`).
+
+**Fix:** draw the real message. The discomfort is the finding.
+
+### IMPORTANT 7 — "here" has no referent, and the third framing's "here" can never have one
+
+All three framings are deictic — *the spelling broke **here***, *the grammar broke **here***, *the machinery broke **here**, not your code*. The caption, by this session's own C15 reasoning, **names no station**:
+
+> Its cause lives in the caption, which describes the rail as a whole and **names no station** [read: `ux/wireframes.md:216-218`]
+
+For `tokens` and `ast` the word points at a station the geometry deliberately leaves **open and upstream of the edge** — B2's whole point ("a phase's own failure never bars it"). For `entwined` it points at a stage that is **not a lifecycle phase and is drawn nowhere on the rail**, which the README states in the same entry ("`entwined` … is not a lifecycle phase at all and therefore has no phase name to key against", `README.md:645-647`).
+
+Against the copy contract's own operational test — "would a learner who never read this glossary understand it?" (`README.md:710-711`) — "here" fails: it promises a location the caption is contractually forbidden to give. C15 booked the *screen-reader* half of this cost this session and did not book the *sighted* half, which is in the drawn copy.
+
+**Fix:** either the framings stop being deictic (*"the spelling broke — <message>"*), or the caption gains a locator and B3 is re-opened deliberately. Record it as a cost if neither.
+
+### IMPORTANT 8 — C14's block shape rests entirely on the waiting count, and nothing justifies the waiting count existing
+
+C14 is the session's most consequential ruling: the cause arm is a **block**, therefore `types.ts` needs a union over shapes, therefore `string | string` is banned. The block's second row is the waiting count — *"the last two phases wait for it."*
+
+C16 **named** that string; nobody **justified** it. And it is the one derived string on the rail that restates something the rail already draws in words: each barred station draws the standing word `waiting` [read: `ux/wireframes.md:338`, `:396`, `:427`]. Contrast the count line, which explains a `·` that carries no word at all. The design's central discipline is the opposite of restatement:
+
+> an arrangement that repeats the cause per barred phase is telling them a single truth four times [read: `ux/personas.md:74-77`]
+> **one barring edge, one cause, drawn once** [read: `ux/wireframes.md:49`]
+
+**If the waiting count goes, C14 collapses.** Both arms become one line, the shape union evaporates, and `PhaseEntry`'s existing `readonly cause: string` stops being wrong. That is a large amount of 0.3 contract riding on an unargued row — and the campaign's own intake question 1 ("did this commit take a decision?") was answered "the string had no name", not "the string should exist".
+
+**Counter-proposal:** put the waiting count to the same test C15 put the barred station to. Either argue it (the honest argument is that `waiting` says *that* a station waits and the count says *how far* the machine got, which the geometry shows but a screen-reader traversal does not aggregate), or drop it and re-derive C14. Do not let it survive by having been named.
+
+### IMPORTANT 9 — a third derived count is drawn on every rail, unnamed, unruled, and with an unstated predicate
+
+`▾ 2` is drawn in eight of the fourteen fenced blocks. The README mentions it in a subordinate clause — "**openable** (the phase is reachable and something fits it, **drawn with its count**)" [read: `README.md:751`] — and gives it no name, no glossary entry, no derivation rule, and no home in `display-labels.ts`'s inventory. It is absent from C10's uncovered-strings list [read: `DECISIONS.md:428-430`].
+
+Its predicate is genuinely ambiguous. The README says "something fits it"; `index.tsx` renders `recoverRenderableLenses(roster, phase.lenses).map(l => l.name)` [read: `src/lib/study-lenses/orchestrate/index.tsx:659-663`], i.e. lenses recovered against the joined roster — and the empty count's own definition insists "a phase whose only lens fails its applicability on this program is empty too" (`README.md:686-688`). So the kit count and the empty count must be complementary over the same predicate, and nothing says so.
+
+This is C16's exact argument applied to the sibling C16 missed: three derived numbers on one rail, one just named because it had no name, one named long ago, one still nameless.
+
+### IMPORTANT 10 — A14 opens a taxonomy question the class split has no rule for
+
+A14 makes the gutter class 1 "with the editor". The class-1 criterion is "editor-based" [read: `README.md:456-457`], so the assignment is at least not incoherent — but nothing in the taxonomy says **when a part of a surface gets its own class**. The editor also consumes "completion, hover, format" through its adapter [read: `README.md:146-148`]; a hover popup fed by the selected level's data is a rendered surface by every test the gutter passes. If the gutter needs a class row, so do those, and `SurfaceClass`'s exhaustiveness argument (A13: three members, no fourth, because the split is total over "the surfaces the mask acts on") starts depending on an uncounted set.
+
+The contrast is sharp against A3, which was forced off lineage and containment onto a four-route exhaustion argument and made to walk the routes in the twin. A14 was opened this session with no argument at all beyond placement [read: `README.md:177-181` — no class reasoning; `DECISIONS.md:266` — the row's warrant is that the census could not see it].
+
+**Fix:** state the rule — *a surface takes a class when the mask can act on it independently of its parent*; then the gutter takes class 1 as a **part of** the class-1 editor (not a member alongside it), and the hover popup needs no row. One sentence in § Enforcement.
+
+### IMPORTANT 11 — a fourth ring exists, and `station` — the region's most contested reclaimed word — is asserted in it in the sense H2 formally retired
+
+The radius now names three rings: region, package's own four documents, and the **eight siblings of `orchestrate/` under `src/lib/study-lenses/`** [read: `DECISIONS.md:756-766`]. I re-ran the ring and it reproduces (`restore conformance` 0, `--sl-` 0, `none entry` 0; `gutter` 8/5 all `language-levels/`; `overlay` 14/6 all `lenses/writeme/`) [measured: `git grep -ci` per term over the eight directories].
+
+But `src/lib/study-lenses--deprecated-architecture/` and `src/lib/embody/` are **siblings of `study-lenses/`, not of `orchestrate/`** — in no ring, and both already touched by the campaign's own 0.3 table (the `l1-picker.tsx` note; the JEJ README staleness row). In them:
+
+- **`station` used as a synonym for `phase` — as a live TYPE — across 39 files** [measured: `git grep -cw "station\|stations" -- 'src/lib/study-lenses--deprecated-architecture'` → 39 files; e.g. `DOCS.md:135` `phase?: Station | readonly Station[];`, `lenses/README.md:94` "phases-panel station(s)"].
+- The same sense in a **live, non-deprecated** file: `src/lib/embody/language-levels/just-enough-javascript/README.md:42-43` — "the phases panel's CORE **stations** (`source`, `parse`) … CORE/LL is a classification, not a **station**".
+
+H2's ruling is exactly about this: "that sense is **formally retired** (human ruling 2026-08-15) rather than left to collide silently, because the two are one-to-one and **a reader carrying the old meaning would be right by accident forever**" [read: `README.md:766-770`].
+
+The exhaustion argument the radius rests on generalizes from three terms that measure zero (`class [123]`, `--sl-`, `restore conformance`) to the whole vocabulary. It does not hold for `station` — and `station` is the one term whose retirement is a human ruling.
+
+**Fix:** this does not require fixing 39 files (CP-3 stands). It requires one honest row: a fourth ring, censused for the terms the region *reclaims* rather than *narrows*, with `station` DECLARED. Closing 0.2 on "a stated radius" is only closure if the statement is true, and today it is silent about a ring that contains a retired sense as a type name.
+
+### IMPORTANT 12 — H6's status still asserts a file count its own enumeration does not produce, in the row edited this session to make it enumerable
+
+`DECISIONS.md:526`: "**SETTLED at REGION scope** — 27 prose violations across **9** files", followed by "**The status's own file count was wrong**: it said 27 violations across **9** files while the column enumerated **8** paths … **Corrected by ENUMERATION rather than by adjusting the numeral**".
+
+The column's prose-violation paths at HEAD: `README.md`, `DOCS.md`, `ux/wireframes.md`, `types.ts`, `lib/recommending/DOCS.md`, `lib/recommending/README.md`, `lib/recommending/types.ts`, `lib/composing/README.md` = **8**. The two added this session are declared **not** violations ("a retrospective record"; "filed as an EXCEPTION site rather than a violation"), so they cannot be the ninth. The enumerated occurrence counts sum to **34**, not 27 (3+8+5+2+7+6+1+2) [read: the column, per-path `×N`].
+
+So the row now carries the wrong headline *and* the note saying the headline is wrong *and* the claim that it was corrected — three mutually incompatible statuses in one cell, which is the C12 defect the third intake question exists to catch, landed by the commit that landed the third intake question.
+
+**Fix:** replace the headline with the enumeration's own numbers, or with "counts re-measured per commit; see the column".
+
+### IMPORTANT 13 — the frame-corner finding has been false since **before** this session's baseline, in the section this session repaired for exactly that
+
+`DECISIONS.md:857-867` and the roll-call row MINOR 14 (`:590`) both assert, with a `[measured 2026-08-18]` tag: "There are **two** [drawings closing with `└` and no `┌`] … **Two of four full drawings are missing their top rule.**"
+
+At HEAD: **four `┌`, four `└`, perfectly paired** — `:173/:187`, `:485/:505`, `:580/:594`, `:605/:619` [measured: corner scan of `ux/wireframes.md`]. It has been true since `8c35c977` ("docs: the six MINOR, and **two drawings get the top rule they never had**", 2026-08-18) — round 8's own resolution, and **before** this session's baseline `061af657` [measured: `git show <sha>:…/wireframes.md | grep -c '^┌'` at `061af657`, `0d9bd6d2`, HEAD → 4 at every point].
+
+This is the *adjacent bullet* to the one `0d9bd6d2` repaired, in the same § What this list does not cover, under a commit titled "the three instruments this pass leans on were each wrong, and they are repaired before any decision rides them". A fourth instrument in the same list reports a discharged defect as live, with a measurement tag dated the day it was already false.
+
+### IMPORTANT 14 — `types.ts:194` carries a mangled JSDoc line, in one of the three documents `DEV.md`'s read-together test names
+
+```
+ * render invariants compare against), and the opened layer's overrides (a * recommendation-opened mount's recommendation). The generator arm carries only the
+```
+[read: `src/lib/study-lenses/orchestrate/types.ts:194`]
+
+A stray comment-leader mid-sentence, a joined line ~160 chars wide, and a tautology ("a recommendation-opened mount's recommendation") where the original read "a recommendation-opened mount's proposal". Introduced by `da4328d1`'s term sweep [measured: `git show da4328d1^:…/types.ts` → the two lines were `… overrides (a` / `* recommendation-opened mount's proposal).`]. Prettier does not catch it — it does not reflow JSDoc prose [measured: `npx prettier --check` over all six documents → clean].
+
+This is the sweep-collateral class the campaign has been hunting for eleven rounds, sitting in the region's contract file, unfound by every instrument because every instrument counts *occurrences of the retired word*.
+
+---
+
+## MINOR
+
+15. **Every `ux/wireframes.md` line citation in `DECISIONS.md` is stale at HEAD.** `:267`/`:361` (the single-line-excerpt exclusion, `:846-848`) are now prose; `:281-282`/`:337-338` (C14's column) are now prose and a rail row; `:160`/`:356`/`:174`/`:376`/`:464`/`:488` and the fences `:331`/`:339`, `:360`/`:362` all point elsewhere [measured: line-by-line read at HEAD]. The session added ~35 lines to the file at `99e04692` and did not re-anchor. `DEV.md § Path citations` exists for this.
+
+16. **Third-ring census cell `the guide → 1 / 1` is 2 files at the census commit** — `lenses/parsons/DOCS.md` and `lib/questioning/LOSS-LEDGER.md` [measured: `git grep -cil "the guide" ffb4b0d8 -- <the eight sibling dirs>` → 2]. Conclusion unchanged (both polysemy), but one of seven cells in the instrument the radius closure rests on is wrong on a two-minute re-measure. (`verdict`'s 184/50 is method-sensitive; I do not assert it.)
+
+17. **"the four count-line rules" vs "Four rules for one caption"** — `README.md:486-487` and `:700`. Three of the four are count-line rules; only rule 4 is about the caption. Under C14 the caption now has its own rules (occupancy, arm shapes, precedence) that are not among the four.
+
+18. **`cause line` names a block; `cause arm` is an unglossed synonym.** README uses `cause line` for the whole two-row arm (`:487`, `:494`, `:502`) and `cause arm` for the same object (`:510`); DOCS uses `cause arm` (`:270`); wireframes uses "the cause arm's own second row" (`:455`). Three names, one object, and the surviving name calls a block a line — which is the naming defect `glossary · the caption` was created to end ("What is rejected is naming the SLOT after an arm").
+
+19. **The drawn cause arm has three rows, not two.** Both parse-break drawings render a blank spacer above the message (`:339`, `:397`); the count-line drawing has none (`:178`). No contract mentions the spacer, and C14's "two rows" is the thing 0.3 will type.
+
+20. **`· a way to study Source`** — drawn twice (`:586`, `:612`), discussed in the README as "conditional, not part of the form" (`:574-577`), given no keying rule and no home, and absent from C10's uncovered-strings list (`DECISIONS.md:428-430`). It is a distinct string from the tray heading `ways to study the <label>`.
+
+21. **The nameplate's totality claim and its two-forms rule use different referents.** § Enforcement: "It names what the pane holds **in every occupant state, which nothing else does**" (`:234-235`). Display labels: "on the editor arm it names **the program** (`your code`); on the lens and generator arms it names **the occupant**" (`:571-573`). The route that disqualifies the rail (marks no occupant in 2 of 3 states) is stated against a noun the nameplate itself only uses in 2 of 3 states.
+
+22. **"the band, the strip, the level UI … all stay rendered"** (`README.md:137-138`) is declared vocabulary residue whose justification — "A render list naming the surface" (`DECISIONS.md:686`) — answers the *category* question, not the *truth* question. Under the Rail the band **contains** the rail (G1), so the sentence cannot survive the rename intact: it becomes "the band, the rail, …". That is round 9's BLOCKER-1 shape ("six sentences failed the second question while passing the first"), reproduced in a row that says it now avoids it.
+
+23. **"Three geometries, three framings … many-to-one"** (`ux/wireframes.md:52-55`) — one geometry ("everything open") has zero framings, so the relation is a partial function from 3 framings onto 2 geometries. Correct as stated, but the 3-and-3 pairing invites the very 1:1 reading the bullet exists to kill.
+
+24. **New sketch content was written during 0.2 and is already recorded as SETTLED.** `DOCS.md § The render projection` gained the caption block, rule 4's clause, the stage-keying, and the two-keyspace claim this session; C13/C14's rows read `SETTLED`. AR-2's job is to challenge the sketch, and it will arrive at clauses the index reports as closed. No gate is removed; the rubber-stamp risk is real.
+
+---
+
+## Counter-proposals
+
+**CP-α — build the clause×drawing coverage table, not a fifth ring.** Round 10's exhaustion argument is about containers; BLOCKER 4 shows the live defects are on a different axis. One table, one row per contract clause in `glossary · the caption` + `glossary · display labels` + `glossary · station`, columns `asserted at` / `drawn at` / `undrawn — reason`. It subsumes "asserted and never drawn", it makes the tray/caption gap and the singular-at-one gap visible in one pass, and it is the only instrument in this campaign that detects absence.
+
+**CP-β — kill the coincidence, not the coupling.** For BLOCKER 3: `standing` stays a machine union; `display-labels.ts` keys `waiting → "waiting"`; the two are documented as *the same spelling by choice, not by identity*. This is exactly how `FitMark` already works (`'does-not-fit'` → `steps outside`), so it introduces nothing, and it makes "renaming the union rewrites learner copy" false instead of merely warned-about.
+
+**CP-γ — re-derive C14 from the waiting count's justification, not from the drawings.** The drawings are evidence that the cause arm *is* two rows; they are not evidence it *should* be. Settle IMPORTANT 8 first. If the waiting count survives, C14 is right and the shape union is right. If it does not, `types.ts` gets a much simpler contract and `PhaseEntry`'s existing shape stops being a defect — a materially cheaper 0.3.
+
+**CP-δ — one sentence for A14.** "A surface takes a class when the mask can act on it independently of its parent." The gutter then travels with the editor as part of a class-1 surface, the hover popup needs no row, and A13's exhaustiveness stops depending on an uncounted set.
+
+**CP-ε — for the deprecated ring, declare rather than census.** One row: `station`-as-`phase` survives as a live TYPE in `src/lib/study-lenses--deprecated-architecture/` (39 files) and in `src/lib/embody/language-levels/just-enough-javascript/README.md`; DECLARED, owner = whoever retires the deprecated tree. Cost: ten minutes. Benefit: the radius statement becomes true.
+
+---
+
+## The five questions, answered directly
+
+**1 · Is 0.2 closeable now?** No. Four things block it, and three of them are cheap: the `DOCS.md` deferral clause (delete three sentences), `the mark row` rename (four sites), the tray drawing's missing caption row (one line). The fourth — the standing string's two homes — needs a human ruling, not an edit. None is a redesign; total work is well under a session. What is *not* cheap and should not be rushed is IMPORTANT 8: C14 is this round's headline decision and its warrant has not been argued.
+
+**2 · Is there an un-swept ring, term, or form?** All three. **Form:** absence in the drawn surface — the campaign has a rule against it, one hand-fixed instance, and no instrument (BLOCKER 4; four caption clauses undrawn). **Ring:** the siblings of `study-lenses/` rather than of `orchestrate/` — `study-lenses--deprecated-architecture/` and `src/lib/embody/` (IMPORTANT 11). **Term:** `station`, whose retired phase-synonym sense is a live TYPE in 39 files of that ring, against a 2026-08-15 human ruling. Round 10's "exhaustible" prediction is right about *containers* and generalizes wrongly from three terms that measure zero: the zeros reproduce (`class [123]`, `--sl-`, `restore conformance`, `none entry`), and `station`, `gutter` and `overlay` do not.
+
+**3 · Do C14/C15/C16/A14 hold?**
+- **C14** — the *ruling* holds (three documents did disagree, and `string | string` genuinely admits the concatenation defect). Its *warrant* does not: it exists only because the waiting count exists, and nothing argues that (IMPORTANT 8). Its *naming* is broken: an arm called `line` that is a block, plus an unglossed synonym `arm` (MINOR 18). And the block it types is two rows while the drawings are three (MINOR 19).
+- **Geometry/framing separation** — holds, and I verified it against the code rather than the docs. `deriveAccessibility` bars `environment` and `evaluation` off `facts.entwined.ok` alone [read: `derive-accessibility.ts:38-43`], the carry chain preserves the origin stage [read: `derive-entwined.ts:56-62` — `if (!tokens.ok) return { ok: false, cause: tokens.cause }`], and `environment` derives *after* `entwined` [read: `derive-facts.ts:21-27`], so no `environment`-tagged cause can ever reach a barred phase. The many-to-one claim and the `environment`-is-unreachable strike are **both correct**. The wording (3-and-3) is loose (MINOR 23), and the drawn sample message is fabricated (IMPORTANT 6).
+- **C15** — the strongest thing in the eight commits. The inversion is real, both cited passages say what the row says they say, and recording rather than fixing it is the right call.
+- **C16** — the dead-code proof is **correct**: `tokens` bars 3, `ast`/`entwined` bar 2, `environment` bars 0, so a singular branch is unreachable. Verified independently.
+- **A14** — the weakest. Opened with no argument, and it opens a decomposition question the class taxonomy has no rule for (IMPORTANT 10).
+
+**4 · Can README + DOCS + types.ts predict the implementation?** `types.ts` being thin is **correctly 0.3's** — `DEV.md:2107-2112` places the read-together test at the *end* of 0.3, after types are written, and AR-1's trigger is explicitly "before `types.ts` locks the contract". That is not a defect and should not be treated as one. But the test that *is* 0.2's — can `types.ts` be written deterministically from the prose? — fails on two specific points today: the standing string's home (BLOCKER 3) and the caption arm's vocabulary/shape (BLOCKER 2 + MINOR 18/19). Both are prose ambiguities, both are 0.2's, and both will be resolved by whoever holds the keyboard at 0.3 if they are not ruled now.
+
+**5 · Is anything this session wrote actually WRONG?** Yes, six things, and two of them are numbers presented as measured:
+- `the guide → 1 / 1` in the third-ring census: **2 files** at the census commit (MINOR 16).
+- H6's "27 prose violations across 9 files": the column enumerates **8** paths and **34** occurrences (IMPORTANT 12).
+- "Two of four full drawings are missing their top rule": **zero** are, and have been since before the baseline (IMPORTANT 13).
+- The `entwined` sample message `entwining failed.` does not exist in the tree (IMPORTANT 6).
+- Every `ux/wireframes.md` line citation in `DECISIONS.md` (MINOR 15).
+- Pre-existing but live in the reviewed artifact: `derive-study.ts` called "the region's other value file" (IMPORTANT 5) and the mangled `types.ts:194` (IMPORTANT 14).
+
+Everything else I spot-checked reproduces exactly: the malformed-row check (0), the class census (15 files), the `strip` residue counts, README's `proposal` → 7, the manifest's three omissions and one phantom, `index.tsx:414`/`:654`, the untracked `evaluators/run/`, the three empty sibling-ring terms, and the frame histogram at `{63: …}` with the two single-line excerpts as its only outliers.
+
+---
+
+**Certainty.** High (≥90%) on BLOCKERs 1–3 and IMPORTANTs 5, 6, 11, 12, 13, 14 and every MINOR — each is a direct file read or a command I ran this session. Moderate (~70%) on BLOCKER 4's *severity* — the tray/caption omission is certain, but whether an undrawn clause blocks 0.2 or is a recorded cost is the human's call. Moderate (~65%) on IMPORTANT 8 — the waiting count may well be right; what I am confident of is that nobody has argued it and C14 depends on it. Lower (~55%) on IMPORTANT 10 — A14 is defensible under "editor-based"; the gap I am confident of is that no rule says when a part gets a class.
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
 
 # ROUND 10'S VERDICT, AS RETURNED — ARCHIVE, NOT A TASK LIST
 
