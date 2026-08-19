@@ -916,6 +916,67 @@ execution and never holds one alone.
   fixture pinned the opposite on a never-started execution, and the transported
   assertion re-targets to a post-ignition cancel). Recorded here per HR-21;
   encoded at `src/lib/study-lenses/evaluators/lib/execution-handle/README.md`.
+- **P0-R design rulings (human rulings 2026-08-18, at the unit's design review —
+  ar-1 round 1 PAUSE, four rulings given in-session, remaining concerns accepted
+  fix-all).** The error phase is carried ONLY where it varies — run's
+  `'javascript'` arm; the timeout, iteration-limit, and io arms are mid-run by
+  construction and carry none, the invariant stated in prose (HR-20 unchanged:
+  two values, spelled `'evaluation'`). A mock's liveness is the CONSUMER's own
+  obligation — the machinery's budget pauses across an io exchange and no layer
+  installs a watchdog; a never-settling mock holds the run and `cancel()` is the
+  exit (the handle library's source-liveness clause, restated at the one
+  callback run's consumers author). `RunResult` is DISCRIMINATED on `outcome` —
+  an HR-4 exception with its strength argument: runtime values are identical to
+  the reference's flat shape, but each arm carries exactly the fields that exist
+  for it (the deprecated port's own commitment), so a consumer narrowing on
+  `outcome` never reads an absent field; every reference name is kept. The
+  `'io'` error kind is an ADDITION carrying a named supersede of the reference's
+  classification (the reference surfaced a mock's failure as the learner-shaped
+  `kind: 'javascript'`): HR-9's unmocked-verb posture requires an answer
+  distinguishable from the learner's own error, a mock's failure is the same
+  io-layer lesson, and adding the union member later breaks exhaustive consumers
+  while adding it now is free. The shared capability probe HOISTS to
+  `evaluators/lib/capability-probe/` (mini Phase-0, the W3.a scoped-ar-1
+  precedent): the deprecated port carried the Worker/SharedArrayBuffer probe
+  byte-identical in both evaluators, and the hoist keeps run's and intercept's
+  environment-refusal wordings from drifting; spec refusals stay per-evaluator,
+  and whether the kind's refusal shape grows a discriminating field is P0-K's
+  question, named open. The engine's seconds-default export is its own additive
+  engine increment in the W4b run chain (beside E2): run's always-populated
+  `options.seconds` echo imports the machinery's default rather than
+  re-declaring it, and the export does not exist today. An io answer the
+  transport channel cannot carry classifies as an io error, never a machinery
+  defect; the io increment's constraint is that the check runs on run's side of
+  the call boundary, before the wrapper returns. Recorded here per HR-21;
+  encoded at `src/lib/study-lenses/evaluators/run/README.md`.
+- **P0-R design rulings, second round (human rulings 2026-08-19, at the ar-1
+  round-2 and scoped-module reviews).** The hoisted module is NAMED
+  `environment-refusal` (three-way homonym: the region's compile-time type
+  probes, local-llm's device capability probe, and the module's own export being
+  a refusal, not a probe), at
+  `src/lib/study-lenses/evaluators/lib/environment-refusal/`. The two-species
+  refusal taxonomy is CANONICAL AT THE REGION ROOT — a committed-contract edit
+  approved: the region README § Outcomes gains the species pair (environment
+  refusal: the shared wording; spec refusal: the evaluator's own words), the
+  glossary gains both entries, and the region `types.ts` refusal comment is
+  amended so the shared wording no longer falsifies it (comment only; no type
+  shape changed). The module SPLITS a pure decision leaf from the environment
+  read: the leaf takes the two capability facts and words the refusal
+  (exhaustive plain-fixture suite, wording pinned by exact equality, arm order
+  pinned), the wrapper alone reads globals with one node-tier and one
+  browser-tier row — the deprecated port's own pair — per DEV.md's
+  cross-the-boundary-by-moving rule; the round-1 stub-based suite is superseded.
+  The shared halt-payload SHAPE question (run's and intercept's worker setups
+  shared 57 of 106 lines in the port — buildHaltAuthor, readCap, the halt
+  record) is BANKED TO P0-I: run's Phase 0 declares its own `RunHalt` per the
+  port precedent, and P0-I's design inventory decides the dedup with both units'
+  halt needs visible. And the settlement precedence gains STEP 0: a
+  consumer-ended run settles `'cancel'`, outranking even the io flag — a Stop
+  pressed during an in-flight mock answers `'cancel'`, never an io lesson the
+  presser did not ask for (the mirror order — mock fails first, cancel second —
+  still answers `'io'`). Recorded here per HR-21; encoded at
+  `src/lib/study-lenses/evaluators/lib/environment-refusal/README.md` and
+  `src/lib/study-lenses/evaluators/run/README.md`.
 
 ### The ratification, and what it settled (human ruling 2026-08-06)
 
