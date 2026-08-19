@@ -229,7 +229,7 @@ describe('deriveTokens', () => {
 			}).toEqual({ present: true, span: [token?.start, token?.end] });
 		});
 
-		it.skip("an element's text is the snippet's own source slice", () => {
+		it("an element's text is the snippet's own source slice", () => {
 			const source = 'let x = 1 // done';
 			const stage = deriveTokens({ source, type: 'script' });
 			// PINNED(human ruling 2026-08-18: tokens-stage residence — embody closes the leaf's input-coherence precondition by construction)
