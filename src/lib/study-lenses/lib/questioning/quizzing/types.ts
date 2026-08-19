@@ -28,8 +28,12 @@ import type { BlockCell } from '../types.js';
 
 /**
  * How a learner answers a `QuizItem`, and therefore the shape of both the
- * response and the answer key. The full end-state vocabulary (the catalog
- * names all five); the panel modes (`mcq` / `multi-mcq`) answer by option id,
+ * response and the answer key. Today's vocabulary — the five the catalog
+ * names, additive-open going forward (a new mode is an additive member and
+ * a cross-consumer contract event; question kinds that do not need this
+ * engine arrive as new questioners with their own item shapes — an
+ * extension doorway inside this union was considered and declined, human
+ * ruling 2026-08-18); the panel modes (`mcq` / `multi-mcq`) answer by option id,
  * the code-surface modes (`click-token` / `click-line` / `select-in-code`)
  * answer by source range. The `mcq`, code-surface `click-token` / `click-line`,
  * and exhaustive `select-in-code` variants of `QuizItem` / `LearnerResponse` are

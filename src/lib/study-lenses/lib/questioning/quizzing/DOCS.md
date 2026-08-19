@@ -313,10 +313,24 @@ rationale.
   `Category`, not socratizing's `Feature`; the correspondence is partial
   and unpromised.
 - **Enumerate the closed string vocabularies fully; build modes as their
-  generators land** (carried): `AnswerMode` (five) and `Family` (seven)
-  are end-state vocabularies; `multi-mcq` is enumerated-not-built;
-  `click-line` is graded-not-generated (both under one vacancy:
-  offset→line reads).
+  generators land** (carried; amended 2026-08-18): `AnswerMode` (five
+  today) and `Family` (seven) are enumerated up front and additive-open —
+  a new member is a cross-consumer contract event, not a redesign; the
+  earlier "end-state" word overstated closure. `multi-mcq` is
+  enumerated-not-built; `click-line` is graded-not-generated (both under
+  one vacancy: offset→line reads).
+- **No extension doorway in the item model** (human ruling 2026-08-18,
+  declining the design-review counter-proposal after clarification):
+  answer-mode openness lives at two levels that already exist — a new
+  quizzing-internal mode is an ADDITIVE built member (a cross-consumer
+  contract event landing its item variant, response arm, and grade arm
+  together), and a question kind that does not need this engine arrives
+  as a NEW QUESTIONER with its own item shape and grader (the family's
+  TAnswer openness plus the async-widened ask). A typed extension
+  variant would have pre-paid the additive event's shape at the cost of
+  admitting keyless items into the gradable register and colliding with
+  the parent charter's "open mode" prohibition — measured at the design
+  review.
 - **The answer carries the grading surface** (human ruling 2026-08-18):
   `QuizzingAnswer.grade` IS the engine's `grade` (identity-pinned at the
   envelope unit); the field's type (`QuizzingGrader`) is async-capable —
