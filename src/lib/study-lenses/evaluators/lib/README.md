@@ -19,6 +19,9 @@ types directly — nine names from `lib/engine/types.ts`, in `run/` and
 `intercept/` only; the deprecated `lib/` itself imports none, which this rule
 explains rather than contradicts (it publishes types and has no engine seam).
 
+- [`environment-refusal/`](./environment-refusal/README.md) — the engine-backed
+  evaluators' shared environment refusal: the machinery's two prerequisites read
+  and worded once, so no two evaluators drift on the sentence.
 - [`execution-handle/`](./execution-handle/README.md) — the execution-handle
   library: the factory that constructs the kind's handles, so the consumption
   laws every evaluator promises are built once and obeyed structurally.

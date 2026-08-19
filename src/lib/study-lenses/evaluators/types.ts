@@ -123,7 +123,11 @@ export type EvaluationSpec = {
 export type EvaluatorRefusal = {
 	readonly refused: true;
 
-	/** Why, in the evaluator's own words. */
+	/**
+	 * Why — in the evaluator's own words for a spec refusal; the region's
+	 * shared wording for an environment refusal (human ruling 2026-08-19;
+	 * README § Outcomes, errors, refusals owns the species pair).
+	 */
 	readonly reason: string;
 };
 

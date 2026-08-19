@@ -29,7 +29,8 @@ evaluators/
 ├── intercept/   step-through execution: live event stream, generator surface,
 │                entwined enrichment, pending interactions
 ├── lib/         the region-internal shared libraries the evaluators build
-│                on (execution-handle, iteration-guard) — region-level
+│                on (execution-handle, iteration-guard,
+│                environment-refusal) — region-level
 │                because only evaluators consume them; machinery consumed
 │                beyond this region lives in the package lib/
 └── tests/       the kind's type-contract assertions
@@ -199,7 +200,15 @@ per-evaluator widenings.
 Three channels, never mixed:
 
 - **Refusal** — main's answer to a spec it cannot serve:
-  `{ refused: true, reason }`, in the evaluator's own words.
+  `{ refused: true, reason }`. Two species share the shape (human ruling
+  2026-08-19): an **environment refusal** — the hosting environment cannot run
+  the evaluator — for the engine-backed evaluators carries their one shared
+  wording, built by the `lib/environment-refusal` module so no two drift on the
+  sentence (an evaluator on other machinery words its own environment species);
+  a **spec refusal** — the spec itself cannot be served — is in the evaluator's
+  own words. The species are distinguishable by wording, not by data; whether
+  the shape grows a discriminating field is an open design question at this
+  root.
 - **Learner outcomes** — the result's `outcome` field, spoken in the reference
   vocabulary. The kind exports the six values as `EvaluationOutcome` —
   `'complete'`, `'cancel'`, `'fail'`, `'timeout'`, `'iteration-limit'`,
@@ -304,7 +313,10 @@ this region owns, and resolve its homonyms.
 - **streaming handle** — `Execution<TEvent, TResult>`: the base plus
   `AsyncIterable`.
 - **refusal** — the kind's refusal-as-data shape: returned by main instead of a
-  handle, with the reason in the evaluator's own words.
+  handle. Its two species: the **environment refusal** (the machinery's
+  prerequisites are absent — the region's one shared wording, from
+  `lib/environment-refusal`) and the **spec refusal** (this spec cannot be
+  served — the evaluator's own words).
 - **inert** — the creation guarantee: no learner code, no worker, before first
   consumption. Not a ban on evaluator-owned eager derivation.
 - **consumption** — the closed trigger list that starts a run: the first
@@ -494,7 +506,8 @@ belong to the units that build those surfaces.
   `EvaluatorRefusal`, `ErrorPhase`, `ExecutionAxis`, `MachineryDefectKind`,
   `PendingInteraction`
 - Region-internal machinery: [`lib/`](./lib/README.md) — the shared libraries
-  the evaluators build on: execution-handle and iteration-guard
+  the evaluators build on: execution-handle, iteration-guard, and
+  environment-refusal
 - The engine beneath: [`../lib/engine/README.md`](../lib/engine/README.md)
 - The frozen previous region:
   [`../evaluators-deprecated/README.md`](../evaluators-deprecated/README.md)
