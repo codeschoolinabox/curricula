@@ -23,11 +23,27 @@ public API, and the bounded context ("classifying describes; consumers select").
 `classify-tokens.ts` is the single public export; phases 2–4 are hoisted in-file
 helpers (newspaper anatomy: export first, helpers below).
 
-1. **Validate inputs** (sync, throws) — `code` must be a string, `tokens` a
-   non-null array, `ast` a non-null node. Throws `TypeError` otherwise; this is
-   the module's only throw site (boundary validation only — see README § Public
-   API for why the module throws rather than degrading: it sits behind a
-   successful-parse gate, not inside an editor render loop).
+1. **Validate inputs** (sync, throws) — `code` must be a string; `tokens` and
+   `ast` must be **present**, and their shape is not checked. Throws `TypeError`
+   otherwise; this is the module's only throw site (boundary validation only —
+   see README § Public API for why the module throws rather than degrading: it
+   sits behind a successful-parse gate, not inside an editor render loop).
+
+   This bullet promised "`tokens` a non-null array, `ast` a non-null node" until
+   2026-08-18, which the guard has never delivered — it tests both for presence
+   and neither for shape. The sentence was narrowed to what the code does rather
+   than the guard widened to what the sentence said (**human ruling
+   2026-08-18**, the same ruling recorded in the sibling
+   [`../scanning/DOCS.md` § Structural constraints](../scanning/DOCS.md#structural-constraints),
+   where the drift ran the other way — that guard checked more than its contract
+   asked for, and the extra check came out).
+
+   ⚠ **The two sibling leaves now differ deliberately**, and nothing else in the
+   tree records it: this module type-checks `code` because its own Phase-0
+   sketch asked for it, while `scanning` presence-checks all three of its parts.
+   Both are internally consistent; they are not consistent with each other. The
+   deferred fold of both leaves into embody is where that should be settled, not
+   here.
 
 2. **Token-stream classification** (pure) — one pass over `tokens`. Skip `eof`
    and zero-length tokens; the element list is FIXED at the end of this pass.
@@ -93,14 +109,14 @@ helpers (newspaper anatomy: export first, helpers below).
 ```mermaid
 flowchart TD
     In["ClassifyInput<br/>{ code, tokens, ast }"]
-    Shaped["shape-confirmed input"]
+    Confirmed["presence-confirmed input"]
     Seeded["totally categorized tokens<br/>(semantic category + role seed;<br/>partner null)"]
     Refined["AST-refined tokens<br/>(block + paren + operator roles;<br/>generator * re-binned)"]
     Paired["paired tokens<br/>(partner links + closers<br/>inherit opener role)"]
     Out["frozen ClassifiedToken[]<br/>(source-ordered, total, non-overlapping)"]
 
-    In -->|"validate — throws TypeError<br/>on null/missing"| Shaped
-    Shaped -->|"classify by token type<br/>(pure; element list fixed here)"| Seeded
+    In -->|"validate — throws TypeError<br/>on null/missing"| Confirmed
+    Confirmed -->|"classify by token type<br/>(pure; element list fixed here)"| Seeded
     Seeded -->|"one AST traversal:<br/>block + paren + operator roles +<br/>generator * re-bin (pure)"| Refined
     Refined -->|"stack pairing +<br/>closer inheritance (pure)"| Paired
     Paired -->|"assemble + freeze<br/>(shape finalization only)"| Out
@@ -186,8 +202,12 @@ flowchart TD
   and AST and never re-derives them (regex-vs-division disambiguation, comment
   attachment, and the like are settled before it is called).
 - **Input coherence.** The three input values must come from one parse of one
-  source; the classifier validates shape, not provenance — mismatched inputs are
-  a caller bug.
+  source; the classifier validates **presence**, not provenance — mismatched
+  inputs are a caller bug. A part of the wrong _type_ is the same class of
+  failure: a number where a token array belongs is not an absence, the boundary
+  does not catch it, and it surfaces from wherever the part is first used. (The
+  word here was "shape" until 2026-08-18, which read as a promise the guard has
+  never kept.)
 
 ## Decisions
 

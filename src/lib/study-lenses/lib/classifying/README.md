@@ -168,10 +168,13 @@ token stream, `facts.ast.value` for the AST); the projection is the consumer's
 one-line boundary. Tests construct the same shapes with a direct `acorn.parse`
 call.
 
-The function **throws** on missing or null inputs. This is deliberate: the
-module is called only behind a successful-parse gate — a consumer confirms
-`facts.ast.ok` (or a successful local parse) before calling — so null inputs
-here are a caller bug to surface, not a runtime state to absorb.
+The function **throws** on missing or null inputs, and on a `code` that is not a
+string. This is deliberate: the module is called only behind a successful-parse
+gate — a consumer confirms `facts.ast.ok` (or a successful local parse) before
+calling — so null inputs here are a caller bug to surface, not a runtime state
+to absorb. `tokens` and `ast` are checked for presence only; a present value of
+the wrong type is a coherence failure, and DOCS.md § Out of scope says why that
+is not this boundary's job.
 
 Behavior:
 

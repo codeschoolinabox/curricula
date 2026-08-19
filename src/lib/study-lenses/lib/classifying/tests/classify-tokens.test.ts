@@ -797,6 +797,27 @@ describe('classifyTokens', () => {
 			).toThrow(TypeError);
 		});
 
+		it('names the required parts when code is missing', () => {
+			const { tokens, ast } = parse('x');
+			expect(() =>
+				classifyTokens({ tokens, ast } as unknown as ClassifyInput),
+			).toThrow(/requires \{ code, tokens, ast \}/);
+		});
+
+		it('throws TypeError when code is not a string', () => {
+			const { tokens, ast } = parse('x');
+			expect(() =>
+				classifyTokens({ code: 42, tokens, ast } as unknown as ClassifyInput),
+			).toThrow(TypeError);
+		});
+
+		it('names the required parts when code is not a string', () => {
+			const { tokens, ast } = parse('x');
+			expect(() =>
+				classifyTokens({ code: 42, tokens, ast } as unknown as ClassifyInput),
+			).toThrow(/requires \{ code, tokens, ast \}/);
+		});
+
 		it('throws TypeError when tokens is null', () => {
 			const { ast } = parse('x');
 			expect(() =>
@@ -808,6 +829,17 @@ describe('classifyTokens', () => {
 			).toThrow(TypeError);
 		});
 
+		it('names the required parts when tokens is null', () => {
+			const { ast } = parse('x');
+			expect(() =>
+				classifyTokens({
+					code: 'x',
+					tokens: null,
+					ast,
+				} as unknown as ClassifyInput),
+			).toThrow(/requires \{ code, tokens, ast \}/);
+		});
+
 		it('throws TypeError when ast is null', () => {
 			const { tokens } = parse('x');
 			expect(() =>
@@ -817,6 +849,17 @@ describe('classifyTokens', () => {
 					ast: null,
 				} as unknown as ClassifyInput),
 			).toThrow(TypeError);
+		});
+
+		it('names the required parts when ast is null', () => {
+			const { tokens } = parse('x');
+			expect(() =>
+				classifyTokens({
+					code: 'x',
+					tokens,
+					ast: null,
+				} as unknown as ClassifyInput),
+			).toThrow(/requires \{ code, tokens, ast \}/);
 		});
 	});
 });
