@@ -15,18 +15,18 @@ afterEach(() => {
 	vi.restoreAllMocks();
 });
 
-describe.skip('deriveTokens — a defecting enrichment derivation', () => {
+describe('deriveTokens — a defecting enrichment derivation', () => {
 	it('still publishes the tokens stage value', () => {
 		const stage = deriveTokens({ source: 'let x = 1', type: 'script' });
 		expect(stage.ok && stage.value.tokens).toHaveLength(4);
 	});
 
-	it('publishes the value without the member', () => {
+	it.skip('publishes the value without the member', () => {
 		const stage = deriveTokens({ source: 'let x = 1', type: 'script' });
 		expect(stage.ok && stage.value.inputElements).toBeUndefined();
 	});
 
-	it('reports the defect loudly', () => {
+	it.skip('reports the defect loudly', () => {
 		const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 		deriveTokens({ source: 'let x = 1', type: 'script' });
 		expect(errorSpy).toHaveBeenCalledTimes(1);
