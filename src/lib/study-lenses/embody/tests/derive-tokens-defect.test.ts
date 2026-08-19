@@ -21,7 +21,7 @@ describe('deriveTokens — a defecting enrichment derivation', () => {
 		expect(stage.ok && stage.value.tokens).toHaveLength(4);
 	});
 
-	it.skip('publishes the value without the member', () => {
+	it('publishes the value without the member', () => {
 		const stage = deriveTokens({ source: 'let x = 1', type: 'script' });
 		expect(stage.ok && stage.value.inputElements).toBeUndefined();
 	});
