@@ -2,23 +2,139 @@
 
 # orchestrate ux — resumption point
 
-**STATE: Phase 0 step 0.2. `ar-1` ROUND 12 HAS RUN and returned PAUSE — 2
-blockers, 7 important, 6 minor. ITS VERDICT IS ARCHIVED VERBATIM BELOW, and THE
-HUMAN GATE IS OPEN: no fix round opens until the human has seen it (standing
-since round 9, never discharged). AR-5 has still never run and fires at 0.2
-close.**
+**STATE: Phase 0 step 0.2. `ar-1` ROUND 12 RAN and returned PAUSE — 2 blockers,
+7 important, 6 minor; verdict archived verbatim below. THE HUMAN HAS READ IT AND
+CHOSE TO HAND OFF rather than open the fix round in that session (2026-08-19).
+YOU ARE THE FIX ROUND. AR-5 has still never run and fires at 0.2 close.**
+
+## YOUR FIRST ACTION — read this before anything else
+
+**Three rulings are owed BY THE HUMAN and three of round 12's findings are
+blocked on them.** Ask for all three in one message, up front. Do not infer any
+of them, and do not start the edits that depend on them:
+
+1. **The `●` marker (BLOCKER 2).** It is drawn twice, it marks the open lens's
+   station, and no document names it. It is a fifth thing a station carries
+   against a glossary that says four, and it is the counterparty in **R-H** —
+   the reason the nameplate earns class 2 and the rail does not. **Ruling
+   needed:** is it a fifth station property, or a projection of `PaneOccupant`
+   the rail reads at render? **B10 — "the first question `types.ts` answers" —
+   cannot be answered correctly until this is**, because both candidate answers
+   omit it.
+2. **F4's copy home (IMPORTANT 7).** The README declines a `copy/` directory
+   because "eight tiny value files with a barrel to hide them is worse than one
+   file with eight exports". `DEV.md` **bans barrel files** and prescribes one
+   concept per file, so the barrel is not a cost of the alternative — it is
+   forbidden, and the prescribed shape is exactly eight files imported directly.
+   The chosen shape is the one the conventions forbid [round 12 measured **1 of
+   163** non-`types.ts` files under `study-lenses/` carrying more than one
+   top-level export]. **F4 is a human ruling (2026-08-18), so only the human can
+   re-argue it or take `copy/`.**
+3. **CP-η versus CP-α — which instrument gets built, if either.** Building an
+   instrument is the human's decision by standing rule. See § THE INSTRUMENT
+   QUESTION below; round 12's argument against CP-α being the closer is strong
+   and was verified.
+
+**BLOCKER 1 NEEDS NO RULING — the measurement was run and it fits.** The open
+question was whether `not reached` (11 chars) can be centred under all five
+stations inside 62 columns, § The spelling breaks drawing three of them. **It
+can, in all three barred drawings, with no collisions** [measured at `26a922e3`:
+each standing placed centred on its station's span → rightmost column **60**
+(spelling) and **62** (parse, machinery); minimum interior gap 1 column, in the
+spelling drawing between the `AST` and `Environment` strings]. So BLOCKER 1 is a
+**script**, not a fourth question. Two taste calls survive and are the
+implementer's to note, not the human's to rule: that 1-column gap, and
+`Evaluation` landing flush at column 62 against the closing `│` at 63.
+
+## What the fix round covers — the cheap set needs no rulings
+
+Round 12's verdict is archived verbatim below; work from it, not from this
+summary. These need no ruling and the outgoing session judged them cheap:
+
+- **BLOCKER 1** — recompute the padding **by script** for all three barred
+  drawings, then re-verify. Standing rule: a drawing's padding is COMPUTED,
+  never eyeballed. It was applied to the closing vertical (index 63) and not to
+  the interior, which is why the frame instrument reports clean over the broken
+  drawing.
+- **IMPORTANT 3** — one numeral. "hears `waiting` four times" → "two or three
+  times". The argument holds unchanged at either number. **It is quoted into
+  `DECISIONS.md` twice as C18's principal asserting site — fix all three.**
+
+  ⛔ **CHANGE THE NUMERAL ONLY. `waiting` STAYS.** That sentence sits one clause
+  after "the standing's drawn word, **`not reached`**", and the contradiction is
+  **deliberate and protected by a human ruling** (C18: _record it open, do not
+  answer it_). Rewriting `waiting` → `not reached` while you are in that
+  sentence is the obvious edit and it **overturns the ruling** — it would settle
+  the spoken axis by keystroke, which is exactly what C18 exists to prevent. A
+  context-free reader walked into this trap on the first pass.
+
+- **IMPORTANT 4 — NOT ACTUALLY CHEAP; it hides a fourth ruling.** The three
+  cause-arm drawings disagree [measured: parse and spelling draw
+  blank·message·count; machinery draws blank·message·message·**blank**·count].
+  "Make them agree" leaves unmade the very decision **R-X pins as a `types.ts`
+  shape**: is the spacer above the block or between message and count, and is
+  the message one row or two? **Put that to the human with the other three**, or
+  land only the restatement of C14's column and leave the drawings alone.
+- **IMPORTANT 6** — sweep the noun `mark` where it names the **standing**, or
+  give the glossary a sentence licensing ordinary-English use against the
+  contract term. **Work from round 12's seven enumerated bullets, not from a
+  count**: the outgoing session wrote "8 sites" and a context-free re-measure
+  reproduced **seven**. `mark` also legitimately names the **fit mark**
+  throughout, so a bare count of the noun is not the sweep's terminating
+  condition — the enumeration is.
+- **IMPORTANT 8** — write the missing checkpoint rows: a **sighted** row for the
+  unreached count's redundancy (T10 is a screen-reader traversal and cannot
+  answer it), rows for the caption's zero/one states, and split C18's
+  spoken-word question off T10.
+- **IMPORTANT 5** — run round 11's roll-call. **Eleven of its findings are in no
+  ledger** (I7, I9, I10, M17–M24). Three are design questions, not bookkeeping.
+
+## THE OUTGOING SESSION'S RECOMMENDATION — argued, not binding
+
+**Do not run round 13 as the acceptance test.** The campaign already ruled that
+closure means _a named radius with an owner for everything outside it_, not _the
+sweep found nothing_. Round 10 identified the mechanism — each round finds its
+defects at the boundary the previous instrument stopped at — and **round 12
+confirmed it by finding a class round 11's own framing missed**. Rounds do not
+converge here; blocker counts have gone 3 → 4 → 5 → 3 → 4 → 2 → 2 → 4 → 2.
+
+The proposed close: take the three rulings, land the cheap set, build whichever
+instrument the human picks, then **close 0.2 on the stated radius** and let AR-5
+and the Phase-0 → Phase-1 human gate be the remaining gates. **Neither has ever
+fired.** If the human wants a round 13 anyway, it is theirs to call — but it
+should be argued as a decision, not defaulted into.
+
+## THE INSTRUMENT QUESTION — round 12 challenged this campaign's own diagnosis
+
+Round 11 framed the live defect class as **absence** in the drawn surface,
+against instruments that all detect **presence**, and proposed **CP-α** (a
+clause × drawing coverage table; its specification is quoted in § THE GATE THAT
+JUST RAN).
+
+**Round 12 argues a third class — present-and-wrong — and proves it with
+BLOCKER 1.** The clause IS asserted, IS drawn, IS indexed, and **CP-α as
+specified would tick it green**, because CP-α's columns are `asserted at` /
+`drawn at` / `undrawn — reason` and the clause is drawn. Its **CP-η** proposes a
+drawing-**consistency** scan instead: station-name centre vs standing centre per
+rail drawing; caption row structure (arm, spacer position, row count); drawn
+numerals against the drawing's own stations; and control-row tokens against §
+What the region must render, **in both directions**. Round 12 estimates ~40
+lines of Python over the file the frame scan already parses.
+
+The outgoing session verified round 12's proof and would build **CP-η**, keeping
+CP-α as a cheap add rather than the closer. **The human decides.**
 
 **Two of round 12's findings were re-measured before this line was written and
 both reproduce.** BLOCKER 1: in § The spelling breaks the standings row is
 shifted left of its stations by up to 7 columns, so the first `not reached`
 spans columns 16-26 while `AST` spans 27-29 and `Tokens` spans 14-19 — **the
-drawing says `Tokens` is not reached, nine lines above prose reading "`Source`
-and `Tokens` stay open"** [measured: name-centre vs standing-centre, every rail
-drawing]. It is a REGRESSION introduced by C17's own execution: swapping
-`waiting` (7 chars) for `not reached` (11) consumed the padding and nobody
-recomputed it. IMPORTANT 3: `source` and `tokens` are unconditionally accessible
-[read: `embody/derive-accessibility.ts`], so at most THREE phases can ever be
-barred and the twin's "hears `waiting` four times" is impossible.
+drawing says `Tokens` is not reached, nineteen lines above prose reading
+"`Source` and `Tokens` stay open"** [measured: name-centre vs standing-centre,
+every rail drawing]. It is a REGRESSION introduced by C17's own execution:
+swapping `waiting` (7 chars) for `not reached` (11) consumed the padding and
+nobody recomputed it. IMPORTANT 3: `source` and `tokens` are unconditionally
+accessible [read: `embody/derive-accessibility.ts`], so at most THREE phases can
+ever be barred and the twin's "hears `waiting` four times" is impossible.
 
 **Round 11 was declared FULLY RESOLVED and was not.** A context-free validation
 run before round 12 found **three of its six "wrong things" still wrong at
@@ -128,15 +244,15 @@ it is a checkpoint question, not a document one.
 
 ## Baselines — measure these again at session start, do not trust them
 
-| what                   | value                                                                                                                                                                                                                                                                                                                                                 |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| prior session baseline | **`061af657`** — SHA-pinned                                                                                                                                                                                                                                                                                                                           |
-| **AR-5's baseline**    | **`80306ad9`** — the campaign's, not any session's. SHA-pinned                                                                                                                                                                                                                                                                                        |
-| AR-5's SHA list size   | **77 commits** [measured at `ffc59db3`] — **campaign-scoped**, and it is a budget question before AR-5 launches                                                                                                                                                                                                                                       |
-| green (orchestrate)    | **622 passing in 22 files** [measured at `ffc59db3`] — campaign-scoped                                                                                                                                                                                                                                                                                |
-| typecheck (repo-wide)  | `npx tsc --noEmit` exit **0** [measured at `ffc59db3`] — **foreign-scoped, NOT campaign-scoped**: it compiles the whole tree, so a peer session breaks it without touching this campaign                                                                                                                                                              |
-| upstream               | **none configured** on `main` [measured: `git rev-parse --abbrev-ref main@{upstream}` → fatal]. **`main` is 293 commits AHEAD of `origin/main` (`cf0316bd`); `origin/main` is ahead by nothing** [measured at `f358910c`] — foreign-scoped. An earlier revision of this row said `origin/main` was ahead. It is backwards, and it feeds the push gate |
-| **foreign commits**    | **15** since `061af657` [measured at `ffc59db3`] — **foreign-scoped, so this number is wrong by the time you read it**                                                                                                                                                                                                                                |
+| what                   | value                                                                                                                                                                                                                                                                                                                                     |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| prior session baseline | **`061af657`** (round-11 session) and **`65215551`** (the round-12 session, whose five commits are listed below) — SHA-pinned                                                                                                                                                                                                             |
+| **AR-5's baseline**    | **`80306ad9`** — the campaign's, not any session's. SHA-pinned                                                                                                                                                                                                                                                                            |
+| AR-5's SHA list size   | **80 commits** [measured at `26a922e3`] — **campaign-scoped**, and it is a budget question to put to the human BEFORE AR-5 launches                                                                                                                                                                                                       |
+| green (orchestrate)    | **622 passing in 22 files** [measured at `26a922e3`] — campaign-scoped                                                                                                                                                                                                                                                                    |
+| typecheck (repo-wide)  | `npx tsc --noEmit` exit **0** [measured at `26a922e3`] — **foreign-scoped, NOT campaign-scoped**: it compiles the whole tree, so a peer session breaks it without touching this campaign                                                                                                                                                  |
+| upstream               | **none configured** on `main` [measured: `git rev-parse --abbrev-ref main@{upstream}` → fatal]. **`main` is 295 commits AHEAD of `origin/main` (`cf0316bd`); `origin/main` is ahead by nothing** [measured at `26a922e3`] — foreign-scoped. An earlier revision said `origin/main` was ahead. It is backwards, and it feeds the push gate |
+| **foreign commits**    | **8** since `65215551`, the round-12 session's baseline [measured at `26a922e3`] — **foreign-scoped, so this number is wrong by the time you read it.** The tree is shared and moves during a session                                                                                                                                     |
 
 ⚠ **The tree carries other campaigns' work, including a modified
 `AGENTS.principal.md` (governance surface) and untracked directories.** The
@@ -147,6 +263,47 @@ rules: § Mechanics that will bite you, in the archive — that section is LIVE.
 ```text
 src/lib/study-lenses/orchestrate .planning-handoffs/orchestrate-ux src/lib/study-lenses/WORKFLOWS.md
 ```
+
+## What the ROUND-12 session did — five commits, `65215551..26a922e3`
+
+**Four of the five are the fix pass that had to precede round 12**, because the
+handoff could not launch it: the "reusable" brief was round 11's verbatim, and
+the five questions eleven rounds have answered were recorded nowhere.
+
+| SHA        | what                                                                                                                              |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `1e95814e` | C17 had HALF-LANDED — the drawn word reached the drawings and the README, not § Fresh mount. **C18 opened, deliberately UNRULED** |
+| `ffc59db3` | the citation CLASS retired for section anchors; C14 widened to its third drawing; H6's aggregate DELETED not renumbered           |
+| `f358910c` | the resumption point — five questions recorded AS QUESTIONS, brief rewritten, volatility tags, ONE exemption list                 |
+| `28d1d761` | **the context-free re-validation's findings** — `f358910c` had introduced three NEW false claims while fixing old ones            |
+| `26a922e3` | round 12's verdict, archived verbatim                                                                                             |
+
+⚠ **NEVER ASSEMBLE THE AR-5 LIST FROM THIS TABLE. Run the command** in § What
+the ROUND-11 session did. The table cannot be complete: the commit that updates
+it is always later than it.
+
+### Two errors the outgoing session made, both propagated before being caught
+
+Named because a handoff that only lists successes misreports the tree, and
+because both are instances of rules this campaign had already written down.
+
+1. **The C17 word swap broke the drawings.** `waiting` (7 chars) → `not reached`
+   (11) consumed the interior padding of three rail drawings. The standing rule
+   — _a drawing's padding is COMPUTED, never eyeballed_ — was applied to the
+   closing vertical and not to the interior. **Round 12 found it as BLOCKER 1.**
+   The frame instrument reports `{63: 80} outliers: none` over it, because it
+   measures index 63 only.
+2. **"hears `waiting` four times" is impossible and was re-quoted twice.**
+   `1e95814e` restructured that exact paragraph without noticing the numeral,
+   then quoted it into `DECISIONS.md` as C18's principal asserting site. **Round
+   12 found it as IMPORTANT 3.**
+
+**The invariant-12 lesson, now with hard evidence: the context-free validation
+must run AFTER the rewrite, not before it.** Validation 1 found six defects;
+fixing them (`f358910c`) introduced three new false claims; validation 2 caught
+those. **And one of validation 2's own six MUST-FIX was wrong** — it measured a
+commit range that stopped at a table's last row rather than at the session's
+last commit. Re-measure every reviewer number, including a validator's.
 
 ## What the ROUND-11 session did — thirteen commits, of which this table names eight
 
@@ -335,16 +492,25 @@ diagnosis is that every instrument this campaign owns is a **presence detector**
 while the live defect class is **absence**. Hand it that diagnosis and **ask it
 to falsify the diagnosis**, not merely to apply it.
 
-### When round 12 returns
+### When round 12 returns — ITS PAUSE BRANCH IS DISCHARGED; the rest still binds
 
-- **On PAUSE: put it to the human before opening a fix round.** That instruction
-  has stood since round 9 and is not discharged.
+⚠ **The first bullet is DONE. Do not obey it as an instruction.** Round 12
+returned PAUSE, it WAS put to the human, and the human read it and handed off —
+**you are the fix round the human authorised.** A context-free reader stopped
+here and re-asked for permission already given. The PROCEED branch has NOT fired
+and is live for whenever 0.2 actually closes.
+
+- ~~On PAUSE: put it to the human before opening a fix round.~~ **DISCHARGED
+  2026-08-19** — done, and this handoff is the human's answer. The rule itself
+  still stands for a round 13, if the human calls one.
 - **On PROCEED: 0.2 closes**, which fires, in order — **AR-5** against baseline
   `80306ad9` with a **SHA list from the command below, never a range and never a
-  table** (77 commits at `ffc59db3`, so put its scoping to the human BEFORE
-  launching; `ar-5` carries **no frontmatter model pin** and inherits whatever
-  tier this session runs on) → the settings-line discharge → the **Phase-0 →
-  Phase-1 human gate** → the **push gate**. No upstream is configured on `main`.
+  table** (**80** at `26a922e3` — campaign-scoped; an earlier revision said 77,
+  true at `ffc59db3`, and the Baselines table is the figure of record. Put its
+  scoping to the human BEFORE launching; `ar-5` carries **no frontmatter model
+  pin** and inherits whatever tier this session runs on) → the settings-line
+  discharge → the **Phase-0 → Phase-1 human gate** → the **push gate**. No
+  upstream is configured on `main`.
 - **Archive the verdict verbatim in this file**, under the same banner the four
   previous rounds use:
   `# ROUND 12'S VERDICT, AS RETURNED — ARCHIVE, NOT A TASK LIST`. Splice it
@@ -358,12 +524,12 @@ to falsify the diagnosis**, not merely to apply it.
   that is the guard. Do not re-anchor a reviewer's line numbers — you would be
   editing a record of what they said.
 
-## What was still open at round 11 — SUPERSEDED by § THE NEXT GATE
+## What was still open at round 11 — SUPERSEDED by § YOUR FIRST ACTION
 
 **Actionable — DISCHARGED, every item.**
 
 1. ~~`ar-1` round 11~~ — it RAN, returned PAUSE, and is resolved. The live gate
-   is **round 12**, in § THE NEXT GATE at the top of this file.
+   is **round 12's FIX ROUND**, in § YOUR FIRST ACTION at the top of this file.
 2. **AR-5 has NEVER run**, and no ceremony level removes it. Ruled 2026-08-18:
    it fires at **0.2 CLOSE**, not before. Baseline `80306ad9`; hand it a **SHA
    list from the command above, never a range and never this file's table**.
@@ -371,12 +537,15 @@ to falsify the diagnosis**, not merely to apply it.
 **Standing conditions, not work items:**
 
 - The **push gate** — human only, and there is no upstream to measure against.
-- **Everything in `DECISIONS.md` § 0.3 entry conditions**, which went **24 → 27
-  rows** this session [measured 2026-08-19: row-title diff against `061af657`] —
-  four added, one replaced. The four: the render projection's dropped framing
-  key; the barred station's per-station cause (conditional on T10);
-  `generator/README.md`'s homeless `strip` vocabulary; and the
-  three-package-reconciliations row rewritten to seven with per-item owners.
+- **Everything in `DECISIONS.md` § 0.3 entry conditions**, which went **23 → 27
+  rows** [measured at `26a922e3`: row-title diff against `061af657`. An earlier
+  revision said **24 →** 27, which reproduces under no accounting]. **Four
+  genuinely new rows, plus one retitled**: the render projection's dropped
+  framing key; the barred station's per-station cause (conditional on T10);
+  `generator/README.md`'s homeless `strip` vocabulary; and **C18 — the barred
+  station's SPOKEN word**, which the earlier enumeration omitted while counting
+  the retitle among its four. The retitle is three-package-reconciliations →
+  seven, with per-item owners.
 
 ## Rulings taken 2026-08-19 — binding, do not re-litigate
 
@@ -401,10 +570,15 @@ produced**, which is the durable home; this table is the convenience copy.
   named together with its cost, because `ar-2` and `ar-5` inherit it — **`ar-5`
   has no `model:` line in its frontmatter at all** [read:
   `.claude/agents/ar-5.md`], so it runs on whatever tier spawns it.
-- **Opens in**: Phase 0 step 0.2, at the **round-12** gate. Round 11's gate is
-  CLOSED and ruled — see § ROUND 11'S GATE.
-- **Gates the human holds**: the round-12 PAUSE decision (standing since round
-  9), the Phase-0 → Phase-1 review gate, and the push.
+- **Opens in**: Phase 0 step 0.2, in **round 12's FIX ROUND**. Round 12 ran,
+  returned PAUSE, and the human read it and handed off rather than fixing in
+  that session. **Ask for the three owed rulings first** — see § YOUR FIRST
+  ACTION at the top of this file.
+- **Gates the human holds**: the three owed rulings (the `●`, F4's copy home,
+  CP-η vs CP-α); whether a round 13 runs at all — the outgoing session argues
+  NOT, see § THE OUTGOING SESSION'S RECOMMENDATION; **AR-5's scope, because its
+  SHA list is 80 commits**; the Phase-0 → Phase-1 review gate; and the push.
+  There is no upstream on `main`.
 - **The twin ask is re-asked every session, not remembered** [read: `DEV.md` §
   Phase 0 — "If a session ends in between, **ask again** — do not carry the
   answer in a plan file"]. Re-asked and re-confirmed 2026-08-19:
