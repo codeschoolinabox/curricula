@@ -597,11 +597,32 @@ this region owns.
     origin, so the key is a field read rather than a derivation. Three framings
     are authored, one per reachable origin:
 
-    | the stage that failed      | the framing                                                         |
-    | -------------------------- | ------------------------------------------------------------------- |
-    | `tokens`                   | `the spelling broke here — <the parser's message>`                  |
-    | `ast`                      | `the grammar broke here — <the parser's message>`                   |
-    | `entwined` · `environment` | `the machinery broke here, not your code — <the machine's message>` |
+    | the stage that failed         | the framing                                                         |
+    | ----------------------------- | ------------------------------------------------------------------- |
+    | `tokens`                      | `the spelling broke here — <the parser's message>`                  |
+    | `ast`                         | `the grammar broke here — <the parser's message>`                   |
+    | `entwined`                    | `the machinery broke here, not your code — <the machine's message>` |
+    | ~~`environment`~~ UNREACHABLE | — never originates a rendered cause; see below                      |
+
+    **`environment` is struck rather than dropped, because the row said it and
+    it is false by construction.** An `environment`-tagged cause is producible,
+    but no barred phase ever reads it: `deriveAccessibility` never touches
+    `facts.environment` at all [read:
+    [`../embody/derive-accessibility.ts`](../embody/derive-accessibility.ts) —
+    `environment` and `evaluation` are both barred off `facts.entwined`, and the
+    doc comment says why: "an environment defect never bars evaluation: the
+    scope structure is terminal"]. So the third framing has exactly **one** live
+    key. Listing two invites an implementer to write a branch that can never be
+    taken, and deleting the word silently would lose the fact that it was
+    considered.
+
+    **On the count: "three authored framings" and R-T's "two authored framings
+    plus one shared instrument-fault branch" are the same fact.** R-T counts the
+    two that name a fault in the learner's PROGRAM and sets the instrument-fault
+    sentence aside as a shared branch; this table counts authored STRINGS, of
+    which there are three. **The string count governs the copy contract**,
+    because `display-labels.ts` holds three. R-T is not superseded — it is the
+    same split, counted by origin rather than by string.
 
     **One constant cannot serve both, and the constant this entry used to carry
     was the `ast` one.** A `tokens` failure never reached the grammar, so _the

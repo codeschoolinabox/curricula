@@ -40,13 +40,25 @@ proposals         0 … N ranked recommendations of a next lens
 
 Three facts about that data shape every drawing below:
 
-- **The barring edge bars a suffix, never a scatter.** Exactly three shapes:
-  everything open; grammar broken (source, tokens and ast stay open, the last
-  two wait); spelling broken (source and tokens stay open, the last three wait).
-  `source` and `tokens` are always reachable, and **a phase's own error never
-  bars it** — a grammar error leaves the grammar phase open, because that is
-  where the grammar error is studied. So **one barring edge, one cause, drawn
-  once.**
+- **The barring edge bars a suffix, never a scatter.** Exactly three
+  **geometries**: everything open; the last two wait (source, tokens and ast
+  stay open); the last three wait (source and tokens stay open). `source` and
+  `tokens` are always reachable, and **a phase's own error never bars it** — a
+  grammar error leaves the grammar phase open, because that is where the grammar
+  error is studied. So **one barring edge, one cause, drawn once.**
+
+  **Geometry and framing are counted separately, and binding them one-to-one is
+  wrong.** Three geometries, three framings, and the relation is
+  **many-to-one**: an `entwined` failure bars `environment` and `evaluation` —
+  the SAME geometry as a grammar break — and says something entirely different,
+  because the framing is keyed by the stage that FAILED, not by the phases that
+  wait. [read: `../../embody/derive-accessibility.ts` — `environment` and
+  `evaluation` both read `facts.entwined.ok`, so an `ast` failure and an
+  `entwined` failure are indistinguishable in shape and differ only in
+  `cause.stage`.] An earlier revision of this bullet named the geometries
+  "grammar broken" and "spelling broken", which read the framing off the
+  geometry and left the third framing with nowhere to be.
+
 - **`0` is the ordinary number of lenses on a phase**, not an edge case. Four of
   five phases have none today, and an arrangement that treats zero as a
   degenerate case of one will be wrong four fifths of the time.
@@ -357,9 +369,9 @@ reporting `undetermined`.
 **The same instrument, one stage upstream, and the framing changes with it.** A
 `tokens` failure never reached the grammar, so the cause line says _the spelling
 broke here_ — the region README keys the framing by the stage that FAILED rather
-than by the phase that is barred, and this is the second of its two authored
-framings. Drawn here because a shape asserted and never drawn is how the
-single-constant defect survived eight AR-1 rounds.
+than by the phase that is barred, and this is the second of its **three**
+authored framings. Drawn here because a shape asserted and never drawn is how
+the single-constant defect survived eight AR-1 rounds.
 
 **Three phases wait, not two**, and the geometry is the only thing that says so:
 a `tokens` failure bars `ast` as well as the two downstream, while the grammar
@@ -370,6 +382,45 @@ there without either being authored.
 **`Source` and `Tokens` stay open.** The barring edge is still drawn between
 stations rather than on one: `Tokens` is where the error is studied, so it keeps
 its mark and its kit.
+
+## The machinery breaks — the same geometry, a different sentence
+
+The third framing, drawn as a **rail-and-caption excerpt** — the rail with its
+mark row and the caption, and nothing else. Not a band excerpt: the band is the
+control row and the rail, and the caption renders beneath the rail.
+
+```text
+│  Source ─── Tokens ─── AST ──╳╌╌ Environment ╌╌╌╌ Evaluation │
+│   ▾ 2         ·          ·         waiting         waiting   │
+│                                                              │
+│  the machinery broke here, not your code — entwining failed. │
+│  the last two phases wait for it.                            │
+```
+
+**Compare it to [the grammar case](#the-parse-breaks--the-machine-stopped): the
+geometry is identical, character for character.** Both bar `environment` and
+`evaluation`; both leave `ast` open; both count two waiting. The only difference
+is the sentence, and that is the whole point — **the framing is keyed by the
+stage that failed, and two different stages produce this one shape** [read:
+`../../embody/derive-accessibility.ts` — `environment` and `evaluation` both
+read `facts.entwined.ok`, so `ast` and `entwined` origins are indistinguishable
+in geometry].
+
+**Drawn rather than declared undrawn**, because this document's own rule is that
+a shape asserted and never drawn is how the single-constant defect survived
+eight AR-1 rounds — and until now the third framing was the asserted-and-undrawn
+one, authored in `README.md` and appearing nowhere else in the package.
+
+**What it is honest about.** `entwined` and `environment` fail only as guarded
+defects of the embodiment, reported loudly — so a learner meets this sentence
+rarely, and when they do, the one thing the copy must not do is blame their
+program for the instrument's bug. `environment` cannot originate a rendered
+cause at all: nothing it bars is drawn, so this branch is reachable only through
+`entwined`.
+
+**No count line here either.** The caption holds the cause, and the count of
+what waits is the cause arm's own second row — not the count line returning
+under another name.
 
 ## The level does not admit this snippet type
 

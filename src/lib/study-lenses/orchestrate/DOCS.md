@@ -1,4 +1,4 @@
-<!-- cspell:ignore renderable affordances behaviour unrepresentable keyspace -->
+<!-- cspell:ignore renderable affordances behaviour unrepresentable keyspace failable -->
 
 # orchestrate — Architecture & Decisions
 
@@ -84,7 +84,7 @@ flowchart TD
     CFG -->|"supplies the registered levels, names the selected one"| VER
     VER -->|"classify: × admitted types × current type"| MARKS
     SNP -->|"the current type"| MARKS
-    EMB -->|"render, mechanical"| SUR
+    EMB -->|"render, mechanical — each phase's accessibility, and a barred phase's cause WITH ITS STAGE"| SUR
     VER -->|"annotate the editor's gutter, selected level only"| SUR
     MARKS -->|"selector marks · mask = selected assessment × strict posture"| SUR
     EMB -->|"the fitting lenses' recommendations, collected + ranked"| RECS
@@ -273,6 +273,28 @@ verdicts without consulting a level twice.
      And **an open tray never takes the caption**: a tray opens BETWEEN the rail
      and the caption, pushing it down along with the pane, because a tray
      describes one station while the caption describes the rail as a whole.
+
+  **The cause line's framing is keyed by the STAGE that failed, never by the
+  phase that is barred** — structural, not copy, and therefore owed here rather
+  than only in the glossary. Three framings: `tokens` → _the spelling broke
+  here_, `ast` → _the grammar broke here_, `entwined` → _the machinery broke
+  here, not your code_. **The key is not derivable from the geometry**, because
+  an `ast` failure and an `entwined` failure bar exactly the same phases [read:
+  `../embody/derive-accessibility.ts` — `environment` and `evaluation` both read
+  `facts.entwined.ok`]. Nor from the phase-order constant, which has no member
+  named `entwined` at all. So the render path needs `cause.stage`, and a
+  projection that carries only the message cannot produce the right sentence.
+
+  **And the projection must therefore carry it.** Today it does not: the panel
+  receives `cause` flattened to its message alone, and the boundary states that
+  discard as an invariant. Widening it is a 0.3 obligation, recorded rather than
+  discovered — see the campaign's 0.3 entry conditions.
+
+  **This makes `display-labels.ts` key against TWO embody vocabularies**, not
+  one: the lifecycle phase names it already uses for the labels, and the
+  failable STAGE names the framings key against. Those sets are not the same —
+  `entwined` is a stage and not a phase — and a file that keys against two
+  vocabularies should say so where its home is settled.
 
   The strings themselves are `display-labels.ts`'s (§ What lives here); what is
   structural — and therefore belongs here rather than only in the glossary — is
