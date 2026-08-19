@@ -304,6 +304,39 @@ Never pass a `model` parameter when spawning an `ar-N`.
   None blocks this campaign and none is this campaign's to fix.
 - **The fall's motion design and its reduced-motion equivalent** — a sandbox
   checkpoint against a running surface, per `spellme/DOCS.md` § Out of scope.
+- **Four findings from the Phase-1 close that have no other home** — recorded
+  here because the reports that found them are gone and the bodies that would
+  hold them are immutable. None blocks anything.
+  1. **A relay shipped under a `measured` tag.** `39e792e9`'s body reads
+     "[measured by the reviewer]" for the no-live-consumer claim. That is a
+     relay wearing the wrong label — `[measured:]` carries a command run this
+     session, and a subagent's finding is `[relayed:]`. **The substance is
+     true**: an AR-5 re-ran it independently [relayed: ar-5, 2026-08-19] and the
+     live quizzing imports take `ClassifiedToken`, the output contract, not
+     `ClassifyInput`. Only the tag is wrong, and the body cannot be amended.
+  2. **Six freeze assertions can pass vacuously.** `Object.isFrozen(undefined)`
+     returns `true`, so each of the three `Object.isFrozen(elements(…)[0]…)`
+     assertions in `scanning` and the three `result[0]` ones in `classifying`
+     survive an empty or short return. They are covered in practice — the
+     `One`/`Many` blocks fail loudly on an empty sequence — so this is
+     triangulation carrying an assertion that does not carry itself. The minimal
+     close is a `toBeDefined()` beside each, or asserting frozen-ness on a value
+     the same test already pins.
+  3. **`scanning`'s DOCS and README disagree about the caller's projection**,
+     and the cause is foreign: § Out of scope still says projecting the three
+     values is "the caller's one-line boundary… named in the README rather than
+     done here", while the README after `60349d76` says a consumer holding an
+     `Embodiment` does not call this module at all — the factory calls it once
+     per settle. The README is also split against itself. **Not this campaign's
+     to fix**; it belongs to whoever closes embody-derivation-facts, and
+     `60349d76` edited README.md and types.ts without DOCS.md.
+  4. **`lib/loop-guard`'s documented error discriminant is asserted by no
+     test.** Its README promises a `reason` of `'parse-failed'` or
+     `'multiline-injection'`; `LoopGuardError` is a type alias rather than a
+     class, so `.toThrow(Class)` is unavailable, and `grep -n reason` over its
+     test file returns nothing [relayed: ar-5, 2026-08-19]. A different module
+     and a different campaign's work — recorded so the finding outlives the
+     report.
 - **Registering `spellme` in the composition root is NOT Phase 1's job.**
   `orchestrate/lib/composing/built-in-lenses.ts` imports parsons and writeme and
   knows nothing of spellme [measured 2026-08-14: spellme appears in no file
