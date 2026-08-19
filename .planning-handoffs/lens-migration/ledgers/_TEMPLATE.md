@@ -343,10 +343,18 @@ The `src/lenses/` file is frequently a **shell**; the pedagogy is in
 | `tables-universal`           | 134                       | `wc-trace-table/`                                                                                                  |
 | `tracing`                    | `TracingLens.jsx` 313     | `aran-build.js`, `advice/`, `pointcut.js`, `shadowing/`, `trace-*.js`                                              |
 | `ask-javascript` (`bnd-001`) | 412                       | `ask/component/ask-questions.js`                                                                                   |
-| the coloring foundation      | —                         | `prism/`                                                                                                           |
+| ~~the coloring foundation~~  | —                         | ~~`prism/`~~ — **NOT A QUARRY SOURCE, human ruling 2026-08-19**                                                    |
 
 [measured 2026-08-15: `grep -ohE '(public\|static\|/static)/[A-Za-z0-9_./-]+'`
 over `src/lenses/*.jsx`, and `wc -l` on the parsonizer set]
+
+⚠️ **`prism/` is struck (human ruling 2026-08-19): _"prism is incidental, we'll
+create a code styling for all lenses to share."_** The foundation is a fresh
+shared build, not a port, and R-1 already retains Prism as a **library** rather
+than as quarried content. **Do not open a row against `public/static/prism/`.**
+The reasoning lives once, in
+[SPEC.md § Gen 1's second root](../SPEC.md#gen-1s-second-root--the-lens-file-is-often-only-a-shell);
+this is the copy that governs a seeder and it deliberately does not restate it.
 
 **Seven of the eighteen Gen-1 lens files reference an iframe** (`EditorLens`,
 `ParsonsLens`, `TracingLens`, `StepThroughsLens`, `QASMEditorLens`,

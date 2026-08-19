@@ -73,18 +73,46 @@ rows with **zero `G1-live`** while three of its own rows quoted files it had not
 inventoried. Gen-1 source is `src/lenses/` **and** `public/static/`, and listers
 4 and 5 run over both.
 
-| lens                    | shell in `src/lenses/`    | engine in `public/static/`                                                                                         |
-| ----------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `parsons`               | `ParsonsLens.jsx` **181** | `parsonizer/parsons.js` **1367** · `component.js` **574** · `lis.js` **148**; `public/parsons-iframe.html` **586** |
-| `blanks`                | `BlanksLens.jsx` 914      | `blanks/blankenate.js`                                                                                             |
-| `tables-universal`      | 134                       | `wc-trace-table/`                                                                                                  |
-| `tracing`               | `TracingLens.jsx` 313     | `aran-build.js` · `advice/` · `pointcut.js` · `shadowing/` · `trace-*.js`                                          |
-| `ask-javascript`        | 412 (`bnd-001`)           | `ask/component/ask-questions.js`                                                                                   |
-| the coloring foundation | —                         | `prism/`                                                                                                           |
+| lens                        | shell in `src/lenses/`    | engine in `public/static/`                                                                                         |
+| --------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `parsons`                   | `ParsonsLens.jsx` **181** | `parsonizer/parsons.js` **1367** · `component.js` **574** · `lis.js` **148**; `public/parsons-iframe.html` **586** |
+| `blanks`                    | `BlanksLens.jsx` 914      | `blanks/blankenate.js`                                                                                             |
+| `tables-universal`          | 134                       | `wc-trace-table/`                                                                                                  |
+| `tracing`                   | `TracingLens.jsx` 313     | `aran-build.js` · `advice/` · `pointcut.js` · `shadowing/` · `trace-*.js`                                          |
+| `ask-javascript`            | 412 (`bnd-001`)           | `ask/component/ask-questions.js`                                                                                   |
+| ~~the coloring foundation~~ | —                         | ~~`prism/`~~ — **NOT A QUARRY SOURCE, human ruling 2026-08-19**                                                    |
 
 [measured 2026-08-15:
 `grep -ohE '(public|static|/static)/[A-Za-z0-9_./-]+' src/lenses/*.jsx`, and
 `wc -l` on the parsonizer set]
+
+⚠️ **`prism/` is struck from this table (human ruling 2026-08-19): _"prism is
+incidental, we'll create a code styling for all lenses to share."_** Gen-1's
+`public/static/prism/` — **5603 lines across 2 non-vendored files** [measured
+2026-08-19] — is **not** a fidelity source and is owed no read. The foundation
+is a **fresh shared build**, not a port:
+[§ The coloring foundation](#the-coloring-foundation) already says it owns five
+artifacts of its own, and [R-1](#rulings-of-record) already retains Prism
+deliberately as a **library** — the no-parse fallback producer — rather than as
+quarried content. This row was the one place in the campaign that read the other
+way, and it read that way in two documents at once.
+
+**The rest of the table stands, and it is the campaign's largest unread
+surface.** Measured 2026-08-19 under `public/static/`, non-vendored: `ask` 1369
+lines across 18 files · `advice` 972 + `shadowing` 495 + the `aran-*`/`trace-*`
+roots · `wc-trace-table` 518 (+470 in a `--backup` sibling) · `blanks` 297 ·
+`estree-walker` 338 · `lib` 272 · `data` 88. **`parsonizer`'s 2167 is the only
+part any ledger has read** (`fd6066b3`), so **1 of 8 ledgers has a second-root
+reading and the other seven are scoped to shells.** Whether that is a Gate-1
+blocker or a per-lens obligation is **not ruled**.
+
+⚠️ **`WritemeLens` is the exception and it matters, because `writeme` is the
+fidelity control.** 874 lines with **zero** references to `static/` or `iframe`
+[measured 2026-08-19], so it genuinely has no second root and its ledger's
+`instruments: 1–5` is honest. The control holds. **Seven of eighteen Gen-1 lens
+files reference an iframe** — `EditorLens`, `ParsonsLens`, `QASMEditorLens`,
+`StepThroughsLens`, `TracingLens`, `debug-javascript`, `run-javascript` — and
+for those seven the `.jsx` is not where the lens lived.
 
 **Seven of the eighteen Gen-1 lens files reference an iframe** — `EditorLens`,
 `ParsonsLens`, `TracingLens`, `StepThroughsLens`, `QASMEditorLens`,

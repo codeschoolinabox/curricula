@@ -260,6 +260,55 @@ something to cite for what a Gen-1 learner actually met. Read
 and, more importantly, for the **remainders** — the read returned roughly 110
 candidate affordances and STEP 1a opened 33.
 
+### ⛔ STEP 1a's rows are weighted toward the WRAPPERS, and the twin is what fixes it
+
+**Human ruling 2026-08-19:** _"you can re-investigate the parsons nesting doll
+as we create the user-twin, this will also help you cut past the cruft and to
+the value."_ **The re-investigation is not a separate corrective pass — it
+happens inside the twin drafting**, because writing what the learner actually
+got is the instrument that separates cruft from value.
+
+Gen-1 `parsons` is a nesting doll: `ParsonsLens.jsx` → `<iframe>` →
+`parsons-iframe.html` → `parsons.js` → `lis.js`. **`parsons.js` is the core**;
+everything above it is container. STEP 1a's 33 rows are distributed the wrong
+way round [measured 2026-08-19]:
+
+| source                                          | lines    | rows   |
+| ----------------------------------------------- | -------- | ------ |
+| `parsons-iframe.html` — the container           | 586      | 13     |
+| `component.js` — a wrapper the host never loads | 574      | 5      |
+| `ParsonsLens.jsx` — the shell                   | 181      | 3      |
+| **`parsons.js` — THE CORE**                     | **1367** | **10** |
+| `lis.js`                                        | 148      | 2      |
+
+**21 of 33 rows come from wrappers; the core got 12.** The whole-file read of
+`parsons.js` reported roughly 60 affordances and STEP 1a opened ten. **Three
+live, learner- or reader-facing families were dropped and are NOT named in §
+Seed census's remainders** — Prism syntax highlighting of the fragments,
+unconditional HTML-escaping of every fragment, and the whole `user_actions` /
+`solutionHash` action-logging surface. Open rows for them as the twin reaches
+them, appending from the ledger's current last id.
+
+**Two cross-agent questions the STEP 1a reports already settle, which its rows
+left as uncertainty — verify and close them:**
+
+- `parsons-iframe.html`'s guess history hangs on `parsonWidget.user_actions`,
+  which its own reader could not confirm. `parsons.js` **does** expose it —
+  `this.user_actions = []` and `this.user_actions.push(logData)` [measured
+  2026-08-19]. **The 📝 Review Guesses history works.**
+- `trackGuess` looks up `ul-sortable-code`, an id absent from the iframe's
+  markup. `parsons.js` mints it — `'<ul id="ul-' + destinationID + '">'` — and
+  the iframe passes `sortableId: 'sortable-code'` [both measured 2026-08-19].
+  **The per-guess DOM snapshot really is captured.**
+
+⚠️ **`prism/` is NOT owed a read** (human ruling 2026-08-19, recorded where it
+governs:
+[SPEC.md § Gen 1's second root](./SPEC.md#gen-1s-second-root--the-lens-file-is-often-only-a-shell)).
+The coloring foundation is a fresh shared build. **But `parsons.js` calls
+`Prism.highlightAllUnder` unguarded**, so the twin may still owe a row about
+what the learner _saw_ — the affordance is in `parsons.js`, which was read; the
+library behind it is not quarried.
+
 ⚠️ **Three findings from that read reshape the twin before it is drafted. Do not
 re-derive them; do re-measure any number you intend to publish.**
 
