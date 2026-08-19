@@ -1,4 +1,4 @@
-<!-- cspell:ignore spellme -->
+<!-- cspell:ignore spellme undercounts -->
 
 # Brief — align spellme's docs to the published input-element member
 
@@ -68,6 +68,9 @@ wraps across source lines; grep a short fragment]. Ask:
 > tokens-ok-only, treating an absent member inside `readStream` as a caller bug
 > to surface (the leaf's own precondition philosophy)?
 
+**ANSWERED — see § Rulings of record below.** The rest of this section is the
+question as it was posed; the answer and its four companions are recorded there.
+
 Record the answer as a dated ruling in this file AND reflect it in the edited
 prose. The ruling's landing sites (disambiguation: spellme's README uses "the
 gate" for the LEARNER-progression gate — a different concept; do not annotate
@@ -79,6 +82,230 @@ unimplemented stubs; their contracts ARE the Phase-1 spec. NEITHER answer
 requires test edits: the three skipped applicability fixtures behave identically
 under both (only an enrichment-defect state distinguishes them, and no skipped
 test constructs one).
+
+## Rulings of record
+
+Four rulings, taken 2026-08-19 across this campaign's session — not all at its
+start; ruling 2 was revised mid-session and ruling 1 was re-put twice, and each
+bullet says so. Recorded here because a ruling that cannot be found by
+`git grep` does not exist (DEV.md § Ruling provenance).
+
+**Two of the four are in transit, and this block is not their home.** Only
+ruling 2 has no module document to live in — a ceremony decision governs none.
+Rulings 1 and 3 govern documents that exist today, so each is tagged
+`→ migrates to` and the campaign's closing commit enumerates the transfer. A
+`.planning-handoffs/` file is transitional scaffolding and gets pruned; a ruling
+left only here evaporates with it.
+
+- **Ruling 1 — `applicability` PRESENCE-GATES** (human ruling 2026-08-19,
+  answering the question posed above). **→ migrates to
+  `src/lib/study-lenses/lenses/spellme/README.md` § The lens object, and
+  `core.ts`'s `applicability` JSDoc** — both must carry the
+  `(human ruling 2026-08-19)` parenthetical, not merely the behavior.
+
+  The lens declines when embody's enrichment defected, and the learner-facing
+  cost is recorded explicitly rather than absorbed quietly.
+
+  **This ruling was put to the human three times, and the record of that is the
+  point.** First approved on a framing that omitted a consequence. Re-put with
+  the consequence measured, and **reaffirmed**: spellme is the **only**
+  `phase: 'tokens'` lens [measured 2026-08-19: `grep -rn "phase: '"
+  src/lib/study-lenses/lenses/*/index.tsx` — parsons and writeme are both
+  `source`], so a decline empties the phase, and an accessible-but-empty phase
+  renders `Tokens, spelling: nothing studies this phase yet` [read:
+  `src/lib/study-lenses/orchestrate/README.md`, in the display-labelling bullet
+  under `## Glossary — region terms`; grep `nothing studies this phase yet` — "a
+  phase whose only lens fails its applicability on this program is empty too"].
+  That is a claim about **curriculum coverage** made when the truth is
+  **machinery**, and it inverts embody's own rule that absence is "a reported
+  embody defect, never a property of the program" [read:
+  `src/lib/study-lenses/embody/README.md` § Reading the embodiment]. Accepted as
+  a known cost; the caption itself is orchestrate's and is recorded below as a
+  follow-on.
+
+  **Third put — the decline is SILENT, and an earlier draft of this bullet was
+  wrong.** That draft recorded a third part: a `console.error` from spellme's
+  own gate, approved on the agent's framing that the alternative left the
+  decline "inferred from an embody message three modules away." **That framing
+  was false in three measured ways**, and AR-1 caught it before the prose
+  landed: `applicability` "must be pure and synchronous, over the Facts alone"
+  [read: `src/lib/study-lenses/embody/types.ts` § `Gateable` remark], so a side
+  effect there falsifies the contract on the function it sits in; embody's
+  wrapper **already names the declining lens** [read:
+  `src/lib/study-lenses/embody/gate-lenses.ts` — `` `gateLenses: the
+  ${lens.name} gate threw …` ``]; and `derive-tokens.ts` **already reports the
+  defect at the defect site** [read:
+  `src/lib/study-lenses/embody/derive-tokens.ts`, the `catch` around the leaf
+  call]. There is also no precedent for it [measured 2026-08-19: `grep -rn
+  "console\." src/lib/study-lenses/lenses/ --include=*.ts --include=*.tsx | grep
+  -v tests` → no output]. **Re-put with those three measurements attached, the
+  human ruled: silent `return false`.** No `console.error`, no embody edit, no
+  new pattern in the lens region.
+
+  **The ruling is also consistent with the lens kind's own contract**, which is
+  weaker than the earlier draft's claim that the contract _required_ it. The
+  Totality remark on `Lens` says that for this kind, refusal-as-data "is
+  realized at the gate — a lens that cannot serve is never offered, so `main`
+  carries no refusal arm" [read: `src/lib/study-lenses/lenses/types.ts` §
+  `Lens`]. That bars a refusal arm in `main`; it does **not** discriminate
+  between presence-gating and the rejected alternative, which put a precondition
+  throw in `readStream` and would also have left `main` refusal-arm-free. A
+  human ruling needs no derivation, and manufacturing one invites a future
+  session to believe the question is foreclosed when it is not.
+
+  **The spelling.** Use
+  `facts.tokens.ok && facts.tokens.value.inputElements !== undefined`.
+
+  ⚠ **An earlier draft of this bullet carried a ⚠ DO-NOT-USE directive against
+  the `in` spelling. That directive was FALSE and is struck.** It claimed `in`
+  cannot narrow an optional property on a non-union object type, citing
+  `filterType`'s union-only branch. That was a **partial** source read shipped
+  under a `[read:]` tag: `filterType` narrows the _object_ reference, while the
+  _property_ reference is narrowed one frame earlier, in
+  `narrowTypeByBinaryExpression`'s `InKeyword` case, which is gated on
+  `containsMissingType` — an intrinsic that only enters a property's type under
+  `exactOptionalPropertyTypes`. Measured directly rather than reasoned [measured
+  2026-08-19: a three-function probe over the real `Facts` type, compiled with
+  the repo's own config. Under `exactOptionalPropertyTypes: true` the no-check
+  control errors TS2322 and **both** the `in` form and the `!== undefined` form
+  compile clean; under `--exactOptionalPropertyTypes false` the control **and**
+  the `in` form both error, and only `!== undefined` survives]. So the flag the
+  struck directive cited as its own evidence is precisely the flag that **makes
+  `in` work** — the claim was inverted, not merely wrong.
+
+  **`!== undefined` is still the spelling to use**, for the one reason that
+  survives: it depends on the member being `undefined`, not on the **key** being
+  absent — and key-absence is pinned only by a recorded-only backlog item [read:
+  `../embody-derivation-facts/BRIEF.md`, the backlog under the bold "Settled
+  (human, 2026-08-19, at the write-back gate)" paragraph; grep `defect-T2` —
+  "defect-T2 'in'-check strengthen"]. It is also the spelling that keeps
+  compiling if `exactOptionalPropertyTypes` is ever relaxed. That is a
+  robustness argument, not a correctness one, and it is recorded as such.
+
+- **Ruling 2 — `ceremony: medium`** (human ruling 2026-08-19). AR-1 and AR-5
+  fire; AR-2, AR-3 and AR-4 do not. **The timing, stated plainly because
+  "revised down" is a shape DEV.md § ceremony scrutinizes:** the human first
+  answered `full` at session start, then revised to `medium` mid-session, before
+  any commit landed. No commit exists under `full`. Not an agent-side
+  lightening: the agent never states this value and never lowers it.
+
+  **The gate set named, per DEV.md § ceremony's own instruction to name it
+  rather than assume it.** DEV.md records a docs-only precedent under which AR-2
+  fires "where a sketch or structural artifact is among the changed files" and
+  AR-3/AR-4 are `n/a`. This changeset would meet that trigger — edit site 4 is
+  `spellme/DOCS.md`, the architectural sketch — and it also touches source
+  (`core.ts`, `types.ts`), which routes an increment to the **ordinary** set.
+  Ruling 2 settles both: the level is `medium`, so the set is **AR-1 + AR-5 on
+  every commit-group**, and the collision is named here rather than left for a
+  future reader to find.
+
+  This is the only ruling in this block with no module document to migrate to.
+
+- **Ruling 3 — the leaf edit covers BOTH halves** (human ruling 2026-08-19). **→
+  migrates to `src/lib/study-lenses/lib/scanning/DOCS.md` § Out of scope**,
+  inline, where DEV.md § Ruling provenance puts it.
+
+  Site 6 below already routes `lib/scanning/README.md` — routed by the embody
+  close AR-5, before this campaign opened. What this ruling **adds is the
+  `DOCS.md` half**: § Out of scope says, verbatim, "**The caller's gate and
+  projection.** Gating on a successful tokens stage, and projecting the three
+  values off an embodiment's facts, are the caller's one-line boundary and are
+  named in the README rather than done here" [read:
+  `src/lib/study-lenses/lib/scanning/DOCS.md`; grep `are the caller's one-line
+  boundary`]. The two were approved together under the batch-fix rule. Together
+  they close the whole of the finding recorded at `./PHASE-1.md` — under
+  `## Deferred, and recorded elsewhere`, the third numbered sub-item of the
+  "Four findings from the Phase-1 close" bullet; grep `DOCS and README disagree`
+  — whose named owner, the embody-derivation-facts campaign, has since closed
+  [read: `60349d76`].
+
+- **Ruling 4** (human ruling 2026-08-19) — **the embody review-findings backlog
+  stays RECORDED-ONLY.** It re-confirms the ruling at
+  `../embody-derivation-facts/BRIEF.md`, in the bold paragraph "Settled (human,
+  2026-08-19, at the write-back gate)" — a bold paragraph, not a heading; grep
+  `at the write-back gate` — item 4. Offered to this session under § Also
+  available below, and declined. Out of scope. Nothing to migrate: it is a scope
+  decision about another campaign's backlog.
+
+### Standing values — transcribed, not decided
+
+Not rulings, and deliberately not numbered as such: `work` and `prospective` are
+the agent's to state, `ceremony` is ruling 2's, and `twin-doc` is each module's
+already-established value, which outside Phase 0 is never re-asked.
+
+- `work: software` — path-derived, mechanically: `src/` and unnamed paths are
+  software work.
+- `prospective` — the artifacts constrain a Phase 1 that has not run.
+- **spellme = `twin-doc: user`** [measured 2026-08-19: `git log --format='%B'
+  --all -S 'twin-doc' -- src/lib/study-lenses/lenses/spellme | grep 'twin-doc' |
+  head -1`].
+- **`lib/scanning` = `twin-doc: none`** [measured 2026-08-19:
+  `git log --format='%B' -- src/lib/study-lenses/lib/scanning | grep -o 'twin-doc: [a-z]*' | sort | uniq -c`
+  → 28 `none`, 1 `machine`; the `machine` one's subject module was embody, not
+  the leaf].
+- **This file = `twin-doc: none`**, matching its own last commit `adf83dc5`.
+
+### Recorded, not fixed
+
+Two findings this campaign surfaces and deliberately does not act on, and two
+obligations it hands forward to spellme Phase 1.
+
+1. **The orchestrate caption tells a learner the wrong thing on an embody
+   defect.** Grounds and measurement are under ruling 1. Fixing it is an
+   orchestrate change — a different module, a different campaign — and it is out
+   of this campaign's scope. Recorded here so the finding outlives the session
+   that found it.
+2. **`"the gate"` is a homonym, and `DOCS.md` carries BOTH senses by itself.**
+   The collision is not across the two documents, which is how an earlier draft
+   of this item framed it — it is inside one. `DOCS.md` says "**The gate**
+   answers applicability" in its § Architectural sketch (machinery), and "**The
+   gate is the entire refusal channel.** A wrong claim advances nothing" in its
+   § Structural constraints (learner) — the second near-verbatim from
+   `README.md` § Glossary, which defines _the gate_ as "the rule that the stream
+   advances only on a correct claim". So renaming one document's usage would
+   **not** resolve it. Pre-existing; not caused by this campaign, which walks
+   into it. **Mitigation taken instead of a rename, and scoped:** in the
+   **committed module prose** this campaign writes about the defect state, the
+   bare word "gate" never appears — the sentences say "applicability declines"
+   or "the lens is not offered". The mitigation binds the module documents, not
+   this handoff, which uses "gate" freely and would otherwise be its own
+   violation. A rename of the committed prose is the human's to elect.
+3. **Phase 1 owes a defect-state test, and it needs its own FILE.** The new
+   presence condition ships with no test constructing the defect state [measured
+   2026-08-19: `grep -c inputElements
+   src/lib/study-lenses/lenses/spellme/tests/*.ts*` → 0 in both files]. This
+   campaign adds no tests by its own charter (§ Verification below), so the
+   obligation passes to spellme Phase 1 — **but not as a fixture added to
+   `core.test.ts`**, which an earlier draft of this item said and which would
+   not work. The defect state is constructed with a **file-scoped, hoisted**
+   `vi.mock` of the leaf, and the precedent file says in its own header why it
+   is separate: the healthy suite lives elsewhere, "untouched by the mock"
+   [read: `src/lib/study-lenses/embody/tests/derive-tokens-defect.test.ts`, its
+   header comment and the `vi.mock` above the imports]. Dropped into
+   `core.test.ts` the mock would poison all 54 healthy core tests. So: **a new
+   test file mirroring that one's shape**, with the mock surviving through
+   `embody()` rather than a direct stage call. Not a defect of this campaign —
+   spellme's core is entirely unimplemented stubs, and its suite stands at 3
+   passing and 82 skipped of 85 [measured 2026-08-19: `npx vitest run --project
+   unit src/lib/study-lenses/lenses/spellme`] — but a gap that would otherwise
+   be discovered at Phase 1's test strategy, after a plan had already been built
+   on the wrong shape.
+4. **`readStream` gets a precondition throw, not an "absent-member arm".** Under
+   ruling 1 the member is guaranteed present by the time `readStream` runs —
+   `Lens`'s Totality remark makes mounting without the gate "a consumer bug", so
+   `readStream` may assume presence, and an arm that _handles_ absence as a
+   state would be a dead branch no test can reach. But the compiler still forces
+   a check: `readStream` receives a fresh `Facts`, applicability's truth does
+   not cross the function boundary, and `!` is barred [read: `eslint.config.mjs`
+   — `@typescript-eslint/no-non-null-assertion` set to `error` over
+   `src/lib/study-lenses/**/*.ts`]. The resolution is the sentence `core.ts`
+   already carries: an unusable embodiment is "a caller bug rather than a state
+   to absorb" [read: `src/lib/study-lenses/lenses/spellme/core.ts`, the
+   `readStream` JSDoc — the quote wraps across source lines, so grep `bug rather
+   than a state to absorb`]. It re-checks and **throws** — unreachable by
+   contract, required by the compiler — exactly as the leaf does for its own
+   inputs. Recorded because the distinction is invisible until someone writes
+   the branch.
 
 ## The edit sites (measured 2026-08-19; re-verify line positions — they drift)
 
@@ -95,7 +322,11 @@ In `src/lib/study-lenses/lenses/spellme/`:
    still owns the kind table.
 3. **core.ts ~line 55** — the readStream JSDoc "the sequence itself comes from
    the scanning leaf": widen to name the published member as the source (via
-   embody), plus the absent-member arm per the design ruling above.
+   embody), plus the precondition throw per § Recorded, not fixed item 4 —
+   **not** an absent-member arm. **And `core.ts`'s `applicability` JSDoc must
+   carry the `(human ruling 2026-08-19)` parenthetical**, not merely the new
+   behavior: it is one of ruling 1's two migration targets, and a behavior
+   recorded without its provenance is one the next session cannot locate.
 4. **DOCS.md ~line 208** — the Navigation entry "The derivation:
    ../../lib/scanning/README.md": still true for the vocabulary; add the
    member's residence (embody publishes; consumers read) so the derivation
@@ -114,6 +345,10 @@ In `src/lib/study-lenses/lenses/spellme/`:
    explicit approval).
 
 ## Also available to this session (human may activate any)
+
+**Offered and DECLINED — see § Rulings of record, ruling 4.** The backlog stays
+recorded-only; nothing below was activated. Kept here because the offer stands
+for whichever session comes next.
 
 The embody campaign's review-findings backlog — recorded-only at close, per
 increment with commit pointers — lives at
@@ -139,5 +374,27 @@ Per-file checkpoints on every changed file (markdownlint/cspell from REPO ROOT
 only; eslint+prettier on any .ts); spellme suite unchanged
 (`3 passed | 82 skipped (85)` shape — this campaign adds no tests unless the
 human activates backlog items); embody + scanning suites untouched; tsc at 0.
-Ceremony per the human's session-start answer; commit bodies carry the settings
-line + sourced claims; the design ruling transcribed here same-day.
+**Ceremony per ruling 2 (`medium`) — NOT the session-start answer**, which was
+`full` and was superseded mid-session; this line said "per the human's
+session-start answer" and aimed at the dead value until 2026-08-19. Commit
+bodies carry the settings line + sourced claims; the design ruling transcribed
+here same-day.
+
+**And the closing commit ENUMERATES the ruling migrations.** Rulings 1 and 3 are
+tagged `→ migrates to` in § Rulings of record because their homes exist; the
+close is where that transfer is checked rather than assumed. Verify each landed
+**with its `(human ruling 2026-08-19)` parenthetical**, using the wrap-safe form
+— prettier breaks a parenthetical mid-line and a single-line `git grep` then
+undercounts:
+
+```sh
+# undercounts — prettier breaks the parenthetical and this misses the wrapped ones
+git grep -h 'human ruling 2026-08-19' -- src/lib/study-lenses | wc -l
+
+# the form that works — note the redirect: `cat <file>` reads a file NAMED "file"
+f=src/lib/study-lenses/lenses/spellme/README.md
+tr '\n' ' ' <"$f" | tr -s ' ' | grep -o 'human ruling 2026-08-19' | wc -l
+```
+
+Run the second form on each migration target **after** `prettier --write`, never
+before. A ruling left only in this file evaporates when the handoff is pruned.
