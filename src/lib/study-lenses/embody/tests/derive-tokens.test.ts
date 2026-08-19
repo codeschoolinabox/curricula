@@ -194,7 +194,7 @@ describe('deriveTokens', () => {
 			).toBe(true);
 		});
 
-		it.skip('a template with a substitution → Template then TemplateSubstitutionTail', () => {
+		it('a template with a substitution → Template then TemplateSubstitutionTail', () => {
 			const stage = deriveTokens({ source: '`a${b}c`', type: 'script' });
 			expect(
 				stage.ok &&
