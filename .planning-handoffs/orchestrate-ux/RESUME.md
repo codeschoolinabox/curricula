@@ -1,19 +1,10 @@
-<!-- cspell:ignore actioned acyclicity affordances authorised behaviour behavioural brok checkability checkpointed codemod codepoint cutover failable finditer generalises homehood misdescribes neighbouring organise organised parentheticals pathspec respecified scriptable spellme synchronisation ugrep elif endswith findall fullmatch importants keyspace misalign renderable rindex startswith unargued unfiled unfound unglossed unactioned unbannered unbuilt undercount undercounted undercounts undrawn unmigrated unretired unrun wireframes -->
+<!-- cspell:ignore actioned acyclicity affordances authorised behaviour behavioural brok checkability checkpointed codemod codepoint cutover failable finditer generalises homehood misdescribes neighbouring organise organised parentheticals pathspec respecified scriptable spellme synchronisation ugrep discharged elif unattacked endswith findall fullmatch importants keyspace misalign renderable rindex startswith unargued unfiled unfound unglossed unactioned unbannered unbuilt undercount undercounted undercounts undrawn unmigrated unretired unrun wireframes -->
 
 # orchestrate ux — resumption point
 
-**STATE: Phase 0 step 0.2. ROUND 10 IS FULLY RESOLVED. `ar-1` ROUND 11 HAS RUN
-AND RETURNED PAUSE — 4 BLOCKERS, 9 IMPORTANT, 7 MINOR. Its verdict is archived
-verbatim below (§ ROUND 11'S VERDICT). AR-5 has still never run; 0.2 is not
-closeable, so it would review a changeset about to grow.**
-
-⚠ **THE PAUSE IS WITH THE HUMAN AND NO FIX ROUND IS OPEN.** The standing
-instruction since round 9 is that a PAUSE goes to the human before a fix round
-opens; it has never been discharged. **Do not start fixing from the verdict.**
-
-**Round 11 found SIX things this session wrote that are wrong, and three of them
-are corrections to corrections** — read § What round 11 says is wrong, below,
-before trusting any number in the § What this session did table.
+**STATE: Phase 0 step 0.2. ROUND 11 IS FULLY RESOLVED — 3 commits, `e61c7201`,
+`9e11074f`, and this one. `ar-1` ROUND 12 IS THE NEXT GATE and has NOT run. AR-5
+has still never run and fires at 0.2 close.**
 
 **Why a built module is in "Phase 0".** `orchestrate/` ships, has tests and a
 browser checkpoint ledger — and its **interface was never designed**. Phase 0
@@ -34,11 +25,54 @@ twin is **three documents**, all at `src/lib/study-lenses/orchestrate/ux/`:
 ambiguous.)
 
 **Read [`DECISIONS.md`](./DECISIONS.md) first** — the decision index, its § 0.3
-entry conditions (the deferrals' only home), and § The campaign's RADIUS, which
-is what closing 0.2 actually claims and which now has **three rings, not two**.
-Every `A*/B*/C*/D*/F*/G*/H*/I*` row id and every `CP-N` counter-proposal cited
-below is defined there; `T*` checkpoints are defined in § Sandbox checkpoints,
-in the archive.
+entry conditions (the deferrals' only home), § Deferred to an eyeball check (two
+round-11 findings ruled into the checkpoints, NOT open), and § The campaign's
+RADIUS, which now has **four rings**. Every row id and `CP-N` cited below is
+defined there; `T*` checkpoints are in § Sandbox checkpoints, in the archive.
+
+## What round 11 changed, and the three commits that answered it
+
+Round 11 returned **PAUSE — 4 blockers, 9 important, 7 minor** — and called this
+session's work "the strongest of the eleven rounds" while finding **six things
+it had written that were wrong**. Its verdict is archived verbatim below.
+
+| SHA        | what                                                                                         |
+| ---------- | -------------------------------------------------------------------------------------------- |
+| `e61c7201` | **BLOCKER 3** — the drawn word and the union member DECOUPLED; `waiting` → **`not reached`** |
+| `9e11074f` | **BLOCKERs 1, 2, 4** + the six wrong things + the **fourth ring**                            |
+
+**Two human rulings drove it** (2026-08-19): the machine value and the learner's
+word are decoupled, so UX vocabulary can be refined later without touching
+`types.ts`; and `waiting` was simply wrong copy — the README glosses it as
+_"barred, downstream of the barring edge"_, reaching for the opposite word.
+
+**The pattern round 11 exposed is worth more than any single finding.** Three of
+its six corrections were **corrections that had themselves gone stale or
+half-landed**, inside the very sections written to fix staleness — including one
+in the same list as the bullet `0d9bd6d2` repaired, under a subject line
+claiming the instruments "were each wrong and are repaired". Assume the same of
+this commit.
+
+## THE NEXT GATE — `ar-1` ROUND 12
+
+Registered agent, **no `model` parameter**. Same brief shape as round 11 (below,
+under § The round-11 brief), with round 11's findings as **evidence of what was
+fixed**. Its verdict is archived verbatim in this file; do not re-derive it.
+
+**Tell round 12 what it must attack, because round 11 named it and nobody built
+it: CP-α, the clause × drawing coverage table.** Round 11's diagnosis is that
+every instrument this campaign owns is a **presence detector** — greps, the
+reading list, the frame scan, the census — and the live defect class is
+**absence in the drawn surface**. Four of the caption's contract clauses had no
+drawing; one of them (the tray ordering) was actively contradicted by omission
+and is fixed. **The instrument is unbuilt and unruled**, deliberately, because
+building one is a decision. That is the single most likely source of round 12's
+findings.
+
+**Also unattacked:** the standing rows are now visibly tight — `not reached` is
+11 characters against `waiting`'s 7, and the spelling-break rail draws three of
+them in 62 columns. That is a real layout constraint the drawings surfaced, and
+it is a checkpoint question, not a document one.
 
 ## Baselines — measure these again at session start, do not trust them
 
@@ -60,7 +94,7 @@ rules: § Mechanics that will bite you, in the archive — that section is LIVE.
 src/lib/study-lenses/orchestrate .planning-handoffs/orchestrate-ux src/lib/study-lenses/WORKFLOWS.md
 ```
 
-## What this session did — eight commits
+## What this session did — thirteen commits, `0d9bd6d2..HEAD`
 
 `0d9bd6d2` · `9ab9e419` · `b3c2f0dc` · `99e04692` · `ffb4b0d8` · `fa57a777` ·
 `1f370db6` · `1106c268`
@@ -108,7 +142,10 @@ they assert the decision anyway, and three defects fell out:
 clean.** Every future vocabulary row closes by reading the `home of record`
 column's documents, not by counting.
 
-## What round 11 says is WRONG — re-verified this session, all confirmed
+## What round 11 said was WRONG — ALL SIX FIXED at `9e11074f`
+
+**Discharged; kept because the pattern is the lesson.** Three of the six were
+corrections that had themselves gone stale or half-landed.
 
 | claim                                                                      | measured at HEAD                                                                                                                                                                     |
 | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -125,7 +162,12 @@ staleness. `0d9bd6d2`'s subject line — "the three instruments this pass leans 
 were each wrong, and they are repaired before any decision rides them" — was
 true of three bullets and there was a fourth in the same list.
 
-## THE GATE — ROUND 11 IS AT THE HUMAN. WHAT HAPPENS NEXT IS THEIRS
+## ROUND 11'S GATE — CLOSED. The human ruled 2026-08-19; do not work from this
+
+**Discharged. Not a task list.** Both design questions were ruled — decouple the
+drawn word from the union member (`e61c7201`), and defer the unreached count's
+justification plus the undrawn-clause coverage to the checkpoints. All four
+blockers are fixed. Kept because the reasoning is auditable.
 
 **Round 11's own verdict on cost:** three of its four blockers are cheap —
 delete a three-sentence status clause from `DOCS.md`, rename `the mark row` at
@@ -182,7 +224,7 @@ standing ruling (CP-3).
   from `~/.claude/projects/<project-slug>/<session-id>/subagents/*.jsonl`, which
   no repo grep and no top-level `*.jsonl` glob reaches. See § Mechanics, trap 4.
 
-## What is still open
+## What was still open at round 11 — SUPERSEDED by § THE NEXT GATE
 
 **Actionable:**
 
