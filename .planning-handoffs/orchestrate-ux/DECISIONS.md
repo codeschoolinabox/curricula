@@ -617,6 +617,24 @@ binds, and these bind the whole class-2 subject rather than any one document.
 | R-H | R-D's route wording is satisfied by the rail. Narrow it, or retire the rail's competing claim?              | **Narrow it** to _naming the pane's occupant_. Does not reopen `0c78c63c`.                                                                  |
 | R-I | The nameplate has no placement rule (A11), and R-D falsifies the uniqueness claim (A12). Ride, or separate? | **Ride the amendment.** Same rule as the announcer: outside both maskable containers. Shipping it without would ship class 2 unenforceable. |
 
+### Rulings taken 2026-08-19 — the round-10 resolution
+
+Seven more, taken at plan time and during execution. **They live here because
+`DEV.md` § Ruling provenance makes a campaign's durable artifact the home and a
+plan file is not a record** — an earlier revision left them in `RESUME.md`
+alone, which a context-free reader flagged: `RESUME.md` prunes with the campaign
+and R-X pins a `types.ts` shape that 0.3 consumes.
+
+| #    | ruling                                                                                                                                                                                                                            |
+| ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R-X  | **The caption is ONE slot holding one THING, and its arms differ in SHAPE.** Cause arm = a block (framed message + the waiting count); count arm = one line. The union is over arm shapes, never `string \| string`. See **C14**. |
+| R-Y  | **The third framing is DRAWN.** Refined in execution to a **rail-and-caption excerpt**: a _band_ excerpt cannot carry it, because G1 makes the band the control row and the rail while the caption renders beneath. See **C13**.  |
+| R-Z  | **G7's columns invert** — home → `README.md` § What renders; `editor/README.md` → asserting, carrying 2 of 5 clauses. The class claim gets **A14**.                                                                               |
+| R-AA | **`ar-1` round 11 is the acceptance test**, then AR-5 at 0.2 close.                                                                                                                                                               |
+| R-AB | **The intake checklist has a THIRD question** — a commit that edits a row re-reads that row AS RENDERED. Landed in § How to maintain it.                                                                                          |
+| R-AC | **The sibling-region ring is the radius's third ring**, censused with a declared **polysemy exclusion**: a term naming a sibling region's own domain object is not a divergence. Declared, not fixed.                             |
+| R-AD | **The census reads TRACKED files only**, with one untracked observation recorded rather than dropped.                                                                                                                             |
+
 **R-H is the one worth re-reading before touching this subject again.** Round 5
 proposed distinguishing the nameplate (_naming where the LEARNER is_) from the
 rail (_narrating where the MACHINE is_) and flagged that the two are one word

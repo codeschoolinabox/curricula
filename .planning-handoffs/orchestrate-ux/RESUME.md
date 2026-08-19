@@ -1,16 +1,59 @@
-<!-- cspell:ignore actioned acyclicity affordances authorised behaviour behavioural brok checkability checkpointed codemod codepoint cutover failable finditer generalises homehood misdescribes neighbouring organise organised parentheticals pathspec respecified scriptable spellme synchronisation ugrep unactioned unbannered unbuilt undercount undercounted undercounts undrawn unmigrated unretired unrun wireframes -->
+<!-- cspell:ignore actioned acyclicity affordances authorised behaviour behavioural brok checkability checkpointed codemod codepoint cutover failable finditer generalises homehood misdescribes neighbouring organise organised parentheticals pathspec respecified scriptable spellme synchronisation ugrep elif endswith findall fullmatch misalign rindex startswith unactioned unbannered unbuilt undercount undercounted undercounts undrawn unmigrated unretired unrun wireframes -->
 
 # orchestrate ux — resumption point
 
-**STATE: Phase 0 step 0.2. ROUND 10 IS FULLY RESOLVED — 7 commits this session,
-`0d9bd6d2..1f370db6`. `ar-1` ROUND 11 IS THE NEXT GATE and has NOT run. AR-5
-still has never run and fires at 0.2 close.**
+**STATE: Phase 0 step 0.2. ROUND 10 IS FULLY RESOLVED. `ar-1` ROUND 11 IS THE
+NEXT GATE and has NOT run. AR-5 still has never run and fires at 0.2 close.**
+
+**Why a built module is in "Phase 0".** `orchestrate/` ships, has tests and a
+browser checkpoint ledger — and its **interface was never designed**. Phase 0
+here specifies the arrangement (the Rail) that replaces the lifecycle strip;
+what exists in `index.tsx` today is scaffolding, not contract. Full statement: §
+What this campaign is, in the archive.
+
+**The declared position, and it is the archive's ruling, not a fresh one:**
+
+```text
+work: software · twin-doc: user · ceremony: full · prospective
+```
+
+`twin-doc: user` is why AR-1 reviews a **twin** as well as a README, and the
+twin is **three documents**, all at `src/lib/study-lenses/orchestrate/ux/`:
+`personas.md`, `user-journeys.md`, `wireframes.md`. (Give AR-1 absolute paths —
+`lenses/spellme/ux/wireframes.md` also exists and a bare relative path is
+ambiguous.)
 
 **Read [`DECISIONS.md`](./DECISIONS.md) first** — the decision index, its § 0.3
 entry conditions (the deferrals' only home), and § The campaign's RADIUS, which
 is what closing 0.2 actually claims and which now has **three rings, not two**.
+Every `A*/B*/C*/D*/F*/G*/H*/I*` row id and every `CP-N` counter-proposal cited
+below is defined there; `T*` checkpoints are defined in § Sandbox checkpoints,
+in the archive.
 
-## What this session did — the seven commits
+## Baselines — measure these again at session start, do not trust them
+
+| what                    | value                                                                             |
+| ----------------------- | --------------------------------------------------------------------------------- |
+| this session's baseline | **`061af657`**                                                                    |
+| **AR-5's baseline**     | **`80306ad9`** — the campaign's, not this session's                               |
+| green                   | **622 passing in 22 files** · `npx tsc --noEmit` exit **0** [measured 2026-08-19] |
+| upstream                | **none configured** on `main`; the frontier is `origin/main` = `cf0316bd`         |
+| foreign commits         | **0** since `061af657` [measured 2026-08-19] — but the WORKING TREE is dirty      |
+
+⚠ **The tree carries other campaigns' work, including a modified
+`AGENTS.principal.md` (governance surface) and untracked directories.** The
+pathspec below is a **staging discipline**, not just a log filter: commit with
+`git commit --no-verify -F <msg> -- <paths>` and never `-a`. Full standing
+rules: § Mechanics that will bite you, in the archive — that section is LIVE.
+
+```text
+src/lib/study-lenses/orchestrate .planning-handoffs/orchestrate-ux src/lib/study-lenses/WORKFLOWS.md
+```
+
+## What this session did — eight commits
+
+`0d9bd6d2` · `9ab9e419` · `b3c2f0dc` · `99e04692` · `ffb4b0d8` · `fa57a777` ·
+`1f370db6` · `1106c268`
 
 | SHA        | what                                                                                    |
 | ---------- | --------------------------------------------------------------------------------------- |
@@ -21,24 +64,29 @@ is what closing 0.2 actually claims and which now has **three rings, not two**.
 | `ffb4b0d8` | **IMPORTANT 5** — G7's home inverted; A14 opened; the sibling ring censused             |
 | `fa57a777` | **IMPORTANT 7** — the inverted asymmetry booked · C15 · checkpoint T10                  |
 | `1f370db6` | **MINOR 8–11** + the manifest + H6's own count discrepancy · C16                        |
+| `1106c268` | the resumption point opens on round 11                                                  |
 
-**Take the SHAs, never a range.** [measured 2026-08-19: `git log --oneline
-061af657..HEAD` → all commits since the session baseline; the same with the
-campaign pathspec → **these seven**.] The pathspec is
-`src/lib/study-lenses/orchestrate .planning-handoffs/orchestrate-ux src/lib/study-lenses/WORKFLOWS.md`.
+⚠ **NEVER ASSEMBLE THE AR-5 LIST FROM THIS TABLE. Run the command.** Every
+round's table has been short by at least its own closing commit, and an earlier
+revision of THIS table claimed to have solved that and was itself short by one
+(`1106c268`, which is inside the pathspec because it edits this file). **The
+table cannot be complete: the commit that updates it is always later than it.**
 
-⚠ **Unlike every earlier round's table, this one is complete** — the seven above
-are all of it, because the resumption-point refresh is its own eighth commit
-rather than a closing commit the table predates. That off-by-one bit rounds 8
-and 9; it does not bite here.
+```bash
+git log --oneline 80306ad9..HEAD -- \
+  src/lib/study-lenses/orchestrate .planning-handoffs/orchestrate-ux \
+  src/lib/study-lenses/WORKFLOWS.md
+```
 
 ## The one thing this session changed most
 
 **CP-2's reading list works, and it is the only instrument that reached the last
 blocker.** Round 10 proposed it and nothing had used it. `ux/personas.md` and
-`ux/user-journeys.md` are **0 for all four caption phrases** — measured, true,
-and the exact basis on which my own plan concluded they needed nothing. Read end
-to end instead, they assert the decision anyway, and three defects fell out:
+`ux/user-journeys.md` are **0 for all four caption phrases** — those four being
+`the caption`, `the slot beneath the rail`, `the reason line`, and
+`the empty-count line` — which is measured, true, and the exact basis on which
+this session's own plan concluded they needed nothing. Read end to end instead,
+they assert the decision anyway, and three defects fell out:
 
 1. a live contradiction — Journey 6 licensing the per-phase cause repetition
    `personas.md` rejects one file over;
@@ -55,69 +103,164 @@ column's documents, not by counting.
 Registered agent, **no `model` parameter** (the frontmatter pins govern; passing
 one silently overrides the roster).
 
+**Inputs to hand it** — `DEV.md § AR-1`'s _Provide to agent_ line, made
+concrete: the region `README.md` and `DOCS.md`; **all three twin documents** at
+the absolute paths above; `types.ts` **as context, not as a review target** (0.3
+locks it, and it is deliberately thin); `DECISIONS.md` in full — round 10's
+IMPORTANT 6 was a defect _inside_ it, so it is reviewable; and the code read as
+evidence (`embody/derive-accessibility.ts`, `display-labels.ts`, `index.tsx`,
+`phases-panel/types.ts`).
+
 **Brief it on the WHOLE twin, never a narrowed scope.** Round 8's lesson is that
 telling a reviewer what not to review is how a real regression walks through.
-Give it round 10's findings as **evidence of what was fixed**, not as a no-go
-zone.
+Give it round 10's findings as **evidence of what was fixed** — the verdict is
+archived verbatim in this file under § ROUND 10'S VERDICT — not as a no-go zone.
 
-**Tell it these are the subjects this session touched**, so it can attack them
-rather than rediscover them: the caption's name and arm shapes (C12, C14), the
-three framings and the new § The machinery breaks drawing (C13), G7's inverted
-home and A14, C15's recorded asymmetry, C16's waiting count, and the sibling
-ring in H8.
+**Tell it the subjects this session touched**, so it attacks rather than
+rediscovers: the caption's name and arm shapes (C12, C14), the three framings
+and the new § The machinery breaks drawing (C13), G7's inverted home and A14,
+C15's recorded asymmetry, C16's waiting count, the sibling ring in H8.
 
-**And tell it what is deliberately NOT fixed**: everything in § 0.3 entry
-conditions, and every package- and sibling-scope divergence in H8 — declared,
-not fixed, by standing ruling (CP-3).
+**And what is deliberately NOT fixed**: everything in § 0.3 entry conditions,
+and every package- and sibling-scope divergence in H8 — declared, not fixed, by
+standing ruling (CP-3).
+
+### When round 11 returns
+
+- **On PAUSE: put it to the human before opening a fix round.** That instruction
+  has stood since round 9 and is not discharged.
+- **Archive the verdict verbatim in this file**, under the same banner the three
+  previous rounds use. Splice it **programmatically** and **unescape it** — the
+  transcript stores it HTML-escaped. A verdict that looks lost is recoverable
+  from `~/.claude/projects/<project-slug>/<session-id>/subagents/*.jsonl`, which
+  no repo grep and no top-level `*.jsonl` glob reaches. See § Mechanics, trap 4.
 
 ## What is still open
 
+**Actionable:**
+
 1. **`ar-1` round 11**, above.
 2. **AR-5 has NEVER run**, and no ceremony level removes it. Ruled 2026-08-18:
-   it fires at **0.2 CLOSE**, not before. **Hand it a SHA list, never a range**
-   — foreign commits interleave every pass, and a peer session committed 13
-   times during this session's planning alone.
-3. **The push gate, and there is no upstream to measure against.** [measured
-   2026-08-18: `git rev-parse --abbrev-ref main@{u}` → _no upstream
-   configured_.] The frontier is `origin/main` (`cf0316bd`).
-4. **Everything in `DECISIONS.md` § 0.3 entry conditions** — which gained two
-   rows this session: the render projection's dropped framing key, and the
-   barred station's per-station cause (conditional on checkpoint T10).
+   it fires at **0.2 CLOSE**, not before. Baseline `80306ad9`; hand it a **SHA
+   list from the command above, never a range and never this file's table**.
+
+**Standing conditions, not work items:**
+
+- The **push gate** — human only, and there is no upstream to measure against.
+- **Everything in `DECISIONS.md` § 0.3 entry conditions**, which went **24 → 27
+  rows** this session [measured 2026-08-19: row-title diff against `061af657`] —
+  four added, one replaced. The four: the render projection's dropped framing
+  key; the barred station's per-station cause (conditional on T10);
+  `generator/README.md`'s homeless `strip` vocabulary; and the
+  three-package-reconciliations row rewritten to seven with per-item owners.
 
 ## Rulings taken 2026-08-19 — binding, do not re-litigate
 
-| #    | ruling                                                                                                                                                                                                                                                                              |
-| ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| R-X  | **The caption is ONE slot holding one THING, and its arms differ in SHAPE.** Cause arm = a block (framed message + the waiting count); count arm = one line. The union in `types.ts` is over arm shapes, never `string \| string`.                                                  |
-| R-Y  | **The third framing is DRAWN** — not a fourth full frame, not a declared exception. **Refined during execution**: a _band_ excerpt cannot carry it (G1 makes the band the control row and the rail; the caption renders beneath the rail), so it is a **rail-and-caption excerpt**. |
-| R-Z  | **G7's columns invert** — home → `README.md` § What renders; `editor/README.md` → asserting. The class claim gets its own row, **A14**.                                                                                                                                             |
-| R-AA | **`ar-1` round 11 runs as the acceptance test**, then AR-5 at 0.2 close.                                                                                                                                                                                                            |
-| R-AB | **The intake checklist has a THIRD question** — a commit that edits a row re-reads that row as rendered. (Round 10 asked for this; it had never landed.)                                                                                                                            |
-| R-AC | **The sibling-region ring is the radius's third ring**, censused by H8's seven terms with a declared **polysemy exclusion** (a term naming a sibling region's own domain object is not a divergence). **Declared, not fixed.**                                                      |
-| R-AD | **The census reads TRACKED files only.** One untracked observation is recorded anyway — `evaluators/run/README.md` mints this region's third framing independently, one region over.                                                                                                |
+**Also recorded in [`DECISIONS.md`](./DECISIONS.md) § Rulings this list
+produced**, which is the durable home; this table is the convenience copy.
 
-## Mechanics that bit THIS session — read before editing
+| #    | ruling                                                                                                                                                                                                                             |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R-X  | **The caption is ONE slot holding one THING, and its arms differ in SHAPE.** Cause arm = a block (framed message + the waiting count); count arm = one line. The union in `types.ts` is over arm shapes, never `string \| string`. |
+| R-Y  | **The third framing is DRAWN.** Refined in execution: a _band_ excerpt cannot carry it (G1 makes the band the control row and the rail; the caption renders beneath), so it is a **rail-and-caption excerpt**.                     |
+| R-Z  | **G7's columns invert** — home → `README.md` § What renders; `editor/README.md` → asserting. The class claim gets its own row, **A14**.                                                                                            |
+| R-AA | **`ar-1` round 11 runs as the acceptance test**, then AR-5 at 0.2 close.                                                                                                                                                           |
+| R-AB | **The intake checklist has a THIRD question** — a commit that edits a row re-reads that row as rendered.                                                                                                                           |
+| R-AC | **The sibling-region ring is the radius's third ring**, censused with a declared **polysemy exclusion**. Declared, not fixed.                                                                                                      |
+| R-AD | **The census reads TRACKED files only**, with one untracked observation recorded anyway.                                                                                                                                           |
+
+## Operating instructions for the next session
+
+- **Model**: design work tracks the strongest available tier. Round 11 is a
+  design review; run the orchestrator on an opus-tier model and pass **no**
+  `model` parameter to `ar-1`. A downgrade must be named together with its cost,
+  because `ar-2` and `ar-5` inherit it.
+- **Opens in**: Phase 0 step 0.2, at the round-11 gate.
+- **Gates the human holds**: the round-11 PAUSE decision, the Phase-0 → Phase-1
+  review gate, and the push.
+- **Watch for**: a receipt that counts instead of reads (see § The one thing
+  this session changed most), and any number carried forward without
+  re-measuring.
+
+## The two instruments — RUNNABLE, because an instrument with no command is a rumour
+
+There is an untracked `scripts/lib/check-tables/` in the tree with a test
+importing a module that does not exist. **It is not these instruments and it is
+not this campaign's** — ignore it.
+
+````bash
+# 1 · rendered-row check — every table row's unescaped-pipe count vs its header
+python3 - <<'EOF'
+import re
+lines=open('.planning-handoffs/orchestrate-ux/DECISIONS.md').read().split('\n')
+inf=False; hdr=None; bad=[]
+pipes=lambda s: len(re.findall(r'(?<!\\)\|', s))
+for i,l in enumerate(lines,1):
+    if l.strip().startswith('```'): inf=not inf; continue
+    if inf: continue
+    s=l.strip()
+    if s.startswith('|') and s.endswith('|'):
+        if re.fullmatch(r'\|[\s:\-|]+\|', s): continue
+        nxt=lines[i].strip() if i<len(lines) else ''
+        if re.fullmatch(r'\|[\s:\-|]+\|', nxt): hdr=pipes(s); continue
+        if hdr is not None and pipes(s)!=hdr: bad.append((i,pipes(s),hdr))
+    elif s=='': hdr=None
+print('malformed rows:', bad or 'none')
+EOF
+
+# 2 · frame alignment — closing-vertical codepoint index, ONE-LINE FENCES EXCLUDED
+python3 - <<'EOF'
+import collections
+lines=open('src/lib/study-lenses/orchestrate/ux/wireframes.md').read().split('\n')
+inf=False; block=[]; blocks=[]
+for i,l in enumerate(lines,1):
+    if l.strip().startswith('```'):
+        if inf: blocks.append(block); block=[]
+        inf=not inf; continue
+    if inf and l.startswith('│') and '│' in l[1:]: block.append((i,l.rindex('│')))
+h=collections.Counter(); out=[]
+for b in blocks:
+    if len(b)<=1: continue          # single-line excerpts cannot misalign — declared exclusion
+    for i,idx in b:
+        h[idx]+=1
+        if idx!=63: out.append((i,idx))
+print('histogram:', dict(h), 'outliers:', out or 'none')
+EOF
+````
+
+**Expected at this commit: `malformed rows: none` and `{63: 77}`, no outliers**
+[measured 2026-08-19]. **The one-line-fence exclusion is not optional** — run
+without it and the scan reports two false outliers (`:267`, `:361`), both
+single-line control-row excerpts, and a next agent chases them.
+
+## Mechanics that bit THIS session
+
+The **standing** list is § Mechanics that will bite you, in the archive, and it
+is LIVE. These four are additions from this session:
 
 - **Prettier reflows the wide `DECISIONS.md` tables on every write**, so a row
-  you edited by hand will not match a literal `old_string` on the next pass.
-  Edit rows programmatically (split on unescaped `|`, replace the cell, rejoin)
-  or re-read the row first.
+  you edited by hand will not match a literal string on the next pass. Edit rows
+  programmatically (split on unescaped `|`, replace the cell, rejoin) or re-read
+  the row first.
 - **`--write` is safe only where the file was clean BEFORE your edit.** For the
   two twin files this was verified specifically, not assumed:
   `git show HEAD:<path> | npx prettier --check --stdin-filepath <path>`, exit 0.
-  The session-start measurement had not covered them.
-- **Two instruments must be re-run after any edit that touches them**, and both
-  were, every time: the rendered-row pipe-count check over every table in
-  `DECISIONS.md`, and the closing-vertical codepoint scan over every multi-line
-  fenced block in `ux/wireframes.md`. Current state: **0 malformed rows**;
-  **`{63: 77}`, zero outliers** [measured 2026-08-19].
 - **A new drawing's padding is COMPUTED, never eyeballed.** The five framed
-  lines added at `99e04692` were padded to index 63 by script before being
-  written, then verified after.
+  lines added at `99e04692` were padded to index 63 by script, then verified.
+- **A heredoc with backticks and parentheses is a trap.** Two `python3 - <<'PY'`
+  splices failed on unclosed parens mid-string; writing the script to a file and
+  running it is the reliable form.
 
-> **ARCHIVE BELOW THIS LINE.** Everything from § Round 9 down is a record of
-> rounds already resolved, kept because the reasoning is auditable. **No task
-> list below this point is live.** The live work is § THE NEXT GATE, above.
+> **ARCHIVE BELOW THIS LINE — WITH FOUR EXEMPTIONS THAT ARE STILL LIVE.**
+> Everything from § Round 9 down is a record of rounds already resolved, and
+> **no task list below this point is live.** But four sections below are not
+> records, and they still bind: **§ Commit form** (which `DECISIONS.md` calls
+> "the thing that actually fires"), **§ Mechanics that will bite you**, **§
+> Sandbox checkpoints owed at Phase 1** (the only definition of T1–T10), and **§
+> Human rulings** (the standing `twin-doc: user` / `ceremony: full` declaration
+> and the twin's three paths). An earlier revision of this banner said only "no
+> task list below is live", and a context-free reader obeyed it and lost all
+> four.
 
 ## Round 9 — PAUSE, resolved 2026-08-18
 
@@ -1998,11 +2141,12 @@ severity-equal to a failing test — say "LOSS LEDGER: NO REMOVALS" when true);
 the per-file checkpoint results; and a justification if you used `--no-verify`.
 
 **And before it lands, answer
-[`DECISIONS.md` § How to maintain it](./DECISIONS.md)'s two intake questions** —
-did this commit take a decision, and did it discover a site. They are cited here
-rather than restated, because one rule with two homes is the defect this
-campaign has spent six rounds removing from the region. This template is the
-thing that actually fires; the checklist is what it fires.
+[`DECISIONS.md` § How to maintain it](./DECISIONS.md)'s THREE intake questions**
+— did this commit take a decision, did it discover a site, and **did it edit a
+row** (in which case re-read that row AS RENDERED, not as a diff; R-AB,
+2026-08-19). They are cited here rather than restated, because one rule with two
+homes is the defect this campaign has spent six rounds removing from the region.
+This template is the thing that actually fires; the checklist is what it fires.
 
 ## Mechanics that will bite you
 
