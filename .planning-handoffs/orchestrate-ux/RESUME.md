@@ -2150,17 +2150,18 @@ Route: `npm start` → `http://localhost:3000/spiralearn/sandbox/orchestrate/`.
 200 from the dev shell — verify in a real browser, never by status code.** Rows
 route into `orchestrate/PHASE-1-CHECKPOINT-LEDGER.md`.
 
-| #   | Named action                                                | Expected observation                                                                                       |
-| --- | ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| T1  | Load; read the control row, rail, pane, proposals           | tokens applied; console clean                                                                              |
-| T2  | Click the navbar moon                                       | **house tokens AND lens tints both flip** — the observation jsdom structurally cannot make                 |
-| T3  | Read the four empty stations parsing, then with `1 +`       | the reason renders; the barring edge names its cause **once**; empty vs waiting legible without reading    |
-| T4  | Inject several lenses into one phase; read at 1 and many    | the rail's geometry does not move. **Requires editing `spiralearn/sandbox/orchestrate/index.mdx`**         |
-| T5  | Scaffold level + strict + `debugger;`                       | overlay names level and violation; rail dim+inert; Generate code dim+inert at its own element; class 2 lit |
-| T6  | Open a lens, then Edit code; press Tab                      | focus lands somewhere meaningful, not `body`. **R-11's third sighting** — two stand; a third promotes it   |
-| T7  | Arrow through the lens picker without committing            | **no lens opens**                                                                                          |
-| T8  | Screen reader: open a lens; then trip the mask              | both announced; the blocked sentence spoken **once**, not twice                                            |
-| T9  | Full keyboard pass; repeat reduced-motion and forced-colors | every control reachable; focus ring visible in both tones; nothing conveyed by opacity alone               |
+| #   | Named action                                                | Expected observation                                                                                                                  |
+| --- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| T1  | Load; read the control row, rail, pane, proposals           | tokens applied; console clean                                                                                                         |
+| T2  | Click the navbar moon                                       | **house tokens AND lens tints both flip** — the observation jsdom structurally cannot make                                            |
+| T3  | Read the four empty stations parsing, then with `1 +`       | the reason renders; the barring edge names its cause **once**; empty vs waiting legible without reading                               |
+| T4  | Inject several lenses into one phase; read at 1 and many    | the rail's geometry does not move. **Requires editing `spiralearn/sandbox/orchestrate/index.mdx`**                                    |
+| T5  | Scaffold level + strict + `debugger;`                       | overlay names level and violation; rail dim+inert; Generate code dim+inert at its own element; class 2 lit                            |
+| T6  | Open a lens, then Edit code; press Tab                      | focus lands somewhere meaningful, not `body`. **R-11's third sighting** — two stand; a third promotes it                              |
+| T7  | Arrow through the lens picker without committing            | **no lens opens**                                                                                                                     |
+| T8  | Screen reader: open a lens; then trip the mask              | both announced; the blocked sentence spoken **once**, not twice                                                                       |
+| T9  | Full keyboard pass; repeat reduced-motion and forced-colors | every control reachable; focus ring visible in both tones; nothing conveyed by opacity alone                                          |
+| T10 | Screen reader: traverse the rail with a barring edge drawn  | the barred stations speak `waiting` and nothing else; the cause is heard ONCE, unattached to any station. **Is that acceptable?** C15 |
 
 ## The process failure to not repeat
 

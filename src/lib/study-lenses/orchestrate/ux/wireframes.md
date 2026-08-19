@@ -210,6 +210,38 @@ so a reader moving through them linearly hears one sentence about four phases
 and cannot attach it to the one they just passed. This is the one place the
 spoken surface says more than the drawn one, deliberately.
 
+**And the same argument condemns what this arrangement does to the BARRED
+station — a cost the design incurs and nothing had recorded.** A waiting station
+has one drawn string, the standing word `waiting`, and no per-station text of
+its own. Its cause lives in the caption, which describes the rail as a whole and
+**names no station** — the identical objection, applied in the opposite
+direction. So a reader traversing linearly hears `waiting` four times and meets
+one unattached sentence about where the machine stopped.
+
+**This inverts Journey 6's own complaint rather than answering it.**
+[`user-journeys.md`](./user-journeys.md) states the defect as: the empty phase
+gives "a dead control and no reason for it" while "the _barred_ phase, by
+contrast, carries its cause — **the common case is served worse than the
+exceptional one**, which is the wrong way round." The Rail fixes the common case
+and, by moving the cause into a collective caption, makes the exceptional case
+the unattached one. **That is not obviously wrong** — B3's one-cause-drawn-once
+rule is a real decision, and repeating the parser's sentence per waiting phase
+is the failure [`personas.md`](./personas.md) names as telling a learner a
+single truth four times. But it is a **new cost**, and recording costs is this
+document's job.
+
+**Under strict it compounds in the same subtree.** The passage below books the
+per-station empty reason going dark with the rail; the barred cause is in the
+caption, which is class 3 by A9 and dims with the rail too. Both readers lose
+both halves at once.
+
+**Whether this is acceptable is a checkpoint question, not a document question**
+— a screen-reader pass over a barred rail is the only thing that settles it. If
+it is not acceptable, the cheap answer is the one the empty station already got:
+per-station visually-hidden text carrying the cause, which is a 0.3 obligation
+rather than a layout change, and which would have to be reconciled with B3's
+draw-once rule for the DRAWN surface.
+
 **Under strict, neither reader gets it, and that is a second unpaid cost.** The
 reason earns none of the four class-2 routes — it acts on no boundary, explains
 no boundary, is not the region's voice, and names no occupant — so it is class 3
