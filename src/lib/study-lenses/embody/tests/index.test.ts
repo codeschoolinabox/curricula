@@ -120,7 +120,7 @@ describe('embody', () => {
 			).toBe(true);
 		});
 
-		it.skip('freezes the input-element sequence deeply', () => {
+		it('freezes the input-element sequence deeply', () => {
 			const { facts } = embody('let x = 1');
 			const sequence = facts.tokens.ok
 				? facts.tokens.value.inputElements
