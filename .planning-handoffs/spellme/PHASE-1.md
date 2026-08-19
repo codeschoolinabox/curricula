@@ -1,22 +1,38 @@
-<!-- cspell:ignore spellme lookaheads tokenizer ZWNBSP -->
+<!-- cspell:ignore spellme lookaheads tokenizer ZWNBSP undercounts -->
 
 # Phase 1 — `lib/scanning`, then `spellme`
 
 **Phase 0 is closed. Phase 1 is UNDER WAY.** The canon is the in-repo READMEs
 and DOCS.md sketches, and this file deliberately does not restate them.
 
-⚠ **Only § Rulings of record and § Where things stand are maintained.**
-Everything below describing what Phase 1 _will_ do was written before it began
-and has not been kept current — treat it as the campaign's opening statement,
-not its status.
+⚠ **Three sections are maintained: § Where things stand, § Rulings of record,
+and § Traps.** Everything else describing what Phase 1 _will_ do was written
+before it began and has not been kept current — treat it as the campaign's
+opening statement, not its status. **§ What Phase 1 is is stale** and says so
+where it matters: it still claims "the fold does not exist yet", false since
+`065afc16`. The two rulings it used to be cited for now live in § Rulings of
+record, because a ruling readable only from a disclaimed section is one a
+careful reader may ignore.
 
 **`lib/scanning` Phase 1 is CLOSED**: 78 of 78 passing, 0 skipped [measured
-2026-08-19]. § Where things stand carries the SHA list; the status lives here,
-not elsewhere. [`./WAVE-2-BRIEF.md`](./WAVE-2-BRIEF.md) is now a **closed
-record** and says so in its own banner — this file used to route readers there
-for live status while that file routed them back here, and each disclaimed
-itself. [`./WAVE-1-BRIEF.md`](./WAVE-1-BRIEF.md) is a **historical record, not
-live status**: it briefed a wave that planned 33 un-skips and stopped at 24 by
+2026-08-19]. `lib/classifying` was reconciled alongside it (153 of 153). § Where
+things stand carries the SHA list; the status lives here, not elsewhere.
+
+➡ **THE NEXT CAMPAIGN IS NOT `spellme` PHASE 1.** A human ruling on 2026-08-19
+put a `spellme` **docs mini-campaign** first, and it is already briefed by
+another session:
+[`./ACQUISITION-ALIGNMENT-BRIEF.md`](./ACQUISITION-ALIGNMENT-BRIEF.md)
+(`adf83dc5`). Start there. That ruling also **declined** moving `scanning` into
+`embody/` — see § Deferred, whose bullet on the fold used to read as a go-ahead.
+A cold read of this file on 2026-08-19 could not reach the next action at all:
+neither campaign document named the brief, and the one pointer toward that area
+framed declined work as pending. That is what this paragraph fixes.
+
+[`./WAVE-2-BRIEF.md`](./WAVE-2-BRIEF.md) is now a **closed record** and says so
+in its own banner — this file used to route readers there for live status while
+that file routed them back here, and each disclaimed itself.
+[`./WAVE-1-BRIEF.md`](./WAVE-1-BRIEF.md) is a **historical record, not live
+status**: it briefed a wave that planned 33 un-skips and stopped at 24 by
 design, and its own numbers (33-of-67, six rulings) were true when written and
 are not now.
 
@@ -56,16 +72,23 @@ closed at the last of them, 71 of 71 passing [measured 2026-08-18].
 | `39e792e9` | `lib/classifying`'s mirror-image contract reconciliation                                 |
 | `e7627ccf` | the error-class assertions `237bdd10` dropped are restored                               |
 
-Suite after them: **78 passing, 0 skipped** [measured 2026-08-19]. The six
-handoff-doc commits riding with the campaign: `6e1926c3` `38fee403` `eacae342`
-`6ecb22e9` `0281cfa6`, and the one adding these rows.
+Suite after them: **78 passing, 0 skipped** [measured 2026-08-19]. **The
+campaign's doc-only commits — eleven, listed** [measured 2026-08-19: `git log
+--format=%h -- .planning-handoffs/spellme/PHASE-1.md
+.planning-handoffs/spellme/WAVE-2-BRIEF.md`]: `e6e3e16d` `9163a1c4` `6e1926c3`
+`38fee403` `eacae342` `6ecb22e9` `0281cfa6` `65215551` `9bfac80d` `6d7d3f08`,
+and the one adding this line.
 
-⚠ **This table has now failed the same way twice.** It read
-`` `<wave 2>` | the remaining 47 `` until 2026-08-18; then `0281cfa6` filled
-that row and **omitted itself and the four commits after it** until 2026-08-19,
-when an AR-5 addendum caught it. Both are exactly what the warning below
-predicts about a SHA list written last — including that the author's own last
-commit is the one that goes missing.
+⚠ **This table has now failed the same way three times, and each fix failed
+too.** It read `` `<wave 2>` | the remaining 47 `` until 2026-08-18. Then
+`0281cfa6` filled that row and **omitted itself and the four commits after it**,
+caught by an AR-5 addendum on 2026-08-19. Then the rewrite answering that
+addendum **still omitted five doc commits** — including the two that had just
+added § Deferred's findings — caught the same day by a context-free cold read,
+with one loop over `git log`. Every occurrence is what the warning below
+predicts: a SHA list is written last, and the author's own last commit is the
+one that goes missing. **Run the loop before trusting this list rather than
+reading it** — a list this often wrong is evidence, not authority.
 
 ⚠ **Foreign commits interleave all of those**, one of them landing _between_
 `9eea31a3` and `349d2f99`. **Do not trust a count here — recompute it**, because
@@ -226,6 +249,18 @@ Ruling provenance).
   human**, not a rule an agent may declare. It is recorded here because a claim
   made in an immutable commit body cannot be corrected there.
 
+- **Five phases, three named helpers; and Fake It expires at `One`** — both
+  settled at Phase 0, restated here 2026-08-19. The sketch's phase 1 is a guard
+  clause and phase 4 a merge, and **both stay inline in the export** rather than
+  becoming named helpers, so the Refactor step is held against the **phases**,
+  not a helper count. And under a suite committed skipped, DEV.md's "Fake It
+  expires when the next test is written" means **when the next test is
+  un-skipped**. Both were written in § What Phase 1 is — which this file's own
+  header disclaims as unmaintained, and which is genuinely stale (it still says
+  "the fold does not exist yet", false since `065afc16`). Restated here because
+  a ruling living only in a disclaimed section is one a careful reader is
+  entitled to ignore, and `WAVE-2-BRIEF.md` was citing them from there.
+
 ## Traps, each of which has already cost something
 
 - **The test helper must mirror `embody/derive-tokens.ts`** — `acorn.tokenizer`
@@ -256,9 +291,14 @@ Ruling provenance).
 - **`markdownlint-cli2` with a bare file argument treats it as a glob** and
   lints nothing. The per-file form is `--no-globs "<file>"`.
 - **Never run `eslint --fix`.** Read a peer's import block and match it by hand.
-- **A settings line and a `(human ruling …)` parenthetical both wrap.** Prettier
-  breaks them mid-line, so any single-line grep of either counts too few; run
-  `tr '\n' ' '` over the file first.
+- **A settings line and a `(human ruling …)` parenthetical both wrap**, and the
+  obvious workaround is wrong twice over. Prettier breaks them mid-line, so a
+  single-line `git grep` counts too few — but `tr '\n' ' '` alone still misses a
+  wrapped bullet, because the indented continuation leaves **two** spaces
+  mid-phrase, and `grep -c` after `tr` counts **lines**, of which there is now
+  exactly one. The form that works:
+  `… | tr '\n' ' ' | tr -s ' ' | grep -o 'human ruling' | wc -l`. All three
+  wrong forms have been shipped in this campaign's own documents.
 - **cspell set-diffs go vacuous out of tree** — a baseline copy in a scratchpad
   reports zero words checked. Test each flagged word against
   `git show HEAD:<file>` instead.
@@ -286,20 +326,32 @@ Never pass a `model` parameter when spawning an `ar-N`.
 - The Phase-1 → Phase-2 boundary.
 - `ar-5`, scoped by the SHA list above plus Phase 1's own commits.
 - **The push, and it is far larger than this campaign.** `main` has **no
-  upstream configured** [measured 2026-08-15: `git rev-parse --abbrev-ref
+  upstream configured** [measured 2026-08-19: `git rev-parse --abbrev-ref
   main@{upstream}` → "fatal: no upstream configured"], and `origin/main..HEAD`
-  is **91 commits** [measured 2026-08-15: `git rev-list --count
-  origin/main..HEAD`]. Six of them are this campaign's. Do not present the push
-  as "six commits" — whoever holds that gate is deciding about ninety-one, most
-  of them other sessions' work. **This number climbs on its own**: it read 81 on
-  2026-08-14, and a peer's own commit body that day said "'unpushed' turns out
-  to mean 83 commits, not 8". Re-measure it at the gate; never quote this line.
+  is **284 commits** [measured 2026-08-19: `git rev-list --count
+  origin/main..HEAD`; `origin/main` last moved 2026-08-11]. Roughly **38** are
+  this campaign's — 30 named SHAs plus wave 1's unnamed interior. Whoever holds
+  that gate is deciding about two hundred and eighty-four, most of them other
+  sessions' work. **This number climbs fast**: 81 on 2026-08-14, 91 on
+  2026-08-15, **284** on 2026-08-19 — 197 commits in four days. Re-measure it at
+  the gate; never quote this line. ⚠ This bullet said "**91** … **six** of them
+  are this campaign's" until 2026-08-19. The 91 was correctly caveated and a
+  cold reader re-measured it as instructed. The **six was not caveated and was
+  wrong when written** — it under-counted the campaign's own share by a factor
+  of six, in the one sentence written to stop someone under-presenting this
+  gate.
 
 ## Deferred, and recorded elsewhere
 
-- **Folding `scanning` and `classifying` into embody** —
-  [`../embody-derivation-facts/BRIEF.md`](../embody-derivation-facts/BRIEF.md).
-  Happens after `lib/scanning` is green, not before.
+- ⛔ **Folding `scanning` and `classifying` into embody — DECLINED, do not start
+  it.** This bullet used to read "happens after `lib/scanning` is green, not
+  before"; `lib/scanning` is now green, so it read as a go-ahead for work the
+  human has since refused. **`scanning` STAYS in `lib/`** — the leaf remains and
+  embody publishes by calling it (human ruling 2026-08-19, recorded in
+  [`../embody-derivation-facts/BRIEF.md` § Settled](../embody-derivation-facts/BRIEF.md)
+  and echoed in
+  [`./ACQUISITION-ALIGNMENT-BRIEF.md`](./ACQUISITION-ALIGNMENT-BRIEF.md)). A
+  cold reader following the old wording would have opened the wrong campaign.
 - **Five measured embody defects** — [`EMBODY-FLAGS.md`](./EMBODY-FLAGS.md).
   None blocks this campaign and none is this campaign's to fix.
 - **The fall's motion design and its reduced-motion equivalent** — a sandbox
@@ -314,14 +366,18 @@ Never pass a `model` parameter when spawning an `ar-N`.
      true**: an AR-5 re-ran it independently [relayed: ar-5, 2026-08-19] and the
      live quizzing imports take `ClassifiedToken`, the output contract, not
      `ClassifyInput`. Only the tag is wrong, and the body cannot be amended.
-  2. **Six freeze assertions can pass vacuously.** `Object.isFrozen(undefined)`
-     returns `true`, so each of the three `Object.isFrozen(elements(…)[0]…)`
-     assertions in `scanning` and the three `result[0]` ones in `classifying`
-     survive an empty or short return. They are covered in practice — the
-     `One`/`Many` blocks fail loudly on an empty sequence — so this is
-     triangulation carrying an assertion that does not carry itself. The minimal
-     close is a `toBeDefined()` beside each, or asserting frozen-ness on a value
-     the same test already pins.
+  2. **Five freeze assertions can pass vacuously.** `Object.isFrozen(undefined)`
+     returns `true`, so an assertion reaching through an index survives an empty
+     or short return [measured 2026-08-19: `scanning` lines 402 and 406,
+     `classifying` lines 778, 783 and 788 — note the last is `result[1]`, not a
+     third `result[0]`]. The array-level assertions (`scanning` 398,
+     `classifying` 773) are **not** in this class: the export always returns an
+     array, so there is nothing to vanish. This bullet said "six … three and
+     three" until 2026-08-19; it was miscounted in both modules. They are
+     covered in practice — the `One`/`Many` blocks fail loudly on an empty
+     sequence — so this is triangulation carrying an assertion that does not
+     carry itself. The minimal close is a `toBeDefined()` beside each, or
+     asserting frozen-ness on a value the same test already pins.
   3. **`scanning`'s DOCS and README disagree about the caller's projection**,
      and the cause is foreign: § Out of scope still says projecting the three
      values is "the caller's one-line boundary… named in the README rather than
@@ -336,19 +392,23 @@ Never pass a `model` parameter when spawning an `ar-N`.
      class, so `.toThrow(Class)` is unavailable, and no test mentions the field
      at all [measured 2026-08-19: `grep -rn "reason"
      src/lib/study-lenses/lib/loop-guard/tests/` exits 1 with no output, against
-     a README naming the discriminant at lines 203, 204, 212 and 222]. A
-     different module and a different campaign's work — recorded so the finding
-     outlives the report. ⚠ The commit that first recorded this finding put
-     "lines 202 and 262" in its body under a `[measured:]` tag; those were the
-     reviewer's numbers, relayed, and they are wrong. The substance held under
-     re-measurement — the line numbers did not. That body is immutable, which is
-     why the corrected evidence lives here, and it is finding 1's defect
-     committed inside the commit recording finding 1.
+     a README naming the discriminant at lines 203, 204, 212, 222, 262 and 264].
+     A different module and a different campaign's work — recorded so the
+     finding outlives the report. ⚠ The commit that first recorded this finding
+     put "lines 202 and 262" in its body under a `[measured:]` tag; those were
+     the reviewer's numbers, relayed, and they are wrong. The substance held
+     under re-measurement — the line numbers did not. That body is immutable,
+     which is why the corrected evidence lives here, and it is finding 1's
+     defect committed inside the commit recording finding 1.
 - **Registering `spellme` in the composition root is NOT Phase 1's job.**
   `orchestrate/lib/composing/built-in-lenses.ts` imports parsons and writeme and
-  knows nothing of spellme [measured 2026-08-14: spellme appears in no file
-  outside its own directory except `lib/scanning/README.md`]. A lens nobody can
-  reach is not a defect at this stage — the lens object exists and is frozen,
-  and wiring it up is a Phase-2 concern once there is something to mount. Do not
-  add the import on the way past; it would put an unimplemented component in
-  front of a learner.
+  knows nothing of spellme [measured 2026-08-19: spellme is now named in
+  **eight** files outside its own directory — `git grep -l spellme -- src/ |
+  grep -v lenses/spellme/` — including `embody/notional-machine.md` and four
+  `orchestrate/` docs. The 2026-08-14 form of this tag said "no file except
+  `lib/scanning/README.md`", which the tree outgrew; the bullet's substance is
+  unchanged and still measured: `built-in-lenses.ts` imports only parsons and
+  writeme]. A lens nobody can reach is not a defect at this stage — the lens
+  object exists and is frozen, and wiring it up is a Phase-2 concern once there
+  is something to mount. Do not add the import on the way past; it would put an
+  unimplemented component in front of a learner.

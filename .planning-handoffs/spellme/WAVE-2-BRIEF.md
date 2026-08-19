@@ -3,7 +3,7 @@
 <!-- cspell:ignore questionDot Punctuator IdentifierName PrivateIdentifier -->
 <!-- cspell:ignore NumericLiteral StringLiteral RegularExpressionLiteral -->
 <!-- cspell:ignore TemplateSubstitutionTail HashbangComment LineTerminator -->
-<!-- cspell:ignore DivPunctuator RightBracePunctuator pathspec worktree ZWNBSP -->
+<!-- cspell:ignore DivPunctuator RightBracePunctuator pathspec worktree ZWNBSP undercounts -->
 
 # `lib/scanning` Phase 1, Wave 2 — closed record (was a tdd-worker launch brief)
 
@@ -25,27 +25,35 @@
 > stale a fourth time, knowingly, would escalate its verdict to PAUSE.
 
 Process rulings governing this campaign are in
-[`./PHASE-1.md` § Rulings of record](./PHASE-1.md) — ten bullets, nine of them
-human rulings and the other an orchestrator assignment, findable via
-`git grep -n "human ruling" -- .planning-handoffs/spellme/PHASE-1.md` — scoped
-deliberately, because the unscoped form also matches the briefs that cite the
-rulings, this one included, so its count is not a constant. Eight of the nine
-bullets carry the phrase; the one that does not, AR-5 ownership, is the
+[`./PHASE-1.md` § Rulings of record](./PHASE-1.md). **Count them yourself rather
+than trusting a number here** — this sentence has carried a wrong count twice,
+and the obvious command counts wrong:
+
+```bash
+sed -n '/^## Rulings of record/,/^## Traps/p' .planning-handoffs/spellme/PHASE-1.md | grep -c '^- \*\*'
+sed -n '/^## Rulings of record/,/^## Traps/p' .planning-handoffs/spellme/PHASE-1.md | tr '\n' ' ' | tr -s ' ' | grep -o 'human ruling' | wc -l
+```
+
+Every bullet but one is a human ruling; the exception, AR-5 ownership, is the
 orchestrator's own assignment and says so rather than borrowing the human's
-authority. Read that section. Do not re-litigate any of them; if one seems
-wrong, report FLAG.
+authority. **`git grep "human ruling"` alone is not the instrument** — prettier
+wraps the parenthetical across lines, so § Traps' `tr '\n' ' '` workaround is
+needed, and that too reads low without **`tr -s ' '`**, because an indented
+continuation leaves two spaces mid-phrase. Read that section. Do not re-litigate
+any of them; if one seems wrong, report FLAG.
 
-⚠ **Read three sections of `PHASE-1.md`, not one: § Rulings of record, § Traps,
-and § What Phase 1 is.** All three are live and this brief depends on all three.
+⚠ **Read `PHASE-1.md` § Rulings of record, § Where things stand and § Traps.**
+Those are the maintained sections, per that file's own header.
 
+- **§ Rulings of record** now also carries the two structural rulings this brief
+  cites — **five phases, three named helpers**, and **Fake It expires at
+  `One`**. They used to live only in § What Phase 1 is, which that file
+  disclaims as unmaintained and which is genuinely stale; this brief was citing
+  rulings out of a disclaimed section, and both documents disagreed about which
+  sections were live. Fixed 2026-08-19.
 - **§ Traps** carries items this brief does not duplicate — plant no new
   `PINNED(` markers, the per-file markdownlint form is `--no-globs "<file>"`,
   and `repo-facts.mjs` caches its markdownlint number for 24 hours.
-- **§ What Phase 1 is** carries two rulings this brief cites but does not
-  restate: **five phases, three named helpers** (the guard and the merge stay
-  inline), and **Fake It expires at `One`** — under tests-committed-skipped,
-  DEV.md's "when the next test is written" means "when the next test is
-  un-skipped".
 - **§ Where things stand** carries this campaign's SHA list, which AR-5 takes.
 
 ⚠ **An earlier draft of this brief told you the rest of that file was stale, and
