@@ -212,12 +212,13 @@ and cannot attach it to the one they just passed. This is the one place the
 spoken surface says more than the drawn one, deliberately.
 
 **And the same argument condemns what this arrangement does to the BARRED
-station — a cost the design incurs and nothing had recorded.** A waiting station
-has one drawn string, the standing word `waiting`, and no per-station text of
-its own. Its cause lives in the caption, which describes the rail as a whole and
-**names no station** — the identical objection, applied in the opposite
-direction. So a reader traversing linearly hears `waiting` four times and meets
-one unattached sentence about where the machine stopped.
+station — a cost the design incurs and nothing had recorded.** A station in the
+`waiting` standing has one drawn string — the standing's drawn word,
+**`not reached`** — and no per-station text of its own. Its cause lives in the
+caption, which describes the rail as a whole and **names no station** — the
+identical objection, applied in the opposite direction. So a reader traversing
+linearly hears `waiting` four times and meets one unattached sentence about
+where the machine stopped.
 
 **This inverts Journey 6's own complaint rather than answering it.**
 [`user-journeys.md`](./user-journeys.md) states the defect as: the empty phase
@@ -909,6 +910,16 @@ costs and what it does not:
 7. **No drawing here has been seen by anyone who is not its author**, and the
    one question that decides the revamp — whether four empty phases teach or
    alarm — cannot be answered by any of them.
+8. **What a barred station SPEAKS is unruled, and this document contradicts
+   itself about it on purpose.** The standing's drawn word was decoupled from
+   its union member (human ruling 2026-08-19), which settled the **drawn** axis
+   only: the `waiting` standing draws `not reached`. Nothing anywhere says
+   whether the spoken surface follows the drawn word or the machine value. §
+   Fresh mount now draws the one and speaks the other in the same paragraph, and
+   that contradiction is **left standing rather than closed by an edit** — the
+   sentence it sits in is the recorded argument for a cost, and closing it here
+   would settle a second axis the ruling deliberately left alone. It is the one
+   thing the barred-rail screen-reader checkpoint is built to observe.
 
 ## Navigation
 
