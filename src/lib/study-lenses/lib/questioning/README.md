@@ -127,13 +127,13 @@ nondeterministic runtime facts, and any questioner may deliberately randomize
 wording or option order. The kind's laws are elsewhere — the envelope,
 assessment as data, cells and anchors on every item — never in the means.
 
-What a dynamic questioner's own Phase 0 settles: the ask seam (the envelope's
-ask is synchronous as typed, and a promise-shaped answer cannot ride the bare
-roster — the honest paths are runtime facts computed upstream and delivered as
-facts, an embody design event, or an async widening of the envelope, a family
-design event); the shape its runtime facts take; and its re-encounter story
-under randomization. The `serves` gate stays static either way: a pure,
-synchronous predicate over the parsed facts — gate on statics, run inside ask.
+What a dynamic questioner's own Phase 0 settles: the shape its runtime
+facts take; its tier placement if it consumes the evaluators region; and
+its re-encounter story under randomization. The ask seam is settled (human
+ruling 2026-08-18): ask answers directly or behind a promise that settles
+as data — consumers await uniformly, and a sync leaf is untouched. The
+`serves` gate stays static either way: a pure, synchronous predicate over
+the parsed facts — gate on statics, run inside ask.
 
 ## One grid (the curriculum commitment)
 

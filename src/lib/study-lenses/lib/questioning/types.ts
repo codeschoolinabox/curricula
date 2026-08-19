@@ -105,21 +105,31 @@ export type QuestionerRefusal = {
  * is a legal pairing; the read-bound — a questioner reads
  * `embodiment.facts` and never `embodiment.study`, so the lifecycle payload
  * crosses this type boundary unread; emitted values arrive frozen, and refusal is the pinned
- * data shape, never a throw and never a half-result. The signature types
- * ask as synchronous — a mechanical fact of today's type, not a law of the
- * kind: how a dynamic questioner (runtime ground truth; README § Static
- * and dynamic ground truth) meets this seam is its own Phase-0 question,
- * and a promise-shaped answer cannot ride the bare roster's ok-true
- * default.
+ * data shape, never a throw and never a half-result. Ask answers directly
+ * or behind a promise (human ruling 2026-08-18): the return widens to the
+ * answer, the refusal, or a Promise of either, so a sync leaf costs
+ * nothing and a dynamic questioner (runtime ground truth; README § Static
+ * and dynamic ground truth) runs code, calls services, or consults agents
+ * inside ask. Consumers await uniformly — awaiting a plain value is the
+ * identity — and a bare-roster answer narrows by its `ok` discriminant
+ * after the await (an un-awaited answer cannot be narrowed: the promise
+ * arm has no `ok`, and the contract test pins that rejection). A returned
+ * promise SETTLES AS DATA — the answer or the pinned refusal — and never
+ * rejects: an async throw would be a third channel the refusal shape does
+ * not cover, so settling is a law of the kind, not a type. The seam is
+ * typed `Promise`, not `PromiseLike`, deliberately; cancellation is not
+ * modeled (an abort parameter later is its own family-wide signature
+ * event). `serves` stays synchronous and static — gate on statics, run
+ * inside ask.
  */
 export type Questioner<TAnswer = { readonly ok: true }, TConfig = never> = {
 	/** The questioner's stable name — the family's roster identity. */
 	readonly name: string;
 	/** May this questioner serve this code? Pure, boolean, no cause. */
 	readonly serves: (facts: Facts) => boolean;
-	/** The main operation: embodiment in, frozen items out — or refusal. */
+	/** The main operation: embodiment in, frozen items out — or refusal; directly, or behind a promise that settles as data. */
 	readonly ask: (
 		embodiment: Embodiment,
 		config?: TConfig,
-	) => TAnswer | QuestionerRefusal;
+	) => TAnswer | QuestionerRefusal | Promise<TAnswer | QuestionerRefusal>;
 };

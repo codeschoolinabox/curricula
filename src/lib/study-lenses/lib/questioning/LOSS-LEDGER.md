@@ -210,6 +210,18 @@ Rows:
 | README § Leveling "This parent and both engines are language-level-blind" | REWORDED    | README § Leveling                      | Pre-merge review catch: the sentence states a law of the KIND in roster voice; a future third questioner is equally bound — now "every questioner under it".                                                                                                                                                                                                                                   |
 | Ledger § Owed forward, last row (the Explorotron divergence)              | RETIRED     | —                                      | Discharged by this section; the Owed-forward register itself stays open below.                                                                                                                                                                                                                                                                                                                 |
 
+## Gate redirect (2026-08-18, second round): the async widening
+
+The Stage-3 gate round widened the envelope's ask (human ruling; the
+quizzing plan carries the design review).
+
+| Content | Disposition | Where | Why |
+| --- | --- | --- | --- |
+| types.ts JSDoc "The signature types ask as synchronous ... a promise-shaped answer cannot ride the bare roster's ok-true default" | REWORDED | types.ts `Questioner` JSDoc | The widening landed: ask answers directly or behind a promise that settles as data; post-await narrowing replaces the cannot-ride caveat. Amends the first gate-redirect round's outcome on the same JSDoc. |
+| README § Static and dynamic "the honest paths are ... an async widening of the envelope, a family design event" | RESOLVED | README § Static and dynamic ground truth | The third path landed 2026-08-18; the remaining dynamic seams are runtime-facts shape and tier placement. |
+| NM § ASK; ux J1 "an immediate verdict" | REWORDED | notional-machine.md; ux/user-journeys.md | The ask may settle behind a promise; "immediate" is a property of today's sync leaves, not a family law. |
+| tests/questioner-contract.test.ts pin 4 ("narrows a bare-roster answer ... without a guard") | REPLACED | the contract test | Under the widened return the old pin compiled only via initializer narrowing — a false green (measured at the design review); the Awaited-typed pin + a ts-expect-error forgotten-await pin + an awaited drive replace it. |
+
 ## Owed forward (burn-down)
 
 | Debt                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Owed to                               |

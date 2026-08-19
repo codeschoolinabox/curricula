@@ -26,7 +26,16 @@ const closedLike: Questioner<{
 	ask: () => refusal,
 };
 
-const roster: ReadonlyArray<Questioner> = [openLike, closedLike];
+const asyncLike: Questioner<{
+	readonly ok: true;
+	readonly traces: readonly string[];
+}> = {
+	name: 'async-like',
+	serves: (facts: Facts) => facts.ast.ok,
+	ask: () => Promise.resolve(refusal),
+};
+
+const roster: ReadonlyArray<Questioner> = [openLike, closedLike, asyncLike];
 
 function askBare(
 	questioner: Questioner,
@@ -35,21 +44,40 @@ function askBare(
 	return questioner.ask(embodiment);
 }
 
+async function askSettled(
+	questioner: Questioner,
+	embodiment: Embodiment,
+): Promise<Awaited<ReturnType<Questioner['ask']>>> {
+	return questioner.ask(embodiment);
+}
+
 describe('Questioner envelope', () => {
 	it('holds a heterogeneous roster under the bare name', () => {
-		expect(roster).toHaveLength(2);
+		expect(roster).toHaveLength(3);
 	});
 
 	it('drives a bare roster member without config', () => {
 		expect(typeof askBare).toBe('function');
 	});
 
+	it('drives a promise-answering member to a settled answer', () => {
+		expect(typeof askSettled).toBe('function');
+	});
+
 	it('narrows a refusal by its ok discriminant', () => {
 		expect(refusal.ok).toBe(false);
 	});
 
-	it('narrows a bare-roster answer to the refusal arm without a guard', () => {
-		const answer: ReturnType<Questioner['ask']> = refusal;
+	it('narrows a settled bare-roster answer to the refusal arm without a guard', () => {
+		const answer: Awaited<ReturnType<Questioner['ask']>> = refusal;
 		expect(answer.ok === false ? answer.error.message : '').toBe('unparseable');
+	});
+
+	it('rejects narrowing an un-awaited answer', () => {
+		const pending: ReturnType<Questioner['ask']> = Promise.resolve(refusal);
+		expect(
+			// @ts-expect-error -- an un-awaited ask answer keeps its promise arm, which has no `ok`; narrowing requires the await (async-widening pin, human ruling 2026-08-18)
+			pending.ok === undefined,
+		).toBe(true);
 	});
 });

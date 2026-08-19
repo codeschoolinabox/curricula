@@ -46,8 +46,10 @@ facts arrive → SERVES? ──false──▶ not offered (a boolean, no cause)
   pairing.
 - **ASK, and its refusal arm.** The ask entry either runs the machine or refuses
   as data — which fact stage failed, and why — never a half-result and never a
-  silent empty success. Predict: unparseable source refuses at ask with the
-  parser's cause; it does not produce zero items.
+  silent empty success. It may answer directly or behind a promise that
+  settles as data (never a rejection) — await uniformly. Predict:
+  unparseable source refuses at ask with the parser's cause; it does not
+  produce zero items.
 - **GROUND.** Today's leaves read: they walk what the parse produced — tokens,
   AST, the scope environment — anchor by anchor and once over the whole program,
   and never evaluate the snippet. That is their choice, not the kind's law. A

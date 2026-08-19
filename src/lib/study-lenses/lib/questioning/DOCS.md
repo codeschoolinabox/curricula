@@ -1,5 +1,5 @@
 <!-- cspell:ignore socratizing quizzing socratize Schulte unbuilt -->
-<!-- cspell:ignore reenrichment linearization Gateable gradability -->
+<!-- cspell:ignore reenrichment linearization Gateable gradability unlegislated unmodeled -->
 
 # lib/questioning — Architecture & Decisions
 
@@ -235,9 +235,23 @@ collateral) until it retires.
   codified, and supersedes in detail the campaign spec's decision-9 headline
   "pure and stateless" — its content (assessment as data; no learner state)
   stands; blanket generation-purity does not. Grading determinism was NOT
-  loosened. The dynamic questioner's open seams (the sync-typed ask;
-  runtime-facts shape; tier placement if it consumes the evaluators region) are
-  recorded in README § Static and dynamic ground truth.
+  loosened. The dynamic questioner's open seams (runtime-facts shape; tier
+  placement if it consumes the evaluators region) are recorded in README
+  § Static and dynamic ground truth — the third recorded seam, the
+  sync-typed ask, was resolved by the 2026-08-18 widening (next row).
+- **Ask is async-capable** (human ruling 2026-08-18, the Stage-3 gate
+  round): the return widens to
+  `TAnswer | QuestionerRefusal | Promise<TAnswer | QuestionerRefusal>`.
+  Consumers await uniformly (awaiting a plain value is the identity); a
+  sync leaf satisfies the widened type unchanged — the landed socratizing
+  questioner compiles untouched (measured at the design review, tsc probe
+  against the real import); `serves` stays sync/static by law. A returned
+  promise settles as data and never rejects — the refusal shape covers
+  every non-answer, and an async throw would be an unlegislated third
+  channel. Declined alternative: uniform `Promise` returns, which would
+  force-wrap every sync leaf. `Promise` over `PromiseLike` is deliberate
+  strictness. Cancellation is unmodeled and deferred — an abort parameter
+  is its own family-wide signature event.
 - **No open/closed register type is minted.** No forward code discriminates on
   the register; minting a discriminant with no consumer would be the first step
   of reviving the orchestrator.
