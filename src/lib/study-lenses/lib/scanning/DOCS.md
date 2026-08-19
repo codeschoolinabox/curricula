@@ -145,24 +145,31 @@ flowchart TD
 - **Input coherence.** The source text, the token array and the comment array
   must come from one reading of one source. This module validates presence, not
   provenance; a token ending past the end of the source is a caller bug, and it
-  is the one thing that could break the tiling claim above. **A part of the
-  wrong type is the same class of failure** (human ruling 2026-08-18, the same
-  one recorded under § Structural constraints) — a number where a token array
-  belongs is not an absence, and the boundary does not catch it. It surfaces
-  from wherever the part is first used, which is the one place this module's
-  fail-at-the-boundary rule deliberately does not reach. Where it surfaces
-  depends on the part [measured 2026-08-19, the committed module bundled with
-  `esbuild --external:acorn` and called directly]: `tokens: 42` throws from the
-  fold, `tokens.keys is not a function`; an array of the wrong _contents_ gets
-  further, to the naming rule, and throws reading `.keyword` on a token type
-  that is not there. **Nothing is published in either case** — an earlier
-  revision of this bullet claimed the wrong-contents case "hands every element
-  the whole source before anything throws", which is false: the whole-source
-  slice is computed for the first element and dies in the same iteration, so no
-  caller ever sees it.
-- **The caller's gate and projection.** Gating on a successful tokens stage, and
-  projecting the three values off an embodiment's facts, are the caller's
-  one-line boundary and are named in the README rather than done here.
+  is the one thing that could break the tiling claim above — closed by
+  construction on the factory path, which is the primary one; see the gate and
+  projection bullet below. **A part of the wrong type is the same class of
+  failure** (human ruling 2026-08-18, the same one recorded under § Structural
+  constraints) — a number where a token array belongs is not an absence, and the
+  boundary does not catch it. It surfaces from wherever the part is first used,
+  which is the one place this module's fail-at-the-boundary rule deliberately
+  does not reach. Where it surfaces depends on the part [measured 2026-08-19,
+  the committed module bundled with `esbuild --external:acorn` and called
+  directly]: `tokens: 42` throws from the fold, `tokens.keys is not a function`;
+  an array of the wrong _contents_ gets further, to the naming rule, and throws
+  reading `.keyword` on a token type that is not there. **Nothing is published
+  in either case** — an earlier revision of this bullet claimed the
+  wrong-contents case "hands every element the whole source before anything
+  throws", which is false: the whole-source slice is computed for the first
+  element and dies in the same iteration, so no caller ever sees it.
+- **The caller's gate, and the three-value projection where there is one.**
+  Neither is done here (human ruling 2026-08-19). Which caller owes what changed
+  with the embody integration: the factory closes input coherence by
+  construction and projects nothing; a caller outside the embodiment's reach
+  gates and projects for itself. The account lives in README § Public API and §
+  Where this module and the specification part ways. This bullet called the two
+  together "the caller's one-line boundary" — correct for a leaf embody does not
+  call, which is why the sibling leaves still say it, and wrong here since the
+  integration. The README's matching passage was corrected in the same commit.
 - **Selection, filtering, ranking, or presentation.** The module describes; a
   consumer chooses.
 - **Destinations.** Where an element goes, what it means to a learner, whether

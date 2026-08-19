@@ -346,9 +346,21 @@ fidelity guarantee.
 precondition.** The source text, the token array and the comment array must come
 from **one reading of one source**. This module checks that they are present,
 not that they belong together; hand it tokens from a different source and the
-spans will not join. Projecting the three values off one embodiment's facts,
-behind one successful-tokens gate, is what satisfies it — which is the whole of
-the caller's boundary.
+spans will not join.
+
+**Who satisfies it depends on which caller you are, and the primary path is no
+longer a projection at all.** Since the embody integration the factory calls
+this module over a reading it produced itself, so coherence holds **by
+construction** and nobody projects — see § Public API, and
+`../../embody/types.ts`'s `inputElements` remark for the normative statement of
+that guarantee, including its one hole: the published sequence is absent exactly
+when the derivation itself defected, which is embody's to report and a
+consumer's to check for. A caller outside the embodiment's reach projects the
+three values off its own facts, behind one successful-tokens gate; this leaf's
+own tests build the same shapes from a direct `acorn.tokenizer` call. That
+projection is the whole of _that_ caller's boundary — it was never the whole of
+every caller's, and this sentence went on saying it was after the integration
+landed underneath it.
 
 **The parser refuses some programs the language accepts, so this module never
 sees them.** A reserved word spelled with a Unicode escape — `\u0069f`, six
