@@ -1,9 +1,24 @@
-<!-- cspell:ignore actioned acyclicity affordances authorised behaviour behavioural brok checkability checkpointed codemod codepoint cutover failable finditer generalises homehood misdescribes neighbouring organise organised parentheticals pathspec respecified scriptable spellme synchronisation ugrep discharged elif unattacked endswith findall fullmatch importants keyspace misalign renderable rindex startswith unargued unfiled unfound unglossed unactioned unbannered unbuilt undercount undercounted undercounts undrawn unmigrated unretired unrun wireframes -->
+<!-- cspell:ignore actioned acyclicity affordances authorised behaviour behavioural brok checkability checkpointed codemod codepoint cutover deixis failable finditer generalises homehood misdescribes neighbouring organise organised parentheticals pathspec respecified scriptable spellme synchronisation ugrep discharged elif unattacked endswith findall fullmatch importants keyspace misalign renderable rindex startswith unargued unfiled unfound unglossed unactioned unbannered unbuilt undercount undercounted undercounts undrawn unmigrated unretired unrun wireframes -->
 
 # orchestrate ux — resumption point
 
-**STATE: Phase 0 step 0.2. `ar-1` ROUND 12 IS THE NEXT GATE and has NOT run.
-AR-5 has still never run and fires at 0.2 close.**
+**STATE: Phase 0 step 0.2. `ar-1` ROUND 12 HAS RUN and returned PAUSE — 2
+blockers, 7 important, 6 minor. ITS VERDICT IS ARCHIVED VERBATIM BELOW, and THE
+HUMAN GATE IS OPEN: no fix round opens until the human has seen it (standing
+since round 9, never discharged). AR-5 has still never run and fires at 0.2
+close.**
+
+**Two of round 12's findings were re-measured before this line was written and
+both reproduce.** BLOCKER 1: in § The spelling breaks the standings row is
+shifted left of its stations by up to 7 columns, so the first `not reached`
+spans columns 16-26 while `AST` spans 27-29 and `Tokens` spans 14-19 — **the
+drawing says `Tokens` is not reached, nine lines above prose reading "`Source`
+and `Tokens` stay open"** [measured: name-centre vs standing-centre, every rail
+drawing]. It is a REGRESSION introduced by C17's own execution: swapping
+`waiting` (7 chars) for `not reached` (11) consumed the padding and nobody
+recomputed it. IMPORTANT 3: `source` and `tokens` are unconditionally accessible
+[read: `embody/derive-accessibility.ts`], so at most THREE phases can ever be
+barred and the twin's "hears `waiting` four times" is impossible.
 
 **Round 11 was declared FULLY RESOLVED and was not.** A context-free validation
 run before round 12 found **three of its six "wrong things" still wrong at
@@ -72,7 +87,7 @@ in the same list as the bullet `0d9bd6d2` repaired, under a subject line
 claiming the instruments "were each wrong and are repaired". Assume the same of
 this commit.
 
-## THE NEXT GATE — `ar-1` ROUND 12
+## THE GATE THAT JUST RAN — `ar-1` ROUND 12, PAUSE. The brief below is kept for round 13
 
 Registered agent, **no `model` parameter**. Its brief is **§ THE ROUND-12
 BRIEF**, below — written for round 12, not inherited from round 11. Round 11's
@@ -863,6 +878,290 @@ since:
 | R-O | Hand off at this boundary; a fresh session opens on round 8's blockers.                                                                  |
 
 ---
+
+---
+
+# ROUND 12'S VERDICT, AS RETURNED — ARCHIVE, NOT A TASK LIST
+
+**Provenance, and it is not repo state.** Spliced 2026-08-19 from this session's
+subagent transcript at `<session-id>/subagents/agent-a9f56f4e0a2fac93e.jsonl`
+programmatically, so it is verbatim by construction. **HTML-unescaping ran and
+was a no-op this time** — zero entities in the stored text — which is recorded
+because the previous round's splice DID need it and a reader should not conclude
+the step is optional. The reviewer's own two-line preamble ("I have enough
+measured ground. Writing the report.") is the only thing trimmed; nothing inside
+the report is altered. **Every claim below is `[relayed: ar-1 round 12]` until
+re-measured** — and two were re-measured before this file was written: BLOCKER
+1's column arithmetic and IMPORTANT 3's impossibility proof both reproduce.
+
+<!-- prettier-ignore-start -->
+<!-- markdownlint-capture -->
+<!-- markdownlint-disable -->
+
+```text
+Reviewed as: claude-opus-5[1m] | UNDETERMINED
+```
+
+The environment context states the exact model ID is `claude-opus-5[1m]`. `DEV.md § Sub-model dispatch` pins AR-1 to `opus`; an opus-tier model ran, so the pin took.
+
+# AR-1 Round 12 — Design Challenge, `orchestrate ux` (the Rail), Phase 0 step 0.2
+
+**Verdict: PAUSE.** Two blockers, seven importants, six minors. I read all six documents end to end, `DECISIONS.md` in full, `RESUME.md`'s live block plus the archived round-11 verdict, and the five code files. Every number below is one I ran; where I could not reproduce a campaign claim I say so, and where I re-measured a campaign claim and it **held**, I say that too.
+
+**What verified clean, stated first.** The fourth-ring `station` count reproduces exactly with the cited command [measured: `git grep -lw "station\|stations" -- 'src/lib/study-lenses--deprecated-architecture'` → **39**; note `-lw "station"` alone returns 34, so the alternation is load-bearing]. `the guide → 3 hits / 2 files` reproduces [measured: `git grep -ic "the guide"` over the sibling ring → `lenses/parsons/DOCS.md`:1, `lib/questioning/LOSS-LEDGER.md`:2]. H6's per-path figures reproduce under case-insensitive counting [measured at `1e95814e`, squeezed unwrap, `grep -oi`: README **7** · DOCS **1** · wireframes **7** = **15**; case-*sensitive* gives 6/1/5, so the method matters and the row is right]. The `strip` residue table reproduces exactly at all five paths [measured at HEAD: 6 · 1 · 4 · 1 · 6]. Both campaign instruments run green [measured: `malformed rows: none`; `histogram: {63: 80} outliers: none`]. `deriveAccessibility`'s geometry claims, C16's dead-code proof, and the `environment`-is-unreachable strike are all correct against the code — I re-derived them from `derive-accessibility.ts` rather than relaying. C17's restructure did reach § Fresh mount's prose, and § A station's tray, open does now carry its caption row.
+
+---
+
+## BLOCKERS
+
+### BLOCKER 1 — the drawn rail now attributes `not reached` to the wrong stations, and the regression was introduced by this campaign's own C17 execution
+
+This is the "standing rows are visibly tight" item the brief names as unattacked. It is not tight — it has already broken.
+
+I measured the centre column of every station name against the centre column of its standing, in every rail drawing, before and after `e61c7201`:
+
+| drawing | before `e61c7201` (worst offset) | at HEAD (worst offset) |
+| --- | --- | --- |
+| § Fresh mount | ±1 | ±1 |
+| § The parse breaks | ±1 | **−5** |
+| § The spelling breaks | ±1 | **−7** |
+| § The machinery breaks | ±1 | **−5** |
+| § warn / § Strict / § An excursion open | ±1 | ±1 |
+
+[measured this session: name-centre vs standing-centre over `git show e61c7201^:…/ux/wireframes.md` and HEAD]
+
+The worst case is § The spelling breaks. `AST` occupies columns 27–29; the `not reached` that belongs to it occupies columns **16–26** — entirely to the left of `AST`, and overlapping `Tokens` (14–19). A reader taking the drawing at face value reads **`Tokens` as not reached**, in the section whose own prose says:
+
+> **`Source` and `Tokens` stay open.** The barring edge is still drawn between stations rather than on one: `Tokens` is where the error is studied, so it keeps its mark and its kit.
+
+[read: `src/lib/study-lenses/orchestrate/ux/wireframes.md` § The spelling breaks — the machine stopped earlier]
+
+Every unbarred drawing is still centred to ±1, which is what makes this a regression rather than a house style: the swap of `waiting` (7 chars) for `not reached` (11) consumed the padding and nobody recomputed it, against this campaign's own standing rule — *"A new drawing's padding is COMPUTED, never eyeballed"* [read: `RESUME.md` § Mechanics that bit THIS session]. That rule was applied to the **closing vertical** (index 63) and not to the interior, which is exactly why the frame instrument still reports clean.
+
+**Why it is a blocker rather than a cosmetic redirect.** The twin's stated job is that a learner "who reads neither still sees it" in the geometry (§ The parse breaks), and B2's whole decision is that the edge is drawn **between** stations because a phase's own failure never bars it. A drawing that puts a barred standing under an unbarred station falsifies B2 in the only artifact that renders it. It also lands on the campaign's most contested word — the drawing now says the thing the prose spends a paragraph denying.
+
+**Fix (edit, possibly with a ruling behind it):** recompute the padding by script for all three barred drawings and re-verify. If `not reached` cannot be centred under all five stations inside 62 columns without collision — which is the live question, since three of them appear in § The spelling breaks — that is the narrow-viewport doubt arriving early on the desktop drawing, and it needs the human: keep `not reached` and accept a stacked or abbreviated standing row, or choose a shorter word. **Certainty: 99%** on the measurement; ~80% that it warrants BLOCKER rather than IMPORTANT — the omission is certain, its severity is the human's call.
+
+---
+
+### BLOCKER 2 — the rail draws a fifth thing on a station, it is load-bearing in a human ruling, and no document names it
+
+`●` is drawn twice — § A station's tray, open and § An excursion open — as `▾ 2 ●`. It marks the station of the **open lens**. It is:
+
+- **not the standing.** `▾ 2 ●` is an *openable* station that is *also* the open lens's station, so the marker is orthogonal to the three-valued `openable · bare · waiting`.
+- **not among the four things a station carries.** `README.md` glossary · station: *"one per phase, in the machine's fixed order, carrying **four** things"* — phase, label + short label, standing, tray. B8 records exactly four.
+- **named nowhere.** [measured: `●` → 2 hits in `orchestrate/`, both fenced drawings; 1 hit in `DECISIONS.md`, and that one is the ruling text below. No glossary entry, no `display-labels.ts` inventory slot, no C10 row, no DECISIONS row.]
+- **load-bearing in two arguments.** The rail's justification for hiding the kit rests on it — *"The open lens's station keeps its mark while the tray is closed, so the rail answers 'where am I' without the tray being open — which is the whole reason the rail can afford to hide the kit"* [read: § An excursion open]. And the nameplate's class-2 route survives only by contrast with it — *"Where the two coincide the rail's answer is a by-product: it marks the open lens's station"* [read: § Strict, covering — editor mode]. R-H is decided against it by name: *"As worded, R-D's route is satisfied by the rail's `●`"* [read: `DECISIONS.md` § A, the R-H discriminator paragraph].
+
+So a nameless glyph is the counterparty in the argument that puts the nameplate in class 2 and keeps the rail in class 3 — the most-cited decision in the region.
+
+**Why this is 0.2's and not 0.3's.** It changes the answer to the first question `types.ts` is scheduled to answer. B10 asks whether openable and bare stations are one shape or two; neither answer has a field for "this station holds the open lens", and it cannot be folded into `standing` without collapsing a three-valued union with a boolean. An implementer at 0.3 will invent the field, its name, and whether it lives on the station or is derived from `PaneOccupant` at render — three decisions the prose does not make. That is precisely 0.2's deliverable failing.
+
+It is also AR-1's second focus area landing squarely: a concept the module works with that the glossary never names.
+
+**Fix (needs a ruling, cheaply):** name it, give it a glossary entry, and say whether it is a fifth thing a station carries or a projection of `PaneOccupant` the rail reads at render. B8's "four" then becomes five, or the entry records why it is not a station property. **Certainty: 95%** that it is unnamed and load-bearing; ~85% that it blocks deterministic types.
+
+---
+
+## IMPORTANT
+
+### IMPORTANT 3 — the twin states a number the machine cannot produce, in the paragraph this pass restructured, and quotes it twice into the index
+
+§ Fresh mount, in the barred-station cost paragraph `1e95814e` rewrote:
+
+> So a reader traversing linearly hears `waiting` four times and meets one unattached sentence about where the machine stopped.
+
+**Four is impossible.** `deriveAccessibility` makes `source` and `tokens` unconditionally accessible; `ast` is barred only by a `tokens` failure; `environment` and `evaluation` are barred only off `facts.entwined.ok` [read: `src/lib/study-lenses/embody/derive-accessibility.ts:32-44`]. Maximum barred = **three**. The region README says so itself, in the entry C16 settled:
+
+> by the barring rules a suffix of exactly two or three phases waits — a `tokens` failure bars three, an `ast` or `entwined` failure bars two, and `environment` bars nothing at all — so the plural is total and a defensive singular branch would be dead code
+
+[read: `README.md` glossary · display labels, the unreached count]
+
+The number is the empty-phase count copied into the barred paragraph: the sentence directly above it correctly says a reader *"hears one sentence about four phases"* — four **empty** phases. The symmetry of the argument carried the wrong numeral across. Introduced at `fa57a777` [measured: `git log -S "waiting\` four times"`], survived `1e95814e`'s restructure, and is now quoted verbatim as C18's principal asserting site in **two** places in `DECISIONS.md` [read: C18's `also asserts` column, and § 0.3 entry conditions' C18 row].
+
+This is a direct hit on question 5, and it is worse than a typo: it is the quantitative claim underneath C15's cost argument, propagated into the index by the commit that opened C18 around it.
+
+**Fix:** `two or three times`. The argument holds unchanged at either number. **Certainty: 99%.**
+
+### IMPORTANT 4 — C14's widened evidence describes a shape none of the three drawings has
+
+`ffc59db3` widened C14's column to the third drawing and described the evidence as:
+
+> all three DRAW the cause arm as a framed message row, a blank spacer, and the unreached count beneath it
+
+[read: `DECISIONS.md` C14, `also asserts`]
+
+Measured, row by row [this session, over `ux/wireframes.md`]:
+
+| drawing | rows of the caption region |
+| --- | --- |
+| § The parse breaks | blank · message · count — **spacer above, none between** |
+| § The spelling breaks | blank · message · count — **spacer above, none between** |
+| § The machinery breaks | blank · message row 1 · message row 2 · **blank** · count |
+
+The description matches none of them: in two the spacer precedes the message and the count is adjacent; in the third the message is two rows and there *is* a spacer between message and count. Round 11's MINOR 19 flagged the spacer and it was never recorded; the new drawing made the inconsistency worse rather than resolving it.
+
+**Why it matters at 0.2.** R-X pins the arm union as a union over **shapes**, and the cause arm's shape is what 0.3 types. Is the block `(message, count)` or `(message, separator, count)`? Is the message one string or a wrapping string plus its framing? The drawn evidence — the only evidence C14 cites — is internally inconsistent about the first, and the index's summary of it is wrong about all three.
+
+**Fix:** make the three drawings agree, then restate the column as what they actually show. **Certainty: 99%** on the measurement; the shape question is real either way.
+
+### IMPORTANT 5 — round 11's PAUSE was closed with three IMPORTANTs and eight MINORs neither fixed nor recorded anywhere
+
+Round 11 returned four blockers, nine importants, seven minors. The live record accounts for the four blockers, IMPORTANT 5, 8, 11, 12, 13, 14 and MINOR 15, 16. **IMPORTANT 7, 9, 10 and MINOR 17–24 appear in no ledger** [measured: `grep -rn "round 11"` over `orchestrate/` and `DECISIONS.md` → 8 hits, none of them these]. I checked substance rather than labels, and all eleven are live at HEAD:
+
+- **I7 (deixis).** *"broke here"* survives at 15 sites [measured: squeezed unwrap — README **8** · DOCS **3** · wireframes **4**]. Nothing records the cost that "here" promises a location the caption is contractually forbidden to give.
+- **I9 (the third derived count).** `▾ N` is drawn 24 times in the twin [measured: `grep -c "▾"`]. Named only in a subordinate clause — *"drawn with its count"* [read: README glossary · station, glossary · standing]. No name, no entry, no derivation rule, no `display-labels.ts` slot, absent from C10's uncovered-strings list [measured: 0 hits]. Its predicate is still ambiguous against its own sibling: the README's empty count is *"phases that are both accessible and EMPTY of fitting lenses"*, while the live projection counts `recoverRenderableLenses(roster, phase.lenses)` [read: `index.tsx` `toPhaseEntry`] — a further filter the count-line rule does not mention, so the two counts are not provably complementary.
+- **I10 (when a part of a surface gets its own class).** No rule exists [measured: 0 hits for any phrasing of it]. A14 still rests on placement.
+- **M17** both phrasings live ("the four count-line rules" / "Four rules for one caption"). **M18** `cause line` and `cause arm` both live for one object (README 8/2, DOCS 5/2, wireframes 3/1) — and the surviving name calls a block a line, which is the naming defect `glossary · the caption` was created to end. **M19** the spacer, see IMPORTANT 4. **M20** `· a way to study Source` drawn twice, still absent from C10 [measured: 0]. **M21**, **M22**, **M23** all reproduce verbatim.
+
+**M22 is the one I would promote.** `README.md` § What renders still reads *"the band, the strip, the level UI, the guide, and the recommendations all stay rendered"*. `DECISIONS.md`'s residue table declares it *"A render list naming the surface"* — a **category** answer. Under the Rail the band **contains** the rail (G1), so as a render list the sentence is false twice over: there is no strip, and its replacement is inside an item already on the list. This is round 9's BLOCKER-1 shape ("six sentences failed the second question while passing the first") reproducing inside the table that says it now avoids it.
+
+**Why this is IMPORTANT and not bookkeeping.** The campaign built a roll-call table for round 8 precisely so the next round could ask "did these land?" rather than re-deriving [read: `DECISIONS.md` § Round 8's fourteen findings]. That instrument was not run for round 11. The consequence is that round 12 spent its budget re-deriving round 11 instead of attacking forward, and the campaign's closure argument — "closure does not mean the sweep found nothing; it means a stated radius" — cannot be made while eleven findings are outside every ledger. **Certainty: 95%.**
+
+### IMPORTANT 6 — BLOCKER 2's fix took the compound noun and left the collision
+
+Round 11's BLOCKER 2 was that the twin named the standings row "the mark row", using the one word the glossary spends four near-homonym paragraphs keeping off the concept. `the mark row` is now zero [measured: 0 hits in `orchestrate/`]. But the noun itself survives for the standing at eight sites [measured, `ux/wireframes.md` + `README.md`]:
+
+- *"the rail's per-station **marks**"* (§ Fresh mount, the pairing rule)
+- *"its name and a **mark** saying the phase is reachable"* (§ A station's tray, open)
+- *"it keeps its **mark** and its kit"* (§ The spelling breaks)
+- *"on a **mark** strict has just made unreachable"* (§ Strict, covering — **inside the class-2 exhaustion argument**)
+- *"The open lens's station keeps its **mark**"* (§ An excursion open)
+- *"a **bare mark** on the line"* (§ A station's kit at 0, 1 and many)
+- *"**bare** draws as a **bare mark** with no word at all"* (`README.md` glossary · display labels) — the exact phrase round 11 quoted as evidence of the collision.
+
+Against `README.md` glossary · station: *"**`standing` is deliberately not called a mark.** … They would have been the fourth and fifth near-homonyms in a glossary that already keeps three apart."*
+
+A blocker closed by renaming one phrase while the term it was a phrase of stayed live at eight sites is the half-landed-correction pattern this campaign names as its signature defect — reproduced inside the round declared "all four blockers are fixed". **Fix:** sweep the noun, or give the glossary a sentence licensing the ordinary-English use and distinguishing it from the contract term. **Certainty: 95%.**
+
+### IMPORTANT 7 — F4's declined alternative is argued against a house convention, on a premise DEV.md falsifies
+
+`README.md` § What lives here:
+
+> The alternative — a `copy/` directory beside `rail/` and `guide/` — was considered and declined: these are values, not a surface, and eight tiny value files with a barrel to hide them is worse than **one file with eight exports**.
+
+Round 11's IMPORTANT 5 removed the false `derive-study.ts` premise; the replacement argument carries a new one. `DEV.md` § 1 states, twice:
+
+> **NO BARREL FILES**: Import directly from the source file. No internal `index.ts` re-exports.
+> **CRITICAL**: All internal files use default-only exports.
+
+and § Conventions Summary: *"Multiple things from one file | **Split into separate files**"*.
+
+So the barrel is not a cost of the `copy/` alternative — it is banned, and the prescribed shape is exactly eight files imported directly. And the chosen shape, "one file with eight exports", is the one the conventions forbid: **1 of 163** non-`types.ts` files under `study-lenses/` carries more than one top-level export [measured: `git ls-files` + `grep -c "^export "`]. The house pattern is honored 162/163 times and this ruling writes against it.
+
+Two further strains the prose does not address: the file will key against **two** vocabularies (`LifecyclePhaseName` for labels, `FailableStageName` for framings — DOCS says so), and several of the nine families are not values at all — the nameplate's *two forms chosen by a rule*, the empty-station reason *with a derived count*, the unreached count *derived per settle*. A file named `display-labels` holding form-selection rules and derived templates is under-named for what it is asked to hold. (The README says "eight", `DECISIONS.md` C11's 0.3 row says "**nine** copy families" — the contract statement disagrees with its own deferral row.)
+
+**This needs the human**, because F4 is a human ruling (2026-08-18). The narrow ask: re-argue it on a premise `DEV.md` does not contradict, or take `copy/` with one concept per file and direct imports. **Certainty: 95%** on the convention collision; the ruling itself is the human's.
+
+### IMPORTANT 8 — two human deferrals were routed to "an eyeball check" that does not exist
+
+`DECISIONS.md` § Deferred to an eyeball check routes two round-11 findings out of prose and into the checkpoints:
+
+> **Ruled: the count stays and C14 stands; revisit at an eyeball check when we see how it plays out for a learner.** Checkpoint **T10** carries it.
+> **The remaining three are ruled a checkpoint question**, not a prose one
+
+T10's full text is:
+
+> Screen reader: traverse the rail with a barring edge drawn | the barred stations speak `waiting` and nothing else; the cause is heard ONCE, unattached to any station. **Is that acceptable?** C15
+
+[read: `RESUME.md` § Sandbox checkpoints owed at Phase 1]
+
+T10 names **no observation of the unreached count**, and it is a *screen-reader* traversal — structurally incapable of answering a question about whether a **sighted** learner finds a drawn caption row redundant against the standings it restates. That is the same accounting error round 11 caught in the announcer argument: *"the mitigation reaches a different reader than the one who lost something"*.
+
+And the three remaining undrawn caption clauses — singular-at-one, absent-at-zero, the empty caption — have **no checkpoint row at all** [measured: the checkpoint table returns zero hits for `singular`, `zero`, `caption`, `count`].
+
+`DEV.md § Sandbox Checkpoints` is explicit: *"the checkpoint description names a specific user action … and a specific expected observation. Avoid vague phrasing … If you can't name what to look at, the increment probably isn't observable."* A deferral to an unnamed observation is not a deferral; it is a decision nobody made, waiting to be made by whoever holds the keyboard.
+
+T10 is also now carrying three unrelated questions — C15's acceptability, C18's spoken word, and the count's justification. One checkpoint, three verdicts, one "Is that acceptable?".
+
+**Fix:** write the rows. One sighted row for the count's redundancy, one for the caption's zero/one states, and split C18 off T10. **Certainty: 95%.**
+
+### IMPORTANT 9 — the projection contract omits a value drawn in every full-frame drawing
+
+`ux/wireframes.md` § What the region must render opens with a closed contract: *"The region is handed exactly this, per settle, and **may draw nothing that is not here**"* — then lists phases, levels, the selected level's mark, the posture, the pane, and recommendations. **The snippet type is not on it**, and `[module]` / `[script]` is drawn in the control row of every full-frame drawing, and § The level does not admit this snippet type turns entirely on it.
+
+This is the reverse of the absence class the campaign is hunting: not a clause asserted and never drawn, but a thing **drawn and never granted**. CP-α as specified indexes clauses → drawings and would not see it, because it walks the glossary's rows, not the drawings'. **Fix:** add the row. **Certainty: 90%** — the contract is unambiguous about totality, and the type is unambiguously absent from it.
+
+---
+
+## MINOR
+
+10. **The barred-station cost lives in § Fresh mount, whose drawing has no barred station.** C15's home of record is a section titled "the default state"; a reader arriving at the cost argument must hold a drawing from two sections down. Argued to be deliberate (the C3 symmetry), but it is why the "four times" error survived — the numeral had no drawing beside it to falsify it.
+
+11. **The unreached count and the standing say the same thing on screen.** `not reached` on each barred station, plus *"the last two phases were not reached"* beneath. That is the restatement the design's own discipline rejects everywhere else. The human ruled it stays; the ruling predates `waiting` → `not reached`, which made the restatement **verbatim** rather than merely semantic. Worth naming in T10's row when it is written.
+
+12. **`bare` has no drawn word and no named glyph.** `·` is drawn 40+ times, described as "a bare mark with no word at all". Whether `·` is copy, presentation, or a house token is unstated — the third unnamed drawn element after `●` and `▾ N`.
+
+13. **`DOCS.md` is 475 lines against `DEV.md`'s sketch rule** — *"Keep it short"*, *"Short enough to read in 60 seconds"*. Not this campaign's creation, but § The render projection grew four clauses during 0.2 and is where AR-2 will land.
+
+14. **Round 11's MINOR 24 stands unanswered.** Sketch content was written during 0.2 and its rows read `SETTLED`; AR-2's job is to challenge the sketch and it will arrive at clauses the index reports closed. No gate is removed; the rubber-stamp exposure is real and nothing records it.
+
+15. **`README.md` is 965 lines, ~650 of it glossary**, against § Directory Documentation Convention's "what this module does, how to navigate it". The `display labels` entry alone is ~200 lines and contains four sub-contracts. This is where the caption's rules, the framings table, the counts and the ordering rule all live — and `DEV.md` puts the sketch, not the README, as the document the Refactor is held against. C12 already recorded half of this (I7); the other half is that the README is now the region's specification.
+
+---
+
+## Counter-proposals
+
+**CP-ζ — the diagnosis is incomplete, and I can prove it with one command.** Round 11's framing is presence-detectors vs. an absence defect class. There is a **third class, and it is the live one: present-and-wrong.** BLOCKER 1 is the proof. The frame instrument reports `{63: 80} outliers: none`; the reading list finds the drawing; the census finds the file; a receipt would quote the sentence; and **CP-α as specified would tick "the standing is drawn at § The spelling breaks ✅"** — because CP-α's columns are `asserted at` / `drawn at` / `undrawn — reason`, and the clause *is* drawn. Every instrument the campaign owns or has proposed passes a drawing that says `not reached` under the one station its own prose insists is open. IMPORTANT 3 is a fourth class the same way: the clause is asserted, drawn, indexed — and the number in it is impossible.
+
+So: **build CP-α, but do not close 0.2 on it.** It catches the tray/caption class and it is cheap. It does not catch either of this round's blockers.
+
+**CP-η — the instrument the campaign actually lacks is a drawing-consistency check, and it is scriptable.** Not a coverage table — a *consistency* scan over the fenced blocks, computing what the drawings assert and comparing it to itself and to the contract:
+
+1. station-name centre vs standing centre, per rail drawing (would have caught BLOCKER 1 the moment `e61c7201` landed);
+2. row structure of each caption region — arm, spacer position, row count (IMPORTANT 4);
+3. the drawn count-line numeral against the drawing's own bare stations, and the unreached numeral against its own `not reached` count (these currently agree — I checked — so the check would run green and stay useful);
+4. every token drawn in a control row against § What the region must render's list, both directions (IMPORTANT 9).
+
+It is ~40 lines of Python, it runs on the same file the frame scan already parses, and it is the first instrument in this campaign that reads a drawing as an *assertion* rather than as a *line*.
+
+**CP-θ — run round 11's roll-call before round 13.** The round-8 table exists and works. Reproduce it for round 11: one row per finding, where it is recorded, whether it landed, re-measured. Eleven findings are outside every ledger right now, and three of them (I7, I9, I10) are design questions, not bookkeeping. This is cheaper than the round it will otherwise cost.
+
+**CP-ι — name the `●` before B10 is answered.** B10 is billed as "the first question `types.ts` answers". It cannot be answered correctly while a fifth station element is unnamed, because both candidate answers omit it. Ten minutes of prose now; a type migration later.
+
+---
+
+## The five questions, answered directly
+
+**1 · Is 0.2 closeable now?** **No.** Two things block it. **BLOCKER 2 (the `●`) needs a human ruling**, not an edit — it decides a station's shape and it is the counterparty in R-H. **BLOCKER 1** is an edit *if* the padding recomputes cleanly, and a **ruling** if it does not, which the three-standing spelling drawing suggests is live. Everything else is cheap: IMPORTANT 3 is one numeral, IMPORTANT 4 is three drawings agreeing, IMPORTANT 6 is a sweep, IMPORTANT 8 is writing two checkpoint rows. **IMPORTANT 7 needs the human** because F4 is a human ruling and the collision is with `DEV.md`. Total work outside the two rulings is well under a session.
+
+**2 · Is there an un-swept ring, term, or FORM?** **Not a ring** — the fourth-ring declaration reproduces exactly and I have no fifth to offer; above `study-lenses/` the region's terms genuinely stop being asserted. **A term: `mark`**, still live for the standing at eight sites after the blocker that named it was closed (IMPORTANT 6). **A form, and it is not the one the brief names**: the live class is **present-and-wrong**, not absent (CP-ζ). CP-α remains unbuilt and remains worth building; it is not what closes this.
+
+**3 · Do the decisions this pass touched hold?**
+- **C17's decoupling** — holds, and it is right. The restructure reached § Fresh mount's prose, and glossary · standing correctly survives untouched. Its **execution** broke the drawings (BLOCKER 1), and the receipt quoted sentences while the evidence that failed was geometry.
+- **C18's deliberate non-ruling** — holds, and declaring it rather than closing it is the correct call. But the sentence it is declared *in* carries an impossible number (IMPORTANT 3), and that sentence is quoted into C18's column twice.
+- **C14's widened evidence** — the widening was right (the third drawing did belong in the column); the **description of what the three drawings show is wrong** (IMPORTANT 4), and the shape question it exists to settle is still open in the drawings themselves.
+- **H6's deleted aggregate** — **holds, and I could not falsify it.** The per-path figures reproduce at the tagged SHA under case-insensitive counting. Deleting the numeral rather than replacing it was the right move.
+- **The fourth-ring declaration** — **holds.** 39 files reproduces with the cited command, and the polysemy exclusion is sound.
+
+**4 · Can `types.ts` be written deterministically from the prose today?** **No**, on three specific points, and the read-together test is correctly 0.3's and I have not applied it. (a) **The station's shape** — the `●` is a field nothing names, and B10's two candidate answers both omit it. (b) **The cause arm's block structure** — one row or two for the message, spacer or no spacer before the count; the drawings disagree with each other and the index's summary of them is wrong about all three. (c) **The kit count's predicate** — attached lenses or roster-recovered lenses, and whether it must be complementary with the empty count that the README defines over a different filter. All three are prose ambiguities, all three are 0.2's, and all three will be resolved silently at 0.3 if they are not ruled now.
+
+**5 · Is anything this pre-pass wrote actually WRONG?** **Yes, three things, and one of them was already wrong before it and got propagated.**
+- `not reached` under the wrong stations in three drawings — **introduced by `e61c7201`**, measured pre/post (BLOCKER 1).
+- C14's "all three DRAW … a framed message row, a blank spacer, and the unreached count beneath it" — **written by `ffc59db3`**, true of none of the three (IMPORTANT 4).
+- *"hears `waiting` four times"* — inherited from `fa57a777`, **restructured and re-quoted twice into `DECISIONS.md` by `1e95814e`** without being noticed, and falsified by the region's own C16 proof (IMPORTANT 3).
+
+I re-measured everything else this pass asserts and could not break it: the fourth ring, the guide 3/2, H6's per-path counts, the `strip` residue, both instruments, the geometry/framing separation, the `environment` strike, and C16's dead-code argument all reproduce. **This pass's arithmetic is sound; its drawings are not.**
+
+---
+
+## Certainty
+
+**High (≥95%)** on BLOCKER 1, BLOCKER 2's facts, IMPORTANT 3, 4, 5, 6, 7, 8 — each is a command I ran or a file I read end to end this session. **~90%** on IMPORTANT 9 (the contract's totality claim is unambiguous; whether the type toggle counts as "handed to the region" is arguable). **~85%** that BLOCKER 2 blocks deterministic types rather than being an IMPORTANT — an implementer *could* derive the marker from `PaneOccupant` without a station field, but nothing tells them to. **~80%** that BLOCKER 1 is a blocker rather than a cosmetic redirect — the misattribution is certain, its severity is `DEV.md § Sandbox Checkpoints`' redirect policy applied to a document rather than a screen, which is the human's call. **~70%** on CP-ζ's framing being the *right* generalization — I am confident the present-and-wrong class exists and that no current or proposed instrument catches it, less confident that "three classes" is the final taxonomy rather than a fourth boundary waiting.
+
+## Files
+
+- `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/study-lenses/orchestrate/ux/wireframes.md` — BLOCKER 1, BLOCKER 2, IMPORTANT 3, 4, 6, 9
+- `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/study-lenses/orchestrate/README.md` — BLOCKER 2, IMPORTANT 6, 7, MINOR 15
+- `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/.planning-handoffs/orchestrate-ux/DECISIONS.md` — IMPORTANT 3, 4, 5, 8
+- `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/.planning-handoffs/orchestrate-ux/RESUME.md` — IMPORTANT 5, 8 (§ Sandbox checkpoints, T10)
+- `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/study-lenses/embody/derive-accessibility.ts` — IMPORTANT 3's falsifier
+- `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/DEV.md` § Conventions Summary, § 1, § Sandbox Checkpoints — IMPORTANT 7, 8
+
+Per `DEV.md § Resolution Rules` and `RESUME.md`'s standing instruction since round 9: **this PAUSE goes to the human before a fix round opens.**
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
 
 ---
 
