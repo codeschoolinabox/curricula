@@ -483,7 +483,7 @@ this region owns.
   survives only in that surface's name and in the `candidate` entry's contrast,
   where it names the same thing a recommendation does — everywhere else in this
   region's prose the contract term is the one to use.
-- **the caption** — the one line beneath the rail, and the object the four
+- **the caption** — the one thing beneath the rail, and the object the four
   count-line rules govern. It holds the **cause line** wherever a barring edge
   is drawn, else the **count line**, else nothing: one slot, two producers, a
   total order between them. Named because it is a contract object with a
@@ -497,6 +497,26 @@ this region owns.
   SLOT after an arm**: calling the whole object "the reason line" is what made a
   total order read as a competition between two objects, which is the defect
   this entry exists to end.
+
+  **One slot, one occupant — and the two arms are not the same SHAPE** (human
+  ruling 2026-08-19). The count line is one line. The **cause line is a block**:
+  the framed message, and beneath it the count of what waits. So the caption
+  holds exactly one thing at a time, and "one line at a time" — which both this
+  entry and the sketch said until now — was false of the arm that motivates the
+  slot's existence, and drawn as two rows in the only document that draws it.
+
+  **This does not weaken rule 4, it explains it.** The count line yields the
+  slot **entirely** where a barring edge is drawn, and the count the cause arm
+  carries beneath its message is a **different string over a different
+  predicate** — what WAITS, not what is empty. Two counts, never both, never one
+  standing in for the other. Reading rule 4 as "the count moves inside the
+  cause" is the misreading this paragraph exists to prevent.
+
+  **What that makes `types.ts` do**: the union is over the two arms' SHAPES, not
+  over two strings. A union of `string` and `string` cannot express an arm that
+  is a pair, and would let an implementer satisfy the type while shipping the
+  cause as a single concatenated line.
+
 - **apparatus** — what the mask uses to DO its work, as against the surfaces it
   acts ON. **This narrows a package term and the narrowing is load-bearing**:
   the package glossary defines the enforcement mask AS "the strict-posture
@@ -640,19 +660,22 @@ this region owns.
   never takes that slot.** A tray opens BETWEEN the rail and the slot, pushing
   the line down along with the pane — it never replaces it, because the tray
   describes one station while the line describes the rail as a whole. So the
-  slot beneath the rail holds exactly one line at a time and the precedence is
+  slot beneath the rail holds exactly one thing at a time and the precedence is
   total: the cause line wherever a barring edge is drawn, else the count line,
-  else nothing. Four rules for one line, and they live together here because
-  they are one contract: a count that renders at zero, that reads plural at one,
-  or that competes with the cause for the slot beneath the rail is wrong in the
-  same way, and an implementer reading only two of the three would ship the
-  third defect. **Display copy never carries a machine token, and never needs
-  this glossary to be legible** (human ruling 2026-08-17) — the rule the marks
-  already follow, and the reason the sentence a learner reads when the machine
-  stops says _the grammar broke here_ (or _the spelling broke here_, whichever
-  stage failed) rather than naming **the barring edge**. Two tests, and the
-  second is **operational rather than etymological**. A machine token is a
-  string the machine uses to talk to itself — `does-not-fit`,
+  else nothing. **One thing, not one line** — the count line is a line and the
+  cause line is a block (its message, and beneath it the count of what waits),
+  so the slot's occupants differ in height and the contract is about occupancy
+  rather than about rows. Four rules for one slot, and they live together here
+  because they are one contract: a count that renders at zero, that reads plural
+  at one, or that competes with the cause for the slot beneath the rail is wrong
+  in the same way, and an implementer reading only two of the three would ship
+  the third defect. **Display copy never carries a machine token, and never
+  needs this glossary to be legible** (human ruling 2026-08-17) — the rule the
+  marks already follow, and the reason the sentence a learner reads when the
+  machine stops says _the grammar broke here_ (or _the spelling broke here_,
+  whichever stage failed) rather than naming **the barring edge**. Two tests,
+  and the second is **operational rather than etymological**. A machine token is
+  a string the machine uses to talk to itself — `does-not-fit`,
   `not-applicable-for-type` — and none of those ever surfaces. Everything else
   is settled by one question: **would a learner who never read this glossary
   understand it?** `barring edge` fails it, naming a boundary the copy never

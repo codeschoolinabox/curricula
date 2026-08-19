@@ -247,11 +247,17 @@ verdicts without consulting a level twice.
   label, the standing (`openable` · `bare` · `waiting`), and its tray where it
   has one. Whether the openable and bare cases are one shape or two is the first
   question `types.ts` answers.
-- **The caption — the one line beneath the rail — holds exactly one line at a
-  time, and its precedence is total**: the cause line wherever a barring edge is
-  drawn, else the count line, else nothing. Four rules govern that one line and
-  they are one contract, not four — an implementer who reads some of them ships
-  the rest as defects.
+- **The caption — the one thing beneath the rail — holds exactly one occupant at
+  a time, and its precedence is total**: the cause line wherever a barring edge
+  is drawn, else the count line, else nothing. Four rules govern that one slot
+  and they are one contract, not four — an implementer who reads some of them
+  ships the rest as defects.
+
+  **The two arms are not the same shape** (human ruling 2026-08-19). The count
+  line is one line; the **cause line is a block** — the framed message, and
+  beneath it the count of what waits. The slot's occupancy is exactly one; its
+  HEIGHT is not fixed, and every drawing in the twin already renders it that
+  way.
   1. **The count is derived per settle, never written** — the number of phases
      that are both accessible and EMPTY of fitting lenses. Not a property of the
      roster: a phase whose only lens fails applicability on this program is
@@ -260,16 +266,23 @@ verdicts without consulting a level twice.
   2. **Singular at one.**
   3. **Absent at zero** — it does not render.
   4. **It yields the slot entirely wherever a barring edge is drawn**, where the
-     cause line renders instead. And **an open tray never takes the slot**: a
-     tray opens BETWEEN the rail and the slot, pushing the line down along with
-     the pane, because a tray describes one station while the line describes the
-     rail as a whole.
+     cause line renders instead. **Entirely means gone, not relocated** — the
+     count the cause arm carries beneath its message is a DIFFERENT string over
+     a DIFFERENT predicate (what WAITS, versus what is accessible and empty).
+     Two counts, never both, and neither ever stands in for the other. And **an
+     open tray never takes the slot**: a tray opens BETWEEN the rail and the
+     slot, pushing the caption down along with the pane, because a tray
+     describes one station while the caption describes the rail as a whole.
 
   The strings themselves are `display-labels.ts`'s (§ What lives here); what is
   structural — and therefore belongs here rather than only in the glossary — is
   that the caption is ONE slot fed by TWO producers with a total order between
-  them, so the render path resolves the precedence before it has a line to draw.
-  That is the shape `types.ts` gives a union rather than two optional fields.
+  them, so the render path resolves the precedence before it has anything to
+  draw. That is the shape `types.ts` gives a union rather than two optional
+  fields — **and the union is over the two arms' SHAPES, not over two strings**:
+  the count arm is a line, the cause arm is a pair. `string | string` is
+  satisfiable by an implementation that concatenates the cause into one row,
+  which is the defect this distinction exists to make unrepresentable.
 
 - The panel receives its ordered phase list built from that constant plus the
   labels, and renders it as **the rail** ABOVE the surface pane and BENEATH the
