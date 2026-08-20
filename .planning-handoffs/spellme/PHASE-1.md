@@ -1,4 +1,5 @@
 <!-- cspell:ignore spellme lookaheads tokenizer ZWNBSP undercounts -->
+<!-- cspell:ignore wireframes worktrees -->
 
 # Phase 1 — `lib/scanning`, then `spellme`
 
@@ -18,8 +19,13 @@ careful reader may ignore.
 2026-08-19]. `lib/classifying` was reconciled alongside it (153 of 153). § Where
 things stand carries the SHA list; the status lives here, not elsewhere.
 
-✅ **THE NEXT CAMPAIGN _IS_ `spellme` PHASE 1 — this banner said otherwise until
-2026-08-19 and was right when written.** The docs mini-campaign it redirected to
+🚧 **`spellme` PHASE 1 IS UNDER WAY — wave 1 is CLOSED (2026-08-20).** See § The
+`spellme` LENS — Phase 1, wave 1 for its ten SHAs, and § The `spellme` LENS's
+rulings for the four decisions it took. Wave 2 is `readStream`. ⚠ This banner
+read "THE NEXT CAMPAIGN _IS_ `spellme` PHASE 1" until 2026-08-20 — true for one
+day, and then the same stale-redirect defect the paragraph below documents about
+itself, for the third time in this file. **A banner announcing what is next
+expires the moment someone starts it.** The docs mini-campaign that preceded it
 ([`./ACQUISITION-ALIGNMENT-BRIEF.md`](./ACQUISITION-ALIGNMENT-BRIEF.md),
 `adf83dc5`) **CLOSED** the same day in **six** commits — `614ab524` `191f7da9`
 `120880d7` `349d3f0a` `01a87b9f` `f7eefe61`, the last being post-close handoff
@@ -131,6 +137,65 @@ markdownlint 0 · `npm run check:governance` 0 errors and 62 advisories.
 **The shared worktree is real.** A peer session held nine `.planning-handoffs`
 files staged while these commits landed. Commit by explicit pathspec in one
 shell invocation, with `--no-verify`; never unstage a peer's files.
+
+### The `spellme` LENS — Phase 1, wave 1 (2026-08-20)
+
+⚠ **Everything above this heading is `lib/scanning`'s, which is CLOSED.** The
+lens is a different module and its Phase 1 opened 2026-08-20.
+
+**Ten commits, as a LIST — and this list was RE-RUN, not remembered** [measured
+2026-08-20: `git log --format="%h %s" --since="2026-08-19 23:00" --
+src/lib/study-lenses/lenses/spellme/
+.planning-handoffs/spellme/PHASE1-WAVE-1-BRIEF.md` → exactly these ten]:
+
+| SHA        | What                                                             |
+| ---------- | ---------------------------------------------------------------- |
+| `c703b5c3` | the wave-1 brief lands in-repo, and why its workers run serially |
+| `2cfbc364` | `config` answers the one-more threshold default                  |
+| `6213f4a7` | `config` resolves both thresholds over the cascade's overrides   |
+| `7b2b6d10` | `config` refuses a negative threshold                            |
+| `528bf3bc` | `config` refuses a fractional or non-finite threshold            |
+| `377b6be1` | the gate declines when the published member is absent            |
+| `c01ad2bb` | the lens contributes no recommendations                          |
+| `14652100` | the empty recommendation set is a stable frozen reference        |
+| `3b4e9f80` | a line terminator carries the mark too                           |
+| `ed76f43b` | an out-of-range threshold throws `RangeError`                    |
+
+**Suite after them: `22 passed | 65 skipped (87)` across three files** — the new
+`tests/core-defect.test.ts` among them — with `core.test.ts` down from 54 skips
+to **37** [measured 2026-08-20]. `npx tsc --noEmit` 0.
+
+**Wave 1 covered the three clusters with no dependency on the element stream:**
+`config` (+ `Exceptions`), `applicability` (+ the new defect file), `recommend`.
+Waves 2-5 are `readStream` · then `positionCursor`/`judgeClaim`/`handOver` ·
+then `settle` · then the component. That map lives in
+[`./PHASE1-WAVE-1-BRIEF.md`](./PHASE1-WAVE-1-BRIEF.md) § The wave map and
+nowhere else.
+
+⚠ **The fan-out did not happen, and the reason is reusable.** A wave-0 probe
+measured that `isolation: "worktree"` cuts worktrees from **`origin/main`**,
+which is 2026-08-11 and **316 commits behind local `main`** at the time — so the
+`spellme` lens does not exist inside such a worktree at all [measured
+2026-08-20: `git ls-tree -d --name-only origin/main
+src/lib/study-lenses/lenses/` → `debug-props lib parsons writeme`]. Everything
+else about the mechanism passed: isolation genuine, vitest ran, tsc ran, `ar-4`
+spawned and returned. **This closes one of the five items `AGENTS.principal.md`
+§ Execution mechanics lists as unmeasured**; transcribing it there is governance
+surface and needs human instruction. Two secondary findings: `node_modules`
+resolves only because the worktree is nested inside the main checkout, and the
+isolation guardrail refuses compound shell commands.
+
+⚠ **An `ar-4` destroyed a peer session's index.** Mid-review it ran `git stash`
+then `git stash pop`; `pop` without `--index` restores everything unstaged, so
+three peer-held `.planning-handoffs/` files went from staged-and-modified to
+modified-only. **No content was lost**, but the staged blobs differed from the
+working-tree blobs, so it was partially-staged work not reconstructible from the
+tree. **Recoverable at `526b7ac4` (the popped stash's index commit) until the
+next `git gc`**, via `git restore --source=526b7ac4 --staged -- <paths>`, which
+rewrites the index only. Recorded here because a commit body is not where a
+human looks for this. The lesson: a general "no writes" prohibition does not
+reach `git stash` — **name it explicitly in every AR prompt.** A hardened prompt
+doing so was used for the next two ARs and neither touched repository state.
 
 ## What Phase 1 is
 
@@ -279,6 +344,56 @@ Ruling provenance).
   "the fold does not exist yet", false since `065afc16`). Restated here because
   a ruling living only in a disclaimed section is one a careful reader is
   entitled to ignore, and `WAVE-2-BRIEF.md` was citing them from there.
+
+### The `spellme` LENS's rulings (2026-08-20)
+
+Four, taken across the lens's wave-1 session. The first three have end-state
+homes and **migrated there**; they are listed here for findability, not as their
+home. The fourth governs process and has none.
+
+- (human ruling 2026-08-20) **The mark widens: a `LineTerminator` carries it
+  too.** `README.md` and `types.ts` had disagreed — the fate table gave the
+  _consumed_ row a marking variant while `types.ts` and the Glossary described
+  only the block-comment case — and **no test read `.marked` on a terminator, so
+  both readings shipped green.** The mark now names one property: _the syntactic
+  grammar reads a line break here_, which a terminator is directly and a block
+  comment becomes by §12.4. **→ migrated to** `lenses/spellme/types.ts`,
+  `README.md` §§ The three fates and Glossary, `DOCS.md` § Execution phases 3
+  and its Mermaid edge (`3b4e9f80`). Same pass corrected a real pre-existing
+  error: DOCS phase 3 had claimed "both the fate and the mark are functions of
+  the element kind alone", which the mark never was.
+- (human ruling 2026-08-20) **Both marked fates are DRAWN, and the two carriers
+  differ** — taken at the AR-5 that caught the widening stopping short. A
+  set-aside comment carries `data-marked` on its jar entry; a consumed line
+  break leaves `data-spellme-break` on the token tape, where **presence is the
+  mark** — no false-valued twin, because an unmarked consumed element leaves
+  nothing, which is what _evaporates_ means. The reviewer had proposed the
+  opposite (mark as a model-only property, rendered by the set-aside fate alone)
+  and was overruled. **→ migrated to** `README.md` § UI structure, `DOCS.md` §
+  Structural constraints, and the twin `ux/wireframes.md` — whose entry under
+  "What has no wireframe, deliberately" records that the consumed mark's visual
+  is **owed and undesigned**, deferred to a sandbox checkpoint.
+- (human ruling 2026-08-20) **An out-of-range threshold throws `RangeError`, not
+  `TypeError`** — explicitly including revisiting the three already-green
+  `Exceptions` assertions that pinned the old class. All three refusals —
+  negative, fractional, non-finite — are properties only a number can have, so
+  what is refused is always the right kind of value carrying a wrong one. **→
+  migrated to** `README.md` § Configuration ("Legal values"), with the class
+  named in `core.ts`'s `@throws` tag per the convention that JSDoc is the API
+  reference. ⚠ The wave-1 brief had asserted "no sibling `config()` throws …
+  genuinely new code with no precedent"; that was true only of sibling **lens**
+  config factories — `lib/engine/worker/write-call-response.ts` already carried
+  `@throws RangeError` for a numeric-limit violation. The brief now carries a
+  dated SUPERSEDED correction rather than a silent rewrite.
+- (human ruling 2026-08-20) **The parallel fan-out was re-affirmed and then
+  defeated by measurement, not by argument.** Told that `core.ts`'s eight
+  functions share one file and therefore one committable pathspec, the human
+  kept the 2026-08-14 "real fan-out" ruling and elected to **attempt parallel**
+  behind worktree isolation. The wave-0 probe then found worktrees are cut from
+  `origin/main`, where the lens does not exist. The pre-declared fallback —
+  serial single-worker waves — took effect. **The ruling is not overturned**: it
+  was never tested, because the mechanism that would have tested it is unusable
+  here. If `origin/main` ever advances, the question reopens.
 
 ## Traps, each of which has already cost something
 
