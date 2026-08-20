@@ -2,181 +2,125 @@
 
 # orchestrate ux — resumption point
 
-**STATE: Phase 0 step 0.2. `ar-1` ROUND 12 RAN and returned PAUSE — 2 blockers,
-7 important, 6 minor; verdict archived verbatim below. THE HUMAN HAS READ IT AND
-CHOSE TO HAND OFF rather than open the fix round in that session (2026-08-19).
-YOU ARE THE FIX ROUND. AR-5 has still never run and fires at 0.2 close.**
+**STATE: Phase 0 step 0.2. `ar-1` round 12's FIX ROUND IS COMPLETE — fourteen
+commits, `1046c90d..df0f5c99`. Both blockers, all seven importants and all six
+minors are closed, recorded, or ruled open with an owner. Seven rulings were
+taken. THE NEXT GATE IS AR-5, WHICH HAS NEVER RUN.**
 
 ## YOUR FIRST ACTION — read this before anything else
 
-**Three rulings are owed BY THE HUMAN and three of round 12's findings are
-blocked on them.** Ask for all three in one message, up front. Do not infer any
-of them, and do not start the edits that depend on them:
+**There are no owed rulings.** The three the last handoff owed, plus a fourth
+hiding inside IMPORTANT 4 and three more from the roll-call and the twin ask,
+were all asked in one message before any edit opened, and all seven are recorded
+in [`DECISIONS.md`](./DECISIONS.md) § Rulings taken 2026-08-19 — the round-12
+fix round (**R-AE … R-AK**). Do not re-ask them and do not re-litigate them.
 
-1. **The `●` marker (BLOCKER 2).** It is drawn twice, it marks the open lens's
-   station, and no document names it. It is a fifth thing a station carries
-   against a glossary that says four, and it is the counterparty in **R-H** —
-   the reason the nameplate earns class 2 and the rail does not. **Ruling
-   needed:** is it a fifth station property, or a projection of `PaneOccupant`
-   the rail reads at render? **B10 — "the first question `types.ts` answers" —
-   cannot be answered correctly until this is**, because both candidate answers
-   omit it.
-2. **F4's copy home (IMPORTANT 7).** The README declines a `copy/` directory
-   because "eight tiny value files with a barrel to hide them is worse than one
-   file with eight exports". `DEV.md` **bans barrel files** and prescribes one
-   concept per file, so the barrel is not a cost of the alternative — it is
-   forbidden, and the prescribed shape is exactly eight files imported directly.
-   The chosen shape is the one the conventions forbid [round 12 measured **1 of
-   163** non-`types.ts` files under `study-lenses/` carrying more than one
-   top-level export]. **F4 is a human ruling (2026-08-18), so only the human can
-   re-argue it or take `copy/`.**
-3. **CP-η versus CP-α — which instrument gets built, if either.** Building an
-   instrument is the human's decision by standing rule. See § THE INSTRUMENT
-   QUESTION below; round 12's argument against CP-α being the closer is strong
-   and was verified.
+**The human ruled 2026-08-19 that there is NO round 13**, and the reasoning is
+worth carrying rather than repeating: the campaign's closure criterion is a
+STATED RADIUS with an owner for everything outside it, not a sweep that found
+nothing; round 10 named the mechanism by which every round finds defects at the
+boundary the last instrument stopped at; and **two gates have never fired once**
+while AR-1 has fired twelve times. The fallback trigger is written down: **if
+AR-5 returns PAUSE on anything design-shaped rather than change-shaped, that is
+the evidence a round 13 was owed** — and it gets called then, argued, rather
+than defaulted into now.
 
-**BLOCKER 1 NEEDS NO RULING — the measurement was run and it fits.** The open
-question was whether `not reached` (11 chars) can be centred under all five
-stations inside 62 columns, § The spelling breaks drawing three of them. **It
-can, in all three barred drawings, with no collisions** [measured at `26a922e3`:
-each standing placed centred on its station's span → rightmost column **60**
-(spelling) and **62** (parse, machinery); minimum interior gap 1 column, in the
-spelling drawing between the `AST` and `Environment` strings]. So BLOCKER 1 is a
-**script**, not a fourth question. Two taste calls survive and are the
-implementer's to note, not the human's to rule: that 1-column gap, and
-`Evaluation` landing flush at column 62 against the closing `│` at 63.
+So the sequence from here is: **AR-5** → the settings-line discharge → the
+**Phase-0 → Phase-1 human gate** → the **push gate**.
 
-## What the fix round covers — the cheap set needs no rulings
+## AR-5 — the next gate, and what it needs
 
-Round 12's verdict is archived verbatim below; work from it, not from this
-summary. These need no ruling and the outgoing session judged them cheap:
+Registered agent `ar-5`. **It carries NO `model:` pin** [read:
+`.claude/agents/ar-5.md`] and inherits whatever tier spawns it — name the tier
+and its cost when you launch it.
 
-- **BLOCKER 1** — recompute the padding **by script** for all three barred
-  drawings, then re-verify. Standing rule: a drawing's padding is COMPUTED,
-  never eyeballed. It was applied to the closing vertical (index 63) and not to
-  the interior, which is why the frame instrument reports clean over the broken
-  drawing.
-- **IMPORTANT 3** — one numeral. "hears `waiting` four times" → "two or three
-  times". The argument holds unchanged at either number. **It is quoted into
-  `DECISIONS.md` twice as C18's principal asserting site — fix all three.**
+- **Baseline `80306ad9`** — the campaign's, not any session's. SHA-pinned.
+- **Hand it a SHA LIST from the command below, never a range and never any table
+  in this file.** Every round's table has been short by at least its own closing
+  commit, and the commit that updates a table is always later than the table.
 
-  ⛔ **CHANGE THE NUMERAL ONLY. `waiting` STAYS.** That sentence sits one clause
-  after "the standing's drawn word, **`not reached`**", and the contradiction is
-  **deliberate and protected by a human ruling** (C18: _record it open, do not
-  answer it_). Rewriting `waiting` → `not reached` while you are in that
-  sentence is the obvious edit and it **overturns the ruling** — it would settle
-  the spoken axis by keystroke, which is exactly what C18 exists to prevent. A
-  context-free reader walked into this trap on the first pass.
-
-- **IMPORTANT 4 — NOT ACTUALLY CHEAP; it hides a fourth ruling.** The three
-  cause-arm drawings disagree [measured: parse and spelling draw
-  blank·message·count; machinery draws blank·message·message·**blank**·count].
-  "Make them agree" leaves unmade the very decision **R-X pins as a `types.ts`
-  shape**: is the spacer above the block or between message and count, and is
-  the message one row or two? **Put that to the human with the other three**, or
-  land only the restatement of C14's column and leave the drawings alone.
-- **IMPORTANT 6** — sweep the noun `mark` where it names the **standing**, or
-  give the glossary a sentence licensing ordinary-English use against the
-  contract term. **Work from round 12's seven enumerated bullets, not from a
-  count**: the outgoing session wrote "8 sites" and a context-free re-measure
-  reproduced **seven**. `mark` also legitimately names the **fit mark**
-  throughout, so a bare count of the noun is not the sweep's terminating
-  condition — the enumeration is.
-- **IMPORTANT 8** — write the missing checkpoint rows: a **sighted** row for the
-  unreached count's redundancy (T10 is a screen-reader traversal and cannot
-  answer it), rows for the caption's zero/one states, and split C18's
-  spoken-word question off T10.
-- **IMPORTANT 5** — run round 11's roll-call. **Eleven of its findings are in no
-  ledger** (I7, I9, I10, M17–M24). Three are design questions, not bookkeeping.
-
-## THE OUTGOING SESSION'S RECOMMENDATION — argued, not binding
-
-**Do not run round 13 as the acceptance test.** The campaign already ruled that
-closure means _a named radius with an owner for everything outside it_, not _the
-sweep found nothing_. Round 10 identified the mechanism — each round finds its
-defects at the boundary the previous instrument stopped at — and **round 12
-confirmed it by finding a class round 11's own framing missed**. Rounds do not
-converge here; blocker counts have gone 3 → 4 → 5 → 3 → 4 → 2 → 2 → 4 → 2.
-
-The proposed close: take the three rulings, land the cheap set, build whichever
-instrument the human picks, then **close 0.2 on the stated radius** and let AR-5
-and the Phase-0 → Phase-1 human gate be the remaining gates. **Neither has ever
-fired.** If the human wants a round 13 anyway, it is theirs to call — but it
-should be argued as a decision, not defaulted into.
-
-## THE INSTRUMENT QUESTION — round 12 challenged this campaign's own diagnosis
-
-Round 11 framed the live defect class as **absence** in the drawn surface,
-against instruments that all detect **presence**, and proposed **CP-α** (a
-clause × drawing coverage table; its specification is quoted in § THE GATE THAT
-JUST RAN).
-
-**Round 12 argues a third class — present-and-wrong — and proves it with
-BLOCKER 1.** The clause IS asserted, IS drawn, IS indexed, and **CP-α as
-specified would tick it green**, because CP-α's columns are `asserted at` /
-`drawn at` / `undrawn — reason` and the clause is drawn. Its **CP-η** proposes a
-drawing-**consistency** scan instead: station-name centre vs standing centre per
-rail drawing; caption row structure (arm, spacer position, row count); drawn
-numerals against the drawing's own stations; and control-row tokens against §
-What the region must render, **in both directions**. Round 12 estimates ~40
-lines of Python over the file the frame scan already parses.
-
-The outgoing session verified round 12's proof and would build **CP-η**, keeping
-CP-α as a cheap add rather than the closer. **The human decides.**
-
-**Two of round 12's findings were re-measured before this line was written and
-both reproduce.** BLOCKER 1: in § The spelling breaks the standings row is
-shifted left of its stations by up to 7 columns, so the first `not reached`
-spans columns 16-26 while `AST` spans 27-29 and `Tokens` spans 14-19 — **the
-drawing says `Tokens` is not reached, nineteen lines above prose reading
-"`Source` and `Tokens` stay open"** [measured: name-centre vs standing-centre,
-every rail drawing]. It is a REGRESSION introduced by C17's own execution:
-swapping `waiting` (7 chars) for `not reached` (11) consumed the padding and
-nobody recomputed it. IMPORTANT 3: `source` and `tokens` are unconditionally
-accessible [read: `embody/derive-accessibility.ts`], so at most THREE phases can
-ever be barred and the twin's "hears `waiting` four times" is impossible.
-
-**Round 11 was declared FULLY RESOLVED and was not.** A context-free validation
-run before round 12 found **three of its six "wrong things" still wrong at
-HEAD**, plus a half-landed human ruling in the twin itself. Those are fixed —
-`1e95814e`, `ffc59db3` — and the lesson is the one this file keeps re-learning:
-**a resolution claim is a repo-state claim, and it decays like any other.** Do
-not read "resolved" in this file as measured unless it carries a tag.
-
-**How to read a number in this file.** Every measured claim below is tagged with
-what makes it decay, because the last three sessions each shipped one that had
-gone stale in a different way:
-
-- **SHA-pinned** — measured at a named commit; never decays.
-- **campaign-scoped** — decays when THIS campaign commits.
-- **foreign-scoped** — decays with **zero** campaign commits, because the tree
-  is shared. These are the ones that bite.
-
-**Why a built module is in "Phase 0".** `orchestrate/` ships, has tests and a
-browser checkpoint ledger — and its **interface was never designed**. Phase 0
-here specifies the arrangement (the Rail) that replaces the lifecycle strip;
-what exists in `index.tsx` today is scaffolding, not contract. Full statement: §
-What this campaign is, in the archive.
-
-**The declared position, and it is the archive's ruling, not a fresh one:**
-
-```text
-work: software · twin-doc: user · ceremony: full · prospective
+```bash
+git log --oneline 80306ad9..HEAD -- \
+  src/lib/study-lenses/orchestrate .planning-handoffs/orchestrate-ux \
+  src/lib/study-lenses/WORKFLOWS.md
 ```
 
-`twin-doc: user` is why AR-1 reviews a **twin** as well as a README, and the
-twin is **three documents**, all at `src/lib/study-lenses/orchestrate/ux/`:
-`personas.md`, `user-journeys.md`, `wireframes.md`. (Give AR-1 absolute paths —
-`lenses/spellme/ux/wireframes.md` also exists and a bare relative path is
-ambiguous.)
+- **Its scope is a budget question and it was put to the human before launch.**
+  The list was **89** commits at `93a7bba2` — campaign-scoped, so re-measure it
+  rather than quoting that number.
 
-**Read [`DECISIONS.md`](./DECISIONS.md) first** — the decision index, its § 0.3
-entry conditions (the deferrals' only home), § Deferred to an eyeball check (two
-round-11 findings ruled into the checkpoints, NOT open), and § The campaign's
-RADIUS, which now has **four rings**. Every **row id** cited below is defined
-there — but **`CP-N` counter-proposals are NOT**: they are defined in this
-file's archived verdicts, below the banner; `T*` checkpoints are in § Sandbox
-checkpoints, in the archive.
+## What the FIX ROUND did — fourteen commits, `1046c90d..df0f5c99`
+
+⚠ **NEVER ASSEMBLE THE AR-5 LIST FROM THIS TABLE. Run the command above.**
+
+| SHA        | what                                                                                                    |
+| ---------- | ------------------------------------------------------------------------------------------------------- |
+| `1046c90d` | **CP-η built and landed RED** · instrument 1 widened to this file · the seven rulings recorded          |
+| `bbc21d87` | **BLOCKER 1** — three barred drawings recomputed, fifteen columns, floor-centred                        |
+| `b5a9c8f0` | **IMPORTANT 4** (R-AH) · C16's retired quote · B11's first evidence · histogram → `{63: 79}`            |
+| `a5f5e007` | **a correction**: `b5a9c8f0`'s body claimed a prettier checkpoint that had FAILED when it was written   |
+| `26f8e521` | **IMPORTANT 9** · the projection contract's totality scoped to DATA · C13's dead citation · **B13**     |
+| `fe4995db` | **IMPORTANT 3** — six sites in four files, numeral only · **B3** re-opened and re-closed                |
+| `e7456954` | **IMPORTANT 6** — the `mark` sweep · and a false kit claim nobody had found                             |
+| `883fc4c2` | **BLOCKER 2** (R-AE) — the occupant dot named · round 11's I9 · MINOR 12 · **B14** · B8's second home   |
+| `190b763d` | **IMPORTANT 8** — checkpoint rows **T11–T14**, T10's content untouched, five citations re-pointed       |
+| `bfa95a50` | **IMPORTANT 5 / CP-θ** — round 11's roll-call; the eleven unfiled findings filed · **A15** · **C19**    |
+| `93a7bba2` | **MINOR 22** — the render list that was false twice                                                     |
+| `97d2c0bc` | **IMPORTANT 7** (R-AF) — F4's barrel premise struck, the divergence declared, the shape deferred to 0.3 |
+| `f8ae6cd3` | **MINORs 13, 15, 10** — recorded, deliberately not acted on                                             |
+| `df0f5c99` | **CP-α built** (R-AG) · CP-η check 4 · CP-η GREEN on all four                                           |
+
+## What this round found that round 12 did NOT
+
+Recorded because a fix round that only lists the reviewer's items misreports
+what happened, and because each of these is a class the reviewer's instruments
+could not reach.
+
+1. **IMPORTANT 3 was SIX sites in four files**, not three in two. `personas.md`
+   carries the ORIGIN phrasing — "telling them a single truth four times" — and
+   `wireframes.md` and `README.md` quote it by name. Round 12 found the
+   `waiting` phrasing only.
+2. **Two of IMPORTANT 6's seven `mark` sites name the `●`, not the standing.**
+   Sweeping them would have asserted the marker IS the standing, which `▾ 2 ●`
+   falsifies. They went to **B14** instead.
+3. **§ The spelling breaks said `Tokens` "keeps its mark and its kit". It has no
+   kit** — four of five phases have none, and the drawing above that sentence
+   has always shown that station bare. Found by re-reading a sentence the noun
+   sweep forced open; no instrument reaches prose-against-drawing.
+4. **C16's column quoted a RETIRED drawn string**, and **C13 cited a section
+   existing in no file.** Two live defects inside the index built to catch them.
+5. **CP-α's first run found C7's two-string split has no drawn surface** — no
+   drawing shows a tray containing a full phase label. Checkpoint **T16**.
+6. **The unbarred drawings sit at ±1.5, not ±1.** CP-η's tolerance is the
+   measured one; at ±1 it fires on seven correct drawings and the next agent
+   loosens it.
+
+## What is RECORDED OPEN, with an owner — the radius, made concrete
+
+Closing 0.2 does not claim these are solved. It claims each has a home:
+
+- **A15** — when does a PART of a surface take its own class? Round 11's I10,
+  recorded open per R-AJ. It amends A13's exhaustiveness claim, so it is the
+  human's.
+- **C19** — the three framings are deictic and the caption may not say where.
+  RECORDED, not settled; checkpoint **T15**.
+- **C7 / T16, C5 / T12 · T13, C15 / T10, C18 / T10 · T14** — six checkpoint
+  questions, each with a named action and a specific expected observation.
+- **M18, M20, M21, M23** — recorded as costs with measured counts, per R-AK.
+- **§ 0.3 entry conditions** — every deferral, including the kit count's
+  predicate, `display-labels.ts`'s shape, and the AR-2 briefing obligation.
+
+## The failure this round committed, and the mechanical fix
+
+`b5a9c8f0`'s body claims `RESUME.md … prettier clean`. **The check had failed
+when that line was written** — the per-file checkpoints were run AFTER `git add`
+rather than before, so a DIRTY result was printed and the commit went ahead in
+the same breath. `a5f5e007` is the correction of record; amend is forbidden, so
+the false line stands in an immutable body.
+
+**The fix is ordering, not diligence: run the checkpoints BEFORE `git add`, and
+treat DIRTY as a stop rather than a line item.** Every commit after `a5f5e007`
+did, and three of them caught a dirty file that would otherwise have shipped.
 
 ## What round 11 changed, and the FOUR commits that answered it
 
@@ -203,7 +147,13 @@ in the same list as the bullet `0d9bd6d2` repaired, under a subject line
 claiming the instruments "were each wrong and are repaired". Assume the same of
 this commit.
 
-## THE GATE THAT JUST RAN — `ar-1` ROUND 12, PAUSE. The brief below is kept for round 13
+## ROUND 12'S GATE — DISCHARGED. Its fix round is `1046c90d..df0f5c99`
+
+**Not a task list.** Round 12 ran, returned PAUSE, the human read it and
+authorised the fix round, and that round is complete. The brief below was
+written for round 12 and is kept because a round 13 — **which the human ruled
+against 2026-08-19** — would need one like it. Its verdict is archived verbatim
+further down and is IMMUTABLE.
 
 Registered agent, **no `model` parameter**. Its brief is **§ THE ROUND-12
 BRIEF**, below — written for round 12, not inherited from round 11. Round 11's
@@ -244,21 +194,23 @@ it is a checkpoint question, not a document one.
 
 ## Baselines — measure these again at session start, do not trust them
 
-| what                   | value                                                                                                                                                                                                                                                                                                                                     |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| prior session baseline | **`061af657`** (round-11 session) and **`65215551`** (the round-12 session, whose five commits are listed below) — SHA-pinned                                                                                                                                                                                                             |
-| **AR-5's baseline**    | **`80306ad9`** — the campaign's, not any session's. SHA-pinned                                                                                                                                                                                                                                                                            |
-| AR-5's SHA list size   | **80 commits** [measured at `26a922e3`] — **campaign-scoped**, and it is a budget question to put to the human BEFORE AR-5 launches                                                                                                                                                                                                       |
-| green (orchestrate)    | **622 passing in 22 files** [measured at `26a922e3`] — campaign-scoped                                                                                                                                                                                                                                                                    |
-| typecheck (repo-wide)  | `npx tsc --noEmit` exit **0** [measured at `26a922e3`] — **foreign-scoped, NOT campaign-scoped**: it compiles the whole tree, so a peer session breaks it without touching this campaign                                                                                                                                                  |
-| upstream               | **none configured** on `main` [measured: `git rev-parse --abbrev-ref main@{upstream}` → fatal]. **`main` is 295 commits AHEAD of `origin/main` (`cf0316bd`); `origin/main` is ahead by nothing** [measured at `26a922e3`] — foreign-scoped. An earlier revision said `origin/main` was ahead. It is backwards, and it feeds the push gate |
-| **foreign commits**    | **8** since `65215551`, the round-12 session's baseline [measured at `26a922e3`] — **foreign-scoped, so this number is wrong by the time you read it.** The tree is shared and moves during a session                                                                                                                                     |
+| what                    | value                                                                                                                                                                                                   |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **AR-5's baseline**     | **`80306ad9`** — the campaign's, not any session's. **SHA-pinned**, never decays                                                                                                                        |
+| this session's baseline | **`1046c90d`** — the fix round's first commit. SHA-pinned                                                                                                                                               |
+| AR-5's SHA list size    | **95** [measured at `df0f5c99`] — **campaign-scoped**. Put its scoping to the human BEFORE launching                                                                                                    |
+| green (orchestrate)     | **622 passing in 22 files** [measured at `df0f5c99`] — campaign-scoped, and unchanged across all fourteen commits, which is expected: this round touched no code                                        |
+| typecheck (repo-wide)   | `npx tsc --noEmit` exit **0** [measured at `df0f5c99`] — **foreign-scoped**                                                                                                                             |
+| the four instruments    | `DECISIONS.md malformed rows: none` · `RESUME.md malformed rows: none` · `{63: 79} outliers: none` · `CP-eta: GREEN` on all four checks [measured at `df0f5c99`] — campaign-scoped                      |
+| upstream                | **none configured** on `main` [measured: `git rev-parse --abbrev-ref main@{upstream}` → fatal]                                                                                                          |
+| **foreign commits**     | **22 during this session alone**, against 13 of mine [measured at `df0f5c99`: `git log 1046c90d..HEAD`, 35 total]. **Foreign-scoped, so it is wrong by the time you read it.** The tree moves under you |
 
-⚠ **The tree carries other campaigns' work, including a modified
-`AGENTS.principal.md` (governance surface) and untracked directories.** The
-pathspec below is a **staging discipline**, not just a log filter: commit with
-`git commit --no-verify -F <msg> -- <paths>` and never `-a`. Full standing
-rules: § Mechanics that will bite you, in the archive — that section is LIVE.
+⚠ **The pathspec is a STAGING DISCIPLINE, not a log filter.** Foreign files sat
+STAGED in the index throughout this session — three of them, from peer sessions
+— and a `git commit -a`, or any pathspec broader than these three paths, sweeps
+another session's work into your commit. Commit with
+`git commit --no-verify -F <msg> -- <paths>` and never `-a`. Verified all
+fourteen times: each commit touched only its own files.
 
 ```text
 src/lib/study-lenses/orchestrate .planning-handoffs/orchestrate-ux src/lib/study-lenses/WORKFLOWS.md
@@ -562,31 +514,44 @@ produced**, which is the durable home; this table is the convenience copy.
 | R-AC | **The sibling-region ring is the radius's third ring**, censused with a declared **polysemy exclusion**. Declared, not fixed.                                                                                                      |
 | R-AD | **The census reads TRACKED files only**, with one untracked observation recorded anyway.                                                                                                                                           |
 
+**And the round-12 fix round's seven, taken 2026-08-19** — durable home is the
+same section of [`DECISIONS.md`](./DECISIONS.md):
+
+| #    | ruling                                                                                                                                     |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| R-AE | The **`●` is the occupant dot** — a projection of `PaneOccupant` read at render, NOT a station property. **B8's four stands.** See **B14** |
+| R-AF | **F4: the premise is fixed, the FILE SHAPE defers to 0.3.** The barrel `DEV.md` bans was never a cost of the declined alternative          |
+| R-AG | **Build BOTH instruments** — CP-η (present-and-wrong) and CP-α (absence). CP-α does NOT close 0.2                                          |
+| R-AH | **The cause arm is `blank · message (wrapping) · count`** — spacer above, message one wrapping string. `types.ts` shape stays two-part     |
+| R-AI | **`twin-doc: user`** — re-asked and re-confirmed this session, per `DEV.md` § Phase 0                                                      |
+| R-AJ | **Round 11's I10 is RECORDED OPEN as A15**, not answered — it amends A13's exhaustiveness claim                                            |
+| R-AK | **Round 11's M18 is RECORDED as a cost**, not swept — a fourth rename mid-round is how rounds generate the next round's findings           |
+
 ## Operating instructions for the next session
 
-- **Model**: design work tracks the strongest available tier. Round 12 is a
-  design review; run the orchestrator on an opus-tier model and pass **no**
-  `model` parameter to `ar-1` (its frontmatter pins `opus`). A downgrade must be
-  named together with its cost, because `ar-2` and `ar-5` inherit it — **`ar-5`
-  has no `model:` line in its frontmatter at all** [read:
-  `.claude/agents/ar-5.md`], so it runs on whatever tier spawns it.
-- **Opens in**: Phase 0 step 0.2, in **round 12's FIX ROUND**. Round 12 ran,
-  returned PAUSE, and the human read it and handed off rather than fixing in
-  that session. **Ask for the three owed rulings first** — see § YOUR FIRST
-  ACTION at the top of this file.
-- **Gates the human holds**: the three owed rulings (the `●`, F4's copy home,
-  CP-η vs CP-α); whether a round 13 runs at all — the outgoing session argues
-  NOT, see § THE OUTGOING SESSION'S RECOMMENDATION; **AR-5's scope, because its
-  SHA list is 80 commits**; the Phase-0 → Phase-1 review gate; and the push.
-  There is no upstream on `main`.
+- **Opens in**: Phase 0 step 0.2, **at the AR-5 gate**. The fix round is done;
+  no edits are owed and no rulings are owed. See § AR-5 at the top of this file.
+- **Model**: AR-5 is judgment-heavy and should track the authoring tier.
+  **`ar-5` carries no `model:` line at all** [read: `.claude/agents/ar-5.md`],
+  so it inherits whatever spawns it — name the tier and its cost. Do NOT pass a
+  `model` parameter to any `ar-N`; the frontmatter pins are the roster.
+- **Gates the human holds**: AR-5's scope (95 commits and campaign-scoped);
+  whether a round 13 runs after AR-5 (**ruled NO 2026-08-19**, with a stated
+  fallback trigger — see § YOUR FIRST ACTION); the Phase-0 → Phase-1 review; and
+  the push. There is no upstream on `main`.
 - **The twin ask is re-asked every session, not remembered** [read: `DEV.md` §
   Phase 0 — "If a session ends in between, **ask again** — do not carry the
   answer in a plan file"]. Re-asked and re-confirmed 2026-08-19:
-  `twin-doc: user`.
-- **Watch for**: a receipt that counts instead of reads (see § The one thing the
-  round-11 session changed most); any number carried forward without
-  re-measuring; and **a "resolved" claim taken on trust** — three of round 11's
-  six were not, and the file said they were.
+  `twin-doc: user`. Ask again anyway.
+- **Run the per-file checkpoints BEFORE `git add`, and treat DIRTY as a stop.**
+  This is not style advice: `b5a9c8f0` shipped a body claiming a checkpoint that
+  had failed, because the loop ran after staging. See § The failure this round
+  committed.
+- **Watch for**: any number carried forward without re-measuring — this file's
+  most repeated defect by a wide margin; a "resolved" claim taken on trust; and
+  a receipt that counts instead of reads. **And re-measure a REVIEWER's numbers
+  too**: round 12 was right on the substance of everything I checked and wrong
+  on five counts, and this round found four defects round 12 did not.
 
 ## The instruments — RUNNABLE, because an instrument with no command is a rumour
 
