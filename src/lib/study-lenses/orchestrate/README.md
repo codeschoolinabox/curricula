@@ -489,19 +489,19 @@ this region owns.
   where it names the same thing a recommendation does — everywhere else in this
   region's prose the contract term is the one to use.
 - **the caption** — the one thing beneath the rail, and the object the four
-  count-line rules govern. It holds the **cause line** wherever a barring edge
-  is drawn, else the **count line**, else nothing: one slot, two producers, a
-  total order between them. Named because it is a contract object with a
-  precedence rule and, until now, only a seven-word phrase — "the slot beneath
-  the rail" — in two documents that had to stay in sync. A tray never takes it:
-  a tray opens BETWEEN the rail and the caption, pushing it down along with the
-  pane, because a tray describes one station while the caption describes the
-  rail as a whole. **Its two arms are the cause line and the count line**, and
-  those are the only names either arm takes — `the reason line` and
-  `the empty-count line` are retired for both. **What is rejected is naming the
-  SLOT after an arm**: calling the whole object "the reason line" is what made a
-  total order read as a competition between two objects, which is the defect
-  this entry exists to end.
+  rules govern. It holds the **cause line** wherever a barring edge is drawn,
+  else the **count line**, else nothing: one slot, two producers, a total order
+  between them. Named because it is a contract object with a precedence rule
+  and, until now, only a seven-word phrase — "the slot beneath the rail" — in
+  two documents that had to stay in sync. A tray never takes it: a tray opens
+  BETWEEN the rail and the caption, pushing it down along with the pane, because
+  a tray describes one station while the caption describes the rail as a whole.
+  **Its two arms are the cause line and the count line**, and those are the only
+  names either arm takes — `the reason line` and `the empty-count line` are
+  retired for both. **What is rejected is naming the SLOT after an arm**:
+  calling the whole object "the reason line" is what made a total order read as
+  a competition between two objects, which is the defect this entry exists to
+  end.
 
   **One slot, one occupant — and the two arms are not the same SHAPE** (human
   ruling 2026-08-19). The count line is one line. The **cause line is a block**:

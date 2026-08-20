@@ -793,7 +793,7 @@ is LIVE. These four are additions from this session:
 > 1. **§ Commit form** — which `DECISIONS.md` calls "the thing that actually
 >    fires".
 > 2. **§ Mechanics that will bite you** — the standing trap list.
-> 3. **§ Sandbox checkpoints owed at Phase 1** — the only definition of T1–T14.
+> 3. **§ Sandbox checkpoints owed at Phase 1** — the only definition of T1–T15.
 >    **T10 deliberately carries a retired word; see C18 before you "fix" it.**
 > 4. **§ Human rulings** — the standing `twin-doc: user` / `ceremony: full`
 >    declaration and the twin's three paths.
@@ -3440,6 +3440,7 @@ route into `orchestrate/PHASE-1-CHECKPOINT-LEDGER.md`.
 | T12 | Load with a roster where **exactly one** accessible phase is empty. Read the caption                                            | the count line renders **singular** — one phase, not `1 phases`. C5 rule 2. **Requires editing `spiralearn/sandbox/orchestrate/index.mdx`**, as T4 does                                                                                                                                                 |
 | T13 | Load with a fitting lens on **every** accessible phase. Look at the strip of space between the rail and the pane                | **no caption row renders at all**, and no blank line is reserved for it — the pane sits directly beneath the rail. C5 rule 3                                                                                                                                                                            |
 | T14 | Screen reader, barring edge drawn. Traverse the barred stations and **write down the exact word spoken at each**                | **this row OBSERVES and does not decide.** C18 is unruled by human ruling — record `waiting`, `not reached`, or whatever is actually spoken, as evidence for that ruling. Do NOT reconcile it with the drawn word here. C18                                                                             |
+| T15 | Trip any parse break. Read ONLY the cause line, without looking at the rail                                                     | **say what the word _here_ points at.** The three framings all say `broke here` and the caption names no station by contract (B3, C15) — so the answer is either "nothing" or a station the geometry deliberately leaves OPEN. C19                                                                      |
 
 ## The process failure to not repeat
 
