@@ -139,11 +139,12 @@ frozen seed. Returning remounts the editor seeded from the live source — edits
 survive every excursion. The Edit code button (rendered whenever the editor is
 away, never masked) is the guaranteed way home; the open lens's tray entry
 closes it too, whenever the rail itself is not masked. During any excursion the
-band, the strip, the level UI, the guide, and the recommendations all stay
-rendered — frozen, like every derivation input — only the pane's occupant
-changes. And the one visual pane is two DOM slots: the editor renders in its own
-never-masked slot; the open lens and the generator render within the maskable
-content region, so the class-1/class-3 split survives the swap.
+band — the control row and the rail — the level UI, the guide, and the
+recommendations all stay rendered — frozen, like every derivation input — only
+the pane's occupant changes. And the one visual pane is two DOM slots: the
+editor renders in its own never-masked slot; the open lens and the generator
+render within the maskable content region, so the class-1/class-3 split survives
+the swap.
 
 - **The editor (home base)** — the surface the learner authors in, and the only
   place typing enters the program's source; every derived state re-derives from
