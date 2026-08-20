@@ -11,6 +11,8 @@
 <!-- cspell:ignore capitalisation loosenings -->
 <!-- structure-check.sh awk locals; see § The structural-integrity check: -->
 <!-- cspell:ignore isledger lslice bslice bbanner lrow ochar -->
+<!-- transport-check.sh schema locals; see § The transport check: -->
+<!-- cspell:ignore QCOL RCOL NCELL -->
 
 # `<lens>` — fidelity ledger
 
@@ -1124,22 +1126,71 @@ unwrap_markup() { case "$1" in '<'*) printf '%s' "$2" | perl -pe 's/^`(.*)`$/$1/
 
 perl -ne '
   BEGIN { $M = $ENV{MEMBER};
-          $noref = ($ENV{REF} eq "NONE" && $ENV{PORT} eq "NONE"); }
+          $noref = ($ENV{REF} eq "NONE" && $ENV{PORT} eq "NONE");
+          $QCOL = -1; $RCOL = -1; $ECOL = -1; $NCELL = 0; $LEGACY = 0; }
+
+  # SCHEMA. The column layout is READ OFF THE LEDGER’S OWN HEADER ROW and never
+  # hardcoded as an index -- so a not-yet-migrated ledger carrying `evidence`
+  # resolves to the legacy layout and this check behaves byte-identically to the
+  # one-cell form on it. That is what lets the check land before the data.
+  if ($QCOL < 0 && $ECOL < 0 && /^\|\s*#\s*\|/) {
+    my @h = split /(?<!\\)\|/, $_, -1; $NCELL = scalar @h;
+    for my $i (0..$#h) { my $t = $h[$i]; $t =~ s/^\s+|\s+$//g;
+      $QCOL = $i if $t eq "quoted"; $RCOL = $i if $t eq "reasoned"; $ECOL = $i if $t eq "evidence"; }
+    if ($QCOL < 0 && $ECOL >= 0) { $QCOL = $ECOL; $LEGACY = 1; }
+    next;
+  }
   next unless /^\| `([a-z0-9-]+-\d{3})`/; my $id = $1;
   next if $M ne "all" && !/^\| `[a-z0-9-]+-\d{3}` *\| *`\Q$M\E` /;
-  $rows++; my $n = 0;
-  while (/Gen-([23])\s*`([A-Za-z.]+\.md)`\s*§\s*(.*?):\s*(?:_"(.*?)"_|<em>"(.*?)"<\/em>)/g) {
-    my $q = defined $4 ? $4 : $5;
-    print join("\t", $id, "G$1", $2, $3, $q), "\n"; $n++;
+  $rows++;
+
+  # CELL SCOPING, on the UNESCAPED pipe -- the delimiter GFM itself uses, and
+  # the correct inverse of transport modification 1 (`|` -> `\|`). This is NOT
+  # the naive field split the one-cell form rightly avoided: a raw /\|/ split
+  # truncates the SIX rows across the two committed ledgers that carry a literal
+  # escaped pipe inside a cell [measured 2026-08-20: parsons-003, -022, -081,
+  # -091, -104 and writeme-018; two of them are Gen-2/3 rows parsed today].
+  my @c = split /(?<!\\)\|/, $_, -1;
+  print join("\t",$id,"-","-","!RAGGED", scalar(@c)." cells against header ".$NCELL),"\n"
+      if $NCELL && @c != $NCELL;
+  my $q = ($QCOL >= 0 && $QCOL <= $#c) ? $c[$QCOL] : "";
+  my $r = ($RCOL >= 0 && $RCOL <= $#c) ? $c[$RCOL] : "";
+
+  # THE PARSE ARM, scoped to `quoted`. Adjacency is now STRUCTURAL rather than
+  # incidental: citation and quotation must share a cell, so a `|` between them
+  # cannot parse. The one-cell form got that property only from `\s*` happening
+  # not to match a pipe.
+  my $n = 0;
+  while ($q =~ /Gen-([23])\s*`([A-Za-z.]+\.md)`\s*§\s*(.*?):\s*(?:_"(.*?)"_|<em>"(.*?)"<\/em>)/g) {
+    my $quote = defined $4 ? $4 : $5;
+    print join("\t", $id, "G$1", $2, $3, $quote), "\n"; $n++;
   }
   $parsed += $n;
-  my $cited = () = /Gen-[23]\s*`[A-Za-z.]+\.md`\s*§/g;
-  my $lead  = () = /Gen-[23]\s*`?[A-Za-z0-9._\/-]+\.md`?/g;
+
+  # THE THREE COUNTERS, all scoped to `quoted` TOGETHER. Scoping the parse arm
+  # while leaving these line-scoped would let citation-shaped prose in `reasoned`
+  # inflate `cited` and manufacture UNQUOTED findings on clean rows.
+  my $cited = () = $q =~ /Gen-[23]\s*`[A-Za-z.]+\.md`\s*§/g;
+  my $lead  = () = $q =~ /Gen-[23]\s*`?[A-Za-z0-9._\/-]+\.md`?/g;
   print join("\t",$id,"-","-","!MALFORMED","$cited of $lead leads parse"),"\n" if $lead > $cited;
   print join("\t",$id,"-","-","!UNQUOTED", "$n of $cited cited"),"\n"          if $cited > $n;
+
+  # THE `reasoned` ARM. Transported extractor output in the derivation cell is a
+  # BREACH, not a finding -- because without it the wrong split silently drains
+  # the check and exits 0, which is the failure the ruling was taken to prevent.
+  unless ($LEGACY) {
+    my $mc = () = $r =~ /Gen-[123]\s*`[A-Za-z0-9._-]+\.[a-z]+`/g;
+    my $mq = () = $r =~ /(?:_"|<em>")/g;
+    print join("\t",$id,"-","-","!MISPLACED-CITATION","$mc in reasoned"),"\n" if $mc;
+    print join("\t",$id,"-","-","!MISPLACED-QUOTATION","$mq in reasoned"),"\n" if $mq;
+  }
+
   if ($n == 0) { $nocite++;
     print join("\t",$id,"-","-","!NO-CITATION","-"),"\n" unless $noref; }
-  END { print join("\t","-","-","-","!CENSUS",
+  END { print join("\t","-","-","-","!SCHEMA","unresolved -- no header row carrying `quoted` or `evidence`"),"\n" if $QCOL < 0;
+        print join("\t","-","-","-","!SCHEMA","half-migrated -- `quoted` present, `reasoned` absent"),"\n"
+            if $QCOL >= 0 && !$LEGACY && $RCOL < 0;
+        print join("\t","-","-","-","!CENSUS",
         "member=$M ref=$ENV{REF} rows=".($rows+0)
         ." parsed=".($parsed+0)." nocite=".($nocite+0)),"\n" }
 ' "$L" > "$REC"
@@ -1153,6 +1204,10 @@ while IFS=$'\t' read -r id side file head stored; do
     '!UNQUOTED')    echo "$id UNQUOTED ($stored)";           continue;;
     '!MALFORMED')   echo "$id MALFORMED-CITATION ($stored)"; continue;;
     '!NO-CITATION') echo "$id NO-CITATION";                  continue;;
+    '!RAGGED')      echo "BREACH $id RAGGED-ROW ($stored)";  continue;;
+    '!MISPLACED-CITATION')  echo "BREACH $id MISPLACED-CITATION ($stored)";  continue;;
+    '!MISPLACED-QUOTATION') echo "BREACH $id MISPLACED-QUOTATION ($stored)"; continue;;
+    '!SCHEMA')      echo "BREACH SCHEMA $stored";            continue;;
   esac
   case "$side" in
     G2) [ "$REF"  = NONE ] && { echo "$id G2 UNEXPECTED-CITATION $file § $head"; continue; }
@@ -1176,6 +1231,13 @@ cat "$OUT"
 n=$(sed -n 's/^CENSUS .*rows=\([0-9]*\) .*/\1/p' "$OUT")
 [ -n "$n" ] || { echo "FAIL: no CENSUS line -- the check did not complete"; exit 1; }
 [ "$n" -gt 0 ] || { echo "FAIL: zero rows matched -- wrong ledger path, wrong MEMBER, or the id prefix moved"; exit 1; }
+# THE SECOND FLOOR. A BREACH is a violated two-cell contract, not a finding
+# about a quotation, so it refuses rather than reports. `rows > 0` alone cannot
+# see a botched migration: the wrong split leaves rows=120 and exits 0 while the
+# check's reach silently drains [measured 2026-08-20 -- see § The amendment gate].
+b=$(/usr/bin/grep -c '^BREACH ' "$OUT" || true)
+[ "$b" -eq 0 ] || { echo "FAIL: $b structural breach(es) -- the two-cell contract is violated"; exit 1; }
+exit 0
 ```
 
 The four sentinel arms must `continue` **before** `case "$side"`, or `set -u`
@@ -1240,13 +1302,27 @@ literal-prefix discipline `firstblock`, `glossterm` and `resolve` all carry.
   now means _this ledger cites no heading on that side, and here are the rows I
   checked_ — which is also what stops `dropdowns` and `variables`, whose whole
   G2 arm is a structural no-op, reading as a clean bill.
-- **The `NO-CITATION` set is derived, not judged.** With a reference root it
-  must equal the union of the lister-4 and lister-5 id ranges in
-  `### Seed census` — those are the rows § What Pass 1 writes says cite no
-  heading at all. **Both committed ledgers already satisfy it**: `parsons` =
-  `045`–`047`, its three lister-4 clusters; `writeme` = **empty**, because
-  `WritemeLens` has 0 orphans. Publish the derivation and never the number —
-  `writeme` already contradicts any threshold.
+- **The `NO-CITATION` set is derived, not judged** — but ⚠️ ~~it must equal the
+  union of the lister-4 and lister-5 id ranges in `### Seed census`; `parsons` =
+  `045`–`047`, its three lister-4 clusters~~ **STRUCK 2026-08-20: that
+  derivation was stale by 73 rows and nothing was checking it.** Measured on the
+  live ledger: `parsons`'s `NO-CITATION` set is `045`–`120`, **76 rows**, not
+  three. Every Gen-1 row is in it and correctly so — `parsed`, `cited` **and**
+  `lead` all key on `Gen-[23]`, so a Gen-1 citation never reaches even the
+  `MALFORMED-CITATION` residual. The blindness is total, not partial, and it
+  covers 61 % of the ledger.
+
+  **The rule failed because it identified a set by what it LACKED.** A row lands
+  in `NO-CITATION` for two unrelated reasons — it cites nothing, or it cites
+  something this grammar cannot read — and the old derivation could not tell
+  them apart, so an append of 40 Gen-1 rows moved the set silently and read as a
+  clean bill. **Identify the lister rows POSITIVELY instead**, by the
+  `lister-N cluster` anchor form in `quoted`. `writeme` = **empty** still holds,
+  because `WritemeLens` has 0 orphans. Publish the derivation and never the
+  number — `writeme` already contradicts any threshold.
+
+  Until a Gen-1 arm exists, `nocite` is a **coverage report, not a finding**: it
+  counts the rows this check does not reach.
 
 **Mutation-test every changed line before trusting the gate, not one of them.**
 Publishing this check on five plants is how it shipped without a floor. All
@@ -1256,10 +1332,10 @@ confirmed to fire [all measured 2026-08-18]:
 | mutation                                            | expected                                                                                                                       |
 | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | run it against **this template**                    | `rows=0 parsed=0` — the specimen ids are `` `<lens>-001` `` and `<` is outside the id class. Without the census: total silence |
-| fabrication whose filename carries a path           | that id under **both** `MALFORMED-CITATION (0 of 1 leads parse)` and `NO-CITATION`; `parsons` nocite 3 → **4**                 |
+| fabrication whose filename carries a path           | that id under **both** `MALFORMED-CITATION (0 of 1 leads parse)` and `NO-CITATION`; `parsons` nocite **76 → 77** ⚠️            |
 | fabrication omitting the `§`                        | the same pair                                                                                                                  |
-| baseline `NO-CITATION` set, nothing planted         | `parsons` = `045`,`046`,`047`; `writeme` = none                                                                                |
-| fabrication **beside** a good citation, path form   | `MALFORMED-CITATION (1 of 2 leads parse)`; nocite **stays 3** — the floor alone is blind here, which is why `lead` exists      |
+| baseline `NO-CITATION` set, nothing planted         | ⚠️ `parsons` = `045`–`120`, **76 rows** — ~~`045`,`046`,`047`~~; `writeme` = none [re-measured 2026-08-20]                     |
+| fabrication **beside** a good citation, path form   | `MALFORMED-CITATION (1 of 2 leads parse)`; nocite **stays 76** ⚠️ — the floor alone is blind here, which is why `lead` exists  |
 | fabrication **beside** a good citation, no-`§` form | the same                                                                                                                       |
 | `lead` false-positive gate, both clean ledgers      | **0** rows where `lead > cited`. **Gate publication on this**                                                                  |
 | `REF=NONE` with a well-formed Gen-2 citation        | `UNEXPECTED-CITATION`                                                                                                          |
@@ -1272,12 +1348,32 @@ confirmed to fire [all measured 2026-08-18]:
 Four more rows, each added because a reviewer broke the check in that exact
 place [all measured 2026-08-18]:
 
-| mutation                                                                      | expected                                                                                 |
-| ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| **modification 4** — backticks laundered onto a prose quotation               | `DIVERGENT`. The row whose absence made the amendment gate blind; see below              |
-| a fabrication citing a **non-`.md`** file (`types.ts`) beside a good citation | `MALFORMED-CITATION (1 of 2 leads parse)`. Under a `.md`-only `lead`, **no line at all** |
-| the row pattern matches nothing — wrong path, wrong `MEMBER`, moved prefix    | `FAIL: zero rows matched`, **exit 1**. A `CENSUS` line alone is a report, not a floor    |
-| Family F preflight, marker misspelled into a **shape-valid** slug             | `UNMARKED-ROW`. Under a `[a-z][a-z-]*` character class it was **silent**                 |
+| mutation                                                                       | expected                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **modification 4** — backticks laundered onto a prose quotation                | `DIVERGENT`. The row whose absence made the amendment gate blind; see below                                                                                                                                                                                                                                                                                                                                    |
+| a fabrication citing a **non-`.md`** file (`types.ts`) beside a good citation  | ⛔ **THIS ROW IS FALSE AND WAS FALSE BEFORE THE TWO-CELL REWRITE.** It documents the **reverted** widened `lead`; the shipping `lead` is `.md`-only, so the plant produces **no line at all** under the published check and under this one alike [both measured 2026-08-20 on the same plant]. Kept, struck, rather than deleted: a corpus row that never fired is the thing this table exists to make visible |
+| the row pattern matches nothing — wrong path, wrong `MEMBER`, ~~moved prefix~~ | `FAIL: zero rows matched`, **exit 1**. ⚠️ The **moved-prefix** clause is false: the id regex is `[a-z0-9-]+-\d{3}`, so renaming `parsons-NNN` to `parsnip-NNN` still yields `rows=120` under both forms. Wrong path and wrong `MEMBER` do fire [measured 2026-08-20]                                                                                                                                           |
+| Family F preflight, marker misspelled into a **shape-valid** slug              | `UNMARKED-ROW`. Under a `[a-z][a-z-]*` character class it was **silent**                                                                                                                                                                                                                                                                                                                                       |
+
+**And five more for the two-cell arms**, added when the check was cell-scoped
+[all measured 2026-08-20, each planted alone against the check as extracted back
+out of this file]. A `BREACH` is a violated contract rather than a finding about
+a quotation, so every one of these **exits 1**:
+
+| mutation                                                           | expected                                                                            |
+| ------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
+| the header's `quoted` column renamed                               | `BREACH SCHEMA unresolved`. The check refuses rather than reading column 4 by index |
+| `quoted` present, `reasoned` renamed away                          | `BREACH SCHEMA half-migrated`                                                       |
+| a `\|` unescaped inside a cell — the prettier/`MD056` damage class | `BREACH parsons-091 RAGGED-ROW (14 cells against header 9)`                         |
+| a quotation planted in the `reasoned` cell                         | `BREACH parsons-086 MISPLACED-QUOTATION (1 in reasoned)`                            |
+| a citation planted in the `reasoned` cell                          | `BREACH parsons-086 MISPLACED-CITATION (1 in reasoned)`                             |
+
+⚠️ **Two of these were mis-planted first and passed, which is the point of
+planting them one at a time.** A `MISPLACED-QUOTATION` plant appended to the end
+of the row line landed in `gate`, not `reasoned`, and the check correctly said
+nothing. **A plant that does not land where you think it did reads exactly like
+a check that does not fire.** Plant by splitting the row on the unescaped pipe
+and writing the named field, never by appending to the line.
 
 ### The amendment gate — the two clean regressions are NOT it
 
