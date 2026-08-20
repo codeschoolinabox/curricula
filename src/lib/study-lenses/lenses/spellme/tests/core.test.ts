@@ -394,18 +394,18 @@ describe('spellme core', () => {
 
 	describe('Exceptions', () => {
 		it('refuses a negative threshold', () => {
-			expect(() => spellmeCore.config({ skipAfter: -1 })).toThrow(TypeError);
+			expect(() => spellmeCore.config({ skipAfter: -1 })).toThrow(RangeError);
 		});
 
 		it('refuses a fractional threshold', () => {
 			expect(() => spellmeCore.config({ oneMoreAfter: 1.5 })).toThrow(
-				TypeError,
+				RangeError,
 			);
 		});
 
 		it('refuses a non-finite threshold', () => {
 			expect(() => spellmeCore.config({ skipAfter: Number.NaN })).toThrow(
-				TypeError,
+				RangeError,
 			);
 		});
 	});

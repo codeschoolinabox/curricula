@@ -35,7 +35,7 @@ import type {
  * treated as absent and the default applies, while `null` and `false`
  * are values and win verbatim.
  *
- * @throws TypeError on a negative, fractional or non-finite threshold —
+ * @throws RangeError on a negative, fractional or non-finite threshold —
  *   the factory is a boundary and does not coerce invalid input (see
  *   `./README.md` § Configuration).
  */
@@ -203,7 +203,7 @@ function refuseOutOfRangeThresholds(
 	for (const key of THRESHOLD_KEYS) {
 		const value = defined[key];
 		if (typeof value === 'number' && !isLegalThreshold(value)) {
-			throw new TypeError(
+			throw new RangeError(
 				`spellme config: ${key} must be a non-negative integer, got ${value}`,
 			);
 		}
