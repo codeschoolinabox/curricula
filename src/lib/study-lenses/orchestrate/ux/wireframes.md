@@ -248,11 +248,17 @@ caption, which is class 3 by A9 and dims with the rail too. Both readers lose
 both halves at once.
 
 **Whether this is acceptable is a checkpoint question, not a document question**
-— a screen-reader pass over a barred rail is the only thing that settles it. If
-it is not acceptable, the cheap answer is the one the empty station already got:
-per-station visually-hidden text carrying the cause, which is a 0.3 obligation
-rather than a layout change, and which would have to be reconciled with B3's
-draw-once rule for the DRAWN surface.
+— a screen-reader pass over a barred rail is the only thing that settles it.
+(**The drawing this paragraph describes is two sections down**, at
+[The parse breaks](#the-parse-breaks--the-machine-stopped): this section's own
+drawing has no barred station, by the C3 symmetry that puts the cost beside the
+empty station's. The placement is deliberate and stays — but a numeral with no
+drawing beside it is how "four times" survived four rounds here, so the pointer
+is drawn explicitly rather than left to the reader.) If it is not acceptable,
+the cheap answer is the one the empty station already got: per-station
+visually-hidden text carrying the cause, which is a 0.3 obligation rather than a
+layout change, and which would have to be reconciled with B3's draw-once rule
+for the DRAWN surface.
 
 **Under strict, neither reader gets it, and that is a second unpaid cost.** The
 reason earns none of the four class-2 routes — it acts on no boundary, explains
