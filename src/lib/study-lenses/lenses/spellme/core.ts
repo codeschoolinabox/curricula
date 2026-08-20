@@ -33,7 +33,7 @@ import type {
  *   `./README.md` § Configuration).
  */
 function config(_overrides?: Partial<LensConfig>): LensConfig {
-	throw new Error('spellme config: not implemented');
+	return { oneMoreAfter: 2 };
 }
 
 /**

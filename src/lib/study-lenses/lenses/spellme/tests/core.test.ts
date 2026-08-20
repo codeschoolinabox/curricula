@@ -325,7 +325,7 @@ describe('spellme core', () => {
 	});
 
 	describe('config', () => {
-		it.skip('applies the one-more threshold default', () => {
+		it('applies the one-more threshold default', () => {
 			expect(spellmeCore.config().oneMoreAfter).toBe(2);
 		});
 
