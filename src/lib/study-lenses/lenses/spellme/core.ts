@@ -168,7 +168,7 @@ function handOver(
  * recommendations yet (see `./README.md` § Future direction).
  */
 function recommend(): ReadonlyArray<Recommendation> {
-	throw new Error('spellme recommend: not implemented');
+	return [];
 }
 
 /**

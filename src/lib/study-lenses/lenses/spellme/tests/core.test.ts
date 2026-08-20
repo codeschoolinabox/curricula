@@ -379,7 +379,7 @@ describe('spellme core', () => {
 	});
 
 	describe('recommend', () => {
-		it.skip('returns the empty array', () => {
+		it('returns the empty array', () => {
 			expect(spellmeCore.recommend()).toEqual([]);
 		});
 
