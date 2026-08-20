@@ -748,15 +748,14 @@ ticked it green for the same reason.
 
 ⚠ **The histogram figure is CAMPAIGN-SCOPED and has gone 72 → 77 → 80 → 79.**
 The drop to 79 is this commit deleting one framed blank line from § The
-machinery breaks, and it is recorded in the same commit that caused it —
-because every previous revision of this paragraph was written a commit or two
-after the number moved.
-An earlier revision of this paragraph documented `{63: 77}`, which was true two
-commits before it was written, so the first thing a fresh agent did — re-measure
-at session start — returned a mismatch with no way to tell whether the tree had
-drifted, the instrument had broken, or the handoff was wrong. **If your run
-prints a different number and reports no outliers, the instrument is fine and
-this line is stale. Update it.**
+machinery breaks, and it is recorded in the same commit that caused it — because
+every previous revision of this paragraph was written a commit or two after the
+number moved. An earlier revision of this paragraph documented `{63: 77}`, which
+was true two commits before it was written, so the first thing a fresh agent did
+— re-measure at session start — returned a mismatch with no way to tell whether
+the tree had drifted, the instrument had broken, or the handoff was wrong. **If
+your run prints a different number and reports no outliers, the instrument is
+fine and this line is stale. Update it.**
 
 **The one-line-fence exclusion is not optional** — run without it and the scan
 reports two false outliers, and a next agent chases them. **They are named here
