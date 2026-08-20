@@ -649,6 +649,25 @@ on. The surviving discriminator is that the nameplate **always** names the
 occupant while the rail names a **phase** and marks no occupant at all in two of
 three occupant states.
 
+### Rulings taken 2026-08-19 — the round-12 fix round
+
+Seven, all asked in one message before any edit opened, per `RESUME.md` § YOUR
+FIRST ACTION. **Three were owed by the handoff, a fourth was hiding inside
+IMPORTANT 4, and three more surfaced from the roll-call and the twin ask.** They
+are recorded in the commit that opens the fix round rather than in the one that
+closes it, because every commit below cites them — intake question 1 asks the
+question of the commit that TAKES the decision.
+
+| #        | ruling                                                                                                                                                                                                                                                                                                                                                         |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **R-AE** | **The `●` is a projection of `PaneOccupant` the rail reads at render**, not a fifth station property. **B8's four STANDS**; the glossary entry records _why it is not a station property_ — it is derivable from the pane occupant the projection contract already hands the region. B10's 0.3 row records that `Station`'s shape question does not absorb it. |
+| **R-AF** | **F4: the premise is fixed, the FILE SHAPE defers to 0.3.** The declined-`copy/` argument rests on a barrel `DEV.md` § 1 bans outright, so the barrel was never a cost of the alternative. Strike the false premise, declare the collision, and let 0.3 choose the shape — C11 already owes `display-labels.ts` its whole widening.                            |
+| **R-AG** | **Build BOTH instruments** — CP-η (drawing consistency, the present-and-wrong detector) and CP-α (clause × drawing coverage, the absence detector). CP-α does not close 0.2; round 12 proved it ticks BLOCKER 1 green.                                                                                                                                         |
+| **R-AH** | **The cause arm is `blank · message (wrapping) · count`.** The spacer is above the block; the message is ONE string that wraps. § The machinery breaks' internal blank goes. The `types.ts` shape stays two-part — the drawing's own sentence, "the framing is one string", is what settles it.                                                                |
+| **R-AI** | **`twin-doc: user`** — re-asked and re-confirmed this session, per `DEV.md` § Phase 0's per-session rule. The twin is the three documents at `ux/`.                                                                                                                                                                                                            |
+| **R-AJ** | **Round 11's I10 is RECORDED OPEN as A15, not answered.** Nothing in the taxonomy says when a part of a surface takes its own class, and the proposed rule amends A13's exhaustiveness claim. A3 was not allowed to settle its class argument by keystroke; this one is not either.                                                                            |
+| **R-AK** | **Round 11's M18 (`cause line` naming a block) is RECORDED as a cost, not swept.** A fourth vocabulary rename inside a round that already runs a `mark` sweep and three drawing edits is how five consecutive rounds generated the next round's findings.                                                                                                      |
+
 ## 0.3 entry conditions — the deferrals' ONLY home
 
 R-M (human ruling 2026-08-17) took the deferral notes back OUT of

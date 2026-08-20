@@ -588,7 +588,13 @@ produced**, which is the durable home; this table is the convenience copy.
   re-measuring; and **a "resolved" claim taken on trust** — three of round 11's
   six were not, and the file said they were.
 
-## The two instruments — RUNNABLE, because an instrument with no command is a rumour
+## The instruments — RUNNABLE, because an instrument with no command is a rumour
+
+**Was § The two instruments until 2026-08-19**, when CP-η made it three. No
+in-repo citation used the old heading [measured: `grep -rn "two instruments"`
+over `orchestrate/` and this directory → **1** hit, the heading itself]; the
+launch prompt that handed this session its work does cite it, which is why the
+rename is recorded here rather than performed silently.
 
 There is an untracked `scripts/lib/check-tables/` in the tree with a test
 importing a module that does not exist. **It is not these instruments and it is
@@ -596,22 +602,26 @@ not this campaign's** — ignore it.
 
 ````bash
 # 1 · rendered-row check — every table row's unescaped-pipe count vs its header
+#     BOTH campaign files: DECISIONS.md's rows are the closure argument, and
+#     RESUME.md's checkpoint table is a contract nothing else lints.
 python3 - <<'EOF'
 import re
-lines=open('.planning-handoffs/orchestrate-ux/DECISIONS.md').read().split('\n')
-inf=False; hdr=None; bad=[]
-pipes=lambda s: len(re.findall(r'(?<!\\)\|', s))
-for i,l in enumerate(lines,1):
-    if l.strip().startswith('```'): inf=not inf; continue
-    if inf: continue
-    s=l.strip()
-    if s.startswith('|') and s.endswith('|'):
-        if re.fullmatch(r'\|[\s:\-|]+\|', s): continue
-        nxt=lines[i].strip() if i<len(lines) else ''
-        if re.fullmatch(r'\|[\s:\-|]+\|', nxt): hdr=pipes(s); continue
-        if hdr is not None and pipes(s)!=hdr: bad.append((i,pipes(s),hdr))
-    elif s=='': hdr=None
-print('malformed rows:', bad or 'none')
+for path in ('.planning-handoffs/orchestrate-ux/DECISIONS.md',
+             '.planning-handoffs/orchestrate-ux/RESUME.md'):
+    lines=open(path).read().split('\n')
+    inf=False; hdr=None; bad=[]
+    pipes=lambda s: len(re.findall(r'(?<!\\)\|', s))
+    for i,l in enumerate(lines,1):
+        if l.strip().startswith('```'): inf=not inf; continue
+        if inf: continue
+        s=l.strip()
+        if s.startswith('|') and s.endswith('|'):
+            if re.fullmatch(r'\|[\s:\-|]+\|', s): continue
+            nxt=lines[i].strip() if i<len(lines) else ''
+            if re.fullmatch(r'\|[\s:\-|]+\|', nxt): hdr=pipes(s); continue
+            if hdr is not None and pipes(s)!=hdr: bad.append((i,pipes(s),hdr))
+        elif s=='': hdr=None
+    print(path.split('/')[-1], 'malformed rows:', bad or 'none')
 EOF
 
 # 2 · frame alignment — closing-vertical codepoint index, ONE-LINE FENCES EXCLUDED
@@ -632,10 +642,101 @@ for b in blocks:
         if idx!=63: out.append((i,idx))
 print('histogram:', dict(h), 'outliers:', out or 'none')
 EOF
+
+# 3 · CP-η — drawing CONSISTENCY. Reads a drawing as an ASSERTION, not as a line.
+#     Instruments 1 and 2 detect PRESENCE; CP-α detects ABSENCE; this one detects
+#     PRESENT-AND-WRONG, the class that shipped BLOCKER 1 past all of them.
+python3 - <<'EOF'
+import re
+PATH='src/lib/study-lenses/orchestrate/ux/wireframes.md'
+NAMES=['Source','Tokens','AST','Environment','Evaluation']
+WORDS={'one':1,'two':2,'three':3,'four':4,'five':5}
+STANDING=r'▾ \d+ ●|▾ \d+|not reached|·'
+TOLERANCE=1.5   # the MEASURED house tolerance, not a round number — see below
+lines=open(PATH).read().split('\n')
+inf=False; blocks=[]; cur=[]
+for i,l in enumerate(lines,1):
+    if l.strip().startswith('```'):
+        if inf: blocks.append(cur)
+        cur=[]; inf=not inf; continue
+    if inf: cur.append((i,l))
+rails=[]
+for b in blocks:
+    at=[k for k,(i,l) in enumerate(b) if all(n in l for n in NAMES)]
+    if not at: continue
+    k=at[0]; nxt=b[k+1] if k+1<len(b) else None
+    if nxt and nxt[1].startswith('│') and re.search(STANDING, nxt[1]):
+        rails.append((b,k,nxt))
+bad1=[]
+for b,k,(line,stand) in rails:
+    row=b[k][1]
+    spans=[(n,row.index(n),row.index(n)+len(n)-1) for n in NAMES]
+    cells=[(m.start(),m.end()-1,m.group()) for m in re.finditer(STANDING,stand)]
+    if len(cells)!=len(spans): bad1.append((line,'COUNT',len(cells),len(spans))); continue
+    for (n,a,b2),(sa,sb,t) in zip(spans,cells):
+        off=(sa+sb)/2-(a+b2)/2
+        if abs(off)>TOLERANCE: bad1.append((line,n,t,round(off,1)))
+print('1 · alignment, name centre vs standing centre, tolerance +/-%s'%TOLERANCE)
+print('   PASS - %s rail drawings'%len(rails)) if not bad1 else [
+    print('   FAIL line %s  %s'%(r[0],r[1:])) for r in bad1]
+bad2=[]
+for b,k,(line,stand) in rails:
+    if 'not reached' not in stand: continue
+    shape=[]
+    for i,l in b[k+2:]:
+        if not l.startswith('│') or l[1:2] in ('─','├','└'): break
+        body=l[1:l.rindex('│')] if '│' in l[1:] else l[1:]
+        if not body.strip(): shape.append('BLANK')
+        elif re.search(r'the last \w+ phases were not reached',body): shape.append('COUNT')
+        else: shape.append('MESSAGE')
+    ok=(len(shape)>=3 and shape[0]=='BLANK' and shape[-1]=='COUNT'
+        and set(shape[1:-1])=={'MESSAGE'})
+    if not ok: bad2.append((line,' · '.join(shape)))
+print('2 · caption shape, barred drawings - expected BLANK · MESSAGE+ · COUNT')
+print('   PASS') if not bad2 else [
+    print('   FAIL rail at line %s  ->  %s'%r) for r in bad2]
+bad3=[]
+for b,k,(line,stand) in rails:
+    body=[l for i,l in b[k+2:]]
+    if 'not reached' in stand:
+        drawn=len(re.findall('not reached',stand)); m=None
+        for l in body:
+            m=re.search(r'the last (\w+) phases were not reached',l)
+            if m: break
+        if m and WORDS.get(m.group(1))!=drawn:
+            bad3.append((line,'unreached',drawn,m.group(1)))
+    dots=len(re.findall('·',stand)); m=None
+    for l in body:
+        m=re.search(r'(\w+) phases have nothing to open yet',l)
+        if m: break
+    if m and WORDS.get(m.group(1))!=dots:
+        bad3.append((line,'empty',dots,m.group(1)))
+print("3 · drawn numerals vs the drawing's own stations")
+print('   PASS') if not bad3 else [
+    print('   FAIL rail at line %s  %s: drawn %s, caption says %s'%r) for r in bad3]
+print('CP-eta: %s'%('RED' if (bad1 or bad2 or bad3) else 'GREEN'))
+EOF
 ````
 
-**Expected: `malformed rows: none` and `{63: 80}`, no outliers** [measured at
-`ffc59db3`].
+**Expected: `DECISIONS.md malformed rows: none` ·
+`RESUME.md malformed rows: none` · `{63: 80}`, no outliers** [all three measured
+at this commit]. **CP-η is RED at this commit, deliberately** — see below.
+
+⚠ **CP-η's tolerance is ±1.5 and that number is MEASURED, not chosen.** Every
+unbarred drawing sits at up to ±1.5 — `Evaluation`'s `·` at column 52 against a
+name centre of 53.5, in all seven of them — because a five-character station
+name centred over an eleven-character span lands on a half column. Round 12
+reported this tolerance as "±1"; it is not. **A tolerance of ±1 fires on seven
+CORRECT drawings on its first run**, and the next agent loosens it rather than
+investigating, which is how an instrument becomes decoration. Tighten it only
+after re-laying out the seven, and never as a side effect of chasing a failure.
+
+⚠ **Neither instrument 1 nor instrument 2 can regress-test BLOCKER 1**, and this
+is why CP-η exists. The frame scan measures the **closing vertical at index 63
+only** and reports `{63: 80} outliers: none` over a drawing whose interior says
+`Tokens` is not reached. The clause is asserted, drawn, and indexed — round 12
+named the class **present-and-wrong**, and CP-α, the instrument round 11
+proposed, would have ticked it green for the same reason.
 
 ⚠ **The histogram figure is CAMPAIGN-SCOPED and has already gone 72 → 77 → 80.**
 An earlier revision of this paragraph documented `{63: 77}`, which was true two
