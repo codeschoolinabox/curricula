@@ -22,8 +22,9 @@ things stand carries the SHA list; the status lives here, not elsewhere.
 🚧 **`spellme` PHASE 1 IS UNDER WAY — wave 1 is CLOSED (2026-08-20).** See § The
 `spellme` LENS — Phase 1, wave 1 for its SHA list — **re-run its loop rather
 than counting rows; this sentence said "ten" and was outgrown within the hour**
-— and § The `spellme` LENS's rulings for the four decisions it took. Wave 2 is
-`readStream`. ⚠ This banner read "THE NEXT CAMPAIGN _IS_ `spellme` PHASE 1"
+— and § The `spellme` LENS's rulings for the five decisions it took. Wave 2 is
+`readStream` + `positionCursor`; wave 3 is the static surface and the first
+eyeball check. ⚠ This banner read "THE NEXT CAMPAIGN _IS_ `spellme` PHASE 1"
 until 2026-08-20 — true for one day, and then the same stale-redirect defect the
 paragraph below documents about itself, for the third time in this file. **A
 banner announcing what is next expires the moment someone starts it.** The docs
@@ -195,10 +196,24 @@ of files you remember touching.
 
 **Wave 1 covered the three clusters with no dependency on the element stream:**
 `config` (+ `Exceptions`), `applicability` (+ the new defect file), `recommend`.
-Waves 2-5 are `readStream` · then `positionCursor`/`judgeClaim`/`handOver` ·
-then `settle` · then the component. That map lives in
-[`./PHASE1-WAVE-1-BRIEF.md`](./PHASE1-WAVE-1-BRIEF.md) § The wave map and
-nowhere else.
+
+**Waves 2-5, RE-ORDERED (human ruling 2026-08-20):** wave 2 is `readStream` **+
+`positionCursor`** (15 un-skips); wave 3 is the **static surface** — 23 of the
+28 component tests — plus the sandbox injection, which is the campaign's **first
+🔍 eyeball check**; wave 4 is `judgeClaim`/`handOver`/`settle`; wave 5 is the 5
+component tests that drive the claim loop. **The canonical map lives in
+[`./PHASE1-WAVE-2-BRIEF.md`](./PHASE1-WAVE-2-BRIEF.md) § The wave map**; wave
+1's brief carries the superseded one and says so.
+
+The re-order is grounded, not preference: only **5** of the 28 component tests
+call `fireEvent` and therefore need the claim loop [measured 2026-08-20: `grep
+-c fireEvent` over `tests/component.test.tsx` → 11 calls across 5 tests]. The
+other 23 are static rendering needing only `config`, `readStream` and
+`positionCursor`. Under the old order nothing was visible until 37 more core
+tests had landed; under this one it is 15. It also lets wave 2 take plain **file
+order** — the earlier plan had to carve `:34`/`:54`/`:58` out mid-block — and it
+makes declining Fake It at `:30` correct rather than contested, because `:34`
+cannot be satisfied honestly under a `return []`.
 
 ⚠ **The fan-out did not happen, and the reason is reusable.** A wave-0 probe
 measured that `isolation: "worktree"` cuts worktrees from **`origin/main`**,

@@ -10,22 +10,34 @@ This brief is for a **different module**: the `spellme` lens at
 [`./PHASE1-WAVE-1-BRIEF.md`](./PHASE1-WAVE-1-BRIEF.md), which is closed and
 whose clusters are green.
 
-**Scope: `readStream` — the spine. Twelve un-skips in `tests/core.test.ts`**,
-and one question you must put to the human before you write a thirteenth test.
+**Scope: `readStream` and `positionCursor` — the spine and the cursor. FIFTEEN
+un-skips in `tests/core.test.ts`**, and one question you carry forward as a
+FLAG.
 
 **37 of the 54 core tests route through `readStream`** via `core.test.ts`'s
-`streamOf` helper, so nothing in waves 3-5 can go green until your work is
+`streamOf` helper, so nothing downstream can go green until your work is
 committed. That is why you run alone.
 
 ## The wave map — spellme's `core.ts`, all five waves
 
-| Wave          | Cluster                                      | State                                                     |
-| ------------- | -------------------------------------------- | --------------------------------------------------------- |
-| 1             | `config` · `applicability` · `recommend`     | **CLOSED** 2026-08-20                                     |
-| **2 — YOURS** | `readStream`                                 | this brief                                                |
-| 3             | `positionCursor` · `judgeClaim` · `handOver` | consumes your committed stream                            |
-| 4             | `settle`                                     | consumes `judgeClaim`'s `ClaimVerdicts`                   |
-| 5             | `index.tsx`, the React surface               | 28 `component.test.tsx` skips; orchestrator, not a worker |
+⚠ **Re-ordered by human ruling 2026-08-20**, after measurement showed only **5**
+of the 28 component tests drive the claim loop — the other 23 are static and
+need only `config`, `readStream` and `positionCursor`. So `positionCursor` moves
+forward into your wave, and **the surface arrives one wave later instead of
+three**, which is what makes an eyeball check possible after 15 core tests
+rather than 37.
+
+| Wave          | Cluster                                                             | State                                            |
+| ------------- | ------------------------------------------------------------------- | ------------------------------------------------ |
+| 1             | `config` · `applicability` · `recommend`                            | **CLOSED** 2026-08-20                            |
+| **2 — YOURS** | `readStream` · `positionCursor`                                     | this brief — 15 un-skips                         |
+| 3             | the **static surface** (23 component tests) + the sandbox injection | 🔍 the eyeball check; orchestrator, not a worker |
+| 4             | `judgeClaim` · `handOver` · `settle`                                | the claim loop, 22 core tests                    |
+| 5             | the 5 claim-loop component tests                                    | orchestrator                                     |
+
+**Wave 3 depends on you for both functions.** The static surface renders the
+tapes and the jar from your stream, and reads `data-cursor` off your
+`positionCursor`. Ship them coherent.
 
 ## First act — governance, before anything else
 
@@ -53,7 +65,8 @@ Router-text reach into a spawned worker has been measured both present
 - `lenses/spellme/tests/core.test.ts` — read the whole file, not only your
   blocks.
 - `lenses/spellme/tests/core-defect.test.ts` — two passing tests, and the home
-  of the thirteenth you may not yet write. See § The one question you must ask.
+  of the extra test you may not yet write. See § The one question you carry
+  forward as a FLAG.
 - `lenses/spellme/ux/user-journeys.md` and `ux/wireframes.md` — **the twin is
   TWO files** and `twin-doc: user` makes both canon. Wave 1 edited one and
   called the twin done; that shipped a definition contradicting a ruling.
@@ -222,7 +235,27 @@ an absent-member arm** — a branch that _handles_ absence is a dead branch no
 test can reach. `core.ts`'s `readStream` JSDoc and `DOCS.md` § Structural
 constraints both state this.
 
-## ⚠ The one question you must ask before writing a thirteenth test
+### And `positionCursor`
+
+`positionCursor(stream, from): number` — advance past every element that
+advances on its own, so the cursor comes to rest **on a claimable element or
+past the end of the stream**. `DOCS.md` § Execution phases 4: it runs at mount
+and again after every fall, and **it is the only writer of the cursor**.
+
+⚠ **Key it on the element KIND, not on the fate.** The two predicates are
+extensionally equal — the ten claimable kinds are exactly the `token-tape` ones
+— but your un-skip order reaches `:34` **before** `:44` forces any fate to be
+real, so a fate-keyed implementation would be reading a value nothing has pinned
+yet. Kind is the honest key at that moment and stays correct afterwards.
+
+⚠ **Waves 4 and 5 must call this rather than doing arithmetic, and no test
+forces them to.** `settle`'s and `handOver`'s assertions are
+`toBeGreaterThan(0)` and their fixture `'a+++b'` has **no trivia at all**, so a
+bare `cursor + 1` would pass everything and leave the cursor resting on
+whitespace. You cannot fix that from here — make this function obviously the one
+writer, and say so in your handover.
+
+## ⚠ The one question you carry forward as a FLAG
 
 **`readStream`'s throw CLASS is not settled, and three places in the tree read
 as though it were.** The single corrective record is the **blockquote at
@@ -245,38 +278,46 @@ channels, no fourth. So:
 
 1. **Raise it as a FLAG in your final report**, with the wrong-kind argument
    stated. The orchestrator holds the human gate; the ruling is theirs to fetch.
-2. **The twelve un-skips ARE the wave.** Report **DONE** on them with the FLAG
+2. **The fifteen un-skips ARE the wave.** Report **DONE** on them with the FLAG
    attached. **Do not report BLOCKED for want of this ruling** and do not hold
-   twelve committed increments hostage to it.
-3. **Write no thirteenth test.** If the ruling arrives while you are still live,
-   add the `@throws` tag to `readStream`'s JSDoc and then write it in
+   fifteen committed increments hostage to it.
+3. **Write no extra test.** If the ruling arrives while you are still live, add
+   the `@throws` tag to `readStream`'s JSDoc and then write it in
    `tests/core-defect.test.ts` (which already mocks the leaf and constructs the
    state). ⚠ A bare `.toThrow()` **passes vacuously** against the stub — assert
    the class.
 
 ## Un-skip order — exactly this, and nothing else
 
-**`:30` · `:40` · `:44` · `:50` · `:64` · `:68` · `:72` · `:76` · `:80` · `:84`
-· `:88` · `:92`** — twelve.
+**Plain FILE ORDER — `:30` · `:34` · `:40` · `:44` · `:50` · `:54` · `:58` ·
+`:64` · `:68` · `:72` · `:76` · `:80` · `:84` · `:88` · `:92`** — fifteen. That
+is every `it.skip` in `Zero`, `One`, `Many` and `The three fates, and the mark`,
+with **no exceptions and nothing left behind**. The re-ordering that brought
+`positionCursor` into this wave is what makes plain file order correct here; an
+earlier draft had to carve three tests out mid-block, and no longer does.
 
-- **`:30`** `streamOf('')` → `[]`. **Fake It (`return []`) is legitimate here,
-  and it WILL be committed — that is correct, not a defect.** `:40` kills it in
-  the very next un-skip, so exposure is exactly one increment, which is the
-  tolerance wave 1 already took: `c01ad2bb` committed `return []` for
-  `recommend` and `14652100` killed it. ⚠ An earlier draft of this brief said
-  "do not let it survive into a commit", which contradicted both the
-  one-commit-per-increment rule and that precedent. **What must not happen is a
-  fake surviving to the END of the wave** — wave 3 inherits `readStream` as a
-  committed dependency, so a fake that escapes wave 2 breaks three clusters
-  instead of one. Exit gate 5 checks your final state, not your first commit.
-- **`:40` `:44`** — `One`. `:40` forces the real read; `:44` forces the fate.
-- **`:50`** — `Many`, `'const x = 1'` → **7** elements.
-- **`:64`-`:92`** — the fates and the mark, eight tests.
+- ⛔ **`:30` — Fake It is DECLINED here, and this is the one place the brief
+  overrides the usual permission.** `streamOf('')` → `[]` would pass under
+  `return []`, but the very next un-skip is `:34`
+  (`positionCursor(streamOf('  '), 0)` → `1`) and under that fake
+  `streamOf('  ')` is `[]`, so an honest `positionCursor([], 0)` returns `0`,
+  not `1`. The fake forces you either to hardcode `return 1` or to build
+  `readStream` outside its own increment. **Implement the real read-and-map at
+  `:30`** — the guard, the throw, and a `.map()` whose callback may still return
+  a placeholder fate and mark, since an empty source never runs it.
+- **`:34`** — the cursor's first test. Key on **kind** (see above); no fate is
+  real yet.
+- **`:40` `:44`** — `One`. `:40` forces the mapper to actually run; `:44` forces
+  the first real fate.
+- **`:50` `:54` `:58`** — `Many`. `'const x = 1'` → **7** elements; then the
+  cursor resting on the first claimable element, then advancing past a run of
+  trivia.
+- **`:64`–`:92`** — the fates and the mark, eight tests. This is where traps 1
+  and 2 bite.
 
-⛔ **`:34`, `:54` and `:58` stay skipped.** They sit inside the `Zero` and
-`Many` blocks you are opening, and they belong to **wave 3's `positionCursor`**.
-A block you opened is not yours in full. Every other `it.skip` in the file, and
-all 28 in `component.test.tsx`, likewise.
+⛔ **Everything else stays skipped** — the `Verdicts`, one-more, gate and
+way-past blocks are wave 4's, and all 28 in `component.test.tsx` are waves 3 and
+5's.
 
 ## Ground truth — MEASURE it, do not guess and do not trust this brief
 
@@ -299,7 +340,7 @@ Unmeasured, and yours to establish: `''` · `'x'` · `'// hi'` · `'a b'` ·
    on text alone.** `element.text` containing a terminator is **necessary and
    not sufficient** — a `StringLiteral` or a `Template` can contain a real
    newline and must stay **unmarked**. No fixture in this wave contains one, so
-   a text-only predicate **passes all twelve tests** and ships a defect wave 3
+   a text-only predicate **passes all fifteen tests** and ships a defect wave 4
    inherits. The contract is: `LineTerminator` → marked **by its kind**;
    `Comment` → marked **only if its own text carries a terminator**; everything
    else → unmarked, whatever its text says.
@@ -364,16 +405,15 @@ Unmeasured, and yours to establish: `''` · `'x'` · `'// hi'` · `'a b'` ·
 Report DONE only when all hold, each shown with its command output:
 
 1. `npx vitest run --project unit src/lib/study-lenses/lenses/spellme` shows
-   **34 passing** and **53 skipped** of 87 — 22 inherited + your 12. **Verify by
+   **37 passing** and **50 skipped** of 87 — 22 inherited + your 15. **Verify by
    running it, not by matching this arithmetic**; reconcile any difference
    before reporting.
 2. `npx tsc --noEmit` → 0 errors.
 3. No new failing file outside the **nine**-path baseline above.
 4. `npx prettier --check`, `npx eslint`, `npx cspell` clean on both your paths.
-5. **No Fake It survives into your final state.** Read `core.ts` at your last
-   commit and confirm no hardcoded return remains. Your _first_ commit is
-   expected to contain `return []`; that is the sanctioned one-increment
-   exposure, not a gate failure.
+5. **No Fake It anywhere, in any commit.** This wave declines the usual
+   first-test permission (see § Un-skip order), so `return []` should never
+   appear. Read `core.ts` at your final commit AND `git show` your first one.
 6. `readStream` reflects `DOCS.md` § Execution phase 3 **as a phase**, and the
    fate table is total over all fourteen kinds.
 7. Every increment has an `ar-4` verdict; every CONSIDER has a documented

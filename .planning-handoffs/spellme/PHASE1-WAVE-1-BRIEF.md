@@ -28,7 +28,16 @@ clusters. Nothing else about the wave changed.
 
 ## The wave map — spellme's `core.ts`, all five waves
 
-`core.ts` holds eight functions. This is the only document that decomposes them.
+`core.ts` holds eight functions.
+
+⚠ **SUPERSEDED 2026-08-20 — the canonical map is now
+[`./PHASE1-WAVE-2-BRIEF.md`](./PHASE1-WAVE-2-BRIEF.md) § The wave map.** The
+human re-ordered waves 2-5 after measurement showed only **5** of the 28
+component tests drive the claim loop: `positionCursor` moved forward into wave
+2, and the static surface plus its 🔍 sandbox checkpoint moved up to wave 3, so
+an eyeball check arrives after 15 core tests rather than 37. **Wave 1's own
+scope, below and throughout this file, is unaffected and closed.** The table
+that follows is kept as the shape wave 1 was launched under.
 
 | Wave          | Cluster                                      | Owns                                                                       |
 | ------------- | -------------------------------------------- | -------------------------------------------------------------------------- |
@@ -38,9 +47,9 @@ clusters. Nothing else about the wave changed.
 | **4**         | `settle`                                     | consumes `judgeClaim`'s `ClaimVerdicts`                                    |
 | **5**         | `index.tsx`, the React surface               | all 28 `component.test.tsx` skips; runs in the orchestrator, not a worker  |
 
-**Waves 2-5 do not exist yet as documents.** If you need to hand something
-forward to one, name the wave number and the function — the orchestrator holds
-this map. Do not go looking for a wave-2 brief; there is none.
+**Waves 2-5 did not exist as documents when this brief was written.** Wave 2's
+now does — [`./PHASE1-WAVE-2-BRIEF.md`](./PHASE1-WAVE-2-BRIEF.md) — and it
+carries the current map.
 
 ## First act — governance, before anything else
 
