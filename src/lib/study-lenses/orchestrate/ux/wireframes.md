@@ -21,8 +21,16 @@ structure is the repair.
 
 ## What the region must render
 
-The projection contract. The region is handed exactly this, per settle, and may
-draw nothing that is not here:
+The projection contract. The region is handed exactly this, per settle, and
+**may draw no DATA that is not on this list.** The region's own controls are not
+on it and are not meant to be — `[Generate code]`, `[Guide ▾]`, `[Edit code]`
+and the strict toggle are surfaces this region renders, specified in
+[The parts](#the-parts), and a control's own label belongs to the surface that
+renders it. **The distinction is load-bearing in both directions**: read as a
+totality over everything DRAWN, this contract condemns four controls the
+arrangement cannot work without; read as a totality over the DATA, it is exact,
+and the snippet type below was missing from it while being drawn in every
+full-frame drawing.
 
 ```text
 per phase, in the machine's fixed order:
@@ -33,6 +41,8 @@ per phase, in the machine's fixed order:
 levels            0 … N registered; one selected, or the none-state
 the selected      fits · does not fit · not applicable for this type ·
   level's mark      undetermined while unparsed
+the snippet type  module · script — what the type toggle's face reads, and
+                  what the selected level's admission is crossed against
 the posture       warn (default) or strict
 the pane          the editor · one open lens · or the generator
 recommendations   0 … N ranked recommendations of a next lens
