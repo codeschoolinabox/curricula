@@ -363,15 +363,15 @@ describe('spellme core', () => {
 	});
 
 	describe('applicability', () => {
-		it.skip('holds for a program that lexes and parses', () => {
+		it('holds for a program that lexes and parses', () => {
 			expect(spellmeCore.applicability(embody('const x = 1').facts)).toBe(true);
 		});
 
-		it.skip('holds for a program that lexes but does not parse', () => {
+		it('holds for a program that lexes but does not parse', () => {
 			expect(spellmeCore.applicability(embody('const x = ').facts)).toBe(true);
 		});
 
-		it.skip('fails for a program that does not lex', () => {
+		it('fails for a program that does not lex', () => {
 			expect(spellmeCore.applicability(embody('const x = "').facts)).toBe(
 				false,
 			);

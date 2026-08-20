@@ -82,8 +82,8 @@ function config(overrides: Partial<LensConfig> = {}): LensConfig {
  * No syntax tree is read, so a program that lexes but does not parse is
  * served in full.
  */
-function applicability(_facts: Facts): boolean {
-	throw new Error('spellme applicability: not implemented');
+function applicability(facts: Facts): boolean {
+	return facts.tokens.ok && facts.tokens.value.inputElements !== undefined;
 }
 
 /**
