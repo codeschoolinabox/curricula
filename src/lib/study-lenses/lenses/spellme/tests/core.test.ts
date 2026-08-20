@@ -383,11 +383,11 @@ describe('spellme core', () => {
 			expect(spellmeCore.recommend()).toEqual([]);
 		});
 
-		it.skip('returns a frozen array', () => {
+		it('returns a frozen array', () => {
 			expect(Object.isFrozen(spellmeCore.recommend())).toBe(true);
 		});
 
-		it.skip('returns a stable reference across calls', () => {
+		it('returns a stable reference across calls', () => {
 			expect(spellmeCore.recommend()).toBe(spellmeCore.recommend());
 		});
 	});

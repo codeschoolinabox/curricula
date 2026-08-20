@@ -10,6 +10,7 @@
  */
 
 import cloneAndFreeze from '@utils/clone-and-freeze.js';
+import freezeInPlace from '@utils/freeze-in-place.js';
 
 import type { Facts } from '../../embody/types.js';
 import type {
@@ -168,8 +169,16 @@ function handOver(
  * recommendations yet (see `./README.md` § Future direction).
  */
 function recommend(): ReadonlyArray<Recommendation> {
-	return [];
+	return EMPTY_RECOMMENDATIONS;
 }
+
+/**
+ * Module-level frozen-empty-array constant — shared across all `recommend`
+ * calls so the empty-result return is a stable reference (no per-call
+ * allocation). `freezeInPlace`, not `cloneAndFreeze`: this array is built
+ * here and no caller owns it.
+ */
+const EMPTY_RECOMMENDATIONS = freezeInPlace<ReadonlyArray<Recommendation>>([]);
 
 /**
  * The two keys `config` resolves as thresholds. Every other key is an
