@@ -329,35 +329,35 @@ describe('spellme core', () => {
 			expect(spellmeCore.config().oneMoreAfter).toBe(2);
 		});
 
-		it.skip('applies the way-past threshold default', () => {
+		it('applies the way-past threshold default', () => {
 			expect(spellmeCore.config().skipAfter).toBe(4);
 		});
 
-		it.skip('lets an override win', () => {
+		it('lets an override win', () => {
 			expect(spellmeCore.config({ oneMoreAfter: 0 }).oneMoreAfter).toBe(0);
 		});
 
-		it.skip('treats a key present with undefined as absent', () => {
+		it('treats a key present with undefined as absent', () => {
 			expect(spellmeCore.config({ oneMoreAfter: undefined }).oneMoreAfter).toBe(
 				2,
 			);
 		});
 
-		it.skip('preserves an unknown key verbatim', () => {
+		it('preserves an unknown key verbatim', () => {
 			expect(spellmeCore.config({ future: 'value' }).future).toBe('value');
 		});
 
-		it.skip('freezes the result', () => {
+		it('freezes the result', () => {
 			expect(Object.isFrozen(spellmeCore.config())).toBe(true);
 		});
 
-		it.skip('does not freeze the caller overrides object', () => {
+		it('does not freeze the caller overrides object', () => {
 			const overrides = { skipAfter: 6 };
 			spellmeCore.config(overrides);
 			expect(Object.isFrozen(overrides)).toBe(false);
 		});
 
-		it.skip('accepts a threshold below the other, leaving the one-more field unreachable', () => {
+		it('accepts a threshold below the other, leaving the one-more field unreachable', () => {
 			expect(spellmeCore.config({ skipAfter: 1 }).skipAfter).toBe(1);
 		});
 	});

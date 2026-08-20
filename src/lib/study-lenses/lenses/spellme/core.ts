@@ -9,8 +9,14 @@
  * `./tests/core.test.ts`).
  */
 
+import cloneAndFreeze from '@utils/clone-and-freeze.js';
+
 import type { Facts } from '../../embody/types.js';
-import type { LensConfig, Recommendation } from '../types.js';
+import type {
+	LensConfig,
+	Recommendation,
+	SerializableValue,
+} from '../types.js';
 
 import type {
 	Claim,
@@ -32,8 +38,23 @@ import type {
  *   the factory is a boundary and does not coerce invalid input (see
  *   `./README.md` § Configuration).
  */
-function config(_overrides?: Partial<LensConfig>): LensConfig {
-	return { oneMoreAfter: 2 };
+function config(overrides: Partial<LensConfig> = {}): LensConfig {
+	// Drop `undefined`-valued keys BEFORE the spread: a bare spread would let
+	// `{ oneMoreAfter: undefined }` shadow the default with `undefined`,
+	// violating the kind contract's absent-key rule. `null`/`false` survive the
+	// filter and win verbatim (no `??` / `||` coercion).
+	const defined = Object.fromEntries(
+		Object.entries(overrides).filter(
+			(entry): entry is [string, SerializableValue] => entry[1] !== undefined,
+		),
+	);
+	// `cloneAndFreeze` (not `freezeInPlace`) so a caller-supplied overrides
+	// object is NOT frozen as a side-effect.
+	return cloneAndFreeze<LensConfig>({
+		oneMoreAfter: 2,
+		skipAfter: 4,
+		...defined,
+	});
 }
 
 /**
