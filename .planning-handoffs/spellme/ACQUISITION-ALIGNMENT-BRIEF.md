@@ -93,7 +93,13 @@ commits interleave them:
 | `614ab524` | the rulings get a home before any prose moves           |
 | `191f7da9` | the leaf's caller-boundary passages, both halves        |
 | `120880d7` | spellme reads a published member; the acquisition sweep |
-| (this one) | the presence-gate ruling, alone, and this close         |
+| `349d3f0a` | the presence-gate ruling, alone, and this close         |
+
+⚠ **The last row read `(this one)` until a follow-up commit filled it**, which
+is the trap `./PHASE-1.md` records three times against its own table: a SHA list
+is written last, so the author's own final commit is the one that goes missing.
+A SHA cannot be known before its commit exists, so the honest form is to fill it
+immediately afterwards — not to leave a placeholder and hope.
 
 **The campaign's success condition, which is an ABSENCE closing:**
 `inputElements` appeared **zero** times across all **nine** tracked spellme
