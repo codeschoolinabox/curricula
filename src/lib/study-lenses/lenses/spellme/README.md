@@ -229,6 +229,12 @@ The module's default export is a frozen `Lens` per [`../types.ts`](../types.ts):
   it, so applicability declines and the lens is not offered. Reading one
   member's presence derives nothing, which is what keeps applicability cheap.
 
+  **The decline is silent** — no logging, no side effect of any kind. This
+  function must be pure and synchronous over the facts alone, per the kind's
+  `Gateable` contract; and the defect is already reported loudly at its own
+  site, by the machinery that caused it, so a second report from a consumer that
+  did not cause it would be duplicate noise.
+
   **No syntax tree is read**, so a program that lexes but does not parse is
   served in full — the state where "your spelling is fine, your grammar is not"
   is worth seeing.

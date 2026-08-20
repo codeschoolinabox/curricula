@@ -18,15 +18,23 @@ careful reader may ignore.
 2026-08-19]. `lib/classifying` was reconciled alongside it (153 of 153). § Where
 things stand carries the SHA list; the status lives here, not elsewhere.
 
-➡ **THE NEXT CAMPAIGN IS NOT `spellme` PHASE 1.** A human ruling on 2026-08-19
-put a `spellme` **docs mini-campaign** first, and it is already briefed by
-another session:
-[`./ACQUISITION-ALIGNMENT-BRIEF.md`](./ACQUISITION-ALIGNMENT-BRIEF.md)
-(`adf83dc5`). Start there. That ruling also **declined** moving `scanning` into
-`embody/` — see § Deferred, whose bullet on the fold used to read as a go-ahead.
-A cold read of this file on 2026-08-19 could not reach the next action at all:
-neither campaign document named the brief, and the one pointer toward that area
-framed declined work as pending. That is what this paragraph fixes.
+✅ **THE NEXT CAMPAIGN _IS_ `spellme` PHASE 1 — this banner said otherwise until
+2026-08-19 and was right when written.** The docs mini-campaign it redirected to
+([`./ACQUISITION-ALIGNMENT-BRIEF.md`](./ACQUISITION-ALIGNMENT-BRIEF.md),
+`adf83dc5`) **CLOSED** the same day in five commits — `614ab524` `191f7da9`
+`120880d7` `349d3f0a` `01a87b9f`. Read that brief's § CLOSED and § Recorded, not
+fixed before starting: it hands Phase 1 two obligations and settles
+`applicability`'s contract. Then start here.
+
+That earlier ruling also **declined** moving `scanning` into `embody/` — see §
+Deferred, whose bullet on the fold used to read as a go-ahead. A cold read of
+this file on 2026-08-19 could not reach the next action at all: neither campaign
+document named the brief, and the one pointer toward that area framed declined
+work as pending. ⚠ **And then this paragraph became the same defect it fixed** —
+a context-free validation on 2026-08-19 found it still redirecting away from the
+campaign that had by then become next, sitting above the three maintained
+sections where it reads as authoritative. A redirect is exactly the kind of
+prose that goes stale the moment it succeeds.
 
 [`./WAVE-2-BRIEF.md`](./WAVE-2-BRIEF.md) is now a **closed record** and says so
 in its own banner — this file used to route readers there for live status while

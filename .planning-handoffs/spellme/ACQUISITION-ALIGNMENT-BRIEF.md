@@ -406,7 +406,7 @@ In `src/lib/study-lenses/lenses/spellme/`:
    still owns the kind table.
 3. **core.ts ~line 55** — the readStream JSDoc "the sequence itself comes from
    the scanning leaf": widen to name the published member as the source (via
-   embody), plus the precondition throw per § Recorded, not fixed item 4 —
+   embody), plus the precondition throw per § Recorded, not fixed item 5 —
    **not** an absent-member arm. **And `core.ts`'s `applicability` JSDoc must
    carry the `(human ruling 2026-08-19)` parenthetical**, not merely the new
    behavior: it is one of ruling 1's two migration targets, and a behavior
