@@ -73,8 +73,8 @@ prediction against what the phase shows. The lifecycle is not navigation to them
   identically.
 - **Reading the barring edge once.** It bars a suffix, never a scatter — one
   barring edge, one cause, everything downstream waiting — and an arrangement
-  that repeats the cause per barred phase is telling them a single truth four
-  times.
+  that repeats the cause per barred phase is telling them a single truth two or
+  three times.
 - **Predicting before opening.** Anything that opens a study surface as a
   side-effect of navigating toward it destroys the prediction they came to make.
 

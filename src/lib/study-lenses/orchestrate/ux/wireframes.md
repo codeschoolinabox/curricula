@@ -227,8 +227,8 @@ station — a cost the design incurs and nothing had recorded.** A station in th
 **`not reached`** — and no per-station text of its own. Its cause lives in the
 caption, which describes the rail as a whole and **names no station** — the
 identical objection, applied in the opposite direction. So a reader traversing
-linearly hears `waiting` four times and meets one unattached sentence about
-where the machine stopped.
+linearly hears `waiting` two or three times and meets one unattached sentence
+about where the machine stopped.
 
 **This inverts Journey 6's own complaint rather than answering it.**
 [`user-journeys.md`](./user-journeys.md) states the defect as: the empty phase
@@ -239,8 +239,8 @@ and, by moving the cause into a collective caption, makes the exceptional case
 the unattached one. **That is not obviously wrong** — B3's one-cause-drawn-once
 rule is a real decision, and repeating the parser's sentence per waiting phase
 is the failure [`personas.md`](./personas.md) names as telling a learner a
-single truth four times. But it is a **new cost**, and recording costs is this
-document's job.
+single truth two or three times. But it is a **new cost**, and recording costs
+is this document's job.
 
 **Under strict it compounds in the same subtree.** The passage below books the
 per-station empty reason going dark with the rail; the barred cause is in the
