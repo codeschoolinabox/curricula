@@ -565,8 +565,9 @@ walks them because an exhaustion argument cannot be made by citation alone
   to hide the kit. But it marks **no occupant at all** in two of the three
   occupant states — nothing is marked in editor mode, and no station is marked
   when the pane holds the generator, which belongs to no phase. A surface that
-  answers "where am I" for one occupant out of three, on a mark strict has just
-  made unreachable, is not the thing that names where the learner is standing.
+  answers "where am I" for one occupant out of three, on an occupant dot strict
+  has just made unreachable, is not the thing that names where the learner is
+  standing.
 
 So class 3 is the residue — and it is the right residue, because that is exactly
 what an orientation surface a posture may withdraw should be.
@@ -648,9 +649,9 @@ in the row**; the two are never both present.
 └──────────────────────────────────────────────────────────────┘
 ```
 
-**The open lens's station keeps its mark while the tray is closed**, so the rail
-answers "where am I" without the tray being open — which is the whole reason the
-rail can afford to hide the kit.
+**The open lens's station keeps its occupant dot while the tray is closed**, so
+the rail answers "where am I" without the tray being open — which is the whole
+reason the rail can afford to hide the kit.
 
 **Proposals render below the pane in every mode, including editor mode.** They
 are a second lens-opening affordance and the arrangement owns that rather than
@@ -704,7 +705,7 @@ are handed to it explicitly rather than left ownerless here.
 ## A station's kit at 0, 1 and many
 
 ```text
-0 ─  Tokens        a bare mark on the line. No tray, no disclosure
+0 ─ Tokens the bare standing: a single dot on the line. No tray, no disclosure
         ·          control, nothing disabled. The phase is named and
                    reachable; nothing claims to be openable.
 

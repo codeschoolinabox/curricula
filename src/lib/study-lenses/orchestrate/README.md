@@ -583,8 +583,8 @@ this region owns.
   - **A station's standing, spoken and drawn — and the drawn word is NOT the
     union member** (human ruling 2026-08-19). The `waiting` standing draws as
     **`not reached`**; **openable** draws as its tray affordance and its count;
-    **bare** draws as a bare mark with no word at all. Only one of the three has
-    a string, which is why the standing is not keyed like a fit mark.
+    **bare** draws as a single mid-line dot and no word at all. Only one of the
+    three has a string, which is why the standing is not keyed like a fit mark.
 
     **The machine value and the learner's word are decoupled, and this entry
     owns the second one.** `standing` is a union the code branches on; the drawn
@@ -781,6 +781,24 @@ this region owns.
     decoupled, see `glossary · display labels`).
   - the **tray**, where the phase has one.
 
+  **Four, and the `●` is not a fifth** (human ruling 2026-08-19). The rail draws
+  a filled dot on the station whose lens the pane is currently holding — the
+  **occupant dot** — and it is **not a station property**: it is a projection of
+  the **pane occupant**, which the region is already handed per settle, read at
+  render. Storing it on the station would be a second source of truth for which
+  lens is open. It is orthogonal to the standing rather than a value of it —
+  `▾ 2 ●` is an _openable_ station that is _also_ the open lens's — so it could
+  not be folded into that three-valued union in any case. It marks **no station
+  at all** when the pane holds the editor or the generator, which is the fact
+  the nameplate's class-2 route turns on.
+
+  **The three drawn forms are presentation, not display copy** — the standing's
+  `▾ N` and `·`, and the occupant dot. Only `waiting` has a drawn string; the
+  other two standings are drawn as glyphs with no word, so nothing about them is
+  keyed, derived, or owed a slot in `display-labels.ts`. **The one exception is
+  the number**: `N` is the **kit count**, derived per settle like the empty
+  count, and its predicate is owed at 0.3 rather than settled here.
+
   **`standing` is deliberately not called a mark.** A **fit mark** is a level's
   four-valued classification of the code and rides the exported `FitMark` type;
   a standing is a projection of reachability and kit, and **no level is involved
@@ -807,7 +825,10 @@ this region owns.
   the ordinary case at four of five phases) · **waiting** (barred, downstream of
   the barring edge). A projection of reachability and kit, in which **no level
   is involved at all** — which is why it is deliberately not called a mark, and
-  why it is not keyed like one: only `waiting` has a drawn string.
+  why it is not keyed like one: only `waiting` has a drawn string. **openable**
+  draws as its disclosure control with the **kit count** (`▾ 2`); **bare** draws
+  as a single mid-line dot (`·`) and no word at all. Both are presentation; see
+  `glossary · station`.
 - **the barring edge** — the boundary between the last reachable phase and the
   first waiting one: where the machine stopped. Rendered between stations rather
   than on one, because a phase's own failure never bars it. The definition is

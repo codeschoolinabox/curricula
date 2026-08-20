@@ -247,6 +247,13 @@ verdicts without consulting a level twice.
   label, the standing (`openable` · `bare` · `waiting`), and its tray where it
   has one. Whether the openable and bare cases are one shape or two is the first
   question `types.ts` answers.
+- **The occupant dot is NOT a fifth thing the station carries** (human ruling
+  2026-08-19). The filled dot the rail draws on the station whose lens the pane
+  holds is **derived at render from the pane occupant**, which is already in the
+  projection above — so it needs no field, and giving it one would put a second
+  source of truth for the open lens next to the first. It is orthogonal to the
+  standing, not a value of it: an openable station can also be the open lens's.
+  Nothing is marked when the pane holds the editor or the generator.
 - **The caption — the one thing beneath the rail — holds exactly one occupant at
   a time, and its precedence is total**: the cause line wherever a barring edge
   is drawn, else the count line, else nothing. Four rules govern that one
