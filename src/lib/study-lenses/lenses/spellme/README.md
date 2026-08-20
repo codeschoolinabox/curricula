@@ -64,10 +64,16 @@ whose token streams are identical to the character can therefore behave
 differently, and nothing downstream shows it — the syntax tree has dropped the
 comment, the token stream never held it.
 
-So a comment carrying a line terminator lands in the jar **marked**. The mark
-names a **property, never a consequence**: whether automatic semicolon insertion
-fired depends on the production it lands in, and this lens does not know that.
-It says the comment carries a line break and that the grammar reads it as one.
+(human ruling 2026-08-20) So a comment carrying a line terminator lands in the
+jar **marked** — and so does an evaporating line terminator, which is one
+directly. The mark is the same property in both cases: **the syntactic grammar
+reads a line break here.** That is why it is one field and not two, and why the
+table above gives two of the three fates a marking variant.
+
+The mark names a **property, never a consequence**: whether automatic semicolon
+insertion fired depends on the production it lands in, and this lens does not
+know that. It says a line break is read here, not that anything followed from
+it.
 
 ## What the learner claims
 
@@ -374,9 +380,11 @@ elements_. These are this lens's own.
   is offered at all is a _decline_, above, and a different question.
 - **the jar** — the set-aside region, holding everything the scanner lifted out.
   It stays visible and is never emptied.
-- **mark** — one property, and only this one: a block comment carries a line
-  terminator, which the syntactic grammar reads as a line break. Per-field
-  correctness is a **verdict**, never a mark.
+- **mark** — one property, and only this one: **the syntactic grammar reads a
+  line break here.** Two elements carry it (human ruling 2026-08-20) — a line
+  terminator, which is one directly, and a block comment containing one, which
+  §12.4 makes one for the syntactic grammar. Per-field correctness is a
+  **verdict**, never a mark.
 - **provenance** — whose doing a fall was: the learner's claim, or the machine's
   after a hand-over. It is recorded on the token tape, and it is never scored.
 - **skip** — handing an unclaimed element to the machine once attempts reach

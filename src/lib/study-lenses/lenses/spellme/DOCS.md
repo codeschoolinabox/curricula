@@ -58,10 +58,13 @@ upward, no persisted state, no value returned to a consumer.
    check, read the input-element sequence published on the embodiment's tokens
    fact and give each element its fate and, where it has one, its mark. **This
    phase derives no element and calls nothing** — the scanning leaf owns the
-   derivation, the embodiment publishes it, and both the fate and the mark are
-   functions of the element kind alone. **Input:** the embodiment's facts, whose
-   tokens fact carries the sequence at `facts.tokens.value.inputElements`.
-   **Output:** the stream — every element carrying where it will end up.
+   derivation and the embodiment publishes it. The fate is a function of the
+   element kind alone; **the mark is not.** (human ruling 2026-08-20) It says
+   the syntactic grammar reads a line break here — which a `LineTerminator` does
+   by its kind, and a `Comment` only if its own text carries one. **Input:** the
+   embodiment's facts, whose tokens fact carries the sequence at
+   `facts.tokens.value.inputElements`. **Output:** the stream — every element
+   carrying where it will end up.
 
 4. **Position** _(sync, pure)_ — advance past every element that advances on its
    own, so the cursor rests on a claimable element or past the end. Runs at
@@ -112,7 +115,7 @@ flowchart TD
     Props -->|"facts.tokens.value.inputElements —<br/>read behind the applicability check;<br/>a read, not a derivation, pure"| Seq
     Overrides -->|"resolve defaults, refuse an out-of-range<br/>threshold, freeze — the factory, before<br/>anything mounts"| Props
     Props -->|"read the two thresholds off the<br/>resolved configuration, pure"| Thresholds
-    Seq -->|"derive each fate from its element kind<br/>and mark a comment carrying a line break, pure"| Stream
+    Seq -->|"derive each fate from its element kind, and mark<br/>wherever the grammar reads a line break —<br/>a terminator by kind, a comment by its text, pure"| Stream
     Stream -->|"seed at the first claimable element, pure"| Session
     Session -->|"render the tapes, the jar, and the form<br/>with the verdicts of the last claim"| Surface
     Thresholds -->|"open the one-more field, then the way past,<br/>at the attempt count each names"| Surface

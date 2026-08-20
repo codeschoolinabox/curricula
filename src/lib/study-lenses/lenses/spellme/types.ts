@@ -70,11 +70,17 @@ export type Fate = 'token-tape' | 'set-aside' | 'consumed';
  * One element as this exercise holds it: the derivation's element, the
  * fate derived from its kind, and the one mark.
  *
- * `marked` names a **property, never a consequence**: a block comment
- * carries a line terminator, which the syntactic grammar reads as a line
- * break. Whether automatic semicolon insertion actually fired depends on
- * the production it lands in, and this lens does not know that. Per-field
- * correctness is a `Verdict`, never a mark.
+ * `marked` says **the syntactic grammar reads a line break here**. Two
+ * elements carry it (human ruling 2026-08-20): a `LineTerminator`, which
+ * is one directly, and a block comment containing one, which ECMA-262
+ * §12.4 makes one for the purposes of the syntactic grammar. The mark is
+ * the same property in both cases, which is why it is one field and not
+ * two.
+ *
+ * It names a **property, never a consequence**: whether automatic
+ * semicolon insertion actually fired depends on the production it lands
+ * in, and this lens does not know that. Per-field correctness is a
+ * `Verdict`, never a mark.
  */
 export type StreamElement = {
 	readonly element: InputElement;
