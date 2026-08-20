@@ -719,8 +719,15 @@ EOF
 ````
 
 **Expected: `DECISIONS.md malformed rows: none` ·
-`RESUME.md malformed rows: none` · `{63: 80}`, no outliers** [all three measured
-at this commit]. **CP-η is RED at this commit, deliberately** — see below.
+`RESUME.md malformed rows: none` · `{63: 79}`, no outliers · `CP-eta: GREEN`**
+[all four measured at this commit].
+
+CP-η landed **RED** at `1046c90d` — twelve failing columns and one failing
+caption shape — and that was deliberate: an instrument that has never been seen
+to fail has not been shown to work. It went green in two steps, `bbc21d87`
+(check 1) and this commit (check 2). Check 3 passed throughout and was
+mutation-tested rather than trusted [see `1046c90d`'s body for all four
+mutations].
 
 ⚠ **CP-η's tolerance is ±1.5 and that number is MEASURED, not chosen.** Every
 unbarred drawing sits at up to ±1.5 — `Evaluation`'s `·` at column 52 against a
@@ -733,12 +740,17 @@ after re-laying out the seven, and never as a side effect of chasing a failure.
 
 ⚠ **Neither instrument 1 nor instrument 2 can regress-test BLOCKER 1**, and this
 is why CP-η exists. The frame scan measures the **closing vertical at index 63
-only** and reports `{63: 80} outliers: none` over a drawing whose interior says
-`Tokens` is not reached. The clause is asserted, drawn, and indexed — round 12
-named the class **present-and-wrong**, and CP-α, the instrument round 11
-proposed, would have ticked it green for the same reason.
+only**. It reported `{63: 80} outliers: none` over a drawing whose interior said
+`Tokens` was not reached [measured at `1046c90d`, before the fix]. The clause
+was asserted, drawn, and indexed — round 12 named the class
+**present-and-wrong**, and CP-α, the instrument round 11 proposed, would have
+ticked it green for the same reason.
 
-⚠ **The histogram figure is CAMPAIGN-SCOPED and has already gone 72 → 77 → 80.**
+⚠ **The histogram figure is CAMPAIGN-SCOPED and has gone 72 → 77 → 80 → 79.**
+The drop to 79 is this commit deleting one framed blank line from § The
+machinery breaks, and it is recorded in the same commit that caused it —
+because every previous revision of this paragraph was written a commit or two
+after the number moved.
 An earlier revision of this paragraph documented `{63: 77}`, which was true two
 commits before it was written, so the first thing a fresh agent did — re-measure
 at session start — returned a mismatch with no way to tell whether the tree had

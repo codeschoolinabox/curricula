@@ -437,7 +437,6 @@ the control row and the rail, and the caption renders beneath the rail.
 │                                                              │
 │  the machinery broke here, not your code —                   │
 │  the syntax tree does not span its source.                   │
-│                                                              │
 │  the last two phases were not reached.                       │
 ```
 
