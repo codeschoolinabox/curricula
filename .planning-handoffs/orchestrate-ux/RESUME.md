@@ -590,6 +590,15 @@ produced**, which is the durable home; this table is the convenience copy.
 
 ## The instruments — RUNNABLE, because an instrument with no command is a rumour
 
+**FOUR of them as of 2026-08-19**, and they detect three different things.
+Instruments 1 and 2 detect **presence** — a malformed row, a misaligned frame.
+**CP-α** (in [`DECISIONS.md`](./DECISIONS.md) § CP-α, a table rather than a
+script) detects **absence** — a contract clause no drawing renders. **CP-η**
+detects **present-and-wrong** — a drawing that renders the clause and says the
+opposite of its prose, which is the class that shipped BLOCKER 1 past every
+other one. None subsumes another, and round 12's proof is that CP-α would have
+ticked BLOCKER 1 green.
+
 **Was § The two instruments until 2026-08-19**, when CP-η made it three. No
 in-repo citation used the old heading [measured: `grep -rn "two instruments"`
 over `orchestrate/` and this directory → **1** hit, the heading itself]; the
@@ -714,13 +723,39 @@ for b,k,(line,stand) in rails:
 print("3 · drawn numerals vs the drawing's own stations")
 print('   PASS') if not bad3 else [
     print('   FAIL rail at line %s  %s: drawn %s, caption says %s'%r) for r in bad3]
-print('CP-eta: %s'%('RED' if (bad1 or bad2 or bad3) else 'GREEN'))
+# 4 · control-row tokens vs the projection contract, BOTH directions.
+#     Allowlist = the region's OWN controls, which the contract deliberately does
+#     not grant (B13). Everything else drawn must be projected data.
+OWN = ('Generate code', 'Edit code', 'Guide')
+PROJECTED = {'snippet type': r'\[(module|script)\]',
+             "the selected level's mark": r'\[[^]]+ · [^]]+▾\]',
+             'the none-state': r'\[plain JavaScript ▾\]',
+             'the posture': r'\([•o ]\) strict'}
+rows=[]
+for b in blocks:
+    for i,l in b:
+        if l.startswith('│') and (re.search(r'\([•o ]\) strict', l) or '[Generate code]' in l):
+            rows.append((i,l))
+bad4=[]
+for i,l in rows:
+    for tok in re.findall(r'\[[^]]*\]', l):
+        if any(o in tok for o in OWN): continue
+        if any(re.fullmatch(p, tok) for p in PROJECTED.values()): continue
+        bad4.append((i, 'DRAWN, NOT GRANTED', tok))
+seen=' '.join(l for i,l in rows)
+for name, pat in PROJECTED.items():
+    if not re.search(pat, seen):
+        bad4.append(('-', 'GRANTED, NEVER DRAWN', name))
+print('4 · control-row tokens vs the projection contract, both directions')
+print('   PASS - %s control rows'%len(rows)) if not bad4 else [
+    print('   FAIL line %s  %s: %s'%r) for r in bad4]
+print('CP-eta: %s'%('RED' if (bad1 or bad2 or bad3 or bad4) else 'GREEN'))
 EOF
 ````
 
-**Expected: `DECISIONS.md malformed rows: none` ·
-`RESUME.md malformed rows: none` · `{63: 79}`, no outliers · `CP-eta: GREEN`**
-[all four measured at this commit].
+**Expected, running the block below: `DECISIONS.md malformed rows: none` ·
+`RESUME.md malformed rows: none` · `{63: 79}`, no outliers · `CP-eta: GREEN` on
+all **four** checks** [all measured at this commit].
 
 CP-η landed **RED** at `1046c90d` — twelve failing columns and one failing
 caption shape — and that was deliberate: an instrument that has never been seen
@@ -793,7 +828,7 @@ is LIVE. These four are additions from this session:
 > 1. **§ Commit form** — which `DECISIONS.md` calls "the thing that actually
 >    fires".
 > 2. **§ Mechanics that will bite you** — the standing trap list.
-> 3. **§ Sandbox checkpoints owed at Phase 1** — the only definition of T1–T15.
+> 3. **§ Sandbox checkpoints owed at Phase 1** — the only definition of T1–T16.
 >    **T10 deliberately carries a retired word; see C18 before you "fix" it.**
 > 4. **§ Human rulings** — the standing `twin-doc: user` / `ceremony: full`
 >    declaration and the twin's three paths.
@@ -3441,6 +3476,7 @@ route into `orchestrate/PHASE-1-CHECKPOINT-LEDGER.md`.
 | T13 | Load with a fitting lens on **every** accessible phase. Look at the strip of space between the rail and the pane                | **no caption row renders at all**, and no blank line is reserved for it — the pane sits directly beneath the rail. C5 rule 3                                                                                                                                                                            |
 | T14 | Screen reader, barring edge drawn. Traverse the barred stations and **write down the exact word spoken at each**                | **this row OBSERVES and does not decide.** C18 is unruled by human ruling — record `waiting`, `not reached`, or whatever is actually spoken, as evidence for that ruling. Do NOT reconcile it with the drawn word here. C18                                                                             |
 | T15 | Trip any parse break. Read ONLY the cause line, without looking at the rail                                                     | **say what the word _here_ points at.** The three framings all say `broke here` and the caption names no station by contract (B3, C15) — so the answer is either "nothing" or a station the geometry deliberately leaves OPEN. C19                                                                      |
+| T16 | Open the tray on a station whose phase has a fitting lens. Read the tray's own text, not the lens entries                       | **the FULL phase label renders somewhere in the tray** (`Tokens · spelling`), not just the short label the rail draws. C7 makes these two authored strings; if the tray shows only lens entries, the second string has no drawn home. C7 · CP-α                                                         |
 
 ## The process failure to not repeat
 
