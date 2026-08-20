@@ -397,13 +397,13 @@ describe('spellme core', () => {
 			expect(() => spellmeCore.config({ skipAfter: -1 })).toThrow(TypeError);
 		});
 
-		it.skip('refuses a fractional threshold', () => {
+		it('refuses a fractional threshold', () => {
 			expect(() => spellmeCore.config({ oneMoreAfter: 1.5 })).toThrow(
 				TypeError,
 			);
 		});
 
-		it.skip('refuses a non-finite threshold', () => {
+		it('refuses a non-finite threshold', () => {
 			expect(() => spellmeCore.config({ skipAfter: Number.NaN })).toThrow(
 				TypeError,
 			);

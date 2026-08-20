@@ -193,12 +193,22 @@ function refuseOutOfRangeThresholds(
 ): void {
 	for (const key of THRESHOLD_KEYS) {
 		const value = defined[key];
-		if (typeof value === 'number' && value < 0) {
+		if (typeof value === 'number' && !isLegalThreshold(value)) {
 			throw new TypeError(
 				`spellme config: ${key} must be a non-negative integer, got ${value}`,
 			);
 		}
 	}
+}
+
+/**
+ * `./README.md` § Configuration's "Legal values" as a predicate — "Both are
+ * non-negative integers". `Number.isInteger` is false for a fraction AND for
+ * NaN and Infinity, so the three refusals that section names — negative,
+ * fractional, non-finite — are all of them the negation of this one test.
+ */
+function isLegalThreshold(value: number): boolean {
+	return Number.isInteger(value) && value >= 0;
 }
 
 // Intentionally unfrozen — `./index.tsx` freezes the composed `Lens`
