@@ -51,7 +51,7 @@ nothing.
 | --------------- | -------------------------------- | ------------------------------------------------- |
 | becomes a token | lands on the token tape          | —                                                 |
 | set aside       | goes to the jar, and stays there | a block comment carrying a line terminator        |
-| consumed        | evaporates; nothing arrives      | a line terminator — automatic semicolon insertion |
+| consumed        | evaporates — see § UI structure  | a line terminator — automatic semicolon insertion |
 
 The **fate** is this lens's word, derived from the element's kind —
 `lib/scanning` reports the kind and says nothing about destinations.
@@ -279,6 +279,14 @@ error. Negative, fractional and non-finite values are refused at the factory
 boundary rather than coerced, per this package's fail-fast rule for invalid
 input crossing a boundary.
 
+(human ruling 2026-08-20) The refusal throws a **`RangeError`**, not a
+`TypeError`. All three refusals are properties only a number can have, so what
+is refused is always the right kind of value carrying a wrong one — which is
+what `RangeError` names, and what ECMA-262 itself uses for the same predicate
+(`new Array(-1)`, `new Array(1.5)` and `new Array(NaN)` all throw it). A
+**non-numeric** threshold is a different question and is deliberately not
+answered here.
+
 ## UI structure
 
 ```text
@@ -289,6 +297,7 @@ input crossing a boundary.
     <span data-spellme-rest>
   <section data-spellme-tokens>           — the token tape, in stream order
     <span data-spellme-element data-element-kind="…" data-claimed="true|false">
+    <span data-spellme-break>             — a consumed line break the grammar reads
   <section data-spellme-jar>              — set aside, and kept
     <span data-spellme-set-aside data-marked="true|false">
   <form data-spellme-claim-form data-attempts="N">
@@ -304,11 +313,19 @@ input crossing a boundary.
 </div>
 ```
 
+**Both marked fates are drawn** (human ruling 2026-08-20). A set-aside comment
+carries `data-marked` on its jar entry; a consumed line break leaves
+`data-spellme-break` on the token tape, at the position it was read. Its
+**presence is the mark** — there is no `data-marked="false"` twin, because an
+unmarked consumed element leaves nothing at all, which is what _evaporates_
+means. That is the same presence-is-the-state rule the verdict attributes
+follow.
+
 The `data-lens` attribute plus the `data-spellme-*` family, `data-cursor`,
-`data-element-kind`, `data-extent`, `data-claimed` and `data-marked` are harness
-selectors and CSS hooks; renaming any is a contract change. It is
-`data-element-kind` and never bare `data-kind`: the package glossary owns _kind_
-for a kind of study utility, and the sibling leaf
+`data-element-kind`, `data-extent`, `data-claimed`, `data-marked` and
+`data-spellme-break` are harness selectors and CSS hooks; renaming any is a
+contract change. It is `data-element-kind` and never bare `data-kind`: the
+package glossary owns _kind_ for a kind of study utility, and the sibling leaf
 [`lib/classifying`](../../lib/classifying/README.md) publishes a different
 element taxonomy over the same tokens, so both halves of the word need saying.
 The three `data-*-verdict` attributes carry `attested` or `diverging` — the
@@ -367,9 +384,11 @@ elements_. These are this lens's own.
 - **fall into place** — what a correct claim does: the element's characters
   leave the input tape, arrive on the token tape, and the cursor advances.
 - **the fates** — where an element ends up, derived from its element kind: the
-  token tape, the jar, or nothing. **Every** element has one, claimed or not —
-  two of the three belong entirely to elements the learner never claims, which
-  is the whole point of watching them rather than asserting them.
+  token tape, the jar, or nothing — though a consumed element the grammar reads
+  a line break at still leaves its mark on the token tape, which is the one
+  place "nothing" is qualified. **Every** element has one, claimed or not — two
+  of the three belong entirely to elements the learner never claims, which is
+  the whole point of watching them rather than asserting them.
 - **decline** — `applicability` answering `false`, so the lens is never offered
   at all. Distinct from _the gate_, which is about the advance **inside** an
   offered lens. Nothing about a decline is visible here, because in that state
@@ -399,7 +418,9 @@ elements_. These are this lens's own.
   here beyond those two.
 - **the tapes** — two of the three regions, not all of them: the **input tape**
   holds the program the scanner has not yet reached, the **token tape** holds
-  what has fallen. The jar is the third region and is not a tape.
+  what has fallen, plus the marks for the line breaks read between them. A mark
+  is not a fallen element and carries no provenance — nothing claimed it. The
+  jar is the third region and is not a tape.
 - **verdict** — the independent judgement of one claim field. Two per claim
   ordinarily, three once the one-more field has opened; they never combine into
   a score.

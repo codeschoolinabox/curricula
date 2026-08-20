@@ -154,10 +154,11 @@ flowchart TD
   never the stepper's value itself.
 - **Verdicts never aggregate.** There is no score, no percentage and no session
   summary; combining them anywhere would contradict the gate.
-- **This lens derives no element.** Fate and mark are functions of the element
-  kind; everything else about an element arrives on the published member. A
-  second lens of this family reads that same member rather than re-deriving it
-  or fetching it.
+- **This lens derives no element.** The fate is a function of the element kind
+  and the mark is a function of the kind **and, for a comment, its text**;
+  everything else about an element arrives on the published member. A second
+  lens of this family reads that same member rather than re-deriving it or
+  fetching it.
 - **`readStream` re-checks and throws; it never carries an absent-member arm.**
   Applicability guarantees the member is present, but that narrowing does not
   cross the function boundary and `!` is barred here, so both narrowing checks
@@ -166,6 +167,13 @@ flowchart TD
 - **The lens renders no snippet-type control and holds no copy of that state.**
   The reading depends on the goal symbol, and that toggle belongs to the
   orchestrator, which disposes this lens when it changes.
+- (human ruling 2026-08-20) **Both marked fates are drawn, and the two carriers
+  differ.** A set-aside comment carries `data-marked` on its jar entry; a
+  consumed line break leaves `data-spellme-break` on the token tape. The second
+  has no false-valued twin — its presence is the mark, because an unmarked
+  consumed element leaves nothing, which is what _evaporates_ means. So `marked`
+  is a property of every stream element in the model, and the surface renders it
+  in two different shapes rather than one.
 - **The jar is never emptied**, and trivia are never claimed.
 - **Selectors bind to attributes, never to label text.** A verdict attribute is
   absent before the first submitted claim, and absence is the state.

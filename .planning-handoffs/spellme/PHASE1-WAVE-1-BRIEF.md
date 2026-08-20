@@ -267,11 +267,17 @@ unamended, and it is a boundary rule, not a prediction (human ruling 2026-08-15,
    `const EMPTY_RECOMMENDATIONS = freezeInPlace<ReadonlyArray<Recommendation>>([]);`
    declared **after** the function. There is no shared constant to import; each
    lens declares its own.
-4. **No sibling `config()` throws.** The `@throws TypeError` on negative,
-   fractional and non-finite thresholds is genuinely new code with no precedent.
-   Validate **after** the `undefined` filter and **before** the freeze. **Scope
-   it exactly:** the two documented keys `oneMoreAfter` and `skipAfter`, and
-   only the three refusals README § Configuration names — negative, fractional,
+4. **No sibling `config()` throws.** ⚠ **SUPERSEDED 2026-08-20 — the class is
+   now `RangeError`, not `TypeError`** (human ruling; recorded in
+   `lenses/spellme/README.md` § Configuration, which is its home). Two further
+   corrections to what this item said: a precedent DOES exist —
+   `lib/engine/worker/write-call-response.ts` carries `@throws RangeError` for a
+   numeric-limit violation — and it was true only of sibling _lens_ config
+   factories. The rest of the item still holds. The refusal on negative,
+   fractional and non-finite thresholds was new code for this module. Validate
+   **after** the `undefined` filter and **before** the freeze. **Scope it
+   exactly:** the two documented keys `oneMoreAfter` and `skipAfter`, and only
+   the three refusals README § Configuration names — negative, fractional,
    non-finite. A **non-numeric** value for either key is covered by no test and
    no document; do not invent a rule for it — if you think one is needed,
    **FLAG** it. `switch` is banned, so use an if-chain or a lookup.
@@ -386,6 +392,29 @@ asserting a bare `.toThrow()` passes vacuously against the current stub's own
 close to them: _"wave 2 owes a `readStream` precondition-throw test in the
 mock-poisoned state; the throw's class is unspecified in the Phase-0 artifacts
 and needs a human ruling before the test can be written."_
+
+> ✅ **The instruction above was correct and was followed** — the wave-1 worker
+> raised exactly this FLAG and wrote no test. Two of its factual claims are
+> **still true today**: `readStream` carries no `@throws` tag, and `TypeError`
+> appears nowhere in this module. Only its reasoning is spent, not its facts.
+>
+> ⚠ **The class is NOT settled for `readStream`. Wave 2 must not assume it is.**
+> The 2026-08-20 ruling was put as a question about `readStream`'s throw class,
+> and the answer chosen was "`RangeError` — and revisit `config` too". But
+> `ed76f43b`'s body recorded only the `config` half, and an AR-5 reading that
+> body reasonably concluded the ruling had never reached `readStream`. **That
+> under-recording is the defect**, it cannot be fixed in an immutable body, and
+> this block is where it is corrected.
+>
+> **The reviewer also raised a substantive objection, and it should be settled
+> before the assertion is written:** by the ruling's own distinction —
+> `TypeError` is the wrong KIND of value, `RangeError` is the right kind
+> carrying a wrong one — an **absent** published member is a wrong-kind case, so
+> `RangeError` may be affirmatively wrong here even though it is right for an
+> out-of-range threshold. The two throws are not obviously the same species.
+>
+> **Wave 2 owes the test, and owes putting that objection to the human first.**
+> Do not spell it `.toThrow(RangeError)` on the strength of this block.
 
 **Cluster 3 — `recommend`** (3 un-skips). `:382` `:386` `:390`.
 

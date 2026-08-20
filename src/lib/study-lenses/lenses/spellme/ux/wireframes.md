@@ -167,6 +167,14 @@ The mark is a flag on the entry plus its own line of text, never colour alone.
 It states the property — this comment carries a line break, and the grammar
 reads it as one — and stops there.
 
+(human ruling 2026-08-20) **Two elements carry the mark, and only one of them is
+drawn here.** The jar entry above is the set-aside case. The other is a
+**consumed line break**, which never reaches the jar — its fate is to evaporate
+— and which the token tape marks instead, at the position the grammar read it.
+Both say the same thing: a line break is read here. Neither says anything about
+whether automatic semicolon insertion actually fired, which depends on the
+production and which this lens does not know.
+
 > ⚠ **doubt.** Two containers of equal weight, one of which is empty for most
 > programs, is a lot of dead space. The honest counter is that an empty jar is
 > itself information: this program set nothing aside.
@@ -178,6 +186,21 @@ it cannot be drawn in ASCII. It wants to be designed at a running dev server,
 against the sandbox checkpoint, not agreed in advance from a picture — and it is
 the one element of this surface where the author would rather be surprised than
 right.
+
+**The consumed line break's mark**, and this one is owed rather than refused.
+The ruling of 2026-08-20 says the token tape marks it; what that mark looks like
+beside a row of tokens is not drawn, and drawing it in ASCII would fix a
+decision this document has no grounds for. It is the same case as the falling
+animation — settle it at the sandbox checkpoint, against a running surface. Two
+constraints it must meet, both from the jar's mark above: never colour alone,
+and it says a line break is read here and nothing about automatic semicolon
+insertion.
+
+> ⚠ **doubt.** A mark for something that evaporated may read as clutter on a
+> tape whose whole job is showing what survived. The honest counter is that ASI
+> is precisely the thing a learner cannot see and most needs to, and that a mark
+> which appears only where the grammar reads a break is rare enough not to
+> crowd.
 
 **The declined state**, and for a sharper reason: there is no surface to draw.
 When the embodiment's input-element derivation defects, applicability declines

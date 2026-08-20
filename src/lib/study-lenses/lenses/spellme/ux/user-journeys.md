@@ -160,7 +160,9 @@ In ninety seconds they have seen everything the lens does.
 `IdentifierName`, and do not believe it.
 
 This is the lens's best claim and it is available to everyone, unlike the marked
-comment, which sits at the end of a whole stream. `null`, `true` and `false` are
+comment, which sits at the end of a whole stream. (A marked _line break_ is not
+rare in the same way — most multi-line programs carry several — so that scarcity
+argument is about the comment alone.) `null`, `true` and `false` are
 `ReservedWord`s, `ReservedWord`s are `IdentifierName`s, and the thing that makes
 them values happens one phase later.
 
@@ -182,9 +184,11 @@ source is the enhancement — not the other way round. Nothing about this lens
 requires pointing.
 
 The verdicts land in an `aria-live` region, so they are announced rather than
-only coloured — verdicts, never "marks", which in this lens names one property
-of a comment and nothing else. The three fates carry a border style as well as a
-hue.
+only coloured — verdicts, never "marks". (human ruling 2026-08-20) A _mark_ in
+this lens names one property and only this one: the syntactic grammar reads a
+line break here. Two elements carry it — a comment containing a terminator, and
+a consumed line terminator itself — and neither is a judgement of anything the
+learner did. The three fates carry a border style as well as a hue.
 
 > ⚠ **doubt.** The one place this may still break is the falling animation:
 > motion is the reward the whole loop is built around, and a learner who has
