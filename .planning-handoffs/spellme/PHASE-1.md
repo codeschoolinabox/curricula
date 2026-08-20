@@ -20,12 +20,14 @@ careful reader may ignore.
 things stand carries the SHA list; the status lives here, not elsewhere.
 
 🚧 **`spellme` PHASE 1 IS UNDER WAY — wave 1 is CLOSED (2026-08-20).** See § The
-`spellme` LENS — Phase 1, wave 1 for its ten SHAs, and § The `spellme` LENS's
-rulings for the four decisions it took. Wave 2 is `readStream`. ⚠ This banner
-read "THE NEXT CAMPAIGN _IS_ `spellme` PHASE 1" until 2026-08-20 — true for one
-day, and then the same stale-redirect defect the paragraph below documents about
-itself, for the third time in this file. **A banner announcing what is next
-expires the moment someone starts it.** The docs mini-campaign that preceded it
+`spellme` LENS — Phase 1, wave 1 for its SHA list — **re-run its loop rather
+than counting rows; this sentence said "ten" and was outgrown within the hour**
+— and § The `spellme` LENS's rulings for the four decisions it took. Wave 2 is
+`readStream`. ⚠ This banner read "THE NEXT CAMPAIGN _IS_ `spellme` PHASE 1"
+until 2026-08-20 — true for one day, and then the same stale-redirect defect the
+paragraph below documents about itself, for the third time in this file. **A
+banner announcing what is next expires the moment someone starts it.** The docs
+mini-campaign that preceded it
 ([`./ACQUISITION-ALIGNMENT-BRIEF.md`](./ACQUISITION-ALIGNMENT-BRIEF.md),
 `adf83dc5`) **CLOSED** the same day in **six** commits — `614ab524` `191f7da9`
 `120880d7` `349d3f0a` `01a87b9f` `f7eefe61`, the last being post-close handoff
