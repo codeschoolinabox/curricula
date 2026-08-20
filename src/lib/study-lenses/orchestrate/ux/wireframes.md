@@ -344,7 +344,7 @@ four legible states, drawn below, not one control with four strings.
 │         [Just Enough JavaScript · can't tell yet ▾]          │
 ├──────────────────────────────────────────────────────────────┤
 │  Source ─── Tokens ─── AST ──╳╌╌ Environment ╌╌╌╌ Evaluation │
-│   ▾ 2       ·       ·       not reached       not reached    │
+│   ▾ 2         ·         ·        not reached     not reached │
 │                                                              │
 │  the grammar broke here — Unexpected token (2:8).            │
 │  the last two phases were not reached.                       │
@@ -402,7 +402,7 @@ reporting `undetermined`.
 │         [Just Enough JavaScript · can't tell yet ▾]          │
 ├──────────────────────────────────────────────────────────────┤
 │  Source ─── Tokens ──╳╌╌ AST ╌╌╌ Environment ╌╌╌ Evaluation  │
-│  ▾ 2     ·    not reached    not reached    not reached      │
+│   ▾ 2         ·      not reached not reached    not reached  │
 │                                                              │
 │  the spelling broke here — Invalid or unexpected token.      │
 │  the last three phases were not reached.                     │
@@ -433,7 +433,7 @@ the control row and the rail, and the caption renders beneath the rail.
 
 ```text
 │  Source ─── Tokens ─── AST ──╳╌╌ Environment ╌╌╌╌ Evaluation │
-│   ▾ 2       ·       ·       not reached       not reached    │
+│   ▾ 2         ·         ·        not reached     not reached │
 │                                                              │
 │  the machinery broke here, not your code —                   │
 │  the syntax tree does not span its source.                   │
