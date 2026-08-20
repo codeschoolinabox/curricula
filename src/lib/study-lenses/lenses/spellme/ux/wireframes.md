@@ -179,6 +179,14 @@ against the sandbox checkpoint, not agreed in advance from a picture — and it 
 the one element of this surface where the author would rather be surprised than
 right.
 
+**The declined state**, and for a sharper reason: there is no surface to draw.
+When the embodiment's input-element derivation defects, applicability declines
+and this lens is never mounted, so nothing on this page appears. What the
+learner meets instead is the orchestrator's empty-phase caption, which says this
+phase has nothing to study — and that is wrong, because what failed was the
+instrument. See [user-journeys.md](./user-journeys.md) § What this document is
+asking of the design review, item 7; the caption is the orchestrator's to fix.
+
 ## Navigation
 
 - The lens: [`../README.md`](../README.md) — what each region holds.

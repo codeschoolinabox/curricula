@@ -378,14 +378,16 @@ Never pass a `model` parameter when spawning an `ar-N`.
      sequence — so this is triangulation carrying an assertion that does not
      carry itself. The minimal close is a `toBeDefined()` beside each, or
      asserting frozen-ness on a value the same test already pins.
-  3. **`scanning`'s DOCS and README disagree about the caller's projection**,
-     and the cause is foreign: § Out of scope still says projecting the three
-     values is "the caller's one-line boundary… named in the README rather than
-     done here", while the README after `60349d76` says a consumer holding an
-     `Embodiment` does not call this module at all — the factory calls it once
-     per settle. The README is also split against itself. **Not this campaign's
-     to fix**; it belongs to whoever closes embody-derivation-facts, and
-     `60349d76` edited README.md and types.ts without DOCS.md.
+  3. ✅ **CLOSED by `191f7da9`** (2026-08-19) — do not go looking for this. It
+     read: "`scanning`'s DOCS and README disagree about the caller's projection…
+     **Not this campaign's to fix**; it belongs to whoever closes
+     embody-derivation-facts." Both clauses expired. The named owner closed at
+     `60349d76`, and the spellme acquisition-alignment mini-campaign fixed both
+     halves under a human ruling of 2026-08-19. **The text this item quoted no
+     longer exists** [measured 2026-08-19: `git grep -c "named in the README
+     rather than done here" -- src/lib/study-lenses` → no matches]. A reader
+     following the old wording would hunt a disagreement that is gone — the same
+     failure this file's own header paragraph was written to stop.
   4. **`lib/loop-guard`'s documented error discriminant is asserted by no
      test.** Its README promises a `reason` of `'parse-failed'` or
      `'multiline-injection'`; `LoopGuardError` is a type alias rather than a

@@ -217,10 +217,22 @@ The module's default export is a frozen `Lens` per [`../types.ts`](../types.ts):
 - `name: 'spellme'` · `phase: 'tokens'`
 - `main` — the React component: `<div data-lens="spellme">`, the input tape, the
   token tape, the jar, the claim form, the per-field verdicts.
-- `applicability(facts)` — `facts.tokens.ok`. The element sequence needs the
-  tokens stage; a source that does not lex has none. **No syntax tree is read**,
-  so a program that lexes but does not parse is served in full — the state where
-  "your spelling is fine, your grammar is not" is worth seeing.
+- `applicability(facts)` — the tokens stage produced a value **and** the
+  published member is there:
+  `facts.tokens.ok && facts.tokens.value.inputElements !== undefined`.
+
+  Two conditions, for two different reasons (human ruling 2026-08-19). The
+  tokens stage because a source that does not lex has no sequence at all. The
+  member's presence because it is **optional** — the orientation above states
+  that and cites embody's normative account, so a successful tokens stage does
+  not by itself guarantee the sequence exists. This lens cannot serve without
+  it, so applicability declines and the lens is not offered. Reading one
+  member's presence derives nothing, which is what keeps applicability cheap.
+
+  **No syntax tree is read**, so a program that lexes but does not parse is
+  served in full — the state where "your spelling is fine, your grammar is not"
+  is worth seeing.
+
 - `config(overrides?)` — the pure factory: defaults applied, overrides win,
   unknown keys preserved, `undefined` treated as absent, result deep-frozen.
 - `recommend(embodiment)` — the frozen empty array; see
@@ -346,9 +358,14 @@ elements_. These are this lens's own.
   token tape, the jar, or nothing. **Every** element has one, claimed or not —
   two of the three belong entirely to elements the learner never claims, which
   is the whole point of watching them rather than asserting them.
+- **decline** — `applicability` answering `false`, so the lens is never offered
+  at all. Distinct from _the gate_, which is about the advance **inside** an
+  offered lens. Nothing about a decline is visible here, because in that state
+  this lens is not drawn.
 - **the gate** — the rule that the stream advances only on a correct claim. It
-  is this lens's entire refusal channel: no score, no failure state, and nothing
-  blocked except the advance itself.
+  is this lens's entire refusal channel **within an offered lens**: no score, no
+  failure state, and nothing blocked except the advance itself. Whether the lens
+  is offered at all is a _decline_, above, and a different question.
 - **the jar** — the set-aside region, holding everything the scanner lifted out.
   It stays visible and is never emptied.
 - **mark** — one property, and only this one: a block comment carries a line
@@ -376,6 +393,36 @@ elements_. These are this lens's own.
 ## Edge cases
 
 - **A program that lexes but does not parse** — served in full.
+- **A program that lexes, but embody's input-element derivation defected** — the
+  lens is not offered. This is the one non-offer condition that is **not a
+  property of the program**: the source is fine and the tokens are fine;
+  embody's own machinery failed and reported it, and the published member is
+  absent. The lens has nothing to build a stream from, so it declines.
+
+  **The accepted cost, stated rather than absorbed** (human ruling 2026-08-19):
+  spellme is the only lens declaring the `tokens` phase, and **every further
+  lens of this family reads the same published member** — so on this defect the
+  phase empties however many of them exist. It is not a transient roster
+  accident that a second lens would fix. An accessible-but-empty phase is drawn
+  with its own reason, `Tokens, spelling: nothing studies this phase yet`, and
+  that sentence is **false** here: the curriculum does study this phase; what
+  broke is machinery. The caption cannot tell "nothing studies this phase" from
+  "everything that studies it declined for one machinery reason", and that is
+  the shape the follow-on has to fix. It belongs to the orchestrator's
+  empty-station caption, not to this lens, and it is recorded as an open
+  follow-on in this campaign's handoff —
+  `.planning-handoffs/spellme/ACQUISITION-ALIGNMENT-BRIEF.md` § Recorded, not
+  fixed. **That home is transitional**: whoever next works the orchestrator's
+  station copy should carry it into `orchestrate/README.md`, which already
+  describes the empty-station case this defect lands in.
+
+  **The alternative was not weighed and refused — it is barred.** Staying
+  offered and failing at mount would put a refusal in `main`, and the lens
+  kind's contract realizes refusal-as-data at applicability precisely so `main`
+  carries no refusal arm ([`../types.ts`](../types.ts), the `Lens` Totality
+  remark). It would also, there being no error boundary anywhere in this
+  package, take the whole panel down rather than this lens alone.
+
 - **A program that does not lex** — the lens is not offered. Explaining the
   reader's own error is the **error-interpreting lens**, which the package
   roster already names across both parse phases; it belongs to the package, not

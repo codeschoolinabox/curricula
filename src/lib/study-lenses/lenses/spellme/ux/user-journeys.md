@@ -213,9 +213,23 @@ And one that only shows up over a whole program rather than at any single claim:
 5. **Keyboard cost scales with the picker**, and ten options per element is a
    different exercise by keyboard than by mouse.
 6. **The reward is motion**, and reduced-motion learners have none.
+7. **When the machinery breaks, the learner is told the curriculum is empty.**
+   If the embodiment's input-element derivation defects, this lens declines —
+   and because it is currently the only lens of its phase, the phase is drawn as
+   having nothing to study: _nothing studies this phase yet_. The learner is
+   told something false about the curriculum when what actually failed was the
+   instrument. This is Journey 4's doubt arriving from the other direction — not
+   a contradiction between two true readings, but a plain untruth — and the
+   caption belongs to the orchestrator rather than to this lens, so this
+   document records the cost rather than proposing the fix.
 
-None of these is a bug. All are the shape of the exercise, and the shape is what
-a design review is for.
+None of the first six is a bug, and all six are the shape of the exercise —
+which is what a design review is for. **The seventh is the exception twice
+over**: it is a defect rather than a shape, and the fix belongs to the
+orchestrator rather than to this lens; and it is a cost this lens's design
+**accepts** (human ruling 2026-08-19) rather than a tension it leaves open. It
+also has no journey above, because in that state the learner never reaches this
+lens — there is no one to write from where they sit.
 
 ## Navigation
 

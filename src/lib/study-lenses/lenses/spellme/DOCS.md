@@ -43,20 +43,25 @@ upward, no persisted state, no value returned to a consumer.
    resolved configuration the surface is later handed.
 
 2. **Answer applicability** _(the gate; sync, pure, cheap)_ — whether the tokens
-   stage produced a value. No syntax tree is consulted, so a program that lexes
-   but does not parse is served, and no derivation happens here, because a gate
-   is budgeted to the facts it reads. **Input:** the facts. **Output:** whether
-   this lens is offered at all.
+   stage produced a value **and** the published member is present on it. The
+   second condition is not redundant (human ruling 2026-08-19): the sequence
+   arrives on an optional member, absent when the embodiment's own derivation
+   defected, so a successful tokens stage does not imply it exists.
+   Applicability declines there and the lens is not offered. No syntax tree is
+   consulted, so a program that lexes but does not parse is served; and testing
+   one member's presence derives nothing, so the rule still holds — **a gate is
+   budgeted to the facts it reads**, and this one reads two. **Input:** the
+   facts. **Output:** whether this lens is offered at all.
 
-3. **Read the stream** _(the surface; sync, pure, mount-stable)_ — behind the
-   applicability check, read the input-element sequence published on the
-   embodiment's tokens fact and give each element its fate and, where it has
-   one, its mark. **This phase derives no element and calls nothing** — the
-   scanning leaf owns the derivation, the embodiment publishes it, and both the
-   fate and the mark are functions of the element kind alone. **Input:** the
-   embodiment's facts, whose tokens fact carries the sequence at
-   `facts.tokens.value.inputElements`. **Output:** the stream — every element
-   carrying where it will end up.
+3. **Read the stream** _(the surface; sync, pure, mount-stable, throws on a
+   precondition applicability has already excluded)_ — behind the applicability
+   check, read the input-element sequence published on the embodiment's tokens
+   fact and give each element its fate and, where it has one, its mark. **This
+   phase derives no element and calls nothing** — the scanning leaf owns the
+   derivation, the embodiment publishes it, and both the fate and the mark are
+   functions of the element kind alone. **Input:** the embodiment's facts, whose
+   tokens fact carries the sequence at `facts.tokens.value.inputElements`.
+   **Output:** the stream — every element carrying where it will end up.
 
 4. **Position** _(sync, pure)_ — advance past every element that advances on its
    own, so the cursor rests on a claimable element or past the end. Runs at
@@ -147,9 +152,14 @@ flowchart TD
 - **Verdicts never aggregate.** There is no score, no percentage and no session
   summary; combining them anywhere would contradict the gate.
 - **This lens derives no element.** Fate and mark are functions of the element
-  kind; everything else about an element arrives on the published sequence. A
-  second lens of this family reads that same published member rather than
-  re-deriving it — or calling for it.
+  kind; everything else about an element arrives on the published member. A
+  second lens of this family reads that same member rather than re-deriving it
+  or fetching it.
+- **`readStream` re-checks and throws; it never carries an absent-member arm.**
+  Applicability guarantees the member is present, but that narrowing does not
+  cross the function boundary and `!` is barred here, so both narrowing checks
+  are re-made as a precondition and a failure throws. A branch that _handles_
+  absence as a state would be a dead branch no test can reach.
 - **The lens renders no snippet-type control and holds no copy of that state.**
   The reading depends on the goal symbol, and that toggle belongs to the
   orchestrator, which disposes this lens when it changes.

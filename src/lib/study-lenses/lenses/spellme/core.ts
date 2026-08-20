@@ -37,8 +37,25 @@ function config(_overrides?: Partial<LensConfig>): LensConfig {
 }
 
 /**
- * Whether this lens can serve the embodiment: the tokens stage must have
- * produced a value, because the element sequence is derived from it.
+ * Whether this lens can serve the embodiment:
+ * `facts.tokens.ok && facts.tokens.value.inputElements !== undefined`.
+ *
+ * Two conditions (human ruling 2026-08-19). The tokens stage because a
+ * source that does not lex has no sequence at all. The member's presence
+ * because it is optional — embody publishes it on every successful
+ * tokenization except when its own derivation defected — so a successful
+ * tokens stage does not by itself guarantee the sequence exists. Absent
+ * it, this lens has nothing to build a stream from, so it declines and
+ * is not offered.
+ *
+ * Presence is tested with `!== undefined` rather than `in`. Both narrow
+ * under this repo's `exactOptionalPropertyTypes` — but `in`'s narrowing
+ * DEPENDS on that flag, and only `!== undefined` still narrows without
+ * it. The spelling is chosen to survive a compiler-config change, not
+ * because `in` is wrong today.
+ *
+ * Stays pure: no logging, no side effect. The defect is already reported
+ * loudly by the machinery that caused it.
  *
  * No syntax tree is read, so a program that lexes but does not parse is
  * served in full.
@@ -57,7 +74,13 @@ function applicability(_facts: Facts): boolean {
  * and this function reads the published member.
  *
  * Called behind `applicability`, so an unusable embodiment is a caller
- * bug rather than a state to absorb.
+ * bug rather than a state to absorb. Applicability has already required
+ * the member's presence, so there is no absent-member state to handle
+ * here — but its narrowing does not cross this function boundary, so
+ * **both narrowing checks are re-made** — the stage's `ok`, then the
+ * member — and a failure **throws**. That throw is unreachable whenever
+ * applicability was honored, which is exactly the precondition the
+ * scanning leaf states for its own inputs.
  */
 function readStream(_facts: Facts): ReadonlyArray<StreamElement> {
 	throw new Error('spellme readStream: not implemented');

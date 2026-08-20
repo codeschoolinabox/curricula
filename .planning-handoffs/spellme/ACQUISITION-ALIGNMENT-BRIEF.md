@@ -83,6 +83,58 @@ requires test edits: the three skipped applicability fixtures behave identically
 under both (only an enrichment-defect state distinguishes them, and no skipped
 test constructs one).
 
+## CLOSED — 2026-08-19
+
+**This campaign is complete.** Four commits, as a SHA LIST because foreign
+commits interleave them:
+
+| SHA        | What                                                    |
+| ---------- | ------------------------------------------------------- |
+| `614ab524` | the rulings get a home before any prose moves           |
+| `191f7da9` | the leaf's caller-boundary passages, both halves        |
+| `120880d7` | spellme reads a published member; the acquisition sweep |
+| (this one) | the presence-gate ruling, alone, and this close         |
+
+**The campaign's success condition, which is an ABSENCE closing:**
+`inputElements` appeared **zero** times across all **nine** tracked spellme
+files at baseline [measured 2026-08-19: `git ls-tree -r --name-only 26a922e3 --
+src/lib/study-lenses/lenses/spellme/` → nine, the seven non-test files plus
+`tests/core.test.ts` and `tests/component.test.tsx`; `git grep -c inputElements
+26a922e3 -- <that dir>` → no matches] and now appears in README, DOCS and
+core.ts. This line said "seven" until 2026-08-19 — the non-test count, written
+without the qualifier in the one sentence labelled the success condition. The
+two test files remain at zero, which is the standing gap § Recorded, not fixed
+item 4 hands to Phase 1. Every other instrument this campaign owns is a presence
+detector and would have passed a tree in which nothing was fixed.
+
+**Ruling migrations, verified rather than assumed** — the obligation § Rulings
+of record set with its `→ migrates to` tags:
+
+- **Ruling 1 → `lenses/spellme/README.md` § The lens object and `core.ts`'s
+  `applicability` JSDoc.** Both landed with the `(human ruling 2026-08-19)`
+  parenthetical.
+- **Ruling 3 → `lib/scanning/DOCS.md` § Out of scope.** Landed inline in
+  `191f7da9`.
+
+Each was checked with the wrap-safe form **after** `prettier --write`, and with
+`git grep -n 'human ruling'`, because prettier broke the leaf's citation twice —
+the second time inside the round that was fixing the first.
+
+**Ceremony:** `ceremony: medium` (ruling 2) — AR-1 on each of the four
+commit-groups, AR-5 once over the SHA list. All five reviews ran; **every one of
+the four AR-1s and the AR-5 returned PAUSE**, and in every case the blocker was
+an error introduced **by a fix round** rather than one surviving it. That is
+this campaign's most transferable finding, and it is why each resolution was
+re-verified by the reviewer that raised it instead of being self-certified.
+
+⚠ **This paragraph reported its own gates in the past tense before they had
+run.** Until 2026-08-19 it read "Ceremony discharged… AR-1 returned PAUSE on
+three of four groups" — written while the fourth AR-1 was still in flight and
+before AR-5 existed, with a SHA table whose last row read `(this one)`. A
+closing record that reports outstanding gates as discharged is the highest-cost
+doc defect this repo has: the next reader gets no signal that anything is owed.
+Caught by that fourth AR-1.
+
 ## Rulings of record
 
 Four rulings, taken 2026-08-19 across this campaign's session — not all at its
@@ -247,7 +299,7 @@ already-established value, which outside Phase 0 is never re-asked.
 
 ### Recorded, not fixed
 
-Two findings this campaign surfaces and deliberately does not act on, and two
+Three findings this campaign surfaces and deliberately does not act on, and two
 obligations it hands forward to spellme Phase 1.
 
 1. **The orchestrate caption tells a learner the wrong thing on an embody
@@ -255,7 +307,33 @@ obligations it hands forward to spellme Phase 1.
    orchestrate change — a different module, a different campaign — and it is out
    of this campaign's scope. Recorded here so the finding outlives the session
    that found it.
-2. **`"the gate"` is a homonym, and `DOCS.md` carries BOTH senses by itself.**
+2. **The coherence guarantee is restated across four files, and its declared
+   normative home is in another module.** `embody/types.ts` says of itself that
+   it carries "the normative statement of the coherence guarantee"; the leaf
+   restates the mechanism at README § Public API and § Where this module and the
+   specification part ways, and `DOCS.md` § Out of scope phrases it again.
+
+   ⚠ **The count and the command this bullet first carried were both wrong**,
+   caught by AR-5. It said "five homes" behind a plain
+   `grep -rn "by construction"`, which returns **three lines across three
+   files** — the phrase wraps under prettier at six further sites, which is this
+   campaign's own recorded trap. Wrap-safe it is **ten occurrences across four
+   files** [measured 2026-08-19: `perl -0777 -ne 'my $c=()=/by\s+construction/g;
+   print $c' <file>` per file → `scanning/README.md` 3, `scanning/DOCS.md` 2,
+   `embody/README.md` 4, `embody/types.ts` 1]. And one home the bullet named —
+   `scanning/types.ts`'s `ScanInput` doc-comment — measures **zero**: it
+   restates the **acquisition** story, not the coherence mechanism, so it was
+   never a home for the thing being counted. Raised by AR-1 on C1 as the primary
+   bounded-context lens: the leaf's code is genuinely domain-blind, but its
+   **prose** narrates embody's control flow, so the fold `lib/scanning/DOCS.md`
+   already defers will have five sites to keep in step. C1 took the cheap half —
+   its new passages now point at `embody/types.ts` for the normative statement
+   instead of re-deriving it — and left the rest. **The durable fix belongs to
+   the deferred two-leaves-into-embody fold, not to a passage correction**, and
+   is recorded here so that campaign inherits the site count rather than
+   discovering it.
+
+3. **`"the gate"` is a homonym, and `DOCS.md` carries BOTH senses by itself.**
    The collision is not across the two documents, which is how an earlier draft
    of this item framed it — it is inside one. `DOCS.md` says "**The gate**
    answers applicability" in its § Architectural sketch (machinery), and "**The
@@ -270,7 +348,7 @@ obligations it hands forward to spellme Phase 1.
    or "the lens is not offered". The mitigation binds the module documents, not
    this handoff, which uses "gate" freely and would otherwise be its own
    violation. A rename of the committed prose is the human's to elect.
-3. **Phase 1 owes a defect-state test, and it needs its own FILE.** The new
+4. **Phase 1 owes a defect-state test, and it needs its own FILE.** The new
    presence condition ships with no test constructing the defect state [measured
    2026-08-19: `grep -c inputElements
    src/lib/study-lenses/lenses/spellme/tests/*.ts*` → 0 in both files]. This
@@ -290,7 +368,7 @@ obligations it hands forward to spellme Phase 1.
    unit src/lib/study-lenses/lenses/spellme`] — but a gap that would otherwise
    be discovered at Phase 1's test strategy, after a plan had already been built
    on the wrong shape.
-4. **`readStream` gets a precondition throw, not an "absent-member arm".** Under
+5. **`readStream` gets a precondition throw, not an "absent-member arm".** Under
    ruling 1 the member is guaranteed present by the time `readStream` runs —
    `Lens`'s Totality remark makes mounting without the gate "a consumer bug", so
    `readStream` may assume presence, and an arm that _handles_ absence as a
