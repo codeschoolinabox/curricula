@@ -52,8 +52,11 @@ first row. Scope and disposition: [SPEC.md](../SPEC.md).
 cite these ids, and a renumber silently re-points every citation.
 
 **This ledger is the campaign's row-style reference** — the exemplar the other
-seven are cut against. What it demonstrates is mostly **restraint**: **115
-rows**, zero dispositions. `parsons-010` is the clearest case — it is
+seven are cut against. What it demonstrates is mostly **restraint**: **120
+rows**, zero dispositions [measured 2026-08-20, row-scoped]. ⚠️ **This number
+has gone stale three times — `47` → `115` → `120` — and twice inside a commit
+whose own subject or heading announced a stale-number repair.** Re-measure it;
+never transcribe it from here. `parsons-010` is the clearest case — it is
 [FIDELITY-METHOD § Worked rows](../FIDELITY-METHOD.md#worked-rows)' own
 `parsons-018`, whose disposition the method hands you outright
 (`restore-as-doc`), and this ledger leaves the cell **empty** anyway, because
@@ -397,7 +400,9 @@ below return, and a bare `grep -c function` returns 97 against the third one's
 68, so the number means nothing without its form:
 
 ```bash
-export LC_ALL=C; F=…/public/static/parsonizer/parsons.js
+export LC_ALL=C
+GEN1="/Users/master/Documents/0-teach-code/0-spiralearn/0-study-lenses-committee/zz--oldd-clauding-and-context-dump/spiral-lens"
+F="$GEN1/public/static/parsonizer/parsons.js"
 /usr/bin/grep -oE '\b[A-Z][A-Za-z_0-9]*\.[a-zA-Z_$][a-zA-Z_$0-9]*' "$F" | sort -u          # 16
 /usr/bin/grep -oE 'this\.[a-zA-Z_$][a-zA-Z_$0-9]*[[:space:]]*=' "$F" | sort -u             # 17
 /usr/bin/grep -cE '^[[:space:]]*(function [A-Za-z_$][A-Za-z_$0-9]*|[A-Za-z_$.]+\.prototype\.[A-Za-z_$0-9]+[[:space:]]*=[[:space:]]*function|[A-Za-z_$][A-Za-z_$0-9]*[[:space:]]*:[[:space:]]*function)' "$F"   # 68

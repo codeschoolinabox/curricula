@@ -192,13 +192,14 @@ is owed.
 ## ⛔ START HERE — STEP 1 is the `parsons` twin pilot; STEP 2 is the template amendments
 
 ⚠️ **THIS HEADING'S TITLE IS STALE AND THE TABLE BELOW IS THE LIVE ORDER.** The
-title is kept **only** because six cross-references elsewhere in this file
-resolve to its anchor, and re-pointing them is a separate edit that would itself
-need checking. **STEP 1's twin half is blocked; the live unit is STEP 1c**, one
-section down. A reader who trusts a heading over the table it introduces is
-exactly the failure this file's own § Read this first describes — _"a reader
-working from the list rather than the prose gets the wrong one."_ Here the table
-is right and the heading is wrong.
+title is kept **only** because **seven** cross-references elsewhere in this file
+resolve to its anchor [measured 2026-08-20 — an earlier revision of this
+sentence said six, and it was seven when written], and re-pointing them is a
+separate edit that would itself need checking. **STEP 1's twin half is blocked;
+the live unit is STEP 1c**, one section down. A reader who trusts a heading over
+the table it introduces is exactly the failure this file's own § Read this first
+describes — _"a reader working from the list rather than the prose gets the
+wrong one."_ Here the table is right and the heading is wrong.
 
 **The units, in this order, ONE SESSION EACH. The order is ruled — it is not the
 reading session's to re-pick, and neither is collapsing them into one session.**
@@ -267,15 +268,33 @@ produced two human rulings that are now the next unit.
      — everything the extractor addresses and returns. `reasoned` holds what the
      seeder concluded.
 
-   - ⚠️ **"Changing the shape breaks the check" is FALSE as an unconditional
-     claim, and an earlier revision of this bullet published it that way.** The
-     perl program scans the whole row line and captures only the span inside
-     `_"…"_` or `<em>"…"</em>`; **a cell boundary is invisible to it** [measured
-     2026-08-20]. Under the ruled shape above the check needs no rewrite at all.
-     What it still needs is a **Gen-1 arm**, which it has never had — see the
-     eight non-transporting quotations below. `_TEMPLATE.md` § The amendment
-     gate still binds: the whole mutation corpus must fire afterwards, plus both
-     clean regressions.
+   - ⛔ **THE ADJACENCY IS LOAD-BEARING. The citation must immediately precede
+     its quotation, separated by whitespace only.** The grammar matches
+     `§ <heading>:` then `\s*` then the quotation, and **`\s*` cannot cross a
+     `|`** — so a cell boundary between them, or a reordering that puts the
+     quote first, drops the row to `UNQUOTED` **while the check still exits 0**
+     [all measured 2026-08-20 on four planted rows: citation and quote in one
+     cell → `parsed=1`; in adjacent cells → **`parsed=0`**; quote before
+     citation in one cell → **`parsed=0`**; both together inside `quoted` →
+     `parsed=1`].
+
+     ⚠️ ~~The perl program scans the whole row line … a cell boundary is
+     invisible to it.~~ — **STRUCK 2026-08-20, found by AR-5. It was published
+     under a `[measured:]` tag and it is false**, and this same bullet carried
+     its own counter-example two paragraphs above: the `parsed=7 nocite=116`
+     reading **is** the boundary being visible. **The ruled decision is
+     unaffected** — citation stays with quotation, which is the shape that
+     parses — but a session told the boundary was harmless could have re-cut 120
+     rows into a shape where `parsed` silently falls from 57 to 7 with every
+     gate green.
+
+   - **What the check does still need is a Gen-1 arm**, which it has never had —
+     see the eight non-transporting quotations below. `_TEMPLATE.md` § The
+     amendment gate still binds: the whole mutation corpus must fire afterwards,
+     plus both clean regressions. **STEP 1c additionally owes one new fixture
+     pair**: a row with the citation immediately before its quotation, which
+     must parse, and one with a `|` between them, which must report `UNQUOTED`.
+     Nothing else catches the failure above.
 
 ### ⛔ FOUR GREEN GATES REPORTED CLEAN OVER A LEDGER THAT DID NOT RENDER
 
@@ -295,6 +314,16 @@ marker 413 lines later].
 | `prettier --check`  | prettier does not reflow inside a fence, so it was already "formatted" |
 | the Pass-1 gate     | line-based `grep`; a fence is not a token it knows                     |
 | the transport check | same — it scans line text and never parses structure                   |
+
+⚠️ **`e447ab91`'s body blames `7c3da9aa` for introducing it. That is wrong, the
+body cannot be amended, so the correction lives here.** Measured 2026-08-20 by
+AR-5 and reproduced: `7c3da9aa` and `1478049f` each carry 14 fence markers, all
+width 3, and **zero four-backtick lines**. The break was introduced by
+**`390e8d54`** — the commit that closed AR-1's three blockers — which added a
+four-backtick open, a four-backtick close, and a three-backtick line with
+trailing prose that closes nothing. **The true reading is sharper than the
+published one: the fix commit is what broke the document**, which is this
+campaign's own recorded pattern rather than an accident.
 
 **This is the campaign's founding complaint, live in its own exemplar** — a
 check reporting success over nothing, the class
@@ -361,6 +390,29 @@ exactly that span and a table there trips its walk-column check). It covers the
 from a bare grep, which returns 21 — and it **records an observation about the
 port and never fills a disposition**; that is Pass 2's.
 
+### The template amendments — THE list, because a count is not an enumeration
+
+⚠️ **This file has published the count five ways** — "three" twice, "FOUR",
+"FIVE", "seven" — and `e447ab91` then declared seven while pointing at no list
+that could be counted, which is the same defect one level up. **Counting the
+amendments actually named across this file yields EIGHT** [measured 2026-08-20
+by AR-5, reproduced]. **This is the list. Every other site defers to it, and no
+number anywhere is to be transcribed.**
+
+| #     | amendment                                                                                                                                                                | state                                                  |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------ |
+| **1** | the Family F invocation is a census, not a floor                                                                                                                         | open, ⛔ in `_TEMPLATE.md`                             |
+| **2** | the mutation corpus is not a sufficient amendment gate                                                                                                                   | open, ⛔ in `_TEMPLATE.md`                             |
+| **3** | `[COPY]` / `[METHOD]` marking per section                                                                                                                                | open                                                   |
+| **4** | a citation anchor for a non-markdown, non-test source                                                                                                                    | open — **used** by rows `048`–`120`, still unpublished |
+| **5** | the mutation-test procedure cannot tell a live check from a failed plant                                                                                                 | open                                                   |
+| **6** | **the `quoted` / `reasoned` split**                                                                                                                                      | **STEP 1c** — ruled 2026-08-20                         |
+| **7** | **the per-cohort `pass` column**                                                                                                                                         | **STEP 1c** — landed for `parsons` only at `390e8d54`  |
+| **8** | **`<em>` versus a code span** — a quotation carrying significant whitespace, `*`, or a bare `_` must go in a code span, because `<em>` lets prettier silently rewrite it | **STEP 1c** — three corruptions measured 2026-08-19/20 |
+
+**STEP 1c lands 6, 7 and 8. Five remain**, and standing ruling 3 binds every one
+of them before `_family-f.md` is cut.
+
 ### AR-1's concerns still open — enumerated, not absorbed
 
 Closed at `390e8d54`: blockers 1, 2, 3, and concerns 7, 8 and 12. **Still
@@ -371,11 +423,14 @@ open:**
   consumer exists"? `107` writes `state_path` on every action and is tagged
   `G1-dead`; `113` has no caller on the deployed path and is tagged `G1-live`.
   **This is the column a twin reads to decide what to preserve.**
-- **5 — the affordance vocabulary forks across cohorts.** `fragment` (10 uses in
-  `081`–`115`), `block` (4 in `048`–`080`), `pile` and `pool` all name one
-  object; `author` (8) displaces `educator` (7) with no glossary row for either.
-  R-7 forbids the twin from re-deriving, so the twin cannot fix this — the
-  ledger must.
+- **5 — the affordance vocabulary forks across cohorts.** `fragment`, `block`,
+  `pile` and `pool` all name one object, and `author` displaces `educator`, with
+  no glossary row for any of them. ⚠️ **No counts are published**: AR-1's four
+  (10 / 4 / 8 / 7) reproduce under neither AR-5's extraction nor mine — three
+  instruments, three answers, which is the unstable-instrument class this
+  campaign strikes elsewhere. **Derive them with a stated extraction or state
+  none**, and note the fork is visible without any number. R-7 forbids the twin
+  from re-deriving, so the twin cannot fix this — the ledger must.
 - **6 — four rows re-open a place an existing row opened**, two with
   byte-identical anchors: `063`/`082`, `070`/`091`, `067`/`096`, `070`/`108`.
 - **9 — `evidence` cells carry a fourth annotation class** the template does not
