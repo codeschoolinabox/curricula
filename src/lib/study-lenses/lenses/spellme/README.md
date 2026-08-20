@@ -28,12 +28,19 @@ and set aside** into a jar that stays visibly full. The learner never claims
 either (human ruling 2026-08-13). Watching what the scanner discards is the
 point of not being asked about it.
 
-**The element sequence is not this lens's derivation.**
-[`lib/scanning`](../../lib/scanning/README.md) turns the tokens fact into the
-specification's input elements — the vocabulary, the template folding, the `}`
-disambiguation, the trivia. This lens reads that sequence and builds an exercise
-on it; it derives no element itself, and a second lens of this family reads the
-same sequence rather than re-deriving it.
+**The element sequence is not this lens's derivation, and this lens does not go
+and get it.** [`lib/scanning`](../../lib/scanning/README.md) turns the tokens
+fact into the specification's input elements — the vocabulary, the template
+folding, the `}` disambiguation, the trivia. **The embodiment's factory calls
+that leaf and publishes the result**, so the sequence arrives already on the
+facts, at `facts.tokens.value.inputElements`. This lens reads that member and
+builds an exercise on it; it calls nothing, it derives no element itself, and a
+second lens of this family reads the same published member rather than
+re-deriving it.
+
+The member is **optional** — absent exactly when the derivation itself defected,
+which is a report about embody's machinery and never a property of the program
+([embody/README.md § Reading the embodiment](../../embody/README.md#reading-the-embodiment)).
 
 ## The three fates, and the mark
 
@@ -313,7 +320,10 @@ lens nothing and leaves the coloring foundation free to bind them.
 The package glossary owns the shared meanings;
 [`lib/scanning`](../../lib/scanning/README.md) owns _input element_, _element
 kind_, _trivia_, _tiling_ and _run collapsing_, and this lens uses all five
-unchanged. These are this lens's own.
+unchanged. The sequence itself is embody's to publish —
+[embody/README.md § Reading the embodiment](../../embody/README.md#reading-the-embodiment)
+states its optionality, and embody's own glossary names the concept _input
+elements_. These are this lens's own.
 
 - **attempt** — one submitted claim that did not make the element fall. Attempts
   are counted per element and reset when the cursor advances; both configured
@@ -348,6 +358,10 @@ unchanged. These are this lens's own.
   after a hand-over. It is recorded on the token tape, and it is never scored.
 - **skip** — handing an unclaimed element to the machine once attempts reach
   `skipAfter`. It falls named and recorded unclaimed.
+- **the published member** — this lens's shorthand for
+  `facts.tokens.value.inputElements`, the optional field the sequence arrives
+  on. This lens reads it and never fills it; the coinage is this lens's, not
+  embody's, whose glossary calls the concept _input elements_.
 - **the stream** — the element sequence as this exercise holds it: every input
   element carrying the fate its kind implies and, where it has one, its mark.
   The learner meets it one element at a time, and nothing about it is derived
@@ -399,8 +413,10 @@ unchanged. These are this lens's own.
 ## Navigation
 
 - Region: [`../README.md`](../README.md) — the lens kind's mechanics.
-- The derivation:
-  [`../../lib/scanning/README.md`](../../lib/scanning/README.md).
+- The derivation's vocabulary and rules:
+  [`../../lib/scanning/README.md`](../../lib/scanning/README.md) —
+  documentation, not an instruction to call it; the acquisition is in the
+  orientation above.
 - [`DOCS.md`](./DOCS.md) — this lens's architectural sketch and decisions.
 - [`types.ts`](./types.ts) — the lens-local domain model.
 - **The user twin** (`twin-doc: user`, human ruling 2026-08-13):

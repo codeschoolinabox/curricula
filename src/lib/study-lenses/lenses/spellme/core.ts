@@ -48,11 +48,14 @@ function applicability(_facts: Facts): boolean {
 }
 
 /**
- * Derives the stream from the embodiment's published parse facts: every
- * input element carrying the fate its kind implies and, where it has
- * one, its mark.
+ * Derives the stream from the input-element sequence the embodiment
+ * publishes at `facts.tokens.value.inputElements`: every input element
+ * carrying the fate its kind implies and, where it has one, its mark.
  *
- * Derives no element — the sequence itself comes from the scanning leaf.
+ * Derives no element, and calls nothing — the scanning leaf owns the
+ * derivation and its vocabulary, the embodiment publishes the result,
+ * and this function reads the published member.
+ *
  * Called behind `applicability`, so an unusable embodiment is a caller
  * bug rather than a state to absorb.
  */

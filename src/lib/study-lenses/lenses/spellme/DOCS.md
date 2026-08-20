@@ -49,11 +49,14 @@ upward, no persisted state, no value returned to a consumer.
    this lens is offered at all.
 
 3. **Read the stream** _(the surface; sync, pure, mount-stable)_ — behind the
-   applicability check, take the derivation's element sequence and give each
-   element its fate and, where it has one, its mark. **This phase derives no
-   element**; both the fate and the mark are functions of the element kind
-   alone. **Input:** the embodiment's published parse facts. **Output:** the
-   stream — every element carrying where it will end up.
+   applicability check, read the input-element sequence published on the
+   embodiment's tokens fact and give each element its fate and, where it has
+   one, its mark. **This phase derives no element and calls nothing** — the
+   scanning leaf owns the derivation, the embodiment publishes it, and both the
+   fate and the mark are functions of the element kind alone. **Input:** the
+   embodiment's facts, whose tokens fact carries the sequence at
+   `facts.tokens.value.inputElements`. **Output:** the stream — every element
+   carrying where it will end up.
 
 4. **Position** _(sync, pure)_ — advance past every element that advances on its
    own, so the cursor rests on a claimable element or past the end. Runs at
@@ -101,7 +104,7 @@ flowchart TD
     Claim["a submitted claim<br/>(element kind · extent · the one-more<br/>answer, once that field is open)"]
     Verdicts["one verdict per field,<br/>independent, never a score"]
 
-    Props -->|"read the tokens fact behind the<br/>applicability check, pure"| Seq
+    Props -->|"facts.tokens.value.inputElements —<br/>read behind the applicability check;<br/>a read, not a derivation, pure"| Seq
     Overrides -->|"resolve defaults, refuse an out-of-range<br/>threshold, freeze — the factory, before<br/>anything mounts"| Props
     Props -->|"read the two thresholds off the<br/>resolved configuration, pure"| Thresholds
     Seq -->|"derive each fate from its element kind<br/>and mark a comment carrying a line break, pure"| Stream
@@ -144,8 +147,9 @@ flowchart TD
 - **Verdicts never aggregate.** There is no score, no percentage and no session
   summary; combining them anywhere would contradict the gate.
 - **This lens derives no element.** Fate and mark are functions of the element
-  kind; everything else about an element comes from upstream. A second lens of
-  this family reads the same sequence rather than re-deriving it.
+  kind; everything else about an element arrives on the published sequence. A
+  second lens of this family reads that same published member rather than
+  re-deriving it — or calling for it.
 - **The lens renders no snippet-type control and holds no copy of that state.**
   The reading depends on the goal symbol, and that toggle belongs to the
   orchestrator, which disposes this lens when it changes.
@@ -155,8 +159,11 @@ flowchart TD
 
 ### Out of scope
 
-- **Deriving the element sequence, the vocabulary, or the tiling.** All
-  upstream.
+- **Deriving the element sequence, the vocabulary, or the tiling** — and
+  **fetching** any of them. Upstream, but not all to the same place: the
+  vocabulary and the tiling are the scanning leaf's, while publishing the
+  sequence is the embodiment's. This lens reads the result, deriving nothing and
+  fetching nothing.
 - **Explaining a program that does not lex** — the error-interpreting lens,
   which belongs to the package rather than to this family.
 - **Claiming the trivia**, the goal-symbol question, one-character sabotage, and
@@ -204,7 +211,9 @@ flowchart TD
   [README.md](./README.md).
 - **The user twin:** [ux/user-journeys.md](./ux/user-journeys.md) and
   [ux/wireframes.md](./ux/wireframes.md).
-- **The derivation:**
-  [../../lib/scanning/README.md](../../lib/scanning/README.md).
+- **The derivation's vocabulary and rules:**
+  [../../lib/scanning/README.md](../../lib/scanning/README.md) — documentation,
+  not an instruction to call it; the acquisition is in
+  [README.md](./README.md)'s orientation.
 - **Kind contract:** [../types.ts](../types.ts). **Region:**
   [../README.md](../README.md).
