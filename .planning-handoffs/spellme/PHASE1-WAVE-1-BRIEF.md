@@ -394,9 +394,13 @@ mock-poisoned state; the throw's class is unspecified in the Phase-0 artifacts
 and needs a human ruling before the test can be written."_
 
 > ✅ **The instruction above was correct and was followed** — the wave-1 worker
-> raised exactly this FLAG and wrote no test. Two of its factual claims are
-> **still true today**: `readStream` carries no `@throws` tag, and `TypeError`
-> appears nowhere in this module. Only its reasoning is spent, not its facts.
+> raised exactly this FLAG and wrote no test. Its load-bearing fact is **still
+> true today**: `readStream` carries no `@throws` tag at all — grep the
+> `readStream` JSDoc in `core.ts` and confirm it yourself. Its other fact — that
+> `TypeError` appears nowhere in this module — **has since been falsified by the
+> fix that landed the `RangeError` ruling**: `README.md` § Configuration now
+> names `TypeError` once, only to say the config refusal is _not_ one. Nothing
+> pins `readStream`'s class either way.
 >
 > ⚠ **The class is NOT settled for `readStream`. Wave 2 must not assume it is.**
 > The 2026-08-20 ruling was put as a question about `readStream`'s throw class,

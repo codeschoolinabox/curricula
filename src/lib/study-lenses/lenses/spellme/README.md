@@ -418,9 +418,10 @@ elements_. These are this lens's own.
   here beyond those two.
 - **the tapes** — two of the three regions, not all of them: the **input tape**
   holds the program the scanner has not yet reached, the **token tape** holds
-  what has fallen, plus the marks for the line breaks read between them. A mark
-  is not a fallen element and carries no provenance — nothing claimed it. The
-  jar is the third region and is not a tape.
+  what has fallen, plus the marks for the line breaks read as the tape fills —
+  including one read before anything has fallen at all. A mark is not a fallen
+  element and carries no provenance — nothing claimed it. The jar is the third
+  region and is not a tape.
 - **verdict** — the independent judgement of one claim field. Two per claim
   ordinarily, three once the one-more field has opened; they never combine into
   a score.
