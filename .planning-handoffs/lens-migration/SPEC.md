@@ -2,9 +2,11 @@
 FIDELITY-METHOD.md and everything under ledgers/, families/ and handoffs/, when
 the last lens lands and its ledger closes. What survives the retirement is each
 lens's own README/DOCS and its `## What this lens does NOT do` section. -->
+
 <!-- cspell:ignore blankenate parsonizer socratize socratizing reenrichment Wong okaidia lezer stepthroughs qasm dropdowns writeme parsons blankenated colorizing Infima deuteranopia Gateable jsdom -->
 <!-- cspell:ignore colour colours distractor distractors ledgered Leitner WCAG clauding oldd throughs reloadable ordinally spellme gamified -->
 <!-- cspell:ignore behaviour behaviours pointcut unbuilt errormsg recognises parentheticals personas wireframes zakey -->
+<!-- cspell:ignore reorganising -->
 <!-- cspell:ignore affordances enshittifying -->
 
 # Lens migration — campaign canon
@@ -378,6 +380,28 @@ because its risk is pacing and arrangement. A lens whose risk is who-arrives
 owes personas and may owe no journey at all. **The lens's README says which
 items it chose and why** — that sentence is the twin's own justification and is
 what AR-1 challenges.
+
+#### The `parsons` selection, ruled 2026-08-19
+
+**`parsons` owes personas, user journeys and wire-frames** — three of the five,
+_"all three, and possibly others"_ (human ruling 2026-08-19). **User stories and
+story sequencing are not owed**; the menu stays open, and an item fitting none
+of the five is a reason to add a dated row here rather than to force one of
+these.
+
+Two further rulings of the same day shape what goes inside:
+
+- **Two personas, not three.** A third — the reader tracing what shipped — was
+  proposed and **cut**. The two are the one solving and the one authoring, and
+  **they may be the same person**: `parsons-048` builds the puzzle from the
+  editor's own source, so _"learners from the editor … it's the same thing
+  really."_ Authoring is a stance on one surface, not a second audience.
+- **The learner's journeys decompose on the engine's own vocabulary**, not on a
+  session narrative: its four logged move types (`addOutput`, `moveOutput`,
+  `removeOutput`, `moveInput`) and the grader's five distinct verdicts. Placing,
+  reorganising, putting a fragment back and rearranging the untouched pool are
+  four different things a learner does, and the last is recorded by the engine
+  while changing nothing about the answer.
 
 **Why this campaign in particular.** Every lens here is an interaction surface
 whose losses are interaction losses — a hint ladder, a reveal order, a legend

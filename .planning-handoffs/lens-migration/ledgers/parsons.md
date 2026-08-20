@@ -371,6 +371,18 @@ paragraph declared **two**. **Struck 2026-08-20**, found by AR-1; the disclosure
 now lists every row carrying a host-derived claim, because an undeclared
 cross-file premise is the thing this paragraph exists to prevent.
 
+⚠️ **AUTHORING AND SOLVING ARE ONE SURFACE, and rows `081`–`089` are cut on that
+reading** (human ruling 2026-08-19): _"educators should be able to write those
+in as well then configure the codeblock for parsons, or learners from the editor
+(it's the same thing really)."_ The evidence was already in the ledger —
+`parsons-048` builds the puzzle from the URL's `code` parameter and
+`ParsonsLens.jsx` encodes the editor's source into it — so **a learner editing
+code and opening this lens is authoring their own exercise, distractors
+included.** "Educator" therefore names a **stance**, not a second person, and a
+row in that voice is not a row about somebody else. This is why the authoring
+rows carry `author` where `048`–`080` carry `educator`; **the two words are one
+role and the vocabulary is owed a reconciliation** (AR-1, 2026-08-19).
+
 **How the readers were briefed, because it is the pass's own method claim:**
 each brief named its file, its question and its return shape, and named **no
 prior finding, no row id, no count, and no earlier read**. A completeness check

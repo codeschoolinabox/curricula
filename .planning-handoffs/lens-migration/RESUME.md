@@ -4,7 +4,7 @@ closes; nothing here is end-state documentation. -->
 <!-- cspell:ignore colour distractor distractors ledgered throughs -->
 <!-- cspell:ignore firstblock glossterm parsonizer parsonize errormsg recognises -->
 <!-- cspell:ignore unbuilt ugrep affordances behaviour behavioural flexbox -->
-<!-- cspell:ignore normalisation unrunnable -->
+<!-- cspell:ignore normalisation unrunnable unrepaired -->
 <!-- cspell:ignore loosenings capitalisation enshittifying keyable unbuildable -->
 <!-- cspell:ignore normalises undercounted oldd clauding zakey nocite -->
 <!-- a human ruling quoted verbatim; do not translate it and do not "fix" it: -->
@@ -182,11 +182,117 @@ is owed.
 **Two units, in this order, ONE SESSION EACH. The order is ruled — it is not the
 reading session's to re-pick, and neither is collapsing them into one session.**
 
-|             | unit                                                                                                                    | why it sits here                                                                                     |
-| ----------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| ~~STEP 1a~~ | ~~the Gen-1 second-root read and the ledger append~~                                                                    | **DONE at `fd6066b3`** — 33 rows appended, `048`–`080`. Struck rather than ticked                    |
-| **STEP 1b** | the [`parsons` twin pilot](#step-1--the-parsons-twin-pilot) — **YOU START HERE**                                        | it is the human's quality gate on the whole campaign, and its ledger is now widened                  |
-| **STEP 2**  | [three template amendments](#step-2--three-template-amendments-then-_family-fmd), then `_family-f.md`'s inventory shape | the amendments unblock `_family-f.md` and four further ledgers. **A FOURTH is now owed — see below** |
+|             | unit                                                                                                                           | why it sits here                                                                                               |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| ~~STEP 1a~~ | ~~the Gen-1 second-root read and the ledger append~~                                                                           | **DONE at `fd6066b3`** — 33 rows appended, `048`–`080`. Struck rather than ticked                              |
+| ~~STEP 1b~~ | ~~the re-investigation half of the twin pilot~~                                                                                | **DONE — `7c3da9aa`, `1478049f`, `390e8d54`.** Ledger 80 → **120 rows**. Struck rather than ticked             |
+| **STEP 1c** | [the `quoted`/`reasoned` migration](#-start-here--step-1c-is-the-migration-the-twin-is-blocked-behind-it) — **YOU START HERE** | a human ruling of 2026-08-20 changes the row shape of all eight ledgers, and **the twin is blocked behind it** |
+| **STEP 1d** | the `parsons` twin itself, co-authored                                                                                         | AR-1 forbids drafting it from the ledger as it stands — see the blocker below                                  |
+| **STEP 2**  | [the template amendments](#step-2--three-template-amendments-then-_family-fmd), then `_family-f.md`'s inventory shape          | now **seven**, not three. STEP 1c lands two of them; five remain                                               |
+
+## ⛔ START HERE — STEP 1c is the migration; the twin is blocked behind it
+
+**STEP 1b's re-investigation is done and its three commits are unpushed.** The
+ledger went from 80 rows to **120**: 35 from four fresh readers over
+`parsons.js` and `parsons.css`, and 5 from a Pass-3 counter-read. **AR-1 then
+returned PAUSE with three blockers, all of which reproduced**, and closing them
+produced two human rulings that are now the next unit.
+
+| SHA        | what                                                                                                         |
+| ---------- | ------------------------------------------------------------------------------------------------------------ |
+| `7c3da9aa` | the core re-read — rows `081`–`115`, the census, and the ledger's stale "47 rows" struck                     |
+| `1478049f` | the Pass-3 counter-read — rows `116`–`120`, and `parsons-097` corrected because it was **present and wrong** |
+| `390e8d54` | AR-1's three blockers closed, plus the per-cohort `pass` column                                              |
+
+### The two rulings that make STEP 1c a unit
+
+1. **Per-cohort pass markers** (human ruling 2026-08-20) — **LANDED at
+   `390e8d54` for `parsons` only.** `writeme` and `_TEMPLATE.md` still owe it.
+   The measurement that forced it: 47 rows were Pass 1, **68 were Pass 2 and 5
+   were Pass 3**, while a document-level banner claimed Pass 1 for all of them
+   and asserted _"thinness is a property of the instruments, not a finding"_ —
+   false of four agents reading whole files.
+
+2. **⛔ SPLIT `evidence` INTO `quoted` AND `reasoned`, AND MIGRATE BOTH SEEDED
+   LEDGERS** (human ruling 2026-08-20). **This is STEP 1c and nothing else is.**
+   - `quoted` holds **extractor output only** — the verbatim fragment and
+     nothing besides. A gate can then assert mechanically that it is a substring
+     of the source, which is what the missing Gen-1 arm has to do anyway.
+     `reasoned` holds the seeder's derivation, **labelled as the seeder's**.
+   - **Why**, and it is measured rather than argued: **five affordance sentences
+     shipped wrong in this pass** — `092`, `094`, `097`, `098`, and the
+     `108`–`110` cohort. Every one is the same shape: a **consequence** claim
+     resting on a **location** quote, with nothing checking the gap. AR-1's
+     assessment is that four of the five would have been caught by writing the
+     derivation in a separate cell and noticing nothing in `quoted` supported
+     it.
+   - **Scope: `_TEMPLATE.md` first** (standing ruling 3 — the template is
+     amended before a ledger is cut from it), then re-cut **`parsons` 120 rows**
+     and **`writeme` 45 rows**, then **rewrite the transport check to parse two
+     cells**. Then re-run every gate on both ledgers.
+   - ⚠️ **The published transport check parses the current one-cell shape.**
+     Changing the shape breaks it, and `_TEMPLATE.md` § The amendment gate
+     requires the whole mutation corpus to still fire afterwards plus both clean
+     regressions. Budget for that; it is not a formatting change.
+
+### ⛔ The twin is BLOCKED, and this is AR-1's ruling not a preference
+
+> _"A draft that cannot cite the ledger is not ready for the gate. If the
+> ledger's rows do not yet support the journey being drawn, that is a finding
+> about the ledger — raise it."_ — SPEC § R-7
+
+**Do not draft `ux/` until STEP 1c lands.** A twin citing the rows as they stood
+would have carried five wrong claims into the artifact whose entire purpose is
+proving the old behaviour was understood — past the one person who could catch
+them. The five are fixed; the **mechanism** that let them through is not, and
+that mechanism is STEP 1c.
+
+**What the twin already has, ruled and recorded** — do not re-ask any of it:
+`SPEC.md § R-7`'s new subsection carries the menu selection (personas, journeys,
+wire-frames — **not** stories or sequencing), the two-persona ruling, and the
+decomposition of the learner's journeys on the engine's four logged move types.
+The skeleton was corrected by the human twice and is in that section.
+
+### ⛔ STEP 1a's rows carry 8 non-transporting quotations, measured and unrepaired
+
+Rows **`050`, `052`, `058`, `066` (two fragments), `068`, `072`, `076`** quote
+Gen-1 source that is not in the source [measured 2026-08-19: 147 fragments
+checked across `045`–`120`, 9 skipped as truncated]. Two classes, both of which
+this pass hit and documented: **a multi-line rule composed onto one line**,
+which is not a quotation, and **whitespace prettier collapsed inside emphasis**.
+
+**They survived `fd6066b3` because the published transport check has no Gen-1
+arm** — it parses Gen-2/Gen-3 heading citations only, so `parsed` sat unchanged
+at **57 across an append of 40 rows**, which reads exactly like a clean bill.
+The stopgap that found them is a `grep -F` re-check of every `<em>` fragment
+against its source file; **it has no home**, like the transport check itself.
+Building the real arm is part of STEP 1c's check rewrite.
+
+### AR-1's concerns still open — enumerated, not absorbed
+
+Closed at `390e8d54`: blockers 1, 2, 3, and concerns 7, 8 and 12. **Still
+open:**
+
+- **4 — the liveness predicate is unstated**, and `086`, `107`, `113` are each
+  tagged against their own shape. Is `G1-live` "the code executes" or "a
+  consumer exists"? `107` writes `state_path` on every action and is tagged
+  `G1-dead`; `113` has no caller on the deployed path and is tagged `G1-live`.
+  **This is the column a twin reads to decide what to preserve.**
+- **5 — the affordance vocabulary forks across cohorts.** `fragment` (10 uses in
+  `081`–`115`), `block` (4 in `048`–`080`), `pile` and `pool` all name one
+  object; `author` (8) displaces `educator` (7) with no glossary row for either.
+  R-7 forbids the twin from re-deriving, so the twin cannot fix this — the
+  ledger must.
+- **6 — four rows re-open a place an existing row opened**, two with
+  byte-identical anchors: `063`/`082`, `070`/`091`, `067`/`096`, `070`/`108`.
+- **9 — `evidence` cells carry a fourth annotation class** the template does not
+  permit. STEP 1c's split is the structural answer; the trim is owed either way.
+- **10 — rulings recorded only in commit bodies.** Partly closed: the
+  authoring-surface ruling is now in the ledger and the menu ruling in SPEC.
+- **11 — `parsons-101`'s stated mechanism cannot fire.** `Math.min` is a no-op
+  wherever the indent loop runs, because a length mismatch has already pushed an
+  error. Its conclusion is right; its mechanism is vacuous, and its anchor is a
+  local variable rather than a place.
 
 ⚠️ **STEP 1 split into two units on 2026-08-19, by human ruling, and the split
 is not the reading session's to re-collapse.** Two measurements forced it: the
@@ -218,6 +324,16 @@ they removed. Hand off between the steps
 ([AGENTS.principal.md § Handoff agency](../../AGENTS.principal.md#handoff-agency--the-agent-owns-the-call)).
 
 ### STEP 1 — the `parsons` twin pilot
+
+⚠️ **THIS SECTION IS NO LONGER THE START, AND ITS RE-INVESTIGATION HALF IS
+DONE.**
+[§ START HERE](#-start-here--step-1c-is-the-migration-the-twin-is-blocked-behind-it)
+is the sole authority on order. The re-investigation landed at `7c3da9aa`,
+`1478049f` and `390e8d54`; **the twin itself is STEP 1d and is blocked behind
+STEP 1c's migration.** Everything below still governs the twin **when it is
+written** — the co-authorship, the one-claim scope, the citation rule — and none
+of it is the reading session's to re-open. What is stale here is only the
+sequencing, and this paragraph is the correction.
 
 ⛔ **THE TWIN IS CO-AUTHORED WITH THE HUMAN. It is not drafted alone and handed
 over for approval, and reading it that way produces the artifact R-7 exists to
