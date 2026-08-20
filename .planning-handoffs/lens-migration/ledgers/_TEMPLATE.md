@@ -9,6 +9,8 @@
 <!-- cspell:ignore towc multibyte Normalising -->
 <!-- cspell:ignore keyable legitimise nocite quotemeta mktemp licence unrun -->
 <!-- cspell:ignore capitalisation loosenings -->
+<!-- structure-check.sh awk locals; see § The structural-integrity check: -->
+<!-- cspell:ignore isledger lslice bslice bbanner lrow ochar -->
 
 # `<lens>` — fidelity ledger
 
@@ -920,6 +922,143 @@ copied into both passes a check that compares them to each other. Use
 and **not `grep -E`**: five of the six `does NOT do` headings carry a
 parenthetical and one carries a `+`, so the regex form returns 0 on exactly the
 class this rule exists for.
+
+### The structural-integrity check — run this one FIRST
+
+**The Pass-1 gate above checks SHAPE, § The transport check below checks
+TRANSPORT, and this checks STRUCTURE — whether the lines those two read are
+document content at all, or code-block content.** It runs **before** both,
+because a ledger that did not render makes every other gate vacuous while
+leaving all of them green.
+
+On 2026-08-20 `parsons.md` carried a `bash` fence opened with **four** backticks
+and closed with **three**. A three-backtick line does not close a four-backtick
+fence, so 418 lines — all 120 rows, the whole of `## Rows` and the whole of
+`## Close conditions` — sat inside a code block. **Every published gate reported
+clean**, and the table below is not recalled from that incident: it was
+reproduced this session against a live mutant, a blank-line-padded four-backtick
+fence run through `prettier --write` so that nothing cosmetic gives it away [all
+measured 2026-08-20 on a scratch copy under `/private/tmp`].
+
+| gate                | verdict over a ledger whose 120 rows are ALL buried                                      |
+| ------------------- | ---------------------------------------------------------------------------------------- |
+| `markdownlint-cli2` | `Summary: 0 error(s)` — a giant code block is valid markdown                             |
+| `prettier --check`  | `All matched files use Prettier code style!`                                             |
+| the Pass-1 gate     | `rows: 120`, and not one of its eight checks emits a FAIL line                           |
+| the transport check | `rows=120 parsed=57 nocite=76` — **byte-identical** to the clean ledger's output, exit 0 |
+| **this check**      | **exit 1**, `buried-rows=120`                                                            |
+
+**Neither obvious one-line form works, and both were measured before this one
+was written.**
+
+- ``grep -cE '^`{4,}'`` **must be 0** is wrong: a four-backtick fence is
+  **legal**, and this template carries a paired one so that its `firstblock`
+  body can contain a three-backtick line [measured 2026-08-20: 2 hits, both
+  halves of one pair]. The rule would fail the document that defines it. ⚠️ Note
+  the **doubled** delimiters: a single-backtick code span cannot contain a
+  backtick, so the obvious spelling of this very rule does not render. An
+  earlier statement of it elsewhere in the campaign is written that way.
+- ``grep -cE '^`{3,}'`` **must be even** is unreliable rather than wrong. It
+  does fire at `390e8d54` — 17 markers, odd — but only because it miscounts the
+  stray ` ``` ` line as a fence marker. **The fence that did the burying was
+  itself correctly paired**, opened at 383 and closed at 801, so a form that
+  counted only real fence markers would see balance and pass. Parity is a
+  property of the markers; what matters is a property of the **content**.
+
+So the check asks the only question that matters: **are the row lines, the two
+slice headings and the banner inside a fence or outside one?**
+
+```bash
+# structure-check.sh <doc.md> [row-id-prefix]
+#
+# Run from the repository root, on every campaign document. The row and slice
+# arms are LEDGER-ONLY and switch themselves off elsewhere -- a check that must
+# not be run on two thirds of its own campaign's files gets run on them anyway,
+# and its failures get learned-to-ignore.
+set -u
+LC_ALL=C; export LC_ALL
+awk -v lens="${2:-}" '
+  function fence_line(   t, ch, k, info) {
+    t = $0; sub(/^[ \t]{0,3}/, "", t); ch = substr(t,1,1)
+    if (ch != "`" && ch != "~") return 0
+    k = 0; while (substr(t, k+1, 1) == ch) k++
+    if (k < 3) return 0
+    info = substr(t, k+1)
+    if (!open) {
+      if (ch == "`" && index(info, "`") > 0) return 0   # illegal backtick info string
+      open=1; ochar=ch; olen=k; oline=NR; return 1
+    }
+    # CommonMark: a closer matches the opener char, is at least as long, and
+    # carries no info string. All three clauses are load-bearing -- dropping any
+    # one of them lets the `390e8d54` stray line close a fence it cannot close.
+    if (ch == ochar && k >= olen && info ~ /^[ \t]*$/) { open=0; return 1 }
+    return 0
+  }
+  { if (fence_line()) next }
+
+  # Ledger-hood is keyed on `## Rows` ALONE, and counted whether the heading is
+  # buried or live -- a fence that swallows it must not also switch the check
+  # off. The two narrative ledgers carry no `## Rows`; `_boundary.md` does carry
+  # `## Close conditions`, so keying on either would make it a ledger and then
+  # demand a row prefix it has no rows for.
+  /^## Rows[ \t]*$/             { isledger=1; if (open) bslice++; else lslice++ }
+  /^## Close conditions[ \t]*$/ {             if (open) bslice++; else lslice++ }
+  /^> \*\*PASS 1 — SEEDED/      { if (open) bbanner++ }
+  lens != "" && $0 ~ ("^\\| `" lens "-[0-9][0-9][0-9]`") {
+    if (open) { brow++; if (!frow) frow = NR } else lrow++ }
+
+  END {
+    bad = 0
+    # Arm 1 -- an unclosed fence. EVERY document, ledger or not.
+    if (open) {
+      printf "FAIL STRUCT-FENCE-UNCLOSED: %d-%s fence opened at line %d is never closed\n",
+             olen, (ochar=="`" ? "backtick" : "tilde"), oline; bad=1 }
+
+    if (!isledger) {
+      printf "STRUCT-CENSUS doc=not-a-ledger unclosed=%d -- row and slice arms N/A\n", (open?1:0)
+      exit bad }
+
+    # Arms 2-4 -- containment. A LEDGER only.
+    if (bslice)  { printf "FAIL STRUCT-BURIED-SLICE-HEADING: %d of `## Rows` / `## Close conditions` sit inside a fence\n", bslice; bad=1 }
+    if (bbanner) { printf "FAIL STRUCT-BURIED-BANNER: the PASS 1 banner sits inside a fence\n"; bad=1 }
+    if (brow)    { printf "FAIL STRUCT-BURIED-ROWS: %d `%s-NNN` row lines sit inside a fence, first at line %d\n", brow, lens, frow; bad=1 }
+    if (lslice != 2) { printf "FAIL STRUCT-SLICE-BROKEN: %d live `## Rows`/`## Close conditions` headings, expected 2\n", lslice+0; bad=1 }
+
+    # Arm 5 -- THE FLOOR, a refusal rather than a report. Without it a wrong
+    # prefix makes every row arm trivially true, which is exactly how the Pass-1
+    # gate once printed `rows: 0` and not one FAIL over a real 47-row ledger.
+    if (lens == "") { printf "FAIL STRUCT-NO-PREFIX: this document is a ledger; pass its row-id prefix\n"; bad=1 }
+    else if (lrow == 0) { printf "FAIL STRUCT-ZERO-ROWS: no live `%s-NNN` rows -- wrong prefix, or every row is buried\n", lens; bad=1 }
+
+    printf "STRUCT-CENSUS lens=%s live-rows=%d buried-rows=%d buried-slice=%d buried-banner=%d unclosed=%d\n",
+           lens, lrow+0, brow+0, bslice+0, bbanner+0, (open?1:0)
+    exit bad
+  }' "$1"
+```
+
+**Mutation-tested one plant at a time, not one representative** — publishing the
+Pass-1 gate on a single tested check is how five of its six lines shipped dead
+[all measured 2026-08-20 against scratch copies of `parsons.md` and this
+template]:
+
+| mutation                                                       | expected                                                                           |
+| -------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| a five-backtick fence appended, never closed                   | `STRUCT-FENCE-UNCLOSED`, naming the opening line                                   |
+| the honest burying fence above, `prettier --write`-normalised  | `STRUCT-BURIED-ROWS: 120`, plus buried-slice and both floor arms                   |
+| a fence opened at the top, shifting every later pairing by one | `STRUCT-BURIED-BANNER` — the banner lands inside, the rows do not                  |
+| `## Close conditions` deleted                                  | `STRUCT-SLICE-BROKEN: 1 live … expected 2`                                         |
+| a real ledger, prefix argument omitted                         | `STRUCT-NO-PREFIX`. Under an earlier form this printed a clean census              |
+| a real ledger, prefix `parsnip` instead of `parsons`           | `STRUCT-ZERO-ROWS`. This is the Pass-1 gate's `LENS=_family-f` defect, forestalled |
+| **this template, with its legal paired four-backtick fence**   | **exit 0**. A ``'^`{4,}'`` must-be-0 rule would have failed it                     |
+| the two narrative ledgers, `_boundary.md` and `_playbook.md`   | `doc=not-a-ledger`, exit 0. An earlier form failed both, and 4 other campaign docs |
+| `390e8d54:…/parsons.md`, the real historical break             | exit 1, `buried-rows=120 buried-slice=2` — while all four gates above stay green   |
+
+**When it runs.** On **every** campaign document, at **every** commit that
+touches one — not only at the seeding commit, and not only on ledgers. This
+trigger is stated here rather than left to be inferred, because
+[§ When this check runs](#when-this-check-runs--it-had-no-trigger-for-seven-of-the-eight-ledgers)
+records what an untriggered check is worth: the transport check existed, was
+mutation-tested, and had a stated trigger for exactly one of the eight ledgers.
 
 ### The transport check
 
