@@ -85,8 +85,9 @@ test constructs one).
 
 ## CLOSED — 2026-08-19
 
-**This campaign is complete.** Four commits, as a SHA LIST because foreign
-commits interleave them:
+**This campaign is complete.** **Six** commits, as a SHA LIST because foreign
+commits interleave them — the last is post-close handoff debt, found by the
+context-free validation and fixed rather than shipped:
 
 | SHA        | What                                                    |
 | ---------- | ------------------------------------------------------- |
@@ -94,12 +95,22 @@ commits interleave them:
 | `191f7da9` | the leaf's caller-boundary passages, both halves        |
 | `120880d7` | spellme reads a published member; the acquisition sweep |
 | `349d3f0a` | the presence-gate ruling, alone, and this close         |
+| `01a87b9f` | this table stops saying `(this one)`                    |
+| `f7eefe61` | handoff debt: the stale redirect, the missing silence   |
 
-⚠ **The last row read `(this one)` until a follow-up commit filled it**, which
-is the trap `./PHASE-1.md` records three times against its own table: a SHA list
-is written last, so the author's own final commit is the one that goes missing.
-A SHA cannot be known before its commit exists, so the honest form is to fill it
-immediately afterwards — not to leave a placeholder and hope.
+⚠ **This table has now failed the same way twice, and the second failure was
+inside the fix for the first.** It read `(this one)` in its last row until
+`01a87b9f` filled it — and `01a87b9f` **did not add itself**, so the table then
+listed four commits and stood beside prose describing five. `f7eefe61` was
+missing for the same reason. Both were added on 2026-08-19 after a context-free
+reader counted the rows.
+
+That is the trap `./PHASE-1.md` records four times against its own table: a SHA
+list is written last, so the author's own final commit is the one that goes
+missing — **including in the commit whose whole purpose is fixing the list**. A
+SHA cannot be known before its commit exists, so the only reliable form is to
+re-run the loop and rewrite the table from its output, never to append what you
+remember having done.
 
 **The campaign's success condition, which is an ABSENCE closing:**
 `inputElements` appeared **zero** times across all **nine** tracked spellme

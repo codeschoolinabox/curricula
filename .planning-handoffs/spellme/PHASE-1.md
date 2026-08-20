@@ -21,10 +21,11 @@ things stand carries the SHA list; the status lives here, not elsewhere.
 ✅ **THE NEXT CAMPAIGN _IS_ `spellme` PHASE 1 — this banner said otherwise until
 2026-08-19 and was right when written.** The docs mini-campaign it redirected to
 ([`./ACQUISITION-ALIGNMENT-BRIEF.md`](./ACQUISITION-ALIGNMENT-BRIEF.md),
-`adf83dc5`) **CLOSED** the same day in five commits — `614ab524` `191f7da9`
-`120880d7` `349d3f0a` `01a87b9f`. Read that brief's § CLOSED and § Recorded, not
-fixed before starting: it hands Phase 1 two obligations and settles
-`applicability`'s contract. Then start here.
+`adf83dc5`) **CLOSED** the same day in **six** commits — `614ab524` `191f7da9`
+`120880d7` `349d3f0a` `01a87b9f` `f7eefe61`, the last being post-close handoff
+debt. Read that brief's § CLOSED and its `### Recorded, not fixed` subsection
+before starting: it hands Phase 1 two obligations and settles `applicability`'s
+contract. Then start here.
 
 That earlier ruling also **declined** moving `scanning` into `embody/` — see §
 Deferred, whose bullet on the fold used to read as a go-ahead. A cold read of
@@ -81,11 +82,21 @@ closed at the last of them, 71 of 71 passing [measured 2026-08-18].
 | `e7627ccf` | the error-class assertions `237bdd10` dropped are restored                               |
 
 Suite after them: **78 passing, 0 skipped** [measured 2026-08-19]. **The
-campaign's doc-only commits — eleven, listed** [measured 2026-08-19: `git log
---format=%h -- .planning-handoffs/spellme/PHASE-1.md
-.planning-handoffs/spellme/WAVE-2-BRIEF.md`]: `e6e3e16d` `9163a1c4` `6e1926c3`
-`38fee403` `eacae342` `6ecb22e9` `0281cfa6` `65215551` `9bfac80d` `6d7d3f08`,
-and the one adding this line.
+campaign's doc-only commits — SIXTEEN, and do not read this list, RE-RUN IT**
+[measured 2026-08-19: `git log --format=%h --
+.planning-handoffs/spellme/PHASE-1.md
+.planning-handoffs/spellme/WAVE-2-BRIEF.md`]: `f7eefe61` `349d3f0a` `16a3d187`
+`6d7d3f08` `9bfac80d` `65215551` `0281cfa6` `6ecb22e9` `eacae342` `38fee403`
+`6e1926c3` `9163a1c4` `e6e3e16d` `d2688fd8` `a5fb4a08` `da7cb376`, plus the one
+adding this line.
+
+⚠ **This count read "eleven" until 2026-08-19, when the loop it cites returned
+sixteen** — a context-free reader ran the command the sentence carried and got a
+different answer than the sentence. Three commits (`349d3f0a`, `16a3d187`,
+`f7eefe61`) had edited this very file without recording themselves in it, and
+`f7eefe61` did so in the round that was fixing a different instance of the same
+defect. **That is failure four of the pattern the ⚠ below names.** AR-5 takes
+this list, so a stale one under-scopes the review that would have caught it.
 
 ⚠ **This table has now failed the same way three times, and each fix failed
 too.** It read `` `<wave 2>` | the remaining 47 `` until 2026-08-18. Then
