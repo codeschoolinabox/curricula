@@ -1,4 +1,4 @@
-<!-- cspell:ignore behaviour behavioural colouring colours generalise neighbourhood spellme wireframes -->
+<!-- cspell:ignore failable behaviour behavioural colouring colours generalise neighbourhood spellme wireframes -->
 
 # orchestrate
 
@@ -55,12 +55,26 @@ rendered surfaces stay thin over them.
 home for every string the glossary's `display labels` entry governs — not the
 phase labels alone. The copy contract is a set of families that share one
 discipline (keyed or derived against a constant, never authored at the render
-site), and a contract with one discipline and eight homes is a contract nobody
-can hold. A surface that renders a string imports it; it does not spell it.
+site), and a contract with one discipline and a home per family is a contract
+nobody can hold (**the families are enumerated in `glossary · display labels`,
+and that enumeration is the checkable form — this sentence deliberately states
+no count**, because three documents stated three different ones). A surface that
+renders a string imports it; it does not spell it.
 
 The alternative — a `copy/` directory beside `rail/` and `guide/` — was
-considered and declined: these are values, not a surface, and eight tiny value
-files with a barrel to hide them is worse than one file with eight exports. **An
+considered and declined: these are values, not a surface, and the families key
+against **two** vocabularies (`LifecyclePhaseName` for the labels,
+`FailableStageName` for the framings) while several are not values at all — the
+nameplate's two forms are chosen by a rule, the empty-station reason carries a
+derived count. Splitting one contract with one discipline across a directory is
+what the ruling declines. **The premise is stated carefully because an earlier
+revision argued it from a barrel** — "eight tiny value files with a barrel to
+hide them is worse than one file with eight exports" — and `DEV.md` § 1 **bans
+barrel files outright**, so the barrel was never a cost of the alternative: the
+shape `DEV.md` prescribes is exactly one file per family, imported directly.
+**The chosen shape diverges from that convention and the divergence is declared,
+not concealed** (round 12 IMPORTANT 7); how the file is actually shaped is a 0.3
+question, and `display-labels.ts` owes a widening there in any case. **An
 earlier revision argued this from `derive-study.ts` being "the region's other
 value file" — it is a FUNCTION file** [measured 2026-08-19: one export, `export
 default function deriveStudy(`], and `display-labels.ts` is the region's only
