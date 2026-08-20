@@ -266,11 +266,11 @@ belongs in the same ledger as the orientation cost recorded under
 [Strict, covering](#strict-covering--editor-mode), and it is no better paid.
 
 **The standing row and the caption travel together.** A drawing that runs the
-whole instrument top to bottom and shows the rail's per-station marks shows the
-caption too; one that abbreviates the rail to a bare line shows neither, and the
-band excerpts further down crop it along with everything else they crop — none
-of them is a claim that the caption is gone. Where a barring edge is drawn the
-caption holds the cause line instead of the count line.
+whole instrument top to bottom and shows the rail's per-station standings shows
+the caption too; one that abbreviates the rail to a bare line shows neither, and
+the band excerpts further down crop it along with everything else they crop —
+none of them is a claim that the caption is gone. Where a barring edge is drawn
+the caption holds the cause line instead of the count line.
 
 **And there is a third case, added deliberately**: an excerpt that shows the
 rail WITH its caption and nothing else. It is not a band excerpt — the band is
@@ -337,7 +337,8 @@ small.
 
 A station with nothing to open has **no tray and no disclosure control at all**.
 It is not a disabled tray; there is nothing there to be disabled. What the
-station carries instead is its name and a mark saying the phase is reachable.
+station carries instead is its name and a standing saying the phase is
+reachable.
 
 ## A level selected, and the code fits
 
@@ -433,7 +434,11 @@ there without either being authored.
 
 **`Source` and `Tokens` stay open.** The barring edge is still drawn between
 stations rather than on one: `Tokens` is where the error is studied, so it keeps
-its mark and its kit.
+its standing rather than going to `waiting` — and, exactly as with `ast` in the
+grammar case, **nothing studies it**: its station is bare. An earlier revision
+said it "keeps its mark and its kit", which asserted a kit that does not exist —
+four of five phases have none today, and the drawing above has always shown this
+station bare.
 
 ## The machinery breaks — the same geometry, a different sentence
 
