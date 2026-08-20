@@ -667,8 +667,13 @@ one new finding, and confirmation that the three known gaps are the only others.
 
 ## Round 11's twenty findings — where each one lives
 
-**Built 2026-08-19 (round 12 IMPORTANT 5, CP-θ).** Round 11 returned 4 blockers,
-9 important and 7 minor. Round 12 measured that **eleven of them appear in no
+**Built 2026-08-19 (round 12 IMPORTANT 5, CP-θ).** Round 11 returned 4 blockers
+and, by its own verdict's numbering, **IMPORTANT 5–14 and MINOR 15–24 — ten and
+ten, twenty-four findings in all**. `RESUME.md` relays "4 blockers, 9 important,
+7 minor" and this section's title says twenty; **both undercount, and the table
+below has 24 rows** [measured 2026-08-19 against the archived verdict's own
+headings]. A roll-call that mis-states its own size is the defect it exists to
+prevent, one level up. Round 12 measured that **eleven of them appear in no
 ledger** — I7, I9, I10 and M17–M24 — and that three of those are design
 questions rather than bookkeeping. The consequence it named is the one worth
 recording: round 12 spent its budget re-deriving round 11 instead of attacking
@@ -1015,8 +1020,11 @@ does not re-raise them as open.
   round 12 IMPORTANT 8 found here.
 
 **What is NOT deferred by either ruling**: round 11's proposed clause × drawing
-coverage table (CP-α). It remains unbuilt and unruled, and it is the only
-instrument anyone has proposed that detects **absence** rather than presence.
+coverage table (CP-α). **It was unbuilt and unruled when this paragraph was
+written; R-AG ruled it and it is BUILT as of 2026-08-19** — see § CP-α above. It
+remains the only instrument that detects **absence** rather than presence, and
+round 12's correction stands beside it: it is not what closes 0.2, because
+BLOCKER 1 was a clause it would have ticked green.
 
 ## What this list does not cover
 
@@ -1049,7 +1057,8 @@ Honest limits, so a reader does not mistake it for a totality:
   2. The histogram is **`{63: 80, 73: 1, 68: 1}`** [measured at `1e95814e`:
      closing-vertical index over every framed line in every fenced block].
      **Campaign-scoped — it moves whenever this campaign adds a framed line, and
-     it has already gone 72 → 77 → 80.** Re-run it; do not carry it.
+     it has gone 72 → 77 → 80 → **79**, the last step being `b5a9c8f0` deleting
+     one framed blank line.** Re-run it; do not carry it.
   3. **The two outliers are anchored BY CONTENT here, deliberately.** Every
      line-number citation this bullet has carried has gone stale, twice, so it
      now names the drawings instead: the index-73 line is the control row
