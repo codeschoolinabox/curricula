@@ -4,7 +4,7 @@ closes; nothing here is end-state documentation. -->
 <!-- cspell:ignore colour distractor distractors ledgered throughs -->
 <!-- cspell:ignore firstblock glossterm parsonizer parsonize errormsg recognises -->
 <!-- cspell:ignore unbuilt ugrep affordances behaviour behavioural flexbox -->
-<!-- cspell:ignore normalisation unrunnable unrepaired -->
+<!-- cspell:ignore normalisation unrunnable unrepaired toplevel -->
 <!-- cspell:ignore loosenings capitalisation enshittifying keyable unbuildable -->
 <!-- cspell:ignore normalises undercounted oldd clauding zakey nocite -->
 <!-- a human ruling quoted verbatim; do not translate it and do not "fix" it: -->
@@ -78,11 +78,13 @@ interleave. Five landed between this session's own commits.
 
 ⚠️ **Nothing here is pushed, and "unpushed" is far bigger than this campaign.**
 `main` has **no upstream configured**, so `git log @{u}..HEAD` returns 0 and
-reads as clean. Measured against the remote, local `main` is **83 commits ahead
-of `origin/main`**, of which **12 are this campaign's**; the rest belong to
-other campaigns and concurrent sessions [measured 2026-08-14: `git rev-list
---count origin/main..HEAD`]. **A push publishes all 83.** Whoever holds that
-gate is deciding for every campaign in the tree, not just this one.
+reads as clean. Measured against the remote, local `main` is ~~83~~ — **333
+commits ahead of `origin/main`** [measured 2026-08-20: `git rev-list --count
+origin/main..HEAD`], of which **52 are this campaign's since `d0b71810`**; the
+rest belong to other campaigns and concurrent sessions. **A push publishes
+all 333.** Whoever holds that gate is deciding for every campaign in the tree,
+not just this one. ⚠️ **Both numbers move daily and the 83 above stood for six
+days** — re-run the command; never read either figure from this sentence.
 
 ⚠️ **This table and the 83 above are both stale, and the gap is bigger than one
 commit.** As of 2026-08-15 the gap-check below returns **`346cb845` plus every
@@ -95,10 +97,20 @@ actually returns. Before dispatching AR-5, close the gap from the command and
 never from the table:
 
 ```bash
+cd "$(git rev-parse --show-toplevel)"   # NOT optional -- see below
 git log --oneline d0b71810..HEAD -- .planning-handoffs/lens-migration/
 ```
 
 Anything it returns is a campaign commit missing from the list above.
+
+⛔ **THAT `cd` IS THE WHOLE COMMAND.** The pathspec is repo-relative, so **run
+from the campaign directory the same command returns 0 and exits 0** — reading
+exactly like "the table is complete" [measured 2026-08-20 by the context-free
+validation; from the repo root it returned **52**]. Agent shells do not persist
+`cd` between calls, so a session that wandered into `ledgers/` gets the silent
+zero. **This is the campaign's own named failure class — a check reporting
+absence over nothing — sitting on the instrument that closes the AR-5 list**,
+and it was published bare for five sessions.
 
 **Do not filter by the settings line.** `ceremony: full (AR-3, AR-4 n/a)` is the
 docs-only-campaign convention, not this campaign's signature — it matches **19**
@@ -143,8 +155,8 @@ measurably were not. Both acts are recorded in § What is committed. Nothing her
 is owed.
 
 1. **`ledgers/<lens>.md` — the seeded per-lens ledgers.** **Two of eight are
-   seeded** — `parsons` (~~47 rows, repaired at `dae045f3`~~ — **80 rows as of
-   `fd6066b3`**) and `writeme` (45 rows, the fidelity control). **You start at
+   seeded** — `parsons` (~~47 rows, repaired at `dae045f3`~~ — **120 rows as of
+   `390e8d54`**) and `writeme` (45 rows, the fidelity control). **You start at
    [§ START HERE](#-start-here--step-1-is-the-parsons-twin-pilot-step-2-is-the-template-amendments)
    at the top of this file, not here and not at § Seeding wave status.**
    ~~`writeme` owes 13 cell re-cuts~~ — **DONE at `c734b5ad`**; ~~`parsons`
@@ -179,7 +191,16 @@ is owed.
 
 ## ⛔ START HERE — STEP 1 is the `parsons` twin pilot; STEP 2 is the template amendments
 
-**Two units, in this order, ONE SESSION EACH. The order is ruled — it is not the
+⚠️ **THIS HEADING'S TITLE IS STALE AND THE TABLE BELOW IS THE LIVE ORDER.** The
+title is kept **only** because six cross-references elsewhere in this file
+resolve to its anchor, and re-pointing them is a separate edit that would itself
+need checking. **STEP 1's twin half is blocked; the live unit is STEP 1c**, one
+section down. A reader who trusts a heading over the table it introduces is
+exactly the failure this file's own § Read this first describes — _"a reader
+working from the list rather than the prose gets the wrong one."_ Here the table
+is right and the heading is wrong.
+
+**The units, in this order, ONE SESSION EACH. The order is ruled — it is not the
 reading session's to re-pick, and neither is collapsing them into one session.**
 
 |             | unit                                                                                                                           | why it sits here                                                                                               |
@@ -230,10 +251,65 @@ produced two human rulings that are now the next unit.
      amended before a ledger is cut from it), then re-cut **`parsons` 120 rows**
      and **`writeme` 45 rows**, then **rewrite the transport check to parse two
      cells**. Then re-run every gate on both ledgers.
-   - ⚠️ **The published transport check parses the current one-cell shape.**
-     Changing the shape breaks it, and `_TEMPLATE.md` § The amendment gate
-     requires the whole mutation corpus to still fire afterwards plus both clean
-     regressions. Budget for that; it is not a formatting change.
+   - ⛔ **THE CITATION STAYS WITH THE QUOTATION, IN `quoted`.** This is the one
+     decision everything else in STEP 1c depends on, and it is settled by
+     measurement rather than taste [both measured 2026-08-20 by the context-free
+     validation, on scratch copies]:
+
+     | split boundary                            | transport check                                                                   |
+     | ----------------------------------------- | --------------------------------------------------------------------------------- |
+     | citation stays with the quote in `quoted` | `rows=120 parsed=57 nocite=76`, 0 DIVERGENT, exit 0 — **byte-identical to today** |
+     | citation moved into `reasoned`            | `rows=120 parsed=7 nocite=116`, **41 UNQUOTED — and it still exits 0**            |
+
+     The second shape destroys the check's reach and **reports success while
+     doing it**, because the floor only asserts `rows > 0`. `quoted` therefore
+     holds the file, the anchor, the occurrence count and the verbatim fragment
+     — everything the extractor addresses and returns. `reasoned` holds what the
+     seeder concluded.
+
+   - ⚠️ **"Changing the shape breaks the check" is FALSE as an unconditional
+     claim, and an earlier revision of this bullet published it that way.** The
+     perl program scans the whole row line and captures only the span inside
+     `_"…"_` or `<em>"…"</em>`; **a cell boundary is invisible to it** [measured
+     2026-08-20]. Under the ruled shape above the check needs no rewrite at all.
+     What it still needs is a **Gen-1 arm**, which it has never had — see the
+     eight non-transporting quotations below. `_TEMPLATE.md` § The amendment
+     gate still binds: the whole mutation corpus must fire afterwards, plus both
+     clean regressions.
+
+### ⛔ FOUR GREEN GATES REPORTED CLEAN OVER A LEDGER THAT DID NOT RENDER
+
+**Read this before running any gate in STEP 1c.** On 2026-08-20 the ledger
+carried a `````bash` fence opened with **four** backticks and closed with
+**three**. A three-backtick line does not close a four-backtick fence, so
+**everything after it — all 120 rows and the whole of § Close conditions — was
+inside a code block** [measured 2026-08-20 by the context-free validation, then
+reproduced: `grep -nE '^`{3,}'` returned the open at one line and the next fence
+marker 413 lines later].
+
+**Every published gate reported clean anyway**, and each for its own reason:
+
+| gate                | why it saw nothing wrong                                               |
+| ------------------- | ---------------------------------------------------------------------- |
+| `markdownlint-cli2` | a giant code block is valid markdown — `Summary: 0 error(s)`           |
+| `prettier --check`  | prettier does not reflow inside a fence, so it was already "formatted" |
+| the Pass-1 gate     | line-based `grep`; a fence is not a token it knows                     |
+| the transport check | same — it scans line text and never parses structure                   |
+
+**This is the campaign's founding complaint, live in its own exemplar** — a
+check reporting success over nothing, the class
+[SPEC.md § The register check](./SPEC.md#the-register-check) already records
+five times. It is fixed. **Two consequences bind STEP 1c:**
+
+1. **The prettier trap in this file was MASKED, not absent.** The table was
+   inert for as long as the fence held. STEP 1c re-cuts all 120 rows and hands
+   prettier a table it has effectively never touched. **Capture the row count
+   before `prettier --write` and again after, and COMPARE them** — a gate run
+   twice without comparing is theatre. (First contact after the repair: 120 →
+   120, no row lost, no quotation damaged [measured 2026-08-20].)
+2. **No gate in this campaign can see a structural break.** Adding one is cheap
+   and is owed: `grep -cE '^`{3,}'` must be **even**, and every fence must open
+   and close at the same width.
 
 ### ⛔ The twin is BLOCKED, and this is AR-1's ruling not a preference
 
@@ -267,6 +343,23 @@ at **57 across an append of 40 rows**, which reads exactly like a clean bill.
 The stopgap that found them is a `grep -F` re-check of every `<em>` fragment
 against its source file; **it has no home**, like the transport check itself.
 Building the real arm is part of STEP 1c's check rewrite.
+
+### ⛔ The Gen-3 direct-check appendix vanished at a step boundary — RE-ASSIGNED
+
+**It was assigned to STEP 1b, STEP 1b is now struck as DONE, and the appendix
+does not exist** [measured 2026-08-20 by the context-free validation: no such
+section in `ledgers/parsons.md`, and no line anywhere carried it forward]. A
+deliverable that disappears because the step owning it closed is a worse failure
+than one that is refused, because nothing reports it.
+
+**It is now STEP 1d's**, drafted alongside the twin, and its shape is ruled: a
+`## Gen-3 direct check` section in `ledgers/parsons.md` placed **after**
+`## Close conditions` (human ruling 2026-08-19 on the location; **not** between
+`## Rows` and `## Close conditions`, because the Pass-1 gate's `slice()` runs
+exactly that span and a table there trips its walk-column check). It covers the
+**20** rows carrying `heading absent from the port` — derived row-scoped, never
+from a bare grep, which returns 21 — and it **records an observation about the
+port and never fills a disposition**; that is Pass 2's.
 
 ### AR-1's concerns still open — enumerated, not absorbed
 
@@ -388,10 +481,10 @@ catch.
 ⚠️ **It is NOT blocked by the three template amendments above, and an earlier
 reading of the sequencing said it was** [measured 2026-08-18]. Those amendments
 gate **cutting a new ledger**. The pilot cuts none: ~~`parsons`' ledger is
-seeded, 47 rows~~ — **80 rows as of `fd6066b3`**, gate-clean and passing the
-transport check; its Gen-1 pair, Gen-2 docs and landed Gen-3 port all exist, and
-the twin can be checked against a running lens. **It can run in parallel with
-the amendment work, or before it.**
+seeded, 47 rows~~ — ~~80 rows as of `fd6066b3`~~ — **120 rows as of
+`390e8d54`**, gate-clean and passing the transport check; its Gen-1 pair, Gen-2
+docs and landed Gen-3 port all exist, and the twin can be checked against a
+running lens. **It can run in parallel with the amendment work, or before it.**
 
 ⚠️ **`built-in-lenses.ts` is NOT under `lenses/`, and an earlier revision of
 this bullet implied it was.** The registry is
@@ -457,13 +550,20 @@ way round [measured 2026-08-19]:
 | **`parsons.js` — THE CORE**                     | **1367** | **10** |
 | `lis.js`                                        | 148      | 2      |
 
-**21 of 33 rows come from wrappers; the core got 12.** The whole-file read of
-`parsons.js` reported roughly 60 affordances and STEP 1a opened ten. **Three
-live, learner- or reader-facing families were dropped and are NOT named in §
-Seed census's remainders** — Prism syntax highlighting of the fragments,
-unconditional HTML-escaping of every fragment, and the whole `user_actions` /
-`solutionHash` action-logging surface. Open rows for them as the twin reaches
-them, appending from the ledger's current last id.
+~~**21 of 33 rows come from wrappers; the core got 12.**~~ — **STRUCK
+2026-08-20, found by AR-1. The table above says 23 and 10**, and the 21/12 split
+reconciles only by counting `lis.js` into "the core" while the same sentence
+defines the core as `parsons.js` alone. The ledger's own copy of this sentence
+was struck the same day; this one is the second home, and a rule with two homes
+had one of them go stale.
+
+~~**Three live, learner- or reader-facing families were dropped**~~ — Prism
+syntax highlighting, unconditional HTML-escaping, and the `user_actions` /
+`solutionHash` surface. **ALL THREE ARE ROWED**: `parsons-103` / `-104`,
+`parsons-087`, and `parsons-105` / `-106` / `-107`. They were found by the
+STEP-1b readers **unprompted**, without being named in any brief, which is the
+stronger result — the completeness check that would have caught them was never
+needed. Struck rather than left as an instruction to do finished work.
 
 **Two cross-agent questions the STEP 1a reports already settle, which its rows
 left as uncertainty — verify and close them:**
@@ -543,6 +643,17 @@ lens.
 them before a ledger is cut.** The third is the `[COPY]`/`[METHOD]` marking in §
 Two human rulings below — it is easy to miss because it sits under a different
 heading, and the previous two revisions of this section undercounted it.
+
+⛔ **THE COUNT IS SEVEN, AND THIS FILE HAS PUBLISHED IT FOUR DIFFERENT WAYS** —
+"three" in the heading above, "FOUR" in the sentence below, "FIVE" at § Where to
+start item 3, and "seven" in § START HERE's table [measured 2026-08-20 by the
+context-free validation]. **§ START HERE governs.** The seventh and the two
+added on 2026-08-20 are: the `quoted`/`reasoned` split, the per-cohort `pass`
+column, and the `<em>`-versus-code-span hazard — a quotation carrying
+significant whitespace, an emphasis character or a bare `_` must go in a code
+span, because `<em>` lets prettier silently rewrite it. **Do not transcribe any
+of these numbers; count the enumerated list.** A count published in four places
+has no count, which is this canon's own ruling one document over.
 
 ⚠️ **THERE ARE NOW FOUR, and the heading above still says three.** Two were
 added by STEP 1a (`fd6066b3`) and are recorded here rather than absorbed
@@ -624,15 +735,26 @@ them as part of the amendment rather than in passing:
    and `glossterm` spliced in AHEAD of the perl block** — get that order wrong
    and you get a script that runs and reports nothing.
 
-   ✅ **The splice recipe above is now EXERCISED, not just published** [measured
-   2026-08-19]. Assembled exactly as written — `set -u`, `LC_ALL=C`, the arg
-   block, then `firstblock`/`glossterm`/`norm`/`unwrap_markup`, **then** the
-   perl program — it reproduces `_TEMPLATE.md` § The amendment gate's published
-   baseline **to the number**: `parsons` NO-CITATION = `045`,`046`,`047`,
-   `rows=47 parsed=57 nocite=3`, **0 DIVERGENT**, exit 0. So the recipe is
-   right, the file stays scratch, and rebuilding it costs one paste rather than
-   a debugging session. **It still has no home, and that is still the gap** —
-   what is closed is the doubt about whether the recipe works.
+   ✅ **The splice recipe above is EXERCISED, and was re-assembled from scratch
+   again on 2026-08-20.** Built exactly as written — `set -u`, `LC_ALL=C`, the
+   arg block, then `firstblock`/`glossterm`/`norm`/`unwrap_markup`, **then** the
+   perl program — it runs and both published regressions hold: `parsons` **0
+   DIVERGENT**, `writeme` exactly `writeme-019 UNQUOTED (1 of 2 cited)` with 0
+   divergent, exit 0 both times.
+
+   ⚠️ **~~`parsons` NO-CITATION = `045`,`046`,`047`,
+   `rows=47 parsed=57 nocite=3`~~ — STRUCK 2026-08-20.** Those were `parsons`'
+   numbers at 47 rows and they are quoted here as if they were the check's
+   invariant. Today the same command returns `rows=120 parsed=57 nocite=76`,
+   NO-CITATION = `045`–`120` [measured]. **The stable thing is the DERIVATION,
+   not the figures** — the NO-CITATION set equals the lister-4 cluster ids union
+   every hand-read id, which is what `_TEMPLATE.md` § The transport check
+   requires and what should have been written here. The same stale triple is
+   published twice more in `_TEMPLATE.md`, once as a derivation invariant and
+   once as a mutation-corpus baseline; **both are owed the same strike.** So the
+   recipe is right, the file stays scratch, and rebuilding it costs one paste
+   rather than a debugging session. **It still has no home, and that is still
+   the gap** — what is closed is the doubt about whether the recipe works.
 
 4. **The twelve fixture-pair assertions are specified and unlocated**, and one
    pair looks unbuildable. "The same span mis-transcribed" never says of what;
@@ -1188,7 +1310,7 @@ re-derive it from here.
 8. ~~**THEN re-seed `parsons`** against the widened root. The ledger still has
    **zero `G1-live` rows**~~ — **DONE at `fd6066b3`, struck rather than
    ticked.** 33 rows appended as `048`–`080` from a whole-file hand-read, not
-   from the embargoed lister. The ledger carries **36** rows tagged `G1-live` or
+   from the embargoed lister. The ledger carries **76** rows tagged `G1-live` or
    `G1-dead` [measured 2026-08-19, row-scoped]. **Append; never renumber** — and
    that now means never renumbering `001`–`080`. Take the next id from the
    ledger as it stands when you start, **not from a number written here**.
