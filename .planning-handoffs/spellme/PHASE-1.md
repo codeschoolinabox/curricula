@@ -207,11 +207,28 @@ which is 2026-08-11 and **316 commits behind local `main`** at the time — so t
 2026-08-20: `git ls-tree -d --name-only origin/main
 src/lib/study-lenses/lenses/` → `debug-props lib parsons writeme`]. Everything
 else about the mechanism passed: isolation genuine, vitest ran, tsc ran, `ar-4`
-spawned and returned. **This closes one of the five items `AGENTS.principal.md`
-§ Execution mechanics lists as unmeasured**; transcribing it there is governance
-surface and needs human instruction. Two secondary findings: `node_modules`
-resolves only because the worktree is nested inside the main checkout, and the
-isolation guardrail refuses compound shell commands.
+spawned and returned.
+
+⚠ **It does NOT close the governance question, and `88daae6b`'s body says it
+does** (human correction 2026-08-20). That body reads "which closes one of the
+five items AGENTS.principal.md lists as unmeasured"; it is immutable, so the
+correction lives here. **The finding is conditional, not general.** Two halves,
+and only one of them is durable:
+
+- **Durable, and a property of the harness:** a worktree is cut from
+  `origin/main`, not from local `HEAD`. That holds in any repository.
+- **Time-bound project state:** `origin/main` here is 300+ commits behind
+  **because nothing has been pushed since 2026-08-11**. That is the only reason
+  the lens is missing from the worktree. **Push, and worktree isolation may work
+  perfectly** — the mechanism was never actually tested, only starved of a tree
+  containing the module.
+
+So this belongs in a campaign record, which is where it now is. Promoting it to
+`AGENTS.principal.md` would put an expiring measurement into global governance
+and would state as settled a question this session did not settle. Two secondary
+findings, both genuinely durable: `node_modules` resolves **only** because the
+worktree is nested inside the main checkout — move it elsewhere and every tool
+breaks — and the isolation guardrail refuses compound shell commands.
 
 ⚠ **An `ar-4` destroyed a peer session's index.** Mid-review it ran `git stash`
 then `git stash pop`; `pop` without `--index` restores everything unstaged, so
