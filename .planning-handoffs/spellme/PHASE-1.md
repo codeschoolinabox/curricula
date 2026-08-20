@@ -160,10 +160,36 @@ src/lib/study-lenses/lenses/spellme/
 | `14652100` | the empty recommendation set is a stable frozen reference        |
 | `3b4e9f80` | a line terminator carries the mark too                           |
 | `ed76f43b` | an out-of-range threshold throws `RangeError`                    |
+| `88daae6b` | this record learns the lens started, and what it ruled           |
+| `8a144188` | the mark reaches the whole document set; both carriers drawn     |
+| `6d3bef7f` | a fix round falsified a fact the next round certified as true    |
+
+⚠ **Thirteen with the commit adding these three rows — which the loop above
+cannot see, because it did not exist when the loop ran.** That is the fifth
+instance in this file of the shape it documents about itself: the author's own
+last commit is the one that goes missing. Named here rather than left to be
+discovered. **Re-run the loop; do not read this table.**
 
 **Suite after them: `22 passed | 65 skipped (87)` across three files** — the new
 `tests/core-defect.test.ts` among them — with `core.test.ts` down from 54 skips
 to **37** [measured 2026-08-20]. `npx tsc --noEmit` 0.
+
+**The wave-1 `ar-5` returned PAUSE twice, then CONSIDER.** Both original
+blockers (the `RangeError` ruling having no document home; the `marked` widening
+reaching three documents and stopping) are **confirmed closed** by a reviewer
+that wrote its own exhaustive sweep rather than reusing the author's. Round 2
+found three more the first fix round had introduced or walked past — including a
+self-contradiction _inside_ `DOCS.md` that two rounds of targeted edits missed —
+and round 3 found one false supporting fact plus four minors. **The two round-3
+CONSIDER items were fixed before handoff (`6d3bef7f`); the minors are routed to
+close-out and are not blockers.** Wave 2 is gated on nothing but the two open
+human items below.
+
+⚠ **The transferable finding, now demonstrated three rounds running: the fix
+round is where new defects enter.** Round 1's fix falsified a fact that round
+2's fix then certified as "still true today". Always re-verify with the reviewer
+that raised the finding, and sweep over `git ls-files` rather than over the list
+of files you remember touching.
 
 **Wave 1 covered the three clusters with no dependency on the element stream:**
 `config` (+ `Exceptions`), `applicability` (+ the new defect file), `recommend`.
