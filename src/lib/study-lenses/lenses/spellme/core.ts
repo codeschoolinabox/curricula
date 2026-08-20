@@ -48,6 +48,7 @@ function config(overrides: Partial<LensConfig> = {}): LensConfig {
 			(entry): entry is [string, SerializableValue] => entry[1] !== undefined,
 		),
 	);
+	refuseOutOfRangeThresholds(defined);
 	// `cloneAndFreeze` (not `freezeInPlace`) so a caller-supplied overrides
 	// object is NOT frozen as a side-effect.
 	return cloneAndFreeze<LensConfig>({
@@ -168,6 +169,36 @@ function handOver(
  */
 function recommend(): ReadonlyArray<Recommendation> {
 	throw new Error('spellme recommend: not implemented');
+}
+
+/**
+ * The two keys `config` resolves as thresholds. Every other key is an
+ * unknown field, preserved verbatim under the open-shape contract and never
+ * range-checked.
+ */
+const THRESHOLD_KEYS = ['oneMoreAfter', 'skipAfter'] as const;
+
+/**
+ * Refuses an out-of-range threshold at the factory boundary rather than
+ * coercing it — a silently clamped configuration is an educator's setting
+ * that did not take effect and said nothing (`./DOCS.md` § Decisions).
+ *
+ * Scoped to numbers on purpose. Negative, fractional and non-finite are the
+ * three refusals `./README.md` § Configuration names, and all three are
+ * properties a number can have; no document rules on a non-numeric value for
+ * either key, so this does not invent one.
+ */
+function refuseOutOfRangeThresholds(
+	defined: Record<string, SerializableValue>,
+): void {
+	for (const key of THRESHOLD_KEYS) {
+		const value = defined[key];
+		if (typeof value === 'number' && value < 0) {
+			throw new TypeError(
+				`spellme config: ${key} must be a non-negative integer, got ${value}`,
+			);
+		}
+	}
 }
 
 // Intentionally unfrozen — `./index.tsx` freezes the composed `Lens`

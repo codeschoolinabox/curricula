@@ -393,7 +393,7 @@ describe('spellme core', () => {
 	});
 
 	describe('Exceptions', () => {
-		it.skip('refuses a negative threshold', () => {
+		it('refuses a negative threshold', () => {
 			expect(() => spellmeCore.config({ skipAfter: -1 })).toThrow(TypeError);
 		});
 
