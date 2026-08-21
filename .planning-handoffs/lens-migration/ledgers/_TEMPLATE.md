@@ -10,7 +10,7 @@
 <!-- cspell:ignore keyable legitimise nocite quotemeta mktemp licence unrun -->
 <!-- cspell:ignore capitalisation loosenings -->
 <!-- structure-check.sh awk locals; see § The structural-integrity check: -->
-<!-- cspell:ignore isledger lslice bslice bbanner lrow ochar -->
+<!-- cspell:ignore isledger lslice bslice bbanner lrow ochar incomment -->
 <!-- transport-check.sh schema locals; see § The transport check: -->
 <!-- cspell:ignore QCOL RCOL NCELL -->
 
@@ -968,7 +968,25 @@ was written.**
   property of the markers; what matters is a property of the **content**.
 
 So the check asks the only question that matters: **are the row lines, the two
-slice headings and the banner inside a fence or outside one?**
+slice headings and the banner **rendered, or buried**?**
+
+⛔ **The question is "does it render", NOT "is it fenced", and the first
+published version of this check got that wrong.** A fence is one burial
+mechanism; an **unterminated HTML comment** is another, and it is the one this
+very document instructs a seeder to create — § Rows carries two `<!-- … -->`
+specimen blocks each marked _"Delete when the first real row lands"_, and
+deleting the body while missing the closing `-->` buries everything below it to
+EOF. Measured 2026-08-20 by AR-2 and reproduced: the template's own specimen
+opener, planted above `## Rows` in `parsons.md` and run through
+`prettier --write`, produced **five** green gates — `prettier --check` clean,
+`markdownlint-cli2` `0 error(s)`, the Pass-1 gate `rows: 120`, the transport
+check `rows=120 parsed=57 nocite=76` exit 0, **and this check itself
+`live-rows=120 buried-rows=0 unclosed=0` exit 0**. A balanced comment around the
+same span gives the identical five-green result.
+
+**So the check tracks both mechanisms in one pass**, and a third mechanism, if
+one is ever found, is an argument for asserting on rendered output rather than
+for a fourth arm.
 
 ```bash
 # structure-check.sh <doc.md> [row-id-prefix]
@@ -977,9 +995,27 @@ slice headings and the banner inside a fence or outside one?**
 # arms are LEDGER-ONLY and switch themselves off elsewhere -- a check that must
 # not be run on two thirds of its own campaign's files gets run on them anyway,
 # and its failures get learned-to-ignore.
+#
+# For a LEDGER, invoke it with the row-id prefix -- `structure-check.sh <doc>`
+# alone is a FAIL, by design. On this template that argument is the literal
+# `<lens>`: `structure-check.sh ledgers/_TEMPLATE.md '<lens>'`.
 set -u
 LC_ALL=C; export LC_ALL
 awk -v lens="${2:-}" '
+  # BURIAL is the union of two mechanisms. `buried` is evaluated at the START of
+  # each line, so a delimiter line never counts as its own content.
+  function scan_comment(   s, i) {
+    # Per OCCURRENCE, never per line start: the cspell:ignore headers of every
+    # ledger open and close a comment on one line, and a per-line-start form
+    # reads the first of them as burying the entire document.
+    s = $0
+    while (1) {
+      if (!incomment) { i = index(s, "<!--"); if (!i) return
+                        incomment=1; cline=NR; s = substr(s, i+4) }
+      else            { i = index(s, "-->");  if (!i) return
+                        incomment=0;          s = substr(s, i+3) }
+    }
+  }
   function fence_line(   t, ch, k, info) {
     t = $0; sub(/^[ \t]{0,3}/, "", t); ch = substr(t,1,1)
     if (ch != "`" && ch != "~") return 0
@@ -996,34 +1032,56 @@ awk -v lens="${2:-}" '
     if (ch == ochar && k >= olen && info ~ /^[ \t]*$/) { open=0; return 1 }
     return 0
   }
-  { if (fence_line()) next }
+  # A fence delimiter inside a comment is comment text, and `<!--` inside a
+  # fence is fence text. Each mechanism suppresses the other; neither nests.
+  { buried = (open || incomment)
+    if (!incomment) { if (fence_line()) next }
+    if (!open) scan_comment() }
 
   # Ledger-hood is keyed on `## Rows` ALONE, and counted whether the heading is
-  # buried or live -- a fence that swallows it must not also switch the check
+  # buried or live -- a burial that swallows it must not also switch the check
   # off. The two narrative ledgers carry no `## Rows`; `_boundary.md` does carry
   # `## Close conditions`, so keying on either would make it a ledger and then
   # demand a row prefix it has no rows for.
-  /^## Rows[ \t]*$/             { isledger=1; if (open) bslice++; else lslice++ }
-  /^## Close conditions[ \t]*$/ {             if (open) bslice++; else lslice++ }
-  /^> \*\*PASS 1 — SEEDED/      { if (open) bbanner++ }
+  /^## Rows[ \t]*$/             { isledger=1; if (buried) bslice++; else lslice++ }
+  /^## Close conditions[ \t]*$/ {             if (buried) bslice++; else lslice++ }
+  /^> \*\*PASS 1 — SEEDED/      { if (buried) bbanner++ }
   lens != "" && $0 ~ ("^\\| `" lens "-[0-9][0-9][0-9]`") {
-    if (open) { brow++; if (!frow) frow = NR } else lrow++ }
+    if (buried) { brow++; if (!frow) frow = NR } else lrow++ }
 
   END {
     bad = 0
-    # Arm 1 -- an unclosed fence. EVERY document, ledger or not.
+    # Arm 1 -- an unterminated container. EVERY document, ledger or not.
     if (open) {
       printf "FAIL STRUCT-FENCE-UNCLOSED: %d-%s fence opened at line %d is never closed\n",
              olen, (ochar=="`" ? "backtick" : "tilde"), oline; bad=1 }
+    if (incomment) {
+      printf "FAIL STRUCT-COMMENT-UNCLOSED: HTML comment opened at line %d is never closed\n",
+             cline; bad=1 }
 
     if (!isledger) {
-      printf "STRUCT-CENSUS doc=not-a-ledger unclosed=%d -- row and slice arms N/A\n", (open?1:0)
+      printf "STRUCT-CENSUS doc=not-a-ledger unclosed-fence=%d unclosed-comment=%d -- row and slice arms N/A\n",
+             (open?1:0), (incomment?1:0)
       exit bad }
 
-    # Arms 2-4 -- containment. A LEDGER only.
-    if (bslice)  { printf "FAIL STRUCT-BURIED-SLICE-HEADING: %d of `## Rows` / `## Close conditions` sit inside a fence\n", bslice; bad=1 }
-    if (bbanner) { printf "FAIL STRUCT-BURIED-BANNER: the PASS 1 banner sits inside a fence\n"; bad=1 }
-    if (brow)    { printf "FAIL STRUCT-BURIED-ROWS: %d `%s-NNN` row lines sit inside a fence, first at line %d\n", brow, lens, frow; bad=1 }
+    # THIS TEMPLATE is a ledger by shape and NOT one by status, and the
+    # discriminator is mechanical rather than a filename: the row-id prefix of a
+    # real ledger is a lens slug, and only the skeleton uses the placeholder.
+    # Its specimen rows are SUPPOSED to sit inside the two `<!-- … -->` blocks
+    # § Rows tells a seeder to delete -- so buried rows are expected here and a
+    # defect anywhere else. Reported, never silently exempted.
+    if (lens ~ /[<>]/) {
+      if (lslice != 2) { printf "FAIL STRUCT-SLICE-BROKEN: %d live slice headings, expected 2\n", lslice+0; bad=1 }
+      printf "STRUCT-CENSUS doc=template specimen-rows-live=%d specimen-rows-commented=%d unclosed-fence=%d unclosed-comment=%d\n",
+             lrow+0, brow+0, (open?1:0), (incomment?1:0)
+      exit bad }
+
+    # Arms 2-4 -- containment. A LEDGER only. "Buried" means fenced OR
+    # commented; the arms deliberately do not distinguish, because the reader
+    # cannot either.
+    if (bslice)  { printf "FAIL STRUCT-BURIED-SLICE-HEADING: %d of `## Rows` / `## Close conditions` are buried\n", bslice; bad=1 }
+    if (bbanner) { printf "FAIL STRUCT-BURIED-BANNER: the PASS 1 banner is buried\n"; bad=1 }
+    if (brow)    { printf "FAIL STRUCT-BURIED-ROWS: %d `%s-NNN` row lines are buried, first at line %d\n", brow, lens, frow; bad=1 }
     if (lslice != 2) { printf "FAIL STRUCT-SLICE-BROKEN: %d live `## Rows`/`## Close conditions` headings, expected 2\n", lslice+0; bad=1 }
 
     # Arm 5 -- THE FLOOR, a refusal rather than a report. Without it a wrong
@@ -1032,28 +1090,33 @@ awk -v lens="${2:-}" '
     if (lens == "") { printf "FAIL STRUCT-NO-PREFIX: this document is a ledger; pass its row-id prefix\n"; bad=1 }
     else if (lrow == 0) { printf "FAIL STRUCT-ZERO-ROWS: no live `%s-NNN` rows -- wrong prefix, or every row is buried\n", lens; bad=1 }
 
-    printf "STRUCT-CENSUS lens=%s live-rows=%d buried-rows=%d buried-slice=%d buried-banner=%d unclosed=%d\n",
-           lens, lrow+0, brow+0, bslice+0, bbanner+0, (open?1:0)
+    printf "STRUCT-CENSUS lens=%s live-rows=%d buried-rows=%d buried-slice=%d buried-banner=%d unclosed-fence=%d unclosed-comment=%d\n",
+           lens, lrow+0, brow+0, bslice+0, bbanner+0, (open?1:0), (incomment?1:0)
     exit bad
   }' "$1"
 ```
+
+⚠️ **A consequence to expect rather than debug: on THIS template `live-rows`
+falls from 3 to 1.** Two of its three specimen rows sit inside the `<!-- … -->`
+blocks § Rows tells a seeder to delete, so the earlier form was counting
+commented-out rows as live — which is the same blindness one level down.
 
 **Mutation-tested one plant at a time, not one representative** — publishing the
 Pass-1 gate on a single tested check is how five of its six lines shipped dead
 [all measured 2026-08-20 against scratch copies of `parsons.md` and this
 template]:
 
-| mutation                                                       | expected                                                                           |
-| -------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| a five-backtick fence appended, never closed                   | `STRUCT-FENCE-UNCLOSED`, naming the opening line                                   |
-| the honest burying fence above, `prettier --write`-normalised  | `STRUCT-BURIED-ROWS: 120`, plus buried-slice and both floor arms                   |
-| a fence opened at the top, shifting every later pairing by one | `STRUCT-BURIED-BANNER` — the banner lands inside, the rows do not                  |
-| `## Close conditions` deleted                                  | `STRUCT-SLICE-BROKEN: 1 live … expected 2`                                         |
-| a real ledger, prefix argument omitted                         | `STRUCT-NO-PREFIX`. Under an earlier form this printed a clean census              |
-| a real ledger, prefix `parsnip` instead of `parsons`           | `STRUCT-ZERO-ROWS`. This is the Pass-1 gate's `LENS=_family-f` defect, forestalled |
-| **this template, with its legal paired four-backtick fence**   | **exit 0**. A ``'^`{4,}'`` must-be-0 rule would have failed it                     |
-| the two narrative ledgers, `_boundary.md` and `_playbook.md`   | `doc=not-a-ledger`, exit 0. An earlier form failed both, and 4 other campaign docs |
-| `390e8d54:…/parsons.md`, the real historical break             | exit 1, `buried-rows=120 buried-slice=2` — while all four gates above stay green   |
+| mutation                                                                 | expected                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| a five-backtick fence appended, never closed                             | `STRUCT-FENCE-UNCLOSED`, naming the opening line                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| the honest burying fence above, `prettier --write`-normalised            | `STRUCT-BURIED-ROWS: 120`, plus buried-slice and both floor arms                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| a fence opened at the top, shifting every later pairing by one           | `STRUCT-BURIED-BANNER` — the banner lands inside, the rows do not                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `## Close conditions` deleted                                            | `STRUCT-SLICE-BROKEN: 1 live … expected 2`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| a real ledger, prefix argument omitted                                   | `STRUCT-NO-PREFIX`. Under an earlier form this printed a clean census                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| a real ledger, prefix `parsnip` instead of `parsons`                     | `STRUCT-ZERO-ROWS`. This is the Pass-1 gate's `LENS=_family-f` defect, forestalled                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| **this template**, invoked as `structure-check.sh _TEMPLATE.md '<lens>'` | **exit 0**, `doc=template specimen-rows-live=1 specimen-rows-commented=2`. A ``'^`{4,}'`` must-be-0 rule would have failed it. ⚠️ **The invocation is part of the expectation**: the prefix argument is not optional for a document carrying `## Rows`, and `structure-check.sh _TEMPLATE.md` alone is a deliberate `STRUCT-NO-PREFIX` FAIL. An earlier revision of this row published the verdict without the argv that produces it, and `6c3e6d16`'s body then asserted the bare form exits 0 — false as invoked, immutable, and corrected here |
+| the two narrative ledgers, `_boundary.md` and `_playbook.md`             | `doc=not-a-ledger`, exit 0. An earlier form failed both, and 4 other campaign docs                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `390e8d54:…/parsons.md`, the real historical break                       | exit 1, `buried-rows=120 buried-slice=2` — while all four gates above stay green                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
 **When it runs.** On **every** campaign document, at **every** commit that
 touches one — not only at the seeding commit, and not only on ledgers. This
@@ -1133,11 +1196,27 @@ perl -ne '
   # hardcoded as an index -- so a not-yet-migrated ledger carrying `evidence`
   # resolves to the legacy layout and this check behaves byte-identically to the
   # one-cell form on it. That is what lets the check land before the data.
-  if ($QCOL < 0 && $ECOL < 0 && /^\|\s*#\s*\|/) {
+  $ISLEDGER = 1 if /^## Rows[ \t]*$/;
+  if (!$SEEN && /^\|\s*#\s*\|/) {
+    $SEEN = 1;
     my @h = split /(?<!\\)\|/, $_, -1; $NCELL = scalar @h;
     for my $i (0..$#h) { my $t = $h[$i]; $t =~ s/^\s+|\s+$//g;
       $QCOL = $i if $t eq "quoted"; $RCOL = $i if $t eq "reasoned"; $ECOL = $i if $t eq "evidence"; }
-    if ($QCOL < 0 && $ECOL >= 0) { $QCOL = $ECOL; $LEGACY = 1; }
+    # SCHEMA RESOLUTION IS TOTAL, never a fallback chain. Four states, three
+    # legal. An earlier form tested only `$QCOL < 0 && $ECOL >= 0` and so
+    # resolved `evidence` + `reasoned` -- the insert done, the rename not -- to
+    # LEGACY, which skips the whole `reasoned` arm below. A full citation AND a
+    # transported quotation planted in `reasoned` then produced 0 findings and
+    # exit 0, with a census byte-identical to the clean ledger [measured
+    # 2026-08-20, AR-2]. That is a check reporting success over nothing, inside
+    # the increment written to stop it. `evidence` is the name in every
+    # committed ledger and in FIDELITY-METHOD § Columns, so the half-done state
+    # this missed is the LIKELIER half.
+    if    ($QCOL >= 0 && $RCOL >= 0) { }                                     # two-cell
+    elsif ($ECOL >= 0 && $QCOL < 0 && $RCOL < 0) { $QCOL = $ECOL; $LEGACY = 1 }  # legacy
+    elsif ($ECOL >= 0 && $RCOL >= 0) { $SCHEMA = "half-migrated -- `reasoned` present beside `evidence`" }
+    elsif ($QCOL >= 0 && $RCOL <  0) { $SCHEMA = "half-migrated -- `quoted` present, `reasoned` absent" }
+    else                             { $SCHEMA = "unresolved -- no header row carrying `quoted` or `evidence`" }
     next;
   }
   next unless /^\| `([a-z0-9-]+-\d{3})`/; my $id = $1;
@@ -1149,7 +1228,10 @@ perl -ne '
   # the naive field split the one-cell form rightly avoided: a raw /\|/ split
   # truncates the SIX rows across the two committed ledgers that carry a literal
   # escaped pipe inside a cell [measured 2026-08-20: parsons-003, -022, -081,
-  # -091, -104 and writeme-018; two of them are Gen-2/3 rows parsed today].
+  # -091, -104 and writeme-018; THREE of them -- parsons-003, parsons-022 and
+  # writeme-018 -- are Gen-2/3 rows the check parses today, so the naive form
+  # loses live citations, not just cells [re-measured 2026-08-20 by AR-2: the
+  # published figure of two was wrong].
   my @c = split /(?<!\\)\|/, $_, -1;
   print join("\t",$id,"-","-","!RAGGED", scalar(@c)." cells against header ".$NCELL),"\n"
       if $NCELL && @c != $NCELL;
@@ -1178,18 +1260,32 @@ perl -ne '
   # THE `reasoned` ARM. Transported extractor output in the derivation cell is a
   # BREACH, not a finding -- because without it the wrong split silently drains
   # the check and exits 0, which is the failure the ruling was taken to prevent.
+  # ⛔ THE REFUSAL REUSES THE ACCEPTANCE GRAMMAR, and must. An earlier form
+  # refused `Gen-[123]` at ANY extension plus a bare `_"` anywhere -- both
+  # strictly WIDER than what `quoted` accepts, so they refused forms that have
+  # no legal home in either cell. Measured 2026-08-20 by AR-2: a `reasoned`
+  # clause citing a RULING (`_"Pass 1 transports; it does not author"_`) -- the
+  # house idiom of this campaign, 80 occurrences across its documents --
+  # breached the whole ledger, and so did ordinary derivation prose naming a
+  # Gen-1 file. A false BREACH blocks a correct migration and gets worked
+  # around, which is worse than a missed one.
   unless ($LEGACY) {
-    my $mc = () = $r =~ /Gen-[123]\s*`[A-Za-z0-9._-]+\.[a-z]+`/g;
-    my $mq = () = $r =~ /(?:_"|<em>")/g;
+    my $mc = () = $r =~ /Gen-[23]\s*`[A-Za-z.]+\.md`\s*§/g;
+    my $mq = () = $r =~ /Gen-[23]\s*`[A-Za-z.]+\.md`\s*§\s*.*?:\s*(?:_"|<em>")/g;
     print join("\t",$id,"-","-","!MISPLACED-CITATION","$mc in reasoned"),"\n" if $mc;
     print join("\t",$id,"-","-","!MISPLACED-QUOTATION","$mq in reasoned"),"\n" if $mq;
   }
 
   if ($n == 0) { $nocite++;
     print join("\t",$id,"-","-","!NO-CITATION","-"),"\n" unless $noref; }
-  END { print join("\t","-","-","-","!SCHEMA","unresolved -- no header row carrying `quoted` or `evidence`"),"\n" if $QCOL < 0;
-        print join("\t","-","-","-","!SCHEMA","half-migrated -- `quoted` present, `reasoned` absent"),"\n"
-            if $QCOL >= 0 && !$LEGACY && $RCOL < 0;
+  END { # Ledger-hood is INCREMENT 1 PREDICATE, reused rather than re-invented.
+        # `_boundary.md` and `_playbook.md` are the two narrative ledgers and
+        # carry no `## Rows`; an earlier form refused `_boundary.md` with
+        # `BREACH SCHEMA unresolved` (exit 1) where the pre-rewrite check
+        # exited 0, so the two gates published one commit apart gave opposite
+        # answers to "is this a ledger" [measured 2026-08-20, AR-2].
+        if (!$ISLEDGER) { print join("\t","-","-","-","!NOT-A-LEDGER","-"),"\n" }
+        elsif ($SCHEMA) { print join("\t","-","-","-","!SCHEMA",$SCHEMA),"\n" }
         print join("\t","-","-","-","!CENSUS",
         "member=$M ref=$ENV{REF} rows=".($rows+0)
         ." parsed=".($parsed+0)." nocite=".($nocite+0)),"\n" }
@@ -1208,6 +1304,7 @@ while IFS=$'\t' read -r id side file head stored; do
     '!MISPLACED-CITATION')  echo "BREACH $id MISPLACED-CITATION ($stored)";  continue;;
     '!MISPLACED-QUOTATION') echo "BREACH $id MISPLACED-QUOTATION ($stored)"; continue;;
     '!SCHEMA')      echo "BREACH SCHEMA $stored";            continue;;
+    '!NOT-A-LEDGER') echo "doc=not-a-ledger -- no \`## Rows\`; schema and reasoned arms N/A"; continue;;
   esac
   case "$side" in
     G2) [ "$REF"  = NONE ] && { echo "$id G2 UNEXPECTED-CITATION $file § $head"; continue; }
@@ -1230,7 +1327,13 @@ cat "$OUT"
 # MEMBER, or a moved id prefix all print one tidy census line and exit 0.
 n=$(sed -n 's/^CENSUS .*rows=\([0-9]*\) .*/\1/p' "$OUT")
 [ -n "$n" ] || { echo "FAIL: no CENSUS line -- the check did not complete"; exit 1; }
-[ "$n" -gt 0 ] || { echo "FAIL: zero rows matched -- wrong ledger path, wrong MEMBER, or the id prefix moved"; exit 1; }
+# The rows floor is a LEDGER assertion. On `_boundary.md` and `_playbook.md` --
+# the two narrative ledgers, which carry no `## Rows` -- zero rows is the
+# correct answer, not a wrong path, and failing them is how a gate teaches its
+# reader to ignore it.
+if ! /usr/bin/grep -q '^doc=not-a-ledger' "$OUT"; then
+  [ "$n" -gt 0 ] || { echo "FAIL: zero rows matched -- wrong ledger path, wrong MEMBER, or the id prefix moved"; exit 1; }
+fi
 # THE SECOND FLOOR. A BREACH is a violated two-cell contract, not a finding
 # about a quotation, so it refuses rather than reports. `rows > 0` alone cannot
 # see a botched migration: the wrong split leaves rows=120 and exits 0 while the
@@ -1302,48 +1405,53 @@ literal-prefix discipline `firstblock`, `glossterm` and `resolve` all carry.
   now means _this ledger cites no heading on that side, and here are the rows I
   checked_ — which is also what stops `dropdowns` and `variables`, whose whole
   G2 arm is a structural no-op, reading as a clean bill.
-- **The `NO-CITATION` set is derived, not judged** — but ⚠️ ~~it must equal the
-  union of the lister-4 and lister-5 id ranges in `### Seed census`; `parsons` =
-  `045`–`047`, its three lister-4 clusters~~ **STRUCK 2026-08-20: that
-  derivation was stale by 73 rows and nothing was checking it.** Measured on the
-  live ledger: `parsons`'s `NO-CITATION` set is `045`–`120`, **76 rows**, not
-  three. Every Gen-1 row is in it and correctly so — `parsed`, `cited` **and**
-  `lead` all key on `Gen-[23]`, so a Gen-1 citation never reaches even the
-  `MALFORMED-CITATION` residual. The blindness is total, not partial, and it
-  covers 61 % of the ledger.
+- **`nocite` is a COVERAGE REPORT, not a finding, and it is derived by the check
+  rather than published here.** ⚠️ ~~The `NO-CITATION` set must equal the union
+  of the lister-4 and lister-5 id ranges in `### Seed census`; `parsons` =
+  `045`–`047`, its three lister-4 clusters~~ — **STRUCK 2026-08-20: that
+  derivation was stale by 73 rows and nothing was checking it.** A row lands in
+  `NO-CITATION` for two unrelated reasons — it cites nothing, or it cites
+  something this grammar cannot read — and the struck rule could not tell them
+  apart, so an append of Gen-1 rows moved the set silently and read as a clean
+  bill. **It identified a set by what it LACKED.**
 
-  **The rule failed because it identified a set by what it LACKED.** A row lands
-  in `NO-CITATION` for two unrelated reasons — it cites nothing, or it cites
-  something this grammar cannot read — and the old derivation could not tell
-  them apart, so an append of 40 Gen-1 rows moved the set silently and read as a
-  clean bill. **Identify the lister rows POSITIVELY instead**, by the
-  `lister-N cluster` anchor form in `quoted`. `writeme` = **empty** still holds,
-  because `WritemeLens` has 0 orphans. Publish the derivation and never the
-  number — `writeme` already contradicts any threshold.
+  ⚠️ **The first replacement was wrong too, and in the same shape.** It said
+  _"identify the lister rows positively, by the `lister-N cluster` anchor form"_
+  — which describes only the lister subset while sitting under a heading about
+  the whole `NO-CITATION` set, so a reader applying it predicts three and
+  measures the Gen-1 population [found 2026-08-20 by AR-2, reproduced]. **A
+  correction that re-instantiates the defect it corrects is this campaign's
+  recorded failure mode, and it happened here one paragraph after the strike.**
 
-  Until a Gen-1 arm exists, `nocite` is a **coverage report, not a finding**: it
-  counts the rows this check does not reach.
+  **So no derivation and no figure is published in this bullet at all.** The
+  check derives both sides in the same run and prints them together; the
+  standing assertion is `nocite` against the count of rows whose `provenance`
+  carries no `G2`/`G3` tag, which is a property of the ledger rather than a
+  number carried in prose. Until a Gen-1 arm exists, `nocite` counts the rows
+  this check does not reach — it is not a defect count. `writeme` = **empty**
+  still holds, because `WritemeLens` has 0 orphans, and `writeme` already
+  contradicts any threshold.
 
 **Mutation-test every changed line before trusting the gate, not one of them.**
 Publishing this check on five plants is how it shipped without a floor. All
 thirteen below were planted one at a time in a `/tmp` scratch copy and each
 confirmed to fire [all measured 2026-08-18]:
 
-| mutation                                            | expected                                                                                                                       |
-| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| run it against **this template**                    | `rows=0 parsed=0` — the specimen ids are `` `<lens>-001` `` and `<` is outside the id class. Without the census: total silence |
-| fabrication whose filename carries a path           | that id under **both** `MALFORMED-CITATION (0 of 1 leads parse)` and `NO-CITATION`; `parsons` nocite **76 → 77** ⚠️            |
-| fabrication omitting the `§`                        | the same pair                                                                                                                  |
-| baseline `NO-CITATION` set, nothing planted         | ⚠️ `parsons` = `045`–`120`, **76 rows** — ~~`045`,`046`,`047`~~; `writeme` = none [re-measured 2026-08-20]                     |
-| fabrication **beside** a good citation, path form   | `MALFORMED-CITATION (1 of 2 leads parse)`; nocite **stays 76** ⚠️ — the floor alone is blind here, which is why `lead` exists  |
-| fabrication **beside** a good citation, no-`§` form | the same                                                                                                                       |
-| `lead` false-positive gate, both clean ledgers      | **0** rows where `lead > cited`. **Gate publication on this**                                                                  |
-| `REF=NONE` with a well-formed Gen-2 citation        | `UNEXPECTED-CITATION`                                                                                                          |
-| `PORT=NONE` with a well-formed Gen-3 citation       | `UNEXPECTED-CITATION`. Under the pre-amendment form: **silent**                                                                |
-| `REF=NONE PORT=NONE` on a 4-row fixture             | no per-row `NO-CITATION` spam; census carries `rows=4 parsed=1 nocite=3`                                                       |
-| member filter, `MEMBER=<slug>`                      | per-member `rows=` sums to the whole-ledger `rows=` — 2 + 1 + 1 = 4                                                            |
-| member filter with one marker deleted               | the sum falls **short** (3 of 4) and the preflight names `UNMARKED-ROW`                                                        |
-| `norm()`'s fragment-targeted bracket clause         | an escaped **path** link → `DIVERGENT`; `writeme-006`'s escaped **fragment** link stays clean                                  |
+| mutation                                            | expected                                                                                                                                                                          |
+| --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| run it against **this template**                    | `rows=0 parsed=0` — the specimen ids are `` `<lens>-001` `` and `<` is outside the id class. Without the census: total silence                                                    |
+| fabrication whose filename carries a path           | that id under **both** `MALFORMED-CITATION (0 of 1 leads parse)` and `NO-CITATION`; `parsons` nocite rises by exactly 1                                                           |
+| fabrication omitting the `§`                        | the same pair                                                                                                                                                                     |
+| baseline `NO-CITATION` set, nothing planted         | `parsons` = every `G1-*` row and no other; `writeme` = none. **Derived in the run, never transcribed** — the literal id range this row used to publish is exactly what went stale |
+| fabrication **beside** a good citation, path form   | `MALFORMED-CITATION (1 of 2 leads parse)`; nocite **unchanged** — the floor alone is blind here, which is why `lead` exists                                                       |
+| fabrication **beside** a good citation, no-`§` form | the same                                                                                                                                                                          |
+| `lead` false-positive gate, both clean ledgers      | **0** rows where `lead > cited`. **Gate publication on this**                                                                                                                     |
+| `REF=NONE` with a well-formed Gen-2 citation        | `UNEXPECTED-CITATION`                                                                                                                                                             |
+| `PORT=NONE` with a well-formed Gen-3 citation       | `UNEXPECTED-CITATION`. Under the pre-amendment form: **silent**                                                                                                                   |
+| `REF=NONE PORT=NONE` on a 4-row fixture             | no per-row `NO-CITATION` spam; census carries `rows=4 parsed=1 nocite=3`                                                                                                          |
+| member filter, `MEMBER=<slug>`                      | ⛔ **UNVERIFIABLE TODAY** — `_family-f.md` is not cut, so there is nothing to run it against. per-member `rows=` sums to the whole-ledger `rows=`                                 |
+| member filter with one marker deleted               | ⛔ **UNVERIFIABLE TODAY** — same reason. the sum falls **short** and the preflight names `UNMARKED-ROW`                                                                           |
+| `norm()`'s fragment-targeted bracket clause         | an escaped **path** link → `DIVERGENT`; `writeme-006`'s escaped **fragment** link stays clean                                                                                     |
 
 Four more rows, each added because a reviewer broke the check in that exact
 place [all measured 2026-08-18]:
@@ -1353,7 +1461,7 @@ place [all measured 2026-08-18]:
 | **modification 4** — backticks laundered onto a prose quotation                | `DIVERGENT`. The row whose absence made the amendment gate blind; see below                                                                                                                                                                                                                                                                                                                                    |
 | a fabrication citing a **non-`.md`** file (`types.ts`) beside a good citation  | ⛔ **THIS ROW IS FALSE AND WAS FALSE BEFORE THE TWO-CELL REWRITE.** It documents the **reverted** widened `lead`; the shipping `lead` is `.md`-only, so the plant produces **no line at all** under the published check and under this one alike [both measured 2026-08-20 on the same plant]. Kept, struck, rather than deleted: a corpus row that never fired is the thing this table exists to make visible |
 | the row pattern matches nothing — wrong path, wrong `MEMBER`, ~~moved prefix~~ | `FAIL: zero rows matched`, **exit 1**. ⚠️ The **moved-prefix** clause is false: the id regex is `[a-z0-9-]+-\d{3}`, so renaming `parsons-NNN` to `parsnip-NNN` still yields `rows=120` under both forms. Wrong path and wrong `MEMBER` do fire [measured 2026-08-20]                                                                                                                                           |
-| Family F preflight, marker misspelled into a **shape-valid** slug              | `UNMARKED-ROW`. Under a `[a-z][a-z-]*` character class it was **silent**                                                                                                                                                                                                                                                                                                                                       |
+| Family F preflight, marker misspelled into a **shape-valid** slug              | ⛔ **UNVERIFIABLE TODAY** — `_family-f.md` is not cut. `UNMARKED-ROW`; under a `[a-z][a-z-]*` character class it was **silent**                                                                                                                                                                                                                                                                                |
 
 **And five more for the two-cell arms**, added when the check was cell-scoped
 [all measured 2026-08-20, each planted alone against the check as extracted back
@@ -1392,13 +1500,34 @@ could make that edit, pass every gate this section published, and cite the
 licence.
 
 **So the gate is the mutation corpus, not the regressions.** After any change to
-`norm()`, `unwrap_markup()`, `firstblock`, `glossterm`, `parsed`, `cited` or
-`lead`, **every row of both tables above must still fire**, and then the two
-regressions must hold. (`firstblock` and `glossterm` are named because they
-supply half the comparison and are pasted in from another section, so editing
-them does not look like editing the check.) The modification-4 row exists
-because its absence is what let one widening through: published `norm()` →
-`parsons-001 G2 DIVERGENT`, widened → silent.
+`norm()`, `unwrap_markup()`, `firstblock`, `glossterm`, `parsed`, `cited`,
+`lead`, **the schema resolver, the unescaped-pipe cell split, `$mc`, `$mq`, the
+`RAGGED` arm or the BREACH floor**, **every row of all three tables above must
+still fire**, and then the two regressions must hold. (`firstblock` and
+`glossterm` are named because they supply half the comparison and are pasted in
+from another section, so editing them does not look like editing the check. The
+six added 2026-08-20 are named for the same reason: a cell split can be widened
+and both refusals loosened without any of the original seven being touched.) The
+modification-4 row exists because its absence is what let one widening through:
+published `norm()` → `parsons-001 G2 DIVERGENT`, widened → silent.
+
+⚠️ **The trigger list said "both tables" while three existed**, for one commit
+[found 2026-08-20 by AR-2]. A stale count in the sentence that decides when the
+gate runs is worse than a stale count in a finding, because nothing downstream
+re-derives it.
+
+⛔ **AN APOSTROPHE IN A COMMENT BREAKS THE WHOLE CHECK, SILENTLY.** The perl and
+awk programs above live inside single-quoted shell strings, so a `'` anywhere
+inside one — including in an explanatory comment — terminates the program early
+and the rest is handed to the shell. This shipped: a comment reading _"the
+campaign's own house idiom"_ produced
+`Can't open own: No such file or directory` and an exit status of 2, and a
+harness that only inspected stdout read the empty result as a clean pass
+[measured 2026-08-20]. Two consequences, both mechanical: **write no apostrophe
+inside these blocks** — rephrase, as this file now does — and **give any harness
+that runs an extracted check a floor on the extraction itself**, because an
+empty script exits 0 and prints nothing, which is indistinguishable from a check
+that found nothing.
 
 ⛔ **AND THE CORPUS IS STILL NOT SUFFICIENT. Do not read the paragraph above as
 a closed gate.** AR-2 measured loosenings that pass the whole corpus **and**
