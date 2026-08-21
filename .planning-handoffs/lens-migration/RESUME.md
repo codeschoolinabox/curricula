@@ -204,15 +204,68 @@ wrong one."_ Here the table is right and the heading is wrong.
 **The units, in this order, ONE SESSION EACH. The order is ruled — it is not the
 reading session's to re-pick, and neither is collapsing them into one session.**
 
-|             | unit                                                                                                                           | why it sits here                                                                                               |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| ~~STEP 1a~~ | ~~the Gen-1 second-root read and the ledger append~~                                                                           | **DONE at `fd6066b3`** — 33 rows appended, `048`–`080`. Struck rather than ticked                              |
-| ~~STEP 1b~~ | ~~the re-investigation half of the twin pilot~~                                                                                | **DONE — `7c3da9aa`, `1478049f`, `390e8d54`.** Ledger 80 → **120 rows**. Struck rather than ticked             |
-| **STEP 1c** | [the `quoted`/`reasoned` migration](#-start-here--step-1c-is-the-migration-the-twin-is-blocked-behind-it) — **YOU START HERE** | a human ruling of 2026-08-20 changes the row shape of all eight ledgers, and **the twin is blocked behind it** |
-| **STEP 1d** | the `parsons` twin itself, co-authored                                                                                         | AR-1 forbids drafting it from the ledger as it stands — see the blocker below                                  |
-| **STEP 2**  | [the template amendments](#step-2--three-template-amendments-then-_family-fmd), then `_family-f.md`'s inventory shape          | now **seven**, not three. STEP 1c lands two of them; five remain                                               |
+|             | unit                                                                                                                                                                               | why it sits here                                                                                               |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| ~~STEP 1a~~ | ~~the Gen-1 second-root read and the ledger append~~                                                                                                                               | **DONE at `fd6066b3`** — 33 rows appended, `048`–`080`. Struck rather than ticked                              |
+| ~~STEP 1b~~ | ~~the re-investigation half of the twin pilot~~                                                                                                                                    | **DONE — `7c3da9aa`, `1478049f`, `390e8d54`.** Ledger 80 → **120 rows**. Struck rather than ticked             |
+| **STEP 1c** | [the `quoted`/`reasoned` migration](#-start-here--step-1c-is-the-migration-the-twin-is-blocked-behind-it) — **template half DONE (7 commits); the LEDGER half is where you start** | a human ruling of 2026-08-20 changes the row shape of all eight ledgers, and **the twin is blocked behind it** |
+| **STEP 1d** | the `parsons` twin itself, co-authored                                                                                                                                             | AR-1 forbids drafting it from the ledger as it stands — see the blocker below                                  |
+| **STEP 2**  | [the template amendments](#step-2--three-template-amendments-then-_family-fmd), then `_family-f.md`'s inventory shape                                                              | now **seven**, not three. STEP 1c lands two of them; five remain                                               |
 
 ## ⛔ START HERE — STEP 1c is the migration; the twin is blocked behind it
+
+> ### ⛔ STEP 1c's TEMPLATE HALF IS DONE — YOU ARE STARTING THE LEDGER HALF
+>
+> **Seven commits, 2026-08-20/21, all in `ledgers/_TEMPLATE.md`, none pushed.**
+> No ledger was re-cut — that is deliberately yours.
+>
+> | SHA        | what                                                          |
+> | ---------- | ------------------------------------------------------------- |
+> | `b0f6be78` | `### The structural-integrity check` — NEW                    |
+> | `6c3e6d16` | `### The transport check` — cell-scoped for a two-cell schema |
+> | `0d815dfb` | AR-2 round 1, PAUSE — 12 findings                             |
+> | `708a6902` | AR-2 round 2, PAUSE — 2 findings                              |
+> | `57564e01` | a bare `G3` tag would have broken the new self-check          |
+> | `684adcce` | AR-2 round 3, CONSIDER — 2 residuals                          |
+> | `ea381b82` | `### The Gen-1 arm` — NEW, and RUN against the quarry         |
+>
+> **What is DONE:** the three gates the schema needs to be checkable — a
+> structural-integrity check that sees burial by fence **and** by HTML comment;
+> the transport check cell-scoped so it reads `quoted` and `reasoned` separately
+> and refuses a half-migrated schema; and the Gen-1 arm, which never existed.
+> **Amendment 4 is discharged** by the last of those.
+>
+> **What is NOT done, and is your unit: amendments 6, 7 and 8 — the two-cell
+> schema itself — and then the two ledger re-cuts.** Nothing in the template
+> forecloses the schema; it was left free on purpose.
+>
+> **Why the split:** the schema binds all eight ledgers and is a design unit.
+> [AGENTS.principal.md § Handoff agency](../../AGENTS.principal.md#handoff-agency--the-agent-owns-the-call)
+> rules _"Design ahead → always fresh"_, and this file's own § Read this first
+> records three consecutive same-session fix rounds each introducing the defect
+> they removed. The template half took **three AR-2 rounds**, and every one of
+> them found a defect in the PREVIOUS round's newest code — never in the fixes
+> for the reproduced findings. Expect that pattern; it is why the re-verify is
+> not optional.
+>
+> **Two human rulings taken this session, and they bind you:**
+>
+> 1. **The Gen-1 quarry is MOUNTED and readable** — it is no longer STEP 1d's
+>    alone. The arm ran against it.
+> 2. **`writeme-019` stays in `quoted`.** A citation whose extractor returned
+>    empty is still extractor output, so **`quoted` holds the citations the
+>    extractor ADDRESSES, including those where it returned nothing.** § What
+>    Pass 1 writes owes that one sentence of precision — it is currently only in
+>    `0d815dfb`'s body, and writing it is part of amendment 6.
+>
+> ⛔ **The Gen-1 arm found SEVEN transport defects nobody had ever checked** —
+> rows `050`, `051` ×2, `056`, `108` ×2, `110` — on top of the 8 this file
+> already names. They are the fragments the 2026-08-19 stopgap **skipped** as
+> truncated, and they are the same composed-onto-one-line class. **Fifteen
+> genuine defects now, not eight.** Full enumeration and the two non-defects on
+> `parsons-109` are in `_TEMPLATE.md` § The Gen-1 arm; they are published there
+> rather than recorded against the rows, because a repair is its own unit with
+> its own gate run.
 
 **STEP 1b's re-investigation is done and its three commits are unpushed.** The
 ledger went from 80 rows to **120**: 35 from four fresh readers over
@@ -358,7 +411,18 @@ wire-frames — **not** stories or sequencing), the two-persona ruling, and the
 decomposition of the learner's journeys on the engine's four logged move types.
 The skeleton was corrected by the human twice and is in that section.
 
-### ⛔ STEP 1a's rows carry 8 non-transporting quotations, measured and unrepaired
+### ⛔ STEP 1a's rows carry 15 non-transporting quotations, measured and unrepaired
+
+⚠️ **This section said EIGHT until 2026-08-21, and eight was what the instrument
+could see, not what was there.** The Gen-1 arm published at `ea381b82` found
+**seven more** — rows `050`, `051` ×2, `056`, `108` ×2, `110` — every one of
+them a fragment the 2026-08-19 stopgap **skipped as truncated** and therefore
+never checked. They are the same composed-onto-one-line class as the original
+eight. The paragraph below is kept because its reasoning is still right; only
+its number was wrong, and it was wrong because a skip reads exactly like a pass.
+**Canonical enumeration, with the two non-defects on `parsons-109` and why they
+cannot be fixed in a one-cell ledger:**
+[`_TEMPLATE.md` § The Gen-1 arm](./ledgers/_TEMPLATE.md#the-gen-1-arm).
 
 Rows **`050`, `052`, `058`, `066` (two fragments), `068`, `072`, `076`** quote
 Gen-1 source that is not in the source [measured 2026-08-19: 147 fragments
@@ -399,19 +463,25 @@ amendments actually named across this file yields EIGHT** [measured 2026-08-20
 by AR-5, reproduced]. **This is the list. Every other site defers to it, and no
 number anywhere is to be transcribed.**
 
-| #     | amendment                                                                                                                                                                | state                                                  |
-| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------ |
-| **1** | the Family F invocation is a census, not a floor                                                                                                                         | open, ⛔ in `_TEMPLATE.md`                             |
-| **2** | the mutation corpus is not a sufficient amendment gate                                                                                                                   | open, ⛔ in `_TEMPLATE.md`                             |
-| **3** | `[COPY]` / `[METHOD]` marking per section                                                                                                                                | open                                                   |
-| **4** | a citation anchor for a non-markdown, non-test source                                                                                                                    | open — **used** by rows `048`–`120`, still unpublished |
-| **5** | the mutation-test procedure cannot tell a live check from a failed plant                                                                                                 | open                                                   |
-| **6** | **the `quoted` / `reasoned` split**                                                                                                                                      | **STEP 1c** — ruled 2026-08-20                         |
-| **7** | **the per-cohort `pass` column**                                                                                                                                         | **STEP 1c** — landed for `parsons` only at `390e8d54`  |
-| **8** | **`<em>` versus a code span** — a quotation carrying significant whitespace, `*`, or a bare `_` must go in a code span, because `<em>` lets prettier silently rewrite it | **STEP 1c** — three corruptions measured 2026-08-19/20 |
+| #         | amendment                                                                                                                                                                | state                                                                                                                     |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| **1**     | the Family F invocation is a census, not a floor                                                                                                                         | open, ⛔ in `_TEMPLATE.md`                                                                                                |
+| **2**     | the mutation corpus is not a sufficient amendment gate                                                                                                                   | open, ⛔ in `_TEMPLATE.md`                                                                                                |
+| **3**     | `[COPY]` / `[METHOD]` marking per section                                                                                                                                | open                                                                                                                      |
+| ~~**4**~~ | ~~a citation anchor for a non-markdown, non-test source~~                                                                                                                | ⛔ **DISCHARGED at `ea381b82`** — `_TEMPLATE.md` § The Gen-1 arm publishes the grammar those rows use. Struck, not ticked |
+| **5**     | the mutation-test procedure cannot tell a live check from a failed plant                                                                                                 | open                                                                                                                      |
+| **6**     | **the `quoted` / `reasoned` split**                                                                                                                                      | **STEP 1c** — ruled 2026-08-20                                                                                            |
+| **7**     | **the per-cohort `pass` column**                                                                                                                                         | **STEP 1c** — landed for `parsons` only at `390e8d54`                                                                     |
+| **8**     | **`<em>` versus a code span** — a quotation carrying significant whitespace, `*`, or a bare `_` must go in a code span, because `<em>` lets prettier silently rewrite it | **STEP 1c** — three corruptions measured 2026-08-19/20                                                                    |
 
-**STEP 1c lands 6, 7 and 8. Five remain**, and standing ruling 3 binds every one
-of them before `_family-f.md` is cut.
+⚠️ **STEP 1c's TEMPLATE HALF is done and landed nothing on this list except 4.**
+Amendments **6, 7 and 8 are still open** — they are the two-cell schema itself,
+and that is the next session's unit. What the template half did land is the
+three **gates** the schema needs in order to be checkable at all, plus amendment
+4, which fell out of building the Gen-1 arm.
+
+**Four remain: 1, 2, 3 and 5**, plus 6, 7 and 8 which are the next unit.
+Standing ruling 3 binds every one of them before `_family-f.md` is cut.
 
 ### AR-1's concerns still open — enumerated, not absorbed
 
