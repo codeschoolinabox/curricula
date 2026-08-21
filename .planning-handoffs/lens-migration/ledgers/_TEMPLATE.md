@@ -12,7 +12,7 @@
 <!-- structure-check.sh awk locals; see § The structural-integrity check: -->
 <!-- cspell:ignore isledger lslice bslice bbanner lrow ochar incomment -->
 <!-- transport-check.sh schema locals; see § The transport check: -->
-<!-- cspell:ignore QCOL RCOL NCELL -->
+<!-- cspell:ignore QCOL RCOL NCELL PCOL provless istemplate -->
 
 # `<lens>` — fidelity ledger
 
@@ -1049,6 +1049,10 @@ awk -v lens="${2:-}" '
   lens != "" && $0 ~ ("^\\| `" lens "-[0-9][0-9][0-9]`") {
     if (buried) { brow++; if (!frow) frow = NR } else lrow++ }
 
+  # The skeleton announces itself IN ITS OWN TEXT -- its specimen rows literally
+  # read `<lens>-001`. Keyed here, on the document, and never on the argument.
+  /^\| `<[a-z]+>-[0-9][0-9][0-9]`/ { istemplate=1 }
+
   END {
     bad = 0
     # Arm 1 -- an unterminated container. EVERY document, ledger or not.
@@ -1064,14 +1068,25 @@ awk -v lens="${2:-}" '
              (open?1:0), (incomment?1:0)
       exit bad }
 
-    # THIS TEMPLATE is a ledger by shape and NOT one by status, and the
-    # discriminator is mechanical rather than a filename: the row-id prefix of a
-    # real ledger is a lens slug, and only the skeleton uses the placeholder.
-    # Its specimen rows are SUPPOSED to sit inside the two `<!-- … -->` blocks
-    # § Rows tells a seeder to delete -- so buried rows are expected here and a
-    # defect anywhere else. Reported, never silently exempted.
-    if (lens ~ /[<>]/) {
+    # THIS TEMPLATE is a ledger by shape and NOT one by status. Its specimen
+    # rows are SUPPOSED to sit inside the two `<!-- … -->` blocks § Rows tells a
+    # seeder to delete -- so buried rows are expected here and a defect anywhere
+    # else. Reported, never silently exempted.
+    #
+    # ⛔ BOTH conditions, and the document one is the load-bearing half. An
+    # earlier form branched on `lens ~ /[<>]/` alone -- the CALLER-supplied
+    # prefix -- so `structure-check.sh parsons.md <lens>` printed a clean census
+    # over a real 120-row ledger, buried rows and all [measured 2026-08-20 by
+    # AR-2, reproduced]. That is verbatim the `LENS=_family-f` defect Arm 5
+    # below claims to have forestalled, re-inherited on a new branch -- and made
+    # SHORTER to reach, because § The structural-integrity check publishes
+    # `_TEMPLATE.md <lens>` as the canonical invocation and swapping the
+    # filename is exactly how a published invocation gets reused.
+    if (istemplate && lens ~ /^<[a-z]+>$/) {
       if (lslice != 2) { printf "FAIL STRUCT-SLICE-BROKEN: %d live slice headings, expected 2\n", lslice+0; bad=1 }
+      # The template branch carries its own floor: a skeleton has specimen rows,
+      # and zero of them means the prefix did not match what the document uses.
+      if (lrow + brow == 0) { printf "FAIL STRUCT-NO-SPECIMENS: no `%s-NNN` rows -- this is not the skeleton\n", lens; bad=1 }
       printf "STRUCT-CENSUS doc=template specimen-rows-live=%d specimen-rows-commented=%d unclosed-fence=%d unclosed-comment=%d\n",
              lrow+0, brow+0, (open?1:0), (incomment?1:0)
       exit bad }
@@ -1201,7 +1216,8 @@ perl -ne '
     $SEEN = 1;
     my @h = split /(?<!\\)\|/, $_, -1; $NCELL = scalar @h;
     for my $i (0..$#h) { my $t = $h[$i]; $t =~ s/^\s+|\s+$//g;
-      $QCOL = $i if $t eq "quoted"; $RCOL = $i if $t eq "reasoned"; $ECOL = $i if $t eq "evidence"; }
+      $QCOL = $i if $t eq "quoted"; $RCOL = $i if $t eq "reasoned"; $ECOL = $i if $t eq "evidence";
+      $PCOL = $i if $t eq "provenance"; }
     # SCHEMA RESOLUTION IS TOTAL, never a fallback chain. Four states, three
     # legal. An earlier form tested only `$QCOL < 0 && $ECOL >= 0` and so
     # resolved `evidence` + `reasoned` -- the insert done, the rename not -- to
@@ -1276,6 +1292,17 @@ perl -ne '
     print join("\t",$id,"-","-","!MISPLACED-QUOTATION","$mq in reasoned"),"\n" if $mq;
   }
 
+  # THE SELF-CHECK ON `nocite`, so that no derivation of it has to live in
+  # prose. A row carrying no `G2`/`G3` provenance tag is a row this grammar
+  # cannot reach by construction, so `nocite` and `provless` must agree. Three
+  # successive revisions of § The transport check published a DERIVATION of the
+  # NO-CITATION set instead: the first went stale by 73 rows, the second was
+  # wrong in the same shape, and the third asserted that the check enforced it
+  # when the check had no counter reading `provenance` at all [measured
+  # 2026-08-20 by AR-2 -- a negative grep over the assembled check]. That third
+  # form is the worst of the three, because being told a self-check exists is
+  # what stops anyone re-deriving it. This is that self-check.
+  $provless++ if $PCOL >= 0 && $PCOL <= $#c && $c[$PCOL] !~ /G[23]-/;
   if ($n == 0) { $nocite++;
     print join("\t",$id,"-","-","!NO-CITATION","-"),"\n" unless $noref; }
   END { # Ledger-hood is INCREMENT 1 PREDICATE, reused rather than re-invented.
@@ -1284,11 +1311,27 @@ perl -ne '
         # `BREACH SCHEMA unresolved` (exit 1) where the pre-rewrite check
         # exited 0, so the two gates published one commit apart gave opposite
         # answers to "is this a ledger" [measured 2026-08-20, AR-2].
-        if (!$ISLEDGER) { print join("\t","-","-","-","!NOT-A-LEDGER","-"),"\n" }
+        # ⚠️ One heading must not be a kill switch for the whole gate stack.
+        # `## Rows` is what `slice()`, the Pass-1 gate and both of these gates
+        # key on, so renaming it made a ledger report `doc=not-a-ledger` at exit
+        # 0 in BOTH gates -- and suppressed a real schema breach that had
+        # refused a moment earlier [measured 2026-08-20 by AR-2]. A document
+        # carrying a ledger-shaped header row while missing `## Rows` is
+        # therefore a refusal, not an exemption. Verified safe on the two
+        # narrative ledgers: `_boundary.md`s two `| # |` headers name neither
+        # column, and `_playbook.md` has no header row at all.
+        if (!$ISLEDGER) {
+          if ($QCOL >= 0 || $ECOL >= 0) {
+            print join("\t","-","-","-","!SCHEMA",
+              "ledger-shaped header row but no `## Rows` heading -- slice(), the Pass-1 gate and both gates key on it"),"\n" }
+          else { print join("\t","-","-","-","!NOT-A-LEDGER","-"),"\n" } }
         elsif ($SCHEMA) { print join("\t","-","-","-","!SCHEMA",$SCHEMA),"\n" }
+        print join("\t","-","-","-","!NOCITE-MISMATCH",
+                   "nocite=".($nocite+0)." provless=".($provless+0)),"\n"
+            if $ISLEDGER && !$noref && ($nocite+0) != ($provless+0);
         print join("\t","-","-","-","!CENSUS",
         "member=$M ref=$ENV{REF} rows=".($rows+0)
-        ." parsed=".($parsed+0)." nocite=".($nocite+0)),"\n" }
+        ." parsed=".($parsed+0)." nocite=".($nocite+0)." provless=".($provless+0)),"\n" }
 ' "$L" > "$REC"
 
 # NOT `$(while ... case ...)`: the `)` closing a case pattern terminates the
@@ -1305,6 +1348,7 @@ while IFS=$'\t' read -r id side file head stored; do
     '!MISPLACED-QUOTATION') echo "BREACH $id MISPLACED-QUOTATION ($stored)"; continue;;
     '!SCHEMA')      echo "BREACH SCHEMA $stored";            continue;;
     '!NOT-A-LEDGER') echo "doc=not-a-ledger -- no \`## Rows\`; schema and reasoned arms N/A"; continue;;
+    '!NOCITE-MISMATCH') echo "BREACH NOCITE-MISMATCH ($stored) -- rows unreachable by the grammar do not match rows carrying no G2/G3 tag"; continue;;
   esac
   case "$side" in
     G2) [ "$REF"  = NONE ] && { echo "$id G2 UNEXPECTED-CITATION $file § $head"; continue; }
@@ -1423,14 +1467,31 @@ literal-prefix discipline `firstblock`, `glossterm` and `resolve` all carry.
   correction that re-instantiates the defect it corrects is this campaign's
   recorded failure mode, and it happened here one paragraph after the strike.**
 
-  **So no derivation and no figure is published in this bullet at all.** The
-  check derives both sides in the same run and prints them together; the
-  standing assertion is `nocite` against the count of rows whose `provenance`
-  carries no `G2`/`G3` tag, which is a property of the ledger rather than a
-  number carried in prose. Until a Gen-1 arm exists, `nocite` counts the rows
-  this check does not reach — it is not a defect count. `writeme` = **empty**
-  still holds, because `WritemeLens` has 0 orphans, and `writeme` already
-  contradicts any threshold.
+  ⚠️ **And the SECOND replacement was worse than the first two, which is why the
+  mechanism now exists in the check rather than in this bullet.** It said _"the
+  check derives both sides in the same run"_ — describing a self-check that
+  **had never been written**: the assembled check maintained seven counters and
+  not one of them read the `provenance` cell [measured 2026-08-20 by AR-2, a
+  negative grep over the extracted program]. A stale derivation is bad; a
+  derivation that tells the reader a self-check exists is worse, because it is
+  the sentence that stops anyone re-deriving it.
+
+  **So the mechanism is now real and this bullet publishes no figure.** The
+  check counts `provless` — rows whose `provenance` carries no `G2`/`G3` tag —
+  beside `nocite`, prints both on the `CENSUS` line, and raises
+  `BREACH NOCITE-MISMATCH` when they disagree. A row unreachable by the Gen-2/3
+  grammar and a row carrying no Gen-2/3 tag are the same row by construction, so
+  the equality is an invariant of the ledger rather than a number in prose, and
+  the next append re-derives it instead of staling it. Until a Gen-1 arm exists,
+  `nocite` counts the rows this check does not reach — it is **not** a defect
+  count. `writeme` = **empty** still holds, because `WritemeLens` has 0 orphans.
+
+  ⚠️ **This adds a field to the `CENSUS` line, so the census is no longer
+  byte-identical to the pre-rewrite form.** § The amendment gate's two clean
+  regressions are stated as **findings** — `parsons` 0 divergent, `writeme`
+  exactly `writeme-019 UNQUOTED (1 of 2 cited)` — and those are unchanged and
+  still byte-identical. It is the census line, which reports rather than
+  asserts, that grew.
 
 **Mutation-test every changed line before trusting the gate, not one of them.**
 Publishing this check on five plants is how it shipped without a floor. All
@@ -1468,13 +1529,25 @@ place [all measured 2026-08-18]:
 out of this file]. A `BREACH` is a violated contract rather than a finding about
 a quotation, so every one of these **exits 1**:
 
-| mutation                                                           | expected                                                                            |
-| ------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
-| the header's `quoted` column renamed                               | `BREACH SCHEMA unresolved`. The check refuses rather than reading column 4 by index |
-| `quoted` present, `reasoned` renamed away                          | `BREACH SCHEMA half-migrated`                                                       |
-| a `\|` unescaped inside a cell — the prettier/`MD056` damage class | `BREACH parsons-091 RAGGED-ROW (14 cells against header 9)`                         |
-| a quotation planted in the `reasoned` cell                         | `BREACH parsons-086 MISPLACED-QUOTATION (1 in reasoned)`                            |
-| a citation planted in the `reasoned` cell                          | `BREACH parsons-086 MISPLACED-CITATION (1 in reasoned)`                             |
+| mutation                                                             | expected                                                                                                                                                         |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| the header's `quoted` column renamed                                 | `BREACH SCHEMA unresolved`. The check refuses rather than reading column 4 by index                                                                              |
+| `quoted` present, `reasoned` renamed away                            | `BREACH SCHEMA half-migrated`                                                                                                                                    |
+| a `\|` unescaped inside a cell — the prettier/`MD056` damage class   | `BREACH parsons-091 RAGGED-ROW (14 cells against header 9)`                                                                                                      |
+| a quotation planted in the `reasoned` cell                           | `BREACH parsons-086 MISPLACED-QUOTATION (1 in reasoned)`                                                                                                         |
+| a citation planted in the `reasoned` cell                            | `BREACH parsons-086 MISPLACED-CITATION (1 in reasoned)`                                                                                                          |
+| `evidence` **and** `reasoned` in one header — the rename half missed | `BREACH SCHEMA half-migrated -- reasoned present beside evidence`. Under a fallback chain this resolved to LEGACY and drained the whole `reasoned` arm at exit 0 |
+| `## Rows` renamed on a ledger-shaped document                        | `BREACH SCHEMA ledger-shaped header row but no ## Rows`. One heading must not switch the gate stack off                                                          |
+| `nocite` and `provless` forced apart                                 | `BREACH NOCITE-MISMATCH`. Both clean ledgers agree on the first run — `parsons` 76/76, `writeme` 0/0                                                             |
+
+**And two for
+[§ The structural-integrity check](#the-structural-integrity-check--run-this-one-first)**,
+whose template branch is the newest code in either gate:
+
+| mutation                                                         | expected                                                                                                           |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| a **real ledger** invoked with the placeholder prefix `'<lens>'` | `FAIL STRUCT-ZERO-ROWS`, exit 1. Branching on the ARGUMENT alone printed a clean census over a live 120-row ledger |
+| **this template** invoked with a real lens prefix                | `FAIL STRUCT-ZERO-ROWS`, exit 1 — the template branch requires BOTH the document flag and the argument shape       |
 
 ⚠️ **Two of these were mis-planted first and passed, which is the point of
 planting them one at a time.** A `MISPLACED-QUOTATION` plant appended to the end
