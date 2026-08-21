@@ -10,7 +10,7 @@
 <!-- cspell:ignore keyable legitimise nocite quotemeta mktemp licence unrun -->
 <!-- cspell:ignore capitalisation loosenings -->
 <!-- structure-check.sh awk locals; see § The structural-integrity check: -->
-<!-- cspell:ignore isledger lslice bslice bbanner lrow ochar incomment -->
+<!-- cspell:ignore isledger lslice bslice bbanner lrow ochar incomment hasreal -->
 <!-- transport-check.sh schema locals; see § The transport check: -->
 <!-- cspell:ignore QCOL RCOL NCELL PCOL provless istemplate -->
 
@@ -1051,7 +1051,17 @@ awk -v lens="${2:-}" '
 
   # The skeleton announces itself IN ITS OWN TEXT -- its specimen rows literally
   # read `<lens>-001`. Keyed here, on the document, and never on the argument.
-  /^\| `<[a-z]+>-[0-9][0-9][0-9]`/ { istemplate=1 }
+  # `^\|` is load-bearing: a specimen quoted INSIDE a cell is escaped and does
+  # not match, so no other campaign document sets this [measured 2026-08-21:
+  # exactly one file matches, `_TEMPLATE.md`, 3 lines].
+  /^\| `<[a-z]+>-[0-9][0-9][0-9]`/    { istemplate=1 }
+  # ...and a real ledger announces ITSELF, by carrying a real-slug row. Required
+  # ABSENT below, because `istemplate` alone is set by a LEFTOVER specimen row
+  # too -- and an undeleted specimen plus the published placeholder invocation
+  # co-occur naturally at the seeding commit, the one moment § When this check
+  # runs names. Measured 2026-08-21: `_TEMPLATE.md` 0 real-slug rows,
+  # `parsons.md` 120, a ledger with a leftover specimen 120.
+  /^\| `[a-z][a-z0-9-]*-[0-9][0-9][0-9]`/ { hasreal=1 }
 
   END {
     bad = 0
@@ -1082,7 +1092,7 @@ awk -v lens="${2:-}" '
     # SHORTER to reach, because § The structural-integrity check publishes
     # `_TEMPLATE.md <lens>` as the canonical invocation and swapping the
     # filename is exactly how a published invocation gets reused.
-    if (istemplate && lens ~ /^<[a-z]+>$/) {
+    if (istemplate && !hasreal && lens ~ /^<[a-z]+>$/) {
       if (lslice != 2) { printf "FAIL STRUCT-SLICE-BROKEN: %d live slice headings, expected 2\n", lslice+0; bad=1 }
       # The template branch carries its own floor: a skeleton has specimen rows,
       # and zero of them means the prefix did not match what the document uses.
@@ -1090,6 +1100,16 @@ awk -v lens="${2:-}" '
       printf "STRUCT-CENSUS doc=template specimen-rows-live=%d specimen-rows-commented=%d unclosed-fence=%d unclosed-comment=%d\n",
              lrow+0, brow+0, (open?1:0), (incomment?1:0)
       exit bad }
+
+    # Arm 1b -- a real ledger carrying SPECIMEN rows. § Rows tells a seeder to
+    # delete both specimen blocks; nothing was checking that they had been. The
+    # Pass-1 gate cannot: its walk check keys on `**`walked`**` / `**`found`** /
+    # `Design owed`, which a specimen row does not carry, and its id-sequence
+    # and census checks only see `<lens-slug>-NNN` rows [measured 2026-08-21 by
+    # AR-2]. An undeleted specimen also flips `istemplate` on a real ledger,
+    # which is how it reached the template branch at all.
+    if (istemplate && hasreal) {
+      printf "FAIL STRUCT-SPECIMEN-LEFT: a real ledger still carries `<lens>-NNN` specimen rows -- § Rows says delete them\n"; bad=1 }
 
     # Arms 2-4 -- containment. A LEDGER only. "Buried" means fenced OR
     # commented; the arms deliberately do not distinguish, because the reader
@@ -1311,6 +1331,16 @@ perl -ne '
   # `G3` is an ADDITION, so the first one written would have raised a false
   # BREACH against a correct ledger.
   $provless++ if $PCOL >= 0 && $PCOL <= $#c && $c[$PCOL] !~ /G2-|G3/;
+  # `unreachable` is the side compared against `provless`, and it is NOT
+  # `nocite`. A row carrying a Gen-2/3 pointer the grammar cannot read is
+  # UNREACHABLE-BY-DEFECT and lands in `nocite`; a row carrying no pointer at
+  # all is unreachable BY CONSTRUCTION. Comparing `nocite` to `provless`
+  # collapsed those two -- which is the same two-reasons distinction the struck
+  # NO-CITATION derivation failed on, re-made one revision later -- and turned a
+  # published MALFORMED-CITATION finding into a whole-ledger BREACH claiming the
+  # two-cell contract was violated when a quotation was merely mis-transcribed
+  # [measured 2026-08-21 by AR-2]. `lead == 0` is the by-construction side.
+  $unreachable++ if $lead == 0;
   if ($n == 0) { $nocite++;
     print join("\t",$id,"-","-","!NO-CITATION","-"),"\n" unless $noref; }
   END { # Ledger-hood is INCREMENT 1 PREDICATE, reused rather than re-invented.
@@ -1335,11 +1365,12 @@ perl -ne '
           else { print join("\t","-","-","-","!NOT-A-LEDGER","-"),"\n" } }
         elsif ($SCHEMA) { print join("\t","-","-","-","!SCHEMA",$SCHEMA),"\n" }
         print join("\t","-","-","-","!NOCITE-MISMATCH",
-                   "nocite=".($nocite+0)." provless=".($provless+0)),"\n"
-            if $ISLEDGER && !$noref && ($nocite+0) != ($provless+0);
+                   "unreachable=".($unreachable+0)." provless=".($provless+0)),"\n"
+            if $ISLEDGER && !$noref && ($unreachable+0) != ($provless+0);
         print join("\t","-","-","-","!CENSUS",
         "member=$M ref=$ENV{REF} rows=".($rows+0)
-        ." parsed=".($parsed+0)." nocite=".($nocite+0)." provless=".($provless+0)),"\n" }
+        ." parsed=".($parsed+0)." nocite=".($nocite+0)
+        ." unreachable=".($unreachable+0)." provless=".($provless+0)),"\n" }
 ' "$L" > "$REC"
 
 # NOT `$(while ... case ...)`: the `)` closing a case pattern terminates the
@@ -1553,10 +1584,12 @@ a quotation, so every one of these **exits 1**:
 [§ The structural-integrity check](#the-structural-integrity-check--run-this-one-first)**,
 whose template branch is the newest code in either gate:
 
-| mutation                                                         | expected                                                                                                           |
-| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| a **real ledger** invoked with the placeholder prefix `'<lens>'` | `FAIL STRUCT-ZERO-ROWS`, exit 1. Branching on the ARGUMENT alone printed a clean census over a live 120-row ledger |
-| **this template** invoked with a real lens prefix                | `FAIL STRUCT-ZERO-ROWS`, exit 1 — the template branch requires BOTH the document flag and the argument shape       |
+| mutation                                                          | expected                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| a **real ledger** invoked with the placeholder prefix `'<lens>'`  | `FAIL STRUCT-ZERO-ROWS`, exit 1. Branching on the ARGUMENT alone printed a clean census over a live 120-row ledger                                                                                                                                                                                                                                                                                               |
+| **this template** invoked with a real lens prefix                 | `FAIL STRUCT-ZERO-ROWS`, exit 1 — the template branch requires BOTH the document flag and the argument shape                                                                                                                                                                                                                                                                                                     |
+| this template invoked with an unused placeholder, `'<other>'`     | `FAIL STRUCT-NO-SPECIMENS`, exit 1 — the template branch has its own floor and cannot be entered vacuously                                                                                                                                                                                                                                                                                                       |
+| a real ledger carrying a **leftover specimen row**, either prefix | `FAIL STRUCT-SPECIMEN-LEFT`, exit 1. Nothing else catches it: the Pass-1 gate's walk check keys on `walked`/`found`/`Design owed`, which a specimen row does not carry, and its id and census checks see only real-slug rows. The leftover ALSO flips `istemplate`, which is how it reached the template branch — so both conditions co-occur at the seeding commit, the one moment § When this check runs names |
 
 ⚠️ **Two of these were mis-planted first and passed, which is the point of
 planting them one at a time.** A `MISPLACED-QUOTATION` plant appended to the end
@@ -1571,6 +1604,15 @@ and writing the named field, never by appending to the line.
 **0 divergent**, and `parsons` **0 divergent** [measured 2026-08-18]. Necessary,
 and **nowhere near sufficient** — an earlier revision published them as the
 whole gate.
+
+⚠️ **What is held byte-identical is the FINDING LINES, not the whole run.** The
+`CENSUS` line has since gained `unreachable=` and `provless=`, so a whole-run
+diff against a transcript from before 2026-08-20 shows a difference that is not
+a regression. This section's own distinction governs — _"a census reports; a
+floor refuses"_ — and growing a reporting line does not relax an assertion. Two
+immutable commit bodies (`6c3e6d16`, `0d815dfb`) claim byte-identity of the
+**output**; that is now true only of the findings, and this is where the
+correction lives because those bodies cannot carry it.
 
 ⚠️ **A zero baseline cannot detect a loosening.** Both regressions sit at 0
 divergent, so widening `norm()` leaves 0 at 0. AR-2 performed the exact widening
