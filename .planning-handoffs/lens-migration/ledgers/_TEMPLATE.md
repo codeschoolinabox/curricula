@@ -1302,7 +1302,15 @@ perl -ne '
   # 2026-08-20 by AR-2 -- a negative grep over the assembled check]. That third
   # form is the worst of the three, because being told a self-check exists is
   # what stops anyone re-deriving it. This is that self-check.
-  $provless++ if $PCOL >= 0 && $PCOL <= $#c && $c[$PCOL] !~ /G[23]-/;
+  # ⚠️ `G2-` OR `G3`, never `G[23]-`. The provenance vocabulary is `G1-live`,
+  # `G1-dead`, `G2-code`, `G2-doc` and a BARE `G3` -- the Gen-3 tag carries no
+  # hyphen, so a hyphen-anchored class silently misses it. No row is `G3`-only
+  # in either committed ledger today [measured 2026-08-20: 0 of 120 and 0 of 45],
+  # so `G[23]-` agreed with `nocite` by luck of the current data rather than by
+  # being right -- and FIDELITY-METHOD § Columns rules that a row carrying only
+  # `G3` is an ADDITION, so the first one written would have raised a false
+  # BREACH against a correct ledger.
+  $provless++ if $PCOL >= 0 && $PCOL <= $#c && $c[$PCOL] !~ /G2-|G3/;
   if ($n == 0) { $nocite++;
     print join("\t",$id,"-","-","!NO-CITATION","-"),"\n" unless $noref; }
   END { # Ledger-hood is INCREMENT 1 PREDICATE, reused rather than re-invented.
@@ -1529,16 +1537,17 @@ place [all measured 2026-08-18]:
 out of this file]. A `BREACH` is a violated contract rather than a finding about
 a quotation, so every one of these **exits 1**:
 
-| mutation                                                             | expected                                                                                                                                                         |
-| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| the header's `quoted` column renamed                                 | `BREACH SCHEMA unresolved`. The check refuses rather than reading column 4 by index                                                                              |
-| `quoted` present, `reasoned` renamed away                            | `BREACH SCHEMA half-migrated`                                                                                                                                    |
-| a `\|` unescaped inside a cell — the prettier/`MD056` damage class   | `BREACH parsons-091 RAGGED-ROW (14 cells against header 9)`                                                                                                      |
-| a quotation planted in the `reasoned` cell                           | `BREACH parsons-086 MISPLACED-QUOTATION (1 in reasoned)`                                                                                                         |
-| a citation planted in the `reasoned` cell                            | `BREACH parsons-086 MISPLACED-CITATION (1 in reasoned)`                                                                                                          |
-| `evidence` **and** `reasoned` in one header — the rename half missed | `BREACH SCHEMA half-migrated -- reasoned present beside evidence`. Under a fallback chain this resolved to LEGACY and drained the whole `reasoned` arm at exit 0 |
-| `## Rows` renamed on a ledger-shaped document                        | `BREACH SCHEMA ledger-shaped header row but no ## Rows`. One heading must not switch the gate stack off                                                          |
-| `nocite` and `provless` forced apart                                 | `BREACH NOCITE-MISMATCH`. Both clean ledgers agree on the first run — `parsons` 76/76, `writeme` 0/0                                                             |
+| mutation                                                             | expected                                                                                                                                                                                                                                                               |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| the header's `quoted` column renamed                                 | `BREACH SCHEMA unresolved`. The check refuses rather than reading column 4 by index                                                                                                                                                                                    |
+| `quoted` present, `reasoned` renamed away                            | `BREACH SCHEMA half-migrated`                                                                                                                                                                                                                                          |
+| a `\|` unescaped inside a cell — the prettier/`MD056` damage class   | `BREACH parsons-091 RAGGED-ROW (14 cells against header 9)`                                                                                                                                                                                                            |
+| a quotation planted in the `reasoned` cell                           | `BREACH parsons-086 MISPLACED-QUOTATION (1 in reasoned)`                                                                                                                                                                                                               |
+| a citation planted in the `reasoned` cell                            | `BREACH parsons-086 MISPLACED-CITATION (1 in reasoned)`                                                                                                                                                                                                                |
+| `evidence` **and** `reasoned` in one header — the rename half missed | `BREACH SCHEMA half-migrated -- reasoned present beside evidence`. Under a fallback chain this resolved to LEGACY and drained the whole `reasoned` arm at exit 0                                                                                                       |
+| `## Rows` renamed on a ledger-shaped document                        | `BREACH SCHEMA ledger-shaped header row but no ## Rows`. One heading must not switch the gate stack off                                                                                                                                                                |
+| `nocite` and `provless` forced apart                                 | `BREACH NOCITE-MISMATCH`. Both clean ledgers agree on the first run — `parsons` 76/76, `writeme` 0/0                                                                                                                                                                   |
+| a synthetic **`G3`-only** row, the `ADDITION` shape                  | **SILENT.** Under a `G[23]-` character class it was a false `BREACH NOCITE-MISMATCH (nocite=0 provless=1)`: the Gen-3 tag carries no hyphen, and no `G3`-only row exists in either ledger today, so the counters agreed by luck of the data rather than by being right |
 
 **And two for
 [§ The structural-integrity check](#the-structural-integrity-check--run-this-one-first)**,
