@@ -13,6 +13,8 @@
 <!-- cspell:ignore isledger lslice bslice bbanner lrow ochar incomment hasreal -->
 <!-- transport-check.sh schema locals; see § The transport check: -->
 <!-- cspell:ignore QCOL RCOL NCELL PCOL provless istemplate -->
+<!-- gen1-arm.sh locals; see § The Gen-1 arm: -->
+<!-- cspell:ignore toks unesc -->
 
 # `<lens>` — fidelity ledger
 
@@ -1597,6 +1599,212 @@ of the row line landed in `gate`, not `reasoned`, and the check correctly said
 nothing. **A plant that does not land where you think it did reads exactly like
 a check that does not fire.** Plant by splitting the row on the unescaped pipe
 and writing the named field, never by appending to the line.
+
+### The Gen-1 arm
+
+**§ The transport check re-runs an EXTRACTOR and diffs. Gen-1 has no
+extractor**, because it cites non-markdown source with no headings — so this arm
+asserts **substring-and-count** instead. It is the missing arm
+[SPEC.md § The register check](../SPEC.md#the-register-check) has been owed
+since `fd6066b3`, and until it existed `parsons`'s 78 Gen-1 citations were
+invisible at all three counters.
+
+**Three assertion kinds, and collapsing them into one `grep -F` is wrong-signed
+on two of the three:**
+
+| kind      | assertion                                                                                                             |
+| --------- | --------------------------------------------------------------------------------------------------------------------- |
+| `PRESENT` | the fragment occurs in the anchor's file, and where the citation carries `(N×)` the anchor occurs **exactly** N times |
+| `ABSENT`  | the anchor occurs exactly **0** times — the `occurs 0 times` family, which a substring gate reports backwards         |
+| `SET`     | a lister-4 cluster: every listed class name, and the declared count against the listed count                          |
+
+**Count OCCURRENCES, never lines.** `grep -c` counts matching lines, and
+`parsons-104` asserts `prettyPrint` at 8× — a line-counting check is wrong the
+moment two land on one line.
+
+**Refusals are visible and ARITHMETIC.** Every citation is either checked or
+named on a `REFUSED` line, and the census refuses to close unless
+`checked + refused == citations`. A form this arm cannot check is **named**,
+never skipped — that is the whole difference between this and the silent
+`nocite` it replaces.
+
+```bash
+# gen1-arm.sh <ledger.md> <gen1-root> <row-id-prefix>
+#
+# Run from the repository root. <gen1-root> is absolute and must be PINNED and
+# reported: the quarry carries three copies of every cited file and they are not
+# identical -- parsons-iframe.html differs across all three roots by 16 lines
+# [measured 2026-08-21]. The findings below happen to be root-insensitive, and
+# that is a measurement, not an assumption.
+set -u
+LC_ALL=C; export LC_ALL
+ROOT="$2" LENS="$3" perl -e '
+my ($root,$lens) = ($ENV{ROOT}, $ENV{LENS});
+open my $fh, "<", $ARGV[0] or die "cannot open $ARGV[0]\n";
+my ($QCOL,$ECOL) = (-1,-1);
+my (%src, @find, $cites,$checked,$refused,$present,$absent,$set,$quotes);
+
+sub slurp { my $p = shift; return $src{$p} if exists $src{$p};
+  my $t; if (open my $s, "<", $p) { local $/; $t = <$s> } $src{$p} = $t; return $t }
+
+# Undo ONLY the sanctioned transport escapes. NOT norm(): norm() collapses
+# whitespace, and parsons-113 quotes a two-space literal whose two spaces are
+# the entire subject of the row.
+sub unesc { my $s = shift;
+  $s =~ s/\\\|/|/g; $s =~ s/\\\*/*/g; $s =~ s/\\_/_/g; $s =~ s/\\\[/[/g; $s =~ s/\\\]/]/g; $s }
+sub occ { my ($hay,$n) = @_; my ($c,$p) = (0,0);
+  while (($p = index($hay,$n,$p)) >= 0) { $c++; $p += length($n) } $c }
+
+while (my $line = <$fh>) {
+  if ($QCOL < 0 && $ECOL < 0 && $line =~ /^\|\s*#\s*\|/) {
+    my @h = split /(?<!\\)\|/, $line, -1;
+    for my $i (0..$#h) { my $t=$h[$i]; $t =~ s/^\s+|\s+$//g;
+      $QCOL=$i if $t eq "quoted"; $ECOL=$i if $t eq "evidence" }
+    $QCOL = $ECOL if $QCOL < 0 && $ECOL >= 0;
+    next }
+  next unless $line =~ /^\| `(\Q$lens\E-\d{3})`/; my $id = $1;
+  my @c = split /(?<!\\)\|/, $line, -1;
+  my $q = ($QCOL >= 0 && $QCOL <= $#c) ? $c[$QCOL] : $line;
+  next unless $q =~ /Gen-1\s*`/;
+
+  # Segment the cell at each Gen-1 file citation, so every fragment is scoped to
+  # its NEAREST PRECEDING anchor. First-anchor-governs measured 47% false
+  # positives on cells citing two files; nearest-preceding measured 0.
+  my @seg;
+  while ($q =~ /Gen-1\s*`([A-Za-z0-9._-]+\.(?:js|jsx|css|html))`/g) {
+    push @seg, { file => $1, start => $+[0] } }
+  for my $i (0..$#seg) {
+    $seg[$i]{end}  = ($i < $#seg) ? $seg[$i+1]{start} : length($q);
+    $seg[$i]{text} = substr($q, $seg[$i]{start}, $seg[$i]{end} - $seg[$i]{start});
+    $cites++ }
+
+  for my $s (@seg) {
+    my $f = $s->{file};
+    my $path = "$root/" . ( $f =~ /^ParsonsLens/       ? "src/lenses/$f"
+                          : $f eq "parsons-iframe.html" ? "public/$f"
+                          :                              "public/static/parsonizer/$f" );
+    my $body = slurp($path);
+    unless (defined $body) { push @find, "REFUSED $id GEN1-MISSING-SOURCE $path"; $refused++; next }
+    my $t = $s->{text};
+
+    if ($t =~ /lister-4 cluster/) {                       # --- SET
+      my ($decl)   = $t =~ /\*\*(\d+) orphan classes\*\*/;
+      my ($banner) = $t =~ /lister-4 cluster `([^`]*)`/;
+      my @names = grep { $_ ne $banner } $t =~ /`([A-Za-z][A-Za-z0-9_-]*)`/g;
+      unless (defined $decl) { push @find, "REFUSED $id GEN1-SET-NO-COUNT"; $refused++; next }
+      push @find, "GEN1-SET-COUNT $id declares $decl, lists ".scalar(@names) if @names != $decl;
+      $set++; $checked++; next }
+
+    if ($t =~ /occurs?\s+\*\*0\s*(?:times)?\*\*|\(0×\)|occurs? nowhere/) {   # --- ABSENT
+      # The zero-claim is bound to the tokens it is made ABOUT. An unbound form
+      # tested every backticked token in the segment and produced TWELVE false
+      # positives: a segment routinely carries present-assertions and an
+      # absence-assertion together.
+      if ($t =~ /the function/) {
+        push @find, "REFUSED $id GEN1-SCOPED-ZERO (absence asserted of a function, not the file)"; $refused++; next }
+      my @toks;
+      while ($t =~ /((?:`[^`]+`(?:\s*,\s*|\s+and\s+|\s+)?)+?)(?:all\s+)?occurs?\s+(?:\*\*0|nowhere)/g) {
+        push @toks, $1 =~ /`([^`]+)`/g }
+      unless (@toks) { push @find, "REFUSED $id GEN1-ZERO-UNBOUND"; $refused++; next }
+      for my $k (@toks) { my $n = occ($body, unesc($k));
+        push @find, "GEN1-UNEXPECTED-PRESENT $id `$k` occurs $n times, row asserts 0" if $n }
+      $absent++; $checked++; next }
+
+    my ($anchor) = $t =~ /^\s*,\s*`([^`]+)`/;             # --- PRESENT
+    my ($decl)   = $t =~ /`[^`]+`\s*\((\d+)×/;
+    if (!defined $anchor) { push @find, "REFUSED $id GEN1-NO-ANCHOR (prose descriptor, not a greppable token)"; $refused++; next }
+    if (!defined $decl)   { push @find, "REFUSED $id GEN1-NO-COUNT `$anchor` (unfalsifiable as a count claim)"; $refused++; next }
+    my $n = occ($body, unesc($anchor));
+    push @find, "GEN1-COUNT $id `$anchor` occurs $n, row declares $decl" if $n != $decl;
+
+    my @frag = $t =~ /<em>"(.*?)"<\/em>/g;
+    push @frag, $t =~ /(?<!\\)_"(.*?)"_/g;
+    for my $fr (@frag) { $quotes++;
+      if ($fr =~ /…\s*$/) { push @find, "REFUSED $id GEN1-TRAILING-ELLIPSIS (an extractor cut cannot be reproduced)"; $refused++; next }
+      # A mid-string … is an ELISION: assert each piece in order, never the
+      # composed whole. Three distinct meanings of … live in these rows.
+      my @parts = split /\s*…\s*/, unesc($fr);
+      my ($from, $ok) = (0, 1);
+      for my $p (@parts) { next unless length $p;
+        my $at = index($body, $p, $from);
+        if ($at < 0) { $ok = 0; last } $from = $at + length($p) }
+      push @find, "GEN1-QUOTE-ABSENT $id ".(@parts>1 ? "(elided, in order) " : "").q{"}.substr($fr,0,72).q{"} unless $ok }
+    $present++; $checked++ }
+}
+print "$_\n" for @find;
+printf "GEN1-CENSUS lens=%s root=%s citations=%d checked=%d refused=%d present=%d absent=%d set=%d quotations=%d findings=%d\n",
+  $lens, $root, $cites+0, $checked+0, $refused+0, $present+0, $absent+0, $set+0, $quotes+0, scalar(@find);
+# THE FLOOR -- arithmetic, not a report. A form that is neither checked nor
+# named is the silence this arm exists to end.
+if (($checked+0) + ($refused+0) != ($cites+0)) {
+  printf "FAIL: census does not close -- %d checked + %d refused != %d citations\n", $checked+0, $refused+0, $cites+0;
+  exit 1 }
+exit 0;
+' "$1"
+```
+
+**Run against the real quarry on 2026-08-21, `parsons` at 120 rows**, root
+pinned to the `spiral-lens` tree this ledger names:
+
+```text
+GEN1-CENSUS lens=parsons citations=78 checked=69 refused=9
+            present=62 absent=4 set=3 quotations=138 findings=28
+```
+
+**Seventeen `GEN1-QUOTE-ABSENT`, and they are three different things:**
+
+| class                                                           | rows                                               | count |
+| --------------------------------------------------------------- | -------------------------------------------------- | ----- |
+| the set RESUME already names, reproduced **independently**      | `050`, `052`, `058`, `066` ×2, `068`, `072`, `076` | **8** |
+| ⛔ **NEW — no instrument had ever checked these**               | `050`, `051` ×2, `056`, `108` ×2, `110`            | **7** |
+| **not defects** — an artefact of the one-cell schema, see below | `109` ×2                                           | **2** |
+
+**The 7 new ones are the fragments the 2026-08-19 stopgap SKIPPED as
+truncated**, and they are the same defect class as the published 8 — a
+multi-line rule composed onto one line. Hand-verified: `parsons-110` quotes
+`ul.incorrect { … background-color: #ffefef; }` where the source carries `;\n}`,
+so the composed form is not a byte-run in the file. **The skip was the only
+reason they looked clean.** They are named here rather than repaired, because
+they belong to other commit groups and a repair is its own unit with its own
+gate run.
+
+⛔ **The 2 on `parsons-109` are the ruling arguing for itself, and they cannot
+be fixed in a one-cell ledger.** That row cites `parsons.css`; its ⚠️ annotation
+then quotes `parsons-iframe.html` content while naming that file as **bare
+prose** rather than as a `Gen-1` citation, so nearest-preceding-anchor scoping
+attributes the fragments to the wrong file. No mechanical scoping can separate
+them while annotation and extractor output share a cell. **Under the two-cell
+schema the annotation is `reasoned`, this arm never sees it, and both vanish.**
+
+**Reach is what the split buys, measured on the real ledger with empty stubs so
+this is coverage and not contents:**
+
+| schema              | citations | checked | refused | code-span quotations unchecked |
+| ------------------- | --------: | ------: | ------: | -----------------------------: |
+| one-cell (today)    |        78 |      25 |      53 |                             51 |
+| two-cell (migrated) |        78 |      75 |       3 |                          **0** |
+
+**The nine refusals, transcribed from the run and not from the design** — `049`,
+`061`, `073`, `075`, `085`, `093` `GEN1-NO-ANCHOR`; `064`, `065`
+`GEN1-NO-COUNT`; `094` `GEN1-SCOPED-ZERO`, whose absence is asserted **of a
+function** while the token occurs 6× in the file, so a file-scoped check would
+be wrong-signed.
+
+⚠️ **`073` is `GEN1-NO-ANCHOR` here and was `GEN1-ZERO-UNBOUND` in the drafting
+run**, because the published ABSENT predicate is narrower than the draft one and
+the row falls through to the PRESENT arm instead. It is refused and named either
+way and the census closes at nine either way — but an earlier revision of this
+paragraph carried the draft label, which would have been a sentence wrong about
+its own evidence, in the section written to catch exactly that. **The list above
+is `grep '^REFUSED'` over the check as extracted back out of this file**, which
+is the only form of it worth publishing.
+
+⚠️ **Amendment 4 is discharged by this section and is to be struck from RESUME's
+list.** _"A citation anchor for a non-markdown, non-test source"_ has been in
+use by rows `048`–`120` and unpublished since STEP 1a; the grammar this arm
+parses **is** that anchor, now written down. Struck explicitly rather than left
+implicit — a deliverable that closes silently is the failure
+[§ The Gen-3 direct-check appendix](../RESUME.md) records.
 
 ### The amendment gate — the two clean regressions are NOT it
 
