@@ -420,5 +420,11 @@ describe('spellme core', () => {
 				RangeError,
 			);
 		});
+
+		it('refuses to read a stream from a program that does not lex', () => {
+			expect(() => spellmeCore.readStream(embody('const x = "').facts)).toThrow(
+				TypeError,
+			);
+		});
 	});
 });
