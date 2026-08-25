@@ -10,7 +10,7 @@
 <!-- cspell:ignore keyable legitimise nocite quotemeta mktemp licence unrun -->
 <!-- cspell:ignore capitalisation loosenings initialised -->
 <!-- structure-check.sh awk locals; see § The structural-integrity check: -->
-<!-- cspell:ignore isledger lslice bslice bbanner lrow ochar incomment hasreal -->
+<!-- cspell:ignore isledger lslice bslice bbanner lrow ochar incomment hasreal rowline -->
 <!-- transport-check.sh schema locals; see § The transport check: -->
 <!-- cspell:ignore QCOL RCOL NCELL PCOL provless istemplate -->
 <!-- gen1-arm.sh locals; see § The Gen-1 arm: -->
@@ -1053,8 +1053,19 @@ awk -v lens="${2:-}" '
   /^## Rows[ \t]*$/             { isledger=1; if (buried) bslice++; else lslice++ }
   /^## Close conditions[ \t]*$/ {             if (buried) bslice++; else lslice++ }
   /^> \*\*PASS 1 — SEEDED/      { if (buried) bbanner++ }
-  lens != "" && $0 ~ ("^\\| `" lens "-[0-9][0-9][0-9]`") {
-    if (buried) { brow++; if (!frow) frow = NR } else lrow++ }
+  # LITERAL PREFIX, not an interpolated regex -- the discipline `resolve`,
+  # `firstblock` and `glossterm` all carry, and which the two sibling checks
+  # carry as perl quotemeta. This check kept the regex, so a prefix of `.*`
+  # satisfied the STRUCT-ZERO-ROWS floor over any ledger [measured 2026-08-24 by
+  # AR-5: `parsons.md` with lens=`.*` gave live-rows=120, exit 0]. That floor
+  # exists to forestall exactly that.
+  function rowline(   p) {
+    if (lens == "") return 0
+    p = "| `" lens "-"
+    if (index($0, p) != 1) return 0
+    return substr($0, length(p) + 1, 3) ~ /^[0-9][0-9][0-9]$/ &&
+           substr($0, length(p) + 4, 1) == "`" }
+  rowline() { if (buried) { brow++; if (!frow) frow = NR } else lrow++ }
 
   # The skeleton announces itself IN ITS OWN TEXT -- its specimen rows literally
   # read `<lens>-001`. Keyed here, on the document, and never on the argument.
@@ -1816,10 +1827,10 @@ if ($SCHEMA)  { print "FAIL: SCHEMA $SCHEMA\n"; $bad = 1 }
 # "no rows" is a broken invocation.
 # ⛔ The not-a-ledger exemption is a POSITIVE signal this check printed itself,
 # never the absence of one. Gating the rows floor on `$ISLEDGER` let a wrong
-# path onto any of the campaign`s five non-ledger documents exit 0 with
+# path onto any of the campaign`s SIX non-ledger documents exit 0 with
 # `citations=0` [measured 2026-08-24 by AR-1 on `SPEC.md` and
 # `FIDELITY-METHOD.md`] -- and a non-ledger is the LIKELIER wrong path, being
-# five of the nine. § The transport check does not have this hole; this now
+# six of the nine. § The transport check does not have this hole; this now
 # mirrors it.
 if (!$ISLEDGER) { print "doc=not-a-ledger -- no `## Rows`; Gen-1 arms N/A\n" }
 elsif (($rows+0) == 0) {
@@ -1843,12 +1854,21 @@ exit($bad ? 1 : 0);
 ' "$1"
 ```
 
-**Run against the real quarry on 2026-08-21, `parsons` at 120 rows**, root
-pinned to the `spiral-lens` tree this ledger names:
+**Run against the real quarry, `parsons` at 120 rows**, root pinned to the
+`spiral-lens` tree that ledger names.
+
+⚠️ ~~A transcribed `GEN1-CENSUS` line stood here, reading `findings=28` and
+carrying neither `root=`, `missing=` nor `misplaced=`.~~ **STRUCK 2026-08-24 by
+AR-5: it did not close against this section's own enumeration and it had gone
+stale in three fields.** The section below lists **17** `QUOTE-ABSENT` + **9**
+`REFUSED` + **1** `GEN1-COUNT` = **27**, and the shipping check prints 27.
+
+**Publishing a census is what this section forbids one heading up.** Run it and
+paste the output — the arithmetic that matters is
+`checked + refused == citations`, which the check asserts itself and refuses on:
 
 ```text
-GEN1-CENSUS lens=parsons citations=78 checked=69 refused=9
-            present=62 absent=4 set=3 quotations=138 findings=28
+sh gen1-arm.sh <ledger.md> <gen1-root> <row-id-prefix>
 ```
 
 **Seventeen `GEN1-QUOTE-ABSENT`, and they are three different things:**
@@ -1931,7 +1951,7 @@ extracted back out of this file]:
 | ⛔ **a PARTIAL split** — the citation stays in `quoted`, the `<em>` fragment moves to `reasoned` | `FAIL: … quotation(s) sit in the derivation cell on Gen-1 rows`, exit 1. **Without this arm the run reported `findings=10` at exit 0 — all seventeen `GEN1-QUOTE-ABSENT` findings, the entire published defect set, silently deleted** [measured 2026-08-24 by AR-1]. Every other floor passes: rows intact, the citation is where it belongs so `misplaced` is 0, and the arithmetic holds. It is also the LIKELIEST half-done migration, because moving derivation prose takes the fragment embedded in it |
 | the `provenance` column renamed, on a ledger carrying Gen-2/3 rows                               | `BREACH SCHEMA unresolved -- no provenance column`, exit 1 (§ The transport check)                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | the same, on an **all-Gen-1** ledger — the shape six of Family F will have                       | the same. Under an uninitialised `$PCOL` this was **byte-identical to the clean run**, because `unreachable == provless == rows` either way                                                                                                                                                                                                                                                                                                                                                                  |
-| a wrong path landing on a **non-ledger** campaign document                                       | `doc=not-a-ledger`, exit 0 — a POSITIVE signal the check prints itself, never the absence of one. Five of the nine campaign documents are non-ledgers, so this is the likelier wrong path                                                                                                                                                                                                                                                                                                                    |
+| a wrong path landing on a **non-ledger** campaign document                                       | `doc=not-a-ledger`, exit 0 — a POSITIVE signal the check prints itself, never the absence of one. Six of the nine campaign documents are non-ledgers, so this is the likelier wrong path                                                                                                                                                                                                                                                                                                                     |
 | one row citing a **nonexistent** source file                                                     | `FAIL: 1 citation(s) refused for a missing source`, exit 1. A `missing == refused` threshold exited 0 here, and partial-missing is the EXPECTED state for seven ledgers until the path map moves to `## Source inventory`                                                                                                                                                                                                                                                                                    |
 | the same ledger split correctly                                                                  | exit 0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | a cluster whose annotation **re-mentions** a listed class                                        | **SILENT.** Counting mentions rather than distinct names reported `parsons-047` as "declares 2, lists 5" over a correct row                                                                                                                                                                                                                                                                                                                                                                                  |
@@ -1985,7 +2005,8 @@ list.** _"A citation anchor for a non-markdown, non-test source"_ has been in
 use by rows `048`–`120` and unpublished since STEP 1a; the grammar this arm
 parses **is** that anchor, now written down. Struck explicitly rather than left
 implicit — a deliverable that closes silently is the failure
-[§ The Gen-3 direct-check appendix](../RESUME.md) records.
+[§ The Gen-3 direct-check appendix](../RESUME.md#-the-gen-3-direct-check-appendix-vanished-at-a-step-boundary--re-assigned)
+records.
 
 ### The amendment gate — the two clean regressions are NOT it
 

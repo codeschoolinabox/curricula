@@ -205,20 +205,32 @@ wrong one."_ Here the table is right and the heading is wrong.
 **The units, in this order, ONE SESSION EACH. The order is ruled — it is not the
 reading session's to re-pick, and neither is collapsing them into one session.**
 
-|             | unit                                                                                                                                                                               | why it sits here                                                                                               |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| ~~STEP 1a~~ | ~~the Gen-1 second-root read and the ledger append~~                                                                                                                               | **DONE at `fd6066b3`** — 33 rows appended, `048`–`080`. Struck rather than ticked                              |
-| ~~STEP 1b~~ | ~~the re-investigation half of the twin pilot~~                                                                                                                                    | **DONE — `7c3da9aa`, `1478049f`, `390e8d54`.** Ledger 80 → **120 rows**. Struck rather than ticked             |
-| **STEP 1c** | [the `quoted`/`reasoned` migration](#-start-here--step-1c-is-the-migration-the-twin-is-blocked-behind-it) — **template half DONE (7 commits); the LEDGER half is where you start** | a human ruling of 2026-08-20 changes the row shape of all eight ledgers, and **the twin is blocked behind it** |
-| **STEP 1d** | the `parsons` twin itself, co-authored                                                                                                                                             | AR-1 forbids drafting it from the ledger as it stands — see the blocker below                                  |
-| **STEP 2**  | [the template amendments](#step-2--three-template-amendments-then-_family-fmd), then `_family-f.md`'s inventory shape                                                              | now **seven**, not three. STEP 1c lands two of them; five remain                                               |
+|             | unit                                                                                                                                                                               | why it sits here                                                                                                                                                                                                                               |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ~~STEP 1a~~ | ~~the Gen-1 second-root read and the ledger append~~                                                                                                                               | **DONE at `fd6066b3`** — 33 rows appended, `048`–`080`. Struck rather than ticked                                                                                                                                                              |
+| ~~STEP 1b~~ | ~~the re-investigation half of the twin pilot~~                                                                                                                                    | **DONE — `7c3da9aa`, `1478049f`, `390e8d54`.** Ledger 80 → **120 rows**. Struck rather than ticked                                                                                                                                             |
+| **STEP 1c** | [the `quoted`/`reasoned` migration](#-start-here--step-1c-is-the-migration-the-twin-is-blocked-behind-it) — **template half DONE (7 commits); the LEDGER half is where you start** | a human ruling of 2026-08-20 changes the row shape of all eight ledgers, and **the twin is blocked behind it**                                                                                                                                 |
+| **STEP 1d** | the `parsons` twin itself, co-authored                                                                                                                                             | AR-1 forbids drafting it from the ledger as it stands — see the blocker below                                                                                                                                                                  |
+| **STEP 2**  | [the template amendments](#step-2--three-template-amendments-then-_family-fmd), then `_family-f.md`'s inventory shape                                                              | ⚠️ ~~now **seven**, not three. STEP 1c lands two of them; five remain~~ — **STRUCK: no number here.** § The template amendments is THE list and rules that no number anywhere is to be transcribed; this cell transcribed three, all now wrong |
 
 ## ⛔ START HERE — STEP 1c is the migration; the twin is blocked behind it
 
+⚠️ **`afcacf8a`'s commit body says this heading's text was left unchanged
+because "seven cross-references resolve to its anchor". That count belongs to
+the OTHER `START HERE` heading** — the stale STEP-1 one above, where § its own
+paragraph states it correctly. The body is immutable and now pushed, so the
+correction lives here [measured 2026-08-24 by AR-5 against `afcacf8a`'s own
+tree]. The reason for not renaming this heading still stands; only the number
+attached to it was wrong, and it was published without a `[measured:]` tag,
+which is the one class this campaign's own invariant 13 exists to stop.
+
 > ### ⛔ STEP 1c's TEMPLATE HALF IS DONE — YOU ARE STARTING THE LEDGER HALF
 >
-> **TEN commits, 2026-08-20/24, none pushed.** No ledger was re-cut — that is
-> deliberately yours.
+> **ELEVEN commits, 2026-08-20/24.** No ledger was re-cut — that is deliberately
+> yours.
+>
+> ⛔ **EIGHT OF THEM ARE ALREADY PUSHED, AND NOT BY THIS CAMPAIGN.** See § The
+> push state below — read it before you assume anything is droppable.
 >
 > | SHA        | what                                                          |
 > | ---------- | ------------------------------------------------------------- |
@@ -342,6 +354,35 @@ reading session's to re-pick, and neither is collapsing them into one session.**
 > `parsons-109` are in `_TEMPLATE.md` § The Gen-1 arm; they are published there
 > rather than recorded against the rows, because a repair is its own unit with
 > its own gate run.
+
+### ⛔ The push state — eight of the eleven are already out, and not by this campaign
+
+Measured 2026-08-24, and **re-measure it yourself rather than reading it here**:
+
+```bash
+git ls-remote origin refs/heads/main          # -> afcacf8a…, a commit of this group
+git merge-base --is-ancestor <sha> origin/main
+git rev-list --count origin/main..HEAD
+```
+
+`b0f6be78` through `afcacf8a` are all ancestors of `origin/main`. **No session
+of this campaign ran a push.** A concurrent session pushed 354 commits off
+shared `main` and these eight rode out with them — the reflog records it as an
+ordinary update by push.
+
+**Two consequences, and the first is the one that matters:**
+
+1. **Those eight are no longer droppable.** `AGENTS.principal.md` invariant 5
+   justifies autonomous commits on the grounds that they are "new commits only,
+   so every checkpoint is droppable". That held until the push. Undoing any of
+   the eight now needs a force-push, which is the human's alone.
+2. **`5e47c96e`, `6534985f` and `7da05610` are still local.**
+
+⚠️ **This file said "none pushed" until 2026-08-24, and it was TRUE when
+written.** It went false with no action by this campaign, and nothing
+re-measured it until AR-5 did. **In a shared worktree the push state is not a
+fact about your own work** — it is a fact about everyone's, and it changes while
+you are not looking. Re-measure before repeating it.
 
 ### ⛔ THE TARGET HEADER ROW — published because nothing can catch you if it is wrong
 
