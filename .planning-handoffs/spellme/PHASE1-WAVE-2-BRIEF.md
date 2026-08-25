@@ -10,13 +10,17 @@ This brief is for a **different module**: the `spellme` lens at
 [`./PHASE1-WAVE-1-BRIEF.md`](./PHASE1-WAVE-1-BRIEF.md), which is closed and
 whose clusters are green.
 
-**Scope: `readStream` and `positionCursor` — the spine and the cursor. FIFTEEN
-un-skips in `tests/core.test.ts`**, and one question you carry forward as a
-FLAG.
+**Scope: `readStream` and `positionCursor` — the spine and the cursor. SEVENTEEN
+un-skips in `tests/core.test.ts`**, plus the precondition-throw test in
+`tests/core-defect.test.ts`, which is now **ruled and yours to write** (human
+ruling 2026-08-25 — see § The precondition throw). It said FIFTEEN and "one
+question you carry forward as a FLAG" until 2026-08-25; two tests were added and
+the question was answered.
 
-**37 of the 54 core tests route through `readStream`** via `core.test.ts`'s
-`streamOf` helper, so nothing downstream can go green until your work is
-committed. That is why you run alone.
+**39 of the 56 core tests route through `readStream`** via `core.test.ts`'s
+`streamOf` helper [measured 2026-08-25], so nothing downstream can go green
+until your work is committed. That is why you run alone. (It read "37 of the 54"
+until `4d3e97a6` added two tests, both of which route through `streamOf`.)
 
 ## The wave map — spellme's `core.ts`, all five waves
 
@@ -24,13 +28,13 @@ committed. That is why you run alone.
 of the 28 component tests drive the claim loop — the other 23 are static and
 need only `config`, `readStream` and `positionCursor`. So `positionCursor` moves
 forward into your wave, and **the surface arrives one wave later instead of
-three**, which is what makes an eyeball check possible after 15 core tests
-rather than 37.
+three**, which is what makes an eyeball check possible after 17 core tests
+rather than 39.
 
 | Wave          | Cluster                                                             | State                                            |
 | ------------- | ------------------------------------------------------------------- | ------------------------------------------------ |
 | 1             | `config` · `applicability` · `recommend`                            | **CLOSED** 2026-08-20                            |
-| **2 — YOURS** | `readStream` · `positionCursor`                                     | this brief — 15 un-skips                         |
+| **2 — YOURS** | `readStream` · `positionCursor`                                     | this brief — **17** un-skips + 1 new test        |
 | 3             | the **static surface** (23 component tests) + the sandbox injection | 🔍 the eyeball check; orchestrator, not a worker |
 | 4             | `judgeClaim` · `handOver` · `settle`                                | the claim loop, 22 core tests                    |
 | 5             | the 5 claim-loop component tests                                    | orchestrator                                     |
@@ -57,7 +61,9 @@ Router-text reach into a spawned worker has been measured both present
   Also § Glossary (_the fates_, _mark_, _the stream_, _the tapes_) and § Edge
   cases.
 - `lenses/spellme/DOCS.md` — **your Refactor step is held against § Execution
-  phases 3** and the `Seq --> Stream` edge of the Mermaid `## Data flow`.
+  phases 3 AND 4** — phase 3 is `readStream`, phase 4 is `positionCursor` — plus
+  the `Seq --> Stream` edge of the Mermaid `## Data flow`. (This said "phases 3"
+  alone until 2026-08-25.)
 - `lenses/spellme/types.ts` — `StreamElement`, `Fate`, and the `marked`
   contract.
 - `lenses/spellme/core.ts` — the file you edit. `readStream` is yours; the three
@@ -65,8 +71,9 @@ Router-text reach into a spawned worker has been measured both present
 - `lenses/spellme/tests/core.test.ts` — read the whole file, not only your
   blocks.
 - `lenses/spellme/tests/core-defect.test.ts` — two passing tests, and the home
-  of the extra test you may not yet write. See § The one question you carry
-  forward as a FLAG.
+  of the precondition-throw test that **is now yours to write**. See § The
+  precondition throw. (This said "the extra test you may not yet write" and
+  pointed at a FLAG section until 2026-08-25, when the ruling was taken.)
 - `lenses/spellme/ux/user-journeys.md` and `ux/wireframes.md` — **the twin is
   TWO files** and `twin-doc: user` makes both canon. Wave 1 edited one and
   called the twin done; that shipped a definition contradicting a ruling.
@@ -80,19 +87,37 @@ Router-text reach into a spawned worker has been measured both present
 
 ## Measured baselines — the debt that is NOT yours
 
+⚠ **Every row below was re-measured 2026-08-25**, at the launch that follows it
+— not "at brief time", which is the label that licensed the previous staleness.
+**HEAD and `unpushed` move within minutes**: HEAD moved three times during the
+2026-08-25 launch preparation and `unpushed` went 6 → 28 in the same hour, all
+of it peer `quizzing` work. Re-measure before you act on any of it.
+
 | Fact                 | Value                                                                                                         |
 | -------------------- | ------------------------------------------------------------------------------------------------------------- |
-| HEAD at brief time   | `666090188d5a54066cae9ef5b2c30a1db65460e8` [measured 2026-08-20]                                              |
-| spellme working tree | **clean** [measured: `git status --porcelain -- src/lib/study-lenses/lenses/spellme/`]                        |
-| spellme suite        | `22 passed \| 65 skipped (87)` across three files                                                             |
-| remaining skips      | `core.test.ts` **37**, `component.test.tsx` **28** [measured: `git grep -cF "it.skip("`]                      |
-| `npx tsc --noEmit`   | **0 errors**                                                                                                  |
+| HEAD at LAUNCH time  | `4d3e97a65f00699352cd0f9c44cd6e7da5554ac1` [measured 2026-08-25: `git rev-parse HEAD`] — **volatile**         |
+| spellme working tree | **clean** [measured: `git status --porcelain -- src/lib/study-lenses/lenses/spellme/` → empty]                |
+| spellme suite        | `22 passed \| 67 skipped (89)` across three files [measured: `npx vitest run --project unit …/spellme`]       |
+| remaining skips      | `core.test.ts` **39**, `component.test.tsx` **28** [measured: `git grep -cF "it.skip("`]                      |
+| `npx tsc --noEmit`   | **0 errors** [measured 2026-08-25]                                                                            |
 | Node                 | **v20.11.0 against engines `>=22.11.0` — BELOW the minimum.** Both tools run anyway. Proceed; upgrade nothing |
-| unpushed             | `origin/main..HEAD` = 343 and climbing. Not yours. Never push                                                 |
+| unpushed             | `origin/main..HEAD` = **28** and climbing [measured 2026-08-25]. Not yours. Never push                        |
+
+⚠ **The `unpushed` row said `343 and climbing` until 2026-08-25, and the human
+has since pushed.** A worker who reads a number three hundred off from what it
+measures will correctly distrust every other row in this table, so the
+correction is dated rather than silent.
 
 **Failing-test baseline — repo-wide, all foreign.** **EIGHT** test files fail at
-HEAD; `41 failed | 9853 passed | 120 skipped | 17 todo (10031)` [measured
-2026-08-20: `npx vitest run --project unit --reporter=basic`]:
+HEAD — `Test Files 8 failed | 453 passed (461)`,
+`Tests 41 failed | 10296 passed | 135 skipped | 17 todo (10489)` [measured
+2026-08-25: `npx vitest run --project unit`]. The **eight paths are unchanged**
+from 2026-08-20; only the pass total moved, and it moved because peer `quizzing`
+work landed. **Seven of the eight fail at COLLECTION** (`0 test`,
+`loadAndTransform`) rather than on an assertion — all 41 failing tests live in
+`remark-study-lenses.test.ts` alone [measured 2026-08-25: the eight paths run
+directly]. That matters to you: a collection failure looks different from an
+assertion failure, and six of these will never print a test name.
 
 ```text
 scripts/lib/check-tables/tests/find-table-defects.test.ts
@@ -139,16 +164,19 @@ git commit --no-verify -m "..." -- <the same paths>
   `git stash`.**
 - **Announce each commit as it lands: full SHA + message.**
 
-**Your two allowed paths:**
+**Your three allowed paths:**
 
 ```text
 src/lib/study-lenses/lenses/spellme/core.ts
 src/lib/study-lenses/lenses/spellme/tests/core.test.ts
+src/lib/study-lenses/lenses/spellme/tests/core-defect.test.ts
 ```
 
 `README.md`, `DOCS.md`, `types.ts` and `ux/**` are the Phase-0 contract and are
-**never yours** — a need for one is a **FLAG**. `tests/core-defect.test.ts`
-becomes yours only after the human answers § The one question you must ask.
+**never yours** — a need for one is a **FLAG**. `tests/core-defect.test.ts` was
+conditional on a ruling until 2026-08-25; **that ruling has been taken** and the
+path is yours — see § The precondition throw. (This line pointed at "§ The one
+question you must ask", a heading that never existed.)
 
 **Commit granularity: one commit per increment, i.e. per red event.** Tests
 arriving green fold into the open increment with a one-line record each.
@@ -205,11 +233,22 @@ body; it is immutable.
 3. Implement. **Fake It only where its killer is the very next un-skip.**
 4. **Format then lint, in this order:** `npx prettier --write <file>`, then
    `npx eslint <file>`, then `npx cspell <file>`.
-5. Refactor against `DOCS.md` § Execution phases 3.
+5. Refactor against `DOCS.md` § Execution phases **3 and 4** — phase 3 is
+   `readStream`, phase 4 is `positionCursor`. ⚠ This line named phase 3 only
+   until 2026-08-25: `23f4555b` moved `positionCursor` into this wave and
+   updated five sites, walking past this one and exit gate item 6, so the
+   function arrived with no Refactor target and no structural exit criterion.
 6. Self-review against the governance file's two checklists.
 7. Spawn `ar-4` (with the hardened read-only prompt).
 8. Quality checks: scoped suite, `npx tsc --noEmit`, `npx prettier --check`.
 9. Commit by pathspec. Announce the full SHA.
+
+⚠ **DEV.md Phase 1 step 14 (reconcile the docs) has no worker-executable form
+here, and this compressed cycle drops it deliberately.** `README.md`, `DOCS.md`
+and `types.ts` are FLAG-only for you, so **step 14 is a READ and a FLAG on
+divergence — never an edit.** Named explicitly because the alternative is a
+worker that either silently skips a governance-named step or attempts a
+forbidden write.
 
 ## The contract you are implementing
 
@@ -255,46 +294,89 @@ bare `cursor + 1` would pass everything and leave the cursor resting on
 whitespace. You cannot fix that from here — make this function obviously the one
 writer, and say so in your handover.
 
-## ⚠ The one question you carry forward as a FLAG
+## The precondition throw — RULED, and yours to write
 
-**`readStream`'s throw CLASS is not settled, and three places in the tree read
-as though it were.** The single corrective record is the **blockquote at
-[`./PHASE1-WAVE-1-BRIEF.md`](./PHASE1-WAVE-1-BRIEF.md) line ~396, opening
-`✅ The instruction above was correct`** — cited by anchor because it carries no
-searchable label.
+(human ruling 2026-08-25) **`readStream` throws `TypeError`.** This section
+previously told you the class was unsettled and to carry it forward as a FLAG;
+the orchestrator put it to the human before this launch, so it is settled and
+the FLAG is discharged. **`tests/core-defect.test.ts` is now your third allowed
+path.**
 
-What is true: `readStream` carries **no `@throws` tag at all**. An `ar-5` argued
-`RangeError` may be **affirmatively wrong** here — by the ruling's own
-distinction, `TypeError` is the wrong KIND of value and `RangeError` is the
-right kind carrying a wrong one, so an **absent member** is a wrong-kind case
-even though a negative threshold is a range case.
+**The grounds, recorded so a later session need not re-derive them.** The
+scanning leaf's own precondition throw for an **absence** is a `TypeError`
+[read: `../../src/lib/study-lenses/lib/scanning/derive-input-elements.ts`, the
+guard above `foldTemplateRuns` — "Presence is the whole check", and "the caller
+gates on a successful tokens stage first, so an absence here is its bug to
+surface rather than a state to absorb"]. `readStream`'s own JSDoc already
+asserts its throw is "exactly the precondition the scanning leaf states for its
+own inputs", so two classes for one precondition in adjacent modules would be an
+incoherence. An `ar-5` had separately argued `RangeError` is **affirmatively
+wrong** here: by the 2026-08-20 ruling's own distinction, an absent member is a
+wrong-**kind** case, not a right-kind-wrong-**value** one.
 
-**Do not spell `.toThrow(RangeError)` on the strength of anything you have
-read.**
+⚠ **This does NOT disturb `config`.** `config` keeps `RangeError` — a threshold
+out of range is exactly the wrong-value case — and the three committed
+`Exceptions` tests stay as they are. The 2026-08-20 ruling was put as a question
+about `readStream` but `ed76f43b`'s body recorded only the `config` half; this
+reverses the `readStream` half only.
 
-**How to route it, because you have no channel to the human and DONE must not
-depend on one.** You report to the orchestrator, not to the human — three
-channels, no fourth. So:
+**What you owe, in this wave:**
 
-1. **Raise it as a FLAG in your final report**, with the wrong-kind argument
-   stated. The orchestrator holds the human gate; the ruling is theirs to fetch.
-2. **The fifteen un-skips ARE the wave.** Report **DONE** on them with the FLAG
-   attached. **Do not report BLOCKED for want of this ruling** and do not hold
-   fifteen committed increments hostage to it.
-3. **Write no extra test.** If the ruling arrives while you are still live, add
-   the `@throws` tag to `readStream`'s JSDoc and then write it in
-   `tests/core-defect.test.ts` (which already mocks the leaf and constructs the
-   state). ⚠ A bare `.toThrow()` **passes vacuously** against the stub — assert
-   the class.
+1. **Add `@throws TypeError` to `readStream`'s JSDoc** — it currently carries no
+   `@throws` tag at all. Do this **before** writing the assertion, so the
+   contract exists before the test that pins it.
+2. **Write the test in `tests/core-defect.test.ts`**, which already mocks the
+   leaf and constructs the member-absent state. ⚠ **A bare `.toThrow()` passes
+   vacuously** against the stub's own "not implemented" throw — assert the
+   class: `.toThrow(TypeError)`.
+3. ⚠ **And do not reach for a message regex instead.** `.toThrow(/regex/)` does
+   **not** check the error class at all — it matches the message only, so it
+   would pass against the stub's own `Error`. The class form is the one that
+   discriminates. `core-defect.test.ts` is strict **one assertion per `it`** and
+   carries **no comments in tests** — match it; do not add a second assertion to
+   the same `it` to cover both.
 
 ## Un-skip order — exactly this, and nothing else
 
-**Plain FILE ORDER — `:30` · `:34` · `:40` · `:44` · `:50` · `:54` · `:58` ·
-`:64` · `:68` · `:72` · `:76` · `:80` · `:84` · `:88` · `:92`** — fifteen. That
-is every `it.skip` in `Zero`, `One`, `Many` and `The three fates, and the mark`,
-with **no exceptions and nothing left behind**. The re-ordering that brought
-`positionCursor` into this wave is what makes plain file order correct here; an
-earlier draft had to carve three tests out mid-block, and no longer does.
+**Plain FILE ORDER, and there are SEVENTEEN.** That is every `it.skip` in
+`Zero`, `One`, `Many` and `The three fates, and the mark`, with **no exceptions
+and nothing left behind**.
+
+⚠ **Take them by NAME. The line numbers below are secondary and were already
+wrong once.** `4d3e97a6` inserted two tests on 2026-08-25 and **eight of the
+original fifteen line numbers shifted** — this list said `:50` for what is now
+`:54`, and `:64` for what is now `:72`. Names are stable; line numbers are not.
+Re-derive them yourself before you start:
+`grep -n "it.skip(" tests/core.test.ts | head -20`.
+
+| #   | Line   | Test name                                                                    |
+| --- | ------ | ---------------------------------------------------------------------------- |
+| 1   | `:30`  | reads an empty stream from an empty program                                  |
+| 2   | `:34`  | positions the cursor past the end of a program with nothing claimable        |
+| 3   | `:40`  | reads one element from a one-element program                                 |
+| 4   | `:44`  | gives a claimable element the token-tape fate                                |
+| 5   | `:48`  | **leaves the cursor where it rests when the element is already claimable**   |
+| 6   | `:54`  | reads every element of a short declaration                                   |
+| 7   | `:58`  | rests the cursor on the first claimable element                              |
+| 8   | `:62`  | advances the cursor past a run of trivia between claimable elements          |
+| 9   | `:66`  | **advances the cursor past a mixed run of whitespace and a line terminator** |
+| 10  | `:72`  | sends a comment to the jar                                                   |
+| 11  | `:76`  | sends a hashbang to the jar                                                  |
+| 12  | `:80`  | evaporates whitespace                                                        |
+| 13  | `:84`  | evaporates a line terminator                                                 |
+| 14  | `:88`  | marks a block comment carrying a line terminator                             |
+| 15  | `:92`  | leaves a block comment without a line terminator unmarked                    |
+| 16  | `:96`  | leaves a line comment unmarked                                               |
+| 17  | `:100` | leaves a hashbang unmarked                                                   |
+
+**Rows 5 and 9 are the two added on 2026-08-25** (human ruling 2026-08-25,
+landed in `4d3e97a6`) and they are the whole reason `positionCursor` is honestly
+testable. Before them, **two wrong implementations passed the entire module**:
+`return from + 1`, and the subtler `isClaimable(stream[from]) ? from : from + 1`
+— advance exactly one element — which also passed wave 3's `data-cursor` test
+and wave 4's `toBeGreaterThan(0)` assertions. Row 9 is the only test in the
+campaign that kills the second one; no other fixture anywhere in the module
+contains a **mixed** trivia run.
 
 - ⛔ **`:30` — Fake It is DECLINED here, and this is the one place the brief
   overrides the usual permission.** `streamOf('')` → `[]` would pass under
@@ -305,15 +387,31 @@ earlier draft had to carve three tests out mid-block, and no longer does.
   `readStream` outside its own increment. **Implement the real read-and-map at
   `:30`** — the guard, the throw, and a `.map()` whose callback may still return
   a placeholder fate and mark, since an empty source never runs it.
-- **`:34`** — the cursor's first test. Key on **kind** (see above); no fate is
-  real yet.
-- **`:40` `:44`** — `One`. `:40` forces the mapper to actually run; `:44` forces
+- **Row 2** (_positions the cursor past the end…_) — the cursor's first test.
+  Key on **kind** (see above); no fate is real yet.
+- **Rows 3–4** — `One`. Row 3 forces the mapper to actually run; row 4 forces
   the first real fate.
-- **`:50` `:54` `:58`** — `Many`. `'const x = 1'` → **7** elements; then the
-  cursor resting on the first claimable element, then advancing past a run of
-  trivia.
-- **`:64`–`:92`** — the fates and the mark, eight tests. This is where traps 1
+- **Row 5** (_leaves the cursor where it rests…_) — the identity case:
+  `positionCursor(streamOf('x'), 0)` → **`0`**, not `1`. The cursor already
+  rests on a claimable element, so it does not move. This is the first test that
+  forbids an unconditional advance.
+- **Rows 6–9** — `Many`. `'const x = 1'` → **7** elements; the cursor resting on
+  the first claimable element; advancing past a run of trivia; and then row 9,
+  `positionCursor(streamOf('a \n b'), 1)` → **`4`**. Row 9 is the one that
+  forces a **loop**: `'a \n b'` is five elements —
+  `[IdentifierName, WhiteSpace, LineTerminator, WhiteSpace, IdentifierName]` —
+  because the leaf never merges whitespace with a line terminator, so the cursor
+  must cross **three** advancing elements in one call. A single step lands on
+  `2` and is wrong.
+- **Rows 10–17** — the fates and the mark, eight tests. This is where traps 1
   and 2 bite.
+
+⚠ **Exit gate item 5's "no Fake It" governs `readStream`'s RETURN VALUE** — a
+surviving `return []`. It does **not** bar the `.map()` callback placeholder
+that row 1 explicitly sanctions above; that placeholder is expected to live
+across rows 1–3 and dies at row 4. Stating the scope because the two lines read
+as contradictory otherwise, and a previous draft of this brief shipped exactly
+that contradiction.
 
 ⛔ **Everything else stays skipped** — the `Verdicts`, one-more, gate and
 way-past blocks are wave 4's, and all 28 in `component.test.tsx` are waves 3 and
@@ -327,9 +425,9 @@ commit body. Only two are pre-measured here:
 
 - `'#!/usr/bin/env node\nx'` → **three** elements: `HashbangComment` [0,19),
   `LineTerminator` [19,20), `IdentifierName` [20,21). **The hashbang excludes
-  its terminator**, which is why `:92`'s `marked === false` holds naturally
-  [relayed: wave-1 planning measurement, 2026-08-20 — re-measure it].
-- `'const x = 1'` → **7** elements, per `:50`'s own assertion.
+  its terminator**, which is why row 17 / `:100`'s `marked === false` holds
+  naturally [relayed: wave-1 planning measurement, 2026-08-20 — re-measure it].
+- `'const x = 1'` → **7** elements, per row 6 / `:54`'s own assertion.
 
 Unmeasured, and yours to establish: `''` · `'x'` · `'// hi'` · `'a b'` ·
 `'a\nb'` · `'/* a\nb */'` · `'/* ab */'`.
@@ -340,14 +438,15 @@ Unmeasured, and yours to establish: `''` · `'x'` · `'// hi'` · `'a b'` ·
    on text alone.** `element.text` containing a terminator is **necessary and
    not sufficient** — a `StringLiteral` or a `Template` can contain a real
    newline and must stay **unmarked**. No fixture in this wave contains one, so
-   a text-only predicate **passes all fifteen tests** and ships a defect wave 4
-   inherits. The contract is: `LineTerminator` → marked **by its kind**;
+   a text-only predicate **passes all seventeen tests** and ships a defect wave
+   4 inherits. The contract is: `LineTerminator` → marked **by its kind**;
    `Comment` → marked **only if its own text carries a terminator**; everything
    else → unmarked, whatever its text says.
-2. **And it must cover FOUR line terminators.** `:80` uses `\n` only; the leaf's
-   kind table names **LF, CR, U+2028 and U+2029**. `text.includes('\n')` passes
-   the whole suite and is **wrong**. Traps 1 and 2 are two halves of one
-   predicate — getting either alone still leaves it broken.
+2. **And it must cover FOUR line terminators.** Row 14 / `:88` (_marks a block
+   comment carrying a line terminator_) uses `\n` only; the leaf's kind table
+   names **LF, CR, U+2028 and U+2029**. `text.includes('\n')` passes the whole
+   suite and is **wrong**. Traps 1 and 2 are two halves of one predicate —
+   getting either alone still leaves it broken.
 3. **Only ONE of the ten CLAIMABLE kinds has its fate asserted** (`:44`,
    `IdentifierName`). Measured across every `core.test.ts` fixture, the
    token-channel kinds present are **`IdentifierName`, `NumericLiteral`,
@@ -355,7 +454,7 @@ Unmeasured, and yours to establish: `''` · `'x'` · `'// hi'` · `'a b'` ·
    fixture at all: `PrivateIdentifier`, `DivPunctuator`, `StringLiteral`,
    `Template`, `TemplateSubstitutionTail`, `RegularExpressionLiteral`. ⚠ An
    earlier draft listed seven and included `RightBracePunctuator`, which **is**
-   present — `:141`'s `'if (a) {}'` produces one. A partial fate table passes.
+   present — `:149`'s `'if (a) {}'` produces one. A partial fate table passes.
    **Mitigate with a type, not a test:** a total
    `Record<InputElementKind, Fate>` makes the compiler enforce all fourteen.
    That needs
@@ -385,7 +484,9 @@ Unmeasured, and yours to establish: `''` · `'x'` · `'// hi'` · `'a b'` ·
 12. **Sweep over `git ls-files`, never over the files you remember touching.**
     In wave 1 two consecutive rounds walked past a contradiction inside one file
     because each fixed a remembered list.
-13. **Today is 2026-08-20 local.** `repo-facts.mjs` stamps UTC.
+13. ⚠ **Today is NOT 2026-08-20 — this line said so until 2026-08-25 and would
+    have put a wrong date into an immutable commit body.** Run `date` and use
+    what it says. `repo-facts.mjs` stamps UTC.
 
 ## Lint constraints
 
@@ -405,21 +506,35 @@ Unmeasured, and yours to establish: `''` · `'x'` · `'// hi'` · `'a b'` ·
 Report DONE only when all hold, each shown with its command output:
 
 1. `npx vitest run --project unit src/lib/study-lenses/lenses/spellme` shows
-   **37 passing** and **50 skipped** of 87 — 22 inherited + your 15. **Verify by
-   running it, not by matching this arithmetic**; reconcile any difference
-   before reporting.
+   **39 passing** and **50 skipped** of 89 — 22 inherited + your 17 — **plus the
+   precondition-throw test** in `core-defect.test.ts`, so expect **40 passing of
+   90** once that lands. **Verify by running it, not by matching this
+   arithmetic**; reconcile any difference before reporting. (It read
+   `37 / 50 of 87` until 2026-08-25.)
 2. `npx tsc --noEmit` → 0 errors.
-3. No new failing file outside the **nine**-path baseline above.
-4. `npx prettier --check`, `npx eslint`, `npx cspell` clean on both your paths.
+3. No new failing file outside the baseline list in § Measured baselines. **Do
+   not carry a count in this line** — it carried "nine" while that section said
+   EIGHT, and a count restated in two places is a count that will disagree with
+   itself again.
+4. `npx prettier --check`, `npx eslint`, `npx cspell` clean on **all three** of
+   your paths.
 5. **No Fake It anywhere, in any commit.** This wave declines the usual
    first-test permission (see § Un-skip order), so `return []` should never
    appear. Read `core.ts` at your final commit AND `git show` your first one.
 6. `readStream` reflects `DOCS.md` § Execution phase 3 **as a phase**, and the
-   fate table is total over all fourteen kinds.
+   fate table is total over all fourteen kinds. **And `positionCursor` reflects
+   phase 4: it advances past _every_ consecutive advancing element — a loop or
+   scan, never a single step — and returns `from` unchanged when the element
+   there is already claimable.** A single-step implementation
+   (`isClaimable(stream[from]) ? from : from + 1`) passed every test in the
+   module before 2026-08-25; the two locks added in `4d3e97a6` are what kill it,
+   and this line is the structural half of the same check.
 7. Every increment has an `ar-4` verdict; every CONSIDER has a documented
    response in its body.
 8. Your full SHA list, in order, with messages.
-9. The human's ruling on the throw class, and whether you wrote that test.
+9. `readStream` carries `@throws TypeError` and the class-asserting test is
+   green in `tests/core-defect.test.ts`. The ruling is already taken
+   (2026-08-25) — this line previously asked you to report it as still open.
 
 ## Report DONE | BLOCKED | FLAG — no fourth channel
 
