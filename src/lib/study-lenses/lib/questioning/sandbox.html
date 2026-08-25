@@ -1,0 +1,440 @@
+<!doctype html>
+<!--
+  questioning sandbox — permanent dev infrastructure, not part of the
+  region's contract.
+
+  Serve it with the engine's sandbox config, which roots at the
+  study-lenses package:
+
+      npx vite --config src/lib/study-lenses/lib/engine/vite.sandbox.config.ts
+
+  then open  /lib/questioning/sandbox.html
+
+  One snippet, both registers: the page drives the two landed questioners
+  through the family ask seam exactly as a roster consumer would —
+  `await questioner.ask(embodiment, config)`, settles as data, refusal
+  narrowed by `ok`. The socratizing config panel genuinely filters (its
+  checkbox groups mirror MicroDecisionConfig: a missing group imposes no
+  filter, an explicit false excludes — so the panel emits false only for
+  unchecked boxes and omits fully-checked groups). The quizzing filter
+  panel is deliberately INERT and says so: QuizFilter is declared, not
+  consumed — the engine no-op is oracle-pinned.
+
+  cspell:ignore quizzing socratizing
+-->
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>questioning sandbox</title>
+		<style>
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+			body {
+				font-family: monospace;
+				font-size: 13px;
+				padding: 1.5rem;
+				max-width: 1200px;
+				margin: 0 auto;
+			}
+			h1 {
+				font-size: 1.1rem;
+				margin-bottom: 0.4rem;
+			}
+			p.note {
+				color: #666;
+				margin-bottom: 1rem;
+			}
+			textarea {
+				width: 100%;
+				height: 110px;
+				font-family: monospace;
+				font-size: 13px;
+				padding: 0.5rem;
+				tab-size: 2;
+				border: 2px solid #333;
+				resize: vertical;
+			}
+			.controls {
+				margin-top: 0.5rem;
+				display: flex;
+				gap: 0.75rem;
+				align-items: center;
+				flex-wrap: wrap;
+			}
+			button {
+				padding: 0.4rem 1.2rem;
+				font-family: monospace;
+				font-size: 13px;
+				cursor: pointer;
+				border: 2px solid #333;
+				background: #eee;
+			}
+			label {
+				font-size: 12px;
+			}
+			select,
+			input[type='number'] {
+				font-family: monospace;
+				font-size: 12px;
+				border: 2px solid #333;
+				padding: 0.2rem;
+			}
+			.presets {
+				margin-top: 0.5rem;
+			}
+			.presets summary {
+				cursor: pointer;
+				color: #555;
+				font-size: 12px;
+			}
+			.preset-btns {
+				margin-top: 0.4rem;
+				display: flex;
+				gap: 0.5rem;
+				flex-wrap: wrap;
+			}
+			.panes {
+				margin-top: 1rem;
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 1rem;
+				align-items: start;
+			}
+			.pane {
+				border: 2px solid #333;
+				padding: 0.75rem;
+			}
+			.pane h2 {
+				font-size: 1rem;
+				margin-bottom: 0.5rem;
+			}
+			.pane h2 .serves {
+				font-size: 11px;
+				padding: 0.1rem 0.4rem;
+				border: 1px solid #333;
+				margin-left: 0.5rem;
+			}
+			fieldset {
+				border: 1px solid #999;
+				padding: 0.4rem 0.6rem;
+				margin-bottom: 0.5rem;
+			}
+			fieldset legend {
+				font-size: 11px;
+				color: #555;
+				padding: 0 0.3rem;
+			}
+			fieldset label {
+				margin-right: 0.7rem;
+				white-space: nowrap;
+				display: inline-block;
+			}
+			fieldset.inert {
+				border-style: dashed;
+				color: #999;
+			}
+			fieldset.inert legend {
+				color: #b00;
+			}
+			.status {
+				margin-top: 0.5rem;
+				padding: 0.5rem;
+				border: 1px dashed #999;
+				background: #fafafa;
+				white-space: pre-wrap;
+			}
+			.item {
+				border: 1px solid #bbb;
+				border-left: 4px solid #888;
+				padding: 0.4rem 0.6rem;
+				margin-top: 0.5rem;
+			}
+			.item .meta {
+				color: #555;
+				font-size: 11px;
+				margin-bottom: 0.25rem;
+			}
+			.item .prompt {
+				margin-top: 0.2rem;
+			}
+			.item ul {
+				margin: 0.25rem 0 0 1.2rem;
+			}
+			.item li {
+				margin-top: 0.15rem;
+			}
+			.key {
+				color: #0a5;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>questioning sandbox — both registers over one snippet</h1>
+		<p class="note">
+			Type a snippet, tweak the panels, hit [ask]. Each pane drives its
+			questioner through the family seam (<code
+				>await ask(embodiment, config)</code
+			>) and renders the answer or the refusal. The quizzing filter panel is
+			inert by contract — <strong>declared, not consumed</strong>; the engine
+			no-op is oracle-pinned.
+		</p>
+
+		<textarea id="code" title="the snippet" aria-label="the snippet">
+let total = 0;
+for (const n of [1, 2, 3]) {
+	total = total + n;
+}
+console.log(total);</textarea
+		>
+
+		<details open class="presets">
+			<summary>preset snippets</summary>
+			<div class="preset-btns">
+				<button
+					type="button"
+					class="preset"
+					data-code="let x = 5;&#10;x = x + 1;&#10;console.log(x);"
+				>
+					[1 · let + reassign]
+				</button>
+				<button
+					type="button"
+					class="preset"
+					data-code="const greeting = 'hello';&#10;const name = prompt('who?');&#10;alert(greeting + ' ' + name);"
+				>
+					[2 · const + io]
+				</button>
+				<button
+					type="button"
+					class="preset"
+					data-code="let a = 1;&#10;{&#10;&#9;let a = 2;&#10;&#9;console.log(a);&#10;}&#10;console.log(a);"
+				>
+					[3 · shadowing]
+				</button>
+				<button
+					type="button"
+					class="preset"
+					data-code="var old = 1;&#10;let mixed = old + 1;&#10;console.log(mixed);"
+				>
+					[4 · var launders]
+				</button>
+				<button type="button" class="preset" data-code="let = ;">
+					[5 · unparseable]
+				</button>
+			</div>
+		</details>
+
+		<div class="controls">
+			<button id="ask" type="button">[ask]</button>
+			<label
+				>type:
+				<select id="type">
+					<option value="module">module</option>
+					<option value="script">script</option>
+				</select>
+			</label>
+		</div>
+
+		<div class="panes">
+			<section class="pane" id="socratizing-pane">
+				<h2>
+					socratizing (open register)<span class="serves" id="soc-serves"
+						>serves: ?</span
+					>
+				</h2>
+				<div id="soc-config"></div>
+				<label
+					>count cap:
+					<input id="soc-count" type="number" min="0" step="1" value="0" />
+					(0 = no cap)</label
+				>
+				<div class="status" id="soc-status">hit [ask] to begin.</div>
+				<div id="soc-out"></div>
+			</section>
+
+			<section class="pane" id="quizzing-pane">
+				<h2>
+					quizzing (closed register)<span class="serves" id="quiz-serves"
+						>serves: ?</span
+					>
+				</h2>
+				<fieldset class="inert">
+					<legend>
+						config — accepted, no field consumed (the engine's QuizFilter is
+						declared, NOT built; inert by contract)
+					</legend>
+					<label><input type="checkbox" checked disabled /> families</label>
+					<label><input type="checkbox" checked disabled /> categories</label>
+					<label>range <input type="number" disabled /></label>
+					<label>count <input type="number" disabled /></label>
+				</fieldset>
+				<div class="status" id="quiz-status">hit [ask] to begin.</div>
+				<div id="quiz-out"></div>
+			</section>
+		</div>
+
+		<script type="module">
+			import embody from '../../embody/index.ts';
+			import socratizingQuestioner from './socratizing/socratizing-questioner.ts';
+			import quizzingQuestioner from './quizzing/quizzing-questioner.ts';
+
+			const CONFIG_GROUPS = {
+				kind: ['microDecision', 'comprehension'],
+				features: [
+					'variables',
+					'data',
+					'operators',
+					'controlFlow',
+					'functions',
+					'userInteraction',
+					'reading',
+				],
+				levels: [
+					'syntax',
+					'semantics',
+					'connections',
+					'goals',
+					'userExperience',
+				],
+				audiences: ['developers', 'computer', 'users'],
+				register: ['open', 'pointed', 'comparative'],
+				categories: [
+					'voice',
+					'clarity',
+					'consistency',
+					'caution',
+					'trap',
+					'easterEgg',
+				],
+			};
+
+			const codeEl = document.getElementById('code');
+			const typeEl = document.getElementById('type');
+			const askBtn = document.getElementById('ask');
+			const socConfigEl = document.getElementById('soc-config');
+			const socCountEl = document.getElementById('soc-count');
+
+			buildConfigPanel();
+
+			for (const button of document.querySelectorAll('.preset')) {
+				button.addEventListener('click', () => {
+					codeEl.value = button.dataset.code;
+					typeEl.value = 'module';
+					void ask();
+				});
+			}
+			askBtn.addEventListener('click', () => void ask());
+
+			function buildConfigPanel() {
+				for (const [group, keys] of Object.entries(CONFIG_GROUPS)) {
+					const fieldset = document.createElement('fieldset');
+					const legend = document.createElement('legend');
+					legend.textContent = group;
+					fieldset.append(legend);
+					for (const key of keys) {
+						const label = document.createElement('label');
+						const box = document.createElement('input');
+						box.type = 'checkbox';
+						box.checked = true;
+						box.id = `cfg-${group}-${key}`;
+						label.append(box, ` ${key}`);
+						fieldset.append(label);
+					}
+					socConfigEl.append(fieldset);
+				}
+			}
+
+			// A missing group imposes no filter; an explicit false excludes —
+			// so emit false only for unchecked boxes, omit fully-checked groups.
+			function readConfig() {
+				const config = {};
+				for (const [group, keys] of Object.entries(CONFIG_GROUPS)) {
+					const excluded = keys.filter(
+						(key) => !document.getElementById(`cfg-${group}-${key}`).checked,
+					);
+					if (excluded.length > 0) {
+						config[group] = Object.fromEntries(
+							excluded.map((key) => [key, false]),
+						);
+					}
+				}
+				const count = Number(socCountEl.value);
+				if (count > 0) {
+					config.count = count;
+				}
+				return config;
+			}
+
+			async function ask() {
+				const embodiment = embody(codeEl.value, { type: typeEl.value });
+				await renderSocratizing(embodiment);
+				await renderQuizzing(embodiment);
+			}
+
+			async function renderSocratizing(embodiment) {
+				const servesEl = document.getElementById('soc-serves');
+				const statusEl = document.getElementById('soc-status');
+				const outEl = document.getElementById('soc-out');
+				servesEl.textContent = `serves: ${socratizingQuestioner.serves(embodiment.facts)}`;
+				const answer = await socratizingQuestioner.ask(
+					embodiment,
+					readConfig(),
+				);
+				outEl.textContent = '';
+				if (!answer.ok) {
+					statusEl.textContent = `refusal: ${answer.error.message}${answer.error.offset === undefined ? '' : ` @ ${answer.error.offset}`}`;
+					return;
+				}
+				statusEl.textContent = `${answer.questions.length} question(s)${answer.analyzerErrors ? ` · ${answer.analyzerErrors.length} analyzer error(s)` : ''}`;
+				for (const question of answer.questions) {
+					const card = document.createElement('div');
+					card.className = 'item';
+					const meta = document.createElement('div');
+					meta.className = 'meta';
+					meta.textContent = `[${question.location.start}, ${question.location.end}) · ${question.kind} · ${question.feature} · ${question.category} · ${question.nodeType}`;
+					const list = document.createElement('ul');
+					for (const entry of question.questions) {
+						const row = document.createElement('li');
+						row.textContent = `${entry.register}: ${entry.text}`;
+						list.append(row);
+					}
+					card.append(meta, list);
+					outEl.append(card);
+				}
+			}
+
+			async function renderQuizzing(embodiment) {
+				const servesEl = document.getElementById('quiz-serves');
+				const statusEl = document.getElementById('quiz-status');
+				const outEl = document.getElementById('quiz-out');
+				servesEl.textContent = `serves: ${quizzingQuestioner.serves(embodiment.facts)}`;
+				const answer = await quizzingQuestioner.ask(embodiment);
+				outEl.textContent = '';
+				if (!answer.ok) {
+					statusEl.textContent = `refusal: ${answer.error.message}${answer.error.offset === undefined ? '' : ` @ ${answer.error.offset}`}`;
+					return;
+				}
+				statusEl.textContent = `${answer.items.length} item(s)`;
+				for (const item of answer.items) {
+					const card = document.createElement('div');
+					card.className = 'item';
+					const meta = document.createElement('div');
+					meta.className = 'meta';
+					meta.textContent = `${item.form} · ${item.mode} · [${item.anchorRange[0]}, ${item.anchorRange[1]})`;
+					const key = document.createElement('div');
+					key.className = 'key';
+					key.textContent = `${item.groupKey}${item.unlocks ? ` → unlocks ${item.unlocks.length}` : ''}`;
+					const prompt = document.createElement('div');
+					prompt.className = 'prompt';
+					prompt.textContent = item.prompt;
+					card.append(meta, key, prompt);
+					outEl.append(card);
+				}
+			}
+		</script>
+	</body>
+</html>

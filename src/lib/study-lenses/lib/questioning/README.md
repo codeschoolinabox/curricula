@@ -396,6 +396,7 @@ lib/questioning/
   notional-machine.md    the machine twin — the questioner kind's NM
   ux/                    the user twin — learner journeys through questioning
   LOSS-LEDGER.md         transport provenance for these docs
+  sandbox.html           permanent dev page — both registers over one snippet
   socratizing/           the open register's leaf questioner
   quizzing/              the closed register's leaf questioner
 ```
