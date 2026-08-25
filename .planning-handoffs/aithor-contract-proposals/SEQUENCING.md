@@ -213,8 +213,29 @@ divergence Wave 1's caution had warned about.
 - **A Wave-2 design risk (2026-08-05):** the node-type inventory will re-admit
   `var` unless it maps rules deliberately — the leaf's default-deny message is
   domain-blind, so nothing else stops it.
-- **Close before Wave 2's Phase 0 opens (2026-08-05):** this memo's own Wave-2
-  spec contradicts what Wave 1 shipped — `README.PROPOSED.md` describes a
-  declaration-admitting floor while `types.PROPOSED.ts` still imports from the
-  pre-move `allowlisting` path. The two `.PROPOSED` files are the place to fix
-  it; a review asked that it be closed before the wave opens, not during.
+- **DISCHARGED at `ec84bc30` (2026-08-25).** This memo's Wave-2 spec had
+  contradicted what Wave 1 shipped: `README.PROPOSED.md` described a
+  declaration-admitting floor and `types.PROPOSED.ts` imported from the pre-move
+  `allowlisting` path. Both corrected. A review then found a third, larger
+  contradiction of the same class — all three drafts claimed the leaf owns a
+  parse, when it publishes settings and never parses — and that is corrected
+  too. Recorded as discharged rather than deleted, so a reader knows the
+  obligation closed and where.
+- **Model routing for Wave 2 (human ruling 2026-08-25):** Phase 0 runs on
+  **Fable**, Phase 1 on **Opus**. The mechanism Phase 0 = Fable buys is that
+  `ar-2` and `ar-5` carry no `model:` pin and inherit the spawning session's
+  model, so the sketch and pre-merge gates track the authoring tier. **Both
+  halves depart from `HUMANS.md` § Model selection rules**, which names Opus for
+  Phase-0 design and Sonnet for post-gate TDD; the ruling overrides it
+  deliberately, because a 353-test contract reshape with a full evals re-author
+  is not routine increment work. Recorded here per
+  [DEV.md § Ruling provenance](../../DEV.md#ruling-provenance) — a ruling whose
+  end-state home does not exist yet rides its campaign's durable artifact.
+- **Phase 0 owes a loss ledger, and it is large (2026-08-25).** Landing the
+  drafts as the committed contract deletes ~22KB: `README.md` 49,370 → 33,656,
+  `types.ts` 24,170 → 19,381, `DOCS.md` 17,100 → 15,341 [measured]. `DEV.md` §
+  Documentation migration discipline binds an enumeration built by hand from the
+  baseline diff.
+- **`types.PROPOSED.ts`'s imports do not compile at the Wave-2 seat
+  (2026-08-25):** they are written from the Wave-3 seat. Re-base them at
+  landing; `npx tsc --noEmit` is the gate.
