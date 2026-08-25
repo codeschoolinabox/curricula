@@ -44,6 +44,10 @@ describe('spellme core', () => {
 		it.skip('gives a claimable element the token-tape fate', () => {
 			expect(streamOf('x')[0]?.fate).toBe('token-tape');
 		});
+
+		it.skip('leaves the cursor where it rests when the element is already claimable', () => {
+			expect(spellmeCore.positionCursor(streamOf('x'), 0)).toBe(0);
+		});
 	});
 
 	describe('Many', () => {
@@ -57,6 +61,10 @@ describe('spellme core', () => {
 
 		it.skip('advances the cursor past a run of trivia between claimable elements', () => {
 			expect(spellmeCore.positionCursor(streamOf('a  b'), 1)).toBe(2);
+		});
+
+		it.skip('advances the cursor past a mixed run of whitespace and a line terminator', () => {
+			expect(spellmeCore.positionCursor(streamOf('a \n b'), 1)).toBe(4);
 		});
 	});
 
