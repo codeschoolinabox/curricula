@@ -189,8 +189,8 @@ describe('resolveBinding', () => {
 	describe('Simple', () => {
 		it('resolves deterministically for the same occurrence', () => {
 			const snippet = embody('let n = 1; n;').facts;
-			const forest = readScopeForest(facts);
-			const occurrence = tokenAt(classifyOf(facts), 11);
+			const forest = readScopeForest(snippet);
+			const occurrence = tokenAt(classifyOf(snippet), 11);
 			expect(resolveBinding(occurrence, forest)).toEqual(
 				resolveBinding(occurrence, forest),
 			);
