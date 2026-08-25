@@ -57,6 +57,12 @@ Router-text reach into a spawned worker has been measured both present
 
 ## Then read the module canon, end to end, never in split ranges
 
+⚠ **Path anchors, because this list mixes three of them.** Paths starting
+`lenses/spellme/` are relative to **`src/lib/study-lenses/`**. Paths starting
+`../../` are relative to **the spellme module directory**
+(`src/lib/study-lenses/lenses/spellme/`), so `../../lib/scanning/` is
+`src/lib/study-lenses/lib/scanning/`. Everything else is repo-root relative.
+
 - `lenses/spellme/README.md` — **§ The three fates, and the mark is yours.**
   Also § Glossary (_the fates_, _mark_, _the stream_, _the tapes_) and § Edge
   cases.
@@ -89,19 +95,19 @@ Router-text reach into a spawned worker has been measured both present
 
 ⚠ **Every row below was re-measured 2026-08-25**, at the launch that follows it
 — not "at brief time", which is the label that licensed the previous staleness.
-**HEAD and `unpushed` move within minutes**: HEAD moved three times during the
-2026-08-25 launch preparation and `unpushed` went 6 → 28 in the same hour, all
-of it peer `quizzing` work. Re-measure before you act on any of it.
+**HEAD and `unpushed` move within minutes and are deliberately NOT pinned**:
+during the 2026-08-25 launch preparation HEAD moved five times and `unpushed`
+went 6 → 30 within the hour, all of it peer `quizzing` work. Run the commands.
 
 | Fact                 | Value                                                                                                         |
 | -------------------- | ------------------------------------------------------------------------------------------------------------- |
-| HEAD at LAUNCH time  | `4d3e97a65f00699352cd0f9c44cd6e7da5554ac1` [measured 2026-08-25: `git rev-parse HEAD`] — **volatile**         |
+| HEAD at LAUNCH time  | **Deliberately not pinned — run `git rev-parse HEAD`.** It moved five times during this launch preparation    |
 | spellme working tree | **clean** [measured: `git status --porcelain -- src/lib/study-lenses/lenses/spellme/` → empty]                |
 | spellme suite        | `22 passed \| 67 skipped (89)` across three files [measured: `npx vitest run --project unit …/spellme`]       |
 | remaining skips      | `core.test.ts` **39**, `component.test.tsx` **28** [measured: `git grep -cF "it.skip("`]                      |
 | `npx tsc --noEmit`   | **0 errors** [measured 2026-08-25]                                                                            |
 | Node                 | **v20.11.0 against engines `>=22.11.0` — BELOW the minimum.** Both tools run anyway. Proceed; upgrade nothing |
-| unpushed             | `origin/main..HEAD` = **28** and climbing [measured 2026-08-25]. Not yours. Never push                        |
+| unpushed             | **Not pinned — run `git rev-list --count origin/main..HEAD`.** It was 30 and climbing. Not yours. Never push  |
 
 ⚠ **The `unpushed` row said `343 and climbing` until 2026-08-25, and the human
 has since pushed.** A worker who reads a number three hundred off from what it
@@ -117,7 +123,10 @@ work landed. **Seven of the eight fail at COLLECTION** (`0 test`,
 `loadAndTransform`) rather than on an assertion — all 41 failing tests live in
 `remark-study-lenses.test.ts` alone [measured 2026-08-25: the eight paths run
 directly]. That matters to you: a collection failure looks different from an
-assertion failure, and six of these will never print a test name.
+assertion failure, and **seven** of these will never print a test name. (This
+said "six" for a few hours on 2026-08-25, contradicting the "seven" two
+sentences above it — the exact count-disagrees-with-itself defect that exit-gate
+item 3 was rewritten to prevent, reintroduced by the round that rewrote it.)
 
 ```text
 scripts/lib/check-tables/tests/find-table-defects.test.ts
@@ -204,9 +213,11 @@ body; it is immutable.
   the opt-out to AR-4.**
 - **`ar-4` fires per increment**, after self-review, before commit. Spawn the
   registered `ar-4` **by name**; it has been measured working from a worker
-  context. Provide it: `core.ts`, `core.test.ts`, `types.ts`, the peer `DOCS.md`
-  including its Mermaid diagram, and `../../lib/scanning/types.ts`. **Paths,
-  never pasted contents.**
+  context. Provide it: `core.ts`, `core.test.ts`,
+  **`tests/core-defect.test.ts`** (added 2026-08-25 — it is now an allowed path
+  and carries increment 0's driver, so a reviewer without it is blind to the
+  test driving the throw), `types.ts`, the peer `DOCS.md` including its Mermaid
+  diagram, and `../../lib/scanning/types.ts`. **Paths, never pasted contents.**
 - ⛔ **Every review prompt must forbid `git stash` BY NAME**, alongside a
   general read-only mandate and an allow-list. In wave 1 an `ar-4` carrying a
   general "strictly read-only" instruction ran `git stash` / `git stash pop` and
@@ -219,7 +230,10 @@ body; it is immutable.
 - **`ar-5` is the orchestrator's. Do not spawn it.**
 - **Never pass a `model` parameter** to a reviewer.
 - **No 🔍 sandbox checkpoint in this wave**, declared explicitly: `readStream`
-  is a pure function with no user-observable surface. The component is wave 5's.
+  **both of your functions are pure** with no user-observable surface. The
+  component tests begin at **wave 3**, not wave 5 — see the wave map. (This said
+  "`readStream` is a pure function" and "the component is wave 5's" until
+  2026-08-25; the re-order had walked past both.)
 - PROCEED → commit. CONSIDER → answer each concern in the commit body. PAUSE →
   **report BLOCKED with the reviewer's concerns verbatim.**
 
@@ -320,6 +334,28 @@ out of range is exactly the wrong-value case — and the three committed
 about `readStream` but `ed76f43b`'s body recorded only the `config` half; this
 reverses the `readStream` half only.
 
+### Where it sits in the order — it is INCREMENT 0, before row 1
+
+**Write it first, before un-skipping row 1.** A cold read on 2026-08-25 found
+this genuinely ambiguous — the test is an eighteenth item that is _authored_
+rather than _un-skipped_, and § Un-skip order's "plain file order" says nothing
+about it. Two workers would have produced two different commit structures, and
+exit-gate item 5 (`git show` your first commit) would be checking a commit whose
+contents were undefined. So it is settled here:
+
+- **It is a real red.** The stub throws
+  `new Error('spellme readStream: not implemented')`, and `Error` is **not** an
+  instance of `TypeError`, so `.toThrow(TypeError)` fails against it. You get a
+  genuine red-then-green cycle, not a vacuous pass.
+- **Increment 0 lands the guard and the throw.** The two narrowing re-checks and
+  the `TypeError` are its implementation.
+- **Row 1 (`:30`) then adds only the `.map()`** — which is why its sanctioned
+  placeholder callback is safe: an empty source never runs it.
+
+That splits what § Un-skip order's row-1 bullet describes as one step ("the
+guard, the throw, and a `.map()`") across two commits, deliberately. **Follow
+this section where the two differ.**
+
 **What you owe, in this wave:**
 
 1. **Add `@throws TypeError` to `readStream`'s JSDoc** — it currently carries no
@@ -343,11 +379,19 @@ reverses the `readStream` half only.
 and nothing left behind**.
 
 ⚠ **Take them by NAME. The line numbers below are secondary and were already
-wrong once.** `4d3e97a6` inserted two tests on 2026-08-25 and **eight of the
-original fifteen line numbers shifted** — this list said `:50` for what is now
-`:54`, and `:64` for what is now `:72`. Names are stable; line numbers are not.
-Re-derive them yourself before you start:
+wrong once.** `4d3e97a6` inserted two tests on 2026-08-25 and **ELEVEN of the
+original fifteen line numbers shifted** — only the first four held. This list
+said `:50` for what is now `:54`, and `:64` for what is now `:72`. Names are
+stable; line numbers are not. Re-derive them yourself before you start:
 `grep -n "it.skip(" tests/core.test.ts | head -20`.
+
+⚠ **That count said "eight" until a cold read re-derived it as eleven [measured
+2026-08-25: the fifteen original names looked up by name in the amended file — 4
+held their line, 11 moved].** The wrong number also went into `132bdad3`'s
+commit body, where it is **immutable and cannot be corrected**; this line is its
+correction. It changes nothing operationally — "take them by name" is right
+under either count — but a measured-sounding number that does not reproduce is
+exactly what this campaign has bled on.
 
 | #   | Line   | Test name                                                                    |
 | --- | ------ | ---------------------------------------------------------------------------- |
@@ -417,20 +461,50 @@ that contradiction.
 way-past blocks are wave 4's, and all 28 in `component.test.tsx` are waves 3 and
 5's.
 
-## Ground truth — MEASURE it, do not guess and do not trust this brief
+## Ground truth — ALL TEN FIXTURES, MEASURED
 
-The fixtures below are what your tests feed `embody()`. **Measure the leaf's
-actual output for each before implementing**, and put the measurement in your
-commit body. Only two are pre-measured here:
+⚠ **This section previously said "measure the leaf's actual output for each
+before implementing" and left seven fixtures to you. That instruction was not
+executable** and a cold read caught it on 2026-08-25: `streamOf` calls
+`readStream`, which is the unimplemented thing, so the measurement is circular;
+`core-defect.test.ts` is `vi.mock`-poisoned throughout; and a scratch harness
+would need a fourth path in a shared worktree that the environment cannot then
+delete. **So the orchestrator measured all ten and pasted them here.**
 
-- `'#!/usr/bin/env node\nx'` → **three** elements: `HashbangComment` [0,19),
-  `LineTerminator` [19,20), `IdentifierName` [20,21). **The hashbang excludes
-  its terminator**, which is why row 17 / `:100`'s `marked === false` holds
-  naturally [relayed: wave-1 planning measurement, 2026-08-20 — re-measure it].
-- `'const x = 1'` → **7** elements, per row 6 / `:54`'s own assertion.
+Every row below is `[kind, start, end, text]` in sequence order [measured
+2026-08-25: a temporary probe reading
+`embody(src).facts.tokens.value.inputElements` directly, run inside the spellme
+suite and reverted byte-identically — `git status --porcelain` on the module was
+empty afterwards]:
 
-Unmeasured, and yours to establish: `''` · `'x'` · `'// hi'` · `'a b'` ·
-`'a\nb'` · `'/* a\nb */'` · `'/* ab */'`.
+```text
+""                       => []
+"x"                      => [IdentifierName 0-1 "x"]
+"// hi"                  => [Comment 0-5 "// hi"]
+"a b"                    => [IdentifierName 0-1, WhiteSpace 1-2, IdentifierName 2-3]
+"a\nb"                   => [IdentifierName 0-1, LineTerminator 1-2 "\n", IdentifierName 2-3]
+"/* a\nb */"             => [Comment 0-9 "/* a\nb */"]
+"/* ab */"               => [Comment 0-8 "/* ab */"]
+"a \n b"                 => [IdentifierName 0-1, WhiteSpace 1-2, LineTerminator 2-3, WhiteSpace 3-4, IdentifierName 4-5]
+"#!/usr/bin/env node\nx" => [HashbangComment 0-19, LineTerminator 19-20, IdentifierName 20-21]
+"const x = 1"            => [IdentifierName 0-5 "const", WhiteSpace 5-6, IdentifierName 6-7 "x",
+                             WhiteSpace 7-8, Punctuator 8-9 "=", WhiteSpace 9-10, NumericLiteral 10-11 "1"]
+```
+
+**What these settle, so you do not have to re-derive them:**
+
+- **The hashbang EXCLUDES its terminator** — `[0,19)`, with the `LineTerminator`
+  a separate element. That is why row 17's `marked === false` holds naturally.
+  This was `[relayed:]` until 2026-08-25 and is now measured.
+- **`'a \n b'` is FIVE elements**, so row 9's cursor must cross **three**
+  advancing elements in one call and land on `4`. A single step lands on `2`.
+- **`'const x = 1'` is SEVEN elements**, matching row 6's assertion.
+- **Both block-comment fixtures are a single `Comment`.** `'/* a\nb */'`'s text
+  contains `\n` (marked), `'/* ab */'`'s does not (unmarked) — the mark turns on
+  the **text** for a `Comment`, and on the **kind** for a `LineTerminator`.
+
+**Still re-measure before you rely on any of it.** The leaf is a peer's module
+and this table is a snapshot, not a contract.
 
 ## Traps, each of which has already cost something
 
@@ -486,7 +560,9 @@ Unmeasured, and yours to establish: `''` · `'x'` · `'// hi'` · `'a b'` ·
     because each fixed a remembered list.
 13. ⚠ **Today is NOT 2026-08-20 — this line said so until 2026-08-25 and would
     have put a wrong date into an immutable commit body.** Run `date` and use
-    what it says. `repo-facts.mjs` stamps UTC.
+    what it says. **Local time wins for commit bodies**; `repo-facts.mjs` stamps
+    UTC, and this machine is UTC-4, so after 20:00 local the two name
+    **different dates**. Take the local one and do not mix them within a body.
 
 ## Lint constraints
 
