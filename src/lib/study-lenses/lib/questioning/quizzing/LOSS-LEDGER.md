@@ -1,5 +1,5 @@
 <!-- cspell:ignore quizzing socratizing unshadowed mcq distractor -->
-<!-- cspell:ignore unbuilt reassignability gradable pointered injectivity gradability cloneability -->
+<!-- cspell:ignore unbuilt reassignability gradable pointered injectivity gradability cloneability chokepoint -->
 
 # Loss ledger — the Stage-3 quizzing transport
 
@@ -63,6 +63,8 @@ projection over `facts.environment` (§ C).
 | `generators/types.ts` | conformed | classifying depth; "Phase 3" cross-reference → "the run phase" |
 | `resolving/types.ts` | re-authored around the carried pair | `Binding` + `Occurrence` port verbatim; their JSDoc's `DeclarationInfo`/`buildScope`/B→C-swap/`status.parsed` references reworded to `TrackedDeclaration`/the projection/parse-gate phrasing; the minted forest types are new (§ C) |
 | `tests/resolve-binding.test.ts.oracle-staged` staging defect | repaired FORWARD at `48d7301f` (orchestrator-sanctioned, pre-activation) | the Phase-0 rewire left two unbound `facts` readers in the snippet-declared "resolves deterministically" test — the file could not run; the repair restored the quarry's own spelling (2 identifiers, assertions byte-untouched), so the transport stays behavior-preserving vs the quarry blob |
+| `context/build-context.ts` | conformed (U5 — the § B entry rewire realized source-side) | nine instances, itemized in the U5 commit body (863c9ea1): a cspell ignore (`chokepoint`); the stale @file phase-number generalized; the `Snippet`→`Facts` type import (path byte-identical); the classifying depth re-point; § B JSDoc residue rewords (`buildScope`→the projection, Class-A/B labels dropped, facts-stage vocabulary); both signatures re-typed to `facts: Facts`; the one-line remap (`status.parsed` ×1 + `raw.ast` ×2 — the only Snippet reads in the file); the throw reword inside the pinned regex; the `readScopeForest(facts)` call per the landed signature |
+| `run-generators.ts` | conformed (U5) | one class: the @file "Phase 3" cross-reference → "the run phase" (the generators/types.ts precedent wording); otherwise byte-identical to quarry blob `018b9fb1` |
 | The 22 oracle fixture files importing legacy embody | rewired at staging | the `'../../../../embody/index.js'` import string is byte-identical by depth (it now resolves to greenfield embody); `import type { Snippet }` → `Facts`; fixtures destructure `.facts`; the per-file classify helper reads `facts.source.value` / `facts.tokens.value.tokens` / `facts.ast.value`; classifying import depth `../../` → `../../../` |
 | `FAIL_AT_PARSE` (three files: `build-context`, `generate-quiz`, `read-scope-forest` tests) | replaced with the genuinely unparseable `'let = ;'` | the magic scenario is a legacy-embody affordance greenfield deliberately lacks; the socratizing suite set the precedent |
 | Engine throw-message wording | reworded within the pinned regex | the oracle pins `/parsed\|unparsed\|ast/i`; the message now speaks facts vocabulary |
