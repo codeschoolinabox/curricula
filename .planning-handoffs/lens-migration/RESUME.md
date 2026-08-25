@@ -7,6 +7,7 @@ closes; nothing here is end-state documentation. -->
 <!-- cspell:ignore normalisation unrunnable unrepaired toplevel -->
 <!-- cspell:ignore loosenings capitalisation enshittifying keyable unbuildable -->
 <!-- cspell:ignore normalises undercounted oldd clauding zakey nocite -->
+<!-- cspell:ignore Explorotron multibyte -->
 <!-- a human ruling quoted verbatim; do not translate it and do not "fix" it: -->
 <!-- cspell:ignore séparé -->
 
@@ -216,8 +217,8 @@ reading session's to re-pick, and neither is collapsing them into one session.**
 
 > ### ⛔ STEP 1c's TEMPLATE HALF IS DONE — YOU ARE STARTING THE LEDGER HALF
 >
-> **Seven commits, 2026-08-20/21, all in `ledgers/_TEMPLATE.md`, none pushed.**
-> No ledger was re-cut — that is deliberately yours.
+> **TEN commits, 2026-08-20/24, none pushed.** No ledger was re-cut — that is
+> deliberately yours.
 >
 > | SHA        | what                                                          |
 > | ---------- | ------------------------------------------------------------- |
@@ -228,6 +229,34 @@ reading session's to re-pick, and neither is collapsing them into one session.**
 > | `57564e01` | a bare `G3` tag would have broken the new self-check          |
 > | `684adcce` | AR-2 round 3, CONSIDER — 2 residuals                          |
 > | `ea381b82` | `### The Gen-1 arm` — NEW, and RUN against the quarry         |
+> | `afcacf8a` | this resumption point                                         |
+> | `5e47c96e` | AR-1 round 1, PAUSE — 3 blockers + 8 concerns                 |
+> | `6534985f` | AR-1 round 2, CONSIDER — a gate condition + 3 siblings        |
+>
+> ⚠️ **This table said SEVEN and omitted the last two until 2026-08-24**, when a
+> context-free reader caught it. That matters more than an off-by-two, because
+> `5e47c96e`'s own subject is _"the handoff told the next session something
+> false"_ — and a reader could not tell whether that false thing was still in
+> front of them. **It is not.** `5e47c96e` struck the "nothing forecloses the
+> schema" claim and the superseded fence-parity rule; `6534985f` closed a
+> partial-split hole in the Gen-1 arm. Both are reflected in this block.
+>
+> ### The gates you must run, all FOUR of them, in this order
+>
+> | #   | gate                     | where                                           | when                                                                  |
+> | --- | ------------------------ | ----------------------------------------------- | --------------------------------------------------------------------- |
+> | 1   | **structural-integrity** | `_TEMPLATE.md` § The structural-integrity check | FIRST, always — a document that did not render makes the rest vacuous |
+> | 2   | **Pass-1 gate**          | `_TEMPLATE.md` § Close conditions               | shape                                                                 |
+> | 3   | **transport check**      | `_TEMPLATE.md` § The transport check            | transport, Gen-2/3                                                    |
+> | 4   | **Gen-1 arm**            | `_TEMPLATE.md` § The Gen-1 arm                  | any ledger carrying a `Gen-1` citation                                |
+>
+> **Every path argument is REPO-RELATIVE**, and every command runs from the
+> repository root. ⚠️ `firstblock` lives inside a **four-backtick** fence,
+> because its own body contains a three-backtick line — a generic extractor
+> silently returns nothing, and an empty script exits 0 while printing nothing.
+> **Floor any harness on its own extraction.** Also run under `LC_ALL=C`: the
+> published mandate is about BSD `awk` aborting on UTF-8, and `§` is itself
+> multibyte, which bites a hand-rolled matcher.
 >
 > **What is DONE:** the three gates the schema needs to be checkable — a
 > structural-integrity check that sees burial by fence **and** by HTML comment;
@@ -235,17 +264,33 @@ reading session's to re-pick, and neither is collapsing them into one session.**
 > and refuses a half-migrated schema; and the Gen-1 arm, which never existed.
 > **Amendment 4 is discharged** by the last of those.
 >
-> **What is NOT done, and is your unit: amendments 6, 7 and 8 — the two-cell
-> schema itself — and then the two ledger re-cuts.**
+> **What is NOT done, and is your unit: amendments 6, 7 and 8, and then the two
+> ledger re-cuts.** ⚠️ Amendment 7 is **not** part of the schema — the
+> per-cohort `pass` column lives in `### Seed census`, a different table
+> entirely, and grouping it with 6 and 8 costs a reader a wrong mental model.
+>
+> ⛔ **`FIDELITY-METHOD.md` § Columns line 84 is IN SCOPE, and this is the
+> ruling.** It is the authoritative definition of the column you are deleting,
+> and two separate instructions elsewhere say not to touch that file — § Read
+> this first says _"do not re-derive"_, and § Owed to FIDELITY-METHOD says
+> _"deliberately not edited from here"_. **Neither was written about this.**
+> Leaving it makes the campaign's method document define a column that no longer
+> exists. Amend that row with the rest of amendment 6, and say so in the commit
+> body.
 >
 > ⚠️ ~~Nothing in the template forecloses the schema; it was left free on
 > purpose.~~ **STRUCK 2026-08-24, found by AR-1 — it was not true.** Two things
 > are already pinned and you should know which:
 >
 > - **`writeme-019` stays in `quoted`** (human ruling, below). One end pinned.
-> - **§ The transport check makes ANY `Gen-[23] \`x.md\` §`inside`reasoned` a
->   whole-ledger BREACH.** That silently answers a question amendment 6 owns —
->   _may a seeder's derivation cite its source?_ — and the published answer is
+> - **§ The transport check makes ANY canonical Gen-2/Gen-3 heading citation
+>   inside the `reasoned` cell a whole-ledger BREACH.** ⚠️ This bullet was
+>   itself damaged by **amendment 8's own hazard** until 2026-08-24 — a nested
+>   code span paired wrong and rendered as ``§`inside`reasoned``, while
+>   `markdownlint` and `prettier --check` both reported clean over it. The
+>   hazard you are here to publish, live in the bullet describing it, invisible
+>   to both gates. That silently answers a question amendment 6 owns — _may a
+>   seeder's derivation cite its source?_ — and the published answer is
 >   currently **no**. Today's ledgers escape only by convention accident: 27
 >   rows carry an annotation and **zero** write a citation in the canonical
 >   idiom, because they say _"candidate successor: port README § …"_ rather than
@@ -269,6 +314,16 @@ reading session's to re-pick, and neither is collapsing them into one session.**
 > for the reproduced findings. Expect that pattern; it is why the re-verify is
 > not optional.
 >
+> **Two standing rulings that bind this unit and are stated FAR below** — a
+> context-free reader found one 363 lines down and the other 1,185, neither
+> reachable from here:
+>
+> - **⛔ Do not cut `_family-f.md`**, in this step or the next. Both of its
+>   blockers are still marked ⛔ in `_TEMPLATE.md` at the point of use.
+> - **Standing ruling 3 — the template is amended before a ledger is cut from
+>   it.** It is invoked about eight times in this file and defined once, near
+>   the end. It is why the template half came first.
+>
 > **Two human rulings taken this session, and they bind you:**
 >
 > 1. **The Gen-1 quarry is MOUNTED and readable** — it is no longer STEP 1d's
@@ -287,6 +342,31 @@ reading session's to re-pick, and neither is collapsing them into one session.**
 > `parsons-109` are in `_TEMPLATE.md` § The Gen-1 arm; they are published there
 > rather than recorded against the rows, because a repair is its own unit with
 > its own gate run.
+
+### ⛔ THE TARGET HEADER ROW — published because nothing can catch you if it is wrong
+
+```text
+| # | affordance | provenance | quoted | reasoned | disposition | discharged by | gate |
+```
+
+**`evidence` is RENAMED to `quoted`, and `reasoned` is INSERTED after it** —
+position 5 of 8. Not two new columns replacing one.
+
+**Every gate reads the header BY NAME and is therefore blind to the order**
+[read: the schema resolvers in `_TEMPLATE.md` §§ The transport check and The
+Gen-1 arm]. A wrong order passes the schema resolver, both floors and both clean
+regressions **silently**. That is this campaign's own founding defect class
+landing on your first keystroke, which is why the row is published here rather
+than left to be inferred from § Columns.
+
+⚠️ **This section sits OUTSIDE the blockquote above, deliberately.** Inside it,
+`prettier --write` was **non-idempotent**: a fenced block nested in a blockquote
+made it re-nest the following paragraph one level deeper on every pass, and a
+code span containing blockquote characters made it inject more of them into the
+prose each time [measured 2026-08-24: three consecutive `--write` passes, each
+differing from the last, converging on nothing]. The note describing the hazard
+was itself an instance of it. **Do not nest a fence, or a code span containing a
+blockquote marker, inside a blockquote in this file.**
 
 **STEP 1b's re-investigation is done and its three commits are unpushed.** The
 ledger went from 80 rows to **120**: 35 from four fresh readers over
@@ -324,8 +404,9 @@ produced two human rulings that are now the next unit.
      it.
    - **Scope: `_TEMPLATE.md` first** (standing ruling 3 — the template is
      amended before a ledger is cut from it), then re-cut **`parsons` 120 rows**
-     and **`writeme` 45 rows**, then **rewrite the transport check to parse two
-     cells**. Then re-run every gate on both ledgers.
+     and **`writeme` 45 rows**, then ~~rewrite the transport check to parse two
+     cells~~ — **DONE at `6c3e6d16`; it already parses two cells.** Then re-run
+     every gate on both ledgers.
    - ⛔ **THE CITATION STAYS WITH THE QUOTATION, IN `quoted`.** This is the one
      decision everything else in STEP 1c depends on, and it is settled by
      measurement rather than taste [both measured 2026-08-20 by the context-free
@@ -362,13 +443,15 @@ produced two human rulings that are now the next unit.
      rows into a shape where `parsed` silently falls from 57 to 7 with every
      gate green.
 
-   - **What the check does still need is a Gen-1 arm**, which it has never had —
-     see the eight non-transporting quotations below. `_TEMPLATE.md` § The
-     amendment gate still binds: the whole mutation corpus must fire afterwards,
-     plus both clean regressions. **STEP 1c additionally owes one new fixture
-     pair**: a row with the citation immediately before its quotation, which
-     must parse, and one with a `|` between them, which must report `UNQUOTED`.
-     Nothing else catches the failure above.
+   - ~~**What the check does still need is a Gen-1 arm**, which it has never had
+     — see the eight non-transporting quotations below.~~ **STRUCK 2026-08-24:
+     BUILT AND RUN at `ea381b82`**, and it is what found sixteen
+     non-transporting quotations where this sentence says eight. `_TEMPLATE.md`
+     § The amendment gate still binds: the whole mutation corpus must fire
+     afterwards, plus both clean regressions. **STEP 1c additionally owes one
+     new fixture pair**: a row with the citation immediately before its
+     quotation, which must parse, and one with a `|` between them, which must
+     report `UNQUOTED`. Nothing else catches the failure above.
 
 ### ⛔ FOUR GREEN GATES REPORTED CLEAN OVER A LEDGER THAT DID NOT RENDER
 
@@ -478,7 +561,10 @@ arm** — it parses Gen-2/Gen-3 heading citations only, so `parsed` sat unchange
 at **57 across an append of 40 rows**, which reads exactly like a clean bill.
 The stopgap that found them is a `grep -F` re-check of every `<em>` fragment
 against its source file; **it has no home**, like the transport check itself.
-Building the real arm is part of STEP 1c's check rewrite.
+~~Building the real arm is part of STEP 1c's check rewrite.~~ **BUILT AND RUN at
+`ea381b82`** — `_TEMPLATE.md` § The Gen-1 arm. It reproduced these eight
+independently and found **eight more**, because the stopgap above **skipped**
+every `…`-bearing fragment and a skip reads exactly like a pass.
 
 ### ⛔ The Gen-3 direct-check appendix vanished at a step boundary — RE-ASSIGNED
 
@@ -1580,8 +1666,17 @@ agenda explicitly.)_
   short, and a worker that globs from it finds ELEVEN `parsonizer` directories**
   [measured 2026-08-19 by the context-free validation: `find … -type d -name
   parsonizer | wc -l` → **11**, including `dist/` copies SPEC says to use for
-  nothing]. **The campaign has two Gen-1 roots in circulation and rules between
-  them nowhere:**
+  nothing]. ⚠️ ~~**The campaign has two Gen-1 roots in circulation**~~ — **it is
+  THREE, measured 2026-08-21 while building the Gen-1 arm**: `spiral-lens/`,
+  `0--study-lenses--it-begins/` and `welcome-to-programming/`, plus
+  `Explorotron/libs/js-parsons/` as a genuinely distinct upstream lineage for
+  `parsons.js`, `parsons.css` and `lis.js`. `parsons-iframe.html` — which
+  carries 16 of `parsons`'s Gen-1 citations — differs across **all three** by
+  **16 lines** each, not 8. **The arm was run against each root and returned
+  byte-identical findings**, so `parsons`'s results are root-insensitive; that
+  is a measurement about this ledger and not a property of the roots, which is
+  why the arm still pins its root and prints it. **The campaign still rules
+  between them nowhere:**
 
   ```text
   …/0-study-lenses-committee/zz--oldd-clauding-and-context-dump/0--study-lenses--it-begins/   # FIDELITY-METHOD § 4's GEN1=
