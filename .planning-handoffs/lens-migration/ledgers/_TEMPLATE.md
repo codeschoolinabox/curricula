@@ -1733,8 +1733,17 @@ while (my $line = <$fh>) {
     my $lq = () = $line =~ /(?:<em>"|(?<!\\)_")/g;
     my $qq = () = $q    =~ /(?:<em>"|(?<!\\)_")/g;
     my $rq = () = $c[$RCOL] =~ /(?:<em>"|(?<!\\)_")/g;
-    if ($rq > 0 && $q =~ /Gen-1\s*`/) { $qmisplaced += $rq;
-      push @find, "GEN1-MISPLACED-QUOTATION $id -- $rq quotation(s) sit in the derivation cell on a Gen-1 row" } }
+    # ⛔ AND `$qq == 0` IS THE WHOLE PREDICATE. A partial split moves the
+    # extractor fragment OUT of `quoted`, leaving a citation with nothing to
+    # check; a legitimate derivation cell QUOTES THINGS -- an instrument caveat
+    # is a permitted annotation class and caveats routinely quote -- while
+    # `quoted` keeps its own fragments. An earlier form fired on any quotation
+    # in `reasoned` and so REFUSED THE TARGET STATE THIS SECTION PRESCRIBES:
+    # moving the annotation on row 109 into `reasoned`, which this section says
+    # makes its two non-defects vanish, gave exit 1 [measured 2026-08-24 by a
+    # context-free reader doing exactly what this file said to do].
+    if ($rq > 0 && $qq == 0 && $q =~ /Gen-1\s*`/) { $qmisplaced += $rq;
+      push @find, "GEN1-MISPLACED-QUOTATION $id -- $rq quotation(s) in the derivation cell while `quoted` has none" } }
   next unless $q =~ /Gen-1\s*`/;
 
   # Segment the cell at each Gen-1 file citation, so every fragment is scoped to

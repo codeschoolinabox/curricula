@@ -226,8 +226,15 @@ which is the one class this campaign's own invariant 13 exists to stop.
 
 > ### ⛔ STEP 1c's TEMPLATE HALF IS DONE — YOU ARE STARTING THE LEDGER HALF
 >
-> **ELEVEN commits, 2026-08-20/24.** No ledger was re-cut — that is deliberately
-> yours.
+> **The commits are listed below and NOT counted here.** No ledger was re-cut —
+> that is deliberately yours.
+>
+> ⚠️ **This line has carried a wrong count twice** — "seven" when it was ten,
+> then "eleven" when the table listed ten — each caught by a context-free reader
+> rather than by any gate. **The list is the record; a count beside a list is a
+> second statement of the same fact, and this file has now demonstrated three
+> times that the second one goes stale.** Derive it:
+> `git log --oneline 23f4555b..HEAD -- .planning-handoffs/lens-migration/`.
 >
 > ⛔ **EIGHT OF THEM ARE ALREADY PUSHED, AND NOT BY THIS CAMPAIGN.** See § The
 > push state below — read it before you assume anything is droppable.
@@ -262,13 +269,14 @@ which is the one class this campaign's own invariant 13 exists to stop.
 > | 3   | **transport check**      | `_TEMPLATE.md` § The transport check            | transport, Gen-2/3                                                    |
 > | 4   | **Gen-1 arm**            | `_TEMPLATE.md` § The Gen-1 arm                  | any ledger carrying a `Gen-1` citation                                |
 >
-> **Every path argument is REPO-RELATIVE**, and every command runs from the
-> repository root. ⚠️ `firstblock` lives inside a **four-backtick** fence,
-> because its own body contains a three-backtick line — a generic extractor
-> silently returns nothing, and an empty script exits 0 while printing nothing.
-> **Floor any harness on its own extraction.** Also run under `LC_ALL=C`: the
-> published mandate is about BSD `awk` aborting on UTF-8, and `§` is itself
-> multibyte, which bites a hand-rolled matcher.
+> **Every command runs from the repository root, and every path argument is
+> repo-relative EXCEPT the Gen-1 root, which is absolute** — see § The gate
+> arguments below for all seven, collected. ⚠️ `firstblock` lives inside a
+> **four-backtick** fence, because its own body contains a three-backtick line —
+> a generic extractor silently returns nothing, and an empty script exits 0
+> while printing nothing. **Floor any harness on its own extraction.** Also run
+> under `LC_ALL=C`: the published mandate is about BSD `awk` aborting on UTF-8,
+> and `§` is itself multibyte, which bites a hand-rolled matcher.
 >
 > **What is DONE:** the three gates the schema needs to be checkable — a
 > structural-integrity check that sees burial by fence **and** by HTML comment;
@@ -349,13 +357,45 @@ which is the one class this campaign's own invariant 13 exists to stop.
 > ⛔ **The Gen-1 arm found SEVEN transport defects nobody had ever checked** —
 > rows `050`, `051` ×2, `056`, `108` ×2, `110` — on top of the 8 this file
 > already names. They are the fragments the 2026-08-19 stopgap **skipped** as
-> truncated, and they are the same composed-onto-one-line class. **Fifteen
-> genuine defects now, not eight.** Full enumeration and the two non-defects on
-> `parsons-109` are in `_TEMPLATE.md` § The Gen-1 arm; they are published there
-> rather than recorded against the rows, because a repair is its own unit with
-> its own gate run.
+> truncated, and they are the same composed-onto-one-line class. **FIFTEEN
+> non-transporting quotations, plus a SIXTEENTH defect of a different class —
+> `parsons-119`, whose count was taken by line.** ⚠️ Two populations, and this
+> file stated them interchangeably in four places until 2026-08-24; a
+> context-free reader derived both from one run and found each figure wrong in
+> the opposite direction. **The arm prints them: 17 `QUOTE-ABSENT` minus the 2
+> non-defects on `parsons-109` is 15; plus 1 `GEN1-COUNT` is 16.** Full
+> enumeration and the two non-defects on `parsons-109` are in `_TEMPLATE.md` §
+> The Gen-1 arm; they are published there rather than recorded against the rows,
+> because a repair is its own unit with its own gate run.
 
-### ⛔ The push state — eight of the eleven are already out, and not by this campaign
+### The gate arguments — all seven, because a cold reader reconstructed them from five places
+
+Run from the repository root.
+
+| gate       | arguments                                                                                                                                             |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| structural | `<doc.md>` `<row-id-prefix>` — the id prefix, literally `<lens>` for the template                                                                     |
+| Pass-1     | `L=<ledger>` `LENS=<row-id-prefix>` `CENSUS=<the § Seed census total row>` — 120 for `parsons`, 45 for `writeme`                                      |
+| transport  | `<ledger>` `<REF>` `<PORT>` `[member]` — `REF=src/lib/study-lenses--deprecated-architecture/lenses/<lens>`, `PORT=src/lib/study-lenses/lenses/<lens>` |
+| Gen-1 arm  | `<ledger>` `<gen1-root>` `<row-id-prefix>`                                                                                                            |
+
+⚠️ **The Gen-1 root is the one absolute argument, and it was published nowhere
+in a form you can paste** — elided in § Operating instructions, described in
+prose in the template, while a **different** root appears in full at
+`_TEMPLATE.md` § Lister 4. A cold reader assembled it by hand with a
+one-in-three chance of being wrong. For `parsons` it is:
+
+```text
+/Users/master/Documents/0-teach-code/0-spiralearn/0-study-lenses-committee/zz--oldd-clauding-and-context-dump/spiral-lens
+```
+
+Three roots carry these files and **the campaign still rules between them
+nowhere.** The arm returned byte-identical findings against all three, which is
+a measurement about `parsons` and not a property of the roots — so it pins its
+root and prints it. A wrong root fails loudly (`refused for a missing source`),
+not silently.
+
+### ⛔ The push state — eight of these commits are already out, and not by this campaign
 
 Measured 2026-08-24, and **re-measure it yourself rather than reading it here**:
 

@@ -815,7 +815,10 @@ and are struck rather than left standing beside this.**
    lines** — the count was taken by LINE.
 2. ⚠️ **"This pass's rows carry 0" is false.** Rows `108` and `110` were added
    by `7c3da9aa`, which IS this pass [measured 2026-08-21 by AR-1: `git log -S`
-   on the row id]. Three of the sixteen are this pass's own.
+   on the row id]. Three of the **fifteen non-transporting quotations** are this
+   pass's own — and so is `parsons-119`'s miscount, which makes **four of the
+   sixteen defects**. ⚠️ The two denominators are different populations and this
+   sentence conflated them until 2026-08-24.
 3. **The check no longer has no Gen-1 arm.** It was built and run at `ea381b82`,
    and it is what found items 1 and 2.
 
