@@ -159,11 +159,16 @@ flowchart TD
   everything else about an element arrives on the published member. A second
   lens of this family reads that same member rather than re-deriving it or
   fetching it.
-- **`readStream` re-checks and throws; it never carries an absent-member arm.**
-  Applicability guarantees the member is present, but that narrowing does not
-  cross the function boundary and `!` is barred here, so both narrowing checks
-  are re-made as a precondition and a failure throws. A branch that _handles_
-  absence as a state would be a dead branch no test can reach.
+- **`readStream` re-checks and throws a `TypeError`; it never carries an
+  absent-member arm.** Applicability guarantees the member is present, but that
+  narrowing does not cross the function boundary and `!` is barred here, so both
+  narrowing checks are re-made as a precondition and a failure throws. A branch
+  that _handles_ absence as a state would be a dead branch no test can reach.
+  (human ruling 2026-08-25) The class is `TypeError`, which is the scanning
+  leaf's own for an absent input: an absent member is a wrong-**kind** case,
+  where the out-of-range threshold `config` refuses with a `RangeError` is the
+  right-kind-wrong-**value** one. Two refusals in one file, two classes, and the
+  distinction is the ruling's.
 - **The lens renders no snippet-type control and holds no copy of that state.**
   The reading depends on the goal symbol, and that toggle belongs to the
   orchestrator, which disposes this lens when it changes.

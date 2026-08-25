@@ -85,6 +85,10 @@ describe('spellme core', () => {
 			expect(streamOf('a\nb')[1]?.fate).toBe('consumed');
 		});
 
+		it('marks a line terminator by its kind', () => {
+			expect(streamOf('a\nb')[1]?.marked).toBe(true);
+		});
+
 		it('marks a block comment carrying a line terminator', () => {
 			expect(streamOf('/* a\nb */')[0]?.marked).toBe(true);
 		});

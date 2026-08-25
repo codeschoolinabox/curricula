@@ -24,7 +24,9 @@ import type {
 } from '../types.js';
 
 import type {
+	AdvancingKind,
 	Claim,
+	ClaimableKind,
 	ClaimVerdicts,
 	Fate,
 	SessionState,
@@ -245,7 +247,9 @@ const THRESHOLD_KEYS = ['oneMoreAfter', 'skipAfter'] as const;
  * fourteen rows against `./README.md`'s fate table should not have to resolve
  * an alias to do it.
  */
-const FATE_BY_KIND = freezeInPlace<Record<InputElementKind, Fate>>({
+const FATE_BY_KIND = freezeInPlace<
+	Record<InputElementKind, Fate> & Record<ClaimableKind, 'token-tape'>
+>({
 	IdentifierName: 'token-tape',
 	PrivateIdentifier: 'token-tape',
 	Punctuator: 'token-tape',
@@ -286,7 +290,11 @@ const LINE_TERMINATORS = freezeInPlace(['\n', '\r', '\u2028', '\u2029']);
  * the compiler then refuses a widened upstream vocabulary here, where a list
  * would silently let a new trivia kind become claimable.
  */
-const ADVANCES_ON_ITS_OWN = freezeInPlace<Record<InputElementKind, boolean>>({
+const ADVANCES_ON_ITS_OWN = freezeInPlace<
+	Record<InputElementKind, boolean> &
+		Record<AdvancingKind, true> &
+		Record<ClaimableKind, false>
+>({
 	IdentifierName: false,
 	PrivateIdentifier: false,
 	Punctuator: false,
