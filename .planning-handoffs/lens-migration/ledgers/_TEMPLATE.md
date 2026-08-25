@@ -14,7 +14,7 @@
 <!-- transport-check.sh schema locals; see § The transport check: -->
 <!-- cspell:ignore QCOL RCOL NCELL PCOL provless istemplate -->
 <!-- gen1-arm.sh locals; see § The Gen-1 arm: -->
-<!-- cspell:ignore toks unesc qmisplaced uninitialised -->
+<!-- cspell:ignore toks unesc qmisplaced uninitialised srcpath -->
 
 # `<lens>` — fidelity ledger
 
@@ -1696,6 +1696,12 @@ sub unesc { my $s = shift;
   $s =~ s/\\\|/|/g; $s =~ s/\\\*/*/g; $s =~ s/\\_/_/g; $s =~ s/\\\[/[/g; $s =~ s/\\\]/]/g; $s }
 sub occ { my ($hay,$n) = @_; my ($c,$p) = (0,0);
   while (($p = index($hay,$n,$p)) >= 0) { $c++; $p += length($n) } $c }
+# The file-to-path map. ⛔ PARSONS-SHAPED -- see the three owed items below; on
+# another lens this resolves a real file to a path that does not exist.
+sub srcpath { my ($root,$f) = @_;
+  return "$root/" . ( $f =~ /^ParsonsLens/        ? "src/lenses/$f"
+                    : $f eq "parsons-iframe.html" ? "public/$f"
+                    :                               "public/static/parsonizer/$f" ) }
 
 while (my $line = <$fh>) {
   $ISLEDGER = 1 if $line =~ /^## Rows[ \t]*$/;
@@ -1729,21 +1735,6 @@ while (my $line = <$fh>) {
   # by AR-1: ALL SEVENTEEN `GEN1-QUOTE-ABSENT` findings vanished, the whole
   # published defect set, at exit 0. It is also the likeliest half-done
   # migration, because moving derivation prose takes the fragment inside it.
-  if ($RCOL >= 0 && $RCOL <= $#c) {
-    my $lq = () = $line =~ /(?:<em>"|(?<!\\)_")/g;
-    my $qq = () = $q    =~ /(?:<em>"|(?<!\\)_")/g;
-    my $rq = () = $c[$RCOL] =~ /(?:<em>"|(?<!\\)_")/g;
-    # ⛔ AND `$qq == 0` IS THE WHOLE PREDICATE. A partial split moves the
-    # extractor fragment OUT of `quoted`, leaving a citation with nothing to
-    # check; a legitimate derivation cell QUOTES THINGS -- an instrument caveat
-    # is a permitted annotation class and caveats routinely quote -- while
-    # `quoted` keeps its own fragments. An earlier form fired on any quotation
-    # in `reasoned` and so REFUSED THE TARGET STATE THIS SECTION PRESCRIBES:
-    # moving the annotation on row 109 into `reasoned`, which this section says
-    # makes its two non-defects vanish, gave exit 1 [measured 2026-08-24 by a
-    # context-free reader doing exactly what this file said to do].
-    if ($rq > 0 && $qq == 0 && $q =~ /Gen-1\s*`/) { $qmisplaced += $rq;
-      push @find, "GEN1-MISPLACED-QUOTATION $id -- $rq quotation(s) in the derivation cell while `quoted` has none" } }
   next unless $q =~ /Gen-1\s*`/;
 
   # Segment the cell at each Gen-1 file citation, so every fragment is scoped to
@@ -1757,12 +1748,36 @@ while (my $line = <$fh>) {
     $seg[$i]{text} = substr($q, $seg[$i]{start}, $seg[$i]{end} - $seg[$i]{start});
     $cites++ }
 
+  # ⛔ MISPLACED QUOTATION -- and the signal is THE ARM ITS OWN INSTRUMENT, not a
+  # count. A quotation sitting in `reasoned` that is a VERBATIM SUBSTRING of a
+  # Gen-1 source this row cites is extractor output in the wrong cell; a caveat
+  # the seeder wrote is not, because the seeder did not copy it out of the file.
+  #
+  # Two count-based predicates were tried first and BOTH were wrong in BOTH
+  # directions [measured 2026-08-25 on five fixtures built from this ledger]:
+  #   any quotation in `reasoned`   -> refused the target state § The Gen-1 arm
+  #                                    itself prescribes, and refused the three
+  #                                    lister-4 rows for carrying a caveat.
+  #   ...and `quoted` empty         -> MISSED the half-partial split, where only
+  #                                    the first fragment moves on rows carrying
+  #                                    two: exit 0 while FIVE published findings
+  #                                    (051, 066, 068, 108, 110) silently vanish.
+  # `$qq == 0` is also the NORMAL state of the 12 Gen-1 rows that cite without
+  # quoting at all -- every lister-4 SET row and every ABSENT row.
+  if ($RCOL >= 0 && $RCOL <= $#c && @seg) {
+    my @rq = $c[$RCOL] =~ /<em>"(.*?)"<\/em>/g;
+    push @rq, $c[$RCOL] =~ /(?<!\\)_"(.*?)"_/g;
+    for my $fr (@rq) {
+      next if $fr =~ /…/;          # elided or truncated: not a testable substring
+      for my $s (@seg) {
+        my $b = slurp(srcpath($root, $s->{file}));
+        next unless defined $b;
+        if (index($b, unesc($fr)) >= 0) { $qmisplaced++;
+          push @find, "GEN1-MISPLACED-QUOTATION $id -- a verbatim source fragment sits in the derivation cell";
+          last } } } }
+
   for my $s (@seg) {
-    my $f = $s->{file};
-    my $path = "$root/" . ( $f =~ /^ParsonsLens/       ? "src/lenses/$f"
-                          : $f eq "parsons-iframe.html" ? "public/$f"
-                          :                              "public/static/parsonizer/$f" );
-    my $body = slurp($path);
+    my $body = slurp(srcpath($root, $s->{file}));
     unless (defined $body) { push @find, "REFUSED $id GEN1-MISSING-SOURCE $path"; $refused++; $missing++; next }
     my $t = $s->{text};
 
@@ -1958,6 +1973,9 @@ extracted back out of this file]:
 | wrong quarry root                                                                                | `FAIL: every citation refused for a missing source`, exit 1 — the reason `GEN1-MISSING-SOURCE` is counted apart from the refusal class                                                                                                                                                                                                                                                                                                                                                                       |
 | **a migrated ledger split the WRONG way**, citation in `reasoned`                                | `FAIL: … Gen-1 citation(s) sit outside the extractor-output cell`, exit 1. **The count is fixture-dependent and deliberately not transcribed** — an earlier revision published `74`, and a faithful plant of this row's own description gives `76`                                                                                                                                                                                                                                                           |
 | ⛔ **a PARTIAL split** — the citation stays in `quoted`, the `<em>` fragment moves to `reasoned` | `FAIL: … quotation(s) sit in the derivation cell on Gen-1 rows`, exit 1. **Without this arm the run reported `findings=10` at exit 0 — all seventeen `GEN1-QUOTE-ABSENT` findings, the entire published defect set, silently deleted** [measured 2026-08-24 by AR-1]. Every other floor passes: rows intact, the citation is where it belongs so `misplaced` is 0, and the arithmetic holds. It is also the LIKELIEST half-done migration, because moving derivation prose takes the fragment embedded in it |
+| ⛔ **a HALF-PARTIAL split** — only the FIRST `<em>` moves, on rows carrying two or more          | `FAIL: … quotation(s) sit in the derivation cell`, exit 1. ⚠️ **A `quoted`-is-empty predicate MISSED this**, at exit 0, while five published findings — `051`, `066`, `068`, `108`, `110` — silently vanished [measured 2026-08-25 by AR-5]. Two of the five are the STEP-1b defects this campaign had just finished recording                                                                                                                                                                               |
+| a legitimate **instrument caveat that quotes**, added to the three lister-4 `SET` rows           | **SILENT**, exit 0. ⚠️ Both count-based predicates REFUSED this. An instrument caveat is one of exactly three permitted annotation classes and § Lister 4 instructs the seeder to write it; `$qq == 0` is also the normal state of the **12** Gen-1 rows that cite without quoting at all                                                                                                                                                                                                                    |
+| the target state § The Gen-1 arm itself prescribes — row `109`'s annotation moved to `reasoned`  | **SILENT**, exit 0, and its two non-defects vanish exactly as that section says. ⚠️ An any-quotation predicate gave exit 1 here — the file refusing what the file prescribes, found by a context-free reader doing what it was told                                                                                                                                                                                                                                                                          |
 | the `provenance` column renamed, on a ledger carrying Gen-2/3 rows                               | `BREACH SCHEMA unresolved -- no provenance column`, exit 1 (§ The transport check)                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | the same, on an **all-Gen-1** ledger — the shape six of Family F will have                       | the same. Under an uninitialised `$PCOL` this was **byte-identical to the clean run**, because `unreachable == provless == rows` either way                                                                                                                                                                                                                                                                                                                                                                  |
 | a wrong path landing on a **non-ledger** campaign document                                       | `doc=not-a-ledger`, exit 0 — a POSITIVE signal the check prints itself, never the absence of one. Six of the nine campaign documents are non-ledgers, so this is the likelier wrong path                                                                                                                                                                                                                                                                                                                     |
@@ -2046,10 +2064,10 @@ licence.
 `norm()`, `unwrap_markup()`, `firstblock`, `glossterm`, `parsed`, `cited`,
 `lead`, **the schema resolver, the unescaped-pipe cell split, `$mc`, `$mq`, the
 `RAGGED` arm or the BREACH floor** — or to **any of § The Gen-1 arm's `unesc`,
-`occ`, the segmenter, the ABSENT token-binding, the SET dedupe or its four
-floors** — **every mutation table in § The transport check, § The
-structural-integrity check and § The Gen-1 arm must still fire**, and then the
-two regressions must hold.
+`occ`, `srcpath`, the segmenter, the ABSENT token-binding, the SET dedupe, the
+misplaced-quotation substring test, or any of its floors** — **every mutation
+table in § The transport check, § The structural-integrity check and § The Gen-1
+arm must still fire**, and then the two regressions must hold.
 
 ⚠️ **Counting the tables in prose is banned here, and this sentence is why.** It
 said _"both tables"_ while three existed, then _"all three"_ while four did, and

@@ -239,26 +239,27 @@ which is the one class this campaign's own invariant 13 exists to stop.
 > ⛔ **EIGHT OF THEM ARE ALREADY PUSHED, AND NOT BY THIS CAMPAIGN.** See § The
 > push state below — read it before you assume anything is droppable.
 >
-> | SHA        | what                                                          |
-> | ---------- | ------------------------------------------------------------- |
-> | `b0f6be78` | `### The structural-integrity check` — NEW                    |
-> | `6c3e6d16` | `### The transport check` — cell-scoped for a two-cell schema |
-> | `0d815dfb` | AR-2 round 1, PAUSE — 12 findings                             |
-> | `708a6902` | AR-2 round 2, PAUSE — 2 findings                              |
-> | `57564e01` | a bare `G3` tag would have broken the new self-check          |
-> | `684adcce` | AR-2 round 3, CONSIDER — 2 residuals                          |
-> | `ea381b82` | `### The Gen-1 arm` — NEW, and RUN against the quarry         |
-> | `afcacf8a` | this resumption point                                         |
-> | `5e47c96e` | AR-1 round 1, PAUSE — 3 blockers + 8 concerns                 |
-> | `6534985f` | AR-1 round 2, CONSIDER — a gate condition + 3 siblings        |
+> **What landed, by phase.** ⛔ **No SHA list, and this is deliberate** — the
+> list here was short THREE times, twice caught by a context-free reader and
+> once by AR-5, and the third time it was the fixing commit that made it stale
+> again. `git log` reconstructs SHAs; it does not reconstruct why:
 >
-> ⚠️ **This table said SEVEN and omitted the last two until 2026-08-24**, when a
-> context-free reader caught it. That matters more than an off-by-two, because
-> `5e47c96e`'s own subject is _"the handoff told the next session something
-> false"_ — and a reader could not tell whether that false thing was still in
-> front of them. **It is not.** `5e47c96e` struck the "nothing forecloses the
-> schema" claim and the superseded fence-parity rule; `6534985f` closed a
-> partial-split hole in the Gen-1 arm. Both are reflected in this block.
+> | phase | what                                                                                                                                                          |
+> | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+> | 1     | `### The structural-integrity check` — NEW. Burial by fence **and** by HTML comment                                                                           |
+> | 2     | `### The transport check` — cell-scoped, proven a byte-identical no-op first                                                                                  |
+> | 3     | **AR-2, three rounds** — PAUSE, PAUSE, CONSIDER. Each found its defect in the previous round's newest code                                                    |
+> | 4     | `### The Gen-1 arm` — NEW, and RUN against the quarry. Found 15 non-transporting quotations where the campaign recorded 8, plus a 16th of another class       |
+> | 5     | **AR-1, two rounds** — PAUSE then CONSIDER. Four floors the arm did not have; a SET arm counting mentions not distinct names                                  |
+> | 6     | **Two context-free validations** — both found defects no gate could see, including that the target state this file prescribes failed the gate this file built |
+> | 7     | **AR-5, two rounds** — the push state, a census that did not close, and a misplaced-quotation predicate wrong in both directions                              |
+>
+> ⚠️ **The earlier SHA table said SEVEN and omitted two**, and a reader could
+> not tell whether the false thing named in one of the omitted subjects was
+> still in front of them. **It is not.** `5e47c96e` struck the "nothing
+> forecloses the schema" claim and the superseded fence-parity rule; `6534985f`
+> closed a partial-split hole in the Gen-1 arm. Both are reflected in this
+> block.
 >
 > ### The gates you must run, all FOUR of them, in this order
 >
@@ -416,7 +417,10 @@ ordinary update by push.
    justifies autonomous commits on the grounds that they are "new commits only,
    so every checkpoint is droppable". That held until the push. Undoing any of
    the eight now needs a force-push, which is the human's alone.
-2. **`5e47c96e`, `6534985f` and `7da05610` are still local.**
+2. **The rest are still local — derive which, do not read a list here.** The
+   list in this file has now been short three times, most recently by two.
+   `git rev-list origin/main..HEAD` and intersect with the derivation command
+   above.
 
 ⚠️ **This file said "none pushed" until 2026-08-24, and it was TRUE when
 written.** It went false with no action by this campaign, and nothing
@@ -644,8 +648,9 @@ The stopgap that found them is a `grep -F` re-check of every `<em>` fragment
 against its source file; **it has no home**, like the transport check itself.
 ~~Building the real arm is part of STEP 1c's check rewrite.~~ **BUILT AND RUN at
 `ea381b82`** — `_TEMPLATE.md` § The Gen-1 arm. It reproduced these eight
-independently and found **eight more**, because the stopgap above **skipped**
-every `…`-bearing fragment and a skip reads exactly like a pass.
+independently and found **seven more** — 8 + 7 = the fifteen non-transporting
+quotations this file records — because the stopgap above **skipped** every
+`…`-bearing fragment and a skip reads exactly like a pass.
 
 ### ⛔ The Gen-3 direct-check appendix vanished at a step boundary — RE-ASSIGNED
 
