@@ -104,8 +104,24 @@ function applicability(facts: Facts): boolean {
  * member — and a failure **throws**. That throw is unreachable whenever
  * applicability was honored, which is exactly the precondition the
  * scanning leaf states for its own inputs.
+ *
+ * @throws TypeError when the tokens stage did not succeed, or succeeded
+ *   without the published member. (human ruling 2026-08-25) The class is
+ *   the scanning leaf's own for an absent input, and an absent member is
+ *   a wrong-**kind** case rather than the right-kind-wrong-**value** one
+ *   `config` refuses with a `RangeError`.
  */
-function readStream(_facts: Facts): ReadonlyArray<StreamElement> {
+function readStream(facts: Facts): ReadonlyArray<StreamElement> {
+	if (!facts.tokens.ok) {
+		throw new TypeError(
+			'spellme readStream: the tokens stage did not succeed; call behind applicability',
+		);
+	}
+	if (facts.tokens.value.inputElements === undefined) {
+		throw new TypeError(
+			'spellme readStream: the tokens stage published no input elements; call behind applicability',
+		);
+	}
 	throw new Error('spellme readStream: not implemented');
 }
 

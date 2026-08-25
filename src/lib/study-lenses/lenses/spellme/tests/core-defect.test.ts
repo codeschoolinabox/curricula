@@ -37,4 +37,10 @@ describe('spellme core — a defecting input-element derivation', () => {
 	it('declines applicability', () => {
 		expect(spellmeCore.applicability(embody('let x = 1').facts)).toBe(false);
 	});
+
+	it('refuses to read a stream, throwing a TypeError', () => {
+		expect(() => spellmeCore.readStream(embody('let x = 1').facts)).toThrow(
+			TypeError,
+		);
+	});
 });
