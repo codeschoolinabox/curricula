@@ -113,8 +113,9 @@ re-keys.
 ## Generator registry — ordering is a contract [S3; panel admission S5]
 
 The [S3] half is PROMOTED (Stage 3 landed): the
-token→node→program tier pin, registry-then-stream order with its
-reverse-registry negative twin, deliberately-not-source-order, the
+token→node→program tier pin, registry-then-stream order (the
+reverse-registry negative twin's live pin is the module's
+run-generators oracle), deliberately-not-source-order, the
 10-generator post-realm taxonomy with V4-fires-last, and the
 surgical-excision record now live in the quizzing README (§ Public
 API "Ordered"), DOCS § Decisions (registry-order row), and

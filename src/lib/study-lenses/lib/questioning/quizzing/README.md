@@ -121,7 +121,8 @@ group they unlock, while V10c is deliberately self-excluded (it unlocks
 binding-scoped peers, not its own cross-variable group). `grade` never
 reads `unlocks`; the consumer owns when propagation fires. Free globals
 contribute targets, never unlocks — credit cannot reach a nonexistent
-binding group.
+binding group; a free global can even be the anchor when it is the
+group's source-first occurrence.
 
 **Curated bank vs generated** — two provenances under one contract. A
 generated item's content is computed from the snippet's structure; a
