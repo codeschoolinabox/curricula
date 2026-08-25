@@ -31,13 +31,13 @@ describe('spellme core', () => {
 			expect(streamOf('')).toEqual([]);
 		});
 
-		it.skip('positions the cursor past the end of a program with nothing claimable', () => {
+		it('positions the cursor past the end of a program with nothing claimable', () => {
 			expect(spellmeCore.positionCursor(streamOf('  '), 0)).toBe(1);
 		});
 	});
 
 	describe('One', () => {
-		it.skip('reads one element from a one-element program', () => {
+		it('reads one element from a one-element program', () => {
 			expect(streamOf('x')).toHaveLength(1);
 		});
 

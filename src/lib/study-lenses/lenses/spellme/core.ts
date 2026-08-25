@@ -13,6 +13,7 @@ import cloneAndFreeze from '@utils/clone-and-freeze.js';
 import freezeInPlace from '@utils/freeze-in-place.js';
 
 import type { Facts } from '../../embody/types.js';
+import type { InputElementKind } from '../../lib/scanning/types.js';
 import type {
 	LensConfig,
 	Recommendation,
@@ -142,10 +143,17 @@ function readStream(facts: Facts): ReadonlyArray<StreamElement> {
  * The only writer of the cursor.
  */
 function positionCursor(
-	_stream: ReadonlyArray<StreamElement>,
-	_from: number,
+	stream: ReadonlyArray<StreamElement>,
+	from: number,
 ): number {
-	throw new Error('spellme positionCursor: not implemented');
+	let cursor = from;
+	while (
+		cursor < stream.length &&
+		ADVANCES_ON_ITS_OWN[stream[cursor].element.kind]
+	) {
+		cursor += 1;
+	}
+	return cursor;
 }
 
 /**
@@ -213,6 +221,36 @@ const EMPTY_RECOMMENDATIONS = freezeInPlace<ReadonlyArray<Recommendation>>([]);
  * range-checked.
  */
 const THRESHOLD_KEYS = ['oneMoreAfter', 'skipAfter'] as const;
+
+/**
+ * Which element kinds advance on their own — the four the learner never claims
+ * (`./README.md` § What the learner claims).
+ *
+ * Keyed on the element **kind** and not on the fate. The two predicates are
+ * extensionally equal, but the kind is the property the derivation publishes,
+ * while a fate is this lens's own reading of it — so keying on the kind leaves
+ * the cursor independent of that reading.
+ *
+ * Total over the derivation's fourteen kinds rather than a list of the four:
+ * the compiler then refuses a widened upstream vocabulary here, where a list
+ * would silently let a new trivia kind become claimable.
+ */
+const ADVANCES_ON_ITS_OWN: Record<InputElementKind, boolean> = {
+	IdentifierName: false,
+	PrivateIdentifier: false,
+	Punctuator: false,
+	DivPunctuator: false,
+	RightBracePunctuator: false,
+	NumericLiteral: false,
+	StringLiteral: false,
+	Template: false,
+	TemplateSubstitutionTail: false,
+	RegularExpressionLiteral: false,
+	Comment: true,
+	HashbangComment: true,
+	WhiteSpace: true,
+	LineTerminator: true,
+};
 
 /**
  * Refuses an out-of-range threshold at the factory boundary rather than
