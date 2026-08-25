@@ -525,6 +525,19 @@ repo's own convention.
   ⚠ This settles the scope question that `d5f965e8`'s immutable body left open.
   The general rule — whether an authored test in this campaign ever rides the
   opt-out — is answered **no**.
+
+  **It ran, and returned CONSIDER** (after one attempt died on an API stall — a
+  death is not a skip). Its two substantive findings: increment 0 genuinely did
+  **not** triangulate at landing — zero active tests called `readStream`, so an
+  unconditional `throw new TypeError(…)` would have passed — but the killer
+  landed in the very next commit `75994c99` and the `ar-4` of the time had
+  already raised it, so the exposure was one commit inside one wave. And the
+  live gap it named, which AR-5 had independently raised as its concern 5:
+  **`readStream`'s `!facts.tokens.ok` guard was asserted by no test anywhere.**
+  Closed in `2c911356` with a measured fixture — `embody('const x = "')` gives
+  `tokens.ok=false` [measured 2026-08-25], and the lock is verified live: under
+  mutation of that guard's class it is the only failure.
+
 - (human ruling 2026-08-25) **`DOCS.md` and `core.ts` may state the throw class
   and tie the kind tables to `types.ts`.** Both are contract-adjacent and were
   approved rather than taken. The tie is
