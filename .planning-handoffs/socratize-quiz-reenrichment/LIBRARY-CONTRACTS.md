@@ -40,148 +40,38 @@ READ-ONLY).
 
 ## Group-key grammar — the mastery-propagation identity system [S3]
 
-Pinned in
-`lib/quizzing/tests/{binding,chain,classification,realm,usage,usage-kind}-group-key.test.ts`:
-
-- **Seven namespaced axes**: `category:` (category or category:role) ·
-  `binding:<decl-span>` · `usage:<decl>:<usageKind>` · `usage-kind:<kind>`
-  (cross-variable) · `element-type:const-update` · `chain:<role>:<name>` ·
-  `realm:<name>` (DROPPED with the realm forms — locked decision 4). The axes
-  are **pairwise non-prefixing**, and the tests assert that against the LIVE
-  sibling serializers so prefix drift surfaces immediately.
-- **Per-axis identity semantics**: `usage` = binding × use-type; `usage-kind` =
-  cross-variable by use-type; `chain` = role × name, deliberately
-  binding-AGNOSTIC (shadowing bindings share one chain group — the designed
-  contrast with `usage`'s binding-scoped axis).
-- **Binding identity is `declarationRange` ONLY** (`binding-group-key` tests):
-  two same-range bindings key identically regardless of name AND regardless of
-  kind — "kind is non-identity convenience data — it must never fold into the
-  key"; same-name shadowing bindings key apart by site.
-- Which serializers live in `keying/` vs inline is a recorded convention (prose
-  canon — a `keying/realm-group-key.ts` header comment, not test-pinned):
-  `element-type:` is an inline key in V6b, not a `keying/` file. Keep the file
-  placement on port.
+PROMOTED (Stage 3 landed): the six-axis grammar, the pairwise
+non-prefixing law (oracle-asserted against the live sibling
+serializers), binding identity as `declarationRange` ONLY
+(kind never folds into a key), and the keying-vs-inline placement
+convention now live in `src/lib/study-lenses/lib/questioning/quizzing/`
+README § Glossary "Group key" and DOCS § Structural constraints.
 
 ## The R-6 occurrence-class ruling (`usage:occ`) — READ BEFORE WIRING SCOPE [S3]
 
-The quarry's hand-rolled scope forest — built by the LIVE legacy
-`src/lib/embody/lib/scope/build-scope.ts` ([SPEC.md](./SPEC.md) § Terms, embody
-tree #1), which the quarry's 44-line `resolving/read-scope-forest.ts` accessor
-reaches via `../../../../embody/…` — resolves an identifier occurrence to a
-binding only for the **legacy tracked set** — `{var, let, const}` declarator ids
-plus the `for-of` left. Everything else (free globals, function names,
-parameters) is unresolvable and falls back to a **group-of-one** key
-`usage:occ:<start>-<end>` — isolated mastery, no propagation. Pinned in
-`lib/quizzing/tests/v7-usage-kind.test.ts` ("falls back to a per-occurrence
-group-of-one for a free global", "…for a function name and parameters the scope
-forest does not track"; resolved and unresolved occurrences coexist
-per-occurrence in one snippet) — 33/33 green at ruling time [measured:
-`./node_modules/.bin/vitest run` on that file, 2026-08-05].
-
-**The trap R-6 closes**: greenfield `facts.environment` (eslint-scope) DOES
-resolve function names and parameters, so a naive "pre-resolved refs collapse
-`resolveBinding` to a lookup" swap breaks those pins and silently changes
-pedagogy (params/function names would join V10b bulk-credit and V10c sameness).
-**Ruling R-6, Option A (human ruling 2026-08-05)**: the Stage-3 shim answers
-null for every occurrence OUTSIDE the legacy tracked set, preserving the occ
-fallback verbatim. Free globals behave identically under both scope sources
-(`resolved: null` either way).
-
-**The second divergence R-6 also covers**: the landed shared adapter
-`src/lib/study-lenses/lib/scoping/derive-scope-usage.ts` keeps only
-`let`/`const` bindings — it EXCLUDES `var`, which the quarry quizzing forest
-TRACKS (v7 pins var occurrences resolving to binding groups). So the quizzing
-shim must include `var`; the shared adapter must NOT be reused as-is
-([SPEC.md](./SPEC.md) Q13). Occurrence-class table:
-
-| Occurrence class                                   | Quarry forest | eslint-scope     | R-6 shim       |
-| -------------------------------------------------- | ------------- | ---------------- | -------------- |
-| `var`/`let`/`const` declarator id + its references | resolves      | resolves         | resolves       |
-| `for-of` left target                               | resolves      | resolves         | resolves       |
-| function declaration name                          | occ fallback  | resolves         | **null → occ** |
-| parameter                                          | occ fallback  | resolves         | **null → occ** |
-| free global                                        | occ fallback  | `resolved: null` | null → occ     |
-
-The table is illustrative, not exhaustive — the governing rule is the universal
-sentence (null for EVERY occurrence outside the legacy tracked set). Catch
-parameters, class names, import bindings, and function-expression names all
-resolve under eslint-scope and none is exercised by a quarry quizzing test
-[relayed: ar-2 probe + grep] — the shim answers null for all of them.
-
-**Shim realization (recommended) and its structural pins.** The clean
-realization is a forest **projection**: filter eslint-scope's defs to the
-tracked set, register them **at their lexical scopes** into a quarry-shaped
-`ScopeAnalysis`, and port `resolveBinding` verbatim over it. Under that
-realization the null-outside-the-set rule is a corollary rather than a special
-case, and two subtleties stay faithful automatically:
-
-- `read-scope-forest.test.ts` pins the forest's STRUCTURAL surface, not just
-  resolution: `.root.kind === 'program'`, `.root.declarations` is a `Map`, a
-  nested block appears as `children[0]` with `kind: 'block'`, output frozen,
-  throws on an unparsed snippet. Greenfield `facts.environment` carries a
-  global/module DOUBLE scope on the Program node — the projection must collapse
-  it to the quarry's single `'program'` root or those pins go red.
-- Inside the tracked set the two scope models still differ on unpinned edges:
-  the quarry registers `var` at its **lexical** scope while eslint-scope hoists
-  it (`{ var x = 1; } x;` — quarry: occ; eslint-scope: resolves), and same-scope
-  redeclaration identity is the LAST declarator under the quarry's `Map.set` vs
-  naturally the first def under eslint-scope [relayed: ar-2 probe; no pin
-  exercises either edge]. Lexical-scope registration keeps both quarry-faithful;
-  if Stage 3 prefers otherwise, it declares those edges out-of-contract
-  explicitly at its AR-1 rather than drifting silently.
-
-`resolveBinding` feeds all 7 surviving scope-forest generators
-(V6/V6b/V7/V8/V10a/b/c), and occ keys are also constructed in `v6b-const-update`
-and pinned by `sameness-unlocks-contract.test.ts` (V10c unlocks must NEVER be
-occ-fallback keys) — the ruling's blast radius is the whole scope-generator
-family, not V7 alone.
-
-**`resolveBinding`'s own oracle** is `resolve-binding.test.ts` (22 tests) — the
-direct pin file for the function R-6 governs; a forest-projection rewrite must
-keep five constraints it pins [relayed: ar-1, full read]:
-
-- the binding carries its declaration `kind`, per-shadow ("carries the inner
-  kind, not the outer, when the kinds differ across a shadow");
-- the for-of arm is TWO behaviors: a body reference resolves to the iteration
-  binding AND the iterable climbs out of the for-of scope to its outer binding;
-- the returned range tuple is frozen;
-- the input contract is a minimal `{ start, text }` occurrence, not only a full
-  `ClassifiedToken`;
-- a property-name occurrence never throws and resolves to null when no in-scope
-  binding matches.
+PROMOTED (Stage 3 landed): the five-fact account, the
+occurrence-class table, the tracked-set boundary (ruling R-6), and
+resolveBinding's five pinned constraints now live in
+`src/lib/study-lenses/lib/questioning/quizzing/DOCS.md` § Where scope
+comes from, with the glossary entries (tracked set, occ fallback,
+scope forest) in that module's README. ERRATUM, corrected in place at
+promotion (2026-08-25): this section's original body said
+`resolve-binding.test.ts` holds 22 tests; the file holds **17** in
+both the quarry blob and the ported oracle [measured at port: grep -c
+"it(" → 17; the U4 worker re-confirmed at the blob].
 
 ## Grading — total, binary, one-sided [S3; range grading also pinned lens-side, S5]
 
-Pinned in `lib/quizzing/tests/grade.test.ts` +
-`lenses/quiz/tests/grade-ranges.test.ts`:
-
-- **`grade` is total and never throws.** A malformed response is a distinct
-  verdict — never an exception, and never a penalty (the no-penalty half is
-  pinned cross-cluster, in `mastery.test.ts`'s malformed-is-a-no-op — a UI bug
-  must not cost the learner mastery).
-- **Binary exhaustive set-equality, no partial credit**, across all three item
-  VARIANTS (`mcq` / code-surface / `select-in-code`) — which is FOUR modes:
-  `click-line` shares the code-surface item shape and grading arm with
-  `click-token`, so "three variants" and "five-mode vocabulary" (§ Answer modes)
-  are both true and porting `grade` to only three modes drops the pinned
-  `click-line` arm. Partial selection incorrect; superset incorrect;
-  order-independent; duplicates collapse to correct. Range comparison is exact
-  tuple equality, pinned in BOTH directions (start-matches-end-differs AND
-  end-matches-start-differs, in `grade` and again lens-side in `grade-ranges`).
-  Empty-vs-empty is vacuously correct (a zero-target item is a generator bug,
-  not grade's to police). A "subset counts" grading note was explicitly
-  RETRACTED in the quarry docs — exhaustive set-equality IS the spec.
-- **The malformed/incorrect boundary**: a known-but-wrong option id is
-  `incorrect`; an id outside the item's own option pool is `malformed` with a
-  developer `reason` string. Mode mismatches (item mode ≠ response mode) are
-  malformed — 11 of the 12 ordered mode pairs are pinned, with a "does not
-  match" reason asserted on 6 [relayed: verify:planned-unbuilt-supp-b — the
-  audit's "all 9 pairs" was a miscount]. The unpinned twelfth pair is (`mcq`
-  item → `click-line` response) — the existing mcq-vs-click pin uses the
-  `click-token` default; one added assertion closes the grid.
-- **One-sided seam**: `grade` never reads the Snippet; the Verdict never echoes
-  the answer key; item `feedback` rides verbatim on BOTH correct and incorrect.
-  Formative missed/extra feedback is deliberately computed lens-side.
+The [S3] half is PROMOTED (Stage 3 landed): totality/never-throws,
+binary exhaustive set-equality across three variants = FOUR modes,
+the malformed/incorrect boundary, the one-sided seam, and the
+retracted "subset counts" note now live in the quizzing README
+(§ Public API "Grading is one-sided") and DOCS (§ Grading, incl. the
+promoted 11-of-12 mode-pair coverage note). REMAINING lens-side
+[S5]: range comparison is pinned in BOTH directions AGAIN lens-side
+in `grade-ranges.test.ts`, and the no-penalty half of malformed is
+pinned cross-cluster in `mastery.test.ts`'s malformed-is-a-no-op —
+a UI bug must not cost the learner mastery.
 
 ## Mastery — two channels, monotonic, color-free [S5]
 
@@ -205,136 +95,70 @@ Pinned in `lenses/quiz/tests/mastery.test.ts` + `decorations.test.ts`:
 
 ## Earned propagation — credit as data, asymmetric by design [S3 producer / S5 fold]
 
-Pinned in `lenses/quiz/tests/mastery.test.ts` (inc 7) +
-`lib/quizzing/tests/sameness-unlocks-contract.test.ts` +
-`v10a-binding-sameness.test.ts` + `v10c-cross-variable-use-type.test.ts`:
-
-- A correct sameness (select-in-code) gesture credits the deduped
-  `{own groupKey} ∪ item.unlocks` one step each, accruing on top of prior
-  progress, capped at 1, PRESERVING a peer's prior `wrong` mark. An incorrect
-  gesture flags only the own group and **never propagates**. Empty unlocks
-  tolerated. Credit operates in the groupKey namespace — never item ids — which
-  is what lets it survive re-keys.
-- **Producer contract**: every `unlocks` entry is a namespaced groupKey
-  (`^(binding|usage|usage-kind):`) carried by some emitted peer item, deduped,
-  source-ordered. ONLY the sameness forms V10a/b/c carry the field. V10a/V10b
-  are members of the group they unlock; **V10c is deliberately self-EXCLUDED**
-  (it unlocks binding-scoped peers, not its own cross-variable group).
-- **V10b↔V7 bulk-credit bijection**: every V10b unlock equals a re-keyed V7
-  groupKey AND every re-keyed V7 usage key is unlocked by some V10b item — full
-  coverage both directions. V10c unlocks are binding-scoped V7 usage keys, never
-  occ-fallback keys, never globals.
-- **Globals contribute targets, never unlocks**: recognition includes a free
-  global as a target; credit cannot reach a nonexistent binding group. A global
-  can even be the anchor when source-first.
+The PRODUCER half is PROMOTED (Stage 3 landed): unlocks as namespaced
+groupKeys carried by emitted peers (deduped, source-ordered), only
+the sameness forms carrying the field, V10a/V10b group membership,
+V10c's deliberate self-exclusion, the V10b↔V7 bulk-credit bijection
+both directions, and globals-contribute-targets-never-unlocks now
+live in the quizzing README § Glossary "Sameness unlock" and the
+catalog's V10 rows. REMAINING consumer-fold [S5] (pinned in
+`lenses/quiz/tests/mastery.test.ts` inc 7): a correct sameness
+gesture credits the deduped {own groupKey} ∪ item.unlocks one step
+each, accruing on prior progress, capped at 1, PRESERVING a peer's
+prior wrong mark; an incorrect gesture flags only the own group and
+never propagates; empty unlocks tolerated; credit operates in the
+groupKey namespace — never item ids — which is what lets it survive
+re-keys.
 
 ## Generator registry — ordering is a contract [S3; panel admission S5]
 
-Pinned in `lib/quizzing/tests/generate-quiz.test.ts` +
-`lenses/quiz/tests/build-quiz.test.ts`; the taxonomy in the registry header
-(`lib/quizzing/generators/registry.ts`):
-
-- `generateQuiz` orders **token-anchored → node-anchored → program-anchored**
-  (pinned in `generate-quiz.test.ts`); the finer "registry order, then stream
-  order" tier — including its reverse-registry negative twin — is pinned in
-  `run-generators.test.ts` ("concatenates generators in registry order, then
-  stream order"). Deliberately NOT source-position order. Output is deep-frozen
-  and deterministic; it throws on an unparsed snippet even with non-empty
-  classified input.
-- The panel admits by **MODE** (`mcq` | `click-token` | `select-in-code`), never
-  by a form allowlist.
-- The 12-generator taxonomy (10 after the realm drop): v1 category-id, v2
-  keyword-vocab, v6 kind-semantics, v6b const-update, v7 usage-kind, v8
-  declaration-site, v10a/b/c sameness, v3 provenance (dropped), v5
-  value-category (dropped), v4 two-chains — **V4 deliberately last because it
-  reads both anchor streams**.
-- ⚠ **Surgical excision (Stage 3)**: the registry header's realm clause sits
-  MID-SENTENCE, directly adjoining the V4-fires-last rationale. Deleting the
-  V3/V5 imports and array entries is mechanical; the header edit must excise the
-  realm clause while keeping the V4 rationale intact.
+The [S3] half is PROMOTED (Stage 3 landed): the
+token→node→program tier pin, registry-then-stream order with its
+reverse-registry negative twin, deliberately-not-source-order, the
+10-generator post-realm taxonomy with V4-fires-last, and the
+surgical-excision record now live in the quizzing README (§ Public
+API "Ordered"), DOCS § Decisions (registry-order row), and
+LOSS-LEDGER § A (the excision inventory, landed at U9). REMAINING
+[S5]: the panel admits by MODE (`mcq` | `click-token` |
+`select-in-code`), never by a form allowlist — pinned in
+`lenses/quiz/tests/build-quiz.test.ts`.
 
 ## Two-stream descent + the use-type taxonomy [S3]
 
-Pinned in `lib/quizzing/tests/descend-identifiers.test.ts` +
-`v7-usage-kind.test.ts` + `v4-two-chains.test.ts`:
-
-- One AST descent produces two **deliberately disjoint** anchor streams:
-  `identifierAnchors` vs `propertyAccessAnchors`. Non-computed member properties
-  are excluded from identifierAnchors and emitted on the property stream
-  (range + name, no usageKind). **Non-computed object-literal keys are excluded
-  from BOTH streams** (pinned twice: "excludes a non-computed object-literal
-  key" AND "emits nothing for a non-computed object-literal key", with the
-  downstream V4 pin "emits no prototype-chain item for a non-computed
-  object-literal key" — an object-literal key is not a prototype-chain lookup).
-  Computed members and computed keys are scope reads on the identifier stream.
-  Each stream is independently source-ordered. Disjointness is the inc-2 FLAG
-  mitigation keeping property names out of `resolveBinding` **by construction**.
-  The property stream is the sole feed for V4's prototype-chain anchors. The
-  descent is self-contained pure-acorn (its private in-file `childNode` helper —
-  no vendoring decision needed).
-- **The 4-kind learner-facing use-type taxonomy** — `declared` / `read` /
-  `assigned` / `read-and-assigned` — with pinned edge rulings: compound
-  assignment (`x += …`), prefix and postfix update are ALL `read-and-assigned`;
-  a `for-of` declares the iteration variable and reads the iterable; assignment
-  targets range to the identifier, not the expression.
-- **V4's two-chains pedagogy**: every identifier resolves via the scope chain,
-  every non-computed property via the prototype chain (anchored to the PROPERTY
-  span); a computed member is two scope-chain references and no prototype-chain
-  item; chain grouping is binding-agnostic name-in-role.
+PROMOTED (Stage 3 landed): the one-descent/two-disjoint-streams
+contract, object-literal keys excluded from BOTH streams, the 4-kind
+use-type taxonomy with its pinned edge rulings, and V4's two-chains
+pedagogy now live in the quizzing README (§ Glossary "Anchor
+stream" / "Use-type taxonomy", § Edge cases, the catalog's V4 row)
+and DOCS § Structural constraints.
 
 ## Defensive guards — the engine gates on parsed, not validated [S3]
 
-- **var-laundering** (`v6-kind-semantics.test.ts`): `var` parses and REACHES the
-  generators; build-scope launders var's kind into the `'let' | 'const'`-typed
-  field. V6/V6b therefore guard **per-binding** — a snippet-level "contains var
-  → bail" would drop the `let` too — rather than mis-grade var as
-  non-reassignable.
-- **V2 contextual keywords** (`v2-keyword-vocab.test.ts`): acorn's context-free
-  tokenizer emits `obj.let` / `{ const: 1 }` as keyword tokens, so V2 fires only
-  when the NEXT meaningful token is an identifier (a lookbehind guard would
-  wrongly skip for-loop-init `let`); destructuring heads (`{` / `[` pattern
-  openers) are deliberately declined — outside JeJ, matching the binding-aware
-  forms.
-- **V6b group separation** (`v6b-const-update.test.ts`):
-  `element-type:const-update` is deliberately NOT `category:keyword` — V6b is an
-  execution × atom runtime-error fact (answer: TypeError; with SyntaxError /
-  ReferenceError / silently-ignored as misconception distractors) and must not
-  share the text-surface recognition mastery group of V1/V2.
-- **Representative rule** (`v10a-binding-sameness.test.ts` + `is-representative`
-  gate): sameness forms emit exactly ONE item per propagation group, anchored at
-  the group's **source-first** occurrence — even under TDZ ordering where a
-  reference precedes its declaration; the anchor is itself a target (never
-  special-cased); item ids key on binding identity independent of which
-  occurrence is representative. The gate relies on members arriving
-  source-ordered.
+PROMOTED (Stage 3 landed): var-laundering with per-binding guards,
+V2's contextual-keyword next-token guard, V6b's group separation
+(`element-type:const-update`, deliberately not `category:keyword`),
+and the representative rule (source-first anchor, TDZ-safe, the
+anchor is itself a target) now live in the quizzing README (§ Edge
+cases, § The question catalog) and DOCS § Decisions.
 
 ## QuizFilter — declared, NOT built; Stage 3 inherits a build decision [S3]
 
-⚠ **Not test-pinned, and not implemented.** There are no filter tests in the
-quarry; `generateQuiz` declares the parameter underscore-prefixed
-(`_filter?: QuizFilter` — "part of the locked contract but is not yet
-consumed"), the quarry lens README records "No config filtering (inc 8)", and
-the only pin is `generate-quiz.test.ts`'s "accepts a filter argument as a no-op"
-— which pins the NO-OP [relayed: ar-1, read of generate-quiz.ts + tests]. A
-verbatim port ships a green no-op; do not mistake that for oracle-covered
-filtering.
-
-The intended semantics are design canon from the `QuizFilter` doc comment in
-`lib/quizzing/types.ts` (mirrors `MicroDecisionConfig` SEMANTICS, not shape):
-omitted group = no filter; all-false excludes; AND across groups, OR within;
-`count` caps the source-ordered result LAST; `0` ≡ omitted; `range` = 1-based
-inclusive LINES kept on any overlap. Stage 3 inherits a BUILD decision, not a
-port decision — and the line-range arm has an unmet dependency the quarry docs
-name: offsets→lines conversion via `Source.offsets`, which does not exist.
-Line-ranges vs an offset flip (consistency with greenfield socratizing) is
-Stage-3 AR-1 material. The quiz lens also declares a `categories` allow-list
-knob that nothing consumes — same class: port the declaration, note the vacancy.
+PROMOTED (Stage 3 landed): declared-not-consumed (the no-op is
+oracle-pinned), the filter-semantics contract, and the build-
+decision inheritance now live in the quizzing README
+§ Configuration and DOCS § Decisions. NOTE: this section's original
+"1-based inclusive LINES" sentence was SUPERSEDED by the 2026-08-18
+ruling — `QuizFilter.range` is a zero-indexed half-open OFFSET span
+(the family's anchor law; recorded in the module docs). The quiz
+lens's own unconsumed `categories` knob remains Stage-5 material.
 
 ## Answer modes — five, with a build-state ledger [S5; the AnswerMode vocabulary rides S3's types port]
 
-The `AnswerMode` end-state vocabulary is **five** modes — `mcq`, `click-token`,
-`click-line`, `select-in-code`, `multi-mcq` — with a build-state ledger the plan
-compresses to four: `multi-mcq` is enumerated but not built; `click-line` is
+The `AnswerMode` vocabulary is **five** modes today — `mcq`, `click-token`,
+`click-line`, `select-in-code`, `multi-mcq` — additive-open going forward (the
+"end-state" framing was retired by the 2026-08-18 gate-round ruling, landed at
+a9e4d522: a new mode is an additive cross-consumer contract event), with a
+build-state ledger the plan compresses to four: `multi-mcq` is enumerated but not built; `click-line` is
 graded but not generated (pending `Source.offsets`). One variant per assessment
 gesture; capture mechanics fold within a variant. Interaction invariants pinned
 in `lenses/quiz/tests/anchors.test.ts` + `component.test.tsx` +
@@ -392,15 +216,14 @@ ratification items).
 
 ## Catalog frame and future forms [S3]
 
-Quarry-doc prose (not test-pinned, still design canon): question forms are
-organized by Block-Model cell; families build in order variables → operators →
-literals → keywords → delimiters → calls → io; the curated-bank-vs-generated
-provenance distinction is bounded by JEJ's finite concept set. Enumerated future
-forms: V9 shadow, V12 binding-identity, V13 value-at-a-point, V14 lookup-depth —
-all answerable by a static scope walk. The `Family` vocabulary (seven values,
-quizzing's own coarse axis) corresponds to socratizing's `Feature` only
-PARTIALLY and non-isomorphically — no total map is promised; the recommender
-builds it where needed.
+PROMOTED (Stage 3 landed): the Block-Model catalog frame, the
+families build order, the curated-vs-generated provenance
+distinction, the enumerated future forms V9/V12/V13/V14, and the
+partial non-isomorphic Family↔Feature correspondence now live in
+the quizzing README (§ The question catalog, § Glossary). NOTE: this
+section's original "bounded by JEJ's finite concept set" clause was
+SUPERSEDED by locked decision 9 (2026-08-11) — the bank is
+UN-bounded; `serves` is the serve-this-code test.
 
 ## Reading guide
 

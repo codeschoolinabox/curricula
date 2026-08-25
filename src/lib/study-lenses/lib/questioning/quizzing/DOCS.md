@@ -88,7 +88,10 @@ option id outside the item's own pool, grades to `malformed` (a
 caller/UI bug, distinct from a wrong answer). A code-surface item has no
 range validation arm: `grade` never sees the source, so a nonsense range
 is simply `incorrect`. `grade` is **total and never throws** — it runs
-in a consumer's interaction loop on every click.
+in a consumer's interaction loop on every click. Oracle-coverage note
+(promoted at Stage-3 close): 11 of the 12 ordered mode-mismatch pairs
+are pinned; the unpinned twelfth is an `mcq` item meeting a
+`click-line` response — one added assertion would close the grid.
 
 ### Where scope comes from
 
@@ -131,6 +134,30 @@ dated):
    LAST declarator; the for-of body-block fold is structural only (no
    resolution pin distinguishes it). If a future change wants any of
    these otherwise, it is a ruling, not a drift.
+
+The occurrence-class view of the boundary (promoted from the campaign
+canon at Stage-3 close; illustrative — the governing rule is fact 3's
+universal sentence, null for EVERY occurrence outside the tracked set):
+
+| Occurrence class                                   | This forest    |
+| -------------------------------------------------- | -------------- |
+| `var`/`let`/`const` declarator id + its references | resolves       |
+| `for-of` left target                               | resolves       |
+| function name · parameter · catch param · class    | null → occ     |
+| import binding · destructuring pattern binding     | null → occ     |
+| free global                                        | null → occ     |
+
+The environment resolves most of the null rows; the forest deliberately
+does not — a naive pre-resolved swap would silently move parameters and
+function names into sameness/bulk-credit groups, the exact pedagogy
+drift R-6 closes. `resolveBinding`'s oracle pins five constraints its
+projection rewrite preserved: the binding carries its declaration kind
+PER-SHADOW (the inner kind when kinds differ across a shadow); the
+for-of arm is TWO behaviors (a body reference resolves to the iteration
+binding AND the iterable climbs out of the for-of scope); the returned
+range tuple is frozen; the input contract is a minimal
+`{ start, text }` occurrence, never only a full `ClassifiedToken`; a
+property-name occurrence never throws and resolves to null.
 
 ### Data flow
 
