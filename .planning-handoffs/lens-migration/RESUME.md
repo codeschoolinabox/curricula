@@ -369,6 +369,35 @@ which is the one class this campaign's own invariant 13 exists to stop.
 > The Gen-1 arm; they are published there rather than recorded against the rows,
 > because a repair is its own unit with its own gate run.
 
+### ⛔ The AR trail — which gates closed, and the one that did not
+
+| gate                        | rounds | outcome                                            |
+| --------------------------- | ------ | -------------------------------------------------- |
+| **AR-2** (the two checks)   | 3      | PAUSE, PAUSE, **CONSIDER** — closed                |
+| **AR-1** (the commit group) | 2      | PAUSE, **CONSIDER** — closed                       |
+| **context-free validation** | 2      | both found defects no gate could see; both applied |
+| **AR-5** (pre-merge)        | 3      | PAUSE, PAUSE, **PAUSE** — ⛔ **NOT CLOSED**        |
+
+⛔ **AR-5's round-3 PAUSE is addressed by a commit AR-5 has not reviewed.** The
+change **reduces** what the Gen-1 arm claims — the misplaced-quotation predicate
+stops refusing and starts reporting — so it cannot introduce a false refusal.
+But it has not been through the gate. **Run AR-5 over the campaign's unpushed
+SHAs before treating this as merged, and before any push.**
+
+Why it was handed over rather than run again: five consecutive rounds each found
+their defect in the previous round's newest code, and the last two were in a
+context long past the point where
+[AGENTS.principal.md § Handoff agency](../../AGENTS.principal.md#handoff-agency--the-agent-owns-the-call)
+says to stop — _"a learned lesson repeats as an error"_. A sixth round on a
+spent context is the pattern, not the cure.
+
+**Everything else is measured green** on the tree you inherit: all four
+published programs parse and run;
+`parsons rows=120 parsed=57 nocite=76 unreachable=76 provless=76` and
+`writeme-019 UNQUOTED (1 of 2 cited)` unmoved; Gen-1 `findings=27`; the
+structural check exit 0 on all nine campaign documents; prettier idempotent;
+markdownlint 0; cspell 0.
+
 ### The gate arguments — all seven, because a cold reader reconstructed them from five places
 
 Run from the repository root.
