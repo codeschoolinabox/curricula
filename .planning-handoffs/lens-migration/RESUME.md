@@ -7,7 +7,7 @@ closes; nothing here is end-state documentation. -->
 <!-- cspell:ignore normalisation unrunnable unrepaired toplevel -->
 <!-- cspell:ignore loosenings capitalisation enshittifying keyable unbuildable -->
 <!-- cspell:ignore normalises undercounted oldd clauding zakey nocite -->
-<!-- cspell:ignore Explorotron multibyte -->
+<!-- cspell:ignore Explorotron multibyte provless unreachable -->
 <!-- a human ruling quoted verbatim; do not translate it and do not "fix" it: -->
 <!-- cspell:ignore séparé -->
 
