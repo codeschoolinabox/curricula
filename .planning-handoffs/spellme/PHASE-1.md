@@ -424,9 +424,21 @@ every doc commit touching this section since is absent **by construction**.
 ⚠ **The two most recent instances, both this session.** Until `2d585565`, only
 four of the wave's commits appeared anywhere in this file, all incidentally
 inside ruling prose — there was no wave-2 list at all: **failure six**.
-`2d585565` then wrote "THIRTEEN commits" and omitted itself — **failure seven,
-inside the commit whose own subject was the missing list.** The regress stops
-here by refusing to pin a count at all.
+`2d585565` then wrote a hard count and omitted itself — **failure seven, inside
+the commit whose own subject was the missing list.** The regress stops here by
+refusing to pin a count at all.
+
+⚠ **A THIRD failure mode, distinct from those two and worth more than either: an
+absence claim that QUOTES the token it is counting falsifies itself.** It fired
+three times on 2026-08-25, all mine, all identically: a note saying "only four
+carry the citation" that itself carried the citation (4 → 5); a commit body
+claiming a count-word grep returned 0 when the note beside it quoted that word
+(0 → 1); and the wrap-safe `nine-path` grep that returned zero because the
+literal text carried markdown bold. **The rule: a "this string does not appear"
+claim must be run against a file that does not contain your description of the
+string — or the description must not quote it.** Always pair it with a positive
+control. This is the sharpest instance of § Traps' vacuous-grep entry, and it
+survives because the instrument reads clean every time.
 
 | SHA        | What                                                           |
 | ---------- | -------------------------------------------------------------- |
