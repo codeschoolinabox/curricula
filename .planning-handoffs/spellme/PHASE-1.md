@@ -455,6 +455,37 @@ home. The fourth governs process and has none.
   was never tested, because the mechanism that would have tested it is unusable
   here. If `origin/main` ever advances, the question reopens.
 
+  **REOPENED 2026-08-25 by the ruling's own trigger — and it hits a second
+  obstacle nobody had reached.** The human pushed, so the condition fired:
+  `origin/main` now carries the lens [measured 2026-08-25: `git ls-tree -d
+  --name-only origin/main src/lib/study-lenses/lenses/` → `debug-props lib
+  parsons spellme writeme`]. The **content** obstacle the wave-0 probe found is
+  therefore gone. Two things stand between that and a usable fan-out, and only
+  the first is configuration:
+  1. The harness cuts worktrees from `origin/<default-branch>` by default, and
+     the `worktree.baseRef` setting that would change it to local `HEAD` is
+     **not set** here [measured 2026-08-25: no `worktree` or `baseRef` key in
+     `.claude/settings.json` or `.claude/settings.local.json`; the former's only
+     top-level keys are `$schema`, `permissions`, `hooks`]. That file is
+     **governance surface**, so flipping it needs explicit human instruction.
+  2. ⛔ **The durable one: a worktree is created ON A NEW BRANCH, and there is
+     no agent-executable path back to `main`.** Branch creation requires
+     explicit instruction, and `git merge` and `git cherry-pick` are both
+     forbidden to agents under § Git Policy. So even a perfectly populated
+     worktree leaves a worker unable to land its commits. **This is independent
+     of `origin/main`'s freshness and of the settings flip**, and nothing in
+     this campaign's record had named it.
+
+  **Nothing changes for waves 2 or 4.** Wave 2 is serial for reasons the
+  worktree question never touched — 39 of the 56 core tests route through
+  `readStream` via `streamOf` [measured 2026-08-25], and both its functions
+  share one file and therefore one pathspec. Wave 4's three functions likewise
+  all live in `core.ts`; its only real edge is `judgeClaim → settle` (settle's
+  six tests each build verdicts via `judgeClaim`), leaving `handOver`
+  independent — **one parallel pair, worth about one worker of wall clock.** Not
+  worth a governance round-trip. The decision is parked for the human at the
+  wave-3/4 boundary, and it needs BOTH items above, not just the first.
+
 ## Traps, each of which has already cost something
 
 - **The test helper must mirror `embody/derive-tokens.ts`** — `acorn.tokenizer`
