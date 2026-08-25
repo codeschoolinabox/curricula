@@ -13,7 +13,10 @@ import cloneAndFreeze from '@utils/clone-and-freeze.js';
 import freezeInPlace from '@utils/freeze-in-place.js';
 
 import type { Facts } from '../../embody/types.js';
-import type { InputElementKind } from '../../lib/scanning/types.js';
+import type {
+	InputElement,
+	InputElementKind,
+} from '../../lib/scanning/types.js';
 import type {
 	LensConfig,
 	Recommendation,
@@ -125,15 +128,13 @@ function readStream(facts: Facts): ReadonlyArray<StreamElement> {
 			'spellme readStream: the tokens stage published no input elements; call behind applicability',
 		);
 	}
-	// `marked` is still a placeholder — it dies at 'marks a block comment
-	// carrying a line terminator'.
 	// `freezeInPlace`, not `cloneAndFreeze`: the array and its wrappers are built
 	// here, and each `element` it reaches is already frozen by the scanning leaf.
 	return freezeInPlace(
 		inputElements.map((element) => ({
 			element,
 			fate: FATE_BY_KIND[element.kind],
-			marked: false,
+			marked: isMarked(element),
 		})),
 	);
 }
@@ -262,6 +263,17 @@ const FATE_BY_KIND = freezeInPlace<Record<InputElementKind, Fate>>({
 });
 
 /**
+ * The four code points the specification counts as line terminators, per the
+ * kind table at `../../lib/scanning/README.md` — "a run of LF, CR, U+2028,
+ * U+2029".
+ *
+ * All four, and not just `\n`: the only fixture asserting a marked comment
+ * uses `\n`, so `text.includes('\n')` passes this module's entire suite and is
+ * wrong for a comment carrying any of the other three.
+ */
+const LINE_TERMINATORS = freezeInPlace(['\n', '\r', '\u2028', '\u2029']);
+
+/**
  * Which element kinds advance on their own — the four the learner never claims
  * (`./README.md` § What the learner claims).
  *
@@ -290,6 +302,34 @@ const ADVANCES_ON_ITS_OWN = freezeInPlace<Record<InputElementKind, boolean>>({
 	WhiteSpace: true,
 	LineTerminator: true,
 });
+
+/**
+ * Whether the syntactic grammar reads a line break at this element
+ * (`./README.md` § Glossary, _mark_). Two elements carry it (human ruling
+ * 2026-08-20): a `LineTerminator`, which is one directly, and a block comment
+ * containing one, which ECMA-262 §12.4 makes one for the syntactic grammar.
+ *
+ * **Gated on the kind first, and that gate is the whole point.** A
+ * `StringLiteral` or a `Template` can carry a real line break in its own text
+ * and must stay unmarked: the mark says what the grammar reads, never what the
+ * characters contain. No fixture in this module holds one, so a text-only
+ * predicate passes every test here and ships the defect to whoever renders it.
+ *
+ * A line comment needs no arm of its own — its text ends at the terminator, so
+ * it can never contain one. That is why the prose says _block_ comment while
+ * the check below needs no block/line distinction.
+ */
+function isMarked(element: InputElement): boolean {
+	if (element.kind === 'LineTerminator') {
+		return true;
+	}
+	if (element.kind === 'Comment') {
+		return LINE_TERMINATORS.some((terminator) =>
+			element.text.includes(terminator),
+		);
+	}
+	return false;
+}
 
 /**
  * Refuses an out-of-range threshold at the factory boundary rather than

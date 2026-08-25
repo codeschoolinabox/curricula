@@ -85,19 +85,19 @@ describe('spellme core', () => {
 			expect(streamOf('a\nb')[1]?.fate).toBe('consumed');
 		});
 
-		it.skip('marks a block comment carrying a line terminator', () => {
+		it('marks a block comment carrying a line terminator', () => {
 			expect(streamOf('/* a\nb */')[0]?.marked).toBe(true);
 		});
 
-		it.skip('leaves a block comment without a line terminator unmarked', () => {
+		it('leaves a block comment without a line terminator unmarked', () => {
 			expect(streamOf('/* ab */')[0]?.marked).toBe(false);
 		});
 
-		it.skip('leaves a line comment unmarked', () => {
+		it('leaves a line comment unmarked', () => {
 			expect(streamOf('// hi')[0]?.marked).toBe(false);
 		});
 
-		it.skip('leaves a hashbang unmarked', () => {
+		it('leaves a hashbang unmarked', () => {
 			expect(streamOf('#!/usr/bin/env node\nx')[0]?.marked).toBe(false);
 		});
 	});
