@@ -41,47 +41,47 @@ describe('spellme core', () => {
 			expect(streamOf('x')).toHaveLength(1);
 		});
 
-		it.skip('gives a claimable element the token-tape fate', () => {
+		it('gives a claimable element the token-tape fate', () => {
 			expect(streamOf('x')[0]?.fate).toBe('token-tape');
 		});
 
-		it.skip('leaves the cursor where it rests when the element is already claimable', () => {
+		it('leaves the cursor where it rests when the element is already claimable', () => {
 			expect(spellmeCore.positionCursor(streamOf('x'), 0)).toBe(0);
 		});
 	});
 
 	describe('Many', () => {
-		it.skip('reads every element of a short declaration', () => {
+		it('reads every element of a short declaration', () => {
 			expect(streamOf('const x = 1')).toHaveLength(7);
 		});
 
-		it.skip('rests the cursor on the first claimable element', () => {
+		it('rests the cursor on the first claimable element', () => {
 			expect(spellmeCore.positionCursor(streamOf('  x'), 0)).toBe(1);
 		});
 
-		it.skip('advances the cursor past a run of trivia between claimable elements', () => {
+		it('advances the cursor past a run of trivia between claimable elements', () => {
 			expect(spellmeCore.positionCursor(streamOf('a  b'), 1)).toBe(2);
 		});
 
-		it.skip('advances the cursor past a mixed run of whitespace and a line terminator', () => {
+		it('advances the cursor past a mixed run of whitespace and a line terminator', () => {
 			expect(spellmeCore.positionCursor(streamOf('a \n b'), 1)).toBe(4);
 		});
 	});
 
 	describe('The three fates, and the mark', () => {
-		it.skip('sends a comment to the jar', () => {
+		it('sends a comment to the jar', () => {
 			expect(streamOf('// hi')[0]?.fate).toBe('set-aside');
 		});
 
-		it.skip('sends a hashbang to the jar', () => {
+		it('sends a hashbang to the jar', () => {
 			expect(streamOf('#!/usr/bin/env node\nx')[0]?.fate).toBe('set-aside');
 		});
 
-		it.skip('evaporates whitespace', () => {
+		it('evaporates whitespace', () => {
 			expect(streamOf('a b')[1]?.fate).toBe('consumed');
 		});
 
-		it.skip('evaporates a line terminator', () => {
+		it('evaporates a line terminator', () => {
 			expect(streamOf('a\nb')[1]?.fate).toBe('consumed');
 		});
 

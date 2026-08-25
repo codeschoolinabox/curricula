@@ -23,6 +23,7 @@ import type {
 import type {
 	Claim,
 	ClaimVerdicts,
+	Fate,
 	SessionState,
 	StreamElement,
 } from './types.js';
@@ -124,14 +125,14 @@ function readStream(facts: Facts): ReadonlyArray<StreamElement> {
 			'spellme readStream: the tokens stage published no input elements; call behind applicability',
 		);
 	}
-	// Placeholder fate and mark — an empty source never runs this callback, and
-	// both die at 'gives a claimable element the token-tape fate'.
+	// `marked` is still a placeholder — it dies at 'marks a block comment
+	// carrying a line terminator'.
 	// `freezeInPlace`, not `cloneAndFreeze`: the array and its wrappers are built
 	// here, and each `element` it reaches is already frozen by the scanning leaf.
 	return freezeInPlace(
 		inputElements.map((element) => ({
 			element,
-			fate: 'consumed',
+			fate: FATE_BY_KIND[element.kind],
 			marked: false,
 		})),
 	);
@@ -223,19 +224,57 @@ const EMPTY_RECOMMENDATIONS = freezeInPlace<ReadonlyArray<Recommendation>>([]);
 const THRESHOLD_KEYS = ['oneMoreAfter', 'skipAfter'] as const;
 
 /**
+ * Where an element of each kind ends up (`./README.md` § The three fates, and
+ * the mark): the ten claimable kinds land on the token tape, a comment and a
+ * hashbang are lifted out and kept, and whitespace and a line terminator
+ * evaporate.
+ *
+ * A table because **the fate is a function of the element kind alone** — which
+ * the mark is not, and which is why the mark is derived separately.
+ *
+ * Total over the derivation's fourteen kinds, and that totality is the whole
+ * check: only one claimable kind has its fate asserted anywhere in the suite,
+ * so a partial table would pass every test in the module. The compiler covers
+ * the other nine, where no fixture does.
+ *
+ * The ten repeated `'token-tape'` literals are deliberate and raise a
+ * `sonarjs/no-duplicate-string` warning. That rule is downgraded to a warning
+ * in `eslint.config.mjs` for exactly this shape — "extracting to constants
+ * scatters what should read as a single record" — and a reader checking these
+ * fourteen rows against `./README.md`'s fate table should not have to resolve
+ * an alias to do it.
+ */
+const FATE_BY_KIND = freezeInPlace<Record<InputElementKind, Fate>>({
+	IdentifierName: 'token-tape',
+	PrivateIdentifier: 'token-tape',
+	Punctuator: 'token-tape',
+	DivPunctuator: 'token-tape',
+	RightBracePunctuator: 'token-tape',
+	NumericLiteral: 'token-tape',
+	StringLiteral: 'token-tape',
+	Template: 'token-tape',
+	TemplateSubstitutionTail: 'token-tape',
+	RegularExpressionLiteral: 'token-tape',
+	Comment: 'set-aside',
+	HashbangComment: 'set-aside',
+	WhiteSpace: 'consumed',
+	LineTerminator: 'consumed',
+});
+
+/**
  * Which element kinds advance on their own — the four the learner never claims
  * (`./README.md` § What the learner claims).
  *
- * Keyed on the element **kind** and not on the fate. The two predicates are
- * extensionally equal, but the kind is the property the derivation publishes,
- * while a fate is this lens's own reading of it — so keying on the kind leaves
- * the cursor independent of that reading.
+ * Deliberately NOT derived from `FATE_BY_KIND`. The two agree today, but
+ * `FATE_BY_KIND[kind] !== 'token-tape'` would make the cursor depend on which
+ * fate means claimable — this lens's own reading — where the kind is what the
+ * derivation itself publishes.
  *
  * Total over the derivation's fourteen kinds rather than a list of the four:
  * the compiler then refuses a widened upstream vocabulary here, where a list
  * would silently let a new trivia kind become claimable.
  */
-const ADVANCES_ON_ITS_OWN: Record<InputElementKind, boolean> = {
+const ADVANCES_ON_ITS_OWN = freezeInPlace<Record<InputElementKind, boolean>>({
 	IdentifierName: false,
 	PrivateIdentifier: false,
 	Punctuator: false,
@@ -250,7 +289,7 @@ const ADVANCES_ON_ITS_OWN: Record<InputElementKind, boolean> = {
 	HashbangComment: true,
 	WhiteSpace: true,
 	LineTerminator: true,
-};
+});
 
 /**
  * Refuses an out-of-range threshold at the factory boundary rather than
