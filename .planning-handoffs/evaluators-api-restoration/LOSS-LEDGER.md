@@ -1044,6 +1044,21 @@ execution and never holds one alone.
   `src/lib/study-lenses/evaluators/intercept/notional-machine.md`, the region
   root `README.md` and `notional-machine.md`, the handle library's
   `README.md`/`DOCS.md`/suite, and the engine `README.md`'s example.
+- **W4 opening rulings (human rulings 2026-08-25, at the wave's opening
+  check-in, recorded ledger-first).** The banked halt-AUTHOR dedup resolves
+  SHARED: a parameterized shared author module in `evaluators/lib/` — the
+  environment-refusal hoist's anti-drift argument prevails; the loc-stamping
+  seam rides a parameter so intercept's attributed call site stays its own —
+  owing the mini-Phase-0 scoped ar-1 per the W3.a precedent, consumed by both
+  chains' worker setups; the per-evaluator halt SHAPES stay as ruled 2026-08-19.
+  E2 and the seconds-default export execute BEFORE BOTH chains — a named
+  sequencing deviation from the run-chain-only slotting (2026-08-17): it clears
+  intercept's phase rows too and keeps the engine's public-API edits out of the
+  parallel window. The seconds default exports as its own constant file
+  (`lib/engine/default-seconds.ts`, one concept per file), imported by the
+  engine and both evaluators — never a second copy of the number. And X1 fires
+  no 🔍: the handle library has no user-loadable surface, confirmed by the human
+  under the no-agent-declared-skips rule.
 
 ### The ratification, and what it settled (human ruling 2026-08-06)
 
