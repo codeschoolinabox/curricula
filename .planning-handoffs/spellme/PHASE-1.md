@@ -478,13 +478,67 @@ home. The fourth governs process and has none.
 
   **Nothing changes for waves 2 or 4.** Wave 2 is serial for reasons the
   worktree question never touched — 39 of the 56 core tests route through
-  `readStream` via `streamOf` [measured 2026-08-25], and both its functions
-  share one file and therefore one pathspec. Wave 4's three functions likewise
-  all live in `core.ts`; its only real edge is `judgeClaim → settle` (settle's
-  six tests each build verdicts via `judgeClaim`), leaving `handOver`
-  independent — **one parallel pair, worth about one worker of wall clock.** Not
-  worth a governance round-trip. The decision is parked for the human at the
-  wave-3/4 boundary, and it needs BOTH items above, not just the first.
+  `readStream` via `streamOf` [measured 2026-08-25: `perl -0777` split of
+  `tests/core.test.ts` on `it(` boundaries → 56 blocks, 39 containing
+  `streamOf(`], and both its functions share one file and therefore one
+  pathspec. Wave 4's three functions likewise all live in `core.ts`; its only
+  real edge is `judgeClaim → settle` (settle's six tests each build verdicts via
+  `judgeClaim`), leaving `handOver` independent — **one parallel pair, worth
+  about one worker of wall clock.** Not worth a governance round-trip. The
+  decision is parked for the human at the wave-3/4 boundary, and it needs BOTH
+  items above, not just the first.
+
+### The `spellme` LENS's rulings (2026-08-25, wave 2)
+
+Five, taken across wave 2's launch preparation and its closing AR-5. Recorded
+here because a ruling that lives only in a wave-scoped brief evaporates when the
+brief is pruned, and `.planning-handoffs/` briefs are transitional by this
+repo's own convention.
+
+- (human ruling 2026-08-25) **`readStream` throws a `TypeError`.** This
+  **reverses the `readStream` half** of the 2026-08-20 `RangeError` ruling and
+  leaves `config` alone. Grounds: the scanning leaf's own precondition throw for
+  an absence is a `TypeError` [read:
+  `src/lib/study-lenses/lib/scanning/derive-input-elements.ts` — "Presence is
+  the whole check"], and `readStream`'s JSDoc already asserts its throw is
+  "exactly the precondition the scanning leaf states for its own inputs", so two
+  classes for one precondition in adjacent modules would be an incoherence. An
+  `ar-5` had argued `RangeError` is affirmatively wrong here: an absent member
+  is a wrong-**kind** case, not the right-kind-wrong-**value** one. **→ migrated
+  to** `core.ts`'s `@throws` tag and `DOCS.md` § Structural constraints. ⚠ The
+  2026-08-20 ruling was put as a question about `readStream`, but `ed76f43b`'s
+  body recorded only the `config` half — which is how it stayed unsettled for
+  five days.
+- (human ruling 2026-08-25) **Two `positionCursor` regression locks were added
+  to the committed suite**, skipped, in `4d3e97a6`, and **a third, the
+  `LineTerminator` mark lock, at the AR-5.** All three pin already-documented
+  contracts that no test reached. What made them necessary: `positionCursor` had
+  three call sites, all starting the cursor on trivia, so both `from + 1`
+  **and** the subtler `isClaimable(stream[from]) ? from : from + 1` passed the
+  entire module; and `isMarked`'s `LineTerminator → true` arm was pinned by
+  nothing at any wave [measured 2026-08-25: mutating it to `return false` left
+  the suite fully green at `40 passed | 50 skipped (90)`].
+- (human ruling 2026-08-25) **The 2026-08-14 AR-3 opt-out does NOT extend to
+  authored tests.** Wave 2's increment 0 was driven by an authored test rather
+  than an un-skip; the opt-out is recorded "for un-skips", and the human ruled
+  that `ar-3` **runs retrospectively** rather than the exemption being widened.
+  ⚠ This settles the scope question that `d5f965e8`'s immutable body left open.
+  The general rule — whether an authored test in this campaign ever rides the
+  opt-out — is answered **no**.
+- (human ruling 2026-08-25) **`DOCS.md` and `core.ts` may state the throw class
+  and tie the kind tables to `types.ts`.** Both are contract-adjacent and were
+  approved rather than taken. The tie is
+  `Record<InputElementKind, …> & Record<AdvancingKind, true> & Record<ClaimableKind, false>`,
+  which closes the gap where `AdvancingKind` was referenced by nothing and
+  `ADVANCES_ON_ITS_OWN` silently restated the same partition [measured
+  2026-08-25: with the tie, mutating `Comment: true` → `false` and
+  `StringLiteral: 'token-tape'` → `'set-aside'` each produce `TS2322`; without
+  it, neither did].
+- (orchestrator ruling, mechanical, 2026-08-25) **The precondition-throw test is
+  increment 0**, before the first un-skip. The stub threw `Error`, which is not
+  a `TypeError`, so it is a genuine red. Recorded because a cold read found the
+  order genuinely ambiguous and two workers would have produced two different
+  commit structures.
 
 ## Traps, each of which has already cost something
 

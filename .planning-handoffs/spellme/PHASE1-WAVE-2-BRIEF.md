@@ -2,6 +2,31 @@
 
 # `tdd-worker` launch brief — the `spellme` LENS, Phase 1, Wave 2
 
+## ✅ CLOSED 2026-08-25 — this is a RECORD, not live status
+
+**Wave 2 is done.** Every number below § Measured baselines was true **at
+launch** and is now historical — the suite it describes as
+`22 passed | 67 skipped (89)` finished at **`41 passed | 50 skipped (91)`**
+[measured 2026-08-25: `npx vitest run --project unit
+src/lib/study-lenses/lenses/spellme`], and `core.test.ts`'s skips went **39 →
+22**. Do not launch anything against this file.
+
+This banner exists because this campaign's records have gone stale in exactly
+this way five times, and because a brief whose numbers were correct when written
+is the most convincing wrong document a cold reader can meet.
+
+**Six commits closed the wave** — re-run rather than trusting this list
+(`git log --format='%h %s' -- src/lib/study-lenses/lenses/spellme/`): `d5f965e8`
+`75994c99` `893ca8c9` `40a677b3` `65a6c1a4`, plus the AR-5 remediation.
+
+**Where the live record is:** [`./PHASE-1.md`](./PHASE-1.md) §§ Where things
+stand and **The `spellme` LENS's rulings (2026-08-25, wave 2)**. **Next is wave
+3** — the static surface (23 component tests) plus the sandbox injection, and
+the campaign's first 🔍 eyeball checkpoint. It runs in the orchestrator, not a
+worker.
+
+---
+
 ⚠ **Read this paragraph before anything else.** Two files sit beside this one
 with confusingly similar names — `./WAVE-1-BRIEF.md` and `./WAVE-2-BRIEF.md`.
 **They are `lib/scanning`'s waves, they are CLOSED, and they are not yours.**
@@ -18,9 +43,11 @@ question you carry forward as a FLAG" until 2026-08-25; two tests were added and
 the question was answered.
 
 **39 of the 56 core tests route through `readStream`** via `core.test.ts`'s
-`streamOf` helper [measured 2026-08-25], so nothing downstream can go green
-until your work is committed. That is why you run alone. (It read "37 of the 54"
-until `4d3e97a6` added two tests, both of which route through `streamOf`.)
+`streamOf` helper [measured 2026-08-25: `perl -0777` split of
+`tests/core.test.ts` on `it(` boundaries → 56 blocks, 39 containing
+`streamOf(`], so nothing downstream can go green until your work is committed.
+That is why you run alone. (It read "37 of the 54" until `4d3e97a6` added two
+tests, both of which route through `streamOf`.)
 
 ## The wave map — spellme's `core.ts`, all five waves
 
@@ -105,7 +132,7 @@ went 6 → 30 within the hour, all of it peer `quizzing` work. Run the commands.
 | spellme working tree | **clean** [measured: `git status --porcelain -- src/lib/study-lenses/lenses/spellme/` → empty]                |
 | spellme suite        | `22 passed \| 67 skipped (89)` across three files [measured: `npx vitest run --project unit …/spellme`]       |
 | remaining skips      | `core.test.ts` **39**, `component.test.tsx` **28** [measured: `git grep -cF "it.skip("`]                      |
-| `npx tsc --noEmit`   | **0 errors** [measured 2026-08-25]                                                                            |
+| `npx tsc --noEmit`   | **0 errors** [measured 2026-08-25: `npx tsc --noEmit`]                                                        |
 | Node                 | **v20.11.0 against engines `>=22.11.0` — BELOW the minimum.** Both tools run anyway. Proceed; upgrade nothing |
 | unpushed             | **Not pinned — run `git rev-list --count origin/main..HEAD`.** It was 30 and climbing. Not yours. Never push  |
 
