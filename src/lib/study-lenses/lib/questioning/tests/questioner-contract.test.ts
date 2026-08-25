@@ -1,6 +1,11 @@
+// cspell:ignore socratizing
+
 import { describe, expect, it } from 'vitest';
 
+import embody from '../../../embody/index.js';
 import type { Embodiment, Facts } from '../../../embody/types.js';
+import quizzingQuestioner from '../quizzing/quizzing-questioner.js';
+import socratizingQuestioner from '../socratizing/socratizing-questioner.js';
 import type { Questioner, QuestionerRefusal } from '../types.js';
 
 const refusal: QuestionerRefusal = {
@@ -35,7 +40,13 @@ const asyncLike: Questioner<{
 	ask: () => Promise.resolve(refusal),
 };
 
-const roster: ReadonlyArray<Questioner> = [openLike, closedLike, asyncLike];
+const roster: ReadonlyArray<Questioner> = [
+	openLike,
+	closedLike,
+	asyncLike,
+	socratizingQuestioner,
+	quizzingQuestioner,
+];
 
 function askBare(
 	questioner: Questioner,
@@ -53,7 +64,12 @@ async function askSettled(
 
 describe('Questioner envelope', () => {
 	it('holds a heterogeneous roster under the bare name', () => {
-		expect(roster).toHaveLength(3);
+		expect(roster).toHaveLength(5);
+	});
+
+	it('settles a real roster member to a narrowable answer', async () => {
+		const answer = await askSettled(roster[4], embody('let x = 1;'));
+		expect(answer.ok).toBe(true);
 	});
 
 	it('drives a bare roster member without config', () => {

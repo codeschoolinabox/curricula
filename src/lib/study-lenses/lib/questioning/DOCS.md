@@ -105,18 +105,19 @@ at this abstraction the register transformations are the region.
   every grid literal they emit against them.
 - Grid and taxonomy vocabulary changes are cross-questioner contract events.
 
-### The closed register's conformance (on paper, owed to Stage 3)
+### The closed register's conformance (landed at Stage 3)
 
-The quarry closed engine's entry takes two data inputs — the snippet and its
-pre-computed classified tokens — and today the quiz lens composes them. Under
-the envelope, ask takes the embodiment alone, so the classification call moves
-inside the questioner (a sibling lib-tier leaf, runtime import — legal under the
-import law). Two consequences the Stage-3 design review ratifies: the
-composition seam relocates from the lens into the questioner, and a consumer
-that also needs classified tokens classifies twice unless the port keeps the
-engine's two-input entry INSIDE the wrap and exposes only the envelope. The
-port's oracle is unaffected either way — the wrap adds an entry, it does not
-change one.
+The closed engine's entry takes two data inputs — the parsed facts and their
+pre-computed classified tokens. Under the envelope, ask takes the embodiment
+alone, so the classification call moved inside the questioner (a sibling
+lib-tier leaf, runtime import — legal under the import law). Two consequences
+the Stage-3 design review ratified and the port landed: the composition seam
+lives in the questioner for roster consumers, and a consumer that also needs
+classified tokens would classify twice unless the engine's two-input entry
+stays public BESIDE the envelope — so both surfaces are public (the engine
+entry for classified-sharing consumers, who classify exactly once; the
+questioner as the family's roster surface). The port's oracle was unaffected —
+the wrap added an entry, it did not change one.
 
 ### Out of scope
 

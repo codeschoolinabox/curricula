@@ -155,8 +155,8 @@ carries the review):
 | Owed | Where it lands |
 | --- | --- |
 | The LIBRARY-CONTRACTS **[S3]** cluster promotion (cluster bodies → this module's README/DOCS; one-line pointers left behind; the 17-vs-22 `resolve-binding` test-count erratum noted) | U11, campaign close |
-| Parent `DOCS.md § The closed register's conformance` retitle + the inverted "exposes only the envelope" connective fix | U10 (parent-file edit, human-authorized via the approved plan) |
-| A parent-glossary "family" homonym entry (questioner family vs `Family`) | U10, same parent pass |
+| Parent `DOCS.md § The closed register's conformance` retitle + the inverted "exposes only the envelope" connective fix | DISCHARGED at U10 — landed in the same changeset as this row edit (the parent pass) |
+| A parent-glossary "family" homonym entry (questioner family vs `Family`) | DISCHARGED at U10 — the parent README glossary family/feature bullet gained the homonym sentence, same changeset |
 | A residue-reword ruling reconciling the two landed § B precedents (U1/U7a KEPT stale quarry-history JSDoc byte-faithful; U5 REWORDED it riding a forced entry rewire) — plus the named residue sites: `usage-group-key.ts` build-history paragraph, `resolve-binding.ts` buildScope mentions, `is-representative.ts` "only caller" claim | a future session or U11's promotion pass, whichever the human routes |
 | A `lib/scoping` README back-pointer to this module's forest (the deliberate-duplication cross-reference) | a future session; out of this changeset |
 | The parent ledger's Owed-forward row recording the human's socratizing-twins intent ("socratizing will be the same when we get there", 2026-08-18) | U11, parent-ledger edit |

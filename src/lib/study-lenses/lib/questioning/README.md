@@ -358,7 +358,11 @@ parent owns.
   correct answer, and the accumulated evidence a learner has demonstrated a
   form. Neither exists in the open register (charter law, § Ownership boundary).
 - **family / feature** — each engine's own coarse taxonomy axis; related,
-  partial, non-isomorphic, no total map (see § Taxonomies).
+  partial, non-isomorphic, no total map (see § Taxonomies). One further
+  homonym, resolved the way quizzing's glossary resolves it: lowercase
+  unqualified "family" in this region's prose means the questioner family
+  (the kind this README defines); code-voiced `Family` always means
+  quizzing's taxonomy type.
 - **form** — the closed register's typed field: the stable content-spec key of
   one generator's output. The open register has no `form` field; its counterpart
   is the analyzer id. "Form" in this README means "one question template an
