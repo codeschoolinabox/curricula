@@ -14,7 +14,7 @@
 <!-- transport-check.sh schema locals; see § The transport check: -->
 <!-- cspell:ignore QCOL RCOL NCELL PCOL provless istemplate -->
 <!-- gen1-arm.sh locals; see § The Gen-1 arm: -->
-<!-- cspell:ignore toks unesc qmisplaced uninitialised srcpath -->
+<!-- cspell:ignore toks unesc qmisplaced uninitialised srcpath qfrags -->
 
 # `<lens>` — fidelity ledger
 
@@ -1768,12 +1768,23 @@ while (my $line = <$fh>) {
     my @rq = $c[$RCOL] =~ /<em>"(.*?)"<\/em>/g;
     push @rq, $c[$RCOL] =~ /(?<!\\)_"(.*?)"_/g;
     for my $fr (@rq) {
-      next if $fr =~ /…/;          # elided or truncated: not a testable substring
+      # Elided fragments are tested PIECEWISE, in order, exactly as the PRESENT
+      # arm tests them. ⛔ An earlier form skipped anything carrying an ellipsis
+      # -- and a partial split moving ONLY those deleted SEVEN findings at exit
+      # 0: `050`, `051` x2, `056`, `108` x2, `110`, which are verbatim the seven
+      # this arm was published for finding. § The Gen-1 arm says of them "the
+      # skip was the only reason they looked clean"; that skip had been
+      # reinstated one layer up [measured 2026-08-25 by AR-5].
+      my @parts = split /\s*…\s*/, unesc($fr);
       for my $s (@seg) {
         my $b = slurp(srcpath($root, $s->{file}));
         next unless defined $b;
-        if (index($b, unesc($fr)) >= 0) { $qmisplaced++;
-          push @find, "GEN1-MISPLACED-QUOTATION $id -- a verbatim source fragment sits in the derivation cell";
+        my ($from, $ok) = (0, 1);
+        for my $p (@parts) { next unless length $p;
+          my $at = index($b, $p, $from);
+          if ($at < 0) { $ok = 0; last } $from = $at + length($p) }
+        if ($ok) { $qmisplaced++;
+          push @find, "GEN1-SOURCE-IN-REASONED $id -- a source fragment sits in the derivation cell";
           last } } } }
 
   for my $s (@seg) {
@@ -1861,8 +1872,24 @@ elsif (($rows+0) == 0) {
   print "FAIL: zero rows matched -- wrong ledger path, wrong row-id prefix, or the prefix moved\n"; $bad = 1 }
 if (($misplaced+0) > 0) {
   printf "FAIL: %d Gen-1 citation(s) sit outside the extractor-output cell -- the ledger is split wrong\n", $misplaced+0; $bad = 1 }
+# ⛔ THIS REPORTS. IT DOES NOT REFUSE, AND THAT IS A CONCLUSION RATHER THAN A
+# RETREAT. Four review rounds narrowed this predicate and each revealed a case
+# the previous one got wrong, in alternating directions. The reason is now
+# established: a source fragment in `reasoned` is EITHER extractor output that
+# moved out of `quoted` OR the seeder quoting the source in a caveat -- and
+# § What Pass 1 writes permits exactly that caveat, with § Lister 4 instructing
+# the seeder to write it. The two differ only in WHAT `quoted` USED TO HOLD,
+# which is not present in a migrated row. No predicate over one row can decide
+# it [established 2026-08-25 across AR-1 and AR-5 rounds; the last attempt
+# refused the template worked example on all three lister-4 rows].
+#
+# A refusal that cannot decide is worse than a report: it either blocks a
+# correct migration or waves a broken one through, and this one did both in
+# successive revisions. THE REAL DETECTOR IS A BEFORE/AFTER COMPARISON at
+# migration time -- see § The migration fragment count, which is the same shape
+# as the prettier row-count rule this campaign already mandates.
 if (($qmisplaced+0) > 0) {
-  printf "FAIL: %d quotation(s) sit in the derivation cell on Gen-1 rows -- the ledger is split PARTIALLY, and this arm would otherwise report nothing\n", $qmisplaced+0; $bad = 1 }
+  printf "NOTE: %d source fragment(s) sit in the derivation cell on Gen-1 rows -- adjudicate each: moved extractor output, or a caveat quoting the source?\n", $qmisplaced+0 }
 if (($checked+0) + ($refused+0) != ($cites+0)) {
   printf "FAIL: census does not close -- %d checked + %d refused != %d citations\n", $checked+0, $refused+0, $cites+0; $bad = 1 }
 # A MISSING SOURCE FILE is a broken invocation, not an unfalsifiable citation
@@ -1998,6 +2025,56 @@ paragraph carried the draft label, which would have been a sentence wrong about
 its own evidence, in the section written to catch exactly that. **The list above
 is `grep '^REFUSED'` over the check as extracted back out of this file**, which
 is the only form of it worth publishing.
+
+### The migration fragment count — what it can decide, and what nothing can
+
+⛔ **A partial split is a MIGRATION-TIME property, not a row property.** Run
+this at the re-cut, comparing the **`evidence` cell before** against the
+**`quoted` cell after**:
+
+```bash
+# Both sides from the repository root. `git show <pre-migration-sha>:<ledger>`
+# gives the before side after the fact.
+qfrags() {  # qfrags <ledger.md> <row-id-prefix> <column-name>
+  perl -ne 'BEGIN{$p=shift @ARGV; $col=shift @ARGV; $i=-1}
+    if ($i < 0 && /^\|\s*#\s*\|/) { my @h = split /(?<!\\)\|/, $_, -1;
+      for my $k (0..$#h) { my $t=$h[$k]; $t=~s/^\s+|\s+$//g; $i=$k if $t eq $col } next }
+    next unless /^\| `(\Q$p\E-\d{3})`/; my $id = $1;
+    my @c = split /(?<!\\)\|/, $_, -1; my $cell = ($i >= 0 && $i <= $#c) ? $c[$i] : "";
+    my $n = () = $cell =~ /<em>"/g; my $m = () = $cell =~ /(?<!\\)_"/g;
+    print "$id\t", $n+$m, "\n"' "$2" "$3" "$1"
+}
+diff <(qfrags "$BEFORE" "$LENS" evidence) <(qfrags "$AFTER" "$LENS" quoted)
+```
+
+⚠️ **COMPARE THE CELL, NOT THE ROW.** A whole-row count is **invariant** under a
+partial split -- moving a cell boundary neither creates nor destroys a fragment
+-- so diffing row totals detects **nothing**. An earlier revision of this
+section published exactly that, with "any line of output is a defect" written
+above it [measured 2026-08-25: whole-row diff of a correct split against a
+half-partial split gave **0 differing rows**]. A check that could not fire,
+published as the one that catches every shape.
+
+**A differing line is NOT automatically a defect.** It means fragments left
+`quoted`. That is the defect where they were extractor output, and it is CORRECT
+where they were an annotation quotation belonging in `reasoned` -- which is
+exactly what `parsons-109` is, and what § The Gen-1 arm prescribes moving.
+
+⛔ **So this is a report requiring adjudication, like the arm's `NOTE`, and not
+a gate. Nothing in this campaign can gate it, and that is a finding rather than
+an omission.** The one-cell `evidence` cell mixed extractor output with the
+seeder annotation quotations; the split separates them **by judgment**, and no
+count over either side recovers which was which. Four review rounds narrowed a
+row-scoped predicate and each revealed a case it got wrong in the opposite
+direction, until the reason was named: the two differ only in what `quoted` used
+to hold, and the one-cell ledger never recorded which of its fragments were
+which.
+
+**The two reports together are what a reviewer reads:** this one says fragments
+left `quoted`; the arm says source fragments sit in `reasoned`. A row in both
+whose fragment is extractor output is a partial split; a row in both whose
+fragment is a caveat is correct. **A human decides, per row, and records the
+decision** -- which is what a fidelity ledger is for.
 
 **When it runs.** On **every ledger carrying a `Gen-1` citation** — at the
 seeding commit beside the Pass-1 gate and § The transport check, and again at
