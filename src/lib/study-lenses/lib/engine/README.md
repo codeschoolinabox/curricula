@@ -57,12 +57,12 @@ The spec is the whole coupling surface:
   rejects reaches `serializeHalt` as `kind: 'throw'`, exactly like a
   function-path throw.
 - `yieldCharge` — whether each yield deducts the flat yield charge from the
-  budget. Defaults to true; densely emitting consumers (an intercept evaluator,
-  the tracers) pass false, because at one event per program step the fee alone
-  exhausts a default budget with almost no real runtime. It waives the FEE only
-  — the budget still pauses for yield-waits and call servicing, and real running
-  time still times the run out; loop safety under the waiver rests on the
-  consumer's own iteration cap.
+  budget. Defaults to true; densely emitting consumers (an intercept evaluator
+  when its spec carries an iteration cap, the tracers) pass false, because at
+  one event per program step the fee alone exhausts a default budget with almost
+  no real runtime. It waives the FEE only — the budget still pauses for
+  yield-waits and call servicing, and real running time still times the run out;
+  loop safety under the waiver rests on the consumer's own iteration cap.
 
 The handle is `AsyncIterable` over whatever `onMessage` yields, plus `result`
 (the items array + settlement), `cancel()`, and `fail(reason?)`. Construction is

@@ -151,7 +151,9 @@ the gap is named, not papered over.
   closed list.
 - Never replays a settled stream, and never serves data through a torn-down
   handle.
-- Never hangs the settle channel on an unanswered interaction.
+- Never hangs the settle channel on its own account — the one sanctioned hang is
+  the consumer's: an iterate ignition that neither responds nor cancels holds
+  the run, because ceasing to pull is not a stop (human ruling 2026-08-19).
 - Never lets the engine's spellings reach a result — seam vocabulary is mapped,
   per evaluator, into the reference vocabulary above.
 
@@ -186,7 +188,9 @@ settled at its Phase 0; and **what an unanswered ask does under a drain** is
 ruled and modeled per evaluator, in that evaluator's own unit. This document
 legislates neither. What the contract does fix, mode-agnostic: an unmocked ask
 takes the evaluator's declared posture, and an unanswered interaction never
-hangs the settle channel.
+hangs the settle channel on the machine's own account — the consumer's
+sanctioned hold (neither responding nor cancelling under an iterate ignition) is
+the one exception, ruled 2026-08-19.
 
 ## Predictions worth making
 

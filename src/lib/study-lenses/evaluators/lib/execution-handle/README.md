@@ -75,13 +75,18 @@ An evaluator supplies a **source** — the library's one input, entered lazily:
 - **`events`** (streaming sources only) — the pull seam the library's drainer
   and iterator consume — an ASYNC ITERATOR (an async generator satisfies it):
   the library never asks the source for a second iterator, so one-shot-ness is
-  by construction. A source that settles `result` SHOULD end its `events`; the
-  library does not require it — on a settle it stops pulling and ATTEMPTS
-  disposal itself, once, never awaited (§ The laws — settle ends consumption).
-  `types.ts` declares TWO NAMED source types — the streaming source, with
-  `events` REQUIRED, and the result-only source, which declares `events?: never`
-  — and the factory's overloads discriminate on them, streaming declared first,
-  so the discrimination survives non-literal call sites (under this repo's
+  by construction. The consumer side mirrors it — **the handle is
+  self-iterating**: `[Symbol.asyncIterator]()` answers ONE memoized iterator for
+  the handle's life, the async-generator convention (human ruling 2026-08-19, at
+  P0-I's design review), so a second call can never split the stream, and a
+  widening's own stepping member can alias the same iterator a later `for await`
+  continues. A source that settles `result` SHOULD end its `events`; the library
+  does not require it — on a settle it stops pulling and ATTEMPTS disposal
+  itself, once, never awaited (§ The laws — settle ends consumption). `types.ts`
+  declares TWO NAMED source types — the streaming source, with `events`
+  REQUIRED, and the result-only source, which declares `events?: never` — and
+  the factory's overloads discriminate on them, streaming declared first, so the
+  discrimination survives non-literal call sites (under this repo's
   `exactOptionalPropertyTypes`, an author writing `events: undefined` must not
   slip between the overloads, and `never` bars it even off-literal).
 
@@ -122,13 +127,14 @@ requirements bind the seam per HR-10).
 
 ## Widening — the library installs the eager echoes
 
-An evaluator's handle carries eager fields (`code`, `ast`, `options`) and
-controls of its own, and **the library installs them** (human ruling 2026-08-18,
-this unit's design review): the factory's second parameter is a BUILDER over
-library-supplied controls — `createExecution(source, (controls) => extras)`,
-where `controls` is `{ cancel }` — and the factory returns the handle with the
-extras installed, correct descriptors and all, frozen LAST. `TExtras` is
-inferred from the builder's return.
+An evaluator's handle carries eager fields (`code`, `options`, its derivation
+echo) and controls of its own, and **the library installs them** (human ruling
+2026-08-18, this unit's design review): the factory's second parameter is a
+BUILDER over library-supplied controls —
+`createExecution(source, (controls) => extras)`, where `controls` is
+`{ cancel }` — and the factory returns the handle with the extras installed,
+correct descriptors and all, frozen LAST. `TExtras` is inferred from the
+builder's return.
 
 That placement is load-bearing, not convenience. Ignition-on-`.result`- access
 requires `result` to be a GETTER that fires the start latch (the engine's own

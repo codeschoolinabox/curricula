@@ -82,6 +82,9 @@ flowchart TD
   both overloads.
 - **Two named source types** discriminate the overloads (`events` required vs
   `events?: never`), streaming declared first.
+- **The handle is self-iterating** — `[Symbol.asyncIterator]()` answers one
+  memoized iterator for the handle's life (ruled 2026-08-19), so the stream
+  cannot be split by a second call.
 
 ### Out of scope
 

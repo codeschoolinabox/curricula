@@ -276,6 +276,15 @@ describe('edge cases', () => {
 });
 
 describe('the mode latch', () => {
+	it.skip('Symbol.asyncIterator answers the same iterator for the handle’s life', () => {
+		const execution = createExecution(
+			createStreamingSource(['a'], { ok: true, events: ['a'] }),
+		);
+		expect(execution[Symbol.asyncIterator]()).toBe(
+			execution[Symbol.asyncIterator](),
+		);
+	});
+
 	it.skip('batch first: .result resolves the complete result', async () => {
 		const result = { ok: true, events: ['a'] };
 		const execution = createExecution(createStreamingSource(['a'], result));

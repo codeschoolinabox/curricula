@@ -120,11 +120,12 @@ Three layers, each a widening of the last:
   record (human ruling 2026-08-05).
 - **Per-evaluator widenings.** Each evaluator names its own handle as an
   intersection with the base or the streaming handle, adding its eager echoes
-  (`code`, `ast`, `options`) and its own controls (`fail`, the generator
-  surface). Eager-versus-deferred is per evaluator — the reference made it both
-  ways, and the reference's own sync sibling (`SyncExecution` with `ParseHandle`
-  and `TokenizeHandle` over it) is the in-house precedent for exactly this
-  widening-by-intersection.
+  (`code`, `options`, and its derivation echo — run's `ast`, intercept's
+  `entwined`; the naming departure is ruled, 2026-08-19) and its own controls
+  (`fail`, the generator surface). Eager-versus-deferred is per evaluator — the
+  reference made it both ways, and the reference's own sync sibling
+  (`SyncExecution` with `ParseHandle` and `TokenizeHandle` over it) is the
+  in-house precedent for exactly this widening-by-intersection.
 
 Two rules keep the lattice coherent:
 
@@ -331,8 +332,10 @@ this region owns, and resolve its homonyms.
 - **result** — the complete record a handle resolves with: outcome, ok, events,
   echoes. Always fulfills.
 - **echo** — a spec or derivation field repeated on the handle or the result
-  (`code`, `ast`, `options`) so a consumer holding the answer needs no other
-  reference; the resolved options echo always carries the populated budget.
+  (`code`, `options`, and each evaluator's derivation echo — run's `ast`,
+  intercept's `entwined`, ruled 2026-08-19) so a consumer holding the answer
+  needs no other reference; the resolved options echo always carries the
+  populated budget.
 - **settling** — the moment a run ends and the result fulfills. The engine's
   `EngineSettlement` is its seam-level input; the deprecated kind's `Settlement`
   type and `settled` companion retire with that region. Distinct from the
