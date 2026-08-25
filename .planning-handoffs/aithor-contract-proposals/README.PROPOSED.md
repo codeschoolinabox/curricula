@@ -136,7 +136,7 @@ rawness is the lesson.
   silently.
 - **Allowlist** (`allowlist`) — a `SyntaxAllowlist`: the node-rule table and
   admitted-globals set the JEJ level already ships as its policy data
-  (`{ nodes: Record<string, NodeRule>; admittedGlobals: ReadonlySet<string> }`,
+  (`{ readonly nodes: Readonly<Record<string, NodeRule>>; readonly admittedGlobals: ReadonlySet<string> }`,
   `NodeRule = true | ConstraintCheck`), graduated to a shared leaf no level owns
   (Wave 1). It is **a level's curation in one shape** — or any caller's
   hand-built slice. aithor reads it two ways, and the two are not the same:
@@ -149,7 +149,7 @@ rawness is the lesson.
     nothing" would be actively wrong).
   - **Gated** — enforced by the **walk tier** of the gate hierarchy: the generic
     default-deny walk over `nodes` (the same machinery the level's own validator
-    reads its allowlist through, shared from the Wave-1 leaf).
+    reads its allowlist through, shared from the screening leaf).
     **`admittedGlobals` are steered, never gated by aithor**: ruling an
     identifier undeclared takes the package's scope analysis, which aithor does
     not own — vocabulary gating arrives only through an injected gate.
@@ -160,14 +160,22 @@ rawness is the lesson.
   - An allowlist whose `nodes` table is **empty** denies every node type — a
     legitimate, honestly-unsatisfiable request that ends in the attempt bound's
     refusal, not a config-shape throw.
-- **The paired parse.** A `SyntaxAllowlist`'s totality is **parse-relative**
-  (its own contract: a node type reachable under other parse settings and absent
-  from the table is a _false rejection_). The Wave-1 shared leaf therefore owns
-  **both** the walk **and** the parse the walk requires — module goal, the
-  package's ECMA version, `preserveParens` as the datasets are authored against
-  — so the pairing has one home and cannot drift. aithor gates through the
-  leaf's paired parse; its only other parsing (the `complexity` metric, vary's
-  seed inventory, repair diagnostics) rides the same primitive.
+- **The parse the walk is relative to.** A `SyntaxAllowlist`'s totality is
+  **parse-relative** (its own contract: a node type reachable under other parse
+  settings and absent from the table is a _false rejection_). The screening leaf
+  **publishes the settings and never parses** — one named configuration,
+  `{ ecmaVersion: 2024, ranges: true }`, so every caller shapes its facts alike.
+  The parse **goal** is deliberately not among them: it is the one setting that
+  legitimately varies per source, so a caller supplies it at the call.
+
+  ⚠️ **OPEN DECISION for Wave 2's Phase 0 — do not assume it settled here.**
+  aithor parses at four sites (the walk tier, the parse tier, the `complexity`
+  metric, vary's seed inventory). Each must pair the published settings with a
+  goal, and _whose obligation that pairing is_ has never been stated by any
+  draft. It matters: a module goal makes four further node types reachable, and
+  a table authored against a script goal but screened under a module goal sees
+  those as **false rejections**, not violations. Phase 0 decides and records it.
+
 - **Steering text** (`steering`) — an optional consumer-supplied prose summary
   of the constraints, rendered into the prompt in place of the mechanical
   node-type phrasing. The natural hook for a level-side descriptor to carry its
@@ -196,7 +204,7 @@ rawness is the lesson.
   one tier of which runs per attempt:
   1. the **injected gate**, when supplied;
   2. else the **walk tier** — the default-deny walk over `allowlist.nodes`
-     through the leaf's paired parse;
+     through the leaf's published parse settings;
   3. else the **parse tier** — the candidate must parse (module goal, the paired
      parse's settings). No allowlist = the **trivial level** = plain JS.
      (Default-deny has no allow-all encoding — an empty `nodes` table denies
@@ -214,13 +222,15 @@ rawness is the lesson.
   under a brokenness profile can "fix" the requested breakage, ping-ponging to
   the bound — an accepted cost, covered by the bound.)
 - **Finding** — one located reason a gate refused a candidate:
-  `{ message, location?, nodePath? }`, with `location` the region's offset-based
-  `SourceRange` (`{ start, end }` character offsets — the new tree's
-  located-diagnostic convention, nested under `location` exactly as the levels'
-  `Violation` carries it, so a consumer's gate returns its level's violations
-  **unchanged and losslessly** — the shape is a true structural supertype, not
-  one that merely compiles). The message is the repair fuel; the location and
-  node path point at it when the gate knows them.
+  `{ message, location?, nodePath? }`, with `location` the **screening leaf's**
+  offset-based `SourceRange` (re-exported by the levels region, so level-side
+  consumers keep their import; note the pre-greenfield `validating/` homonym
+  holds line/column **objects** and is not interchangeable) (`{ start, end }`
+  character offsets — the new tree's located-diagnostic convention, nested under
+  `location` exactly as the levels' `Violation` carries it, so a consumer's gate
+  returns its level's violations **unchanged and losslessly** — the shape is a
+  true structural supertype, not one that merely compiles). The message is the
+  repair fuel; the location and node path point at it when the gate knows them.
 - **Raw** (`raw: true`) — the explicit uncurated opt-in: one model call, no
   loop, no gates, and the result's `program` carries the model's **byte-exact
   raw output** (the runtime's un-extracted reply) rather than the extracted code
@@ -248,17 +258,35 @@ rawness is the lesson.
   - **`syntax`** held (the aspect formerly named `languageLevel` — renamed
     because under node-type semantics it holds the seed's _grammar_, and naming
     it after the level spine's `LanguageLevel` type would collide) → the seed's
-    **node-type inventory**, read through the leaf's paired parse, **unioned
-    with a structural floor** — the scaffolding node types no curation
-    meaningfully gates (the program envelope, statement/expression wrappers,
-    identifiers, literals, declarations) — becomes the request's
-    `allowlist.nodes`. Without the floor, a seed of `let n = 3;` would forbid
-    the very node types any variation must use; the floor is a named design
-    decision, pinned as data in the leaf. Globals are **not** inventoried (that
-    would take scope analysis); the seed itself rides the prompt, which carries
-    its vocabulary by example, and the derived empty `admittedGlobals` renders
-    no clause. A seed of plain statements inventories to its structural types —
+    **node-type inventory**, read through the leaf's published parse settings,
+    **unioned with the structural floor** — `Program`, `ExpressionStatement`,
+    `BlockStatement`, `Identifier`, `Literal`, and **no declaration among them**
+    — becomes the request's `allowlist.nodes`. The floor's operative test is
+    **reachability-completion of an inventory**: which types must be admitted so
+    a program holding an existing program's grammar is not refused for a surface
+    choice the original happened not to make. A binding site **fails that test**
+    — unreachable except under a declaration statement, so admitting it alone
+    suppresses one violation and grants no expressive power, while admitting
+    both would let a variation introduce a binding the held program never had.
+    Declarations therefore come from the inventory itself. The empty statement
+    is excluded on the same test. Worked: a seed of `let n = 3;` inventories to
+    `Program`, `Identifier`, `Literal`, `VariableDeclaration`,
+    `VariableDeclarator` — the floor's contribution is `ExpressionStatement` and
+    `BlockStatement`, without which the variation `3;` is refused for a wrapper
+    the seed simply never used.
+
+    ⚠️ **OPEN for Phase 0 — the `var` re-admission.** ESTree encodes
+    `let`/`const`/`var` as `VariableDeclaration.kind`, a field, not a node type,
+    so a seed of `let n = 3;` and one of `var n = 3;` inventory identically and
+    a `syntax`-held vary derived from either **admits all three**. Pinning the
+    kind takes a `ConstraintCheck`, not a node-type entry. Phase 0 decides
+    whether to map it; naming it here so the wave opens holding it rather than
+    discovering it in Phase 1. Globals are **not** inventoried (that would take
+    scope analysis); the seed itself rides the prompt, which carries its
+    vocabulary by example, and the derived empty `admittedGlobals` renders no
+    clause. A seed of plain statements inventories to its structural types —
     under default-deny that IS "simple statements only" with no special idiom.
+
   - `size` held → the seed's line count and nesting depth as `≤` maxima.
   - The **soft** aspects (`behavior`, `strategy`, `implementation`) are prompt
     instructions, unchanged. A `vary` declaring any aspect is mutually exclusive
@@ -268,6 +296,7 @@ rawness is the lesson.
     aspect is **gated only when the walk tier runs**: under an injected gate the
     allowlist (hand-set or vary-derived) steers while the injected gate alone
     gates — a consumer wanting both composes the shared walk into its gate.
+
 - **Attempt** — one model call, initial or repair. The curated attempt bound is
   **3, fixed and non-configurable**: a repair turn against a small local model
   is the request's dominant cost — and under an injected gate that may embody
@@ -371,8 +400,8 @@ without changing what it returns.
   constraints (mechanical node-type rendering, or the consumer's steering text),
   the held soft aspects, and repair turns.
 - The **gate hierarchy derivation**, the walk and parse tiers (through the
-  leaf's paired parse), and the size-bounds check; relaying an injected gate's
-  findings — and diagnosing its `'undetermined'` — into repair.
+  leaf's published parse settings), and the size-bounds check; relaying an
+  injected gate's findings — and diagnosing its `'undetermined'` — into repair.
 - The curated loop, its fixed attempt bound, and the result/refusal shapes.
 - The model lifecycle drive (which model, when) and the catalog-membership
   pre-check; the value-not-throw loader boundary.
@@ -388,8 +417,8 @@ without changing what it returns.
   package's one scope analysis; aithor steers `admittedGlobals` and gates
   nothing about them.
 - **The allowlist machinery.** The `SyntaxAllowlist` shape, the default-deny
-  walk, and the paired parse are the Wave-1 shared leaf's; aithor and the levels
-  both read them from there.
+  walk, and the published parse settings are the screening leaf's; aithor and
+  the levels both read them from there.
 - **The model runtime** — fetch, cache, backends: local-llm's, injected. The
   default-runtime factory constructs local-llm (which has no remote path), so
   the local-only invariant stays anchored in code.
@@ -407,9 +436,9 @@ without changing what it returns.
   displaces the walk (a lifecycle profile asking for intentionally broken code
   would otherwise be "repaired" into correctness by the very machinery meant to
   serve it). A consumer wanting walk-and-more composes the shared walk into its
-  gate — the Wave-1 leaf exists so that composition is three lines. `raw: true`
-  is the one explicit opt-out, and it is an opt-out _of gating_, not a mode of
-  it.
+  gate — the screening leaf exists so that composition is three lines.
+  `raw: true` is the one explicit opt-out, and it is an opt-out _of gating_, not
+  a mode of it.
 - **Steering and gating are named separately, everywhere.** Steered-only
   surfaces (`admittedGlobals`, everything under `raw`, an allowlist beside an
   injected gate) are documented as such; the gap between asked-for and enforced
@@ -441,8 +470,8 @@ construction, the walk and parse tiers, the size check, the loop, result shaping
 — is pure given those injected.
 
 - **The walk tier is a pure unit** over (candidate, allowlist): in/out of the
-  node table, checked rules refusing, located findings, the paired parse's
-  false-rejection invariant.
+  node table, checked rules refusing, located findings, the published parse
+  settings' false-rejection invariant.
 - **The curated invariant, by construction**: a fake gate returning findings
   must yield a repair or a refusal; a fake gate returning `'undetermined'` must
   yield a repair (with aithor's parse diagnosis as fuel) or a refusal — never a
@@ -469,11 +498,12 @@ construction, the walk and parse tiers, the size check, the loop, result shaping
 - Parent:
   [`../README.md`](../../src/lib/embody/language-levels/just-enough-javascript/README.md)
   — the JEJ level (until Wave 3; the shared-leaf shelf README after).
-- The Wave-1 shared allowlist leaf — `SyntaxAllowlist` / `NodeRule` /
-  `ConstraintCheck`, the default-deny walk, and the paired parse; the machinery
-  the levels' validators and this module both read. (Path fixed at Wave 1; the
-  levels' `Violation` moves there and is re-exported by the region, so existing
-  consumers keep their import.)
+- [`screening`](../../src/lib/study-lenses/lib/screening/README.md) —
+  `SyntaxAllowlist` / `NodeRule` / `ConstraintCheck`, `Violation`,
+  `SourceRange`, the default-deny walk, the published parse settings, and
+  `STRUCTURAL_FLOOR`; the machinery the levels' validators and this module both
+  read. The levels region re-exports `Violation` and `SourceRange`, so existing
+  consumers keep their import.
 - [`local-llm`](../../src/lib/study-lenses/lib/local-llm/README.md) — the
   injected model runtime.
 - `./DOCS.md` (dossier: `DOCS.PROPOSED.md`) — the architecture sketch: the gate

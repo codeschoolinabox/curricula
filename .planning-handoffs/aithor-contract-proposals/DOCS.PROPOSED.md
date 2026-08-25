@@ -41,14 +41,14 @@ Six phases, cut by structural seam — every impure point owns a phase boundary:
   (injected ≻ walk ≻ parse) and carried on the resolved request — the single
   source the result's meta reports, and the by-construction guarantee of one
   tier per attempt. A `vary` declaring aspects compiles down here: a held
-  `syntax` reads the seed's node-type inventory through the leaf's paired parse
-  and unions the leaf's structural floor; a held `size` reads the seed's
-  measures; soft holds become the held-aspect list. Three config-shape mistakes
-  throw before any model is reached — the raw-beside-gate contradiction (a gate
-  cannot be steered, so there is no honest downgrade), a `vary` declaring an
-  aspect beside a hand-set allowlist or size bound, and a hard hold with no seed
-  to read off — and a throwing request emits **no progress event** (the
-  `resolve` event fires on successful resolution only). Resolution runs
+  `syntax` reads the seed's node-type inventory through the leaf's published
+  parse settings and unions the leaf's structural floor; a held `size` reads the
+  seed's measures; soft holds become the held-aspect list. Three config-shape
+  mistakes throw before any model is reached — the raw-beside-gate contradiction
+  (a gate cannot be steered, so there is no honest downgrade), a `vary`
+  declaring an aspect beside a hand-set allowlist or size bound, and a hard hold
+  with no seed to read off — and a throwing request emits **no progress event**
+  (the `resolve` event fires on successful resolution only). Resolution runs
   **once**; the repair loop re-enters downstream, never here.
 - **Prompt construction** — input: the resolved request (+ repair fuel on a
   repair turn); output: a built prompt. **Pure, sync.** Steering renders here:
@@ -79,10 +79,10 @@ Six phases, cut by structural seam — every impure point owns a phase boundary:
   tier is injected (seam 3 — consumer-owned, may embody and execute); pure and
   sync on the walk and parse tiers.** Skipped entirely under `raw`. The resolved
   request's tier says which correctness gate runs — the injected gate, the
-  leaf's default-deny walk over the allowlist's node table, or the paired parse
-  alone — and the **size-bounds check runs beside every tier**. A gate's
-  `undetermined` verdict is diagnosed here by aithor's own parse into located
-  repair fuel. A throwing injected gate propagates.
+  leaf's default-deny walk over the allowlist's node table, or the published
+  parse settings alone — and the **size-bounds check runs beside every tier**. A
+  gate's `undetermined` verdict is diagnosed here by aithor's own parse into
+  located repair fuel. A throwing injected gate propagates.
 - **Disposition** — input: the attempt verdict (+ resolved request); output: a
   program + meta, the next repair turn, or a refusal. **Pure.** Under `raw` the
   byte-exact reply is returned unmodified beside meta — no gating happened, one
@@ -136,12 +136,13 @@ config-shape throw. What changed is the vocabulary it compiles into: a held
 `syntax` (formerly `languageLevel`) produces a node-type allowlist — the seed's
 inventory unioned with the leaf's structural floor — rather than a feature
 subset, and the empty-inventory exclude-all idiom is gone (a parseable seed's
-inventory is never empty; the floor guarantees the scaffolding types any
-variation needs). The seed measurement rides the leaf's paired parse — the same
-detector the walk tier gates by, never a parallel one. The parse-failure policy
-split survives: the walk tier tolerates an unparseable candidate (a located
-finding), while the vary resolver throws on a hard hold with no parseable seed —
-there is no AST to inventory.
+inventory is never empty; the floor supplies the scaffolding types the inventory
+omits — not every type a variation might need, which the inventory cannot know).
+The seed measurement parses with the leaf's published settings — the same
+configuration the walk tier gates by, never a parallel one. The parse-failure
+policy split survives: the walk tier tolerates an unparseable candidate (a
+located finding), while the vary resolver throws on a hard hold with no
+parseable seed — there is no AST to inventory.
 
 ## Structural constraints
 
@@ -164,8 +165,9 @@ there is no AST to inventory.
   attempt; aithor diagnoses the candidate with its own parse to build located
   repair fuel; the bound spends normally.
 - **The walk's soundness is parse-relative, and the pairing is owned upstream.**
-  The Wave-1 leaf owns both the walk and the parse it requires; aithor gates
-  through that paired parse and never introduces a second parser configuration.
+  The screening leaf owns the walk and PUBLISHES the settings the walk's
+  soundness is relative to; it never parses. aithor parses with those settings
+  and supplies the goal itself, and introduces no second parser configuration.
   One named edge the parse tier admits: an **empty** candidate parses (an empty
   program is valid JavaScript), so a bare curated call with no size floor can
   return an empty program — accepted transition behavior; a consumer's gate or
@@ -210,8 +212,8 @@ there is no AST to inventory.
   consumer compositions, arriving (if at all) inside the injected gate. This
   module never names a level, a lifecycle phase, or a posture.
 - **The allowlist machinery** — the `SyntaxAllowlist` shape, the default-deny
-  walk, the paired parse, the structural floor: the Wave-1 shared leaf's, read
-  by the levels' validators and this module alike.
+  walk, the published parse settings, the structural floor: the screening
+  leaf's, read by the levels' validators and this module alike.
 - **The model runtime** — fetch, cache, backends: local-llm's, injected; the
   host wires the backends it ships.
 - **Embodiment, lenses, execution** of the returned program — once a program

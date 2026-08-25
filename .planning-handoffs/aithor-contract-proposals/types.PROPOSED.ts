@@ -6,8 +6,8 @@
  * DOSSIER ARTIFACT: this file is NOT compiled (tsc includes `src/**` only) and
  * the committed `aithor/types.ts` is untouched until the maintainer ratifies.
  * Import paths below are the intended END-STATE paths (the Wave-3 seat,
- * `src/lib/study-lenses/lib/aithor/`); the Wave-1 leaf path is a placeholder
- * until that leaf is named. Every reshaped or deleted type carries a
+ * `src/lib/study-lenses/lib/aithor/`); the shared leaf landed as `screening`
+ * and its path is settled. Every reshaped or deleted type carries a
  * `@remarks DELTA` note naming its wave and blast radius (evals / consumer
  * socket), per the dossier's obligations.
  *
@@ -32,8 +32,8 @@
  *   {@link ResolvedAithorConfig}.
  */
 
-import type { SyntaxAllowlist } from '../allowlisting/types.js'; // Wave-1 leaf — name/path TBD at extraction; sibling leaf from the Wave-3 seat
-import type { SourceRange } from '../allowlisting/types.js'; // offset-based { start, end }; moves with `Violation` (AR-1 #14, option a)
+import type { SyntaxAllowlist } from '../screening/types.js'; // the shared screening leaf; sibling leaf from the Wave-3 seat
+import type { SourceRange } from '../screening/types.js'; // offset-based { start, end }; moves with `Violation` (AR-1 #14, option a)
 import type { LoadedModel } from '../local-llm/types.js';
 
 // ─── Findings (the gate's refusal vocabulary; repair fuel) ────────────
@@ -208,7 +208,7 @@ type AithorRuntime = {
  * semantics a held aspect pins the seed's grammar, and the old name collided
  * with the level spine's `LanguageLevel` type in a module that is now
  * level-agnostic (AR-1 #10). Held `syntax` compiles to the seed's node-type
- * inventory (read through the leaf's paired parse) UNIONED with the leaf's
+ * inventory (read through the leaf's published parse settings) UNIONED with the leaf's
  * structural floor (AR-1 #5 — without the floor, `let n = 3;` would forbid
  * the node types any variation must use); globals are not inventoried, and
  * the derived empty `admittedGlobals` renders no prompt clause (AR-1 #6).
