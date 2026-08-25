@@ -1,61 +1,139 @@
-<!-- cspell:ignore actioned acyclicity affordances authorised behaviour behavioural brok checkability checkpointed codemod codepoint cutover deixis failable finditer generalises homehood misdescribes neighbouring organise organised parentheticals pathspec respecified scriptable spellme synchronisation ugrep discharged elif unattacked endswith findall fullmatch importants keyspace misalign renderable rindex startswith unargued unfiled unfound unglossed unactioned unbannered unbuilt undercount undercounted undercounts undrawn unmigrated unretired unrun wireframes -->
+<!-- cspell:ignore ungranted widenings actioned acyclicity affordances authorised behaviour behavioural brok checkability checkpointed codemod codepoint cutover deixis failable finditer generalises homehood misdescribes neighbouring organise organised parentheticals pathspec respecified scriptable spellme synchronisation ugrep discharged elif unattacked endswith findall fullmatch importants keyspace misalign renderable rindex startswith unargued unfiled unfound unglossed unactioned unbannered unbuilt undercount undercounted undercounts undrawn unmigrated unretired unrun wireframes -->
 
 # orchestrate ux — resumption point
 
-**STATE: Phase 0 step 0.2. `ar-1` round 12's FIX ROUND IS COMPLETE — fourteen
-commits, `1046c90d~1..df0f5c99`. Both blockers, all seven importants and all six
-minors are closed, recorded, or ruled open with an owner. Seven rulings were
-taken. THE NEXT GATE IS AR-5, WHICH HAS NEVER RUN.**
+**STATE: Phase 0 step 0.2. `ar-5` HAS RUN — the first one this campaign ever ran
+— and returned PAUSE with ten findings. THE HUMAN READ IT AND RULED: fix all
+ten, then re-run AR-5 on the delta. YOU ARE THAT FIX ROUND. Sixteen commits are
+unpushed, `1046c90d~1..HEAD`.**
 
 ## YOUR FIRST ACTION — read this before anything else
 
-**There are no owed rulings.** The three the last handoff owed, plus a fourth
-hiding inside IMPORTANT 4 and three more from the roll-call and the twin ask,
-were all asked in one message before any edit opened, and all seven are recorded
-in [`DECISIONS.md`](./DECISIONS.md) § Rulings taken 2026-08-19 — the round-12
-fix round (**R-AE … R-AK**). Do not re-ask them and do not re-litigate them.
+**No rulings are owed and none is coming.** AR-5 returned **ten findings, every
+one CHANGE-shaped** — false statements about what a document says or what a
+command returns, not decisions needing re-taking. It said so explicitly: _"NO
+ROUND 13 IS OWED BY THIS REVIEW … The human's 2026-08-19 fallback trigger has
+not fired."_ Its verdict is archived verbatim below under **§ AR-5'S VERDICT**.
+**Work from the archived verdict, never from this summary.**
 
-**The human ruled 2026-08-19 that there is NO round 13**, and the reasoning is
-worth carrying rather than repeating: the campaign's closure criterion is a
-STATED RADIUS with an owner for everything outside it, not a sweep that found
-nothing; round 10 named the mechanism by which every round finds defects at the
-boundary the last instrument stopped at; and **two gates have never fired once**
-while AR-1 has fired twelve times. The fallback trigger is written down: **if
-AR-5 returns PAUSE on anything design-shaped rather than change-shaped, that is
-the evidence a round 13 was owed** — and it gets called then, argued, rather
-than defaulted into now.
+**Do not re-ask whether to open this round.** It was put to the human on
+2026-08-25 with the options and their trade-offs, and the ruling is: **fix all
+ten, then re-launch AR-5 on the delta only — not the full 97.**
 
-So the sequence from here is: **AR-5** → the settings-line discharge → the
-**Phase-0 → Phase-1 human gate** → the **push gate**.
+**Your first action is not an edit.** Two of the ten findings are corrections of
+corrections, so **re-measure each one before you touch it.** Three were
+re-measured when this file was written and all three reproduce; the other seven
+have not been.
 
-## AR-5 — the next gate, and everything it needs
+## The ten findings, and what the human ruled for each
 
-**0.2 IS NOT CLOSED YET, AND AR-5 IS WHAT CLOSES IT.** Ruled 2026-08-18: AR-5
-fires at **0.2 close**. Round 12's PROCEED branch never fired — it returned
-PAUSE, the fix round discharged it, and the human ruled there is no round 13. So
-the trigger is `DEV.md § AR-5`'s own first disjunct, **"after all increments
-complete"**, which the fourteen commits satisfy. AR-5 is the last review before
-0.2 closes, not a review of an already-closed 0.2. A previous revision of this
-file left that ambiguous and a context-free reader could not tell which.
+Round 12's fix round closed both its blockers and every important and minor.
+**AR-5 then found ten more, and three of them are defects introduced BY that fix
+round.** That is the campaign's signature failure mode, and it is now measured
+at two instances inside a single session.
 
-Registered agent `ar-5`. **It carries NO `model:` pin** [read:
-`.claude/agents/ar-5.md` — frontmatter is `name` / `description` / `tools` only]
-and inherits whatever tier spawns it. Name the tier and its cost when you launch
-it. **Pass no `model` parameter to any `ar-N`.**
+### Fix these — one bounded commit, in this order
 
-### The five inputs `DEV.md § AR-5` requires — assembled, so nobody invents them
+1. **F1 · `README.md` § What renders still lists a control-row member twice.**
+   It reads "the band — the control row and the rail — **the level UI**, the
+   guide, and the recommendations". The level UI **is** the level selector and
+   the strict toggle, both named members of the control row [read: `README.md`
+   glossary · control row]. `93a7bba2` claimed to have removed exactly this
+   defect and moved it one item over. **Re-read D8's and G1's columns after.**
+2. **F2 · `ux/wireframes.md` quotes `ux/user-journeys.md` with a sentence that
+   is not there.** It quotes _"the barred phase, by contrast, carries its
+   cause"_; `carries its cause` is **0** occurrences in that file [measured
+   2026-08-25]. ~46 words are elided with no ellipsis, and the elided clause is
+   the today's-build-vs-the-arrangement distinction the quoting paragraph is
+   arguing about. Replace with the verbatim sentence or de-quote it.
+3. **F3 · the projection contract still omits a datum drawn twice.** The blocked
+   overlay renders the level's **violation** ("debugger statements are outside
+   this level"); `violation` appears **1** time in the whole twin and the
+   contract grants it nowhere [measured 2026-08-25: overlay drawn **2** times].
+   This is **B13's own class surviving B13's fix**. Add the row, exactly as the
+   snippet type was added:
+   `the selected level's cause: the first violation · or the admitted types`
+   [`README.md` glossary · assessment already names it].
+4. **F4 · C14's evidence clause is wrong again, in a new direction.** It says
+   "the count arm sits in the same gap and draws no separator of its own". The
+   count arm sits in **no** gap: the four count-arm drawings have no row between
+   rail and caption; the three cause-arm drawings all have one. **R-AH's
+   conclusion survives** on its independent ground (the drawing's own "the
+   framing is one string") — fix the justification, do not re-derive the ruling.
+5. **F5 · `RESUME.md`'s `266` is `265` at the SHA it is tagged to.** Correct it.
+   **The other half is uncorrectable**: `fa6dd40c` and `7dea8eaa` carry wrong
+   self-referential counts in immutable bodies, alongside `b5a9c8f0`'s false
+   checkpoint line. Record all three in the closing commit body, and adopt the
+   convention AR-5 proposes: `N at <parent>, N+1 including this commit`.
+6. **F8 · A10's tag decayed.** It claims `SurfaceClass` → 1 hit; it is now 4
+   [measured by AR-5, re-measure it]. The row's substance holds; its evidence
+   does not.
+7. **F10 · the closing commit owes an enumeration nobody has named.** R-S
+   resolves the fact that this file becomes unreachable by citing `DEV.md` §
+   Ruling provenance — _"the campaign's closing commit body enumerates what went
+   where"_. Neither § AR-5 nor § Operating instructions listed that as an
+   obligation. Put it on the closing checklist.
 
-`DEV.md`'s _Provide to agent_ line asks for five things. All five are here,
-because the only other enumeration in this file sits inside § THE ROUND-12
-BRIEF, which is an **AR-1** input list under a heading that says do not work
-from it.
+### Build these — the two instrument widenings, landed RED first
 
-**1 · The baseline SHA** — `80306ad9`. The campaign's, not any session's.
-SHA-pinned, never decays.
+AR-5's CP-1 and CP-2, and **both are ten-line changes to CP-η, not a fifth
+instrument**. The precedent is this campaign's own: `1046c90d` landed CP-η RED
+so its detection was proven before anything was trusted to it.
 
-**2 · The modified file paths** — 21 [measured at `fa6dd40c`: `git diff
---name-only 80306ad9..HEAD -- <the three pathspecs>`]. Re-run it; the list is
-campaign-scoped.
+- **CP-1 · widen check 4's row selector.** It scans only lines matching
+  `( ) strict` or `[Generate code]` — **7 of 10 control-row lines**, and zero
+  overlay lines. **That is why F3 was invisible to it.** Widen it to every
+  framed line in a full-frame drawing, allowlist the region's own controls and
+  the drawn copy the glossary owns, and let everything else fail loudly.
+- **CP-2 · let check 2 see count-arm captions.** It opens with
+  `if 'not reached' not in stand: continue`, so it skips all four count-arm
+  drawings. **That is why F4 was invisible to it.** Give the count arm its own
+  expected shape (`COUNT` alone, no leading `BLANK`).
+- Also worth doing, AR-5's finding 7: each check should print `skipped: N`
+  beside `PASS`. A pass count with a silent skip count is how coverage is lost.
+
+### Record, do not fix
+
+- **F6** — `cb2e3448` and `1106c268` carry **zero** sourced-claim tags while
+  asserting repo state. Immutable; record in the closing body.
+- **F9** — the campaign writes `[measured at <sha>: …]`, a house variant
+  `DEV.md` § Sourced claims does not define. It is an improvement and it is
+  undocumented; a naive audit grep for `[measured:` plus a space scores **15**
+  bodies as untagged. One line in the closing body, or a `DEV.md` proposal at
+  0.3.
+
+### And AR-5's third counter-proposal, which is a DECISION not to build
+
+**CP-3 · do not build a quotation checker.** F2 is the only misquotation it
+found across six documents, having checked every cross-document quotation it
+could locate. The cheaper discipline is the one `DECISIONS.md` already names:
+**expand `also asserts` to include the document that QUOTES this one**, and
+re-read on edit. A quotation instrument would be the fifth instrument round 8's
+reviewer warned about.
+
+## Then: re-run AR-5 on the DELTA, not the full 97
+
+AR-5's own recommendation. Its inputs are assembled in § AR-5 below — all five
+that `DEV.md § AR-5` requires — but the baseline for the re-review is **your fix
+commit's parent**, not `80306ad9`. Hand it the full campaign context and the
+narrow diff; do not make it re-read 97 commit bodies to check seven fixes.
+
+## AR-5 — its five inputs, assembled, for the DELTA re-run
+
+`DEV.md § AR-5`'s _Provide to agent_ line asks for five things. The first AR-5
+launch assembled them here because the only other enumeration in this file sits
+inside § THE ROUND-12 BRIEF — an **AR-1** input list, under a heading that says
+do not work from it, marking `types.ts` "context, NOT a review target", which is
+backwards for AR-5. Keep them here.
+
+**For the re-run, change ONE thing: the baseline.** Use your fix commit's
+parent, not `80306ad9`. AR-5 asked for the delta, not the full 97 bodies again.
+
+**1 · The baseline SHA** — `80306ad9` for a full review; **your fix commit's
+parent** for the delta re-run. Record it before you start editing.
+
+**2 · The modified file paths** — 21 across the campaign [measured at
+`7dea8eaa`]. Re-run it; campaign-scoped.
 
 ```bash
 git diff --name-only 80306ad9..HEAD -- \
@@ -63,14 +141,15 @@ git diff --name-only 80306ad9..HEAD -- \
   src/lib/study-lenses/WORKFLOWS.md
 ```
 
-**3 · The original task description** — Phase 0 step 0.2 for the **Rail**, the
-arrangement that replaces the lifecycle strip. `orchestrate/` ships and has
-tests and a browser checkpoint ledger, and its **interface was never designed**;
-what is in `index.tsx` today is scaffolding, not contract. Full statement: §
-What this campaign is, below the archive banner.
+**3 · The original task description** — Phase 0 step 0.2 for **the Rail**, the
+arrangement replacing the lifecycle strip. `orchestrate/` ships, has tests and a
+browser checkpoint ledger, and **its interface was never designed**; `index.tsx`
+today is scaffolding, not contract. 0.2's deliverable is that `types.ts` can be
+written deterministically from the prose. Full statement: § What this campaign
+is, below the archive banner — one of the six live exemptions.
 
 **4 · The Phase 0 spec paths** — **not `DOCS.md` alone**; `DEV.md` is explicit
-that the spec is these artifacts read together.
+that the spec is these read together.
 
 ```text
 src/lib/study-lenses/orchestrate/README.md
@@ -78,31 +157,29 @@ src/lib/study-lenses/orchestrate/DOCS.md
 src/lib/study-lenses/orchestrate/types.ts
 ```
 
-**5 · The twin** — owed, because `twin-doc: user`. Three documents, and **give
-absolute paths**: `lenses/spellme/ux/wireframes.md` also exists and a bare
-relative path is ambiguous.
+**5 · The twin** — owed, because `twin-doc: user`. **Absolute paths**:
+`lenses/spellme/ux/wireframes.md` also exists and a bare relative path is
+ambiguous.
 
 ```text
-src/lib/study-lenses/orchestrate/ux/personas.md
-src/lib/study-lenses/orchestrate/ux/user-journeys.md
-src/lib/study-lenses/orchestrate/ux/wireframes.md
+/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/study-lenses/orchestrate/ux/personas.md
+/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/study-lenses/orchestrate/ux/user-journeys.md
+/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/study-lenses/orchestrate/ux/wireframes.md
 ```
+
+**Model**: `ar-5` carries **no `model:` pin** [read: `.claude/agents/ar-5.md` —
+frontmatter is `name` / `description` / `tools` only] and inherits whatever tier
+spawns it. Name the tier and its cost. **Pass no `model` parameter to any
+`ar-N`.**
 
 ### The range and the SHA list are DIFFERENT things — both are needed
 
-An earlier revision of this file said "**never a range**" with no qualification,
-against a `DEV.md` line that tells the reviewer to run
-`git diff <baseline>..HEAD` itself. Both are right about different objects:
-
-- **The DIFF is a range**, and the reviewer runs it — that is `DEV.md`'s
-  instruction and it stands. Scope it with the pathspec, or the diff pulls in
-  foreign work: `80306ad9..HEAD` is **266** commits unscoped and **96** scoped
-  [measured at `fa6dd40c`].
+- **The DIFF is a range** and the reviewer runs it — `DEV.md`'s instruction, and
+  it stands. Scope it with the pathspec or it pulls in foreign work.
 - **The SHA LIST is a list**, and it is what lets AR-5 audit each commit BODY —
-  the settings line, the sourced claims, the loss ledger, the receipts. **That**
-  is what must never be handed over as a range or copied from a table in this
-  file: every round's table has been short by at least its own closing commit,
-  because the commit that updates a table is always later than the table.
+  settings line, sourced claims, loss ledger, receipts. **That** is what must
+  never be a range or a table copied from this file: every round's table has
+  been short by at least its own closing commit.
 
 ```bash
 git log --oneline 80306ad9..HEAD -- \
@@ -110,94 +187,19 @@ git log --oneline 80306ad9..HEAD -- \
   src/lib/study-lenses/WORKFLOWS.md
 ```
 
-**Its size is a budget question and it is the human's, not yet discharged.** The
-list was **95** at `df0f5c99` and **96** at `fa6dd40c` — campaign-scoped, so
-re-measure rather than quoting either. (An earlier revision said "89 at
-`93a7bba2`"; 89 is the count at **`883fc4c2`**, four commits earlier, and
-`93a7bba2`'s is 92. The number was right and its SHA was not — the same defect
-class as a stale number, caught by the same habit: measure and tag in one
-breath.)
+## What AR-5 verified clean, which is worth as much as what it broke
 
-## What the FIX ROUND did — fourteen commits, `1046c90d~1..df0f5c99`
+Do not re-derive these; they are measured and archived.
 
-⚠ **NEVER ASSEMBLE THE AR-5 LIST FROM THIS TABLE. Run the command above.**
-
-| SHA        | what                                                                                                    |
-| ---------- | ------------------------------------------------------------------------------------------------------- |
-| `1046c90d` | **CP-η built and landed RED** · instrument 1 widened to this file · the seven rulings recorded          |
-| `bbc21d87` | **BLOCKER 1** — three barred drawings recomputed, fifteen columns, floor-centred                        |
-| `b5a9c8f0` | **IMPORTANT 4** (R-AH) · C16's retired quote · B11's first evidence · histogram → `{63: 79}`            |
-| `a5f5e007` | **a correction**: `b5a9c8f0`'s body claimed a prettier checkpoint that had FAILED when it was written   |
-| `26f8e521` | **IMPORTANT 9** · the projection contract's totality scoped to DATA · C13's dead citation · **B13**     |
-| `fe4995db` | **IMPORTANT 3** — six sites in four files, numeral only · **B3** re-opened and re-closed                |
-| `e7456954` | **IMPORTANT 6** — the `mark` sweep · and a false kit claim nobody had found                             |
-| `883fc4c2` | **BLOCKER 2** (R-AE) — the occupant dot named · round 11's I9 · MINOR 12 · **B14** · B8's second home   |
-| `190b763d` | **IMPORTANT 8** — checkpoint rows **T11–T14**, T10's content untouched, five citations re-pointed       |
-| `bfa95a50` | **IMPORTANT 5 / CP-θ** — round 11's roll-call; the eleven unfiled findings filed · **A15** · **C19**    |
-| `93a7bba2` | **round 11's MINOR 22** (promoted by round 12's IMPORTANT 5) — the render list that was false twice     |
-| `97d2c0bc` | **IMPORTANT 7** (R-AF) — F4's barrel premise struck, the divergence declared, the shape deferred to 0.3 |
-| `f8ae6cd3` | **MINORs 13, 15, 10** — recorded, deliberately not acted on                                             |
-| `df0f5c99` | **CP-α built** (R-AG) · CP-η check 4 · CP-η GREEN on all four                                           |
-
-## What this round found that round 12 did NOT
-
-Recorded because a fix round that only lists the reviewer's items misreports
-what happened, and because each of these is a class the reviewer's instruments
-could not reach.
-
-1. **IMPORTANT 3 was SIX sites in four files**, not three in two. `personas.md`
-   carries the ORIGIN phrasing — "telling them a single truth four times" — and
-   `wireframes.md` and `README.md` quote it by name. Round 12 found the
-   `waiting` phrasing only.
-2. **Two of IMPORTANT 6's `mark` sites name the `●`, not the standing.** (Round
-   12's verdict says "eight sites" and enumerates seven; the enumeration is what
-   this round worked from, and five of the seven name the standing.) Sweeping
-   them would have asserted the marker IS the standing, which `▾ 2 ●` falsifies.
-   They went to **B14** instead.
-3. **§ The spelling breaks said `Tokens` "keeps its mark and its kit". It has no
-   kit** — four of five phases have none, and the drawing above that sentence
-   has always shown that station bare. Found by re-reading a sentence the noun
-   sweep forced open; no instrument reaches prose-against-drawing.
-4. **C16's column quoted a RETIRED drawn string**, and **C13 cited a section
-   existing in no file.** Two live defects inside the index built to catch them.
-5. **CP-α's first run found C7's two-string split has no drawn surface** — no
-   drawing shows a tray containing a full phase label. Checkpoint **T16**.
-6. **The unbarred drawings sit at ±1.5, not ±1.** CP-η's tolerance is the
-   measured one; at ±1 it fires on **six** correct drawings and the next agent
-   loosens it [measured: 9 rail drawings carry a standings row, 3 of them
-   barred].
-
-## What is RECORDED OPEN, with an owner — the radius, made concrete
-
-Closing 0.2 does not claim these are solved. It claims each has a home:
-
-- **A15** — when does a PART of a surface take its own class? Round 11's I10,
-  recorded open per R-AJ. It amends A13's exhaustiveness claim, so it is the
-  human's.
-- **C19** — the three framings are deictic and the caption may not say where.
-  RECORDED, not settled; checkpoint **T15**.
-- **C14 · C16 / T11, C5 / T12 · T13, C15 / T10, C18 / T10 · T14, C19 / T15, C7 /
-  T16** — seven checkpoint questions, each with a named action and a specific
-  expected observation. **T11 is the one this round created to carry round 11's
-  I8**, which had been routed to T10 — a screen-reader traversal that cannot
-  answer a sighted question.
-- **M18, M20, M21, M23** — recorded as costs with measured counts. **R-AK covers
-  M18 only**; the other three are recorded via round 11's roll-call in
-  `DECISIONS.md`, not by that ruling.
-- **§ 0.3 entry conditions** — every deferral, including the kit count's
-  predicate, `display-labels.ts`'s shape, and the AR-2 briefing obligation.
-
-## The failure this round committed, and the mechanical fix
-
-`b5a9c8f0`'s body claims `RESUME.md … prettier clean`. **The check had failed
-when that line was written** — the per-file checkpoints were run AFTER `git add`
-rather than before, so a DIRTY result was printed and the commit went ahead in
-the same breath. `a5f5e007` is the correction of record; amend is forbidden, so
-the false line stands in an immutable body.
-
-**The fix is ordering, not diligence: run the checkpoints BEFORE `git add`, and
-treat DIRTY as a stop rather than a line item.** Every commit after `a5f5e007`
-did, and three of them caught a dirty file that would otherwise have shipped.
+All four instruments reproduce character-for-character · CP-η's **±1.5**
+tolerance is genuinely measured, and round 12's "±1" was wrong · **15 of 15**
+CP-α drawn-counts exact · the `strip` residue table's five per-file counts
+reproduce · **97/97 commit bodies carry the full settings line** · `tsc` exit 0
+· 622 passing in 22 files · `npm run check:governance` **0 errors** · no `any`,
+no cast, no `@ts-`, no `eslint-disable` anywhere in the changeset · the twin's
+three documents exist and still address the learner-facing reader · **no
+dangling reference anywhere** — every row id, ruling id, checkpoint id and SHA
+resolves.
 
 ## What round 11 changed, and the FOUR commits that answered it
 
@@ -271,23 +273,25 @@ it is a checkpoint question, not a document one.
 
 ## Baselines — measure these again at session start, do not trust them
 
-| what                    | value                                                                                                                                                                                                                                                                                                                                                                                        |
-| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **AR-5's baseline**     | **`80306ad9`** — the campaign's, not any session's. **SHA-pinned**, never decays                                                                                                                                                                                                                                                                                                             |
-| this session's baseline | **`1046c90d`** — the fix round's first commit. SHA-pinned                                                                                                                                                                                                                                                                                                                                    |
-| AR-5's SHA list size    | **95** [measured at `df0f5c99`] — **campaign-scoped**. Put its scoping to the human BEFORE launching                                                                                                                                                                                                                                                                                         |
-| green (orchestrate)     | **622 passing in 22 files** [measured at `df0f5c99`] — campaign-scoped, and unchanged across all fourteen commits, which is expected: this round touched no code                                                                                                                                                                                                                             |
-| typecheck (repo-wide)   | `npx tsc --noEmit` exit **0** [measured at `df0f5c99`] — **foreign-scoped**                                                                                                                                                                                                                                                                                                                  |
-| the four instruments    | `DECISIONS.md malformed rows: none` · `RESUME.md malformed rows: none` · `{63: 79} outliers: none` · `CP-eta: GREEN` on all four checks [measured at `df0f5c99`] — campaign-scoped                                                                                                                                                                                                           |
-| upstream                | **none configured** on `main` [measured: `git rev-parse --abbrev-ref main@{upstream}` → fatal]                                                                                                                                                                                                                                                                                               |
-| **foreign commits**     | **22 during this session alone**, against 13 of mine [measured at `df0f5c99`: `git log 1046c90d..df0f5c99`, 35 total. **13 not 14, because `..` excludes its left endpoint** and `1046c90d` is the fix round's own first commit — the same off-by-one that made the range in the headings above wrong]. **Foreign-scoped, so it is wrong by the time you read it.** The tree moves under you |
+| what                    | value                                                                                                                                                                                    |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **AR-5's baseline**     | **`80306ad9`** for a full review — SHA-pinned. **For the delta re-run, use your fix commit's parent instead**                                                                            |
+| this session's baseline | **`1046c90d~1`** — the fix round opens at `1046c90d` and `..` excludes its left endpoint. SHA-pinned                                                                                     |
+| AR-5's SHA list size    | **98** at `7dea8eaa` + this commit — **campaign-scoped**. `git rev-list --count` unscoped is **316** at this commit and is NOT the number to hand a reviewer — it is mostly foreign work |
+| modified file paths     | **21** [measured at `7dea8eaa`] — campaign-scoped                                                                                                                                        |
+| green (orchestrate)     | **622 passing in 22 files** [measured by AR-5 at `7dea8eaa`] — campaign-scoped, unchanged all round, which is expected: nothing here touched code                                        |
+| typecheck (repo-wide)   | `npx tsc --noEmit` exit **0** [measured by AR-5] — **foreign-scoped**                                                                                                                    |
+| governance check        | `npm run check:governance` **0 errors**, 66 advisories **all foreign** [measured by AR-5]                                                                                                |
+| the four instruments    | `malformed rows: none` ×2 · `{63: 79} outliers: none` · `CP-eta: GREEN` on four checks. **CP-η's coverage is narrower than its PASS line admits — see F-CP-1 and F-CP-2**                |
+| upstream                | **none configured** on `main` [measured: `git rev-parse --abbrev-ref main@{upstream}` → fatal]                                                                                           |
+| **foreign commits**     | **22 in the previous session alone**, against 13 of its own [measured at `df0f5c99`]. **Foreign-scoped, so wrong by the time you read it.** The tree moves under you, continuously       |
 
 ⚠ **The pathspec is a STAGING DISCIPLINE, not a log filter.** Foreign files sat
-STAGED in the index throughout this session — three of them, from peer sessions
-— and a `git commit -a`, or any pathspec broader than these three paths, sweeps
-another session's work into your commit. Commit with
-`git commit --no-verify -F <msg> -- <paths>` and never `-a`. Verified all
-fourteen times: each commit touched only its own files.
+STAGED in the index for the whole of the last session — three of them, from peer
+sessions — and a `git commit -a`, or any pathspec broader than these three
+paths, sweeps another session's work into your commit. Commit with
+`git commit --no-verify -F <msg> -- <paths>` and never `-a`. Verified on all
+sixteen commits: each touched only its own files.
 
 ```text
 src/lib/study-lenses/orchestrate .planning-handoffs/orchestrate-ux src/lib/study-lenses/WORKFLOWS.md
@@ -613,29 +617,31 @@ same section of [`DECISIONS.md`](./DECISIONS.md):
 
 ## Operating instructions for the next session
 
-- **Opens in**: Phase 0 step 0.2, **at the AR-5 gate**. The fix round is done;
-  no edits are owed and no rulings are owed. See § AR-5 at the top of this file.
-- **Model**: AR-5 is judgment-heavy and should track the authoring tier.
-  **`ar-5` carries no `model:` line at all** [read: `.claude/agents/ar-5.md`],
-  so it inherits whatever spawns it — name the tier and its cost. Do NOT pass a
-  `model` parameter to any `ar-N`; the frontmatter pins are the roster.
-- **Gates the human holds**: AR-5's scope (95 commits and campaign-scoped);
-  whether a round 13 runs after AR-5 (**ruled NO 2026-08-19**, with a stated
-  fallback trigger — see § YOUR FIRST ACTION); the Phase-0 → Phase-1 review; and
-  the push. There is no upstream on `main`.
+- **Opens in**: Phase 0 step 0.2, **in AR-5's fix round**. AR-5 ran, returned
+  PAUSE with ten findings, the human read it and ruled _fix all ten, then re-run
+  AR-5 on the delta_. No rulings are owed. See § YOUR FIRST ACTION.
+- **Model**: this is correction work over prose, not design. AR-5 carries no
+  `model:` pin and inherits your tier; name the tier and its cost when you
+  launch the re-run. Pass no `model` parameter to any `ar-N`.
+- **Gates the human holds**: the Phase-0 → Phase-1 review, and the push. There
+  is no upstream on `main`. **Whether a round 13 runs is CLOSED** — ruled no on
+  2026-08-19, and AR-5 confirmed the fallback trigger did not fire: all ten of
+  its findings are change-shaped.
 - **The twin ask is re-asked every session, not remembered** [read: `DEV.md` §
-  Phase 0 — "If a session ends in between, **ask again** — do not carry the
-  answer in a plan file"]. Re-asked and re-confirmed 2026-08-19:
-  `twin-doc: user`. Ask again anyway.
+  Phase 0 — "If a session ends in between, **ask again**"]. Standing value:
+  `twin-doc: user`. Ask anyway.
 - **Run the per-file checkpoints BEFORE `git add`, and treat DIRTY as a stop.**
-  This is not style advice: `b5a9c8f0` shipped a body claiming a checkpoint that
-  had failed, because the loop ran after staging. See § The failure this round
-  committed.
-- **Watch for**: any number carried forward without re-measuring — this file's
-  most repeated defect by a wide margin; a "resolved" claim taken on trust; and
-  a receipt that counts instead of reads. **And re-measure a REVIEWER's numbers
-  too**: round 12 was right on the substance of everything I checked and wrong
-  on five counts, and this round found four defects round 12 did not.
+  `b5a9c8f0` shipped a body claiming a checkpoint that had failed, because the
+  loop ran after staging.
+- **Re-measure every number before you quote it, INCLUDING a reviewer's and
+  INCLUDING your own from ten minutes ago.** This file's most repeated defect by
+  a wide margin is a number that was true when measured and false when written
+  down. Two of AR-5's ten findings are exactly that, and one of them corrects a
+  commit body that was itself correcting that defect class.
+- **The half-landed correction is this campaign's signature failure, and the
+  last session committed one while writing the rule against it.** Before any fix
+  lands, name what else cites the thing you are changing and re-read it AFTER
+  the edit — not before.
 
 ## The instruments — RUNNABLE, because an instrument with no command is a rumour
 
@@ -1255,6 +1261,200 @@ since:
 | R-O | Hand off at this boundary; a fresh session opens on round 8's blockers.                                                                  |
 
 ---
+
+---
+
+# AR-5'S VERDICT, AS RETURNED — ARCHIVE, NOT A TASK LIST
+
+**Provenance, and it is not repo state.** Spliced 2026-08-25 from this session's
+subagent transcript at `<session-id>/subagents/agent-a6e12ba247c4fa41c.jsonl`
+**programmatically**, so it is verbatim by construction — 22,817 characters, the
+longest text block in the transcript. **HTML-unescaping ran and was a no-op this
+time** — zero entities in the stored text — which is recorded because an earlier
+round's splice DID need it and a reader should not conclude the step is
+optional. Nothing inside the report is altered.
+
+**Every claim below is `[relayed: ar-5]` until re-measured** — and three were
+re-measured before this file was written, and all three reproduce: finding 1's
+control-row membership [read: `README.md` glossary · control row — the level
+selector and the strict toggle are named members], finding 2's missing quotation
+[measured: `carries its cause` → **0** in `ux/user-journeys.md`], and finding
+3's ungranted datum [measured: `violation` → **1** in the whole twin, and the
+blocked overlay drawn **2** times].
+
+**This is the first AR-5 this campaign has ever run**, and it closes 0.2 when it
+returns PROCEED. It returned PAUSE.
+
+<!-- prettier-ignore-start -->
+<!-- markdownlint-capture -->
+<!-- markdownlint-disable -->
+
+Reviewed as: claude-opus-5[1m] | UNDETERMINED
+
+I read `CLAUDE.md`'s router, `AGENTS.principal.md` (my model id `claude-opus-5[1m]` matches the `opus-5` substring), `DEV.md` §§ Adversarial Review Protocol / AR-5 / Sourced claims / Ruling provenance / Prospective and retrospective documentation, the full campaign diff, all 97 commit bodies, and the six spec/twin documents end to end.
+
+## What verified clean (stated first, because most of it did)
+
+- **All four instruments reproduce character-for-character** [measured, spliced from `RESUME.md` §  The instruments and run: `DECISIONS.md malformed rows: none` · `RESUME.md malformed rows: none` · `histogram: {63: 79} outliers: none` · `CP-eta: GREEN` on all four checks, 9 rail drawings, 7 control rows].
+- **CP-η's ±1.5 tolerance is genuinely measured, not chosen** [measured: `Evaluation`'s `·` sits at exactly −1.5 in six unbarred drawings — lines 187, 325, 509, 525, 645, 697; the three barred drawings sit at ≤ 0.5. At ±1 it would fire on all six]. Round 12's "±1" report is wrong and `RESUME.md`'s correction is right.
+- **Every CP-α drawn-count I re-derived independently is exact** [measured over fenced blocks only: openable 11 · bare 49 · not reached 10 · occupant dot 2 · `your code` 4 · `the pane holds:` 3 · fits 1 · steps outside 3 · modules only 1 · can't tell yet 2 · none-state 2 · blocked sentence 2 · proposals heading 1 · tray heading 1 · phase tail 2 — 15 of 15].
+- **The `strip` residue table's per-file counts reproduce** [measured, squeezed unwrap: README 5 · DOCS 1 · wireframes 4 · generator/README 1 · PHASE-1-CHECKPOINT-LEDGER 6].
+- **97/97 commit bodies carry the full four-part settings line** [measured: `work: software`/`twin-doc: user`/`ceremony: full`/`prospective` all present in every body].
+- **Gates**: `npx tsc --noEmit` exit 0 · `npx vitest run src/lib/study-lenses/orchestrate` → 622 passed in 22 files · `npm run check:governance` → **0 errors**, 66 advisories all foreign (aran-weaving skill) · per-file prettier/markdownlint/cspell clean on all eight touched docs [all measured this session].
+- **Receipts are real and un-narrowed** where I sampled. `883fc4c2`'s B14 block prints 5 receipts against a 5-site column; all four quoted sentences exist verbatim at the named sites [read: README:843-846, DOCS:251-253, wireframes:658, wireframes:575].
+- **Cross-file quotations to code and to `spellme` verify** [read: `derive-accessibility.ts:18-19` — "an environment defect never bars evaluation: the scope structure is terminal"; `lenses/spellme/README.md` — the personas sentence, verbatim].
+- **Type contract integrity**: no `any`, no cast, no `@ts-`, no `eslint-disable` added anywhere in the changeset [measured over the full `+` side]. `SurfaceClass`'s `'meta-control'` → `'meta-node'` rename has zero runtime consumers [measured: `git grep SurfaceClass -- src/` → 4 hits, 1 declaration + 3 README prose].
+- **Twin (`twin-doc: user`)**: all three documents exist, are current, and still address the learner-facing reader. The recorded answer is still **true** of the changeset. Security: no-op — pure documentation plus one type literal, no untrusted input, no trust boundary.
+- The changeset is **fully committed**; nothing campaign-scoped is dirty [measured: `git status --porcelain` over the three pathspecs → empty].
+
+---
+
+## Concerns
+
+### 1 — IMPORTANT · CHANGE-shaped · `93a7bba2`'s fix reproduces the exact defect it declares fixed
+
+**What / where.** `README.md` § What renders, line 156:
+
+```text
+During any excursion the band — the control row and the rail — the level UI,
+the guide, and the recommendations all stay rendered
+```
+
+The **level UI is the level selector and the strict toggle** [read: `README.md` § What lives here — "`level-ui/` the level selector and the strict toggle"], and both are named members of the control row [read: `README.md` glossary · control row — "the row of controls at the top of the band: the level selector, the strict toggle, the snippet-type toggle, the Edit code button, and the Generate code button"]. The sentence therefore names the band, expands it to the control row, and then lists a subset of the control row again.
+
+**Why it matters.** `93a7bba2`'s own body states the defect it was removing as *"an item listed beside a list it is already inside"* and claims the repair: *"That names the band's contents rather than listing one of them a second time."* [read: `git log -1 93a7bba2`]. That completion claim is false at HEAD — the sentence lists one of them a second time, one item over. This is the campaign's signature failure mode (a correction that half-lands) inside the commit that promoted the finding out of the roll-call *because it was a truth defect rather than a filing one*.
+
+**Fix.** Strike `the level UI` from the list, or reword to "the band — the control row and the rail — the guide, and the recommendations". Then re-read D8's and G1's columns.
+
+### 2 — IMPORTANT · CHANGE-shaped · `wireframes.md` quotes `user-journeys.md` with a sentence that does not exist there
+
+**What / where.** `ux/wireframes.md:233-238`:
+
+> `user-journeys.md` states the defect as: the empty phase gives "a dead control and no reason for it" while **"the _barred_ phase, by contrast, carries its cause — the common case is served worse than the exceptional one, which is the wrong way round."**
+
+The source reads [read: `ux/user-journeys.md:277-283`, squeezed]: *"A `_barred_` phase, by contrast, **has a cause to be read** — **today's build draws one per barred phase; the arrangement draws one, once, in the caption**, and this bullet is describing what the learner meets now rather than licensing the repetition personas.md rejects. Either way the contrast holds: the common case is served worse…"*
+
+`carries its cause` appears **zero** times in `user-journeys.md` [measured]. Three defects in one quotation: a substituted verb phrase, ~46 elided words with no ellipsis, and two non-adjacent clauses joined as one continuous quote.
+
+**Why it matters.** The elided clause is precisely the today's-build-vs-the-arrangement disambiguation, and the paragraph doing the quoting is arguing about exactly that distinction ("This inverts Journey 6's own complaint"). This is not stale: `b3c2f0dc` rewrote the source sentence and `fa57a777` — **three commits later** — wrote the quotation [measured: `git log -S` on both strings]. The quote was manufactured against text already in its current form. No campaign instrument reaches prose-quoting-prose.
+
+**Fix.** Replace with the verbatim sentence, or de-quote it into an attributed paraphrase.
+
+### 3 — IMPORTANT · CHANGE-shaped · the projection contract is still not a totality — the blocked state's violation is drawn twice and granted nowhere
+
+**What / where.** `ux/wireframes.md` § What the region must render, now scoped by B13 to read *"may draw no **DATA** that is not on this list."* The list grants "the selected level's mark" as its four label values and nothing else about the level's assessment. The word `violation` appears **zero** times in the whole twin [measured].
+
+Yet two full-frame drawings render the blocked overlay carrying one: `│ ░ Just Enough JavaScript: debugger statements are outside this level…` (lines 534-536 and 624-626). `README.md` § Enforcement names that content explicitly — *"The blocked state names the level and the first violation, or the type-admission cause"* — and `glossary · assessment` confirms the region holds it: *"carrying its fit mark AND the cause that mark needs downstream (the violations, or the admitted types)"*.
+
+**Why it matters.** This is B13's own class — *drawn and never granted* — surviving the B13 fix one datum over. `DECISIONS.md` B13 states that CP-α cannot catch it ("CP-α walks the glossary's clauses and not the drawings' tokens"); CP-η check 4 cannot either, because it only scans lines matching `( ) strict` or `[Generate code]`, and the overlay matches neither. So the recurrence was structurally invisible to both instruments built to prevent it.
+
+**Fix.** Add a row — `the selected level's cause: the first violation · or the admitted types` — to the contract block, exactly as the snippet type was added.
+
+### 4 — IMPORTANT · CHANGE-shaped · C14's corrected evidence clause is false of the drawings, for the second time in the same row
+
+**What / where.** `DECISIONS.md` C14's `also asserts` column, corrected at `b5a9c8f0` under R-AH:
+
+> **The blank line ABOVE the block is the rail-to-caption gap, not a row of the arm** — the count arm sits in the same gap and draws no separator of its own
+
+The second clause is false of every count-arm drawing [measured over all nine rail drawings]:
+
+| drawing | rows between the rail and the caption |
+| --- | --- |
+| 186, 324, 524, 644 (count arm) | **none** — the caption line sits immediately below |
+| 363, 421, 456 (cause arm) | **one framed blank row**, in all three |
+
+The count arm sits in **no** gap. The blank appears above one arm and not the other, which is the reading R-AH rejects. The row's own status cell already records that this evidence clause "WAS TRUE OF NONE OF THE THREE DRAWINGS and is corrected here (round 12 IMPORTANT 4)"; the correction is false again in a different direction.
+
+**Why it matters.** CP-η check 2 cannot see it: `if 'not reached' not in stand: continue` skips every count-arm drawing, so the instrument built for present-and-wrong has a blind spot exactly where this lives. R-AH's *conclusion* (two-part `types.ts` shape) survives — it stands on the independent ground the row also cites, the drawing's own "the framing is one string" — so this is a false justification, not a wrong decision.
+
+**Fix.** State what the drawings actually do: the cause arm draws a leading blank row and the count arm does not; decide whether that asymmetry is intentional presentation (and say so) or a drawing inconsistency. Do not re-derive R-AH.
+
+### 5 — IMPORTANT · CHANGE-shaped · `[measured:]`-tagged range counts are wrong at their own tagged SHAs, in the live block and in two immutable bodies
+
+**What / where.**
+
+- `RESUME.md` § The range and the SHA list, line 99: *"`80306ad9..HEAD` is **266** commits unscoped and **96** scoped [measured at `fa6dd40c`]."* At `fa6dd40c` the unscoped count is **265** [measured: `git rev-list --count 80306ad9..fa6dd40c` → 265; scoped 96 is correct].
+- `7dea8eaa`'s body: *"[measured at this commit: `80306ad9..HEAD` is **266** commits unscoped, **96** scoped]"*. At `7dea8eaa` the true values are **268** and **97** [measured]. Both numbers are wrong at the SHA the tag names — the 96 is `fa6dd40c`'s.
+- `fa6dd40c`'s body, under the header **BASELINES, ALL RE-MEASURED AT THIS COMMIT**: *"AR-5's SHA list 95 … was 89 at `93a7bba2`"*. At `fa6dd40c` the list is **96**, and `93a7bba2`'s count is **92** [measured: 883fc4c2→89 · 93a7bba2→92 · df0f5c99→95 · fa6dd40c→96 · 7dea8eaa→97].
+
+**Why it matters.** `7dea8eaa`'s item 2 is a correction of *exactly* this defect class ("The number was right and its SHA was not"), issued in the same body that commits it. The context-free validation that produced that commit did not catch it. `fa6dd40c`'s wrong "89 at `93a7bba2`" was corrected in `RESUME.md` one commit later but stands permanently in an immutable body — a second confirmed instance of `b5a9c8f0`'s class, which the round's own § The failure this round committed presents as singular and mechanically fixed by ordering. Ordering does not fix a self-referential count.
+
+**Fix.** Correct 266 → 265 in `RESUME.md`'s live block. Record in the closing commit body that `fa6dd40c` and `7dea8eaa` carry uncorrectable numeric errors, alongside `b5a9c8f0`. Adopt a stated convention for self-referential counts (`N at <parent>, N+1 including this commit`) — the ordering fix cannot reach them.
+
+### 6 — MINOR · CHANGE-shaped · two commit bodies carry no sourced-claim tag at all
+
+`cb2e3448` and `1106c268` contain **zero** `[measured:]`/`[read:]`/`[relayed:]` tags [measured across all 97 bodies], while asserting repo state: *"`not reached` is 11 characters against `waiting`'s 7, and the spelling-break rail draws three of them in 62 columns"*, *"Four of the caption's contract clauses had no drawing"*, *"Round 10 is fully resolved in seven commits"*. Immutable; record it in the closing body rather than attempting a fix. The other 95 bodies are tagged.
+
+### 7 — MINOR · CHANGE-shaped · CP-η's coverage limits are unstated, and one of them hides finding 4
+
+Attacking the instrument as instructed — it was written by the agent whose drawings it certifies, and three limits are undocumented:
+
+- **Check 2 never runs on 4 of the 9 rail drawings.** `if 'not reached' not in stand: continue` excludes every count-arm caption. The caption-shape rule is enforced on the cause arm alone. Finding 4 lives in that gap.
+- **Check 4 scans 7 of 10 control-row lines** [measured]. Lines 617, 642 and 694 — `[Edit code]`-led rows with no strict toggle — match neither `( ) strict` nor `[Generate code]` and are silently skipped. Nothing hides there today (all their tokens are allowlisted or projected), but the instrument reports "PASS - 7 control rows" without saying 3 were never read.
+- **Check 1 silently drops a block.** The § Strict, covering — with a lens already open drawing has a full station row and no standings row (correctly, per the abbreviation rule); the detector skips it with no output. `RESUME.md` states "9 rail drawings carry a standings row" so the number is honest, but the script prints a pass count, never a skip count — a future drawing that inserts an annotation row between the names and the standings would drop out of coverage invisibly.
+
+Suggested fix: have each check print `skipped: N` beside `PASS`, and widen check 4's row detector to `l.startswith('│') and re.search(r'\[(Edit code|Generate code)\]|strict', l)`.
+
+### 8 — MINOR · CHANGE-shaped · A10's measured claim no longer reproduces
+
+`DECISIONS.md` A10's `also asserts` reads *"nothing — one consumer, its own declaration [measured: `git grep -n "SurfaceClass" -- src/` → 1 hit]"*. It is now **4 hits** [measured] — the declaration plus three `README.md` prose sites. The three README sites assert A13's no-fourth-member claim rather than A10's literal spelling, so the row's substance holds; the tag's evidence does not, and by amendment 4's own logic a column that grew after closure wants a look.
+
+### 9 — MINOR · observational · the `[measured at <sha>: …]` tag form is a house variant `DEV.md` does not define
+
+The campaign consistently writes `[measured at `df0f5c99`: <command>]`. `DEV.md` § Sourced claims defines `[measured: <command run this session>]`. The variant is an improvement — it pins volatile numbers to a SHA, which is the discipline this campaign most needed — but it is undocumented, and a naive audit grep for `\[measured: ` returns **15 false "untagged" bodies** [measured — that is how I first mis-scored the audit]. Worth one line in the closing body, or a `DEV.md` proposal at 0.3.
+
+### 10 — MINOR · CHANGE-shaped · the closing commit owes an enumeration nothing currently names
+
+`DECISIONS.md` R-S records that this file goes unreachable when `.planning-handoffs/` prunes, and resolves it by citing `DEV.md` § Ruling provenance — *"the campaign's closing commit body enumerates what went where"*. Neither `RESUME.md` § AR-5 nor § Operating instructions names that as an obligation of the 0.2-closing commit. Add it to the closing checklist so the twenty-plus rulings recorded only in `DECISIONS.md` do not go unreachable by omission.
+
+---
+
+## What I checked and found correct, that a reader might expect to be findings
+
+- **`phases-panel/` exists on disk while the manifest lists `rail/` which does not.** Fully enumerated in F3 and disposed of 2026-08-19: *"Listed-but-unbuilt is correct under `prospective`; unlisted-but-existing is a gap … 0.3's."* `README.md` § What lives here also omits `tests/` and `PHASE-1-CHECKPOINT-LEDGER.md`, and the row says so. Correct handling; I am not re-opening it.
+- **`README.md:121` still says "the lifecycle strip … are inline text."** Explicitly a row in the residue table, with a ruling (2026-08-18) and a stated 0.3 widening obligation. Declared, not silent.
+- **`wireframes.md` § Fresh mount draws `not reached` and speaks `waiting` in the same paragraph.** Deliberate under C18, named at § What this document is asking item 8, and left standing by human ruling. Not a defect.
+- **Sketch content (`DOCS.md`) and `types.ts` were edited during 0.2**, out of the Phase-0 artifact order invariant 2 fixes. Recorded as M24 with the mitigation written into § 0.3 entry conditions: *"Whoever briefs AR-2 hands it the list of clauses added during 0.2 and states that this index's status column is NOT evidence."* No gate is removed and AR-2 still fires. Honest handling; I note only that nothing enforces the instruction and it lives in a file R-S says will become unreachable — which is finding 10.
+- **`types.ts` is thin.** Per the dispatching prompt and B10/C11/B14, its locking is 0.3's. Not read as a 0.2 defect.
+- **The three geometries / three framings claim checks out against the code** [read: `derive-accessibility.ts` — `ast` barred only by a `tokens` failure; `environment` and `evaluation` both off `facts.entwined`, so the reachable suffixes are exactly {}, {env,eval}, {ast,env,eval}, and the "two or three phases wait, so the plural is total" reasoning is sound].
+- **The `single truth four times` → `two or three times` sweep is complete** [measured: two surviving `four times` in `wireframes.md`, both legitimate — line 256 is a meta-reference to the defect, line 842 is the Kit Drawer's four empty columns, a different fact].
+
+---
+
+## Counter-proposals
+
+**CP-1 — the missing instrument is drawings-tokens → contract, not contract-clauses → drawings.** CP-α walks the glossary and asks "is it drawn?"; CP-η walks the drawings and asks "does it agree with itself?". Neither walks *every drawn datum* and asks "is it granted?" — which is B13's class and finding 3's. CP-η check 4 does exactly this, but only over control rows. **Widen check 4's row selector to every framed line in a full-frame drawing**, allowlist the region's own controls and the drawn copy the glossary owns, and let everything else fail loudly. That is a ten-line change to an instrument that already exists and would have caught finding 3 on its first run. It is not a fifth instrument.
+
+**CP-2 — the count-arm caption is inside CP-η's reach for one line.** Delete `if 'not reached' not in stand: continue` and give the count arm its own expected shape (`COUNT` alone, no leading `BLANK`). That closes finding 4's blind spot and turns C14's evidence clause into something a script asserts rather than something a row claims.
+
+**CP-3 — do not build a quotation checker.** Finding 2 is the only misquotation I found across six documents and I checked every cross-document quotation I could locate. The cheaper discipline is the one `DECISIONS.md` already names: expand `also asserts` to include *the document that quotes this one*, and re-read on edit. A quotation instrument would be the fifth instrument round 8's reviewer warned about.
+
+---
+
+## Verdict: **PAUSE**
+
+**Certainty that the five IMPORTANT findings are real: 92%.** Each rests on a command I ran or a file I read end to end, and findings 1, 3 and 4 are re-derivable in one command. My residual 8% is on finding 1's severity — a charitable apposition reading makes it redundancy rather than falsehood, though `93a7bba2`'s own body forecloses that reading.
+
+**Certainty that PAUSE is the right verdict rather than CONSIDER: 70%.** The case for CONSIDER is real and I want it on the record: no finding reopens a decision, every fix is bounded, and the human's gate follows either way. What tips it is that **three of the five sit inside the two documents that ARE the 0.2 deliverable** — `README.md` § What renders and `ux/wireframes.md` § What the region must render — and 0.2's stated test is that `types.ts` can be written deterministically from that prose. A projection contract that claims totality over the data and omits a datum drawn in two full-frame drawings fails that test on its own terms. This campaign's history is of "resolved" claims taken on trust; a gate that opens over four verifiable falsehoods it just measured would be another one.
+
+**On the round-13 fallback, stated plainly as instructed: NO ROUND 13 IS OWED BY THIS REVIEW.**
+
+Every one of my ten findings is **CHANGE-shaped**. Not one is DESIGN-shaped. I found no decision that needs re-taking, no ruling that needs re-litigating, and no place where the arrangement's design is wrong or under-specified in a way argument could fix. Findings 1, 2, 4 and 5 are false statements about what a document says or what a command returns — corrections, not judgments. Finding 3 is a missing row in a list whose fix (add the assessment's cause) is fully determined by `README.md` glossary · assessment, which already names the datum. Findings 6-10 are records and instrument widenings.
+
+The human's 2026-08-19 fallback trigger — *"if AR-5 returns PAUSE on anything design-shaped rather than change-shaped, that is the evidence a round 13 was owed"* — **has not fired.** The ruling that there is no round 13 stands on the evidence I gathered: twelve AR-1 rounds have exhausted the design surface, and what remains at the boundary is bookkeeping, not architecture.
+
+**Recommended resolution:** one bounded fix commit — findings 1, 2, 3, 4, 5 (the `RESUME.md` half), 8 and 10, batched, with the two instrument widenings from CP-1 and CP-2 landing RED first per this campaign's own precedent; findings 5 (the immutable half), 6 and 9 recorded in the closing commit body. Then re-run all four instruments and re-launch AR-5 on the delta only, not the full 97.
+
+**Files whose contents are load-bearing to these findings:**
+
+- `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/study-lenses/orchestrate/README.md` (line 156 — finding 1)
+- `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/study-lenses/orchestrate/ux/wireframes.md` (lines 233-238 — finding 2; lines 35-50 and 533-537, 623-627 — finding 3)
+- `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/study-lenses/orchestrate/ux/user-journeys.md` (lines 277-283 — finding 2's source)
+- `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/.planning-handoffs/orchestrate-ux/DECISIONS.md` (C14 at line 402 — finding 4; A10 at line 262 — finding 8; § CP-α at line 612)
+- `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/.planning-handoffs/orchestrate-ux/RESUME.md` (line 99 — finding 5; §  The instruments at lines 640-805 — finding 7)
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
 
 ---
 
