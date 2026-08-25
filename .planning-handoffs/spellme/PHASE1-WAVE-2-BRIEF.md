@@ -6,18 +6,24 @@
 
 **Wave 2 is done.** Every number below § Measured baselines was true **at
 launch** and is now historical — the suite it describes as
-`22 passed | 67 skipped (89)` finished at **`41 passed | 50 skipped (91)`**
+`22 passed | 67 skipped (89)` finished at **`42 passed | 50 skipped (92)`**
 [measured 2026-08-25: `npx vitest run --project unit
 src/lib/study-lenses/lenses/spellme`], and `core.test.ts`'s skips went **39 →
-22**. Do not launch anything against this file.
+22**. Do not launch anything against this file. (This banner said `41 … (91)`
+until the guard-1 test landed in `2c911356` — a closing number written before
+the closing commit, which is the same defect one paragraph below.)
 
 This banner exists because this campaign's records have gone stale in exactly
 this way five times, and because a brief whose numbers were correct when written
 is the most convincing wrong document a cold reader can meet.
 
-**Six commits closed the wave** — re-run rather than trusting this list
-(`git log --format='%h %s' -- src/lib/study-lenses/lenses/spellme/`): `d5f965e8`
-`75994c99` `893ca8c9` `40a677b3` `65a6c1a4`, plus the AR-5 remediation.
+**THIRTEEN commits closed the wave** — four prep, five increments, four
+post-review. ⚠ This line said "six" for an hour on 2026-08-25, having been
+written before the AR-5 and AR-3 remediation landed: **a SHA count written
+before the last commit exists is the failure this campaign has now recorded six
+times.** The list lives in [`./PHASE-1.md`](./PHASE-1.md) § The `spellme` LENS —
+Phase 1, wave 2, and **re-run it rather than trusting either file**:
+`git log --format='%h %s' --since='2026-08-25 07:00' -- src/lib/study-lenses/lenses/spellme/ .planning-handoffs/spellme/`.
 
 **Where the live record is:** [`./PHASE-1.md`](./PHASE-1.md) §§ Where things
 stand and **The `spellme` LENS's rulings (2026-08-25, wave 2)**. **Next is wave

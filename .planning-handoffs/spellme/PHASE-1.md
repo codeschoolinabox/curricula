@@ -405,6 +405,50 @@ Ruling provenance).
   a ruling living only in a disclaimed section is one a careful reader is
   entitled to ignore, and `WAVE-2-BRIEF.md` was citing them from there.
 
+### The `spellme` LENS — Phase 1, wave 2 (CLOSED 2026-08-25)
+
+**`readStream` + `positionCursor`. THIRTEEN commits, as a SHA LIST** — this list
+was **re-run from `git log`, not remembered**, which is the discipline this file
+records failing five times [measured 2026-08-25: `git log --format='%h %s'
+--since='2026-08-25 07:00' -- src/lib/study-lenses/lenses/spellme/
+.planning-handoffs/spellme/`]. ⚠ **Until this section was written, only four of
+the thirteen appeared anywhere in this file, and all four incidentally inside
+ruling prose — there was no wave-2 list at all.** That is failure six of the
+same pattern, caught at the close.
+
+| SHA        | What                                                           |
+| ---------- | -------------------------------------------------------------- |
+| `4d3e97a6` | prep — two `positionCursor` regression locks, added skipped    |
+| `132bdad3` | prep — the wave-2 brief re-measured and corrected (E1–E10)     |
+| `22a622f0` | prep — the worktree ruling's trigger fired                     |
+| `f30e5f60` | prep — the context-free validation's five must-fixes           |
+| `d5f965e8` | increment 0 — `readStream` refuses with a `TypeError`          |
+| `75994c99` | `readStream` reads the published sequence into a frozen stream |
+| `893ca8c9` | the cursor advances past every self-advancing element          |
+| `40a677b3` | every element kind carries the fate its kind implies           |
+| `65a6c1a4` | the mark says the grammar reads a line break here              |
+| `d7079a3f` | AR-5 blocker 1 + concerns 3/4 — the mark lock, the type ties   |
+| `24d5b953` | AR-5 concerns 6/9 — rulings recorded, the brief marked CLOSED  |
+| `2c911356` | `readStream`'s guard-1 test — AR-3 CONSIDER + AR-5 concern 5   |
+| `27b1876a` | the retrospective AR-3's verdict joins the ruling              |
+
+**State at close** [all measured 2026-08-25 by the orchestrator, not relayed]:
+scoped suite `42 passed | 50 skipped (92)` across three files;
+`npx tsc --noEmit` **0**; skips `core.test.ts` **22**, `component.test.tsx`
+**28**; module and handoff trees clean. Repo-wide: the **eight** foreign
+failures, unchanged in identity, plus the documented
+`orchestrate/index.test.tsx` flake — confirmed passing **128/128 alone, three
+runs of three**, and orchestrate references `spellme` only in prose, so no code
+path reaches it.
+
+**What the wave cost, and what it bought.** Seventeen un-skips plus two authored
+tests, five `ar-4` verdicts, an AR-5 **PAUSE** over two blockers, and a
+retrospective AR-3. **Two of the four post-hoc findings were defects the suite
+could not see** — the single-step `positionCursor` mutant and the unpinned
+`LineTerminator` mark — and both were confirmed by **mutating the source and
+watching the suite stay green**, which is the technique a read-only reviewer
+cannot run and the orchestrator can.
+
 ### The `spellme` LENS's rulings (2026-08-20)
 
 Four, taken across the lens's wave-1 session. The first three have end-state
@@ -489,6 +533,14 @@ home. The fourth governs process and has none.
   items above, not just the first.
 
 ### The `spellme` LENS's rulings (2026-08-25, wave 2)
+
+⚠ **Five bullets below, but only FOUR are the human's** — the fifth is an
+orchestrator ruling and is labelled as one. `27b1876a`'s body says "all five …
+citations", which its own cited measurement (4/4/4) contradicts: the measurement
+was right and the word beside it was not. The body is immutable, so the
+correction lives here. **Counting bullets is not counting citations** — and note
+that a note like this one, if it quoted the citation string, would raise the
+count it is correcting. It deliberately does not.
 
 Five, taken across wave 2's launch preparation and its closing AR-5. Recorded
 here because a ruling that lives only in a wave-scoped brief evaporates when the
