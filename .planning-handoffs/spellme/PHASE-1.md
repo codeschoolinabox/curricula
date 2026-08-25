@@ -407,14 +407,26 @@ Ruling provenance).
 
 ### The `spellme` LENS — Phase 1, wave 2 (CLOSED 2026-08-25)
 
-**`readStream` + `positionCursor`. THIRTEEN commits, as a SHA LIST** — this list
-was **re-run from `git log`, not remembered**, which is the discipline this file
-records failing five times [measured 2026-08-25: `git log --format='%h %s'
---since='2026-08-25 07:00' -- src/lib/study-lenses/lenses/spellme/
-.planning-handoffs/spellme/`]. ⚠ **Until this section was written, only four of
-the thirteen appeared anywhere in this file, and all four incidentally inside
-ruling prose — there was no wave-2 list at all.** That is failure six of the
-same pattern, caught at the close.
+**`readStream` + `positionCursor`.** ⚠ **Do not count the rows below. RUN THIS**
+— the only form that cannot go stale:
+
+```sh
+git log --format='%h %s' --since='2026-08-25 07:00' -- \
+  src/lib/study-lenses/lenses/spellme/ .planning-handoffs/spellme/
+```
+
+**A table cannot contain the commit that writes it.** That is arithmetic, not
+carelessness — a SHA does not exist until its commit does — and it is why this
+file has recorded the same failure five times while each fix reproduced it. The
+rows below were re-run from that command and were complete **when written**;
+every doc commit touching this section since is absent **by construction**.
+
+⚠ **The two most recent instances, both this session.** Until `2d585565`, only
+four of the wave's commits appeared anywhere in this file, all incidentally
+inside ruling prose — there was no wave-2 list at all: **failure six**.
+`2d585565` then wrote "THIRTEEN commits" and omitted itself — **failure seven,
+inside the commit whose own subject was the missing list.** The regress stops
+here by refusing to pin a count at all.
 
 | SHA        | What                                                           |
 | ---------- | -------------------------------------------------------------- |
