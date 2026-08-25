@@ -27,7 +27,7 @@ function claim(
 
 describe('spellme core', () => {
 	describe('Zero', () => {
-		it.skip('reads an empty stream from an empty program', () => {
+		it('reads an empty stream from an empty program', () => {
 			expect(streamOf('')).toEqual([]);
 		});
 

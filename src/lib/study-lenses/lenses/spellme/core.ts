@@ -117,12 +117,23 @@ function readStream(facts: Facts): ReadonlyArray<StreamElement> {
 			'spellme readStream: the tokens stage did not succeed; call behind applicability',
 		);
 	}
-	if (facts.tokens.value.inputElements === undefined) {
+	const { inputElements } = facts.tokens.value;
+	if (inputElements === undefined) {
 		throw new TypeError(
 			'spellme readStream: the tokens stage published no input elements; call behind applicability',
 		);
 	}
-	throw new Error('spellme readStream: not implemented');
+	// Placeholder fate and mark — an empty source never runs this callback, and
+	// both die at 'gives a claimable element the token-tape fate'.
+	// `freezeInPlace`, not `cloneAndFreeze`: the array and its wrappers are built
+	// here, and each `element` it reaches is already frozen by the scanning leaf.
+	return freezeInPlace(
+		inputElements.map((element) => ({
+			element,
+			fate: 'consumed',
+			marked: false,
+		})),
+	);
 }
 
 /**
