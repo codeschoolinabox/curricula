@@ -236,8 +236,29 @@ reading session's to re-pick, and neither is collapsing them into one session.**
 > **Amendment 4 is discharged** by the last of those.
 >
 > **What is NOT done, and is your unit: amendments 6, 7 and 8 — the two-cell
-> schema itself — and then the two ledger re-cuts.** Nothing in the template
-> forecloses the schema; it was left free on purpose.
+> schema itself — and then the two ledger re-cuts.**
+>
+> ⚠️ ~~Nothing in the template forecloses the schema; it was left free on
+> purpose.~~ **STRUCK 2026-08-24, found by AR-1 — it was not true.** Two things
+> are already pinned and you should know which:
+>
+> - **`writeme-019` stays in `quoted`** (human ruling, below). One end pinned.
+> - **§ The transport check makes ANY `Gen-[23] \`x.md\` §`inside`reasoned` a
+>   whole-ledger BREACH.** That silently answers a question amendment 6 owns —
+>   _may a seeder's derivation cite its source?_ — and the published answer is
+>   currently **no**. Today's ledgers escape only by convention accident: 27
+>   rows carry an annotation and **zero** write a citation in the canonical
+>   idiom, because they say _"candidate successor: port README § …"_ rather than
+>   _"Gen-3 `README.md` § …"_ [measured 2026-08-21 by AR-1 across both ledgers].
+>   The same fact written canonically breaches the ledger — and § What Pass 1
+>   writes explicitly permits `candidate successor: …` as an annotation class,
+>   which the split sends to `reasoned`.
+>
+>   **Treat that refusal as PROVISIONAL and yours to rule on.** Narrowing it to
+>   citation-**plus**-quotation and demoting a bare citation to a finding is the
+>   change the campaign's own rule points at — a false BREACH blocks a correct
+>   migration, which § The transport check already records as worse than a
+>   missed one.
 >
 > **Why the split:** the schema binds all eight ledgers and is a design unit.
 > [AGENTS.principal.md § Handoff agency](../../AGENTS.principal.md#handoff-agency--the-agent-owns-the-call)
@@ -389,9 +410,18 @@ five times. It is fixed. **Two consequences bind STEP 1c:**
    before `prettier --write` and again after, and COMPARE them** — a gate run
    twice without comparing is theatre. (First contact after the repair: 120 →
    120, no row lost, no quotation damaged [measured 2026-08-20].)
-2. **No gate in this campaign can see a structural break.** Adding one is cheap
-   and is owed: `grep -cE '^`{3,}'` must be **even**, and every fence must open
-   and close at the same width.
+2. ~~**No gate in this campaign can see a structural break.** Adding one is
+   cheap and is owed: `grep -cE '^`{3,}'` must be **even**, and every fence must
+   open and close at the same width.~~ **STRUCK 2026-08-24 — both halves are now
+   wrong.** The first is false since `b0f6be78`. The second is the form
+   `_TEMPLATE.md` § The structural-integrity check measured and rejected: **the
+   fence that did the burying at `390e8d54` was itself correctly paired**, so
+   parity is a property of the markers while the defect is a property of the
+   content — and "the same width" additionally contradicts CommonMark, where a
+   closer need only be **at least** as long as its opener. **The live gate is
+   `_TEMPLATE.md` § The structural-integrity check**, which asks whether the row
+   lines, the slice headings and the banner are buried, by fence **or** by HTML
+   comment.
 
 ### ⛔ The twin is BLOCKED, and this is AR-1's ruling not a preference
 
@@ -411,7 +441,7 @@ wire-frames — **not** stories or sequencing), the two-persona ruling, and the
 decomposition of the learner's journeys on the engine's four logged move types.
 The skeleton was corrected by the human twice and is in that section.
 
-### ⛔ STEP 1a's rows carry 15 non-transporting quotations, measured and unrepaired
+### ⛔ 16 non-transporting quotations, measured and unrepaired — 12 in STEP 1a's rows, 3 in STEP 1b's, 1 a miscount
 
 ⚠️ **This section said EIGHT until 2026-08-21, and eight was what the instrument
 could see, not what was there.** The Gen-1 arm published at `ea381b82` found
@@ -420,6 +450,19 @@ them a fragment the 2026-08-19 stopgap **skipped as truncated** and therefore
 never checked. They are the same composed-onto-one-line class as the original
 eight. The paragraph below is kept because its reasoning is still right; only
 its number was wrong, and it was wrong because a skip reads exactly like a pass.
+
+⚠️ ~~**STEP 1a's** rows carry 15~~ — **the attribution was wrong too, struck
+2026-08-24 by AR-1.** The split is **12 in STEP 1a's `048`–`080` and 3 in STEP
+1b's `081`–`120`**: rows `108` and `110` were added by `7c3da9aa`, which is STEP
+1b's own pass [measured 2026-08-21: `git log -S` on the row id]. So
+`parsons.md`'s claim that this pass's rows carry **0** non-transporting
+quotations is false and is corrected there.
+
+⛔ **And a SIXTEENTH, of a different class:** `parsons-119` declares
+`log_errors` at 7× where it occurs **8 times across 7 lines** — the row's count
+was taken by LINE. That is the defect the Gen-1 arm's own doctrine opens by
+warning against, found by the arm and left unpublished for three days.
+
 **Canonical enumeration, with the two non-defects on `parsons-109` and why they
 cannot be fixed in a one-cell ledger:**
 [`_TEMPLATE.md` § The Gen-1 arm](./ledgers/_TEMPLATE.md#the-gen-1-arm).

@@ -772,7 +772,11 @@ and a `§` heading; those rows cite Gen-1 source by function, method or literal
 instead — so they land in `NO-CITATION` and no quotation of theirs is ever
 diffed. The seeding run's own numbers show it: `rows=120 parsed=57 nocite=76`,
 where **57 is unchanged from the 80-row baseline across an append of 40 rows**.
-**A Gen-1 arm does not exist and is owed to `_TEMPLATE.md`.**
+~~**A Gen-1 arm does not exist and is owed to `_TEMPLATE.md`.**~~ **BUILT and
+RUN at `ea381b82`** —
+[`_TEMPLATE.md` § The Gen-1 arm](./_TEMPLATE.md#the-gen-1-arm). It closes its
+census over this ledger: `citations=78 checked=69 refused=9`, every refusal
+named [measured 2026-08-21 against the pinned `spiral-lens` quarry root].
 
 Pending it, this pass re-grepped every `<em>` quotation in every Gen-1 row back
 against its source with `grep -F` — 147 fragments across rows `045`–`120`, 9
@@ -781,10 +785,10 @@ in this pass's own rows before they were committed**, which is why those are not
 in the tree. Run over the whole population it then found eight more, and **none
 of them is this pass's**:
 
-| rows                                             | non-transporting quotations |
-| ------------------------------------------------ | --------------------------- |
-| `045`–`080` — STEP 1a's, committed at `fd6066b3` | **8**, across 7 rows        |
-| `081`–`120` — this pass's                        | **0**                       |
+| rows                                                 | non-transporting quotations                 |
+| ---------------------------------------------------- | ------------------------------------------- |
+| ~~`045`–`080` — STEP 1a's, committed at `fd6066b3`~~ | ~~**8**, across 7 rows~~ → **12** ⚠️        |
+| ~~`081`–`120` — this pass's~~                        | ~~**0**~~ → **3**, in `108` ×2 and `110` ⚠️ |
 
 The seven are `parsons-050`, `-052`, `-058`, `-066` (two fragments), `-068`,
 `-072` and `-076`, and every one is a class this pass hit and documented: a
@@ -794,11 +798,31 @@ quotes a comment whose source carries two spaces after `//` where the cell has
 one.
 
 **They are named and measured here rather than repaired**, because they belong
-to another pass and another commit group, and a repair of seven rows is its own
-unit with its own gate run. **This is the defect class the campaign exists to
-catch, sitting in the ledger it holds up as its own exemplar, and it survived a
-commit because the check has no Gen-1 arm.** Owed, with those ids, to whichever
-session builds one.
+to another pass and another commit group, and a repair is its own unit with its
+own gate run. **This is the defect class the campaign exists to catch, sitting
+in the ledger it holds up as its own exemplar.**
+
+⛔ **UPDATED 2026-08-24, after the Gen-1 arm ran. Three claims above are wrong
+and are struck rather than left standing beside this.**
+
+1. **It is 16, not 8.** The arm found seven more non-transporting quotations —
+   `050`, `051` ×2, `056`, `108` ×2, `110` — every one a fragment the 2026-08-19
+   stopgap **skipped as truncated**, and every one the same
+   composed-onto-one-line class. Plus a sixteenth of a different class:
+   **`parsons-119` declares `log_errors` at 7× where it occurs 8 times across 7
+   lines** — the count was taken by LINE.
+2. ⚠️ **"This pass's rows carry 0" is false.** Rows `108` and `110` were added
+   by `7c3da9aa`, which IS this pass [measured 2026-08-21 by AR-1: `git log -S`
+   on the row id]. Three of the sixteen are this pass's own.
+3. **The check no longer has no Gen-1 arm.** It was built and run at `ea381b82`,
+   and it is what found items 1 and 2.
+
+**Canonical enumeration, including the two non-defects on `parsons-109` that are
+an artefact of the one-cell schema:**
+[`_TEMPLATE.md` § The Gen-1 arm](./_TEMPLATE.md#the-gen-1-arm). ⛔ **That
+enumeration is owed a move INTO this file** — the skeleton every ledger is
+copied from should not carry a parsons-specific run — and that move is recorded
+as the first item of the ledger-re-cut session.
 
 Campaign-close conditions, none of which this ledger yet meets:
 

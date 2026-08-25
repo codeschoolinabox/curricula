@@ -8,7 +8,7 @@
 <!-- cspell:ignore behaviour behaviours affordances pointcut QASM -->
 <!-- cspell:ignore towc multibyte Normalising -->
 <!-- cspell:ignore keyable legitimise nocite quotemeta mktemp licence unrun -->
-<!-- cspell:ignore capitalisation loosenings -->
+<!-- cspell:ignore capitalisation loosenings initialised -->
 <!-- structure-check.sh awk locals; see § The structural-integrity check: -->
 <!-- cspell:ignore isledger lslice bslice bbanner lrow ochar incomment hasreal -->
 <!-- transport-check.sh schema locals; see § The transport check: -->
@@ -1565,10 +1565,10 @@ place [all measured 2026-08-18]:
 | the row pattern matches nothing — wrong path, wrong `MEMBER`, ~~moved prefix~~ | `FAIL: zero rows matched`, **exit 1**. ⚠️ The **moved-prefix** clause is false: the id regex is `[a-z0-9-]+-\d{3}`, so renaming `parsons-NNN` to `parsnip-NNN` still yields `rows=120` under both forms. Wrong path and wrong `MEMBER` do fire [measured 2026-08-20]                                                                                                                                           |
 | Family F preflight, marker misspelled into a **shape-valid** slug              | ⛔ **UNVERIFIABLE TODAY** — `_family-f.md` is not cut. `UNMARKED-ROW`; under a `[a-z][a-z-]*` character class it was **silent**                                                                                                                                                                                                                                                                                |
 
-**And five more for the two-cell arms**, added when the check was cell-scoped
-[all measured 2026-08-20, each planted alone against the check as extracted back
-out of this file]. A `BREACH` is a violated contract rather than a finding about
-a quotation, so every one of these **exits 1**:
+**And these for the two-cell arms**, added when the check was cell-scoped [all
+measured 2026-08-20, each planted alone against the check as extracted back out
+of this file]. A `BREACH` is a violated contract rather than a finding about a
+quotation, so every one of these **exits 1**:
 
 | mutation                                                             | expected                                                                                                                                                                                                                                                               |
 | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1582,7 +1582,7 @@ a quotation, so every one of these **exits 1**:
 | `nocite` and `provless` forced apart                                 | `BREACH NOCITE-MISMATCH`. Both clean ledgers agree on the first run — `parsons` 76/76, `writeme` 0/0                                                                                                                                                                   |
 | a synthetic **`G3`-only** row, the `ADDITION` shape                  | **SILENT.** Under a `G[23]-` character class it was a false `BREACH NOCITE-MISMATCH (nocite=0 provless=1)`: the Gen-3 tag carries no hyphen, and no `G3`-only row exists in either ledger today, so the counters agreed by luck of the data rather than by being right |
 
-**And two for
+**And these for
 [§ The structural-integrity check](#the-structural-integrity-check--run-this-one-first)**,
 whose template branch is the newest code in either gate:
 
@@ -1641,7 +1641,9 @@ LC_ALL=C; export LC_ALL
 ROOT="$2" LENS="$3" perl -e '
 my ($root,$lens) = ($ENV{ROOT}, $ENV{LENS});
 open my $fh, "<", $ARGV[0] or die "cannot open $ARGV[0]\n";
-my ($QCOL,$ECOL) = (-1,-1);
+# All three initialised: an undefined $RCOL makes `$RCOL < 0` FALSE, which sends
+# every legacy ledger down the else-branch and refuses it as unresolved.
+my ($QCOL,$RCOL,$ECOL) = (-1,-1,-1);
 my (%src, @find, $cites,$checked,$refused,$present,$absent,$set,$quotes);
 
 sub slurp { my $p = shift; return $src{$p} if exists $src{$p};
@@ -1656,15 +1658,29 @@ sub occ { my ($hay,$n) = @_; my ($c,$p) = (0,0);
   while (($p = index($hay,$n,$p)) >= 0) { $c++; $p += length($n) } $c }
 
 while (my $line = <$fh>) {
-  if ($QCOL < 0 && $ECOL < 0 && $line =~ /^\|\s*#\s*\|/) {
+  $ISLEDGER = 1 if $line =~ /^## Rows[ \t]*$/;
+  if (!$SEEN && $line =~ /^\|\s*#\s*\|/) {
+    $SEEN = 1;
     my @h = split /(?<!\\)\|/, $line, -1;
     for my $i (0..$#h) { my $t=$h[$i]; $t =~ s/^\s+|\s+$//g;
-      $QCOL=$i if $t eq "quoted"; $ECOL=$i if $t eq "evidence" }
-    $QCOL = $ECOL if $QCOL < 0 && $ECOL >= 0;
+      $QCOL=$i if $t eq "quoted"; $RCOL=$i if $t eq "reasoned"; $ECOL=$i if $t eq "evidence" }
+    # SCHEMA RESOLUTION IS TOTAL here too, for the same reason it is total in
+    # § The transport check: a fallback chain reaches an unnamed state silently.
+    if    ($QCOL >= 0 && $RCOL >= 0) { }
+    elsif ($ECOL >= 0 && $QCOL < 0 && $RCOL < 0) { $QCOL = $ECOL }
+    else  { $SCHEMA = "unresolved or half-migrated -- no single cell holds extractor output" }
     next }
   next unless $line =~ /^\| `(\Q$lens\E-\d{3})`/; my $id = $1;
+  $rows++;
   my @c = split /(?<!\\)\|/, $line, -1;
   my $q = ($QCOL >= 0 && $QCOL <= $#c) ? $c[$QCOL] : $line;
+  # A Gen-1 citation ON THE ROW but not in the cell that is supposed to hold
+  # extractor output is the WRONG SPLIT, and it is the case a citations-count
+  # floor cannot see -- because `writeme` legitimately carries zero Gen-1
+  # citations, so "zero" is not by itself wrong. This is the same misplacement
+  # § The transport check refuses, asserted for the Gen-1 grammar.
+  if ($line =~ /Gen-1\s*`/ && $q !~ /Gen-1\s*`/) { $misplaced++;
+    push @find, "GEN1-MISPLACED-CITATION $id -- a Gen-1 citation is on the row but not in the extractor-output cell" }
   next unless $q =~ /Gen-1\s*`/;
 
   # Segment the cell at each Gen-1 file citation, so every fragment is scoped to
@@ -1684,15 +1700,23 @@ while (my $line = <$fh>) {
                           : $f eq "parsons-iframe.html" ? "public/$f"
                           :                              "public/static/parsonizer/$f" );
     my $body = slurp($path);
-    unless (defined $body) { push @find, "REFUSED $id GEN1-MISSING-SOURCE $path"; $refused++; next }
+    unless (defined $body) { push @find, "REFUSED $id GEN1-MISSING-SOURCE $path"; $refused++; $missing++; next }
     my $t = $s->{text};
 
     if ($t =~ /lister-4 cluster/) {                       # --- SET
       my ($decl)   = $t =~ /\*\*(\d+) orphan classes\*\*/;
       my ($banner) = $t =~ /lister-4 cluster `([^`]*)`/;
-      my @names = grep { $_ ne $banner } $t =~ /`([A-Za-z][A-Za-z0-9_-]*)`/g;
+      # DEDUPE. The declared count is of DISTINCT classes; the cell mentions
+      # some of them more than once, because an annotation names them again.
+      # Counting mentions made `parsons-047` report "declares 2, lists 5" over a
+      # correct row [measured 2026-08-21 by AR-1: `parsons-fallback` ×4,
+      # `codeContainer` ×3]. `045` and `046` agreed only because their
+      # annotations happen not to re-mention a class -- agreed by luck of the
+      # data, which is the reasoning that earned `57564e01` its own commit.
+      my %seen; my @names = grep { $_ ne $banner && !$seen{$_}++ }
+                            $t =~ /`([A-Za-z][A-Za-z0-9_-]*)`/g;
       unless (defined $decl) { push @find, "REFUSED $id GEN1-SET-NO-COUNT"; $refused++; next }
-      push @find, "GEN1-SET-COUNT $id declares $decl, lists ".scalar(@names) if @names != $decl;
+      push @find, "GEN1-SET-COUNT $id declares $decl, lists ".scalar(@names)." distinct" if @names != $decl;
       $set++; $checked++; next }
 
     if ($t =~ /occurs?\s+\*\*0\s*(?:times)?\*\*|\(0×\)|occurs? nowhere/) {   # --- ABSENT
@@ -1734,12 +1758,30 @@ while (my $line = <$fh>) {
 print "$_\n" for @find;
 printf "GEN1-CENSUS lens=%s root=%s citations=%d checked=%d refused=%d present=%d absent=%d set=%d quotations=%d findings=%d\n",
   $lens, $root, $cites+0, $checked+0, $refused+0, $present+0, $absent+0, $set+0, $quotes+0, scalar(@find);
-# THE FLOOR -- arithmetic, not a report. A form that is neither checked nor
-# named is the silence this arm exists to end.
+# THE FLOORS. ⛔ The arithmetic one is NOT sufficient on its own: `checked +
+# refused == citations` holds trivially at 0 + 0 == 0, so a wrong row-id prefix,
+# a wrong ledger path, a wrong quarry root and the WRONG SPLIT of a migrated
+# ledger all printed a tidy census and exited 0 [all measured 2026-08-21 by
+# AR-1]. That is the `LENS=_family-f` defect a third time, and the last of those
+# cases is precisely a botched migration -- where § The transport check refuses
+# and this arm waved it through. A floor that cannot fail is a report.
+my $bad = 0;
+if ($SCHEMA)  { print "FAIL: SCHEMA $SCHEMA\n"; $bad = 1 }
+# The floor is on ROWS, not citations. `writeme` carries 45 rows and ZERO Gen-1
+# citations, legitimately -- so "no citations" is a fact about a ledger and only
+# "no rows" is a broken invocation.
+if ($ISLEDGER && ($rows+0) == 0) {
+  print "FAIL: zero rows matched -- wrong ledger path, wrong row-id prefix, or the prefix moved\n"; $bad = 1 }
+if (($misplaced+0) > 0) {
+  printf "FAIL: %d Gen-1 citation(s) sit outside the extractor-output cell -- the ledger is split wrong\n", $misplaced+0; $bad = 1 }
 if (($checked+0) + ($refused+0) != ($cites+0)) {
-  printf "FAIL: census does not close -- %d checked + %d refused != %d citations\n", $checked+0, $refused+0, $cites+0;
-  exit 1 }
-exit 0;
+  printf "FAIL: census does not close -- %d checked + %d refused != %d citations\n", $checked+0, $refused+0, $cites+0; $bad = 1 }
+# A MISSING SOURCE FILE is a broken invocation, not an unfalsifiable citation
+# form, and it is the only refusal whose count rising to 100%% means the run was
+# worthless. Counted apart from the refusal class so it cannot hide inside it.
+if (($missing+0) > 0 && ($missing+0) == ($refused+0)) {
+  printf "FAIL: every citation refused for a missing source -- check the quarry root\n"; $bad = 1 }
+exit($bad ? 1 : 0);
 ' "$1"
 ```
 
@@ -1776,19 +1818,67 @@ attributes the fragments to the wrong file. No mechanical scoping can separate
 them while annotation and extractor output share a cell. **Under the two-cell
 schema the annotation is `reasoned`, this arm never sees it, and both vanish.**
 
-**Reach is what the split buys, measured on the real ledger with empty stubs so
-this is coverage and not contents:**
+⛔ **AND ONE MORE, WHICH IS THIS SECTION FINDING ITS OWN DOCTRINE VIOLATED:**
 
-| schema              | citations | checked | refused | code-span quotations unchecked |
-| ------------------- | --------: | ------: | ------: | -----------------------------: |
-| one-cell (today)    |        78 |      25 |      53 |                             51 |
-| two-cell (migrated) |        78 |      75 |       3 |                          **0** |
+```text
+GEN1-COUNT parsons-119 `log_errors` occurs 8, row declares 7
+```
+
+`log_errors` occurs **8 times across 7 lines** in `parsons.js` [measured
+2026-08-21: `grep -o … | wc -l` → 8; `grep -c` → 7]. **The row's count was taken
+by LINE** — verbatim the defect this section opens by warning against. It is a
+**16th** genuine defect. An earlier revision published 26 of its own 28 findings
+and left this one unnamed, which is precisely the arithmetic the census exists
+to prevent; the section had run the arm, found its own doctrine's instance, and
+not reported it.
+
+⚠️ ~~A reach table here compared one-cell `25 of 78` checked against two-cell
+`75 of 78`.~~ **STRUCK 2026-08-21.** Those figures contradicted the census
+printed thirty lines above them — `checked=69 refused=9`, same ledger, same
+schema — and their stated method was _"measured with empty stubs"_, which is not
+a command. § Publish the number by publishing the command forbids exactly that,
+and this file cites that rule three times. **The reach claim is real and is now
+stated qualitatively**: annotation prose and extractor output share a cell
+today, so a mechanical arm cannot always tell which file a fragment belongs to —
+`parsons-109` is the worked instance — and the two-cell schema removes that
+ambiguity by construction. Whoever needs a number publishes the command.
+
+⚠️ **A second claim went with it: that the migrated schema leaves `0` quotations
+unchecked.** That does not follow from the schema. This arm reads quotations
+from `<em>"…"</em>` and `_"…"_` only, so a **code-span** quotation is unreadable
+under either schema — reaching zero needs a third quotation form here, which
+collides head-on with open **amendment 8**, whose whole content is that a
+quotation carrying significant whitespace, `*` or a bare `_` **must** move to a
+code span. That collision is owed to whichever session holds both.
 
 **The nine refusals, transcribed from the run and not from the design** — `049`,
 `061`, `073`, `075`, `085`, `093` `GEN1-NO-ANCHOR`; `064`, `065`
 `GEN1-NO-COUNT`; `094` `GEN1-SCOPED-ZERO`, whose absence is asserted **of a
 function** while the token occurs 6× in the file, so a file-scoped check would
 be wrong-signed.
+
+**Its mutation corpus** — this arm shipped with none, which is the thing § The
+amendment gate forbids twice, and the SET dedupe defect above is what a missing
+corpus costs [all measured 2026-08-21, planted one at a time against the arm as
+extracted back out of this file]:
+
+| mutation                                                             | expected                                                                                                                               |
+| -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| clean `parsons`                                                      | `citations=78 checked=69 refused=9`, exit 0                                                                                            |
+| clean `writeme`, which carries **zero** Gen-1 citations legitimately | `citations=0`, exit **0**. ⛔ A `citations > 0` floor would fail a correct ledger — the floor is on ROWS                               |
+| wrong row-id prefix                                                  | `FAIL: zero rows matched`, exit 1                                                                                                      |
+| wrong ledger path                                                    | the same                                                                                                                               |
+| wrong quarry root                                                    | `FAIL: every citation refused for a missing source`, exit 1 — the reason `GEN1-MISSING-SOURCE` is counted apart from the refusal class |
+| **a migrated ledger split the WRONG way**, citation in `reasoned`    | `FAIL: 74 Gen-1 citation(s) sit outside the extractor-output cell`, exit 1                                                             |
+| the same ledger split correctly                                      | exit 0                                                                                                                                 |
+| a cluster whose annotation **re-mentions** a listed class            | **SILENT.** Counting mentions rather than distinct names reported `parsons-047` as "declares 2, lists 5" over a correct row            |
+
+⚠️ **Every one of the four refusing rows above exited 0 before 2026-08-21**,
+because the only floor was `checked + refused == citations`, which holds at
+`0 + 0 == 0`. A floor that cannot fail is a report — the `LENS=_family-f` defect
+for the third time in this file, and the wrong-split row is the case that
+matters most, since it is exactly what a botched migration produces and § The
+transport check refuses it while this arm waved it through.
 
 ⚠️ **`073` is `GEN1-NO-ANCHOR` here and was `GEN1-ZERO-UNBOUND` in the drafting
 run**, because the published ABSENT predicate is narrower than the draft one and
@@ -1798,6 +1888,34 @@ paragraph carried the draft label, which would have been a sentence wrong about
 its own evidence, in the section written to catch exactly that. **The list above
 is `grep '^REFUSED'` over the check as extracted back out of this file**, which
 is the only form of it worth publishing.
+
+**When it runs.** On **every ledger carrying a `Gen-1` citation** — at the
+seeding commit beside the Pass-1 gate and § The transport check, and again at
+campaign close. Stated here because
+[§ When this check runs](#when-this-check-runs--it-had-no-trigger-for-seven-of-the-eight-ledgers)
+is written in the singular about the transport check and names neither this arm
+nor § The structural-integrity check, and that section's own title records what
+an untriggered check is worth.
+
+⛔ **THREE THINGS THIS SECTION OWES, named rather than left to be discovered.**
+Deferred by human ruling of 2026-08-24 to the session that re-cuts the ledgers,
+because each is a relocation rather than a correction:
+
+1. **The path resolver is parsons-only.** The file→path map hardcodes
+   `public/static/parsonizer/`, `public/` and `src/lenses/`. A `blanks` ledger
+   citing `BlanksLens.jsx` — a file that **exists** — gets `GEN1-MISSING-SOURCE`
+   over a fabricated quotation [measured 2026-08-21 by AR-1 on a two-row
+   fixture]. **Seven of the eight ledgers inherit this.** The map belongs
+   per-ledger in `## Source inventory`, beside the existing `REF=` idiom, and
+   the Gen-1 root belongs there with it.
+2. **The parsons run and its findings belong in
+   `parsons.md § Close conditions`**, not in the skeleton every ledger is copied
+   from. This file opens with _"delete nothing structural"_ and now carries a
+   lens-specific run; `parsons.md`'s own § Close conditions already has the home
+   and the table.
+3. **This section is not reachable from anywhere inside this file.** It is
+   linked from RESUME and from the cspell header, and from no check that
+   precedes it.
 
 ⚠️ **Amendment 4 is discharged by this section and is to be struck from RESUME's
 list.** _"A citation anchor for a non-markdown, non-test source"_ has been in
@@ -1834,14 +1952,23 @@ licence.
 **So the gate is the mutation corpus, not the regressions.** After any change to
 `norm()`, `unwrap_markup()`, `firstblock`, `glossterm`, `parsed`, `cited`,
 `lead`, **the schema resolver, the unescaped-pipe cell split, `$mc`, `$mq`, the
-`RAGGED` arm or the BREACH floor**, **every row of all three tables above must
-still fire**, and then the two regressions must hold. (`firstblock` and
-`glossterm` are named because they supply half the comparison and are pasted in
-from another section, so editing them does not look like editing the check. The
-six added 2026-08-20 are named for the same reason: a cell split can be widened
-and both refusals loosened without any of the original seven being touched.) The
-modification-4 row exists because its absence is what let one widening through:
-published `norm()` → `parsons-001 G2 DIVERGENT`, widened → silent.
+`RAGGED` arm or the BREACH floor** — or to **any of § The Gen-1 arm's `unesc`,
+`occ`, the segmenter, the ABSENT token-binding, the SET dedupe or its four
+floors** — **every mutation table in § The transport check, § The
+structural-integrity check and § The Gen-1 arm must still fire**, and then the
+two regressions must hold.
+
+⚠️ **Counting the tables in prose is banned here, and this sentence is why.** It
+said _"both tables"_ while three existed, then _"all three"_ while four did, and
+the paragraph recording the first slip stood beside its own re-instantiation
+[found 2026-08-21 by AR-1]. **The tables are named, never numbered** — a name
+cannot go stale when a table is added. (`firstblock` and `glossterm` are named
+because they supply half the comparison and are pasted in from another section,
+so editing them does not look like editing the check. The six added 2026-08-20
+are named for the same reason: a cell split can be widened and both refusals
+loosened without any of the original seven being touched.) The modification-4
+row exists because its absence is what let one widening through: published
+`norm()` → `parsons-001 G2 DIVERGENT`, widened → silent.
 
 ⚠️ **The trigger list said "both tables" while three existed**, for one commit
 [found 2026-08-20 by AR-2]. A stale count in the sentence that decides when the
