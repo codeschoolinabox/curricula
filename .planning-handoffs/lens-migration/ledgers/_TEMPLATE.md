@@ -14,7 +14,7 @@
 <!-- transport-check.sh schema locals; see § The transport check: -->
 <!-- cspell:ignore QCOL RCOL NCELL PCOL provless istemplate -->
 <!-- gen1-arm.sh locals; see § The Gen-1 arm: -->
-<!-- cspell:ignore toks unesc -->
+<!-- cspell:ignore toks unesc qmisplaced uninitialised -->
 
 # `<lens>` — fidelity ledger
 
@@ -1227,7 +1227,15 @@ unwrap_markup() { case "$1" in '<'*) printf '%s' "$2" | perl -pe 's/^`(.*)`$/$1/
 perl -ne '
   BEGIN { $M = $ENV{MEMBER};
           $noref = ($ENV{REF} eq "NONE" && $ENV{PORT} eq "NONE");
-          $QCOL = -1; $RCOL = -1; $ECOL = -1; $NCELL = 0; $LEGACY = 0; }
+          # ⛔ EVERY column index initialised. An uninitialised one makes
+          # `$X >= 0` TRUE on undef, so its guard can never be false and
+          # `$c[undef]` silently reads cell 0 -- the empty string left of the
+          # leading pipe. `$PCOL` shipped that way and was blind on any
+          # Gen-1-only ledger, the shape `dropdowns`, `variables` and six of
+          # Family F will have [measured 2026-08-24 by AR-1: renaming the
+          # `provenance` header produced byte-identical output on an all-G1
+          # fixture]. It agreed on `parsons` by luck of its 44 Gen-2/3 rows.
+          $QCOL = -1; $RCOL = -1; $ECOL = -1; $PCOL = -1; $NCELL = 0; $LEGACY = 0; }
 
   # SCHEMA. The column layout is READ OFF THE LEDGER’S OWN HEADER ROW and never
   # hardcoded as an index -- so a not-yet-migrated ledger carrying `evidence`
@@ -1255,6 +1263,9 @@ perl -ne '
     elsif ($ECOL >= 0 && $RCOL >= 0) { $SCHEMA = "half-migrated -- `reasoned` present beside `evidence`" }
     elsif ($QCOL >= 0 && $RCOL <  0) { $SCHEMA = "half-migrated -- `quoted` present, `reasoned` absent" }
     else                             { $SCHEMA = "unresolved -- no header row carrying `quoted` or `evidence`" }
+    # `provenance` is resolved by the SAME total resolver, so a missing one is a
+    # NAMED refusal rather than an inferred NOCITE-MISMATCH blaming the grammar.
+    $SCHEMA = "unresolved -- no `provenance` column" if $PCOL < 0 && !$SCHEMA;
     next;
   }
   next unless /^\| `([a-z0-9-]+-\d{3})`/; my $id = $1;
@@ -1307,6 +1318,19 @@ perl -ne '
   # breached the whole ledger, and so did ordinary derivation prose naming a
   # Gen-1 file. A false BREACH blocks a correct migration and gets worked
   # around, which is worse than a missed one.
+  #
+  # ⚠️ AND `$mc` IS PROVISIONAL, ruled so on 2026-08-24. Refusing a bare
+  # citation in `reasoned` answers a question amendment 6 owns -- MAY A SEEDER
+  # DERIVATION CITE ITS SOURCE? -- and the answer here is currently no. Today
+  # the ledgers escape by convention accident only: 27 rows carry an annotation
+  # and ZERO write a citation in the canonical idiom, because they say
+  # "candidate successor: port README" rather than "Gen-3 `README.md`". The same
+  # fact written canonically breaches the ledger, and § What Pass 1 writes
+  # explicitly permits that annotation class. Narrowing `$mc` to citation-PLUS-
+  # quotation and demoting a bare citation to a finding is the change the rule
+  # above points at. This note is here, and not only in the resumption point,
+  # because THIS file is what gets copied into eight ledgers and that file
+  # retires with the campaign.
   unless ($LEGACY) {
     my $mc = () = $r =~ /Gen-[23]\s*`[A-Za-z.]+\.md`\s*§/g;
     my $mq = () = $r =~ /Gen-[23]\s*`[A-Za-z.]+\.md`\s*§\s*.*?:\s*(?:_"|<em>")/g;
@@ -1539,24 +1563,24 @@ Publishing this check on five plants is how it shipped without a floor. All
 thirteen below were planted one at a time in a `/tmp` scratch copy and each
 confirmed to fire [all measured 2026-08-18]:
 
-| mutation                                            | expected                                                                                                                                                                          |
-| --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| run it against **this template**                    | `rows=0 parsed=0` — the specimen ids are `` `<lens>-001` `` and `<` is outside the id class. Without the census: total silence                                                    |
-| fabrication whose filename carries a path           | that id under **both** `MALFORMED-CITATION (0 of 1 leads parse)` and `NO-CITATION`; `parsons` nocite rises by exactly 1                                                           |
-| fabrication omitting the `§`                        | the same pair                                                                                                                                                                     |
-| baseline `NO-CITATION` set, nothing planted         | `parsons` = every `G1-*` row and no other; `writeme` = none. **Derived in the run, never transcribed** — the literal id range this row used to publish is exactly what went stale |
-| fabrication **beside** a good citation, path form   | `MALFORMED-CITATION (1 of 2 leads parse)`; nocite **unchanged** — the floor alone is blind here, which is why `lead` exists                                                       |
-| fabrication **beside** a good citation, no-`§` form | the same                                                                                                                                                                          |
-| `lead` false-positive gate, both clean ledgers      | **0** rows where `lead > cited`. **Gate publication on this**                                                                                                                     |
-| `REF=NONE` with a well-formed Gen-2 citation        | `UNEXPECTED-CITATION`                                                                                                                                                             |
-| `PORT=NONE` with a well-formed Gen-3 citation       | `UNEXPECTED-CITATION`. Under the pre-amendment form: **silent**                                                                                                                   |
-| `REF=NONE PORT=NONE` on a 4-row fixture             | no per-row `NO-CITATION` spam; census carries `rows=4 parsed=1 nocite=3`                                                                                                          |
-| member filter, `MEMBER=<slug>`                      | ⛔ **UNVERIFIABLE TODAY** — `_family-f.md` is not cut, so there is nothing to run it against. per-member `rows=` sums to the whole-ledger `rows=`                                 |
-| member filter with one marker deleted               | ⛔ **UNVERIFIABLE TODAY** — same reason. the sum falls **short** and the preflight names `UNMARKED-ROW`                                                                           |
-| `norm()`'s fragment-targeted bracket clause         | an escaped **path** link → `DIVERGENT`; `writeme-006`'s escaped **fragment** link stays clean                                                                                     |
+| mutation                                            | expected                                                                                                                                                                                                                 |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| run it against **this template**                    | `rows=0 parsed=0` — the specimen ids are `` `<lens>-001` `` and `<` is outside the id class — **plus `FAIL: zero rows matched`, exit 1**. The floor landed after this row was written and the row was never swept for it |
+| fabrication whose filename carries a path           | that id under **both** `MALFORMED-CITATION (0 of 1 leads parse)` and `NO-CITATION`; `parsons` nocite rises by exactly 1                                                                                                  |
+| fabrication omitting the `§`                        | the same pair                                                                                                                                                                                                            |
+| baseline `NO-CITATION` set, nothing planted         | `parsons` = every `G1-*` row and no other; `writeme` = none. **Derived in the run, never transcribed** — the literal id range this row used to publish is exactly what went stale                                        |
+| fabrication **beside** a good citation, path form   | `MALFORMED-CITATION (1 of 2 leads parse)`; nocite **unchanged** — the floor alone is blind here, which is why `lead` exists                                                                                              |
+| fabrication **beside** a good citation, no-`§` form | the same                                                                                                                                                                                                                 |
+| `lead` false-positive gate, both clean ledgers      | **0** rows where `lead > cited`. **Gate publication on this**                                                                                                                                                            |
+| `REF=NONE` with a well-formed Gen-2 citation        | `UNEXPECTED-CITATION`                                                                                                                                                                                                    |
+| `PORT=NONE` with a well-formed Gen-3 citation       | `UNEXPECTED-CITATION`. Under the pre-amendment form: **silent**                                                                                                                                                          |
+| `REF=NONE PORT=NONE` on a 4-row fixture             | no per-row `NO-CITATION` spam; census carries `rows=4 parsed=1 nocite=3`                                                                                                                                                 |
+| member filter, `MEMBER=<slug>`                      | ⛔ **UNVERIFIABLE TODAY** — `_family-f.md` is not cut, so there is nothing to run it against. per-member `rows=` sums to the whole-ledger `rows=`                                                                        |
+| member filter with one marker deleted               | ⛔ **UNVERIFIABLE TODAY** — same reason. the sum falls **short** and the preflight names `UNMARKED-ROW`                                                                                                                  |
+| `norm()`'s fragment-targeted bracket clause         | an escaped **path** link → `DIVERGENT`; `writeme-006`'s escaped **fragment** link stays clean                                                                                                                            |
 
-Four more rows, each added because a reviewer broke the check in that exact
-place [all measured 2026-08-18]:
+More rows, each added because a reviewer broke the check in that exact place
+[all measured 2026-08-18]:
 
 | mutation                                                                       | expected                                                                                                                                                                                                                                                                                                                                                                                                       |
 | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1681,6 +1705,20 @@ while (my $line = <$fh>) {
   # § The transport check refuses, asserted for the Gen-1 grammar.
   if ($line =~ /Gen-1\s*`/ && $q !~ /Gen-1\s*`/) { $misplaced++;
     push @find, "GEN1-MISPLACED-CITATION $id -- a Gen-1 citation is on the row but not in the extractor-output cell" }
+  # ⛔ AND THE SYMMETRIC SIGNAL FOR QUOTATIONS, which is the one that matters
+  # most. A PARTIAL split -- citation left in `quoted`, the fragment carried
+  # into `reasoned` with the derivation prose it was embedded in -- passes every
+  # other floor: rows is intact, the citation is where it belongs so `misplaced`
+  # is 0, and `checked + refused == citations` still holds. Measured 2026-08-24
+  # by AR-1: ALL SEVENTEEN `GEN1-QUOTE-ABSENT` findings vanished, the whole
+  # published defect set, at exit 0. It is also the likeliest half-done
+  # migration, because moving derivation prose takes the fragment inside it.
+  if ($RCOL >= 0 && $RCOL <= $#c) {
+    my $lq = () = $line =~ /(?:<em>"|(?<!\\)_")/g;
+    my $qq = () = $q    =~ /(?:<em>"|(?<!\\)_")/g;
+    my $rq = () = $c[$RCOL] =~ /(?:<em>"|(?<!\\)_")/g;
+    if ($rq > 0 && $q =~ /Gen-1\s*`/) { $qmisplaced += $rq;
+      push @find, "GEN1-MISPLACED-QUOTATION $id -- $rq quotation(s) sit in the derivation cell on a Gen-1 row" } }
   next unless $q =~ /Gen-1\s*`/;
 
   # Segment the cell at each Gen-1 file citation, so every fragment is scoped to
@@ -1756,8 +1794,9 @@ while (my $line = <$fh>) {
     $present++; $checked++ }
 }
 print "$_\n" for @find;
-printf "GEN1-CENSUS lens=%s root=%s citations=%d checked=%d refused=%d present=%d absent=%d set=%d quotations=%d findings=%d\n",
-  $lens, $root, $cites+0, $checked+0, $refused+0, $present+0, $absent+0, $set+0, $quotes+0, scalar(@find);
+printf "GEN1-CENSUS lens=%s root=%s citations=%d checked=%d refused=%d missing=%d present=%d absent=%d set=%d quotations=%d misplaced=%d/%d findings=%d\n",
+  $lens, $root, $cites+0, $checked+0, $refused+0, $missing+0, $present+0, $absent+0,
+  $set+0, $quotes+0, $misplaced+0, $qmisplaced+0, scalar(@find);
 # THE FLOORS. ⛔ The arithmetic one is NOT sufficient on its own: `checked +
 # refused == citations` holds trivially at 0 + 0 == 0, so a wrong row-id prefix,
 # a wrong ledger path, a wrong quarry root and the WRONG SPLIT of a migrated
@@ -1770,17 +1809,31 @@ if ($SCHEMA)  { print "FAIL: SCHEMA $SCHEMA\n"; $bad = 1 }
 # The floor is on ROWS, not citations. `writeme` carries 45 rows and ZERO Gen-1
 # citations, legitimately -- so "no citations" is a fact about a ledger and only
 # "no rows" is a broken invocation.
-if ($ISLEDGER && ($rows+0) == 0) {
+# ⛔ The not-a-ledger exemption is a POSITIVE signal this check printed itself,
+# never the absence of one. Gating the rows floor on `$ISLEDGER` let a wrong
+# path onto any of the campaign`s five non-ledger documents exit 0 with
+# `citations=0` [measured 2026-08-24 by AR-1 on `SPEC.md` and
+# `FIDELITY-METHOD.md`] -- and a non-ledger is the LIKELIER wrong path, being
+# five of the nine. § The transport check does not have this hole; this now
+# mirrors it.
+if (!$ISLEDGER) { print "doc=not-a-ledger -- no `## Rows`; Gen-1 arms N/A\n" }
+elsif (($rows+0) == 0) {
   print "FAIL: zero rows matched -- wrong ledger path, wrong row-id prefix, or the prefix moved\n"; $bad = 1 }
 if (($misplaced+0) > 0) {
   printf "FAIL: %d Gen-1 citation(s) sit outside the extractor-output cell -- the ledger is split wrong\n", $misplaced+0; $bad = 1 }
+if (($qmisplaced+0) > 0) {
+  printf "FAIL: %d quotation(s) sit in the derivation cell on Gen-1 rows -- the ledger is split PARTIALLY, and this arm would otherwise report nothing\n", $qmisplaced+0; $bad = 1 }
 if (($checked+0) + ($refused+0) != ($cites+0)) {
   printf "FAIL: census does not close -- %d checked + %d refused != %d citations\n", $checked+0, $refused+0, $cites+0; $bad = 1 }
 # A MISSING SOURCE FILE is a broken invocation, not an unfalsifiable citation
-# form, and it is the only refusal whose count rising to 100%% means the run was
-# worthless. Counted apart from the refusal class so it cannot hide inside it.
-if (($missing+0) > 0 && ($missing+0) == ($refused+0)) {
-  printf "FAIL: every citation refused for a missing source -- check the quarry root\n"; $bad = 1 }
+# form. ⛔ ANY of them refuses, not only 100%: the published path resolver is
+# parsons-shaped, so on another ledger SOME files resolve and others do not, and
+# a `== refused` threshold exits 0 over silently unchecked citations [measured
+# 2026-08-24 by AR-1: one row citing a nonexistent file gave refused=10, exit 0].
+# Partial-missing is the EXPECTED state for seven of the eight ledgers until the
+# resolver moves to `## Source inventory`.
+if (($missing+0) > 0) {
+  printf "FAIL: %d citation(s) refused for a missing source -- check the quarry root and the file-to-path map\n", $missing+0; $bad = 1 }
 exit($bad ? 1 : 0);
 ' "$1"
 ```
@@ -1862,16 +1915,21 @@ amendment gate forbids twice, and the SET dedupe defect above is what a missing
 corpus costs [all measured 2026-08-21, planted one at a time against the arm as
 extracted back out of this file]:
 
-| mutation                                                             | expected                                                                                                                               |
-| -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| clean `parsons`                                                      | `citations=78 checked=69 refused=9`, exit 0                                                                                            |
-| clean `writeme`, which carries **zero** Gen-1 citations legitimately | `citations=0`, exit **0**. ⛔ A `citations > 0` floor would fail a correct ledger — the floor is on ROWS                               |
-| wrong row-id prefix                                                  | `FAIL: zero rows matched`, exit 1                                                                                                      |
-| wrong ledger path                                                    | the same                                                                                                                               |
-| wrong quarry root                                                    | `FAIL: every citation refused for a missing source`, exit 1 — the reason `GEN1-MISSING-SOURCE` is counted apart from the refusal class |
-| **a migrated ledger split the WRONG way**, citation in `reasoned`    | `FAIL: 74 Gen-1 citation(s) sit outside the extractor-output cell`, exit 1                                                             |
-| the same ledger split correctly                                      | exit 0                                                                                                                                 |
-| a cluster whose annotation **re-mentions** a listed class            | **SILENT.** Counting mentions rather than distinct names reported `parsons-047` as "declares 2, lists 5" over a correct row            |
+| mutation                                                                                         | expected                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| clean `parsons`                                                                                  | `citations=78 checked=69 refused=9`, exit 0                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| clean `writeme`, which carries **zero** Gen-1 citations legitimately                             | `citations=0`, exit **0**. ⛔ A `citations > 0` floor would fail a correct ledger — the floor is on ROWS                                                                                                                                                                                                                                                                                                                                                                                                     |
+| wrong row-id prefix                                                                              | `FAIL: zero rows matched`, exit 1                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| wrong ledger path                                                                                | the same                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| wrong quarry root                                                                                | `FAIL: every citation refused for a missing source`, exit 1 — the reason `GEN1-MISSING-SOURCE` is counted apart from the refusal class                                                                                                                                                                                                                                                                                                                                                                       |
+| **a migrated ledger split the WRONG way**, citation in `reasoned`                                | `FAIL: … Gen-1 citation(s) sit outside the extractor-output cell`, exit 1. **The count is fixture-dependent and deliberately not transcribed** — an earlier revision published `74`, and a faithful plant of this row's own description gives `76`                                                                                                                                                                                                                                                           |
+| ⛔ **a PARTIAL split** — the citation stays in `quoted`, the `<em>` fragment moves to `reasoned` | `FAIL: … quotation(s) sit in the derivation cell on Gen-1 rows`, exit 1. **Without this arm the run reported `findings=10` at exit 0 — all seventeen `GEN1-QUOTE-ABSENT` findings, the entire published defect set, silently deleted** [measured 2026-08-24 by AR-1]. Every other floor passes: rows intact, the citation is where it belongs so `misplaced` is 0, and the arithmetic holds. It is also the LIKELIEST half-done migration, because moving derivation prose takes the fragment embedded in it |
+| the `provenance` column renamed, on a ledger carrying Gen-2/3 rows                               | `BREACH SCHEMA unresolved -- no provenance column`, exit 1 (§ The transport check)                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| the same, on an **all-Gen-1** ledger — the shape six of Family F will have                       | the same. Under an uninitialised `$PCOL` this was **byte-identical to the clean run**, because `unreachable == provless == rows` either way                                                                                                                                                                                                                                                                                                                                                                  |
+| a wrong path landing on a **non-ledger** campaign document                                       | `doc=not-a-ledger`, exit 0 — a POSITIVE signal the check prints itself, never the absence of one. Five of the nine campaign documents are non-ledgers, so this is the likelier wrong path                                                                                                                                                                                                                                                                                                                    |
+| one row citing a **nonexistent** source file                                                     | `FAIL: 1 citation(s) refused for a missing source`, exit 1. A `missing == refused` threshold exited 0 here, and partial-missing is the EXPECTED state for seven ledgers until the path map moves to `## Source inventory`                                                                                                                                                                                                                                                                                    |
+| the same ledger split correctly                                                                  | exit 0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| a cluster whose annotation **re-mentions** a listed class                                        | **SILENT.** Counting mentions rather than distinct names reported `parsons-047` as "declares 2, lists 5" over a correct row                                                                                                                                                                                                                                                                                                                                                                                  |
 
 ⚠️ **Every one of the four refusing rows above exited 0 before 2026-08-21**,
 because the only floor was `checked + refused == citations`, which holds at

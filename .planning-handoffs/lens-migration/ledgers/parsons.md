@@ -782,8 +782,10 @@ Pending it, this pass re-grepped every `<em>` quotation in every Gen-1 row back
 against its source with `grep -F` — 147 fragments across rows `045`–`120`, 9
 skipped as truncated [measured 2026-08-19]. It found **seven transport defects
 in this pass's own rows before they were committed**, which is why those are not
-in the tree. Run over the whole population it then found eight more, and **none
-of them is this pass's**:
+in the tree. Run over the whole population it then found ~~eight more, and
+**none of them is this pass's**~~ — ⚠️ **both halves STRUCK 2026-08-24: it is
+sixteen, and three of them ARE this pass's. The correction is under the table,
+and this sentence stated the same two facts wrongly one line above it.**
 
 | rows                                                 | non-transporting quotations                 |
 | ---------------------------------------------------- | ------------------------------------------- |
