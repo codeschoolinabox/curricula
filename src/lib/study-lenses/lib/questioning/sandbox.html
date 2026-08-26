@@ -8,7 +8,12 @@
 
       npx vite --config src/lib/study-lenses/lib/engine/vite.sandbox.config.ts
 
-  then open  /lib/questioning/sandbox.html
+  then open  http://localhost:5173/lib/questioning/sandbox.html
+  (the scheme matters: vite serves plain HTTP — a browser that upgrades
+  a schemeless localhost URL to https shows ERR_SSL_PROTOCOL_ERROR; if
+  typing http:// still redirects, clear Chrome's localhost HSTS entry at
+  chrome://net-internals/#hsts or disable "Always use secure
+  connections")
 
   One snippet, both registers: the page drives the two landed questioners
   through the family ask seam exactly as a roster consumer would —
