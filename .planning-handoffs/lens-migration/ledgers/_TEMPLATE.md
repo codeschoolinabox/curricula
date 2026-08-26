@@ -15,7 +15,7 @@
 <!-- cspell:ignore QCOL RCOL NCELL PCOL provless istemplate -->
 <!-- gen1-arm.sh locals; see § The Gen-1 arm: -->
 <!-- cspell:ignore toks unesc qmisplaced uninitialised srcpath qfrags -->
-<!-- cspell:ignore fragdiff FRAGCENSUS reparented -->
+<!-- cspell:ignore fragdiff FRAGCENSUS reparented mkfixture -->
 
 # `<lens>` — fidelity ledger
 
@@ -2024,13 +2024,20 @@ extracted back out of this file]:
 | ⛔ **an ELIDED-ONLY split** — only the `…`-bearing fragments move to `reasoned`                  | `NOTE: … source fragment(s) …`, **exit 0**, and **`GEN1-QUOTE-ABSENT` falls 17 → 10** [measured 2026-08-26, the `elided` mode below, 50 fragments moved]. The seven deleted are verbatim the seven this arm was published for finding — the ones the 2026-08-19 stopgap skipped as truncated. **One NOTE line for seven deletions**, which is why the before/after comparison and not this NOTE is the detector                                                                                                                                           |
 | a cluster whose annotation **re-mentions** a listed class                                        | **SILENT.** Counting mentions rather than distinct names reported `parsons-047` as "declares 2, lists 5" over a correct row                                                                                                                                                                                                                                                                                                                                                                                                                               |
 
-⛔ **THE FINDING SET IS THE ASSERTION. THE EXIT CODE IS NOT.** Four of the rows
-above exit 0 and three of those are defects — a partial split, a half-partial
-split and an elided-only split all print one `NOTE` line and exit clean while
-deleting 17, 10 and 7 published findings respectively. **Read every split
-against the CORRECT row: `GEN1-QUOTE-ABSENT` must come back at 17 on
-`parsons`.** A run of this arm over a migrated ledger is not evidence of
+⛔ **THE FINDING SET IS THE ASSERTION. THE EXIT CODE IS NOT.** The four
+migration rows — `CORRECT`, `PARTIAL`, `HALF-PARTIAL` and `ELIDED-ONLY` —
+**all** exit 0, and three of them are defects: each prints one `NOTE` line and
+exits clean while deleting 17, 10 and 7 published findings respectively. **Read
+every split against the `CORRECT` row: `GEN1-QUOTE-ABSENT` must come back at 17
+on `parsons`.** A run of this arm over a migrated ledger is not evidence of
 anything until that number is compared.
+
+⚠️ **That sentence said _"Four of the rows above exit 0"_ for one commit, and
+eleven of the eighteen do** [found 2026-08-26 by AR-5]. It meant the four
+migration rows and read as a count over the whole table — understating by nearly
+three times how many rows exit 0, **in the paragraph whose only job is to stop a
+reader trusting exit 0.** The rows are named now. Another count beside a list,
+caught by a reviewer rather than by any gate.
 
 ⚠️ ~~The two split rows above published `FAIL: … exit 1`.~~ **STRUCK 2026-08-26
 by AR-5** — the shipping check emits `NOTE:` and never sets `$bad`, and has
@@ -2040,17 +2047,72 @@ show b30016ce -- <this file> | grep -c 'PARTIAL split'` → **0**]. A corpus row
 that publishes an expectation the shipping check does not meet is worse than a
 missing row: it is a green light nobody re-runs.
 
-**The fixtures are published as a command, not as a figure** — § Publish the
-number by publishing the command forbids the alternative, and an earlier
-revision of this section shipped seven fixture counts whose construction lived
-nowhere and which did not reproduce. Migrate the header (`evidence` → `quoted`,
-insert an empty `reasoned`), splitting cells on the campaign's own
-`/(?<!\\)\|/`; then per mode move `<em>"…"</em>` and `(?<!\\)_"…"_` spans out of
-`quoted` into `reasoned` — **all** of them (`partial`), the **first** on each
-row (`half`), those containing a mid-string `…` (`elided`), or **none**
-(`correct`). **Floor the builder on its own plant**: a mode that moves zero
-fragments has not landed, and a plant that did not land reads exactly like a
-check that did not fire.
+**The builder is published as a PROGRAM, not as prose** — ⚠️ ~~a paragraph
+describing the four modes in English~~ **STRUCK 2026-08-26 by AR-5.** That
+paragraph said _"a mid-string `…`"_ while the corpus row beside it said
+_"`…`-bearing"_; the two are different filters, they give different counts, and
+**neither reproduced the published figures** — a reviewer building from the
+prose measured 8 and 55 fragments moved against the published 50. Every other
+instrument in this file ships as a fenced program with a floor; this was the one
+published as English, and it is the one whose figures did not reproduce, twice —
+at seven counts, then at two. § Publish the number by publishing the command
+means the command, not a description of it.
+
+```bash
+# mkfixture.sh <one-cell-ledger.md> <mode>   -- mode: correct|partial|half|elided
+#
+# Migrate a one-cell ledger to the two-cell schema and move quotation fragments
+# out of `quoted` into `reasoned` per mode, so the corpus figures above are
+# re-derivable in one command. Cells split on the campaign own /(?<!\\)\|/ --
+# six rows across the two committed ledgers carry a literal \| inside a cell.
+set -u
+LC_ALL=C; export LC_ALL
+MODE="$2" perl -e '
+my $mode = $ENV{MODE};
+my ($E, $hdr, $sep, $moved) = (-1, 0, 0, 0);
+open my $fh, "<", $ARGV[0] or die "cannot open $ARGV[0]\n";
+while (my $l = <$fh>) {
+  if (!$hdr && $l =~ /^\|\s*#\s*\|/) { $hdr = 1;
+    my @h = split /(?<!\\)\|/, $l, -1;
+    for my $i (0..$#h) { my $t=$h[$i]; $t=~s/^\s+|\s+$//g; $E=$i if $t eq "evidence" }
+    die "FAIL: no evidence column in the header\n" if $E < 0;
+    $h[$E] = " quoted "; splice(@h, $E+1, 0, " reasoned "); print join("|", @h); next }
+  if ($hdr && !$sep && $l =~ /^\|[\s-]*\|/ && $l =~ /-/) { $sep = 1;
+    my @h = split /(?<!\\)\|/, $l, -1; splice(@h, $E+1, 0, " --- "); print join("|", @h); next }
+  unless ($l =~ /^\| `[a-z0-9-]+-\d{3}`/) { print $l; next }
+  my @c = split /(?<!\\)\|/, $l, -1; my $q = $c[$E]; my @mv;
+  # ⛔ THE FILTERS ARE THE DEFINITION OF EACH MODE. `elided` is any fragment
+  # CARRYING an ellipsis, trailing or mid-string, and [^"]* deliberately does
+  # not cross a quote mark -- which is why it moves 50 and not 55.
+  if    ($mode eq "partial") { while ($q =~ s/(<em>".*?"<\/em>)//)         { push @mv, $1 }
+                               while ($q =~ s/((?<!\\)_".*?"_)//)          { push @mv, $1 } }
+  elsif ($mode eq "half")    { if    ($q =~ s/(<em>".*?"<\/em>)//)         { push @mv, $1 }
+                               elsif ($q =~ s/((?<!\\)_".*?"_)//)          { push @mv, $1 } }
+  elsif ($mode eq "elided")  { while ($q =~ s/(<em>"[^"]*…[^"]*"<\/em>)//) { push @mv, $1 }
+                               while ($q =~ s/((?<!\\)_"[^"]*…[^"]*"_)//)  { push @mv, $1 } }
+  elsif ($mode ne "correct") { die "FAIL: unknown mode $mode\n" }
+  $moved += scalar @mv;
+  my $r = @mv ? " " . join(" ", @mv) . " " : " ";
+  splice(@c, $E, 1, $q, $r); print join("|", @c);
+}
+# THE PLANT FLOOR. A mode that moved nothing has not landed, and a plant that
+# did not land reads exactly like a check that did not fire.
+print STDERR "mkfixture: mode=$mode fragments-moved=$moved\n";
+if ($mode ne "correct" && $moved == 0) {
+  print STDERR "FAIL: mode $mode moved no fragments -- the plant did not land\n"; exit 1 }
+' "$1"
+```
+
+**The four modes against the live 120-row `parsons` ledger** [all measured
+2026-08-26 with the program above; `differing` is from `fragdiff`, the rest from
+§ The Gen-1 arm]:
+
+| mode      | fragments moved | `FRAGCENSUS differing` | `GEN1-QUOTE-ABSENT` | `NOTE` | exit  |
+| --------- | --------------- | ---------------------- | ------------------- | ------ | ----- |
+| `correct` | **0**           | **0**                  | **17**              | 0      | 0     |
+| `partial` | **213**         | **108**                | **0**               | 1      | **0** |
+| `half`    | **108**         | **108**                | **7**               | 1      | **0** |
+| `elided`  | **50**          | **41**                 | **10**              | 1      | **0** |
 
 ⚠️ **Every one of the four refusing rows above exited 0 before 2026-08-21**,
 because the only floor was `checked + refused == citations`, which holds at
@@ -2118,14 +2180,22 @@ records.
 this at the re-cut, comparing the **`evidence` cell before** against the
 **`quoted` cell after**:
 
-⛔ **EXTRACT THE TWO FUNCTIONS, NOT THE FENCE.** The invocation on the last line
+⛔ **FLOOR ANY HARNESS ON ITS OWN EXTRACTION**, and take the fence whole — the
+last line is `fragdiff`'s closing brace, so dropping it truncates the function
+into `syntax error: unexpected end of file`.
+
+⚠️ ~~EXTRACT THE TWO FUNCTIONS, NOT THE FENCE. The invocation on the last line
 runs the moment the fence is sourced, and with `$BEFORE` and `$AFTER` unset it
-opens the empty filename twice — two stderr lines and nothing on stdout, which a
-harness reading only stdout scores as a clean pass [measured 2026-08-26]. This
-is the same family as the four-backtick fence and the apostrophe-in-a-comment.
+opens the empty filename twice.~~ **STRUCK 2026-08-26 by AR-5: the invocation
+moved out of the fence into the prose below it in the same commit that wrote
+this warning, so the warning described an artifact its own diff had deleted —
+and obeying it truncated the function.** The hazard was real when observed and
+the general rule above survives it; `$BEFORE` and `$AFTER` now appear nowhere in
+the fence.
 
 ```bash
-# Both sides from the repository root. X# piped: `git show <pre-migration-sha>:<ledger> > /tmp/before.md`.
+# Both sides from the repository root. ⛔ NEVER piped -- write the BEFORE side to
+# a file first: `git show <pre-migration-sha>:<ledger> > /tmp/before.md`.
 qfrags() {  # qfrags <ledger.md> <row-id-prefix> <column-name>
   perl -ne 'BEGIN{$p=shift @ARGV; $col=shift @ARGV; $i=-1; $rows=0}
     if ($i < 0 && /^\|\s*#\s*\|/) { my @h = split /(?<!\\)\|/, $_, -1;
@@ -2148,6 +2218,9 @@ qfrags() {  # qfrags <ledger.md> <row-id-prefix> <column-name>
 # `diff`, so the floors above buy nothing unless something reads them. This also
 # asserts the two sides describe the same ledger before any line is believed.
 fragdiff() {  # fragdiff <before.md> <after.md> <row-id-prefix> <before-col> <after-col>
+  # `local` on every name: without it a call from an interactive shell clobbers
+  # b, a, nb, na and rc in the caller. The diff is computed ONCE, into d.
+  local b a nb na d
   b=$(mktemp); a=$(mktemp)
   qfrags "$1" "$3" "$4" > "$b" || { rm -f "$b" "$a"; echo "FAIL: the BEFORE side refused"; return 1; }
   qfrags "$2" "$3" "$5" > "$a" || { rm -f "$b" "$a"; echo "FAIL: the AFTER side refused"; return 1; }
@@ -2155,9 +2228,10 @@ fragdiff() {  # fragdiff <before.md> <after.md> <row-id-prefix> <before-col> <af
   if [ "$nb" -ne "$na" ]; then
     rm -f "$b" "$a"; echo "FAIL: row counts differ -- $nb before, $na after; the two sides are not the same ledger"; return 1
   fi
-  diff "$b" "$a"; rc=$?
-  echo "FRAGCENSUS rows=$nb differing=$(diff "$b" "$a" | grep -c '^<')"
-  rm -f "$b" "$a"; return $rc
+  d=$(diff "$b" "$a"); rm -f "$b" "$a"
+  [ -n "$d" ] && printf "%s\n" "$d"
+  printf "FRAGCENSUS rows=%s differing=%s\n" "$nb" "$(printf "%s" "$d" | grep -c "^<")"
+  [ -z "$d" ]
 }
 ```
 

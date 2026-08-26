@@ -8,7 +8,7 @@ closes; nothing here is end-state documentation. -->
 <!-- cspell:ignore loosenings capitalisation enshittifying keyable unbuildable -->
 <!-- cspell:ignore normalises undercounted oldd clauding zakey nocite -->
 <!-- cspell:ignore Explorotron multibyte provless unreachable -->
-<!-- cspell:ignore qfrags fragdiff -->
+<!-- cspell:ignore qfrags fragdiff reparented -->
 <!-- a human ruling quoted verbatim; do not translate it and do not "fix" it: -->
 <!-- cspell:ignore séparé -->
 
@@ -268,7 +268,7 @@ which is the one class this campaign's own invariant 13 exists to stop.
 > already short by one.** The count is gone rather than corrected: § The
 > amendment gate rules that tables are **named, never numbered**, because a
 > number beside a list is a second statement of the same fact and this campaign
-> has now watched the second one go stale five times.
+> has watched the second one go stale in every review round it has run.
 >
 > | #   | gate                     | where                                           | when                                                                     |
 > | --- | ------------------------ | ----------------------------------------------- | ------------------------------------------------------------------------ |
@@ -284,12 +284,12 @@ which is the one class this campaign's own invariant 13 exists to stop.
 >
 > **Every command runs from the repository root, and every path argument is
 > repo-relative EXCEPT the Gen-1 root, which is absolute** — see § The gate
-> arguments below for all seven, collected. ⚠️ `firstblock` lives inside a
-> **four-backtick** fence, because its own body contains a three-backtick line —
-> a generic extractor silently returns nothing, and an empty script exits 0
-> while printing nothing. **Floor any harness on its own extraction.** Also run
-> under `LC_ALL=C`: the published mandate is about BSD `awk` aborting on UTF-8,
-> and `§` is itself multibyte, which bites a hand-rolled matcher.
+> arguments below, collected. ⚠️ `firstblock` lives inside a **four-backtick**
+> fence, because its own body contains a three-backtick line — a generic
+> extractor silently returns nothing, and an empty script exits 0 while printing
+> nothing. **Floor any harness on its own extraction.** Also run under
+> `LC_ALL=C`: the published mandate is about BSD `awk` aborting on UTF-8, and
+> `§` is itself multibyte, which bites a hand-rolled matcher.
 >
 > **What is DONE:** the three gates the schema needs to be checkable — a
 > structural-integrity check that sees burial by fence **and** by HTML comment;
@@ -424,13 +424,32 @@ enough not to re-wrap, and run `prettier --write` three times and diff.**
 | **AR-2** (the two checks)   | 3      | PAUSE, PAUSE, **CONSIDER** — closed                |
 | **AR-1** (the commit group) | 2      | PAUSE, **CONSIDER** — closed                       |
 | **context-free validation** | 2      | both found defects no gate could see; both applied |
-| **AR-5** (pre-merge)        | 3      | PAUSE, PAUSE, **PAUSE** — ⛔ **NOT CLOSED**        |
+| **AR-5** (pre-merge)        | 5      | PAUSE ×5 — ⛔ **NOT CLOSED**                       |
 
-⛔ **AR-5's round-3 PAUSE is addressed by a commit AR-5 has not reviewed.** The
-change **reduces** what the Gen-1 arm claims — the misplaced-quotation predicate
-stops refusing and starts reporting — so it cannot introduce a false refusal.
-But it has not been through the gate. **Run AR-5 over the campaign's unpushed
-SHAs before treating this as merged, and before any push.**
+⛔ **AR-5 has now run five rounds and closed none of them. Rounds 4 and 5 both
+ran on 2026-08-26 and both found their defects in the round before.**
+
+- **Round 4**, over the nine unpushed SHAs, returned three blockers: a heading
+  insertion at `b30016ce` had reparented § The Gen-1 arm's trigger, its owed
+  items and its amendment-4 note into the new section; the mutation corpus
+  published `FAIL … exit 1` where the shipping check emits `NOTE … exit 0`; and
+  the partial-split detector could neither fail nor be reached from the runbook.
+  All three are closed at `b7459ffd`, and round 5 verified each independently.
+- **Round 5**, over `b7459ffd` alone, returned **four more — every one in that
+  commit's own new text**: a ⛔ extraction warning describing an invocation the
+  same diff had deleted (obeying it truncated `fragdiff` into a syntax error); a
+  struck count still live twelve lines below the change that falsified it; the
+  `elided` fixture figures not reproducing from a self-contradicting prose
+  recipe; and three wrong counts in the immutable commit body.
+
+⛔ **`b7459ffd`'s body carries three numbers that are wrong, and it cannot be
+amended.** Corrected here so a reader who greps the body does not inherit them
+[all measured 2026-08-26]: the `fragdiff` corpus is **ten** rows, not nine; the
+commit added **five** cspell ignore entries carrying **four** distinct words,
+not three; and its `elided 50 -> 10` line was unreproducible from the recipe it
+shipped — the builder is now published as a program and the figure re-derives.
+
+**AR-5 must still close over the campaign's unpushed SHAs before any push.**
 
 Why it was handed over rather than run again: five consecutive rounds each found
 their defect in the previous round's newest code, and the last two were in a
@@ -451,18 +470,28 @@ substitute them first [measured 2026-08-26]. Then:
 as **17 QUOTE-ABSENT + 9 REFUSED + 1 GEN1-COUNT**; the structural check exit 0
 on all nine campaign documents; prettier idempotent; markdownlint 0; cspell 0.
 
-⛔ **Two campaign documents REFUSE the transport check, and that is correct
-rather than a defect to fix.** `FIDELITY-METHOD.md` carries five row-shaped
-lines in § Worked rows and a ledger-shaped header with no `## Rows`;
-`RESUME.md`'s first `| # |` header is **the published target header row
-itself**, which resolves `quoted` and `reasoned`. Both take
-`BREACH SCHEMA ledger-shaped header row but no ## Rows`, exit 1; `SPEC.md`,
-`LISTERS-6-7-DESIGN.md`, `_boundary.md` and `_playbook.md` resolve
-`doc=not-a-ledger`, exit 0 [all measured 2026-08-26]. **Do not touch the
-resolver** — it is on § The amendment gate's trigger list and a refusal on a
-wrong path is correctly signed. So this file refuses the gate because it
-publishes the schema, and it publishes the schema because nothing else can catch
-a wrong header row.
+⛔ **Campaign documents REFUSE the transport check, and that is correct rather
+than a defect to fix. Named, never counted** — ⚠️ this paragraph said "two" for
+one commit and the answer is three [found 2026-08-26 by AR-5, which is the same
+count-beside-a-list defect the commit above struck twice elsewhere]:
+
+- `FIDELITY-METHOD.md` — five row-shaped lines in § Worked rows plus a
+  ledger-shaped header, no `## Rows` → `BREACH SCHEMA`, exit 1.
+- `RESUME.md` — its **first** `| # |` header is the published target header row
+  itself, which resolves `quoted` and `reasoned`; no `## Rows` →
+  `BREACH SCHEMA`, exit 1, **and** the zero-rows floor.
+- `_TEMPLATE.md` — the zero-rows floor alone, its specimen ids being
+  `<lens>-NNN` → exit 1.
+- `SPEC.md`, `LISTERS-6-7-DESIGN.md`, `_boundary.md`, `_playbook.md` →
+  `doc=not-a-ledger`, exit 0.
+
+[all measured 2026-08-26, the check extracted from this campaign's own template
+and run on each of the nine documents]
+
+**Do not touch the resolver** — it is on § The amendment gate's trigger list and
+a refusal on a wrong path is correctly signed. So this file refuses the gate
+because it publishes the schema, and it publishes the schema because nothing
+else can catch a wrong header row.
 
 ### The gate arguments — collected, because a cold reader reconstructed them from five places
 
