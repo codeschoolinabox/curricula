@@ -669,6 +669,81 @@ repo's own convention.
   order genuinely ambiguous and two workers would have produced two different
   commit structures.
 
+### The `spellme` LENS's rulings (2026-08-26, wave 3)
+
+Seven, all the human's, taken across wave 3's plan-approval gate and the AR-4
+that followed its first commit. **Four have end-state homes and migrated
+there**; they are listed here for findability, not as their home. The other
+three govern process and have none.
+
+⚠ **Two of the seven exist because a review asked for them, not because the gate
+did.** The live-picker ruling below left the selected-state mechanism
+unspecified and the data-flow diagram without a node for the state it made
+load-bearing; an `ar-4` caught both against the commit that recorded it, and the
+human ruled on each. A ruling can therefore arrive _after_ the commit that
+motivated it — which is why this section is keyed to a date rather than to a
+commit.
+
+- (human ruling 2026-08-26) **The un-skip order is ZOMBIES over the lettered
+  blocks, file order within each.** `component.test.tsx`'s blocks run
+  `Interfaces` → `Many` → `Zero` → `Boundaries` → `Interfaces` in file order,
+  which disagrees with canonical ZOMBIES, and wave 3 takes ZOMBIES: `Zero` →
+  `Many` (static only) → `Interfaces — the DOM contract` →
+  `Interfaces — the keyboard journey`. Same reasoning as the 2026-08-14 tiling
+  ruling — un-skipping a sweeping block early licenses structural fakes — and
+  the same closing line: the blocks it moves past are unlettered.
+- (human ruling 2026-08-26) **The 🔍 cadence is five named checkpoints, and
+  every other increment is declared no-checkpoint by the human in advance.** The
+  five: the sandbox injection · the three regions rendering · the picker and
+  stepper live · the CSS arrangement whole · the wave's close. Needed because
+  once the injection lands **every** later increment is user-observable, and
+  `DEV.md` makes checkpoints gate points only the human may skip — so a cadence
+  the agent chose would be the agent skipping. This bullet is that declaration.
+- (human ruling 2026-08-26) **A `{ skipAfter: 0 }` component test is authored**,
+  mirroring the `{ oneMoreAfter: 0 }` fixture the suite already carries. Without
+  it the way past is un-triangulated in wave 3: the only test naming
+  `[data-spellme-skip]` asserts it **absent** at the default `skipAfter` with
+  zero attempts, and nothing in wave 3 raises the attempt count — so omitting
+  the control entirely would close the wave green. ⚠ It is an **authored** test,
+  so `ar-3` fires for it (human ruling 2026-08-25); the un-skip opt-out does not
+  reach it.
+- (human ruling 2026-08-26) **Presentation is part of this lens's value, not
+  decoration, and is decided interdependently with functionality** — in the
+  human's words, _"we are user-twinning this so CSS isn't decoration, it's part
+  of the core value. functionality will be decided interdependently with
+  presentation."_ So the module carries its own stylesheet and wave 3 writes it.
+  **→ migrated to** `DOCS.md` § Decisions. The § Modules row for that file is
+  deliberately deferred to the commit that creates it, because these documents
+  describe the tree as it is.
+- (human ruling 2026-08-26) **The stepper and the kind picker are live in wave
+  3; submit and judging are not.** Forced by the ruling above rather than by any
+  test — no wave-3 test fires an event, so nothing in the suite discriminates a
+  live stepper from a dead one. What forces it is that `README.md` § UI
+  structure mandates `data-extent` on the proposed span and the twin draws that
+  run as tracking the stepper, so an uncontrolled input is a control that
+  visibly does nothing at a checkpoint. **→ migrated to** `DOCS.md` § Structural
+  constraints.
+- (human ruling 2026-08-26) **Which element kind is selected rides
+  `aria-pressed` on the picker's buttons; no `data-*` hook carries it.** Raised
+  by `ar-4`: § UI structure enumerates every harness selector this surface has
+  and none of them said which kind was selected, so the first test to touch the
+  picker would have invented the mechanism. A `data-*` twin would duplicate what
+  `aria-pressed` already names and then have to be kept in step with it; styling
+  binds to `[aria-pressed='true']`, an attribute, so the
+  selectors-never-label-text rule holds. Precedent is in the tree —
+  `writeme.css` already styles `[data-view-toggle][aria-pressed='true']`. **→
+  migrated to** `README.md` § UI structure. It is deliberately the one piece of
+  this surface's state outside the `data-spellme-*` family.
+- (human ruling 2026-08-26) **The data-flow diagram draws the claim in
+  progress.** Also raised by `ar-4`: the live-picker ruling made component-local
+  form state responsible for the surface's own `data-extent` and proposed run,
+  and the Mermaid had no node for it — an edge the Refactor step is held against
+  but cannot see. **→ migrated to** `DOCS.md` § Data flow, as one node and two
+  edges. ⚠ It also falsified a label: the diagram called submission "the one
+  external event in the module", which stepping and picking are now too. That
+  label was corrected in the same commit and the rewrite is enumerated in its
+  body.
+
 ## Traps, each of which has already cost something
 
 - **The test helper must mirror `embody/derive-tokens.ts`** — `acorn.tokenizer`
