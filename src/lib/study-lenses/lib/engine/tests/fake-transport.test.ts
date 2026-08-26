@@ -48,6 +48,20 @@ describe('createFakeTransport', () => {
 			]);
 		});
 
+		// PINNED(human ruling 2026-08-25 — the engine-default halt payload gains `phase` on throws; a revert is consumer-observable)
+		it('the engine-default halt carries the phase on a throw', async () => {
+			const handle = fakeRun("throw new TypeError('boom');", {
+				workerConfig: { omitSerializeHalt: true },
+			});
+			const { settlement } = await handle.result;
+
+			expect(settlement.halt).toEqual({
+				name: 'TypeError',
+				message: 'boom',
+				phase: 'evaluation',
+			});
+		});
+
 		it('settles completed with the reference-stamped halt', async () => {
 			const handle = fakeRun('');
 			const { settlement } = await handle.result;

@@ -102,12 +102,21 @@ type ReferenceConfig = {
  * for consumer-side limit classification.
  */
 function buildReferenceSerializer(config: ReferenceConfig): SerializeHalt {
-	return function serializeReferenceHalt(kind, rawError): unknown {
+	return function serializeReferenceHalt(kind, rawError, phase): unknown {
 		if (config.throwInSerializeHalt) {
 			throw new Error('reference serializer throw');
 		}
 		if (kind === 'natural-end') {
-			return { kind, name: 'natural-end', message: '', viaReference: true };
+			// `phase` echoed deliberately: the contract says a natural end
+			// carries none, and stamping whatever arrived lets the suite
+			// catch a bootstrap that starts passing one.
+			return {
+				kind,
+				name: 'natural-end',
+				message: '',
+				phase,
+				viaReference: true,
+			};
 		}
 
 		const name = rawError instanceof Error ? rawError.name : 'Error';
@@ -117,6 +126,7 @@ function buildReferenceSerializer(config: ReferenceConfig): SerializeHalt {
 			kind,
 			name,
 			message,
+			phase,
 			viaReference: true,
 			isReferenceLimit: name === 'ReferenceLimitError',
 		};

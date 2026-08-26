@@ -125,7 +125,7 @@ describe('bootstrap', () => {
 			expect(halt).toEqual({
 				kind: 'halt',
 				haltKind: 'throw',
-				payload: { name: 'TypeError', message: 'boom' },
+				payload: { name: 'TypeError', message: 'boom', phase: 'evaluation' },
 			});
 		});
 
@@ -161,6 +161,7 @@ describe('bootstrap', () => {
 					kind: 'throw',
 					name: 'RangeError',
 					message: 'kapot',
+					phase: 'evaluation',
 					viaReference: true,
 					isReferenceLimit: false,
 				},
@@ -178,7 +179,7 @@ describe('bootstrap', () => {
 			expect(halt).toEqual({
 				kind: 'halt',
 				haltKind: 'throw',
-				payload: { name: 'Error', message: 'kapot' },
+				payload: { name: 'Error', message: 'kapot', phase: 'evaluation' },
 			});
 		});
 	});
@@ -380,6 +381,16 @@ describe('bootstrap', () => {
 				'throw',
 				'SyntaxError',
 			]);
+		});
+
+		it('an invalid-module-grammar halt carries phase evaluation — the module path classifies nothing', async () => {
+			const { worker, next } = await startRun({}, 'const = 5;', true, 'module');
+			const halt = (await next()) as {
+				payload: { phase?: string };
+			};
+			worker.terminate();
+
+			expect(halt.payload.phase).toBe('evaluation');
 		});
 	});
 

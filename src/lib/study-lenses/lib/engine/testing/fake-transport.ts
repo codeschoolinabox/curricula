@@ -37,6 +37,7 @@
 import type {
 	CallResponse,
 	HaltKind,
+	HaltPhase,
 	ThreadLogic,
 	WorkerSetup,
 } from '../types.js';
@@ -176,13 +177,23 @@ function executeCode(
 	});
 	const body = init.strict ? `"use strict";\n${init.code}` : init.code;
 
+	// Mirrors the bootstrap's STRUCTURAL phase split — which try/catch
+	// caught, never the error's type.
+	let run: (...runArguments: readonly unknown[]) => unknown;
 	try {
 		// eslint-disable-next-line @typescript-eslint/no-implied-eval, sonarjs/code-eval -- the fake runs opaque consumer code same-thread; that IS its purpose
-		const run = new Function(...names, body);
-		// eslint-disable-next-line sonarjs/code-eval, @typescript-eslint/no-unsafe-call -- see above
+		run = new Function(...names, body) as (
+			...runArguments: readonly unknown[]
+		) => unknown;
+	} catch (error) {
+		postHalt(state, setupResult, 'throw', error, 'creation');
+		return;
+	}
+
+	try {
 		run(...values);
 	} catch (error) {
-		postHalt(state, setupResult, 'throw', error);
+		postHalt(state, setupResult, 'throw', error, 'evaluation');
 		return;
 	}
 
@@ -233,13 +244,14 @@ function postHalt(
 	setupResult: ReturnType<WorkerSetup>,
 	haltKind: HaltKind,
 	rawError?: unknown,
+	phase?: HaltPhase,
 ): void {
 	const { serializeHalt } = setupResult;
 	if (serializeHalt === undefined) {
 		enqueue(state, {
 			kind: 'halt',
 			haltKind,
-			payload: defaultHaltPayload(haltKind, rawError),
+			payload: defaultHaltPayload(haltKind, rawError, phase),
 		});
 		return;
 	}
@@ -248,7 +260,7 @@ function postHalt(
 		enqueue(state, {
 			kind: 'halt',
 			haltKind,
-			payload: structuredClone(serializeHalt(haltKind, rawError)),
+			payload: structuredClone(serializeHalt(haltKind, rawError, phase)),
 		});
 	} catch (error) {
 		enqueue(state, {
@@ -260,13 +272,18 @@ function postHalt(
 }
 
 /** The engine-default halt author — mirrors the bootstrap's. */
-function defaultHaltPayload(haltKind: HaltKind, rawError: unknown): unknown {
+function defaultHaltPayload(
+	haltKind: HaltKind,
+	rawError: unknown,
+	phase?: HaltPhase,
+): unknown {
 	if (haltKind === NATURAL_END) {
 		return { name: NATURAL_END, message: '' };
 	}
 	return {
 		name: rawError instanceof Error ? rawError.name : 'Error',
 		message: rawError instanceof Error ? rawError.message : String(rawError),
+		phase,
 	};
 }
 

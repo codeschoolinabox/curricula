@@ -267,14 +267,33 @@ type WorkerGlobals = Readonly<Record<string, unknown>>;
 type HaltKind = 'natural-end' | 'throw';
 
 /**
+ * Where a `'throw'` halt's error arose: `'creation'` — the program failed
+ * before it ran (the `'function'` path's `new Function` construction);
+ * `'evaluation'` — it failed while running. The split is structural on
+ * the `'function'` path (which try/catch caught). The `'module'` path
+ * delivers `'evaluation'` for every rejection of its single-stage
+ * dynamic import — parse success is the consumer's own precondition
+ * upstream, and a link-stage failure (an unresolvable import specifier)
+ * rides `'evaluation'` as a named residual of the one-stage import, not
+ * a classification the engine can structurally make.
+ */
+type HaltPhase = 'creation' | 'evaluation';
+
+/**
  * The consumer's worker-side halt author, invoked by the bootstrap on
  * EVERY worker-side stop — `rawError` is undefined for 'natural-end'.
  * Returns the clone-safe halt payload; worker-side authoring preserves
  * attribution that lives only in the worker (a stamped node path) and
  * classifies non-Error throws. A throw here is a worker crash (the
- * worker-error termination cause).
+ * worker-error termination cause). `phase` is present exactly on
+ * `'throw'` halts — the discriminant the consumer's stop record carries
+ * forward; a natural end has no phase.
  */
-type SerializeHalt = (kind: HaltKind, rawError: unknown) => unknown;
+type SerializeHalt = (
+	kind: HaltKind,
+	rawError: unknown,
+	phase?: HaltPhase,
+) => unknown;
 
 /** What worker logic hands back to the bootstrap at setup. */
 type WorkerSetupResult = {
@@ -309,6 +328,7 @@ export type {
 	Evaluate,
 	EvaluateSpec,
 	HaltKind,
+	HaltPhase,
 	SerializeHalt,
 	SettlementOutcome,
 	ThreadLogic,

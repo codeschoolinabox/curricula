@@ -16,7 +16,12 @@
  * never reused.
  */
 
-import type { HaltKind, SerializeHalt, WorkerSetup } from '../types.js';
+import type {
+	HaltKind,
+	HaltPhase,
+	SerializeHalt,
+	WorkerSetup,
+} from '../types.js';
 
 import createBufferViews from './create-buffer-views.js';
 import PROTOCOL from './protocol.js';
@@ -160,13 +165,25 @@ function executeFunction(
 	});
 	const body = strict ? `"use strict";\n${code}` : code;
 
+	// The phase split is STRUCTURAL — which try/catch caught, never the
+	// error's type: a learner's runtime `throw new SyntaxError(...)` is
+	// 'evaluation', and construction fails 'creation' under both strict
+	// and sloppy bodies.
+	let run: (...runArguments: readonly unknown[]) => unknown;
 	try {
 		// eslint-disable-next-line @typescript-eslint/no-implied-eval, sonarjs/code-eval -- running opaque consumer code in the sandbox IS this module's purpose
-		const run = new Function(...names, body);
-		// eslint-disable-next-line sonarjs/code-eval, @typescript-eslint/no-unsafe-call -- see above; the sandbox executes here
+		run = new Function(...names, body) as (
+			...runArguments: readonly unknown[]
+		) => unknown;
+	} catch (error) {
+		postHalt(state, 'throw', error, 'creation');
+		return;
+	}
+
+	try {
 		run(...values);
 	} catch (error) {
-		postHalt(state, 'throw', error);
+		postHalt(state, 'throw', error, 'evaluation');
 		return;
 	}
 
@@ -220,7 +237,11 @@ async function executeModule(
 	try {
 		await import(/* webpackIgnore: true */ /* @vite-ignore */ url);
 	} catch (error) {
-		postHalt(state, 'throw', error);
+		// Phase is 'evaluation' for every module rejection: the one-stage
+		// dynamic import gives no structural parse/link/run boundary, parse
+		// success is the consumer's upstream precondition, and the
+		// link-stage residual is named at the HaltPhase declaration.
+		postHalt(state, 'throw', error, 'evaluation');
 		return;
 	} finally {
 		URL.revokeObjectURL(url);
@@ -230,12 +251,17 @@ async function executeModule(
 }
 
 /** Authors and posts the halt; a throwing serializer posts `failure`. */
-function postHalt(state: RunState, kind: HaltKind, rawError?: unknown): void {
+function postHalt(
+	state: RunState,
+	kind: HaltKind,
+	rawError?: unknown,
+	phase?: HaltPhase,
+): void {
 	if (state.serializeHalt === null) {
 		post({
 			kind: 'halt',
 			haltKind: kind,
-			payload: defaultHaltPayload(kind, rawError),
+			payload: defaultHaltPayload(kind, rawError, phase),
 		});
 		return;
 	}
@@ -244,7 +270,7 @@ function postHalt(state: RunState, kind: HaltKind, rawError?: unknown): void {
 		post({
 			kind: 'halt',
 			haltKind: kind,
-			payload: state.serializeHalt(kind, rawError),
+			payload: state.serializeHalt(kind, rawError, phase),
 		});
 	} catch (error) {
 		post({
@@ -256,13 +282,18 @@ function postHalt(state: RunState, kind: HaltKind, rawError?: unknown): void {
 }
 
 /** The engine-default halt author (README § two-sided contract). */
-function defaultHaltPayload(kind: HaltKind, rawError: unknown): unknown {
+function defaultHaltPayload(
+	kind: HaltKind,
+	rawError: unknown,
+	phase?: HaltPhase,
+): unknown {
 	if (kind === NATURAL_END) {
 		return { name: NATURAL_END, message: '' };
 	}
 	return {
 		name: rawError instanceof Error ? rawError.name : 'Error',
 		message: rawError instanceof Error ? rawError.message : String(rawError),
+		phase,
 	};
 }
 

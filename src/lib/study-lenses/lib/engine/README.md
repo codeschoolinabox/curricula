@@ -55,7 +55,9 @@ The spec is the whole coupling surface:
   module's top-level evaluation settles; work scheduled beyond it (a pending
   timer) never runs, matching the function path. A module evaluation that
   rejects reaches `serializeHalt` as `kind: 'throw'`, exactly like a
-  function-path throw.
+  function-path throw — always with `phase: 'evaluation'`: the one-stage dynamic
+  import gives no structural parse/link/run boundary, so the module path
+  classifies nothing (the link-stage residual is named at `HaltPhase`).
 - `yieldCharge` — whether each yield deducts the flat yield charge from the
   budget. Defaults to true; densely emitting consumers (an intercept evaluator
   when its spec carries an iteration cap, the tracers) pass false, because at
@@ -130,18 +132,23 @@ channel. Setup may also install worker-GLOBAL state on the worker's `globalThis`
 registers there, not in the parameter list. (On the `'module'` path the returned
 globals are themselves installed on `globalThis`.)
 
-`serializeHalt(kind, rawError)` is the **worker-side halt author**. The
+`serializeHalt(kind, rawError, phase)` is the **worker-side halt author**. The
 bootstrap invokes it on EVERY worker-side stop — `kind: 'natural-end'` when the
-program runs out (`rawError` undefined), `kind: 'throw'` when it throws — and
-posts the clone-safe payload it returns as the halt. Worker-side authoring is
-the seam that preserves attribution data living only in the worker (an error's
-stamped node path), classifies non-Error throws (`throw 'oops'`), and lets
-instrumentation recognize its own limit-throw shape — the engine has no
-`'limit'` kind; limit classification is consumer-owned inside `serializeHalt`. A
-throwing `serializeHalt` is a worker crash (the worker-error termination cause).
-When the hook is absent, the engine defaults the payload to `{ name, message }`
-— drawn from the raw error on throws, and `{ name: 'natural-end', message: '' }`
-on natural ends.
+program runs out (`rawError` and `phase` undefined), `kind: 'throw'` when it
+throws — and posts the clone-safe payload it returns as the halt. On throws,
+`phase` says where the error arose — `'creation'` (the program failed before it
+ran: the function path's `new Function` construction) or `'evaluation'` (while
+running) — and the split is STRUCTURAL, which try/catch caught, never the
+error's type: a learner's runtime `throw new SyntaxError(...)` is
+`'evaluation'`. Worker-side authoring is the seam that preserves attribution
+data living only in the worker (an error's stamped node path), classifies
+non-Error throws (`throw 'oops'`), and lets instrumentation recognize its own
+limit-throw shape — the engine has no `'limit'` kind; limit classification is
+consumer-owned inside `serializeHalt`. A throwing `serializeHalt` is a worker
+crash (the worker-error termination cause). When the hook is absent, the engine
+defaults the payload to `{ name, message, phase }` on throws — drawn from the
+raw error and the structural split (human ruling 2026-08-25) — and
+`{ name: 'natural-end', message: '' }` on natural ends.
 
 **Thread side**:
 
@@ -338,7 +345,8 @@ Using a different name in code is a bug, not a stylistic choice.
   `serializeHalt` (or the engine default), posted by the bootstrap as structured
   data, exactly once per worker-side stop — natural end included.
 - **serializeHalt** — the consumer's worker-side halt author:
-  `(kind, rawError) → clone-safe payload`, kinds `'natural-end'` and `'throw'`.
+  `(kind, rawError, phase?) → clone-safe payload`, kinds `'natural-end'` and
+  `'throw'`; `phase` (`'creation' | 'evaluation'`) present exactly on throws.
   Owns limit classification; preserves worker-only attribution.
 - **termination cause** — the thread-side stop: cancel, fail (with payload),
   timeout, worker-error (crash, environment failure, throwing halt serializer,

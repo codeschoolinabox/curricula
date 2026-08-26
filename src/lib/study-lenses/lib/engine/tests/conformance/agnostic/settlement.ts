@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import REFERENCE_THREAD_LOGIC from '../../../testing/reference-thread-logic.js';
-import type { ThreadLogic } from '../../../types.js';
+import type { HaltPhase, ThreadLogic } from '../../../types.js';
 
 import type { AgnosticRunner } from './types.js';
 
@@ -37,6 +37,47 @@ export default function registerSettlement(runner: AgnosticRunner): void {
 				settlement.outcome,
 				(settlement.halt as { name: string }).name,
 			]).toEqual(['errored', 'TypeError']);
+		});
+
+		it('a runtime throw reaches the halt author with phase evaluation', async () => {
+			const handle = runner.run("throw new TypeError('boom');");
+			const { settlement } = await handle.result;
+
+			expect((settlement.halt as { phase?: HaltPhase }).phase).toBe(
+				'evaluation',
+			);
+		});
+
+		it('a construction failure reaches the halt author with phase creation', async () => {
+			const handle = runner.run('with (Math) { emit(PI); }');
+			const { settlement } = await handle.result;
+
+			expect((settlement.halt as { phase?: HaltPhase }).phase).toBe('creation');
+		});
+
+		it('a natural end reaches the halt author with no phase', async () => {
+			const handle = runner.run('');
+			const { settlement } = await handle.result;
+
+			expect((settlement.halt as { phase?: HaltPhase }).phase).toBeUndefined();
+		});
+
+		it('a runtime-thrown SyntaxError still reaches the halt author with phase evaluation', async () => {
+			const handle = runner.run("throw new SyntaxError('fake');");
+			const { settlement } = await handle.result;
+
+			expect((settlement.halt as { phase?: HaltPhase }).phase).toBe(
+				'evaluation',
+			);
+		});
+
+		it('a construction failure under strict false still reaches the halt author with phase creation', async () => {
+			const handle = runner.run('this is not valid js {{{', {
+				strict: false,
+			});
+			const { settlement } = await handle.result;
+
+			expect((settlement.halt as { phase?: HaltPhase }).phase).toBe('creation');
 		});
 
 		it('attaches the refinement for a recognized limit throw', async () => {

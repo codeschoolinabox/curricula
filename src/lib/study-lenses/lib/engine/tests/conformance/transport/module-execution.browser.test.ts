@@ -11,7 +11,7 @@ import { describe, expect, it } from 'vitest';
 
 import evaluate from '../../../evaluate.js';
 import REFERENCE_THREAD_LOGIC from '../../../testing/reference-thread-logic.js';
-import type { EvaluateSpec } from '../../../types.js';
+import type { EvaluateSpec, HaltPhase } from '../../../types.js';
 
 function moduleRun(code: string, overrides: Partial<EvaluateSpec> = {}) {
 	const spec: EvaluateSpec = {
@@ -47,6 +47,13 @@ describe('module execution (real transport)', () => {
 			settlement.outcome,
 			(settlement.halt as { name: string }).name,
 		]).toEqual(['errored', 'TypeError']);
+	});
+
+	it('a module-evaluation rejection reaches the halt author with phase evaluation', async () => {
+		const handle = moduleRun("await Promise.reject(new TypeError('boom'));");
+		const { settlement } = await handle.result;
+
+		expect((settlement.halt as { phase?: HaltPhase }).phase).toBe('evaluation');
 	});
 
 	it('settles worker-error, never hangs, when a global cannot install on globalThis', async () => {
