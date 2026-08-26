@@ -88,7 +88,7 @@ describe('batch consumption (await)', () => {
 		expect(actual).toEqual(result);
 	});
 
-	it.skip('multiple await calls return the same result', async () => {
+	it('multiple await calls return the same result', async () => {
 		const execution = createExecution(
 			createStreamingSource(['a'], { ok: true, events: ['a'] }),
 		);
@@ -152,7 +152,7 @@ describe('step-through (for await)', () => {
 });
 
 describe('PromiseLike (.then)', () => {
-	it.skip('.then() resolves to the same value as await', async () => {
+	it('.then() resolves to the same value as await', async () => {
 		const result = { ok: true, events: ['a'] };
 		const execution = createExecution(createStreamingSource(['a'], result));
 
@@ -163,7 +163,7 @@ describe('PromiseLike (.then)', () => {
 		expect(actual).toEqual(result);
 	});
 
-	it.skip('multiple .then() calls resolve to the same value', async () => {
+	it('multiple .then() calls resolve to the same value', async () => {
 		const execution = createExecution(
 			createStreamingSource(['a'], { ok: true, events: ['a'] }),
 		);
@@ -195,6 +195,13 @@ describe('.result property', () => {
 		);
 
 		expect(await execution.result).toEqual(result);
+	});
+
+	it('the settle is the same promise object across touches', () => {
+		const source = createStreamingSource(['a'], { ok: true, events: ['a'] });
+		const execution = createExecution(source);
+
+		expect(execution.result).toBe(execution.result);
 	});
 
 	it('a batch ignition calls start once', () => {
