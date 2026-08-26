@@ -177,11 +177,15 @@ encoding — so the whole call text is authored in one place.
   line preservation — loop-guard's, entirely. This module never walks an AST.
 - **The cap's origin and meaning.** Projecting a spec's `iterations` into a cap
   — including any validation, defaulting, or finiteness policy — is the
-  evaluator's; this module takes the number it is given and compares.
+  evaluator's, or the region's shared reader on its behalf (the
+  [guarded worker base](../guarded-worker-base/README.md); pass-through is its
+  ruled policy); this module takes the number it is given and compares.
 - **Halt authoring.** What a halt payload looks like, which `LimitTrip` fields
   ride it and under what names, and what an unrecognized throw becomes are each
-  evaluator's halt-serializer decisions. This module answers one classification
-  and exposes one count.
+  evaluator's halt-serializer decisions — the shared MEMBERS ride the
+  [guarded worker base](../guarded-worker-base/README.md)'s core on their
+  behalf; each unit's own members ride its finisher. This module answers one
+  classification and exposes one count.
 - **Injection.** Delivering the helpers into the running program (the engine's
   injected-globals channel) is the evaluator's worker setup — but see § Design
   commitments: splice and inject are one obligation.
