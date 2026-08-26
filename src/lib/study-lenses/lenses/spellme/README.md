@@ -302,6 +302,7 @@ answered here.
     <span data-spellme-set-aside data-marked="true|false">
   <form data-spellme-claim-form data-attempts="N">
     <div data-spellme-element-kinds>      — ten buttons, each data-element-kind
+                                            and aria-pressed
     <div data-spellme-extent>             — a stepper; drag on the source also sets it
     <div data-spellme-one-more>           — once attempts reach oneMoreAfter
     <button data-spellme-submit>
@@ -332,6 +333,16 @@ The three `data-*-verdict` attributes carry `attested` or `diverging` — the
 glossary's word for a per-field judgement, so the surface and the prose use one
 term and not two. They are **absent until the first submitted claim**; treat
 absence as "unclaimed", not as a state.
+
+(human ruling 2026-08-26) **Which element kind is currently selected rides
+`aria-pressed` on the picker's buttons, and no `data-*` hook carries it.** The
+selection is a pressed-toggle state, which is exactly what `aria-pressed` names,
+so a second attribute would duplicate it and would have to be kept in step with
+it. Styling binds to `[aria-pressed='true']` — an attribute, so the
+selectors-never-label-text rule holds — as `../writeme/` already does for its
+view toggles. It is the one part of this surface's state that is **not** in the
+`data-spellme-*` family, and it is deliberate: the accessible name of the state
+and the hook for drawing it are the same thing.
 
 **`data-spellme-claim-form` is absent when there is nothing to claim** — before
 the first element on a program with no claimable elements, and again once the
