@@ -1,4 +1,4 @@
-<!-- cspell:ignore ungranted widenings actioned acyclicity affordances authorised behaviour behavioural brok checkability checkpointed codemod codepoint cutover deixis failable finditer generalises homehood misdescribes neighbouring organise organised parentheticals pathspec respecified scriptable spellme synchronisation ugrep discharged elif unattacked endswith findall fullmatch importants keyspace misalign renderable rindex startswith unargued unfiled unfound unglossed unactioned unbannered unbuilt undercount undercounted undercounts undrawn unmigrated unretired unrun wireframes -->
+<!-- cspell:ignore ungranted widenings actioned acyclicity affordances authorised behaviour behavioural brok bytearray checkability checkpointed codemod codepoint CPETA cutover deixis failable finditer generalises homehood licence lstrip misdescribes neighbouring organise organised parentheticals pathspec respecified scriptable spellme synchronisation ugrep discharged elif unattacked endswith findall fullmatch importants keyspace misalign renderable rindex startswith unargued unfiled unfound unglossed uninspected unactioned unbannered unbuilt undercount undercounted undercounts undrawn unmigrated unretired unrun wireframes -->
 
 # orchestrate ux — resumption point
 
@@ -93,15 +93,38 @@ at two instances inside a single session.
 
 ### Build these — the two instrument widenings, landed RED first
 
-AR-5's AR5-CP-1 and AR5-CP-2, and **both are ten-line changes to CP-η, not a
-fifth instrument**. The precedent is this campaign's own: `1046c90d` landed CP-η
-RED so its detection was proven before anything was trusted to it.
+**⛔ BUILT. AR5-CP-1, AR5-CP-2 and AR5-F7 all landed together, and CP-η is RED
+on nine residues by design — see § The instruments.** Kept because two of the
+three bullets below carry prescriptions that were measured WRONG, and a reader
+who meets only the fix cannot tell a corrected instruction from an obeyed one.
+
+**Both are changes to CP-η rather than a fifth instrument, and that half held.
+"Ten-line changes" did not** — check 4 was **26** lines and its replacement is
+**90** [measured at this commit: the `# 4 ·` comment through the last check-4
+`print`, at `14e15d71` and at HEAD], because the row selector was never the
+binding constraint. AR-5's own prescription, executed verbatim, leaves the
+instrument **GREEN** on the finding it was built to catch: widening which rows
+the check reads adds nothing to inspect while the extractor still reads `[...]`
+tokens only, and the overlay sentence carries none. The precedent that DID hold
+is this campaign's own: `1046c90d` landed CP-η RED so its detection was proven
+before anything was trusted to it.
 
 - **AR5-CP-1 · widen check 4's row selector.** It scans only lines matching
   `( ) strict` or `[Generate code]` — **7 of 10 control-row lines**, and zero
   overlay lines. **That is why F3 was invisible to it.** Widen it to every
   framed line in a full-frame drawing, allowlist the region's own controls and
-  the drawn copy the glossary owns, and let everything else fail loudly.
+  the drawn copy the glossary owns, and let everything else fail loudly. ⛔
+  **Two halves of that sentence are wrong and were not obeyed.** "Every framed
+  line in a full-frame drawing" is **45** rows and NARROWS the check — it drops
+  three control rows the old selector already reached, and makes the reverse
+  direction lie, because all three cause-arm drawings are excerpts. It reads
+  every framed row in **every** fenced block instead: **81**. And "the drawn
+  copy the glossary owns" points at **CP-α**, which carries the row
+  `the blocked sentence, ordered fix-then-lift` — an allowlist sourced there
+  would have **certified AR5-F3 as correct**. CP-α enumerates what the GLOSSARY
+  owns; F3 is precisely a datum the glossary names and the CONTRACT does not
+  grant. The allowlist is sourced from the projection contract block, and
+  assertion 5 holds the two together one-to-one.
 - **AR5-CP-2 · let check 2 see count-arm captions.** It opens with
   `if 'not reached' not in stand: continue`, so it skips all four count-arm
   drawings. **That is why F4 was invisible to it.** ⛔ **AR-5's prescribed shape
@@ -114,11 +137,26 @@ RED so its detection was proven before anything was trusted to it.
   rail and the caption — which is CP-α's own row _"a tray never takes the
   caption"_ and is CORRECT. **So derive the count arm's expected shape from the
   four count-arm drawings first, then write the check.** Teach the script the
-  count-line string before you teach it a shape.
+  count-line string before you teach it a shape. ⛔ **Done exactly that.** The
+  derived rule is **count arm: `TRAY* · COUNT_LINE`** — the last row is the
+  count line, every row before it is tray box, and there is no leading blank —
+  against **cause arm: `BLANK · MESSAGE+ · CAUSE_COUNT`**. A fourth row class
+  `TRAY` turns CP-α's _"a tray never takes the caption"_ from a table claim into
+  something the script asserts. ⛔ **AR-5's skip count was also wrong**: check 2
+  skipped **6** of the 9 rails, not 4.
 - **AR5-F7 · each check should print `skipped: N` beside `PASS`.** A pass count
   with a silent skip count is how coverage is lost — check 1 currently drops a
   whole block with no output. **Given an id here because the closing commit is
-  audited against a ten-item roll-call and this one had only prose.**
+  audited against a ten-item roll-call and this one had only prose.** ⛔ **Done,
+  and a bare `skipped: N` was NOT enough**: the four checks count four different
+  units, so each prints its unit and the **licence** for skipping — check 1 one
+  name row with no standings (the abbreviation rule), check 2 two cropped
+  excerpts (§ Fresh mount licenses the crop), check 3 two independent
+  comparisons rather than one number, and check 4 an **exclusion ledger** with
+  line numbers, because for it a nonzero skip would mean the classifier stopped.
+  ⛔ **AR-5's "7 of 10 control-row lines" was right and its proposed regex was
+  not** — it matches 12, the extra two being `│ ░ strict off. ░ │`, overlay copy
+  caught on the bare word `strict`.
 
 ### Record, do not fix
 
@@ -695,6 +733,15 @@ opposite of its prose, which is the class that shipped BLOCKER 1 past every
 other one. None subsumes another, and round 12's proof is that CP-α would have
 ticked BLOCKER 1 green.
 
+**Still four. CP-η was WIDENED 2026-08-26, not joined by a fifth** — round 8's
+reviewer warned that "a fifth instrument will find a fifth blind spot", and both
+of AR-5's counter-proposals are changes to an instrument that already exists.
+The widening adds a fourth detected class: **drawn-and-never-granted**, which is
+B13's class and AR5-F3's, and which neither CP-α nor the old check 4 could reach
+— CP-α walks the glossary's clauses and not the drawings' tokens, and check 4
+read `[...]` tokens on control rows only, while the datum that got past
+everything is a bracket-free sentence on an overlay.
+
 **Was § The two instruments until 2026-08-19**, when CP-η made it three. No
 in-repo citation used the old heading [re-measured 2026-08-25 at `883fc4c2`: **3
 lines across 2 files**, not the 1 an earlier revision claimed — the extra hits
@@ -754,114 +801,257 @@ EOF
 # 3 · CP-η — drawing CONSISTENCY. Reads a drawing as an ASSERTION, not as a line.
 #     Instruments 1 and 2 detect PRESENCE; CP-α detects ABSENCE; this one detects
 #     PRESENT-AND-WRONG, the class that shipped BLOCKER 1 past all of them.
+#     Check 4 was widened 2026-08-26 (AR5-CP-1) from control-row tokens to every
+#     drawn datum, and check 2 (AR5-CP-2) from the cause arm to both arms. Each
+#     check now prints what it SKIPPED, with the licence for skipping it.
+#     Set CPETA_FILE to mutation-test against a copy.
 python3 - <<'EOF'
-import re
-PATH='src/lib/study-lenses/orchestrate/ux/wireframes.md'
-NAMES=['Source','Tokens','AST','Environment','Evaluation']
-WORDS={'one':1,'two':2,'three':3,'four':4,'five':5}
-STANDING=r'▾ \d+ ●|▾ \d+|not reached|·'
-TOLERANCE=1.5   # the MEASURED house tolerance, not a round number — see below
-lines=open(PATH).read().split('\n')
-inf=False; blocks=[]; cur=[]
-for i,l in enumerate(lines,1):
+import re, os
+# CPETA_FILE lets a mutation run against a COPY. Never point it at anything but
+# a copy: the instrument is read-only and must stay that way.
+PATH = os.environ.get('CPETA_FILE',
+                      'src/lib/study-lenses/orchestrate/ux/wireframes.md')
+NAMES = ['Source', 'Tokens', 'AST', 'Environment', 'Evaluation']
+WORDS = {'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5}
+STANDING = r'▾ \d+ ●|▾ \d+|not reached|·'
+COUNT_LINE = r'(\w+) phases have nothing to open yet'
+CAUSE_COUNT = r'the last (\w+) phases were not reached'
+TOLERANCE = 1.5   # the MEASURED house tolerance, not a round number
+BOX = '─│┌┐└┘├┤╳╌░'   # space is deliberately NOT box: see check 4
+
+lines = open(PATH).read().split('\n')
+inf = False; blocks = []; cur = []
+for i, l in enumerate(lines, 1):
     if l.strip().startswith('```'):
         if inf: blocks.append(cur)
-        cur=[]; inf=not inf; continue
-    if inf: cur.append((i,l))
-rails=[]
+        cur = []; inf = not inf; continue
+    if inf: cur.append((i, l))
+
+FULL = {id(b) for b in blocks if b and b[0][1].startswith('┌') and b[-1][1].startswith('└')}
+rails = []; unpaired = []
 for b in blocks:
-    at=[k for k,(i,l) in enumerate(b) if all(n in l for n in NAMES)]
+    at = [k for k, (i, l) in enumerate(b) if all(n in l for n in NAMES)]
     if not at: continue
-    k=at[0]; nxt=b[k+1] if k+1<len(b) else None
+    k = at[0]; nxt = b[k + 1] if k + 1 < len(b) else None
     if nxt and nxt[1].startswith('│') and re.search(STANDING, nxt[1]):
-        rails.append((b,k,nxt))
-bad1=[]
-for b,k,(line,stand) in rails:
-    row=b[k][1]
-    spans=[(n,row.index(n),row.index(n)+len(n)-1) for n in NAMES]
-    cells=[(m.start(),m.end()-1,m.group()) for m in re.finditer(STANDING,stand)]
-    if len(cells)!=len(spans): bad1.append((line,'COUNT',len(cells),len(spans))); continue
-    for (n,a,b2),(sa,sb,t) in zip(spans,cells):
-        off=(sa+sb)/2-(a+b2)/2
-        if abs(off)>TOLERANCE: bad1.append((line,n,t,round(off,1)))
-print('1 · alignment, name centre vs standing centre, tolerance +/-%s'%TOLERANCE)
-print('   PASS - %s rail drawings'%len(rails)) if not bad1 else [
-    print('   FAIL line %s  %s'%(r[0],r[1:])) for r in bad1]
-bad2=[]
-for b,k,(line,stand) in rails:
-    if 'not reached' not in stand: continue
-    shape=[]
-    for i,l in b[k+2:]:
-        if not l.startswith('│') or l[1:2] in ('─','├','└'): break
-        body=l[1:l.rindex('│')] if '│' in l[1:] else l[1:]
+        rails.append((b, k, nxt))
+    else:
+        unpaired.append(b[k][0])
+
+# ── 1 · alignment
+bad1 = []
+for b, k, (line, stand) in rails:
+    row = b[k][1]
+    spans = [(n, row.index(n), row.index(n) + len(n) - 1) for n in NAMES]
+    cells = [(m.start(), m.end() - 1, m.group()) for m in re.finditer(STANDING, stand)]
+    if len(cells) != len(spans):
+        bad1.append((line, 'COUNT', len(cells), len(spans))); continue
+    for (n, a, b2), (sa, sb, t) in zip(spans, cells):
+        off = (sa + sb) / 2 - (a + b2) / 2
+        if abs(off) > TOLERANCE: bad1.append((line, n, t, round(off, 1)))
+print('1 · alignment, name centre vs standing centre, tolerance +/-%s' % TOLERANCE)
+print('   PASS - %s rail drawings' % len(rails)) if not bad1 else [
+    print('   FAIL line %s  %s' % (r[0], r[1:])) for r in bad1]
+print('   skipped: %s (name row with no standings row%s) — the abbreviation rule '
+      'licenses it' % (len(unpaired), ': ' + ', '.join(map(str, unpaired)) if unpaired else ''))
+
+# ── 2 · caption shape, BOTH arms
+# The arm is read off the STANDING row, never off the caption: the caption is
+# the thing under test. Expected shapes, derived from the drawings rather than
+# prescribed — cause arm BLANK · MESSAGE+ · CAUSE_COUNT; count arm TRAY* ·
+# COUNT_LINE, no leading blank.
+bad2 = []; skip2 = []
+for b, k, (line, stand) in rails:
+    arm = 'CAUSE' if 'not reached' in stand else 'COUNT'
+    shape = []
+    for i, l in b[k + 2:]:
+        if not l.startswith('│') or l[1:2] in ('─', '├', '└'): break
+        body = l[1:l.rindex('│')] if '│' in l[1:] else l[1:]
         if not body.strip(): shape.append('BLANK')
-        elif re.search(r'the last \w+ phases were not reached',body): shape.append('COUNT')
+        elif body.lstrip()[0] in '┌│└': shape.append('TRAY')
+        elif re.search(CAUSE_COUNT, body): shape.append('CAUSE_COUNT')
+        elif re.search(COUNT_LINE, body): shape.append('COUNT_LINE')
         else: shape.append('MESSAGE')
-    ok=(len(shape)>=3 and shape[0]=='BLANK' and shape[-1]=='COUNT'
-        and set(shape[1:-1])=={'MESSAGE'})
-    if not ok: bad2.append((line,' · '.join(shape)))
-print('2 · caption shape, barred drawings - expected BLANK · MESSAGE+ · COUNT')
+    if not shape:
+        if id(b) in FULL:
+            bad2.append((line, arm, 'no caption in a FULL-FRAME drawing'))
+        else:
+            skip2.append(line)
+        continue
+    if arm == 'CAUSE':
+        ok = (len(shape) >= 3 and shape[0] == 'BLANK' and shape[-1] == 'CAUSE_COUNT'
+              and set(shape[1:-1]) == {'MESSAGE'})
+    else:
+        ok = (shape[-1] == 'COUNT_LINE' and set(shape[:-1]) <= {'TRAY'})
+    if not ok: bad2.append((line, arm, ' · '.join(shape)))
+print('2 · caption shape — CAUSE: BLANK · MESSAGE+ · CAUSE_COUNT · '
+      'COUNT: TRAY* · COUNT_LINE')
 print('   PASS') if not bad2 else [
-    print('   FAIL rail at line %s  ->  %s'%r) for r in bad2]
-bad3=[]
-for b,k,(line,stand) in rails:
-    body=[l for i,l in b[k+2:]]
+    print('   FAIL rail at line %s  %s arm  ->  %s' % r) for r in bad2]
+print('   checked: %s, skipped: %s (cropped excerpts%s) — § Fresh mount licenses '
+      'the crop. The name row with no standings is check 1\'s, not double-counted'
+      % (len(rails) - len(skip2), len(skip2),
+         ': ' + ', '.join(map(str, skip2)) if skip2 else ''))
+
+# ── 3 · drawn numerals vs the drawing's own stations
+bad3 = []; n_un = 0; n_em = 0
+for b, k, (line, stand) in rails:
+    body = [l for i, l in b[k + 2:]]
     if 'not reached' in stand:
-        drawn=len(re.findall('not reached',stand)); m=None
+        drawn = len(re.findall('not reached', stand)); m = None
         for l in body:
-            m=re.search(r'the last (\w+) phases were not reached',l)
+            m = re.search(CAUSE_COUNT, l)
             if m: break
-        if m and WORDS.get(m.group(1))!=drawn:
-            bad3.append((line,'unreached',drawn,m.group(1)))
-    dots=len(re.findall('·',stand)); m=None
+        if m:
+            n_un += 1
+            if WORDS.get(m.group(1)) != drawn:
+                bad3.append((line, 'unreached', drawn, m.group(1)))
+    dots = len(re.findall('·', stand)); m = None
     for l in body:
-        m=re.search(r'(\w+) phases have nothing to open yet',l)
+        m = re.search(COUNT_LINE, l)
         if m: break
-    if m and WORDS.get(m.group(1))!=dots:
-        bad3.append((line,'empty',dots,m.group(1)))
+    if m:
+        n_em += 1
+        if WORDS.get(m.group(1)) != dots:
+            bad3.append((line, 'empty', dots, m.group(1)))
 print("3 · drawn numerals vs the drawing's own stations")
 print('   PASS') if not bad3 else [
-    print('   FAIL rail at line %s  %s: drawn %s, caption says %s'%r) for r in bad3]
-# 4 · control-row tokens vs the projection contract, BOTH directions.
-#     Allowlist = the region's OWN controls, which the contract deliberately does
-#     not grant (B13). Everything else drawn must be projected data.
-OWN = ('Generate code', 'Edit code', 'Guide')
-PROJECTED = {'snippet type': r'\[(module|script)\]',
-             "the selected level's mark": r'\[[^]]+ · [^]]+▾\]',
-             'the none-state': r'\[plain JavaScript ▾\]',
-             'the posture': r'\([•o ]\) strict'}
-rows=[]
+    print('   FAIL rail at line %s  %s: drawn %s, caption says %s' % r) for r in bad3]
+print('   two independent comparisons: unreached checked on %s of %s rails, '
+      'empty-count on %s — the rest draw no such line' % (n_un, len(rails), n_em))
+
+# ── 4 · every drawn datum vs the projection contract, both directions
+# The region's OWN surfaces. The contract excludes them by name: "a control's
+# own label belongs to the surface that renders it."
+OWN = {
+    "the region's own controls": r'\[(Generate code|Edit code|Guide ▾)\]',
+    'the tray heading':          r'ways to study the \w+',
+    'the proposals heading':     r'next, you could:',
+    # ENUMERATED, never "any parenthetical": the broad form covered
+    # `(greeting)` inside the learner's source and truncated that residue.
+    'a stage direction':         r'\((the surface|the generator)[^)]*\)',
+}
+# One entry per clause of the projection contract, keyed by the clause name as
+# that block spells it. Assertion 5 below holds these two lists together.
+GRANTED = {
+    'name':   r'Source|Tokens|AST|Environment|Evaluation',
+    'label':  r'Source|Tokens|AST|Environment|Evaluation',
+    'accessible': (r'▾ \d+ ●|▾ \d+|not reached|·|' + COUNT_LINE +
+                   r'|the (grammar|spelling|machinery) broke here[^│]*'
+                   r'|the syntax tree does not span its source\.|' + CAUSE_COUNT + r'\.'),
+    'levels': r'\[plain JavaScript ▾\]',
+    "the selected level's mark": r'\[[^]]+ · [^]]+▾\]',
+    'the snippet type': r'\[(module|script)\]',
+    'the posture': r'\([•o ]\) strict',
+    'the pane': r'your code|the pane holds: [^│]*',
+    'recommendations': r'\[ [^]]+ \]',
+}
+
+# assertion 5 · the granted table is HELD to the contract block. The block is
+# NOT auto-parsed — two indent levels, a wrapped clause name, three
+# continuation lines. Its clause ANCHORS are read instead (a line indented 0 or
+# 4; a line indented 2 continues the previous one), and anchors and keys must
+# match one-to-one. Add, rename or delete a contract row and this fails loudly
+# rather than the allowlist silently widening.
+inf = False; block = []
+for l in lines:
+    if l.strip().startswith('```'):
+        if inf and any('in the machine' in x for x in block): break
+        inf = not inf; block = []; continue
+    if inf: block.append(l)
+anchors = []
+for l in block:
+    if not l.strip() or 'in the machine' in l: continue
+    ind = len(l) - len(l.lstrip()); head = re.split(r'  +', l.strip())[0]
+    if ind in (0, 4): anchors.append(head)
+    elif ind == 2 and anchors: anchors[-1] += ' ' + head
+bad5 = [('CONTRACT ROW MATCHES %d TABLE KEYS' % sum(k.startswith(a) for k in GRANTED), a)
+        for a in anchors if sum(k.startswith(a) for k in GRANTED) != 1]
+bad5 += [('TABLE KEY MATCHES %d CONTRACT ROWS' % sum(k.startswith(a) for a in anchors), k)
+         for k in GRANTED if sum(k.startswith(a) for a in anchors) != 1]
+
+rows = []
 for b in blocks:
-    for i,l in b:
-        if l.startswith('│') and (re.search(r'\([•o ]\) strict', l) or '[Generate code]' in l):
-            rows.append((i,l))
-bad4=[]
-for i,l in rows:
-    for tok in re.findall(r'\[[^]]*\]', l):
-        if any(o in tok for o in OWN): continue
-        if any(re.fullmatch(p, tok) for p in PROJECTED.values()): continue
-        bad4.append((i, 'DRAWN, NOT GRANTED', tok))
-seen=' '.join(l for i,l in rows)
-for name, pat in PROJECTED.items():
-    if not re.search(pat, seen):
-        bad4.append(('-', 'GRANTED, NEVER DRAWN', name))
-print('4 · control-row tokens vs the projection contract, both directions')
-print('   PASS - %s control rows'%len(rows)) if not bad4 else [
-    print('   FAIL line %s  %s: %s'%r) for r in bad4]
-print('CP-eta: %s'%('RED' if (bad1 or bad2 or bad3 or bad4) else 'GREEN'))
+    for i, l in b:
+        if l.startswith('│'):
+            cut = l.rindex('│')
+            rows.append((i, l[1:cut] if cut else l[1:], l[cut + 1:].strip()))
+drawn_at = {k: [] for k in GRANTED}
+bad4 = []
+for i, body, _ in rows:
+    seen = bytearray(len(body))
+    for name, pat in list(OWN.items()) + list(GRANTED.items()):
+        for m in re.finditer(pat, body):
+            if m.end() > m.start():
+                if name in drawn_at: drawn_at[name].append(i)
+                for c in range(m.start(), m.end()): seen[c] = 1
+    for c, ch in enumerate(body):
+        if ch in BOX: seen[c] = 1
+    run = ''
+    for c in range(len(body) + 1):
+        if c < len(body) and not seen[c]: run += body[c]
+        elif run:
+            if len(run.strip()) > 1: bad4.append((i, 'DRAWN, NOT GRANTED', run.strip()))
+            run = ''
+for k in GRANTED:
+    if not drawn_at[k]: bad4.append(('-', 'GRANTED, NEVER DRAWN', k))
+annotations = [(i, a) for i, _, a in rows if a]
+print('4 · every drawn datum vs the projection contract, both directions')
+print('   PASS - %s framed rows, %s clause anchors matched one-to-one, 0 residues'
+      % (len(rows), len(anchors))) if not (bad4 or bad5) else (
+    [print('   FAIL  %s: %s' % r) for r in bad5] and None,
+    [print('   FAIL line %s  %s: %r' % r) for r in bad4] and None)
+print('   EXCLUSION LEDGER — box-drawing runs consumed; %s trailing annotations '
+      'stripped past the closing vertical, at lines %s. Line numbers rather '
+      'than a bare count, because a count is not auditable.'
+      % (len(annotations), ' '.join(str(i) for i, a in annotations)))
+print('   BLIND SPOTS, measured and not patched: a greedy free-copy match (the '
+      'nameplate, the three framings) leaves its row uninspected past the first '
+      'datum · the reverse direction is file-global, so a clause drawn twice can '
+      'lose one drawing silently · un-framed drawings are unread, and § A '
+      "station's kit at 0, 1 and many is one.")
+print('CP-eta: %s' % ('RED' if (bad1 or bad2 or bad3 or bad4 or bad5) else 'GREEN'))
 EOF
 ````
 
-**Expected, running the block below: `DECISIONS.md malformed rows: none` ·
-`RESUME.md malformed rows: none` · `{63: 79}`, no outliers · `CP-eta: GREEN` on
-all **four** checks** [all measured at this commit].
+**Expected, running the block above: `DECISIONS.md malformed rows: none` ·
+`RESUME.md malformed rows: none` · `{63: 79}`, no outliers · **`CP-eta: RED`,
+check 4, with NINE residues** — the three code-box rows and the blocked
+overlay's three lines drawn twice** [all measured at this commit].
+
+⛔ **THE RED IS DELIBERATE AND IT IS THE POINT.** Check 4 was widened at this
+commit and fires against the projection contract **exactly as it stands**, with
+no mutation and no staging. Six of its nine residues are **AR5-F3** — the datum
+AR-5 found — and three are a datum **AR-5 did not**: the learner's source, drawn
+in every code box and granted nowhere, while the contract grants its `type`
+[read: `README.md` — "the `snippet` prop is the source text alone — the
+glossary's _snippet_ is this prop together with `type`"]. Both are closed by the
+next commit, which adds the two contract rows **and** the two matching table
+keys; assertion 5 makes it impossible to add one without the other.
+
+**Do not silence a residue by allowlisting it.** The allowlist is derived from
+the contract block and held to it one-to-one. A residue means either the drawing
+draws an ungranted datum or the contract owes a row — never that the instrument
+needs loosening.
+
+**AR-5's own prescription for this widening was measured and does not work.** It
+said to widen check 4's _row selector_; substituting its suggested selector and
+changing nothing else yields 12 rows and verdict **GREEN**, because the overlay
+rows carry **zero** bracket tokens and the old extractor only read `[...]`
+[measured at `14e15d71`]. The row selector was never the binding constraint —
+the **extractor** was. And its selector matches two rows that are not control
+rows at all, `│ ░ strict off. ░ │` at two sites, on the bare word `strict`.
 
 CP-η landed **RED** at `1046c90d` — twelve failing columns and one failing
 caption shape — and that was deliberate: an instrument that has never been seen
 to fail has not been shown to work. It went green in two steps, `bbc21d87`
-(check 1) and this commit (check 2). Check 3 passed throughout and was
+(check 1) and `df0f5c99` (check 2). Check 3 passed throughout and was
 mutation-tested rather than trusted [see `1046c90d`'s body for all four
-mutations].
+mutations]. **The widened check 2 is the same case and got the same treatment**:
+it passes on the tree it was written against, so it is mutation-tested rather
+than trusted — five mutations, all firing, in this commit's body. Check 3's
+precedent, not check 1's; a red staged by breaking the instrument would be the
+instrument's fault, which is what this campaign's own note at AR5-CP-2 forbids.
 
 ⚠ **CP-η's tolerance is ±1.5 and that number is MEASURED, not chosen.** Every
 unbarred drawing sits at up to ±1.5 — `Evaluation`'s `·` at column 52 against a
