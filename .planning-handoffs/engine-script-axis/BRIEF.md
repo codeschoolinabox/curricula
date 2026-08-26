@@ -100,6 +100,12 @@ means _this_ kind of ruled, not a ledger entry.
 6. **The test tier was ruled to wait on a fast-tier spike.** That spike has
    since **run and passed** (§ 6, S37/S38), so the ruling is now available on
    evidence rather than deferred.
+7. **Acorn IS the standard.**
+   `[relayed: human — "it's ok if we accept acorn as the standard, learners aren't guaranteed to run on V8"]`.
+   The most consequential of the seven: it converts every acorn-vs-host
+   divergence from a fidelity defect into the definition of the language level,
+   and it makes **gating** on the parse legitimate rather than dangerous. See §
+   7.2b and § 7.13.
 
 ---
 
@@ -454,14 +460,37 @@ Parsing in `evaluate()` would amend that contract; do not.
 
 ```ts
 parse(code, {
-	ecmaVersion: 'latest', // REQUIRED — see below
+	ecmaVersion: ECMA_VERSION, // 2024 — the repo's SHARED pin, NOT 'latest'
 	sourceType: execution === 'module' ? 'module' : 'script',
 	allowHashBang: true,
 });
 ```
 
-**`ecmaVersion: 'latest'` is not optional and its omission is a repeat of the
-defect that killed the `new Function` probe.** Measured:
+**An `ecmaVersion` is mandatory, and it must be the repo's shared pin — an
+earlier draft of this brief said `'latest'` and was wrong.**
+`src/lib/study-lenses/embody/ecma-version.ts` exports `ECMA_VERSION = 2024`, and
+its comment states why it is numeric and why it is shared:
+
+> "Numeric, not `'latest'` — eslint-scope's ES6 gate is `ecmaVersion >= 6`: a
+> string fails the comparison and silently degrades every scope to ES5. One
+> shared value keeps acorn's two readers (tokenize, parse) and the environment
+> stage's scope analysis on one parse goal, **so they cannot drift**."
+
+An engine that picks `'latest'` independently is exactly the drift that constant
+exists to prevent. Measured: 2024 and `'latest'` agree on every case tested
+(top-level await, hashbang, top-level `return`, `let NaN`, class static blocks,
+decorators) and differ only in the `using`-declaration error _message_ — so the
+pin costs nothing today and prevents a silent divergence later.
+
+**OPEN — where the constant lives.** The engine is declared dependency-free and
+is a _shared leaf_; importing `embody/ecma-version.js` is a cross-region
+dependency it forbids. Three options, none free: move the constant somewhere
+genuinely shared; take it as an `EvaluateSpec` field (consumer-supplied, this
+engine's idiom for everything else); or duplicate the numeral and accept the
+drift. **The receiving unit owes a ruling.**
+
+Omitting it entirely is the worst option, and is a repeat of the defect that
+killed the `new Function` probe. Measured:
 
 ```text
 acorn, sourceType:'module', ecmaVersion omitted
@@ -627,16 +656,20 @@ carries today, and it does not gate a union widening on new CI infrastructure.
    `ar-1`; stripping is cosmetic, not classification.
 2. **`let NaN`-class divergence survives any static check** (§ 3.6) —
    label-only, never a refusal, and it needs the `configurable: true` invariant
-   recorded. 2b. **STANDING CLASS — acorn's grammar lags the host, and every gap
-   is a false refusal of a running program.** § 3.6's table is four
-   _script-goal_ cases; § 5.2 puts acorn in front of the shipped `'module'` axis
-   too, where it was never measured against the browser. Measured example: at
-   `ecmaVersion:    'latest'`, `class A { @dec m(){} }` →
-   `Unexpected character '@'`. Against § 1.1 decision 2's own bar this is not a
-   footnote — a parser that refuses what V8 runs reproduces the defect the axis
-   exists to remove. **This is the strongest argument for the § 7.13 option that
-   parses only to LABEL, never to gate.** If acorn does gate, the receiving unit
-   owes a stated policy for host-vs-acorn divergence and a pinned acorn version.
+   recorded.
+
+   **RESOLVED BY § 1.1 DECISION 7 — acorn's grammar IS the language, not a
+   lagging approximation of the host's.** Measured, acorn rejects constructs V8
+   accepts (`class A { @dec m(){} }` → `Unexpected character '@'`, at both 2024
+   and `'latest'`). Before decision 7 that was a standing defect class: a parser
+   refusing what the host runs reproduces the failure the axis exists to remove.
+   **Under decision 7 it is the definition of the level** — learners are not
+   guaranteed to run on V8, so a construct acorn rejects is out of bounds
+   everywhere rather than accidentally allowed on Chrome. Two obligations follow
+   instead of a residual: **pin the acorn version**, so the language does not
+   move under learners on an `npm update`; and **align with `ECMA_VERSION`**,
+   not with whatever the newest acorn accepts.
+
 3. **`strict`-inertness is a migration hazard.** A snippet moved from
    `'function'` to `'script'` silently loses the `strict: true` default. Correct
    fidelity, surprising diff — and `with` programs, which today degrade to a
@@ -732,10 +765,25 @@ carries today, and it does not gate a union widening on new CI infrastructure.
     `EngineError.cause`; or let the engine author a halt thread-side (and decide
     whether `refineError` runs on it); or keep parse failures worker-authored by
     spawning anyway and using the thread's verdict only to LABEL the phase —
-    which forfeits § 3.7's 760× saving but costs no contract change at all.
-    **That third option is the conservative default and the brief recommends it
-    be costed seriously**, because the saving buys latency on a path that only
-    runs when the learner's program is already broken.
+    which forfeits § 3.7's 760× saving but costs no contract change at all. **§
+    1.1 DECISION 7 CHANGES THE WEIGHTING HERE.** An earlier draft recommended
+    the third option — parse only to LABEL, never to gate — on the ground that a
+    parser refusing what the host runs is the defect this axis exists to remove.
+    Decision 7 removes that ground: if acorn is the standard, gating on it is a
+    _feature_ (one language everywhere), not a hazard. The label-only escape
+    hatch is therefore no longer the safe default, and **the contract question
+    can no longer be dodged** — gating means a parse failure must be
+    expressible, and today it is not. Cost the three options on latency and
+    contract surface, not on fidelity.
+
+    **A nuance that survives either way:** for evaluator-driven runs embody has
+    already parsed the learner's source at `ECMA_VERSION`, and the gate bars
+    evaluation unless it succeeded — but the engine receives the
+    **instrumented** source, a different string. The engine's parse is therefore
+    not redundant: it validates instrumentation output, and a failure there is
+    an **instrumentation defect, not a learner error**. Whatever phase
+    vocabulary is chosen must not quietly report an instrumentation bug as the
+    learner's syntax error.
 
     Whichever is chosen, the consumer's `serializeHalt` stops or keeps seeing
     parse failures — and intercept and the tracers author halts, so it is their
@@ -782,11 +830,11 @@ constraints · `engine/worker/bootstrap.ts` end to end · `engine/worker/types.t
 
 **Then, in order:**
 
-1. **Get the human's rulings** on: § 1.1's six decisions (none recorded anywhere
-   but here); § 5.1 prerequisite 0's owner; the five contract amendments (§
-   7.9–§ 7.14) — of which **§ 7.13 is a contract-WIDENING decision owed before
-   `types.ts` is locked**, not a prose reword, and § 7.14 changes the shipped
-   `'module'` path's phase behavior.
+1. **Get the human's rulings** on: § 1.1's SEVEN decisions (none recorded
+   anywhere but here); § 5.1 prerequisite 0's owner; the five contract
+   amendments (§ 7.9–§ 7.14) — of which **§ 7.13 is a contract-WIDENING decision
+   owed before `types.ts` is locked**, not a prose reword, and § 7.14 changes
+   the shipped `'module'` path's phase behavior.
 2. **§ 6's fast-tier spike has already run and passed** (S37/S38). What remains
    is choosing where the esbuild step is invoked — a vitest `globalSetup`, a
    small Vite plugin, or a pretest script — and whether the bundled artifact is
