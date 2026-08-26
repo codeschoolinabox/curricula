@@ -1080,6 +1080,14 @@ execution and never holds one alone.
   the exclusion real); compile probes pin both worker-config shapes and the
   units' deferred `phase` members; the measured shared-line count is 48, not the
   banked 57.
+- **Batch-per-cluster AR-3 cadence is RATIFIED (human ruling 2026-08-26, at an
+  X1 reviewer's process escalation).** HR-13's "AR-3 on every un-skip" is
+  satisfied by ONE ar-3 over a cluster's complete enumerated row set — the
+  reviewer sees every row it is asked to discharge, named — plus a FRESH round
+  whenever rows change or a red set is re-cut; per-row reviewer spawns are not
+  owed. The trigger's timing half is unchanged (the review still precedes the
+  implementation it gates), and AR-4 stays per increment. Binds the rest of this
+  campaign; prior batch rounds this wave stand under it.
 
 ### The ratification, and what it settled (human ruling 2026-08-06)
 
