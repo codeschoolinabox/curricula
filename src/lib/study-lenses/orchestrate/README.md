@@ -113,9 +113,14 @@ type StudyLensesProperties = {
 ```
 
 One disambiguation the surface owes the glossary: the `snippet` prop is the
-source text alone — the glossary's _snippet_ is this prop together with `type`.
-The prop is mount-time only: the instrument seeds from it once, and a later
-change is ignored — after mount the region's own edit intake is the only writer.
+source text alone — the **package** glossary's _snippet_ is this prop together
+with `type` [read: [`../README.md`](../README.md) glossary · snippet — "the raw
+program passed in for study: the source text a learner or host brings, together
+with its snippet type"]. The package is named because this region's glossary has
+no `snippet` entry and is not supposed to: `types.ts` records that "the package
+glossary (`../README.md`) owns the shared vocabulary". The prop is mount-time
+only: the instrument seeds from it once, and a later change is ignored — after
+mount the region's own edit intake is the only writer.
 
 One embedding constraint: the instrument's only heading elements are the guide's
 `h4` topic titles (the lifecycle strip and every control label are inline text),

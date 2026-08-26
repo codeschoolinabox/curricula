@@ -250,11 +250,11 @@ about where the machine stopped.
 
 **This inverts Journey 6's own complaint rather than answering it.**
 [`user-journeys.md`](./user-journeys.md) states the defect as: the empty phase
-gives "a dead control and no reason for it", while a `_barred_` phase "has a
-cause to be read". Its next clause is the one that bears on this passage — the
-cause it means is the one "today's build draws one per barred phase; the
-arrangement draws one, once, in the caption", and it says so explicitly, because
-"this bullet is describing what the learner meets now rather than licensing the
+gives "a dead control and no reason for it", while a _barred_ phase "has a cause
+to be read". Its next clause is the one that bears on this passage — the cause
+it means is the one "today's build draws one per barred phase; the arrangement
+draws one, once, in the caption", and it says so explicitly, because "this
+bullet is describing what the learner meets now rather than licensing the
 repetition" [`personas.md`](./personas.md) rejects. Either way its contrast
 holds: "**the common case is served worse than the exceptional one**, which is
 the wrong way round." The Rail fixes the common case and, by moving the cause

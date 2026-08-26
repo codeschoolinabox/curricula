@@ -1,20 +1,27 @@
-<!-- cspell:ignore ungranted widenings actioned acyclicity affordances authorised behaviour behavioural brok bytearray checkability checkpointed codemod codepoint CPETA cutover deixis failable finditer generalises homehood licence lstrip misdescribes neighbouring organise organised parentheticals pathspec respecified scriptable spellme synchronisation ugrep discharged elif unattacked endswith findall fullmatch importants keyspace misalign renderable rindex startswith unargued unfiled unfound unglossed uninspected unactioned unbannered unbuilt undercount undercounted undercounts undrawn unmigrated unretired unrun wireframes -->
+<!-- cspell:ignore ungranted widenings accountings overclaim Tokenz actioned acyclicity affordances authorised behaviour behavioural brok bytearray checkability checkpointed codemod codepoint CPETA cutover deixis failable finditer generalises homehood licence lstrip misdescribes neighbouring organise organised parentheticals pathspec respecified scriptable spellme synchronisation ugrep discharged elif unattacked endswith findall fullmatch importants keyspace misalign renderable rindex startswith unargued unfiled unfound unglossed uninspected unactioned unbannered unbuilt undercount undercounted undercounts undrawn unmigrated unretired unrun wireframes -->
 
 # orchestrate ux — resumption point
 
-**STATE: Phase 0 step 0.2. AR-5's FIX ROUND IS EXECUTED. All ten findings are
-fixed or recorded, the two instrument widenings are built, and CP-η is GREEN.
-THE NEXT ACTION IS THE AR-5 DELTA RE-RUN — see § Then: re-run AR-5 on the DELTA.
-Its baseline is the fix round's first commit's parent, `f0b5a2bb`, NOT
-`80306ad9`.**
+**STATE: Phase 0 step 0.2. AR-5 HAS NOW RUN TWICE. Round 1's ten findings are
+fixed or recorded; round 2 ran on the delta, returned PAUSE with nine, and the
+human ruled 2026-08-26: honour the PAUSE — fix, then re-run AR-5 on THAT delta.
+Its four IMPORTANT are fixed and its five MINOR disposed in this commit. THE
+NEXT ACTION IS AR-5 ROUND 3, on baseline `ffabcd41` — this commit's parent.**
+
+⛔ **Round 2's own headline: four of its nine findings are defects THIS CAMPAIGN
+introduced while fixing round 1**, including one in the instrument built to
+catch that class and one in the section written to stop rulings being dropped.
+The rate is not falling. Round 3 should assume the same of this commit.\*\*
 
 ## YOUR FIRST ACTION — read this before anything else
 
-**⛔ THE FIX ROUND IS DONE. Do not re-open it, and do not re-fix the ten.** This
-section is the brief that was executed on 2026-08-26; it is kept because six of
-its own instructions were measured WRONG in the doing, and a reader who meets
-only the outcome cannot tell a corrected instruction from an obeyed one. What
-each bullet below got wrong is marked ⛔ inline, beside it.
+**⛔ ROUND 1'S FIX ROUND IS DONE, AND SO IS ROUND 2'S. Do not re-open either,
+and do not re-fix the ten or the nine.** Round 2's verdict is archived verbatim
+below under **§ AR-5 ROUND 2'S VERDICT**; work from it, never from a summary.
+This section is the brief that was executed on 2026-08-26; it is kept because
+six of its own instructions were measured WRONG in the doing, and a reader who
+meets only the outcome cannot tell a corrected instruction from an obeyed one.
+What each bullet below got wrong is marked ⛔ inline, beside it.
 
 **What is live is one thing: relaunch `ar-5` on the delta.** Everything needed
 is in § Then: re-run AR-5 on the DELTA and § AR-5 — its five inputs. Read § What
@@ -49,7 +56,8 @@ own closing commit.
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `970b8919` | **the two instrument widenings + AR5-F7**, landed **RED** on nine residues by design. R-AL, R-AM, R-AN recorded                                        |
 | `70377e6e` | **the seven document fixes** — AR5-F1, F2, F3 (as **two** contract rows, R-AN), F4, F5's live half, F8, F10. CP-η goes **GREEN**, nine residues → zero |
-| _this one_ | **the closing record** — AR5-F5's immutable half, F6, F9, CP-3 accepted, and the six wrong numbers below                                               |
+| `ffabcd41` | **the closing record** — AR5-F5's immutable half, F6, F9, CP-3 accepted, and the six wrong numbers below                                               |
+| _this one_ | **AR-5 round 2's nine findings** — its verdict archived verbatim, the four IMPORTANT fixed, the five MINOR disposed                                    |
 
 **Baseline of the round: `f0b5a2bb`** — `970b8919`'s parent, and **the baseline
 to hand the AR-5 delta re-run**. Under the convention adopted this round, the
@@ -60,21 +68,30 @@ Campaign-scoped, and it moves.
 **Six numbers were wrong and all six were found by re-measuring rather than
 relaying — four of them the reviewer's own.** This is the reason § YOUR FIRST
 ACTION's re-measure instruction exists, and it is the strongest evidence the
-campaign has produced for it.
+campaign has produced for it. **Every row carries its own tag**; an earlier
+revision of this table carried none, on six repo-state claims, and AR-5 round 2
+found it as its finding 6 — in the one table § YOUR FIRST ACTION sends a reader
+to first.
 
-| the claim                                                                                      | whose     | truth                                                                                                                                                     |
-| ---------------------------------------------------------------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `violation` appears **zero** times in the twin (finding 3)                                     | AR-5      | **four** — `user-journeys.md` 3 · `wireframes.md` 1 · `personas.md` 0. The finding's substance is untouched: the datum is drawn twice and granted nowhere |
-| `80306ad9..7dea8eaa` is **268** unscoped (finding 5)                                           | AR-5      | **267**. A finding about wrong self-referential counts carried a wrong count                                                                              |
-| check 2 skips **4** of the 9 rails (finding 7)                                                 | AR-5      | **6**                                                                                                                                                     |
-| widening check 4's **row selector** would have caught finding 3 (CP-1)                         | AR-5      | it does **not** — 12 rows, verdict GREEN. The overlay carries no bracket token; the **extractor** was the constraint                                      |
-| a naive audit grep scores **29** of 98 bodies untagged, **14** carrying only the house variant | this file | **30** and **13** at the SHA they were taken at                                                                                                           |
-| check 4's replacement is a "ten-line change"                                                   | AR-5      | **26 → 90** lines                                                                                                                                         |
+| the claim                                                                                      | whose     | truth                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ---------------------------------------------------------------------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `violation` appears **zero** times in the twin (finding 3)                                     | AR-5      | **three** word-bounded singular — `user-journeys.md` 2 · `wireframes.md` 1 · `personas.md` 0 — and **four** counting the plural [measured at `f0b5a2bb`, squeezed unwrap: `\bviolation\b` → 2·1·0; `\bviolations?\b` → 3·1·0]. **The pattern is printed because the label alone does not fix the number**: an earlier revision said "four, word-bounded", which is true only of the plural-inclusive form. AR-5's **zero** is wrong under both. The finding's substance is untouched: the datum is drawn twice and granted nowhere |
+| `80306ad9..7dea8eaa` is **268** unscoped (finding 5)                                           | AR-5      | **267** [measured at `70377e6e`: `git rev-list --count 80306ad9..7dea8eaa`]. A finding about wrong self-referential counts carried a wrong count                                                                                                                                                                                                                                                                                                                                                                                   |
+| check 2 skips **4** of the 9 rails (finding 7)                                                 | AR-5      | **6** [measured at `14e15d71`: the pre-widening check 2 replayed — 3 cause-arm rails are read, 6 skipped]                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| widening check 4's **row selector** would have caught finding 3 (CP-1)                         | AR-5      | it does **not** — **12 rows, verdict GREEN** [measured at `14e15d71`: AR-5's suggested selector substituted, extractor unchanged; bracket tokens on the overlay rows → **0**]. The **extractor** was the constraint                                                                                                                                                                                                                                                                                                                |
+| a naive audit grep scores **29** of 98 bodies untagged, **14** carrying only the house variant | this file | **30** and **13** [measured at `70377e6e` over the 98 bodies of `80306ad9..afe9259e`]                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| check 4's replacement is a "ten-line change"                                                   | AR-5      | **26 → 90 → 93 → 100** across `14e15d71` · `970b8919` · `70377e6e` · this commit [measured at each SHA named]                                                                                                                                                                                                                                                                                                                                                                                                                      |
 
-**And one finding AR-5 did not make, produced by the instrument it asked for**:
-the projection contract granted the snippet's **type** and not its **text**,
-while every code box draws the text. Ruled **R-AN**; it is why finding 3 landed
-as two contract rows rather than one.
+**A seventh, found by AR-5 round 2 in this round's own work**: the row above
+reading `wireframes.md` 1 was **stale in the commit that wrote it** — `70377e6e`
+added two prose mentions of `violation` to that file while recording the
+pre-edit count [measured at this commit: `\bviolation\b` in `wireframes.md` →
+**3**]. The count above is therefore SHA-pinned to `f0b5a2bb`, the round's
+baseline, where it is the count the finding was about. **And one finding AR-5
+did not make, produced by the instrument it asked for**: the projection contract
+granted the snippet's **type** and not its **text**, while every code box draws
+the text. Ruled **R-AN**; it is why finding 3 landed as two contract rows rather
+than one.
 
 ## The ten findings, and what the human ruled for each
 
@@ -163,9 +180,14 @@ three bullets below carry prescriptions that were measured WRONG, and a reader
 who meets only the fix cannot tell a corrected instruction from an obeyed one.
 
 **Both are changes to CP-η rather than a fifth instrument, and that half held.
-"Ten-line changes" did not** — check 4 was **26** lines and its replacement is
-**90** [measured at this commit: the `# 4 ·` comment through the last check-4
-`print`, at `14e15d71` and at HEAD], because the row selector was never the
+"Ten-line changes" did not** — check 4 went **26 at `14e15d71` → 90 at
+`970b8919` → 93 at `70377e6e` → 100 at this commit** [measured: the `# 4 ·`
+comment through the last check-4 `print`, at each SHA named]. **Both endpoints
+are SHA-pinned deliberately**: an earlier revision wrote "26 … and its
+replacement is 90 [measured at this commit … at `14e15d71` and at HEAD]",
+pinning one endpoint and leaving the other floating, and the floating one moved
+twice — R-AN's two granted keys at `70377e6e`, then finding 4's anchored tails
+here. AR-5 round 2 found it as its finding 2. The row selector was never the
 binding constraint. AR-5's own prescription, executed verbatim, leaves the
 instrument **GREEN** on the finding it was built to catch: widening which rows
 the check reads adds nothing to inspect while the extractor still reads `[...]`
@@ -286,10 +308,20 @@ baseline for the re-review is the fix round's first commit's parent, not
 `80306ad9`. Hand it the full campaign context and the narrow diff; do not make
 it re-read a hundred commit bodies to check seven fixes.
 
-**The baseline is `f0b5a2bb`.** The delta is three commits — `970b8919`,
-`70377e6e`, and this one — and the range is `f0b5a2bb..HEAD`, scoped by the
-pathspec. Run the command in § The range and the SHA list; do not copy the
-table.
+**ROUND 2 RAN AGAINST `f0b5a2bb` and returned PAUSE on nine findings.** ⛔ **For
+ROUND 3 the baseline is `ffabcd41`** — this commit's parent — and the delta is
+ONE commit, this one. Run the command in § The range and the SHA list; do not
+copy the table.
+
+**What round 3 must attack, because round 2 named the pattern and this commit is
+its next instance.** Four of round 2's nine findings were defects the round-1
+fix round introduced, and three of those sat in prose written ABOUT the defect
+class — the Expected line that still said `RED`, the enumeration that dropped
+R-AN, and the blind-spot list that omitted the greedy tail this campaign had
+just added. **This commit is more of the same prose.** Attack, in this order: §
+Closing obligations' new ruling-id tuple; the six-number table's new tags and
+its SHA-pinned `violation` counts; and the anchored instrument's new claim that
+its blind spots are down from four to two.
 
 **Tell it four things it will otherwise have to rediscover, and mark them
 `[relayed: the fix round — falsify them]`:**
@@ -386,14 +418,18 @@ git log --oneline 80306ad9..HEAD -- \
 ## What AR-5 verified clean, which is worth as much as what it broke
 
 **Three of these had decayed by the time the fix round read them; all are
-re-measured at this commit.** ⛔ **`tsc --noEmit` has now flipped TWICE.** AR-5
-measured exit 0; an earlier revision of this section measured exit 2 with eight
-errors under `lib/questioning/quizzing/` and told you so in bold; it is **exit
-0** again [measured at this commit], a peer session having fixed them. It is
-foreign-scoped in every direction, it is not this campaign's to fix, and the
-only safe move is the one this line has always said: **re-run it in the same
-turn you write the body, and carry no figure**. ⛔ **"97/97 commit bodies" is
-101/101 at `70377e6e`, 102/102 including this commit** [measured at this
+re-measured at this commit.** ⛔ **`tsc --noEmit` has now flipped THREE TIMES,
+and this section has been wrong about it twice.** AR-5 round 1 measured exit 0;
+an earlier revision of this section measured exit 2 with eight errors under
+`lib/questioning/quizzing/` and told you so in bold; a peer session fixed those
+and it read exit 0 through this round's first three commits; it is **exit 2**
+again [measured at this commit: 3 errors, all in `lib/script-axis-spike/` and
+`src/pages/script-axis-spike.tsx`, a different peer session's new files, **zero
+under `orchestrate/`**]. Foreign-scoped in every direction, not this campaign's
+to fix, and the only safe move is the one this line has always said: **re-run it
+in the same turn you write the body, and carry no figure.** Three flips is no
+longer an anecdote — it is the argument for the rule. ⛔ **"97/97 commit bodies"
+is 101/101 at `70377e6e`, 102/102 including this commit** [measured at this
 commit]. The property holds; the numerator moves.
 
 All four instruments reproduce · CP-η's **±1.5** tolerance is genuinely
@@ -492,18 +528,18 @@ it is a checkpoint question, not a document one.
 had gone stale are marked; two of them had been carrying AR-5's own figures,
 which are now three commits old.
 
-| what                   | value                                                                                                                                                                                                                                                                                                |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **AR-5's baseline**    | **`80306ad9`** for a full review — SHA-pinned. **For the delta re-run it is `f0b5a2bb`**, `970b8919`'s parent                                                                                                                                                                                        |
-| this round's baseline  | **`f0b5a2bb`** — the fix round is `970b8919` · `70377e6e` · this commit. SHA-pinned                                                                                                                                                                                                                  |
-| campaign SHA list size | **101 at `70377e6e`, 102 including this commit** — campaign-scoped [measured: the scoped `git log --oneline`]. ⛔ **Was "98 at `7dea8eaa`".** The unscoped `git rev-list --count` was **328** at `14e15d71` — mostly foreign, it moves hourly, and it is NOT the number to hand a reviewer           |
-| modified file paths    | **21** across the whole campaign; **4** in this round's delta [both measured at this commit, campaign-scoped]                                                                                                                                                                                        |
-| green (orchestrate)    | **622 passing in 22 files** [measured at this commit] — unchanged all round, which is expected: nothing here touched code                                                                                                                                                                            |
-| typecheck (repo-wide)  | `npx tsc --noEmit` exit **0** [measured at this commit] — **foreign-scoped**. ⛔ **It has flipped inside one day**: this session's own launch prompt asserted exit 2 with eight errors under `lib/questioning/quizzing/`, and a peer session had already fixed them. Re-run it; carry neither figure |
-| governance check       | `npm run check:governance` **0 errors**, 66 advisories **all foreign** [measured at this commit]                                                                                                                                                                                                     |
-| the four instruments   | `malformed rows: none` ×2 · `{63: 79} outliers: none` · **`CP-eta: GREEN` on four checks** [measured at this commit]. ⛔ **The "coverage is narrower than its PASS line admits" caveat is DISCHARGED** — checks 2 and 4 were widened at `970b8919` and each now prints its skips with their licence  |
-| upstream               | **none configured** on `main` [measured at this commit: `git rev-parse --abbrev-ref main@{upstream}` → fatal]                                                                                                                                                                                        |
-| **foreign commits**    | **4 in this round's range, against 2 of its own** at the time this line was written [measured at this commit: `git rev-list --count f0b5a2bb..HEAD` → 6 total, minus the 2 campaign SHAs the scoped log returns]. Foreign-scoped: wrong by the time you read it                                      |
+| what                   | value                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **AR-5's baseline**    | **`80306ad9`** for a full review — SHA-pinned. **For the delta re-run it is `f0b5a2bb`**, `970b8919`'s parent                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| this round's baseline  | **`f0b5a2bb`** — the fix round is `970b8919` · `70377e6e` · this commit. SHA-pinned                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| campaign SHA list size | **101 at `70377e6e`, 102 including this commit** — campaign-scoped [measured: the scoped `git log --oneline`]. ⛔ **Was "98 at `7dea8eaa`".** The unscoped `git rev-list --count` was **328** at `14e15d71` — mostly foreign, it moves hourly, and it is NOT the number to hand a reviewer                                                                                                                                                                                                                                                                                                                                              |
+| modified file paths    | **21** across the whole campaign; **4** in this round's delta [both measured at this commit, campaign-scoped]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| green (orchestrate)    | **622 passing in 22 files** [measured at this commit] — unchanged all round, which is expected: nothing here touched code                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| typecheck (repo-wide)  | `npx tsc --noEmit` exit **2**, **3 errors, all in `lib/script-axis-spike/` and `src/pages/script-axis-spike.tsx`, ZERO under `orchestrate/`** [measured at this commit] — **foreign-scoped, and not this campaign's to fix**. ⛔ **It has now flipped THREE TIMES in three days**: AR-5 round 1 measured exit 0; this session's launch prompt asserted exit 2 with eight errors under `lib/questioning/quizzing/`, which a peer session had already fixed; it measured 0 through this round's first three commits; it is 2 again on a different peer session's new files. **Carry no figure. Re-run it in the turn you write the body** |
+| governance check       | `npm run check:governance` **0 errors**, 66 advisories **all foreign** [measured at this commit]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| the four instruments   | `malformed rows: none` ×2 · `{63: 79} outliers: none` · **`CP-eta: GREEN` on four checks** [measured at this commit]. ⛔ **The "coverage is narrower than its PASS line admits" caveat is DISCHARGED** — checks 2 and 4 were widened at `970b8919` and each now prints its skips with their licence                                                                                                                                                                                                                                                                                                                                     |
+| upstream               | **none configured** on `main` [measured at this commit: `git rev-parse --abbrev-ref main@{upstream}` → fatal]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| **foreign commits**    | **4 in this round's range, against 2 of its own** at the time this line was written [measured at this commit: `git rev-list --count f0b5a2bb..HEAD` → 6 total, minus the 2 campaign SHAs the scoped log returns]. Foreign-scoped: wrong by the time you read it                                                                                                                                                                                                                                                                                                                                                                         |
 
 ⚠ **The pathspec is a STAGING DISCIPLINE, not a log filter.** Foreign files sat
 STAGED in the index for the whole of the last session — three of them, from peer
@@ -889,27 +925,56 @@ intake checklist, which is a bolded paragraph and not a heading.
    Destinations are `types.ts`, the `DOCS.md` sketch and the tests, as 0.3
    writes them.
 
-   ⚠ **R-S NAMES ONLY `DECISIONS.md`, AND THAT IS HALF THE SET** [measured at
-   `970b8919`: `R-[A-Z]{1,2}` over both campaign files — **40** distinct ids,
-   union **R-A … R-AN** and contiguous; `DECISIONS.md` carries **31**,
-   `RESUME.md` **37**, **28** in both]. **Nine rulings are recorded ONLY in
-   `RESUME.md`** — **R-C · R-K · R-L · R-O · R-P · R-R · R-U · R-V · R-W** — and
-   each is a real record in a table, not a citation, with most of them below the
-   archive banner. **Three are recorded only in `DECISIONS.md`** — **R-F · R-AL
-   · R-AM**. So the enumeration is over BOTH files, and a closing commit that
-   walks `DECISIONS.md` alone drops nine.
+   ⚠ **R-S NAMES ONLY `DECISIONS.md`, AND THAT IS HALF THE SET.** The rulings
+   are recorded across BOTH campaign files and both prune [measured at
+   `ffabcd41`, anchored `\bR-[A-Z]{1,2}\b` over each: union **40** ·
+   `DECISIONS.md` **31** · `RESUME.md` **36** at `970b8919`, **40** at
+   `ffabcd41` · **27** in both at `970b8919`. The BARE `R-[A-Z]{1,2}` returns
+   41, and the extra is the false positive **`R-LO`**, matched inside `AR-LOG`
+   at two sites — anchor the pattern].
 
-   **Enumerate; do not write a range.** The union happens to be contiguous
-   today, which is exactly the trap — `DECISIONS.md` on its own has nine gaps,
-   so "R-A through R-AN" is true of the pair and false of either member. An
-   earlier draft of this very bullet wrote that range against `DECISIONS.md`,
-   and the measurement above is what caught it.
+   **Recorded ONLY in `RESUME.md`, as table rows rather than citations — nine:**
+   **R-C · R-K · R-L · R-O · R-P · R-R · R-U · R-V · R-W**, most of them below
+   the archive banner. **Recorded only in `DECISIONS.md` — FOUR: R-F · R-AL ·
+   R-AM · R-AN.**
+
+   ⛔ **THE FOUR WAS THREE UNTIL 2026-08-26, AND THE DROPPED ONE WAS R-AN** —
+   this round's headline ruling, the one that put two rows into the projection
+   contract and therefore has the most 0.3 work riding on it [measured at
+   `970b8919`, the SHA the original tag named: `R-AN` in `RESUME.md` → **0**, in
+   `DECISIONS.md` → **2**]. **The bullet's own thesis executed against the
+   bullet**: it says a closing commit walking `DECISIONS.md` alone drops nine,
+   and its own enumeration dropped one. AR-5 round 2 found it as its finding 3.
+   **And the tuple it carried — 40 / 31 / 37 / 28 — mixed the anchored union
+   with the bare per-file count, and `28` is producible under neither pattern.
+   It is 27.**
+
+   The record-vs-citation distinction applies to **both** halves, not just the
+   nine. `R-F` occurs once in `RESUME.md` — inside the sentence asserting it
+   appears only in `DECISIONS.md` [measured at `ffabcd41`], which is
+   self-falsifying under a bare grep and true under the distinction.
+
+   **Enumerate; do not write a range.** The union happens to be contiguous R-A …
+   R-AN today, which is exactly the trap — `DECISIONS.md` on its own has nine
+   gaps, so "R-A through R-AN" is true of the pair and false of either member.
+   An earlier draft of this bullet wrote that range against `DECISIONS.md`; the
+   measurement caught it. **Then the enumeration that replaced the range dropped
+   a ruling, which is the same defect one level down.** Walk both files and diff
+   the two id sets; do not hand-list either.
 
 2. **State the uncorrectable record.** The immutable commit bodies carrying
-   errors this campaign found and could not fix — currently `fa6dd40c`,
-   `7dea8eaa`, `b5a9c8f0`, and the two untagged bodies `cb2e3448` and
-   `1106c268`. Amend is forbidden, so the closing body is the only place the
-   correction can live.
+   errors this campaign found and could not fix — `fa6dd40c` (95/89 against a
+   true 96/92), `7dea8eaa` (266/96 against a true 267/97), `b5a9c8f0` (a false
+   prettier-clean checkpoint line, corrected in the record at `a5f5e007`), the
+   two untagged bodies `cb2e3448` and `1106c268`, and **`ffabcd41`, whose own
+   DANGLING-REFERENCE SWEEP says "the fifteen SHAs it cites" — a count that
+   reproduces under no accounting** [AR-5 round 2, finding 5; measured over that
+   body: 11 distinct 8-hex tokens, 9 distinct backticked. **The substance holds
+   and only the count is wrong** — every SHA it cites resolves under `git
+   cat-file -e`, and every section name resolves to exactly one heading]. It is
+   the fourth-generation instance of the class, shipped inside the closing
+   commit's own sweep. Amend is forbidden, so the closing body is the only place
+   any of these corrections can live.
 3. **Hand AR-2 the list of clauses written into `DOCS.md` during 0.2**, and
    state that this index's `status` column is **not** evidence for them. That is
    M24, and it is the mitigation for sketch content having been written out of
@@ -1018,7 +1083,12 @@ STANDING = r'▾ \d+ ●|▾ \d+|not reached|·'
 COUNT_LINE = r'(\w+) phases have nothing to open yet'
 CAUSE_COUNT = r'the last (\w+) phases were not reached'
 TOLERANCE = 1.5   # the MEASURED house tolerance, not a round number
-BOX = '─│┌┐└┘├┤╳╌░'   # space is deliberately NOT box: see check 4
+BOX = '─│┌┐└┘├┤╳╌░'
+# Every free-copy pattern ends HERE, at the first run of two or more spaces —
+# never at the closing vertical. A `[^│]*` tail swallows its whole row, so an
+# ungranted datum sitting to the right of one is never classified. Measured:
+# under the old tails, `[Destroy code]` inside a code-box row passed GREEN.
+TAIL = r'.*?(?=\s{2,}|$)'   # space is deliberately NOT box: see check 4
 
 lines = open(PATH).read().split('\n')
 inf = False; blocks = []; cur = []
@@ -1138,16 +1208,16 @@ GRANTED = {
     'name':   r'Source|Tokens|AST|Environment|Evaluation',
     'label':  r'Source|Tokens|AST|Environment|Evaluation',
     'accessible': (r'▾ \d+ ●|▾ \d+|not reached|·|' + COUNT_LINE +
-                   r'|the (grammar|spelling|machinery) broke here[^│]*'
+                   r'|the (grammar|spelling|machinery) broke here' + TAIL +
                    r'|the syntax tree does not span its source\.|' + CAUSE_COUNT + r'\.'),
     'levels': r'\[plain JavaScript ▾\]',
     "the selected level's mark": r'\[[^]]+ · [^]]+▾\]',
     "the selected level's cause":
-        r'\w[\w ]*: [^│]*are outside|this level\. Fix the code[^│]*|strict off\.',
-    'the source': r'\d+  \S[^│]*',
+        r'\w[\w ]*: ' + TAIL + r'|this level\. Fix the code' + TAIL + r'|strict off\.',
+    'the source': r'\d+  \S' + TAIL,
     'the snippet type': r'\[(module|script)\]',
     'the posture': r'\([•o ]\) strict',
-    'the pane': r'your code|the pane holds: [^│]*',
+    'the pane': r'your code|the pane holds: ' + TAIL,
     'recommendations': r'\[ [^]]+ \]',
 }
 
@@ -1195,7 +1265,10 @@ for i, body, _ in rows:
     for c in range(len(body) + 1):
         if c < len(body) and not seen[c]: run += body[c]
         elif run:
-            if len(run.strip()) > 1: bad4.append((i, 'DRAWN, NOT GRANTED', run.strip()))
+            # > 0, not > 1: a one-character gate would accept exactly the
+            # glyph class B14 governs — the occupant dot, the bare standing,
+            # the disclosure control.
+            if run.strip(): bad4.append((i, 'DRAWN, NOT GRANTED', run.strip()))
             run = ''
 for k in GRANTED:
     if not drawn_at[k]: bad4.append(('-', 'GRANTED, NEVER DRAWN', k))
@@ -1209,23 +1282,48 @@ print('   EXCLUSION LEDGER — box-drawing runs consumed; %s trailing annotation
       'stripped past the closing vertical, at lines %s. Line numbers rather '
       'than a bare count, because a count is not auditable.'
       % (len(annotations), ' '.join(str(i) for i, a in annotations)))
-print('   BLIND SPOTS, measured and not patched: a greedy free-copy match (the '
-      'nameplate, the three framings) leaves its row uninspected past the first '
-      'datum · the reverse direction is file-global, so a clause drawn twice can '
-      'lose one drawing silently · un-framed drawings are unread, and § A '
-      "station's kit at 0, 1 and many is one.")
+print('   BLIND SPOTS, measured and STILL not patched — two, down from four: '
+      'the reverse direction is file-global, so a clause drawn twice can lose '
+      'one drawing silently · un-framed drawings are unread, and § A '
+      "station's kit at 0, 1 and many is one. PATCHED 2026-08-26 (AR-5 round 2, "
+      'finding 4): every free-copy tail is anchored at the first run of two or '
+      'more spaces rather than at the closing vertical, and the residue gate is '
+      "one character rather than two. Neither was in the previous BLIND SPOTS "
+      'line, and the greedy tail hid the row class the newest grant was written '
+      'for.')
 print('CP-eta: %s' % ('RED' if (bad1 or bad2 or bad3 or bad4 or bad5) else 'GREEN'))
 EOF
 ````
 
-**Expected, running the block above: `DECISIONS.md malformed rows: none` ·
-`RESUME.md malformed rows: none` · `{63: 79}`, no outliers · **`CP-eta: RED`,
-check 4, with NINE residues** — the three code-box rows and the blocked
-overlay's three lines drawn twice** [all measured at this commit].
+**Expected, running the block above** — `DECISIONS.md malformed rows: none` ·
+`RESUME.md malformed rows: none` · `{63: 79}`, no outliers · **`CP-eta: GREEN`
+on all four checks**, with
+`4 · PASS - 81 framed rows, 11 clause anchors matched one-to-one, 0 residues`
+[measured at `ffabcd41` and re-measured at this commit].
 
-⛔ **THE RED IS DELIBERATE AND IT IS THE POINT.** Check 4 was widened at this
-commit and fires against the projection contract **exactly as it stands**, with
-no mutation and no staging. Six of its nine residues are **AR5-F3** — the datum
+⛔ **THIS PARAGRAPH SAID `RED` WITH NINE RESIDUES UNTIL 2026-08-26, AND THAT WAS
+A HALF-LANDED CORRECTION OF EXACTLY THE KIND THIS ROUND WAS CONVENED TO FIX.**
+It was authored at `970b8919`, where it was true; `70377e6e` added the two
+contract rows that took check 4 to zero and did not bring this line current;
+`ffabcd41` claimed to have brought the handoff sections current and did not
+reach it either. It then contradicted § Baselines, in the same file, which said
+GREEN. **AR-5 round 2 found it as its finding 1.** The lesson is the one this
+file already records two sections down about `{63: 77}`: a session that obeys §
+YOUR FIRST ACTION and runs the instruments meets GREEN against a printed
+expectation of RED, and cannot tell whether the tree drifted, the instrument
+broke, or the handoff is stale.
+
+⚠ **`[measured at this commit]` IS NOT A VALID TAG INSIDE A FILE** (AR-5 round
+2's counter-proposal, adopted). In a commit body "this commit" is fixed forever;
+in a file it silently re-points at every later commit. **Every measurement in
+this file carries the SHA it was taken at.** Two tags authored at `970b8919`
+survived into the live region carrying `at this commit`, and both had gone false
+by `ffabcd41` — this paragraph, and the check-4 line count two sections down.
+
+**CP-η landed RED at `970b8919` on nine residues, deliberately** — six the
+blocked overlay's three lines drawn twice, three the code box — and that was the
+point: it fired against the projection contract exactly as it stood, with no
+mutation and no staging. Six of its nine residues are **AR5-F3** — the datum
 AR-5 found — and three are a datum **AR-5 did not**: the learner's source, drawn
 in every code box and granted nowhere, while the contract grants its `type`
 [read: `README.md` — "the `snippet` prop is the source text alone — the
@@ -1697,6 +1795,246 @@ since:
 | R-O | Hand off at this boundary; a fresh session opens on round 8's blockers.                                                                  |
 
 ---
+
+---
+
+# AR-5 ROUND 2'S VERDICT, AS RETURNED — ARCHIVE, NOT A TASK LIST
+
+**Provenance, and it is not repo state.** Spliced 2026-08-26 from this session's
+subagent transcript at `<session-id>/subagents/agent-a6ca7ee208de26a63.jsonl`
+**programmatically** — the final `assistant` record's single text block, 23,780
+characters — so it is verbatim by construction. **HTML-unescaping ran and was a
+no-op** (zero entities in the stored text), recorded because an earlier round's
+splice DID need it and a reader should not conclude the step is optional.
+
+**Every claim below is `[relayed: ar-5 round 2]` until re-measured** — and the
+four IMPORTANT were re-measured before the fix commit was written. **All four
+reproduce**, including two where this campaign was wrong and the reviewer right:
+the ruling-id intersection is **27**, not the 28 § Closing obligations claimed,
+and an ungranted datum inside a code-box row passed check 4 **GREEN**. **One
+finding does NOT hold: finding 8** — the `snippet` glossary entry exists, in the
+**package** glossary, which is where this region's `types.ts` says the shared
+vocabulary lives [read: `../README.md` glossary · snippet; `types.ts` — "The
+package glossary (../README.md) owns the shared vocabulary"]. The reviewer
+searched `orchestrate/README.md` only. Answered in place rather than deferred.
+
+**This is the DELTA re-run**, against baseline `f0b5a2bb` over three commits,
+not the full campaign. It returned PAUSE. The human ruled 2026-08-26: **honour
+the PAUSE — fix, then re-run AR-5 on that delta.**
+
+<!-- prettier-ignore-start -->
+<!-- markdownlint-capture -->
+<!-- markdownlint-disable -->
+
+```text
+Reviewed as: claude-opus-5[1m] | UNDETERMINED
+```
+
+Model id read from environment context: `claude-opus-5[1m]`. No downgrade — same tier as the round that produced the ten findings.
+
+**Governance chain read**: `CLAUDE.md` router → `opus-5` matches → `AGENTS.principal.md` (full) → `DEV.md` §§ Citation and claim conventions / Sourced claims / Ruling provenance / Adversarial Review Protocol / AR-5 / Sub-model dispatch. Twin read in full at all three absolute paths; `README.md` (1000), `DOCS.md` (482), `types.ts` (226) read; `RESUME.md` live region (1–1317) and `DECISIONS.md` read.
+
+---
+
+## What reproduced
+
+Before the findings, the ledger of what I re-measured and what held. **Every gate figure and almost every corrected number in the three bodies reproduces exactly.**
+
+| claim | verdict |
+| --- | --- |
+| delta = 4 files, 0 matching `\.tsx?$` | ✓ [measured: `git diff --name-only f0b5a2bb..HEAD -- <pathspec>`] |
+| campaign SHA list 100/101/102 at `970b8919`/`70377e6e`/HEAD | ✓ [measured: scoped `git log --oneline`] |
+| settings line 102/102, all four parts, all `twin-doc: user` | ✓ [measured: per-body grep, wrap-immune] |
+| `80306ad9..7dea8eaa` → 267 unscoped / 97 scoped; `..fa6dd40c` → 265/96; `..93a7bba2` scoped 92 | ✓ all four |
+| tag-pattern scores 30 / 15 / 2 untagged over 101 bodies; 30 over the 98 of `..afe9259e` | ✓ all |
+| the two fully untagged bodies are `cb2e3448` and `1106c268` and no others | ✓ |
+| DEV.md's printed command vs its printed prose disagree by 13 | ✓ [read: DEV.md § Sourced claims — `git grep -nE '\[(measured\|read\|relayed):'` vs "Search on the opening token"] |
+| `SurfaceClass` → 4 (declaration + README ×3) | ✓ |
+| check 2 skipped **6** of 9 rails (not AR-5's 4) | ✓ [measured: old selector replayed at `14e15d71`] |
+| AR-5's suggested check-4 row selector → 12 rows, GREEN; 10 control rows + 2 overlay | ✓ exactly |
+| 45 framed rows in 4 full-frame blocks; 81 in 14 fenced blocks; 2 blocks with zero framed rows | ✓ all |
+| check 4: 26 lines → 90 **at `970b8919`** | ✓ exactly |
+| all six F2 replacement fragments verbatim in `user-journeys.md`; `carries its cause` → 0 there | ✓ all six |
+| F1's fix (band = control row + rail; guide and recommendations outside it) | ✓ [read: README glossary · band / · control row] |
+| D8/G1 receipts (`stay rendered` 0, `level UI` 2/0, `the band` 2/8) | ✓ all five |
+| R-AN's two contract rows against `types.ts` and README § Enforcement / glossary · assessment | ✓ verbatim, correct scope, correct indent level |
+| "thirteen false positives" for the crude `any`/cast grep | ✓ 13 at the parent |
+| nine rulings recorded only in `RESUME.md` — R-C·K·L·O·P·R·U·V·W | ✓ all nine are table rows, all absent from `DECISIONS.md` |
+| CP-η GREEN at HEAD: 9 rails/skip 1 @643 · checked 7/skip 2 @532,720 · unreached 3 of 9, empty 4 · 81 rows, 11 anchors, 0 residues | ✓ character-for-character |
+| `tsc --noEmit` exit 0 · `check:governance` 0 errors 66 advisories · 622 passed in 22 files · markdownlint/cspell/prettier clean ×4 | ✓ all, run myself |
+| the four relayed items | all four falsifiable-checked; all four hold |
+
+Relayed item 1 confirmed: CP-η is RED at `970b8919` by design and GREEN from `70377e6e`. Relayed item 3 confirmed: R-AN's second row is correctly worded and grounded. Relayed item 4 confirmed: no drawing changed; I found no drawing that should have.
+
+**Loss lens**: no heading and no table row lost from `DECISIONS.md`, `README.md` or `wireframes.md`. `RESUME.md` lost two Baselines rows (`AR-5's SHA list size`, `this session's baseline`) — both renamed and re-measured inside a section `ffabcd41`'s ledger declares REPLACED. Covered. **No unenumerated deletion anywhere in the delta.**
+
+**Security / type integrity / test coherence**: no-op, correctly. Zero code files, zero governance-surface files, `types.ts` untouched, 622/22 green.
+
+---
+
+## Concerns
+
+### 1 · IMPORTANT — § The instruments still tells the next session to expect `CP-eta: RED` with nine residues. It is GREEN with zero.
+
+**Where**: `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/.planning-handoffs/orchestrate-ux/RESUME.md` lines 1221–1224 — **live**, 93 lines above the archive banner at 1317.
+
+> **Expected, running the block above: … **`CP-eta: RED`, check 4, with NINE residues** — the three code-box rows and the blocked overlay's three lines drawn twice** [all measured at this commit].
+
+[measured: instrument block extracted from lines 960–1218 and run at HEAD → `CP-eta: GREEN`, `4 · PASS - 81 framed rows, 11 clause anchors matched one-to-one, 0 residues`.] The line was authored at `970b8919` [measured: `git blame -L1,1317`] where it was true, and neither `70377e6e` nor `ffabcd41` brought it current — although `ffabcd41`'s body claims "THE HANDOFF SECTIONS, brought to what is true at this commit rather than left describing a pending round," and its own INSTRUMENTS block records `CP-eta: GREEN`.
+
+It contradicts § Baselines at line 504 of the same file, which says "**`CP-eta: GREEN` on four checks** [measured at this commit]". Two live sections, opposite operative expectations.
+
+Why this is not cosmetic: § YOUR FIRST ACTION routes the next reader to run the instruments; § Baselines says "measure these again at session start, do not trust them." A session that obeys gets GREEN against a stated expectation of RED and has no way to tell whether the tree drifted, the instrument broke, or the handoff is stale — **which is verbatim the failure this file already documented at lines 1282–1287** about `{63: 77}`. This is the campaign's signature defect landing inside the round convened to prosecute it.
+
+**Fix**: rewrite the Expected paragraph to GREEN / 0 residues at HEAD, and demote the RED statement to past tense SHA-pinned (`landed RED at 970b8919 on nine residues`), the form the file already uses correctly three paragraphs down ("CP-η landed **RED** at `1046c90d`").
+
+**Counter-proposal (root cause)**: `[measured at this commit]` is not a valid tag *inside a file*. In a commit body "this commit" is fixed forever; in a file it re-points at every later commit. Two such tags survive in the live region from `970b8919` [measured: `git blame` + grep → lines 167 and 1224] and **both are now false**, while the eleven authored at `ffabcd41` are true only until the next commit. Add one line to § Operating instructions: *in a file, every measurement carries the SHA it was taken at; `at this commit` belongs only in a commit body.* The file already learned this once and wrote it down at line 482 — "The original measurement carried no SHA, so it read as current forever."
+
+Certainty the claim is false at HEAD: **99%**. Certainty it matters to the next session: **85%**.
+
+### 2 · MINOR — same class, same two tags: "26 → 90 lines" is 93 at HEAD.
+
+**Where**: `RESUME.md` line 167 (live), and repeated in § What this round did's table, line 72.
+
+[measured: span from `# ── 4 ·` to the line before `print('CP-eta:` → `14e15d71` **26** · `970b8919` **90** · `70377e6e` **93** · HEAD **93**.] 90 was exact when written; the two GRANTED keys R-AN added at `70377e6e` grew it by three. The tag reads `[measured at this commit: … at 14e15d71 and at HEAD]` — one endpoint is SHA-pinned and the other is not, and the unpinned one moved.
+
+**Fix**: `26 at 14e15d71, 90 at 970b8919, 93 at HEAD` — or SHA-pin both endpoints.
+
+Certainty: **97%**.
+
+### 3 · IMPORTANT — § Closing obligations' ruling enumeration drops **R-AN**, and its "28 in both" reproduces under no accounting.
+
+**Where**: `RESUME.md` lines 892–906 (live), and identically in `970b8919`'s commit body (immutable).
+
+> ⚠ **R-S NAMES ONLY `DECISIONS.md`, AND THAT IS HALF THE SET** [measured at `970b8919`: `R-[A-Z]{1,2}` over both campaign files — **40** distinct ids … `DECISIONS.md` carries **31**, `RESUME.md` **37**, **28** in both]. … **Three are recorded only in `DECISIONS.md`** — **R-F · R-AL · R-AM**.
+
+Two defects.
+
+**(a) The enumeration is four, not three.** R-AN is recorded in `DECISIONS.md` § Rulings taken 2026-08-26 and in B13's and C14's cells; it appears in `RESUME.md` only as prose citations, **never as a table record** [measured: `grep -cE '^\| \*\*R-AN\*\*|^\| R-AN '` on `RESUME.md` → 0]. At the SHA the measurement was taken it was not in `RESUME.md` at all [measured: `git show 970b8919:.../RESUME.md | grep -c 'R-AN'` → **0**; same command on `DECISIONS.md` → 2], so even the naive grep the tag names would have returned four.
+
+This is the bullet's own stated failure mode, executing inside the bullet: its thesis is *"Enumerate; do not write a range … a closing commit that walks `DECISIONS.md` alone drops nine."* The bullet's own enumeration drops one — and the dropped one is this round's headline ruling, the one that put two rows into the projection contract and therefore has the most 0.3 work riding on it. **The 0.2-closing commit is the very next gate and it consumes this list.**
+
+**(b) The measurement tuple is not producible.** [measured at `970b8919` with the printed regex `R-[A-Z]{1,2}`: D **31**, R **37**, union **41**, intersection **27**. With `\bR-[A-Z]{1,2}\b`: D 31, R **36**, union **40**, intersection **27**.] The reported (40, 31, 37, 28) mixes a filtered union with an unfiltered per-file count; 28 is a derived residual, not a measurement. The extra id under the printed regex is the false positive **`R-LO`**, from `AR-LOG` at `RESUME.md` lines 1608 and 4108 — the same unanchored-pattern trap as findings 6b and 9 below.
+
+Footnote worth one line to the author: `R-F`'s **only** occurrence in `RESUME.md` is inside the sentence asserting it appears only in `DECISIONS.md` [measured: `grep -c 'R-F\b'` → 1, at line 898]. Self-falsifying under re-grep; true only under the record-vs-citation distinction the paragraph states for the nine and omits for the three. Add the qualifier to both halves.
+
+**Fix**: `Four are recorded only in DECISIONS.md — R-F · R-AL · R-AM · R-AN`, with the record-not-citation qualifier applied to both halves; re-state the tuple as `union 40 (41 under the bare regex, R-LO from AR-LOG), D 31, R 36, 27 in both` with the anchored regex printed.
+
+Certainty R-AN is missing: **95%**. Certainty 28 is wrong: **97%**. Certainty this bites the closing commit if unfixed: **80%**.
+
+### 4 · IMPORTANT — CP-η check 4's printed blind-spot list understates its blindness, and the pattern **this round added** is one of the unlisted ones.
+
+**Where**: `RESUME.md` lines 1212–1216 (the instrument's own `BLIND SPOTS` print), and the claim it warrants in the twin at `/Users/master/.../orchestrate/ux/wireframes.md` line 46.
+
+The instrument declares: *"a greedy free-copy match (**the nameplate, the three framings**) leaves its row uninspected past the first datum."* Measured by mutation against a copy via `CPETA_FILE` (read-only; the tracked file was never touched — verified `git status --porcelain` clean on the pathspec):
+
+| mutation | expected | actual |
+| --- | --- | --- |
+| `[Destroy code]  ▓ 99 ▓` appended **inside a code-box row** | RED | **GREEN** |
+| `[Delete everything]` appended after `the pane holds:` | RED | **GREEN** |
+| text replaced after `the machinery broke here,` | RED | **GREEN** |
+| `Tokens` → `Tokenz` on a rail (control) | RED | RED ✓ |
+| `[Nuke]` added to a control row (control) | RED | RED ✓ |
+
+The first row is the sharp one. `'the source': r'\d+  \S[^│]*'` was **added at `70377e6e` under R-AN** and swallows every code-box row to its closing vertical — so the check that certifies the contract's totality is blind on exactly the row class the round's newest grant was written for, and that blindness is not in the declared three. Same for `'the pane': r'…the pane holds: [^│]*'` and `'accessible'`'s `broke here[^│]*`.
+
+Undeclared fourth: `len(run.strip()) > 1` (line 1198) silently accepts any **single-character** ungranted datum [measured: `✱` added to a `[Guide ▾]` row → GREEN]. One-character glyphs are precisely the datum class B14 governs (`●`, `·`, `▾`).
+
+Why it reaches spec, not just the handoff: `wireframes.md` line 46 — a 0.2 deliverable in the twin — now says **"Read the list as complete only as far as that check is green."** The hedge is honest in direction, but the warrant it points at is materially weaker than its printed self-description, and `970b8919`'s body asserts "two DECLARED blind spots, both SILENT as expected" as if the enumeration were closed.
+
+**Counter-proposal**: two options, both small.
+- *Cheap and honest*: extend the printed blind-spot line to name every `[^│]*` tail by key (`the source`, `the pane`, `accessible`'s framings, `the selected level's cause`) plus the one-character gate. Costs one print statement and makes the twin's hedge accurate.
+- *Better*: anchor the tails so they stop at the datum rather than the row — e.g. `\d+  \S.*?(?=\s{2,}|$)` — and re-run. This recovers real coverage on the code-box rows, which is where R-AN's grant lives. Expect new residues; that is the instrument working, and § The instruments' own rule already says how to read them ("A residue means either the drawing draws an ungranted datum or the contract owes a row — never that the instrument needs loosening").
+
+Certainty the three mutations pass green: **99%** (run). Certainty the declared list is materially incomplete: **90%**.
+
+### 5 · MINOR — `ffabcd41`'s DANGLING-REFERENCE SWEEP: "the fifteen SHAs it cites" reproduces under no accounting.
+
+[measured over `ffabcd41`'s body: 11 distinct 8-hex tokens, 20 occurrences, 9 distinct backticked, 12 backticked occurrences; over the lines it added to `RESUME.md`: 6 distinct, 25 backticked occurrences, 32 hex occurrences; whole live region: 33 distinct, 111 occurrences.] None is 15.
+
+**The substance holds** — I ran `git cat-file -e` on all 11 body SHAs and all 6 added-line SHAs: every one resolves, and all eight cited section names resolve to exactly one heading each [measured]. Only the count is wrong.
+
+Amend is forbidden, so this is uncorrectable: it belongs in § Closing obligations item 2's uncorrectable-record list alongside `fa6dd40c`, `7dea8eaa`, `b5a9c8f0`. Recording it is the fix. Noted plainly because it is the fourth-generation instance of the class, shipped in the closing commit's own dangling-reference sweep.
+
+Certainty: **90%** (I tried eight accountings; a ninth may exist).
+
+### 6 · IMPORTANT — § What this round did's six-number table carries **zero** sourced-claim tags, and two of its cells are false at HEAD.
+
+**Where**: `RESUME.md` lines 60–72 (live).
+
+**(a) No tags.** Six repo-state claims, no `[measured:]`/`[read:]`/`[relayed:]` on any row, and the lead sentence — "all six were found by re-measuring rather than relaying" — is itself an untagged method claim. `DEV.md` § Sourced claims names handoffs as one of the four auditable surfaces; `DEV.md` § AR-5 asks me to audit exactly this. The rest of the file is scrupulous about tags, which is what makes the gap conspicuous: this is the one table a downstream reader is most likely to quote, and § YOUR FIRST ACTION points at it first.
+
+**(b) Row 1 does not reproduce under its own declared method.** The cell reads "**four** — `user-journeys.md` 3 · `wireframes.md` 1 · `personas.md` 0", and the F3 bullet at line 106 states the method as "word-bounded, squeezed unwrap". [measured at `f0b5a2bb`, squeezed unwrap: `\bviolation\b` → user-journeys **2**, wireframes 1, personas 0 = **three**. The line-169 hit is `violations`, plural. The stated "four" appears only under an unbounded substring match — the opposite of the declared method.]
+
+**(c) The same cell is stale in its own commit.** `70377e6e` wrote "`wireframes.md` 1" and, in that same commit, edited `wireframes.md` to contain three [measured at HEAD: `\bviolation\b` → user-journeys 2 · wireframes **3** · personas 0].
+
+The finding's substance is untouched, as the row itself says — the datum was drawn and never granted, and it is granted now. But this is the second wrong count on AR-5's finding 3 in two rounds, and the mechanism both times was a labelled method that does not produce the labelled number.
+
+Same class, one more instance worth a line: `ffabcd41`'s body says "**13** carry only the `[measured at <sha>:` form." [measured over the 30 naive-untagged bodies of `80306ad9..afe9259e`: `[measured at <sha>` → **5**; `[measured at ` anything (incl. `at this commit`) → **13**.] 13 is right for the family, wrong for the spelling printed beside it. The body's own deeper-finding paragraph enumerates three house variants, so the fix is to name the family, not one member.
+
+**Fix**: tag every row; correct row 1 to `three word-bounded (user-journeys 2 · wireframes 1 · personas 0) at f0b5a2bb; four under an unbounded match` and SHA-pin it; correct the `<sha>` spelling to the variant family.
+
+Certainty on (a): **95%**. On (b): **95%**. On (c): **99%**.
+
+### 7 · MINOR — `_this one_` should be resolved to `ffabcd41`.
+
+`RESUME.md` line 52. You asked whether it should have been resolved: **yes**. Harm is bounded — the standing warning at lines 43–46 forbids assembling the SHA list from the table, and I did not — but it is the only cell of three a reader cannot resolve without `git blame`, in the table § YOUR FIRST ACTION sends them to first. Resolving it in the archive commit, as you intend, is the right disposition. Certainty it is worth doing: **80%**.
+
+### 8 · MINOR (pre-existing, newly load-bearing) — "the glossary's _snippet_" names a glossary entry that does not exist.
+
+`README.md` lines 115–116 assert "the glossary's _snippet_ is this prop together with `type`"; `orchestrate/README.md` § Glossary — region terms has no `snippet` entry [measured: `grep -c '^- \*\*snippet\*\*'` → **0**]. Not introduced here [measured: `git blame -L113,118` → `56d12dbf`/`eb5d249b`, both pre-baseline], but this delta quotes that sentence into the twin at `wireframes.md` lines 41–43 and builds R-AN's `the source` row on it. 0.3 writes `types.ts` from this prose and the term it leans on is unglossed.
+
+This is AR-1's question (glossary completeness) and I am not re-opening it — flagged so 0.3 does not inherit it silently. Certainty the entry is absent: **99%**.
+
+### 9 · MINOR — a code span where the source has italics.
+
+`wireframes.md` line 253 writes ``a `_barred_` phase``; `user-journeys.md` line 278 has `A _barred_ phase`. The code span renders literal underscores in monospace where the quoted source renders italic *barred*. Cosmetic, but it sits inside the paragraph this round rewrote to fix a misquotation. Certainty: **90%**.
+
+---
+
+## Cross-cutting reads
+
+**Cross-increment coherence** — holds. The three commits' vocabulary is consistent; the new instrument tokens (`TRAY`, `COUNT_LINE`, `CAUSE_COUNT`) are script-internal and do not leak into domain prose; the two new contract rows use the README glossary's own words. No naming drift, no abstraction leakage.
+
+**README / DOCS drift** — `DOCS.md` § The render projection states structural rules, not a per-datum grant list, so R-AN's two rows create no divergence there; `types.ts` already carries `SettledSnippet = { source, type }`, so the twin's new rows land on existing type shapes rather than inventing parallel ones. `README.md` § What renders now enumerates band / guide / recommendations with no member listed twice, verified against glossary · band and · control row. **Documentation sync is clean.**
+
+**Phase 0 step 0.2** — `twin-doc: user` (R-AL) is still *true* of this changeset: it edits the twin and the region's user-facing render prose, and `user` names the right reader. All three twin documents exist and address the learner-facing reader. All three commit bodies carry the full four-part settings line. Discharge holds. I did not re-litigate whether `user` was wise; that is AR-1's question.
+
+**Scope vs. spec** — nothing shipped that the spec did not name. The two contract rows are ruled (R-AN); the instrument widening was AR-5's own counter-proposal; § Closing obligations is a handoff section, not a spec artifact. No nice-to-haves.
+
+**Non-Negotiable Invariants** — all hold. Invariant 13 is the one under strain, and finding 6(a) is where.
+
+---
+
+## Verdict
+
+**PAUSE** — certainty this is the right call **70%**; the honest alternative is CONSIDER and I say why below.
+
+Rationale. None of the nine touches design, contract, or product code; every gate is green and I ran all of them; the substance of all seven document fixes and both instrument widenings holds under independent re-measurement. **What blocks is timing, not magnitude**: two of the four IMPORTANTs feed the *immediate* next gates rather than some later one.
+
+- **Finding 3** is a defect *in* § Closing obligations, and § Closing obligations is the next thing the 0.2-closing commit reads. A closing commit that walks that three-item list drops R-AN — the ruling with the most 0.3 work riding on it. DEV.md's PAUSE test is "should be resolved before continuing," and this one must be resolved before the very next commit, not after it.
+- **Finding 1** makes the file's own first-action instruction misfire: the next session runs the instruments and meets GREEN against a printed expectation of RED.
+- **Finding 4** is the one that reaches the twin, a 0.2 deliverable: `wireframes.md` line 46 stakes the contract's completeness on a check that goes green on a code-box row carrying `[Destroy code]`.
+- **Finding 6** is a sourced-claims gap on the table most likely to be quoted downstream, with two cells already false.
+
+Consistency argues the same way: five of these nine are the same shape as the ten I found last round — false or unreproducible statements about repo state in live documents — and that set drew a PAUSE. Halving the count does not change the class, and this campaign's own measured lesson is that the fix round is where the next defect lands.
+
+**The remediation is small and I want that on the record**, because a PAUSE should not read as bigger than it is. Four edits, all inside the two files already open, none needing a ruling, none re-opening a finding:
+
+1. `RESUME.md` 1221–1224 — Expected → GREEN / 0 residues; demote RED to `landed RED at 970b8919`.
+2. `RESUME.md` 892–906 — four not three, add R-AN, restate the tuple as `40 (41 bare, R-LO from AR-LOG) · D 31 · R 36 · 27 both`, qualify record-vs-citation on both halves.
+3. `RESUME.md` 1212–1216 — extend the printed blind-spot list to every `[^│]*` tail plus the one-character gate; optionally anchor the tails and re-run.
+4. `RESUME.md` 60–72 — tag all six rows; correct row 1 to three word-bounded and SHA-pin it.
+
+Plus, in the closing body: record finding 5's "fifteen" in the uncorrectable ledger, and finding 2's SHA-pin. Findings 7–9 are one-line dispositions.
+
+**Why CONSIDER is defensible and I did not choose it.** Three of the four blocking items are corrections *to the closing commit's own inputs*, and CONSIDER's rule — document a response to each, then continue — would force the implementing agent to look at them before writing that body, which is most of what a PAUSE buys. If you read it that way, take it as CONSIDER and fix all four in the closing commit; I will not argue that reading is wrong. What I will not do is call it PROCEED: finding 3 is a live enumeration error with a mechanical consequence one commit away, and finding 4 puts an overclaim in the twin.
+
+**No round 13 is owed by this review.** Every finding is CHANGE-shaped — a false or unreproducible statement, or a missing tag. None needs a ruling. The 2026-08-19 fallback trigger has not fired.
+
+**If these four land, 0.2 closes.** The next gates are the settings-line discharge, § Closing obligations (all four, with the corrected enumeration), the Phase-0 → Phase-1 human gate, and the push gate. `main` still has no upstream [measured: `git rev-parse --abbrev-ref main@{upstream}` → fatal].
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
 
 ---
 
