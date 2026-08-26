@@ -1,6 +1,6 @@
 /**
  * run's contract: the spec widening, the result-only handle, the
- * discriminated result, the error taxonomy, and the two worker seam
+ * discriminated result, the error taxonomy, and the three worker seam
  * records. README.md carries the domain model and the design rulings
  * (2026-08-18/19); DOCS.md carries the architectural sketch this file
  * locks. Reference type names return wholesale (HR-8): `RunHandle`,
@@ -21,6 +21,7 @@
 
 import type { Program } from 'acorn';
 
+import type { HaltCore } from '../lib/guarded-worker-base/types.js';
 import type { LimitTrip } from '../lib/iteration-guard/types.js';
 import type {
 	ErrorPhase,
@@ -250,31 +251,26 @@ export type RunResult =
 // ─── Seam 1: the halt payload (worker → thread) ──────────────────────────────
 
 /**
- * run's worker-authored, clone-safe stop record — authored by run's halt
- * author on EVERY worker-side stop (natural end and throw alike; the
- * stop record is authored where the raw throw lives, pin run:272), and
- * narrowed exactly ONCE thread-side (a payload failing the narrowing is
- * the defensive `'defect'` arm). Package-internal seam, not consumer
- * surface. Declared run's own per the banked halt-shape ruling
- * (2026-08-19): whether this shape consolidates into a shared home is
- * P0-I's design inventory's, decided with both units' halt needs
- * visible.
+ * run's worker-authored, clone-safe stop record — authored on EVERY
+ * worker-side stop (natural end and throw alike; the stop record is
+ * authored where the raw throw lives, pin run:272), and narrowed exactly
+ * ONCE thread-side (a payload failing the narrowing is the defensive
+ * `'defect'` arm). Package-internal seam, not consumer surface.
+ *
+ * The shape stays declared here under run's name (the 2026-08-19
+ * per-evaluator ruling, carried through the 2026-08-25 shared-author
+ * resolution), and it IS the guarded worker base's core: run's setup
+ * registers `createGuardedWorkerBase`'s author with NO finisher, so the
+ * authored record is the core itself and the alias is that identity's
+ * zero-drift record. What the alias buys, spelled out: a discriminated
+ * union on `natural` — the natural arm pins its empty members (`phase:
+ * null` included), the throw arm carries the engine's structural
+ * `phase` non-null (the E2 increment), so the settlement mapper narrows
+ * on `natural` and reads an {@link ErrorPhase}, never a fabricated
+ * default. Intercept's halt differs through its finisher, never by
+ * forking this skeleton.
  */
-export type RunHalt = {
-	/** `true` on a natural end (no throw). */
-	readonly natural: boolean;
-	/** The thrown error's name; `''` on a natural end. */
-	readonly errorName: string;
-	/** The thrown error's message, or `String(thrown)`; `''` on a natural end. */
-	readonly message: string;
-	/**
-	 * The guard's trip record when the throw was the marked limit throw
-	 * (classified structurally, never by message); `null` otherwise.
-	 */
-	readonly trip: LimitTrip | null;
-	/** The never-reset run total of guarded-loop iterations — real on EVERY halt. */
-	readonly iterationCount: number;
-};
+export type RunHalt = HaltCore;
 
 // ─── Seam 2: the worker config (thread → worker) ─────────────────────────────
 
@@ -287,4 +283,25 @@ export type RunHalt = {
  */
 export type RunWorkerConfig = {
 	readonly iterationLimit?: number;
+};
+
+// ─── Seam 3: the ask (worker → thread) ───────────────────────────────────────
+
+/**
+ * The clone-safe ask a dialog trap sends through the machinery's call
+ * channel — minted at the worker-setup increment, consumed by the
+ * thread-side io wrapper (which alone owns answer validation and io
+ * classification; the trap does neither). The request is rendered as the
+ * platform would render the dialog, the deprecated intercept setup's
+ * own rules carried: `alert` rides two overloads — no argument is `''`,
+ * one argument converts through `String` (an explicit `undefined`
+ * renders `'undefined'`); `confirm`/`prompt` declare their message
+ * optional-with-default, so an explicit `undefined` counts as omitted
+ * (`''`); `prompt`'s `defaultValue` is ABSENT when undefined, never a
+ * rendered `'undefined'`.
+ */
+export type RunIoRequest = {
+	readonly verb: IoVerb;
+	readonly message: string;
+	readonly defaultValue?: string;
 };

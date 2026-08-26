@@ -4,7 +4,7 @@ import type {
 	InterceptHalt,
 	InterceptWorkerConfig,
 } from '../../../intercept/types.js';
-import type { RunHalt, RunWorkerConfig } from '../../../run/types.js';
+import type { RunWorkerConfig } from '../../../run/types.js';
 import createGuardedWorkerBase from '../create-guarded-worker-base.js';
 import type { HaltCore } from '../types.js';
 
@@ -221,10 +221,8 @@ describe('compile probes (live)', () => {
 	});
 
 	it('the units’ phase members are still deferred — remove these lines when they land', () => {
-		// @ts-expect-error RunHalt gains `phase` at run's worker-setup increment (R1)
-		const runPhase: RunHalt['phase'] = undefined;
 		// @ts-expect-error InterceptHalt gains `phase` at intercept's worker-setup increment
 		const interceptPhase: InterceptHalt['phase'] = undefined;
-		expect([runPhase, interceptPhase]).toEqual([undefined, undefined]);
+		expect([interceptPhase]).toEqual([undefined]);
 	});
 });
