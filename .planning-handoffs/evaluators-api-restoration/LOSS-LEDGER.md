@@ -1059,6 +1059,27 @@ execution and never holds one alone.
   engine and both evaluators — never a second copy of the number. And X1 fires
   no 🔍: the handle library has no user-loadable surface, confirmed by the human
   under the no-agent-declared-skips rule.
+- **The guarded-worker-base design rulings (2026-08-25/26, at the module's
+  scoped ar-1 — verdict PAUSE, eleven concerns, all resolved).** The shared
+  module ruled at the W4 opening reshapes to ONE concept:
+  `createGuardedWorkerBase(workerConfig, finish?)` in
+  `evaluators/lib/guarded-worker-base/`, answering the guard globals and the
+  halt author together — the cap reading and the guard construction fold in as
+  in-file helpers, retiring the last wiring duplicated across the port's two
+  setups (composition delegated by the human to the agent's judgment, this
+  round, and decided for the one-concept shape). The halt core is a
+  DISCRIMINATED UNION on `natural` — the throw arm's `phase` narrows to the
+  engine's `HaltPhase`, the natural arm pins the empty members, and no mapper
+  ever fabricates a phase. The finisher is GUARDED AT THE BUILDER — a throwing
+  finisher degrades to the unfinished core, never a lost halt (intercept's
+  stack-parse residual is the named first client). Fix-alls applied with them:
+  the deprecated setups are cited as the deprecated kind (never "the
+  reference"); iteration-guard's § Excludes sentences amended to name the shared
+  reader; the module scoped to the GUARDED engine-backed evaluators (the
+  quarry's variables halt — no trip, no count — is the counterexample that makes
+  the exclusion real); compile probes pin both worker-config shapes and the
+  units' deferred `phase` members; the measured shared-line count is 48, not the
+  banked 57.
 
 ### The ratification, and what it settled (human ruling 2026-08-06)
 
