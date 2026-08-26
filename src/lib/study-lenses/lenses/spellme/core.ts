@@ -235,10 +235,18 @@ const THRESHOLD_KEYS = ['oneMoreAfter', 'skipAfter'] as const;
  * A table because **the fate is a function of the element kind alone** — which
  * the mark is not, and which is why the mark is derived separately.
  *
- * Total over the derivation's fourteen kinds, and that totality is the whole
- * check: only one claimable kind has its fate asserted anywhere in the suite,
- * so a partial table would pass every test in the module. The compiler covers
- * the other nine, where no fixture does.
+ * **Two type checks, not one, and the second is the stronger.** Totality over
+ * the derivation's fourteen kinds catches a *missing* row — necessary because
+ * only one claimable kind has its fate asserted anywhere in the suite, so a
+ * partial table would pass every test in the module. The intersection with
+ * `Record<ClaimableKind, 'token-tape'>` then catches a *wrong* row, pinning
+ * each of the ten by value rather than by presence.
+ *
+ * ⚠ **Do not simplify this back to `Record<InputElementKind, Fate>`.** This
+ * comment said totality "is the whole check" until 2026-08-25, which an AR-5
+ * flagged as an invitation to do exactly that — and doing it silently reopens
+ * the hole: with the intersection removed, `StringLiteral: 'set-aside'`
+ * compiles. Both halves are load-bearing and both were verified by mutation.
  *
  * The ten repeated `'token-tape'` literals are deliberate and raise a
  * `sonarjs/no-duplicate-string` warning. That rule is downgraded to a warning
@@ -289,6 +297,20 @@ const LINE_TERMINATORS = freezeInPlace(['\n', '\r', '\u2028', '\u2029']);
  * Total over the derivation's fourteen kinds rather than a list of the four:
  * the compiler then refuses a widened upstream vocabulary here, where a list
  * would silently let a new trivia kind become claimable.
+ *
+ * **And intersected with the two domain unions**, so each row is pinned by
+ * value against `types.ts` rather than merely present. Without that tie
+ * `AdvancingKind` was referenced by nothing and this table silently restated
+ * the same partition — edit either and they disagree in silence. ⚠ Do not
+ * simplify it away; `Comment: false` compiles without it.
+ *
+ * ⚠ **Known residual, deliberately not closed here:** the tie catches a row
+ * contradicting a union it belongs to, but nothing asserts the two unions
+ * *partition* `InputElementKind`. Drop a kind from `AdvancingKind` without
+ * adding it to `ClaimableKind` and that kind's rows fall back to unpinned in
+ * both tables. Closing it means `AdvancingKind = Exclude<InputElementKind,
+ * ClaimableKind>` in `types.ts` — a Phase-0 contract change, so a FLAG and the
+ * human's, not a refactor (raised by AR-5, 2026-08-25, and never compiled).
  */
 const ADVANCES_ON_ITS_OWN = freezeInPlace<
 	Record<InputElementKind, boolean> &

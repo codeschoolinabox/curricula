@@ -1,5 +1,5 @@
 <!-- cspell:ignore spellme lookaheads tokenizer ZWNBSP undercounts -->
-<!-- cspell:ignore wireframes worktrees -->
+<!-- cspell:ignore wireframes worktrees Rects -->
 
 # Phase 1 — `lib/scanning`, then `spellme`
 
@@ -440,6 +440,23 @@ string — or the description must not quote it.** Always pair it with a positiv
 control. This is the sharpest instance of § Traps' vacuous-grep entry, and it
 survives because the instrument reads clean every time.
 
+**Its companion rule, from the same family:** an absence claim over an
+alternation must **state that it used `grep -E`**. `0b0485c3`'s body tagged one
+`[measured: … grep for A|B over the file -> 0]` without naming the flag — the
+claim was true (re-run with `-E` and a positive control), but the tag does not
+establish the instrument on the one pattern shape this campaign has a named trap
+for. Say the flag, or the tag proves nothing.
+
+⚠ **And a fourth, found by the AR-5 re-verification: a claim corrected in ONE of
+the places it lives.** `2d585565` wrote a hard commit count into **two** files;
+`0b0485c3` fixed it structurally in `PHASE-1.md` **only**, and `2a7d691b` edited
+the same section again and still did not sweep the sibling. Two consecutive
+correction rounds walked past the copy one directory over — § Traps item 12 at
+directory scope. **The generalization is not "sweep `git ls-files`": it is that
+a number living in two documents will disagree, so make one document its only
+home and have the other point at it.** That is what this section now does and
+what `PHASE1-WAVE-2-BRIEF.md` was corrected to do.
+
 | SHA        | What                                                           |
 | ---------- | -------------------------------------------------------------- |
 | `4d3e97a6` | prep — two `positionCursor` regression locks, added skipped    |
@@ -461,9 +478,22 @@ scoped suite `42 passed | 50 skipped (92)` across three files;
 `npx tsc --noEmit` **0**; skips `core.test.ts` **22**, `component.test.tsx`
 **28**; module and handoff trees clean. Repo-wide: the **eight** foreign
 failures, unchanged in identity, plus the documented
-`orchestrate/index.test.tsx` flake — confirmed passing **128/128 alone, three
-runs of three**, and orchestrate references `spellme` only in prose, so no code
-path reaches it.
+`orchestrate/index.test.tsx` flake. It is **provably not this wave's**:
+orchestrate references `spellme` only in `.md` files, never a `.ts`/`.tsx`
+[measured 2026-08-25, with a positive control on `parsons`, which does appear in
+composition code], so no code path reaches it.
+
+⚠ **But "passes 128/128 alone" is NOT a reliable discriminator, and this record
+said it was.** The claim was a true measurement of an intermittent thing, stated
+as though it settled the question. Combined evidence across two agents: **9
+isolated runs, 1 failure** — 7 passes here, and an AR-5 saw it **fail alone** on
+its second run with `TypeError: textRange(...).getClientRects is not a function`
+[measured 2026-08-25 by both]. So it is **intermittent in isolation too**,
+merely rare on this machine, and the symptom is a **jsdom/CodeMirror layout-API
+gap**, not the Worker-pool parallelism the wave-2 brief attributes it to. ⚠
+**Wave 3 is jsdom component work** — the wave most likely to meet it. Do not let
+a green isolated re-run convince a future session that a failure there is
+foreign; check the symptom.
 
 **What the wave cost, and what it bought.** Seventeen un-skips plus two authored
 tests, five `ar-4` verdicts, an AR-5 **PAUSE** over two blockers, and a

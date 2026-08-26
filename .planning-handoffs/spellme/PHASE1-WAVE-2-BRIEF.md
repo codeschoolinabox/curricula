@@ -4,8 +4,11 @@
 
 ## ✅ CLOSED 2026-08-25 — this is a RECORD, not live status
 
-**Wave 2 is done.** Every number below § Measured baselines was true **at
-launch** and is now historical — the suite it describes as
+**Wave 2 is done. Every number ANYWHERE IN THIS FILE was true when written and
+is now historical** — including the two above § Measured baselines, which is
+where this sentence used to scope itself and is why an AR-5 caught it on
+2026-08-25: the disclaimer written to stop a cold reader trusting a stale number
+had carved out the region containing them. The suite it describes as
 `22 passed | 67 skipped (89)` finished at **`42 passed | 50 skipped (92)`**
 [measured 2026-08-25: `npx vitest run --project unit
 src/lib/study-lenses/lenses/spellme`], and `core.test.ts`'s skips went **39 →
@@ -17,13 +20,27 @@ This banner exists because this campaign's records have gone stale in exactly
 this way five times, and because a brief whose numbers were correct when written
 is the most convincing wrong document a cold reader can meet.
 
-**THIRTEEN commits closed the wave** — four prep, five increments, four
-post-review. ⚠ This line said "six" for an hour on 2026-08-25, having been
-written before the AR-5 and AR-3 remediation landed: **a SHA count written
-before the last commit exists is the failure this campaign has now recorded six
-times.** The list lives in [`./PHASE-1.md`](./PHASE-1.md) § The `spellme` LENS —
-Phase 1, wave 2, and **re-run it rather than trusting either file**:
-`git log --format='%h %s' --since='2026-08-25 07:00' -- src/lib/study-lenses/lenses/spellme/ .planning-handoffs/spellme/`.
+**How many commits closed the wave: RUN THIS.** This line carries no number, on
+purpose.
+
+```sh
+git log --format='%h %s' --since='2026-08-25 07:00' -- \
+  src/lib/study-lenses/lenses/spellme/ .planning-handoffs/spellme/
+```
+
+⚠ **This line has now carried a wrong count twice on one day** — first "six",
+then a hard number that was already three low when an AR-5 checked it. Both were
+written before the commits that falsified them, which is unavoidable: **a
+document cannot count the commit that writes it.** The second time is the worse
+one, because the sibling `PHASE-1.md` had already been fixed structurally and
+**two consecutive correction rounds walked past this copy in the file next
+door** — the campaign's own § Traps item 12, at directory scope rather than file
+scope.
+
+**The generalization, which is worth more than either fix:** a number living in
+two documents will disagree. **Make one document its only home and have the
+other point at it.** [`./PHASE-1.md`](./PHASE-1.md) § The `spellme` LENS — Phase
+1, wave 2 is that home; this file points, and stores nothing.
 
 **Where the live record is:** [`./PHASE-1.md`](./PHASE-1.md) §§ Where things
 stand and **The `spellme` LENS's rulings (2026-08-25, wave 2)**. **Next is wave
@@ -53,7 +70,10 @@ the question was answered.
 `tests/core.test.ts` on `it(` boundaries → 56 blocks, 39 containing
 `streamOf(`], so nothing downstream can go green until your work is committed.
 That is why you run alone. (It read "37 of the 54" until `4d3e97a6` added two
-tests, both of which route through `streamOf`.)
+tests, both of which route through `streamOf`.) ⚠ **Historical, like everything
+else here: it is now 40 of 58** [measured 2026-08-25], because `d7079a3f` and
+`2c911356` each added a test and only the first uses `streamOf`. The 39/56 above
+was true when written; do not act on it.
 
 ## The wave map — spellme's `core.ts`, all five waves
 
