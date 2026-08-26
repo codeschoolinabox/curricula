@@ -305,3 +305,39 @@ export type RunIoRequest = {
 	readonly message: string;
 	readonly defaultValue?: string;
 };
+
+// ─── Seam 4: the io flag (resolver → mapper) ─────────────────────────────────
+
+/**
+ * run's closure-side io classification record — the settlement mapper's
+ * precedence step 1 reads it (a flagged run settles the `'error'`
+ * outcome's `'io'` arm, outranked only by the consumer's cancel, human
+ * ruling 2026-08-19). The record IS the io arm's error, complete:
+ * classification happens at the io seam, where the interrupted exchange
+ * is known — an io failure reaches the machinery as its generic
+ * call-error cause, so the mapper rides this record onto the arm
+ * unchanged and re-derives nothing. The alias is that identity's
+ * zero-drift record, the {@link RunHalt} pattern.
+ */
+export type RunIoFlag = IoResultError;
+
+/**
+ * The thread-side io resolver's answer, discriminated on `answered`:
+ * the validated value ready to ride the machinery's response channel
+ * back to the blocked trap, or the minted flag. The answer vocabulary
+ * is the union of the three verbs' validated answers — prompt's
+ * `string | null`, confirm's `boolean`, alert's `undefined` — which is
+ * by the channel's own design exactly the value vocabulary it carries
+ * (the engine's `CallResponse`, mirrored structurally per this file's
+ * boundary and locked both directions by a compile-time probe in the
+ * tests, the {@link RunDefectCause} pattern).
+ */
+export type RunIoResolution =
+	| {
+			readonly answered: true;
+			readonly answer: string | boolean | null | undefined;
+	  }
+	| {
+			readonly answered: false;
+			readonly flag: RunIoFlag;
+	  };
