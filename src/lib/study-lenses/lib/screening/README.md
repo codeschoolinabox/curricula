@@ -208,7 +208,7 @@ Behavior:
   parser's own property order — which is source order for most node shapes but
   not all (a template literal's interpolated expressions enumerate before its
   text chunks). A consumer needing strict source order sorts by
-  `location.start`, as the JEJ level's `validate` does.
+  `location.start`.
 
 ## Edge cases
 
@@ -292,13 +292,21 @@ rules:
 
 - **Pure-sync only.** No async, no I/O, no side effects, no randomness.
 - **Domain-blind.** No language levels, no lifecycle phases, no enforcement
-  postures, no lenses — in the code or in the prose. It imports no package
-  region — not embody, not levels, not lenses — not even for types; its only
-  foreign vocabulary is acorn's, type-only. (Repo-wide freezing utilities are
-  not a package region.) The rule's own statement is bounded: naming the posture
-  in this document is describing the leaf, not practising a domain — a re-scope
-  raised 2026-08-06 and still open, because the same rule was the cited
-  authority for five deletions and its literal reading would self-apply.
+  postures, no lenses — in the code, or in prose that states this module's
+  contract. It imports no package region — not embody, not levels, not lenses —
+  not even for types; its only foreign vocabulary is acorn's, type-only.
+  (Repo-wide freezing utilities are not a package region.) **Two bounds on the
+  rule's own reading** (human ruling 2026-08-25). First, it does not forbid
+  **naming the category in order to declare blindness to it** — this bullet, the
+  orientation above, and § Why this module exists all do that, and each is
+  describing the leaf. Second, **[§ Consumers](#consumers) is a carve-out**: a
+  module is required to name who uses it [read: `DEV.md` § Directory
+  Documentation Convention — "siblings link to each other"], so naming a
+  consumer there is navigation, not domain knowledge. The earlier wording, _"in
+  the code or in the prose"_, forbade both on a literal reading and so
+  self-applied. It was the cited authority for five deletions, every one of them
+  in a source file's JSDoc rather than in a README, so all five stay justified
+  under the narrower rule.
 - **Absence is the baseline; recommendation is a later layer** (human ruling
   2026-08-06). The leaf reports what it did not admit and never tells a reader
   what to write instead. A recommendation surface — "did you mean", a suggested
