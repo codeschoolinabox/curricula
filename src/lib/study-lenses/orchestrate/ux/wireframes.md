@@ -28,9 +28,23 @@ and the strict toggle are surfaces this region renders, specified in
 [The parts](#the-parts), and a control's own label belongs to the surface that
 renders it. **The distinction is load-bearing in both directions**: read as a
 totality over everything DRAWN, this contract condemns four controls the
-arrangement cannot work without; read as a totality over the DATA, it is exact,
-and the snippet type below was missing from it while being drawn in every
-full-frame drawing.
+arrangement cannot work without; read as a totality over the DATA, it is exact.
+
+**A totality is only worth the sweep that produced it, and this one has now been
+swept three times, finding a hole each time.** The **snippet type** was missing
+while being drawn in every full-frame drawing. The **selected level's cause**
+was missing while the blocked overlay drew it twice — `README.md` § Enforcement
+names that content outright ("The blocked state names the level and the first
+violation, or the type-admission cause") and `glossary · assessment` confirms
+the region holds it. And **the source** was missing while every code box drew
+it, though it is the region's only required input [read: `types.ts`
+`StudyLensesProperties` — "The program source"] and `README.md` states that "the
+`snippet` prop is the source text alone — the glossary's _snippet_ is this prop
+together with `type`", so the contract granted half a snippet. The first was
+found by a reviewer, the second by a reviewer, the **third by an instrument** —
+`RESUME.md` § The instruments, CP-η check 4, which walks every drawn datum and
+asks whether this list grants it. **Read the list as complete only as far as
+that check is green.**
 
 ```text
 per phase, in the machine's fixed order:
@@ -41,6 +55,10 @@ per phase, in the machine's fixed order:
 levels            0 … N registered; one selected, or the none-state
 the selected      fits · does not fit · not applicable for this type ·
   level's mark      undetermined while unparsed
+the selected      the first violation · or the admitted types — the cause
+  level's cause     the mark needs downstream, which the mark alone omits
+the source        the program text; the region seeds from it at mount and
+                  its own edit intake is the only writer thereafter
 the snippet type  module · script — what the type toggle's face reads, and
                   what the selected level's admission is crossed against
 the posture       warn (default) or strict
@@ -232,15 +250,20 @@ about where the machine stopped.
 
 **This inverts Journey 6's own complaint rather than answering it.**
 [`user-journeys.md`](./user-journeys.md) states the defect as: the empty phase
-gives "a dead control and no reason for it" while "the _barred_ phase, by
-contrast, carries its cause — **the common case is served worse than the
-exceptional one**, which is the wrong way round." The Rail fixes the common case
-and, by moving the cause into a collective caption, makes the exceptional case
-the unattached one. **That is not obviously wrong** — B3's one-cause-drawn-once
-rule is a real decision, and repeating the parser's sentence per waiting phase
-is the failure [`personas.md`](./personas.md) names as telling a learner a
-single truth two or three times. But it is a **new cost**, and recording costs
-is this document's job.
+gives "a dead control and no reason for it", while a `_barred_` phase "has a
+cause to be read". Its next clause is the one that bears on this passage — the
+cause it means is the one "today's build draws one per barred phase; the
+arrangement draws one, once, in the caption", and it says so explicitly, because
+"this bullet is describing what the learner meets now rather than licensing the
+repetition" [`personas.md`](./personas.md) rejects. Either way its contrast
+holds: "**the common case is served worse than the exceptional one**, which is
+the wrong way round." The Rail fixes the common case and, by moving the cause
+into a collective caption, makes the exceptional case the unattached one. **That
+is not obviously wrong** — B3's one-cause-drawn-once rule is a real decision,
+and repeating the parser's sentence per waiting phase is the failure
+[`personas.md`](./personas.md) names as telling a learner a single truth two or
+three times. But it is a **new cost**, and recording costs is this document's
+job.
 
 **Under strict it compounds in the same subtree.** The passage below books the
 per-station empty reason going dark with the rail; the barred cause is in the

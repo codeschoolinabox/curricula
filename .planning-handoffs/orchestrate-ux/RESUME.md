@@ -2,33 +2,77 @@
 
 # orchestrate ux — resumption point
 
-**STATE: Phase 0 step 0.2. `ar-5` HAS RUN — the first one this campaign ever ran
-— and returned PAUSE with ten findings. THE HUMAN READ IT AND RULED: fix all
-ten, then re-run AR-5 on the delta. YOU ARE THAT FIX ROUND. Seventeen commits
-are unpushed as of `afe9259e` — `1046c90d~1..afe9259e` — and **this file's own
-commit makes it eighteen**, which is the
-`N at <parent>, N+1 including this commit` convention AR5-F5 asks for, applied
-here first.**
+**STATE: Phase 0 step 0.2. AR-5's FIX ROUND IS EXECUTED. All ten findings are
+fixed or recorded, the two instrument widenings are built, and CP-η is GREEN.
+THE NEXT ACTION IS THE AR-5 DELTA RE-RUN — see § Then: re-run AR-5 on the DELTA.
+Its baseline is the fix round's first commit's parent, `f0b5a2bb`, NOT
+`80306ad9`.**
 
 ## YOUR FIRST ACTION — read this before anything else
 
-**No rulings are owed and none is coming.** AR-5 returned **ten findings, every
-one CHANGE-shaped** — false statements about what a document says or what a
-command returns, not decisions needing re-taking. It said so explicitly: _"NO
-ROUND 13 IS OWED BY THIS REVIEW … The human's 2026-08-19 fallback trigger has
-not fired."_ Its verdict is archived verbatim below under **§ AR-5'S VERDICT**.
-**Work from the archived verdict, never from this summary.**
+**⛔ THE FIX ROUND IS DONE. Do not re-open it, and do not re-fix the ten.** This
+section is the brief that was executed on 2026-08-26; it is kept because six of
+its own instructions were measured WRONG in the doing, and a reader who meets
+only the outcome cannot tell a corrected instruction from an obeyed one. What
+each bullet below got wrong is marked ⛔ inline, beside it.
 
-**Do not re-ask whether to open this round.** It was put to the human on
-2026-08-25 with the options and their trade-offs, and the ruling is: **fix all
-ten, then re-launch AR-5 on the delta only — not the full 97.**
+**What is live is one thing: relaunch `ar-5` on the delta.** Everything needed
+is in § Then: re-run AR-5 on the DELTA and § AR-5 — its five inputs. Read § What
+this round did first, because the delta is three commits and one of them lands
+an instrument RED on purpose.
 
-**Your first action is not an edit.** Two of the ten findings are corrections of
-corrections, so **re-measure each one before you touch it.** **Re-measure ALL
-TEN.** An earlier revision of this line certified three as "re-measured and
-reproducing" and **one of the three was wrong** — AR5-F3's count was taken over
-one file and written up as the whole twin. A certification that lets you skip a
-measurement is worth less than the measurement.
+**No rulings are owed on the ten.** AR-5 returned **ten findings, every one
+CHANGE-shaped** — false statements about what a document says or what a command
+returns, not decisions needing re-taking. It said so explicitly: _"NO ROUND 13
+IS OWED BY THIS REVIEW … The human's 2026-08-19 fallback trigger has not
+fired."_ Its verdict is archived verbatim below under **§ AR-5'S VERDICT**.
+**Work from the archived verdict, never from this summary.** Three rulings WERE
+taken this round and none of them re-opens a finding: **R-AL, R-AM, R-AN**,
+recorded in [`DECISIONS.md`](./DECISIONS.md) § Rulings taken 2026-08-26.
+
+**Your first action was not an edit.** Two of the ten findings are corrections
+of corrections, so **each was re-measured before it was touched — all ten.** An
+earlier revision of this line certified three as "re-measured and reproducing"
+and **one of the three was wrong**. A certification that lets you skip a
+measurement is worth less than the measurement. **That instruction earned its
+keep: re-measuring found five more wrong numbers, four of them the reviewer's
+own** — see § What this round did.
+
+## What this round did — and the six things it found the reviewer got wrong
+
+⚠ **NEVER ASSEMBLE THE AR-5 LIST FROM THIS TABLE. Run the command** in § The
+range and the SHA list. The table cannot be complete: the commit that updates it
+is always later than it, and every round's table has been short by at least its
+own closing commit.
+
+| SHA        | what                                                                                                                                                   |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `970b8919` | **the two instrument widenings + AR5-F7**, landed **RED** on nine residues by design. R-AL, R-AM, R-AN recorded                                        |
+| _this one_ | **the seven document fixes** — AR5-F1, F2, F3 (as **two** contract rows, R-AN), F4, F5's live half, F8, F10. CP-η goes **GREEN**, nine residues → zero |
+
+**Baseline of the round: `f0b5a2bb`** — `970b8919`'s parent, and the baseline to
+hand the AR-5 delta re-run. Under the convention adopted this round, the
+campaign SHA list is **100 at `970b8919`, 101 including this commit** [measured
+at this commit, campaign-scoped].
+
+**Six numbers were wrong and all six were found by re-measuring rather than
+relaying — four of them the reviewer's own.** This is the reason § YOUR FIRST
+ACTION's re-measure instruction exists, and it is the strongest evidence the
+campaign has produced for it.
+
+| the claim                                                                                      | whose     | truth                                                                                                                                                     |
+| ---------------------------------------------------------------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `violation` appears **zero** times in the twin (finding 3)                                     | AR-5      | **four** — `user-journeys.md` 3 · `wireframes.md` 1 · `personas.md` 0. The finding's substance is untouched: the datum is drawn twice and granted nowhere |
+| `80306ad9..7dea8eaa` is **268** unscoped (finding 5)                                           | AR-5      | **267**. A finding about wrong self-referential counts carried a wrong count                                                                              |
+| check 2 skips **4** of the 9 rails (finding 7)                                                 | AR-5      | **6**                                                                                                                                                     |
+| widening check 4's **row selector** would have caught finding 3 (CP-1)                         | AR-5      | it does **not** — 12 rows, verdict GREEN. The overlay carries no bracket token; the **extractor** was the constraint                                      |
+| a naive audit grep scores **29** of 98 bodies untagged, **14** carrying only the house variant | this file | **30** and **13** at the SHA they were taken at                                                                                                           |
+| check 4's replacement is a "ten-line change"                                                   | AR-5      | **26 → 90** lines                                                                                                                                         |
+
+**And one finding AR-5 did not make, produced by the instrument it asked for**:
+the projection contract granted the snippet's **type** and not its **text**,
+while every code box draws the text. Ruled **R-AN**; it is why finding 3 landed
+as two contract rows rather than one.
 
 ## The ten findings, and what the human ruled for each
 
@@ -79,7 +123,16 @@ at two instances inside a single session.
    `fa6dd40c` and `7dea8eaa` carry wrong self-referential counts in immutable
    bodies, alongside `b5a9c8f0`'s false checkpoint line. Record all three in the
    closing commit body, and adopt the convention AR-5 proposes:
-   `N at <parent>, N+1 including this commit`.
+   `N at <parent>, N+1 including this commit`. ⛔ **AR-5's own correction is
+   ALSO wrong.** It says `80306ad9..7dea8eaa` is **268** unscoped; it is **267**
+   [measured at `970b8919`: `git rev-list --count 80306ad9..7dea8eaa` → 267,
+   scoped 97; `..fa6dd40c` → 265, scoped 96; `..93a7bba2` scoped → 92]. So
+   `fa6dd40c`'s "95 … was 89 at `93a7bba2`" is wrong twice (96 and 92),
+   `7dea8eaa`'s "266 unscoped, 96 scoped" is wrong twice (267 and 97), **and the
+   finding that corrects them is wrong once**. Three generations of one defect
+   in one chain. `b5a9c8f0`'s false checkpoint line was already corrected in the
+   record at `a5f5e007`. **The convention is adopted here and used by every
+   commit of this round.**
 6. **AR5-F8 · A10's tag decayed.** It claims `SurfaceClass` → 1 hit; it is now 4
    [measured by AR-5, re-measure it]. The row's substance holds; its evidence
    does not.
@@ -89,7 +142,16 @@ at two instances inside a single session.
    where"_. Neither § AR-5 nor § Operating instructions listed that as an
    obligation. **There is no section called "the closing checklist" — make §
    Operating instructions the home**, or open a § Closing obligations. The
-   obligation is real and currently belongs to no document.
+   obligation is real and currently belongs to no document. ⛔ **DONE — §
+   Closing obligations, below.** A named heading over a bullet folded into §
+   Operating instructions, deliberately: this campaign's own measured lesson is
+   that a rule with no home does not fire, and the intake checklist is the
+   standing proof — it is a bolded paragraph rather than a heading, so
+   `grep '^#'` never finds it and every session has had to be told where it is.
+
+**ALL SEVEN ABOVE ARE FIXED.** F1, F2, F3, F4, F5's live half, F8 and F10 landed
+together; F3 landed as **two** contract rows rather than one, per R-AN. See §
+What this round did.
 
 ### Build these — the two instrument widenings, landed RED first
 
@@ -622,8 +684,10 @@ and is live for whenever 0.2 actually closes.
   true at `ffc59db3`, and the Baselines table is the figure of record. Put its
   scoping to the human BEFORE launching; `ar-5` carries **no frontmatter model
   pin** and inherits whatever tier this session runs on) → the settings-line
-  discharge → the **Phase-0 → Phase-1 human gate** → the **push gate**. No
-  upstream is configured on `main`.
+  discharge → **§ Closing obligations, all four** → the **Phase-0 → Phase-1
+  human gate** → the **push gate**. No upstream is configured on `main`. **§
+  Closing obligations was added to this chain 2026-08-26 (AR5-F10)**; it was an
+  obligation `DEV.md` imposed and no section of this file listed.
 - **Archive the verdict verbatim in this file**, under the same banner the four
   previous rounds use:
   `# ROUND 12'S VERDICT, AS RETURNED — ARCHIVE, NOT A TASK LIST`. Splice it
@@ -721,6 +785,62 @@ same section of [`DECISIONS.md`](./DECISIONS.md):
   last session committed one while writing the rule against it.** Before any fix
   lands, name what else cites the thing you are changing and re-read it AFTER
   the edit — not before.
+- **The commit that closes 0.2 owes four things, and they are in § Closing
+  obligations** — the section directly below. Read it before writing that
+  commit's body, not after; one of the four cannot be discharged by amendment
+  because amend is forbidden.
+
+## Closing obligations — what the 0.2-closing commit owes
+
+**Opened 2026-08-26 for AR5-F10.** These are obligations of the commit that
+closes 0.2, and until now they belonged to no document: `DEV.md` names the
+first, `DECISIONS.md` R-S relies on it, and neither § AR-5 nor § Operating
+instructions listed it. A named heading rather than a bullet folded elsewhere,
+because the campaign's own standing example of a rule nobody can find is the
+intake checklist, which is a bolded paragraph and not a heading.
+
+1. **Enumerate what went where.** `.planning-handoffs/` prunes, so **every
+   ruling recorded only in this campaign's own files goes unreachable at 0.2
+   close unless this commit says where it went** [read: `DEV.md` § Ruling
+   provenance — "A ruling whose end-state home does not exist yet **rides its
+   campaign's own durable artifact** … and moves into that document when it is
+   written; the campaign's closing commit body enumerates what went where"].
+   Destinations are `types.ts`, the `DOCS.md` sketch and the tests, as 0.3
+   writes them.
+
+   ⚠ **R-S NAMES ONLY `DECISIONS.md`, AND THAT IS HALF THE SET** [measured at
+   `970b8919`: `R-[A-Z]{1,2}` over both campaign files — **40** distinct ids,
+   union **R-A … R-AN** and contiguous; `DECISIONS.md` carries **31**,
+   `RESUME.md` **37**, **28** in both]. **Nine rulings are recorded ONLY in
+   `RESUME.md`** — **R-C · R-K · R-L · R-O · R-P · R-R · R-U · R-V · R-W** — and
+   each is a real record in a table, not a citation, with most of them below the
+   archive banner. **Three are recorded only in `DECISIONS.md`** — **R-F · R-AL
+   · R-AM**. So the enumeration is over BOTH files, and a closing commit that
+   walks `DECISIONS.md` alone drops nine.
+
+   **Enumerate; do not write a range.** The union happens to be contiguous
+   today, which is exactly the trap — `DECISIONS.md` on its own has nine gaps,
+   so "R-A through R-AN" is true of the pair and false of either member. An
+   earlier draft of this very bullet wrote that range against `DECISIONS.md`,
+   and the measurement above is what caught it.
+
+2. **State the uncorrectable record.** The immutable commit bodies carrying
+   errors this campaign found and could not fix — currently `fa6dd40c`,
+   `7dea8eaa`, `b5a9c8f0`, and the two untagged bodies `cb2e3448` and
+   `1106c268`. Amend is forbidden, so the closing body is the only place the
+   correction can live.
+3. **Hand AR-2 the list of clauses written into `DOCS.md` during 0.2**, and
+   state that this index's `status` column is **not** evidence for them. That is
+   M24, and it is the mitigation for sketch content having been written out of
+   the Phase-0 artifact order.
+4. **Say which numbers in this file are campaign-scoped and will move** — the
+   SHA list, the modified-path count, the frame histogram. A closing commit that
+   states them bare hands the next reader a figure with no scope.
+
+**Self-referential counts use the form
+`N at <parent>, N+1 including this commit`** (AR-5's proposal, adopted
+2026-08-26). A commit cannot count itself before it exists, and three commit
+bodies in this campaign have shipped a wrong number by trying.
 
 ## The instruments — RUNNABLE, because an instrument with no command is a rumour
 
@@ -941,6 +1061,9 @@ GRANTED = {
                    r'|the syntax tree does not span its source\.|' + CAUSE_COUNT + r'\.'),
     'levels': r'\[plain JavaScript ▾\]',
     "the selected level's mark": r'\[[^]]+ · [^]]+▾\]',
+    "the selected level's cause":
+        r'\w[\w ]*: [^│]*are outside|this level\. Fix the code[^│]*|strict off\.',
+    'the source': r'\d+  \S[^│]*',
     'the snippet type': r'\[(module|script)\]',
     'the posture': r'\([•o ]\) strict',
     'the pane': r'your code|the pane holds: [^│]*',
