@@ -1080,6 +1080,17 @@ execution and never holds one alone.
   the exclusion real); compile probes pin both worker-config shapes and the
   units' deferred `phase` members; the measured shared-line count is 48, not the
   banked 57.
+- **The in-stream error event is WORKER-SENT (human ruling 2026-08-26, resolving
+  the I2 seam flag).** The wire union gains an error arm the worker emits at the
+  throw site, immediately before authoring its stop record — the step stays
+  genuinely worker-minted in the one gapped ordinal space, and the committed
+  "worker-authored order is authoritative / enrichment never renumbers"
+  sentences hold untouched. The quarry's thread-side `events.length + 1` minting
+  is REJECTED for the rebuild: a thread-side count disagrees with worker
+  ordinals wherever a mocked dialog consumed one, and it would falsify the
+  committed step semantics. Encoded at I3 (the emission + the wire arm +
+  narrow-record-message's new leg, a ruled cross-increment extension of I2's
+  landed seam).
 - **Batch-per-cluster AR-3 cadence is RATIFIED (human ruling 2026-08-26, at an
   X1 reviewer's process escalation).** HR-13's "AR-3 on every un-skip" is
   satisfied by ONE ar-3 over a cluster's complete enumerated row set — the
