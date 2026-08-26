@@ -15,6 +15,7 @@
 <!-- cspell:ignore QCOL RCOL NCELL PCOL provless istemplate -->
 <!-- gen1-arm.sh locals; see § The Gen-1 arm: -->
 <!-- cspell:ignore toks unesc qmisplaced uninitialised srcpath qfrags -->
+<!-- cspell:ignore fragdiff FRAGCENSUS reparented -->
 
 # `<lens>` — fidelity ledger
 
@@ -1727,14 +1728,25 @@ while (my $line = <$fh>) {
   # § The transport check refuses, asserted for the Gen-1 grammar.
   if ($line =~ /Gen-1\s*`/ && $q !~ /Gen-1\s*`/) { $misplaced++;
     push @find, "GEN1-MISPLACED-CITATION $id -- a Gen-1 citation is on the row but not in the extractor-output cell" }
-  # ⛔ AND THE SYMMETRIC SIGNAL FOR QUOTATIONS, which is the one that matters
-  # most. A PARTIAL split -- citation left in `quoted`, the fragment carried
-  # into `reasoned` with the derivation prose it was embedded in -- passes every
+  # ⛔ AND THE SYMMETRIC SIGNAL FOR QUOTATIONS. ⚠️ READ THE BLOCK AT THE FOOT OF
+  # THIS PROGRAM BEFORE RELYING ON IT: this arm REPORTS and does not refuse, and
+  # it CANNOT SEE the deletions it is described here as catching. It fires only
+  # on a fragment that IS a verbatim substring of the source; every
+  # `GEN1-QUOTE-ABSENT` finding is by construction a fragment that is NOT. The
+  # two predicates are complements. An earlier revision of this comment stood
+  # 145 lines above that conclusion calling this "the one that matters most",
+  # which is how a reader takes a report for a floor.
+  #
+  # A PARTIAL split -- citation left in `quoted`, the fragment carried into
+  # `reasoned` with the derivation prose it was embedded in -- passes every
   # other floor: rows is intact, the citation is where it belongs so `misplaced`
   # is 0, and `checked + refused == citations` still holds. Measured 2026-08-24
-  # by AR-1: ALL SEVENTEEN `GEN1-QUOTE-ABSENT` findings vanished, the whole
-  # published defect set, at exit 0. It is also the likeliest half-done
+  # by AR-1 and reproduced 2026-08-26: ALL SEVENTEEN `GEN1-QUOTE-ABSENT`
+  # findings vanish, the whole published defect set, at exit 0 -- and THIS arm
+  # emits exactly ONE NOTE line over it. It is also the likeliest half-done
   # migration, because moving derivation prose takes the fragment inside it.
+  # THE DETECTOR IS THE BEFORE/AFTER COMPARISON in § The migration fragment
+  # count, which is a listed gate and not an optional appendix.
   next unless $q =~ /Gen-1\s*`/;
 
   # Segment the cell at each Gen-1 file citation, so every fragment is scoped to
@@ -1991,24 +2003,54 @@ amendment gate forbids twice, and the SET dedupe defect above is what a missing
 corpus costs [all measured 2026-08-21, planted one at a time against the arm as
 extracted back out of this file]:
 
-| mutation                                                                                         | expected                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| clean `parsons`                                                                                  | `citations=78 checked=69 refused=9`, exit 0                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| clean `writeme`, which carries **zero** Gen-1 citations legitimately                             | `citations=0`, exit **0**. ⛔ A `citations > 0` floor would fail a correct ledger — the floor is on ROWS                                                                                                                                                                                                                                                                                                                                                                                                     |
-| wrong row-id prefix                                                                              | `FAIL: zero rows matched`, exit 1                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| wrong ledger path                                                                                | the same                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| wrong quarry root                                                                                | `FAIL: every citation refused for a missing source`, exit 1 — the reason `GEN1-MISSING-SOURCE` is counted apart from the refusal class                                                                                                                                                                                                                                                                                                                                                                       |
-| **a migrated ledger split the WRONG way**, citation in `reasoned`                                | `FAIL: … Gen-1 citation(s) sit outside the extractor-output cell`, exit 1. **The count is fixture-dependent and deliberately not transcribed** — an earlier revision published `74`, and a faithful plant of this row's own description gives `76`                                                                                                                                                                                                                                                           |
-| ⛔ **a PARTIAL split** — the citation stays in `quoted`, the `<em>` fragment moves to `reasoned` | `FAIL: … quotation(s) sit in the derivation cell on Gen-1 rows`, exit 1. **Without this arm the run reported `findings=10` at exit 0 — all seventeen `GEN1-QUOTE-ABSENT` findings, the entire published defect set, silently deleted** [measured 2026-08-24 by AR-1]. Every other floor passes: rows intact, the citation is where it belongs so `misplaced` is 0, and the arithmetic holds. It is also the LIKELIEST half-done migration, because moving derivation prose takes the fragment embedded in it |
-| ⛔ **a HALF-PARTIAL split** — only the FIRST `<em>` moves, on rows carrying two or more          | `FAIL: … quotation(s) sit in the derivation cell`, exit 1. ⚠️ **A `quoted`-is-empty predicate MISSED this**, at exit 0, while five published findings — `051`, `066`, `068`, `108`, `110` — silently vanished [measured 2026-08-25 by AR-5]. Two of the five are the STEP-1b defects this campaign had just finished recording                                                                                                                                                                               |
-| a legitimate **instrument caveat that quotes**, added to the three lister-4 `SET` rows           | **SILENT**, exit 0. ⚠️ Both count-based predicates REFUSED this. An instrument caveat is one of exactly three permitted annotation classes and § Lister 4 instructs the seeder to write it; `$qq == 0` is also the normal state of the **12** Gen-1 rows that cite without quoting at all                                                                                                                                                                                                                    |
-| the target state § The Gen-1 arm itself prescribes — row `109`'s annotation moved to `reasoned`  | **SILENT**, exit 0, and its two non-defects vanish exactly as that section says. ⚠️ An any-quotation predicate gave exit 1 here — the file refusing what the file prescribes, found by a context-free reader doing what it was told                                                                                                                                                                                                                                                                          |
-| the `provenance` column renamed, on a ledger carrying Gen-2/3 rows                               | `BREACH SCHEMA unresolved -- no provenance column`, exit 1 (§ The transport check)                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| the same, on an **all-Gen-1** ledger — the shape six of Family F will have                       | the same. Under an uninitialised `$PCOL` this was **byte-identical to the clean run**, because `unreachable == provless == rows` either way                                                                                                                                                                                                                                                                                                                                                                  |
-| a wrong path landing on a **non-ledger** campaign document                                       | `doc=not-a-ledger`, exit 0 — a POSITIVE signal the check prints itself, never the absence of one. Six of the nine campaign documents are non-ledgers, so this is the likelier wrong path                                                                                                                                                                                                                                                                                                                     |
-| one row citing a **nonexistent** source file                                                     | `FAIL: 1 citation(s) refused for a missing source`, exit 1. A `missing == refused` threshold exited 0 here, and partial-missing is the EXPECTED state for seven ledgers until the path map moves to `## Source inventory`                                                                                                                                                                                                                                                                                    |
-| the same ledger split correctly                                                                  | exit 0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| a cluster whose annotation **re-mentions** a listed class                                        | **SILENT.** Counting mentions rather than distinct names reported `parsons-047` as "declares 2, lists 5" over a correct row                                                                                                                                                                                                                                                                                                                                                                                  |
+| mutation                                                                                         | expected                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| clean `parsons`                                                                                  | `citations=78 checked=69 refused=9`, exit 0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| clean `writeme`, which carries **zero** Gen-1 citations legitimately                             | `citations=0`, exit **0**. ⛔ A `citations > 0` floor would fail a correct ledger — the floor is on ROWS                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| wrong row-id prefix                                                                              | `FAIL: zero rows matched`, exit 1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| wrong ledger path                                                                                | the same                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| wrong quarry root                                                                                | `FAIL: every citation refused for a missing source`, exit 1 — the reason `GEN1-MISSING-SOURCE` is counted apart from the refusal class                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| **a migrated ledger split the WRONG way**, citation in `reasoned`                                | `FAIL: … Gen-1 citation(s) sit outside the extractor-output cell`, exit 1. **The count is fixture-dependent and deliberately not transcribed** — an earlier revision published `74`, and a faithful plant of this row's own description gives `76`                                                                                                                                                                                                                                                                                                        |
+| ⛔ **a PARTIAL split** — the citation stays in `quoted`, the `<em>` fragment moves to `reasoned` | `NOTE: … source fragment(s) sit in the derivation cell on Gen-1 rows`, **exit 0** — it reports, it does not refuse. ⛔ **`GEN1-QUOTE-ABSENT` falls 17 → 0: the entire published defect set, deleted, behind one NOTE line and a clean exit** [measured 2026-08-26, the `partial` mode below, 213 fragments moved]. Every other floor passes: rows intact, the citation is where it belongs so `misplaced` is 0, and the arithmetic holds. It is also the LIKELIEST half-done migration, because moving derivation prose takes the fragment embedded in it |
+| ⛔ **a HALF-PARTIAL split** — only the FIRST `<em>` moves, on rows carrying two or more          | `NOTE: … source fragment(s) sit in the derivation cell`, **exit 0**. ⛔ **`GEN1-QUOTE-ABSENT` falls 17 → 7** [measured 2026-08-26, the `half` mode below, 108 fragments moved]. ⚠️ **A `quoted`-is-empty predicate MISSED this entirely**, at exit 0, while five published findings — `051`, `066`, `068`, `108`, `110` — silently vanished [measured 2026-08-25 by AR-5]. Two of the five are the STEP-1b defects this campaign had just finished recording                                                                                              |
+| a legitimate **instrument caveat that quotes**, added to the three lister-4 `SET` rows           | **SILENT**, exit 0. ⚠️ Both count-based predicates REFUSED this. An instrument caveat is one of exactly three permitted annotation classes and § Lister 4 instructs the seeder to write it; `$qq == 0` is also the normal state of the **12** Gen-1 rows that cite without quoting at all                                                                                                                                                                                                                                                                 |
+| the target state § The Gen-1 arm itself prescribes — row `109`'s annotation moved to `reasoned`  | **SILENT**, exit 0, and its two non-defects vanish exactly as that section says. ⚠️ An any-quotation predicate gave exit 1 here — the file refusing what the file prescribes, found by a context-free reader doing what it was told                                                                                                                                                                                                                                                                                                                       |
+| the `provenance` column renamed, on a ledger carrying Gen-2/3 rows                               | `BREACH SCHEMA unresolved -- no provenance column`, exit 1 (§ The transport check)                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| the same, on an **all-Gen-1** ledger — the shape six of Family F will have                       | the same. Under an uninitialised `$PCOL` this was **byte-identical to the clean run**, because `unreachable == provless == rows` either way                                                                                                                                                                                                                                                                                                                                                                                                               |
+| a wrong path landing on a **non-ledger** campaign document                                       | `doc=not-a-ledger`, exit 0 — a POSITIVE signal the check prints itself, never the absence of one. Six of the nine campaign documents are non-ledgers, so this is the likelier wrong path                                                                                                                                                                                                                                                                                                                                                                  |
+| one row citing a **nonexistent** source file                                                     | `FAIL: 1 citation(s) refused for a missing source`, exit 1. A `missing == refused` threshold exited 0 here, and partial-missing is the EXPECTED state for seven ledgers until the path map moves to `## Source inventory`                                                                                                                                                                                                                                                                                                                                 |
+| the same ledger split correctly                                                                  | exit 0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| ⛔ **a CORRECT migration** — `evidence` renamed to `quoted`, `reasoned` inserted and left empty  | ⛔ **`GEN1-QUOTE-ABSENT` stays at 17**, `NOTE` absent, exit 0 [measured 2026-08-26, the `correct` mode below, 0 fragments moved]. **This is the row the other three are read against.** A migration that preserves the finding set is the only evidence the split was clean; exit 0 is common to every row below and asserts nothing                                                                                                                                                                                                                      |
+| ⛔ **an ELIDED-ONLY split** — only the `…`-bearing fragments move to `reasoned`                  | `NOTE: … source fragment(s) …`, **exit 0**, and **`GEN1-QUOTE-ABSENT` falls 17 → 10** [measured 2026-08-26, the `elided` mode below, 50 fragments moved]. The seven deleted are verbatim the seven this arm was published for finding — the ones the 2026-08-19 stopgap skipped as truncated. **One NOTE line for seven deletions**, which is why the before/after comparison and not this NOTE is the detector                                                                                                                                           |
+| a cluster whose annotation **re-mentions** a listed class                                        | **SILENT.** Counting mentions rather than distinct names reported `parsons-047` as "declares 2, lists 5" over a correct row                                                                                                                                                                                                                                                                                                                                                                                                                               |
+
+⛔ **THE FINDING SET IS THE ASSERTION. THE EXIT CODE IS NOT.** Four of the rows
+above exit 0 and three of those are defects — a partial split, a half-partial
+split and an elided-only split all print one `NOTE` line and exit clean while
+deleting 17, 10 and 7 published findings respectively. **Read every split
+against the CORRECT row: `GEN1-QUOTE-ABSENT` must come back at 17 on
+`parsons`.** A run of this arm over a migrated ledger is not evidence of
+anything until that number is compared.
+
+⚠️ ~~The two split rows above published `FAIL: … exit 1`.~~ **STRUCK 2026-08-26
+by AR-5** — the shipping check emits `NOTE:` and never sets `$bad`, and has
+since `b30016ce` made the predicate report instead of refuse. The corpus was not
+updated with it, which is the trigger § The amendment gate names by hand [`git
+show b30016ce -- <this file> | grep -c 'PARTIAL split'` → **0**]. A corpus row
+that publishes an expectation the shipping check does not meet is worse than a
+missing row: it is a green light nobody re-runs.
+
+**The fixtures are published as a command, not as a figure** — § Publish the
+number by publishing the command forbids the alternative, and an earlier
+revision of this section shipped seven fixture counts whose construction lived
+nowhere and which did not reproduce. Migrate the header (`evidence` → `quoted`,
+insert an empty `reasoned`), splitting cells on the campaign's own
+`/(?<!\\)\|/`; then per mode move `<em>"…"</em>` and `(?<!\\)_"…"_` spans out of
+`quoted` into `reasoned` — **all** of them (`partial`), the **first** on each
+row (`half`), those containing a mid-string `…` (`elided`), or **none**
+(`correct`). **Floor the builder on its own plant**: a mode that moves zero
+fragments has not landed, and a plant that did not land reads exactly like a
+check that did not fire.
 
 ⚠️ **Every one of the four refusing rows above exited 0 before 2026-08-21**,
 because the only floor was `checked + refused == citations`, which holds at
@@ -2026,26 +2068,118 @@ its own evidence, in the section written to catch exactly that. **The list above
 is `grep '^REFUSED'` over the check as extracted back out of this file**, which
 is the only form of it worth publishing.
 
+**When it runs.** On **every ledger carrying a `Gen-1` citation** — at the
+seeding commit beside the Pass-1 gate and § The transport check, and again at
+campaign close. Stated here because
+[§ When this check runs](#when-this-check-runs--it-had-no-trigger-for-seven-of-the-eight-ledgers)
+is written in the singular about the transport check and names neither this arm
+nor § The structural-integrity check, and that section's own title records what
+an untriggered check is worth.
+
+⚠️ **This paragraph and the two blocks below were rendering under § The
+migration fragment count for one commit group** — inserting that heading at
+`b30016ce` reparented them, leaving this arm with **no trigger inside the
+template**, which is the document that gets copied into eight ledgers while
+RESUME retires with the campaign. Restored 2026-08-26, verbatim, to where
+`4e85d50d` had them [found by AR-5; every gate was green over the move —
+markdownlint 0, prettier clean, cspell 0, structural check exit 0].
+
+⛔ **THREE THINGS THIS SECTION OWES, named rather than left to be discovered.**
+Deferred by human ruling of 2026-08-24 to the session that re-cuts the ledgers,
+because each is a relocation rather than a correction:
+
+1. **The path resolver is parsons-only.** The file→path map hardcodes
+   `public/static/parsonizer/`, `public/` and `src/lenses/`. A `blanks` ledger
+   citing `BlanksLens.jsx` — a file that **exists** — gets `GEN1-MISSING-SOURCE`
+   over a fabricated quotation [measured 2026-08-21 by AR-1 on a two-row
+   fixture]. **Seven of the eight ledgers inherit this.** The map belongs
+   per-ledger in `## Source inventory`, beside the existing `REF=` idiom, and
+   the Gen-1 root belongs there with it.
+2. **The parsons run and its findings belong in
+   `parsons.md § Close conditions`**, not in the skeleton every ledger is copied
+   from. This file opens with _"delete nothing structural"_ and now carries a
+   lens-specific run; `parsons.md`'s own § Close conditions already has the home
+   and the table.
+3. **This section is not reachable from anywhere inside this file.** It is
+   linked from RESUME and from the cspell header, and from no check that
+   precedes it.
+
+⚠️ **Amendment 4 is discharged by this section and is to be struck from RESUME's
+list.** _"A citation anchor for a non-markdown, non-test source"_ has been in
+use by rows `048`–`120` and unpublished since STEP 1a; the grammar this arm
+parses **is** that anchor, now written down. Struck explicitly rather than left
+implicit — a deliverable that closes silently is the failure
+[§ The Gen-3 direct-check appendix](../RESUME.md#-the-gen-3-direct-check-appendix-vanished-at-a-step-boundary--re-assigned)
+records.
+
 ### The migration fragment count — what it can decide, and what nothing can
 
 ⛔ **A partial split is a MIGRATION-TIME property, not a row property.** Run
 this at the re-cut, comparing the **`evidence` cell before** against the
 **`quoted` cell after**:
 
+⛔ **EXTRACT THE TWO FUNCTIONS, NOT THE FENCE.** The invocation on the last line
+runs the moment the fence is sourced, and with `$BEFORE` and `$AFTER` unset it
+opens the empty filename twice — two stderr lines and nothing on stdout, which a
+harness reading only stdout scores as a clean pass [measured 2026-08-26]. This
+is the same family as the four-backtick fence and the apostrophe-in-a-comment.
+
 ```bash
-# Both sides from the repository root. `git show <pre-migration-sha>:<ledger>`
-# gives the before side after the fact.
+# Both sides from the repository root. X# piped: `git show <pre-migration-sha>:<ledger> > /tmp/before.md`.
 qfrags() {  # qfrags <ledger.md> <row-id-prefix> <column-name>
-  perl -ne 'BEGIN{$p=shift @ARGV; $col=shift @ARGV; $i=-1}
+  perl -ne 'BEGIN{$p=shift @ARGV; $col=shift @ARGV; $i=-1; $rows=0}
     if ($i < 0 && /^\|\s*#\s*\|/) { my @h = split /(?<!\\)\|/, $_, -1;
       for my $k (0..$#h) { my $t=$h[$k]; $t=~s/^\s+|\s+$//g; $i=$k if $t eq $col } next }
-    next unless /^\| `(\Q$p\E-\d{3})`/; my $id = $1;
+    next unless /^\| `(\Q$p\E-\d{3})`/; my $id = $1; $rows++;
     my @c = split /(?<!\\)\|/, $_, -1; my $cell = ($i >= 0 && $i <= $#c) ? $c[$i] : "";
     my $n = () = $cell =~ /<em>"/g; my $m = () = $cell =~ /(?<!\\)_"/g;
-    print "$id\t", $n+$m, "\n"' "$2" "$3" "$1"
+    print "$id\t", $n+$m, "\n";
+    # ⛔ THE TWO FLOORS. Without them this helper cannot fail, and the failure it
+    # cannot report is the LIKELIEST operator error: running the AFTER side with
+    # the column name `quoted` against a ledger that has not been migrated yet.
+    # Measured 2026-08-26 on the live 120-row parsons ledger: an unresolved
+    # column printed 120 rows every one reading 0, exit 0; a wrong row-id prefix
+    # printed nothing, exit 0; and a diff of two wrong invocations was EMPTY.
+    # A clean bill over nothing -- the LENS=_family-f defect a fourth time.
+    END { if ($i < 0) { print STDERR "FAIL: column $col does not resolve in the header -- wrong column name, or the ledger is not migrated yet\n"; exit 2 }
+          if ($rows == 0) { print STDERR "FAIL: zero rows matched -- wrong ledger path, or wrong row-id prefix\n"; exit 3 } }' "$2" "$3" "$1"
 }
-diff <(qfrags "$BEFORE" "$LENS" evidence) <(qfrags "$AFTER" "$LENS" quoted)
+# ⛔ ALWAYS CALL IT THROUGH THIS. Inside `<(...)` a non-zero exit is invisible to
+# `diff`, so the floors above buy nothing unless something reads them. This also
+# asserts the two sides describe the same ledger before any line is believed.
+fragdiff() {  # fragdiff <before.md> <after.md> <row-id-prefix> <before-col> <after-col>
+  b=$(mktemp); a=$(mktemp)
+  qfrags "$1" "$3" "$4" > "$b" || { rm -f "$b" "$a"; echo "FAIL: the BEFORE side refused"; return 1; }
+  qfrags "$2" "$3" "$5" > "$a" || { rm -f "$b" "$a"; echo "FAIL: the AFTER side refused"; return 1; }
+  nb=$(wc -l < "$b" | tr -d " "); na=$(wc -l < "$a" | tr -d " ")
+  if [ "$nb" -ne "$na" ]; then
+    rm -f "$b" "$a"; echo "FAIL: row counts differ -- $nb before, $na after; the two sides are not the same ledger"; return 1
+  fi
+  diff "$b" "$a"; rc=$?
+  echo "FRAGCENSUS rows=$nb differing=$(diff "$b" "$a" | grep -c '^<')"
+  rm -f "$b" "$a"; return $rc
+}
 ```
+
+Invoke it as `fragdiff /tmp/before.md <ledger.md> <lens> evidence quoted`.
+
+**Its mutation corpus** — this helper shipped with none, which is what § The
+amendment gate forbids twice, and the missing floor above is what that cost [all
+measured 2026-08-26, planted one at a time against the helper as extracted back
+out of this file]:
+
+| mutation                                                     | expected                                                                                                                                                                                                                                                                                                                                    |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| a **correct** migration                                      | no differing lines, `FRAGCENSUS rows=120 differing=0`, exit 0                                                                                                                                                                                                                                                                               |
+| the AFTER column named `quoted` on an **un-migrated** ledger | `FAIL: column quoted does not resolve …`, exit 1. ⛔ Before the floor: **120 rows every one reading 0, exit 0**                                                                                                                                                                                                                             |
+| a wrong **row-id prefix** on either side                     | `FAIL: zero rows matched …`, exit 1. ⛔ Before the floor: **no output at all, exit 0**                                                                                                                                                                                                                                                      |
+| a wrong **ledger path** on either side                       | ⚠️ **`FAIL: column … does not resolve`, exit 1 — NOT the zero-rows message.** A path that does not exist yields no header at all, so the column floor fires first. The refusal is correct and the message is misleading; it is transcribed from the run rather than predicted, because an earlier draft of this row predicted the other one |
+| **both** sides wrong                                         | `FAIL` from the BEFORE side, exit 1. ⛔ Before the floor: `diff` of two empty streams — **no output, exit 0, a clean bill over nothing**                                                                                                                                                                                                    |
+| BEFORE and AFTER at **different row counts**                 | `FAIL: row counts differ — 120 before, 119 after`, exit 1 — the two sides are not the same ledger                                                                                                                                                                                                                                           |
+| a **partial** split                                          | `FRAGCENSUS rows=120 differing=108`, exit 1                                                                                                                                                                                                                                                                                                 |
+| a **half-partial** split                                     | ⚠️ **`differing=108` as well — byte-identical to the partial row.** `differing` counts ROWS, and both splits touch every row that carries at least one fragment. **This report says a split is wrong; it does not say how wrong.** Only the per-row counts separate them, and only a human reading them does                                |
+| an **elided-only** split                                     | `FRAGCENSUS rows=120 differing=41`, exit 1 — the shape that deletes seven published findings while § The Gen-1 arm emits one `NOTE` at exit 0                                                                                                                                                                                               |
+| a **whole-row** count instead of a cell count                | ⛔ **0 differing rows** — invariant under any split. The form an earlier revision published under _"any line of output is a defect"_                                                                                                                                                                                                        |
 
 ⚠️ **COMPARE THE CELL, NOT THE ROW.** A whole-row count is **invariant** under a
 partial split -- moving a cell boundary neither creates nor destroys a fragment
@@ -2076,41 +2210,33 @@ whose fragment is extractor output is a partial split; a row in both whose
 fragment is a caveat is correct. **A human decides, per row, and records the
 decision** -- which is what a fidelity ledger is for.
 
-**When it runs.** On **every ledger carrying a `Gen-1` citation** — at the
-seeding commit beside the Pass-1 gate and § The transport check, and again at
-campaign close. Stated here because
-[§ When this check runs](#when-this-check-runs--it-had-no-trigger-for-seven-of-the-eight-ledgers)
-is written in the singular about the transport check and names neither this arm
-nor § The structural-integrity check, and that section's own title records what
-an untriggered check is worth.
+**When it runs — and it is NOT the trigger that used to stand here.** ⚠️ The
+paragraph previously in this position was § The Gen-1 arm's, and it said _"at
+the seeding commit beside the Pass-1 gate"_. **That is impossible for this
+section**: a before/after comparison has no _before_ at a seeding commit, where
+the ledger is being written for the first time. It ran on **this** section for
+one commit group because inserting this heading reparented it, and no gate could
+see the move [found 2026-08-26 by AR-5 against `b30016ce`; the trigger is back
+under § The Gen-1 arm where `4e85d50d` had it].
 
-⛔ **THREE THINGS THIS SECTION OWES, named rather than left to be discovered.**
-Deferred by human ruling of 2026-08-24 to the session that re-cuts the ledgers,
-because each is a relocation rather than a correction:
+This check runs **once per ledger, at the re-cut commit that migrates it** —
+comparing `git show <pre-migration-sha>:<ledger>` against the working tree. It
+runs a second time at campaign close only if a later commit moved a cell. It is
+a **report requiring per-row adjudication, never a gate**, so "it ran" is not
+discharged by an exit code; it is discharged by the adjudication table in the
+ledger's own § Close conditions.
 
-1. **The path resolver is parsons-only.** The file→path map hardcodes
-   `public/static/parsonizer/`, `public/` and `src/lenses/`. A `blanks` ledger
-   citing `BlanksLens.jsx` — a file that **exists** — gets `GEN1-MISSING-SOURCE`
-   over a fabricated quotation [measured 2026-08-21 by AR-1 on a two-row
-   fixture]. **Seven of the eight ledgers inherit this.** The map belongs
-   per-ledger in `## Source inventory`, beside the existing `REF=` idiom, and
-   the Gen-1 root belongs there with it.
-2. **The parsons run and its findings belong in
-   `parsons.md § Close conditions`**, not in the skeleton every ledger is copied
-   from. This file opens with _"delete nothing structural"_ and now carries a
-   lens-specific run; `parsons.md`'s own § Close conditions already has the home
-   and the table.
-3. **This section is not reachable from anywhere inside this file.** It is
-   linked from RESUME and from the cspell header, and from no check that
-   precedes it.
-
-⚠️ **Amendment 4 is discharged by this section and is to be struck from RESUME's
-list.** _"A citation anchor for a non-markdown, non-test source"_ has been in
-use by rows `048`–`120` and unpublished since STEP 1a; the grammar this arm
-parses **is** that anchor, now written down. Struck explicitly rather than left
-implicit — a deliverable that closes silently is the failure
-[§ The Gen-3 direct-check appendix](../RESUME.md#-the-gen-3-direct-check-appendix-vanished-at-a-step-boundary--re-assigned)
-records.
+⛔ **AND IT IS ONLY UN-SKIPPABLE IF THE RUNBOOK CARRIES IT.** The four gates a
+session is told to run cannot see a partial split — § The Gen-1 arm's
+`SOURCE-IN-REASONED` fires only on a fragment that **is** a verbatim substring
+of the source, while every `GEN1-QUOTE-ABSENT` finding is by construction a
+fragment that is **not**, so the two predicates are complements and the report
+cannot see the deletion it compensates for [measured 2026-08-26 by AR-5: an
+elided-only split drops `parsons` findings **17 → 10** while `NOTE` fires
+**once**, exit 0]. This check is the only instrument that can. It is therefore
+listed in
+[RESUME.md § The gates you must run](../RESUME.md#the-gates-you-must-run-in-this-order--the-list-is-the-count)
+as gate 5, beside the four rather than below them.
 
 ### The amendment gate — the two clean regressions are NOT it
 

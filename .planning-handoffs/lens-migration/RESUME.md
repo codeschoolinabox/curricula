@@ -8,6 +8,7 @@ closes; nothing here is end-state documentation. -->
 <!-- cspell:ignore loosenings capitalisation enshittifying keyable unbuildable -->
 <!-- cspell:ignore normalises undercounted oldd clauding zakey nocite -->
 <!-- cspell:ignore Explorotron multibyte provless unreachable -->
+<!-- cspell:ignore qfrags fragdiff -->
 <!-- a human ruling quoted verbatim; do not translate it and do not "fix" it: -->
 <!-- cspell:ignore séparé -->
 
@@ -261,14 +262,25 @@ which is the one class this campaign's own invariant 13 exists to stop.
 > closed a partial-split hole in the Gen-1 arm. Both are reflected in this
 > block.
 >
-> ### The gates you must run, all FOUR of them, in this order
+> ### The gates you must run, in this order — the list is the count
 >
-> | #   | gate                     | where                                           | when                                                                  |
-> | --- | ------------------------ | ----------------------------------------------- | --------------------------------------------------------------------- |
-> | 1   | **structural-integrity** | `_TEMPLATE.md` § The structural-integrity check | FIRST, always — a document that did not render makes the rest vacuous |
-> | 2   | **Pass-1 gate**          | `_TEMPLATE.md` § Close conditions               | shape                                                                 |
-> | 3   | **transport check**      | `_TEMPLATE.md` § The transport check            | transport, Gen-2/3                                                    |
-> | 4   | **Gen-1 arm**            | `_TEMPLATE.md` § The Gen-1 arm                  | any ledger carrying a `Gen-1` citation                                |
+> ⚠️ **This heading said "all FOUR of them" until 2026-08-26 and the list was
+> already short by one.** The count is gone rather than corrected: § The
+> amendment gate rules that tables are **named, never numbered**, because a
+> number beside a list is a second statement of the same fact and this campaign
+> has now watched the second one go stale five times.
+>
+> | #   | gate                     | where                                           | when                                                                     |
+> | --- | ------------------------ | ----------------------------------------------- | ------------------------------------------------------------------------ |
+> | 1   | **structural-integrity** | `_TEMPLATE.md` § The structural-integrity check | FIRST, always — a document that did not render makes the rest vacuous    |
+> | 2   | **Pass-1 gate**          | `_TEMPLATE.md` § Close conditions               | shape                                                                    |
+> | 3   | **transport check**      | `_TEMPLATE.md` § The transport check            | transport, Gen-2/3                                                       |
+> | 4   | **Gen-1 arm**            | `_TEMPLATE.md` § The Gen-1 arm                  | any ledger carrying a `Gen-1` citation                                   |
+> | 5   | **fragment count**       | `_TEMPLATE.md` § The migration fragment count   | ⛔ every re-cut commit — **run through `fragdiff`, never `qfrags` bare** |
+>
+> ⛔ **Gate 5 is not optional and the other four cannot substitute for it** — §
+> Why gate 5 exists, below this blockquote, is the argument and the measurement.
+> It sits outside for the reason § THE TARGET HEADER ROW does.
 >
 > **Every command runs from the repository root, and every path argument is
 > repo-relative EXCEPT the Gen-1 root, which is absolute** — see § The gate
@@ -369,6 +381,42 @@ which is the one class this campaign's own invariant 13 exists to stop.
 > The Gen-1 arm; they are published there rather than recorded against the rows,
 > because a repair is its own unit with its own gate run.
 
+### ⛔ Why gate 5 exists — the other four cannot see a partial split
+
+A **partial split** — a fragment carried into `reasoned` with the derivation
+prose it was embedded in — passes all four gates above.
+
+§ The Gen-1 arm looks like it covers this, and it cannot. Its
+`SOURCE-IN-REASONED` report fires only on a fragment that **is** a verbatim
+substring of the cited source; every `GEN1-QUOTE-ABSENT` finding is by
+construction a fragment that is **not**. The two predicates are complements, so
+the report can never see the disappearance of the findings it appears to guard.
+
+Measured 2026-08-26 against the live 120-row `parsons` ledger, one fixture per
+shape:
+
+| split shape                           | `GEN1-QUOTE-ABSENT`   | `NOTE` lines | exit  |
+| ------------------------------------- | --------------------- | ------------ | ----- |
+| correct — `reasoned` left empty       | **17**, all preserved | 0            | 0     |
+| elided-only — only `…` fragments move | **10**                | **1**        | **0** |
+| half-partial — first fragment only    | **7**                 | **1**        | **0** |
+| full partial — every fragment moves   | **0**                 | **1**        | **0** |
+
+Seven, ten and seventeen published findings deleted, each behind **one** report
+line and a **clean exit**. That is why gate 5 is listed beside the four rather
+than below them, and why its discharge is the adjudication table in the ledger's
+own § Close conditions rather than an exit code.
+
+⚠️ **This section sits outside the blockquote for the same reason § THE TARGET
+HEADER ROW does, and the hazard is wider than that section records.** It carries
+no fence and no code span containing a blockquote marker — the two things the
+existing warning names — and `prettier --write` still injected stray `>`
+characters into its prose on the **first** pass, then more on each pass after
+[measured 2026-08-26: three consecutive passes, differing by 6 then 8 lines,
+converging on nothing]. Long paragraphs carrying bold spans re-wrap badly inside
+that blockquote whatever they contain. **Put prose there only if it is short
+enough not to re-wrap, and run `prettier --write` three times and diff.**
+
 ### ⛔ The AR trail — which gates closed, and the one that did not
 
 | gate                        | rounds | outcome                                            |
@@ -391,23 +439,47 @@ context long past the point where
 says to stop — _"a learned lesson repeats as an error"_. A sixth round on a
 spent context is the pattern, not the cure.
 
-**Everything else is measured green** on the tree you inherit: all four
-published programs parse and run;
+**Everything else is measured green** on the tree you inherit — **and "green" is
+not the same as "covered", which is what the paragraph below is for.** The
+programs are named, never counted: `firstblock`, `glossterm`, the Pass-1 gate,
+the structural check, the transport check, the Gen-1 arm, `qfrags`/`fragdiff`.
+All extract and run except the **Pass-1 gate**, which does **not** `bash -n` as
+published — its three placeholder assignments contain `<`, a shell redirect;
+substitute them first [measured 2026-08-26]. Then:
 `parsons rows=120 parsed=57 nocite=76 unreachable=76 provless=76` and
-`writeme-019 UNQUOTED (1 of 2 cited)` unmoved; Gen-1 `findings=27`; the
-structural check exit 0 on all nine campaign documents; prettier idempotent;
-markdownlint 0; cspell 0.
+`writeme-019 UNQUOTED (1 of 2 cited)` unmoved; Gen-1 `findings=27` decomposing
+as **17 QUOTE-ABSENT + 9 REFUSED + 1 GEN1-COUNT**; the structural check exit 0
+on all nine campaign documents; prettier idempotent; markdownlint 0; cspell 0.
 
-### The gate arguments — all seven, because a cold reader reconstructed them from five places
+⛔ **Two campaign documents REFUSE the transport check, and that is correct
+rather than a defect to fix.** `FIDELITY-METHOD.md` carries five row-shaped
+lines in § Worked rows and a ledger-shaped header with no `## Rows`;
+`RESUME.md`'s first `| # |` header is **the published target header row
+itself**, which resolves `quoted` and `reasoned`. Both take
+`BREACH SCHEMA ledger-shaped header row but no ## Rows`, exit 1; `SPEC.md`,
+`LISTERS-6-7-DESIGN.md`, `_boundary.md` and `_playbook.md` resolve
+`doc=not-a-ledger`, exit 0 [all measured 2026-08-26]. **Do not touch the
+resolver** — it is on § The amendment gate's trigger list and a refusal on a
+wrong path is correctly signed. So this file refuses the gate because it
+publishes the schema, and it publishes the schema because nothing else can catch
+a wrong header row.
+
+### The gate arguments — collected, because a cold reader reconstructed them from five places
+
+⚠️ **This heading said "all seven" and the seven were the distinct argument
+_values_, not the gates** — a reader counting table rows found four and took the
+heading for stale. It was not; it is now, because gate 5 adds two more. **Struck
+rather than recounted**, for the reason § The gates you must run above states.
 
 Run from the repository root.
 
-| gate       | arguments                                                                                                                                             |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| structural | `<doc.md>` `<row-id-prefix>` — the id prefix, literally `<lens>` for the template                                                                     |
-| Pass-1     | `L=<ledger>` `LENS=<row-id-prefix>` `CENSUS=<the § Seed census total row>` — 120 for `parsons`, 45 for `writeme`                                      |
-| transport  | `<ledger>` `<REF>` `<PORT>` `[member]` — `REF=src/lib/study-lenses--deprecated-architecture/lenses/<lens>`, `PORT=src/lib/study-lenses/lenses/<lens>` |
-| Gen-1 arm  | `<ledger>` `<gen1-root>` `<row-id-prefix>`                                                                                                            |
+| gate           | arguments                                                                                                                                                                     |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| structural     | `<doc.md>` `<row-id-prefix>` — the id prefix, literally `<lens>` for the template                                                                                             |
+| Pass-1         | `L=<ledger>` `LENS=<row-id-prefix>` `CENSUS=<the § Seed census total row>` — 120 for `parsons`, 45 for `writeme`                                                              |
+| transport      | `<ledger>` `<REF>` `<PORT>` `[member]` — `REF=src/lib/study-lenses--deprecated-architecture/lenses/<lens>`, `PORT=src/lib/study-lenses/lenses/<lens>`                         |
+| Gen-1 arm      | `<ledger>` `<gen1-root>` `<row-id-prefix>`                                                                                                                                    |
+| fragment count | `fragdiff <before.md> <after.md> <row-id-prefix> evidence quoted` — the BEFORE side **written to a file**, `git show <pre-migration-sha>:<ledger> > <before.md>`, never piped |
 
 ⚠️ **The Gen-1 root is the one absolute argument, and it was published nowhere
 in a form you can paste** — elided in § Operating instructions, described in
