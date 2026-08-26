@@ -139,6 +139,19 @@ flowchart TD
   judges; the stepper value, the selected element kind and the pending radio
   live in the component and are typed there. The clear-on-step rule below is a
   render-layer invariant, and it owes a component test rather than a core one.
+- (human ruling 2026-08-26) **The claim in progress is live before the claim
+  is.** The extent stepper and the element-kind picker respond from the moment
+  the surface exists, ahead of any judging: the stepper drives `data-extent` and
+  the proposed run on the input tape, and the picker shows which kind is
+  selected. Two things force it.
+  [README.md § UI structure](./README.md#ui-structure) mandates a `data-extent`
+  on the proposed span and the twin draws that run as visibly tracking the
+  stepper, so a stepper wired to nothing is a control that plainly does nothing.
+  And presentation here is decided against a running surface
+  ([§ Decisions](#decisions)), which a dead control cannot support. **Submitting
+  and judging are a separate seam and are not implied by this** — a surface can
+  be honest about the boundary the learner is proposing without yet having an
+  opinion about it.
 - **The gate is the entire refusal channel.** A wrong claim advances nothing and
   costs nothing else: no score, no failure state, no lockout, no limit on
   attempts. The way past changes which exits exist, never what the gate does.
@@ -230,6 +243,21 @@ flowchart TD
 - **A `skipAfter` below `oneMoreAfter` is legal.** It makes the one-more field
   unreachable, which is a coherent thing for an educator to want; refusing it
   would encode a pedagogy the configuration has no business holding.
+- (human ruling 2026-08-26) **Presentation is part of this lens's value, not
+  decoration.** Presentation and behavior are one design surface here rather
+  than two layers, so this module carries its own stylesheet rather than
+  inheriting whatever the host page provides. The grounds are the twin: this is
+  a `twin-doc: user` module whose wire-frames carry pedagogy **in the
+  arrangement** — the jar beside the token tape at equal weight because comments
+  are output with a different destination rather than lesser output, and
+  consumed source dimmed in place rather than deleted because "a deleted
+  character is gone and proves nothing". A correct DOM with no arrangement is
+  not this lens working. What the stylesheet may **not** settle is unchanged:
+  the two semantic roles' hues and the fall's motion design stay in
+  [§ Out of scope](#out-of-scope), and the consumed line break's mark stays owed
+  to a sandbox checkpoint by
+  [ux/wireframes.md § What has no wireframe, deliberately](./ux/wireframes.md#what-has-no-wireframe-deliberately).
+  None of the three becomes decidable just because a stylesheet exists.
 
 ## Navigation
 
