@@ -64,6 +64,7 @@ export default function createExecution<
 	const state: HandleState<TEvent, TResult> = {
 		source,
 		settle: null,
+		mode: null,
 		iterator: null,
 	};
 	// Library descriptors merge AFTER extras, so the library's members win
@@ -111,6 +112,8 @@ function ignite<TEvent, TResult>(
 	if (state.settle === null) {
 		// eslint-disable-next-line functional/immutable-data -- the start latch is the handle's one mutable cell (engine RunState precedent; sanctioned in this cluster's ar-3 consultation)
 		state.settle = state.source.result;
+		// eslint-disable-next-line functional/immutable-data -- the mode latch rides the same state record (fixed at ignition, human ruling 2026-08-18)
+		state.mode = mode;
 		state.source.start(mode);
 		if (mode === 'batch' && state.source.events !== undefined) {
 			// Deliberate gap until the defect-routes increment: a rejecting
@@ -182,7 +185,9 @@ function streamingIteratorDescriptor<TEvent, TResult>(
  * The consumer-driven pull loop: the first pull is the ignition touch
  * (mode `'iterate'`); every pull forwards the source's own `events`
  * seam, so the consumer's pace IS the run's pace and the drainer never
- * engages.
+ * engages. Under a latched `'batch'` mode the iterator is already
+ * ended — it answers done without touching the source, because the
+ * drainer owns the seam (the mode latch, ruled 2026-08-18).
  */
 function createConsumerIterator<TEvent, TResult>(
 	state: HandleState<TEvent, TResult>,
@@ -190,6 +195,9 @@ function createConsumerIterator<TEvent, TResult>(
 ): AsyncIterator<TEvent> {
 	return {
 		next(): Promise<IteratorResult<TEvent>> {
+			if (state.mode === 'batch') {
+				return Promise.resolve({ value: undefined, done: true });
+			}
 			void ignite(state, 'iterate');
 			return events.next();
 		},
@@ -198,11 +206,13 @@ function createConsumerIterator<TEvent, TResult>(
 
 /**
  * The handle's internal state: the settle field IS the start latch;
- * the iterator field memoizes the one consumer iterator a streaming
- * handle ever answers.
+ * the mode field is the mode latch, fixed at ignition for the
+ * handle's life; the iterator field memoizes the one consumer
+ * iterator a streaming handle ever answers.
  */
 type HandleState<TEvent, TResult> = {
 	readonly source: StreamingSource<TEvent, TResult> | ResultOnlySource<TResult>;
 	settle: Promise<TResult> | null;
+	mode: ExecutionMode | null;
 	iterator: AsyncIterator<TEvent> | null;
 };

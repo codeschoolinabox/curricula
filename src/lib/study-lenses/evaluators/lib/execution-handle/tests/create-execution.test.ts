@@ -330,7 +330,7 @@ describe('edge cases', () => {
 });
 
 describe('the mode latch', () => {
-	it.skip('Symbol.asyncIterator answers the same iterator for the handle’s life', () => {
+	it('Symbol.asyncIterator answers the same iterator for the handle’s life', () => {
 		const execution = createExecution(
 			createStreamingSource(['a'], { ok: true, events: ['a'] }),
 		);
@@ -339,14 +339,14 @@ describe('the mode latch', () => {
 		);
 	});
 
-	it.skip('batch first: .result resolves the complete result', async () => {
+	it('batch first: .result resolves the complete result', async () => {
 		const result = { ok: true, events: ['a'] };
 		const execution = createExecution(createStreamingSource(['a'], result));
 
 		expect(await execution.result).toEqual(result);
 	});
 
-	it.skip('batch first: a later iterator is already ended', async () => {
+	it('batch first: a later iterator is already ended', async () => {
 		const execution = createExecution(
 			createStreamingSource(['a', 'b'], { ok: true, events: [] }),
 		);
@@ -360,7 +360,17 @@ describe('the mode latch', () => {
 		expect(collected).toEqual([]);
 	});
 
-	it.skip('iterate first: a later await subscribes and resolves', async () => {
+	it('an after-batch iterator never pulls the source', async () => {
+		const source = createStreamingSource(['a', 'b'], { ok: true, events: [] });
+		const execution = createExecution(source);
+		await execution.result;
+
+		await execution[Symbol.asyncIterator]().next();
+
+		expect(source.nextCalls()).toBe(3);
+	});
+
+	it('iterate first: a later await subscribes and resolves', async () => {
 		const execution = createExecution(
 			createStreamingSource(['a', 'b'], { ok: true, events: ['a', 'b'] }),
 		);
@@ -373,7 +383,19 @@ describe('the mode latch', () => {
 		expect(await execution).toEqual({ ok: true, events: collected });
 	});
 
-	it.skip('the source learns the engaged mode at start', async () => {
+	it('an iterate-first await touch starts once', async () => {
+		const source = createStreamingSource(['a'], { ok: true, events: ['a'] });
+		const execution = createExecution(source);
+		const iterator = execution[Symbol.asyncIterator]();
+		await iterator.next();
+		await iterator.next();
+
+		await execution;
+
+		expect(source.startCalls()).toBe(1);
+	});
+
+	it('the source learns the engaged mode at start', async () => {
 		const modes: string[] = [];
 		const source = createStreamingSource(['a'], { ok: true, events: [] });
 		const observing = {
@@ -388,6 +410,23 @@ describe('the mode latch', () => {
 		await execution.result;
 
 		expect(modes).toEqual(['batch']);
+	});
+
+	it('the source learns iterate when the consumer pulls first', async () => {
+		const modes: string[] = [];
+		const source = createStreamingSource(['a'], { ok: true, events: [] });
+		const observing = {
+			...source,
+			start(mode: 'iterate' | 'batch') {
+				modes.push(mode);
+				source.start(mode);
+			},
+		};
+		const execution = createExecution(observing);
+
+		await execution[Symbol.asyncIterator]().next();
+
+		expect(modes).toEqual(['iterate']);
 	});
 });
 
