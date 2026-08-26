@@ -15,10 +15,12 @@ function createStreamingSource(
 	readonly startCalls: () => number;
 	readonly stopCalls: () => number;
 	readonly returnCalls: () => number;
+	readonly nextCalls: () => number;
 } {
 	let started = 0;
 	let stopped = 0;
 	let returned = 0;
+	let pulled = 0;
 	let index = 0;
 	let resolveResult!: (value: MockResult) => void;
 	const resultPromise = new Promise<MockResult>(function hold(resolve) {
@@ -37,6 +39,7 @@ function createStreamingSource(
 		sourceDefectResult: (_cause: unknown) => DEFECT,
 		events: {
 			next(): Promise<IteratorResult<string>> {
+				pulled += 1;
 				if (index < items.length) {
 					const value = items[index];
 					index += 1;
@@ -53,6 +56,7 @@ function createStreamingSource(
 		startCalls: () => started,
 		stopCalls: () => stopped,
 		returnCalls: () => returned,
+		nextCalls: () => pulled,
 	};
 }
 
@@ -338,7 +342,7 @@ describe('the mode latch', () => {
 });
 
 describe('the laws the quarry never had', () => {
-	it.skip('construction calls nothing on the source', () => {
+	it('construction calls nothing on the source', () => {
 		const source = createStreamingSource(['a'], { ok: true, events: ['a'] });
 
 		createExecution(source);
@@ -346,7 +350,23 @@ describe('the laws the quarry never had', () => {
 		expect(source.startCalls()).toBe(0);
 	});
 
-	it.skip('installing extras does not ignite', () => {
+	it('construction does not call stop on the source', () => {
+		const source = createStreamingSource(['a'], { ok: true, events: ['a'] });
+
+		createExecution(source);
+
+		expect(source.stopCalls()).toBe(0);
+	});
+
+	it("construction does not pull the source's events", () => {
+		const source = createStreamingSource(['a'], { ok: true, events: ['a'] });
+
+		createExecution(source);
+
+		expect(source.nextCalls()).toBe(0);
+	});
+
+	it('installing extras does not ignite', () => {
 		const source = createStreamingSource(['a'], { ok: true, events: ['a'] });
 
 		createExecution(source, () => ({ code: 'let x;' }));
@@ -582,12 +602,31 @@ describe('the laws the quarry never had', () => {
 		).toThrow('builder bug');
 	});
 
-	it.skip('extras land on the handle', () => {
+	it('extras land on the handle', () => {
 		const source = createStreamingSource([], { ok: true, events: [] });
 
 		const execution = createExecution(source, () => ({ code: 'let x;' }));
 
 		expect(execution.code).toBe('let x;');
+	});
+
+	it('a second extras key lands alongside the first', () => {
+		const source = createStreamingSource([], { ok: true, events: [] });
+
+		const execution = createExecution(source, () => ({
+			code: 'let x;',
+			label: 'demo',
+		}));
+
+		expect(execution.label).toBe('demo');
+	});
+
+	it('the handle with extras installed is frozen', () => {
+		const source = createStreamingSource([], { ok: true, events: [] });
+
+		const execution = createExecution(source, () => ({ code: 'let x;' }));
+
+		expect(Object.isFrozen(execution)).toBe(true);
 	});
 });
 

@@ -10,14 +10,16 @@
  * disposal, never awaited). README.md § The laws carries each law with
  * its pin; DOCS.md carries the sketch.
  *
- * Phase 0 stub: the signature is the contract this unit locks; the body
- * lands at Phase 1 (the X1 increment, W4a). The behavioral suite in
- * tests/ is committed skipped against exactly this surface.
+ * Phase 1 in flight: this body carries the Install slice only — extras
+ * built over controls, frozen last. Ignition, drive, settle, and
+ * teardown land with the remaining X1 increments against the
+ * committed-skipped suite in tests/.
  */
 
 import type {
 	BuildExtras,
 	ResultOnlySource,
+	SourceControls,
 	StreamingSource,
 	WidenedExecution,
 	WidenedExecutionBase,
@@ -38,6 +40,22 @@ export default function createExecution<
 	source: ResultOnlySource<TResult>,
 	buildExtras?: BuildExtras<TExtras>,
 ): WidenedExecutionBase<TResult, TExtras>;
-export default function createExecution(): never {
-	throw new Error('not implemented — Phase 1 (X1, W4a) un-skips the suite');
+export default function createExecution<
+	TEvent,
+	TResult,
+	TExtras extends object = Record<never, never>,
+>(
+	_source: StreamingSource<TEvent, TResult> | ResultOnlySource<TResult>,
+	buildExtras?: BuildExtras<TExtras>,
+): WidenedExecution<TEvent, TResult, TExtras> {
+	// ─── Phase 1: Install (sync, inert) ──────────────────────────────────
+	const controls: SourceControls = {
+		cancel: function cancel(): void {},
+	};
+	const extrasDescriptors =
+		buildExtras === undefined
+			? {}
+			: Object.getOwnPropertyDescriptors(buildExtras(controls));
+	const handle = Object.create(Object.prototype, extrasDescriptors) as object;
+	return Object.freeze(handle) as WidenedExecution<TEvent, TResult, TExtras>;
 }
