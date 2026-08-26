@@ -1,7 +1,7 @@
 /**
  * intercept's contract: the spec widening, the streaming handle with its
  * explicit generator surface, the enriched event union, the discriminated
- * result, the error taxonomy, and the two worker seam records. README.md
+ * result, the error taxonomy, and the worker seam records. README.md
  * carries the domain model and the design rulings (2026-08-19, the
  * ledger's P0-I bullet with its second round); DOCS.md carries the sketch
  * this file locks. Reference type names return wholesale (HR-8):
@@ -485,3 +485,87 @@ export type InterceptHalt = {
 export type InterceptWorkerConfig = {
 	readonly iterationLimit?: number;
 };
+
+// ─── Seam 3: the wire record (worker → thread) ───────────────────────────────
+
+/**
+ * The attribution legs a wire record carries — the call-site span and the
+ * UTF-16 offset pair, both in the facts' coordinate space, decoded
+ * worker-side from the wrap's ONE six-field stamp (`'L:C:L:C:S:E'`,
+ * `wrap-call-expressions.ts`'s decode contract: the first four fields the
+ * span, the last two the offsets). One stamp carries both, so the
+ * README's both-or-neither rule is structural here too: a record holds a
+ * full span WITH its finite offsets, or all three legs `null` where no
+ * wrap attributed the moment — one without the other is malformed and the
+ * narrowing drops it.
+ */
+type WireAttribution =
+	| {
+			readonly loc: InterceptLoc;
+			readonly start: number;
+			readonly end: number;
+	  }
+	| { readonly loc: null; readonly start: null; readonly end: null };
+
+/**
+ * What every wire record carries beside its kind arm: the worker-minted
+ * `step` (1-based, strictly increasing, never renumbered thread-side —
+ * gaps are legal and meaningful, so the narrowing validates finiteness
+ * and nothing more), the attribution legs, and the call's raw arguments
+ * (elements deliberately `unknown`: learner values legitimately take any
+ * clone-safe shape, so that IS their declared depth).
+ */
+type WireRecordBase = WireAttribution & {
+	readonly step: number;
+	readonly args: readonly unknown[];
+};
+
+/**
+ * A `console.<method>(…)` call on the wire; nothing returns. `method` is
+ * the open string of the whole-surface trap (the {@link ConsoleMethod}
+ * names are the documented set).
+ */
+export type WireConsoleRecord = WireRecordBase & {
+	readonly event: 'console';
+	readonly method: string;
+};
+
+/** An ANSWERED `prompt(…)` on the wire: `return` is what the program received. */
+export type WirePromptRecord = WireRecordBase & {
+	readonly event: 'prompt';
+	readonly return: string | null;
+};
+
+/**
+ * An ANSWERED `alert(…)` on the wire: `return` present AND `undefined` —
+ * the void contract's modelled value, a real check under
+ * `exactOptionalPropertyTypes` (the deprecated port's H-3 ruling,
+ * carried).
+ */
+export type WireAlertRecord = WireRecordBase & {
+	readonly event: 'alert';
+	readonly return: undefined;
+};
+
+/** An ANSWERED `confirm(…)` on the wire: `return` is what the program received. */
+export type WireConfirmRecord = WireRecordBase & {
+	readonly event: 'confirm';
+	readonly return: boolean;
+};
+
+/**
+ * The wire form of a record — what the worker posts across the clone
+ * boundary for a COMPLETED moment (README § Glossary: a record is a
+ * console call or an answered dialog; an ask rides the interaction
+ * channel, never this seam). NARROWER than the delivered event by exactly
+ * the enrichment (HR-12): plain clone-safe data only — no `nodePath`, no
+ * accessors. Narrowed at ONE site (`narrow-record-message.ts`); reference
+ * spellings per HR-8 — `event`, `method`, `args`, `return`, `step`; the
+ * deprecated port's `kind`/`returnValue` vocabulary retires with its
+ * region.
+ */
+export type InterceptWireRecord =
+	| WireConsoleRecord
+	| WirePromptRecord
+	| WireAlertRecord
+	| WireConfirmRecord;
