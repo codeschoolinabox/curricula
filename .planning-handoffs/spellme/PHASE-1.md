@@ -19,16 +19,26 @@ careful reader may ignore.
 2026-08-19]. `lib/classifying` was reconciled alongside it (153 of 153). § Where
 things stand carries the SHA list; the status lives here, not elsewhere.
 
-🚧 **`spellme` PHASE 1 IS UNDER WAY — wave 1 is CLOSED (2026-08-20).** See § The
-`spellme` LENS — Phase 1, wave 1 for its SHA list — **re-run its loop rather
-than counting rows; this sentence said "ten" and was outgrown within the hour**
-— and § The `spellme` LENS's rulings for the five decisions it took. Wave 2 is
-`readStream` + `positionCursor`; wave 3 is the static surface and the first
-eyeball check. ⚠ This banner read "THE NEXT CAMPAIGN _IS_ `spellme` PHASE 1"
-until 2026-08-20 — true for one day, and then the same stale-redirect defect the
-paragraph below documents about itself, for the third time in this file. **A
-banner announcing what is next expires the moment someone starts it.** The docs
-mini-campaign that preceded it
+🚧 **`spellme` PHASE 1 IS UNDER WAY — waves 1 AND 2 are CLOSED (2026-08-20 and
+2026-08-25).**
+
+▶ **NEXT IS WAVE 3, and its launch prompt is committed at
+[`./PHASE1-WAVE-3-BRIEF.md`](./PHASE1-WAVE-3-BRIEF.md)** — the static surface
+(23 of `component.test.tsx`'s 28 skipped tests), the sandbox injection, and the
+campaign's **first 🔍 eyeball checkpoint**. It runs in the **orchestrator**, not
+a worker, and it opens with **one question that must go to the human before the
+first edit** — the un-skip order, where file order and ZOMBIES order disagree.
+That brief was context-free validated; the validation returned nine must-fixes
+against its first draft and all nine are applied.
+
+See § The `spellme` LENS — Phase 1, wave 1 and § … wave 2 for their SHA lists —
+**re-run their loops rather than counting rows; the wave-1 sentence said "ten"
+and was outgrown within the hour** — and both `### The spellme LENS's rulings`
+sections for the nine decisions they took. ⚠ This banner read "THE NEXT CAMPAIGN
+_IS_ `spellme` PHASE 1" until 2026-08-20 — true for one day, and then the same
+stale-redirect defect the paragraph below documents about itself, for the third
+time in this file. **A banner announcing what is next expires the moment someone
+starts it.** The docs mini-campaign that preceded it
 ([`./ACQUISITION-ALIGNMENT-BRIEF.md`](./ACQUISITION-ALIGNMENT-BRIEF.md),
 `adf83dc5`) **CLOSED** the same day in **six** commits — `614ab524` `191f7da9`
 `120880d7` `349d3f0a` `01a87b9f` `f7eefe61`, the last being post-close handoff
