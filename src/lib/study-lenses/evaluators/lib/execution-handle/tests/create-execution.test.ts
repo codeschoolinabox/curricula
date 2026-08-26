@@ -773,7 +773,7 @@ describe('the laws the quarry never had', () => {
 		expect(source.stopCalls()).toBe(0);
 	});
 
-	it.skip('a builder that cancels synchronously yields a settled handle', async () => {
+	it('a builder that cancels synchronously yields a settled handle', async () => {
 		const source = createStreamingSource(['a'], { ok: true, events: ['a'] });
 		const execution = createExecution(source, (controls) => {
 			controls.cancel();
@@ -783,7 +783,39 @@ describe('the laws the quarry never had', () => {
 		expect(await execution.result).toBe(INERT);
 	});
 
-	it.skip('a throwing builder throws synchronously at construction', () => {
+	it('a builder cancel still installs its extras', () => {
+		const source = createStreamingSource(['a'], { ok: true, events: ['a'] });
+		const execution = createExecution(source, (controls) => {
+			controls.cancel();
+			return { code: 'let x;' };
+		});
+
+		expect(execution.code).toBe('let x;');
+	});
+
+	it('a builder cancel never starts the source', async () => {
+		const source = createStreamingSource(['a'], { ok: true, events: ['a'] });
+		const execution = createExecution(source, (controls) => {
+			controls.cancel();
+			return { code: 'let x;' };
+		});
+		await execution.result;
+
+		expect(source.startCalls()).toBe(0);
+	});
+
+	it('a builder cancel never calls stop on the source', async () => {
+		const source = createStreamingSource(['a'], { ok: true, events: ['a'] });
+		const execution = createExecution(source, (controls) => {
+			controls.cancel();
+			return { code: 'let x;' };
+		});
+		await execution.result;
+
+		expect(source.stopCalls()).toBe(0);
+	});
+
+	it('a throwing builder throws synchronously at construction', () => {
 		const source = createStreamingSource(['a'], { ok: true, events: ['a'] });
 
 		expect(() =>
