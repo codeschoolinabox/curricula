@@ -24,7 +24,7 @@ function classifyOf(facts: Facts): readonly ClassifiedToken[] {
 }
 
 function v7ItemsOf(code: string): readonly McqQuizItem[] {
-	const facts = embody(code).facts;
+	const { facts } = embody(code);
 	const items = runGenerators(buildContext(facts, classifyOf(facts)), [
 		v7UsageKind,
 	]);
@@ -161,7 +161,7 @@ describe('v7UsageKind', () => {
 
 	describe('Interfaces', () => {
 		it('emits only mcq items', () => {
-			const facts = embody('let x = 1; x;').facts;
+			const { facts } = embody('let x = 1; x;');
 			const items = runGenerators(buildContext(facts, classifyOf(facts)), [
 				v7UsageKind,
 			]);

@@ -23,14 +23,14 @@ function classifyOf(facts: Facts): readonly ClassifiedToken[] {
 describe('buildContext', () => {
 	describe('Zero', () => {
 		it('carries an empty anchor stream for a program with no occurrences', () => {
-			const facts = embody('').facts;
+			const { facts } = embody('');
 			expect(buildContext(facts, classifyOf(facts)).identifierAnchors).toEqual(
 				[],
 			);
 		});
 
 		it('carries an empty property-access stream for a program with no member access', () => {
-			const facts = embody('let x = 1; x;').facts;
+			const { facts } = embody('let x = 1; x;');
 			expect(
 				buildContext(facts, classifyOf(facts)).propertyAccessAnchors,
 			).toEqual([]);
@@ -39,7 +39,7 @@ describe('buildContext', () => {
 
 	describe('One', () => {
 		it('collects the identifier anchors from a single AST descent', () => {
-			const facts = embody('let x = 1; x;').facts;
+			const { facts } = embody('let x = 1; x;');
 			expect(buildContext(facts, classifyOf(facts)).identifierAnchors).toEqual([
 				{ range: [4, 5], name: 'x', usageKind: 'declared' },
 				{ range: [11, 12], name: 'x', usageKind: 'read' },
@@ -47,13 +47,13 @@ describe('buildContext', () => {
 		});
 
 		it('passes the classified token stream through unchanged', () => {
-			const facts = embody('let x = 1;').facts;
+			const { facts } = embody('let x = 1;');
 			const classified = classifyOf(facts);
 			expect(buildContext(facts, classified).classified).toBe(classified);
 		});
 
 		it('carries the scope forest for binding-aware generators', () => {
-			const facts = embody('let x = 1;').facts;
+			const { facts } = embody('let x = 1;');
 			expect(
 				Object.hasOwn(
 					buildContext(facts, classifyOf(facts)).forest.root.declarations,
@@ -63,7 +63,7 @@ describe('buildContext', () => {
 		});
 
 		it('collects the property-access anchors from a single AST descent', () => {
-			const facts = embody('o.x;').facts;
+			const { facts } = embody('o.x;');
 			expect(
 				buildContext(facts, classifyOf(facts)).propertyAccessAnchors,
 			).toEqual([{ range: [2, 3], name: 'x' }]);
@@ -72,14 +72,14 @@ describe('buildContext', () => {
 
 	describe('Interfaces', () => {
 		it('returns a frozen context bundle', () => {
-			const facts = embody('let x = 1;').facts;
+			const { facts } = embody('let x = 1;');
 			expect(Object.isFrozen(buildContext(facts, classifyOf(facts)))).toBe(
 				true,
 			);
 		});
 
 		it('deeply freezes the collected anchor stream', () => {
-			const facts = embody('let x = 1;').facts;
+			const { facts } = embody('let x = 1;');
 			expect(
 				Object.isFrozen(
 					buildContext(facts, classifyOf(facts)).identifierAnchors,
@@ -88,7 +88,7 @@ describe('buildContext', () => {
 		});
 
 		it('freezes each collected anchor object', () => {
-			const facts = embody('let x = 1;').facts;
+			const { facts } = embody('let x = 1;');
 			expect(
 				Object.isFrozen(
 					buildContext(facts, classifyOf(facts)).identifierAnchors[0],
@@ -97,7 +97,7 @@ describe('buildContext', () => {
 		});
 
 		it('deeply freezes the collected property-access stream', () => {
-			const facts = embody('o.x;').facts;
+			const { facts } = embody('o.x;');
 			expect(
 				Object.isFrozen(
 					buildContext(facts, classifyOf(facts)).propertyAccessAnchors,
@@ -106,7 +106,7 @@ describe('buildContext', () => {
 		});
 
 		it('freezes each collected property-access anchor object', () => {
-			const facts = embody('o.x;').facts;
+			const { facts } = embody('o.x;');
 			expect(
 				Object.isFrozen(
 					buildContext(facts, classifyOf(facts)).propertyAccessAnchors[0],
@@ -125,7 +125,7 @@ describe('buildContext', () => {
 
 	describe('Simple', () => {
 		it('is deterministic across repeated builds', () => {
-			const facts = embody('let x = 1; x;').facts;
+			const { facts } = embody('let x = 1; x;');
 			const classified = classifyOf(facts);
 			expect(buildContext(facts, classified)).toEqual(
 				buildContext(facts, classified),

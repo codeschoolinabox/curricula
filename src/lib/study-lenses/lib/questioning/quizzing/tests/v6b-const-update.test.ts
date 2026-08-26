@@ -25,7 +25,7 @@ function classifyOf(facts: Facts): readonly ClassifiedToken[] {
 }
 
 function v6bItemsOf(code: string): readonly McqQuizItem[] {
-	const facts = embody(code).facts;
+	const { facts } = embody(code);
 	const items = runGenerators(buildContext(facts, classifyOf(facts)), [
 		v6bConstUpdate,
 	]);
@@ -160,7 +160,7 @@ describe('v6bConstUpdate', () => {
 
 	describe('Interfaces', () => {
 		it('emits only mcq items', () => {
-			const facts = embody('const x = 1;').facts;
+			const { facts } = embody('const x = 1;');
 			const items = runGenerators(buildContext(facts, classifyOf(facts)), [
 				v6bConstUpdate,
 			]);

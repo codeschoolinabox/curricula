@@ -33,8 +33,8 @@ function classifyOf(facts: Facts): readonly ClassifiedToken[] {
 }
 
 function quizOf(code: string): readonly QuizItem[] {
-	const snippet = embody(code).facts;
-	return generateQuiz(snippet, classifyOf(snippet));
+	const { facts } = embody(code);
+	return generateQuiz(facts, classifyOf(facts));
 }
 
 function unlocksOf(item: QuizItem): readonly string[] {
@@ -44,7 +44,7 @@ function unlocksOf(item: QuizItem): readonly string[] {
 const SAMENESS_FORMS = new Set(['V10a', 'V10b', 'V10c']);
 const KEY_GRAMMAR = /^(binding|usage|usage-kind):/u;
 
-// A snippet exercising all three sameness forms and their propagation peers:
+// RICH exercises all three sameness forms and their propagation peers:
 // `a` declared / read / assigned, `b` declared / read, and a free global `g`.
 const RICH = 'let a = 1; a; a = 2; let b = 2; b; g;';
 

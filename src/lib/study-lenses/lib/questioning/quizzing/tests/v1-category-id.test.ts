@@ -24,7 +24,7 @@ function classifyOf(facts: Facts): readonly ClassifiedToken[] {
 }
 
 function v1ItemsOf(code: string): readonly McqQuizItem[] {
-	const facts = embody(code).facts;
+	const { facts } = embody(code);
 	const items = runGenerators(buildContext(facts, classifyOf(facts)), [
 		v1CategoryId,
 	]);
@@ -40,7 +40,7 @@ describe('v1CategoryId', () => {
 
 	describe('One', () => {
 		it('emits only mcq items', () => {
-			const facts = embody('x').facts;
+			const { facts } = embody('x');
 			const items = runGenerators(buildContext(facts, classifyOf(facts)), [
 				v1CategoryId,
 			]);

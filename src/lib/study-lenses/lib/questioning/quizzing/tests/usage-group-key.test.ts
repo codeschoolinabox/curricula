@@ -142,7 +142,7 @@ describe('usageGroupKey', () => {
 
 	describe('Interfaces', () => {
 		it('keys a real resolved occurrence on its binding-and-use-type', () => {
-			const facts = embody('let n = 1; n;').facts;
+			const { facts } = embody('let n = 1; n;');
 			const binding = resolveBinding(
 				tokenAt(classifyOf(facts), 11),
 				readScopeForest(facts),

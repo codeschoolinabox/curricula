@@ -25,7 +25,7 @@ function classifyOf(facts: Facts): readonly ClassifiedToken[] {
 }
 
 function v6ItemsOf(code: string): readonly McqQuizItem[] {
-	const facts = embody(code).facts;
+	const { facts } = embody(code);
 	const items = runGenerators(buildContext(facts, classifyOf(facts)), [
 		v6KindSemantics,
 	]);
@@ -176,8 +176,8 @@ describe('v6KindSemantics', () => {
 
 	describe('Interfaces', () => {
 		it('emits only mcq items', () => {
-			const snippet = embody('let x = 1;').facts;
-			const items = runGenerators(buildContext(snippet, classifyOf(snippet)), [
+			const { facts } = embody('let x = 1;');
+			const items = runGenerators(buildContext(facts, classifyOf(facts)), [
 				v6KindSemantics,
 			]);
 			expect(items.every((item) => item.mode === 'mcq')).toBe(true);

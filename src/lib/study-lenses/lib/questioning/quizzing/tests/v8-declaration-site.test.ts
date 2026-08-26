@@ -24,7 +24,7 @@ function classifyOf(facts: Facts): readonly ClassifiedToken[] {
 }
 
 function v8ItemsOf(code: string): readonly CodeSurfaceQuizItem[] {
-	const facts = embody(code).facts;
+	const { facts } = embody(code);
 	const items = runGenerators(buildContext(facts, classifyOf(facts)), [
 		v8DeclarationSite,
 	]);
@@ -128,7 +128,7 @@ describe('v8DeclarationSite', () => {
 
 	describe('Interfaces', () => {
 		it('emits only click-token items', () => {
-			const facts = embody('let n = 1; n;').facts;
+			const { facts } = embody('let n = 1; n;');
 			const items = runGenerators(buildContext(facts, classifyOf(facts)), [
 				v8DeclarationSite,
 			]);

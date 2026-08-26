@@ -25,7 +25,7 @@ function classifyOf(facts: Facts): readonly ClassifiedToken[] {
 }
 
 function contextOf(code: string): GenerationContext {
-	const facts = embody(code).facts;
+	const { facts } = embody(code);
 	return buildContext(facts, classifyOf(facts));
 }
 

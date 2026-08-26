@@ -24,7 +24,7 @@ function classifyOf(facts: Facts): readonly ClassifiedToken[] {
 }
 
 function v4RawItemsOf(code: string): readonly QuizItem[] {
-	const facts = embody(code).facts;
+	const { facts } = embody(code);
 	return runGenerators(buildContext(facts, classifyOf(facts)), [v4TwoChains]);
 }
 

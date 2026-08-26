@@ -24,7 +24,7 @@ function classifyOf(facts: Facts): readonly ClassifiedToken[] {
 }
 
 function v10aItemsOf(code: string): readonly SelectInCodeQuizItem[] {
-	const facts = embody(code).facts;
+	const { facts } = embody(code);
 	const items = runGenerators(buildContext(facts, classifyOf(facts)), [
 		v10aBindingSameness,
 	]);

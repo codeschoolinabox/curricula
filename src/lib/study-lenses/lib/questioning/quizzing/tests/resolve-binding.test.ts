@@ -35,7 +35,7 @@ function tokenAt(
 describe('resolveBinding', () => {
 	describe('Zero', () => {
 		it('resolves an undeclared name to null', () => {
-			const facts = embody('x').facts;
+			const { facts } = embody('x');
 			expect(
 				resolveBinding(tokenAt(classifyOf(facts), 0), readScopeForest(facts)),
 			).toBeNull();
@@ -44,21 +44,21 @@ describe('resolveBinding', () => {
 
 	describe('One', () => {
 		it('resolves a reference to its binding', () => {
-			const facts = embody('let n = 1; n;').facts;
+			const { facts } = embody('let n = 1; n;');
 			expect(
 				resolveBinding(tokenAt(classifyOf(facts), 11), readScopeForest(facts)),
 			).toEqual({ name: 'n', declarationRange: [4, 5], kind: 'let' });
 		});
 
 		it('resolves a declaration-site occurrence to its own binding', () => {
-			const facts = embody('let n = 1; n;').facts;
+			const { facts } = embody('let n = 1; n;');
 			expect(
 				resolveBinding(tokenAt(classifyOf(facts), 4), readScopeForest(facts)),
 			).toEqual({ name: 'n', declarationRange: [4, 5], kind: 'let' });
 		});
 
 		it('carries the declaration kind for a let binding', () => {
-			const facts = embody('let n = 1; n;').facts;
+			const { facts } = embody('let n = 1; n;');
 			expect(
 				resolveBinding(tokenAt(classifyOf(facts), 11), readScopeForest(facts))
 					?.kind,
@@ -66,7 +66,7 @@ describe('resolveBinding', () => {
 		});
 
 		it('carries the declaration kind for a const binding', () => {
-			const facts = embody('const n = 1; n;').facts;
+			const { facts } = embody('const n = 1; n;');
 			expect(
 				resolveBinding(tokenAt(classifyOf(facts), 13), readScopeForest(facts))
 					?.kind,
@@ -76,7 +76,7 @@ describe('resolveBinding', () => {
 
 	describe('Many', () => {
 		it('resolves a later reference of one binding to the same declaration', () => {
-			const facts = embody('let n = 1; n; n;').facts;
+			const { facts } = embody('let n = 1; n; n;');
 			expect(
 				resolveBinding(tokenAt(classifyOf(facts), 14), readScopeForest(facts)),
 			).toEqual({ name: 'n', declarationRange: [4, 5], kind: 'let' });
@@ -94,14 +94,14 @@ describe('resolveBinding', () => {
 		});
 
 		it('resolves an inner reference to the shadowing inner binding', () => {
-			const facts = embody('let x = 1; { let x = 2; x; }').facts;
+			const { facts } = embody('let x = 1; { let x = 2; x; }');
 			expect(
 				resolveBinding(tokenAt(classifyOf(facts), 24), readScopeForest(facts)),
 			).toEqual({ name: 'x', declarationRange: [17, 18], kind: 'let' });
 		});
 
 		it('resolves an outer reference to the outer binding despite a later shadow', () => {
-			const facts = embody('let x = 1; x; { let x = 2; }').facts;
+			const { facts } = embody('let x = 1; x; { let x = 2; }');
 			expect(
 				resolveBinding(tokenAt(classifyOf(facts), 11), readScopeForest(facts)),
 			).toEqual({ name: 'x', declarationRange: [4, 5], kind: 'let' });
@@ -110,55 +110,47 @@ describe('resolveBinding', () => {
 		it('carries the inner kind, not the outer, when the kinds differ across a shadow', () => {
 			// outer `let x`, inner `const x` — the inner reference must report the
 			// resolved binding's kind ('const'), not the lexically-outer keyword.
-			const snippet = embody('let x = 1; { const x = 2; x; }').facts;
+			const { facts } = embody('let x = 1; { const x = 2; x; }');
 			expect(
-				resolveBinding(
-					tokenAt(classifyOf(snippet), 26),
-					readScopeForest(snippet),
-				)?.kind,
+				resolveBinding(tokenAt(classifyOf(facts), 26), readScopeForest(facts))
+					?.kind,
 			).toBe('const');
 		});
 
 		it('resolves a for-of body reference to the iteration binding', () => {
-			const snippet = embody(
+			const { facts } = embody(
 				'let items = [1]; for (const x of items) { x; }',
-			).facts;
+			);
 			expect(
-				resolveBinding(
-					tokenAt(classifyOf(snippet), 42),
-					readScopeForest(snippet),
-				),
+				resolveBinding(tokenAt(classifyOf(facts), 42), readScopeForest(facts)),
 			).toEqual({ name: 'x', declarationRange: [28, 29], kind: 'const' });
 		});
 
 		it('climbs from the for-of scope to resolve the iterable to its outer binding', () => {
-			const snippet = embody(
+			const { facts } = embody(
 				'let items = [1]; for (const x of items) { x; }',
-			).facts;
+			);
 			expect(
-				resolveBinding(
-					tokenAt(classifyOf(snippet), 33),
-					readScopeForest(snippet),
-				),
+				resolveBinding(tokenAt(classifyOf(facts), 33), readScopeForest(facts)),
 			).toEqual({ name: 'items', declarationRange: [4, 9], kind: 'let' });
 		});
 	});
 
 	describe('Interfaces', () => {
 		it('returns a frozen binding', () => {
-			const snippet = embody('let n = 1; n;').facts;
+			const { facts } = embody('let n = 1; n;');
 			const binding = resolveBinding(
-				tokenAt(classifyOf(snippet), 11),
-				readScopeForest(snippet),
+				tokenAt(classifyOf(facts), 11),
+				readScopeForest(facts),
 			);
 			expect(binding !== null && Object.isFrozen(binding)).toBe(true);
 		});
 
 		it('returns a binding with a frozen range tuple', () => {
-			const snippet = embody('let n = 1; n;').facts;
+			const { facts } = embody('let n = 1; n;');
 			const binding = resolveBinding(
-				tokenAt(classifyOf(snippet), 11),
-				readScopeForest(snippet),
+				tokenAt(classifyOf(facts), 11),
+				readScopeForest(facts),
 			);
 			expect(
 				binding !== null && Object.isFrozen(binding.declarationRange),
@@ -166,40 +158,34 @@ describe('resolveBinding', () => {
 		});
 
 		it('accepts a minimal { start, text } occurrence, not only a ClassifiedToken', () => {
-			const snippet = embody('let n = 1; n;').facts;
+			const { facts } = embody('let n = 1; n;');
 			expect(
-				resolveBinding({ start: 11, text: 'n' }, readScopeForest(snippet)),
+				resolveBinding({ start: 11, text: 'n' }, readScopeForest(facts)),
 			).toEqual({ name: 'n', declarationRange: [4, 5], kind: 'let' });
 		});
 	});
 
 	describe('Exceptions', () => {
 		it('does not throw on a property-name occurrence', () => {
-			const snippet = embody('obj.foo').facts;
+			const { facts } = embody('obj.foo');
 			expect(() =>
-				resolveBinding(
-					tokenAt(classifyOf(snippet), 4),
-					readScopeForest(snippet),
-				),
+				resolveBinding(tokenAt(classifyOf(facts), 4), readScopeForest(facts)),
 			).not.toThrow();
 		});
 
 		it('resolves a property-name occurrence with no in-scope binding to null', () => {
-			const snippet = embody('obj.foo').facts;
+			const { facts } = embody('obj.foo');
 			expect(
-				resolveBinding(
-					tokenAt(classifyOf(snippet), 4),
-					readScopeForest(snippet),
-				),
+				resolveBinding(tokenAt(classifyOf(facts), 4), readScopeForest(facts)),
 			).toBeNull();
 		});
 	});
 
 	describe('Simple', () => {
 		it('resolves deterministically for the same occurrence', () => {
-			const snippet = embody('let n = 1; n;').facts;
-			const forest = readScopeForest(snippet);
-			const occurrence = tokenAt(classifyOf(snippet), 11);
+			const { facts } = embody('let n = 1; n;');
+			const forest = readScopeForest(facts);
+			const occurrence = tokenAt(classifyOf(facts), 11);
 			expect(resolveBinding(occurrence, forest)).toEqual(
 				resolveBinding(occurrence, forest),
 			);
