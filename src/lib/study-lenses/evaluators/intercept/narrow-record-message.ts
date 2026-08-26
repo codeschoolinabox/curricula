@@ -19,18 +19,21 @@
  *
  * The depth is the deprecated port's briefing decision B-4, carried:
  * every field the seam declares is validated to its full declared depth —
- * the four `event` literals, a finite `step` (finiteness and nothing
+ * the five `event` literals, a finite `step` (finiteness and nothing
  * more: steps are worker-minted and legally gapped, so the narrowing
  * never renumbers and never validates contiguity), an attribution whose
  * legs travel together (a full two-position four-finite-number span WITH
  * two finite UTF-16 offsets, or `loc`/`start`/`end` all null — one
  * without the other is malformed and drops), `console`'s string `method`,
- * an args ARRAY — except the args ELEMENTS, which stay `unknown` because
- * that IS their declared depth (learner values legitimately take any
- * clone-safe shape). `return` is checked per event exactly: alert
- * present-and-`undefined` (H-3's modelled value, a real check under
- * `exactOptionalPropertyTypes`), confirm's boolean, prompt's
- * string-or-null.
+ * an args ARRAY on the call-backed arms — except the args ELEMENTS,
+ * which stay `unknown` because that IS their declared depth (learner
+ * values legitimately take any clone-safe shape). `return` is checked
+ * per event exactly: alert present-and-`undefined` (H-3's modelled
+ * value, a real check under `exactOptionalPropertyTypes`), confirm's
+ * boolean, prompt's string-or-null. The `'error'` arm is the worker-sent
+ * error record (human ruling 2026-08-26, the ledger's in-stream-error
+ * bullet): string `name` and `message`, and NO args — an error moment
+ * has no call, so the args requirement is per-arm, never the envelope's.
  */
 
 import freezeInPlace from '@utils/freeze-in-place.js';
@@ -71,17 +74,18 @@ export default function narrowRecordMessage(
 
 /**
  * The envelope every wire record shares: a finite step (finiteness and
- * nothing more — steps are worker-minted and legally gapped), sound
- * attribution legs, and an args ARRAY whose elements stay `unknown` (B-4's
- * declared depth).
+ * nothing more — steps are worker-minted and legally gapped) and sound
+ * attribution legs. The args ARRAY is the call-backed arms' requirement,
+ * checked per arm — the error arm has no call and no args.
  */
 function hasSoundBase(candidate: Record<string, unknown>): boolean {
-	const stepIsSound = Number.isFinite(candidate['step']);
-	return (
-		stepIsSound &&
-		hasSoundAttribution(candidate) &&
-		Array.isArray(candidate['args'])
-	);
+	return Number.isFinite(candidate['step']) && hasSoundAttribution(candidate);
+}
+
+/** The call-backed arms' args ARRAY — elements stay `unknown` (B-4's
+ * declared depth). */
+function hasCallArguments(candidate: Record<string, unknown>): boolean {
+	return Array.isArray(candidate['args']);
 }
 
 /**
@@ -120,14 +124,25 @@ function isFinitePosition(position: unknown): boolean {
 }
 
 /**
- * Per-event depth, exactly the declared fields: console's open string
- * method; alert's `return` present AND undefined (H-3's modelled value —
- * the one place a presence check is load-bearing, because a missing key
- * and the modelled value are indistinguishable by value alone); confirm's
- * boolean; prompt's string-or-null. An unlisted event drops.
+ * Per-event depth, exactly the declared fields: the error arm's string
+ * `name` and `message` (no call, no args); the call-backed arms' args
+ * ARRAY; console's open string method; alert's `return` present AND
+ * undefined (H-3's modelled value — the one place a presence check is
+ * load-bearing, because a missing key and the modelled value are
+ * indistinguishable by value alone); confirm's boolean; prompt's
+ * string-or-null. An unlisted event drops.
  */
 function hasSoundEventArm(candidate: Record<string, unknown>): boolean {
 	const { event } = candidate;
+	if (event === 'error') {
+		return (
+			typeof candidate['name'] === 'string' &&
+			typeof candidate['message'] === 'string'
+		);
+	}
+	if (!hasCallArguments(candidate)) {
+		return false;
+	}
 	if (event === 'console') {
 		return typeof candidate['method'] === 'string';
 	}

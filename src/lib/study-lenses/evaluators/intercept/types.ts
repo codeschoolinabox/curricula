@@ -19,6 +19,10 @@
  */
 
 import type { Entwined, EntwinedNode, NodePath } from '../../embody/types.js';
+import type {
+	NaturalHaltCore,
+	ThrowHaltCore,
+} from '../lib/guarded-worker-base/types.js';
 import type { LimitTrip, LoopLoc } from '../lib/iteration-guard/types.js';
 import type {
 	ErrorPhase,
@@ -448,31 +452,28 @@ export type InterceptHandle = Execution<InterceptEvent, InterceptResult> & {
 // ─── Seam 1: the worker stop record (worker → thread) ────────────────────────
 
 /**
- * intercept's worker-authored, clone-safe stop record — run's members
- * plus the attributed call site (the member run cannot honestly stamp;
- * the banked halt question's shape half, resolved 2026-08-19). Authored
- * on EVERY worker-side stop; narrowed exactly once, thread-side; the
- * author dedup with run's is deferred to the W4b chain openers.
+ * intercept's worker-authored, clone-safe stop record — the guarded
+ * worker base's halt core plus the attributed call site (the member run
+ * cannot honestly stamp; the banked halt question's shape half, resolved
+ * 2026-08-19; the author dedup resolved SHARED at the W4 opening — the
+ * base's finisher seam is how `loc` rides, never a fork of the
+ * skeleton). Authored on EVERY worker-side stop; narrowed exactly once,
+ * thread-side.
+ *
+ * The union's arms are the base's (`ebb3f603`): the natural arm pins its
+ * empty members — `phase: null` and `loc: null` included — and the throw
+ * arm carries the engine's structural `phase` non-null (the E2 increment,
+ * `a2ff78b0`'s split spelled `'creation' | 'evaluation'`), so the
+ * settlement mapper narrows on `natural` and reads a phase, never a
+ * fabricated default. The throw arm's `loc` is the attributed call site:
+ * the wrap's innermost live call read from the raw throw's stamp, or the
+ * one sanctioned stack-parse position (spliced-coordinate conversion is
+ * the enrichment increment's named question); `null` where neither gave
+ * one.
  */
-export type InterceptHalt = {
-	/** `true` on a natural end (no throw). */
-	readonly natural: boolean;
-	/** The thrown error's name; `''` on a natural end. */
-	readonly errorName: string;
-	/** The thrown error's message, or `String(thrown)`; `''` on a natural end. */
-	readonly message: string;
-	/**
-	 * The attributed call site: the wrap's innermost live call, or the
-	 * one sanctioned stack-parse position (spliced-coordinate conversion
-	 * is the enrichment increment's named question); `null` where neither
-	 * gave one.
-	 */
-	readonly loc: InterceptLoc | null;
-	/** The guard's trip record iff the throw was the marked limit throw. */
-	readonly trip: LimitTrip | null;
-	/** The never-reset run total of guarded-loop iterations. */
-	readonly iterationCount: number;
-};
+export type InterceptHalt =
+	| (NaturalHaltCore & { readonly loc: null })
+	| (ThrowHaltCore & { readonly loc: InterceptLoc | null });
 
 // ─── Seam 2: the worker config (thread → worker) ─────────────────────────────
 
@@ -554,18 +555,82 @@ export type WireConfirmRecord = WireRecordBase & {
 };
 
 /**
- * The wire form of a record — what the worker posts across the clone
- * boundary for a COMPLETED moment (README § Glossary: a record is a
- * console call or an answered dialog; an ask rides the interaction
- * channel, never this seam). NARROWER than the delivered event by exactly
- * the enrichment (HR-12): plain clone-safe data only — no `nodePath`, no
- * accessors. Narrowed at ONE site (`narrow-record-message.ts`); reference
- * spellings per HR-8 — `event`, `method`, `args`, `return`, `step`; the
- * deprecated port's `kind`/`returnValue` vocabulary retires with its
- * region.
+ * The learner's run-ending throw on the wire — WORKER-SENT (human ruling
+ * 2026-08-26, resolving the I2 seam flag): the worker emits it at the
+ * throw site, immediately before authoring its stop record, so `step`
+ * stays genuinely worker-minted in the one gapped ordinal space (a
+ * thread-side `events.length + 1` mint was rejected — it disagrees with
+ * worker ordinals wherever a mocked dialog consumed one). Only the
+ * learner's own throw rides this arm: the guard's marked trip, the
+ * engine-made stops, and machinery defects are settlement-only, and an
+ * io failure's in-stream error event is thread-authored (it never
+ * crosses this seam). No `args` — there is no call — and no `source`
+ * (absent `source` IS the learner-throw marking on the delivered event).
+ */
+export type WireErrorRecord = WireAttribution & {
+	readonly event: 'error';
+	readonly step: number;
+	readonly name: string;
+	readonly message: string;
+};
+
+/**
+ * The wire form of a boundary moment — what the worker posts across the
+ * clone boundary for a COMPLETED moment (README § Glossary: a record is
+ * a console call or an answered dialog; an ask rides the call channel,
+ * never this seam) or for the learner's run-ending throw (the
+ * worker-sent error arm, human ruling 2026-08-26). NARROWER than the
+ * delivered event by exactly the enrichment (HR-12): plain clone-safe
+ * data only — no `nodePath`, no accessors. Narrowed at ONE site
+ * (`narrow-record-message.ts`); reference spellings per HR-8 — `event`,
+ * `method`, `args`, `return`, `step`; the deprecated port's
+ * `kind`/`returnValue` vocabulary retires with its region.
  */
 export type InterceptWireRecord =
 	| WireConsoleRecord
 	| WirePromptRecord
 	| WireAlertRecord
-	| WireConfirmRecord;
+	| WireConfirmRecord
+	| WireErrorRecord;
+
+// ─── Seam 4: the ask (worker → thread, through the call channel) ─────────────
+
+/**
+ * The clone-safe ask a dialog trap sends through the machinery's call
+ * channel — the synchronous round-trip that suspends the run. Minted at
+ * the worker-setup increment, consumed thread-side at `serveAsk` (mock
+ * first — a supplied dialog mock answers before a pending interaction is
+ * ever minted). `step` is minted from the same worker ordinal sequence
+ * the records use: a mocked dialog's ask consumes an ordinal the stream
+ * never delivers — the ruled step gap. The attribution legs are the wire
+ * rule's: a full span WITH its offsets, or all three `null`.
+ */
+export type InterceptAskMessage = WireAttribution & {
+	readonly step: number;
+	readonly request: InterceptInteractionRequest;
+};
+
+// ─── The channel's product (thread-side, pre-enrichment) ─────────────────────
+
+/**
+ * The pending interaction as the interaction channel authors it —
+ * THREAD-side and never a wire message: `respond` is a live main-thread
+ * function; `request` is the clone-safe ask that did cross. Deep-frozen
+ * where authored (freezing does not disable `respond` — a frozen
+ * object's function property still calls). This is the delivered
+ * {@link PendingInteractionEvent} MINUS the enrichment: the enrichment
+ * step builds the delivered event as its own object (offsets resolved to
+ * `nodePath`, the graph accessors installed), carrying `respond`
+ * through, so the three guarantees — respond resumes the run, twice is
+ * inert, post-teardown is a no-op — live here, at one site.
+ */
+export type InterceptPendingInteraction = PendingInteraction<
+	InterceptInteractionRequest,
+	InterceptDialogAnswer
+> & {
+	readonly event: 'pending-interaction';
+	readonly step: number;
+	readonly loc: InterceptLoc | null;
+	readonly start: number | null;
+	readonly end: number | null;
+};

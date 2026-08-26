@@ -1,9 +1,7 @@
+// cspell:ignore kapot
 import { describe, expect, it } from 'vitest';
 
-import type {
-	InterceptHalt,
-	InterceptWorkerConfig,
-} from '../../../intercept/types.js';
+import type { InterceptWorkerConfig } from '../../../intercept/types.js';
 import type { RunWorkerConfig } from '../../../run/types.js';
 import createGuardedWorkerBase from '../create-guarded-worker-base.js';
 import type { HaltCore } from '../types.js';
@@ -218,11 +216,5 @@ describe('compile probes (live)', () => {
 		const interceptCap: number | undefined =
 			null as unknown as InterceptWorkerConfig['iterationLimit'];
 		expect([runCap, interceptCap]).toEqual([null, null]);
-	});
-
-	it('the units’ phase members are still deferred — remove these lines when they land', () => {
-		// @ts-expect-error InterceptHalt gains `phase` at intercept's worker-setup increment
-		const interceptPhase: InterceptHalt['phase'] = undefined;
-		expect([interceptPhase]).toEqual([undefined]);
 	});
 });

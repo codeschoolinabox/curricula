@@ -12,7 +12,12 @@
  * answer is `null` (this seam's own contract; the port answered
  * `undefined` — the engine's sentinel, which the onMessage wiring now
  * owns). Eight offset it-blocks extend the transport for the stamp's
- * offset pair — 33 blocks, 39 runnable rows in all.
+ * offset pair, and six error-arm it-blocks extend it for the worker-sent
+ * error record (human ruling 2026-08-26, the ledger's in-stream-error
+ * bullet — a ruled cross-increment extension of this landed seam: the
+ * wire union gains the error arm and this narrowing gains its leg; an
+ * error moment has no call, so the args requirement is per-arm, never
+ * the envelope's) — 39 blocks, 45 runnable rows in all.
  *
  * Ruling carry block (prose, not PINNED — the pinned-guard hook is
  * unregistered and a guard-down period accepts no new pins, human ruling
@@ -339,6 +344,91 @@ describe('narrowRecordMessage', () => {
 		});
 	});
 
+	describe('the error arm — the worker-sent record', () => {
+		it('a well-formed error record rides by reference — no args, there is no call', () => {
+			const message = {
+				event: 'error',
+				name: 'TypeError',
+				message: 'boom',
+				step: 4,
+				loc: null,
+				start: null,
+				end: null,
+			};
+
+			expect(narrowRecordMessage(message)).toBe(message);
+		});
+
+		it('an error record with full attribution rides', () => {
+			const message = {
+				event: 'error',
+				name: 'TypeError',
+				message: 'boom',
+				step: 4,
+				loc: locOf(),
+				start: 30,
+				end: 46,
+			};
+
+			expect(narrowRecordMessage(message)).toBe(message);
+		});
+
+		it('an error record without a string name is dropped', () => {
+			expect(
+				narrowRecordMessage({
+					event: 'error',
+					name: 42,
+					message: 'boom',
+					step: 4,
+					loc: null,
+					start: null,
+					end: null,
+				}),
+			).toBeNull();
+		});
+
+		it('an error record MISSING its message is dropped', () => {
+			expect(
+				narrowRecordMessage({
+					event: 'error',
+					name: 'TypeError',
+					step: 4,
+					loc: null,
+					start: null,
+					end: null,
+				}),
+			).toBeNull();
+		});
+
+		it('an error record with a non-string message is dropped', () => {
+			expect(
+				narrowRecordMessage({
+					event: 'error',
+					name: 'TypeError',
+					message: null,
+					step: 4,
+					loc: null,
+					start: null,
+					end: null,
+				}),
+			).toBeNull();
+		});
+
+		it("the error record's attribution legs obey both-or-neither too", () => {
+			expect(
+				narrowRecordMessage({
+					event: 'error',
+					name: 'TypeError',
+					message: 'boom',
+					step: 4,
+					loc: locOf(),
+					start: null,
+					end: null,
+				}),
+			).toBeNull();
+		});
+	});
+
 	describe('the args arm', () => {
 		it('a console record whose args is not an array is dropped', () => {
 			expect(
@@ -369,9 +459,9 @@ describe('narrowRecordMessage', () => {
 		it('freezes the args array through its elements', () => {
 			const narrowed = narrowRecordMessage(
 				recordOf({ args: [{ nested: true }] }),
-			);
+			) as import('../types.js').WireConsoleRecord;
 
-			expect(Object.isFrozen(narrowed?.args[0])).toBe(true);
+			expect(Object.isFrozen(narrowed.args[0])).toBe(true);
 		});
 	});
 });
