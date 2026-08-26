@@ -77,7 +77,7 @@ function createResultOnlySource(
 }
 
 describe('batch consumption (await)', () => {
-	it.skip('resolves to the source result', async () => {
+	it('resolves to the source result', async () => {
 		const result = { ok: true, events: ['a', 'b'] };
 		const execution = createExecution(
 			createStreamingSource(['a', 'b'], result),
@@ -99,7 +99,7 @@ describe('batch consumption (await)', () => {
 		expect(first).toBe(second);
 	});
 
-	it.skip('an empty stream resolves correctly', async () => {
+	it('an empty stream resolves correctly', async () => {
 		const execution = createExecution(
 			createStreamingSource([], { ok: true, events: [] }),
 		);
@@ -180,7 +180,7 @@ describe('PromiseLike (.then)', () => {
 });
 
 describe('.result property', () => {
-	it.skip('.result is a Promise', () => {
+	it('.result is a Promise', () => {
 		const execution = createExecution(
 			createStreamingSource([], { ok: true, events: [] }),
 		);
@@ -188,13 +188,44 @@ describe('.result property', () => {
 		expect(execution.result).toBeInstanceOf(Promise);
 	});
 
-	it.skip('.result resolves without iteration — the drainer', async () => {
+	it('.result resolves without iteration — the drainer', async () => {
 		const result = { ok: true, events: ['a', 'b'] };
 		const execution = createExecution(
 			createStreamingSource(['a', 'b'], result),
 		);
 
 		expect(await execution.result).toEqual(result);
+	});
+
+	it('a batch ignition calls start once', () => {
+		const source = createStreamingSource(['a'], { ok: true, events: ['a'] });
+		const execution = createExecution(source);
+
+		void execution.result;
+
+		expect(source.startCalls()).toBe(1);
+	});
+
+	it('a mixed .result-then-await touch starts once', async () => {
+		const source = createStreamingSource(['a'], { ok: true, events: ['a'] });
+		const execution = createExecution(source);
+
+		void execution.result;
+		await execution;
+
+		expect(source.startCalls()).toBe(1);
+	});
+
+	it('the drainer pulls the stream to exhaustion', async () => {
+		const source = createStreamingSource(['a', 'b'], {
+			ok: true,
+			events: ['a', 'b'],
+		});
+		const execution = createExecution(source);
+
+		await execution.result;
+
+		expect(source.nextCalls()).toBe(3);
 	});
 });
 
@@ -257,7 +288,7 @@ describe('cancel', () => {
 });
 
 describe('edge cases', () => {
-	it.skip('an immediate-end stream resolves correctly', async () => {
+	it('an immediate-end stream resolves correctly', async () => {
 		const execution = createExecution(
 			createStreamingSource([], { ok: true, events: [] }),
 		);
