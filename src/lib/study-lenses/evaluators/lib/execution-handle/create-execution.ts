@@ -15,9 +15,11 @@
  * the consumer iterator's first pull, each fixing the mode), the batch
  * Drive path (the drainer, exhaustion-only exit), and the iterate
  * Drive path (the memoized consumer iterator forwarding the source's
- * events). Cancel/teardown, settle-race, and defect routes land with
- * the remaining X1 increments against the committed-skipped suite in
- * tests/.
+ * events), and the inert-cancel half of Teardown (cancel before any
+ * touch settles the inert-cancel result through one door shared with
+ * the builder's controls). The post-ignition cancel (stop routing),
+ * settle-race, and defect routes land with the remaining X1
+ * increments against the committed-skipped suite in tests/.
  */
 
 import type {
@@ -54,19 +56,21 @@ export default function createExecution<
 	buildExtras?: BuildExtras<TExtras>,
 ): WidenedExecution<TEvent, TResult, TExtras> {
 	// ─── Phase 1: Install (sync, inert) ──────────────────────────────────
-	const controls: SourceControls = {
-		cancel: function cancel(): void {},
-	};
-	const extrasDescriptors =
-		buildExtras === undefined
-			? {}
-			: Object.getOwnPropertyDescriptors(buildExtras(controls));
 	const state: HandleState<TEvent, TResult> = {
 		source,
 		settle: null,
 		mode: null,
 		iterator: null,
 	};
+	const controls: SourceControls = {
+		cancel: function cancel(): void {
+			cancelExecution(state);
+		},
+	};
+	const extrasDescriptors =
+		buildExtras === undefined
+			? {}
+			: Object.getOwnPropertyDescriptors(buildExtras(controls));
 	// Library descriptors merge AFTER extras, so the library's members win
 	// at runtime even against a type-evading index-signature builder.
 	const descriptors: PropertyDescriptorMap = {
@@ -78,6 +82,12 @@ export default function createExecution<
 			},
 			enumerable: true,
 			configurable: false,
+		},
+		cancel: {
+			value: controls.cancel,
+			enumerable: false,
+			configurable: false,
+			writable: false,
 		},
 		// eslint-disable-next-line unicorn/no-thenable -- the handle IS the kind's PromiseLike (region types.ts, ExecutionBase); await/.then is the contract, not an accident
 		then: {
@@ -202,6 +212,27 @@ function createConsumerIterator<TEvent, TResult>(
 			return events.next();
 		},
 	};
+}
+
+// ─── Phase 5: Teardown (sync, out of band) ────────────────────────────────────
+
+/**
+ * The consumer's out-of-band stop, one door for the handle's `cancel`
+ * member and the builder's `controls.cancel` alike. Before ignition it
+ * closes the teardown latch by settling the inert-cancel result — the
+ * settle field is the start latch, so a later touch can never open it
+ * and nothing is ever called on the source (nothing started, nothing
+ * to stop). The post-ignition route — `stop()` at most once, never
+ * queued behind a pending pull — lands with its committed-skipped
+ * rows.
+ */
+function cancelExecution<TEvent, TResult>(
+	state: HandleState<TEvent, TResult>,
+): void {
+	if (state.settle === null) {
+		// eslint-disable-next-line functional/immutable-data -- the teardown latch closes through the same sanctioned state record as ignition
+		state.settle = Promise.resolve(state.source.inertCancelResult());
+	}
 }
 
 /**

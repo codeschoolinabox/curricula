@@ -62,17 +62,24 @@ function createStreamingSource(
 
 function createResultOnlySource(
 	result: MockResult,
-): ResultOnlySource<MockResult> & { readonly startCalls: () => number } {
+): ResultOnlySource<MockResult> & {
+	readonly startCalls: () => number;
+	readonly stopCalls: () => number;
+} {
 	let started = 0;
+	let stopped = 0;
 	return {
 		start(_mode) {
 			started += 1;
 		},
-		stop() {},
+		stop() {
+			stopped += 1;
+		},
 		result: Promise.resolve(result),
 		inertCancelResult: () => INERT,
 		sourceDefectResult: (_cause: unknown) => DEFECT,
 		startCalls: () => started,
+		stopCalls: () => stopped,
 	};
 }
 
@@ -639,14 +646,14 @@ describe('the laws the quarry never had', () => {
 		expect(source.stopCalls()).toBe(0);
 	});
 
-	it.skip('a result-only source resolves under await', async () => {
+	it('a result-only source resolves under await', async () => {
 		const result = { ok: true, events: [] };
 		const execution = createExecution(createResultOnlySource(result));
 
 		expect(await execution).toEqual(result);
 	});
 
-	it.skip('a result-only source is always told batch', async () => {
+	it('a result-only source is always told batch', async () => {
 		const modes: string[] = [];
 		const source = createResultOnlySource({ ok: true, events: [] });
 		const observing = {
@@ -663,12 +670,38 @@ describe('the laws the quarry never had', () => {
 		expect(modes).toEqual(['batch']);
 	});
 
-	it.skip('a result-only cancel before ignition settles inert', async () => {
+	it('a result-only cancel before ignition settles inert', async () => {
 		const source = createResultOnlySource({ ok: true, events: [] });
 		const execution = createExecution(source);
 		execution.cancel();
 
 		expect(await execution.result).toBe(INERT);
+	});
+
+	it('a result-only cancel before ignition settles inert under await', async () => {
+		const source = createResultOnlySource({ ok: true, events: [] });
+		const execution = createExecution(source);
+		execution.cancel();
+
+		expect(await execution).toBe(INERT);
+	});
+
+	it('a result-only cancel before ignition never starts', async () => {
+		const source = createResultOnlySource({ ok: true, events: [] });
+		const execution = createExecution(source);
+		execution.cancel();
+		await execution.result;
+
+		expect(source.startCalls()).toBe(0);
+	});
+
+	it('a result-only inert cancel never calls stop', async () => {
+		const source = createResultOnlySource({ ok: true, events: [] });
+		const execution = createExecution(source);
+		execution.cancel();
+		await execution.result;
+
+		expect(source.stopCalls()).toBe(0);
 	});
 
 	it.skip('a builder that cancels synchronously yields a settled handle', async () => {
