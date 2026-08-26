@@ -151,6 +151,16 @@ enumerated here per the AR-5 Loss lens (2026-08-25):
 | "the recommender builds it where needed" (§ Catalog frame, the Family↔Feature map builder) | dropped deliberately | pre-family framing; the recommender layer is future work and its own docs will claim the map when built |
 | "the gate relies on members arriving source-ordered" (§ Defensive guards, is-representative precondition) | not promoted — oracle-internal | an implementation precondition of the sameness gate, pinned by the v10a/is-representative tests; the module docs carry the learner-facing representative rule |
 
+## The post-close round (2026-08-25): the ruled follow-ons
+
+Three human-ruled increments after the Stage-3 close (ceremony full;
+the cluster's AR trail lives in the commit bodies):
+
+| Content | Disposition | Where | Why |
+| --- | --- | --- | --- |
+| `ForestScope.declarations` `ReadonlyMap` → frozen null-prototype `Readonly<Partial<Record>>` (+ the resolver's lookup conform; three sanctioned oracle-pin edits; seven new/edited pins) | RULED TYPE EVENT (increment A) | resolving/types.ts + resolving/*.ts + three test files; DOCS § Decisions carries the dated ruling | DEV.md § 13 conformance — the ported Map was a carried violation whose membership could not freeze; the § C resolve-binding row now counts four conforms |
+| Stale quarry-history JSDoc across nine source files (inc-N / pre-7b / commit-1 narratives; `buildScope`, `Snippet`, `status.parsed` vocabulary; the dangling accessor-seam pointer; is-representative's false "only caller") | REWORDED to greenfield voice (increment B) | the nine sources; every site enumerated in the B commit body | the keep/cut criterion: CUT how-this-got-here narrative; KEEP dated `(human ruling …)` / `(AR-N resolution …)` records and live pointers (AR-1 CP-4) — none of which matched the residue terms, so zero ruling records were touched [measured at the sweep: post-reword grep → 0 hits outside tests] |
+
 ## The gate round (2026-08-18): envelope amendments
 
 Post-Phase-0-commit rulings at the held gate (design-reviewed; the plan
@@ -171,6 +181,6 @@ carries the review):
 | The LIBRARY-CONTRACTS **[S3]** cluster promotion (cluster bodies → this module's README/DOCS; one-line pointers left behind; the 17-vs-22 `resolve-binding` test-count erratum noted) | DISCHARGED at U11 (`10efcc00`) — § F above is the transport record |
 | Parent `DOCS.md § The closed register's conformance` retitle + the inverted "exposes only the envelope" connective fix | DISCHARGED at U10 — landed in the same changeset as this row edit (the parent pass) |
 | A parent-glossary "family" homonym entry (questioner family vs `Family`) | DISCHARGED at U10 — the parent README glossary family/feature bullet gained the homonym sentence, same changeset |
-| A residue-reword ruling reconciling the two landed § B precedents (U1/U7a KEPT stale quarry-history JSDoc byte-faithful; U5 REWORDED it riding a forced entry rewire) — plus the named residue sites: `usage-group-key.ts` build-history paragraph, `resolve-binding.ts` buildScope mentions, `is-representative.ts` "only caller" claim | a future session (U11's promotion pass closed without it); scope the ruling BY GREP, not by this list — AR-5 found further sites (`grade.ts` "Snippet" mention; `v6-kind-semantics.ts` "status.parsed" + its "commit 1's widening" pointer) |
+| A residue-reword ruling reconciling the two landed § B precedents (U1/U7a KEPT stale quarry-history JSDoc byte-faithful; U5 REWORDED it riding a forced entry rewire) — plus the named residue sites: `usage-group-key.ts` build-history paragraph, `resolve-binding.ts` buildScope mentions, `is-representative.ts` "only caller" claim | DISCHARGED by increment B of the post-close round (2026-08-25) — executed by grep, which put `context/descend-identifiers.ts` (five sites) and further narrative vocabulary in scope beyond this row's named list [measured: the pre-reword sweep] |
 | A `lib/scoping` README back-pointer to this module's forest (the deliberate-duplication cross-reference) | a future session; out of this changeset |
 | The parent ledger's Owed-forward row recording the human's socratizing-twins intent ("socratizing will be the same when we get there", 2026-08-18) | DISCHARGED at U11 (`10efcc00`) — the row sits in the parent ledger's burn-down |

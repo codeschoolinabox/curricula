@@ -1,4 +1,4 @@
-// cspell:ignore quizzing chokepoint
+// cspell:ignore quizzing chokepoint disjointness
 
 /**
  * @file Internal types for the quizzing generation context — the two anchor
@@ -42,7 +42,7 @@ export type ChainRole = 'scope-chain' | 'prototype-chain';
  * **this** stream — the descent routes non-computed member property names to the
  * separate `PropertyAccessAnchor` stream (which no binding-aware generator reads)
  * and drops object-literal keys entirely, so a binding-aware generator never feeds
- * `resolveBinding` a non-reference occurrence (the inc-2 FLAG mitigation).
+ * `resolveBinding` a non-reference occurrence (the stream-disjointness rule).
  */
 export type IdentifierAnchor = Readonly<{
 	range: readonly [number, number];
@@ -59,8 +59,8 @@ export type IdentifierAnchor = Readonly<{
  * prototype-chain lookup (`proto-check`), not a scope-chain binding use, so
  * read / write / declare semantics do not apply. Only V4 "two chains" reads this
  * stream (for its prototype-chain items); no binding-aware generator does, so a
- * property name can never reach `resolveBinding` (the inc-2 FLAG holds by
- * construction — the two streams are disjoint).
+ * property name can never reach `resolveBinding` (disjointness holds by
+ * construction).
  */
 export type PropertyAccessAnchor = Readonly<{
 	range: readonly [number, number];

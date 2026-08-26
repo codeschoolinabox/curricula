@@ -4,10 +4,10 @@
  * @file The `resolveBinding` resolver — quizzing's permanent occurrence→binding
  * resolution layer. Given an identifier occurrence and the scope forest (from
  * `./read-scope-forest.ts`), it returns the binding the occurrence resolves to
- * under lexical, shadowing-aware scoping. `buildScope` produces a forest plus
- * read/write counts but no occurrence→binding edges; this walk adds them. See
- * `../DOCS.md` § "The accessor-helper seam" (the occurrence→binding row is
- * permanent — only its scope-forest input migrates B→C).
+ * under lexical, shadowing-aware scoping. The forest carries tracked
+ * declarations but no occurrence→binding edges; this walk adds them. See
+ * `../DOCS.md` § Structural constraints, "Reads through the accessor
+ * seam".
  */
 
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
@@ -20,7 +20,7 @@ import type { Binding, Occurrence } from './types.js';
  *
  * Descends to the deepest scope containing `occurrence.start`, then climbs the
  * parent chain returning the first scope that declares `occurrence.text` (inner
- * shadows outer — the same model as `buildScope`'s own declaration lookup).
+ * shadows outer — standard lexical scoping).
  *
  * @remarks
  * - It answers *which binding is this name bound to here* — it does **not** decide
@@ -68,8 +68,8 @@ function findScopeAtOffset(offset: number, scope: ForestScope): ForestScope {
 /**
  * Climb the scope chain outward from `scope`, returning the first declaration of
  * `name` (inner shadows outer), or null when no scope in the chain declares it.
- * Mirrors `buildScope`'s own (unexported) declaration lookup, over the frozen
- * `ForestScope` tree.
+ * The resolution-time twin of the projection's build-time descent, over the
+ * frozen `ForestScope` tree.
  */
 function lookupBinding(
 	name: string,

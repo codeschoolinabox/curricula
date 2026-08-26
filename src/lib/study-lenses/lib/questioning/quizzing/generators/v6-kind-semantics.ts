@@ -10,7 +10,7 @@
  * source-first occurrence (TDZ forbids use-before-declaration), so firing on
  * `declared` is the simplest one-item-per-binding rule and the anchor is always the
  * declaration span. The answer is machine-determined: `let` → reassignable (yes),
- * `const` → not (no), read off the resolved binding's `kind` (commit 1's widening).
+ * `const` → not (no), read off the resolved binding's `kind`.
  * The propagation group is the binding identity (`binding:<decl>` via
  * `bindingGroupKey`), so a V10a binding-sameness pass bulk-credits it.
  */
@@ -41,8 +41,8 @@ const v6KindSemantics: Generator = {
 		if (binding === null) {
 			return [];
 		}
-		// `build-scope` blind-casts a declaration's kind to `'let' | 'const'`, but
-		// quizzing gates on `status.parsed` (not `status.validated`), so a non-JeJ
+		// The forest projection blind-casts a declaration's kind to `'let' |
+		// 'const'`, but the engine gates on parsed (not validated) facts, so a non-JeJ
 		// `var` binding reaches here with a runtime `kind` of `'var'` the type does
 		// not admit. Guard defensively (widen to compare) so V6 skips it rather than
 		// mis-grading `var` as non-reassignable — V6b's positive const gate is already

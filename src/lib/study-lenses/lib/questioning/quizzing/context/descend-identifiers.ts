@@ -1,10 +1,12 @@
+// cspell:ignore disjointness
+
 /**
  * @file The single AST descent — the anchor-stream half of the quizzing generation
  * context (see `../DOCS.md` § Execution phases). Walks a parsed JeJ AST **once** and emits two
  * sibling anchor streams: one `IdentifierAnchor` per genuine variable occurrence
  * (tagged with the usage kind read off its syntactic position) and one
  * `PropertyAccessAnchor` per non-computed member-property name (`o.x`'s `x`). This
- * is the structural place the inc-2 FLAG is mitigated: a non-computed property name
+ * is the structural place stream disjointness is enforced: a non-computed property name
  * is never emitted into the `identifierAnchors` stream (it feeds the separate
  * `propertyAccessAnchors` stream instead), and a non-computed object-literal key is
  * emitted into neither, so the node-anchored generators that feed `resolveBinding`
@@ -27,11 +29,11 @@ import type {
  * carrying its range and name).
  *
  * @remarks
- * - **FLAG mitigation by construction.** A non-computed `MemberExpression`
+ * - **Stream disjointness by construction.** A non-computed `MemberExpression`
  *   property (`o.x`) never enters `identifierAnchors` — it feeds the sibling
  *   `propertyAccessAnchors` stream — and a non-computed `Property` key (`{ x: 1 }`)
- *   enters neither. So `identifierAnchors` stays byte-identical to the pre-7b
- *   stream, and a downstream binding-aware generator cannot feed `resolveBinding`
+ *   enters neither. So `identifierAnchors` carries only genuine reference /
+ *   declaration occurrences, and a downstream binding-aware generator cannot feed `resolveBinding`
  *   an occurrence that would mis-resolve. The two streams are disjoint.
  * - **One traversal.** Each node returns its own anchors concatenated field-wise
  *   with its children's, across both streams; there is no second walk.
@@ -49,8 +51,8 @@ export default function descendIdentifiers(ast: Node): DescentStreams {
  * The two anchor streams a descent yields, threaded field-wise through the one
  * downward pass. File-local: an implementation detail of the descent, projected
  * into `GenerationContext`'s `identifierAnchors` / `propertyAccessAnchors` by
- * `build-context`. `identifierAnchors` is byte-identical to the pre-7b single
- * stream; `propertyAccessAnchors` is the new sibling.
+ * `build-context`. `identifierAnchors` carries the reference / declaration
+ * occurrences; `propertyAccessAnchors` is its property-name sibling.
  */
 type DescentStreams = Readonly<{
 	identifierAnchors: readonly IdentifierAnchor[];
@@ -69,7 +71,7 @@ const emptyDescent: DescentStreams = Object.freeze({
 
 /**
  * Combine two descents field-wise — "an arm's own anchors, then its children's",
- * in the `[...a, ...b]` order the pre-7b single stream used.
+ * in `[...a, ...b]` source order.
  */
 function concat(a: DescentStreams, b: DescentStreams): DescentStreams {
 	return {
@@ -203,8 +205,8 @@ function collectMember(node: Node): DescentStreams {
 
 /**
  * The property side of a member expression. A computed property (`o[k]`'s `k`) is
- * a real scope-chain reference → recurse into `identifierAnchors` (unchanged from
- * pre-7b). A non-computed property (`o.x`'s `x`) is a prototype-chain lookup that
+ * a real scope-chain reference → recurse into `identifierAnchors`. A non-computed
+ * property (`o.x`'s `x`) is a prototype-chain lookup that
  * feeds `propertyAccessAnchors`. The non-Identifier else-branch is unreachable on
  * valid parsed JS (`o.<expr>` requires bracket access) — drop it rather than
  * recurse, so a malformed node can never surface a phantom scope-chain anchor.

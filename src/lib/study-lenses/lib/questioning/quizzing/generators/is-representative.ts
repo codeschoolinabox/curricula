@@ -9,9 +9,8 @@
  * the representative is `members[0]`; gating on it makes emission deterministic and
  * duplicate-free.
  *
- * Shared by the sameness forms — pre-extracted (V10a is the only caller today;
- * V10b and V10c adopt it as they ship) per the inc-6 plan's user-gated decision,
- * so the load-bearing dedup logic lives in exactly one place.
+ * Shared by the sameness forms (V10a, V10b, V10c), so the load-bearing dedup
+ * logic lives in exactly one place.
  */
 
 import type { IdentifierAnchor } from '../context/types.js';

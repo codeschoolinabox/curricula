@@ -11,7 +11,7 @@
  * occurrence (declarations included — a declared name is a scope-chain citizen) and
  * one prototype-chain item per `propertyAccessAnchors` occurrence, grouping each on
  * the binding-agnostic `chain:<role>:<name>` axis. V4 never resolves a binding, so
- * it is immune to the inc-2 FLAG. Copy is authored from the notional-machine doc's
+ * mis-resolution cannot arise here. Copy is authored from the notional-machine doc's
  * "two chains, same shape" section (`embody/language-levels/just-enough-javascript/
  * notional-machine.md` L192-196, L254-328).
  */

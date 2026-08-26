@@ -1,8 +1,8 @@
 /**
  * @file The `usageGroupKey` serializer — quizzing's binding × use-type `groupKey`
  * formatter. Given a resolved `Binding` and a `UsageKind`, it returns the
- * deterministic propagation-group string that keys the usage-kind form (V7, after
- * its inc-6 re-key) and the binding × use-type sameness form (V10b) on the pair
+ * deterministic propagation-group string that keys the usage-kind form (V7)
+ * and the binding × use-type sameness form (V10b) on the pair
  * `(binding identity, use-type)`. One member of the namespaced-key family: each
  * keying axis owns a stable prefix (see the siblings `./binding-group-key.ts` and
  * `./classification-group-key.ts`, and `../README.md` § Glossary "Group key").

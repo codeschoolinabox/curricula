@@ -98,7 +98,7 @@ function gradeMcq(item: McqQuizItem, response: LearnerResponse): Verdict {
  * (the discriminant-narrowing contract; a caller / UI bug, not a wrong learner).
  * Otherwise the clicked ranges must set-equal the target ranges for `correct`,
  * else `incorrect`. There is no range analogue to mcq's unknown-option-id
- * `malformed`: `grade` never sees the Snippet, so a non-matching range is simply
+ * `malformed`: `grade` never sees the source, so a non-matching range is simply
  * `incorrect`. Both judged verdicts surface `item.feedback`.
  */
 function gradeCodeSurface(

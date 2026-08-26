@@ -8,8 +8,8 @@
  * The propagation group is the binding identity (`binding:<start>-<end>`), so a
  * later sameness form (V10a) can bulk-credit every reference to one binding.
  *
- * This is the increment's first consumer of `resolveBinding`, and so the place
- * the inc-2 FLAG is honored: it feeds the resolver only the descent's anchors,
+ * As a consumer of `resolveBinding`, it feeds the resolver only the descent's
+ * anchors,
  * which already exclude non-reference occurrences (a property name `o.x`), so a
  * property name can never mis-resolve into a spurious declaration-site item.
  */
