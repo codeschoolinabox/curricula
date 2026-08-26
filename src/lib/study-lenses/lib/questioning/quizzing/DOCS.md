@@ -299,6 +299,33 @@ rationale.
   conversion is a consumer concern. The filter itself stays declared,
   not consumed (the no-op is oracle-pinned); its build is a recorded
   future design event.
+- **`ForestScope.declarations` is a frozen null-prototype record, not a
+  Map** ([DEV.md § 13. Deep Freeze Return Values](../../../../../../DEV.md#13-deep-freeze-return-values)
+  conformance; human ruling 2026-08-25, ratifying the U4
+  implementation-audit counter-proposal). The § 13 rule — frozen return
+  values use plain records, never Map/Set — predates the port; the
+  ported ReadonlyMap was a carried violation whose membership
+  `Object.freeze` could not seal (the gap was WHY-commented at the
+  freeze site; that comment retires with this ruling — a retirement,
+  not a loss). The type is `Readonly<Partial<Record<string,
+  TrackedDeclaration>>>` — `Partial` so a miss types as `undefined`,
+  matching the runtime under this repo's flags (bare `Record` would
+  type every miss as a hit). The record is built null-prototype:
+  program-supplied names (`toString`, `__proto__`) must be ordinary own
+  keys — on a `{}`-literal the resolver's indexed read would HIT the
+  prototype chain and crash on `declaration.node`, and a `__proto__`
+  write would silently mutate the prototype. Pins land with the ruling:
+  membership frozen (record and values), a strict-mode write throws,
+  `__proto__` registers as an own key with the prototype staying null,
+  no Map-style `set` survives, and `toString;` resolves null. Embody's
+  live `lib/scope` module (the shared scope walker the prior
+  architecture's forest read through —
+  `src/lib/embody/lib/scope/types.ts`) keeps its identically-named
+  `ReadonlyMap` field — a deliberate divergence licensed by Q13's
+  quizzing-local projection ownership (that live module is a candidate
+  for the same § 13 conformance, out of this scope). The
+  registration-site `Map.set` comment retires with the freeze-site one
+  — both retirements, not losses.
 - **The minted forest types are named for the glossary** (human ruling
   2026-08-18, Stage-3 AR-1): `ScopeForest` / `ForestScope` /
   `TrackedDeclaration` — never the prior `ScopeAnalysis` / `ScopeInfo` /

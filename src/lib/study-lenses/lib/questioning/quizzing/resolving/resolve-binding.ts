@@ -77,7 +77,7 @@ function lookupBinding(
 ): TrackedDeclaration | null {
 	let current: ForestScope | null = scope;
 	while (current !== null) {
-		const declaration = current.declarations.get(name);
+		const declaration = current.declarations[name];
 		if (declaration !== undefined) {
 			return declaration;
 		}

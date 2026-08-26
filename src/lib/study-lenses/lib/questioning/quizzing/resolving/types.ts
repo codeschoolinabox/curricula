@@ -48,14 +48,22 @@ export type TrackedDeclaration = Readonly<{
  * One lexical scope in the forest: its kind, the syntax-tree node that
  * introduces it (scope extent = the node's `[start, end)` range), its parent
  * (`null` only at the program root), the tracked declarations born in it
- * (keyed by name; same-scope redeclaration is last-wins), and its child
- * scopes in source order.
+ * (a frozen plain record keyed by name — `Partial` so a miss types as
+ * `undefined` under this repo's flags, matching the runtime; same-scope
+ * redeclaration is last-wins by registration order; the record is built
+ * null-prototype so a program-supplied name like `__proto__` or `toString`
+ * is an ordinary own key, and deep-freeze genuinely seals MEMBERSHIP —
+ * the ported ReadonlyMap could not be sealed, a carried DEV.md § 13
+ * violation retired by human ruling 2026-08-25), and its child scopes in
+ * source order. Note for future pins: a null-prototype record fails
+ * `toStrictEqual({...})` type-equality against literal objects — pin with
+ * `toEqual` or key assertions.
  */
 export type ForestScope = Readonly<{
 	kind: ForestScopeKind;
 	node: Node;
 	parent: ForestScope | null;
-	declarations: ReadonlyMap<string, TrackedDeclaration>;
+	declarations: Readonly<Partial<Record<string, TrackedDeclaration>>>;
 	children: readonly ForestScope[];
 }>;
 

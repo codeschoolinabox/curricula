@@ -84,6 +84,15 @@ describe('resolveBinding', () => {
 	});
 
 	describe('Boundaries', () => {
+		it('resolves null for a prototype-named occurrence', () => {
+			expect(
+				resolveBinding(
+					{ start: 0, text: 'toString' },
+					readScopeForest(embody('toString;').facts),
+				),
+			).toBeNull();
+		});
+
 		it('resolves an inner reference to the shadowing inner binding', () => {
 			const facts = embody('let x = 1; { let x = 2; x; }').facts;
 			expect(

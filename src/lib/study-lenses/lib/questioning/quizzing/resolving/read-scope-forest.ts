@@ -77,23 +77,18 @@ export default function readScopeForest(facts: Facts): ScopeForest {
 	const tracked = harvestTrackedDeclarations(facts.environment.value);
 
 	// 4. Register each declaration at its lexical position, in source order
-	// (`Map.set` in sorted order makes same-scope redeclaration last-wins).
+	// (indexed assignment in sorted order keeps same-scope redeclaration
+	// last-wins).
 	registerDeclarations(root, tracked);
 
 	// 5. Freeze what the projection owns — never the borrowed AST nodes.
-	// Map entries are not own enumerable properties, so each registered
-	// declaration is frozen explicitly before the structural walk. Known
-	// limitation (DEV.md § 13): `Object.freeze` cannot make a `Map`
-	// immutable, so each scope's `declarations` MEMBERSHIP stays
-	// runtime-mutable behind its compile-time `ReadonlyMap` — the freeze
-	// reaches the Map's values (the loop below), never its key set.
+	// The declarations records are plain null-prototype objects (DEV.md
+	// § 13; human ruling 2026-08-25), so the structural walk seals their
+	// MEMBERSHIP for real — the ported ReadonlyMap could not be sealed.
 	const borrowedNodes = new Set<object>([
 		...collectShells(root).map((shell) => shell.node),
 		...tracked.map((declaration) => declaration.node),
 	]);
-	for (const declaration of tracked) {
-		deepFreezeExcept(declaration, borrowedNodes);
-	}
 	return deepFreezeExcept({ root }, borrowedNodes);
 }
 
@@ -106,7 +101,7 @@ type MutableScope = {
 	kind: ForestScopeKind;
 	node: Node;
 	parent: MutableScope | null;
-	declarations: Map<string, TrackedDeclaration>;
+	declarations: Record<string, TrackedDeclaration>;
 	children: MutableScope[];
 };
 
@@ -124,7 +119,7 @@ function buildShells(program: Node): MutableScope {
 		kind: 'program',
 		node: program,
 		parent: null,
-		declarations: new Map(),
+		declarations: emptyDeclarations(),
 		children: [],
 	};
 	for (const child of astChildren(program)) {
@@ -186,7 +181,7 @@ function openShell(
 		kind,
 		node,
 		parent,
-		declarations: new Map(),
+		declarations: emptyDeclarations(),
 		children: [],
 	};
 	// A build-time attach into a shell this file just created (the child ↔
@@ -280,7 +275,9 @@ function registerDeclarations(
 		const shell = deepestShellAt(declaration.node.start, root);
 		// A build-time write into a shell this file just created — the forest
 		// is frozen before it escapes, so the mutation never leaves this file.
-		shell.declarations.set(declaration.name, declaration);
+		// Indexed assignment in sorted order keeps same-scope redeclaration
+		// last-wins (the Map.set behavior this record replaced).
+		shell.declarations[declaration.name] = declaration;
 	}
 }
 
@@ -302,6 +299,20 @@ function deepestShellAt(offset: number, scope: MutableScope): MutableScope {
 }
 
 // ─── 5. Freeze support ─────────────────────────────────────────────────────
+
+/**
+ * A fresh declarations record. Null-prototype ON PURPOSE, for the READ
+ * side as much as the write side: on a `{}`-literal, the resolver's
+ * indexed lookup of a never-declared `toString` / `constructor` would
+ * HIT the inherited prototype member and crash downstream, and a
+ * program declaring `__proto__` would silently mutate the prototype
+ * instead of registering. With no prototype, every program-supplied
+ * name is an ordinary own key (both behaviors are pinned). The cast is
+ * required because `Object.create` types as `any`.
+ */
+function emptyDeclarations(): Record<string, TrackedDeclaration> {
+	return Object.create(null) as Record<string, TrackedDeclaration>;
+}
 
 /** Every shell in the forest, root first — the freeze walk's ownership list. */
 function collectShells(scope: MutableScope): readonly MutableScope[] {

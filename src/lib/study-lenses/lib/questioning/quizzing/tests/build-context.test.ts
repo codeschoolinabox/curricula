@@ -55,7 +55,8 @@ describe('buildContext', () => {
 		it('carries the scope forest for binding-aware generators', () => {
 			const facts = embody('let x = 1;').facts;
 			expect(
-				buildContext(facts, classifyOf(facts)).forest.root.declarations.has(
+				Object.hasOwn(
+					buildContext(facts, classifyOf(facts)).forest.root.declarations,
 					'x',
 				),
 			).toBe(true);
