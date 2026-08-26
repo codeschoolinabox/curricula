@@ -242,8 +242,10 @@ divergence Wave 1's caution had warned about.
 
 ## Wave 2 is PAUSED (human ruling 2026-08-26)
 
-**Wave 2 does not open until the local-llm outward-contract campaign lands.**
-Brief: [`../local-llm-lifecycle/BRIEF.md`](../local-llm-lifecycle/BRIEF.md).
+**Wave 2 does not open until the local-llm campaign clears its Phase-0 → Phase-1
+human gate** (not until the whole campaign lands) — the precise condition is
+under § What unblocks Wave 2 below. Brief:
+[`../local-llm-lifecycle/BRIEF.md`](../local-llm-lifecycle/BRIEF.md).
 
 **Why.** Wave 2's Phase 0 locks aithor's runtime seam — `ModelLoader`,
 `ResolvedModel`, `AithorRuntime`. Two measurements taken while planning Wave 2

@@ -75,10 +75,25 @@ Then confirm alignment with me in one message before executing.
   `ls src/lib/study-lenses/lib/local-llm | grep -i notional` → empty], so 0.2
   produces a new one. **Still put the twin ask at 0.2 to confirm** — the answer
   is re-asked across a session boundary [read: `DEV.md` § Phase 0, 0.2] — but
-  this ruling is recorded in-repo, not in a plan file, so it is a record. Size
+  this ruling is recorded in-repo, not in a plan file, so it is a record.
+
+  ⚠️ **What silence at that confirm means — a governance collision, named not
+  hidden.** [read: `DEV.md` § Phase 0, 0.2 — "**Where a twin already exists, the
+  tree is the answer.** Silence resolves to `none` only where **no** twin
+  document exists."] No twin exists here, so the letter of that bound would
+  resolve silence to `none` — **reversing a dated, committed ruling and
+  orphaning the `notional-machine.md` you just wrote.** That is precisely the
+  outcome the bound exists to prevent: DEV.md gives its purpose as stopping "a
+  session boundary plus one non-answer" from "silently reversing a human's
+  explicit 'yes'". The tree-existence test is DEV.md's _proxy_ for "was there an
+  affirmative answer", written when no other record could exist. **So: on
+  silence, hold at `machine` — and surface this collision to the human at the
+  Phase-0 gate as its own line.** Do not resolve it silently in either
+  direction; DEV.md is governance surface and only the human amends it. Size
   class [measured: `wc -l` over `git ls-files | grep -i 'notional-machine.md$'`
   → 8 files]: module-level twins run **116–236** lines; the two whole-level ones
   run 797 and 840. local-llm is module-level.
+
 - **`ceremony`: NOT SET, and you must never state it** [read: `DEV.md` §
   ceremony]. **Ask the human.** Two halves people forget:
   - **Silence answers for the _work_ — it runs at `medium`, and you must not
@@ -106,7 +121,11 @@ unconditionally.
   justification each. The glossary must absorb whatever new vocabulary the
   settle-items introduce.
 - **0.2 — the twin.** `notional-machine.md` beside the README. Confirm the ask
-  first (above).
+  first (above). ⚠️ **The AR arrows below are drawn at `full`.** Which of AR-1
+  and AR-2 actually fires is set by the declared level — at `medium` (the
+  silence default) only **AR-1** and **AR-5** fire, and AR-2 does not. Do not
+  read these arrows as overriding the level the human sets.
+
 - **→ AR-1** challenges the README **and the twin together** — a twin is owed
   here, so handing over the README alone gives it half its inputs.
 - **0.3 — `types.ts` + the `DOCS.md` architectural sketch (with the Mermaid
