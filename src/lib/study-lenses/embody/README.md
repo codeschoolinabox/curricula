@@ -298,6 +298,7 @@ rule:
 | `join-study.ts`                                | implementers   | join accessibility + attachments into the study layer                                  |
 | `ecma-version.ts`                              | implementers   | the one shared numeric language year                                                   |
 | `is-node.ts`                                   | implementers   | the membership rule every generic walk here shares                                     |
+| `node-at-span.ts`                              | consumers      | offset span → the deepest exact-match entwined node, or null — a total lookup          |
 | `lifecycle-phase-order.ts`                     | implementers   | the five phases, in specification order                                                |
 | `to-stage-cause.ts`                            | implementers   | parser error → structured StageCause                                                   |
 | `sandbox.html`                                 | developers     | permanent dev page — renders byPath wrappers for inspection                            |
