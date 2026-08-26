@@ -108,6 +108,7 @@ flowchart TD
     Stream["the stream<br/>(each element carrying its fate,<br/>and its mark where it has one)"]
     Session[("session state:<br/>cursor · attempts on this element ·<br/>what has fallen and whose doing it was ·<br/>the last verdicts, absent until the first claim")]
     Surface["input tape · token tape · jar ·<br/>claim form and its per-field verdicts"]
+    Form[("the claim in progress:<br/>stepper extent · selected element kind ·<br/>the pending one-more answer")]
     Submission(["the learner submits, or hands it over"])
     Claim["a submitted claim<br/>(element kind · extent · the one-more<br/>answer, once that field is open)"]
     Verdicts["one verdict per field,<br/>independent, never a score"]
@@ -119,8 +120,10 @@ flowchart TD
     Stream -->|"seed at the first claimable element, pure"| Session
     Session -->|"render the tapes, the jar, and the form<br/>with the verdicts of the last claim"| Surface
     Thresholds -->|"open the one-more field, then the way past,<br/>at the attempt count each names"| Surface
-    Surface -->|"the one external event in the module"| Submission
-    Submission -->|"read the form — element kind, extent, and<br/>the one-more answer where it is open"| Claim
+    Surface -->|"the learner steps the extent, or picks a kind"| Form
+    Form -->|"draw the proposed run and its data-extent, and press<br/>the selected kind — before anything is judged, pure"| Surface
+    Surface -->|"the learner commits to what is on the form"| Submission
+    Submission -->|"snapshot the claim in progress — element kind,<br/>extent, and the one-more answer where it is open"| Claim
     Claim -->|"judge each field against the element<br/>at the cursor, pure and independent"| Verdicts
     Verdicts -->|"kind and extent both attest — it falls,<br/>the cursor advances, attempts reset"| Session
     Verdicts -->|"a blocking field diverges — nothing moves,<br/>the attempt count rises"| Session
@@ -244,8 +247,8 @@ flowchart TD
   unreachable, which is a coherent thing for an educator to want; refusing it
   would encode a pedagogy the configuration has no business holding.
 - (human ruling 2026-08-26) **Presentation is part of this lens's value, not
-  decoration.** Presentation and behavior are one design surface here rather
-  than two layers, so this module carries its own stylesheet rather than
+  decoration.** Presentation and behavior are one design surface here, not one
+  applied over the other, so this module carries its own stylesheet rather than
   inheriting whatever the host page provides. The grounds are the twin: this is
   a `twin-doc: user` module whose wire-frames carry pedagogy **in the
   arrangement** — the jar beside the token tape at equal weight because comments
