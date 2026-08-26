@@ -13,6 +13,7 @@
 
 /* eslint-disable functional/immutable-data -- one run-state record per run is the engine's declared mutable core; every write is in this file */
 
+import DEFAULT_SECONDS from './default-seconds.js';
 import type {
 	EngineError,
 	EngineHandle,
@@ -48,7 +49,6 @@ export default function evaluate(
 }
 
 const STOP_SENTINEL: unique symbol = Symbol('engine-stop');
-const DEFAULT_SECONDS = 5;
 const YIELD_CHARGE_MS = 5;
 const ENGINE_CALL_ERROR = 'EngineCallError';
 const CALL_ERROR = 'call-error' as const;
