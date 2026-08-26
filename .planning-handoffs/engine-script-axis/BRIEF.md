@@ -16,9 +16,9 @@ chromium via playwright.
 human's `rm`** (the agent's is hook-blocked). Inventory and disposition: § 9.
 Re-running is unnecessary — every number is here — but it is available.
 
-> **⚠ THIS DOCUMENT IS THE ONLY RECORD OF SIX HUMAN DECISIONS (§ 1.1) AND OF ~44
-> MEASUREMENTS.** It was drafted in a session-scoped temp directory that does
-> not survive the session. **It must be committed to
+> **⚠ THIS DOCUMENT IS THE ONLY RECORD OF SEVEN HUMAN DECISIONS (§ 1.1) AND OF
+> ~44 MEASUREMENTS.** It was drafted in a session-scoped temp directory that
+> does not survive the session. **It must be committed to
 > `.planning-handoffs/engine-script-axis/BRIEF.md` before anything else** —
 > [DEV.md § Ruling provenance](./DEV.md#ruling-provenance) is explicit that a
 > record `git grep` cannot see does not exist, and a scratchpad is weaker than
@@ -738,56 +738,60 @@ carries today, and it does not gate a union widening on new CI infrastructure.
     mismatch surface as an ordinary throw. Note a probe failure from another
     cause (CSP blocking `blob:`) lands in the same bucket — acceptable, since
     `cause` stays `'worker-error'`.
-13. **AMENDMENT — a thread-side parse failure is NOT EXPRESSIBLE in today's
-    public types. This is a contract-widening decision, not a prose reword, and
-    it is owed BEFORE `types.ts` is locked.** Four walls, all measured:
-    - **`EngineSettlement` has no `phase` field** (`types.ts:183-209`). `phase`
-      is a `serializeHalt` _parameter_ that lives inside the **opaque** `halt`
-      payload. There is nowhere on the settlement to put `'creation'`.
-    - **`halt` is documented absent here**: _"Worker-authored stop payload —
-      present on EVERY worker-side stop … **Absent on main-thread
-      terminations**"_. A thread-side parse failure is a main-thread
-      termination.
-    - **`EngineError.cause` has no parse value**
-      (`'timeout' | 'worker-error' | 'call-error' | 'hook-error'`), and the
-      fallback is explicitly barred — `DOCS.md` § Sandbox start, quoted in full
-      this time: a code-level SyntaxError is surfaced as a worker-authored throw
-      halt, settling errored, _"**never a worker-error (which is reserved for
-      environment, factory, and setup failures)**"_. An earlier draft of this
-      brief truncated that quote before the clause that closes the escape hatch.
-    - **The only route to `outcome:'errored'` WITH a halt is
-      `stop.kind === 'halt'`** (`evaluate.ts:423-499`). Synthesizing one means
-      the engine authors a halt payload thread-side — and then **`refineError`
-      fires on it** (`evaluate.ts:474-481`), handing a consumer hook an
-      engine-authored payload it has never seen before.
+13. **A thread-side parse failure settles as an errored stop carrying
+    `phase: 'creation'`, and today's types already express it.** An earlier
+    draft of this brief called this "not expressible" and "a contract-widening
+    decision owed before `types.ts` locks". **That was wrong**, and the
+    correction matters: it was the only thing standing between this design and §
+    3.7's 760× saving.
 
-    So the receiving unit must choose, explicitly and with a human ruling: widen
-    `EngineError.cause`; or let the engine author a halt thread-side (and decide
-    whether `refineError` runs on it); or keep parse failures worker-authored by
-    spawning anyway and using the thread's verdict only to LABEL the phase —
-    which forfeits § 3.7's 760× saving but costs no contract change at all. **§
-    1.1 DECISION 7 CHANGES THE WEIGHTING HERE.** An earlier draft recommended
-    the third option — parse only to LABEL, never to gate — on the ground that a
-    parser refusing what the host runs is the defect this axis exists to remove.
-    Decision 7 removes that ground: if acorn is the standard, gating on it is a
-    _feature_ (one language everywhere), not a hazard. The label-only escape
-    hatch is therefore no longer the safe default, and **the contract question
-    can no longer be dodged** — gating means a parse failure must be
-    expressible, and today it is not. Cost the three options on latency and
-    contract surface, not on fidelity.
+    `StopCause`'s errored-stop arm is a plain data record with **no worker in
+    it** (`evaluate.ts`):
+    `{ kind: 'halt'; haltKind: HaltKind; payload: unknown }`. The thread
+    constructs one, `classifyStop` routes it to `classifyErroredHalt`, and the
+    run settles `outcome: 'errored'` carrying the payload — plus `refinement` if
+    `refineError` produces one. Point by point against the earlier draft:
+    - `EngineSettlement` needs no `phase` field. `phase` was never a settlement
+      field; it lives inside the opaque payload, exactly where the worker path
+      already puts it.
+    - _"Absent on main-thread terminations"_ describes today's stop set — a doc
+      sentence to update, not a type constraint. The field is optional and
+      permits it.
+    - `EngineError.cause` needs no parse value, because there is **no engine
+      error** on this path. `DOCS.md`'s _"never a worker-error"_ rule is thereby
+      **satisfied**, not violated.
+    - Engine-authored payloads are not a new power: `defaultHaltPayload`
+      (`bootstrap.ts:285-298`) already authors one whenever `serializeHalt` is
+      absent.
 
-    **A nuance that survives either way:** for evaluator-driven runs embody has
+    **It also aligns the engine's phase vocabulary with the embodiment's
+    lifecycle**, which is the point of the spelling HR-20 chose: `'evaluation'`
+    matches embody's `source → tokens → ast → environment → evaluation`, so a
+    parse failure reporting `'creation'` reads as _"never reached evaluation"_
+    in the vocabulary the learner already meets elsewhere. Two layers, one story
+    — a reason to prefer this shape, not merely a cost to absorb.
+
+    **The one real residual, and it is narrow.** On a thread-side parse failure
+    the consumer's worker-side `serializeHalt` does not run, so the payload is
+    the engine default `{ name, message, phase }` rather than the consumer's own
+    shape. A consumer whose settlement mapping narrows its own payload shape (as
+    intercept's does) meets an engine-shaped one on that path alone. Options:
+    document it; add a thread-side author hook; or accept it, since for a parse
+    failure nothing propagated and there is no worker-only attribution to
+    preserve. **`ar-2` picks one — a small decision, not a gate.**
+
+    `refineError` **does** fire on it (`classifyErroredHalt` runs the hook on
+    every errored stop of this kind). Consistent, almost certainly right, and
+    named here so it is not discovered.
+
+    **A nuance that survives regardless:** for evaluator-driven runs embody has
     already parsed the learner's source at `ECMA_VERSION`, and the gate bars
     evaluation unless it succeeded — but the engine receives the
     **instrumented** source, a different string. The engine's parse is therefore
     not redundant: it validates instrumentation output, and a failure there is
-    an **instrumentation defect, not a learner error**. Whatever phase
-    vocabulary is chosen must not quietly report an instrumentation bug as the
-    learner's syntax error.
-
-    Whichever is chosen, the consumer's `serializeHalt` stops or keeps seeing
-    parse failures — and intercept and the tracers author halts, so it is their
-    call too, not only the engine's.
+    an **instrumentation defect, not a learner error**. The phase vocabulary
+    must not quietly report an instrumentation bug as the learner's syntax
+    error.
 
 14. **AMENDMENT — the module path's phase behavior changes, and an earlier draft
     of § 5.3 claimed the opposite.** Parsing the module goal thread-side means a
@@ -831,10 +835,12 @@ constraints · `engine/worker/bootstrap.ts` end to end · `engine/worker/types.t
 **Then, in order:**
 
 1. **Get the human's rulings** on: § 1.1's SEVEN decisions (none recorded
-   anywhere but here); § 5.1 prerequisite 0's owner; the five contract
-   amendments (§ 7.9–§ 7.14) — of which **§ 7.13 is a contract-WIDENING decision
-   owed before `types.ts` is locked**, not a prose reword, and § 7.14 changes
-   the shipped `'module'` path's phase behavior.
+   anywhere but here); § 5.1 prerequisite 0's owner; where `ECMA_VERSION` lives
+   given the engine cannot import from `embody/` (§ 5.2); and the contract
+   amendments § 7.9–§ 7.12 and § 7.14, of which § 7.14 changes the shipped
+   `'module'` path's phase behavior. **§ 7.13 is NOT among them** — an earlier
+   draft listed it as a contract-widening blocker and it is not one; today's
+   types already express a thread-side parse failure.
 2. **§ 6's fast-tier spike has already run and passed** (S37/S38). What remains
    is choosing where the esbuild step is invoked — a vitest `globalSetup`, a
    small Vite plugin, or a pretest script — and whether the bundled artifact is
