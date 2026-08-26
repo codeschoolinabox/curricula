@@ -111,7 +111,7 @@ describe('batch consumption (await)', () => {
 });
 
 describe('step-through (for await)', () => {
-	it.skip('yields all events from the source', async () => {
+	it('yields all events from the source', async () => {
 		const execution = createExecution(
 			createStreamingSource(['a', 'b', 'c'], { ok: true, events: [] }),
 		);
@@ -124,7 +124,7 @@ describe('step-through (for await)', () => {
 		expect(collected).toEqual(['a', 'b', 'c']);
 	});
 
-	it.skip('events arrive in order', async () => {
+	it('events arrive in order', async () => {
 		const execution = createExecution(
 			createStreamingSource(['first', 'second'], { ok: true, events: [] }),
 		);
@@ -137,7 +137,7 @@ describe('step-through (for await)', () => {
 		expect(collected[0]).toBe('first');
 	});
 
-	it.skip('.result resolves after iteration completes', async () => {
+	it('.result resolves after iteration completes', async () => {
 		const execution = createExecution(
 			createStreamingSource(['a'], { ok: true, events: ['a'] }),
 		);
@@ -148,6 +148,18 @@ describe('step-through (for await)', () => {
 		}
 
 		expect(await execution.result).toEqual({ ok: true, events: collected });
+	});
+
+	it('an iterate-first .result touch starts once', async () => {
+		const source = createStreamingSource(['a'], { ok: true, events: ['a'] });
+		const execution = createExecution(source);
+		const iterator = execution[Symbol.asyncIterator]();
+		await iterator.next();
+		await iterator.next();
+
+		await execution.result;
+
+		expect(source.startCalls()).toBe(1);
 	});
 });
 
