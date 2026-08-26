@@ -256,7 +256,7 @@ describe('.result property', () => {
 });
 
 describe('cancel', () => {
-	it.skip('.cancel() is idempotent', () => {
+	it('.cancel() is idempotent', () => {
 		const execution = createExecution(
 			createStreamingSource(['a'], { ok: true, events: ['a'] }),
 		);
@@ -265,7 +265,7 @@ describe('cancel', () => {
 		expect(() => execution.cancel()).not.toThrow();
 	});
 
-	it.skip('cancel before ignition prevents any start', async () => {
+	it('cancel before ignition prevents any start', async () => {
 		const source = createStreamingSource(['a'], { ok: true, events: ['a'] });
 		const execution = createExecution(source);
 
@@ -275,7 +275,7 @@ describe('cancel', () => {
 		expect(source.startCalls()).toBe(0);
 	});
 
-	it.skip('cancel before ignition resolves the inert-cancel result', async () => {
+	it('cancel before ignition resolves the inert-cancel result', async () => {
 		const execution = createExecution(
 			createStreamingSource(['a'], { ok: true, events: ['a'] }),
 		);
@@ -284,7 +284,32 @@ describe('cancel', () => {
 		expect(await execution.result).toBe(INERT);
 	});
 
-	it.skip('break in for-await resolves .result without hanging', async () => {
+	it('stop is called once on a cancel after ignition', async () => {
+		const source = createStreamingSource(['a', 'b'], { ok: true, events: [] });
+		const execution = createExecution(source);
+		const iterator = execution[Symbol.asyncIterator]();
+		await iterator.next();
+
+		execution.cancel();
+		await execution.result;
+
+		expect(source.stopCalls()).toBe(1);
+	});
+
+	it('a second post-ignition cancel never stops twice', async () => {
+		const source = createStreamingSource(['a', 'b'], { ok: true, events: [] });
+		const execution = createExecution(source);
+		const iterator = execution[Symbol.asyncIterator]();
+		await iterator.next();
+
+		execution.cancel();
+		execution.cancel();
+		await execution.result;
+
+		expect(source.stopCalls()).toBe(1);
+	});
+
+	it('break in for-await resolves .result without hanging', async () => {
 		const source = createStreamingSource(
 			Array.from({ length: 50 }, (_unused, index) => `event-${index}`),
 			{ ok: true, events: [] },
@@ -300,16 +325,31 @@ describe('cancel', () => {
 		expect(settled.ok).toBe(false);
 	});
 
-	it.skip('stop is called once on a cancel after ignition', async () => {
+	it('break calls stop once', async () => {
 		const source = createStreamingSource(['a', 'b'], { ok: true, events: [] });
 		const execution = createExecution(source);
 		const iterator = execution[Symbol.asyncIterator]();
 		await iterator.next();
 
+		await iterator.return?.();
+
+		expect(source.stopCalls()).toBe(1);
+	});
+
+	it('a pull after a post-ignition cancel is inert on the source', async () => {
+		const source = createStreamingSource(['a', 'b', 'c'], {
+			ok: true,
+			events: [],
+		});
+		const execution = createExecution(source);
+		const iterator = execution[Symbol.asyncIterator]();
+		await iterator.next();
 		execution.cancel();
 		await execution.result;
 
-		expect(source.stopCalls()).toBe(1);
+		await iterator.next();
+
+		expect(source.nextCalls()).toBe(1);
 	});
 });
 
@@ -470,7 +510,7 @@ describe('the laws the quarry never had', () => {
 		expect(source.startCalls()).toBe(0);
 	});
 
-	it.skip('a touch after an inert cancel never starts', async () => {
+	it('a touch after an inert cancel never starts', async () => {
 		const source = createStreamingSource(['a'], { ok: true, events: ['a'] });
 		const execution = createExecution(source);
 		execution.cancel();
@@ -480,6 +520,17 @@ describe('the laws the quarry never had', () => {
 		await iterator.next();
 
 		expect(source.startCalls()).toBe(0);
+	});
+
+	it('a touch after an inert cancel never pulls the source', async () => {
+		const source = createStreamingSource(['a'], { ok: true, events: ['a'] });
+		const execution = createExecution(source);
+		execution.cancel();
+		await execution.result;
+
+		await execution[Symbol.asyncIterator]().next();
+
+		expect(source.nextCalls()).toBe(0);
 	});
 
 	it.skip('a throwing source is never re-entered', async () => {
@@ -587,7 +638,7 @@ describe('the laws the quarry never had', () => {
 		expect(source.returnCalls()).toBe(1);
 	});
 
-	it.skip('cancel never queues behind a pending pull', async () => {
+	it('cancel never queues behind a pending pull', async () => {
 		const source = createStreamingSource(['a'], { ok: true, events: [] });
 		const suspended = {
 			...source,
@@ -603,6 +654,24 @@ describe('the laws the quarry never had', () => {
 		const settled = await execution.result;
 
 		expect(settled.ok).toBe(false);
+	});
+
+	it('a cancel behind a pending pull calls stop once', async () => {
+		const source = createStreamingSource(['a'], { ok: true, events: [] });
+		const suspended = {
+			...source,
+			events: {
+				next: () => new Promise<IteratorResult<string>>(function pending() {}),
+			},
+		};
+		const execution = createExecution(suspended);
+		const iterator = execution[Symbol.asyncIterator]();
+		void iterator.next();
+
+		execution.cancel();
+		await execution.result;
+
+		expect(source.stopCalls()).toBe(1);
 	});
 
 	it.skip('an events rejection mid-pull settles the source-defect result', async () => {
@@ -636,7 +705,7 @@ describe('the laws the quarry never had', () => {
 		expect(await execution.result).toBe(DEFECT);
 	});
 
-	it.skip('cancel after settlement is inert on the source', async () => {
+	it('cancel after settlement is inert on the source', async () => {
 		const source = createStreamingSource([], { ok: true, events: [] });
 		const execution = createExecution(source);
 		await execution.result;

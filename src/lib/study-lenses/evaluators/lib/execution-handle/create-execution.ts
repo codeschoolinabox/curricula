@@ -15,11 +15,13 @@
  * the consumer iterator's first pull, each fixing the mode), the batch
  * Drive path (the drainer, exhaustion-only exit), and the iterate
  * Drive path (the memoized consumer iterator forwarding the source's
- * events), and the inert-cancel half of Teardown (cancel before any
- * touch settles the inert-cancel result through one door shared with
- * the builder's controls). The post-ignition cancel (stop routing),
- * settle-race, and defect routes land with the remaining X1
- * increments against the committed-skipped suite in tests/.
+ * events), and Teardown's cancel routes (inert-cancel settle;
+ * post-ignition `stop()` at most once, never queued behind a pending
+ * pull; post-settlement and repeat cancels inert on the source; break
+ * resolving only after the settle). Settle-race (drainer stand-down,
+ * live-iterator end, source disposal) and the defect routes land with
+ * the remaining X1 increments against the committed-skipped suite in
+ * tests/.
  */
 
 import type {
@@ -61,10 +63,12 @@ export default function createExecution<
 		settle: null,
 		mode: null,
 		iterator: null,
+		settled: false,
+		stopped: false,
 	};
 	const controls: SourceControls = {
 		cancel: function cancel(): void {
-			cancelExecution(state);
+			void cancelExecution(state);
 		},
 	};
 	const extrasDescriptors =
@@ -124,6 +128,13 @@ function ignite<TEvent, TResult>(
 		state.settle = state.source.result;
 		// eslint-disable-next-line functional/immutable-data -- the mode latch rides the same state record (fixed at ignition, human ruling 2026-08-18)
 		state.mode = mode;
+		void state.settle.then(
+			function markSettled() {
+				// eslint-disable-next-line functional/immutable-data -- the settled flag closes the same sanctioned state record; post-settlement cancels read it to stay inert on the source
+				state.settled = true;
+			},
+			function ignoreUntilDefectRouting() {},
+		);
 		state.source.start(mode);
 		if (mode === 'batch' && state.source.events !== undefined) {
 			// Deliberate gap until the defect-routes increment: a rejecting
@@ -205,11 +216,20 @@ function createConsumerIterator<TEvent, TResult>(
 ): AsyncIterator<TEvent> {
 	return {
 		next(): Promise<IteratorResult<TEvent>> {
-			if (state.mode === 'batch') {
+			const torndown =
+				state.stopped || (state.mode !== 'iterate' && state.settle !== null);
+			if (torndown) {
 				return Promise.resolve({ value: undefined, done: true });
 			}
 			void ignite(state, 'iterate');
 			return events.next();
+		},
+		return(): Promise<IteratorResult<TEvent>> {
+			return cancelExecution(state).then(
+				function endAfterSettle(): IteratorResult<TEvent> {
+					return { value: undefined, done: true };
+				},
+			);
 		},
 	};
 }
@@ -218,32 +238,45 @@ function createConsumerIterator<TEvent, TResult>(
 
 /**
  * The consumer's out-of-band stop, one door for the handle's `cancel`
- * member and the builder's `controls.cancel` alike. Before ignition it
- * closes the teardown latch by settling the inert-cancel result — the
- * settle field is the start latch, so a later touch can never open it
- * and nothing is ever called on the source (nothing started, nothing
- * to stop). The post-ignition route — `stop()` at most once, never
- * queued behind a pending pull — lands with its committed-skipped
- * rows.
+ * member, the builder's `controls.cancel`, and the consumer
+ * iterator's break alike; it answers the settle so break can resolve
+ * only AFTER it. Before ignition it closes the teardown latch by
+ * settling the inert-cancel result — the settle field is the start
+ * latch, so a later touch can never open it and nothing is ever
+ * called on the source (nothing started, nothing to stop). After
+ * ignition it calls `stop()` AT MOST ONCE, synchronously — never
+ * queued behind a pending pull (pins run:140, intercept:292) — and
+ * only while unsettled: a cancel after settlement is inert on the
+ * source, whose cleanup rides its own settle path.
  */
 function cancelExecution<TEvent, TResult>(
 	state: HandleState<TEvent, TResult>,
-): void {
+): Promise<TResult> {
 	if (state.settle === null) {
 		// eslint-disable-next-line functional/immutable-data -- the teardown latch closes through the same sanctioned state record as ignition
 		state.settle = Promise.resolve(state.source.inertCancelResult());
+	} else if (state.mode !== null && !state.settled && !state.stopped) {
+		// eslint-disable-next-line functional/immutable-data -- the stop-once latch rides the same sanctioned state record
+		state.stopped = true;
+		state.source.stop();
 	}
+	return state.settle;
 }
 
 /**
  * The handle's internal state: the settle field IS the start latch;
  * the mode field is the mode latch, fixed at ignition for the
  * handle's life; the iterator field memoizes the one consumer
- * iterator a streaming handle ever answers.
+ * iterator a streaming handle ever answers; the settled and stopped
+ * flags are the teardown latch's two cells — settled makes a late
+ * cancel inert on the source, stopped makes `stop()` once-only and
+ * every later consumer pull inert.
  */
 type HandleState<TEvent, TResult> = {
 	readonly source: StreamingSource<TEvent, TResult> | ResultOnlySource<TResult>;
 	settle: Promise<TResult> | null;
 	mode: ExecutionMode | null;
 	iterator: AsyncIterator<TEvent> | null;
+	settled: boolean;
+	stopped: boolean;
 };
