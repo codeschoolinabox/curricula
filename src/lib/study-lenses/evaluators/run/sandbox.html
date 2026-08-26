@@ -1,0 +1,126 @@
+<!doctype html>
+<!--
+  run evaluator sandbox — permanent dev infrastructure, not part of run's
+  contract. Built EARLY per the campaign's sandbox cadence (HR-15) and
+  extended per increment; the deprecated page and the quarry's are the
+  ruled fidelity targets the completed page carries the union of.
+
+  Serve:  npx vite --config src/lib/study-lenses/evaluators/run/vite.sandbox.config.ts
+  Open:   /evaluators/run/sandbox.html
+
+  This page drives run through the KIND SURFACE — applicability, then
+  main — never its internal factory, so what it exercises is exactly what
+  a consuming lens gets. While the run chain is mid-build, driving a
+  preset renders the honest current answer: a refusal (as data), or the
+  not-implemented throw from the stub — never a faked result.
+-->
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>run evaluator sandbox</title>
+		<style>
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+			body {
+				font-family: monospace;
+				font-size: 13px;
+				padding: 1.5rem;
+				max-width: 820px;
+				margin: 0 auto;
+			}
+			h1 {
+				font-size: 1.1rem;
+				margin-bottom: 0.4rem;
+			}
+			p.note {
+				color: #666;
+				margin-bottom: 1rem;
+			}
+			button {
+				font: inherit;
+				margin: 0 0.4rem 0.4rem 0;
+				padding: 0.3rem 0.6rem;
+			}
+			pre {
+				background: #f4f4f4;
+				padding: 0.8rem;
+				margin-top: 1rem;
+				white-space: pre-wrap;
+				word-break: break-word;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>run evaluator sandbox</h1>
+		<p class="note">
+			Shell stage: presets name the completed page's coverage (io toggles,
+			timeout and defect arms, result dumps, the unexpected-throw catch arrive
+			with their increments). Driving a preset today shows the honest in-build
+			answer.
+		</p>
+		<div id="presets"></div>
+		<pre id="output">idle — pick a preset</pre>
+		<script type="module">
+			import deriveFacts from '../../embody/derive-facts.ts';
+			import run from './index.ts';
+
+			const PRESETS = [
+				{ name: 'happy path', source: '1 + 1;\n' },
+				{ name: 'runtime error', source: 'null();\n' },
+				{ name: 'timeout (0.5s)', source: 'while (true) {}\n', seconds: 0.5 },
+				{
+					name: 'iteration cap (100)',
+					source: 'while (true) {}\n',
+					iterations: 100,
+				},
+				{ name: 'unmocked prompt', source: 'let x = prompt();\n' },
+			];
+
+			const output = document.querySelector('#output');
+			const presets = document.querySelector('#presets');
+
+			function show(value) {
+				output.textContent =
+					typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+			}
+
+			async function drive(preset) {
+				show(`driving "${preset.name}" through the kind surface…`);
+				try {
+					const facts = deriveFacts({ source: preset.source, type: 'script' });
+					const spec = {
+						facts,
+						execution: 'function',
+						...(preset.seconds === undefined
+							? {}
+							: { seconds: preset.seconds }),
+						...(preset.iterations === undefined
+							? {}
+							: { iterations: preset.iterations }),
+					};
+					const verdict = run.applicability(spec);
+					const answer = run.main(spec);
+					if ('refused' in answer) {
+						show({ applicability: verdict, refusal: answer });
+						return;
+					}
+					const result = await answer;
+					show({ applicability: verdict, result });
+				} catch (error) {
+					show(`honest in-build state — main threw:\n${String(error)}`);
+				}
+			}
+
+			for (const preset of PRESETS) {
+				const button = document.createElement('button');
+				button.textContent = preset.name;
+				button.addEventListener('click', () => void drive(preset));
+				presets.append(button);
+			}
+		</script>
+	</body>
+</html>
