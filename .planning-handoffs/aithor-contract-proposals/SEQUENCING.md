@@ -1,4 +1,4 @@
-<!-- cspell:ignore aithor unparseable ungated repoints repoint -->
+<!-- cspell:ignore aithor unparseable ungated repoints repoint resh -->
 
 # Sequencing memo — aithor contract proposals
 
@@ -239,3 +239,69 @@ divergence Wave 1's caution had warned about.
 - **`types.PROPOSED.ts`'s imports do not compile at the Wave-2 seat
   (2026-08-25):** they are written from the Wave-3 seat. Re-base them at
   landing; `npx tsc --noEmit` is the gate.
+
+## Wave 2 is PAUSED (human ruling 2026-08-26)
+
+**Wave 2 does not open until the local-llm outward-contract campaign lands.**
+Brief: [`../local-llm-lifecycle/BRIEF.md`](../local-llm-lifecycle/BRIEF.md).
+
+**Why.** Wave 2's Phase 0 locks aithor's runtime seam — `ModelLoader`,
+`ResolvedModel`, `AithorRuntime`. Two measurements taken while planning Wave 2
+showed that seam is an adapter for a shape that is about to be fixed:
+
+- **`load` has three failure channels** — it throws on an unknown model name,
+  returns a `LoadFailure` on a device limit, and rejects on a probe fault [read:
+  `aithor/load-model.ts` @file]. `load-model.ts` is **89 lines** and its test
+  file **276 lines** [measured: `wc -l`], existing only to absorb those three
+  into one vocabulary.
+- **local-llm's generation half was never modelled.** `load` carries
+  feasibility, a descent, an attempts ledger and terminal causes; `generate` is
+  `(prompt) => Promise<GenerationResult>` with no cancel, no fallback, no
+  device-loss recovery and no ownership. Three of the module's twelve § Out of
+  scope items sit on that one axis.
+
+Writing aithor's contract first would carefully specify an adapter for a shape
+whose need is about to be removed. Nothing in `src/` imports aithor [measured:
+`git grep -n "from.*aithor" -- src` → the one outside reference is a comment],
+and local-llm's only consumer is aithor, so this is the cheapest moment the
+reordering will ever cost.
+
+**What unblocks Wave 2:** the local-llm campaign's Phase-0 → Phase-1 human gate
+passing, and its settle-item 7 (where the five-cause → `NextStep` derivation
+lives) answered — that is the piece Wave 2's seam is built on.
+
+### Rulings carried from the Wave-2 planning session (2026-08-25)
+
+Recorded here because they were made in a session that produced no commit, and a
+plan file is not a record [read: `DEV.md` § Ruling provenance]. They stand for
+Wave 2 when it resumes, **except where the local-llm campaign changes the
+contract they were made against** — re-confirm each at resumption.
+
+1. **Phase 0 runs on Fable, Phase 1 on Opus** — re-affirming the 2026-08-25
+   ruling above. `ar-2` and `ar-5` carry no `model:` pin and inherit the
+   spawning session, so authoring Phase 0 on Fable is what buys Fable-tier
+   judgment at the sketch and pre-merge gates.
+2. **The end-state contract lands whole — the Wave-4 surface is IN.**
+   `AithorOptions`, `AithorProgressEvent`, `ModelLoader.onProgress` and the
+   4-arg `aithor(program, config, runtime?, options?)` signature were ruled to
+   land at Wave 2 as declared types and documented contract. **This supersedes §
+   Wave 2's "the options bag is a later, additive fourth argument (Wave 4)."**
+   ⚠️ **Most exposed to the pause:** it was ruled when `signal` had no
+   downstream support at all. The local-llm campaign may make it honorable, or
+   may reshape it. Re-confirm before landing.
+3. **`types.ts` lands with a declared red typecheck.** Literal 0.3 — "type
+   errors after this step become the TODO list for implementation." The commit
+   body states the exact error count and file set; Phase 1's invariant is that
+   the error set shrinks monotonically, never grows.
+4. **The twin ask is RE-ASKED, never inherited.** The 2026-08-25 answer was
+   `machine`, but a plan file is not a record and the answer is re-asked across
+   a session boundary [read: `DEV.md` § Phase 0, 0.2]. No twin exists for
+   aithor, so silence at the re-ask resolves to `none`, not to `machine`.
+
+**Where Wave 2's planning survives:**
+`~/.claude/plans/read-claude-plans-wave2-aithor-core-resh-buzzing-rabbit.md`
+carries eleven measured findings (F1–F11) — the broken draft imports, the
+`preserveParens` false-violation trap, the two-way `SourceRange` choice, the
+never-existent `evals/sample-report.md`, the WebLLM ceiling — plus a 37-step
+checklist. It is a plan file, so it is not a record; the findings are worth
+re-reading, the rulings above are the record.
