@@ -1199,6 +1199,47 @@ execution and never holds one alone.
     documents the rulings govern — and corrected in place at
     `.planning-handoffs/engine-script-axis/BRIEF.md § 11`.
 
+- **Prerequisite 0 is CLOSED, and it was never tooling debt (human rulings
+  2026-08-27, resolving HR-23's unmask-before-owning clause).** `npm run build`
+  had been failing repo-wide with
+  `TypeError: Cannot read properties of undefined (reading 'includes')`,
+  recorded as unowned and attributed to jest-worker under Node 22. The
+  attribution was wrong on every axis. The real fault was **one line of this
+  repo's own CSS**: a comment in
+  `src/lib/study-lenses--deprecated-architecture/orchestrate/embedded-guide/embedded-guide.css`
+  listed region-item properties slash-separated, ending in a wildcard directly
+  before a slash — which terminates the comment, so the next line parsed as a
+  selector with an unmatched paren. Fixed at `25311f36`; the gate is green
+  `[measured: npm run build, clean environment → EXIT=0, "[SUCCESS] Generated static files in build", minified CSS emitted]`.
+  **The engine's production worker-chunk catcher is therefore live again**,
+  which is what the script axis needed from this prerequisite.
+  - **The unmask recipe is recorded because the diagnosis cost four build runs
+    and two shims, and would have cost the next agent the same.** The opaque
+    `TypeError` is **never** the real error — it is jest-worker's own handler
+    faulting on an unguarded `error.message` when a worker emits a non-`Error`
+    value, which destroys the diagnostic. Two knobs, in order: `TERSER_PARALLEL`
+    is Docusaurus's documented escape for the **JS** minimizer
+    `[read: node_modules/@docusaurus/bundler/lib/minification.js:18-28]`; there
+    is **no equivalent for the CSS minimizer**, which needs the plugin forced to
+    `parallel: false`. Note which worker is whose: `terser-webpack-plugin`
+    carries its own nested `jest-worker@27.5.1`, so a stack naming the
+    **hoisted** `node_modules/jest-worker` (29.7.0) is
+    **css-minimizer-webpack-plugin's**, not terser's
+    `[measured: npm ls jest-worker]`.
+  - **The guard now ships**, so the recipe is a fallback rather than a routine
+    cost: `patches/jest-worker+29.7.0.patch` adds the missing guard and prints
+    the raw value instead of losing it, applied by a `postinstall` hook. This
+    adds `patch-package` as a devDependency and a postinstall step to the repo —
+    a shared-configuration change, ruled by the human. The patch is
+    content-only: the generator's file-mode churn was stripped and the result
+    verified to reverse and re-apply cleanly.
+  - **Recorded against a standing hazard, not just this bug:** the CSS bundle is
+    assembled from the theme, vendor CSS, and every region including
+    `study-lenses--deprecated-architecture/`, so a frozen region's _comment_ can
+    break the whole repo's production build. The fix comments its own reason in
+    place so the shape is not reintroduced — which it was, once, mid-fix, by
+    quoting the offending token literally.
+
 ### The ratification, and what it settled (human ruling 2026-08-06)
 
 One pass over every row. The bulk confirm covered all proposed rows, including

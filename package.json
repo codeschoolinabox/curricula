@@ -34,6 +34,7 @@
 		"test:watch": "vitest",
 		"test:hooks": "python3 .claude/hooks/tests/test-governance-guard.py && python3 .claude/hooks/tests/test-governance-advisory.py && python3 .claude/hooks/tests/test-pinned-guard.py",
 		"validate": "npm run typecheck &&  npm run lint && npm run format:check && npm run test",
+		"postinstall": "patch-package",
 		"prepare": "husky"
 	},
 	"lint-staged": {
@@ -107,6 +108,7 @@
 		"jsdom": "^26.1.0",
 		"lint-staged": "^16.0.0",
 		"markdownlint-cli2": "^0.21.0",
+		"patch-package": "^8.0.1",
 		"playwright": "^1.59.1",
 		"prettier": "^3.5.0",
 		"typescript": "^5.9.3",

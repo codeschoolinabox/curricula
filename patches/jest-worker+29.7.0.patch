@@ -1,0 +1,28 @@
+diff --git a/node_modules/jest-worker/build/workers/NodeThreadsWorker.js b/node_modules/jest-worker/build/workers/NodeThreadsWorker.js
+index e25247a..11c3ab4 100644
+--- a/node_modules/jest-worker/build/workers/NodeThreadsWorker.js
++++ b/node_modules/jest-worker/build/workers/NodeThreadsWorker.js
+@@ -143,6 +143,23 @@ class ExperimentalWorker extends _WorkerAbstract.default {
+     }
+   }
+   _onError(error) {
++    // PATCHED (patches/jest-worker+29.7.0.patch): upstream dereferences
++    // error.message unguarded. A worker thread can emit a non-Error value --
++    // Node's worker 'error' event carries whatever was thrown, and a plain
++    // object deserializes with no .message -- so THIS HANDLER throws, and the
++    // TypeError replaces the real diagnostic. Guard it, and print the raw value
++    // instead of losing it. See the unmask recipe in the evaluators-api-
++    // restoration LOSS-LEDGER.
++    if (typeof error?.message !== 'string') {
++      try {
++        console.error(
++          '[jest-worker patched] worker emitted a non-Error value; the real ' +
++            'failure is below, not a TypeError in this handler:\n' +
++            require('util').inspect(error, {depth: 8})
++        );
++      } catch {}
++      return;
++    }
+     if (error.message.includes('heap out of memory')) {
+       this.state = _types.WorkerStates.OUT_OF_MEMORY;
+ 
