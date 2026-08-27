@@ -34,11 +34,19 @@ six of its own instructions were measured WRONG in the doing, and a reader who
 meets only the outcome cannot tell a corrected instruction from an obeyed one.
 What each bullet below got wrong is marked ⛔ inline, beside it.
 
-⛔ **THE 0.2 CLOSE IS DONE TOO, as of `42aeedb2` — NOTHING IN THIS SECTION IS
-LIVE.** It read "What is live is the 0.2 CLOSE, not another review", and sent a
-reader to § Then: re-run AR-5 on the DELTA and § AR-5 — its five inputs, both of
-which carry their own not-a-dispatch banners. **The live next action is in the
-STATE header at the top of this file: the human's 0.2-close review.** The
+⛔ **THE 0.2 CLOSE IS DONE TOO, as of `42aeedb2` — NO _DISPATCH_ IN THIS SECTION
+IS LIVE.** It read "What is live is the 0.2 CLOSE, not another review", and sent
+a reader to § Then: re-run AR-5 on the DELTA and § AR-5 — its five inputs, both
+of which carry their own not-a-dispatch banners. **The live next action is in
+the STATE header at the top of this file: the human's 0.2-close review.**
+
+⚠ **THIS BANNER SAID "NOTHING IN THIS SECTION IS LIVE" FOR ONE COMMIT, AND THAT
+WAS WRONG IN THE DANGEROUS DIRECTION.** The section's own opening prohibition —
+_do not re-open round 1's or round 2's fix round, and do not re-fix the ten or
+the nine_ — is LIVE, and § Operating instructions restates it. A blanket
+not-live banner licenses exactly the re-opening this section exists to forbid.
+**What is dead here is every DISPATCH; every PROHIBITION still binds.** The
+
 round-5 delta was ONE commit; the three-commit delta named below was round 2's,
 and one of those three lands an instrument RED on purpose.
 
@@ -71,13 +79,26 @@ own closing commit.
 | `970b8919` | **the two instrument widenings + AR5-F7**, landed **RED** on nine residues by design. R-AL, R-AM, R-AN recorded                                        |
 | `70377e6e` | **the seven document fixes** — AR5-F1, F2, F3 (as **two** contract rows, R-AN), F4, F5's live half, F8, F10. CP-η goes **GREEN**, nine residues → zero |
 | `ffabcd41` | **the closing record** — AR5-F5's immutable half, F6, F9, CP-3 accepted, and the six wrong numbers below                                               |
-| `ffabcd41` | **AR-5 round 2's nine findings** — its verdict archived verbatim, the four IMPORTANT fixed, the five MINOR disposed                                    |
+| `f6bd94b6` | **AR-5 round 2's nine findings** — its verdict archived verbatim, the four IMPORTANT fixed, the five MINOR disposed                                    |
 
-⛔ **THE ROW ABOVE READ `_this one_` UNTIL 2026-08-27**, which resolves to
-whatever commit a reader is standing on rather than to the one it describes.
-AR-5 round 2 raised it as its finding 7 and it went unapplied for three rounds.
-This file's own rule governs it: in a commit body "this commit" is fixed
-forever; **in a file the same words silently re-point.**
+⛔ **THE ROW ABOVE READ `_this one_` UNTIL 2026-08-27, AND THE FIRST ATTEMPT TO
+RESOLVE IT PUT THE WRONG SHA THERE.** `aaf90eec` resolved it to `ffabcd41`,
+which is row 3, so the table briefly keyed two contradictory rows to one commit.
+It is **`f6bd94b6`** [measured: `git log --oneline -S "AR-5 round 2's nine
+findings" -- <this file>` → `f6bd94b6`, the same commit that archived round 2's
+verdict; `ffabcd41` PREDATES that verdict — round 2 reviewed the delta ENDING at
+`ffabcd41`].
+
+**The misreading is worth more than the fix.** AR-5 round 2's finding 7 said
+`_this one_` "should be resolved to `ffabcd41`" and called it "the only cell of
+three" — true of the THREE-row table as it stood at `ffabcd41`, where the
+unresolved cell was row 3. `f6bd94b6` APPLIED that finding one commit later and
+appended a fourth row with a NEW `_this one_`, meaning itself. `aaf90eec` then
+carried the old prescription onto the new row. **A relative reference does not
+merely rot — it silently re-aims, and so does a fix quoted from a review that
+read an earlier revision.** This file's own rule is the shallow half of that: in
+a commit body "this commit" is fixed forever; **in a file the same words
+silently re-point.**
 
 **Baseline of the round: `f0b5a2bb`** — `970b8919`'s parent, and the baseline
 that WAS handed to the AR-5 delta re-run. ⛔ **A RECORD, NOT A DISPATCH — all
@@ -813,12 +834,19 @@ to falsify the diagnosis**, not merely to apply it.
 ⛔ **NOTHING IN THIS SECTION IS AN INSTRUCTION AS OF 2026-08-27.** Round 12
 returned PAUSE, it WAS put to the human, and the fix round it authorised is
 complete. **The PROCEED branch has now fired too**: 0.2 closed at `42aeedb2`,
-whose body discharges § Closing obligations in full. Every step the branch below
-prescribes is either done or forbidden elsewhere in this file — the AR-5 cycle
-is closed by ruling, and § Closing obligations carries a DISCHARGED banner.
-**The live next action is in the STATE header at the top of this file.** A
-context-free reader once stopped here and re-asked for permission already given;
-a later one was pointed at a review this file forbids.
+whose body discharges § Closing obligations in full. Its first two steps are
+done or forbidden elsewhere in this file — the AR-5 cycle is closed by ruling,
+and § Closing obligations carries a DISCHARGED banner.
+
+⚠ **THIS BANNER SAID "EVERY step the branch below prescribes" FOR ONE COMMIT,
+AND THE BRANCH'S LAST TWO STEPS ARE THE TWO GATES THAT ARE STILL LIVE** — the
+human's 0.2-close review and the push gate, named as live at § Operating
+instructions' Gates bullet. A reader taking "every step is done" concludes
+nothing remains. **The AR-5 launch and the § Closing obligations discharge are
+dead; the two gates at the end of the chain are the live next action**, and the
+STATE header states them. A context-free reader once stopped here and re-asked
+for permission already given; a later one was pointed at a review this file
+forbids.
 
 - ~~On PAUSE: put it to the human before opening a fix round.~~ **DISCHARGED
   2026-08-19** — done, and this handoff is the human's answer. The rule itself
