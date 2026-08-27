@@ -2,7 +2,7 @@
 
 # orchestrate ux — resumption point
 
-**STATE: Phase 0 step 0.2. AR-5 HAS RUN FOUR TIMES, each on the previous fix
+**STATE: Phase 0 step 0.2. AR-5 HAS RUN FIVE TIMES, each on the previous fix
 round's delta, and each returned PAUSE. **THE AR-5 CYCLE IS CLOSED** — the human
 ruled 2026-08-26, after round 5, that no sixth round runs. THE NEXT ACTION IS
 THE 0.2-CLOSING COMMIT, then the Phase-0 → Phase-1 human gate.**
@@ -355,7 +355,7 @@ introduced by the previous fix round**, and there is no reason to think this
 round's rate is zero. The prose written ABOUT the defect class is the most
 likely place to find the next instance of it.
 
-## AR-5 — its five inputs, assembled, for the DELTA re-run
+## AR-5 — its five inputs, assembled — RECORD, NOT A DISPATCH
 
 `DEV.md § AR-5`'s _Provide to agent_ line asks for five things. The first AR-5
 launch assembled them here because the only other enumeration in this file sits
@@ -540,7 +540,7 @@ which are now three commits old.
 
 | what                   | value                                                                                                                                                                                                                                                                                                                                                                            |
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **AR-5's baseline**    | **`80306ad9`** for a full review — SHA-pinned. **For the round-5 delta re-run it is `f36981f7`**                                                                                                                                                                                                                                                                                 |
+| **AR-5's baseline**    | **`80306ad9`** for the full review that ran; `f0b5a2bb`, `ffabcd41`, `f6bd94b6` and `f36981f7` for the four delta rounds. ⛔ **All five have run and the cycle is closed** — this row is a record, not a dispatch                                                                                                                                                                |
 | this round's baseline  | **none — the AR-5 cycle is closed.** The five rounds ran on `80306ad9` (full), `f0b5a2bb`, `ffabcd41`, `f6bd94b6` and `f36981f7`. The fix round is `970b8919` · `70377e6e` · `ffabcd41` · `f6bd94b6` · `f36981f7` · `80b16a8a` · `fa1e0833`                                                                                                                                      |
 | campaign SHA list size | **105 at `80b16a8a`, 106 including this commit** — campaign-scoped [measured: the scoped `git log --oneline 80306ad9..f36981f7`; 101 at `70377e6e` · 102 at `ffabcd41` · 103 at `f6bd94b6`]. The unscoped `git rev-list --count` is mostly foreign work and is NOT the number to hand a reviewer                                                                                 |
 | modified file paths    | **21** across the whole campaign; **3** in the `ffabcd41..f6bd94b6` delta and **4** in the `f0b5a2bb..ffabcd41` one before it [measured at `f6bd94b6`, campaign-scoped]. **The SHA range is named because "this round" silently re-points** — it meant three different ranges across the five AR-5 rounds                                                                        |
@@ -884,15 +884,18 @@ same section of [`DECISIONS.md`](./DECISIONS.md):
 
 ## Operating instructions for the next session
 
-- **Opens in**: Phase 0 step 0.2, **at the AR-5 DELTA RE-RUN**. The fix round is
-  EXECUTED — all ten findings fixed or recorded, both instrument widenings
-  built, CP-η GREEN. Three rulings were taken (R-AL, R-AM, R-AN) and none
-  re-opens a finding. **Do not re-open the ten.** Launch `ar-5` round 6 against
-  baseline `80b16a8a`; everything it needs is in § Then: re-run AR-5 on the
-  DELTA and § AR-5 — its five inputs. See § What this round did first.
-- **Model**: this is correction work over prose, not design. AR-5 carries no
-  `model:` pin and inherits your tier; name the tier and its cost when you
-  launch the re-run. Pass no `model` parameter to any `ar-N`.
+- **Opens in**: Phase 0 step 0.2, **at the 0.2-CLOSING COMMIT**. ⛔ **The AR-5
+  cycle is CLOSED — do not launch another round.** It ran five times, all five
+  returned PAUSE, and the human closed it 2026-08-26 after round 5. What this
+  session needs is **§ Closing obligations, all four items** — NOT § Then:
+  re-run AR-5 and NOT § AR-5 — its five inputs, both of which are now records of
+  how the five rounds were dispatched, not dispatches. Three rulings were taken
+  (R-AL, R-AM, R-AN) and none re-opens a finding. **Do not re-open the ten, and
+  do not re-fix any round's findings.**
+- **Model**: this is bookkeeping over prose, not design. **No AR-N is owed
+  before the human's Phase-0 → Phase-1 gate.** If one is ever launched, `ar-5`
+  carries no `model:` pin and inherits your tier — name the tier and its cost.
+  Pass no `model` parameter to any `ar-N`.
 - **Gates the human holds**: the Phase-0 → Phase-1 review, and the push. There
   is no upstream on `main`. **Whether a round 13 runs is CLOSED** — ruled no on
   2026-08-19, and AR-5 confirmed the fallback trigger did not fire: all ten of
@@ -952,9 +955,10 @@ intake checklist, which is a bolded paragraph and not a heading.
      | grep -oE 'R-[A-Z]{1,2}' | sort -u
    ```
 
-   **40 rows at `fa1e0833`, R-A … R-AN and contiguous** [measured]. Enumerate
-   all forty with their destinations — `types.ts`, the `DOCS.md` sketch, the
-   tests, as 0.3 writes them.
+   **40 distinct ruling ids, in 54 table rows, at `fa1e0833` — R-A … R-AN and
+   contiguous** [measured; the `sort -u` is what makes it 40]. Run it from the
+   repo root. Enumerate all forty with their destinations — `types.ts`, the
+   `DOCS.md` sketch, the tests, as 0.3 writes them.
 
    ⛔ **Three earlier framings are struck, each a trap the next reader would
    otherwise re-enter.** A **range** (R-A…R-AN) is true of the union and false
