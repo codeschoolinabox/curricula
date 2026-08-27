@@ -1,5 +1,15 @@
 # The `'script'` execution axis — measured evidence and a design proposal
 
+> **⛔ READ [§ 11](#11-corrections-applied-by-the-receiving-session) BEFORE
+> ANYTHING ELSE IN THIS FILE.** Eight of this brief's claims are falsified,
+> including one instruction that cannot be carried out (§ 5.1 prerequisite 3's
+> "transport it rather than re-derive it" — the artifact is gone) and one design
+> step that is unimplementable where § 7.12 puts it. § 1.1's seven decisions and
+> four further rulings are now recorded as **HR-23**; the body below still reads
+> as though none of that happened, because § 10's review record is a history and
+> the body is preserved for audit. **§ 11 supersedes the body wherever they
+> disagree.**
+
 **Nothing in this brief is a ruling.** It proposes; the human rules; rulings are
 recorded in their own home
 ([DEV.md § Ruling provenance](./DEV.md#ruling-provenance), paths from the repo
@@ -946,3 +956,160 @@ Three of round 3's findings were errors I introduced while fixing round 1 and
 round 2. That pattern — the fix round being the dangerous round — is why this
 brief was validated three times and why every count in it is a command rather
 than a number.
+
+---
+
+## 11. Corrections applied by the receiving session
+
+Round 4, in effect — the receiving session's own verification pass, 2026-08-26,
+HEAD `fa1e0833`. **This section supersedes the body wherever they disagree.**
+The body is preserved unedited: § 10 is a history, and rewriting the thing it
+narrates would destroy the audit trail that makes the three prior rounds
+legible.
+
+Every § 1.1 decision, plus five further rulings taken at this unit's launch, is
+now recorded as **HR-23** in
+`.planning-handoffs/evaluators-api-restoration/LOSS-LEDGER.md § Rulings of record`
+— findable by `git grep -n "HR-23"`, which is the test
+[DEV.md § Ruling provenance](../../DEV.md#ruling-provenance) applies.
+
+### 11.1 § 5.1 prerequisite 3's instruction cannot be carried out
+
+§ 9 says `docusaurus.spike.config.ts` holds the working measured webpack fix and
+directs the reader to "transport it rather than re-derive it." **The file does
+not exist anywhere.** Not in the working tree, the index, the stash, or any
+commit — it was never committed
+`[measured: git status --porcelain; git stash list → empty; git log --all --diff-filter=D -- "*spike*" → empty]`.
+Only the prose at § 4.2 survives. **It must be rewritten and re-measured.**
+
+The **diagnosis** is independently confirmed and needs no re-derivation
+`[read: node_modules/@docusaurus/core/lib/webpack/plugins/ChunkAssetPlugin.js:45-53 — "compilation.hooks.additionalTreeRuntimeRequirements.tap(PluginName, (chunk) => { compilation.addRuntimeModule(chunk, new ChunkAssetRuntimeModule()); });"]`.
+The `set` argument webpack passes second is never received, so the three
+requirements are never declared. § 4.2's root-cause paragraph is accurate.
+
+`s15-drive-built-page.mjs` WAS rescued and is tracked here — but it hardcodes
+the now-deleted route `/spiralearn/script-axis-spike` (`:69`) and an absolute
+`file://` path to this machine's playwright (`:14-16`), so it needs a permanent
+route and a path fix before it runs again.
+
+### 11.2 § 4.1's build crash is a MASKED diagnostic, not a diagnosis
+
+`[read: node_modules/jest-worker/build/workers/NodeThreadsWorker.js:145-154 — "_onError(error) { if (error.message.includes('heap out of memory')) { … } }"]`.
+The `.message` dereference is unguarded, so any message-less thrown value from a
+build worker makes **the error handler itself** throw the `TypeError` § 4.1
+reports — destroying the original diagnostic and replacing it with an opaque
+one. § 4.1's "jest-worker under Node 22, not OOM" is true but incomplete:
+**nobody has seen the real failure.** Under HR-23 the crash is unmasked before
+it is owned.
+
+### 11.3 § 5.2's OPEN question is dissolved, and its premise was overstated
+
+HR-23 pins the gate at `ecmaVersion: 'latest'` with acorn's version pinned
+exactly, so the engine takes no numeral and nothing moves out of `embody/`. The
+reasoning is in HR-23; two factual corrections belong here.
+
+- § 5.2 calls `ECMA_VERSION` "the repo's SHARED pin." Its own comment scopes it
+  to three readers **inside embody**
+  `[read: src/lib/study-lenses/embody/ecma-version.ts:1-4 — "One shared value keeps acorn's two readers (tokenize, parse) and the environment stage's scope analysis on one parse goal, so they cannot drift."]`,
+  and `embody/README.md:299` marks it `implementers`-audience. One cross-region
+  importer exists and is itself irregular — a `lib/screening` **test**.
+- § 5.2 says importing it "is a cross-region dependency it forbids." That is
+  **prose only, not lint-enforced.** The tracked `import/no-restricted-paths`
+  rule bars only `<sibling>/lib/**`, and `ecma-version.ts` is not under
+  `embody/lib/`; `lib` appears in neither the `from` nor the `target` position
+  `[read: eslint.config.mjs:15-22, 461-474]`. An agent expecting tsc or eslint
+  to catch the violation will be wrong.
+- § 5.2 frames duplication as "duplicate the numeral and accept the drift." The
+  house form pairs duplication with an **alarm**, in the engine's own tier
+  `[read: src/lib/study-lenses/lib/screening/tests/parse-settings.test.ts:57-58 — "// PINNED(Phase-0 2437801d: the language year is duplicated on purpose — this test is the alarm)"]`.
+  Recorded because the framing, not the option, was the defect.
+
+### 11.4 § 7.12's pre-flight is unimplementable where the brief puts it
+
+`[read: src/lib/study-lenses/lib/engine/worker/types.ts:23-27]` — `SetupMessage`
+carries `kind`, `sharedBuffer`, `workerConfig`. `execution` is on
+`ExecuteMessage` only (`:30-35`). **`handleSetup` cannot know the axis**, and an
+unconditional probe would call `importScripts` on every module-path run —
+throwing in the vitest browser tier, whose workers are module workers, and
+breaking the shipped suite. HR-23 resolves this by adding `execution` to
+`SetupMessage`.
+
+### 11.5 § 7.15 and the tripwire inventory belong to the widening unit
+
+Under § 1.1 decision 5 `ExecutionAxis` stays closed, so the
+`facts.type: 'script'` homonym does not exist yet. Deferring § 7.15 removes this
+unit's **only** contact point with `evaluators/` — which matters, because
+`evaluators/types.ts` sits in the live intercept chain's blast radius and a file
+a peer has modified cannot be committed without taking their work
+([DEV.md § Shared-worktree git mechanics](../../DEV.md#shared-worktree-git-mechanics)).
+
+Recorded so the widening unit inherits it rather than rediscovering it: **there
+are four HR-20 tripwires, not three.** § 1 lists `evaluators/types.ts:81`,
+`type-contracts.test.ts:150` and `README.md:170-186`. It misses the glossary at
+`evaluators/README.md:301-306` ("three senses of `execution`") and `:307-311`
+("evaluate / evaluation — four senses") — a new axis value mints a fifth sense
+and both entries amend. HR-20's live-constraints list also exists in **two**
+copies (`LOSS-LEDGER.md:824-828` and `evaluators/DOCS.md:161-166`), which amend
+together. And § 1's claim that `README.md:170-186` contains the "three senses"
+entry is wrong; that passage points at DOCS.md instead.
+
+### 11.6 § 5.1 prerequisite 1's audit surface, measured
+
+The brief concedes its own list was mis-audited and says "the audit must cover
+`worker/` end to end." The measured starting point
+`[measured: grep -n over src/lib/study-lenses/lib/engine/worker/*.ts]`:
+
+Only **three** symbols in the whole subtree resolve at module load —
+`TextDecoder` (`read-call-response.ts:27`), `TextEncoder`
+(`write-call-response.ts:58`), `Object.freeze` (`protocol.ts:26`) — and each
+already carries an explicit WHY-at-module-load comment. **Everything else is
+call-time**: `Atomics` at 22 sites across six files, plus `Object` (7), `Error`
+(5), `String` (3), `Promise` (3), `SharedArrayBuffer` (2), `Function` (2), `URL`
+(2), `Blob`, `Int32Array`, `Uint8Array`, `RangeError`, bare `postMessage`
+(`bootstrap.ts:379`), and `globalThis` (`:65`, `:213`).
+
+**Four of the six files are thread-side by their own `@file` lines** —
+`clear-event-ready.ts`, `transport.ts`, `write-call-response.ts`,
+`write-resume-signal.ts` — and are unreachable by any learner program. Under
+HR-23 they stay in scope, but the audit records each site's **realm and
+reachability**, because a thread-side latch is hardening where a worker-side one
+is a correctness fix.
+
+### 11.7 The test tier's remaining choice is narrower than § 6 implies
+
+- `esbuild@0.21.5` is **transitive-only**, via `vite@5.4.21` ← `vitest@2.1.9`
+  `[measured: npm ls esbuild]` — not a declared dependency, and one Vite bump
+  from vanishing.
+- **There is no `globalSetup`, no `pretest`, and no npm pre-lifecycle script of
+  any kind in this repo**, so two of the three options § 6 offers have no house
+  precedent at all. The only precedent for injecting build behavior is an inline
+  plugin object literal: `vitest.workspace.ts:71-83` (`coop-coep-headers`) on
+  the Vite side, and three `configureWebpack` literals at
+  `docusaurus.config.ts:65,93,134` on the webpack side.
+- The browser project is **Vitest 2.x API** — `browser: { name: 'chromium' }`
+  `[read: vitest.workspace.ts:64-104]`. Writing `browser.instances` (Vitest 3)
+  would be **silently ignored**. Its `include` also matches `.browser.test.ts`
+  only; a `.browser.test.tsx` would land in the node project.
+- The real config is `vitest.workspace.ts`. The root `vitest.config.ts` is
+  stale, declares no projects, and disagrees with the workspace about aliases.
+
+### 11.8 Smaller falsifications
+
+| brief                                                                                       | actual                                                                                                                                                                                               |
+| ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `types.ts:126` says "the factory runs nothing: it assembles a handle" (§ 5.2)               | that sentence is `engine/DOCS.md:17`; `types.ts:126-127` words laziness differently                                                                                                                  |
+| the defaulting site is `evaluate.ts:186-187` (§ 5.2)                                        | `evaluate.ts:187` **alone** — `:186` is `strict`                                                                                                                                                     |
+| `evaluators/types.ts:81` carries "a 12-line JSDoc" (§ 1)                                    | 15 lines, `:66-80`                                                                                                                                                                                   |
+| the tripwire comment is two lines (§ 1)                                                     | one line, `type-contracts.test.ts:151`, and § 1 truncates its operative clause — _"so the widening cannot land silently"_                                                                            |
+| "the engine belongs to the … W4b chain" (§ 1)                                               | the ledger slots three SPECIFIC engine increments into W4b (`:852`, `:944`, `:1024`); the whole-engine generalization is this brief's own inference, and was unruled until HR-23 placed the unit     |
+| § 10's round-3 table: "§ 5.2 now pins `ecmaVersion: 'latest'`"                              | § 5.2's body pins `ECMA_VERSION` (2024). The table is stale against the body it describes — and HR-23 has now ruled `'latest'`, so round 3 was right and the later change to 2024 was the regression |
+| § 10's round-3 table: § 7.13 is "a contract-widening decision owed before `types.ts` locks" | § 7.13's own body says that was wrong. The table row is the pre-correction history                                                                                                                   |
+
+Two further notes for whoever runs this next. `git grep -n "HR-20"` returns
+**nothing** in `evaluators/DOCS.md` — the attribution there is
+`(human ruling 2026-08-13)`, so § 1's lookup does not work and its own
+`git grep -n "Why the axis stays two-valued"` is the one that does. And the
+SessionStart hook reported `node v20.11.0` against an engines floor of
+`>=22.11.0` while the session shell measured `v22.11.0`
+`[measured: node --version]`; § 4.1's crash was measured under v22.11.0, so any
+re-measurement states which node it ran on.

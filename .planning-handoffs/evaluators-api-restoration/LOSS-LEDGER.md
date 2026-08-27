@@ -1099,6 +1099,105 @@ execution and never holds one alone.
   owed. The trigger's timing half is unchanged (the review still precedes the
   implementation it gates), and AR-4 stays per increment. Binds the rest of this
   campaign; prior batch rounds this wave stand under it.
+- **The `'script'` execution axis opens as a campaign unit, and HR-20's third
+  value is designed but NOT yet ratified (human rulings 2026-08-26, HR-23).**
+  HR-20 requires a third axis value to join "only through its own design review,
+  with its own review pair and engine increment"; this ruling opens that unit
+  and records the decisions it starts from. **It ratifies no execution path** —
+  the unit's own `ar-1`/`ar-2` pair does that, and
+  `.planning-handoffs/engine-script-axis/BRIEF.md` is `ar-1`'s INPUT, never a
+  substitute for it. The unit is INSIDE this campaign, inheriting HR-13's
+  ceremony level, HR-22's greenfield-`embody/` grant, and the shared-tree valve.
+  **`evaluators/types.ts:81`'s union stays closed and its tsc tripwire stays
+  armed**: the engine gains a path no evaluator can request, and the widening is
+  a later, separate unit.
+  - **Seven decisions transported from `BRIEF.md § 1.1`, whose only prior record
+    was that brief.** `'script'` joins as a THIRD value (`'function'` is not
+    replaced); **indirect eval is rejected**
+    `[relayed: human, verbatim — "an incomplete simulation of variable semantics **is not** a narrow cost, it's suicide for an evaluation engine that's meant to _exactly simulate correct semantics_ for learners"]`;
+    the creation check uses **acorn, thread-side**, superseding an earlier
+    `new Function` probe measured to refuse working programs; **acorn replaces
+    the module line-1 marker**, retiring the marker before it was ever built;
+    **engine first** — the engine may carry an axis nothing can yet request,
+    ruled explicitly rather than arrived at by silence; the test tier's
+    fast-tier spike has RUN AND PASSED, so its ruling rests on evidence rather
+    than deferral; and **acorn IS the standard**
+    `[relayed: human — "it's ok if we accept acorn as the standard, learners aren't guaranteed to run on V8"]`.
+    ⚠ **Provenance quality differs and the difference binds.** Only the two
+    quoted decisions carry the human's own words; the other five are the
+    authoring agent's paraphrase of a multiple-choice selection whose wording
+    that agent wrote. Where this campaign later reasons from one of the five, it
+    reasons from a paraphrase.
+  - **The engine's parse gate pins `ecmaVersion: 'latest'`, and acorn's version
+    pins exactly.** The engine's parse is a GATE, whose failure mode is FALSE
+    REFUSAL — not a fact-producer, whose failure mode is a wrong fact. Its own
+    input producer parses looser
+    `[read: src/lib/study-lenses/evaluators/intercept/wrap-call-expressions.ts:133 — "parse(code, { ecmaVersion: 'latest', sourceType, locations: true })"; same at src/lib/study-lenses/lib/loop-guard/splice-loop-guards.ts:110]`,
+    so a gate pinned tighter could refuse instrumented output this region's own
+    instrumenter generated — surfacing an instrumentation defect as the
+    learner's syntax error, the failure HR-19 says presents as the learner's
+    own. **This dissolves the brief's § 5.2 OPEN question entirely**: the engine
+    takes no numeral, so nothing moves out of `embody/` and no new `lib/` leaf
+    is minted. Language-level enforcement stays where it already is, at embody's
+    gate. The exact acorn pin (`^8.16.0` → `8.16.0`) is a repo-wide
+    `package.json` edit with blast radius across embody, classifying, screening,
+    intercept, loop-guard and questioning — shared configuration, human-approved
+    when it lands.
+  - **Both parse goals are gated thread-side — the WIDE fork — and the shipped
+    `'module'` path's phase behavior changes with it.** A module PARSE failure
+    that ships today as `'evaluation'` becomes `'creation'`, falsifying the
+    position at `engine/types.ts:273-278` and its in-code twin at
+    `worker/bootstrap.ts:240-243`, both committed by a sibling session hours
+    before the brief; the unit amends both. **The cost is accepted knowingly,
+    not discovered:** acorn rejects constructs V8 accepts (measured: decorators,
+    at both 2024 and `'latest'`), so the module path's ACCEPTED GRAMMAR NARROWS
+    — one language level across both axes was preferred to a shipped-behavior
+    guarantee. The narrow alternative (gate `'script'` only, leaving `'module'`
+    byte-identical) was posed and declined. Retiring the marker still PRESERVES
+    the link-stage residual — an unresolvable specifier parses fine and fails at
+    link — so that half of the contract is untouched.
+  - **The bootstrap's built-ins audit is the FULL `worker/` subtree**, not the
+    learner-reachable slice. Closes the class, not the instances. Measured
+    starting point, superseding the brief's own four-row table, which it admits
+    was mis-audited: only THREE symbols in the subtree resolve at module load —
+    `TextDecoder` (`read-call-response.ts:27`), `TextEncoder`
+    (`write-call-response.ts:58`), `Object.freeze` (`protocol.ts:26`) — each
+    already carrying a WHY-at-module-load comment; everything else is call-time,
+    `Atomics` alone at 22 sites across six files
+    `[measured: grep -n over src/lib/study-lenses/lib/engine/worker/*.ts]`. The
+    audit records each site's REALM and REACHABILITY, because four of those six
+    files are thread-side by their own `@file` lines (`clear-event-ready.ts`,
+    `transport.ts`, `write-call-response.ts`, `write-resume-signal.ts`) and a
+    thread-side latch is hardening where a worker-side one is a correctness fix.
+    Its own AR pair, green before the axis commits.
+  - **The capability pre-flight rides a wire-protocol change:** `execution` is
+    added to `SetupMessage`. The brief placed the probe in `handleSetup`, which
+    cannot see the axis — `SetupMessage` carries only `kind`, `sharedBuffer`,
+    `workerConfig`
+    `[read: src/lib/study-lenses/lib/engine/worker/types.ts:23-27]` — and an
+    unconditional probe would throw in the vitest browser tier, whose workers
+    are module workers, breaking the shipped suite. Relocating the probe into
+    `executeScript` was posed as the no-protocol-change alternative and declined
+    in favour of the axis reaching setup honestly.
+  - **`npm run build`'s crash is UNMASKED before it is owned.** The reported
+    `TypeError: Cannot read properties of undefined (reading 'includes')` is not
+    the fault — it is jest-worker's own error handler faulting on an unguarded
+    `error.message`
+    `[read: node_modules/jest-worker/build/workers/NodeThreadsWorker.js:145-154]`,
+    which destroys the original diagnostic. Nobody has seen the real failure.
+    Ownership of the repair is decided after it is visible, not before.
+  - ⚠ **The measured spike this design rests on is GONE and one artifact is
+    unrecoverable.** `docusaurus.spike.config.ts` carried the WORKING measured
+    webpack fix and `BRIEF.md § 9` instructs "transport it rather than re-derive
+    it"; it is in no commit, index, stash or working tree
+    `[measured: git log --all --diff-filter=D -- "*spike*" → empty; git stash list → empty]`.
+    It must be rewritten and re-measured. The diagnosis survives and is
+    independently confirmed at
+    `node_modules/@docusaurus/core/lib/webpack/plugins/ChunkAssetPlugin.js:45-53`.
+  - Recorded here per HR-21. Encoded on landing at
+    `src/lib/study-lenses/lib/engine/README.md`, `types.ts` and `DOCS.md` — the
+    documents the rulings govern — and corrected in place at
+    `.planning-handoffs/engine-script-axis/BRIEF.md § 11`.
 
 ### The ratification, and what it settled (human ruling 2026-08-06)
 
