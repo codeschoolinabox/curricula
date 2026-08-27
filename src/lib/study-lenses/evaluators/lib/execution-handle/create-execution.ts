@@ -12,16 +12,16 @@
  *
  * Phase 1 in flight: this body carries Install (extras over controls,
  * frozen last), Ignite through one start latch (both batch doors and
- * the consumer iterator's first pull, each fixing the mode), the batch
- * Drive path (the drainer, exhaustion-only exit), and the iterate
- * Drive path (the memoized consumer iterator forwarding the source's
- * events), and Teardown's cancel routes (inert-cancel settle;
- * post-ignition `stop()` at most once, never queued behind a pending
- * pull; post-settlement and repeat cancels inert on the source; break
- * resolving only after the settle). Settle-race (drainer stand-down,
- * live-iterator end, source disposal) and the defect routes land with
- * the remaining X1 increments against the committed-skipped suite in
- * tests/.
+ * the consumer iterator's first pull, each fixing the mode), both
+ * Drive paths (the drainer racing the settle against each pull; the
+ * memoized consumer iterator forwarding the source's events behind a
+ * one-microtask settled re-check), Settle ending consumption (drainer
+ * stand-down, live-iterator end, best-effort source disposal), and
+ * Teardown's cancel routes (inert-cancel settle; post-ignition
+ * `stop()` at most once, never queued behind a pending pull;
+ * post-settlement and repeat cancels inert on the source; break
+ * resolving only after the settle). The defect routes land with the
+ * last X1 increment against the committed-skipped suite in tests/.
  */
 
 import type {
@@ -132,6 +132,7 @@ function ignite<TEvent, TResult>(
 			function markSettled() {
 				// eslint-disable-next-line functional/immutable-data -- the settled flag closes the same sanctioned state record; post-settlement cancels read it to stay inert on the source
 				state.settled = true;
+				attemptSourceDisposal(state.source.events);
 			},
 			function ignoreUntilDefectRouting() {},
 		);
@@ -141,7 +142,7 @@ function ignite<TEvent, TResult>(
 			// pull is an unhandled rejection here — as is a settle rejection
 			// on a pure-iterate consumption that never touches .result; the
 			// source-defect routing lands with its committed-skipped rows.
-			void drainToExhaustion(state.source.events);
+			void drainUntilSettleOrExhaustion(state.settle, state.source.events);
 		}
 	}
 	return state.settle;
@@ -152,17 +153,25 @@ function ignite<TEvent, TResult>(
 /**
  * The library's one batch loop: pull to relieve backpressure, discard
  * delivered items (the result's own record is the evaluator's), exit
- * on events-exhaustion.
+ * on events-exhaustion OR the settle, whichever comes first — each
+ * pull races the settle, so a mid-drain settle stands the drainer
+ * down with no further pulls owed, even while a pull is suspended.
  */
-async function drainToExhaustion(
+async function drainUntilSettleOrExhaustion<TResult>(
+	settle: Promise<TResult>,
 	events: AsyncIterator<unknown>,
 ): Promise<void> {
+	const settleEndsTheDrain = settle.then(toEndStep, toEndStep);
 	for (;;) {
-		const step = await events.next();
+		const step = await Promise.race([settleEndsTheDrain, events.next()]);
 		if (step.done === true) {
 			return;
 		}
 	}
+}
+
+function toEndStep(): IteratorResult<unknown> {
+	return { value: undefined, done: true };
 }
 
 // ─── Phase 3: Drive (async) — the iterate path ────────────────────────────────
@@ -173,11 +182,6 @@ async function drainToExhaustion(
  * the handle's life (ruled 2026-08-19), so a second call can never
  * split the stream. A result-only source installs nothing — its handle
  * is `ExecutionBase`, not `AsyncIterable`.
- *
- * Phase-1 transient, named: until the mode-latch increments land, an
- * iterator taken after a batch ignition forwards the same events seam
- * the drainer is pulling — the after-batch-ended law arrives with its
- * committed-skipped rows.
  */
 function streamingIteratorDescriptor<TEvent, TResult>(
 	state: HandleState<TEvent, TResult>,
@@ -208,7 +212,12 @@ function streamingIteratorDescriptor<TEvent, TResult>(
  * seam, so the consumer's pace IS the run's pace and the drainer never
  * engages. Under a latched `'batch'` mode the iterator is already
  * ended — it answers done without touching the source, because the
- * drainer owns the seam (the mode latch, ruled 2026-08-18).
+ * drainer owns the seam (the mode latch, ruled 2026-08-18). Every pull
+ * defers one microtask before touching the seam and re-checks the
+ * teardown latch there: settlement is observable one microtask after
+ * `result` resolves (the seam's settled-lag window, README § The
+ * laws), so the deferral is what lets a settle landed in the
+ * consumer's own turn end the iterator without another pull.
  */
 function createConsumerIterator<TEvent, TResult>(
 	state: HandleState<TEvent, TResult>,
@@ -222,7 +231,14 @@ function createConsumerIterator<TEvent, TResult>(
 				return Promise.resolve({ value: undefined, done: true });
 			}
 			void ignite(state, 'iterate');
-			return events.next();
+			return Promise.resolve().then(function pullUnlessSettled():
+				| Promise<IteratorResult<TEvent>>
+				| IteratorResult<TEvent> {
+				if (state.settled || state.stopped) {
+					return { value: undefined, done: true };
+				}
+				return events.next();
+			});
 		},
 		return(): Promise<IteratorResult<TEvent>> {
 			return cancelExecution(state).then(
@@ -232,6 +248,32 @@ function createConsumerIterator<TEvent, TResult>(
 			);
 		},
 	};
+}
+
+// ─── Phase 4: Settle — settle ends consumption ────────────────────────────────
+
+/**
+ * The best-effort half of settle-ends-consumption: disposal of the
+ * source's events iterator is ATTEMPTED once on the settle
+ * (`events.return?.()`), never awaited, a synchronous throw and an
+ * async rejection both swallowed — a suspended source's cleanup is its
+ * own liveness obligation (README § The laws). A result-only source
+ * has nothing to dispose.
+ */
+function attemptSourceDisposal(
+	events: AsyncIterator<unknown> | undefined,
+): void {
+	if (events === undefined) {
+		return;
+	}
+	try {
+		void events
+			.return?.()
+			?.then(undefined, function swallowDisposalRejection() {});
+	} catch {
+		// Disposal is offered, never relied on — a throwing return() is the
+		// source's own defect and never reaches the already-fixed settle.
+	}
 }
 
 // ─── Phase 5: Teardown (sync, out of band) ────────────────────────────────────

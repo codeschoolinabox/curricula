@@ -240,7 +240,11 @@ kept it true in the deprecated region:
   touch reaches it, it fulfills on every path, exactly once.
 - **Idempotent out-of-band cancel** — callable before, during, after; never
   queued behind a pull; teardown latches (pins run:154, intercept:265,
-  intercept:309) and pre-empts the start latch.
+  intercept:309) and pre-empts the start latch. One microtask-window caveat
+  (human ruling 2026-08-26): the seam offers no synchronous settled signal, so a
+  same-tick cancel after a synchronously-resolved source `result` can still call
+  `stop()` once on the already-settled source — harmless where `stop` is
+  idempotent; the seam's documented cardinality.
 - **One-shot** — a settled streaming handle does not replay; the result's events
   array is the record (HR-2; the quarry's replay iterator and `.result.logs`
   cache do not cross).

@@ -309,6 +309,17 @@ describe('cancel', () => {
 		expect(source.stopCalls()).toBe(1);
 	});
 
+	it('a cancel after a batch ignition calls stop once', async () => {
+		const source = createStreamingSource(['a', 'b'], { ok: true, events: [] });
+		const execution = createExecution(source);
+		void execution.result;
+
+		execution.cancel();
+		await execution.result;
+
+		expect(source.stopCalls()).toBe(1);
+	});
+
 	it('break in for-await resolves .result without hanging', async () => {
 		const source = createStreamingSource(
 			Array.from({ length: 50 }, (_unused, index) => `event-${index}`),
@@ -415,6 +426,22 @@ describe('the mode latch', () => {
 		await execution[Symbol.asyncIterator]().next();
 
 		expect(source.nextCalls()).toBe(3);
+	});
+
+	it('an iterator taken before settlement under a batch ignition is already ended', async () => {
+		const source = createStreamingSource(['a'], { ok: true, events: [] });
+		const suspended = {
+			...source,
+			events: {
+				next: () => new Promise<IteratorResult<string>>(function pending() {}),
+			},
+		};
+		const execution = createExecution(suspended);
+		void execution.result;
+
+		const step = await execution[Symbol.asyncIterator]().next();
+
+		expect(step.done).toBe(true);
 	});
 
 	it('iterate first: a later await subscribes and resolves', async () => {
@@ -564,7 +591,42 @@ describe('the laws the quarry never had', () => {
 		expect(await execution.result).toBe(DEFECT);
 	});
 
-	it.skip('the drainer stands down on a mid-drain settle', async () => {
+	it('a settle during the first pull stands the drainer down', async () => {
+		let pulls = 0;
+		let resolveEarly!: (value: MockResult) => void;
+		const early = new Promise<MockResult>(function hold(resolve) {
+			resolveEarly = resolve;
+		});
+		let releaseFirst!: (step: IteratorResult<string>) => void;
+		const held = new Promise<IteratorResult<string>>(function park(resolve) {
+			releaseFirst = resolve;
+		});
+		const source = createStreamingSource(['a'], { ok: true, events: [] });
+		const settling = {
+			...source,
+			result: early,
+			events: {
+				next(): Promise<IteratorResult<string>> {
+					pulls += 1;
+					if (pulls === 1) {
+						resolveEarly({ ok: false, events: [] });
+						return held;
+					}
+					return new Promise<IteratorResult<string>>(function pending() {});
+				},
+			},
+		};
+		const execution = createExecution(settling);
+		await execution.result;
+
+		releaseFirst({ value: 'x', done: false });
+		await execution.result;
+		await execution.result;
+
+		expect(pulls).toBe(1);
+	});
+
+	it('the drainer stands down on a mid-drain settle', async () => {
 		const source = createStreamingSource(
 			Array.from({ length: 50 }, (_unused, index) => `event-${index}`),
 			{ ok: true, events: [] },
@@ -595,7 +657,78 @@ describe('the laws the quarry never had', () => {
 		expect(pulls).toBe(3);
 	});
 
-	it.skip('a mid-iteration settle ends the live consumer iterator', async () => {
+	it('the drainer never pulls again after a mid-drain settle', async () => {
+		let pulls = 0;
+		let resolveEarly!: (value: MockResult) => void;
+		const early = new Promise<MockResult>(function hold(resolve) {
+			resolveEarly = resolve;
+		});
+		let releaseThird!: (step: IteratorResult<string>) => void;
+		const held = new Promise<IteratorResult<string>>(function park(resolve) {
+			releaseThird = resolve;
+		});
+		const source = createStreamingSource(['a'], { ok: true, events: [] });
+		const settling = {
+			...source,
+			result: early,
+			events: {
+				next(): Promise<IteratorResult<string>> {
+					pulls += 1;
+					if (pulls < 3) {
+						return Promise.resolve({ value: 'x', done: false });
+					}
+					if (pulls === 3) {
+						resolveEarly({ ok: false, events: [] });
+						return held;
+					}
+					return new Promise<IteratorResult<string>>(function pending() {});
+				},
+			},
+		};
+		const execution = createExecution(settling);
+		await execution.result;
+
+		releaseThird({ value: 'x', done: false });
+		await execution.result;
+		await execution.result;
+
+		expect(pulls).toBe(3);
+	});
+
+	it('the source iterator is disposed on a mid-drain settle', async () => {
+		let pulls = 0;
+		let disposals = 0;
+		let resolveEarly!: (value: MockResult) => void;
+		const early = new Promise<MockResult>(function hold(resolve) {
+			resolveEarly = resolve;
+		});
+		const source = createStreamingSource(['a'], { ok: true, events: [] });
+		const settling = {
+			...source,
+			result: early,
+			events: {
+				next(): Promise<IteratorResult<string>> {
+					pulls += 1;
+					if (pulls === 3) {
+						resolveEarly({ ok: false, events: [] });
+						return new Promise<IteratorResult<string>>(function pending() {});
+					}
+					return Promise.resolve({ value: 'x', done: false });
+				},
+				return(): Promise<IteratorResult<string>> {
+					disposals += 1;
+					return Promise.resolve({ value: undefined, done: true });
+				},
+			},
+		};
+		const execution = createExecution(settling);
+
+		await execution.result;
+
+		expect(disposals).toBe(1);
+	});
+
+	it('a mid-iteration settle ends the live consumer iterator', async () => {
 		let resolveEarly!: (value: MockResult) => void;
 		const early = new Promise<MockResult>(function hold(resolve) {
 			resolveEarly = resolve;
@@ -618,7 +751,28 @@ describe('the laws the quarry never had', () => {
 		expect(collected).toEqual(['a']);
 	});
 
-	it.skip('the source iterator is disposed on a settle-first exit', async () => {
+	it('a mid-iteration settle never pulls the source again', async () => {
+		let resolveEarly!: (value: MockResult) => void;
+		const early = new Promise<MockResult>(function hold(resolve) {
+			resolveEarly = resolve;
+		});
+		const source = createStreamingSource(['a', 'b', 'c'], {
+			ok: true,
+			events: [],
+		});
+		const settling = { ...source, result: early };
+		const execution = createExecution(settling);
+
+		for await (const event of execution) {
+			if (event === 'a') {
+				resolveEarly({ ok: false, events: ['a'] });
+			}
+		}
+
+		expect(source.nextCalls()).toBe(1);
+	});
+
+	it('the source iterator is disposed on a settle-first exit', async () => {
 		const source = createStreamingSource(['a', 'b', 'c'], {
 			ok: true,
 			events: [],
@@ -771,6 +925,17 @@ describe('the laws the quarry never had', () => {
 		await execution.result;
 
 		expect(source.stopCalls()).toBe(0);
+	});
+
+	it('a result-only cancel after ignition calls stop once', async () => {
+		const source = createResultOnlySource({ ok: true, events: [] });
+		const execution = createExecution(source);
+		void execution.result;
+
+		execution.cancel();
+		await execution.result;
+
+		expect(source.stopCalls()).toBe(1);
 	});
 
 	it('a builder that cancels synchronously yields a settled handle', async () => {
