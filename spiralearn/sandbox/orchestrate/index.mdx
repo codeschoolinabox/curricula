@@ -8,22 +8,30 @@ import BrowserOnly from '@docusaurus/BrowserOnly';
 
 The full instrument, live, with the built-in JEJ level, the injected scaffolding
 level, the three ported lenses (parsons and writeme in the Source select;
-debug-props is panel-excluded — reachable only as a focus request), and one
-page-injected demonstration lens ("notes", self-recommending). Expected — the
-SWAP model, EDITOR-FIRST: the editor mounts at load holding the seed program (no
-lens is named in the props, so the home base is the default); opening any lens
-from the Source select REPLACES the editor; closing — Edit code, or the `—` none
-entry — brings the editor back with your edits intact; the control row shows
-Generate code in editor mode and Edit code while an excursion holds the pane,
-never both at once, because the editor is away exactly while an excursion is
-open; Generate code opens the generator as the pane's third occupant — seeded
-with the buffer exactly as typed, and left through Accept, Discard or Edit code
-(Accept lands the candidate in the editor, everything else leaves the buffer
-untouched); typing until the debounce settles re-renders the phases; breaking
-the parse bars the phases downstream of the break, each naming the parser's
-cause, and fixing it reopens them; the type toggle re-derives immediately,
-closing an open lens OR an open generator first — as do level and posture
-commits, so a derivation-context commit is the fourth way home from the
+debug-props is panel-excluded — reachable only as a focus request), and two
+page-injected lenses: "notes" (self-recommending) and `spellme`, in the **Tokens
+· spelling** station.
+
+`spellme` is injected here **while it is being built**, so its surface is
+incomplete on purpose — this page is where its sandbox checkpoints are
+exercised. It is deliberately NOT registered in the built-in roster, so no
+learner route reaches it; when it is, this injection is removed in the same
+commit, because joining a name that is already built in throws.
+
+Expected — the SWAP model, EDITOR-FIRST: the editor mounts at load holding the
+seed program (no lens is named in the props, so the home base is the default);
+opening any lens from the Source select REPLACES the editor; closing — Edit
+code, or the `—` none entry — brings the editor back with your edits intact; the
+control row shows Generate code in editor mode and Edit code while an excursion
+holds the pane, never both at once, because the editor is away exactly while an
+excursion is open; Generate code opens the generator as the pane's third
+occupant — seeded with the buffer exactly as typed, and left through Accept,
+Discard or Edit code (Accept lands the candidate in the editor, everything else
+leaves the buffer untouched); typing until the debounce settles re-renders the
+phases; breaking the parse bars the phases downstream of the break, each naming
+the parser's cause, and fixing it reopens them; the type toggle re-derives
+immediately, closing an open lens OR an open generator first — as do level and
+posture commits, so a derivation-context commit is the fourth way home from the
 generator (opening a lens closes it too, but lands you in the lens); the level
 selector lists both levels — the built-in JEJ and the injected scaffold — and
 the closed face shows the selected level's live fit mark (each entry's own mark
@@ -55,6 +63,8 @@ export function InstrumentHarness() {
 		require('@site/src/lib/study-lenses/orchestrate/index.tsx').default;
 	const scaffoldLevel =
 		require('@site/src/lib/study-lenses/language-levels/scaffold/index.ts').default;
+	const spellmeLens =
+		require('@site/src/lib/study-lenses/lenses/spellme/index.tsx').default;
 	const notesLens = {
 		name: 'notes',
 		applicability: () => true,
@@ -77,7 +87,7 @@ export function InstrumentHarness() {
 	return (
 		<StudyLenses
 			languageLevels={[scaffoldLevel]}
-			lenses={[notesLens]}
+			lenses={[notesLens, spellmeLens]}
 			snippet={'const greeting = "hello";\nconsole.log(greeting);\n'}
 		/>
 	);
