@@ -184,19 +184,20 @@ who meets only the fix cannot tell a corrected instruction from an obeyed one.
 
 **Both are changes to CP-η rather than a fifth instrument, and that half held.
 "Ten-line changes" did not** — check 4 went **26 at `14e15d71` → 90 at
-`970b8919` → 93 at `70377e6e` → 115 at `f36981f7`** [measured: the `# 4 ·`
-comment through the last check-4 `print`, at each SHA named]. **Every endpoint
-is SHA-pinned deliberately**: an earlier revision wrote "26 … and its
-replacement is 90 [measured at this commit … at `14e15d71` and at HEAD]",
-pinning one endpoint and leaving the other floating, and the floating one moved
-twice — R-AN's two granted keys at `70377e6e`, then finding 4's anchored tails
-here. AR-5 round 2 found it as its finding 2. The row selector was never the
-binding constraint. AR-5's own prescription, executed verbatim, leaves the
-instrument **GREEN** on the finding it was built to catch: widening which rows
-the check reads adds nothing to inspect while the extractor still reads `[...]`
-tokens only, and the overlay sentence carries none. The precedent that DID hold
-is this campaign's own: `1046c90d` landed CP-η RED so its detection was proven
-before anything was trusted to it.
+`970b8919` → 93 at `70377e6e` → 115 at `f36981f7`, 118 including this commit**
+[measured: the `# ── 4 ·` comment's line number subtracted from the last check-4
+`print`'s, at each SHA named]. **Every endpoint is SHA-pinned deliberately**: an
+earlier revision wrote "26 … and its replacement is 90 [measured at this commit
+… at `14e15d71` and at HEAD]", pinning one endpoint and leaving the other
+floating, and the floating one moved twice — R-AN's two granted keys at
+`70377e6e`, then finding 4's anchored tails here. AR-5 round 2 found it as its
+finding 2. The row selector was never the binding constraint. AR-5's own
+prescription, executed verbatim, leaves the instrument **GREEN** on the finding
+it was built to catch: widening which rows the check reads adds nothing to
+inspect while the extractor still reads `[...]` tokens only, and the overlay
+sentence carries none. The precedent that DID hold is this campaign's own:
+`1046c90d` landed CP-η RED so its detection was proven before anything was
+trusted to it.
 
 - **AR5-CP-1 · widen check 4's row selector.** It scans only lines matching
   `( ) strict` or `[Generate code]` — **7 of 10 control-row lines**, and zero
@@ -317,15 +318,16 @@ ONE commit. Run the command in § The range and the SHA list; do not copy the
 table, and do not write "this commit's parent" — it resolves to a foreign commit
 in this shared tree.
 
-**What round 3 must attack, because round 2 named the pattern and this commit is
-its next instance.** Four of round 2's nine findings were defects the round-1
-fix round introduced, and three of those sat in prose written ABOUT the defect
-class — the Expected line that still said `RED`, the enumeration that dropped
-R-AN, and the blind-spot list that omitted the greedy tail this campaign had
-just added. **This commit is more of the same prose.** Attack, in this order: §
-Closing obligations' new ruling-id tuple; the six-number table's new tags and
-its SHA-pinned `violation` counts; and the anchored instrument's new claim that
-its blind spots are down from four to two.
+**What round 3 WAS TOLD to attack, because round 2 named the pattern and that
+commit was its next instance — kept as the record of a dispatch, not as one.**
+Four of round 2's nine findings were defects the round-1 fix round introduced,
+and three of those sat in prose written ABOUT the defect class — the Expected
+line that still said `RED`, the enumeration that dropped R-AN, and the
+blind-spot list that omitted the greedy tail this campaign had just added.
+**This commit is more of the same prose.** Attack, in this order: § Closing
+obligations' new ruling-id tuple; the six-number table's new tags and its
+SHA-pinned `violation` counts; and the anchored instrument's new claim that its
+blind spots are down from four to two.
 
 **Tell it four things it will otherwise have to rediscover, and mark them
 `[relayed: the fix round — falsify them]`:**
@@ -429,13 +431,13 @@ an earlier revision of this section measured exit 2 with eight errors under
 and it read exit 0 through this round's first three commits; it is **exit 2**
 again [measured at `f6bd94b6`: 3 errors, all in `lib/script-axis-spike/` and
 `src/pages/script-axis-spike.tsx`, a different peer session's new files, **zero
-under `orchestrate/`**; **re-run it — the count has read 0, 2, 3, 4 and 5 across
-four days and it is not pinnable]**. Foreign-scoped in every direction, not this
+under `orchestrate/`**; re-run it — the count has read 0, 2, 3, 4 and 5 across
+four days and it is not pinnable]. Foreign-scoped in every direction, not this
 campaign's to fix, and the only safe move is the one this line has always said:
-**re-run it in the same turn you write the body, and carry no figure.** Three
-flips is no longer an anecdote — it is the argument for the rule. ⛔ **"97/97
-commit bodies" is 103/103 at `f6bd94b6`\*\* [measured at `f6bd94b6`]. The
-property holds; the numerator moves, so re-run it.
+re-run it in the same turn you write the body, and carry no figure. Three flips
+is no longer an anecdote — it is the argument for the rule. ⛔ "97/97 commit
+bodies" is 103/103 at `f6bd94b6` [measured at `f6bd94b6`]. The property holds;
+the numerator moves, so re-run it.
 
 All four instruments reproduce · CP-η's **±1.5** tolerance is genuinely
 measured, and round 12's "±1" was wrong · **15 of 15** CP-α drawn-counts exact ·
@@ -533,18 +535,18 @@ it is a checkpoint question, not a document one.
 had gone stale are marked; two of them had been carrying AR-5's own figures,
 which are now three commits old.
 
-| what                   | value                                                                                                                                                                                                                                                                                                                                                            |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **AR-5's baseline**    | **`80306ad9`** for a full review — SHA-pinned. **For the round-5 delta re-run it is `f36981f7`**                                                                                                                                                                                                                                                                 |
-| this round's baseline  | **`f36981f7`** for round 5. The rounds so far: round 2 on `f0b5a2bb`, round 3 on `ffabcd41`, round 4 on `f6bd94b6`                                                                                                                                                                                                                                               |
-| campaign SHA list size | **104 at `f36981f7`** — campaign-scoped [measured: the scoped `git log --oneline 80306ad9..f36981f7`; 101 at `70377e6e` · 102 at `ffabcd41` · 103 at `f6bd94b6`]. The unscoped `git rev-list --count` is mostly foreign work and is NOT the number to hand a reviewer                                                                                            |
-| modified file paths    | **21** across the whole campaign; **3** in the `ffabcd41..f6bd94b6` delta and **4** in the `f0b5a2bb..ffabcd41` one before it [measured at `f6bd94b6`, campaign-scoped]. **The SHA range is named because "this round" silently re-points** — it meant three different ranges across the three AR-5 rounds                                                       |
-| green (orchestrate)    | **622 passing in 22 files** [measured at `f6bd94b6`] — unchanged all round, which is expected: nothing here touched code                                                                                                                                                                                                                                         |
-| typecheck (repo-wide)  | `npx tsc --noEmit` exit **2**, all errors under `lib/script-axis-spike/` and `src/pages/script-axis-spike.tsx`, **ZERO under `orchestrate/`** — foreign-scoped, not this campaign's to fix. **NOT PINNED, because a working-tree gate in a shared dirty tree is not reproducible from any SHA**: re-run it. The count has read 0, 2, 3, 4 and 5 across four days |
-| governance check       | `npm run check:governance` **0 errors**, 66 advisories **all foreign** [measured at `f6bd94b6`]                                                                                                                                                                                                                                                                  |
-| the four instruments   | `malformed rows: none` ×2 · `{63: 79} outliers: none` · **`CP-eta: GREEN` on four checks** [measured at `f6bd94b6`]. ⛔ **The "coverage is narrower than its PASS line admits" caveat is DISCHARGED** — checks 2 and 4 were widened at `970b8919` and each now prints its skips with their licence                                                               |
-| upstream               | **none configured** on `main` [measured at `f6bd94b6`: `git rev-parse --abbrev-ref main@{upstream}` → fatal]                                                                                                                                                                                                                                                     |
-| **foreign commits**    | **8 foreign against 1 of its own** in `ffabcd41..f6bd94b6` [measured: `git rev-list --count ffabcd41..f6bd94b6` → 9, minus the 1 the scoped log returns]. Foreign-scoped: wrong by the time you read it                                                                                                                                                          |
+| what                   | value                                                                                                                                                                                                                                                                                                                                                                            |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **AR-5's baseline**    | **`80306ad9`** for a full review — SHA-pinned. **For the round-5 delta re-run it is `f36981f7`**                                                                                                                                                                                                                                                                                 |
+| this round's baseline  | **`f36981f7`** for round 5. The rounds so far: round 2 on `f0b5a2bb`, round 3 on `ffabcd41`, round 4 on `f6bd94b6` . The fix round is `970b8919` · `70377e6e` · `f36981f7` · `80b16a8a`                                                                                                                                                                                          |
+| campaign SHA list size | **105 at `80b16a8a`, 106 including this commit** — campaign-scoped [measured: the scoped `git log --oneline 80306ad9..f36981f7`; 101 at `70377e6e` · 102 at `ffabcd41` · 103 at `f6bd94b6`]. The unscoped `git rev-list --count` is mostly foreign work and is NOT the number to hand a reviewer                                                                                 |
+| modified file paths    | **21** across the whole campaign; **3** in the `ffabcd41..f6bd94b6` delta and **4** in the `f0b5a2bb..ffabcd41` one before it [measured at `f6bd94b6`, campaign-scoped]. **The SHA range is named because "this round" silently re-points** — it meant three different ranges across the five AR-5 rounds                                                                        |
+| green (orchestrate)    | **622 passing in 22 files** [measured at `f6bd94b6`] — unchanged all round, which is expected: nothing here touched code                                                                                                                                                                                                                                                         |
+| typecheck (repo-wide)  | `npx tsc --noEmit` — **exit status and error count are both perishable; run the command**. Errors have been foreign every time, **ZERO under `orchestrate/`** — foreign-scoped, not this campaign's to fix. **NOT PINNED, because a working-tree gate in a shared dirty tree is not reproducible from any SHA**: re-run it. The count has read 0, 2, 3, 4 and 5 across four days |
+| governance check       | `npm run check:governance` **0 errors**, 66 advisories **all foreign** [measured at `f6bd94b6`]                                                                                                                                                                                                                                                                                  |
+| the four instruments   | `malformed rows: none` ×2 · `{63: 79} outliers: none` · **`CP-eta: GREEN` on four checks** [measured at `f6bd94b6`]. ⛔ **The "coverage is narrower than its PASS line admits" caveat is DISCHARGED** — checks 2 and 4 were widened at `970b8919` and each now prints its skips with their licence                                                                               |
+| upstream               | **none configured** on `main` [measured at `f6bd94b6`: `git rev-parse --abbrev-ref main@{upstream}` → fatal]                                                                                                                                                                                                                                                                     |
+| **foreign commits**    | **8 foreign against 1 of its own** in `ffabcd41..f6bd94b6` [measured: `git rev-list --count ffabcd41..f6bd94b6` → 9, minus the 1 the scoped log returns]. Foreign-scoped: wrong by the time you read it                                                                                                                                                                          |
 
 ⚠ **The pathspec is a STAGING DISCIPLINE, not a log filter.** Foreign files sat
 STAGED in the index for the whole of the last session — three of them, from peer
@@ -882,9 +884,9 @@ same section of [`DECISIONS.md`](./DECISIONS.md):
 - **Opens in**: Phase 0 step 0.2, **at the AR-5 DELTA RE-RUN**. The fix round is
   EXECUTED — all ten findings fixed or recorded, both instrument widenings
   built, CP-η GREEN. Three rulings were taken (R-AL, R-AM, R-AN) and none
-  re-opens a finding. **Do not re-open the ten.** Launch `ar-5` against baseline
-  `f0b5a2bb`; everything it needs is in § Then: re-run AR-5 on the DELTA and §
-  AR-5 — its five inputs. See § What this round did first.
+  re-opens a finding. **Do not re-open the ten.** Launch `ar-5` round 6 against
+  baseline `80b16a8a`; everything it needs is in § Then: re-run AR-5 on the
+  DELTA and § AR-5 — its five inputs. See § What this round did first.
 - **Model**: this is correction work over prose, not design. AR-5 carries no
   `model:` pin and inherits your tier; name the tier and its cost when you
   launch the re-run. Pass no `model` parameter to any `ar-N`.
@@ -988,7 +990,11 @@ intake checklist, which is a bolded paragraph and not a heading.
    errors this campaign found and could not fix — `fa6dd40c` (95/89 against a
    true 96/92), `7dea8eaa` (266/96 against a true 267/97), `b5a9c8f0` (a false
    prettier-clean checkpoint line, corrected in the record at `a5f5e007`), the
-   two untagged bodies `cb2e3448` and `1106c268`, and **`ffabcd41`, whose own
+   two untagged bodies `cb2e3448` and `1106c268`, **`f36981f7`** (its INTAKE
+   CHECKLIST calls a `DECISIONS.md` table row prose, so R-AB's third question
+   fired and was declared not to), **`80b16a8a`** (a loss ledger false in three
+   clauses, six unenumerated deletions, an untagged defect-rate series, and a
+   misstatement of the self-referential-count rule), and **`ffabcd41`, whose own
    DANGLING-REFERENCE SWEEP says "the fifteen SHAs it cites" — a count that
    reproduces under no accounting** [AR-5 round 2, finding 5; measured over that
    body: 11 distinct 8-hex tokens, 9 distinct backticked. **The substance holds
@@ -1325,8 +1331,8 @@ for s in [
   'copy. They are safe only because their LEFT bound is specific; a generic '
   'left bound plus an open tail is the defect that shipped as a BLOCKER.',
   'A RIGHT LITERAL NARROWS A GENERIC LEFT BOUND; IT DOES NOT CLOSE IT. Any row '
-  'carrying `Word: … are outside` grants the whole span between them, under '
-  'every revision of this check so far.',
+  'carrying `Word: … are outside`, or `Fix the code … or turn`, grants the span '
+  'between them where that span holds no double space.',
   'THE REVERSE DIRECTION IS FILE-GLOBAL, so a clause drawn twice can lose one '
   'drawing silently. CP-α carries per-drawing counts; this does not.',
   "UN-FRAMED DRAWINGS ARE UNREAD. § A station's kit at 0, 1 and many is one.",
