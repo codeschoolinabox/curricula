@@ -194,11 +194,11 @@ describe('spellme surface', () => {
 	});
 
 	describe('Zero — nothing claimable', () => {
-		it.skip('renders the root for an empty program', () => {
+		it('renders the root for an empty program', () => {
 			expect(root(renderLens(''))).not.toBeNull();
 		});
 
-		it.skip('renders no claim form for a program with nothing claimable', () => {
+		it('renders no claim form for a program with nothing claimable', () => {
 			expect(
 				renderLens('   ').querySelector('[data-spellme-claim-form]'),
 			).toBeNull();
