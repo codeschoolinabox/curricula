@@ -1,4 +1,4 @@
-<!-- cspell:ignore ungranted widenings pinnable accountings overclaim Tokenz actioned acyclicity affordances authorised behaviour behavioural brok bytearray checkability checkpointed codemod codepoint CPETA cutover deixis failable finditer generalises homehood licence lstrip misdescribes neighbouring organise organised parentheticals pathspec respecified scriptable spellme synchronisation ugrep discharged elif unattacked endswith findall fullmatch importants keyspace misalign renderable rindex startswith unargued unfiled unfound unglossed uninspected unactioned unbannered unbuilt undercount undercounted undercounts undrawn unmigrated unretired unrun wireframes -->
+<!-- cspell:ignore ungranted widenings pinnable accountings overclaim Tokenz actioned acyclicity affordances authorised behaviour behavioural brok bytearray checkability checkpointed codemod codepoint CPETA cutover deixis failable finditer generalises homehood licence lstrip misdescribes neighbouring organise organised parentheticals pathspec respecified scriptable spellme synchronisation ugrep discharged elif unattacked endswith findall fullmatch importants keyspace misalign renderable rindex startswith unargued unfiled unfound unglossed uninspected unactioned unbannered unbuilt undercount undercounted undercounts undrawn unmigrated unretired unrun wireframes hypothesised misdeclared numstat unprobed unsourced unsqueezed unarchived -->
 
 # orchestrate ux — resumption point
 
@@ -1845,6 +1845,1007 @@ since:
 | R-O | Hand off at this boundary; a fresh session opens on round 8's blockers.                                                                  |
 
 ---
+
+---
+
+# AR-5 ROUND 5'S VERDICT, AS RETURNED — ARCHIVE, NOT A TASK LIST
+
+**Provenance, and it is not repo state.** Spliced 2026-08-27 from the 2026-08-26
+session's subagent transcript at
+`<session-id>/subagents/agent-a87018c4a7a959e2e.jsonl` **programmatically** —
+the final `assistant` record's single text block, **27,701** characters — so it
+is verbatim by construction. **HTML-unescaping ran and was a no-op** (zero
+entities in the stored text), recorded because an earlier round's splice DID
+need it and a reader should not conclude the step is optional. **The agent id is
+bound to the round by that transcript's own metadata, not by its filename**
+[read: `agent-a87018c4a7a959e2e.meta.json` — `"description": "AR-5 round 5 on
+the mechanical delta"`].
+
+**The fifth and last delta re-run**, on `f36981f7..80b16a8a`. **Ten findings —
+no BLOCKER, six IMPORTANT, four MINOR** [measured: the `### N —` headings
+below]. It returned **PAUSE at 62%**, its own weakest, and stated that **not one
+of the ten touches the deliverable**. **The human closed the AR-5 cycle on this
+verdict 2026-08-26: no sixth round runs** [read: `fa1e0833`'s body — "then go to
+the Phase-0 → Phase-1 gate rather than a sixth review"]. Its findings landed at
+`fa1e0833` under a scope the human tightened to **token substitution** — delete
+nothing, rewrite no sentence.
+
+**Finding 1 is not fixable and rides the 0.2-closing commit's uncorrectable
+ledger**: `80b16a8a`'s loss ledger is false in all three of its clauses, and
+amend is forbidden.
+
+**Every claim below is `[relayed: ar-5 round 5]` until re-measured, and this
+archive is IMMUTABLE — its citations, line numbers and counts are allowed to
+rot.** Several already have: the closing commit corrects figures this verdict
+asserts, and every correction lives there, never here. Its line-number citations
+into `RESUME.md` were measured against a file this splice has itself made
+longer.
+
+<!-- prettier-ignore-start -->
+<!-- markdownlint-capture -->
+<!-- markdownlint-disable -->
+
+```text
+Reviewed as: claude-opus-5[1m] | UNDETERMINED
+```
+
+(The line above is the model id exactly as my environment context states it; `UNDETERMINED` is the literal required token, not a claim about my own id.)
+
+---
+
+# AR-5 Pre-Merge Review — ROUND 5
+
+**Changeset reviewed:** `f36981f7..HEAD`, one commit `80b16a8a`, one file
+`.planning-handoffs/orchestrate-ux/RESUME.md`, +47/−41
+[measured: `git show -M 80b16a8a --numstat` → `47 41 .planning-handoffs/orchestrate-ux/RESUME.md`].
+Governance read in order: `CLAUDE.md` router → `AGENTS.principal.md` (my model id
+matches `opus-5`) → `DEV.md` §§ Adversarial Review Protocol / Sourced claims /
+Ruling provenance / Verdict definitions.
+
+---
+
+## What verified clean — stated first, because most of it did, and because the BLOCKER fix holds
+
+**The regex. I could not falsify the adoption claim.** I re-ran the instrument at
+four revisions against copies via `CPETA_FILE` (the twin was never written
+[measured: `git status --porcelain src/lib/study-lenses/orchestrate/ux/` → empty]),
+on 22 probes of my own construction — 16 in one battery, 6 sharper ones — and
+**found no row where the new pattern is GREEN while any prior revision is RED**:
+
+```text
+probe                                          ffabcd41  f6bd94b6  f36981f7  HERE
+clean control                                  GREEN     GREEN     GREEN     GREEN
+2sp [Destroy code] inside the cause span       GREEN     RED       GREEN     RED
+datum right of "are outside", 1sp              RED       GREEN     RED       RED
+datum before the colon                         RED       RED       RED       RED
+autosave: on on a control row                  RED       GREEN     RED       RED
+2sp datum after the code-box source            GREEN     RED       RED       RED
+glyph outside any span                         GREEN     RED       RED       RED
+```
+
+There is also an analytic reason it cannot lose to two of the three columns:
+`(?:[^│\s]|\s(?!\s))*?` matches a strict subset of the strings `[^│]*?` matches,
+and its match cannot cross the first double-space run, so its granted-character
+set is a subset of both `f36981f7`'s and `f6bd94b6`'s. Fewer granted characters
+can only produce more residues. **The BLOCKER is genuinely closed, and the
+"matches or beats" phrasing is correctly scoped rather than a domination claim.**
+
+Everything else I re-ran myself, none of it relayed:
+
+- `CP-eta: GREEN`, **81 rows, 11 anchors one-to-one, 0 residues** [measured: instrument 3, clean tree]
+- `DECISIONS.md malformed rows: none` · `RESUME.md malformed rows: none` · `histogram: {63: 79} outliers: none` [measured: instruments 1 and 2]
+- **622 passed, 22 files** [measured: `npx vitest run --project unit src/lib/study-lenses/orchestrate`]
+- `npm run check:governance` → **0 errors, 66 advisories** [measured]
+- prettier clean · cspell 0 issues · markdownlint 0 errors on `RESUME.md` [measured, per-file form]
+- **campaign SHA list reproduces exactly at every SHA claimed** [measured: `git log --oneline 80306ad9..<sha>` over the three-path pathspec → `70377e6e` 101 · `ffabcd41` 102 · `f6bd94b6` 103 · **`f36981f7` 104** · `80b16a8a` 105]
+- **check-4 span reproduces**: 26 · 90 · 93 · 100 · **115 at `f36981f7`** · 118 at HEAD, all under one consistent convention (last-print line number minus comment line number) [measured: parsed the fenced block at each SHA]
+- **foreign commits 8-against-1 is right**: `git rev-list --count ffabcd41..f6bd94b6` → **9**; scoped log over the same range → **1** [measured]. The old 14 was wrong and the correction is correct
+- **21 modified campaign paths** still holds [measured: `git diff --name-only 80306ad9..HEAD` over the pathspec]
+- **The twin's absence from this delta is correct, not an omission** [measured: `git show 80b16a8a --stat` → one file, `RESUME.md`]. All three `ux/` documents exist; none was touched; `twin-doc: user` (R-AL) remains *true* of a changeset that edits no reader-facing prose
+- Settings line present and four-part: `work: software · twin-doc: user · ceremony: full · prospective`
+- No code file touched, so no `any`, no cast, no `@ts-`, no `eslint-disable`, no parallel type definition, no OWASP surface. `types.ts` remains the single source of truth
+
+That is a substantial clean bill, and the five figures the commit set out to fix
+are all correct. What follows is what the fix round did *around* those figures.
+
+---
+
+## Concerns
+
+### 1 — IMPORTANT · the loss ledger is false in all three of its clauses, and seven deletions above the archive banner are unenumerated
+
+**What.** The ledger reads: *"Five figures and three pointers corrected IN PLACE;
+**no paragraph replaced, no paragraph added, one four-word entry added to an
+enumerated list.** Nothing removed from any archive."*
+
+- **"No paragraph replaced"** — the STATE header's ⛔ paragraph was replaced
+  outright: 4 lines of round-2 attribution out, 8 lines of new rate-trend
+  argument in. The § Baselines typecheck cell was likewise replaced, not
+  corrected.
+- **"One four-word entry"** — the added BLIND SPOTS entry is **3 source lines /
+  37 words**, beginning *"A RIGHT LITERAL NARROWS A GENERIC LEFT BOUND…"*.
+- **"Nothing removed from any archive"** is the only true clause (all eight hunks
+  sit above line 1474 [measured: hunk headers at 1, 25, 181, 308, 425, 530, 1237,
+  1321]) — and it is the clause that misdirects, because the loss lens asks about
+  the whole file, not the archive.
+
+**Seven deletions, none enumerated, none relocated** [measured: grepped the live
+file for each string — all return zero hits outside the diff]:
+
+| deleted | from |
+| --- | --- |
+| "including one in the instrument built to catch that class and one in the section written to stop rulings being dropped" | STATE ⛔ |
+| "and it was **3** when this paragraph was first written a few minutes earlier, which is the perishability the rule above describes" | § What AR-5 verified clean |
+| "`970b8919`'s parent" | § Baselines, AR-5's baseline cell |
+| "the fix round is `970b8919` · `70377e6e` · this commit. SHA-pinned" | § Baselines, this round's baseline cell |
+| ⛔ "Was \"98 at `7dea8eaa`\"" **and** "was **328** at `14e15d71`" | § Baselines, SHA-list cell |
+| the ⛔ three-flips narrative incl. "eight errors under `lib/questioning/quizzing/`, which a peer session had already fixed" and the "4 errors" figure | § Baselines, typecheck cell |
+| "and the range is named rather than called \"this round\"" | § Baselines, foreign-commits cell |
+
+The fourth one is the real loss: a reader can no longer learn from this file
+which commits constituted the fix round.
+
+**Why it blocks-adjacent.** DEV.md's AR-5 loss lens is explicit — *a deletion
+nobody enumerated is a finding even when the result reads better*. The result
+does read better. That is not the test. And the ledger is in an immutable body.
+
+**Fix.** Restore "the fix round is `970b8919` · `70377e6e` · `f36981f7`" to the
+`this round's baseline` cell (one clause, no prose). Record the remaining six
+deletions and the three false ledger clauses in § Closing obligations item 2's
+uncorrectable ledger against `80b16a8a`.
+
+---
+
+### 2 — IMPORTANT · the commit introduced a markdown rendering defect, in the file whose campaign is about rendered-versus-source truth
+
+**Where.** `.planning-handoffs/orchestrate-ux/RESUME.md:437`:
+
+```text
+commit bodies" is 103/103 at `f6bd94b6`\*\* [measured at `f6bd94b6`]. The
+```
+
+**What.** The paragraph at 424–438 now carries **13 unescaped `**` (odd) plus one
+escaped `\*\*`**; at `f36981f7` it carried **14 unescaped and zero escaped**
+[measured: counted `(?<!\\)\*\*` in the paragraph at both revisions]. The `⛔ **"97/97
+commit bodies" …` opener has no closer, so that ⛔ correction no longer renders
+bold and the reader meets literal asterisks.
+
+**Why this one matters more than a typo.** The commit's own PER-FILE CHECKPOINTS
+line certifies "prettier clean" — prettier is clean *because prettier produced the
+escape*. Markdownlint does not check emphasis balance. This is exactly the gap
+that instrument 1 and intake question 3 ("re-read that row AS RENDERED, not as a
+diff") exist to close, and the body claims that re-read for the five § Baselines
+rows but not for this paragraph. The commit also **removed** a pre-existing
+instance of this identical defect at the old STATE ⛔ (`…same of this commit.\*\*`)
+in the same diff — it fixed one and created another.
+
+**Fix.** Close the opener. One character-pair edit, zero prose.
+
+**Also on the record (pre-existing, below the archive banner, not this delta's):**
+three further unbalanced-bold paragraphs at lines 2708, 3397, 4247 and `\*\*`
+escapes at 1972 and 2044 [measured: paragraph-level scan of the whole file].
+
+---
+
+### 3 — IMPORTANT · concern 5's fix is half-landed for the fifth consecutive round, and the body certifies it complete
+
+**What the body claims:** *"the STATE header, § YOUR FIRST ACTION and the § Then:
+re-run baseline all still dispatched round 3 at `ffabcd41`. … **All three now name
+round 5 at `f36981f7`.**"*
+
+**What is still in the file** [measured: `grep -n` over lines 1–1473]:
+
+- **Line ~885, § Operating instructions for the next session** — *"Launch `ar-5`
+  against baseline **`f0b5a2bb`**"*. That is round **2**'s baseline, three rounds
+  stale, in the section a fresh session reads to learn what to do.
+- **Line 320, § Then: re-run AR-5** — *"**What round 3 must attack**, because
+  round 2 named the pattern and this commit is its next instance… **This commit is
+  more of the same prose.** Attack, in this order: § Closing obligations' new
+  ruling-id tuple; the six-number table's new tags…"* — sitting three lines below
+  the corrected round-5 pointer, giving a reader two contradictory dispatches in
+  adjacent paragraphs and a three-round-old attack list.
+
+There are at least **five** dispatch sites, not three. The failure mode concern 5
+was raised to prevent — *"A fresh session obeying them would have launched the
+wrong review at the wrong baseline"* — is still live at two of them.
+
+**Fix.** Two SHA/number substitutions. Zero prose.
+
+---
+
+### 4 — IMPORTANT · "RECORDED, NOT FIXED" recorded nothing in either item's stated home
+
+**Concern 6.** The body says the `f36981f7` INTAKE-CHECKLIST error *"Goes to
+§ Closing obligations item 2's uncorrectable ledger with `fa6dd40c`, `7dea8eaa`,
+`b5a9c8f0`, `cb2e3448`, `1106c268` and `ffabcd41`."* It did not go there. § Closing
+obligations item 2 still enumerates exactly those six [measured: SHA tokens in
+`RESUME.md:986-996` → `fa6dd40c` `7dea8eaa` `b5a9c8f0` `a5f5e007` `cb2e3448`
+`1106c268` `ffabcd41`; **no `f36981f7`**]. No hunk in this delta touches lines
+915–1012.
+
+**Concern 7.** The body defers the `types.ts` "glossary's snippet" wording as *"a
+0.3 note"*. There is no such note. `DECISIONS.md` § 0.3 entry conditions — which
+R-Q ruled is the deferrals' **ONLY** home — contains no row for it [measured:
+`awk` over the section, grepped for `types.ts|snippet|glossary`], and `DECISIONS.md`
+is not in this delta. The drift itself is real and unchanged [measured:
+`types.ts:40` "glossary's snippet is this prop together with `type`" vs
+`README.md:116` "the **package** glossary's _snippet_"].
+
+**Why this blocks.** Both records live only in an immutable commit body — the one
+place `DEV.md` § Ruling provenance says does not count (*"A ruling recorded only in
+a commit body is findable but not readable where it binds"*), and the place this
+file's own § Closing obligations item 1 says *"goes unreachable at 0.2 close"* when
+`.planning-handoffs/` prunes. **If PROCEED closes 0.2, the closing commit walks
+item 2's six-SHA list and ships an incomplete uncorrectable record, and the 0.3
+deferral is lost.** That is irreversible.
+
+The no-new-prose ruling does not excuse this: appending a SHA to an enumerated
+ledger and a row to a table is not explanatory prose, and the commit found room
+for a 37-word blind-spot entry.
+
+**Fix.** One SHA into item 2. One row into § 0.3 entry conditions. Zero prose.
+
+---
+
+### 5 — IMPORTANT · the new STATE paragraph is an untagged repo-state claim, three of whose four data points have no in-repo witness — and it is itself the prose the ruling forbade
+
+**What.** *"⛔ **The defect rate of the fix rounds is RISING, measured: round 1
+returned 10 findings of which 3 were introduced by the round that preceded it;
+round 2, 9 of which 4; round 3, 8 of which 5; round 4, 8 of which 6.**"* Repeated
+verbatim in the immutable body under "WHY THAT RULING. Measured across four
+rounds…".
+
+**What I found** [measured: read the archived verdicts at `RESUME.md` 1860–2099
+(round 2) and 2100–2293 (round 1) end to end]:
+
+- The **totals** are right: round 1's archive lists 10 concerns, round 2's lists 9.
+- **"of which 3"** appears nowhere in round 1's verdict.
+- **"of which 4"** appears nowhere in round 2's verdict. The nearest statement is
+  round 2's own line 2078: *"five of these nine are the same shape as the ten I
+  found last round"* — **five**, and a different property (shape similarity, not
+  authorship).
+- **Rounds 3 and 4's verdicts are deliberately not archived** (per this dispatch),
+  so "8 of which 5" and "8 of which 6" have no witness in the repository at all.
+- The paragraph carries **no** `[measured:]`, `[read:]` or `[relayed:]` tag while
+  using the word "measured" as its warrant. `DEV.md` § Sourced claims: *"If you
+  cannot produce the tag's evidence in one command, you do not have the claim."*
+
+**Why this is the sharpest instance of the class.** The paragraph's own thesis is
+that *"every one of those new defects was in newly-written explanatory prose."* It
+is ~90 words of newly-written explanatory prose containing an unsourced
+statistical claim, written under a ruling that said to add none. The commit body
+answers "no paragraphs" while the diff shows a replaced paragraph carrying a new
+argument.
+
+**Fix.** Either tag it `[relayed: AR-5 rounds 1–4 verdicts; rounds 3 and 4 not
+archived]` and correct 4→5 against round 2's own words, or cut the series to the
+one thing the archives support: four rounds, four PAUSEs, deliverables clean each
+time.
+
+---
+
+### 6 — IMPORTANT · the 4a/4b fix drops half of the campaign's own adopted count form, and the body misstates that rule
+
+**The rule, live at `RESUME.md:1010`:** *"**Self-referential counts use the form
+`N at <parent>, N+1 including this commit`** (AR-5's proposal, adopted 2026-08-26).
+A commit cannot count itself before it exists…"*
+
+**The body:** *"This commit's own value is 118 and is deliberately NOT claimed —
+a commit cannot pin itself, **which is the whole content of the rule**."*
+
+That is the rule's *ground*, not its *prescription*. The prescription is the
+two-part form, and both corrected rows now carry only the first half:
+
+- `campaign SHA list size` → "104 at `f36981f7`". Should read "…, **105** including this commit" [measured: 105].
+- check-4 span → "115 at `f36981f7`". Should read "…, **118** including this commit" [measured: 118 — the body has the number and declined to write it].
+
+The consequence is small (§ Baselines tells you to re-measure) but the shape is
+this campaign's signature: a correction that lands on the SHA-list row for the
+third round running while contradicting the rule that row exists to satisfy — and
+the misstatement of an adopted rule is now immutable.
+
+**Fix.** Two clause appends. Zero prose. Record the body's misstatement in the
+uncorrectable ledger.
+
+---
+
+### 7 — MINOR · the fifth BLIND SPOTS entry over-declares for the revision it ships with and under-declares the arm it also edited
+
+**Over-declares.** *"…grants the whole span between them, under every revision of
+this check so far, **this one included**."* Falsified for this revision: with a
+double space inside the span the row is **RED** under the new pattern [measured:
+probe B]. Erring toward more blindness is safe, but the entry is a statement about
+instrument behaviour in the list that exists to state instrument behaviour
+accurately — and this list has now been wrong three times (round 2 finding 4,
+round 3 concern 2, here).
+
+**Under-declares.** The entry names only the `Word: … are outside` arm. The second
+arm, edited on the very next line, is equally exploitable:
+`this level. Fix the code [Delete all] or turn` on any row is **GREEN under all
+four revisions** [measured: probe P4]. The existing second entry
+("safe only because their LEFT bound is specific") does not cover it — a specific
+left bound plus a right literal still grants an arbitrary interior; it only makes
+the construct harder to write by accident.
+
+**Fix.** Add "…or `Fix the code … or turn`" and qualify with "where the span
+carries no double space". Six words.
+
+---
+
+### 8 — MINOR · the check-4 span's `[measured:]` recipe does not locate its own anchor, and reads one high
+
+*"[measured: the `# 4 ·` comment through the last check-4 `print`, at each SHA
+named]"*.
+
+- The instrument's comment is **`# ── 4 ·`**. `grep -n '# 4 ·'` returns three
+  lines — 187 (this sentence), 1984 and 4257 (archived `### 4 ·` headings) —
+  **none of them check 4's comment** [measured].
+- "through … the last `print`" read inclusively yields 27 / 91 / 94 / 101 / 116 /
+  119, one more than every published value [measured]. The published series is
+  self-consistent under *last-print line minus comment line*; the **wording** is
+  what does not reproduce.
+
+Pre-existing since `970b8919` renamed the comment, but the row was edited here.
+
+**Fix.** `the `# ── 4 ·` comment's line number subtracted from the last check-4 `print`'s`.
+
+---
+
+### 9 — MINOR · the unpinned typecheck row still leads with a figure the same file twice forbids carrying
+
+§ Baselines now reads "`npx tsc --noEmit` exit **2** … **NOT PINNED** … re-run it."
+Two sections later the file says, twice, *"**Carry no figure.** Re-run it in the
+turn you write the body."* At this working tree the gate is **exit 0, zero
+errors**, and the spike files the row names no longer exist [measured:
+`npx tsc --noEmit` → exit 0; `ls src/lib/script-axis-spike` → No such file].
+Sixth reading in five days. The concern-3 fix unpinned the row and kept the one
+thing the rule says to drop.
+
+**Fix.** Replace "exit **2**" with "exit status and error count both perishable —
+run the command". Zero net prose.
+
+---
+
+### 10 — MINOR · a § Baselines cell the commit re-flowed still carries a stale count
+
+`RESUME.md:541`: *"it meant three different ranges across **the three AR-5
+rounds**"*. Five have run. The commit's INTAKE CHECKLIST states "five § Baselines
+rows … re-read AS RENDERED"; this is the sixth row, reflowed by the same prettier
+pass and not corrected.
+
+---
+
+## Counter-proposals
+
+**CP-1 — make the emphasis-balance check instrument 5, or fold it into instrument 1.**
+Finding 2 is the second instance of this defect in this file and prettier
+*converts* it into a silent one. Six lines, and it reuses instrument 1's
+fence-skipping loop:
+
+```python
+# paragraph-level: count (?<!\\)\*\* outside fences; odd => unbalanced
+```
+
+I know round 8's reviewer warned that a fifth instrument finds a fifth blind spot,
+and I would normally repeat that warning. I am not, for one measured reason: the
+existing gates (prettier, markdownlint, cspell) are not merely silent on this
+class — prettier *actively launders* it into passing. That is different from an
+uncovered class, and it is the same present-and-wrong shape CP-η was built for.
+Folding it into instrument 1 keeps the count at four.
+
+**CP-2 — for the next fix round, forbid replacement as well as addition.**
+The human's ruling said "add no new explanatory prose." Findings 1, 2 and 5 all
+come from *replaced* prose, which the ruling did not name and which the commit
+therefore treated as in-bounds. The rate series (3/10 → 4/9 → 5/8 → 6/8) is
+computed over prose the campaign wrote; the mechanism is not authorship but
+touching prose at all. A round scoped to "substitute tokens inside existing
+sentences; delete nothing; rewrite no sentence" would have produced findings
+3, 4, 6, 8, 9 and 10 as its whole work — all mechanical — and would have produced
+none of 1, 2 or 5.
+
+**CP-3 — do not run a sixth AR-5 on the fix for these.** Findings 3, 4, 6, 8, 9
+and 10 are eleven token-level edits with a zero-prose budget; findings 1, 2 and 5
+are one markup repair plus ledger entries. The proportionate close is: land them,
+re-run the four instruments and the three doc gates, and take the **human's**
+Phase-0 → Phase-1 gate directly rather than a sixth adversarial round. A fifth
+consecutive review of a handoff file whose deliverable has verified clean five
+times running has a worse expected value than the human reading the eleven edits.
+
+---
+
+## Cross-cutting reads
+
+**Cross-increment coherence** — holds for the delta. No naming drift; the one
+regex change is confined to a single definition site [measured: `grep -rn "are
+outside"` across the campaign and region → one pattern definition, at
+`RESUME.md:1243`]. What does *not* hold is **pointer coherence across the
+handoff**: five dispatch sites for one baseline, two of them stale (finding 3),
+and one § Baselines row stale against its own table (finding 10).
+
+**README / DOCS drift** — the delta touches neither, and neither has drifted
+against the twin. The one live spec inconsistency is `types.ts:40` versus
+`README.md:116` (finding 4, concern 7's half), which is ruled to 0.3 and would be
+fine *if the ruling had a home*. It does not.
+
+**Phase 0 step 0.2** — `twin-doc: user` (R-AL) is still **true** of this
+changeset. Its three documents exist, none was written, and the reader the value
+names is unchanged by a fix round over a handoff file. The settings line is
+present and four-part. I did not re-litigate whether `user` was wise; that is
+AR-1's question at Phase 0.
+
+**Type contract integrity** — `types.ts` remains the single source of truth. No
+casts, no `any`, no `@ts-`, no parallel definitions; the delta touches no code
+[measured: `git show 80b16a8a --stat` → one `.md`].
+
+**Test coverage coherence** — 622/22 unchanged and expected; nothing here is
+testable code.
+
+**Scope vs. spec** — nothing shipped that the spec did not name. Conversely,
+three things the spec's own ledgers *did* name did not ship (finding 4's two
+records, finding 1's enumeration).
+
+**Security / OWASP** — no code, no input handling, no dependency change, no
+credential surface. Not applicable, checked rather than assumed.
+
+**Non-Negotiable Invariants** — all hold. The one under strain is the sourced-claims
+invariant, and finding 5 is where.
+
+---
+
+## Verdict: **PAUSE**
+
+**Certainty the ten findings are real: 93%.** Every one rests on a command I ran
+or a file I read end to end. Findings 2, 3, 4, 6, 8, 9 and 10 are re-derivable in
+one command each and I put no weight on judgment for them. My residual sits on
+finding 5's severity — a charitable reading treats the rate series as the
+campaign's own self-assessment rather than a repo-state claim, though the word
+"measured" and the immutable body foreclose it — and on finding 7, where the
+blind-spot entry's "carrying" could be read pattern-relative.
+
+**Certainty PAUSE is right rather than CONSIDER: 62%.** This is the closest of the
+five rounds and I want the case for CONSIDER on the record, because it is strong:
+**not one of my ten findings touches the deliverable.** The README, `DOCS.md`,
+`types.ts`, the twin's three documents, the projection contract, the
+`DECISIONS.md` rows, all four instruments and all four gates verified clean under
+my own commands, for the fifth round running. The BLOCKER this round existed to
+fix is genuinely fixed, and the five figures are genuinely right. A gate that
+keeps closing on handoff-file bookkeeping while the specification is clean is the
+loop the human is trying to exit, and the rate series — whatever its sourcing —
+is describing a real dynamic in which each review round manufactures the next
+round's defects.
+
+**What tips it is that two findings feed the very next gate and one of them is
+irreversible.**
+
+- **Finding 4 must be resolved before the next commit, not after it.** If PROCEED
+  closes 0.2, the closing commit walks § Closing obligations item 2 — six SHAs,
+  no `f36981f7` — and ships an incomplete uncorrectable record; and the `types.ts`
+  deferral never reaches § 0.3 entry conditions. Then `.planning-handoffs/` prunes
+  and both are gone. `DEV.md`'s PAUSE test is *"should be resolved before
+  continuing,"* and this one has no later chance.
+- **Finding 3 misdirects the next session** at the exact site concern 5 was raised
+  to fix, while the immutable body certifies that fix complete.
+
+That is the same test round 2 applied to its own finding 3, and I apply it the
+same way.
+
+**The blocking set is exactly two items — findings 3 and 4 — and both are
+zero-prose.** Findings 1, 2, 5 and 6 are IMPORTANT but their immutable halves can
+only ever go to the uncorrectable ledger; their live halves are one markup repair
+and three clause edits. If the human prefers to route this as **CONSIDER** with
+findings 3 and 4 made explicit obligations of the closing commit, that is a
+defensible call and I would not argue against it — the difference between my
+PAUSE and that CONSIDER is one of sequencing, not of substance.
+
+**On the round-13 fallback, stated plainly: NO ROUND 13 IS OWED BY THIS REVIEW.**
+All ten findings are CHANGE-shaped — false or unlocated statements about repo
+state, and one markup defect. Not one is DESIGN-shaped. No decision needs
+re-taking, no ruling needs re-litigating. The human's 2026-08-19 fallback trigger
+has not fired.
+
+**Recommended resolution — eleven mechanical edits, no new sentences:**
+
+1. `RESUME.md:437` — close the unbalanced `**`.
+2. `RESUME.md:~885` — `f0b5a2bb` → `f36981f7`; "round 5".
+3. `RESUME.md:320` — "round 3 must attack" → round 5, or strike the stale attack list.
+4. `RESUME.md:~990` — add `f36981f7` to § Closing obligations item 2.
+5. `DECISIONS.md` § 0.3 entry conditions — one row: `types.ts` "glossary's snippet" unqualified.
+6. `RESUME.md:540` — append ", 105 including this commit"; `:187` — append ", 118 including this commit".
+7. `RESUME.md:539` — restore "the fix round is `970b8919` · `70377e6e` · `f36981f7`".
+8. `RESUME.md:1328` — qualify the blind-spot entry (double space; second arm).
+9. `RESUME.md:187` — correct the `# ── 4 ·` anchor and the off-by-one wording.
+10. `RESUME.md:~543` — drop "exit **2**"; `:541` — "three AR-5 rounds" → five.
+11. Closing body: record the three false loss-ledger clauses, the six unenumerated deletions, the untagged rate series, and the misstatement of the self-referential-count rule, against `80b16a8a`.
+
+---
+
+## Files whose contents are load-bearing to these findings
+
+- `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/.planning-handoffs/orchestrate-ux/RESUME.md` — line 320 and ~885 (finding 3) · line 437 (finding 2) · lines 424–438 (findings 2, 9) · lines 5–16 (finding 5) · lines 538–547 (findings 1, 6, 9, 10) · lines 986–996 (finding 4) · line 1010 (finding 6) · lines 1243, 1328 (findings 7, and the verified regex) · line 187 (finding 8)
+- `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/.planning-handoffs/orchestrate-ux/DECISIONS.md` — § 0.3 entry conditions (finding 4)
+- `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/study-lenses/orchestrate/types.ts` line 40 and `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/study-lenses/orchestrate/README.md` line 116 (finding 4, concern 7's half)
+- `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/study-lenses/orchestrate/ux/wireframes.md` lines 547–562 and 639–653 (the probe corpus; unmodified, correctly)
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+---
+
+# AR-5 ROUND 4'S VERDICT, AS RETURNED — ARCHIVE, NOT A TASK LIST
+
+**Provenance, and it is not repo state.** Spliced 2026-08-27 from the
+2026-08-26 session's subagent transcript at
+`<session-id>/subagents/agent-a358a0328f019f47b.jsonl` **programmatically** — the
+final `assistant` record's single text block, **17,499** characters — so it is
+verbatim by construction. **HTML-unescaping ran and was a no-op** (zero entities
+in the stored text), recorded because an earlier round's splice DID need it and a
+reader should not conclude the step is optional. **The agent id is bound to the
+round by that transcript's own metadata, not by its filename** [read:
+`agent-a358a0328f019f47b.meta.json` — `"description": "AR-5 round 4 on the
+delta"`].
+
+**The fourth delta re-run**, on `f6bd94b6..f36981f7`. **Eight findings — one
+BLOCKER, five IMPORTANT, two MINOR** [measured: the `### N —` headings below],
+of which **six were defects the round-3 fix round introduced or left** [read:
+`80b16a8a`'s body]. Its BLOCKER: bounding CP-η check 4's span at both ends was a
+measured coverage regression, unnamed in the loss ledger and in the instrument's
+own blind-spot list. It returned **PAUSE**.
+
+**The human ruled 2026-08-26 that the fix round run mechanically** — numbers and
+one regex, **no new explanatory prose** — and it landed at `80b16a8a` [read:
+`80b16a8a`'s body]. That ruling is why the commit that answers this verdict adds
+no paragraphs.
+
+**Every claim below is `[relayed: ar-5 round 4]` until re-measured, and this
+archive is IMMUTABLE — its citations, line numbers and counts are allowed to
+rot.** Several already have: the closing commit corrects figures this verdict
+asserts, and every correction lives there, never here. Its line-number citations
+into `RESUME.md` were measured against a file this splice has itself made longer.
+
+<!-- prettier-ignore-start -->
+<!-- markdownlint-capture -->
+<!-- markdownlint-disable -->
+
+Reviewed as: claude-opus-5[1m] | UNDETERMINED
+
+Governance read: `CLAUDE.md` router → `AGENTS.principal.md` (model id `claude-opus-5[1m]` matches `opus-5`) → `DEV.md` §§ Adversarial Review Protocol / AR-5 / Sourced claims / Ruling provenance / Citation conventions.
+
+**Instrument replay method** — I extracted CP-η's check-3 heredoc from `RESUME.md` at each of `ffabcd41`, `f6bd94b6`, `f36981f7` into standalone scripts and ran each against **copies** of `wireframes.md` via `CPETA_FILE`; the working tree's `wireframes.md` was never written [measured: `git status --short` shows none of the three campaign files dirty]. All three revisions are GREEN on their own baseline at 81 rows / 11 anchors / 0 residues.
+
+---
+
+## Concerns
+
+### 1 — BLOCKER · the both-ends bounding is a MEASURED coverage regression against `f6bd94b6`, and it is not in the loss ledger or the BLIND SPOTS list
+
+**What.** The declared 7-probe table reproduces **exactly**, cell for cell [measured: three extracted instruments × 7 mutations, first-occurrence substitution]:
+
+```text
+probe                                        ffabcd41  f6bd94b6  HERE
+P1 colon `autosave: on` control row            RED      GREEN     RED
+P2 colon `Destroy: everything now`             RED      GREEN     RED
+P3 2sp `[Destroy code]` code-box row          GREEN      RED      RED
+P4 2sp `[Delete everything]` nameplate        GREEN      RED      RED
+P5 2sp `▓ ERASE ALL ▓` after a framing        GREEN      RED      RED
+P6 single glyph `✱`                           GREEN      RED      RED
+P7 1sp `[Delete everything]` nameplate        GREEN     GREEN    GREEN
+```
+
+The BLOCKER fix is real and the table is honest. **But the probe set does not
+exercise the span the change actually altered.** `[^│]*?` between a left bound
+and a right literal is *not* stopped by a run of two or more spaces, where
+`TAIL` was. Five probes of my own, same method [measured]:
+
+```text
+probe                                              ffabcd41  f6bd94b6  HERE   PROPOSED
+Y1 2sp datum INSIDE cause span (after the colon)     GREEN     RED     GREEN    RED
+Y2 2sp datum RIGHT of "are outside"                   RED      RED      RED     RED
+Y3 2sp datum INSIDE the "Fix the code…or turn" span  GREEN     RED     GREEN    RED
+Y4 2sp datum RIGHT of "or turn"                      GREEN     RED      RED     RED
+Y5 `[module]` inside the cause span, 2sp both sides  GREEN     RED     GREEN    RED
+```
+
+f6bd94b6 residue on Y1: `'[Delete everything]  statements are outside'` at line 557. HERE: no residue, GREEN.
+
+**Where.** `RESUME.md` § The instruments, `GRANTED["the selected level's cause"]` (lines 1239–1242); the loss ledger in `f36981f7`'s body; the BLIND SPOTS print (lines 1311–1327).
+
+**Why it matters.** Three of five probes go from detected to undetected against the immediately prior revision, on the two overlay rows the whole BLOCKER was about (drawn twice = 4 live rows). The ledger enumerates *two* behavioural removals and this is a third. The ledger's own sentence — "matching or beating BOTH prior revisions **on all seven probes**" — is true and carefully scoped, so this is not a false immutable claim; it is the subtler successor: **a coverage claim proved on a probe set the author chose, where the unprobed direction is the one the edit touched.** `DEV.md` § Documentation migration discipline: "silent loss is a defect of the same severity as a failing test." The BLIND SPOTS list, which is now the declared home for exactly this, names three open *tails* and no open *interior* — so the hole this commit created is in neither of its two ledgers.
+
+**Suggested fix** (tested, not hypothesised — forbid space-runs inside the span, keep both bounds):
+
+```python
+    "the selected level's cause":
+        r'\w[\w ]*: (?:[^│\s]|\s(?!\s))*?are outside'
+        r'|this level\. Fix the code(?:[^│\s]|\s(?!\s))*?or turn'
+        r'|strict off\.',
+```
+
+[measured: clean tree → `CP-eta: GREEN`, `4 · PASS - 81 framed rows, 11 clause anchors matched one-to-one, 0 residues`; RED on P1–P6, X2–X5 and Y1–Y5 — it dominates both prior revisions on all twelve probes, which is what the previous ledger only asserted.]
+
+And add the **residual** to BLIND SPOTS, because the proposal does not close it either: a generic left bound plus a right literal still grants everything between them on a row that contains both — `Destroy: everything now are outside` on any framed row is GREEN under **all four** revisions [measured: probe X1]. The right bound narrows the hole to rows carrying the literal; it does not remove it.
+
+---
+
+### 2 — IMPORTANT · concern 7's own fix shipped a false figure: the foreign-commit count is measured at the working HEAD and labelled `f6bd94b6`
+
+**What / where.** `RESUME.md` § Baselines, added by this commit:
+
+> **13 foreign against 1 of its own** in `ffabcd41..f6bd94b6` [measured at `f6bd94b6`: `git rev-list --count` → 14 total, minus the 1 the scoped log returns]
+
+**Measured:** `git rev-list --count ffabcd41..f6bd94b6` → **9**, not 14. Scoped log → 1. True figure: **8 foreign against 1**. The 14 is `git rev-list --count ffabcd41..6d72f76e` → **14** — the working HEAD while the body was being written (`f36981f7`'s git parent is `6d72f76e`, not `f6bd94b6`), relabelled as if taken at `f6bd94b6`.
+
+**Why.** This is the *entire content* of the rule this commit adopted — "pin a SHA that exists, which a reader can check out and reproduce exactly". A reader who does that gets 9. Fourth round running, the row rewritten to fix a sourcing defect carries a new one.
+
+**Fix.** `8 foreign against 1 of its own in ffabcd41..f6bd94b6 [measured: git rev-list --count ffabcd41..f6bd94b6 → 9, minus the 1 the scoped log returns]`.
+
+---
+
+### 3 — IMPORTANT · the file now states two different typecheck figures at the same pinned SHA
+
+**Where.** § What AR-5 verified clean (line ~427) vs § Baselines' typecheck row (line ~540).
+
+- Paragraph: `[measured at `f6bd94b6`: **3** errors … — and it was **3** when this paragraph was first written a few minutes earlier, which is the perishability the rule above describes]`
+- § Baselines: `exit **2**, **4 errors** … [measured at `f6bd94b6`]`
+
+The commit body itself says "It was **3** when `f6bd94b6` measured it" and reports 4 at this commit's working tree; I measure **4** now [measured: `npx tsc --noEmit` → exit 2, 4 errors, all under `lib/script-axis-spike/` and `src/pages/script-axis-spike.tsx`, zero under `orchestrate/`]. So the § Baselines pin is false — it carries this commit's value under `f6bd94b6`'s label. Separately, the paragraph's new parenthetical is **vacuous as written**: it prints 3 and then says it was 3 earlier, illustrating no perishability, and omits the current 4.
+
+**Fix.** Either figure is defensible; both must not be pinned to the same SHA. A working-tree gate in a shared dirty tree is the *second* form the new rule names — print the command and declare it perishable, do not pin it to a commit at all.
+
+---
+
+### 4 — IMPORTANT · concern 4 half-landed: the SHA-list correction reached one of its two homes, and the tag the file itself named as false was deleted rather than fixed
+
+**(a)** § Baselines' `campaign SHA list size` row still reads **"101 at `70377e6e`, 102 including this commit"** — re-emitted byte-identical by prettier's reflow, not corrected [measured: `git show f36981f7 -- …RESUME.md | grep "campaign SHA list size"` shows `-` and `+` lines with identical content]. The body claims "The two false figures corrected: the SHA list to **103 at `f6bd94b6`**"; that correction landed only in § What this round did. True values [measured: `git log --oneline 80306ad9..<sha> -- <3 pathspecs> | wc -l`]: 101 at `70377e6e` ✓, 102 at `ffabcd41`, 103 at `f6bd94b6`, **104 at `f36981f7`** — so "102 including this commit" is false in the live region, in the exact form the new rule quotes by name.
+
+**(b)** Line 184: "check 4 went **26 at `14e15d71` → 90 at `970b8919` → 93 at `70377e6e` → 100 at this commit** … **Both endpoints are SHA-pinned deliberately**". Under the file's own definition (`# 4 ·` comment through the last check-4 `print`) I reproduce 26 / 90 / 93 / 100 at those SHAs exactly — and **115 at `f36981f7`** [measured]. The right endpoint is not SHA-pinned, the prose says it is, and the number is false as of this commit because *this commit grew the block*.
+
+**(c)** The loss lens on that same passage: `f6bd94b6` contained the sentence *"Two tags authored at `970b8919` survived into the live region carrying `at this commit`, and both had gone false by `ffabcd41` — this paragraph, and the check-4 line count two sections down."* This commit **deleted** it. One of the two tags it named (this paragraph) was fixed; the other (the check-4 count) was not, and the pointer to it went with the deletion. The loss ledger enumerates "the `at this commit` rule" as a replaced passage but not the loss of a live pointer to an unfixed defect. That is a loss-lens finding under `DEV.md` § AR-5's first bullet.
+
+Six live-region `at this commit` occurrences survive [measured: `awk 'NR<1468' … | grep -c "at this commit"` → 6, down from 18 at `f6bd94b6`]; the body says "the two that remain quote the form as an example". Three of the six are not examples: line 184 (false), line 421 ("all are re-measured at this commit", contradicted by the `f6bd94b6` tags beside it), line 1336 (value true, form forbidden).
+
+---
+
+### 5 — IMPORTANT · the file's first line, and its two most-consulted pointers, now misdirect the next session
+
+**Where.** `RESUME.md` STATE header (lines 5–9), § Then: re-run AR-5 (lines 310–312), § Baselines rows 1–2.
+
+> **STATE: … AR-5 HAS NOW RUN TWICE … THE NEXT ACTION IS AR-5 ROUND 3, on baseline `ffabcd41` — this commit's parent.**
+
+At `f6bd94b6` every word of that was true. At `f36981f7` AR-5 has run three times, the next action is round 4 on `f6bd94b6`, and **"this commit's parent" resolves to `6d72f76e`, a foreign commit**. § Baselines still says the delta re-run baseline is `f0b5a2bb` (round 2's) and that "the fix round is `970b8919` · `70377e6e` · this commit" — three of five. § YOUR FIRST ACTION still says "the delta is three commits".
+
+I accept that archiving round 3's verdict is deliberately deferred to the closing commit — the body says so. The *pointer* is a different artifact from the *record*, and nothing in the body defers it. A fresh session obeying § YOUR FIRST ACTION dispatches the wrong review at the wrong baseline. Invariant 12's structural-blindness argument applies precisely here.
+
+**Fix.** One line in the STATE header plus the two § Baselines rows; or, if the deferral is intended, say so in the header itself.
+
+---
+
+### 6 — IMPORTANT · the body's INTAKE CHECKLIST misclassifies the DECISIONS.md edit, and the rule it disclaims is the campaign's own R-AB
+
+**What.** Body: *"`DECISIONS.md`'s R-AN paragraph is prose, not a row."* The edit is to the **`| **R-AN** | … |` cell of the rulings table** at DECISIONS.md line ~789 — a markdown table row [measured: the R-AN cell differs between `f6bd94b6` and `f36981f7`; R-AL and R-AM are byte-identical]. R-AB's third intake question — "Did it edit a row? Re-read that row AS RENDERED" — therefore fired and was declared not to.
+
+**Consequence: nil.** Instrument 1 reports `DECISIONS.md malformed rows: none` and prettier is clean [measured, both re-run]. The defect is the claim, not the row — and it is in an immutable body, which is this campaign's own top-severity class. It belongs in § Closing obligations item 2's uncorrectable record if it cannot be corrected elsewhere.
+
+---
+
+### 7 — MINOR · the "package glossary" disambiguation reached three documents and not `types.ts`
+
+`orchestrate/types.ts` lines 39–40 still read *"the **glossary's** snippet is this prop together with `type`"* — the unqualified form the README was edited away from and that this commit propagated as "the **package** glossary's" into `wireframes.md`, `RESUME.md` and `DECISIONS.md`. Not a contradiction (round 3's withdrawal of round-2 finding 8 is correct — `snippet` *is* glossed at `src/lib/study-lenses/README.md` line 321, and the README's `[read:]` tag quotes it verbatim [measured]) but the spec artifact 0.3 will be written from carries the ambiguous wording alone. Note it for 0.3 rather than editing prose in a fix round.
+
+---
+
+### 8 — MINOR · concern 8's decline is defensible
+
+The README's *"types.ts records that «the package glossary (`../README.md`) owns the shared vocabulary»"* against types.ts's *"The package glossary (../README.md) owns the shared vocabulary"* differs by a sentence-initial lowercasing and a code span around a path token. `DEV.md` § Sourced claims requires quoted-not-paraphrased; it does not require byte-identical markup, and the sentence is not a `[read:]` tag. Declining a fourth cosmetic edit in the round whose measured lesson is that editing this prose generates the next round's findings is the right call. Certainty the decline is defensible: **80%**.
+
+---
+
+## What verified clean (worth stating, since it is most of the commit)
+
+- **Concern 3** — reproduces exactly under the needle `the glossary's _snippet_ is this prop together with`: `f6bd94b6` → 0 · 1 · 2 · 1, `f36981f7` → 0 · 0 · 1 · 0, survivor at RESUME.md line 2038, below the archive banner [measured, squeezed-unwrap]. The retained halves are verbatim in `README.md`.
+- **Concern 5** — the set diff reproduces: at `f6bd94b6`, RESUME-only = **10** including `R-LO`, DECISIONS-only = **0**; at `970b8919` the tuple 40 / 31 / 36 / 27 and both enumerations reproduce exactly [measured, `\bR-[A-Z]{1,2}\b`].
+- **Concern 6** — reproduces, and only on **raw** (unsqueezed) bodies: `[measured: ` → 30 untagged / 13 house-only, bare `\[measured:` → 29 / 13, over 98 scoped bodies of `80306ad9..afe9259e` [measured]. Squeezing collapses the two patterns, which is worth knowing since this file squeezes elsewhere.
+- **103 at `f6bd94b6`** ✓ and **103/103** settings lines ✓ [measured wrap-aware — no body missing a four-part line]. `\bviolation\b` in wireframes → 3 at `f6bd94b6` ✓. `\bR-LO\b` 0 → 4 ✓. Modified paths 3 and 4 ✓.
+- **All four instruments reproduce at HEAD**: `malformed rows: none` ×2, `{63: 79} outliers: none`, `CP-eta: GREEN — 1 PASS 9 rails skipped 1 · 2 PASS checked 7 skipped 2 · 3 PASS · 4 PASS 81 rows, 11 anchors, 0 residues` — identical to the body's INSTRUMENTS block.
+- **Gates**: 622 passed / 22 files ✓; `check:governance` 0 errors, 66 advisories ✓; per-file markdownlint 0 · cspell 0 · prettier clean on all three files ✓.
+- **Type contract / tests / security**: no code file touched (3 `.md`), no `any`/cast/`@ts-`/`eslint-disable`, no ZOMBIES surface, no trust boundary. OWASP pass is a no-op except the instrument's `CPETA_FILE` `open()`, which is documented read-only and carries its own warning.
+- **Phase 0 step 0.2**: `twin-doc: user` (R-AL) is still **true** of this changeset — one of the three twin documents is touched, and it still addresses the learner-facing reader; the settings line is present and four-part.
+
+---
+
+## Counter-proposals
+
+1. **Concern 1** — the tested pattern above. Then re-run the sweep with the interior probes included and let the BLIND SPOTS list gain its fifth entry: *"a right literal narrows a generic left bound; it does not close it — any row containing `Word: …are outside` grants the whole span."*
+2. **Concerns 2–4** — stop pinning **working-tree** gates (tsc, vitest, governance, the instruments) to SHAs at all. They are the rule's *second* form by nature: in a shared dirty worktree, checking out `f6bd94b6` reproduces none of them. Reserve `[measured at <sha>]` for measurements over **committed content** (git counts, greps of `git show`), which is where it is actually checkable. That distinction, stated once beside the rule, would have caught findings 2 and 3 mechanically.
+3. **Concern 5** — make the STATE header carry only what the *closing* commit will restate, and move the round-number/baseline pointer into a single line the closing commit owns, so a fix commit cannot leave it stale.
+
+---
+
+## Verdict: **PAUSE**
+
+**Certainty the concern-1 regression is real and reproducible: 97%** (measured three times, five probes, both overlay rows, with a working alternative). **Certainty it is unenumerated in both ledgers: 95%.** **Certainty the foreign-commit and typecheck figures are false as pinned: 96%** (arithmetic over fixed SHAs). **Certainty the STATE header misdirects the next dispatcher: 90%.** **Certainty the intake-checklist row/prose claim is false: 92%.**
+
+Rationale: the BLOCKER fix itself is sound and the seven-probe table is the most honest evidence this campaign has produced — but the change removes coverage the previous revision had, on the exact rows the BLOCKER was about, and neither the loss ledger nor the BLIND SPOTS list names it. That is the loss lens's defining trigger and `DEV.md` grades silent loss at failing-test severity. Around it sit two figures that are false at the SHA they are pinned to, both created by *this* round's sourcing fixes, plus a half-landed SHA-list correction and a stale first-line pointer. Six of these eight are defects the fix round introduced or left — the fourth consecutive round at that rate, which is itself the strongest argument for holding the gate rather than closing 0.2 on it.
+
+Fixes 1–5 are small and each is independently measurable; 6 is a record obligation for the closing body; 7 belongs to 0.3; 8 is closed. Nothing here re-opens a ruling — R-AL, R-AM, R-AN are untouched and not re-litigated.
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+---
+
+# AR-5 ROUND 3'S VERDICT, AS RETURNED — ARCHIVE, NOT A TASK LIST
+
+**Provenance, and it is not repo state.** Spliced 2026-08-27 from the 2026-08-26
+session's subagent transcript at
+`<session-id>/subagents/agent-a1cff7612465cc0ff.jsonl` **programmatically** —
+the final `assistant` record's single text block, **23,333** characters — so it
+is verbatim by construction. **HTML-unescaping ran and was a no-op** (zero
+entities in the stored text), recorded because an earlier round's splice DID
+need it and a reader should not conclude the step is optional. **The agent id is
+bound to the round by that transcript's own metadata, not by its filename**
+[read: `agent-a1cff7612465cc0ff.meta.json` — `"description": "AR-5 round 3 on
+the one-commit delta"`].
+
+**The third delta re-run**, on `ffabcd41..f6bd94b6`. **Eight findings — one
+BLOCKER, four IMPORTANT, three MINOR** [measured: the `### N ·` headings below].
+Its BLOCKER: substituting `TAIL` into CP-η check 4 silently dropped a
+right-anchor and **widened** a grant, shipped under a loss-ledger claim of
+strict domination that was measurably false. It returned **PAUSE at 75%**.
+
+**The human ruled 2026-08-26: fix all six** [read: `f36981f7`'s body], and that
+commit is the answer. Its deliberate deferral of this archive is recorded there
+in the same paragraph — _"Round 3's verdict is NOT archived here … so that the
+delta round 4 reviews contains the fixes rather than the record of them"_ —
+which is why three rounds arrive at the closing commit unarchived rather than
+one.
+
+**Every claim below is `[relayed: ar-5 round 3]` until re-measured, and this
+archive is IMMUTABLE — its citations, line numbers and counts are allowed to
+rot.** Several already have: the closing commit corrects figures this verdict
+asserts, and every correction lives there, never here. Its line-number citations
+into `RESUME.md` were measured against a file this splice has itself made
+longer.
+
+<!-- prettier-ignore-start -->
+<!-- markdownlint-capture -->
+<!-- markdownlint-disable -->
+
+## Reviewed as: claude-opus-5[1m] | UNDETERMINED
+
+Same tier as rounds 1 and 2. No downgrade.
+
+**Governance chain read**: `CLAUDE.md` router → `opus-5` matches → `AGENTS.principal.md` (full) → `DEV.md` §§ Citation and claim conventions / Sourced claims / Ruling provenance / Adversarial Review Protocol / Sub-model dispatch / AR-5. Phase-0 spec read: `orchestrate/README.md`, `DOCS.md`, `types.ts`; twin read at all three absolute paths. Delta pulled myself with `git diff ffabcd41..HEAD` over the campaign pathspec — 3 files, 443/100.
+
+---
+
+## What reproduced
+
+Before the findings, the ledger of what held under my own commands. **Most of this commit is right.**
+
+| claim | verdict |
+| --- | --- |
+| delta = 3 files, 0 code | ✓ [measured: `git diff --name-only ffabcd41..HEAD -- <pathspec>`] |
+| settings line present, four parts, `twin-doc: user` | ✓ [measured: per-body grep over the delta] |
+| all four instruments at HEAD: `malformed rows: none` ×2 · `{63: 79}` no outliers · `CP-eta: GREEN`, `4 · PASS - 81 framed rows, 11 clause anchors matched one-to-one, 0 residues` | ✓ character-for-character [measured: block extracted from the ````bash fence at lines 1024–1296 and run] |
+| all four claimed mutations now fire RED (`[Destroy code]  ▓ 99 ▓` in a code-box row · `[Delete everything]` after the nameplate · `▓ ERASE ALL ▓` after a framing · a single `✱` on a control row) | ✓ all four [measured: `CPETA_FILE` against copies] |
+| `violation` at `f0b5a2bb`: `\bviolation\b` → 2·1·0, `\bviolations?\b` → 3·1·0 | ✓ exactly [measured, squeezed unwrap] |
+| `wireframes.md` `\bviolation\b` → 3 at HEAD | ✓ |
+| check 4 line span 26 · 90 · 93 · 100 at `14e15d71`/`970b8919`/`70377e6e`/HEAD | ✓ all four |
+| `80306ad9..7dea8eaa` → 267 unscoped, 97 scoped; `..fa6dd40c` → 96 scoped; `..93a7bba2` → 92 | ✓ all four (so `fa6dd40c` 95/89-vs-96/92 and `7dea8eaa` 266/96-vs-267/97 are right) |
+| `ffabcd41`'s body: 11 distinct 8-hex, 9 distinct backticked; "fifteen" reproduces under no accounting | ✓ |
+| ruling ids at `970b8919`, anchored: union 40 · D 31 · R 36 · both 27; bare union 41, extra `R-LO` | ✓ exactly |
+| `R-AN` at `970b8919`: RESUME 0, DECISIONS 2 | ✓ |
+| campaign SHA list 103 at HEAD, 102 at `ffabcd41` | ✓ (body's figure correct) |
+| gates: 622 passed / 22 files · `check:governance` 0 errors 66 advisories · markdownlint 0 · cspell 0 · prettier clean ×3 | ✓ all, run myself |
+| finding 8's refutation | ✓ **the refutation holds** — [read: `src/lib/study-lenses/README.md` — "**snippet** — the raw program passed in for study: the source text a learner or host brings, together with its snippet type"], and `orchestrate/README.md` has no region `snippet` entry [measured: `grep -nE '^- \*\*snippet'` → 0]. Round 2 searched the wrong glossary. I was wrong; you are right. |
+| finding 9's fix, and every quoted fragment in that `wireframes.md` paragraph | ✓ all five verbatim in `user-journeys.md` [measured, unwrapped] |
+| loss lens: no heading, no table-row first-cell lost from any of the three files | ✓ [measured: heading diff + row-key multiset diff vs `ffabcd41`] |
+| findings 2, 5, 7 dispositions | ✓ |
+
+**Type contract / test coherence / security**: correctly no-op. `types.ts` untouched, zero code files, 622/22 green, pure markdown.
+
+Two gate figures have drifted since the body was written, foreign in both directions: `npx tsc --noEmit` is now **exit 2 with 4 errors** (three in `lib/script-axis-spike/`, one `JSX` namespace in `src/pages/script-axis-spike.tsx`) [measured, dirty tree]. Not this campaign's; noted only because § Baselines now prints `3`.
+
+---
+
+## Concerns
+
+### 1 · BLOCKER — the `TAIL` substitution silently dropped a right-anchor and **widened** a grant. The loss ledger's "strictly dominates" is measurably false.
+
+**Where**: `.planning-handoffs/orchestrate-ux/RESUME.md` line 1191–1192 (the `GRANTED` table, key `"the selected level's cause"`), and the commit body's LOSS LEDGER.
+
+Old, at `ffabcd41`:
+
+```python
+r'\w[\w ]*: [^│]*are outside|this level\. Fix the code[^│]*|strict off\.'
+```
+
+New, at HEAD:
+
+```python
+r'\w[\w ]*: ' + TAIL + r'|this level\. Fix the code' + TAIL + r'|strict off\.'
+```
+
+The first alternative was bounded on **both** ends — `X: … are outside`. `TAIL` replaced `[^│]*are outside`, and the literal terminator went with it. The grant is now *any* `Word…: <text up to the first double space>`, on any framed row.
+
+The other four substitutions all narrow. This one widens, and it is the only one where the old tail was not the sole right-hand bound.
+
+Measured, old instrument vs new, same mutation, against copies:
+
+| mutation on a control row | OLD (`ffabcd41`) | NEW (HEAD) |
+| --- | --- | --- |
+| `autosave: on` | **RED** | **GREEN** |
+| `next up: run it` | **RED** | **GREEN** |
+| `Destroy: everything now` | **RED** | **GREEN** |
+
+The commit body states: *"the four mutations above are the evidence that the replacement strictly dominates them."* Three counterexamples say otherwise, two of them entirely plausible as future drawn copy. The claim is in an immutable body and amend is forbidden — so it is now the **fifth-generation** instance of the uncorrectable class, and it is a claim *about the loss ledger itself*.
+
+**Why it is BLOCKER and not IMPORTANT**: the twin stakes its own totality on this check [read: `wireframes.md` § — "The first was found by a reviewer, the second by a reviewer, the **third by an instrument** … **Read the list as complete only as far as that check is green.**"]. 0.3 writes `types.ts` from that contract. A grant that fires on any colon means the next drawing added in 0.3 can carry an ungranted datum through green.
+
+**Fix**: restore the right anchor — `r'\w[\w ]*: ' + TAIL + r'(?<=are outside)'` is wrong (lookbehind width); use `r'\w[\w ]*: [^│]*?are outside'`, which is both left- and right-bounded and needs no `TAIL` at all. Then re-run and confirm GREEN. Record the widening in the closing body's uncorrectable ledger alongside `ffabcd41`.
+
+Certainty the regression is real: **99%** (run both instruments). Certainty it matters to 0.3: **80%**.
+
+### 2 · IMPORTANT — the new `BLIND SPOTS` line declares "two, down from four". Measured, there are at least four, and two of them are undeclared. This is round 2's finding 4, recurring inside round 2's finding-4 fix.
+
+**Where**: `RESUME.md` lines 1261–1269 (the check-4 `BLIND SPOTS` print), warranting `wireframes.md` line 46.
+
+**(a) The anchor is one space wide.** `TAIL = r'.*?(?=\s{2,}|$)'` stops at the first run of **two or more** spaces. An ungranted datum separated from a free-copy tail by **one** space is still swallowed whole. The same three tokens the body celebrates catching, re-run with a single separator:
+
+| mutation | 2 spaces | 1 space |
+| --- | --- | --- |
+| `[Delete everything]` after `the pane holds:` | **RED** | **GREEN** |
+| `▓ ERASE ALL ▓` after `the machinery broke here,` | **RED** | **GREEN** |
+| `▓ NUKE ▓` in a code-box row | **RED** | **GREEN** |
+
+[all measured via `CPETA_FILE` against copies]. The patch converts total blindness on those rows into one-space-wide blindness. That is real progress and it is not "patched".
+
+**(b) Concern 1's colon hole** is a second undeclared blind spot, and unlike (a) it is a *false grant* rather than a swallowed tail.
+
+The declared two (file-global reverse direction; un-framed drawings) are correct as far as they go. The problem is the closure word — "**two**, down from four" — asserted without a mutation sweep, in a print statement whose whole purpose is to keep the enumeration honest. `970b8919`'s body made the identical assertion ("two DECLARED blind spots") and round 2 found it wrong; the count changed and the method did not.
+
+**Counter-proposal**: stop printing a *number*. Print the enumerated list and a one-line statement of the method that produced it — e.g. *"blind spots found by mutation sweep on <date>, N mutations tried, list below; a count without the sweep that produced it is a guess."* A number invites the next reader to trust closure; a named method invites them to re-run it. If you keep a count, the sweep that produces it belongs in the fence so it re-runs with the instrument.
+
+Certainty the three single-space mutations pass GREEN: **99%** (run). Certainty the declared list is materially incomplete: **90%**.
+
+### 3 · IMPORTANT — fixing the README broke three live verbatim quotations of it, one in the twin and one inside a `[read:]` tag. Unenumerated in the loss ledger.
+
+This commit rewrote the README sentence to insert `**package**`. The exact string it replaced is still quoted, and still attributed to `README.md`, in three live places [measured: unwrapped substring count of "the glossary's _snippet_ is this prop together with `type`" — `orchestrate/README.md` **1 at `ffabcd41`, 0 at HEAD**; `orchestrate/ux/wireframes.md` **1**; `RESUME.md` **2** (one live at 1329, one inside the archived verdict); `DECISIONS.md` **1**]:
+
+1. `/Users/master/.../orchestrate/ux/wireframes.md:41–43` — **the twin, a 0.2 deliverable**: `README.md` states that "the `snippet` prop is the source text alone — the glossary's _snippet_ is this prop together with `type`".
+2. `/Users/master/.../.planning-handoffs/orchestrate-ux/RESUME.md:1329` — **live region, inside a sourced-claim tag**: `[read: `README.md` — "…the glossary's _snippet_…"]`. Under `DEV.md` § Sourced claims a `[read:]` tag asserts the quoted words are in the cited file. **At HEAD they are not.** That is Non-Negotiable Invariant 13 failing in the live region.
+3. `/Users/master/.../.planning-handoffs/orchestrate-ux/DECISIONS.md:793` — **R-AN's own ruling record**, which grounds `the source` contract row on that quotation. `DECISIONS.md` is not in this delta, so the commit made a ruling record stale without touching it.
+
+The commit's LOSS LEDGER enumerates one behavioural removal and three replaced paragraphs. It does not enumerate that it edited a sentence three other documents quote verbatim — which is precisely what the loss lens is for.
+
+**Fix**: three one-line edits, all mechanical — bring the three quotations to the README's current words, or (better) shorten the quoted span to the half that did not change (`"the `snippet` prop is the source text alone"`) and paraphrase the rest. Then `git grep` the new sentence to confirm no fourth site.
+
+Certainty the quoted string is absent from the README at HEAD: **99%**. Certainty it reaches the twin and therefore 0.2: **95%**.
+
+### 4 · IMPORTANT — the rule adopted at this commit is stated as already satisfied, and this commit adds three fresh violations of it.
+
+**Where**: `RESUME.md` lines 1316–1321.
+
+> ⚠ **`[measured at this commit]` IS NOT A VALID TAG INSIDE A FILE** … **Every measurement in this file carries the SHA it was taken at.**
+
+The bolded sentence is a repo-state claim about the file it sits in, and it is false. [measured: unwrapped scan of the live region, lines 1–1800 — **thirteen** genuine `[measured at this commit…]` tags survive, at lines 65, 88, 426, 432, 442, 536, 537, 538, 539, 540, 541, 542 and **1302**.]
+
+Line **1302** is fourteen lines above the rule: `[measured at `ffabcd41` and re-measured at this commit]`, in the very paragraph rewritten to close finding 1. Lines **88** and **426** are also new text in this diff.
+
+Three of the thirteen are already false at HEAD, by exactly the mechanism the rule describes:
+
+- line 64–65: *"the campaign SHA list is 101 at `70377e6e`, **102 including this commit** [measured at this commit: `git log --oneline 80306ad9..HEAD` over the three pathspecs]"* — running the printed command at HEAD returns **103** [measured].
+- line 432: *"'97/97 commit bodies' is 101/101 at `70377e6e`, **102/102 including this commit** [measured at this commit]"* — **103/103** at HEAD.
+- line 538: *"exit 2, **3 errors**… [measured at this commit]"* — **4 errors** at HEAD [measured]. Foreign drift, in the row whose own text says "Carry no figure."
+
+Round 2's counter-proposal was to *add one line to § Operating instructions*. This commit instead wrote the rule as a completed sweep. The sweep was not run.
+
+**Fix**: run it. Thirteen tags, each takes the SHA it was authored at (`git blame` gives them). Correct 65 and 432 to `102 at ffabcd41` (the SHA-pinned form the rule prescribes). Then the bold sentence is true, and it is a claim you can re-measure in one command.
+
+Certainty on the thirteen: **97%** (unwrapped scan; the tag wraps, so a line-based grep undercounts). Certainty two are numerically false at HEAD: **99%**.
+
+### 5 · IMPORTANT — § Closing obligations: anchoring no longer removes `R-LO`, because this commit spliced the verdict that quotes it; and the prescribed method contradicts both stated enumerations.
+
+**Where**: `RESUME.md` lines 928–963.
+
+**(a) The self-falsifying absence claim, fourth instance.** The bullet says the bare pattern's extra is *"the false positive **`R-LO`**, matched inside `AR-LOG` at two sites — **anchor the pattern**."* At `ffabcd41` `\bR-LO\b` in `RESUME.md` was **0**; at HEAD it is **4** [measured], because this commit spliced round 2's verdict, which names `R-LO` as a standalone token at lines 1917, 1921 and 2025, plus the bullet's own line 933. **Anchoring no longer removes it.** The tuple is SHA-pinned to `ffabcd41` and true there, so this is not a false statement — but the *remedy* it hands the closing commit is dead on arrival.
+
+**(b) The prescribed method produces neither stated enumeration.** The bullet closes with *"Walk both files and diff the two id sets; do not hand-list either."* Measured, anchored `\bR-[A-Z]{1,2}\b`:
+
+| | at `970b8919` | at `ffabcd41` | at HEAD |
+| --- | --- | --- | --- |
+| R \ D | 9 (exactly the nine listed) | 9 | **10 — the nine plus `R-LO`** |
+| D \ R | 4 (exactly the four listed) | **0** | **0** |
+
+So at HEAD the prescribed set-diff returns **ten** for the half the bullet says is nine, and **zero** for the half it says is FOUR. The four are recoverable only under the record-vs-citation judgment the bullet states in prose — which is exactly what a set diff cannot make. The instruction and the enumeration contradict each other at the SHA the closing commit will run at.
+
+The bullet's paragraph on `R-F` half-notices this ("self-falsifying under a bare grep and true under the distinction") and then prescribes the bare grep anyway.
+
+**Fix**: (i) drop "anchor the pattern" as the remedy and say what actually holds — *no regex over this file can be trusted, because the file quotes ruling ids in prose about ruling ids; the set diff is a starting list, not the answer*; (ii) replace "diff the two id sets" with the two-step the bullet's own prose already implies — *diff the id sets to get the candidates, then classify each as record or citation by opening the row*; (iii) state the intersection at both SHAs (27 at `970b8919`, 31 at `ffabcd41`) or drop it, since a lone pinned intersection reads as current.
+
+Certainty `R-LO` survives anchoring at HEAD: **99%**. Certainty the set-diff instruction contradicts the FOUR: **95%**. Certainty this bites the closing commit: **75%**.
+
+### 6 · MINOR — row 5 of the six-number table does not reproduce, and it is the one row that got a SHA but not a pattern.
+
+> a naive audit grep scores **29** of 98 bodies untagged, **14** carrying only the house variant | this file | **30** and **13** [measured at `70377e6e` over the 98 bodies of `80306ad9..afe9259e`]
+
+The corpus is right — 98 bodies [measured, scoped]. The range is fixed, so the SHA in the tag cannot change the answer. Measured over those 98 bodies:
+
+| pattern | untagged | of those, carrying `[measured at ` |
+| --- | --- | --- |
+| `DEV.md`'s printed `\[(measured\|read\|relayed):` | **15** | 8 |
+| `\[measured:` | **29** | **13** |
+| any `\[(measured\|read\|relayed)` | 2 | — |
+
+The **13 reproduces exactly** under `\[measured:`; under that same pattern the first number is **29**, not 30. I tried seven patterns and three pathspec subsets; none returns 30.
+
+This is finding 6's own mechanism one row over: row 1 got its pattern printed precisely because "a labelled method that does not produce the labelled number" is the recurring failure, and row 5 got a SHA and a corpus but no pattern. `DEV.md` § Sourced claims: *"If you cannot produce the tag's evidence in one command, you do not have the claim."*
+
+**Fix**: print the pattern (`\[measured:`) and re-measure — I read it as 29/13.
+
+Certainty 30 does not reproduce: **85%** (an eighth pattern may exist; that it needs an eighth is the point).
+
+### 7 · MINOR — § Baselines carries two round-2-scoped figures that read as current.
+
+`modified file paths … **4** in this round's delta` — this round's delta is **3** [measured]. `**foreign commits** — 4 in this round's range, against 2 of its own` — measured against `f0b5a2bb`, not `ffabcd41`. Both are hedged in-cell ("at the time this line was written", "wrong by the time you read it"), so this is a nudge, not a defect: when § Baselines' own scope word ("this round") silently re-points, hedging does not save it. Name the SHA the round is.
+
+Certainty: **90%**.
+
+### 8 · MINOR — the README's new quotation of `types.ts` re-formats what it quotes.
+
+`orchestrate/README.md` writes: `types.ts` records that "the package glossary (`../README.md`) owns the shared vocabulary". The source is a JSDoc comment with no markup: `The package glossary (../README.md) owns the shared vocabulary`. Lowercasing the sentence-initial capital is conventional; adding a code span is the same class as round 2's finding 9, one notch milder because the source has no competing formatting. Mentioned for consistency with the standard this campaign applied to itself, not because it misleads.
+
+Certainty: **70%** that it is worth an edit at all.
+
+---
+
+## Cross-cutting reads
+
+**Cross-increment coherence** — holds within the delta. Vocabulary is consistent; `TAIL` is script-internal and does not leak into domain prose. The one coherence break is concern 3, and it runs *across* the delta boundary into `DECISIONS.md`.
+
+**README / DOCS drift** — `DOCS.md` untouched and still consistent; `types.ts` untouched and still the single source of truth; no casts, no `any`, no parallel types. The README edit is correct on its own terms and wrong in its downstream effect (concern 3).
+
+**Phase 0 step 0.2** — `twin-doc: user` (R-AL) is still **true** of this changeset: it edits the twin and the region's learner-facing render prose, and `user` names the right reader. All three twin documents exist. The settings line is present and four-part [measured]. I did not re-litigate whether `user` was wise — AR-1's question.
+
+**Scope vs. spec** — nothing shipped the spec did not name. Every edit traces to a round-2 finding or to the human's 2026-08-26 ruling.
+
+**Loss lens** — no heading and no table row lost from any of the three files [measured: heading diff and row-key multiset diff against `ffabcd41`]. The declared paragraph replacements are supersessions and are each quoted in the body. **One unenumerated loss**: the README sentence three documents quote (concern 3). **One misdeclared loss**: the instrument widening declared as strict domination (concern 1).
+
+**Non-Negotiable Invariants** — 13 is the one failing, at two sites: the `[read:]` tag at `RESUME.md:1329` whose words are no longer in the cited file (concern 3), and the file-wide compliance claim at 1318 (concern 4).
+
+**Security / OWASP** — no-op, correctly. Zero code, zero untrusted input, zero trust boundaries.
+
+---
+
+## Verdict
+
+**PAUSE** — certainty this is the right call **75%**.
+
+Rationale. Six of round 2's nine are cleanly and verifiably fixed, the refutation of finding 8 is correct and I withdraw it, every gate is green and I ran all of them, and the four claimed mutation catches reproduce exactly. **The commit's substantive work is sound.** What blocks is that the fix round produced three defects that reach past the handoff into the deliverables:
+
+- **Concern 1** is a measured coverage *regression* in the instrument, shipped under a loss-ledger claim of strict domination. `autosave: on` on a control row was RED before this commit and is GREEN after. The twin's totality warrant is now weaker in one direction than it was at the baseline, and 0.3 writes `types.ts` from that contract.
+- **Concern 3** puts a false `[read:]` tag in the live region and a misattributed quotation in the **twin** — a 0.2 deliverable AR-1 reads next.
+- **Concern 2** is round 2's finding 4 landing inside round 2's finding-4 fix: a blind-spot count asserted closed without the sweep that would close it.
+- **Concerns 4 and 5** are the same shape one level down — a rule declared satisfied without measuring, and a remedy falsified by the commit that printed it.
+
+Your own prediction was correct and I want it on the record: you wrote *"Round 3 should assume the same of this commit"*, and the rate did not fall. Four of round 2's nine were fix-round defects; **five of these eight are** [measured against the delta]. The three sharpest all sit in prose or code written *about* the defect class — the loss ledger, the blind-spot enumeration, and the sourced-claims rule.
+
+**The remediation is small and that belongs on the record too.** Six edits, all inside the four files already open, none needing a ruling, none re-opening a round-2 finding:
+
+1. `RESUME.md` 1191–1192 — restore the `are outside` bound: `r'\w[\w ]*: [^│]*?are outside'`. Re-run; expect GREEN.
+2. `RESUME.md` 1261–1269 — replace the count with the sweep. Name the one-space hole and the colon hole.
+3. `wireframes.md` 41–43, `RESUME.md` 1329, `DECISIONS.md` 793 — bring the three quotations to the README's current words, or shorten the quoted span.
+4. `RESUME.md` — SHA-pin the thirteen live `at this commit` tags; correct 65 and 432 to `102 at ffabcd41`.
+5. `RESUME.md` 928–963 — drop "anchor the pattern" as the remedy; make the closing instruction two-step (diff for candidates, then classify).
+6. `RESUME.md` row 5 of the six-number table — print the pattern; I read it as 29/13.
+
+Plus, in the closing body: record concern 1's "strictly dominates" in the uncorrectable ledger alongside `ffabcd41`'s "fifteen SHAs" — it is the fifth-generation instance, and it is a false claim *about* the loss ledger.
+
+**Why CONSIDER is defensible and I did not choose it.** Nothing here touches design, contract, or product code, and four of the six edits are handoff hygiene that CONSIDER's "document a response, then continue" would reach anyway. If the human reads it that way, take it as CONSIDER and land all six in the closing commit; I will not argue that reading is wrong. What I will not call it is PROCEED: concern 1 is a measured regression in the instrument the twin's completeness claim rests on, and concern 3 leaves a `[read:]` tag in the live region quoting words that are not in the file it names.
+
+**No round 13 is owed by this review.** Every concern is CHANGE-shaped — a regression, a false statement, an incomplete enumeration, a missing pattern. None needs a ruling. The 2026-08-19 fallback trigger has not fired.
+
+**If these six land, 0.2 closes.** The next gates are the settings-line discharge, § Closing obligations (all four, with the corrected enumeration *and* the corrected method), the Phase-0 → Phase-1 human gate, and the push gate. `main` still has no upstream [measured: `git rev-parse --abbrev-ref main@{upstream}` → fatal].
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
 
 ---
 
