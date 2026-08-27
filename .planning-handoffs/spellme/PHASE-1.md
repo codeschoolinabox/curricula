@@ -744,6 +744,80 @@ commit.
   label was corrected in the same commit and the rewrite is enumerated in its
   body.
 
+### The `spellme` LENS — Phase 1, wave 3 (IN PROGRESS)
+
+⚠ **Do not count the rows of anything here. RUN THIS** — and note it takes
+**three** paths, not two: wave 2's loop covered the module and the handoffs
+only, and would have missed the sandbox injection entirely.
+
+```sh
+git log --format='%h %s' --since='2026-08-26 00:00' -- \
+  src/lib/study-lenses/lenses/spellme/ \
+  spiralearn/sandbox/orchestrate/index.mdx \
+  .planning-handoffs/spellme/
+```
+
+**🔍 checkpoint #1 — the injection. The human's words, verbatim:**
+
+> "tokens are greyed out when I write the incomplete string"
+>
+> "dash."
+
+**The dash is the finding, and it confirms the design.** The phases panel draws
+two greyed states that look alike: an accessible phase with no attached lens is
+a disabled select whose only option is `—`, while a **barred** phase shows
+`⚠ <parser cause>` and its label carries `data-phase-barred` [read:
+`orchestrate/phases-panel/index.tsx`, the two select branches]. The dash proves
+the **tokens phase stayed accessible** while the source did not lex — spellme
+merely stepped aside — which is what `embody/derive-accessibility.ts` declares
+in its own words: _"`source` and `tokens` are always accessible … A phase's
+own-stage error never bars it — it renders inside the phase."_
+
+⚠ **The empty-station caption does not exist in code.** `orchestrate/README.md`
+specifies `Tokens, spelling: nothing studies this phase yet`, including a
+spoken-form rule turning the label's `·` into a comma, and **no live source
+implements it** [measured 2026-08-27: `git grep -nE "nothing studies|studies
+this phase"` over `src/**/*.ts` and `*.tsx` → only the deprecated architecture
+and unrelated prose; positive control `Tokens · spelling` **is** implemented, at
+`orchestrate/display-labels.ts`]. So the follow-on recorded in this lens's
+README § Edge cases — that the caption cannot tell "nothing studies this phase"
+from "everything that studies it declined" — is about a caption **nobody has
+written yet**. It is `orchestrate/`'s, not this lens's, and not wave 3's (human
+ruling 2026-08-27: observe it, do not fix it).
+
+⚠ **The documented jsdom flake was met first-hand**, for the first time in this
+campaign rather than relayed:
+`TypeError: textRange(...).getClientRects is not a function` printed during an
+`orchestrate/tests/index.test.tsx` run while the file still passed [measured
+2026-08-27]. The record's standing instruction is to check the **symptom**
+rather than trust an isolated re-run, and this is that symptom verbatim.
+
+#### Corrections to immutable commit bodies
+
+A body cannot be amended, so each correction lives here.
+
+- **`12f1d9da`** asserts this module's `DOCS.md` carried no `§` citation before
+  it, "against **3** in the working copy". The 3 is wrong — the count at that
+  commit is **4** [measured: `git show 12f1d9da:<the file>` piped to `grep -c`
+  for the sigil → 4; at its parent → 0]. A fix applied later in the same commit
+  added a fourth citation and the counting sentence was not re-measured after
+  it. The "carried none before" half is true and re-verified.
+- **`e872d18b`** states the scoped suite as "44 passed | **50** skipped". It is
+  **48** — the number its own gate block printed in the same turn [measured]. 50
+  was the pre-increment-1 figure, carried forward by hand instead of read off
+  the output beside it.
+- **`6d72f76e`** reads "all agreeing → 1 … positive control **19**". The → 1 is
+  true of all three instruments; the 19 is true of the **collapsed pipeline
+  alone** — `grep -c` and `git grep -c` both return 18, because `README.md`
+  wraps one parenthetical mid-phrase so no single line carries the whole string
+  [measured]. 19 is the right occurrence count, 18 the right line count.
+
+⚠ **Three of these are the same defect: a count stated beside the measurement
+that contradicts it.** The campaign already names the class — the fix round is
+where new defects enter — and wave 3 has now reproduced it three times in one
+session. What caught each was re-verifying with the reviewer that raised the
+finding, never the author re-reading their own body.
+
 ## Traps, each of which has already cost something
 
 - **The test helper must mirror `embody/derive-tokens.ts`** — `acorn.tokenizer`
@@ -885,6 +959,48 @@ Never pass a `model` parameter when spawning an `ar-N`.
      under re-measurement — the line numbers did not. That body is immutable,
      which is why the corrected evidence lives here, and it is finding 1's
      defect committed inside the commit recording finding 1.
+- ⭐ **Partial data on a failed stage — a Phase-0 unit for a FRESH session**
+  (human ruling 2026-08-27, taken mid-wave-3 and deliberately not designed
+  there; `acorn-loose` approved as a new dependency). Today a failed stage
+  publishes **only a cause** — `StageFailure` is `{ ok: false; cause }` with no
+  partial value [read: `embody/types.ts` — "A stage that failed — as data, never
+  a throw"]. That, not policy, is why this lens declines a program that does not
+  lex: there is no sequence to build a stream from. The three stages differ
+  sharply, and this scoping is recorded so the next session need not re-derive
+  it:
+  1. **`tokens` — genuinely incremental.** `tokenizer()` yields one token at a
+     time, so the prefix exists at throw time; `Array.from` is what discards it
+     [read: `embody/derive-tokens.ts`]. `StageCause` already carries the
+     stopping point — an `offset` its own doc calls "directly sliceable". ⚠ That
+     exact line carries a **compile footgun no test in this repo can see**: the
+     spread form compiles under Docusaurus/Babel loose mode to `[].concat(x)`,
+     which wraps the iterator instead of draining it, so the stage would report
+     `ok` for source that does not lex. The file's own comment is the warning.
+  2. **`ast` — not incremental at all.** `parse()` is one call and yields no
+     partial tree. `acorn-loose` is the purpose-built answer and is approved but
+     **not installed** [measured 2026-08-27: `package.json` declares `acorn` and
+     `eslint-scope` only]. It carries a **curriculum** question, not merely a
+     technical one — loose parsing invents nodes to bridge broken syntax, and
+     publishing a tree the language never produced is a contract decision for an
+     instrument built on the machine's own account.
+  3. **`environment` — no independent failure mode.** It short-circuits on
+     `!ast.ok` and `!entwined.ok`, and `eslint-scope`'s `analyze()` needs a
+     complete `Program` [read: `embody/derive-environment.ts`]. Its partialness
+     is **entirely downstream of `ast`'s** — deciding `ast` decides it, at no
+     extra cost.
+  4. **Also in scope, and easily missed:** `deriveAccessibility` bars `ast` on
+     `!facts.tokens.ok`. A partially-successful stage needs that rule
+     **re-examined**, not merely extended.
+
+  The instinct behind it is already named as its own lens by ruling — this
+  lens's `README.md` § Future direction lists "**the scanner's stopping point**"
+  among the further games, each of which is its own lens (human ruling
+  2026-08-13). ⚠ One claim was **not** verified: that the evaluators already
+  publish partial data by default. `git grep -lnE "partial"` over
+  `evaluators/**/*.ts` returned nothing [measured 2026-08-27], so either it is
+  structural rather than named that way, or the premise needs checking before
+  the handoff leans on it.
+
 - **Registering `spellme` in the composition root is NOT Phase 1's job.**
   `orchestrate/lib/composing/built-in-lenses.ts` imports parsons and writeme and
   knows nothing of spellme [measured 2026-08-19: spellme is now named in

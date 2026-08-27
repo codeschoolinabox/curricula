@@ -176,9 +176,26 @@ down.
 
 ### The 🔍 checkpoint
 
-**URL: `/sandbox/orchestrate`** — `docusaurus.config.ts:234` maps
+⛔ **CORRECTED 2026-08-27 — this section had the URL exactly backwards, and the
+wrong half carried a `[measured]` tag.** It read: "**URL:
+`/sandbox/orchestrate`** — `docusaurus.config.ts:234` maps
 `path: 'spiralearn/sandbox'` to `routeBasePath: 'sandbox'`, so the
-`/spiralearn/` form is a **404** [measured].
+`/spiralearn/` form is a **404** [measured]." A human following it got **Page
+Not Found** at wave 3's first checkpoint.
+
+**URL: `/spiralearn/sandbox/orchestrate/`** — the site's `baseUrl` is
+`'/spiralearn/'` [read: `docusaurus.config.ts`], and `routeBasePath` is
+**relative to `baseUrl`**, so the two concatenate rather than compete. The built
+route registry carries only the prefixed form [measured 2026-08-27:
+`grep -oE "'/spiralearn/sandbox[^']*'" .docusaurus/routes.js` →
+`'/spiralearn/sandbox/orchestrate/'`, with the trailing slash].
+
+⚠ **A status code cannot check this, which is why the error survived review.**
+The dev server answers **every** path — valid or not — with the same 1697-byte
+client-rendered shell and **HTTP 200** [measured 2026-08-27]. `curl` therefore
+reports success for a route that renders Page Not Found. Only a browser can
+tell, which makes the URL a thing the 🔍 checkpoint verifies rather than
+something checkable beforehand.
 
 `npm start`, open it. **Before** the injection the **Tokens · spelling**
 station's select is disabled — `disabled={phase.lenses.length === 0}` at
