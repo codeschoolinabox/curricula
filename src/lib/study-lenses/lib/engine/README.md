@@ -373,6 +373,24 @@ Using a different name in code is a bug, not a stylistic choice.
   FIFO order, runs the message hook, services calls, feeds the stream.
 - **sandbox** — the killable module worker a run executes in; spawned on first
   pull, torn down on every stop path.
+- **realm** — one side of the worker boundary, identified by its global object.
+  The engine spans two: a program runs in the worker realm and shares its global
+  object with the engine's own worker-side code, while the thread realm's
+  globals are unreachable from the program. The same expression is therefore
+  safe on one side and exposed on the other, so
+  [worker/README.md § Realms](./worker/README.md) fixes each file's realm by its
+  import graph rather than by inspection.
+- **latched built-in** — a worker-side capture, taken at module load before any
+  program can run, of the exact callable or object the engine will use
+  afterwards. Every ambient global the engine resolves in the worker realm is
+  latched; the thread realm is unreachable from the program and is left live.
+  Latching fixes the **binding**, not the object: it survives a rebound global,
+  and a callable capture also survives a mutated namespace, but an engine and a
+  program sharing a realm share the intrinsics and no capture defends against
+  that. Unlatched, the failure is silent and misattributed — the halt never
+  posts, so a program that finished instantly settles `timed-out`. (Distinct
+  from the settle-once "latch" the evaluator machine uses for first-write-wins;
+  same word, unrelated concept.)
 - **time budget** — the `seconds` limit. Counts only while the worker is
   unblocked: paused while a yielded item awaits the pull and while `onCall`
   runs. When it fires while an emission is pending thread-side disposal, it
@@ -413,7 +431,11 @@ settlement onto the kind's (the evaluators region); hosting headers (COOP/COEP
 are the host page's concern); worker construction (the consumer's worker factory
 builds the `Worker`; the engine spawns only what it is handed — module-type and
 adjacency are consumer obligations, doc-enforced, and a classic or non-adjacent
-worker fails at load).
+worker fails at load); and the latching of consumer worker logic's own built-ins
+— `setup`, `serializeHalt` and the injected globals all run in the worker realm
+alongside the program, and `serializeHalt` runs after it, so the engine latches
+the engine's resolutions and consumer logic latches its own
+([worker/README.md § Realms](./worker/README.md)).
 
 **Placement**: the engine is a shared leaf of the study-lenses package
 (`src/lib/study-lenses/lib/engine/`); it depends on nothing outside itself, so
@@ -432,7 +454,11 @@ bootstrap-posted, exactly once.
 ## Navigation
 
 - [DOCS.md](./DOCS.md) — architectural sketch, data flow, decision records
+- [notional-machine.md](./notional-machine.md) — the machine twin: how the
+  engine runs a program, and what a program can and cannot do to it
 - [types.ts](./types.ts) — the engine contract
+- [worker/README.md](./worker/README.md) — the transport internals and the two
+  realms
 - [../README.md](../README.md) — the shared-leaf `lib/` directory
 - [../../evaluators-deprecated/README.md](../../evaluators-deprecated/README.md)
   — the DEPRECATED evaluator kind: a frozen consuming contract implemented on
