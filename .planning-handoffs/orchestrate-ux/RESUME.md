@@ -4,8 +4,16 @@
 
 **STATE: Phase 0 step 0.2. AR-5 HAS RUN FIVE TIMES, each on the previous fix
 round's delta, and each returned PAUSE. **THE AR-5 CYCLE IS CLOSED** — the human
-ruled 2026-08-26, after round 5, that no sixth round runs. THE NEXT ACTION IS
-THE 0.2-CLOSING COMMIT, then the Phase-0 → Phase-1 human gate.**
+ruled 2026-08-26, after round 5, that no sixth round runs. THE 0.2-CLOSING
+COMMIT HAS LANDED. THE NEXT ACTION IS THE HUMAN'S 0.2-CLOSE REVIEW — whether 0.2
+closes and 0.3 opens.**
+
+⚠ **The gate after 0.2 is NOT the Phase-0 → Phase-1 gate**, which four sites in
+this block called it until 2026-08-27. `DEV.md` § Phase 0 draws exactly one
+human gate in the phase and puts it **after 0.3 and AR-2** [read: `DEV.md` §
+Phase 0 — the fenced chain, `0.3 types.ts + DOCS.md sketch + tests → AR-2 →
+review, resolve, commit → HUMAN GATE`]. What is due here is the human's
+**0.2-close review**, plus the push gate.
 
 ⛔ **The defect rate of the fix rounds is RISING, measured: round 1 returned 10
 findings of which 3 were introduced by the round that preceded it; round 2, 9 of
@@ -808,9 +816,9 @@ and is live for whenever 0.2 actually closes.
   true at `ffc59db3`, and the Baselines table is the figure of record. Put its
   scoping to the human BEFORE launching; `ar-5` carries **no frontmatter model
   pin** and inherits whatever tier this session runs on) → the settings-line
-  discharge → **§ Closing obligations, all four** → the **Phase-0 → Phase-1
-  human gate** → the **push gate**. No upstream is configured on `main`. **§
-  Closing obligations was added to this chain 2026-08-26 (AR5-F10)**; it was an
+  discharge → **§ Closing obligations, all four** → the **human's 0.2-close
+  review** → the **push gate**. No upstream is configured on `main`. **§ Closing
+  obligations was added to this chain 2026-08-26 (AR5-F10)**; it was an
   obligation `DEV.md` imposed and no section of this file listed.
 - **Archive the verdict verbatim in this file**, under the same banner the four
   previous rounds use:
@@ -884,20 +892,20 @@ same section of [`DECISIONS.md`](./DECISIONS.md):
 
 ## Operating instructions for the next session
 
-- **Opens in**: Phase 0 step 0.2, **at the 0.2-CLOSING COMMIT**. ⛔ **The AR-5
-  cycle is CLOSED — do not launch another round.** It ran five times, all five
-  returned PAUSE, and the human closed it 2026-08-26 after round 5. What this
-  session needs is **§ Closing obligations, all four items** — NOT § Then:
-  re-run AR-5 and NOT § AR-5 — its five inputs, both of which are now records of
-  how the five rounds were dispatched, not dispatches. Three rulings were taken
-  (R-AL, R-AM, R-AN) and none re-opens a finding. **Do not re-open the ten, and
-  do not re-fix any round's findings.**
+- **Opens in**: Phase 0 step 0.2, **AT THE HUMAN'S 0.2-CLOSE REVIEW — the
+  closing commit has LANDED, and § Closing obligations is DISCHARGED.** ⛔ **The
+  AR-5 cycle is CLOSED — do not launch another round.** It ran five times, all
+  five returned PAUSE, and the human closed it 2026-08-26 after round 5. § Then:
+  re-run AR-5 and § AR-5 — its five inputs are records of how the five rounds
+  were dispatched, not dispatches. Three rulings were taken (R-AL, R-AM, R-AN)
+  and none re-opens a finding. **Do not re-open the ten, do not re-fix any
+  round's findings, and do not re-discharge § Closing obligations.**
 - **Model**: this is bookkeeping over prose, not design. **No AR-N is owed
-  before the human's Phase-0 → Phase-1 gate.** If one is ever launched, `ar-5`
-  carries no `model:` pin and inherits your tier — name the tier and its cost.
-  Pass no `model` parameter to any `ar-N`.
-- **Gates the human holds**: the Phase-0 → Phase-1 review, and the push. There
-  is no upstream on `main`. **Whether a round 13 runs is CLOSED** — ruled no on
+  before the human's 0.2-close review.** If one is ever launched, `ar-5` carries
+  no `model:` pin and inherits your tier — name the tier and its cost. Pass no
+  `model` parameter to any `ar-N`.
+- **Gates the human holds**: the 0.2-close review, and the push. There is no
+  upstream on `main`. **Whether a round 13 runs is CLOSED** — ruled no on
   2026-08-19, and AR-5 confirmed the fallback trigger did not fire: all ten of
   its findings are change-shaped.
 - **The twin ask is re-asked every session, not remembered** [read: `DEV.md` §
@@ -921,6 +929,14 @@ same section of [`DECISIONS.md`](./DECISIONS.md):
   because amend is forbidden.
 
 ## Closing obligations — what the 0.2-closing commit owes
+
+⛔ **DISCHARGED 2026-08-27, ALL FOUR, by the commit that added this banner.**
+Its body carries the forty-ruling union walk, the uncorrectable ledger, the AR-2
+brief built from the `DOCS.md` diff rather than from M24's sentence, and the
+campaign-scoped figures. **This section is now a RECORD of what that commit
+owed, not a task list** — do not re-discharge it. A second closing body would
+restate forty destinations nobody re-measured, which is this campaign's top
+defect class aimed at its own closing argument.
 
 **Opened 2026-08-26 for AR5-F10.** These are obligations of the commit that
 closes 0.2, and until now they belonged to no document: `DEV.md` names the
