@@ -3,8 +3,9 @@
 # orchestrate ux — resumption point
 
 **STATE: Phase 0 step 0.2. AR-5 HAS RUN FOUR TIMES, each on the previous fix
-round's delta, and each returned PAUSE. THE NEXT ACTION IS AR-5 ROUND 5, on
-baseline `f36981f7`.**
+round's delta, and each returned PAUSE. **THE AR-5 CYCLE IS CLOSED** — the human
+ruled 2026-08-26, after round 5, that no sixth round runs. THE NEXT ACTION IS
+THE 0.2-CLOSING COMMIT, then the Phase-0 → Phase-1 human gate.**
 
 ⛔ **The defect rate of the fix rounds is RISING, measured: round 1 returned 10
 findings of which 3 were introduced by the round that preceded it; round 2, 9 of
@@ -25,11 +26,11 @@ six of its own instructions were measured WRONG in the doing, and a reader who
 meets only the outcome cannot tell a corrected instruction from an obeyed one.
 What each bullet below got wrong is marked ⛔ inline, beside it.
 
-**What is live is one thing: relaunch `ar-5` on the delta.** Everything needed
-is in § Then: re-run AR-5 on the DELTA and § AR-5 — its five inputs. Read § What
-this round did first. **The round-5 delta is ONE commit**; the three-commit
-delta named below was round 2's, and one of those three lands an instrument RED
-on purpose.
+**What is live is the 0.2 CLOSE, not another review.** Everything needed is in §
+Then: re-run AR-5 on the DELTA and § AR-5 — its five inputs. Read § What this
+round did first. **The round-5 delta is ONE commit**; the three-commit delta
+named below was round 2's, and one of those three lands an instrument RED on
+purpose.
 
 **No rulings are owed on the ten.** AR-5 returned **ten findings, every one
 CHANGE-shaped** — false statements about what a document says or what a command
@@ -306,17 +307,19 @@ about what NOT to build held, and its prescriptions for what to build did not.**
 
 ## Then: re-run AR-5 on the DELTA, not the full 97
 
-**THIS IS THE LIVE NEXT ACTION.** AR-5's own recommendation. Its inputs are
-assembled in § AR-5 below — all five that `DEV.md § AR-5` requires — but the
-baseline for the re-review is the fix round's first commit's parent, not
-`80306ad9`. Hand it the full campaign context and the narrow diff; do not make
-it re-read a hundred commit bodies to check seven fixes.
+⛔ **THIS IS NO LONGER THE LIVE NEXT ACTION — the cycle closed after round 5.**
+Kept as the record of how the five rounds were dispatched. AR-5's own
+recommendation. Its inputs are assembled in § AR-5 below — all five that
+`DEV.md § AR-5` requires — but the baseline for the re-review is the fix round's
+first commit's parent, not `80306ad9`. Hand it the full campaign context and the
+narrow diff; do not make it re-read a hundred commit bodies to check seven
+fixes.
 
 **ROUNDS 2, 3 AND 4 RAN AGAINST `f0b5a2bb`, `ffabcd41` AND `f6bd94b6`, and each
-returned PAUSE.** ⛔ **For ROUND 5 the baseline is `f36981f7`** and the delta is
-ONE commit. Run the command in § The range and the SHA list; do not copy the
-table, and do not write "this commit's parent" — it resolves to a foreign commit
-in this shared tree.
+returned PAUSE, as did round 5 on `f36981f7`.** ⛔ **No round 6 runs** — the
+baseline it would have taken is `80b16a8a`, and the delta is ONE commit. Run the
+command in § The range and the SHA list; do not copy the table, and do not write
+"this commit's parent" — it resolves to a foreign commit in this shared tree.
 
 **What round 3 WAS TOLD to attack, because round 2 named the pattern and that
 commit was its next instance — kept as the record of a dispatch, not as one.**
@@ -538,7 +541,7 @@ which are now three commits old.
 | what                   | value                                                                                                                                                                                                                                                                                                                                                                            |
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **AR-5's baseline**    | **`80306ad9`** for a full review — SHA-pinned. **For the round-5 delta re-run it is `f36981f7`**                                                                                                                                                                                                                                                                                 |
-| this round's baseline  | **`f36981f7`** for round 5. The rounds so far: round 2 on `f0b5a2bb`, round 3 on `ffabcd41`, round 4 on `f6bd94b6` . The fix round is `970b8919` · `70377e6e` · `f36981f7` · `80b16a8a`                                                                                                                                                                                          |
+| this round's baseline  | **none — the AR-5 cycle is closed.** The five rounds ran on `80306ad9` (full), `f0b5a2bb`, `ffabcd41`, `f6bd94b6` and `f36981f7`. The fix round is `970b8919` · `70377e6e` · `ffabcd41` · `f6bd94b6` · `f36981f7` · `80b16a8a` · `fa1e0833`                                                                                                                                      |
 | campaign SHA list size | **105 at `80b16a8a`, 106 including this commit** — campaign-scoped [measured: the scoped `git log --oneline 80306ad9..f36981f7`; 101 at `70377e6e` · 102 at `ffabcd41` · 103 at `f6bd94b6`]. The unscoped `git rev-list --count` is mostly foreign work and is NOT the number to hand a reviewer                                                                                 |
 | modified file paths    | **21** across the whole campaign; **3** in the `ffabcd41..f6bd94b6` delta and **4** in the `f0b5a2bb..ffabcd41` one before it [measured at `f6bd94b6`, campaign-scoped]. **The SHA range is named because "this round" silently re-points** — it meant three different ranges across the five AR-5 rounds                                                                        |
 | green (orchestrate)    | **622 passing in 22 files** [measured at `f6bd94b6`] — unchanged all round, which is expected: nothing here touched code                                                                                                                                                                                                                                                         |
@@ -932,59 +935,37 @@ intake checklist, which is a bolded paragraph and not a heading.
    Destinations are `types.ts`, the `DOCS.md` sketch and the tests, as 0.3
    writes them.
 
-   ⚠ **R-S NAMES ONLY `DECISIONS.md`, AND THAT IS HALF THE SET.** The rulings
-   are recorded across BOTH campaign files and both prune [measured at
-   `ffabcd41`, anchored `\bR-[A-Z]{1,2}\b` over each: union **40** ·
-   `DECISIONS.md` **31** · `RESUME.md` **36** at `970b8919`, **40** at
-   `ffabcd41` · **27** in both at `970b8919`. The BARE `R-[A-Z]{1,2}` returns
-   41, and the extra is the false positive **`R-LO`**, matched inside `AR-LOG`].
-   ⛔ **"Anchor the pattern" WAS the remedy and is now dead**: this file spliced
-   AR-5 round 2's verdict, which names `R-LO` as a standalone token, so
-   `\bR-LO\b` in `RESUME.md` went **0 at `ffabcd41` → 4 at `f6bd94b6`**
-   [measured]. **No regex over this file can be trusted, because the file quotes
-   ruling ids in prose ABOUT ruling ids.**
+   ⚠ **R-S NAMES ONLY `DECISIONS.md`, AND THE SPLIT BETWEEN THE TWO FILES IS A
+   DISTRACTION — BOTH PRUNE.** `.planning-handoffs/` prunes as a directory, so
+   **every ruling recorded in EITHER campaign file goes unreachable at 0.2
+   close**, not merely the ones unique to one of them. The obligation is over
+   the union, and framing it as a split is what sent three earlier revisions of
+   this bullet wrong.
 
-   **Recorded ONLY in `RESUME.md`, as table rows rather than citations — nine:**
-   **R-C · R-K · R-L · R-O · R-P · R-R · R-U · R-V · R-W**, most of them below
-   the archive banner. **Recorded only in `DECISIONS.md` — FOUR: R-F · R-AL ·
-   R-AM · R-AN.**
+   **The instrument is TABLE ROWS, not id occurrences**, because these files
+   quote ruling ids in prose about ruling ids:
 
-   ⛔ **THE FOUR WAS THREE UNTIL 2026-08-26, AND THE DROPPED ONE WAS R-AN** —
-   this round's headline ruling, the one that put two rows into the projection
-   contract and therefore has the most 0.3 work riding on it [measured at
-   `970b8919`, the SHA the original tag named: `R-AN` in `RESUME.md` → **0**, in
-   `DECISIONS.md` → **2**]. **The bullet's own thesis executed against the
-   bullet**: it says a closing commit walking `DECISIONS.md` alone drops nine,
-   and its own enumeration dropped one. AR-5 round 2 found it as its finding 3.
-   **And the tuple it carried — 40 / 31 / 37 / 28 — mixed the anchored union
-   with the bare per-file count, and `28` is producible under neither pattern.
-   It is 27.**
+   ```bash
+   grep -hoE '^\|\s*\*{0,2}R-[A-Z]{1,2}\*{0,2}\s*\|' \
+     .planning-handoffs/orchestrate-ux/RESUME.md \
+     .planning-handoffs/orchestrate-ux/DECISIONS.md \
+     | grep -oE 'R-[A-Z]{1,2}' | sort -u
+   ```
 
-   The record-vs-citation distinction applies to **both** halves, not just the
-   nine. `R-F` occurs once in `RESUME.md` — inside the sentence asserting it
-   appears only in `DECISIONS.md` [measured at `ffabcd41`], which is
-   self-falsifying under a bare grep and true under the distinction.
+   **40 rows at `fa1e0833`, R-A … R-AN and contiguous** [measured]. Enumerate
+   all forty with their destinations — `types.ts`, the `DOCS.md` sketch, the
+   tests, as 0.3 writes them.
 
-   **Enumerate; do not write a range.** The union happens to be contiguous R-A …
-   R-AN today, which is exactly the trap — `DECISIONS.md` on its own has nine
-   gaps, so "R-A through R-AN" is true of the pair and false of either member.
-   An earlier draft of this bullet wrote that range against `DECISIONS.md`; the
-   measurement caught it. **Then the enumeration that replaced the range dropped
-   a ruling, which is the same defect one level down.**
-
-   **The method is TWO steps, and an earlier revision prescribed only the
-   first.** ⛔ Run at `f6bd94b6` the set diff returns **ten** for the half this
-   bullet says is nine — `R-LO` rides along — and **zero** for the half it says
-   is four, because every one of those four is now cited in `RESUME.md`'s prose
-   [measured]. A set diff cannot tell a RECORD from a CITATION, and that
-   distinction is the whole content of both enumerations. So:
-   1. **Diff the two id sets to get CANDIDATES** — never to get the answer.
-   2. **Open each candidate's row and classify it**: a table record, or prose
-      citing it. Only records count, in either direction.
-
-   The counts above are pinned to `970b8919` and are already wrong at
-   `f6bd94b6`; they are kept as the measurement that produced the enumeration,
-   not as current state.
+   ⛔ **Three earlier framings are struck, each a trap the next reader would
+   otherwise re-enter.** A **range** (R-A…R-AN) is true of the union and false
+   of either file alone. An **id-set diff** returned 9-and-4 at `970b8919` but
+   **10-and-0** at `fa1e0833`, because `R-LO` — a false positive matched inside
+   `AR-LOG` — rides along once round 2's verdict is spliced in. And a
+   **record-vs-citation diff** returns 18-and-8, and can only nominate ids
+   ABSENT from one file: it structurally cannot reach the **thirteen** rulings
+   that have a row in one file and a citation in the other, which are precisely
+   the ones a one-file walk drops. Counting the union sidesteps all three, and
+   needs no judgment call.
 
 2. **State the uncorrectable record.** The immutable commit bodies carrying
    errors this campaign found and could not fix — `fa6dd40c` (95/89 against a
