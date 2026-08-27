@@ -7,8 +7,11 @@
  * SCOPING: every rule descends from [data-orchestrator-guide] (the guide root),
  * mirroring the blanks lens under [data-lens='blanks']. The guide root is a flex
  * ITEM of the region row (../orchestrate.css) — this file sets only INSIDE
- * properties on the root and never region-item properties (margin/width/flex*/
- * align-self/order/absolute positioning), which belong to ../orchestrate.css.
+ * properties on the root and never region-item properties (margin, width,
+ * flex*, align-self, order, absolute positioning), which belong to
+ * ../orchestrate.css. Comma-separated deliberately: as a slash-separated list,
+ * the wildcard above lands directly before a slash and closes this comment —
+ * which silently broke `npm run build` for the whole repo until 2026-08-27.
  * (No static leak-guard test covers this file yet — a follow-up analogous to
  * ../tests/orchestrate-css.test.ts is open; the unique attribute prefix is the
  * current safeguard.)
