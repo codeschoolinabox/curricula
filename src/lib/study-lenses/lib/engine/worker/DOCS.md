@@ -38,6 +38,106 @@ flowchart LR
 - **Untouched means zero**: a freshly created buffer is all zeros; the
   protocol's signal values are chosen so zero is the idle/default state of every
   slot.
+- **Capture the callable, not the namespace**: a namespace capture is defeated
+  by a mutated intrinsic, a callable capture is not. Where a callable needs its
+  receiver it is captured together with the object that carries it — the
+  `addEventListener` on the worker global is the site where that applies.
+- **The worker-realm import graph is static and acyclic**: that absence of
+  cycles is what makes every capture bound before the execute turn. A cycle, or
+  a worker-realm module reached only by dynamic import, is out of contract.
+- **Latches are module-private**: no capture crosses a module boundary, so none
+  appears in [../types.ts](../types.ts) or [types.ts](./types.ts).
+
+## Latching
+
+Every ambient global a worker-realm module reads is bound once, at module scope,
+in the file that reads it; every later read goes through that binding. The rule
+itself, the realm model it rests on, its threat model, the per-module capture
+sets and the residuals it does not close all live in
+[README.md § Realms](./README.md#realms). What this section owes is the
+structure a correct implementation must take: when captures are bound, what
+makes a module verifiably compliant, and how far that verification reaches.
+
+### Capture order
+
+The rule buys nothing unless every capture is already bound when the program's
+first instruction runs. Two independent facts guarantee that, and neither one
+alone is load-bearing:
+
+- **A module graph evaluates before its importer's body runs.** The worker entry
+  cannot begin until every module it imports has fully evaluated, so every
+  capture is bound before the entry's first statement. This is why captures may
+  sit below main with the other module constants: evaluation order fixes them,
+  not their position in the file.
+- **A program only ever runs from a later message turn.** The entry registers
+  the message handler and posts the ready signal; a program reaches the realm
+  only on an execute message, which is a separate task. Nothing a program does
+  interleaves with module evaluation.
+
+```mermaid
+sequenceDiagram
+    participant G as the worker module graph
+    participant E as the engine's worker side
+    participant P as the program
+    G->>G: evaluate each worker-realm module — every global it reads is captured
+    G->>E: the entry hands the consumer's worker logic to the engine
+    E-->>E: the message handler is registered; ready is posted
+    Note over G,E: every capture is bound before the execute turn below
+    E->>P: the execute turn starts the program
+    P-->>P: rebinds worker-realm globals — accidental shadowing
+    loop while the program runs, and again after it ends
+        P->>E: emits, calls, ends, or throws
+        E->>E: reads only its captures — never the rebound globals
+    end
+```
+
+The loop is the point. Engine reads are interleaved with the program, not queued
+behind it: an emission pauses and posts mid-run, and the module path's blob
+revoke and halt post land on a later turn after evaluation settles. Every one of
+those reads happens in a realm the program has already had the chance to edit.
+
+### What counts as compliant
+
+Compliance has two halves, and they are verified by different instruments. A
+reader who conflates them will believe the audit checks more than it does.
+
+**Placement — mechanized, and exhaustive.** A worker-realm module places its
+captures correctly when it makes **no value reference to an ambient name from
+inside a function body**. Every ambient name it uses resolves at module scope;
+every function reads a module-scope binding. The predicate is mechanical rather
+than an argument about which reads a program could reach: it discharges an
+already-compliant module with no special case, and it catches a future edit that
+reaches for a fresh global inside a function on the day that edit lands.
+
+One name is exempt and only one. `undefined` is read free but cannot be rebound
+— its global property is non-writable and non-configurable — so reading it live
+is never a defect. Every other ambient name read here is a writable global
+property, `globalThis` included.
+
+**Granularity — what each capture is _of_.** Placement says nothing about this.
+A namespace capture and a callable capture are indistinguishable to any
+predicate over identifier references, because both mention the same name at
+module scope. Granularity is therefore checked separately, by asserting the
+_shape_ of each capture's initializer: a name whose later use is a call is
+captured through a member expression, never as the bare namespace object.
+
+**How far verification reaches.** Only a minority of the captured set is
+reachable by a program after it starts, so the behavioral tier can discriminate
+a correct capture from a broken one for those names alone. Every other captured
+name is resolved strictly before the program runs, and for those the structural
+checks above are the _only_ instrument — which is why granularity is mechanized
+rather than left to review.
+
+### Standing with the module-load convention
+
+The repo convention is that
+[nothing executes at module load](../../../../../AGENTS.principal.md#critical-conventions).
+A capture takes the same exemption this directory's codec singletons already
+take, and for a comparable reason: it is a read whose correctness _is_ its
+timing — taken later it is not the same value, and taking it here is what makes
+every later read answerable. Those singletons state their reason in place and
+are the shape to follow. A global whose only read already sits at module scope
+is already compliant and takes no second binding.
 
 ## Why a typed module, not an inlined script
 

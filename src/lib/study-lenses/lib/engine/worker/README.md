@@ -55,6 +55,26 @@ rule that cannot be got wrong by omission is worth the extra bindings.
 `read-call-response.ts`'s `DECODER` and `write-call-response.ts`'s `ENCODER` are
 the shape to follow: a module-load binding with its reason stated in place.
 
+### What each module captures
+
+Realm is fixed by the import graph, so this table is derived, not declared. The
+thread realm is unreachable from a program and every thread-side module is left
+live — an exemption of reach, not of rigour.
+
+| module                   | realm  | captures                                                                                                                                                                                           |
+| ------------------------ | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bootstrap.ts`           | worker | `postMessage`; `globalThis`; `Atomics.store` `.load` `.wait` `.notify`; `URL.createObjectURL` `.revokeObjectURL`; `Object.freeze` `.keys` `.defineProperty`; `Blob`; `Function`; `Error`; `String` |
+| `read-call-response.ts`  | worker | `Atomics.store` `.load` (its decoder singleton is already at module scope)                                                                                                                         |
+| `create-buffer-views.ts` | both   | `Int32Array`; `Uint8Array`; `Object.freeze`                                                                                                                                                        |
+| `protocol.ts`            | both   | none — its only ambient read already sits at module scope                                                                                                                                          |
+| every thread-side module | thread | left live                                                                                                                                                                                          |
+| `types.ts`               | none   | erased at compile time; runs nowhere                                                                                                                                                               |
+
+The entries are callables, not the namespaces they hang off, because that is
+what the rule requires. `globalThis` is the one object capture: the listener
+registration on it needs its receiver, and a bare callable pulled off it would
+lose one.
+
 ### What the rule does not reach
 
 - **The object, only the binding.** Latching survives a rebound global

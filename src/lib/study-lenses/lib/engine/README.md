@@ -391,6 +391,13 @@ Using a different name in code is a bug, not a stylistic choice.
   posts, so a program that finished instantly settles `timed-out`. (Distinct
   from the settle-once "latch" the evaluator machine uses for first-write-wins;
   same word, unrelated concept.)
+- **ambient name** vs **ambient global** — the _name_ is the identifier a module
+  writes; the _global_ is the value that name resolves to. The distinction is
+  load-bearing rather than pedantic: whether a capture sits at module scope is a
+  question about names and is decidable by reading the source, while whether a
+  capture took the callable or the namespace it hangs off is a question about
+  values and is not. The two halves are verified separately
+  ([worker/DOCS.md § What counts as compliant](./worker/DOCS.md#what-counts-as-compliant)).
 - **time budget** — the `seconds` limit. Counts only while the worker is
   unblocked: paused while a yielded item awaits the pull and while `onCall`
   runs. When it fires while an emission is pending thread-side disposal, it
