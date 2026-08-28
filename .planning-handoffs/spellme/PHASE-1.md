@@ -744,6 +744,50 @@ commit.
   label was corrected in the same commit and the rewrite is enumerated in its
   body.
 
+### The `spellme` LENS's rulings (2026-08-27, wave 3 continued)
+
+Five more, all the human's, taken while wave 3 ran. ⚠ **Three of the five were
+caught by an `ar-4` as UNRECORDED** — the ruling had been given, acted on, and
+cited in a commit body as settled, while `git grep` could find it nowhere. That
+is precisely the failure `DEV.md` § Ruling provenance names: _"Record on
+confirmation, not eventually … in the same turn."_ The reviewer found it; the
+author, who had the ruling in hand, did not.
+
+- (human ruling 2026-08-27) **The `data-marked="false"` lock is authored in
+  increment 5**, beside the `{ skipAfter: 0 }` lock, under a single `ar-3`.
+  Grounds: mutating the jar entry's `data-marked` to a hardcoded `true` leaves
+  the entire suite green [measured 2026-08-27: `46 passed | 46 skipped (92)`,
+  identical to the same run over the unchanged source]. Exactly one component
+  test reads the attribute and it asserts the `true` case. The **core** layer is
+  not at risk — `core.test.ts` pins `marked === false` three times over three
+  element kinds — so what is unpinned is narrowly the **component's rendering**
+  of a value the core already gets right.
+- (human ruling 2026-08-27) **The jar entry's text is asserted too**, in that
+  same increment-5 pass. Nothing reads `textContent` on a jar entry anywhere,
+  yet the entry renders the element's source slice because the twin requires it
+  — `ux/wireframes.md` § The jar draws `[// hi]` and `[/* … */]` with visible
+  text. Lower risk than the mark, since there is no plausible wrong field to
+  render; recorded because canon with no test behind it is how this campaign has
+  repeatedly shipped green defects.
+- (human ruling 2026-08-27) **The data flow draws the surface reading the stream
+  directly.** Raised by `ar-4` against increment 2: the sketch routed everything
+  to `Surface` through `Session`, but the jar reads the stream directly and
+  must, since `SessionState` carries no element kind, text or mark. A second
+  edge was added rather than relabelling the existing one, which would have
+  conflated two different sources into one arrow. Phase 7 also gained the
+  `Input:`/`Output:` lines its six siblings carry. **→ migrated to** `DOCS.md` §
+  Execution phases 7 and § Data flow.
+- (human ruling 2026-08-27) **The empty-station caption is observed, not
+  fixed.** Wave 3 walks into the state this lens's README already flags — tokens
+  accessible, spellme declined, the station reading as though nothing studies
+  the phase. It belongs to `orchestrate/`, not here. ⚠ And it is worse than
+  recorded: **that caption is implemented nowhere in live source** (see the
+  wave-3 section below).
+- (human ruling 2026-08-27) **`acorn-loose` is approved as a new dependency**,
+  for the partial-facts Phase-0 unit — which is **not** wave 3's and goes to a
+  fresh session. See § Deferred, and the launch prompt at
+  [`../embody-partial-facts/BRIEF.md`](../embody-partial-facts/BRIEF.md).
+
 ### The `spellme` LENS — Phase 1, wave 3 (IN PROGRESS)
 
 ⚠ **Do not count the rows of anything here. RUN THIS** — and note it takes
@@ -782,8 +826,8 @@ and unrelated prose; positive control `Tokens · spelling` **is** implemented, a
 `orchestrate/display-labels.ts`]. So the follow-on recorded in this lens's
 README § Edge cases — that the caption cannot tell "nothing studies this phase"
 from "everything that studies it declined" — is about a caption **nobody has
-written yet**. It is `orchestrate/`'s, not this lens's, and not wave 3's (human
-ruling 2026-08-27: observe it, do not fix it).
+written yet**. It is `orchestrate/`'s, not this lens's, and not wave 3's — see
+the ruling recorded above, dated 2026-08-27: observe it, do not fix it.
 
 ⚠ **The documented jsdom flake was met first-hand**, for the first time in this
 campaign rather than relayed:
