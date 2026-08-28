@@ -1,4 +1,4 @@
-// cspell:ignore spellme
+// cspell:ignore spellme wireframes
 
 /**
  * The `spellme` lens — default-exports the frozen `Lens` object the
@@ -52,7 +52,32 @@ function SpellmeMain({ embodiment }: LensProperties): ReactElement {
 		};
 	});
 
-	return <div data-lens="spellme" data-cursor={session.cursor} />;
+	// Everything behind the cursor has already met its fate — that is what
+	// `positionCursor` advancing past it MEANS, and it is the cursor's only
+	// writer. This survives the claim loop landing: a fate is a function of the
+	// element KIND alone, so an element that fell because it was claimed is
+	// always `token-tape` and never survives this filter, whoever moved it.
+	const setAside = stream
+		.slice(0, session.cursor)
+		.filter((streamElement) => streamElement.fate === 'set-aside');
+
+	return (
+		<div data-lens="spellme" data-cursor={session.cursor}>
+			{/* Always present, empty or not: an empty jar is itself information —
+			    this program set nothing aside (`./ux/wireframes.md`). */}
+			<section data-spellme-jar>
+				{setAside.map((streamElement) => (
+					<span
+						data-marked={streamElement.marked}
+						data-spellme-set-aside
+						key={streamElement.element.start}
+					>
+						{streamElement.element.text}
+					</span>
+				))}
+			</section>
+		</div>
+	);
 }
 
 /**

@@ -178,13 +178,13 @@ describe('spellme surface', () => {
 			expect(root(container).dataset.cursor).toBe('0');
 		});
 
-		it.skip('keeps a set-aside element in the jar', () => {
+		it('keeps a set-aside element in the jar', () => {
 			expect(
 				renderLens('// hi').querySelectorAll('[data-spellme-set-aside]'),
 			).toHaveLength(1);
 		});
 
-		it.skip('marks a comment carrying a line terminator', () => {
+		it('marks a comment carrying a line terminator', () => {
 			expect(
 				renderLens('/* a\nb */').querySelector<HTMLElement>(
 					'[data-spellme-set-aside]',
