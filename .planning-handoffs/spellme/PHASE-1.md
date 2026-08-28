@@ -671,18 +671,29 @@ repo's own convention.
 
 ### The `spellme` LENS's rulings (2026-08-26, wave 3)
 
-Seven, all the human's, taken across wave 3's plan-approval gate and the AR-4
-that followed its first commit. **Four have end-state homes and migrated
-there**; they are listed here for findability, not as their home. The other
-three govern process and have none.
+**Eight**, all the human's, taken across wave 3's plan-approval gate and the
+AR-4 that followed its first commit. **Four have end-state homes and migrated
+there**; they are listed here for findability, not as their home. The rest
+govern process and have none.
 
-⚠ **Two of the seven exist because a review asked for them, not because the gate
-did.** The live-picker ruling below left the selected-state mechanism
+⚠ **The eighth was added on 2026-08-27, a day late**, when a context-free
+validation of the wave's resumption prompt found it recorded **nowhere in the
+tree** — it had been given, implemented, and cited in `1d1f45aa`'s body as
+settled while `git grep` could see nothing. It is the **sixth** ruling this wave
+that had to be back-filled after a review went looking, and the fourth caught by
+a reader rather than by its author. `DEV.md` § Ruling provenance: _"the body is
+the timestamp, the document is the home."_
+
+⚠ **Three of the eight exist because a review asked for them, not because the
+gate did.** The live-picker ruling below left the selected-state mechanism
 unspecified and the data-flow diagram without a node for the state it made
-load-bearing; an `ar-4` caught both against the commit that recorded it, and the
-human ruled on each. A ruling can therefore arrive _after_ the commit that
-motivated it — which is why this section is keyed to a date rather than to a
-commit.
+load-bearing; an `ar-4` caught both against the commit that recorded it. The
+**eighth is a third instance** — the same `ar-4` raised the remount finding, and
+the human ruled on all three. A ruling can therefore arrive _after_ the commit
+that motivated it, which is why this section is keyed to a date rather than to a
+commit. ⚠ This sentence read "Two of the seven" for an hour after the eighth
+bullet landed — the count was updated in the header and not here, which is this
+wave's own named defect committed inside the fix for it.
 
 - (human ruling 2026-08-26) **The un-skip order is ZOMBIES over the lettered
   blocks, file order within each.** `component.test.tsx`'s blocks run
@@ -743,6 +754,26 @@ commit.
   external event in the module", which stepping and picking are now too. That
   label was corrected in the same commit and the rewrite is enumerated in its
   body.
+- (human ruling 2026-08-26, **recorded 2026-08-27**) **The stale session seed is
+  fixed IN-MODULE, at the DOM-contract increment.** `MountedLens` renders
+  `<Main config={config} embodiment={embodiment} />` with **no `key`** tied to
+  the embodiment [read: `orchestrate/index.tsx`], and `derive-study.ts` builds a
+  fresh embodiment per derivation — so typing **re-renders** an open lens rather
+  than remounting it. The component's `useMemo` picks up the new stream; the
+  `useState` seed does not, and the cursor goes stale. ⚠ **Adding a `key` in
+  `orchestrate/` was considered and REJECTED** as a cross-module change outside
+  this wave that would silently alter remount behavior for `parsons` and
+  `writeme` too. ⚠ **`parsons/index.tsx` carries the identical lazy-seed shape**
+  under a comment asserting the orchestrator remounts on a source change, which
+  the evidence above contradicts — not this campaign's to fix, recorded so the
+  finding outlives the commit that found it.
+
+  ⚠ **This defect is LIVE at HEAD and user-visible**, which the ruling's own
+  commit body understates as "invisible … increment 1 renders only the
+  attribute". That was true when written and stopped being true one commit
+  later: the jar renders `stream.slice(0, session.cursor)`, so with a frozen
+  seed it can never fill — type a comment into the sandbox and nothing reaches
+  the jar. 🔍 #1 ran **before** the jar landed and has never seen it.
 
 ### The `spellme` LENS's rulings (2026-08-27, wave 3 continued)
 
