@@ -97,6 +97,13 @@ upward, no persisted state, no value returned to a consumer.
    replaces it. No summary, no score, no congratulation — the last fall is the
    ending, and the surface simply has nothing left to ask.
 
+   **Input:** the stream, the session, the two resolved thresholds, and the
+   claim in progress. **Output:** the rendered surface — nothing returns. ⚠ The
+   stream is read **directly**, not through the session: an element's kind, its
+   text and its mark are properties of the stream, and `SessionState` carries
+   none of them. Every region that draws elements — the tapes and the jar alike
+   — reads both, and the data flow shows that as two edges rather than one.
+
 ### Data flow
 
 ```mermaid
@@ -118,6 +125,7 @@ flowchart TD
     Props -->|"read the two thresholds off the<br/>resolved configuration, pure"| Thresholds
     Seq -->|"derive each fate from its element kind, and mark<br/>wherever the grammar reads a line break —<br/>a terminator by kind, a comment by its text, pure"| Stream
     Stream -->|"seed at the first claimable element, pure"| Session
+    Stream -->|"read directly at render — an element's kind, its text and<br/>its mark are the stream's, and the session carries none of them"| Surface
     Session -->|"render the tapes, the jar, and the form<br/>with the verdicts of the last claim"| Surface
     Thresholds -->|"open the one-more field, then the way past,<br/>at the attempt count each names"| Surface
     Surface -->|"the learner steps the extent, or picks a kind"| Form
