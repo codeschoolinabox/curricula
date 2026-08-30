@@ -98,25 +98,25 @@ describe('spellme surface', () => {
 			).not.toBeNull();
 		});
 
-		it.skip('announces verdicts in a live region', () => {
+		it('announces verdicts in a live region', () => {
 			expect(
 				verdicts(renderLens('const x = 1')).getAttribute('aria-live'),
 			).toBe('polite');
 		});
 
-		it.skip('leaves the element-kind verdict absent before the first claim', () => {
+		it('leaves the element-kind verdict absent before the first claim', () => {
 			expect(
 				verdicts(renderLens('const x = 1')).dataset.elementKindVerdict,
 			).toBeUndefined();
 		});
 
-		it.skip('leaves the extent verdict absent before the first claim', () => {
+		it('leaves the extent verdict absent before the first claim', () => {
 			expect(
 				verdicts(renderLens('const x = 1')).dataset.extentVerdict,
 			).toBeUndefined();
 		});
 
-		it.skip('leaves the one-more verdict absent before the first claim', () => {
+		it('leaves the one-more verdict absent before the first claim', () => {
 			expect(
 				verdicts(renderLens('const x = 1')).dataset.oneMoreVerdict,
 			).toBeUndefined();

@@ -1061,7 +1061,9 @@ campaign already names; the trimming is disclosed rather than silent.
    of the recommendation surface — someone else's checkpoint target — rather
    than retiring dead code. **Reported rather than done**, and it is
    cross-module, which the two-tier rule puts behind an explicit check-in
-   regardless.
+   regardless. **(human ruling 2026-08-30) LEAVE IT — it is a live fixture.**
+   This paragraph is the record, so the next reader who takes it for legacy
+   finds the answer here instead of deleting it.
 
 ⚠ **This checkpoint ran AFTER its `ar-4`, correcting the order that slipped one
 increment earlier** — and the correction paid immediately: `ar-4` found
@@ -1123,6 +1125,38 @@ campaign rather than relayed:
 2026-08-27]. The record's standing instruction is to check the **symptom**
 rather than trust an isolated re-run, and this is that symptom verbatim.
 
+⛔ **THE LIVE REGION CANNOT ANNOUNCE ANYTHING, AND THE TWIN PROMISES IT WILL.**
+Raised by `ar-4` at increment A5, which proved it two ways rather than asserting
+it: a runtime probe against this repo's own React 19.2.4 and jsdom showing
+`data-*` set to `null` and to `undefined` produce identical DOM, and a
+TypeScript probe under this repo's real flags showing the `data-*` JSX slot is
+unconstrained. The finding is the shape, not the values:
+`<div data-spellme-verdicts aria-live="polite">` carries **three `data-*`
+attributes and no text content, ever**. Assistive technology observes a live
+region through changes to accessible CONTENT; `data-*` mutations carry no
+accessible semantics at all. So the region as contracted can never speak.
+
+`ux/user-journeys.md` Journey 5 — the journey written for the learner who does
+not use a mouse — states the opposite as canon: _"The verdicts land in an
+`aria-live` region, so they are announced rather than only coloured."_
+
+⚠ **This is a Phase-0 contract gap, not drift introduced by A5.** `README.md` §
+UI structure and `DOCS.md` § Execution phases 7 both describe the region in
+attributes only, and A5 implements exactly what they specify. A5 is merely the
+first increment to mount it. **No unit test can ever catch this** — the suite
+asserts `dataset.*Verdict`, which is blind to whether anything was spoken — and
+no checkpoint so far has exercised a screen reader: #1 and #2 were sighted DOM
+checks and #3 covered tab order, not announcement.
+
+**Left for the human, because it changes a Phase-0 contract.** The reviewer's
+counter-proposal is a visually-hidden text node inside the region, built from
+the same `lastVerdicts` once judging lands, leaving the `data-*` attributes as
+harness and CSS hooks — which reconciles the announcement channel with
+`ux/wireframes.md`'s requirement that verdicts sit against the fields they judge
+rather than in a banner. **Recorded now rather than at the wave that wires
+`judgeClaim`**, because that wave will fill the three attributes with real
+verdicts and have every reason to believe the job is done.
+
 #### Corrections to immutable commit bodies
 
 A body cannot be amended, so each correction lives here.
@@ -1137,6 +1171,26 @@ A body cannot be amended, so each correction lives here.
   **48** — the number its own gate block printed in the same turn [measured]. 50
   was the pre-increment-1 figure, carried forward by hand instead of read off
   the output beside it.
+- **`8c7708d4`** (increment A4) attributes the cspell instability to dependency
+  churn alone — "`package-lock.json` was rewritten at 22:49 and AGAIN at 23:04,
+  each time swapping cspell's bundled dictionaries". **That is at most half the
+  cause, and the larger half is wrong.** A peer has **DELETED `cspell.json`**
+  from the working tree [measured 2026-08-30: `git status --porcelain --
+  cspell.json` reports a deletion, alongside a deleted
+  `.claude/skills/btw/SKILL.md`]. With the committed config supplied explicitly,
+  the same file measures **8**; without it, **30** [measured: `npx cspell
+  --config <HEAD's copy>` → 8, bare run → 30]. So the 0 → 8 step is dictionary
+  churn and the 8 → 30 step is the missing 150-word project list. The body's
+  numbers were right and its explanation was not.
+
+  ⚠ **And the deletion makes the gate fail SILENTLY in the worst shape.**
+  `npx cspell --config cspell.json <file>` now prints a configuration error and
+  then `Files checked: 0, Issues found: 0 in 0 files` — which, read through the
+  `| tail -1` this campaign uses everywhere, is indistinguishable from a clean
+  pass. **`Files checked: 0` is the tell; the issue count is not.** Nothing was
+  restored: `git checkout`/`git restore` are forbidden, and the deletion is a
+  peer's uncommitted work, not this campaign's to judge.
+
 - **`6d72f76e`** reads "all agreeing → 1 … positive control **19**". The → 1 is
   true of all three instruments; the 19 is true of the **collapsed pipeline
   alone** — `grep -c` and `git grep -c` both return 18, because `README.md`

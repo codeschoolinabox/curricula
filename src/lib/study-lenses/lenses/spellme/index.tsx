@@ -190,6 +190,20 @@ function SpellmeMain({ embodiment }: LensProperties): ReactElement {
 					</button>
 				</form>
 			)}
+			{/* Unconditional, unlike parsons's conditional score region: the tests
+			    reach for it directly and a missing region is an error, not a state.
+			    The three verdict attributes are ABSENT until the first submitted
+			    claim — `./README.md` § UI structure, "treat absence as unclaimed,
+			    not as a state" — so each renders `undefined` and React drops it
+			    rather than emitting an empty string. Nothing fills them in this
+			    wave; judging is a later seam. */}
+			<div
+				data-spellme-verdicts
+				aria-live="polite"
+				data-element-kind-verdict={session.lastVerdicts?.elementKind}
+				data-extent-verdict={session.lastVerdicts?.extent}
+				data-one-more-verdict={session.lastVerdicts?.oneMore}
+			/>
 		</div>
 	);
 }
