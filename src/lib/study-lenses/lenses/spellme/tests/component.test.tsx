@@ -60,15 +60,15 @@ describe('spellme lens — Lens object shape', () => {
 
 describe('spellme surface', () => {
 	describe('Interfaces — the DOM contract', () => {
-		it.skip('renders the lens root', () => {
+		it('renders the lens root', () => {
 			expect(root(renderLens('const x = 1'))).not.toBeNull();
 		});
 
-		it.skip('carries the cursor position on the root', () => {
+		it('carries the cursor position on the root', () => {
 			expect(root(renderLens('const x = 1')).dataset.cursor).toBe('0');
 		});
 
-		it.skip('renders the input tape', () => {
+		it('renders the input tape', () => {
 			expect(
 				renderLens('const x = 1').querySelector('[data-spellme-input]'),
 			).not.toBeNull();

@@ -237,7 +237,21 @@ injection-removal obligation · **wave 4's brief, context-free validated**.
    **core** is covered; the component's rendering is not. Ruled: closes in Block
    C, lock 2 above.
 
-## ⛔ A ruled fix Block A MUST carry
+## ⛔ WITHDRAWN — the fix Block A was to carry, and why it is not carried
+
+⛔ **SUPERSEDED 2026-08-29. Do not implement anything in this section.** The
+premise below was measured false, and was already false five weeks before the
+ruling that rested on it. A mounted lens cannot receive a new embodiment at
+HEAD: the session is mount-frozen, the derivation memoizes on it, and
+`assertPaneCoherence` throws on any source mismatch at every excursion-arm
+render. **The full measurement, the orchestrator's own canon and the ruling that
+withdraws this one are in `./PHASE-1.md`'s `(2026-08-29, wave 3 continued)`
+subsection** — read that before this. ⚠ Kept rather than deleted because the
+reasoning is the record: it is what a careful reader concluded from this
+module's code without opening `orchestrate/`, which is the lesson. ⚠ This
+section stood unqualified for one increment after the supersession was recorded
+elsewhere, and an `ar-4` following the trail is what caught it — a stale "MUST
+carry" in a resumption prompt outranks a correction filed in another file.
 
 **The session seed goes stale on a source change** — human ruling **2026-08-26**
 (given before `1d1f45aa`, which is dated 2026-08-26 21:31 [measured]), **now

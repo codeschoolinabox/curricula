@@ -905,13 +905,18 @@ than presented as a settled whole.
   forcing reason the stepper is live; `aria-pressed` on the kind buttons, which
   the 2026-08-26 ruling makes the **only** carrier of the selected kind;
   `data-attempts` on the form; and the `data-spellme-element-kinds` wrapper. All
-  five have **zero** references in this module's tests [measured 2026-08-29].
-  **Not locked, by the same ruling:** `data-spellme-submit`, which wave 5 pins
-  because its `pick()` helper throws; the legend's open-ness, which is vacuous
-  because the legend is a `<div>` and not a `<details>`; and
-  `data-spellme-element` / `data-claimed`, which are wave 5's and whose tape
-  holds nothing in wave 3. Ten authored locks in total — 3 + 2 + 5 — under one
-  `ar-3`, per the 2026-08-25 authored-test ruling.
+  five have **zero** references in this module's tests [measured 2026-08-29]. ⚠
+  **The span lock must assert per-span TEXT, not per-span presence** (raised by
+  `ar-4` at increment A1): swap which slice lands in `data-spellme-consumed` and
+  which in `data-spellme-rest` and every currently-green test still passes,
+  because the only test touching a program with nothing claimable asserts the
+  claim form's **absence** and nothing reads the tape's content. Presence alone
+  is passed by an empty span. **Not locked, by the same ruling:**
+  `data-spellme-submit`, which wave 5 pins because its `pick()` helper throws;
+  the legend's open-ness, which is vacuous because the legend is a `<div>` and
+  not a `<details>`; and `data-spellme-element` / `data-claimed`, which are wave
+  5's and whose tape holds nothing in wave 3. Ten authored locks in total — 3 +
+  2 + 5 — under one `ar-3`, per the 2026-08-25 authored-test ruling.
 
 - (human ruling 2026-08-29) **The extent stepper starts at 1.** The twin
   answered this two ways and neither document ruled: `ux/wireframes.md` § Fresh
