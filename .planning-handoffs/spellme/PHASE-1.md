@@ -924,6 +924,15 @@ than presented as a settled whole.
   5's and whose tape holds nothing in wave 3. Ten authored locks in total — 3 +
   2 + 5 — under one `ar-3`, per the 2026-08-25 authored-test ruling.
 
+  ⚠ **An eleventh was added by the AGENT, not by this ruling** (raised by `ar-4`
+  at increment A3, 2026-08-29): the ten kind buttons carry ten **distinct**
+  values. Neither the `ReadonlyArray<ClaimableKind>` annotation nor the
+  count-of-ten test catches a duplicate standing in for an omission, and ten
+  distinct values each type-pinned to a ten-member union is the whole union
+  exactly once by pigeonhole. It rides the same single `ar-3`. **Disclosed as an
+  agent addition to a human-ruled set so it can be struck** — the ruling above
+  named five, and this is not one of them.
+
 - (human ruling 2026-08-29) **The extent stepper starts at 1.** The twin
   answered this two ways and neither document ruled: `ux/wireframes.md` § Fresh
   mount draws `[ − ] 5 characters [ + ]` for a program whose first element is
@@ -997,6 +1006,42 @@ ahead of both. The order was the agent's slip, not a ruling. It cost nothing
 here — `ar-4` returned no behavioral change — but had it done so, the human
 would have been shown a surface that then moved, and the checkpoint would have
 needed re-running. Recorded so the next wave orders it correctly.
+
+⚠ **TWO CONSECUTIVE REVIEWERS CONCLUDED THIS LENS IS UNREACHABLE IN A BROWSER,
+and both were wrong the same way.** Each reached for
+`orchestrate/lib/composing/built-in-lenses.ts`, found `spellme` correctly
+absent, checked `src/pages/*-preview.tsx`, found them still pointing at the
+deprecated tree, and inferred there is no page. The A2 reviewer caught itself;
+**the A3 reviewer did not**, and raised it as an IMPORTANT concern that the
+mandatory checkpoint had no target — while checkpoint #2 had already run at that
+very URL with the human pasting the rendered DOM. Refuted [measured 2026-08-29:
+`git grep -l spellme`, excluding the lens and the handoffs, returns **11**
+files, among them `spiralearn/sandbox/orchestrate/index.mdx`, which mounts
+`spellmeLens` at line 90; the prefixed route is in `.docusaurus/routes.js`; the
+dev server was listening on it at the time].
+
+**The wrong conclusion sits on a right observation, and that is the finding.**
+Registration IS deliberately absent and the preview pages ARE stale, so the only
+thing making this lens reachable is the sandbox injection — which nothing near
+`built-in-lenses.ts` mentions. A reader starting from the roster, as both
+reviewers did, has no thread leading to the mdx. It is under-signposted, and the
+cost is now measured at two reviews. ⚠ **An `ar-N` verdict is itself a claim**:
+this concern was specific, cited real files, and was still false.
+
+⚠ **A PEER'S `npm install` MOVED A QUALITY GATE MID-SESSION.** `PHASE-1.md`
+measured **0** cspell issues twice, was committed on those readings, and then
+measured **8** on byte-identical content with no edit in between [measured
+2026-08-29: file clean against HEAD, `cspell.json` unchanged since `542d4771`,
+no cache file, and the eight words absent from its 150-word list]. The cause is
+peer WIP: `package.json` and `package-lock.json` are both dirty and
+`node_modules` was rewritten at 22:49, twelve minutes before the second reading
+— an install swapped cspell's bundled dictionaries underneath a running session.
+**All eight words pre-date this campaign's wave-3 commits** [measured: each
+appears in the file at `a0155678`], so none was introduced here and none is
+whitelisted in response — widening a dictionary to accommodate a peer's
+transient dependency state would outlive the state that caused it. Recorded
+because the earlier readings were TRUE WHEN TAKEN and are no longer
+reproducible, which a later reader would otherwise read as a false claim.
 
 ⚠ **The empty-station caption does not exist in code.** `orchestrate/README.md`
 specifies `Tokens, spelling: nothing studies this phase yet`, including a

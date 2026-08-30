@@ -14,7 +14,7 @@ import freezeInPlace from '@utils/freeze-in-place.js';
 import type { Lens, LensProperties } from '../types.js';
 
 import spellmeCore from './core.js';
-import type { SessionState, StreamElement } from './types.js';
+import type { ClaimableKind, SessionState, StreamElement } from './types.js';
 
 /**
  * The spellme surface: the input tape, the token tape, the jar, the
@@ -52,6 +52,14 @@ function SpellmeMain({ embodiment }: LensProperties): ReactElement {
 		};
 	});
 
+	// The claim in progress — component-local form state, and NOT a `Claim`.
+	// `./DOCS.md` § Structural constraints: `Claim` is only ever the submitted
+	// snapshot the pure layer judges. `aria-pressed` is the only carrier of which
+	// kind is selected (human ruling 2026-08-26); no `data-*` hook duplicates it.
+	const [claimedKind, setClaimedKind] = React.useState<ClaimableKind | null>(
+		null,
+	);
+
 	// Everything behind the cursor has already met its fate — that is what
 	// `positionCursor` advancing past it MEANS, and it is the cursor's only
 	// writer.
@@ -83,6 +91,11 @@ function SpellmeMain({ embodiment }: LensProperties): ReactElement {
 		(streamElement) =>
 			streamElement.fate === 'consumed' && streamElement.marked,
 	);
+	// The cursor rests past the end exactly when nothing is left to claim — on an
+	// empty program, on one that is only trivia, and (once the claim loop lands)
+	// once the last element has fallen. `./README.md` § UI structure: the form is
+	// ABSENT then, and nothing replaces it.
+	const isClaimable = session.cursor < stream.length;
 
 	return (
 		<div data-lens="spellme" data-cursor={session.cursor}>
@@ -122,6 +135,25 @@ function SpellmeMain({ embodiment }: LensProperties): ReactElement {
 					</span>
 				))}
 			</section>
+			{isClaimable && (
+				<form data-spellme-claim-form data-attempts={session.attempts}>
+					<div data-spellme-element-kinds>
+						{CLAIMABLE_KINDS.map((elementKind) => (
+							<button
+								data-element-kind={elementKind}
+								aria-pressed={elementKind === claimedKind}
+								key={elementKind}
+								onClick={function pickThisKind() {
+									setClaimedKind(elementKind);
+								}}
+								type="button"
+							>
+								{elementKind}
+							</button>
+						))}
+					</div>
+				</form>
+			)}
 		</div>
 	);
 }
@@ -136,10 +168,45 @@ function textOf(run: ReadonlyArray<StreamElement>): string {
 }
 
 /**
+ * The ten element kinds a learner claims, in the order the picker offers them —
+ * `./README.md` § What the learner claims, and the twin's fresh-mount frame.
+ *
+ * **Spelled out, never filtered from the fourteen.** `./DOCS.md` § Decisions
+ * rules this directly: which kinds this exercise asks about is a pedagogical
+ * decision, and deriving it would let a widening upstream silently grow the
+ * picker. `Object.keys(FATE_BY_KIND).filter(…)` is the forbidden form.
+ *
+ * ⚠ **Known residual, closed by a test rather than by the type.** The
+ * annotation pins that every entry IS a claimable kind, and the suite pins that
+ * there are ten — but neither catches a DUPLICATE standing in for an omission.
+ * A *compile-time* guarantee would want a totality device like the one `core.ts`
+ * uses for its kind tables, which is a contract question. A *runtime* one is
+ * cheap and sufficient: ten DISTINCT values, each type-pinned to a ten-member
+ * union, is the whole union exactly once by pigeonhole. That assertion is an
+ * authored regression lock and lands with the others (raised by `ar-4` at this
+ * increment; an earlier draft of this comment claimed nothing short of a
+ * contract change could close it, which was wrong).
+ */
+const CLAIMABLE_KINDS: ReadonlyArray<ClaimableKind> = freezeInPlace<
+	ReadonlyArray<ClaimableKind>
+>([
+	'IdentifierName',
+	'PrivateIdentifier',
+	'Punctuator',
+	'DivPunctuator',
+	'RightBracePunctuator',
+	'NumericLiteral',
+	'StringLiteral',
+	'Template',
+	'TemplateSubstitutionTail',
+	'RegularExpressionLiteral',
+]);
+
+/**
  * What a consumed line break leaves on the token tape.
  *
  * ⚠ **A PROPOSAL, not a settled design.** `./ux/wireframes.md`
- * § What has no wireframe, deliberately records this visual as **owed and
+ * § What has no wire-frame, deliberately records this visual as **owed and
  * undesigned** and defers it to a sandbox checkpoint against a running surface,
  * so something must exist for the human to react to. It meets the two
  * constraints that document does state: it is a glyph rather than colour alone,

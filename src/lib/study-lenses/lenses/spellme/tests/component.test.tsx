@@ -86,7 +86,7 @@ describe('spellme surface', () => {
 			).not.toBeNull();
 		});
 
-		it.skip('offers ten element-kind buttons', () => {
+		it('offers ten element-kind buttons', () => {
 			expect(
 				renderLens('const x = 1').querySelectorAll('[data-element-kind]'),
 			).toHaveLength(10);
