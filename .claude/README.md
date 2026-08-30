@@ -10,7 +10,7 @@ the file `CLAUDE.md` routed you to).
 
 - **`settings.json`** — project-level permissions shared by every session and
   every fresh checkout. The allowlist carries only read-only verification
-  commands (git reads, `tsc --noEmit`, cspell, per-file markdownlint, the scoped
+  commands (git reads, `tsc --noEmit`, per-file markdownlint, the scoped
   unit-test runner) — prompting on the behavior we want more of taxes it. The
   denylist blocks the write flags that can ride otherwise-read-only commands:
   `npx eslint --fix` (severity-blind autofix, crater `0e05c5ac`; the sanctioned

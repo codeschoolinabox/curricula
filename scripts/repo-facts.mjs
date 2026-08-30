@@ -27,7 +27,6 @@ try {
 	const measurements = [
 		measureNodeVersion(),
 		measureTsc(),
-		measureCspellVersion(),
 		measureMarkdownlint(refresh),
 		measureHead(),
 		measureForeignDirt(),
@@ -72,28 +71,6 @@ function measureTsc() {
 	const value =
 		count === 0 ? '0' : `${count}\n${locations.join('\n') || '(no locations)'}`;
 	return { label: 'tsc errors', command: 'npx tsc --noEmit', value, timestamp };
-}
-
-/**
- * @returns {Measurement}
- */
-function measureCspellVersion() {
-	const timestamp = new Date().toISOString();
-	const run = runCommand(['npx', 'cspell', '--version']);
-	if (run.spawnFailed || run.stdout.trim() === '') {
-		return failedMeasurement(
-			'cspell version',
-			'npx cspell --version',
-			run,
-			timestamp,
-		);
-	}
-	return {
-		label: 'cspell version',
-		command: 'npx cspell --version',
-		value: run.stdout.trim(),
-		timestamp,
-	};
 }
 
 /**

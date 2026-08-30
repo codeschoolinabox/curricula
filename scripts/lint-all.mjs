@@ -1,6 +1,6 @@
 import { spawnSync } from 'node:child_process';
 
-const steps = ['lint:js', 'lint:md', 'lint:mdx', 'lint:names', 'lint:spelling'];
+const steps = ['lint:js', 'lint:md', 'lint:mdx', 'lint:names'];
 
 const runStep = (step) => {
 	const result = spawnSync('npm', ['run', '--silent', step], {

@@ -9,7 +9,6 @@
 			"Bash(git rev-parse:*)",
 			"Bash(git ls-files:*)",
 			"Bash(npx tsc --noEmit)",
-			"Bash(npx cspell:*)",
 			"Bash(npx eslint:*)",
 			"Bash(npx markdownlint-cli2 --no-globs:*)",
 			"Bash(./node_modules/.bin/vitest run --project unit:*)",

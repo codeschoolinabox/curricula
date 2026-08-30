@@ -188,16 +188,15 @@ timestamp it prints beside that value.
 1. **Measure** — the thin entry runs each producing command (node version
    against `package.json` engines — printing both values and their inequality is
    measurement, concluding "therefore do Y" would be judging and stays out;
-   `tsc --noEmit` count + locations; cspell version; markdownlint count;
-   prettier drift count (`npm run format:check`); `HEAD`; foreign dirty files
-   from `git status --porcelain`) and captures raw output with a timestamp.
-   eslint is deliberately absent from the injected path (measured 16–19s).
-   "Slow" is a fixed design-time classification — the slow set is exactly the
-   markdownlint and prettier-drift measurements — never a live runtime
-   threshold: nothing measures a command's duration to decide. A slow
-   measurement whose cached value is fresh — and no `--refresh` — is read from
-   the cache instead of run: the cached measurement joins the set with its
-   ORIGINAL timestamp intact.
+   `tsc --noEmit` count + locations; markdownlint count; prettier drift count
+   (`npm run format:check`); `HEAD`; foreign dirty files from
+   `git status --porcelain`) and captures raw output with a timestamp. eslint is
+   deliberately absent from the injected path (measured 16–19s). "Slow" is a
+   fixed design-time classification — the slow set is exactly the markdownlint
+   and prettier-drift measurements — never a live runtime threshold: nothing
+   measures a command's duration to decide. A slow measurement whose cached
+   value is fresh — and no `--refresh` — is read from the cache instead of run:
+   the cached measurement joins the set with its ORIGINAL timestamp intact.
 2. **Condense** — pure functions reduce raw command output to measurement
    values: tsc output to a count plus locations (a location-less global
    diagnostic still counts), porcelain output to a foreign-dirt line list

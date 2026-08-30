@@ -1,5 +1,3 @@
-<!-- cspell:ignore ultracode -->
-
 # AI Agent Context
 
 This file provides specific context for AI assistants working with this
@@ -254,8 +252,8 @@ See [DEV.md § Linting Conventions](./DEV.md#linting-conventions) for full
 details. Summary:
 
 - **Lint pipeline**: `npm run lint` = ESLint (code + `.mdx`) + markdownlint-cli2
-  (`.md`) + ls-lint (file names) + cspell (spelling); plus Prettier (formatting)
-  and TypeScript (types)
+  (`.md`) + ls-lint (file names); plus Prettier (formatting) and TypeScript
+  (types)
 - Most functional/import/style conventions auto-enforced via ESLint
 - Pre-commit hooks run Prettier (formatting only) on staged files; linters run
   via per-file checkpoints and `npm run validate`, never the hook

@@ -14,7 +14,6 @@
 	"files.insertFinalNewline": true,
 	"eslint.validate": ["javascript", "mdx"],
 	"eslint.useFlatConfig": true,
-	"cSpell.enabled": true,
 	"search.exclude": {
 		"**/node_modules": true,
 		"**/build": true,

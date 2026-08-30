@@ -26,7 +26,6 @@ Educational content for learning to program, powered by
 | `npm run lint:md`           | markdownlint on Markdown files                            |
 | `npm run lint:mdx`          | ESLint + MDX plugin on MDX files                          |
 | `npm run lint:names`        | ls-lint for file/directory naming                         |
-| `npm run lint:spelling`     | cspell spell-check across all content                     |
 | `npm run check:governance`  | Governance-docs checker (links, roster, claims, headings) |
 | `npm run repo:facts`        | Emit measured repo facts (the oracle)                     |
 | `npm run typecheck:scripts` | Type-check `scripts/` (checked-JS project)                |

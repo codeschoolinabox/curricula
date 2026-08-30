@@ -12,7 +12,7 @@ repo. Nothing here ships with the Docusaurus site build.
 
 | Script                      | What it does                                                                      | npm entry                       |
 | --------------------------- | --------------------------------------------------------------------------------- | ------------------------------- |
-| `lint-all.mjs`              | Compound linter: eslint (code + `.mdx`), markdownlint-cli2, ls-lint, cspell       | `npm run lint`                  |
+| `lint-all.mjs`              | Compound linter: eslint (code + `.mdx`), markdownlint-cli2, ls-lint               | `npm run lint`                  |
 | `lint-fix-study-lenses.mjs` | The one sanctioned, scoped autofix (study-lenses tree only)                       | `npm run lint:fix:study-lenses` |
 | `check-governance.mjs`      | Governance checker: verifies the governance corpus keeps naming things that exist | `npm run check:governance`      |
 | `repo-facts.mjs`            | Measured-facts oracle: prints the numbers governance keeps misquoting, live       | `npm run repo:facts`            |
@@ -179,9 +179,9 @@ deliberately not part of `npm run validate` or `lint-all.mjs`.
 ## Measured-facts oracle
 
 The oracle prints repo numbers nobody should ever quote from memory: node
-version vs engines, tsc error count and locations, cspell version, markdownlint
-count, prettier drift count, `HEAD`, and the foreign dirty files ("working tree
-not yours until proven"). Sketch:
+version vs engines, tsc error count and locations, markdownlint count, prettier
+drift count, `HEAD`, and the foreign dirty files ("working tree not yours until
+proven"). Sketch:
 [DOCS.md § Measured-facts oracle](./DOCS.md#measured-facts-oracle).
 
 - **measurement** — a value produced by a command the oracle just ran, carried

@@ -1,5 +1,3 @@
-<!-- cspell:ignore wireframes zakey -->
-
 # Developer Guide
 
 Internal architecture, conventions, and implementation details for contributors.
@@ -1074,7 +1072,7 @@ made bare. It carries one of three tags, and the tag carries its evidence:
 
 | tag                                      | carries                                                                   | example                                                                                       |
 | ---------------------------------------- | ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `[measured: <command>]`                  | the command run **this session**                                          | `[measured: npx cspell DEV.md]` 7 unknown words                                               |
+| `[measured: <command>]`                  | the command run **this session**                                          | `[measured: npx markdownlint-cli2 --no-globs "DEV.md"]` 0 violations                          |
 | `[read: <file> § <heading> — "<words>"]` | the file re-opened this session, quoted where the wording is load-bearing | `[read: AGENTS.md § Non-Negotiable Invariants — "or sequence/state diagram, whichever fits"]` |
 | `[relayed: <who>]`                       | who said it — never restated as fact                                      | `[relayed: ar-1]` MD041 would not fire — unverified                                           |
 
@@ -1517,7 +1515,6 @@ For quick reference:
 ```bash
 npx eslint <changed files>                        # code + .mdx
 npx markdownlint-cli2 --no-globs "<changed .md>"
-npx cspell <changed files>
 npx tsc --noEmit                                  # stays at the measured baseline
 ./node_modules/.bin/vitest run --project unit <changed test paths>
 ```
@@ -2742,11 +2739,11 @@ covers search — and pulls its own inputs.
 
 ## Linting Conventions
 
-Code quality runs through six tools:
+Code quality runs through five tools:
 
-- **`npm run lint`** is a five-step compound over four linters: **ESLint** (two
+- **`npm run lint`** is a four-step compound over three linters: **ESLint** (two
   passes — logic and patterns on `.ts`/`.js`, and `.mdx`), **markdownlint-cli2**
-  (`.md`), **ls-lint** (file names), **cspell** (spelling)
+  (`.md`), **ls-lint** (file names)
 - **Prettier** — formatting (spaces, quotes, line length)
 - **TypeScript** — types via `tsc`
 
@@ -2754,7 +2751,7 @@ Code quality runs through six tools:
 
 ```bash
 # Check for violations
-npm run lint           # eslint + markdownlint + mdx-eslint + ls-lint + cspell
+npm run lint           # eslint + markdownlint + mdx-eslint + ls-lint
 npm run format:check   # Prettier
 npm run typecheck      # TypeScript
 
@@ -2772,7 +2769,6 @@ use the underlying tools directly:
 | ------------------ | ------------------------------------------- |
 | `.ts` `.js` `.mdx` | `npx eslint <file>`                         |
 | `.md`              | `npx markdownlint-cli2 --no-globs "<file>"` |
-| spelling, any type | `npx cspell <file>`                         |
 
 ### Pre-commit Hooks
 
