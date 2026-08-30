@@ -1007,6 +1007,67 @@ here — `ar-4` returned no behavioral change — but had it done so, the human
 would have been shown a surface that then moved, and the checkpoint would have
 needed re-running. Recorded so the next wave orders it correctly.
 
+**🔍 checkpoint #3 — the picker and stepper live. The human's words:**
+
+> - "there's no visible pressed state. when inspecting I can see `aria-pressed`
+>   updates correctly but there's no UI"
+> - "once again, DOM updates visible in" [the inspector] "but not in UI"
+> - "I don't see \"claim it\" anywhere"
+> - "tabbing can't" [reach] "the" [element-kind] "buttons"
+
+The stepper's own three checks — the run tracking the stepper, the clamp past
+the end of the tape, and the floor on an emptied field — were each answered
+"yes", with the qualifier "only when inspecting". ⚠ Quotes are trimmed at three
+typos rather than reproduced with them, and two editorial substitutions are
+bracketed. Widening a dictionary to admit a misspelling is the anti-pattern this
+campaign already names; the trimming is disclosed rather than silent.
+
+**PASSED with redirects, and one finding that is not cosmetic.** Four outcomes:
+
+1. **No visible pressed state, no visible anything — COSMETIC, and it is the
+   strongest vindication the presentation ruling has had.** Every mechanism the
+   checkpoint tested is correct: `aria-pressed` moves, `data-extent` tracks, the
+   clamp holds, the floor holds — all confirmed by the human **in the inspector
+   and nowhere else**. A learner sees none of it. `DOCS.md` § Decisions rules
+   that "a correct DOM with no arrangement is not this lens working"; this is
+   that sentence measured. **Named obligations on the stylesheet increment**,
+   not vague ones: a pressed state for `[aria-pressed='true']`, a visible
+   proposed run distinct from consumed and rest, and a visible focus indicator.
+2. **The submit control was MISSING — a contract gap, fixed in the increment
+   that surfaced it.** `README.md` § UI structure specifies
+   `<button data-spellme-submit>` and the twin's fresh-mount frame draws
+   `[ claim it ]`; neither the A3 increment that built the form nor its `ar-4`
+   caught its absence, and no wave-3 test reaches it. It now renders, INERT by
+   the 2026-08-26 ruling. ⚠ **A form the twin draws with a button, drawn without
+   one, is not that form** — and the only instrument that found this was a human
+   looking at the surface.
+3. **Tab does not reach the element-kind buttons — UNRESOLVED, and the one
+   finding that could be behavioral.** Two causes are consistent with the report
+   and they are not equally serious: either the buttons are genuinely out of the
+   tab order, which contradicts `ux/user-journeys.md` Journey 5 outright and is
+   a defect; or tab reaches them and **nothing renders differently**, which is
+   cause 1 again. Ruled out by measurement: nothing in this module sets
+   `tabindex`, and the orchestrator's `inert` wrapper cannot be active, because
+   `inert` blocks pointer events too and the human's clicks worked. Not ruled
+   out: a missing focus indicator. **Carried as a gate on the stylesheet
+   increment and re-checked at 🔍 #4**, with a visible focus indicator among its
+   named obligations either way.
+4. **The `[study source]` button is not the orchestrator's and is not legacy.**
+   The human asked for it to be commented out or deleted as "legacy". It is the
+   sandbox page's own fixture: `spiralearn/sandbox/orchestrate/index.mdx` gives
+   its demonstration `notesLens` a `recommend` returning one proposal labelled
+   `study the source`, which the orchestrator renders through
+   `data-recommendations`. Removing it would delete the sandbox's only exercise
+   of the recommendation surface — someone else's checkpoint target — rather
+   than retiring dead code. **Reported rather than done**, and it is
+   cross-module, which the two-tier rule puts behind an explicit check-in
+   regardless.
+
+⚠ **This checkpoint ran AFTER its `ar-4`, correcting the order that slipped one
+increment earlier** — and the correction paid immediately: `ar-4` found
+`data-extent` disagreeing with the text beside it, and the human then exercised
+the fixed surface rather than one that moved underneath them.
+
 ⚠ **TWO CONSECUTIVE REVIEWERS CONCLUDED THIS LENS IS UNREACHABLE IN A BROWSER,
 and both were wrong the same way.** Each reached for
 `orchestrate/lib/composing/built-in-lenses.ts`, found `spellme` correctly

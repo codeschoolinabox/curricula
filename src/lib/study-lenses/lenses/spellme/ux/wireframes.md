@@ -35,7 +35,7 @@ is the lesson about whitespace.
 │         [Template][TemplateSubstitutionTail]               │
 │         [RegularExpressionLiteral]                         │
 │                                                            │
-│  extent   [ − ]  5 characters  [ + ]                       │
+│  extent   [ − ]  1 character   [ + ]                       │
 │           (or drag across the source above)                │
 │                                                            │
 │                                             [ claim it ]   │
@@ -52,6 +52,16 @@ hosting it.
 **The extent is a stepper, and dragging is the second way to reach it.** The
 value is a small integer and the count is already on screen; a stepper is
 keyboard-native and testable without a browser, where drag is neither.
+
+(human ruling 2026-08-29) **It opens at 1, and the frame above says so.** That
+frame drew `5 characters` for a program whose first element is exactly five
+characters — the stepper already resting on the answer, which hands the learner
+half the claim. The reading that won is the one
+[user-journeys.md](./user-journeys.md) already implies twice: Journey 1 has the
+learner "step the extent to 5", and Journey 5 has them "arrow it up to 3" —
+neither is a thing you do to a control that is already there. The old frame was
+a moment mid-interaction drawn under a fresh-mount heading. Nothing in
+`user-journeys.md` needed changing, which was checked rather than assumed.
 
 > ⚠ **doubt.** Ten kind buttons is a lot of surface for the first thing a
 > learner sees, and it front-loads vocabulary before any of it has been used.

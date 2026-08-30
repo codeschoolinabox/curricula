@@ -92,7 +92,7 @@ describe('spellme surface', () => {
 			).toHaveLength(10);
 		});
 
-		it.skip('renders the extent stepper', () => {
+		it('renders the extent stepper', () => {
 			expect(
 				renderLens('const x = 1').querySelector('[data-spellme-extent]'),
 			).not.toBeNull();

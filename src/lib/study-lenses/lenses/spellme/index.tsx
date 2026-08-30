@@ -59,6 +59,7 @@ function SpellmeMain({ embodiment }: LensProperties): ReactElement {
 	const [claimedKind, setClaimedKind] = React.useState<ClaimableKind | null>(
 		null,
 	);
+	const [extent, setExtent] = React.useState(MINIMUM_EXTENT);
 
 	// Everything behind the cursor has already met its fate — that is what
 	// `positionCursor` advancing past it MEANS, and it is the cursor's only
@@ -74,6 +75,14 @@ function SpellmeMain({ embodiment }: LensProperties): ReactElement {
 	// elements tile the source exactly, so joining them reproduces it, and the
 	// data flow has no edge from the source to this surface.
 	const unspent = textOf(stream.slice(session.cursor));
+	// What the proposed span can actually show. The stepper is deliberately
+	// unbounded — a `max` would restate the tape's own length, and a native `max`
+	// does not clamp a typed value anyway — so the span clamps instead. Without
+	// this, `data-extent` and the text it sits on are two different reads of one
+	// state: a stepper at 500 over eight remaining characters would DRAW eight and
+	// CLAIM five hundred. The control keeps the raw number the learner typed; the
+	// span describes what the span holds.
+	const shownExtent = Math.min(extent, unspent.length);
 	// The consumed half of the mark. A set-aside comment carries `data-marked` on
 	// its jar entry; a consumed line break leaves this instead, at the position
 	// the grammar read it (`./DOCS.md` § Structural constraints). PRESENCE is the
@@ -105,10 +114,10 @@ function SpellmeMain({ embodiment }: LensProperties): ReactElement {
 			    only thing that moves — the characters stay where they are. */}
 			<section data-spellme-input>
 				<span data-spellme-consumed>{textOf(taken)}</span>
-				<span data-spellme-proposed data-extent={PROPOSED_EXTENT}>
-					{unspent.slice(0, PROPOSED_EXTENT)}
+				<span data-spellme-proposed data-extent={shownExtent}>
+					{unspent.slice(0, shownExtent)}
 				</span>
-				<span data-spellme-rest>{unspent.slice(PROPOSED_EXTENT)}</span>
+				<span data-spellme-rest>{unspent.slice(shownExtent)}</span>
 			</section>
 			{/* What has fallen, in stream order, plus the marks for the line
 			    breaks the grammar read as the tape filled — including one read
@@ -152,6 +161,33 @@ function SpellmeMain({ embodiment }: LensProperties): ReactElement {
 							</button>
 						))}
 					</div>
+					{/* A WRAPPER, not the input: `./README.md` § UI structure writes
+					    `<div data-spellme-extent>`, and the keyboard journey's test
+					    selects `[data-spellme-extent] input` — a descendant. Native
+					    `number`, because the extent is a small integer and a stepper
+					    is keyboard-reachable where a drag is not. */}
+					<div data-spellme-extent>
+						<label>
+							extent, in characters
+							<input
+								min={MINIMUM_EXTENT}
+								onChange={function stepExtent(event) {
+									setExtent(readExtent(event.target.value));
+								}}
+								type="number"
+								value={extent}
+							/>
+						</label>
+					</div>
+					{/* Drawn as `[ claim it ]` in the twin's fresh-mount frame and
+					    specified at `./README.md` § UI structure. INERT in this wave
+					    by ruling — the stepper and the picker are live, submitting
+					    and judging are not, and `judgeClaim`/`settle` are still
+					    stubs. It renders because a claim form the twin draws with a
+					    button, drawn without one, is not this form. */}
+					<button data-spellme-submit type="button">
+						claim it
+					</button>
 				</form>
 			)}
 		</div>
@@ -217,6 +253,30 @@ const CLAIMABLE_KINDS: ReadonlyArray<ClaimableKind> = freezeInPlace<
 const BREAK_MARK = '↵';
 
 /**
+ * The stepper's value as a number, converted at the boundary rather than
+ * confused with the string the DOM hands over (`./README.md` § Glossary,
+ * _extent_, on the same discipline between an extent and a span).
+ *
+ * `Number`, not `Number.parseInt`: parseInt stops at the first non-digit, so it
+ * reads `'1e2'` as 1 and `'3xyz'` as 3 — silently guessing where the string was
+ * not a legal number at all. It also never returns a fraction, which would make
+ * the `Number.isInteger` guard below dead code. A real `type="number"` field
+ * sanitizes most of this away, but jsdom does not, and the claim loop's tests
+ * will construct these strings directly.
+ *
+ * Anything that is not a legal extent floors to the minimum rather than reaching
+ * the surface as `0` or `NaN`. Flooring visibly is the interactive analogue of
+ * the factory's refuse-rather-than-coerce rule (`./DOCS.md` § Decisions): a live
+ * control cannot throw on every keystroke, but it can decline to guess.
+ */
+function readExtent(value: string): number {
+	const parsed = Number(value);
+	return Number.isInteger(parsed) && parsed >= MINIMUM_EXTENT
+		? parsed
+		: MINIMUM_EXTENT;
+}
+
+/**
  * The extent the claim opens on, in characters (human ruling 2026-08-29).
  *
  * One, not the element's true width: `ux/wireframes.md`'s fresh-mount frame
@@ -224,12 +284,12 @@ const BREAK_MARK = '↵';
  * learner half the claim, while `ux/user-journeys.md` Journey 1 has them "step
  * the extent to 5" — so the frame is a moment mid-interaction, not a seed.
  *
- * ⚠ **A constant only until the stepper is live.** The extent becomes
- * component-local form state at the stepper increment, and `data-extent` must
- * track it — `./DOCS.md` § Structural constraints makes that the stated reason
- * the stepper is live at all.
+ * It doubles as the stepper's floor: an element of zero characters cannot
+ * exist, so nothing below this is a claim anyone could make. There is
+ * deliberately no ceiling — the proposed run is clipped by the text remaining
+ * on the tape, so a ceiling would restate the tape's own length.
  */
-const PROPOSED_EXTENT = 1;
+const MINIMUM_EXTENT = 1;
 
 /**
  * The lens object — the module's identity. Frozen at construction (the
