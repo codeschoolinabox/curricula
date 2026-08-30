@@ -122,7 +122,7 @@ describe('spellme surface', () => {
 			).toBeUndefined();
 		});
 
-		it.skip('opens the legend on first mount', () => {
+		it('opens the legend on first mount', () => {
 			expect(
 				renderLens('const x = 1').querySelector('[data-spellme-legend]'),
 			).not.toBeNull();

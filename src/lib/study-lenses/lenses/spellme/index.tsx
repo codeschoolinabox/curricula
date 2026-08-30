@@ -204,6 +204,41 @@ function SpellmeMain({ embodiment }: LensProperties): ReactElement {
 				data-extent-verdict={session.lastVerdicts?.extent}
 				data-one-more-verdict={session.lastVerdicts?.oneMore}
 			/>
+			{/* A plain div, and OPEN is structural rather than a state: `./README.md`
+			    § UI structure writes `<div data-spellme-legend>`, where parsons's
+			    equivalent is a collapsed `<details>`. The contrast is the reason —
+			    parsons's legend explains feedback colours, which a learner can
+			    ignore and still play; this one explains the answer vocabulary,
+			    which they cannot.
+
+			    ⚠ It stays visible when the picker does NOT: the form is gated on
+			    whether anything is left to claim, the legend is not, so the vocabulary is still readable
+			    on a program with nothing left to claim.
+
+			    ⚠ It carries the two facts `ux/user-journeys.md` says a learner
+			    takes FROM IT — Journey 1's "the legend they just read says a
+			    keyword is an identifier name", and Journey 4's learner who reads
+			    it again on reaching `true`. An earlier draft listed the ten names
+			    alone and justified that by "the twin draws no legend region";
+			    that is true of `ux/wireframes.md` and FALSE of its sibling, which
+			    is the wave-1 failure of checking one twin and calling the twin
+			    done. The wording below is `./README.md` § What the learner claims,
+			    condensed, not newly authored. */}
+			<div data-spellme-legend>
+				<p>the ten element kinds you can claim</p>
+				<ul>
+					{CLAIMABLE_KINDS.map((elementKind) => (
+						<li key={elementKind}>{elementKind}</li>
+					))}
+				</ul>
+				<p>
+					Every keyword is an <code>IdentifierName</code> — at this phase{' '}
+					<code>if</code> and <code>myVar</code> are the same kind of thing. And
+					so are <code>null</code>, <code>true</code> and <code>false</code>,
+					which is the sharper case: they look like values, and there are two
+					literal buttons inviting the mistake.
+				</p>
+			</div>
 		</div>
 	);
 }
@@ -232,10 +267,14 @@ function textOf(run: ReadonlyArray<StreamElement>): string {
  * A *compile-time* guarantee would want a totality device like the one `core.ts`
  * uses for its kind tables, which is a contract question. A *runtime* one is
  * cheap and sufficient: ten DISTINCT values, each type-pinned to a ten-member
- * union, is the whole union exactly once by pigeonhole. That assertion is an
- * authored regression lock and lands with the others (raised by `ar-4` at this
- * increment; an earlier draft of this comment claimed nothing short of a
- * contract change could close it, which was wrong).
+ * union, is the whole union exactly once by pigeonhole.
+ *
+ * ⚠ **THAT TEST DOES NOT EXIST YET.** It is owed, not landed — no test in this
+ * module asserts distinctness [measured 2026-08-30: zero hits for `new Set`,
+ * `distinct` or `unique` across all three test files, against a positive
+ * control]. An earlier draft of this comment said it "lands with the others",
+ * which was false, and a false safety net is worse than a named gap: it tells
+ * the next reader to skip the check that is missing.
  */
 const CLAIMABLE_KINDS: ReadonlyArray<ClaimableKind> = freezeInPlace<
 	ReadonlyArray<ClaimableKind>

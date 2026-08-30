@@ -933,6 +933,24 @@ than presented as a settled whole.
   agent addition to a human-ruled set so it can be struck** — the ruling above
   named five, and this is not one of them.
 
+  ⚠ **A TWELFTH, also the agent's, raised by `ar-4` at increment A6**: the
+  legend is rendered UNCONDITIONALLY while the claim form is gated, so the
+  vocabulary stays readable on a program with nothing left to claim. Nothing
+  tests it — the `Zero — nothing claimable` block asserts only the form's
+  ABSENCE — so a later edit wrapping the legend in the same gate "for
+  consistency" would pass every green test. One assertion over the fixture that
+  block already builds. Same disclosure as the eleventh: agent-added, and the
+  human may strike it.
+
+  ⚠ **And the eleventh's own status was MISREPORTED IN SOURCE until
+  2026-08-30.** `index.tsx`'s constant carried "That assertion is an authored
+  regression lock and lands with the others", which was false — no test in this
+  module asserts distinctness [measured 2026-08-30: zero hits for `new Set`,
+  `distinct` or `unique` across all three test files, with a positive control].
+  Found by `ar-4` at A6, two increments after it was written. **A false safety
+  net is worse than a named gap**: it tells the next reader to skip the check
+  that is missing. The comment now states the gap as owed.
+
 - (human ruling 2026-08-29) **The extent stepper starts at 1.** The twin
   answered this two ways and neither document ruled: `ux/wireframes.md` § Fresh
   mount draws `[ − ] 5 characters [ + ]` for a program whose first element is
@@ -1170,6 +1188,16 @@ wave 3 `lastVerdicts` is permanently null and an empty region is CORRECT, so the
 lock cannot be written yet and must not be forgotten when it can be. What
 remains the human's is narrower: whether the region gets text at all, which is a
 Phase-0 contract question.
+
+⚠ **`DOCS.md`'s sketch never mentions the legend or the fates panel.** Phase 7
+and the Mermaid `Surface` node enumerate the tapes, the jar, the claim form and
+the verdicts, where `README.md` § UI structure names two more regions [measured
+2026-08-30: `grep -c legend DOCS.md` → 0]. `DOCS.md` is an architectural
+contract and changing it needs the human, so nothing was edited — but the
+document each `ar-4` is instructed to hold the implementation against is itself
+incomplete relative to the README, and every audit from A6 onward is measuring
+against the smaller of two contracts. Owed as a documentation pass once the
+fates panel lands.
 
 ⚠ No checkpoint so far has exercised a screen reader either: #1 and #2 were
 sighted DOM checks and #3 covered tab order, not announcement.
