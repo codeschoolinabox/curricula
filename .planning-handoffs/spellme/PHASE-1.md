@@ -1152,10 +1152,10 @@ catches it in one line, with an instrument already in the file: the `verdicts()`
 helper in `tests/component.test.tsx` returns the element, and the suite already
 calls `.getAttribute('aria-live')` on it, so `.textContent` was one property
 away [measured 2026-08-30, jsdom over both markups: the region as A5 renders it
-gives `textContent` `""` — announceable false; the same region carrying a built
-sentence — announceable true]. **Only the last step is untestable** — whether a
-screen reader vocalizes it, which varies by product and browser and has no jsdom
-equivalent. The defect lives in the first half, not that one.
+gives `textContent` `""`, with nothing to announce; the same region carrying a
+built sentence has content to announce]. **Only the last step is untestable** —
+whether a screen reader vocalizes it, which varies by product and browser and
+has no jsdom equivalent. The defect lives in the first half, not that one.
 
 ⚠ **The obvious alternative instrument does NOT work, which is why it was
 measured before being written down.** `aria-live="polite"` alone does not
@@ -1225,6 +1225,23 @@ A body cannot be amended, so each correction lives here.
   committed in a body that disclaims a different relayed claim two paragraphs
   earlier. Only screen-reader vocalization is untestable, and the defect is not
   there.
+
+- **`944125b2`** — the commit that corrected the live-region claim — states its
+  own cspell gate as "Issues found: 8". **It is 10** [measured 2026-08-30], and
+  the run printing 10 was in the SAME TURN as the body saying 8. That is this
+  campaign's signature defect, committed inside a commit whose subject is a
+  different correction by the same author. The two extra hits were one coined
+  word used twice, in the prose of that very correction — reworded rather than
+  whitelisted, per the standing trap against widening a dictionary to admit your
+  own invention.
+
+  ⚠ **And the instrument that found it went vacuous, for the second time this
+  session.** Diffing the unknown-word SET against a `git show` copy written to
+  `/tmp` reports `Files checked: 0` — cspell does not scan outside the tree — so
+  the "words added" list was simply the whole current list and proved nothing.
+  The positive control built into the same command is what caught it. **Never
+  diff a word set against an out-of-tree baseline; test each flagged word
+  against the tree instead.**
 
 - **`6d72f76e`** reads "all agreeing → 1 … positive control **19**". The → 1 is
   true of all three instruments; the 19 is true of the **collapsed pipeline
