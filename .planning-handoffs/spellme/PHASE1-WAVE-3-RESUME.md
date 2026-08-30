@@ -92,7 +92,7 @@ ten-buttons test, and the runtime list belongs in `index.tsx`, in-file.
 
 | Fact               | Value                                                                     |
 | ------------------ | ------------------------------------------------------------------------- |
-| HEAD               | `6c510e5f` — **moves within minutes**, peers commit constantly            |
+| HEAD               | **not stated — run `git rev-parse HEAD`**; it moves within minutes        |
 | scoped tree        | see the ⚠ below — this row **cannot honestly assert itself**              |
 | scoped suite       | `Test Files 3 passed (3)` · `Tests 58 passed \| 34 skipped (92)`          |
 | skips              | `component.test.tsx` **12** · `core.test.ts` **22** (wave 4's, untouched) |
@@ -141,13 +141,14 @@ gate is your directory green plus zero NEW failures outside those eight ∪ peer
 WIP.
 
 ⚠ **A NINTH appears intermittently and is NOT a new standing failure.**
-`orchestrate/tests/index.test.tsx` failed once during this handoff's own
-validation — `expected [ 2, 1 ] to deeply equal [ 2, +0 ]` — and **passed
-128/128 in isolation, twice**, which points at cross-file pollution rather than
-the `getClientRects` flake. It did not appear in the run taken minutes later.
-**If you see nine, check whether the ninth is this file before treating the gate
-as violated** — and check the symptom rather than trusting one green re-run
-either way.
+`orchestrate/tests/index.test.tsx` — **seen in 1 of 4 whole-repo runs**, and
+passing 128/128 in isolation twice, which points at cross-file pollution rather
+than the `getClientRects` flake. Recognize it by the assertion, not the file:
+`keys duplicate-target proposals safely`,
+`expected [ 2, 1 ] to deeply equal [ 2, +0 ]`, at `index.test.tsx:1154` — a
+leaked React key warning caught by a spy. **If you see nine, check whether the
+ninth is this one before treating the gate as violated.** ⚠ Do NOT clear it with
+a single green re-run: at that rate, three runs in four look clean.
 
 ⚠ **The jsdom flake is real** —
 `TypeError: textRange(...).getClientRects is not a function` printed during an
@@ -157,9 +158,10 @@ either way.
 ## What is done
 
 **The count is deliberately NOT stated — RUN THE LOOP**, over four paths. An
-earlier revision said "twenty" where the loop returned twenty-one, which is this
-campaign's signature defect in the one section whose entire point is not to
-count from memory:
+earlier revision stated a total its own loop already contradicted — and the true
+figure moved three times more while this paragraph was being written and
+rewritten. **That is why no number appears here.** Correcting a stale count with
+a fresher one is how every previous one came back:
 
 ```sh
 git log --format='%h %s' --since='2026-08-26 00:00' -- \
@@ -171,8 +173,8 @@ git log --format='%h %s' --since='2026-08-26 00:00' -- \
 
 Block A is **six of its eight increments done** — A1 input tape, A2 token tape,
 A3 claim form and picker, A4 extent stepper, A5 verdicts region, A6 legend. The
-surface now renders every region the DOM contract names except the fates panel
-and the one-more field.
+surface now renders every region the DOM contract names except the fates panel,
+the one-more field and the way past — measured by grep, not counted from memory.
 
 **🔍 #2 and #3 are SPENT and both passed**, outcomes recorded verbatim in
 `PHASE-1.md`. #3 passed _with redirects_, and its redirects are live obligations
@@ -184,9 +186,9 @@ there** — it sits mid-line inside a numbered item elsewhere in that file, so t
 canonical `^- \((human|orchestrator) ruling` grep **cannot see it**. Find it
 with an un-anchored `git grep -n "human ruling 2026-08-30"`. That is the
 load-bearing-anchor failure this file warns about above, committed by its own
-author. The first WITHDRAWS the stale-seed fix the earlier handoff called
-mandatory; read that subsection before § WITHDRAWN below, which is kept only as
-a record of the reasoning.
+author. \*\*The stale-seed ruling of 2026-08-29 WITHDRAWS the stale-seed fix the
+earlier handoff called mandatory; read that subsection before § WITHDRAWN below,
+which is kept only as a record of the reasoning.
 
 ## What is left
 
@@ -217,6 +219,11 @@ revision of this file quoted README's order alone and called it "a clean
 two-line insert", which is **this document's own trap #3 — checking one twin and
 generalizing — reproduced inside the instruction warning against it.** Put the
 disagreement to the human before implementing; do not pick one.
+
+⚠ **Do not stall the wave on it.** A7 is blocked only on PLACEMENT — the
+element, its `<summary>`, and its content from README § The three fates are all
+settled. **Ask the question and take A8 meanwhile**; A8 is independent and is
+the other red event left in Block A.
 
 ⚠ Also under-scoped by that earlier revision: README calls the panel's contents
 "the three fates", the preceding legend increment shipped real content plus a
@@ -301,12 +308,12 @@ matched a comment.
 ## ⛔ WITHDRAWN — SKIP THIS SECTION; kept only as a record
 
 ⚠ **Everything below this heading is superseded and must not be acted on.** It
-retains this document's only ⚠⚠ marker and several live-voice imperatives, so a
-reader skimming for the loudest markers lands here first. It is kept because the
-reasoning is the record, and because deleting a superseded finding is how the
-same wrong conclusion gets rediscovered. **The ruling that withdrew it is in
-`PHASE-1.md`'s `(2026-08-29, wave 3 continued)` subsection — read that, not
-this.**
+retains the heaviest warning markers in this file and several live-voice
+imperatives, so a reader skimming for the loudest text lands here first. It is
+kept because the reasoning is the record, and because deleting a superseded
+finding is how the same wrong conclusion gets rediscovered. **The ruling that
+withdrew it is in `PHASE-1.md`'s `(2026-08-29, wave 3 continued)` subsection —
+read that, not this.**
 
 ### The withdrawn text, for the record only
 
@@ -402,12 +409,13 @@ ruling 2026-08-30). It is the sandbox harness's own recommendation fixture.
 
 Every one of these cost something. The first four are new as of 2026-08-30.
 
-- ⛔ **DO NOT COIN A WORD INTO A LINTED FILE.** **FOUR** coinages in one
-  session, one of which reached a commit — and one of the four was invented a
-  SECOND time, in this very handoff, after already being reworded out of another
-  file. The rule is REWORD, never whitelist: a dictionary entry existing to make
-  your own invention pass is not a spelling fix. Verify with a positive control
-  that the `cspell:ignore` header is unchanged.
+- ⛔ **DO NOT COIN WORDS.** Several inventions slipped into prose in one
+  session, one reaching a commit, and one was coined a SECOND time after already
+  being reworded out of another file. ⚠ **The gate that caught most of them is
+  GONE** (see § Measured state), so this is a habit with no automated backstop —
+  which makes it matter more, not less. It is a preference about prose, not a
+  lint rule: prefer an existing word to an invented one, and rewrite rather than
+  reach for a dictionary.
 - ⛔ **A FALSE CLAIM OF TEST COVERAGE IN SOURCE IS WORSE THAN A NAMED GAP.** A
   JSDoc here asserted a regression lock "lands with the others" when no such
   test existed; it survived two increments and one `ar-4` before a later `ar-4`
@@ -433,17 +441,21 @@ Every one of these cost something. The first four are new as of 2026-08-30.
 - **An absence claim that QUOTES the token it counts falsifies itself.** Pair
   every absence grep with a positive control, and state when you used `-E`.
 - **`eslint` is VACUOUS on `.css` and `.mdx`** — exits 0 while reporting the
-  file ignored. ⚠ **So `spellme.css` will have NO per-file automated gate at
-  all**, now that spelling is decommissioned: `prettier --check` and the 🔍
-  checkpoint are the whole of it. Do not assume `npm run validate` covered it.
+  file ignored — so **`spellme.css` gets nothing from eslint.** Its gates are
+  `npx prettier --check`, which DOES check `.css` (verified), and the 🔍
+  checkpoint. ⚠ An earlier revision claimed it had "no per-file automated gate
+  at all" and then named one in the very next clause.
 - **`git grep -c "it.skip"` is a regex.** Use `git grep -cF "it.skip("`.
 - **Node is v20.11.0 against engines `>=22.11.0`.** Both tools run. Proceed.
 - ⛔ **A TOOL THAT VANISHES MID-SESSION IS A `git log` QUESTION FIRST.**
   `git log -S <tool name>` answers in one command whether the project retired it
   on purpose. Diagnosing it from `git status` and `node_modules` timestamps
-  instead cost this campaign six commits' worth of gate claims about a tool
-  outside its pipeline. ⚠ A wave-scoped `git log` loop cannot surface it — a
-  tool's removal is outside the wave's paths by construction.
+  instead left a run of commits asserting a gate for a tool no longer in this
+  pipeline. ⚠ The boundary is a TIMESTAMP, not a commit count: `9baca1e7` landed
+  2026-08-29 23:11:33, and a commit eight minutes earlier ran that gate
+  legitimately. An earlier revision named a count that straddled the line and
+  was wrong about its first member. ⚠ A wave-scoped `git log` loop cannot
+  surface it — a tool's removal is outside the wave's paths by construction.
 - **An `ar-N` verdict is itself a claim.** Two were substantially wrong this
   session — the lens-is-unreachable finding, and "no unit test can catch" the
   live region. Re-measure a reviewer's finding before acting on it.
