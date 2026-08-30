@@ -119,41 +119,19 @@ context-free reader hit the contradiction on the very first gate it ran.
 **Re-run it rather than believe it** — and count this file OUT of "peer WIP",
 because it is yours, and an agent who stashes peer WIP would lose it.
 
-⛔ **THERE IS NO SPELL-CHECK GATE IN THIS PROJECT ANY MORE. DO NOT RECONSTRUCT
-ONE.** `cspell` was **deliberately uninstalled** at `9baca1e7` (2026-08-29
-23:11:33) — _"chore: uninstall cspell and unwire spell-checking from every
-automated check"_. The devDependency is gone (`npm ls cspell` → empty, no
-`node_modules/.bin/cspell`), `lint:spelling` is gone from `package.json`, the
-`Bash(npx cspell:*)` permission is gone from `.claude/settings.json`, and
-**`AGENTS.md`, `AGENTS.principal.md` and `DEV.md` mention cspell zero times**
-[all measured 2026-08-30].
+⚠ **There is no spell-check gate in this project.** `cspell` was uninstalled at
+`9baca1e7` and unwired from every automated check (human confirmation
+2026-08-30: _"cspell has been removed, no more worrying about it"_). **Do not
+run it and do not reconstruct it.** You will see `cspell.json` deleted in
+`git status`; that is the sanctioned completion of the same decommission, and
+the remaining deletion is the human's, not yours.
 
-⚠ **The `cspell.json` you will see deleted in `git status` is the SANCTIONED
-COMPLETION of that decommission, not peer interference.** `9baca1e7`'s own body
-says the config file is not deleted by that commit, because a global
-destructive-command hook blocks the agent from deleting files, and that the one
-remaining deletion is still owed by the human.
-
-⛔ **An earlier revision of this file got this exactly backwards** — it called
-the deletion a peer's, and instructed every session to extract the committed
-config to a temp path and pass `--config` as its FIRST ACT. **That resurrects a
-decommissioned tool.** Do not do it, and delete nothing yourself.
-
-⚠ **Six commits of 2026-08-29/30 (`304160c5` through `6c510e5f`) assert a cspell
-gate in their bodies.** Those runs used an `npx`-fetched binary against a config
-this project had already retired, so the numbers describe a tool outside the
-pipeline. They are not false about what was run — they are irrelevant to what
-gates this repo. **Do not carry them forward and do not try to reproduce them.**
-The live per-file gates are `npx eslint <file>` for `.ts`/`.tsx`,
-`npx markdownlint-cli2 --no-globs "<file>"` for `.md`, `npx tsc --noEmit`, and
-`npx prettier --check`.
-
-⚠ **The reusable lesson:** a tool that vanishes mid-session is a `git log`
-question before it is a peer-interference question. `git log -S` over the tool's
-name finds this in one command. It was diagnosed here three separate ways —
-dictionary churn, then a peer's deletion — and never once by asking whether the
-project had retired it on purpose. ⚠ And `9baca1e7` touches none of this wave's
-four paths, so **§ What is done's own `git log` loop will never surface it.**
+**The live per-file gates:** `npx eslint <file>` for `.ts`/`.tsx`,
+`npx markdownlint-cli2 --no-globs "<file>"` for `.md`, plus `npx tsc --noEmit`
+and `npx prettier --check`. ⚠ An earlier revision of this file made
+reconstructing the spell gate the first act of every session. The account of how
+that error was reached lives in `PHASE-1.md` and is deliberately not repeated
+here: it is history, not an instruction.
 
 ⚠ **The foreign-failure baseline is EIGHT paths, listed in
 [`./PHASE1-WAVE-2-BRIEF.md`](./PHASE1-WAVE-2-BRIEF.md) § Measured baselines** —
@@ -460,6 +438,12 @@ Every one of these cost something. The first four are new as of 2026-08-30.
   checkpoint are the whole of it. Do not assume `npm run validate` covered it.
 - **`git grep -c "it.skip"` is a regex.** Use `git grep -cF "it.skip("`.
 - **Node is v20.11.0 against engines `>=22.11.0`.** Both tools run. Proceed.
+- ⛔ **A TOOL THAT VANISHES MID-SESSION IS A `git log` QUESTION FIRST.**
+  `git log -S <tool name>` answers in one command whether the project retired it
+  on purpose. Diagnosing it from `git status` and `node_modules` timestamps
+  instead cost this campaign six commits' worth of gate claims about a tool
+  outside its pipeline. ⚠ A wave-scoped `git log` loop cannot surface it — a
+  tool's removal is outside the wave's paths by construction.
 - **An `ar-N` verdict is itself a claim.** Two were substantially wrong this
   session — the lens-is-unreachable finding, and "no unit test can catch" the
   live region. Re-measure a reviewer's finding before acting on it.

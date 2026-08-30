@@ -1109,6 +1109,12 @@ reviewers did, has no thread leading to the mdx. It is under-signposted, and the
 cost is now measured at two reviews. ⚠ **An `ar-N` verdict is itself a claim**:
 this concern was specific, cited real files, and was still false.
 
+- (human ruling 2026-08-30) **cspell is gone; stop treating it as an issue** —
+  _"cspell has been removed, no more worring bout that"_. The forensic account
+  below stays as the error record, but no live document instructs anyone to run
+  or reconstruct the tool, and the wave-3 handoff is trimmed to one paragraph
+  naming the live gates instead.
+
 ⛔ **CORRECTION, 2026-08-30 — THE WHOLE cspell DIAGNOSIS BELOW IS WRONGLY
 FRAMED, TWICE OVER, AND SIX COMMIT BODIES INHERIT THE ERROR.** The paragraphs
 that follow blame dependency churn, then a peer's deletion. Neither is what
