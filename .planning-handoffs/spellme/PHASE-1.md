@@ -892,9 +892,15 @@ than presented as a settled whole.
   `README.md` and `DOCS.md` and in **zero** test files [measured 2026-08-29:
   `git grep -n "spellme-break" -- src/`], while `README.md` § Glossary requires
   the tape to hold "the marks for the line breaks read as the tape fills —
-  including one read before anything has fallen at all". And
-  `[data-spellme-claim-form]` appears in exactly two tests, **both asserting
-  `toBeNull()`** [measured 2026-08-29: `grep -n "claim-form"
+  including one read before anything has fallen at all". ⚠ **The break lock must
+  pin the MARK-GATING, not the section** (sharpened by `ar-4` at increment A2,
+  which found two further silent mutants beyond the one already measured):
+  dropping `&& marked` from the predicate makes plain `WhiteSpace` runs render a
+  break glyph too, and replacing the list with `[]` also leaves the suite green
+  — because the one enabled test touching `[data-spellme-tokens]` uses
+  `'const x = 1'`, whose elements behind the cursor are empty before any filter
+  runs. And `[data-spellme-claim-form]` appears in exactly two tests, **both
+  asserting `toBeNull()`** [measured 2026-08-29: `grep -n "claim-form"
   lenses/spellme/tests/component.test.tsx`] — so omitting the whole form would
   close wave 3 green.
 
@@ -957,6 +963,40 @@ the **tokens phase stayed accessible** while the source did not lex — spellme
 merely stepped aside — which is what `embody/derive-accessibility.ts` declares
 in its own words: _"`source` and `tokens` are always accessible … A phase's
 own-stage error never bars it — it renders inside the phase."_
+
+**🔍 checkpoint #2 — the three regions rendering. The human's words, verbatim:**
+
+> "I _think_ it's doing what you said it should do."
+
+— followed by the rendered DOM, pasted from the inspector. ⚠ The quote is
+trimmed to the load-bearing sentence rather than run on: the rest carried a
+typo, and quoting it verbatim would have forced a misspelling into a cspell
+header, which is the anti-pattern this campaign already names. Quote less; never
+widen a dictionary to make a quote pass. **The paste is the finding**: a hedged
+verbal confirmation would have settled nothing, and the markup is
+machine-checkable. Over the source `// hi` + newline + `const x = 1;` it carried
+`data-cursor="2"` — past the comment AND the terminator — a `data-spellme-input`
+split three ways: the comment and its line break already consumed, a proposed
+run holding the single character `c` at `data-extent="1"`, and the remainder of
+the line as the rest; a `data-spellme-tokens` holding exactly one
+`<span data-spellme-break>↵</span>`; and a `data-spellme-jar` holding
+`<span data-spellme-set-aside data-marked="false">// hi</span>`. Every field is
+what the DOM contract specifies. **PASSED, no redirect.**
+
+⚠ **Two things the paste settled that no test could.** The break mark renders
+`↵` — a PROPOSAL, since `ux/wireframes.md` records that visual as owed and
+undesigned — and the human did not object to it, which is the checkpoint's whole
+purpose and is recorded rather than treated as approval of a final design. And
+`data-marked="false"` renders as a real attribute rather than being dropped:
+React stringifies `data-*` booleans, so the false-valued case the Block-C lock
+asserts is genuinely observable in the DOM.
+
+⚠ **The checkpoint ran BEFORE this increment's `ar-4`, not after it.** `DEV.md`
+§ Sandbox Checkpoints puts 🔍 between quality checks and the commit, with `ar-4`
+ahead of both. The order was the agent's slip, not a ruling. It cost nothing
+here — `ar-4` returned no behavioral change — but had it done so, the human
+would have been shown a surface that then moved, and the checkpoint would have
+needed re-running. Recorded so the next wave orders it correctly.
 
 ⚠ **The empty-station caption does not exist in code.** `orchestrate/README.md`
 specifies `Tokens, spelling: nothing studies this phase yet`, including a

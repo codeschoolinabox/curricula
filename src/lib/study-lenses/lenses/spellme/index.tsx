@@ -1,4 +1,4 @@
-// cspell:ignore spellme wireframes
+// cspell:ignore spellme wireframes colour
 
 /**
  * The `spellme` lens — default-exports the frozen `Lens` object the
@@ -66,6 +66,23 @@ function SpellmeMain({ embodiment }: LensProperties): ReactElement {
 	// elements tile the source exactly, so joining them reproduces it, and the
 	// data flow has no edge from the source to this surface.
 	const unspent = textOf(stream.slice(session.cursor));
+	// The consumed half of the mark. A set-aside comment carries `data-marked` on
+	// its jar entry; a consumed line break leaves this instead, at the position
+	// the grammar read it (`./DOCS.md` § Structural constraints). PRESENCE is the
+	// mark — there is no false-valued twin, because an unmarked consumed element
+	// leaves nothing at all, which is what evaporates MEANS.
+	//
+	// ⚠ **This shape is REPLACED, not extended, when fallen elements land**
+	// (wave 5, with the claim loop). A second `.map()` appended beside this one
+	// would render all breaks then all fallen elements — or the reverse — which
+	// silently violates the stream order the comment below asserts. The
+	// replacement is ONE ordered pass over `taken`, branching per element. It is
+	// deliberately not written yet: nothing falls until `settle` exists, so
+	// there is nothing to interleave with and no test could reach it.
+	const breaks = taken.filter(
+		(streamElement) =>
+			streamElement.fate === 'consumed' && streamElement.marked,
+	);
 
 	return (
 		<div data-lens="spellme" data-cursor={session.cursor}>
@@ -79,6 +96,18 @@ function SpellmeMain({ embodiment }: LensProperties): ReactElement {
 					{unspent.slice(0, PROPOSED_EXTENT)}
 				</span>
 				<span data-spellme-rest>{unspent.slice(PROPOSED_EXTENT)}</span>
+			</section>
+			{/* What has fallen, in stream order, plus the marks for the line
+			    breaks the grammar read as the tape filled — including one read
+			    before anything has fallen at all (`./README.md` § Glossary, _the
+			    tapes_). Nothing falls until the claim loop lands, so at this wave
+			    the tape holds marks alone. */}
+			<section data-spellme-tokens>
+				{breaks.map((streamElement) => (
+					<span data-spellme-break key={streamElement.element.start}>
+						{BREAK_MARK}
+					</span>
+				))}
 			</section>
 			{/* Always present, empty or not: an empty jar is itself information —
 			    this program set nothing aside (`./ux/wireframes.md`). */}
@@ -105,6 +134,20 @@ function SpellmeMain({ embodiment }: LensProperties): ReactElement {
 function textOf(run: ReadonlyArray<StreamElement>): string {
 	return run.map((streamElement) => streamElement.element.text).join('');
 }
+
+/**
+ * What a consumed line break leaves on the token tape.
+ *
+ * ⚠ **A PROPOSAL, not a settled design.** `./ux/wireframes.md`
+ * § What has no wireframe, deliberately records this visual as **owed and
+ * undesigned** and defers it to a sandbox checkpoint against a running surface,
+ * so something must exist for the human to react to. It meets the two
+ * constraints that document does state: it is a glyph rather than colour alone,
+ * and it says a line break is read here and nothing about whether automatic
+ * semicolon insertion fired — which depends on the production, and which this
+ * lens does not know.
+ */
+const BREAK_MARK = '↵';
 
 /**
  * The extent the claim opens on, in characters (human ruling 2026-08-29).

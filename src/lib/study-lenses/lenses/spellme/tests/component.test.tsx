@@ -74,13 +74,13 @@ describe('spellme surface', () => {
 			).not.toBeNull();
 		});
 
-		it.skip('renders the token tape', () => {
+		it('renders the token tape', () => {
 			expect(
 				renderLens('const x = 1').querySelector('[data-spellme-tokens]'),
 			).not.toBeNull();
 		});
 
-		it.skip('renders the jar', () => {
+		it('renders the jar', () => {
 			expect(
 				renderLens('const x = 1').querySelector('[data-spellme-jar]'),
 			).not.toBeNull();
