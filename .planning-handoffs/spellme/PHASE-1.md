@@ -1143,10 +1143,36 @@ not use a mouse — states the opposite as canon: _"The verdicts land in an
 ⚠ **This is a Phase-0 contract gap, not drift introduced by A5.** `README.md` §
 UI structure and `DOCS.md` § Execution phases 7 both describe the region in
 attributes only, and A5 implements exactly what they specify. A5 is merely the
-first increment to mount it. **No unit test can ever catch this** — the suite
-asserts `dataset.*Verdict`, which is blind to whether anything was spoken — and
-no checkpoint so far has exercised a screen reader: #1 and #2 were sighted DOM
-checks and #3 covered tab order, not announcement.
+first increment to mount it.
+
+⛔ **CORRECTION, 2026-08-30, prompted by the human: "no unit test can ever catch
+this" was WRONG, and wrong in the direction that lets a defect stand.** `ar-4`
+asserted it, the orchestrator repeated it, and neither measured it. A unit test
+catches it in one line, with an instrument already in the file: the `verdicts()`
+helper in `tests/component.test.tsx` returns the element, and the suite already
+calls `.getAttribute('aria-live')` on it, so `.textContent` was one property
+away [measured 2026-08-30, jsdom over both markups: the region as A5 renders it
+gives `textContent` `""` — announceable false; the same region carrying a built
+sentence — announceable true]. **Only the last step is untestable** — whether a
+screen reader vocalizes it, which varies by product and browser and has no jsdom
+equivalent. The defect lives in the first half, not that one.
+
+⚠ **The obvious alternative instrument does NOT work, which is why it was
+measured before being written down.** `aria-live="polite"` alone does not
+compute to the `status` role — `queryAllByRole(body, 'status')` finds **zero**
+for both the empty region and the one carrying text [measured 2026-08-30]. Role
+queries are the wrong tool here; `textContent` is the right one.
+
+**So the disposition changes.** This is not an untestable gap awaiting a human's
+eye — it is a **writable lock**, owed by the wave that wires
+`judgeClaim`/`settle`, because only that wave produces a verdict to announce. In
+wave 3 `lastVerdicts` is permanently null and an empty region is CORRECT, so the
+lock cannot be written yet and must not be forgotten when it can be. What
+remains the human's is narrower: whether the region gets text at all, which is a
+Phase-0 contract question.
+
+⚠ No checkpoint so far has exercised a screen reader either: #1 and #2 were
+sighted DOM checks and #3 covered tab order, not announcement.
 
 **Left for the human, because it changes a Phase-0 contract.** The reviewer's
 counter-proposal is a visually-hidden text node inside the region, built from
@@ -1190,6 +1216,15 @@ A body cannot be amended, so each correction lives here.
   pass. **`Files checked: 0` is the tell; the issue count is not.** Nothing was
   restored: `git checkout`/`git restore` are forbidden, and the deletion is a
   peer's uncommitted work, not this campaign's to judge.
+
+- **`fec32a75`** (increment A5) carries "No unit test can catch it" for the
+  live-region gap. **Wrong**, and corrected in the section above under the
+  2026-08-30 heading: `textContent` catches it in one line, using a helper the
+  suite already has. The claim came from `ar-4` and was repeated without
+  measurement — precisely the failure the sourced-claims rule exists to stop,
+  committed in a body that disclaims a different relayed claim two paragraphs
+  earlier. Only screen-reader vocalization is untestable, and the defect is not
+  there.
 
 - **`6d72f76e`** reads "all agreeing → 1 … positive control **19**". The → 1 is
   true of all three instruments; the 19 is true of the **collapsed pipeline
