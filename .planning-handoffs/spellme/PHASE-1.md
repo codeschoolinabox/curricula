@@ -1109,6 +1109,38 @@ reviewers did, has no thread leading to the mdx. It is under-signposted, and the
 cost is now measured at two reviews. ⚠ **An `ar-N` verdict is itself a claim**:
 this concern was specific, cited real files, and was still false.
 
+⛔ **CORRECTION, 2026-08-30 — THE WHOLE cspell DIAGNOSIS BELOW IS WRONGLY
+FRAMED, TWICE OVER, AND SIX COMMIT BODIES INHERIT THE ERROR.** The paragraphs
+that follow blame dependency churn, then a peer's deletion. Neither is what
+happened. **`cspell` was DELIBERATELY UNINSTALLED** at `9baca1e7` (2026-08-29
+23:11:33) — _"chore: uninstall cspell and unwire spell-checking from every
+automated check"_ — which dropped the devDependency and its 96 packages, removed
+`lint:spelling`, stripped the tool from `README.md`, `DEV.md`, `AGENTS.md`,
+`AGENTS.principal.md` and the measured-facts oracle, and deleted the
+`Bash(npx cspell:*)` permission [measured 2026-08-30: `npm ls cspell` → empty;
+no `node_modules/.bin/cspell`; `grep -ci cspell` on the three governance files →
+0/0/0; `lint:spelling` absent from `package.json`]. The `cspell.json` deletion
+in the working tree is that commit's **sanctioned completion**, which its own
+body says is owed by the human because a hook blocks the agent from deleting
+files.
+
+**So the observed sequence has a single ordinary cause.** 0 → 8 was the
+uninstall's `npm install` dropping the bundled dictionaries; 8 → 30 was the
+config file going away; and every `npx cspell` run after 23:11 fetched a binary
+that is no longer part of this project. **Six commits — `304160c5`, `8c7708d4`,
+`fec32a75`, `944125b2`, `88ab30b4`, `6c510e5f` — state a cspell gate in their
+bodies. Those gates are not this repo's.** The numbers are real about what was
+run and irrelevant to what gates this codebase.
+
+⚠ **The method failure is the durable part.** The tool's disappearance was
+diagnosed twice, both times from `git status` and `node_modules` timestamps, and
+**never once by asking whether the project had removed it on purpose**.
+`git log -S cspell` answers it in one command. ⚠ And `9baca1e7` touches none of
+this campaign's four paths, so the wave's own `git log` loop could never surface
+it — a scoped loop is a scoped view, and a tool's removal is out of scope by
+construction. **The paragraphs below are kept unrewritten, because the wrong
+reasoning is the record.**
+
 ⚠ **A PEER'S `npm install` MOVED A QUALITY GATE MID-SESSION.** `PHASE-1.md`
 measured **0** cspell issues twice, was committed on those readings, and then
 measured **8** on byte-identical content with no edit in between [measured
