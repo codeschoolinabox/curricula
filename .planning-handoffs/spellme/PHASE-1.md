@@ -754,19 +754,32 @@ wave's own named defect committed inside the fix for it.
   external event in the module", which stepping and picking are now too. That
   label was corrected in the same commit and the rewrite is enumerated in its
   body.
-- (human ruling 2026-08-26, **recorded 2026-08-27**) **The stale session seed is
-  fixed IN-MODULE, at the DOM-contract increment.** `MountedLens` renders
-  `<Main config={config} embodiment={embodiment} />` with **no `key`** tied to
-  the embodiment [read: `orchestrate/index.tsx`], and `derive-study.ts` builds a
-  fresh embodiment per derivation — so typing **re-renders** an open lens rather
-  than remounting it. The component's `useMemo` picks up the new stream; the
-  `useState` seed does not, and the cursor goes stale. ⚠ **Adding a `key` in
-  `orchestrate/` was considered and REJECTED** as a cross-module change outside
-  this wave that would silently alter remount behavior for `parsons` and
-  `writeme` too. ⚠ **`parsons/index.tsx` carries the identical lazy-seed shape**
-  under a comment asserting the orchestrator remounts on a source change, which
-  the evidence above contradicts — not this campaign's to fix, recorded so the
-  finding outlives the commit that found it.
+- (human ruling 2026-08-26, **recorded 2026-08-27**) ⛔ **SUPERSEDED 2026-08-29
+  — the premise below was measured FALSE, and was already false when this ruling
+  was taken.** Read it with the 2026-08-29 subsection, which carries the three
+  reads and the orchestrator's own canon. Kept verbatim rather than rewritten,
+  because the reasoning is the record. ⚠ The bullet deliberately still opens
+  with its `- (human ruling` citation: this subsection's header count is derived
+  by `grep -cE "^- \((human|orchestrator) ruling"`, and wrapping the bullet in a
+  marker silently dropped it from **8** to **7** for one revision of this file.
+  **The stale session seed is fixed IN-MODULE, at the DOM-contract increment.**
+  `MountedLens` renders `<Main config={config} embodiment={embodiment} />` with
+  **no `key`** tied to the embodiment [read: `orchestrate/index.tsx`], and
+  `derive-study.ts` builds a fresh embodiment per derivation — so typing
+  **re-renders** an open lens rather than remounting it. The component's
+  `useMemo` picks up the new stream; the `useState` seed does not, and the
+  cursor goes stale. ⚠ **Adding a `key` in `orchestrate/` was considered and
+  REJECTED** as a cross-module change outside this wave that would silently
+  alter remount behavior for `parsons` and `writeme` too. ⚠
+  **`parsons/index.tsx` carries the identical lazy-seed shape** under a comment
+  asserting the orchestrator remounts on a source change, which the evidence
+  above contradicts — not this campaign's to fix, recorded so the finding
+  outlives the commit that found it.
+
+  ⛔ **The paragraph below is WRONG — superseded 2026-08-29.** The jar fills
+  correctly: typing happens in editor mode, and opening the lens is a fresh
+  mount. It is kept because it is what a careful reader concluded from the code
+  without reading `orchestrate/`, which is the lesson.
 
   ⚠ **This defect is LIVE at HEAD and user-visible**, which the ruling's own
   commit body understates as "invisible … increment 1 renders only the
@@ -818,6 +831,98 @@ author, who had the ruling in hand, did not.
   for the partial-facts Phase-0 unit — which is **not** wave 3's and goes to a
   fresh session. See § Deferred, and the launch prompt at
   [`../embody-partial-facts/BRIEF.md`](../embody-partial-facts/BRIEF.md).
+
+### The `spellme` LENS's rulings (2026-08-29, wave 3 continued)
+
+Four, all the human's, taken at wave 3's resumption gate. ⚠ **The first
+supersedes the grounds of a ruling in the subsection above** — an entry here can
+overturn an entry there, which is why each subsection is keyed to a date rather
+than presented as a settled whole.
+
+- (human ruling 2026-08-29) **The stale session seed is NOT fixed, because the
+  premise was measured false.** The 2026-08-26 ruling directly above holds that
+  typing re-renders an open lens and stales the cursor. A mounted lens cannot
+  receive a new embodiment at HEAD, on three independent reads: `session` is
+  mount-frozen — `React.useState(() => freezeInPlace({ … }))` [read:
+  `orchestrate/index.tsx` — `const [session] = React.useState(`]; `derivation`
+  memoizes on `[session, settled]` [read: same file], so with `session` pinned
+  only a `settled` change can mint a new embodiment; and `assertPaneCoherence`
+  **throws** on `settled.source !== occupant.openedAt.source` at every
+  excursion-arm render [read: same file — "The pane's coherence invariants —
+  loud in dev AND prod, at EVERY excursion-arm render"]. The editor renders only
+  in editor mode, so there is nothing to type into while a lens is mounted.
+  Every open routes through `openLensSurface`, which flushes and anchors
+  `openedAt` — a **fresh mount**, therefore a fresh seed.
+
+  **It is the orchestrator's own end-state canon**, which this campaign had
+  never cited: the editor is _"structurally absent while a lens or the generator
+  is open, so nothing can edit beneath either"_, and the open lens is _"mounted
+  as the pane's occupant with the frozen embodiment, **fixed for the whole
+  mount** … the embodiment never moves"_ [read: `orchestrate/README.md`, the
+  editor and open-lens bullets].
+
+  **The premise was already false five weeks before the ruling was taken.** The
+  editor/lens swap landed `68f82699` and `assertPaneCoherence` landed
+  `157d2af9`, both **2026-07-21** [measured 2026-08-29: `git log --reverse -S`
+  over `orchestrate/index.tsx` for each]; that file's most recent commit is
+  `0173b1c2`, 2026-08-15 [measured]. Nothing regressed — the finding was wrong
+  when made. Grounds for skipping rather than coding it anyway: the fix would be
+  an unreachable branch, which this module bans by name for the sibling case
+  [read: `spellme/DOCS.md` § Structural constraints — "A branch that _handles_
+  absence as a state would be a dead branch no test can reach"], and it would
+  contradict `DOCS.md` § Execution phases 3's **mount-stable** annotation, which
+  is a phase-annotation change and therefore an inter-file trigger.
+
+  ⚠ **The exposure is real and stays recorded**: if `orchestrate/` ever loosens
+  that invariant, `spellme` **and** `parsons` both go stale silently. Neither
+  carries its own guard, and neither should acquire one on this evidence.
+
+  ⚠ **The `parsons` half of the 2026-08-26 bullet splits.** That comment reads
+  "a source **or config** change remounts the lens". The **source** half is
+  right, by the mechanism above. The **config** half is genuinely wrong —
+  re-opening the SAME lens _"re-resolves the configuration in place and
+  announces as a fresh open — the embodiment never moves"_ [read:
+  `orchestrate/README.md`], so parsons's `viewMode` state would not take a
+  re-opened override. The real finding survives; only its subject changes.
+
+- (human ruling 2026-08-29) **Two more authored regression locks**, beside the
+  three already ruled: the token tape's `data-spellme-break` for a consumed line
+  terminator behind the cursor, and the claim form's **presence** when something
+  is claimable. Both are canon no test reaches. `data-spellme-break` appears in
+  `README.md` and `DOCS.md` and in **zero** test files [measured 2026-08-29:
+  `git grep -n "spellme-break" -- src/`], while `README.md` § Glossary requires
+  the tape to hold "the marks for the line breaks read as the tape fills —
+  including one read before anything has fallen at all". And
+  `[data-spellme-claim-form]` appears in exactly two tests, **both asserting
+  `toBeNull()`** [measured 2026-08-29: `grep -n "claim-form"
+  lenses/spellme/tests/component.test.tsx`] — so omitting the whole form would
+  close wave 3 green.
+
+- (human ruling 2026-08-29) **Five more locks, and three named as deliberately
+  unlocked.** Locked: the input tape's `data-spellme-consumed` /
+  `data-spellme-proposed` / `data-spellme-rest` spans; `data-extent` on the
+  proposed span, which `DOCS.md` § Structural constraints makes the stated
+  forcing reason the stepper is live; `aria-pressed` on the kind buttons, which
+  the 2026-08-26 ruling makes the **only** carrier of the selected kind;
+  `data-attempts` on the form; and the `data-spellme-element-kinds` wrapper. All
+  five have **zero** references in this module's tests [measured 2026-08-29].
+  **Not locked, by the same ruling:** `data-spellme-submit`, which wave 5 pins
+  because its `pick()` helper throws; the legend's open-ness, which is vacuous
+  because the legend is a `<div>` and not a `<details>`; and
+  `data-spellme-element` / `data-claimed`, which are wave 5's and whose tape
+  holds nothing in wave 3. Ten authored locks in total — 3 + 2 + 5 — under one
+  `ar-3`, per the 2026-08-25 authored-test ruling.
+
+- (human ruling 2026-08-29) **The extent stepper starts at 1.** The twin
+  answered this two ways and neither document ruled: `ux/wireframes.md` § Fresh
+  mount draws `[ − ] 5 characters [ + ]` for a program whose first element is
+  exactly five characters — the stepper already holding the answer — while
+  `ux/user-journeys.md` Journey 1 has the learner "step the extent to 5" and
+  `ux/wireframes.md`'s after-wrong-claim frame draws `1 character`. The
+  fresh-mount frame is a drawing of a moment mid-interaction, not an initial
+  value; pre-filling the true extent would hand the learner half the claim. **→
+  migrates to** `ux/wireframes.md`'s fresh-mount frame, corrected in the commit
+  that lands the stepper.
 
 ### The `spellme` LENS — Phase 1, wave 3 (IN PROGRESS)
 
@@ -984,6 +1089,21 @@ Never pass a `model` parameter when spawning an `ar-N`.
   and echoed in
   [`./ACQUISITION-ALIGNMENT-BRIEF.md`](./ACQUISITION-ALIGNMENT-BRIEF.md)). A
   cold reader following the old wording would have opened the wrong campaign.
+- ⛔ **PHASE-2 OBLIGATION — the sandbox injection must be REMOVED in the same
+  commit that registers `spellme`.** `spellme` is injected into
+  `spiralearn/sandbox/orchestrate/index.mdx` while it is being built, and is
+  deliberately **absent** from
+  `src/lib/study-lenses/orchestrate/lib/composing/built-in-lenses.ts` [measured
+  2026-08-29: `grep -c spellme` on that file → 0]. Registration without removal
+  puts the same name on the roster twice and `joinLensRoster` **throws** [read:
+  `orchestrate/lib/composing/join-lens-roster.ts` — "duplicate lens name
+  \"${collision}\" — joining is append-only; rename the lens"]. `47234d7c` is
+  the precedent, and it is a real one: that commit touched `index.mdx` **and**
+  `built-in-lenses.ts` together [measured 2026-08-29: `git show --stat 47234d7c`
+  — four files, both among them]. Recorded per the wave-3 launch prompt's
+  standing instruction, which required wave 3 to write it down rather than
+  merely know it.
+
 - **Five measured embody defects** — [`EMBODY-FLAGS.md`](./EMBODY-FLAGS.md).
   None blocks this campaign and none is this campaign's to fix.
 - **The fall's motion design and its reduced-motion equivalent** — a sandbox

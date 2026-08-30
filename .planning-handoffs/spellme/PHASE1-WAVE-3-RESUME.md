@@ -38,17 +38,28 @@ selects, **END TO END**. Then `DEV.md` §§ Incremental Development Workflow,
 Adversarial Review Protocol, Sandbox Checkpoints, Shared-worktree git mechanics,
 Sourced claims, Ruling provenance, No Comments in Tests.
 
-**Then `./PHASE-1.md`** — and specifically its **four** dated rulings
-subsections: `(2026-08-20)`, `(2026-08-25, wave 2)`, `(2026-08-26, wave 3)` and
-`(2026-08-27, wave 3 continued)` [measured: `grep -cE "^### The .spellme. LENS's
-rulings"` → 4]. They hold **22 rulings** between them — 4 · 5 · 8 · 5 in date
-order — and **the thirteen that bind wave 3 are in the last two**. ⚠ **Count
-them rather than trusting that total**, which was written as "21" and was wrong
-within the hour, because a ruling was added to one subsection and the sum was
-not re-derived: `grep -cE "^- \((human|orchestrator) ruling"` between the
-headings. None is restated here — pointing beats copying, and a copy drifts.
-Also read its `### The spellme LENS — Phase 1, wave 3 (IN PROGRESS)` section:
-this wave's running record, including 🔍 #1's outcome in the human's own words.
+**Then `./PHASE-1.md`** — and specifically its dated rulings subsections:
+`(2026-08-20)`, `(2026-08-25, wave 2)`, `(2026-08-26, wave 3)`,
+`(2026-08-27, wave 3 continued)` and `(2026-08-29, wave 3 continued)`. **The
+count is deliberately not stated here** — derive it, both the subsections and
+the rulings inside them:
+
+```sh
+grep -cE "^### The .spellme. LENS's rulings" .planning-handoffs/spellme/PHASE-1.md
+grep -cE "^- \((human|orchestrator) ruling" .planning-handoffs/spellme/PHASE-1.md
+```
+
+⚠ **This sentence said "four subsections … 22 rulings — 4 · 5 · 8 · 5" until
+2026-08-29**, when a fifth subsection landed and the totals moved. That is the
+THIRD time a stated total in this campaign went stale within hours of being
+written; the previous two were corrected with better totals, which is how each
+one came back. **The number is deleted rather than corrected.** ⚠ And the
+`^- \(` anchor is load-bearing: wrapping a bullet in a marker on 2026-08-29
+silently dropped one subsection's count from 8 to 7 for one revision — a
+superseding note must keep the bullet's citation at the very start of its line.
+None is restated here — pointing beats copying, and a copy drifts. Also read its
+`### The spellme LENS — Phase 1, wave 3 (IN PROGRESS)` section: this wave's
+running record, including 🔍 #1's outcome in the human's own words.
 
 Then the module canon end to end: `README.md`, `DOCS.md`, `types.ts`,
 **`core.ts`**, `index.tsx`, `tests/component.test.tsx`, `tests/core.test.ts`,
