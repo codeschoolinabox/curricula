@@ -14,7 +14,12 @@ import freezeInPlace from '@utils/freeze-in-place.js';
 import type { Lens, LensProperties } from '../types.js';
 
 import spellmeCore from './core.js';
-import type { ClaimableKind, SessionState, StreamElement } from './types.js';
+import type {
+	ClaimableKind,
+	OneMoreAnswer,
+	SessionState,
+	StreamElement,
+} from './types.js';
 
 /**
  * The spellme surface: the input tape, the token tape, the jar, the
@@ -29,7 +34,32 @@ import type { ClaimableKind, SessionState, StreamElement } from './types.js';
  *   § Structural constraints — the pure layer never holds state, it takes
  *   a session and returns its successor.
  */
-function SpellmeMain({ embodiment }: LensProperties): ReactElement {
+function SpellmeMain({ config, embodiment }: LensProperties): ReactElement {
+	// Re-resolved through this module's own factory, as `../parsons/` and
+	// `../writeme/` both do. The orchestrator has already run it — its
+	// `resolve-lens-config.ts` calls `lens.config(overrides)` — so this is
+	// idempotent and defensive rather than the first resolution.
+	//
+	// ⚠ The factory THROWS a `RangeError` on an out-of-range threshold
+	// (`./core.ts`), so this call can throw during render. That is a boundary
+	// refusing invalid input, and it is NOT the refusal barred from `main`: that
+	// bar lives in `./README.md` § Edge cases, citing `../types.ts`'s `Lens`
+	// Totality remark, and it is about applicability answering as DATA so `main`
+	// carries no refusal ARM. An educator's malformed setting is instead the
+	// fail-fast case this package refuses at every other boundary.
+	//
+	// ⚠ The siblings share the PATTERN, not the RISK. `../parsons/` and
+	// `../writeme/` re-resolve through their own factories exactly like this, but
+	// neither factory validates anything [measured 2026-08-30: zero `throw new`
+	// or `@throws` in either sibling's `core.ts`, against eight in this module's],
+	// so this is the first lens of the family whose render-time re-resolution can
+	// throw at all.
+	const resolved = React.useMemo(
+		function resolveConfig() {
+			return spellmeCore.config(config);
+		},
+		[config],
+	);
 	// Keyed on the embodiment, so the stream is read once per embodiment rather
 	// than re-derived on every render. `readStream` is pure and its result is
 	// frozen, so the memo is a cost decision, never a correctness one.
@@ -61,6 +91,38 @@ function SpellmeMain({ embodiment }: LensProperties): ReactElement {
 		null,
 	);
 	const [extent, setExtent] = React.useState(MINIMUM_EXTENT);
+
+	// Narrowed FIELD BY FIELD off the open-shape `LensConfig`, which is a
+	// `Record<string, SerializableValue>` — `session.attempts >= config.oneMoreAfter`
+	// is a type error without this. `./core.ts` is where the defaults actually
+	// live; `./types.ts` § SpellmeLensConfig states them in prose.
+	//
+	// ⚠ The literals below are NOT dead. They are unreachable for any
+	// configuration that passed the factory's range check — but that check guards
+	// on `typeof value === 'number'`, so a NON-NUMERIC override survives the
+	// factory unrefused, and does so deliberately: `./README.md` § Configuration
+	// rules that "a non-numeric threshold is a different question and is
+	// deliberately not answered here". In exactly that case the factory has run
+	// and succeeded on a value that is not a number — `SerializableValue` admits
+	// a string, a boolean, `null` and an array of those, and the guard excludes
+	// none of them — and these literals are what the render falls back to,
+	// silently, with no throw and no report. Whether that silence is right is
+	// README's open question, not this file's to settle.
+	const oneMoreAfter =
+		typeof resolved.oneMoreAfter === 'number' ? resolved.oneMoreAfter : 2;
+	const skipAfter =
+		typeof resolved.skipAfter === 'number' ? resolved.skipAfter : 4;
+	// Both thresholds are REACHED, not exceeded (`./README.md` § Configuration,
+	// human ruling 2026-08-14): `>=`, never `>`. Under an exceeds reading no
+	// configuration could open either control on the first attempt, and
+	// `oneMoreAfter: 0` is precisely the setting an educator wanting that trade
+	// reaches for.
+	//
+	// ⚠ `session.attempts` is permanently 0 until `settle` exists, so at this
+	// wave only a ZERO threshold opens either region. That is not a placeholder:
+	// it is the whole reason the suite carries a `{ oneMoreAfter: 0 }` fixture.
+	const isOneMoreOpen = session.attempts >= oneMoreAfter;
+	const isWayPastOpen = session.attempts >= skipAfter;
 
 	// Everything behind the cursor has already met its fate — that is what
 	// `positionCursor` advancing past it MEANS, and it is the cursor's only
@@ -180,6 +242,76 @@ function SpellmeMain({ embodiment }: LensProperties): ReactElement {
 							/>
 						</label>
 					</div>
+					{/* The question is the stepper's value PLUS ONE (`./README.md`
+					    § One more character) — never the stepper's value itself,
+					    which is off by one exactly where the question is most worth
+					    asking: at a stepper resting on the boundary. It opens BELOW
+					    the extent and pushes the button down, so the surface visibly
+					    grows a new requirement rather than swapping one in
+					    (`./ux/wireframes.md`).
+
+					    ⚠ Both runs are built on `shownExtent`, the CLAMPED value,
+					    not the raw stepper: these two lines must describe text that
+					    is actually on the tape, and a run past the end would draw
+					    nothing while naming something. The seam is real and belongs
+					    to the wave that wires judging — `judgeClaim` compares the
+					    CLAIMED extent plus one, and the claimed extent is the raw
+					    stepper. The two agree everywhere the stepper is within the
+					    tape, which is everywhere a claim could be correct.
+
+					    ⚠ The radios are DISABLED, not merely unwired (human ruling
+					    2026-08-30). An uncontrolled radio keeps its `checked` state
+					    in the DOM across re-renders, so a live-looking group here
+					    would let a stale answer stand against a changed question —
+					    which `./DOCS.md` § Structural constraints forbids by name.
+					    `disabled` is what makes "selecting does nothing" true rather
+					    than merely intended, and it owes no clear-on-step test
+					    because there is no pending answer to clear. The wave that
+					    wires judging removes the attribute. */}
+					{isOneMoreOpen && (
+						<div data-spellme-one-more>
+							{/* A description list, not four sibling paragraphs: the twin
+							    draws these "stacked and aligned, so the extra character
+							    is the only thing that moves between the two lines", and
+							    `<dl>` is what makes each label OWN its run rather than
+							    merely precede it. Paragraphs would read correctly today
+							    and decouple silently the first time the stylesheet
+							    arranges labels and runs in separate columns — with no
+							    test able to see it, since nothing anywhere in this
+							    module's tests reads `textContent`.
+
+							    ⚠ This is a TRADE, not a free improvement, and it is
+							    not settled here. A description list carries list
+							    semantics four paragraphs did not, so a screen reader
+							    may announce the group before each pair — added
+							    verbosity on a control `ux/user-journeys.md` already
+							    worries about, since its items 5 and 6 are both about
+							    costs that compound across many repeated claims. Which
+							    way that nets out is the kind of question this module
+							    settles at a running surface rather than on paper, like
+							    the falling animation and the consumed break's mark.
+							    Owed to a sandbox checkpoint. */}
+							<dl>
+								<dt>on the stepper</dt>
+								<dd>{unspent.slice(0, shownExtent)}</dd>
+								<dt>one more</dt>
+								<dd>{unspent.slice(0, shownExtent + 1)}</dd>
+							</dl>
+							<fieldset disabled>
+								<legend>and what would that be?</legend>
+								{ONE_MORE_ANSWERS.map((option) => (
+									<label key={option.answer}>
+										<input
+											name="spellme-one-more"
+											type="radio"
+											value={option.answer}
+										/>
+										{option.label}
+									</label>
+								))}
+							</fieldset>
+						</div>
+					)}
 					{/* Drawn as `[ claim it ]` in the twin's fresh-mount frame and
 					    specified at `./README.md` § UI structure. INERT in this wave
 					    by ruling — the stepper and the picker are live, submitting
@@ -189,6 +321,24 @@ function SpellmeMain({ embodiment }: LensProperties): ReactElement {
 					<button data-spellme-submit type="button">
 						claim it
 					</button>
+					{/* BESIDE the claim button, never in place of it — an
+					    equal-weight sibling rather than a demotion, because taking it
+					    is a legitimate move and a control that looked like giving up
+					    would teach that being stuck is a failure rather than a place
+					    (`./ux/wireframes.md` § After the fourth wrong claim). INERT
+					    alongside submit by the same 2026-08-26 ruling: handing an
+					    element over moves the cursor, and `settle` is still a stub.
+
+					    ⚠ Covered by no test that could fail until Block C's
+					    `{ skipAfter: 0 }` lock lands — the only enabled test naming
+					    this selector asserts its ABSENCE at the default threshold,
+					    which an omitted control would also pass. Disclosed here
+					    rather than left for a reviewer to find. */}
+					{isWayPastOpen && (
+						<button data-spellme-skip type="button">
+							let the machine
+						</button>
+					)}
 				</form>
 			)}
 			{/* Unconditional, unlike parsons's conditional score region: the tests
@@ -337,6 +487,35 @@ const CLAIMABLE_KINDS: ReadonlyArray<ClaimableKind> = freezeInPlace<
 	'Template',
 	'TemplateSubstitutionTail',
 	'RegularExpressionLiteral',
+]);
+
+/**
+ * The three answers to the one-more-character question, in the order
+ * `./README.md` § One more character lists them, paired with its wording.
+ *
+ * The values are `OneMoreAnswer` verbatim, so the wave that wires judging reads
+ * a submitted answer straight off the input rather than translating a label
+ * back into the domain.
+ *
+ * ⚠ **README's wording, deliberately, not the twin's.** Both `./ux/` documents
+ * draw the first option specialized to the kind the learner picked — `still a
+ * Punctuator`. That reads better and cannot be built from these three strings:
+ * it breaks on the article (`still a IdentifierName`) and has no defined form
+ * before any kind is picked. Recorded as a refinement for a sandbox checkpoint
+ * to ask for, rather than silently dropped.
+ *
+ * ⚠ `not an element here` must not be shortened. The word *here* is
+ * load-bearing: whether a run of characters is an element depends on which
+ * question the scanner was asked, and that question belongs to a different
+ * lens.
+ */
+const ONE_MORE_ANSWERS: ReadonlyArray<{
+	readonly answer: OneMoreAnswer;
+	readonly label: string;
+}> = freezeInPlace([
+	{ answer: 'same-kind', label: 'still an element of the same kind' },
+	{ answer: 'different-kind', label: 'an element of a different kind' },
+	{ answer: 'not-an-element', label: 'not an element here' },
 ]);
 
 /**

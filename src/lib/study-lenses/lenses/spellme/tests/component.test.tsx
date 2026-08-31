@@ -136,25 +136,25 @@ describe('spellme surface', () => {
 			).toBe(false);
 		});
 
-		it.skip('renders no snippet-type control of its own', () => {
+		it('renders no snippet-type control of its own', () => {
 			expect(
 				renderLens('const x = 1').querySelector('[data-spellme-snippet-type]'),
 			).toBeNull();
 		});
 
-		it.skip('hides the one-more field before the threshold is reached', () => {
+		it('hides the one-more field before the threshold is reached', () => {
 			expect(
 				renderLens('const x = 1').querySelector('[data-spellme-one-more]'),
 			).toBeNull();
 		});
 
-		it.skip('hides the way past before the threshold is reached', () => {
+		it('hides the way past before the threshold is reached', () => {
 			expect(
 				renderLens('const x = 1').querySelector('[data-spellme-skip]'),
 			).toBeNull();
 		});
 
-		it.skip('shows the one-more field immediately at a zero threshold', () => {
+		it('shows the one-more field immediately at a zero threshold', () => {
 			expect(
 				renderLens('const x = 1', { oneMoreAfter: 0 }).querySelector(
 					'[data-spellme-one-more]',
@@ -231,7 +231,7 @@ describe('spellme surface', () => {
 	});
 
 	describe('Interfaces — the keyboard journey', () => {
-		it.skip('gives every element-kind button a reachable control', () => {
+		it('gives every element-kind button a reachable control', () => {
 			for (const button of Array.from(
 				renderLens('const x = 1').querySelectorAll('[data-element-kind]'),
 			)) {
@@ -239,7 +239,7 @@ describe('spellme surface', () => {
 			}
 		});
 
-		it.skip('gives the extent a native stepper rather than a drag-only control', () => {
+		it('gives the extent a native stepper rather than a drag-only control', () => {
 			expect(
 				renderLens('const x = 1')
 					.querySelector('[data-spellme-extent] input')

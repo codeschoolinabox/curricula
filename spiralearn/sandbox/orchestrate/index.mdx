@@ -18,6 +18,14 @@ exercised. It is deliberately NOT registered in the built-in roster, so no
 learner route reaches it; when it is, this injection is removed in the same
 commit, because joining a name that is already built in throws.
 
+Both of `spellme`'s attempt thresholds are pinned to **zero** here, and that is
+a checkpoint fixture rather than a recommended setting. Its one-more-character
+field and its way past are gated on wrong attempts, and nothing raises that
+count until the claim loop lands — so at the shipped defaults neither control
+can appear on this page at all, and a checkpoint could not look at either. Zero
+opens both from the first render. The `configs` prop goes when the injection
+does.
+
 Expected — the SWAP model, EDITOR-FIRST: the editor mounts at load holding the
 seed program (no lens is named in the props, so the home base is the default);
 opening any lens from the Source select REPLACES the editor; closing — Edit
@@ -86,6 +94,7 @@ export function InstrumentHarness() {
 	];
 	return (
 		<StudyLenses
+			configs={{ spellme: { oneMoreAfter: 0, skipAfter: 0 } }}
 			languageLevels={[scaffoldLevel]}
 			lenses={[notesLens, spellmeLens]}
 			snippet={'const greeting = "hello";\nconsole.log(greeting);\n'}
