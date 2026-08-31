@@ -1,0 +1,353 @@
+/*
+ * Visual styling for the `spellme` lens. Scoped to `[data-lens='spellme']` so it
+ * cannot leak into Docusaurus's global code blocks or another lens's surface,
+ * exactly as `../parsons/parsons.css` and `../writeme/writeme.css` are.
+ *
+ * Presentation here is part of the lens's value rather than decoration
+ * (`./DOCS.md` § Decisions, human ruling 2026-08-26): the arrangement carries
+ * the pedagogy. Two claims from `./ux/wireframes.md` are load-bearing and are
+ * what most of this file exists to realize — consumed source stays DIMMED IN
+ * PLACE rather than being deleted, because "a deleted character is gone and
+ * proves nothing" while a dimmed one appearing in no container below is the
+ * evidence; and the jar sits BESIDE the token tape at EQUAL weight, "not below
+ * it and not smaller", because comments are output with a different destination
+ * rather than lesser output.
+ *
+ * ⚠ FOUR THINGS THIS FILE MAY NOT SETTLE. Existing does not make any of them
+ * decidable, and each is deferred by a document, not by preference:
+ *
+ *   1. The two semantic roles' hues — `attested` and `diverging`.
+ *      `./DOCS.md` § Out of scope makes the palette a package-wide question this
+ *      lens does not settle alone. No custom property is declared for them here,
+ *      deliberately: nothing consumes one while judging is a stub, so a
+ *      declaration would be dead code wearing the shape of a decision.
+ *   2. The fall's motion design and its reduced-motion equivalent. Hence NO
+ *      `transition`, NO `animation` and NO `@keyframes` anywhere in this file —
+ *      `../parsons/parsons.css` carries an unguarded `transition` and is
+ *      deliberately not copied here.
+ *   3. The consumed line break's mark. `./ux/wireframes.md` § What has no
+ *      wireframe, deliberately records its visual as owed and undesigned and
+ *      defers it to a sandbox checkpoint against a running surface. What is
+ *      below is quiet on purpose, so the checkpoint has something to react to
+ *      rather than something to approve.
+ *   4. Where a verdict sits. The twin draws verdicts "against the fields they
+ *      judge, not in a banner", while the DOM has one verdicts region after the
+ *      form. Nothing renders a verdict until judging lands, so this file must
+ *      not invent a banner and thereby settle by default what no one has ruled.
+ *
+ * ⚠ AND TWO THINGS THE WIRE-FRAMES DRAW THAT THE DOM DOES NOT RENDER: the region
+ * labels (INPUT / TOKENS / SET ASIDE) and the jar's "carries a line break"
+ * caption. `::before { content: … }` would produce both and is FORBIDDEN here —
+ * generated content is invisible to assistive technology and would be a silent
+ * change to a DOM contract `./README.md` § UI structure owns. They are DOM gaps
+ * to raise, not CSS to fake.
+ */
+
+/* ── Layer 1 — the regions ─────────────────────────────────────────────────
+ *
+ * A two-column grid on the root, so the token tape and the jar can sit side by
+ * side at equal weight without a wrapper element the DOM contract does not
+ * have.
+ *
+ * Full width is stated by EXCLUSION rather than by naming the five regions that
+ * want it, and the reason is which way each form fails. An enumerated list
+ * silently drops a region added later into grid auto-placement, drawing it as a
+ * half-width column — the wrong shape for what a new region will usually be.
+ * The exclusion form defaults a new region to full width and makes sitting
+ * beside something the deliberate act, which is the same posture Layer 5's
+ * unenumerated `:focus-visible` rule takes for interactive elements.
+ */
+[data-lens='spellme'] {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 0.75rem;
+	align-items: start;
+}
+
+[data-lens='spellme'] > *:not([data-spellme-tokens]):not([data-spellme-jar]) {
+	grid-column: 1 / -1;
+}
+
+/* The two containers of equal weight. `min-height` so an empty jar still reads
+ * as a container: an empty jar is itself information — this program set nothing
+ * aside — and a collapsed box would say nothing at all. */
+[data-lens='spellme'] [data-spellme-tokens],
+[data-lens='spellme'] [data-spellme-jar] {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.25rem;
+	align-content: flex-start;
+	min-height: 3rem;
+	padding: 0.5rem;
+	border: 1px solid var(--ifm-color-emphasis-300, #cccccc);
+	border-radius: 4px;
+	background: var(--ifm-background-surface-color, #ffffff);
+}
+
+/* ── Layer 2 — the input tape ──────────────────────────────────────────────
+ *
+ * ⚠ `white-space: pre-wrap` is LOAD-BEARING, not tidiness. The tape's text is
+ * the source's own characters, spaces and newlines included; without this the
+ * browser collapses runs of whitespace and the whole argument for dimming
+ * rather than deleting dies with them — there would be no visible space left to
+ * notice had evaporated.
+ */
+[data-lens='spellme'] [data-spellme-input] {
+	padding: 0.75rem;
+	border: 1px solid var(--ifm-color-emphasis-300, #cccccc);
+	border-radius: 4px;
+	background: var(--ifm-background-surface-color, #ffffff);
+	font-family: var(--ifm-font-family-monospace, monospace);
+	font-size: 1rem;
+	line-height: 1.6;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+
+/* Spent, and still there. Dimmed in place — never hidden, never removed. */
+[data-lens='spellme'] [data-spellme-consumed] {
+	opacity: 0.4;
+}
+
+/* The run the learner is proposing. It must be distinct from BOTH neighbours,
+ * which is one of the three obligations sandbox checkpoint #3 left on this file:
+ * the mechanism was correct and a learner could see none of it. Underline plus a
+ * tinted ground rather than colour alone, so it survives a monochrome reading.
+ * `min-width` keeps a zero-width proposal from vanishing at the tape's end. */
+[data-lens='spellme'] [data-spellme-proposed] {
+	display: inline-block;
+	min-width: 0.35rem;
+	border-bottom: 2px solid var(--ifm-color-emphasis-700, #4d4d4d);
+	background: var(--ifm-color-emphasis-200, #e0e0e0);
+}
+
+/* What the scanner has not reached: full strength, the reference the other two
+ * are read against. */
+[data-lens='spellme'] [data-spellme-rest] {
+	opacity: 1;
+}
+
+/* ── Layer 3 — what is on the tapes ────────────────────────────────────────
+ *
+ * `./README.md` § UI structure asks each fate to carry a NON-HUE signal, so the
+ * surface reads without colour at all: a token-tape element solid, a set-aside
+ * element dotted, an evaporating one hatched. Only the DOTTED case is drawn
+ * here, and the two absences are not the same absence:
+ *
+ *   · SOLID has no carrier YET. `data-spellme-element` arrives with the claim
+ *     loop, and styling it is that wave's.
+ *   · HATCHED may have no carrier EVER, under the DOM contract as it stands.
+ *     An evaporating element gets no node of its own — every consumed element's
+ *     text is joined into the single `[data-spellme-consumed]` span — so there
+ *     is nothing per-element to hatch. Only the MARKED sub-case has a node, and
+ *     its visual is separately deferred as item 3 in the header. So
+ *     `./README.md` § UI structure's promise of a third non-hue signal may be
+ *     unsatisfiable as literally worded. That is a question for the README, not
+ *     something this file may answer by inventing a carrier.
+ */
+[data-lens='spellme'] [data-spellme-set-aside] {
+	padding: 0.1rem 0.4rem;
+	border: 1px dotted var(--ifm-color-emphasis-600, #666666);
+	border-radius: 3px;
+	font-family: var(--ifm-font-family-monospace, monospace);
+	white-space: pre;
+}
+
+/* The consumed line break's mark. Deliberately quiet: its visual is owed and
+ * undesigned (see the header), and this is a proposal for a checkpoint to react
+ * to. It is a glyph rather than colour alone, and it says a line break was read
+ * here and nothing about whether automatic semicolon insertion fired. */
+[data-lens='spellme'] [data-spellme-break] {
+	padding: 0 0.25rem;
+	opacity: 0.55;
+	font-family: var(--ifm-font-family-monospace, monospace);
+}
+
+/* ── Layer 4 — the claim form ──────────────────────────────────────────────*/
+[data-lens='spellme'] [data-spellme-claim-form] {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	padding: 0.75rem;
+	border: 1px solid var(--ifm-color-emphasis-300, #cccccc);
+	border-radius: 4px;
+	background: var(--ifm-background-surface-color, #ffffff);
+}
+
+[data-lens='spellme'] [data-spellme-element-kinds] {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.35rem;
+}
+
+[data-lens='spellme'] [data-element-kind] {
+	padding: 0.25rem 0.6rem;
+	border: 1px solid var(--ifm-color-emphasis-400, #b3b3b3);
+	border-radius: 3px;
+	background: var(--ifm-color-emphasis-100, #f5f5f5);
+	font-family: var(--ifm-font-family-monospace, monospace);
+	font-size: 0.85rem;
+	cursor: pointer;
+}
+
+/* The pressed state — the first of checkpoint #3's three obligations, and the
+ * one the human could see only in the inspector. `aria-pressed` is the ONLY
+ * carrier of which kind is selected (human ruling 2026-08-26), so this selector
+ * is the whole mechanism rather than a decoration over a `data-*` twin.
+ * Precedent: `../writeme/writeme.css` styles
+ * `[data-view-toggle][aria-pressed='true']` the same way. Weight and an inset
+ * ring, not colour alone. */
+[data-lens='spellme'] [data-element-kind][aria-pressed='true'] {
+	border-color: var(--ifm-color-emphasis-800, #333333);
+	background: var(--ifm-color-emphasis-300, #cccccc);
+	box-shadow: inset 0 0 0 2px var(--ifm-color-emphasis-800, #333333);
+	font-weight: 700;
+}
+
+[data-lens='spellme'] [data-spellme-extent] input {
+	width: 5rem;
+	margin-left: 0.5rem;
+	font-family: var(--ifm-font-family-monospace, monospace);
+}
+
+/* The one-more field. It opens BELOW the extent and pushes the buttons down, so
+ * the surface visibly grows a new requirement rather than swapping one in. The
+ * two runs are a description list drawn as a two-column grid, stacked and
+ * aligned so the extra character is the only thing that moves between them —
+ * which is the twin's stated reason for the arrangement. */
+[data-lens='spellme'] [data-spellme-one-more] {
+	padding: 0.5rem 0.75rem;
+	border-left: 3px solid var(--ifm-color-emphasis-400, #b3b3b3);
+	background: var(--ifm-color-emphasis-100, #f5f5f5);
+}
+
+[data-lens='spellme'] [data-spellme-one-more] dl {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	gap: 0.15rem 0.75rem;
+	margin: 0 0 0.5rem;
+}
+
+[data-lens='spellme'] [data-spellme-one-more] dt {
+	font-size: 0.85rem;
+	opacity: 0.75;
+}
+
+[data-lens='spellme'] [data-spellme-one-more] dd {
+	margin: 0;
+	font-family: var(--ifm-font-family-monospace, monospace);
+	white-space: pre;
+}
+
+[data-lens='spellme'] [data-spellme-one-more] fieldset {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+[data-lens='spellme'] [data-spellme-one-more] label {
+	display: block;
+	font-size: 0.9rem;
+}
+
+/* The submit control and the way past sit on one row, the skip BESIDE the claim
+ * button rather than in place of it — an equal-weight sibling rather than a
+ * demotion, because taking it is a legitimate move and a control that looked
+ * like giving up would teach that being stuck is a failure rather than a place.
+ * `margin-top: auto` is deliberately absent: the form is content-height. */
+[data-lens='spellme'] [data-spellme-submit],
+[data-lens='spellme'] [data-spellme-skip] {
+	align-self: flex-start;
+	padding: 0.4rem 0.9rem;
+	border: 1px solid var(--ifm-color-emphasis-500, #808080);
+	border-radius: 3px;
+	background: var(--ifm-color-emphasis-100, #f5f5f5);
+	cursor: pointer;
+}
+
+/* ── Layer 5 — focus ───────────────────────────────────────────────────────
+ *
+ * The third of checkpoint #3's obligations, and the live hypothesis for its one
+ * unresolved finding: the human reported that tab does not reach the
+ * element-kind buttons, nothing in this module sets `tabindex`, and the
+ * orchestrator's `inert` wrapper is ruled out because `inert` blocks pointer
+ * events and the clicks worked. "Reached but invisible" is what remains, and
+ * this rule is the test of it.
+ *
+ * ⚠ Neither sibling stylesheet carries a `:focus-visible` rule at all
+ * [measured 2026-08-30], so this is new here rather than a house pattern being
+ * followed — and if tab still fails to reach the buttons once this ships, the
+ * cause is behavioral and not cosmetic. NEVER add `outline: none` to this file.
+ */
+[data-lens='spellme'] :focus-visible {
+	outline: 3px solid var(--ifm-color-primary, #2e8555);
+	outline-offset: 2px;
+}
+
+/* ── Layer 6 — the two static regions ──────────────────────────────────────
+ *
+ * The fates panel is collapsed and the legend is open, and that contrast is
+ * structural rather than styling: the vocabulary a learner cannot play without
+ * is open, the reference they consult when a character surprises them is not.
+ * Nothing here may change either, only draw them.
+ */
+[data-lens='spellme'] [data-spellme-fates],
+[data-lens='spellme'] [data-spellme-legend] {
+	padding: 0.5rem 0.75rem;
+	border: 1px solid var(--ifm-color-emphasis-200, #e0e0e0);
+	border-radius: 4px;
+	font-size: 0.9rem;
+}
+
+[data-lens='spellme'] [data-spellme-fates] summary {
+	cursor: pointer;
+	font-weight: 600;
+}
+
+[data-lens='spellme'] [data-spellme-fates] ul,
+[data-lens='spellme'] [data-spellme-legend] ul {
+	margin: 0.35rem 0;
+	padding-left: 1.1rem;
+}
+
+/* The ten kind names read as a wrapped row rather than a tall column: ten list
+ * items stacked would push the whole surface down for vocabulary a learner
+ * scans rather than reads. */
+[data-lens='spellme'] [data-spellme-legend] ul {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.15rem 0.75rem;
+	padding-left: 0;
+	list-style: none;
+}
+
+[data-lens='spellme'] [data-spellme-legend] li {
+	font-family: var(--ifm-font-family-monospace, monospace);
+	font-size: 0.8rem;
+}
+
+/* ── Dark mode — DELIBERATELY ABSENT, and this is the record of why ─────────
+ *
+ * An earlier revision of this file carried a `@media (prefers-color-scheme:
+ * dark)` block overriding the proposed run and the pressed button, justified by
+ * a comment claiming those were "the two places an `--ifm-*` variable does not
+ * already carry the theme". That claim was FALSE and the block was dead:
+ *
+ *   · Docusaurus switches themes on `html[data-theme='dark']`, not on the OS
+ *     preference, and this project sets no `colorMode` override [measured
+ *     2026-08-30].
+ *   · Infima defines every emphasis step this file uses TWICE — once at `:root`
+ *     and once under `html[data-theme='dark']` [measured 2026-08-30: two
+ *     definitions each for emphasis 200, 300, 700 and 800]. So every rule above
+ *     already tracks the theme through the variable, and `var(--x, #fallback)`
+ *     never reaches its fallback, because the variable is never undefined on a
+ *     Docusaurus page.
+ *
+ * The block was therefore not merely inert but keyed to the WRONG SIGNAL: the
+ * OS preference can disagree with the theme the reader actually chose. Deleted
+ * rather than repaired, because there is nothing left for it to do.
+ *
+ * ⚠ `../parsons/parsons.css` carries the same `@media (prefers-color-scheme:
+ * dark)` shape and is presumably dead the same way. NOT this file's to fix, and
+ * recorded so the finding outlives the commit that found it.
+ */

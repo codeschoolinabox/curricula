@@ -8,12 +8,13 @@ carries the shape a correct implementation must take.
 
 ## Modules
 
-| File        | Layer     | Purpose                                                                                             |
-| ----------- | --------- | --------------------------------------------------------------------------------------------------- |
-| `types.ts`  | shared    | the domain model and the configuration contract                                                     |
-| `core.ts`   | pure      | most of the module: the factory, the gate, and the stream, positioning, judging and settling phases |
-| `index.tsx` | component | the surface, and the frozen lens object that is the identity                                        |
-| `ux/`       | twin      | the user twin — journeys and wire-frames                                                            |
+| File          | Layer        | Purpose                                                                                             |
+| ------------- | ------------ | --------------------------------------------------------------------------------------------------- |
+| `types.ts`    | shared       | the domain model and the configuration contract                                                     |
+| `core.ts`     | pure         | most of the module: the factory, the gate, and the stream, positioning, judging and settling phases |
+| `index.tsx`   | component    | the surface, and the frozen lens object that is the identity                                        |
+| `spellme.css` | presentation | the arrangement, which this module owns rather than inherits                                        |
+| `ux/`         | twin         | the user twin — journeys and wire-frames                                                            |
 
 ## Architectural sketch
 

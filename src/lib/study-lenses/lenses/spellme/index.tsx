@@ -21,6 +21,8 @@ import type {
 	StreamElement,
 } from './types.js';
 
+import './spellme.css';
+
 /**
  * The spellme surface: the input tape, the token tape, the jar, the
  * claim form with whichever fields the attempt count has opened, the
