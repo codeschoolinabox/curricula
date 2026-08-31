@@ -1239,6 +1239,45 @@ execution and never holds one alone.
     break the whole repo's production build. The fix comments its own reason in
     place so the shape is not reintroduced — which it was, once, mid-fix, by
     quoting the offending token literally.
+- **The axis's own Phase 0 opens ahead of two of its prerequisites, and
+  prerequisite 1's Phase-0 gate is approved (human rulings 2026-08-30, HR-24).**
+  Four rulings taken at the launch of the `'script'` axis's Phase-0 unit. They
+  are recorded here because the plan file that carried them sits outside the
+  repo, where the lookup
+  [DEV.md § Ruling provenance](../../DEV.md#ruling-provenance) prescribes cannot
+  reach them.
+  - **Prerequisite 1's Phase-0 gate on `0547a734` is APPROVED.** The worker
+    built-ins latch's sketch, its types answer, and its suite committed skipped
+    — 27 rows, 8 unit and 19 browser
+    `[measured: grep -c "it.skip(" over tests/latched-built-ins{,.browser}.test.ts]`
+    — stand as committed, and its Phase 1 is launchable. HR-23's "green before
+    the axis commits" is unchanged by this: the latch gates the axis's COMMITS,
+    not the axis's Phase 0.
+  - **Stage 5 — the axis's own Phase 0 — runs before prerequisite 2 (the
+    classic-worker test tier) and prerequisite 3 (the Docusaurus webpack
+    plugin).** This reorders the queue `BRIEF.md § 8`'s fourth item states —
+    _"land § 5.1's prerequisites before the axis"_ — and the permission is the
+    human's choice, taken with the alternatives presented side by side. It is
+    **not** a reading of any stage table's "genuinely gates" column.
+    Prerequisite 2 still gates every Phase-1 increment of the axis — no classic
+    worker, no red test — so the reorder advances the design work and never the
+    implementation.
+  - **The twin ask for this unit answers `machine`** — the standing value
+    confirmed, not a fresh choice, per DEV.md § 0.2's rule that where a twin
+    already exists the tree is the answer and silence leaves it standing.
+    `src/lib/study-lenses/lib/engine/notional-machine.md` is committed
+    (`8621bfa5`) and this unit amends it for the third execution path **before**
+    `ar-1` reads it, since the twin is that review's input.
+  - **The exact acorn pin (`^8.16.0` → `8.16.0`) lands with Phase 1's parse
+    gate, not in the Phase-0 commit.** HR-23 rules the pin itself; this rules
+    its timing. Phase 0 writes no implementation, so nothing new imports acorn
+    yet, and a shared-configuration change whose blast radius crosses embody,
+    classifying, screening, intercept, loop-guard and questioning belongs in the
+    same commit as the first code that depends on it, where its effect on the
+    suites can be measured rather than assumed.
+  - Recorded here per HR-21. Encoded on landing at
+    `src/lib/study-lenses/lib/engine/README.md`, `notional-machine.md`,
+    `types.ts` and `DOCS.md` — the documents these rulings govern.
 
 ### The ratification, and what it settled (human ruling 2026-08-06)
 
