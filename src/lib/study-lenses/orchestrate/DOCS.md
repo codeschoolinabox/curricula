@@ -264,7 +264,9 @@ verdicts without consulting a level twice.
   line is one line; the **cause line is a block** — the framed message, and
   beneath it the unreached count. The caption's occupancy is exactly one; its
   HEIGHT is not fixed, and every drawing in the twin already renders it that
-  way.
+  way. **The blank row is presentation** (human ruling 2026-08-26): the cause
+  arm draws one above its block and the count arm draws none, because a block
+  takes a separating row and a single line does not.
   1. **The count is derived per settle, never written** — the number of phases
      that are both accessible and EMPTY of fitting lenses. Not a property of the
      roster: a phase whose only lens fails applicability on this program is

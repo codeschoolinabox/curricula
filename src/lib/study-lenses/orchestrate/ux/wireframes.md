@@ -40,11 +40,13 @@ the region holds it. And **the source** was missing while every code box drew
 it, though it is the region's only required input [read: `types.ts`
 `StudyLensesProperties` — "The program source"] and `README.md` states that "the
 `snippet` prop is the source text alone", the package glossary's _snippet_ being
-that prop together with its `type` — so the contract granted half a snippet. The
-first was found by a reviewer, the second by a reviewer, the **third by an
-instrument** — `RESUME.md` § The instruments, CP-η check 4, which walks every
-drawn datum and asks whether this list grants it. **Read the list as complete
-only as far as that check is green.**
+that prop together with its `type` — so the contract granted half a snippet.
+**Both the cause and the source were granted in one pass, rather than one
+granted and the other declared** (human ruling 2026-08-26) — a totality with a
+declared hole is not a totality. The first was found by a reviewer, the second
+by a reviewer, the **third by an instrument** — `RESUME.md` § The instruments,
+CP-η check 4, which walks every drawn datum and asks whether this list grants
+it. **Read the list as complete only as far as that check is green.**
 
 ```text
 per phase, in the machine's fixed order:
