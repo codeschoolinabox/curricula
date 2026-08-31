@@ -962,6 +962,107 @@ than presented as a settled whole.
   migrates to** `ux/wireframes.md`'s fresh-mount frame, corrected in the commit
   that lands the stepper.
 
+### The `spellme` LENS's rulings (2026-08-30, wave 3 continued)
+
+**Seven**, all the human's, taken at wave 3's second resumption gate. The
+largest batch this campaign has taken at once, and the reason is structural
+rather than sloppy: the wave's remaining work had accumulated two twin
+disagreements, two disclosed agent additions, and one contract gap that no
+single increment could resolve on its own.
+
+⚠ **This subsection is NOT everything ruled on 2026-08-30.** Two more of that
+date sit in the wave-3 running record below rather than here — the cspell
+retirement, and the `[study source]` fixture. The second is **invisible to this
+file's canonical count grep**, because its citation sits mid-line inside a
+numbered item; find it with an un-anchored
+`git grep -n "human ruling 2026-08-30"`. Both are left where they are: moving a
+recorded ruling would rewrite the record this file exists to be.
+
+- (human ruling 2026-08-30) **The fates panel sits where `README.md` puts it,
+  and the twin is corrected.** `README.md` § UI structure draws
+  `<details data-spellme-fates>` between the verdicts region and the legend,
+  while `ux/wireframes.md`'s fresh-mount frame draws `ⓘ fates` in a title bar
+  [read: `ux/wireframes.md` § Fresh mount — the frame's title bar carries `ⓘ
+  fates` at its right edge], and `twin-doc: user` makes both canon. That frame
+  is the twin's **only** drawing of the panel and is not disclaimed by its "What
+  has no wireframe, deliberately" section, so the disagreement was real rather
+  than an oversight. **→ migrates to** `ux/wireframes.md`'s fresh-mount frame,
+  corrected in the commit that lands the panel — the same shape as the
+  2026-08-29 stepper ruling, which corrected that same frame rather than the
+  README. ⚠ An earlier revision of the wave-3 resumption prompt quoted README's
+  order alone and called the panel "a clean two-line insert", which was that
+  document's own trap — checking one twin and generalizing — reproduced inside
+  the instruction warning against it.
+
+- (human ruling 2026-08-30) **Both agent-added Block C locks are kept, so the
+  set is TWELVE.** The eleventh (the ten kind buttons carry ten distinct values)
+  and the twelfth (the legend renders unconditionally while the claim form is
+  gated) were disclosed in the 2026-08-29 subsection as agent additions to a
+  human-ruled set of ten, explicitly so they could be struck. They were not. All
+  twelve ride the single `ar-3` the 2026-08-25 authored-test ruling requires.
+
+- (human ruling 2026-08-30) **`DOCS.md`'s sketch gains the legend and the fates
+  panel, and the pass lands in the fates-panel commit.** Execution phase 7 and
+  the Mermaid `Surface` node enumerate the tapes, the jar, the claim form and
+  the verdicts, where `README.md` § UI structure names two more regions
+  [measured 2026-08-30: `grep -c legend DOCS.md` → 0], so every `ar-4` from
+  increment A6 onward has audited against the smaller of two contracts.
+  `DOCS.md` is an architectural contract and the edit is the human's, which is
+  why it waited. **→ migrates to** `DOCS.md` §§ Execution phases 7 and Data
+  flow. The `§ Modules` row for `spellme.css` is unaffected and still lands with
+  the stylesheet, per the 2026-08-26 ruling that deferred it to the commit
+  creating the file.
+
+- (human ruling 2026-08-30) **The one-more field ships the content the twin
+  draws, not an empty container.** The stacked `on the stepper` / `one more`
+  runs and the three answers render at the increment that opens the field.
+  Grounds are the same as the legend increment's: `ux/wireframes.md` § After the
+  second wrong claim and `ux/user-journeys.md` Journey 2 both draw the populated
+  field, and 🔍 #3's second finding already ruled this class — _"A form the twin
+  draws with a button, drawn without one, is not that form."_ The answers are
+  the `OneMoreAnswer` union members verbatim, so the wave that wires judging
+  inherits markup rather than replacing it.
+
+- (human ruling 2026-08-30) **The way past is built at the one-more increment**,
+  not driven into being by Block C's `{ skipAfter: 0 }` test. It is the same
+  mechanism as the one-more gate — one narrowed threshold read against one
+  attempt count — and `DOCS.md` § Execution phases 7 names the render as "the
+  claim form carrying whichever fields the attempt count has opened", singular.
+  The consequence is deliberate: **all twelve Block C tests are then locks over
+  shipped behavior rather than eleven locks plus one driver**, so the set stays
+  uniform and its honesty gate is per-lock mutation rather than a red event. The
+  cost, disclosed rather than absorbed: the skip control ships covered only by a
+  vacuously-green absence test for one increment.
+
+- (human ruling 2026-08-30) **The one-more radios are rendered `disabled`.** The
+  ruling above calls them inert, and inert is not what plainly-rendered radios
+  are: an uncontrolled `<input type="radio">` keeps its `checked` state in the
+  DOM across React re-renders, so stepping the extent would leave a stale answer
+  selected against a changed question — which `DOCS.md` § Structural constraints
+  forbids by name ("Moving the stepper re-asks it and clears the pending answer,
+  because the question has changed"). The submit button ships inert safely
+  because a button holds no state; a radio does, so the analogy breaks and
+  `disabled` is the faithful translation. **No React state, no stale answer, and
+  no thirteenth lock owed** — the clear-on-step invariant that `DOCS.md` says
+  "owes a component test rather than a core one" is not implemented here and
+  stays with judging. **The accepted cost, stated rather than absorbed:** a
+  disabled control leaves the tab order, and this lens has an unresolved
+  tab-order finding open. **The wave that wires judging removes `disabled` in
+  the same commit.**
+
+- (human ruling 2026-08-30) **The sandbox injection gains a `configs` prop**, so
+  the checkpoint can see the two threshold-gated regions at all. Without it
+  neither renders there: the injected element passes `languageLevels`, `lenses`
+  and `snippet` only [measured 2026-08-30:
+  `spiralearn/sandbox/orchestrate/index.mdx`], so `oneMoreAfter` resolves to its
+  default of 2 while `attempts` is permanently 0 behind a stubbed `settle` — and
+  the one-more field and the way past are unreachable. `StudyLenses` already
+  accepts the prop [read: `orchestrate/types.ts` — `readonly configs?:
+  Readonly<Record<string, Partial<LensConfig>>>`]. ⚠ **The line is removed with
+  the whole injection at the Phase-2 registration commit**, per the standing
+  obligation in § Deferred — it is not a second thing to remember, but it is a
+  second reason that removal must be complete.
+
 ### The `spellme` LENS — Phase 1, wave 3 (IN PROGRESS)
 
 ⚠ **Do not count the rows of anything here. RUN THIS** — and note it takes
@@ -1371,6 +1472,15 @@ finding, never the author re-reading their own body.
   and do not silently upgrade anything.
 - **`git grep -c "it.skip"` unscoped also matches `scanning/README.md`.** Scope
   it to the test file.
+- **`prettier` collapses whitespace INSIDE an inline code span**, so a verbatim
+  quote of an ASCII frame is silently rewritten whenever the paragraph reflows —
+  the run of spaces positioning a label at a frame's right edge becomes one
+  space, and `--check` then reports the collapsed form as correct. This campaign
+  quotes `ux/wireframes.md`'s frames often, and every such quote is exposed.
+  **Quote a frame in a FENCED block, which prettier leaves alone, or describe
+  the position rather than reproducing the padding.** Caught 2026-08-30 by
+  diffing `npx prettier <file>` against the file before running `--write`, which
+  is the habit worth keeping: preview the reflow, never discover it.
 
 ## Model and ceremony
 
