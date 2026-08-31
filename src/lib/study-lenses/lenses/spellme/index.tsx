@@ -18,8 +18,9 @@ import type { ClaimableKind, SessionState, StreamElement } from './types.js';
 
 /**
  * The spellme surface: the input tape, the token tape, the jar, the
- * claim form with whichever fields the attempt count has opened, and the
- * per-field verdicts in a live region.
+ * claim form with whichever fields the attempt count has opened, the
+ * per-field verdicts in a live region, and the two static regions — the
+ * fates panel, collapsed, and the legend, open.
  *
  * May assume this lens's applicability held over the embodiment's facts;
  * mounting it otherwise is a consumer bug, so it carries no refusal arm.
@@ -204,6 +205,53 @@ function SpellmeMain({ embodiment }: LensProperties): ReactElement {
 				data-extent-verdict={session.lastVerdicts?.extent}
 				data-one-more-verdict={session.lastVerdicts?.oneMore}
 			/>
+			{/* COLLAPSED is structural rather than a state: `./README.md` § UI
+			    structure writes `<details data-spellme-fates>`, and a bare `<details>`
+			    is closed — no `open` prop is written, and none should be. It is the
+			    deliberate INVERSE of the legend below: the vocabulary a learner cannot
+			    play without is open, the reference they consult when a character
+			    surprises them is not.
+
+			    ⚠ Both twins were checked before this content was written — checking
+			    one and generalizing is the failure this module has already committed
+			    once, at the legend. `ux/wireframes.md` drew this panel in a title bar
+			    until README's placement won (human ruling 2026-08-30); that frame now
+			    draws it here.
+			    `ux/user-journeys.md` names the fates exactly once — "The three fates
+			    carry a border style as well as a hue" — which is a requirement on the
+			    stylesheet, NOT on this panel, and is carried there rather than
+			    absorbed here.
+
+			    The wording is `./README.md` § The three fates, condensed rather than
+			    newly authored — plus "claimed or not", which is borrowed from that
+			    file's § Glossary rather than from § The three fates, and which
+			    `types.ts` echoes on `Fate`. It keeps the mark's negative, the one
+			    thing here a learner is most likely to over-read. */}
+			<details data-spellme-fates>
+				<summary>the three fates</summary>
+				<p>
+					Every character meets one of three fates, claimed or not. Two are
+					quiet, and neither is quite nothing.
+				</p>
+				<ul>
+					<li>
+						<strong>becomes a token</strong> — lands on the token tape
+					</li>
+					<li>
+						<strong>set aside</strong> — goes to the jar, and stays there
+					</li>
+					<li>
+						<strong>consumed</strong> — evaporates
+					</li>
+				</ul>
+				<p>
+					Two of them can leave a <strong>mark</strong>: a block comment
+					carrying a line break, and a line break itself. The mark says the
+					syntactic grammar reads a line break here — never that automatic
+					semicolon insertion fired, which depends on the production, and which
+					this lens does not know.
+				</p>
+			</details>
 			{/* A plain div, and OPEN is structural rather than a state: `./README.md`
 			    § UI structure writes `<div data-spellme-legend>`, where parsons's
 			    equivalent is a collapsed `<details>`. The contrast is the reason —

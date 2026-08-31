@@ -16,7 +16,7 @@ is the lesson about whitespace.
 
 ```text
 ┌────────────────────────────────────────────────────────────┐
-│  spellme                                          ⓘ fates  │
+│  spellme                                                   │
 ├────────────────────────────────────────────────────────────┤
 │  INPUT                                                     │
 │  ▏const x = 1; // hi                                       │
@@ -40,6 +40,8 @@ is the lesson about whitespace.
 │                                                            │
 │                                             [ claim it ]   │
 └────────────────────────────────────────────────────────────┘
+
+  ▸ the three fates
 ```
 
 **No snippet-type control lives here.** The reading does depend on the goal —
@@ -62,6 +64,19 @@ learner "step the extent to 5", and Journey 5 has them "arrow it up to 3" —
 neither is a thing you do to a control that is already there. The old frame was
 a moment mid-interaction drawn under a fresh-mount heading. Nothing in
 `user-journeys.md` needed changing, which was checked rather than assumed.
+
+(human ruling 2026-08-30) **The fates panel is not chrome, and the frame above
+no longer draws it as chrome.** That frame put `ⓘ fates` at the title bar's
+right edge, while [`../README.md`](../README.md) § UI structure writes
+`<details data-spellme-fates>` between the verdicts region and the legend.
+`twin-doc: user` makes both documents canon, so this was a real disagreement
+rather than an oversight — and README's placement won: the panel is one
+collapsed disclosure among the surface's others, not a permanent fixture of the
+chrome. It is drawn above as `▸ the three fates`, collapsed, which is what a
+fresh mount shows. Nothing in [user-journeys.md](./user-journeys.md) needed
+changing, which was checked rather than assumed: that document names the fates
+exactly once, and what it says there — "The three fates carry a border style as
+well as a hue" — is a requirement on the stylesheet, not on this panel.
 
 > ⚠ **doubt.** Ten kind buttons is a lot of surface for the first thing a
 > learner sees, and it front-loads vocabulary before any of it has been used.

@@ -128,7 +128,7 @@ describe('spellme surface', () => {
 			).not.toBeNull();
 		});
 
-		it.skip('collapses the fates panel on first mount', () => {
+		it('collapses the fates panel on first mount', () => {
 			expect(
 				renderLens('const x = 1').querySelector<HTMLDetailsElement>(
 					'[data-spellme-fates]',

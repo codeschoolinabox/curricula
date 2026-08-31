@@ -222,7 +222,8 @@ The module's default export is a frozen `Lens` per [`../types.ts`](../types.ts):
 
 - `name: 'spellme'` · `phase: 'tokens'`
 - `main` — the React component: `<div data-lens="spellme">`, the input tape, the
-  token tape, the jar, the claim form, the per-field verdicts.
+  token tape, the jar, the claim form, the per-field verdicts, the fates panel
+  and the legend.
 - `applicability(facts)` — the tokens stage produced a value **and** the
   published member is there:
   `facts.tokens.ok && facts.tokens.value.inputElements !== undefined`.

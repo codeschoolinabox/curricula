@@ -88,9 +88,19 @@ upward, no persisted state, no value returned to a consumer.
    next session state.
 
 7. **Render** _(sync)_ — the input tape, the token tape, the jar, the claim form
-   carrying whichever fields the attempt count has opened, and the per-field
-   verdicts in a live region. Absence of a verdict attribute is the unclaimed
-   state and is rendered as absence, never as a falsy value.
+   carrying whichever fields the attempt count has opened, the per-field
+   verdicts in a live region, and the two **static** regions: the fates panel,
+   collapsed, and the legend, open. Absence of a verdict attribute is the
+   unclaimed state and is rendered as absence, never as a falsy value.
+
+   **The two static regions read no state at all** — not the stream, not the
+   session, not the configuration. They are vocabulary the surface teaches
+   rather than anything it derives, which is why the data flow below draws no
+   edge into either, and why their open-ness is structural: the legend is a
+   `<div>` and therefore always open, the fates panel a `<details>` and
+   therefore closed until asked. That contrast is itself the content decision —
+   a learner cannot claim without the vocabulary, and can play without the
+   destinations.
 
    **When the stream is exhausted** the cursor rests past the end: the claim
    form is absent, the tapes and the jar stay exactly as they are, and nothing
@@ -114,7 +124,7 @@ flowchart TD
     Seq["input-element sequence<br/>(derived upstream, tiling the source)"]
     Stream["the stream<br/>(each element carrying its fate,<br/>and its mark where it has one)"]
     Session[("session state:<br/>cursor · attempts on this element ·<br/>what has fallen and whose doing it was ·<br/>the last verdicts, absent until the first claim")]
-    Surface["input tape · token tape · jar ·<br/>claim form and its per-field verdicts"]
+    Surface["input tape · token tape · jar ·<br/>claim form and its per-field verdicts ·<br/>the fates panel and the legend — static,<br/>reading no state"]
     Form[("the claim in progress:<br/>stepper extent · selected element kind ·<br/>the pending one-more answer")]
     Submission(["the learner submits, or hands it over"])
     Claim["a submitted claim<br/>(element kind · extent · the one-more<br/>answer, once that field is open)"]
