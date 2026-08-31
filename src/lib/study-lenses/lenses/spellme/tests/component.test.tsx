@@ -161,6 +161,144 @@ describe('spellme surface', () => {
 				),
 			).not.toBeNull();
 		});
+
+		it('shows the way past immediately at a zero threshold', () => {
+			expect(
+				renderLens('const x = 1', { skipAfter: 0 }).querySelector(
+					'[data-spellme-skip]',
+				),
+			).not.toBeNull();
+		});
+
+		it('renders the claim form while something is claimable', () => {
+			expect(
+				renderLens('const x = 1').querySelector('[data-spellme-claim-form]'),
+			).not.toBeNull();
+		});
+
+		it('shows the spent characters in the consumed span', () => {
+			expect(
+				renderLens('// hi\nconst x = 1').querySelector(
+					'[data-spellme-consumed]',
+				)?.textContent,
+			).toBe('// hi\n');
+		});
+
+		it('shows the proposed run at the extent on the stepper', () => {
+			expect(
+				renderLens('// hi\nconst x = 1').querySelector(
+					'[data-spellme-proposed]',
+				)?.textContent,
+			).toBe('c');
+		});
+
+		it('shows what the scanner has not reached in the rest span', () => {
+			expect(
+				renderLens('// hi\nconst x = 1').querySelector('[data-spellme-rest]')
+					?.textContent,
+			).toBe('onst x = 1');
+		});
+
+		it('opens the proposed extent at one', () => {
+			expect(
+				renderLens('const x = 1').querySelector<HTMLElement>(
+					'[data-spellme-proposed]',
+				)?.dataset.extent,
+			).toBe('1');
+		});
+
+		it('tracks the stepper on the proposed extent', () => {
+			const container = renderLens('const x = 1');
+			fireEvent.change(pick(container, '[data-spellme-extent] input'), {
+				target: { value: '3' },
+			});
+			expect(pick(container, '[data-spellme-proposed]').dataset.extent).toBe(
+				'3',
+			);
+		});
+
+		it('tracks the stepper on the proposed run', () => {
+			const container = renderLens('const x = 1');
+			fireEvent.change(pick(container, '[data-spellme-extent] input'), {
+				target: { value: '3' },
+			});
+			expect(pick(container, '[data-spellme-proposed]').textContent).toBe(
+				'con',
+			);
+		});
+
+		it('carries the attempt count on the claim form', () => {
+			expect(
+				renderLens('const x = 1').querySelector<HTMLElement>(
+					'[data-spellme-claim-form]',
+				)?.dataset.attempts,
+			).toBe('0');
+		});
+
+		it('groups every element-kind button in the picker wrapper', () => {
+			expect(
+				renderLens('const x = 1').querySelectorAll(
+					'[data-spellme-element-kinds] [data-element-kind]',
+				),
+			).toHaveLength(10);
+		});
+
+		it('offers ten distinct element kinds', () => {
+			expect(
+				new Set(
+					Array.from(
+						renderLens('const x = 1').querySelectorAll<HTMLElement>(
+							'[data-element-kind]',
+						),
+					).map((button) => button.dataset.elementKind),
+				).size,
+			).toBe(10);
+		});
+
+		it('leaves every element-kind button unpressed before a pick', () => {
+			expect(
+				renderLens('const x = 1').querySelectorAll(
+					'[data-element-kind][aria-pressed="true"]',
+				),
+			).toHaveLength(0);
+		});
+
+		it.each(['IdentifierName', 'RegularExpressionLiteral'])(
+			'presses %s when the learner picks it',
+			(elementKind) => {
+				const container = renderLens('const x = 1');
+				fireEvent.click(
+					pick(container, `[data-element-kind="${elementKind}"]`),
+				);
+				expect(
+					pick(container, `[data-element-kind="${elementKind}"]`).getAttribute(
+						'aria-pressed',
+					),
+				).toBe('true');
+			},
+		);
+
+		it('draws the one-more question against the extent on the stepper', () => {
+			const container = renderLens('const x = 1', { oneMoreAfter: 0 });
+			fireEvent.change(pick(container, '[data-spellme-extent] input'), {
+				target: { value: '3' },
+			});
+			expect(
+				container.querySelectorAll('[data-spellme-one-more] dd')[0]
+					?.textContent,
+			).toBe('con');
+		});
+
+		it('draws the one-more run one character past the stepper', () => {
+			const container = renderLens('const x = 1', { oneMoreAfter: 0 });
+			fireEvent.change(pick(container, '[data-spellme-extent] input'), {
+				target: { value: '3' },
+			});
+			expect(
+				container.querySelectorAll('[data-spellme-one-more] dd')[1]
+					?.textContent,
+			).toBe('cons');
+		});
 	});
 
 	describe('Many — the stream advances', () => {
@@ -191,6 +329,35 @@ describe('spellme surface', () => {
 				)?.dataset.marked,
 			).toBe('true');
 		});
+
+		it('leaves a comment with no line terminator unmarked', () => {
+			expect(
+				renderLens('// hi').querySelector<HTMLElement>(
+					'[data-spellme-set-aside]',
+				)?.dataset.marked,
+			).toBe('false');
+		});
+
+		it('shows a set-aside element its own source text', () => {
+			expect(
+				renderLens('// hi').querySelector('[data-spellme-set-aside]')
+					?.textContent,
+			).toBe('// hi');
+		});
+
+		it('marks a consumed line terminator on the token tape', () => {
+			expect(
+				renderLens('// hi\nconst x = 1').querySelectorAll(
+					'[data-spellme-break]',
+				),
+			).toHaveLength(1);
+		});
+
+		it('leaves no break mark where only whitespace was consumed', () => {
+			expect(
+				renderLens('   const x = 1').querySelectorAll('[data-spellme-break]'),
+			).toHaveLength(0);
+		});
 	});
 
 	describe('Zero — nothing claimable', () => {
@@ -202,6 +369,12 @@ describe('spellme surface', () => {
 			expect(
 				renderLens('   ').querySelector('[data-spellme-claim-form]'),
 			).toBeNull();
+		});
+
+		it('keeps the legend on a program with nothing claimable', () => {
+			expect(
+				renderLens('   ').querySelector('[data-spellme-legend]'),
+			).not.toBeNull();
 		});
 	});
 

@@ -1063,6 +1063,31 @@ recorded ruling would rewrite the record this file exists to be.
   obligation in § Deferred — it is not a second thing to remember, but it is a
   second reason that removal must be complete.
 
+⚠ **A THIRTEENTH lock was added by the AGENT while Block C was authored, and is
+disclosed here so it can be struck** — the same treatment the eleventh and
+twelfth got before the human kept them on 2026-08-30. It pins that the one-more
+field's two runs are the stepper's value and the stepper's value **plus one**.
+`README.md` § One more character calls that off-by-one "precisely the case the
+question exists to teach", and a test that only checks the field's presence
+cannot catch a `+0`. ⚠ **Do not read it against the phrase "no thirteenth lock
+owed" in the sixth ruling above**: that one is about the clear-on-step
+invariant, which the `disabled` ruling made moot, and is a different question
+entirely. This is a new thirteenth layered on the closed set of twelve.
+
+⚠ **One lock in the set CANNOT FAIL this wave, and it is recorded rather than
+dressed up.** Mutating `data-attempts` to a hardcoded `0` leaves the suite fully
+green [measured 2026-08-30], because `session.attempts` is permanently 0 while
+`settle` is a stub — **no test can tell the real read from the constant until
+the claim loop lands.** The test is nevertheless KEPT: `README.md` § UI
+structure makes the attribute canon, and deleting it would leave a documented
+harness hook with no coverage at all, which is the worse of the two. ⚠ An `ar-3`
+proposed marking it with a `PINNED(` comment. That was **declined**, because §
+Traps bars planting new `PINNED(` markers while `pinned-guard.py` stays
+unregistered — still true [measured 2026-08-30: `grep -c pinned-guard
+.claude/settings.json` → 0, with the hook file itself present]. This bullet is
+that marker's substitute and its only possible home, because tests in this repo
+carry no comments.
+
 ### The `spellme` LENS — Phase 1, wave 3 (IN PROGRESS)
 
 ⚠ **Do not count the rows of anything here. RUN THIS** — and note it takes
