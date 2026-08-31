@@ -5509,10 +5509,22 @@ the thing that actually fires; the checklist is what it fires.
   in the `house token` glossary entry; `929d9086` normalized it and declared
   it.) Because you are bypassing the hook, run the per-file checkpoints by hand
   — every one, on every changed file, **from the repo root**.
-- **Per-file checkpoints** (the compound script does not forward file args):
-  `npx markdownlint-cli2 --no-globs "<file>"` · `npx prettier --check "<file>"`.
-  New files: `--write` is safe. Pre-existing files: `--check` first, because
-  `--write` reflows drift that is not yours.
+- **Per-file checkpoints — THE CANONICAL TABLE IS THE GOVERNANCE FILES', NOT
+  THIS BULLET.** Read it in `DEV.md` § Linting Conventions or
+  `AGENTS.principal.md` § Linting, where it is maintained; the compound script
+  does not forward file args, so the per-file commands are what you run. ⛔
+  **This bullet used to RESTATE that table, and had gone stale in the direction
+  that loses a gate**: it listed markdownlint and prettier and **never listed
+  `npx eslint`**, which the governance table requires for `.ts` `.js` `.mdx`
+  [measured 2026-08-30: `npx eslint` occurred 0 times as a checkpoint command in
+  this file]. That cost nothing while the campaign was `.md`-only — **0.3 writes
+  `types.ts` and new `.test.ts` files and is the first step it would have
+  bitten.** One rule with two homes is the defect this campaign spent six rounds
+  removing from the region; this bullet now cites rather than restates.
+- **Prettier, which that table does not carry**:
+  `npx prettier --check "<file>"`. New files: `--write` is safe. Pre-existing
+  files: `--check` first, because `--write` reflows drift that is not yours, and
+  this file's block quotes are non-idempotent under it.
 - ⛔ **CSPELL IS RETIRED. DO NOT RUN IT, AND ITS ABSENCE IS NOT BREAKAGE.**
   `9baca1e7` (2026-08-29) uninstalled it and unwired spell-checking from every
   automated check; `cspell` now appears **0** times across `DEV.md`, `AGENTS.md`
