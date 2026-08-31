@@ -5510,12 +5510,29 @@ the thing that actually fires; the checklist is what it fires.
   it.) Because you are bypassing the hook, run the per-file checkpoints by hand
   — every one, on every changed file, **from the repo root**.
 - **Per-file checkpoints** (the compound script does not forward file args):
-  `npx markdownlint-cli2 --no-globs "<file>"` · `npx cspell "<file>"` ·
-  `npx prettier --check "<file>"`. New files: `--write` is safe. Pre-existing
-  files: `--check` first, because `--write` reflows drift that is not yours.
-- **cspell registration is per-file**, via an inline `<!-- cspell:ignore … -->`
-  header. British spellings and coinages need it; check what each target file
-  already registers before assuming a word is new.
+  `npx markdownlint-cli2 --no-globs "<file>"` · `npx prettier --check "<file>"`.
+  New files: `--write` is safe. Pre-existing files: `--check` first, because
+  `--write` reflows drift that is not yours.
+- ⛔ **CSPELL IS RETIRED. DO NOT RUN IT, AND ITS ABSENCE IS NOT BREAKAGE.**
+  `9baca1e7` (2026-08-29) uninstalled it and unwired spell-checking from every
+  automated check; `cspell` now appears **0** times across `DEV.md`, `AGENTS.md`
+  and `AGENTS.principal.md`, and the per-file checkpoint table in the governance
+  files lists only eslint and markdownlint [measured 2026-08-30, at `50c5df8b`].
+  It is in neither `package.json` nor `node_modules`, so **`npx cspell` resolves
+  to a stray global v5.18.5 and LIES**: it scored `RESUME.md` at 91 issues while
+  that file was byte-identical to `5134e8a2`, where the same command had
+  scored 0. Separately, `cspell.json` sits deleted-but-tracked in the shared
+  tree. **Never register a word to silence it, and never restore the config to
+  make it pass** — both bake a retired tool back into the files.
+
+  ⛔ **`50c5df8b`'S BODY IS WRONG ABOUT THIS AND IS IMMUTABLE.** It reports the
+  checkpoint "UNRUNNABLE AT THIS COMMIT, BY A FOREIGN CAUSE" and reads the
+  deletion as breakage. The tool was retired ON PURPOSE, a day earlier, by a
+  commit that is an ancestor of that one. The campaign memory records this same
+  misreading happening **three times before**; that body is the fourth, and this
+  bullet is the correction. Its other claim survives re-measurement — that
+  commit's added lines introduce no new vocabulary.
+
 - **THREE SEPARATE GREP TRAPS, and the third one bit this campaign hardest.**
   1. **`git grep` and single-line greps LIE on prettier-wrapped markdown.** A
      phrase spanning a wrap is never on one line. Unwrap first.
