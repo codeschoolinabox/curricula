@@ -1278,6 +1278,37 @@ execution and never holds one alone.
   - Recorded here per HR-21. Encoded on landing at
     `src/lib/study-lenses/lib/engine/README.md`, `notional-machine.md`,
     `types.ts` and `DOCS.md` — the documents these rulings govern.
+- **A thread-authored parse stop stays a halt, gains a structural discriminant,
+  and carries acorn's position (human rulings 2026-08-31, HR-25).** Taken to
+  resolve the `'script'` axis unit's `ar-1` PAUSE, which found that the axis
+  turns "a halt means a worker stopped" into a false invariant and leaves a
+  consumer unable to tell an engine-authored payload from its own without
+  inspecting its shape — the technique `engine/DOCS.md` § Structural constraints
+  forbids (_"Classification reads structured data only"_). `BRIEF.md § 7.13`
+  left the shape open for this gate to pick; this is the pick.
+  - **`EngineSettlement` gains `haltOrigin?: 'worker' | 'engine'`.** One
+    carriage, one optional discriminant. The reviewer's alternative — a separate
+    `parseError` field carrying no halt — was posed and declined: it would mint
+    a third shape for `errored` (neither halt nor engine error) and would stop
+    `refineError` firing on this path, since the hook runs only on errored
+    halts. Keeping one carriage keeps the documented hook behaviour and the
+    no-spawn saving intact.
+  - **The gate's payload carries structured position**,
+    `{ name, message, line, column, phase: 'creation' }`, from acorn's own
+    `loc`. The axis exists to fix a POSITION defect — today a learner's syntax
+    error is reported against a brace the learner never typed — so discarding
+    position at the one place the engine can report it structurally was
+    rejected. Engine-authored payload shapes are read by every consumer that
+    narrows a halt, which makes widening one later expensive; it costs nothing
+    now.
+  - **`EvaluateSpec` stays a flat record.** `strict` is honoured on `'function'`
+    alone and is an ignored input on `'script'`, documented as such rather than
+    made unrepresentable by a discriminated union. The union was posed and
+    declined: it is noisier for every consumer that spreads a spec, and `strict`
+    is already inert on `'module'` without anyone minding.
+  - Recorded here per HR-21. Encoded on landing at
+    `src/lib/study-lenses/lib/engine/README.md`, `notional-machine.md` and
+    `types.ts`.
 
 ### The ratification, and what it settled (human ruling 2026-08-06)
 

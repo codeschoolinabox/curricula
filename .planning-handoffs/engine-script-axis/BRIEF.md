@@ -1113,3 +1113,58 @@ SessionStart hook reported `node v20.11.0` against an engines floor of
 `>=22.11.0` while the session shell measured `v22.11.0`
 `[measured: node --version]`; § 4.1's crash was measured under v22.11.0, so any
 re-measurement states which node it ran on.
+
+---
+
+## 12. Deferrals recorded by the Phase-0 unit
+
+Written at Phase 0 step 0.2, after `ar-1`. These are obligations this unit
+accepted and scheduled rather than discharged, recorded in the repo because the
+plan file that would otherwise carry them sits outside it — the same reason
+HR-24 exists. Each names the step that owes it.
+
+- **`engine/DOCS.md` § Out of scope's "gates and refusal" bullet is narrowed to
+  PEDAGOGICAL gates — owed by 0.3.** The engine now owns a gate of its own (the
+  thread-side parse), so a bullet disowning "gates" in general reads as a
+  contradiction of `README.md` § Bounded context's **Owns**. The two senses are
+  genuinely different — embody's evaluation-phase gate and an evaluator's
+  refusal-as-data decide whether a program should run at all and fire before the
+  engine is invoked, while the creation gate decides only whether the program
+  parses on the goal it was posed as — and the README's glossary already draws
+  that line. `ar-1` accepted the deferral and asked that it be findable; this is
+  where it is findable.
+- **`worker/README.md` § Realms' capture table gains `importScripts` for
+  `bootstrap.ts` — owed by 0.3, executed in Phase 1.** The script path resolves
+  a new ambient global in the worker realm, and the committed latch rule is
+  mechanical: every one is latched. **This is a cross-unit tripwire.**
+  `tests/latched-built-ins.test.ts` pins `bootstrap.ts`'s captures as an exact
+  nine-element array
+  `[read: tests/latched-built-ins.test.ts — it.skip('the captures in bootstrap.ts name exactly the globals the README lists for it')]`;
+  that row is skipped today, and prerequisite 1's Phase 1 un-skips it. Whichever
+  of the two units lands second inherits the amendment.
+- **`worker/DOCS.md` § Capture order's conclusion is amended — owed by 0.3.** It
+  currently reasons from "the module path's blob revoke and halt post land on a
+  later turn after evaluation settles". `importScripts` is synchronous, so the
+  script path's revoke and halt post land on the SAME turn — a third case the
+  paragraph does not cover. The conclusion it draws still holds; the enumeration
+  under it does not.
+- **A shared default-halt-payload author — owed by Phase 1, decided by 0.3.**
+  The thread-side gate authors a third `{ name, message, phase: 'creation' }`
+  beside `worker/bootstrap.ts`'s and `testing/fake-transport.ts`'s, and nothing
+  keeps the three identical: the agnostic conformance tier keeps the existing
+  two honest, but the fake runs the function path and never reaches the gate.
+  0.3's sketch names where the extraction lands and what that placement costs;
+  Phase 1 performs it. Note the placement is not free either way — a new file
+  under `worker/` is caught by `latched-built-ins.test.ts`'s LIVE
+  `readdirSync(WORKER_DIRECTORY)` classification row, while a file outside
+  `worker/` is invisible to the only instrument that enforces the latch rule.
+- **The exact acorn pin (`^8.16.0` → `8.16.0`) lands with Phase 1's parse
+  gate**, not with Phase 0 (HR-24). Phase 0 records it as contract; the
+  `package.json` edit is shared configuration and rides the commit that first
+  depends on it.
+- **A built-bundle run, performed manually at least once, is a named gate at the
+  Phase-1 close.** The fast test tier builds its own classic worker rather than
+  letting the bundler decide, so it is structurally blind to the failure that
+  would kill the design — webpack ceasing to strip `{ type: 'module' }`. The
+  observed output rides that commit's body under `[measured:]`; it is not an
+  aspiration.
