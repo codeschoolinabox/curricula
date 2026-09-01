@@ -175,6 +175,20 @@
 			.key {
 				color: #0a5;
 			}
+			.answer {
+				margin-top: 0.3rem;
+				padding: 0.3rem 0.5rem;
+				border: 1px dashed #0a5;
+				background: #f4fff9;
+			}
+			.answer .correct {
+				color: #063;
+				font-weight: bold;
+			}
+			.hint {
+				color: #777;
+				font-style: italic;
+			}
 		</style>
 	</head>
 	<body>
@@ -385,10 +399,10 @@ console.log(total);</textarea
 				const statusEl = document.getElementById('soc-status');
 				const outEl = document.getElementById('soc-out');
 				servesEl.textContent = `serves: ${socratizingQuestioner.serves(embodiment.facts)}`;
-				const answer = await socratizingQuestioner.ask(
-					embodiment,
-					readConfig(),
-				);
+				const config = readConfig();
+				console.log('[socratizing] ask arguments', { embodiment, config });
+				const answer = await socratizingQuestioner.ask(embodiment, config);
+				console.log('[socratizing] answer', answer);
 				outEl.textContent = '';
 				if (!answer.ok) {
 					statusEl.textContent = `refusal: ${answer.error.message}${answer.error.offset === undefined ? '' : ` @ ${answer.error.offset}`}`;
@@ -405,6 +419,16 @@ console.log(total);</textarea
 					for (const entry of question.questions) {
 						const row = document.createElement('li');
 						row.textContent = `${entry.register}: ${entry.text}`;
+						if (entry.hints && entry.hints.length > 0) {
+							const hints = document.createElement('ul');
+							for (const hint of entry.hints) {
+								const hintRow = document.createElement('li');
+								hintRow.className = 'hint';
+								hintRow.textContent = `hint: ${hint}`;
+								hints.append(hintRow);
+							}
+							row.append(hints);
+						}
 						list.append(row);
 					}
 					card.append(meta, list);
@@ -417,28 +441,69 @@ console.log(total);</textarea
 				const statusEl = document.getElementById('quiz-status');
 				const outEl = document.getElementById('quiz-out');
 				servesEl.textContent = `serves: ${quizzingQuestioner.serves(embodiment.facts)}`;
+				console.log('[quizzing] ask arguments', {
+					embodiment,
+					config: undefined,
+				});
 				const answer = await quizzingQuestioner.ask(embodiment);
+				console.log('[quizzing] answer', answer);
 				outEl.textContent = '';
 				if (!answer.ok) {
 					statusEl.textContent = `refusal: ${answer.error.message}${answer.error.offset === undefined ? '' : ` @ ${answer.error.offset}`}`;
 					return;
 				}
 				statusEl.textContent = `${answer.items.length} item(s)`;
+				const code = embodiment.facts.source.value;
 				for (const item of answer.items) {
 					const card = document.createElement('div');
 					card.className = 'item';
 					const meta = document.createElement('div');
 					meta.className = 'meta';
-					meta.textContent = `${item.form} · ${item.mode} · [${item.anchorRange[0]}, ${item.anchorRange[1]})`;
+					meta.textContent = `${item.form} · ${item.mode} · [${item.anchorRange[0]}, ${item.anchorRange[1]}) "${code.slice(item.anchorRange[0], item.anchorRange[1])}"`;
 					const key = document.createElement('div');
 					key.className = 'key';
-					key.textContent = `${item.groupKey}${item.unlocks ? ` → unlocks ${item.unlocks.length}` : ''}`;
+					key.textContent = item.groupKey;
 					const prompt = document.createElement('div');
 					prompt.className = 'prompt';
 					prompt.textContent = item.prompt;
-					card.append(meta, key, prompt);
+					card.append(meta, key, prompt, answerBlock(item, code));
+					if (item.unlocks && item.unlocks.length > 0) {
+						const unlocks = document.createElement('div');
+						unlocks.className = 'meta';
+						unlocks.textContent = `unlocks: ${item.unlocks.join(' · ')}`;
+						card.append(unlocks);
+					}
+					const feedback = document.createElement('div');
+					feedback.className = 'hint';
+					feedback.textContent = `feedback: ${item.feedback}`;
+					card.append(feedback);
 					outEl.append(card);
 				}
+			}
+
+			// The answer key, rendered per mode — the item carries its own
+			// ground truth, so the eyeball surface shows it (a consumer lens
+			// would reveal it only post-grade).
+			function answerBlock(item, code) {
+				const block = document.createElement('div');
+				block.className = 'answer';
+				if (item.mode === 'mcq' || item.mode === 'multi-mcq') {
+					for (const option of item.options) {
+						const row = document.createElement('div');
+						const correct = item.answerOptionIds.includes(option.id);
+						row.className = correct ? 'correct' : '';
+						row.textContent = `${correct ? '✓' : '·'} [${option.id}] ${option.text}`;
+						block.append(row);
+					}
+					return block;
+				}
+				for (const range of item.targetRanges) {
+					const row = document.createElement('div');
+					row.className = 'correct';
+					row.textContent = `✓ [${range[0]}, ${range[1]}) "${code.slice(range[0], range[1])}"`;
+					block.append(row);
+				}
+				return block;
 			}
 		</script>
 	</body>
