@@ -13,6 +13,13 @@ abstraction; each rendered surface and derivation library zooms in below.
 > Written Phase 0, before implementation. The Refactor step is held against this
 > document — not what the code does, but what shape it takes.
 
+**This sketch's size diverges too** (human ruling 2026-09-01), and the
+divergence is declared rather than repaired: `DEV.md` § Directory Documentation
+Convention wants a sketch short enough to read in sixty seconds. The region's
+zoom-ins acquire their own homes as their surfaces are written —
+[`rail/DOCS.md`](./rail/DOCS.md) is the first — and that is where any shrinking
+comes from.
+
 ## Execution phases
 
 1. **Compose** — two cadences. At mount, sync and loud: the default lens roster
@@ -73,6 +80,7 @@ flowchart TD
     VER["level verdicts<br/>(one memoized validate per settle + level)"]
     MARKS["assessments by level<br/>(mark + cause, per settle)"]
     RECS["ranked recommendations<br/>(fitting lenses' recommendations, per settle)"]
+    STA["the rail's stations and caption<br/>(one station per phase · the barring edge ·<br/>the caption's one occupant)"]
     SUR["rendered study environment<br/>(surface pane: editor XOR one excursion — open lens or generator ·<br/>panel · level UI · mask)"]
     CANDIDATE["candidate program<br/>(the accept-eligible arm of one generative ask)"]
     PROPS -->|"join rosters at mount, loud collisions"| CFG
@@ -84,7 +92,9 @@ flowchart TD
     CFG -->|"supplies the registered levels, names the selected one"| VER
     VER -->|"classify: × admitted types × current type"| MARKS
     SNP -->|"the current type"| MARKS
-    EMB -->|"render, mechanical — each phase's accessibility, and a barred phase's cause WITH ITS STAGE"| SUR
+    EMB -->|"each phase's accessibility, and a barred phase's cause WITH ITS STAGE"| STA
+    CFG -->|"supplies the joined roster — the kit each station discloses"| STA
+    STA -->|"render, mechanical"| SUR
     VER -->|"annotate the editor's gutter, selected level only"| SUR
     MARKS -->|"selector marks · mask = selected assessment × strict posture"| SUR
     EMB -->|"the fitting lenses' recommendations, collected + ranked"| RECS
@@ -142,6 +152,20 @@ flowchart TD
   standing's drawn word, and the blocked sentence with its ordered three ways
   out. `display-labels.ts` is their one home. The data names are the other
   regions'.
+- **The caption resolves its precedence before it has anything to draw.** One
+  slot, two producers, a total order between them — a render path that consults
+  both producers and then picks between two rendered strings is a structural
+  defect rather than a cosmetic one. Its counts are read off the stations that
+  render, so the rail and its caption cannot disagree.
+- **A waiting suffix is of size two or three, never one.** `environment` and
+  `evaluation` both read `facts.entwined.ok`, so they bar and unbar together; a
+  `tokens` failure bars three, and `environment` bars nothing at all. The plural
+  is total and a defensive singular branch on the unreached count is unreachable
+  code. This holds of the derivers' carry chain rather than of any one map.
+- **The structure a screen reader traverses comes from named regions and
+  groups**, not from a heading outline. The instrument's only headings are the
+  guide's `h4` topic titles, so the outline is spent and named regions are the
+  only route left.
 
 ## The top component — state and the settle loop
 
@@ -245,8 +269,12 @@ verdicts without consulting a level twice.
 - A **station** is what renders one phase on the rail, and carries four things:
   the phase (the key everything zips against, never drawn), the label and short
   label, the standing (`openable` · `bare` · `waiting`), and its tray where it
-  has one. Whether the openable and bare cases are one shape or two is the first
-  question `types.ts` answers.
+  has one. **The openable and bare cases are two ARMS of one type** — not two
+  types, and not one record with an optional tray. The flat shape admits three
+  states this contract forbids: a bare station carrying a tray, an openable
+  station with nothing to open, and a barred station offering lenses. The kit
+  count is the tray's own size rather than a second field that could disagree
+  with it.
 - **The occupant dot is NOT a fifth thing the station carries** (human ruling
   2026-08-19). The filled dot the rail draws on the station whose lens the pane
   holds is **derived at render from the pane occupant**, which is already in the
@@ -254,6 +282,15 @@ verdicts without consulting a level twice.
   source of truth for the open lens next to the first. It is orthogonal to the
   standing, not a value of it: an openable station can also be the open lens's.
   Nothing is marked when the pane holds the editor or the generator.
+- **The kit count's predicate is the RECOVERED kit** — the phase's attached
+  lenses that resolve on the joined roster, which is the same set its tray
+  discloses. An attached ref the roster cannot recover is a broken embody
+  invariant, reported and dropped from the render, so counting it would draw a
+  number over a tray with nothing in it. This is also what makes the kit count
+  and the empty count complementary with no second predicate to keep in step:
+  `openable` and `bare` are the two arms of one reachable-and-kit judgment, and
+  a barred phase is excluded from the empty count because `waiting` is a third
+  arm rather than an empty second one.
 - **The caption — the one thing beneath the rail — holds exactly one occupant at
   a time, and its precedence is total**: the cause line wherever a barring edge
   is drawn, else the count line, else nothing. Four rules govern that one
@@ -292,14 +329,21 @@ verdicts without consulting a level twice.
   an `ast` failure and an `entwined` failure bar exactly the same phases [read:
   `../embody/derive-accessibility.ts` — `environment` and `evaluation` both read
   `facts.entwined.ok`]. Nor from the phase-order constant, which has no member
-  named `entwined` at all. So the render path needs `cause.stage`, and a
-  projection that carries only the message cannot produce the right sentence.
+  named `entwined` at all. **So the projection carries `cause.stage`**, and one
+  carrying only the message could not produce the right sentence. The cause
+  travels on the CAPTION rather than on a station: one cause is drawn once
+  beneath the rail, so no station carries one.
 
   **This makes `display-labels.ts` key against TWO embody vocabularies**, not
   one: the lifecycle phase names it already uses for the labels, and the
   failable STAGE names the framings key against. Those sets are not the same —
   `entwined` is a stage and not a phase — and a file that keys against two
-  vocabularies should say so where its home is settled.
+  vocabularies should say so where its home is settled. It keeps the
+  constant-file form — one `const`, one deep-frozen record, one bottom default
+  export — and what diverges from one-concept-per-file is that the record has
+  many MEMBERS, not that the file has many exports. Each keyed family is total
+  over its key type, so zipping against a vocabulary is a compile error rather
+  than a discipline.
 
   The strings themselves are `display-labels.ts`'s (§ What lives here); what is
   structural — and therefore belongs here rather than only in the glossary — is
@@ -341,7 +385,12 @@ verdicts without consulting a level twice.
   every-tray-entry assertions keep their meaning.
 - The rail's trays track the committed open lens; the open lens's own tray entry
   is its close affordance — the close commits at the top component and announces
-  `lens-opened: null` (the bus arm shipped reserved, now real). The class-2 Edit
+  `lens-opened: null` (the bus arm shipped reserved, now real). **A tray-entry
+  press raises ONE intent and the top component resolves it**: the same lens
+  carries two affordances of opposite meaning, since a recommendation may target
+  the open lens and re-open it in place, and only the owner of the session
+  choices knows which lens is open. Two callbacks racing over one lens would put
+  that resolution in the surface that cannot see the answer. The class-2 Edit
   code button is the GUARANTEED way home: the rail is class 3 and inert under a
   mask.
 - Coherence invariants at EVERY excursion-arm render, loud in dev AND prod: the
@@ -374,6 +423,13 @@ verdicts without consulting a level twice.
 
 ## Decisions
 
+- **Why the lifecycle is a rail rather than a row of per-phase selects.** Order
+  is a mark on the page rather than a reading convention; where the machine
+  stopped is a property of an EDGE between two stations, which is what the data
+  says, since a phase's own error never bars it; and a station's kit can be any
+  size without perturbing the lifecycle's geometry, because the machine and the
+  kit are drawn in different places. The kit is disclosed in a tray rather than
+  listed on the line, which is what keeps the geometry independent of its size.
 - **Why the pane swaps (editor XOR one excursion).** Inherited from the retired
   reference architecture's two-mode machine, on the maintainer's ruling: in
   editor mode the learner is AUTHORING; in lens mode they are EXERCISING a
@@ -482,3 +538,10 @@ verdicts without consulting a level twice.
 - **The embedding site's composition** — whatever layers produce the configs
   value upstream are the host's build, invisible here.
 - **Learner identity, progress, grading** — the embedding LMS's.
+- **The narrow-viewport geometry** — the honest small-screen form is a vertical
+  list: the same parts in the same order, one station per phase, an optional
+  tray per station, and the barring edge between two of them. Only the direction
+  of the line changes, so it is a stylesheet debt rather than a second contract.
+- **The learner-worded explanation beside the parser's message** — the package
+  promises one and none exists. The parse phases speak the parser's own voice
+  here; the copy that would sit beside it is owed by whoever writes it.

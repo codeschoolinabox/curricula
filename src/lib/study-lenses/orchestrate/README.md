@@ -73,13 +73,26 @@ hide them is worse than one file with eight exports" — and `DEV.md` § 1 **ban
 barrel files outright**, so the barrel was never a cost of the alternative: the
 shape `DEV.md` prescribes is exactly one file per family, imported directly.
 **The chosen shape diverges from that convention and the divergence is declared,
-not concealed** (round 12 IMPORTANT 7); how the file is actually shaped is a 0.3
-question, and `display-labels.ts` owes a widening there in any case. **An
+not concealed** (round 12 IMPORTANT 7): the file keeps the constant-file form
+`DEV.md` § 1 prescribes — one `const`, one deep-frozen record, one bottom
+default export — and what diverges is that the record has many **members**, not
+that the file has many exports. Each keyed family is total over its key type, so
+zipping against a vocabulary is a compile error rather than a discipline. **An
 earlier revision argued this from `derive-study.ts` being "the region's other
 value file" — it is a FUNCTION file** [measured 2026-08-19: one export, `export
 default function deriveStudy(`], and `display-labels.ts` is the region's only
 value file. The conclusion stands on the true premise; the false one is recorded
 so it is not re-derived (round 11 IMPORTANT 5).
+
+**The shape of this README diverges too** (human ruling 2026-09-01), and the
+divergence is declared rather than repaired. `DEV.md` § Directory Documentation
+Convention wants a README that says what a module does and how to navigate it;
+two thirds of this one is glossary, and it has become the region's
+specification. Repairing it is declined on two grounds: the glossary is this
+region's ubiquitous language, and lifting it out would invent a third
+per-directory document ahead of any second use; and the rail's own clauses
+acquire a correct home in [`rail/DOCS.md`](./rail/DOCS.md) as that surface is
+written, which is where any shrinking will actually come from.
 
 **Why the arrangement's five parts do not all live in one directory** (human
 ruling 2026-08-15). `rail/` owns the parts that are the lifecycle — the line,
@@ -763,11 +776,13 @@ this region owns.
 
   **Etymology is the wrong question**, which is why the test above is
   operational rather than historical: **waiting** is an ordinary word this
-  region reclaimed as a contract value for a station's **standing**, and it is
-  drawn on the rail as display copy precisely because a learner understands it
-  cold. What matters is whether the learner needs the glossary, never who coined
-  the word. The contract term names the thing for this package; the copy names
-  it for the learner, and the two are allowed to differ.
+  region reclaimed as a contract value for a station's **standing**, and the
+  word a learner reads there is **`not reached`** — the contract value and the
+  drawn word were deliberately decoupled (human ruling 2026-08-19), so how
+  ordinary the reclaimed word is settles nothing about what gets drawn. What
+  matters is whether the learner needs the glossary, never who coined the word.
+  The contract term names the thing for this package; the copy names it for the
+  learner, and the two are allowed to differ.
 
 - **the rail** — the lifecycle rendered as the machine's own conveyor: a line
   carrying one **station** per phase in the machine's fixed order, with the

@@ -11,7 +11,12 @@
  * vocabulary.
  */
 
-import type { Embodiment, SnippetType } from '../embody/types.js';
+import type {
+	Embodiment,
+	LifecyclePhaseName,
+	SnippetType,
+	StageCause,
+} from '../embody/types.js';
 import type { LanguageLevel } from '../language-levels/types.js';
 import type { Lens, LensConfig } from '../lenses/types.js';
 
@@ -37,9 +42,10 @@ import type { VerdictsByLevel } from './lib/validating/types.js';
 export type StudyLensesProperties = {
 	/**
 	 * The program source. This prop is the source text alone — the
-	 * glossary's snippet is this prop together with `type`. Mount-time
-	 * only: the instrument seeds from it once, and a later change is
-	 * ignored — the region's own edit intake is the only writer thereafter.
+	 * package glossary's snippet is this prop together with `type`.
+	 * Mount-time only: the instrument seeds from it once, and a later
+	 * change is ignored — the region's own edit intake is the only writer
+	 * thereafter.
 	 */
 	readonly snippet: string;
 	/**
@@ -224,3 +230,138 @@ export type PaneOccupant =
 			readonly mode: 'generator';
 			readonly openedAt: SettledSnippet;
 	  };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// The rail's projection
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * A station's three-valued indicator: `openable` (reachable, and something
+ * fits it) · `bare` (reachable, nothing fits — the ordinary case at four of
+ * five phases) · `waiting` (barred, downstream of the barring edge). A
+ * projection of reachability and kit, in which no level is involved at all —
+ * which is why it is deliberately not called a mark.
+ *
+ * @remarks
+ * The machine value and the learner's word are decoupled (human ruling
+ * 2026-08-19): the `waiting` standing draws as `not reached`, while
+ * `openable` and `bare` draw glyphs and no word at all. Only one of the three
+ * has a string, which is why the standing is not keyed like a `FitMark`. The
+ * drawn copy lives in `display-labels.ts`, so renaming this union cannot
+ * rewrite learner copy and rewording that copy cannot touch this union.
+ */
+export type Standing = 'openable' | 'bare' | 'waiting';
+
+/**
+ * The rail's per-phase element — one per phase, in the machine's fixed order,
+ * carrying four things: the phase (the key everything zips against, never
+ * drawn), the label and the short label, the standing, and the tray where it
+ * has one. Never the phase itself: the phase is data, the station is what
+ * renders it.
+ *
+ * @remarks
+ * Three arms rather than one record with an optional tray, because the flat
+ * shape admits three states the contract forbids: a bare station carrying a
+ * tray (a station with nothing to open has no tray and no disclosure control,
+ * not a disabled one), an openable station with nothing in it, and a barred
+ * station offering lenses. The tray is a non-empty tuple for the same reason
+ * — `openable` means something fits, so `▾ 0` is unrepresentable, and the
+ * drawn kit count is the tray's length rather than a second field that could
+ * disagree with it.
+ *
+ * Two things the rail draws are deliberately NOT fields here. The occupant
+ * dot is not a fifth thing a station carries (human ruling 2026-08-19): it is
+ * derived at render from `PaneOccupant`, so a field would be a second source
+ * of truth for which lens is open, and it is orthogonal to the standing
+ * rather than a value of it. The barring edge is not a field either — it bars
+ * a suffix and never a scatter, so its position is a function of the standing
+ * sequence.
+ */
+export type Station =
+	| {
+			readonly phase: LifecyclePhaseName;
+			readonly label: string;
+			readonly shortLabel: string;
+			readonly standing: 'openable';
+			/** This station's kit, in roster order: the lens names its tray discloses. */
+			readonly tray: readonly [string, ...ReadonlyArray<string>];
+	  }
+	| {
+			readonly phase: LifecyclePhaseName;
+			readonly label: string;
+			readonly shortLabel: string;
+			readonly standing: 'bare';
+	  }
+	| {
+			readonly phase: LifecyclePhaseName;
+			readonly label: string;
+			readonly shortLabel: string;
+			readonly standing: 'waiting';
+	  };
+
+// Compile-time pin: the standing vocabulary is exactly the arms' discriminant.
+// A new arm, or a member added to `Standing` alone, fails `npm run typecheck`.
+export type _StationStandingIsExactlyStanding = Expect<
+	[Station['standing']] extends [Standing]
+		? [Standing] extends [Station['standing']]
+			? true
+			: false
+		: false
+>;
+
+/**
+ * The count line's domain. Rule 3 sends zero to the `nothing` arm and rule 4
+ * sends every barred rail to the `cause` arm, so this arm exists only while
+ * all five phases are accessible.
+ */
+export type EmptyCount = 1 | 2 | 3 | 4 | 5;
+
+/**
+ * The unreached count's domain: a suffix of exactly two or three phases
+ * waits. A `tokens` failure bars three, an `ast` or `entwined` failure bars
+ * two, and `environment` bars nothing at all — so the plural is total and a
+ * singular branch would be dead code.
+ *
+ * @remarks
+ * This narrows on a DERIVATION invariant rather than a structural one. It is
+ * true of every embodiment the derivers produce, because `environment` and
+ * `evaluation` both read `facts.entwined.ok`; a hand-assembled `Facts` that
+ * breaks the derivers' carry chain would under-bar, and that invariant lives
+ * in the derivers rather than in this type.
+ */
+export type UnreachedCount = 2 | 3;
+
+/**
+ * The one thing beneath the rail: one slot, two producers, and a total order
+ * between them — the cause wherever a barring edge is drawn, else the count,
+ * else nothing. The render path resolves that precedence before it has
+ * anything to draw.
+ *
+ * @remarks
+ * The union is over the two arms' SHAPES, not over two strings (human ruling
+ * 2026-08-19). The count arm is one part; the cause arm is two — the cause
+ * whose stage keys the framing, and beneath it the unreached count. A
+ * `string | string` union is satisfiable by an implementation that
+ * concatenates the cause into one row, which is the defect this distinction
+ * exists to make unrepresentable: the cause arm exposes no string field at
+ * all, and a count cannot hold prose.
+ *
+ * The two counts are different numbers over different predicates and are
+ * never both on screen — `empty` counts what is accessible and unserved,
+ * `unreached` counts what waits. Neither ever stands in for the other.
+ *
+ * The discriminants name the two PRODUCERS rather than the geometry, so the
+ * unswept `cause line` / `cause arm` prose collision reaches no identifier
+ * here and a later prose sweep costs no code.
+ */
+export type Caption =
+	| {
+			readonly holds: 'cause';
+			readonly cause: StageCause;
+			readonly unreached: UnreachedCount;
+	  }
+	| {
+			readonly holds: 'count';
+			readonly empty: EmptyCount;
+	  }
+	| { readonly holds: 'nothing' };

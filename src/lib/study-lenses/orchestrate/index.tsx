@@ -651,7 +651,7 @@ function toPhaseEntry(
 	phase: LifecyclePhase,
 	roster: JoinedLensRoster,
 ): PhaseEntry {
-	const label = DISPLAY_LABELS[name];
+	const label = DISPLAY_LABELS.phaseLabels[name];
 	if (!phase.accessible) {
 		return { accessible: false, cause: phase.cause.message, label, name };
 	}
