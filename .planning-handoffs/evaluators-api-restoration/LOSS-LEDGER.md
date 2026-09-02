@@ -1091,6 +1091,16 @@ execution and never holds one alone.
   committed step semantics. Encoded at I3 (the emission + the wire arm +
   narrow-record-message's new leg, a ruled cross-increment extension of I2's
   landed seam).
+- **The stack-parse residual converts WORKER-SIDE (human ruling 2026-09-01, the
+  P0-I enrichment increment's named design question).** The no-live-frame
+  residual's position is parsed in the SPLICED text's coordinates; loop-guard's
+  locked line-preservation invariant means only COLUMNS drift, and only on lines
+  carrying a splice. Ruled: the worker config gains the per-line column deltas
+  (small clone-safe data computed at assembly), and the halt author corrects the
+  column BEFORE stamping — one coordinate space on the wire, matching the wrap's
+  original-parse stamps. The thread-side alternative (marked-uncorrected
+  positions converted at enrichment) and the line-only fallback were both
+  declined. Encoded at the I4 enrichment increment.
 - **Batch-per-cluster AR-3 cadence is RATIFIED (human ruling 2026-08-26, at an
   X1 reviewer's process escalation).** HR-13's "AR-3 on every un-skip" is
   satisfied by ONE ar-3 over a cluster's complete enumerated row set — the
@@ -1309,6 +1319,38 @@ execution and never holds one alone.
   - Recorded here per HR-21. Encoded on landing at
     `src/lib/study-lenses/lib/engine/README.md`, `notional-machine.md` and
     `types.ts`.
+- **An undecided creation gate defers, and the engine's own halt payload is a
+  published type (human rulings 2026-09-01, HR-26).** Taken to resolve the
+  `'script'` axis unit's `ar-2` PAUSE, whose first blocker was measured rather
+  than argued: acorn 8.16.0 throws a bare `RangeError` with **no position at
+  all** on deeply nested input
+  `[measured: acorn.parse('('.repeat(60000) + '1' + ')'.repeat(60000)) -> RangeError "Maximum call stack size exceeded", loc undefined]`,
+  which instrumented source reaches long before a learner's does.
+  - **A parser failure that reaches no verdict is not a refusal.** Only a parse
+    REFUSAL settles the run at the gate. Where acorn fails without deciding
+    anything about the program, the gate ABSTAINS and the run proceeds to the
+    worker exactly as though the path were ungated. The reasoning is the gate's
+    own stated failure mode: a gate's failure is FALSE REFUSAL, and refusing a
+    program because the parser hit its own call-stack limit would BE that
+    failure. Two alternatives were posed and declined — a positionless engine
+    halt (refuses a program it never judged) and a `worker-error` engine defect
+    (gives the gate two differently-shaped exits). A consequence rides with it:
+    the gate never throws at its caller, so nothing propagates synchronously out
+    of a pull or a `result` access, and the engine's "never throws / result
+    always settles" invariants survive the new synchronous boundary.
+  - **`types.ts` exports `EngineHalt`.** `halt` stays `unknown` because a
+    CONSUMER payload must be opaque — the engine reading one is the anti-goal —
+    but the engine authors two payloads itself (the worker-side default and the
+    gate's), and no genericity argument covers the engine's own data. One
+    exported type carries the shared `{ name, message }` core, an optional
+    `phase`, and optional `line`/`column` that only the gate fills. This is what
+    makes `haltOrigin` usable rather than merely informative: a consumer that
+    narrows on `'engine'` now has a type rather than a cast. It also replaces a
+    conformance assertion with a compiler check as the thing keeping the
+    engine's authoring sites from drifting, and it absorbs the positionless case
+    above at no extra cost.
+  - Recorded here per HR-21. Encoded on landing at
+    `src/lib/study-lenses/lib/engine/types.ts` and `DOCS.md`.
 
 ### The ratification, and what it settled (human ruling 2026-08-06)
 
