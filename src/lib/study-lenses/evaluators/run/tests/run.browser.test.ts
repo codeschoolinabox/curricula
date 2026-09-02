@@ -22,6 +22,23 @@ function sleep(ms: number): Promise<void> {
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+describe('run — the door: a handle or a refusal, as data', () => {
+	it.skip('main(validSpec) returns a handle, not a refusal', () => {
+		const answer = run.main(buildSpec('1 + 1;\n'));
+		expect('refused' in answer).toBe(false);
+	});
+
+	it.skip('a spec outside the gate is a spec refusal naming the spec', () => {
+		const answer = run.main(buildSpec('let x ='));
+		expect('refused' in answer && answer.reason).toMatch(/spec|gate|ast/u);
+	});
+
+	it.skip('a spec refusal is frozen', () => {
+		const answer = run.main(buildSpec('let x ='));
+		expect(Object.isFrozen(answer)).toBe(true);
+	});
+});
+
 describe('run — the happy path', () => {
 	it.skip('a trivial program completes ok', async () => {
 		const result = await expectHandle(run.main(buildSpec('1 + 1;\n')));

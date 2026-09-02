@@ -172,24 +172,19 @@ describe('run — sync surface (unit tier)', () => {
 });
 
 describe('run — refusals (unit tier: this environment has no Worker)', () => {
-	it.skip('refuses with the shared environment wording', () => {
+	it('refuses with the shared environment wording', () => {
 		const answer = run.main(buildSpec('let x = 1;\n'));
 		expect('refused' in answer && answer.reason).toBe(
 			'run needs a Worker (this looks like server-side rendering or plain Node) to sandbox a program; this environment has none',
 		);
 	});
 
-	it.skip('a spec outside the gate is a spec refusal naming the spec', () => {
-		const answer = run.main(buildSpec('let x ='));
-		expect('refused' in answer && answer.reason).toMatch(/spec|gate|ast/u);
-	});
-
-	it.skip('the environment refusal answers first where both grounds apply', () => {
+	it('the environment refusal answers first where both grounds apply', () => {
 		const answer = run.main(buildSpec('let x ='));
 		expect('refused' in answer && answer.reason).toContain('a Worker');
 	});
 
-	it.skip('a refusal is frozen', () => {
+	it('a refusal is frozen', () => {
 		const answer = run.main(buildSpec('let x = 1;\n'));
 		expect(Object.isFrozen(answer)).toBe(true);
 	});
