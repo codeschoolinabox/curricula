@@ -36,8 +36,12 @@ project's AGENTS.md / AGENTS-template.md).
    missing document as a defect. At any other value you challenge the README and
    every named twin **together**, and an AR-1 handed only the README — or a
    subset of the twins the value names — has reviewed a fraction of what its own
-   trigger names. **A value naming a document that is not in the tree is itself
-   a defect to report**: the step that owed it did not produce it.
+   trigger names. **A value whose artifact is not in the tree is itself a defect
+   to report**: the step that owed it did not produce it. Artifact, not document
+   — `DEV.md`'s naming table gives each value's form, and two are not a file
+   beside the README (`user` is a ux directory; `data` below the size threshold
+   is a section inside the README). Demanding a document of all three reports a
+   false defect on two.
 4. Any design notes the implementing agent provides.
 5. Existing codebase patterns the implementer says this design should align
    with.

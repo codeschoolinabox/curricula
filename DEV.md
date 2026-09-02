@@ -646,9 +646,12 @@ than introducing anything** — the machine twin is already written as a
 notional-machine document beside its module's README and DOCS across the regions
 that hold one [measured 2026-09-01: `git ls-files | grep 'notional-machine\.md'`
 → **10** files in 10 directories, two of which also hold an `.svg`; the tree
-moves, so re-measure rather than quoting this]. One caveat the count exposes: at
-least one of them sits three levels below its region's README rather than beside
-it, so the lookup below is a convention the tree does not yet uniformly honour.
+moves, so re-measure rather than quoting this]. All ten sit beside a `README.md`
+and a `DOCS.md`, and all ten of those READMEs link to the twin [measured
+2026-09-01: per-directory `test -f` and `grep -c` over `git ls-files | grep
+'notional-machine.md' | xargs -n1 dirname | sort -u`]. One deviates on the third
+artifact — the just-enough-javascript language level has no `types.ts` — so the
+lookup below is honoured on the two files it turns on.
 
 | `twin-doc`           | The document it names                                                          |
 | -------------------- | ------------------------------------------------------------------------------ |
@@ -729,20 +732,23 @@ explain the module in plain language — the same reason the machine twin is a
 document rather than a README section, and the machine twins now run from 116 to
 840 lines. And a separate document is separately reviewable, separately
 staleable, and separately citable from the prose that introduces the module.
-**Below that size the README section is right and this row is not owed.** The
-threshold is a judgement and no number is pinned; the machine twins' floor of
-116 lines is the usable marker, against a section case of 33 [measured
-2026-09-01]. That section case is worth reading before deciding:
-`git grep -n 'Ownership boundary'` finds holder-ownership, a shared coordinate
-system and a between-calls lifetime rule, carried in a README and reaching AR-1
-exactly as a twin would.
+**Below that size the separate document is not owed and a README section is
+right — the value is still recorded**, because what the value names is the
+account, not the file it happens to live in. The threshold is a judgement and no
+number is pinned; the machine twins' floor of 116 lines is the usable marker,
+against a section case of 33 [measured 2026-09-01: `git ls-files | grep
+'notional-machine.md' | xargs wc -l` for the floor; the section case is
+`Ownership boundary`'s span in the README that carries it]. That section case is
+worth reading before deciding: `git grep -n 'Ownership boundary'` finds
+holder-ownership, a shared coordinate system and a between-calls lifetime rule,
+carried in a README and reaching AR-1 exactly as a twin would.
 
 **Where the machine twin ends and the data twin begins — the split matters more
 than any other boundary here, because the two documents sit side by side**
 (human ruling 2026-09-01). A machine twin already models entities, not merely
 run phases: `git grep -n '^### Bindings'` finds a machine twin giving each
 binding a scope it lives in, a `'tdz' | 'initialized' | 'dead'` status, and a
-declare-to-dead lifecycle, above a containment model distinguishing direct
+declare-to-dead lifecycle, beneath a containment model that distinguishes direct
 containment from reference. Identity, ownership, lifetime and temporal
 invariants, all of them, in a notional-machine document. **The line is whose
 data it is.** A machine twin models the entities the modelled machine holds as
@@ -752,13 +758,13 @@ furniture of the machine a reader must predict. A data twin models the shapes
 what lives in its own holders, and what a consumer receives.
 
 **Where the module _is_ the machine, "whose" does not decide, and the tie-break
-is what a reader needs the shape for** (human ruling 2026-09-01, on AR-1's
-second challenge). This is not the edge case but the common one: only the
-language-level machine twins model something other than their own module, and in
-`lib/engine` the handle, the item stream and the time budget are each
-simultaneously furniture of the modelled machine and a shape the module hands
-on. So: if a reader needs the shape to **predict what the machine will do**, it
-is machine-twin material — which is what a machine twin's
+is what a reader needs the shape for** (adopted 2026-09-01 under AR-1's second
+challenge; not separately ruled). This is not the edge case but the common one:
+only the language-level machine twins model something other than their own
+module, and in `lib/engine` the handle, the item stream and the time budget are
+each simultaneously furniture of the modelled machine and a shape the module
+hands on. So: if a reader needs the shape to **predict what the machine will
+do**, it is machine-twin material — which is what a machine twin's
 `## Predictions worth making` section is usually for. **That heading is where
 the test tends to be written down, not a precondition for applying it**: seven
 of the ten machine twins carry it, and the designated first instance is not
@@ -810,25 +816,27 @@ and date the ruling here. For the shape of this material as the repo writes it
 today, `git grep -n 'State residency'` finds the closest thing there is.
 
 **`data`, not `state` — the synonym is dispatched here rather than left
-standing** (human ruling 2026-09-01). Five of the six sections the repo has
-written on this material are named for _state_ — `State slots` twice,
-`State design`, `State mutation model` and `State residency`; only
-`Ownership boundary` is not [measured 2026-09-01]. The axis value is `data`
-anyway, because _state_ names a subset: what a holder currently holds. This row
-also covers shapes produced and handed straight on without ever being held,
-which is the non-persistence case it exists for. A module that titles a section
-of its data twin `## State residency` is using the narrower word correctly; the
-value stays `data`, and step 0.1's synonym rule is discharged by saying which is
-which rather than by picking one and hoping.
+standing** (adopted 2026-09-01 under AR-1's challenge; not separately ruled).
+Five of the six sections the repo has written on this material are named for
+_state_ — `State slots` twice, `State design`, `State mutation model` and
+`State residency`; only `Ownership boundary` is not [measured 2026-09-01: `git
+grep -nE '^#{2,4} (State|Ownership) '`, discarding the three hits whose headings
+are about work status rather than data]. The axis value is `data` anyway,
+because _state_ names a subset: what a holder currently holds. This row also
+covers shapes produced and handed straight on without ever being held, which is
+the non-persistence case it exists for. A module that titles a section of its
+data twin `## State residency` is using the narrower word correctly; the value
+stays `data`, and step 0.1's synonym rule is discharged by saying which is which
+rather than by picking one and hoping.
 
 **Why this row is named while `learner` and `teacher` stay unnamed, when all
-three have zero instances** (human ruling 2026-09-01). The row is a
-**precondition** of its first instance in a way a menu is not: without the
-value, the twin ask at 0.2 has nothing to offer and the commit body nothing to
-record, so the first data model could not be written at all. `learner` and
-`teacher` have no pending instance, so naming their documents would be invention
-rather than precondition. That is the test — not that someone intends to write
-one.
+three have zero instances** (adopted 2026-09-01 under AR-1's challenge; not
+separately ruled). The row is a **precondition** of its first instance in a way
+a menu is not: without the value, the twin ask at 0.2 has nothing to offer and
+the commit body nothing to record, so the first data model could not be written
+at all. `learner` and `teacher` have no pending instance, so naming their
+documents would be invention rather than precondition. That is the test — not
+that someone intends to write one.
 
 **`embody` is the designated first instance** (human ruling 2026-09-01) — the
 data core of the study-lenses region, whose model is derived from learner needs
@@ -1387,8 +1395,9 @@ git log --all --format='%x00%H %B' | tr '\n' ' ' | tr '\0' '\n' \
 ```
 
 **Three traps were found by mutation-testing this before publishing it, and each
-one shipped in a draft first** [measured 2026-09-01]. Separating by _field_
-rather than by record emits two lines per commit and leaves every match
+one shipped in a draft first** — the counts below are measured; the claim about
+drafts is this author's own record rather than a repo fact. Separating by
+_field_ rather than by record emits two lines per commit and leaves every match
 unattributed. An unanchored `twin-doc:.*machine` over a flattened body crosses
 into prose and reported **29** records of `data`, a value with **zero**. And
 putting `·` inside a bracket expression — `[-·]`, `[^·-]` — makes the command
@@ -1401,7 +1410,9 @@ settings line breaks mid-list still matches, a value that is not first in its
 list still matches, and a prose-only body does not.
 
 **The hazard is latent, not yet realized** — no settings line in the corpus
-currently wraps inside `twin-doc` [measured 2026-09-01], which is why the naive
+currently wraps inside `twin-doc` [measured 2026-09-01: the flattened pipeline
+above and a line-anchored `--grep='twin-doc: machine'` return the same commit
+set, so no record is reachable only by flattening], which is why the naive
 grep's error today is the `both` blindness rather than a wrap. It is written
 down now because the list form is what makes wrapping likely.
 
@@ -1430,15 +1441,17 @@ human ruling 2026-08-14). Adding `data`, which reads nothing either, made a
 latent inaccuracy load-bearing.
 
 **The correction widens what the axis can admit, so the criterion is stated
-rather than left implicit** (human ruling 2026-09-01, on AR-1's challenge).
-"Reader" was false, but it was also **bounded** — it admitted only things that
-could be cast as audiences. "Model … of" admits anything nameable, so without a
-stop the axis drifts toward a value per artifact. The stop: **a value is
-admitted where a module owes a written account that must precede its own
-contract, and no 0.1 or 0.3 artifact can carry it at the size it needs.** Both
-halves are required, and the second is what the `user` and `data` rows each had
-to argue. Note also what `twin-doc` is not: this is a **documentation** axis,
-and `twin` is its inherited name, not a claim on
+rather than left implicit** (adopted 2026-09-01 under AR-1's challenge; not
+separately ruled). "Reader" was false, but it was also **bounded** — it admitted
+only things that could be cast as audiences. "Model … of" admits anything
+nameable, so without a stop the axis drifts toward a value per artifact. The
+stop: **a value is admitted where a module owes a written account that must
+precede its own contract, and no 0.1 or 0.3 artifact can carry it at the size it
+needs.** Both halves are required, and the second is what the `data` row argues
+at length below. The `user` row argues something different — its name and its
+menu — which is itself the point: each value earns its row on its own ground.
+Note also what `twin-doc` is not: this is a **documentation** axis, and `twin`
+is its inherited name, not a claim on
 `spiralearn/frogramming-and-vibetoading/ontology.md` § 4's predict-and-twin
 stance — which is the same point the blockquote closing this section already
 makes from the other direction.
@@ -2267,18 +2280,23 @@ leave a twin in the tree contradicting `twin-doc: none` in the record. That is
 not the same-record cost accepted below, which is about a default nobody
 objected to, not about an affirmative answer being overwritten.
 
-**The bound resolves per value, not per module** (human ruling 2026-09-01). A
-module can hold one twin and owe another — a notional-machine document present,
-a data-model document absent — and the sentence above, written when a module
-either had a twin or had none, gives that case no answer. It resolves this way:
-**silence leaves standing exactly the values whose documents are present**, and
-nothing further. A value in the record naming a document that is **not** in the
-tree is not a silence case at all. It is a defect, and **AR-1 reports it — or
-AR-5's documentation-sync check, at a declared ceremony that did not fire
-AR-1**, because the step that owed that document did not produce it. The partial
-state was already reachable at the retired `both`, where two documents were owed
-and one could be missing; the list form makes it expressible rather than
-creating it.
+**The bound resolves per value, not per module** (adopted 2026-09-01 under
+AR-1's challenge; not separately ruled). A module can hold one twin and owe
+another — a notional-machine document present, a data-model document absent —
+and the sentence above, written when a module either had a twin or had none,
+gives that case no answer. It resolves this way: **silence leaves standing
+exactly the values whose documents are present**, and nothing further. A value
+in the record whose **artifact** is **not** in the tree is not a silence case at
+all. Artifact, not document: the naming table gives each value's form, and two
+of them are not a file beside the README — a user twin is a ux directory, and a
+data twin below the size threshold is a section inside the README. **A value is
+discharged by the artifact its own row permits**, and a reviewer demanding a
+document of all three reports a false defect on two. It is a defect, and **AR-1
+reports it — or AR-5's documentation-sync check, at a declared ceremony that did
+not fire AR-1**, because the step that owed that document did not produce it.
+The partial state was already reachable at the retired `both`, where two
+documents were owed and one could be missing; the list form makes it expressible
+rather than creating it.
 
 **Finding the twin is a lookup, not a search** (human ruling 2026-08-13). A twin
 document lives in the module directory beside `README.md`, `DOCS.md` and
@@ -2291,7 +2309,10 @@ answered by looking in one place. (This closes a gap recorded earlier the same
 day, when nothing fixed a twin's location and the bound above was therefore
 inert. One row — `learner` and `teacher` — is still deliberately unnamed; the
 bound holds for every named row, which is `machine`, `data` and `user`. Only
-`machine` and `user` have ever been owed by a module [measured 2026-09-01].)
+`machine` and `user` have ever been owed by a module [measured 2026-09-01: `git
+log --all --format=%B | grep -c 'twin-doc: data'` → 0]. The enumeration in this
+parenthesis is a reading order; the canonical order binds the recorded value,
+not prose.)
 
 **The accepted cost, recorded so it is not rediscovered as a defect** (human
 ruling 2026-08-13). Four things are true and were in view when this was ruled:

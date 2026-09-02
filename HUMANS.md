@@ -258,12 +258,12 @@ mechanics, including what the agent writes if you don't answer, are canonical in
 [DEV.md § ceremony](./DEV.md#ceremony).
 
 **The twin ask.** At Phase 0 step 0.2 the agent asks whether any twin docs are
-required, and on "yes" asks which reader. **Here your silence answers for the
-record too:** say nothing and it records `twin-doc: none`, which is the same
-value it would otherwise have supplied — so a non-answer costs you nothing and
-blocks nothing. That is the opposite of the ceremony rule above, deliberately;
-the two axes differ in who owns them, not in whether they have a safe default.
-Canonical in
+required, and on "yes" asks **which model** — one or more, recorded as a `+`
+list in the canonical order. **Here your silence answers for the record too:**
+say nothing and it records `twin-doc: none`, which is the same value it would
+otherwise have supplied — so a non-answer costs you nothing and blocks nothing.
+That is the opposite of the ceremony rule above, deliberately; the two axes
+differ in who owns them, not in whether they have a safe default. Canonical in
 [DEV.md § Phase 0](./DEV.md#phase-0-documentation-specification-before-any-code)'s
 twin ask.
 

@@ -125,11 +125,11 @@ is needed at all.
 > the answer is re-asked, not remembered, across a session boundary. **Put the
 > ask.**
 
-**The machine twin exists.** `embody/notional-machine.md` and `embody/README.md`
-calls it **"the machine twin"** twice [read: `README.md` lines 327 and 477,
-re-measured 2026-09-01; the 287/415 recorded earlier were the wrong lines],
-matching `DEV.md`'s definition of the `machine` value — "a notional-machine
-document, `.md` beside the README".
+**The machine twin exists.** `embody/notional-machine.md` is in the tree, and
+`embody/README.md` calls it **"the machine twin"** twice [read: `README.md`
+lines 327 and 477, re-measured 2026-09-01; the 287/415 recorded earlier were the
+wrong lines], matching `DEV.md`'s definition of the `machine` value — "a
+notional-machine document, `.md` beside the README".
 
 Consequences, all binding:
 
@@ -203,7 +203,7 @@ HEAD: 08dd99f922e862b6b6a13b6cc0b995ab6326eb0d
 ⛔ **`tsc errors: 0` in that block is STALE, and it is the one line above you
 must not act on.** It stays in place because the block is quoted output and
 editing it would stop it being that. Re-measure before using any baseline: the
-count was **13** on 2026-09-02, every one foreign, in `aithor/*` and
+count was **13** on 2026-09-01, every one foreign, in `aithor/*` and
 `study-lenses/lib/local-llm/*`. Reading pre-existing debt as damage you caused
 has burned four agents in this repo. Every other figure in the block is stale
 too — that is what "re-run it yourself" means — but this is the only one whose

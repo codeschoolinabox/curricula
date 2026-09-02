@@ -79,11 +79,13 @@ increment in isolation, AR-5 asks: does the _whole_ hang together?
   you check is that the commit body carries a settings line at all; its absence
   is the defect, not the absent artifact. At any other value the named twin
   documents must all exist, describe what was built, and still name the right
-  models; a value naming a document absent from the tree is a defect. Judge only
-  whether the recorded answer is still **true** of the changeset — if these
-  increments changed what this work owes an account of, the value is stale —
-  never whether it was ever **wise**; the latter is AR-1's question at Phase 0,
-  and re-litigating it here turns the merge gate into a second design review.
+  models; a value whose artifact is absent from the tree is a defect — artifact,
+  not document, since `DEV.md`'s naming table makes `user` a ux directory and a
+  below-threshold `data` a README section. Judge only whether the recorded
+  answer is still **true** of the changeset — if these increments changed what
+  this work owes an account of, the value is stale — never whether it was ever
+  **wise**; the latter is AR-1's question at Phase 0, and re-litigating it here
+  turns the merge gate into a second design review.
 - **Type contract integrity**: is `types.ts` still the single source of truth?
   Any casts, `any`s, or parallel type definitions added during increments?
 - **Test coverage coherence**: do the tests, read together, form a coherent
