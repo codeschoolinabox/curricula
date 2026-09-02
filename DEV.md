@@ -653,7 +653,7 @@ and a `DOCS.md`, and all ten of those READMEs link to the twin [measured
 artifact — the just-enough-javascript language level has no `types.ts` — so the
 lookup below is honoured on the two files it turns on.
 
-| `twin-doc`           | The document it names                                                                                                              |
+| `twin-doc`           | The artifact it names                                                                                                              |
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | `machine`            | a notional-machine document, `.md` beside the README                                                                               |
 | `data`               | a data-model document, **data-model.md**, beside the README — or, below the size threshold, a section inside the README; see below |
@@ -1248,6 +1248,34 @@ for the complete tag misses any tag long enough to wrap, while the opening token
 is never split. Search on the opening token. Whether a tag's evidence is
 adequate is a reviewer's judgment, not a grep's.
 
+**Two rules for a claim that publishes its own command, both earned the
+expensive way** (adopted 2026-09-01 under AR-5's challenge; not separately
+ruled). A campaign that shipped four such commands got four wrong, each correct
+as reasoned and wrong as published, and every one was caught by running the
+artifact rather than by reading it.
+
+1. **Derive the number by running the string you are publishing, extracted from
+   the file after the file is written.** Not by running a command and then
+   writing one down: those are two different acts, and all four failures lived
+   in the gap. Extract with `sed -n` or `awk`, never by retyping, and run under
+   `env -i LC_ALL=C PATH=/usr/bin:/bin` — the shell's `grep` here is **ugrep**,
+   which decodes UTF-8 regardless of locale and will hide a bracket-expression
+   defect that BSD grep exposes. A multibyte character inside `[...]` is the
+   specific trap; take the separator as an alternation instead.
+2. **A command that searches the corpus for a string this document publishes is
+   self-poisoning.** It will match its own documentation, and it fails silently
+   and late — one such count was true for months and is false now, and another
+   grew a false positive the moment someone wrote about it. Exclude the
+   documenting commits, state the claim structurally, or publish no number. The
+   paragraph in [§ twin-doc](#twin-doc) that deliberately carries no corpus size
+   is the worked example.
+
+**Flattening a body to defeat the wrap needs its spaces squeezed.** `proseWrap`
+indents a continuation, so `tr '\n' ' '` alone leaves two spaces where the
+pattern has one, and a search still misses. `tr '\n' ' ' | tr -s ' '` is the
+form. Measured on one phrase in this file, the three instruments returned 5, 7
+and 8; only the last is right.
+
 The four written surfaces where this is auditable are **plan files, commit
 bodies, AR reports, and handoffs**. Chat is not auditable and never will be; the
 tag's value there is that a missing one is visible to the reader.
@@ -1423,10 +1451,11 @@ anchored is empty** — every record the line-anchored `--grep='twin-doc:
 machine'` finds, the flattened pipeline finds too, and none is reachable only by
 flattening, which is what a wrap would produce. The two sets are **not** equal,
 and an earlier revision of this tag wrongly said they were: the anchored form
-returns one more, the prose-only `10e2dc0c`, the false positive documented three
-paragraphs above], which is why the naive grep's error today is the `both`
-blindness rather than a wrap. It is written down now because the list form is
-what makes wrapping likely.
+returns more, because **every prose mention of the value is a false positive** —
+the case documented three paragraphs above. No count is given here on purpose:
+this document is itself one of the things that mention it], which is why the
+naive grep's error today is the `both` blindness rather than a wrap. It is
+written down now because the list form is what makes wrapping likely.
 
 Putting the newest value first in canonical order was considered as a cheaper
 mitigation and rejected: it reduces one value's exposure and leaves the form
@@ -1471,10 +1500,14 @@ makes from the other direction.
 **The curriculum row is defined and currently unexercised.** Phase 0's artifacts
 are a module `README.md`, `types.ts`, a `DOCS.md` sketch and a test suite, none
 of which a curriculum document has — and no commit has yet recorded
-`work: curriculum` [measured 2026-08-13: `git log --all --format=%B | grep -c
-"work: curriculum"` → **0**]. How curriculum work reaches the twin ask is
-therefore an open seam, recorded here rather than answered; the values above are
-what it is offered when it does.
+`work: curriculum` on a settings line [measured 2026-09-01 structurally, over a
+settings-field parse of `git log --all --format=%B`]. **The substring count this
+tag used to publish is now self-poisoned and returns 3**: every hit is prose
+inside a commit body discussing this very command, one of which argues the
+substring form is wrap-immune — and writing that argument is one of the three
+strings that broke it. How curriculum work reaches the twin ask is therefore an
+open seam, recorded here rather than answered; the values above are what it is
+offered when it does.
 
 **Why this claim carries no corpus size, deliberately.** Two drafts of this
 paragraph shipped a count of the settings lines and both were wrong, in opposite

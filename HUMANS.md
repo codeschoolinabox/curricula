@@ -538,6 +538,11 @@ agent claims things are done; you verify they actually are.
 
 **In any message, at any time:**
 
+- **Ask the agent to re-run every command its documents publish — extracted from
+  the file, in one turn, including ones it did not touch this session.** Cheap,
+  mechanical, and the only instrument in the 2026-09-01 twin-doc campaign that
+  caught anything by itself: four published commands did not return the number
+  printed beside them, and each was found by running it, never by reading it.
 - **An untagged repo-state claim is the tell — ask for the command.** When the
   agent says what a file contains, what a command outputs, or what was ruled, it
   owes you `[measured:]`, `[read:]`, or `[relayed:]` with the evidence
