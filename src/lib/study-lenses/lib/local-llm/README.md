@@ -148,11 +148,12 @@ management** (picking, loading, running, decomposing) and **silent on meaning**.
   call before the adapter is ever engaged, and classifies a domain fault the
   adapter lets escape into the failure vocabulary — the generation-side sibling
   of the load chain's own error classification. For every call that does reach
-  it, an adapter — shipped or host-injected — owes three behaviors: honor the
-  per-call signal as soon as its backend allows; an abort ends only that call,
-  as the `aborted` outcome; the model stays usable at **any** abort timing. (A
-  different sense of "adapter" than `lib/`'s shape- producing _callback_
-  adapters — this one drives a backend.)
+  it, an adapter — shipped or host-injected — owes: resolve the decomposed reply
+  (byte-exact `raw`, lossy `code`, `thinkTrace` when the model emits one); honor
+  the per-call signal as soon as its backend allows; an abort ends only that
+  call — surfacing as the `aborted` outcome the wrapper constructs; the model
+  stays usable at **any** abort timing. (A different sense of "adapter" than
+  `lib/`'s shape- producing _callback_ adapters — this one drives a backend.)
 - **Adapter map** — the host-supplied map of runtime kind → runtime adapter,
   given **at construction**. The host **registers only the runtimes it ships**;
   an entry whose runtimes are all absent from the map is simply not loadable

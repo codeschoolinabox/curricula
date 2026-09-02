@@ -470,3 +470,18 @@ pattern keeps a cancelled reply out of the next prompt; **(2)** worker-mode
 after a generation already ended, which is the late-abort poison arm. Both sit
 under ruling 4's usable-after-abort commitment; the third watch item (the
 interrupt-flag poison behavior itself) is already recorded at ruling 4.
+
+### THE PHASE-0 → PHASE-1 GATE: PASSED (human, 2026-09-02 — "proceed")
+
+The one human gate of this campaign's Phase 0 passed on the full agenda (three
+commits `675ec3c0` / `40837685` / `e80f001a`; two deleted-passing-tests; the
+frozen aithor collateral ledger; the flagged cross-territory staleness; the
+real-backend abort-evidence obligation). Agenda item 8 ruled WITH the gate: the
+drafted Runtime-adapter amendment (the resolve-decomposed duty added; "as the
+`aborted` outcome" re-attributed to the wrapper) is applied as its own follow-on
+commit. **Consequence: both of SEQUENCING § What unblocks Wave 2's conditions
+are now met** — the gate has passed and settle-item 7 is answered
+(consumer-side). Wave 2 is launchable; its carried rulings are re-confirmed at
+resumption per SEQUENCING § Rulings carried. Phase 1 of THIS campaign is a later
+session (per those same rulings: on Opus): its TODO is the 4 declared-red
+implementation errors + the 13 un-skips, one at a time, AR-3 each.
