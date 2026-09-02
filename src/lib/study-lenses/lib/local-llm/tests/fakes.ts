@@ -8,9 +8,9 @@
  */
 
 import type {
+	AdapterModel,
 	CapabilityProbe,
 	DeviceCapabilities,
-	LoadedModel,
 	ModelCatalog,
 	ModelCatalogEntry,
 	RuntimeAdapter,
@@ -101,9 +101,11 @@ export const registeredAdapter: RuntimeAdapter = () => {
 	throw new Error('registeredAdapter must not be invoked in selection tests');
 };
 
-// A loaded-model double whose generate echoes a canned reply (the facade tests
-// exercise load-once/dedup/refusal, not generation).
-export const fakeModel = (reply = ''): LoadedModel => ({
+// An adapter-model double whose generate echoes a canned reply — the ADAPTER'S
+// product (raw result, faults escape as rejections); the facade wraps it into
+// the public LoadedModel. The facade tests exercise load-once/dedup/refusal;
+// the wrapper's outcome construction has its own (Phase-1) cluster.
+export const fakeModel = (reply = ''): AdapterModel => ({
 	generate: () => Promise.resolve({ raw: reply, code: reply }),
 });
 

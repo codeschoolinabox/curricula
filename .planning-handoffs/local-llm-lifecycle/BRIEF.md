@@ -387,19 +387,20 @@ and that section ever disagree, that section is right.
 ## Rulings (human, 2026-08-26 — answered at plan approval, recorded same turn)
 
 The eight settle-items and the two Phase-0 asks, as answered via the plan-mode
-batch (AskUserQuestion, plan `read-planning-handoffs-local-llm-lifecyc-
-ancient-swing`). These move into the module's own README/DOCS/types as dated
-`(human ruling 2026-08-26)` parentheticals as those documents are authored;
-the commit bodies enumerate the transfer.
+batch (AskUserQuestion, plan
+`read-planning-handoffs-local-llm-lifecyc- ancient-swing`). These move into the
+module's own README/DOCS/types as dated `(human ruling 2026-08-26)`
+parentheticals as those documents are authored; the commit bodies enumerate the
+transfer.
 
 1. **Failure channel: TWO channels** — an unknown model name becomes a
-   **returned refusal with its own distinct cause** (typo-vs-device
-   distinctness survives as a value); genuine infrastructure faults (the probe
-   rejection) remain rejections. The unknown-name throw is retired.
-2. **Generation lifecycle: a typed outcome** — `generate` resolves an
-   ok-boolean union: success carries the decomposed result; failure carries a
-   small cause vocabulary + optional detail. No attempts ledger (generation
-   has no descent; attempts/repair are aithor's curated loop).
+   **returned refusal with its own distinct cause** (typo-vs-device distinctness
+   survives as a value); genuine infrastructure faults (the probe rejection)
+   remain rejections. The unknown-name throw is retired.
+2. **Generation lifecycle: a typed outcome** — `generate` resolves an ok-boolean
+   union: success carries the decomposed result; failure carries a small cause
+   vocabulary + optional detail. No attempts ledger (generation has no descent;
+   attempts/repair are aithor's curated loop).
 3. **Ownership: accept + document one-generation-at-a-time per loaded model.**
    Queue-with-identity is a recorded obligation owed by whichever campaign
    introduces a second concurrent consumer — deferred, not evaporated.
@@ -407,16 +408,16 @@ the commit bodies enumerate the transfer.
    outcome, never a rejection), plus the commitment: **a signal aborted at any
    time — mid-flight or after settlement — leaves the loaded model usable; the
    next `generate` proceeds normally.** (Forced by WebLLM v0.2.84's measured
-   interrupt-flag poison behavior; the fix mechanism is Phase-1
-   implementation, not contract.)
+   interrupt-flag poison behavior; the fix mechanism is Phase-1 implementation,
+   not contract.)
 5. **Mid-generation device loss: recovery stays OUT; `device-lost` is named**
    honestly in the generation-failure cause vocabulary (naming ≠ recovering).
    Folded into ruling 2's adopted vocabulary.
-6. **Streaming: OUT of the outward contract, deliberately.** The wording
-   leaves the adapter's internal use of WebLLM streaming legal.
-7. **NextStep knowledge: stays consumer-side.** aithor keeps
-   `causeToNextStep`; local-llm's delivery-agnostic boundary holds. Answered,
-   not deferred — this is the settle-item half of Wave 2's unblock condition.
+6. **Streaming: OUT of the outward contract, deliberately.** The wording leaves
+   the adapter's internal use of WebLLM streaming legal.
+7. **NextStep knowledge: stays consumer-side.** aithor keeps `causeToNextStep`;
+   local-llm's delivery-agnostic boundary holds. Answered, not deferred — this
+   is the settle-item half of Wave 2's unblock condition.
 8. **Handle shape: `{ generate }` unchanged; cancel is per-call** —
    `generate(prompt, options?: { signal?: AbortSignal })`. The
    `{ result, cancel }` handle is rejected (call-site churn, duplicated
@@ -425,8 +426,8 @@ the commit bodies enumerate the transfer.
 - **Ceremony: `full`** (the human's answer; AR-1 · AR-2 · AR-5 fire in this
   docs-and-types phase; AR-3/AR-4 defer to Phase-1 un-skips — wording flagged
   for confirmation at the gate).
-- **Twin ask (0.2 re-ask): `machine` stands** — confirmed before `ar-1`
-  spawned, so the answer window closed with an answer; no silence collision.
+- **Twin ask (0.2 re-ask): `machine` stands** — confirmed before `ar-1` spawned,
+  so the answer window closed with an answer; no silence collision.
 
 ### AR-1 PAUSE resolution (human, 2026-09-01)
 
@@ -437,8 +438,23 @@ the two open calls:
 - **The `causeToNextStep` compile break** (widening `LoadFailureCause` with
   `unknown-model` red-lights aithor's exhaustiveness guard): resolved as the
   **frozen collateral ledger** in commit 2's body, handed to Wave 2 — the
-  alternative sanctioned one-line aithor arm was **declined**; zero aithor
-  edits this campaign.
+  alternative sanctioned one-line aithor arm was **declined**; zero aithor edits
+  this campaign.
 - **Releasing a loaded model**: recorded as an explicit README § Excludes
   exclusion — nothing unloads a loaded model; a release verb is **deferred to
   the campaign that first needs one**. No new verb this campaign.
+
+### AR-2 PAUSE resolution (human, 2026-09-02)
+
+ar-2 (Fable, inherited) returned PAUSE on the 0.3 sketch — one blocker (the
+data-flow generation tail drew decomposition wrapper-side, contradicting
+types/tests/adapter, which place it below the adapter seam), one important
+(abort-vs-classification precedence unstated), five minors. The human approved:
+**apply the reviewer's counter-proposals as specified** — redraw the tail with
+the decomposed reply as the node and seam 2 named as the backend's
+non-deterministic call (decompose stays adapter-side; the alternative was
+explicitly declined per the reviewer's own warning); add the abort-precedence
+clause ("a fired signal settles `aborted` whatever the adapter's promise then
+does") plus the abort-then-rejection skipped test; batch the four one-line
+minors. The README's adapter-obligations wording gap (its committed list omits
+the resolve-decomposed duty) goes to the gate agenda, not an edit.

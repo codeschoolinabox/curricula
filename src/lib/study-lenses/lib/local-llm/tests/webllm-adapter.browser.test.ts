@@ -35,4 +35,19 @@ describe('makeWebllmAdapter (real browser)', () => {
 		},
 		180_000,
 	);
+
+	it.skip('an aborted generate leaves the real model answering the next prompt', async () => {
+		const model = await makeWebllmAdapter()(SMALL_CODER, '');
+		const controller = new AbortController();
+		const first = model.generate(
+			'Write a long JavaScript program with many functions.',
+			controller.signal,
+		);
+		controller.abort();
+		await first.catch(() => null);
+		const second = await model.generate(
+			'Write a one-line JavaScript statement that logs hello.',
+		);
+		expect(second.raw.length).toBeGreaterThan(0);
+	}, 180_000);
 });

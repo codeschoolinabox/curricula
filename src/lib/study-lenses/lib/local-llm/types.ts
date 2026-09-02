@@ -19,6 +19,15 @@
  * non-deterministic model call. The host injects its shipped backends as an
  * {@link AdapterMap} at construction ({@link MakeLocalLlm}); there is no global.
  *
+ * Domain failure is a value on both verbs; rejections are reserved for
+ * infrastructure faults (human ruling 2026-08-26): `load` returns a
+ * {@link LoadFailure} — `unknown-model` included — and `generate` returns a
+ * {@link GenerationFailure} — `aborted` included; a rejected
+ * {@link CapabilityProbe} still rejects. The loaded model a consumer receives
+ * is the module's own wrapper over the adapter's {@link AdapterModel}: the
+ * wrapper settles pre-aborted calls before the adapter is engaged and
+ * classifies escaped faults into the failure vocabulary.
+ *
  * Vocabulary is pinned in README.md § Ubiquitous language; the refusal map in
  * README.md § Edge cases.
  */
@@ -26,8 +35,9 @@
 // ─── Generation (the model's reply, decomposed) ───────────────────────────────
 
 /**
- * The model's reply, separated into its parts by model-format — never validated,
- * gated, or cleaned. The consumer selects which part to use per use-case
+ * The model's reply on success, separated into its parts by model-format —
+ * never validated, gated, or cleaned. The consumer selects which part to use
+ * per use-case
  * (curated → {@link GenerationResult.code}; raw-drift → {@link GenerationResult.raw}).
  *
  * @remarks
@@ -45,19 +55,89 @@ type GenerationResult = {
 	readonly thinkTrace?: string;
 };
 
+/**
+ * Why one generation produced nothing — the generation-failure vocabulary
+ * (human ruling 2026-08-26). Small on purpose: one call, one outcome — no
+ * attempts ledger, no retry (a repair loop is the consumer's).
+ *
+ * @remarks
+ * - `'aborted'` — the call's own {@link GenerateOptions.signal} fired, at any
+ *   timing: already aborted at call time (the adapter is never engaged),
+ *   mid-generation (partial text is discarded), or after settlement (a no-op).
+ *   Deliberately bare — no `detail`; the aborter already knows why. The loaded
+ *   model STAYS USABLE: the next `generate` proceeds normally.
+ * - `'device-lost'` — the GPU dropped mid-generation. Named honestly, never
+ *   recovered; the loaded model may be unusable afterwards. Same spelling as
+ *   the load-side {@link AttemptCause} member, which is per-candidate
+ *   diagnostic there and never load-terminal; it is a consumer-facing cause
+ *   only here.
+ * - `'generation-failed'` — any other backend fault; the undiscriminated
+ *   consumer-facing cause (the load ledger's `'unknown'` belongs to the
+ *   diagnostic vocabulary).
+ */
+type GenerationFailureCause = 'aborted' | 'device-lost' | 'generation-failed';
+
+/**
+ * The typed refusal of one generation — a value, never a rejection. `aborted`
+ * carries no `detail` by design; the other two may carry a diagnostic one.
+ */
+type GenerationFailure =
+	| {
+			readonly ok: false;
+			readonly cause: 'aborted';
+	  }
+	| {
+			readonly ok: false;
+			readonly cause: Exclude<GenerationFailureCause, 'aborted'>;
+			readonly detail?: string;
+	  };
+
+/** A successful generation: the decomposed {@link GenerationResult}. */
+type GenerationSuccess = {
+	readonly ok: true;
+	readonly result: GenerationResult;
+};
+
+/**
+ * What one `generate` call resolves to — always a value; `ok` is the
+ * discriminant, true exactly on the result (human ruling 2026-08-26). NOT the
+ * region's `*Outcome` string unions (the engine's `SettlementOutcome`, the
+ * evaluators' `EvaluationOutcome`), which name how a run ended — here the
+ * outcome is the whole returned value.
+ */
+type GenerationOutcome = GenerationSuccess | GenerationFailure;
+
+/** Per-call options. `signal` is the cancellation seam — see {@link LoadedModel}. */
+type GenerateOptions = {
+	readonly signal?: AbortSignal;
+};
+
 // ─── Loaded model (the run surface) ───────────────────────────────────────────
 
 /**
- * A model brought into memory: prompt in, decomposed reply out. Always local —
+ * A model brought into memory: prompt in, one typed outcome out. Always local —
  * runs on the learner's device, never a remote service. Generation is not
  * reproducible (the same prompt yields different output). Sampling defaults live
  * in the adapter, per model — there is deliberately no per-call sampling override.
+ *
+ * SHARED: every caller that resolves the same catalog id on one constructed
+ * runtime receives the same instance, so ONE GENERATION AT A TIME per loaded
+ * model (human ruling 2026-08-26) binds across all holders; until the deferred
+ * queue exists, serializing is the consumer side's. `generate` answers once —
+ * no outward stream (human ruling 2026-08-26). An abort at any timing leaves
+ * the model usable. This surface is the module's own wrapper over the
+ * adapter's {@link AdapterModel}: pre-aborted calls settle without engaging
+ * the adapter, and escaped faults are classified into
+ * {@link GenerationFailure}.
  *
  * NOT a run handle: a loaded model is a thing you call `generate` on, distinct
  * from the engine/embody `*Handle` family (lazy runs you iterate).
  */
 type LoadedModel = {
-	readonly generate: (prompt: string) => Promise<GenerationResult>;
+	readonly generate: (
+		prompt: string,
+		options?: GenerateOptions,
+	) => Promise<GenerationOutcome>;
 };
 
 // ─── Catalog (the candidate models, as data) ──────────────────────────────────
@@ -180,8 +260,27 @@ type LoadProgress = {
 };
 
 /**
+ * What a {@link RuntimeAdapter} produces: the backend-facing generate seam the
+ * module wraps into the public {@link LoadedModel}. The adapter resolves the
+ * RAW decomposed result and lets faults escape as rejections — outcome
+ * construction (the `ok` union, abort settlement, fault classification) is the
+ * wrapper's, the generation-side sibling of the load chain's error
+ * classification. For every call that reaches it, the adapter's obligations
+ * (README § Ubiquitous language, Runtime adapter): honor the signal as soon as
+ * its backend allows; an abort ends only that call; the model stays usable at
+ * ANY abort timing.
+ */
+type AdapterModel = {
+	readonly generate: (
+		prompt: string,
+		signal?: AbortSignal,
+	) => Promise<GenerationResult>;
+};
+
+/**
  * A per-runtime-kind backend driver: it turns a catalog entry's
- * {@link RuntimeLoad} into a uniform {@link LoadedModel}, reporting the one-time
+ * {@link RuntimeLoad} into a uniform {@link AdapterModel} — which the module
+ * wraps into the public {@link LoadedModel} — reporting the one-time
  * fetch through `onProgress`. One adapter per {@link RuntimeKind}, not per model.
  * (A different sense of "adapter" than `lib/`'s shape-producing callback adapters
  * — this one drives a backend.) The host supplies the adapters it ships.
@@ -190,7 +289,7 @@ type RuntimeAdapter = (
 	load: RuntimeLoad,
 	fetchUrl: string,
 	onProgress?: (progress: LoadProgress) => void,
-) => Promise<LoadedModel>;
+) => Promise<AdapterModel>;
 
 /**
  * The host-supplied map of runtime kind → adapter, given at construction. The
@@ -272,6 +371,11 @@ type Selection = {
  *   memory budget fit; or no CPU/WASM candidate; or a named model not feasible).
  *   The pre-flight gate can surface this BEFORE any bring-up. Terminal — the
  *   consumer recommends a native runtime.
+ * - `'unknown-model'` — **pre-flight** (selection-time, pure): the requested
+ *   name is absent from the catalog. Its own cause, kept distinct so a typo
+ *   never masquerades as a device limit — a returned refusal, no longer a
+ *   throw (human ruling 2026-08-26). An EMPTY name is not unknown: it is the
+ *   pick-for-me request.
  * - `'all-candidates-exhausted'` — **post-flight** terminal: feasible candidates
  *   existed but every one failed bring-up with mixed/device causes. Only knowable
  *   AFTER attempting (not pre-flight-surfaceable). Terminal — the consumer
@@ -285,13 +389,14 @@ type Selection = {
  *   and cannot be refetched offline. The next step is reconnecting (or a native
  *   runtime for durable offline).
  *
- * An UNKNOWN model name (absent from the catalog) is NOT a cause — it is a
- * programmer error and throws, never a {@link LoadFailure}. `'device-lost'` is NOT
- * a public cause: a GPU dropping during bring-up is recorded per-candidate in the
- * diagnostic {@link LoadAttempt.cause} and folds to `'all-candidates-exhausted'`.
+ * `'device-lost'` is NOT a load-terminal cause: a GPU dropping during bring-up
+ * is recorded per-candidate in the diagnostic {@link LoadAttempt.cause} and
+ * folds to `'all-candidates-exhausted'`. (At generation time it IS a
+ * consumer-facing cause — {@link GenerationFailureCause}.)
  */
 type LoadFailureCause =
 	| 'no-feasible-model'
+	| 'unknown-model'
 	| 'all-candidates-exhausted'
 	| 'fetch-failed'
 	| 'storage-quota'
@@ -303,7 +408,9 @@ type LoadFailureCause =
  * names `'device-lost'` (GPU dropped during bring-up) and `'unknown'`
  * (undiscriminated) honestly per-attempt without bloating the public terminal
  * vocabulary. The chain promotes a terminal {@link LoadFailureCause} from these by
- * precedence; this richer set is never surfaced to the consumer.
+ * precedence; the richer set rides the returned failure's diagnostic ledger —
+ * visible there, but never terminal, and the consumer relay reads only
+ * {@link LoadFailure.cause}.
  */
 type AttemptCause =
 	| 'fetch-failed'
@@ -326,24 +433,28 @@ type LoadAttempt = {
 
 /**
  * The structured refusal: a named cause, never a half-loaded model. A pre-flight /
- * post-flight discriminated union on `cause` — `'no-feasible-model'` is the only
- * pre-flight cause (the chain never ran, so there are no attempts); every other
- * cause is **post-flight** and carries a NON-EMPTY `attempts` ledger (≥1 candidate
- * was tried and failed). The non-empty tuple makes an empty ledger on a
- * post-flight failure a compile error — the contract's forcing function for the
- * TDD chain. `detail` is a human-readable message (dev/log/instructor-facing, and
- * the only failure field a string-only seam can carry); the structured `attempts`
- * ledger is diagnostic.
+ * post-flight discriminated union on `cause` — `'no-feasible-model'` and
+ * `'unknown-model'` are the two pre-flight causes (the chain never ran, so
+ * there are no attempts); every other cause is **post-flight** and carries a
+ * NON-EMPTY `attempts` ledger (≥1 candidate was tried and failed). The
+ * non-empty tuple makes an empty ledger on a post-flight failure a compile
+ * error — the contract's forcing function for the TDD chain. `detail` is a
+ * human-readable message (dev/log/instructor-facing, and the only failure
+ * field a string-only seam can carry); the structured `attempts` ledger is
+ * diagnostic.
  */
 type LoadFailure =
 	| {
 			readonly ok: false;
-			readonly cause: 'no-feasible-model';
+			readonly cause: 'no-feasible-model' | 'unknown-model';
 			readonly detail?: string;
 	  }
 	| {
 			readonly ok: false;
-			readonly cause: Exclude<LoadFailureCause, 'no-feasible-model'>;
+			readonly cause: Exclude<
+				LoadFailureCause,
+				'no-feasible-model' | 'unknown-model'
+			>;
 			readonly detail?: string;
 			readonly attempts: readonly [LoadAttempt, ...LoadAttempt[]];
 	  };
@@ -379,12 +490,12 @@ type LoadResult = LoadSuccess | LoadFailure;
  * `canRun` is the async probe; `load` is the async lifecycle with one caller
  * entry point (the which-model / which-runtime resolution is internal).
  *
- * `load` throws on an unknown model name (a programmer error); a device or
- * availability limit yields a {@link LoadFailure}, not a throw. A rejected
- * {@link CapabilityProbe} propagates as a rejection too — a broken probe is an
- * infrastructure fault, not a device-limit refusal, so it is collapsed into
- * neither the unknown-name throw nor a returned LoadFailure. `canRun` exposes the
- * probe directly and rejects on the same fault.
+ * Domain failure is a value on both verbs (human ruling 2026-08-26): an
+ * unknown model name yields the pre-flight `unknown-model` {@link LoadFailure}
+ * — no longer a throw — and a device or availability limit yields its own
+ * cause. A rejected {@link CapabilityProbe} still propagates as a rejection —
+ * a broken probe is an infrastructure fault, not a refusal; `canRun` exposes
+ * the probe directly and rejects on the same fault.
  */
 type LocalLlm = {
 	readonly canRun: () => Promise<DeviceCapabilities>;
@@ -420,7 +531,13 @@ type MakeLocalLlm = (config: LocalLlmConfig) => LocalLlm;
 
 export type {
 	GenerationResult,
+	GenerationFailureCause,
+	GenerationFailure,
+	GenerationSuccess,
+	GenerationOutcome,
+	GenerateOptions,
 	LoadedModel,
+	AdapterModel,
 	SizeClass,
 	RuntimeKind,
 	TjsDtype,

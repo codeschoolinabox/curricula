@@ -64,7 +64,7 @@ stateDiagram-v2
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Generating : generate(prompt, signal?)
+    [*] --> Generating : generate(prompt, { signal? })
     [*] --> Aborted : signal already aborted at call time — the backend is never asked
     Generating --> Result : natural end — decomposed reply
     Generating --> Aborted : the call's signal fires — partial text discarded

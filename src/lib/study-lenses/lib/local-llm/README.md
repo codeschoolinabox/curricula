@@ -500,7 +500,7 @@ impure lifecycle) is the test boundary.
 - Primary consumer: [`aithor`][aithor] — the JeJ generative arm that injects
   this as its model runtime.
 - Future consumer:
-  [`../../../study-lenses--deprecated-architecture/lenses/agent-lenses.concept.md`](../../../study-lenses--deprecated-architecture/lenses/agent-lenses.concept.md)
+  [`../../lenses/agent-lenses.concept.md`](../../lenses/agent-lenses.concept.md)
   — agent-lenses, which name this runtime as a prerequisite. (That note calls it
   `llm-client`; this module is the same thing, **renamed `local-llm`** to encode
   the local-only invariant — "client" wrongly implies a remote service.)

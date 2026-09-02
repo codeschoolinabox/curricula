@@ -577,15 +577,195 @@ describe('makeLocalLlm', () => {
 	});
 
 	describe('unknown model name', () => {
-		it('throws (a programmer error, not a LoadFailure)', async () => {
+		it.skip('resolves the unknown-model refusal, not a throw', async () => {
 			const llm = makeLocalLlm({
 				adapters: { webllm: countedAdapter() },
 				catalog: FAKE_CATALOG,
 				capabilityProbe: fakeProbe(),
 			});
-			await expect(llm.load({ model: 'ghost-model' })).rejects.toThrow(
-				'ghost-model',
-			);
+			const result = await llm.load({ model: 'ghost-model' });
+			expect(result.ok === false && result.cause).toBe('unknown-model');
+		});
+
+		it.skip('an empty model name is the pick-for-me request, not unknown', async () => {
+			const llm = makeLocalLlm({
+				adapters: { webllm: countedAdapter() },
+				catalog: FAKE_CATALOG,
+				capabilityProbe: fakeProbe(),
+			});
+			const result = await llm.load({ model: '' });
+			expect(result.ok === true && result.resolvedId).toBe(WEBLLM_ID);
+		});
+	});
+
+	describe('generation outcome (the wrapper over the adapter)', () => {
+		it.skip('a successful generate resolves ok true carrying the decomposed result', async () => {
+			const canned: RuntimeAdapter = () => Promise.resolve(fakeModel('reply'));
+			const llm = makeLocalLlm({
+				adapters: { webllm: canned },
+				catalog: FAKE_CATALOG,
+				capabilityProbe: fakeProbe(),
+			});
+			const loaded = await llm.load();
+			if (!loaded.ok) throw new Error('expected a loaded model');
+			const outcome = await loaded.model.generate('a prompt');
+			expect(outcome.ok === true && outcome.result.raw).toBe('reply');
+		});
+
+		it.skip('a pre-aborted signal settles aborted', async () => {
+			const canned: RuntimeAdapter = () => Promise.resolve(fakeModel('reply'));
+			const llm = makeLocalLlm({
+				adapters: { webllm: canned },
+				catalog: FAKE_CATALOG,
+				capabilityProbe: fakeProbe(),
+			});
+			const loaded = await llm.load();
+			if (!loaded.ok) throw new Error('expected a loaded model');
+			const controller = new AbortController();
+			controller.abort();
+			const outcome = await loaded.model.generate('a prompt', {
+				signal: controller.signal,
+			});
+			expect(outcome.ok === false && outcome.cause).toBe('aborted');
+		});
+
+		it.skip('a pre-aborted call never engages the adapter model', async () => {
+			let engaged = 0;
+			const counting: RuntimeAdapter = () =>
+				Promise.resolve({
+					generate: () => {
+						engaged += 1;
+						return Promise.resolve({ raw: '', code: '' });
+					},
+				});
+			const llm = makeLocalLlm({
+				adapters: { webllm: counting },
+				catalog: FAKE_CATALOG,
+				capabilityProbe: fakeProbe(),
+			});
+			const loaded = await llm.load();
+			if (!loaded.ok) throw new Error('expected a loaded model');
+			const controller = new AbortController();
+			controller.abort();
+			await loaded.model.generate('a prompt', { signal: controller.signal });
+			expect(engaged).toBe(0);
+		});
+
+		it.skip('a mid-flight abort settles aborted even when the adapter later resolves', async () => {
+			let release = (_result: { raw: string; code: string }) => {};
+			const hanging: RuntimeAdapter = () =>
+				Promise.resolve({
+					generate: () =>
+						new Promise<{ raw: string; code: string }>((resolve) => {
+							release = resolve;
+						}),
+				});
+			const llm = makeLocalLlm({
+				adapters: { webllm: hanging },
+				catalog: FAKE_CATALOG,
+				capabilityProbe: fakeProbe(),
+			});
+			const loaded = await llm.load();
+			if (!loaded.ok) throw new Error('expected a loaded model');
+			const controller = new AbortController();
+			const pending = loaded.model.generate('a prompt', {
+				signal: controller.signal,
+			});
+			controller.abort();
+			release({ raw: 'late partial', code: 'late partial' });
+			const outcome = await pending;
+			expect(outcome.ok === false && outcome.cause).toBe('aborted');
+		});
+
+		it.skip('a mid-flight abort settles aborted even when the adapter then rejects', async () => {
+			let breakCall = (_error: Error) => {};
+			const tearing: RuntimeAdapter = () =>
+				Promise.resolve({
+					generate: () =>
+						new Promise<{ raw: string; code: string }>((_resolve, reject) => {
+							breakCall = reject;
+						}),
+				});
+			const llm = makeLocalLlm({
+				adapters: { webllm: tearing },
+				catalog: FAKE_CATALOG,
+				capabilityProbe: fakeProbe(),
+			});
+			const loaded = await llm.load();
+			if (!loaded.ok) throw new Error('expected a loaded model');
+			const controller = new AbortController();
+			const pending = loaded.model.generate('a prompt', {
+				signal: controller.signal,
+			});
+			controller.abort();
+			breakCall(new Error('backend tore down on interrupt'));
+			const outcome = await pending;
+			expect(outcome.ok === false && outcome.cause).toBe('aborted');
+		});
+
+		it.skip('an abort after settlement is a no-op — the next generate proceeds', async () => {
+			const canned: RuntimeAdapter = () => Promise.resolve(fakeModel('reply'));
+			const llm = makeLocalLlm({
+				adapters: { webllm: canned },
+				catalog: FAKE_CATALOG,
+				capabilityProbe: fakeProbe(),
+			});
+			const loaded = await llm.load();
+			if (!loaded.ok) throw new Error('expected a loaded model');
+			const controller = new AbortController();
+			await loaded.model.generate('one', { signal: controller.signal });
+			controller.abort();
+			const next = await loaded.model.generate('two');
+			expect(next.ok).toBe(true);
+		});
+
+		it.skip('the model stays usable after an aborted call', async () => {
+			const canned: RuntimeAdapter = () => Promise.resolve(fakeModel('reply'));
+			const llm = makeLocalLlm({
+				adapters: { webllm: canned },
+				catalog: FAKE_CATALOG,
+				capabilityProbe: fakeProbe(),
+			});
+			const loaded = await llm.load();
+			if (!loaded.ok) throw new Error('expected a loaded model');
+			const controller = new AbortController();
+			controller.abort();
+			await loaded.model.generate('one', { signal: controller.signal });
+			const next = await loaded.model.generate('two');
+			expect(next.ok).toBe(true);
+		});
+
+		it.skip('an escaped adapter fault settles generation-failed', async () => {
+			const broken: RuntimeAdapter = () =>
+				Promise.resolve({
+					generate: () => Promise.reject(new Error('backend broke')),
+				});
+			const llm = makeLocalLlm({
+				adapters: { webllm: broken },
+				catalog: FAKE_CATALOG,
+				capabilityProbe: fakeProbe(),
+			});
+			const loaded = await llm.load();
+			if (!loaded.ok) throw new Error('expected a loaded model');
+			const outcome = await loaded.model.generate('a prompt');
+			expect(outcome.ok === false && outcome.cause).toBe('generation-failed');
+		});
+
+		it.skip('a GPU drop mid-generation settles device-lost', async () => {
+			const dropping: RuntimeAdapter = () =>
+				Promise.resolve({
+					generate: () =>
+						Promise.reject(new Error('WebGPU device lost during decode')),
+				});
+			const llm = makeLocalLlm({
+				adapters: { webllm: dropping },
+				catalog: FAKE_CATALOG,
+				capabilityProbe: fakeProbe(),
+			});
+			const loaded = await llm.load();
+			if (!loaded.ok) throw new Error('expected a loaded model');
+			const outcome = await loaded.model.generate('a prompt');
+			expect(outcome.ok === false && outcome.cause).toBe('device-lost');
 		});
 	});
 
