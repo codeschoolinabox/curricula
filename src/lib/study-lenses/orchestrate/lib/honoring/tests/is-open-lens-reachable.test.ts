@@ -46,6 +46,7 @@ function buildEmbodiment(
 function buildLens(name: string, extras: Partial<Lens> = {}): Lens {
 	return {
 		name,
+		label: name,
 		applicability: () => true,
 		phase: 'source',
 		main: () => null,
@@ -58,6 +59,7 @@ function buildLens(name: string, extras: Partial<Lens> = {}): Lens {
 function buildExcludedLens(name: string, extras: Partial<Lens> = {}): Lens {
 	return {
 		name,
+		label: name,
 		applicability: () => true,
 		main: () => null,
 		...extras,

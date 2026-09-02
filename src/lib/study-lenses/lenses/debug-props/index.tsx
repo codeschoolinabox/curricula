@@ -70,6 +70,7 @@ function isAlwaysApplicable(): boolean {
 
 const debugPropertiesLens: Lens = freezeInPlace<Lens>({
 	name: 'debug-props',
+	label: 'inspect what a lens receives',
 	applicability: isAlwaysApplicable,
 	main: DebugPropertiesMain,
 });

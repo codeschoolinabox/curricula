@@ -666,6 +666,7 @@ function ParsonsMain({
  */
 const parsonsLens: Lens = freezeInPlace<Lens>({
 	name: 'parsons',
+	label: 'rebuild the order',
 	main: ParsonsMain,
 	applicability: parsonsCore.applicability,
 	config: parsonsCore.config,

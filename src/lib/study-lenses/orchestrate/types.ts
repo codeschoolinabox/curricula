@@ -249,15 +249,36 @@ export type PaneOccupant =
  * has a string, which is why the standing is not keyed like a `FitMark`. The
  * drawn copy lives in `display-labels.ts`, so renaming this union cannot
  * rewrite learner copy and rewording that copy cannot touch this union.
+ *
+ * `waiting` was reconsidered at 0.3 and KEPT. The README's objection is to its
+ * GLOSS — "barred, downstream of the barring edge" reaches for the opposite
+ * word — and the gloss is what changed. Renaming the member to `barred` would
+ * name the station's standing after the PHASE's property, collapsing the one
+ * distinction this vocabulary is most insistent on.
  */
 export type Standing = 'openable' | 'bare' | 'waiting';
 
 /**
+ * One entry in a station's tray: the lens the intent names, and the copy the
+ * learner reads.
+ *
+ * @remarks
+ * The label is CARRIED rather than keyed, and the two are not in tension.
+ * A string whose author is outside this region travels on the projection; a
+ * string this region keys against a vocabulary it owns is looked up at render
+ * from `display-labels.ts`. A lens authors its own name for itself
+ * (`Lens.label`), so it travels.
+ */
+export type TrayEntry = {
+	readonly lens: string;
+	readonly label: string;
+};
+
+/**
  * The rail's per-phase element — one per phase, in the machine's fixed order,
- * carrying four things: the phase (the key everything zips against, never
- * drawn), the label and the short label, the standing, and the tray where it
- * has one. Never the phase itself: the phase is data, the station is what
- * renders it.
+ * carrying the phase (the key everything zips against, never drawn), the
+ * standing, and the tray where it has one. Never the phase itself: the phase
+ * is data, the station is what renders it.
  *
  * @remarks
  * Three arms rather than one record with an optional tray, because the flat
@@ -269,33 +290,29 @@ export type Standing = 'openable' | 'bare' | 'waiting';
  * drawn kit count is the tray's length rather than a second field that could
  * disagree with it.
  *
- * Two things the rail draws are deliberately NOT fields here. The occupant
- * dot is not a fifth thing a station carries (human ruling 2026-08-19): it is
- * derived at render from `PaneOccupant`, so a field would be a second source
- * of truth for which lens is open, and it is orthogonal to the standing
- * rather than a value of it. The barring edge is not a field either — it bars
- * a suffix and never a scatter, so its position is a function of the standing
- * sequence.
+ * THREE THINGS THE RAIL DRAWS ARE DELIBERATELY NOT FIELDS, and all three rest
+ * on one rule: nothing derivable from what the projection already carries
+ * gets a field of its own (human ruling 2026-08-19, generalized at 0.3).
+ * The occupant dot is derived at render from `PaneOccupant`. The barring edge
+ * bars a suffix and never a scatter, so its position is a function of the
+ * standing sequence. And the phase's LABEL and SHORT LABEL are a total
+ * function of `phase` through `display-labels.ts`, which the rail must import
+ * anyway for every other string it draws — carrying them would duplicate a
+ * lookup the surface already performs, and would couple this derivation's
+ * tests to copy while its sibling's stay copy-free.
  */
 export type Station =
 	| {
 			readonly phase: LifecyclePhaseName;
-			readonly label: string;
-			readonly shortLabel: string;
 			readonly standing: 'openable';
-			/** This station's kit, in roster order: the lens names its tray discloses. */
-			readonly tray: readonly [string, ...ReadonlyArray<string>];
+			readonly tray: readonly [TrayEntry, ...ReadonlyArray<TrayEntry>];
 	  }
 	| {
 			readonly phase: LifecyclePhaseName;
-			readonly label: string;
-			readonly shortLabel: string;
 			readonly standing: 'bare';
 	  }
 	| {
 			readonly phase: LifecyclePhaseName;
-			readonly label: string;
-			readonly shortLabel: string;
 			readonly standing: 'waiting';
 	  };
 
@@ -313,21 +330,32 @@ export type _StationStandingIsExactlyStanding = Expect<
  * The count line's domain. Rule 3 sends zero to the `nothing` arm and rule 4
  * sends every barred rail to the `cause` arm, so this arm exists only while
  * all five phases are accessible.
+ *
+ * @remarks
+ * A literal union rather than `number`, so the count line's keyed copy is
+ * total over exactly the values that can render. A count is DERIVED by
+ * counting stations, and `Array.prototype.filter().length` is `number`, which
+ * does not narrow — so the deriver narrows it explicitly and THROWS on a
+ * value outside this domain. That throw is not a defensive branch: it is
+ * unreachable by contract, and reaching it means the station list and the
+ * caption disagree, which is a loud defect of the same class as an attached
+ * lens the roster cannot recover.
  */
 export type EmptyCount = 1 | 2 | 3 | 4 | 5;
 
 /**
  * The unreached count's domain: a suffix of exactly two or three phases
  * waits. A `tokens` failure bars three, an `ast` or `entwined` failure bars
- * two, and `environment` bars nothing at all — so the plural is total and a
- * singular branch would be dead code.
+ * two, and `environment` bars nothing at all — so the plural is total and
+ * there is no singular copy to author.
  *
  * @remarks
  * This narrows on a DERIVATION invariant rather than a structural one. It is
  * true of every embodiment the derivers produce, because `environment` and
- * `evaluation` both read `facts.entwined.ok`; a hand-assembled `Facts` that
- * breaks the derivers' carry chain would under-bar, and that invariant lives
- * in the derivers rather than in this type.
+ * `evaluation` are barred by the same upstream stage and so bar and unbar
+ * together; a hand-assembled set of facts that broke the derivers' carry
+ * chain would under-bar, and that invariant lives in the derivers rather than
+ * in this type. The deriver's narrowing throw is what keeps the gap honest.
  */
 export type UnreachedCount = 2 | 3;
 
@@ -345,6 +373,16 @@ export type UnreachedCount = 2 | 3;
  * concatenates the cause into one row, which is the defect this distinction
  * exists to make unrepresentable: the cause arm exposes no string field at
  * all, and a count cannot hold prose.
+ *
+ * BOTH COUNTS ARE REDUNDANT AGAINST THE STATIONS, and carrying them is a
+ * CHOICE rather than something the ruling forces. R-AH fixes the cause arm as
+ * two-part; it does not rule that the second part is a stored number, and a
+ * caption carrying only its cause would satisfy it equally. They are carried
+ * so that counting lives in a pure deriver rather than in the component —
+ * this region's standing "thin components" constraint — and so that the
+ * precedence and the counts are testable without a DOM. The trade against the
+ * no-field-for-what-is-derivable rule is deliberate and is recorded here
+ * because the rule is otherwise general.
  *
  * The two counts are different numbers over different predicates and are
  * never both on screen — `empty` counts what is accessible and unserved,

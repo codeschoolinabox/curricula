@@ -444,6 +444,7 @@ const WritemeComponent: ComponentType<LensProperties> =
 
 const writemeLens = freezeInPlace({
 	name: 'writeme',
+	label: 'write it from memory',
 	main: WritemeComponent,
 	applicability: writemeCore.applicability,
 	config: writemeCore.config,

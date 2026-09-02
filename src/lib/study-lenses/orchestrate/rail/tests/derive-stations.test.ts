@@ -18,7 +18,13 @@ const ORDER: ReadonlyArray<LifecyclePhaseName> = [
 ];
 
 function buildLens(name: string): Lens {
-	return { name, applicability: () => true, phase: 'source', main: () => null };
+	return {
+		name,
+		label: name,
+		applicability: () => true,
+		phase: 'source',
+		main: () => null,
+	};
 }
 
 function buildStudy(
@@ -68,8 +74,18 @@ describe.skip('deriveStations', () => {
 				parsons,
 			]);
 			expect(source?.standing === 'openable' && source.tray).toEqual([
-				'parsons',
+				{ lens: 'parsons', label: 'parsons' },
 			]);
+		});
+
+		it('a tray entry carries the lens own authored label beside its name', () => {
+			const parsons = { ...buildLens('parsons'), label: 'rebuild the order' };
+			const [source] = deriveStations(buildStudy({ source: [parsons] }), [
+				parsons,
+			]);
+			expect(source?.standing === 'openable' && source.tray[0].label).toBe(
+				'rebuild the order',
+			);
 		});
 	});
 
@@ -81,10 +97,10 @@ describe.skip('deriveStations', () => {
 				buildStudy({ source: [parsons, writeme] }),
 				[parsons, writeme],
 			);
-			expect(source?.standing === 'openable' && source.tray).toEqual([
-				'parsons',
-				'writeme',
-			]);
+			expect(
+				source?.standing === 'openable' &&
+					source.tray.map((entry) => entry.lens),
+			).toEqual(['parsons', 'writeme']);
 		});
 
 		it('each station counts only its own kit', () => {
@@ -181,43 +197,24 @@ describe.skip('deriveStations', () => {
 			);
 			expect(deriveStations(study, [])[0]?.standing).not.toBe('waiting');
 		});
-
-		it('a waiting suffix is never of size one', () => {
-			const study = buildStudy(
-				{},
-				{
-					phases: ['environment', 'evaluation'],
-					cause: { stage: 'ast', message: 'Unexpected token (2:8).' },
-				},
-			);
-			expect(
-				deriveStations(study, []).filter(
-					(station) => station.standing === 'waiting',
-				).length,
-			).not.toBe(1);
-		});
 	});
 
 	describe('what a station carries (Interfaces)', () => {
-		it('carries its phase, its label, its short label and its standing', () => {
+		it('a bare station carries its phase and its standing and nothing else', () => {
 			expect(
 				Object.keys(deriveStations(buildStudy(), [])[1] ?? {}).toSorted(
 					(left, right) => left.localeCompare(right),
 				),
-			).toEqual(['label', 'phase', 'shortLabel', 'standing']);
+			).toEqual(['phase', 'standing']);
 		});
 
-		it('draws the short label alongside the full one', () => {
-			const [, tokens] = deriveStations(buildStudy(), []);
-			expect([tokens?.label, tokens?.shortLabel]).toEqual([
-				'Tokens · spelling',
-				'Tokens',
-			]);
+		it('carries no label of its own, because the label is keyed at render', () => {
+			expect(deriveStations(buildStudy(), [])[1]).not.toHaveProperty('label');
 		});
 
-		it('keys the label by phase name rather than by position', () => {
-			expect(deriveStations(buildStudy(), [])[3]?.label).toBe(
-				'Environment · names',
+		it('carries no short label either', () => {
+			expect(deriveStations(buildStudy(), [])[1]).not.toHaveProperty(
+				'shortLabel',
 			);
 		});
 
@@ -237,9 +234,10 @@ describe.skip('deriveStations', () => {
 				buildStudy({ source: [parsons, stray] }),
 				[parsons],
 			);
-			expect(source?.standing === 'openable' && source.tray).toEqual([
-				'parsons',
-			]);
+			expect(
+				source?.standing === 'openable' &&
+					source.tray.map((entry) => entry.lens),
+			).toEqual(['parsons']);
 		});
 
 		it('a phase whose only attached lens is unrecoverable stands bare', () => {

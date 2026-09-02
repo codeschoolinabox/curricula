@@ -20,6 +20,7 @@ describe('joinLensRoster', () => {
 		it('one injected lens → appended after the built-in roster', () => {
 			const highlight = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 			};
@@ -29,11 +30,13 @@ describe('joinLensRoster', () => {
 		it('preserves the given injection order', () => {
 			const highlight = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 			};
 			const outline = {
 				name: 'outline',
+				label: 'outline',
 				applicability: () => true,
 				main: () => null,
 			};
@@ -48,6 +51,7 @@ describe('joinLensRoster', () => {
 		it('a populated joined roster is frozen', () => {
 			const highlight = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 			};
@@ -57,6 +61,7 @@ describe('joinLensRoster', () => {
 		it('an injected lens ref stays unfrozen', () => {
 			const highlight = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 			};
@@ -75,6 +80,7 @@ describe('joinLensRoster', () => {
 		it('sorts before injections in the joined roster', () => {
 			const highlight = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 			};
@@ -91,11 +97,13 @@ describe('joinLensRoster', () => {
 		it('a duplicate lens name → throws', () => {
 			const highlight = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 			};
 			const shadowing = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => false,
 				main: () => null,
 			};
@@ -105,11 +113,13 @@ describe('joinLensRoster', () => {
 		it('the collision error names the offending lens', () => {
 			const highlight = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 			};
 			const shadowing = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => false,
 				main: () => null,
 			};
@@ -119,6 +129,7 @@ describe('joinLensRoster', () => {
 		it('the same lens ref injected twice → throws', () => {
 			const highlight = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 			};
@@ -128,6 +139,7 @@ describe('joinLensRoster', () => {
 		it('an injection colliding with a built-in name → throws naming the offender', () => {
 			const shadowingParsons = {
 				name: 'parsons',
+				label: 'parsons',
 				applicability: () => false,
 				main: () => null,
 			};

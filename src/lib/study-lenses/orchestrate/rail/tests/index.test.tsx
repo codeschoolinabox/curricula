@@ -13,41 +13,22 @@ function fiveStations(): ReadonlyArray<Station> {
 	return [
 		{
 			phase: 'source',
-			label: 'Source',
-			shortLabel: 'Source',
 			standing: 'openable',
-			tray: ['parsons', 'writeme'],
+			tray: [
+				{ lens: 'parsons', label: 'rebuild the order' },
+				{ lens: 'writeme', label: 'write it from memory' },
+			],
 		},
-		{
-			phase: 'tokens',
-			label: 'Tokens · spelling',
-			shortLabel: 'Tokens',
-			standing: 'bare',
-		},
-		{
-			phase: 'ast',
-			label: 'AST · grammar',
-			shortLabel: 'AST',
-			standing: 'bare',
-		},
-		{
-			phase: 'environment',
-			label: 'Environment · names',
-			shortLabel: 'Environment',
-			standing: 'bare',
-		},
-		{
-			phase: 'evaluation',
-			label: 'Evaluation · run',
-			shortLabel: 'Evaluation',
-			standing: 'bare',
-		},
+		{ phase: 'tokens', standing: 'bare' },
+		{ phase: 'ast', standing: 'bare' },
+		{ phase: 'environment', standing: 'bare' },
+		{ phase: 'evaluation', standing: 'bare' },
 	];
 }
 
 function barredStations(): ReadonlyArray<Station> {
 	return fiveStations().map((station, index) =>
-		index >= 3 ? { ...station, standing: 'waiting' } : station,
+		index >= 3 ? { phase: station.phase, standing: 'waiting' } : station,
 	);
 }
 
@@ -122,7 +103,7 @@ describe.skip('Rail', () => {
 	});
 
 	describe('the vocabulary it draws (Many)', () => {
-		it('draws the short label on the line', () => {
+		it('draws the phase short label, keyed rather than carried', () => {
 			const { container } = render(
 				<Rail
 					stations={fiveStations()}

@@ -9,6 +9,7 @@ describe('resolveLensConfig', () => {
 		it('empty cascade + a config factory → the factory defaults', () => {
 			const highlight: Lens = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 				config: (overrides = {}) => ({ theme: 'plain', ...overrides }),
@@ -25,6 +26,7 @@ describe('resolveLensConfig', () => {
 		it('empty cascade + no factory → an empty configuration', () => {
 			const highlight: Lens = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 			};
@@ -42,6 +44,7 @@ describe('resolveLensConfig', () => {
 		it('a host override reaches the factory over its default', () => {
 			const highlight: Lens = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 				config: (overrides = {}) => ({ theme: 'plain', ...overrides }),
@@ -60,6 +63,7 @@ describe('resolveLensConfig', () => {
 		it('opened wins over host', () => {
 			const highlight: Lens = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 			};
@@ -75,6 +79,7 @@ describe('resolveLensConfig', () => {
 		it('learner wins over opened', () => {
 			const highlight: Lens = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 			};
@@ -90,6 +95,7 @@ describe('resolveLensConfig', () => {
 		it('learner wins over host when opened is silent', () => {
 			const highlight: Lens = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 			};
@@ -105,6 +111,7 @@ describe('resolveLensConfig', () => {
 		it('all three set → learner wins', () => {
 			const highlight: Lens = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 			};
@@ -122,6 +129,7 @@ describe('resolveLensConfig', () => {
 		it("another lens's overrides never leak", () => {
 			const highlight: Lens = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 			};
@@ -142,6 +150,7 @@ describe('resolveLensConfig', () => {
 		it('different keys from different layers both survive', () => {
 			const highlight: Lens = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 			};
@@ -157,6 +166,7 @@ describe('resolveLensConfig', () => {
 		it('the factory receives the merged bag, learner final', () => {
 			const highlight: Lens = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 				config: (overrides = {}) => ({
@@ -179,6 +189,7 @@ describe('resolveLensConfig', () => {
 		it('an undefined-valued override key is absent', () => {
 			const highlight: Lens = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 			};
@@ -197,6 +208,7 @@ describe('resolveLensConfig', () => {
 		it('a null-valued override key is a value', () => {
 			const highlight: Lens = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 			};
@@ -214,6 +226,7 @@ describe('resolveLensConfig', () => {
 		it('the resolved configuration is frozen, factory path', () => {
 			const highlight: Lens = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 				config: (overrides = {}) => ({ theme: 'plain', ...overrides }),
@@ -232,6 +245,7 @@ describe('resolveLensConfig', () => {
 		it('the resolved configuration is frozen, no-factory path', () => {
 			const highlight: Lens = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 			};
@@ -249,6 +263,7 @@ describe('resolveLensConfig', () => {
 		it("a caller's layer record stays unfrozen", () => {
 			const highlight: Lens = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 			};

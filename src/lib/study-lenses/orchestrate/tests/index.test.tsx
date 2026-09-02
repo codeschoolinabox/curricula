@@ -175,6 +175,7 @@ function buildLevel(
 function buildLens(name: string, extras: Partial<Lens> = {}): Lens {
 	return {
 		name,
+		label: name,
 		applicability: () => true,
 		phase: 'source',
 		main: () => null,
@@ -188,6 +189,7 @@ function buildPanelExcludedLens(
 ): Lens {
 	return {
 		name,
+		label: name,
 		applicability: () => true,
 		main: () => null,
 		...extras,

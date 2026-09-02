@@ -22,15 +22,18 @@ comes from.
 
 ## Execution phases
 
-1. **Compose** — two cadences. At mount, sync and loud: the default lens roster
-   joins the host's injected lenses, the built-in levels join the injected ones
-   — append-only, collisions fail loudly. Continuously: the configuration
-   cascade re-resolves per lens name over the layers this region sees — the
-   configs prop, then a recommendation's opening overrides when the open lens
-   arrived that way, then the learner's tweaks, always final. Input: the host
-   props + session choices. Output: the composed study configuration.
+1. **Join** (at mount, sync, throws) — the default lens roster joins the host's
+   injected lenses and the built-in levels join the injected ones, append-only;
+   a name or key collision fails loudly, at the author's desk. Runs once. Input:
+   the host props. Output: the joined rosters.
 
-2. **Derive** (sync, pure, per settle) — the settled snippet is embodied with
+2. **Resolve** (continuous, sync, pure) — the configuration cascade re-resolves
+   per lens name over the layers this region sees: the configs prop, then a
+   recommendation's opening overrides when the open lens arrived that way, then
+   the learner's tweaks, always final. Input: the joined rosters + session
+   choices. Output: the composed study configuration.
+
+3. **Derive** (sync, pure, per settle) — the settled snippet is embodied with
    the joined roster; the parse facts a level consumes are assembled once from
    the embodiment's stage values; one memoized validate runs per registered
    level; the fit marks derive from those verdicts, the levels' admitted snippet
@@ -41,7 +44,7 @@ comes from.
    derivation — the frozen embodiment, the level verdicts, the assessments, and
    the ranked recommendations.
 
-3. **Render** (mechanical) — the five-phase panel renders the embodiment; the
+4. **Render** (sync; derives the mask) — the rail renders the embodiment; the
    level UI renders the verdicts and marks; the mask derives here, from the
    selected level's assessment — its mark with its cause — crossed with the
    strict posture, classifying surfaces into the three classes; an initial-focus
@@ -49,7 +52,7 @@ comes from.
    recommendations render here, through the mask. Input: the study derivation +
    composed study configuration. Output: the rendered study environment.
 
-4. **Interact** (async at the edges) — each control re-enters its own phase.
+5. **Interact** (async at the edges) — each control re-enters its own phase.
    Input: the rendered environment + learner intent. Output: a new settle or a
    re-render.
    - **Editing** — source edits re-enter Derive at the next settle. Editor mode
@@ -80,8 +83,9 @@ flowchart TD
     VER["level verdicts<br/>(one memoized validate per settle + level)"]
     MARKS["assessments by level<br/>(mark + cause, per settle)"]
     RECS["ranked recommendations<br/>(fitting lenses' recommendations, per settle)"]
-    STA["the rail's stations and caption<br/>(one station per phase · the barring edge ·<br/>the caption's one occupant)"]
-    SUR["rendered study environment<br/>(surface pane: editor XOR one excursion — open lens or generator ·<br/>panel · level UI · mask)"]
+    STATIONS["the rail's stations<br/>(one per phase, in order · standing · tray where it has one)"]
+    CAPTION["the caption<br/>(one occupant: the cause block, the count line, or nothing)"]
+    SUR["rendered study environment<br/>(surface pane: editor XOR one excursion — open lens or generator ·<br/>rail · level UI · mask)"]
     CANDIDATE["candidate program<br/>(the accept-eligible arm of one generative ask)"]
     PROPS -->|"join rosters at mount, loud collisions"| CFG
     PROPS -->|"initial snippet + type, seeds the editor"| SNP
@@ -92,9 +96,12 @@ flowchart TD
     CFG -->|"supplies the registered levels, names the selected one"| VER
     VER -->|"classify: × admitted types × current type"| MARKS
     SNP -->|"the current type"| MARKS
-    EMB -->|"each phase's accessibility, and a barred phase's cause WITH ITS STAGE"| STA
-    CFG -->|"supplies the joined roster — the kit each station discloses"| STA
-    STA -->|"render, mechanical"| SUR
+    EMB -->|"each phase's accessibility"| STATIONS
+    CFG -->|"supplies the joined roster — the kit each station discloses"| STATIONS
+    STATIONS -->|"how many stand bare, how many stand waiting — and which arm"| CAPTION
+    EMB -->|"a barred phase's cause, carrying the stage that keys its framing"| CAPTION
+    STATIONS -->|"render, mechanical"| SUR
+    CAPTION -->|"render, mechanical"| SUR
     VER -->|"annotate the editor's gutter, selected level only"| SUR
     MARKS -->|"selector marks · mask = selected assessment × strict posture"| SUR
     EMB -->|"the fitting lenses' recommendations, collected + ranked"| RECS
@@ -145,6 +152,14 @@ flowchart TD
   panel-excluded: its applicability holds over the current facts. A divergence
   would mean a blank-pane deadlock or a one-frame totality violation; one
   judgment makes both impossible.
+- **The announcer's three utterances are exhaustive, and a settle is never one
+  of them.** It speaks the pane's occupant changing, a transition into or out of
+  the blocked state, and the barring edge moving. Only the first has an event of
+  its own; the other two are EDGE-TRIGGERED against a remembered previous value,
+  because the blocked state derives at render and the edge moves inside a settle
+  the announcer may not speak. A region that narrated every settle would be
+  noise a learner routes around, so the exhaustiveness is a constraint rather
+  than a list — a fourth utterance is a contract change, not an addition.
 - **Display copy lives here.** Every learner-facing string this region keys or
   derives is its presentation concern — the phase labels and short labels, the
   fit marks, the nameplate's two forms, the tray and proposals headings, the
@@ -158,10 +173,11 @@ flowchart TD
   defect rather than a cosmetic one. Its counts are read off the stations that
   render, so the rail and its caption cannot disagree.
 - **A waiting suffix is of size two or three, never one.** `environment` and
-  `evaluation` both read `facts.entwined.ok`, so they bar and unbar together; a
-  `tokens` failure bars three, and `environment` bars nothing at all. The plural
-  is total and a defensive singular branch on the unreached count is unreachable
-  code. This holds of the derivers' carry chain rather than of any one map.
+  `evaluation` are barred by the same upstream stage, so they bar and unbar
+  together; a `tokens` failure bars three, and `environment` bars nothing at
+  all. The plural is total and a defensive singular branch on the unreached
+  count is unreachable code. This holds of the derivers' carry chain rather than
+  of any one map.
 - **The structure a screen reader traverses comes from named regions and
   groups**, not from a heading outline. The instrument's only headings are the
   guide's `h4` topic titles, so the outline is spent and named regions are the
@@ -178,17 +194,19 @@ README's tree names the files these shapes live in.)
 The top component is the single owner of everything session-scoped; every other
 holder is ephemeral or derived.
 
-| State                                                                                                                                                                                                                       | Holder                                                                                                                                              |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Session choices (level key, posture, type, config tweaks — the open-lens choice lives in the pane occupant)                                                                                                                 | the top component                                                                                                                                   |
-| The pane occupant (`PaneOccupant`: the editor arm with its remount seed, the lens arm with the open lens's name, its open-time settled pair and the opened overrides, or the generator arm with its open-time settled pair) | the top component — one discriminated slot; the union makes "a lens without its snapshot" and "overrides outliving the open choice" unrepresentable |
-| The live source (the buffer as last edited — survives editor unmounts)                                                                                                                                                      | the settle hook's ref, owned by the top component's hook instance; the hook exposes a live-source read and an immediate flush                       |
-| The settled snippet (`SettledSnippet`)                                                                                                                                                                                      | the top component, written only by the settle loop                                                                                                  |
-| The study derivation (`StudyDerivation`)                                                                                                                                                                                    | the top component, recomputed per settle                                                                                                            |
-| The validate memo                                                                                                                                                                                                           | inside the per-instance memoized validate the top component holds                                                                                   |
-| Joined rosters, the bus instance, the generator socket                                                                                                                                                                      | the top component, created once at mount — the socket's mount-stability is what the generator's abort-and-retire mechanics key on                   |
-| Open/closed flags (level list, guide reveal)                                                                                                                                                                                | each surface, ephemeral                                                                                                                             |
-| The generation job (idle → loading → generating → preview \| refused)                                                                                                                                                       | the generator view, ephemeral per mount — never a session choice; dispose-as-unmount is the cancellation                                            |
+| State                                                                                                                                                                                                                       | Holder                                                                                                                                                   |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Session choices (level key, posture, type, config tweaks — the open-lens choice lives in the pane occupant)                                                                                                                 | the top component                                                                                                                                        |
+| The pane occupant (`PaneOccupant`: the editor arm with its remount seed, the lens arm with the open lens's name, its open-time settled pair and the opened overrides, or the generator arm with its open-time settled pair) | the top component — one discriminated slot; the union makes "a lens without its snapshot" and "overrides outliving the open choice" unrepresentable      |
+| The live source (the buffer as last edited — survives editor unmounts)                                                                                                                                                      | the settle hook's ref, owned by the top component's hook instance; the hook exposes a live-source read and an immediate flush                            |
+| The settled snippet (`SettledSnippet`)                                                                                                                                                                                      | the top component, written only by the settle loop                                                                                                       |
+| The study derivation (`StudyDerivation`)                                                                                                                                                                                    | the top component, recomputed per settle                                                                                                                 |
+| The validate memo                                                                                                                                                                                                           | inside the per-instance memoized validate the top component holds                                                                                        |
+| Joined rosters, the bus instance, the generator socket                                                                                                                                                                      | the top component, created once at mount — the socket's mount-stability is what the generator's abort-and-retire mechanics key on                        |
+| Open/closed flags (level list, guide reveal)                                                                                                                                                                                | each surface, ephemeral                                                                                                                                  |
+| The announcer's previous blocked-state value (edge-triggered: it speaks the transition into and out of blocked, and the blocked state derives at render rather than arriving as an event)                                   | the top component — a ref, never a settle-keyed value; comparing it against the current render's mask state is what makes a TRANSITION detectable at all |
+| The announcer's previous barring-edge position (edge-triggered: the edge moves inside a settle, which the announcer may not speak)                                                                                          | the top component — a ref, compared per settle; the settle itself is never announced, so only its effect on the edge is                                  |
+| The generation job (idle → loading → generating → preview \| refused)                                                                                                                                                       | the generator view, ephemeral per mount — never a session choice; dispose-as-unmount is the cancellation                                                 |
 
 ### The settle loop
 
@@ -266,15 +284,22 @@ verdicts without consulting a level twice.
   positional list. Each phase carries TWO authored strings — the full label and
   the short label the rail draws — so the record's value is a pair, never a
   string plus a truncation rule.
-- A **station** is what renders one phase on the rail, and carries four things:
-  the phase (the key everything zips against, never drawn), the label and short
-  label, the standing (`openable` · `bare` · `waiting`), and its tray where it
-  has one. **The openable and bare cases are two ARMS of one type** — not two
-  types, and not one record with an optional tray. The flat shape admits three
-  states this contract forbids: a bare station carrying a tray, an openable
-  station with nothing to open, and a barred station offering lenses. The kit
-  count is the tray's own size rather than a second field that could disagree
-  with it.
+- A **station** is what renders one phase on the rail, and carries the phase
+  (the key everything zips against, never drawn), the standing (`openable` ·
+  `bare` · `waiting`), and its tray where it has one. **The openable and bare
+  cases are two ARMS of one type** — not two types, and not one record with an
+  optional tray. The flat shape admits three states this contract forbids: a
+  bare station carrying a tray, an openable station with nothing to open, and a
+  barred station offering lenses. The kit count is the tray's own size rather
+  than a second field that could disagree with it.
+- **A station carries no labels, and the rule generalizes.** The phase's label
+  and short label are a total function of its phase name through the display
+  copy this region owns, which the rail imports for every other string it draws
+  — so carrying them would duplicate a lookup the surface already performs. What
+  DOES travel on the projection is a string whose author is outside this region:
+  a tray entry carries the lens's own label beside the lens's name, because a
+  lens names itself and this region does not key that. **Carried where the
+  author is elsewhere; keyed where the vocabulary is ours.**
 - **The occupant dot is NOT a fifth thing the station carries** (human ruling
   2026-08-19). The filled dot the rail draws on the station whose lens the pane
   holds is **derived at render from the pane occupant**, which is already in the
@@ -308,7 +333,10 @@ verdicts without consulting a level twice.
      that are both accessible and EMPTY of fitting lenses. Not a property of the
      roster: a phase whose only lens fails applicability on this program is
      empty too, and a **barred** phase is excluded entirely, because it carries
-     a cause instead.
+     a cause instead. That exclusion is ENTAILED by rule 4 rather than
+     independent of it — where anything is barred the count does not render at
+     all — and it is stated because the predicate is what a reader needs to
+     evaluate the count, not because a barred phase could ever be counted.
   2. **Singular at one.**
   3. **Absent at zero** — it does not render.
   4. **It yields the caption entirely wherever a barring edge is drawn**, where
@@ -328,22 +356,22 @@ verdicts without consulting a level twice.
   here, not your code_. **The key is not derivable from the geometry**, because
   an `ast` failure and an `entwined` failure bar exactly the same phases [read:
   `../embody/derive-accessibility.ts` — `environment` and `evaluation` both read
-  `facts.entwined.ok`]. Nor from the phase-order constant, which has no member
-  named `entwined` at all. **So the projection carries `cause.stage`**, and one
-  carrying only the message could not produce the right sentence. The cause
-  travels on the CAPTION rather than on a station: one cause is drawn once
-  beneath the rail, so no station carries one.
+  barred by the same upstream stage]. Nor from the phase-order constant, which
+  has no member named `entwined` at all. **So the projection carries the cause's
+  failing STAGE, not its message alone**, and one carrying only the message
+  could not produce the right sentence. The cause travels on the CAPTION rather
+  than on a station: one cause is drawn once beneath the rail, so no station
+  carries one.
 
   **This makes `display-labels.ts` key against TWO embody vocabularies**, not
   one: the lifecycle phase names it already uses for the labels, and the
   failable STAGE names the framings key against. Those sets are not the same —
   `entwined` is a stage and not a phase — and a file that keys against two
   vocabularies should say so where its home is settled. It keeps the
-  constant-file form — one `const`, one deep-frozen record, one bottom default
-  export — and what diverges from one-concept-per-file is that the record has
-  many MEMBERS, not that the file has many exports. Each keyed family is total
-  over its key type, so zipping against a vocabulary is a compile error rather
-  than a discipline.
+  constant-file form the conventions prescribe for a value file, and what
+  diverges from one-concept-per-file is that the record has many MEMBERS, not
+  that the file has many exports. Each keyed family is total over its key type,
+  so zipping against a vocabulary is a compile error rather than a discipline.
 
   The strings themselves are `display-labels.ts`'s (§ What lives here); what is
   structural — and therefore belongs here rather than only in the glossary — is
@@ -355,7 +383,7 @@ verdicts without consulting a level twice.
   satisfiable by an implementation that concatenates the cause into one row,
   which is the defect this distinction exists to make unrepresentable.
 
-- The panel receives its ordered phase list built from that constant plus the
+- The rail receives its ordered phase list built from that constant plus the
   labels, and renders it as **the rail** ABOVE the surface pane and BENEATH the
   control row, which sits at the top of the band (the Edit code button —
   leading, while an excursion is open — OR the Generate code button, which takes
@@ -378,11 +406,12 @@ verdicts without consulting a level twice.
 - The Generate code button's geometry is deliberate and easily "simplified"
   away: it renders in the control row, OUTSIDE both maskable containers, and
   still carries class 3 — inert and dimmed at its OWN element while the mask is
-  up, like the strip's selects. A surface's class is a fact about what the
-  surface is, never about which container it happens to render in; the button
-  opens a class-3 study surface, so it takes that class with it. It renders in
-  editor mode only, and as a button rather than a select, so the rail's
-  every-tray-entry assertions keep their meaning.
+  up, as every class-3 affordance outside the maskable containers is. A
+  surface's class is a fact about what the surface is, never about which
+  container it happens to render in; the button opens a class-3 study surface,
+  so it takes that class with it. It renders in editor mode only, and as a
+  button rather than a select, so the rail's every-tray-entry assertions keep
+  their meaning.
 - The rail's trays track the committed open lens; the open lens's own tray entry
   is its close affordance — the close commits at the top component and announces
   `lens-opened: null` (the bus arm shipped reserved, now real). **A tray-entry
@@ -394,10 +423,10 @@ verdicts without consulting a level twice.
   code button is the GUARANTEED way home: the rail is class 3 and inert under a
   mask.
 - Coherence invariants at EVERY excursion-arm render, loud in dev AND prod: the
-  settled pair must field-equal the occupant's `openedAt` (source and type) —
-  the generator arm included, since its anchor does the same job as the lens
-  arm's. The roster check stays lens-only: it asks whether the open lens
-  resolves, and a generator names none. The embodiment-matches-snapshot
+  settled pair must field-equal the pair the occupant opened over, source and
+  type both — the generator arm included, since its anchor does the same job as
+  the lens arm's. The roster check stays lens-only: it asks whether the open
+  lens resolves, and a generator names none. The embodiment-matches-snapshot
   guarantee follows transitively — the derivation memo is keyed on settled
   identity, and the derive composition is pure in (settled, mount-frozen
   session).
@@ -417,7 +446,7 @@ verdicts without consulting a level twice.
   flush-at-open that settles out-of-level code the rail or the Generate code
   button offered against the pre-flush facts.
 - The honor resolution runs once at mount, mapping fallback → the editor arm and
-  honored → the lens arm (`openedAt` = the initial settled pair); the lazy
+  honored → the lens arm, which opens over the initial settled pair; the lazy
   initializer stays side-effect-free — no dispatch ever fires from it. The study
   derivation's ranked recommendations render through the mask, in both modes.
 
@@ -493,17 +522,22 @@ verdicts without consulting a level twice.
   announces no `lens-opened{null}` — dispose with nothing open is silent. The
   generator's own arm never reuses this event: `lens-opened`'s payload NAMES a
   lens, so a boolean `generator-opened` carries the generator's open and close
-  instead. Its orderings mirror the lens's — open then the absorbed settle;
-  `{open: false}` before the change event on a derivation-context commit;
-  `{open: false}` then `lens-opened{name}` when a lens opens over it; on accept,
-  `{open: false}` and then the accepted program's `settled`, or no settle at all
-  when the program field-equals the seed.
-- **Bus and effect contract rules.** Listeners must never call `flushSync` — the
-  one-commit batching argument for the pane flip depends on it. The effect
-  registration order — the settled announce BEFORE the orphan defense — is a
-  pinned invariant: the orphan bus sequence depends entirely on hook call order.
-  The settle hook's live-source read and immediate flush are fresh function
-  identities per render and must never key an effect or memo.
+  instead. Its orderings mirror the lens's — open then the absorbed settle; its
+  close announce before the change event on a derivation-context commit; the
+  close announce then `lens-opened{name}` when a lens opens over it; on accept,
+  the close announce and then the accepted program's `settled`, or no settle at
+  all when the program field-equals the seed.
+- **Bus and effect contract rules.** A listener must never force a synchronous
+  re-render — the one-commit batching argument for the pane flip depends on it.
+  The effect registration order — the settled announce BEFORE the orphan defense
+  — is a pinned invariant: the orphan bus sequence depends entirely on hook call
+  order. **The announcer's two edge-detecting effects register AFTER both**, and
+  that position is pinned for the same reason: they compare a remembered
+  previous value against the value this commit rendered, so a detector that ran
+  before the settle announce would compare against a value the region has not
+  yet committed to and speak a transition that did not happen. The settle hook's
+  live-source read and immediate flush are fresh function identities per render
+  and must never key an effect or memo.
 - **Why the composition root is here.** One place joins, so one place can be
   loud: collisions surface at mount, at the author's desk, never as silent
   shadowing discovered by a learner.
@@ -538,6 +572,14 @@ verdicts without consulting a level twice.
 - **The embedding site's composition** — whatever layers produce the configs
   value upstream are the host's build, invisible here.
 - **Learner identity, progress, grading** — the embedding LMS's.
+- **The house-token vocabulary and the tone cascade** — the region README's
+  glossary establishes both, and the cascade's ORDER is load-bearing rather than
+  tidy. No stylesheet exists yet and the eventual code surface is a planned
+  sibling's, so this sketch constrains neither; naming it here keeps its absence
+  a scope statement rather than an omission.
+- **Focus placement across a pane swap** — a recorded defect of the standing
+  scaffolding, whose remedy spans the editor, the pane and the top component.
+  Owed, and owned by whichever increment builds the swap's focus contract.
 - **The narrow-viewport geometry** — the honest small-screen form is a vertical
   list: the same parts in the same order, one station per phase, an optional
   tray per station, and the barring edge between two of them. Only the direction

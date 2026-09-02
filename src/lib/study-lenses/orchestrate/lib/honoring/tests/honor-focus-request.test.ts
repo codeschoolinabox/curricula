@@ -55,6 +55,7 @@ describe('honorFocusRequest', () => {
 		it('resolves to the fallback when no lens is requested, even over a populated roster', () => {
 			const lens: Lens = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 				phase: 'ast',
@@ -91,6 +92,7 @@ describe('honorFocusRequest', () => {
 			it('honors it in that phase, carrying the lens', () => {
 				const lens: Lens = {
 					name: 'highlight',
+					label: 'highlight',
 					applicability: () => true,
 					main: () => null,
 					phase: 'ast',
@@ -131,6 +133,7 @@ describe('honorFocusRequest', () => {
 				const applicability = vi.fn(() => false);
 				const lens: Lens = {
 					name: 'highlight',
+					label: 'highlight',
 					applicability,
 					main: () => null,
 					phase: 'ast',
@@ -169,6 +172,7 @@ describe('honorFocusRequest', () => {
 				const applicability = vi.fn(() => false);
 				const lens: Lens = {
 					name: 'highlight',
+					label: 'highlight',
 					applicability,
 					main: () => null,
 					phase: 'ast',
@@ -204,6 +208,7 @@ describe('honorFocusRequest', () => {
 			it('honors it panel-excluded, carrying the lens', () => {
 				const lens: Lens = {
 					name: 'inspect',
+					label: 'inspect',
 					applicability: () => true,
 					main: () => null,
 				};
@@ -239,6 +244,7 @@ describe('honorFocusRequest', () => {
 		it('mounts at the first accessible phase in its own declared order', () => {
 			const lens: Lens = {
 				name: 'trace',
+				label: 'trace',
 				applicability: () => true,
 				main: () => null,
 				phase: ['environment', 'ast'],
@@ -275,6 +281,7 @@ describe('honorFocusRequest', () => {
 		it('skips a barred declared phase for the next accessible one', () => {
 			const lens: Lens = {
 				name: 'trace',
+				label: 'trace',
 				applicability: () => true,
 				main: () => null,
 				phase: ['ast', 'environment'],
@@ -315,6 +322,7 @@ describe('honorFocusRequest', () => {
 		it('falls back when every declared phase is barred or unattached', () => {
 			const lens: Lens = {
 				name: 'trace',
+				label: 'trace',
 				applicability: () => true,
 				main: () => null,
 				phase: ['ast', 'environment'],
@@ -355,11 +363,13 @@ describe('honorFocusRequest', () => {
 		it('finds the requested lens among several in the roster', () => {
 			const other: Lens = {
 				name: 'other',
+				label: 'other',
 				applicability: () => true,
 				main: () => null,
 			};
 			const lens: Lens = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 				phase: 'ast',
@@ -399,6 +409,7 @@ describe('honorFocusRequest', () => {
 		it('falls back when the requested name is not in the roster', () => {
 			const lens: Lens = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 				phase: 'ast',
@@ -436,6 +447,7 @@ describe('honorFocusRequest', () => {
 		it('falls back when a phase-declaring lens is attached only to a barred phase', () => {
 			const lens: Lens = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 				phase: 'ast',
@@ -475,6 +487,7 @@ describe('honorFocusRequest', () => {
 		it('falls back when a phase-declaring lens declares an accessible phase it is not attached to', () => {
 			const lens: Lens = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 				phase: 'ast',
@@ -508,6 +521,7 @@ describe('honorFocusRequest', () => {
 		it('falls back when a panel-excluded lens refuses at mount', () => {
 			const lens: Lens = {
 				name: 'inspect',
+				label: 'inspect',
 				applicability: () => false,
 				main: () => null,
 			};
@@ -540,6 +554,7 @@ describe('honorFocusRequest', () => {
 		it('falls back when a host lens declares a phase name outside the contract', () => {
 			const lens: Lens = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 				phase: 'asts' as LifecyclePhaseName,
@@ -573,12 +588,14 @@ describe('honorFocusRequest', () => {
 		it('falls back when the attached ref only shares the name, not the reference', () => {
 			const impostor: Lens = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 				phase: 'ast',
 			};
 			const lens: Lens = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 				phase: 'ast',
@@ -612,6 +629,7 @@ describe('honorFocusRequest', () => {
 		it('falls back when a lens declares an empty phase list', () => {
 			const lens: Lens = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 				phase: [],
@@ -648,6 +666,7 @@ describe('honorFocusRequest', () => {
 			const applicability = vi.fn(() => true);
 			const lens: Lens = {
 				name: 'inspect',
+				label: 'inspect',
 				applicability,
 				main: () => null,
 			};
@@ -680,6 +699,7 @@ describe('honorFocusRequest', () => {
 		it('reports nothing on a clean mount', () => {
 			const lens: Lens = {
 				name: 'inspect',
+				label: 'inspect',
 				applicability: () => true,
 				main: () => null,
 			};
@@ -715,6 +735,7 @@ describe('honorFocusRequest', () => {
 		it('resolves to the fallback', () => {
 			const lens: Lens = {
 				name: 'inspect',
+				label: 'inspect',
 				applicability: () => {
 					throw new Error('boom');
 				},
@@ -751,6 +772,7 @@ describe('honorFocusRequest', () => {
 		it('does not rethrow', () => {
 			const lens: Lens = {
 				name: 'inspect',
+				label: 'inspect',
 				applicability: () => {
 					throw new Error('boom');
 				},
@@ -787,6 +809,7 @@ describe('honorFocusRequest', () => {
 		it('reports the throw loudly', () => {
 			const lens: Lens = {
 				name: 'inspect',
+				label: 'inspect',
 				applicability: () => {
 					throw new Error('boom');
 				},
@@ -824,6 +847,7 @@ describe('honorFocusRequest', () => {
 		it('freezes the returned decision', () => {
 			const lens: Lens = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 				phase: 'ast',
@@ -861,6 +885,7 @@ describe('honorFocusRequest', () => {
 		it('leaves the carried lens ref unfrozen', () => {
 			const lens: Lens = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 				phase: 'ast',

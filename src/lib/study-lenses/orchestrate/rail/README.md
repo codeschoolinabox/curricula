@@ -14,15 +14,32 @@ contract.
 ## The order arrives, it is never minted
 
 The rail receives its stations as a prop and draws them in the given order. It
-never sorts, never inserts, and never knows the canonical five — the lifecycle
-order has exactly one truth, and it is not here.
+never sorts and never inserts — the lifecycle order has exactly one truth, and
+it is not here.
+
+**It does know the five phase NAMES, and that is a deliberate reversal of what
+the strip did.** `phases-panel/` was import-free on purpose, taking phase names
+as plain strings so it "cannot know the canonical five or mint a phase order".
+The rail takes the typed phase name instead, because it keys copy against that
+vocabulary — the labels, the empty-station reasons, the tray headings — and a
+plain string would push those lookups back to a caller with no better claim on
+them. What the strip's rule protected survives untouched: knowing the names is
+not knowing the ORDER, and the rail still mints none.
 
 ## What a station shows
 
-One station per phase, and it carries four things: the phase (the key, never
-drawn), the label and the short label, the standing, and its tray where it has
-one. The rail draws the **short label** where width demands it and the tray
-draws the **full** one; it never switches vocabulary.
+One station per phase. It carries the phase (the key, never drawn), the
+standing, and its tray where it has one — and **it does not carry its own
+labels**. The rail draws the **short label** where width demands it and the tray
+draws the **full** one, both keyed by phase name from
+[`../display-labels.ts`](../display-labels.ts), which the rail imports for every
+other string it draws anyway. It never switches vocabulary.
+
+**Carried or keyed, and the rule is where the string's author is.** A string
+this region keys against a vocabulary it owns is looked up at render. A string
+authored OUTSIDE the region travels on the projection — which is why a tray
+entry carries the lens's own label beside the lens's name: a lens names itself,
+and this region does not get to key that.
 
 - **openable** — reachable, and something fits it. Drawn as its disclosure
   control with the **kit count**, and it has a tray. The count is the size of
@@ -77,10 +94,13 @@ resolves it.
 
 Every station and affordance is anchored by attribute and value; drawn copy is
 never a test anchor. `data-rail` on the line; `data-station="<phase>"` per
-station; `data-station-standing="<standing>"`; `data-station-tray` on an open
-tray; `data-station-occupant` on the marked station; `data-barring-edge`;
-`data-caption`, with `data-caption-cause` or `data-caption-count` on whichever
-arm it holds.
+station; `data-station-standing="<standing>"`; `data-station-tray-control` on an
+openable station's disclosure control; `data-station-tray` on an open tray;
+`data-tray-entry="<lens>"` per tray entry — scope entry queries by station, a
+lens attached to several phases appears in each; `data-station-reason` on a bare
+station's visually-hidden reason; `data-station-occupant` on the marked station;
+`data-barring-edge`; `data-caption`, with `data-caption-cause` or
+`data-caption-count` on whichever arm it holds.
 
 **No heading elements.** Every station name and tray label is inline text, and
 the structure a screen reader traverses comes from named regions and groups
@@ -89,8 +109,16 @@ guide, so a host may mount the instrument under any shallow context.
 
 ## What the rail does not own
 
-Fit and accessibility (embody derives both, upstream); the phase order (embody's
-runtime constant); the strings it draws (`../display-labels.ts` keys every one);
+**The region's voice.** The rail carries no live region and no `aria-live`. Two
+of the three things that must be spoken are not on the rail at all, and the rail
+goes inert under strict — which would silence it at the exact posture whose
+transition most needs announcing. The announcer holds the voice, rendered by the
+top component outside both maskable containers; a live region on the caption
+would be a second voice for one sentence.
+
+Also not the rail's: fit and accessibility (embody derives both, upstream); the
+phase order (embody's runtime constant); the phase-keyed strings it draws
+(`../display-labels.ts` keys every one, and a lens's own label is the lens's);
 mounting a lens, closing it, and masking it (the top component commits; the rail
 only asks); any knowledge of levels, verdicts, or postures — **the rail is class
 3 and takes none of the four routes into class 2**, which is why it dims whole

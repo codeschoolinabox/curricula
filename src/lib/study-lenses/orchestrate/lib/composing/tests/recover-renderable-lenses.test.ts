@@ -13,6 +13,7 @@ describe('recoverRenderableLenses', () => {
 		it('empty attached refs → no renderable lenses', () => {
 			const highlight = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 			};
@@ -24,6 +25,7 @@ describe('recoverRenderableLenses', () => {
 		it('one attached roster ref → exactly that lens', () => {
 			const highlight = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 			};
@@ -35,16 +37,19 @@ describe('recoverRenderableLenses', () => {
 		it('recovered lenses follow the roster order, not the attached order', () => {
 			const highlight = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 			};
 			const outline = {
 				name: 'outline',
+				label: 'outline',
 				applicability: () => true,
 				main: () => null,
 			};
 			const trace = {
 				name: 'trace',
+				label: 'trace',
 				applicability: () => true,
 				main: () => null,
 			};
@@ -59,6 +64,7 @@ describe('recoverRenderableLenses', () => {
 		it('the same ref attached twice is recovered once', () => {
 			const highlight = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 			};
@@ -73,11 +79,13 @@ describe('recoverRenderableLenses', () => {
 			vi.spyOn(console, 'error').mockImplementation(() => {});
 			const highlight = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 			};
 			const impostor = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 			};
@@ -89,6 +97,7 @@ describe('recoverRenderableLenses', () => {
 		it('the recovered array is frozen', () => {
 			const highlight = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 			};
@@ -100,6 +109,7 @@ describe('recoverRenderableLenses', () => {
 		it('a recovered lens ref stays unfrozen', () => {
 			const highlight = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 			};
@@ -113,11 +123,13 @@ describe('recoverRenderableLenses', () => {
 			vi.spyOn(console, 'error').mockImplementation(() => {});
 			const highlight = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 			};
 			const mystery = {
 				name: 'mystery',
+				label: 'mystery',
 				applicability: () => true,
 				main: () => null,
 			};
@@ -130,11 +142,13 @@ describe('recoverRenderableLenses', () => {
 			const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 			const highlight = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 			};
 			const mystery = {
 				name: 'mystery',
+				label: 'mystery',
 				applicability: () => true,
 				main: () => null,
 			};
@@ -146,11 +160,13 @@ describe('recoverRenderableLenses', () => {
 			const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 			const mystery = {
 				name: 'mystery',
+				label: 'mystery',
 				applicability: () => true,
 				main: () => null,
 			};
 			const phantom = {
 				name: 'phantom',
+				label: 'phantom',
 				applicability: () => true,
 				main: () => null,
 			};
@@ -162,6 +178,7 @@ describe('recoverRenderableLenses', () => {
 			vi.spyOn(console, 'error').mockImplementation(() => {});
 			const mystery = {
 				name: 'mystery',
+				label: 'mystery',
 				applicability: () => true,
 				main: () => null,
 			};
@@ -172,6 +189,7 @@ describe('recoverRenderableLenses', () => {
 			const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 			const mystery = {
 				name: 'mystery',
+				label: 'mystery',
 				applicability: () => true,
 				main: () => null,
 			};
@@ -183,6 +201,7 @@ describe('recoverRenderableLenses', () => {
 			const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 			const mystery = {
 				name: 'mystery',
+				label: 'mystery',
 				applicability: () => true,
 				main: () => null,
 			};
@@ -194,6 +213,7 @@ describe('recoverRenderableLenses', () => {
 			const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 			const highlight = {
 				name: 'highlight',
+				label: 'highlight',
 				applicability: () => true,
 				main: () => null,
 			};

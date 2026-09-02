@@ -7,11 +7,14 @@
  * @remarks
  * Selector contract (data attributes; drawn copy is never an anchor):
  * `data-rail` on the line; `data-station="<phase>"` per station;
- * `data-station-standing="<standing>"` on each; `data-station-tray` on an
- * open tray; `data-station-occupant` on the station whose lens the pane
- * holds; `data-barring-edge` between the last reachable station and the first
- * waiting one; `data-caption` on the caption, with `data-caption-cause` or
- * `data-caption-count` on whichever arm it holds. No heading elements — every
+ * `data-station-standing="<standing>"` on each; `data-station-tray-control`
+ * on an openable station's disclosure control; `data-station-tray` on an open
+ * tray; `data-tray-entry="<lens>"` per tray entry; `data-station-reason` on a
+ * bare station's visually-hidden reason; `data-station-occupant` on the
+ * station whose lens the pane holds; `data-barring-edge` between the last
+ * reachable station and the first waiting one; `data-caption` on the caption,
+ * with `data-caption-cause` or `data-caption-count` on whichever arm it
+ * holds. No heading elements — every
  * station name and tray label is inline text, and the structure a screen
  * reader traverses comes from named regions and groups.
  *

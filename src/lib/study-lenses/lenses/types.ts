@@ -98,6 +98,14 @@ export type Recommendation = {
  * is never offered, so `main` carries no refusal arm.
  */
 export type Lens = Gateable & {
+	/**
+	 * What a learner reads where this lens is offered — the rail's tray
+	 * entries and the nameplate's occupant form. REQUIRED, because `name` is
+	 * machine vocabulary and no surface may draw it: a learner reads
+	 * _rebuild the order_, never `parsons`. Authored by the lens, because a
+	 * lens's own name for itself is not a consuming region's to key.
+	 */
+	readonly label: string;
 	/** The React component — a thin wrapper over the lens's pure core. */
 	readonly main: ComponentType<LensProperties>;
 	/**

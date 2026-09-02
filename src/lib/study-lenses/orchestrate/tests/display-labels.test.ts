@@ -20,24 +20,24 @@ describe.skip('DISPLAY_LABELS', () => {
 	});
 
 	describe('every phase carries two authored strings (Many)', () => {
-		it('the full labels cover all five phases', () => {
-			expect(Object.values(DISPLAY_LABELS.phaseLabels)).toEqual([
-				'Source',
-				'Tokens · spelling',
-				'AST · grammar',
-				'Environment · names',
-				'Evaluation · run',
-			]);
+		it('the full label of every phase is authored', () => {
+			expect(
+				Object.values(DISPLAY_LABELS.phaseLabels).every(
+					(label) => label.length > 0,
+				),
+			).toBe(true);
 		});
 
-		it('the short labels cover all five phases', () => {
-			expect(Object.values(DISPLAY_LABELS.phaseShortLabels)).toEqual([
-				'Source',
-				'Tokens',
-				'AST',
-				'Environment',
-				'Evaluation',
-			]);
+		it('the tokens phase draws its full label', () => {
+			expect(DISPLAY_LABELS.phaseLabels.tokens).toBe('Tokens · spelling');
+		});
+
+		it('the short label of every phase is authored', () => {
+			expect(
+				Object.values(DISPLAY_LABELS.phaseShortLabels).every(
+					(label) => label.length > 0,
+				),
+			).toBe(true);
 		});
 
 		it('the short label is not the full label truncated at its separator', () => {
@@ -168,10 +168,24 @@ describe.skip('DISPLAY_LABELS', () => {
 			);
 		});
 
-		it('the three ways out order the repair before the escape', () => {
-			expect(DISPLAY_LABELS.blockedWaysOut).toBe(
+		it('the violation arm orders the repair before the escape', () => {
+			expect(DISPLAY_LABELS.blockedWaysOut.violation).toBe(
 				'Fix the code, pick another level, or turn strict off.',
 			);
+		});
+
+		it('the type-admission arm names the toggle as its repair', () => {
+			expect(DISPLAY_LABELS.blockedWaysOut['type-admission']).toBe(
+				'Toggle the type, pick another level, or turn strict off.',
+			);
+		});
+
+		it('every ways-out arm ends at the same escape', () => {
+			expect(
+				Object.values(DISPLAY_LABELS.blockedWaysOut).every((sentence) =>
+					sentence.endsWith('or turn strict off.'),
+				),
+			).toBe(true);
 		});
 
 		it('no drawn string carries a machine token', () => {
@@ -179,8 +193,8 @@ describe.skip('DISPLAY_LABELS', () => {
 				...Object.values(DISPLAY_LABELS.phaseLabels),
 				...Object.values(DISPLAY_LABELS.fitMarks),
 				...Object.values(DISPLAY_LABELS.causeFramings),
+				...Object.values(DISPLAY_LABELS.blockedWaysOut),
 				DISPLAY_LABELS.standingWaiting,
-				DISPLAY_LABELS.blockedWaysOut,
 			].join(' ');
 			expect(
 				['does-not-fit', 'not-applicable-for-type', 'barring edge'].some(

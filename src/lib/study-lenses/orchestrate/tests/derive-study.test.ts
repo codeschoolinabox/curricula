@@ -25,6 +25,7 @@ function buildLevel(
 function buildLens(name: string, extras: Partial<Lens> = {}): Lens {
 	return {
 		name,
+		label: name,
 		applicability: () => true,
 		phase: 'source',
 		main: () => null,
@@ -95,6 +96,7 @@ describe('embody conformance — the seam earlier waves assumed', () => {
 	it('attaches lenses by reference and leaves them mutable after embody', () => {
 		const lens = {
 			name: 'poker',
+			label: 'poker',
 			applicability: () => true,
 			phase: 'source' as const,
 			poked: false,
@@ -110,6 +112,7 @@ describe('embody conformance — the seam earlier waves assumed', () => {
 	it('lists an attached lens on a barred phase — closed, not emptied', () => {
 		const lens = {
 			name: 'env-viewer',
+			label: 'env-viewer',
 			applicability: () => true,
 			phase: 'environment' as const,
 		};

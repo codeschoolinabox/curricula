@@ -4,23 +4,33 @@
  * count, else nothing.
  *
  * @remarks
- * The counts are read off the STATIONS this settle will actually render,
- * which is what makes the caption and the rail structurally incapable of
- * disagreeing: the empty count is how many stations stand `bare`, and the
- * unreached count is how many stand `waiting`. The cause itself is read from
- * the study record rather than from a station, because one cause is drawn
- * once beneath the rail and no station carries it.
+ * THE ARM IS CHOSEN OFF THE STATIONS ALONE. A barring edge is drawn wherever a
+ * station stands `waiting`, so the input that decides the arm is the same one
+ * that draws the edge the precedence rule names — and the cause arrives as
+ * PAYLOAD rather than as a second thing to decide from. Handing this function
+ * the whole study record instead would give it two independent answers to
+ * "is an edge drawn" and no rule for which wins.
+ *
+ * Both counts are read off those same stations: the empty count is how many
+ * stand `bare`, the unreached count how many stand `waiting`. So the caption
+ * cannot disagree with the rail about either its arm or its numbers.
+ *
+ * The counts are narrowed and THROW outside their domains. That is not a
+ * defensive branch — it is unreachable by contract, and reaching it means the
+ * cause and the standings disagree, which is a defect of the same class as an
+ * attached lens the roster cannot recover: reported loudly rather than
+ * papered over.
  *
  * Phase 0 stub: the surface is the contract this unit locks; the body lands
  * in Phase 1, un-skipping its suite one cluster at a time.
  */
 
-import type { LifecyclePhase, LifecyclePhaseName } from '../../embody/types.js';
+import type { StageCause } from '../../embody/types.js';
 import type { Caption, Station } from '../types.js';
 
 export default function deriveCaption(
 	_stations: ReadonlyArray<Station>,
-	_study: Readonly<Record<LifecyclePhaseName, LifecyclePhase>>,
+	_cause: StageCause | null,
 ): Caption {
 	throw new Error('deriveCaption: not implemented');
 }

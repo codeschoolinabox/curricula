@@ -2,6 +2,7 @@ import freezeInPlace from '@utils/freeze-in-place.js';
 
 import type { FailableStageName, LifecyclePhaseName } from '../embody/types.js';
 
+import type { MaskCause } from './lib/masking/types.js';
 import type {
 	EmptyCount,
 	FitMark,
@@ -41,7 +42,7 @@ type DisplayLabels = {
 	readonly emptyCountLines: Readonly<Record<EmptyCount, string>>;
 	readonly unreachedCountLines: Readonly<Record<UnreachedCount, string>>;
 	readonly causeFramings: Readonly<Record<FailableStageName, string>>;
-	readonly blockedWaysOut: string;
+	readonly blockedWaysOut: Readonly<Record<MaskCause['kind'], string>>;
 };
 
 const DISPLAY_LABELS: DisplayLabels = freezeInPlace({
@@ -177,18 +178,25 @@ const DISPLAY_LABELS: DisplayLabels = freezeInPlace({
 	},
 
 	/**
-	 * The blocked sentence's three ways out, and THE ORDER IS CONTRACT: fix
-	 * the code, then pick another level, then turn strict off. A sentence
-	 * offering strict-off first would teach escape, which is the one thing
-	 * this ordering exists to prevent. The level's label and its cause are
-	 * composed in ahead of it.
+	 * The blocked sentence's ways out, keyed by the KIND of cause that put the
+	 * mask up, AND THE ORDER IS CONTRACT: the repair first, the escape last. A
+	 * sentence offering strict-off first would teach escape, which is the one
+	 * thing this ordering exists to prevent.
 	 *
-	 * One sentence, not a record keyed by `MaskCause['kind']`: the contract
-	 * states one ordered sentence, and the type-admission arm's own ways out
-	 * are drawn nowhere in the twin and owned by no decision row. Authoring
-	 * a second string here would invent copy nobody ruled.
+	 * The two arms name different repairs because different things are wrong.
+	 * Out-of-level code is repaired by editing it. An inadmissible snippet TYPE
+	 * is repaired by the type toggle — the region's own class-2 argument is that
+	 * the toggle "can move the code inside" the boundary — so telling that
+	 * learner to fix the code would be advice about the wrong thing. Both arms
+	 * still end at the same escape, and both still order repair before it.
+	 *
+	 * The level's label and its cause are composed in ahead of the sentence.
 	 */
-	blockedWaysOut: 'Fix the code, pick another level, or turn strict off.',
+	blockedWaysOut: {
+		violation: 'Fix the code, pick another level, or turn strict off.',
+		'type-admission':
+			'Toggle the type, pick another level, or turn strict off.',
+	},
 });
 
 export default DISPLAY_LABELS;

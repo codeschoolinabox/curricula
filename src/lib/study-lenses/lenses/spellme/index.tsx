@@ -584,6 +584,7 @@ const MINIMUM_EXTENT = 1;
  */
 const spellmeLens = freezeInPlace({
 	name: 'spellme',
+	label: 'drive the scanner',
 	main: SpellmeMain,
 	applicability: spellmeCore.applicability,
 	config: spellmeCore.config,
