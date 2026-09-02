@@ -76,17 +76,46 @@ export type StageSuccess<Value> = {
 	readonly value: Value;
 };
 
-/** A stage that failed — as data, never a throw. */
-export type StageFailure = {
+/**
+ * A stage that failed — as data, never a throw.
+ *
+ * The failure arm may also carry the stage's **account** — the partial or
+ * recovered data README § Failure grammar defines — under the same `value`
+ * name its success arm uses, distinguished from a trustworthy value only by
+ * this arm's `ok: false` (human ruling 2026-09-01, the same-key design).
+ * The member is optional **permanently** (human ruling 2026-09-02): the
+ * `undefined` a skipped narrowing meets is the standing mechanical guard
+ * behind that ruling's accepted cost, never scaffolding to tighten away.
+ * Which failures publish an account, and when, is README § Failure
+ * grammar's per-arm presence grammar — narrowing `ok` still proves exactly
+ * what it always proved: a value to rely on.
+ */
+export type StageFailure<Value = never> = {
 	readonly ok: false;
 	readonly cause: StageCause;
+	readonly value?: Value;
 };
 
 /**
  * One tagged derivation result. Derived stages share the full envelope; the
- * given stages (`source`, `type`) carry only its success arm.
+ * given stages (`source`, `type`) carry only its success arm. The failure
+ * arm's optional `value` is the stage's account (see {@link StageFailure}).
  */
-export type FactStage<Value> = StageSuccess<Value> | StageFailure;
+export type FactStage<Value> = StageSuccess<Value> | StageFailure<Value>;
+
+/**
+ * The ast stage's failure: beside its cause it may carry the recovered
+ * account — the **recovered tree** the recovering reader builds when the
+ * program lexes but does not parse — with the reader's **invented nodes**
+ * enumerated beside it, by reference into that same tree (README § Failure
+ * grammar; human ruling 2026-09-01: an invented tree is admissible only as
+ * this labeled, separate account). `invented` is present exactly when
+ * `value` is — an invariant the derivers enforce, since optional members
+ * cannot be conditioned on a sibling (data-model.md § Illegal states).
+ */
+export type AstFailure = StageFailure<Program> & {
+	readonly invented?: ReadonlyArray<AcornNode>;
+};
 
 /**
  * The tokens stage's value: the token stream plus the comments the
@@ -129,6 +158,13 @@ export type Tokens = {
 	 * inside the embodiment's deep freeze (an acorn token's `type` is a
 	 * process-global singleton the freeze must not reach) and what joins
 	 * this sequence to any other derivation over the same stream.
+	 *
+	 * Within a tokens failure's account (README § Failure grammar) this
+	 * same member carries the **bounded** sequence: the source cut at the
+	 * account's extent — the end of the last token or set-aside comment,
+	 * whichever is later — handed to the same leaf under its unchanged
+	 * tiling contract (human ruling 2026-09-01: bounded by slicing), and
+	 * optional under this same single absence condition.
 	 */
 	readonly inputElements?: ReadonlyArray<InputElement>;
 };
@@ -142,12 +178,16 @@ export type Tokens = {
  * branch that cannot occur. `tokens` and `ast` fail when the program does
  * not parse (spelling, then grammar). `entwined` and `environment` fail only
  * as embody defects, reported loudly in development — a valid syntax tree
- * always binds and always scopes.
+ * always binds and always scopes. A failed stage may still carry its account
+ * as `value` — partial for a stopped tokenization, recovered downstream of a
+ * grammar failure — under README § Failure grammar's presence rules; the ast
+ * arm's account additionally enumerates its invented nodes
+ * ({@link AstFailure}).
  */
 export type Facts = {
 	readonly source: StageSuccess<string>;
 	readonly tokens: FactStage<Tokens>;
-	readonly ast: FactStage<Program>;
+	readonly ast: StageSuccess<Program> | AstFailure;
 	readonly entwined: FactStage<Entwined>;
 	readonly environment: FactStage<Environment>;
 	readonly type: StageSuccess<SnippetType>;
@@ -235,12 +275,15 @@ export type EntwinedNode = {
 /**
  * Where one pair of grouping parentheses sat: `start` at the `(`, `end` one
  * past the `)` — half-open offsets in UTF-16 code units, the same
- * `start`/`end` vocabulary every node and token carries. The parser's own
- * recorded positions, never re-derived from the text. Entwined data, keyed
- * by the path of the node the parentheses wrapped; a node wrapped more than
- * once carries one span per pair, outermost first — ascending `start`, the
- * order the source reads — and a node with no grouping parentheses has no
- * entry at all (README § Glossary — paren span).
+ * `start`/`end` vocabulary every node and token carries. The recording
+ * instrument's own positions, never re-derived from the text: the parser's
+ * within the machine's binding — where a node with no entry IS the parser's
+ * reading that none wrapped it — and the recovering reader's within a
+ * recovered account, where a missing entry is the reader's silence, never
+ * an assertion about the source (human ruling 2026-09-02). Entwined data,
+ * keyed by the path of the node the parentheses wrapped; a node wrapped
+ * more than once carries one span per pair, outermost first — ascending
+ * `start`, the order the source reads (README § Glossary — paren span).
  */
 export type ParenSpan = {
 	readonly start: number;
@@ -272,12 +315,14 @@ export type Entwined = {
 	 */
 	readonly byOffset: ReadonlyArray<EntwinedNode>;
 	/**
-	 * Where the parse recorded grouping parentheses, keyed by the path of the
-	 * node each pair wrapped — the same key space as `byPath`, so a key here
-	 * always resolves there. Sparse: a node with no grouping parentheses has no
-	 * entry, and an empty list is never published, so a present key always means
-	 * at least one pair. A node wrapped more than once carries one span per pair,
-	 * outermost first. See {@link ParenSpan}.
+	 * Where the reading that produced this binding recorded grouping
+	 * parentheses — the machine's parse in a trustworthy value, the recovering
+	 * reader in a recovered account ({@link ParenSpan} carries the attribution
+	 * rule) — keyed by the path of the node each pair wrapped: the same key
+	 * space as `byPath`, so a key here always resolves there. Sparse: a node
+	 * with no entry carries none, an empty list is never published, and a
+	 * present key always means at least one pair. A node wrapped more than
+	 * once carries one span per pair, outermost first.
 	 */
 	readonly parenSpans: Readonly<
 		Record<NodePath, ReadonlyArray<ParenSpan> | undefined>
@@ -321,6 +366,8 @@ export type ScopeDefinition = {
 	readonly index: number | null;
 	/** The `NodePath` of `name` in the source⇄tree binding — resolve via `entwined.byPath` for the identifier's neighbors and children. */
 	readonly path?: NodePath;
+	/** Present only within a recovered account: this definition rests on an invented node of the recovered tree (human ruling 2026-09-01: invention marked in the structure). Never present in the machine's reading. */
+	readonly invented?: true;
 };
 
 /**
@@ -413,6 +460,8 @@ export type ScopeReference = {
 	 * model.
 	 */
 	readonly usedBeforeBound: UsedBeforeBound;
+	/** Present only within a recovered account: this use's identifier is an invented node of the recovered tree (human ruling 2026-09-01: invention marked in the structure). Never present in the machine's reading. */
+	readonly invented?: true;
 };
 
 /**
@@ -461,6 +510,8 @@ export type ScopeVariable = {
 	 * leaves the module is read from outside it, whatever a consumer makes of that.
 	 */
 	readonly exportedNames: ReadonlyArray<string>;
+	/** Present only within a recovered account: this binding is introduced by, or resolves through, an invented node of the recovered tree (human ruling 2026-09-01: invention marked in the structure). Never present in the machine's reading. */
+	readonly invented?: true;
 };
 
 /**
@@ -481,6 +532,8 @@ export type Scope = {
 	readonly isStrict: boolean;
 	/** `null` only at the root scope. */
 	readonly upper: Scope | null;
+	/** Present only within a recovered account: the node introducing this scope is an invented node of the recovered tree (human ruling 2026-09-01: invention marked in the structure). Never present in the machine's reading. */
+	readonly invented?: true;
 };
 
 /**
@@ -631,11 +684,14 @@ export type ParenSpansByNode = ReadonlyMap<AcornNode, ReadonlyArray<ParenSpan>>;
  * so they travel together — the same reason the tokens value carries the
  * comments the tokenizer set aside.
  *
- * The record is empty on a failed stage: there was no tree to fold, so nothing
- * was recorded. Only `ast` is published — the record's own published form is
- * the entwined binding's, keyed by path rather than by node.
+ * The record carries whatever the reading that produced the tree recorded:
+ * the machine's on a success, the recovering reader's — possibly nothing —
+ * beside a recovered tree, and empty when no tree of either kind exists
+ * ({@link ParenSpan} carries the attribution rule). Only `ast` is published —
+ * the record's own published form is the entwined binding's, keyed by path
+ * rather than by node.
  */
 export type AstDerivation = {
-	readonly ast: FactStage<Program>;
+	readonly ast: StageSuccess<Program> | AstFailure;
 	readonly parenSpansByNode: ParenSpansByNode;
 };

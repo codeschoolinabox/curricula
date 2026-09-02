@@ -3437,7 +3437,7 @@ describe('deriveEnvironment', () => {
 					parenSpansByNode,
 				);
 				const stage = deriveEnvironment(snippet.type, ast, entwined);
-				expect(stage !== ast).toBe(true);
+				expect(stage).not.toBe(ast);
 			});
 
 			it('reports nothing to console.error when carrying an ast failure', () => {

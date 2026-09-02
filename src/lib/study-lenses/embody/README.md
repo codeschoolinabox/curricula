@@ -140,18 +140,18 @@ embodiment.
    binding ties tree back to text, the scope structure reads tree, binding, and
    snippet type together. A failure never stops the walk: a stage whose input is
    missing fails carrying the upstream cause, its origin still named inside it —
-   and where the failed input carries an account
+   and where the failed input carries a recovered account
    ([§ Failure grammar](#failure-grammar)), the stage derives over that account
    instead and publishes the result as its own failure arm's value, the upstream
-   cause still carried. A learner's typo stops nothing — the failed stage is
-   itself a fact, rendered inside the lifecycle phase that owns it. The tokens
-   stage's value carries the token stream together with the comments the
-   tokenizer sets aside — those two emerge from one pass, so they travel
-   together. On a successful tokenization the value also carries
-   `inputElements`: the same source re-read in the specification's own
-   vocabulary, derived over the stream by calling the shared scanning leaf
-   ([`../lib/scanning/`](../lib/scanning/README.md)) — optional in the contract,
-   absent only when that derivation itself defects
+   cause still carried — a partial account never flows downstream. A learner's
+   typo stops nothing — the failed stage is itself a fact, rendered inside the
+   lifecycle phase that owns it. The tokens stage's value carries the token
+   stream together with the comments the tokenizer sets aside — those two emerge
+   from one pass, so they travel together. On a successful tokenization the
+   value also carries `inputElements`: the same source re-read in the
+   specification's own vocabulary, derived over the stream by calling the shared
+   scanning leaf ([`../lib/scanning/`](../lib/scanning/README.md)) — optional in
+   the contract, absent only when that derivation itself defects
    ([§ Failure grammar](#failure-grammar)).
 2. **Derive phase accessibility.** From the tagged stages, each of the five
    lifecycle phases learns whether it can open. The rules are fixed and follow
@@ -347,13 +347,16 @@ rule:
 - **A phase payload narrows on `accessible`.** A barred phase adds its `cause` —
   whose `stage` field names the true origin; both arms list the lenses that fit.
 - **The parse facts are values, not envelopes.** What a language level's
-  validator consumes is `facts.tokens.value` and `facts.ast.value` — never this
-  region's stage envelope.
+  validator consumes is `facts.tokens.value` and `facts.ast.value` **behind
+  `ok: true`** — never this region's stage envelope, and never a failure arm's
+  account, which is not the parse truth ([§ Failure grammar](#failure-grammar)).
 - **The input-element sequence narrows on presence.**
-  `facts.tokens.value.inputElements` is optional: present on every successful
-  tokenization except when the derivation itself defected
-  ([§ Failure grammar](#failure-grammar)). A consumer that needs it checks for
-  it; absence is a reported embody defect, never a property of the program.
+  `facts.tokens.value.inputElements` is optional: on a trustworthy value,
+  present on every successful tokenization except when the derivation itself
+  defected ([§ Failure grammar](#failure-grammar)) — a consumer that needs it
+  checks for it, and absence is a reported embody defect, never a property of
+  the program. Within a tokens failure the same member is the bounded sequence
+  ([§ Glossary — token prefix](#glossary--region-terms)).
 - **A failure arm's `value` is its account — same name, same shape, never the
   same trust.** After `ok` narrows false, `value` where present is the partial
   or recovered account ([§ Failure grammar](#failure-grammar)); a consumer that
@@ -396,9 +399,10 @@ rule:
 The package glossary owns the shared meanings; these entries add the mechanics
 this region owns.
 
-- **fact stage** — one tagged derivation result inside the Facts: either the
-  stage's value, or a structured cause of failure. The unit applicability
-  predicates test and accessibility reads from.
+- **fact stage** — one tagged derivation result inside the Facts: the stage's
+  value, or a structured cause of failure — which may carry the stage's account
+  beside it under the same `value` name, marked by the arm alone. The unit
+  applicability predicates test and accessibility reads from.
 - **account** — what a failed stage publishes beside its cause: its own `value`,
   partial or recovered, under the same name and shape a trustworthy value
   carries, distinguished only by the `ok: false` arm that holds it (human ruling
@@ -410,7 +414,9 @@ this region owns.
   scanner's own reading, not of any completed stream — the program has none. Its
   **extent** is the end of the last token or set-aside comment, whichever is
   later — the account's own boundary, defined even when the cause carries no
-  `offset`; where the cause reports one, the extent sits at or before it. The
+  `offset`; where the cause reports one, the extent sits at or before it, and
+  over empty channels the extent is 0 — a stop before any complete turn still
+  publishes its prefix, with empty channels and an empty bounded sequence. The
   prefix also carries the same reading in the specification's own vocabulary: a
   bounded input-element sequence over the source cut at that extent, handed to
   the same scanning leaf under its unchanged tiling contract (human ruling
@@ -436,29 +442,30 @@ this region owns.
   one is marked in the structure. Never present in the machine's tree.
 - **input elements** — the tokens stage's `inputElements` member: the same
   source re-read in the specification's own vocabulary — ECMA-262's
-  input-element sequence, one named element per span — present on a successful
-  tokenization and absent only when the derivation itself defects
-  ([§ Failure grammar](#failure-grammar)). Derived at embodiment time by calling
-  the shared scanning leaf ([`../lib/scanning/`](../lib/scanning/README.md)),
-  which owns the vocabulary: the fourteen element kinds and their grounds. Each
-  element carries its element kind, its half-open span, its verbatim source
-  slice, and the indices of the parser tokens it wraps — indices into
-  `facts.tokens.value.tokens`, never token objects, which is what lets the
-  sequence live inside the embodiment's deep freeze (an acorn token's type is a
-  process-global the freeze must not reach) and what joins the two derivations
-  on one stream. The sequence tiles the source; tiling is a property of the
-  sequence, never evidence it is the specification's — the leaf records its one
-  deliberate departure and its one known upstream mis-read (a slash after
-  `await`), and the field's own doc repeats them. In prose say **element kind**
-  for which production an element is — never bare "kind", which the package
-  glossary owns for a kind of study utility (the leaf's published field is
-  `kind`, read inside an element where no ambiguity arises; its type is
-  `InputElementKind`). Embody's own contribution is the coherence guarantee: the
-  leaf's precondition — source, tokens and comments from one reading of one
-  source — is satisfied by construction, because the derivation that calls it
-  holds the snippet's source and produced both arrays in one tokenizer pass.
-  (Summarized here; the normative statement lives at the `inputElements` field
-  in [`types.ts`](./types.ts).)
+  input-element sequence, one named element per span — on a trustworthy value,
+  present on a successful tokenization and absent only when the derivation
+  itself defects ([§ Failure grammar](#failure-grammar)); within a tokens
+  failure, the bounded sequence the token-prefix entry defines. Derived at
+  embodiment time by calling the shared scanning leaf
+  ([`../lib/scanning/`](../lib/scanning/README.md)), which owns the vocabulary:
+  the fourteen element kinds and their grounds. Each element carries its element
+  kind, its half-open span, its verbatim source slice, and the indices of the
+  parser tokens it wraps — indices into `facts.tokens.value.tokens`, never token
+  objects, which is what lets the sequence live inside the embodiment's deep
+  freeze (an acorn token's type is a process-global the freeze must not reach)
+  and what joins the two derivations on one stream. The sequence tiles the
+  source; tiling is a property of the sequence, never evidence it is the
+  specification's — the leaf records its one deliberate departure and its one
+  known upstream mis-read (a slash after `await`), and the field's own doc
+  repeats them. In prose say **element kind** for which production an element is
+  — never bare "kind", which the package glossary owns for a kind of study
+  utility (the leaf's published field is `kind`, read inside an element where no
+  ambiguity arises; its type is `InputElementKind`). Embody's own contribution
+  is the coherence guarantee: the leaf's precondition — source, tokens and
+  comments from one reading of one source — is satisfied by construction,
+  because the derivation that calls it holds the snippet's source and produced
+  both arrays in one tokenizer pass. (Summarized here; the normative statement
+  lives at the `inputElements` field in [`types.ts`](./types.ts).)
 - **entwining / entwined** — the derived source⇄tree binding: the stage tying
   each syntax-tree node to its exact place in the source text. Built at
   embodiment time, in this region. A tie is containment: a node ties every token

@@ -43,12 +43,13 @@ are given, restating the snippet; the four derived stages derive in dependency
 order — `tokens` spells the source out; `ast` resolves the tokens into a tree;
 `entwined` ties tree, tokens and text into one navigable binding; `environment`
 reads the static scope structure out of tree, binding and snippet type. Every
-derivation result is a tagged value — the stage's value, or a structured cause —
-and a failure never stops the walk: a learner's unparseable program is quiet
-data rendered where it belongs, while a defect in the region's own machinery
-reports loudly to the developer and degrades as narrowly as dependency allows.
-From the tagged stages the five lifecycle phases learn whether they open; the
-roster's lenses are gated and attached; and the whole structure freezes to the
+derivation result is a tagged value — the stage's value, or a structured cause,
+which may carry the stage's account beside it (README § Failure grammar) — and a
+failure never stops the walk: a learner's unparseable program is quiet data
+rendered where it belongs, while a defect in the region's own machinery reports
+loudly to the developer and degrades as narrowly as dependency allows. From the
+tagged stages the five lifecycle phases learn whether they open; the roster's
+lenses are gated and attached; and the whole structure freezes to the
 freeze-what-you-own boundary. The region's [README](./README.md) § The build
 narrates these steps; [DOCS.md](./DOCS.md) § Structural constraints binds them.
 
@@ -172,9 +173,10 @@ the leaf's README:
   property-key position no reserved-word restriction applies at all, which is
   why V8 runs these programs — a direct consequence of "every keyword is an
   `IdentifierName`" above. The tokenizer enforces it while reading, so the
-  tokens stage fails and no sequence is published — the phases below tokens
-  close on a program V8 runs. The spellme campaign's embody flags record this as
-  F4, with the measured cases.
+  tokens stage fails and no complete sequence is published (the prefix's bounded
+  one still is — § When the scanner stops) — the phases below tokens close on a
+  program V8 runs. The spellme campaign's embody flags record this as F4, with
+  the measured cases.
 
 ## Spec correspondence
 

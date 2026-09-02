@@ -24,7 +24,10 @@ abstraction.
    source⇄tree binding, and the snippet type. Every result is tagged — a value
    or a structured cause — and a failure never stops the walk: a stage whose
    input is missing fails carrying the upstream cause, whose origin stays named
-   inside it. Input: the snippet. Output: the Facts.
+   inside it, and a stage whose failed input carries a recovered account derives
+   over that account instead, publishing the result as its own failure arm's
+   value — a partial account never flows downstream (README § Failure grammar).
+   Input: the snippet. Output: the Facts.
 
 2. **Derive phase accessibility** (sync, mechanical) — the five lifecycle phases
    get their accessibility from the tagged stages by fixed rules: `source` and
@@ -56,7 +59,7 @@ flowchart TD
     ACC["phase accessibility map<br/>(accessible | barred + carried cause)"]
     FIT["per-phase fitting-lens lists"]
     EMB["frozen embodiment<br/>(facts + fit + accessibility)"]
-    SNP -->|"derive stages, pure — failures become tagged causes"| FCT
+    SNP -->|"derive stages, pure — failures become tagged causes,<br/>each may carry its account as the failure arm's value"| FCT
     FCT -->|"map the five phases, mechanical"| ACC
     FCT -->|"run each phase-declaring gate, wrapped — a throw degrades loudly"| FIT
     ROS -->|"supplies the gateables"| FIT
@@ -109,7 +112,16 @@ flowchart TD
   alone satisfies the leaf's input-coherence precondition by construction. The
   sibling `classifying` leaf is permanently excluded from the Facts (human
   ruling 2026-08-18): its five categories are a chosen teaching vocabulary — the
-  accuracy-not-pedagogy contract keeps it a consumer's own projection.
+  accuracy-not-pedagogy contract keeps it a consumer's own projection. The
+  failure arms' **accounts** (README § Failure grammar) answer this same test
+  with named prospective consumers (human ruling 2026-09-01): the
+  error-interpreting lens the package roster names across both parse phases
+  reads the token prefix and the recovered accounts, and the
+  scanner's-stopping-point lens of the spellme family reads the prefix — with
+  one ruled carve-out: the environment account clears condition (b) by explicit
+  ruling rather than a named reader (human ruling 2026-09-01: the environment
+  account is included, invention marked), publication justified per consumer or
+  per ruling, never maximal by default.
 - **Level-blind.** No level knowledge in the region's data or pipeline; level
   logic runs only black-boxed inside individual gates.
 - **Truth, not permission.** This region states what is TRUE about the program;
@@ -119,9 +131,15 @@ flowchart TD
   the rule. The region hands over the machine's own reading, plus at most the
   decidable structural truths it computes from that reading itself — never a
   permission judgment.
-- **One derivation pass.** Stages derive once per snippet, in dependency order;
-  nothing retries and nothing parses the same source twice. The tokens and ast
-  stages are the parse facts every outside consumer reads.
+- **One derivation pass per instrument** (human ruling 2026-09-01, amending the
+  earlier "nothing parses the same source twice"). Stages derive once per
+  snippet, in dependency order; the machine parses once, nothing retries, and no
+  instrument reads the same source twice — but on a failed parse the
+  **recovering reader** may re-read the source once, a second instrument whose
+  output never enters a trustworthy value: it publishes only as the failure
+  arms' accounts (README § Failure grammar). The tokens and ast stages remain
+  the parse facts every outside consumer reads — one parse truth, with the
+  reader's account labeled beside it, never inside it.
 - **Facts index; they never copy the tree, and never wall it.** Each fact is a
   pre-indexed way into the syntax tree that already exists — its nodes are the
   very nodes the parse built, held by reference, never reproduced. The derived
@@ -143,21 +161,27 @@ flowchart TD
   and published sequences are arrays (E3).
 - **Failures publish as tagged stages.** Every derived fact is one value — `ok`
   with the stage's value, or a structured `StageCause` — never a flag beside a
-  payload, and never a throw (E7).
+  payload, and never a throw (E7). The failure arm may additionally carry its
+  account under the same `value` name, marked by the arm alone (E10).
 - **Loud versus graceful.** A learner program that does not parse is quiet data;
   a defect in embody's own machinery is loud — an entwine or scope-analysis
-  failure raises a development-mode report, and a throwing gate degrades to
-  not-applicable and is reported the same way. What a failure bars follows
-  dependency, not loudness: spelling, grammar, and the source⇄tree binding
-  underpin every later surface, so a tokens, ast, or entwine failure bars the
-  phases below it; the scope structure is terminal — no later phase reads it —
-  so an environment failure renders inside the `environment` phase alone,
-  leaving `evaluation` reachable. The input-element enrichment is narrower
-  still: a defect in its derivation reports loudly and the member is simply
-  absent from the tokens value — no stage fails, no phase bars, because nothing
-  downstream reads it. (An internal defect may be caught into data or may
-  acceptably crash — human latitude ruling 2026-08-18; this region catches, for
-  one consistent defect grammar.)
+  failure over the machine's valid tree raises a development-mode report, and a
+  throwing gate degrades to not-applicable and is reported the same way.
+  Loudness follows the cause's own `stage`, never bare `ok: false`: a failure
+  arm carrying an upstream cause is not this stage's defect, whether or not it
+  also carries an account, and a defect while deriving an account degrades that
+  account alone — reported as the account failing, never as a broken machine
+  invariant (README § Failure grammar). What a failure bars follows dependency,
+  not loudness: spelling, grammar, and the source⇄tree binding underpin every
+  later surface, so a tokens, ast, or entwine failure bars the phases below it;
+  the scope structure is terminal — no later phase reads it — so an environment
+  failure renders inside the `environment` phase alone, leaving `evaluation`
+  reachable. The input-element enrichment is narrower still: a defect in its
+  derivation reports loudly and the member is simply absent from the tokens
+  value — no stage fails, no phase bars, because nothing downstream reads it.
+  (An internal defect may be caught into data or may acceptably crash — human
+  latitude ruling 2026-08-18; this region catches, for one consistent defect
+  grammar.)
 - **Freeze-what-you-own.** The freeze covers the structure this region built —
   the wrappers and indices — and reaches deeply into the syntax and scope
   objects the facts index: allocated fresh per derivation and held by nobody
@@ -186,9 +210,10 @@ flowchart TD
 
 Settled decisions on the shape of the embodiment itself — what it publishes,
 what it guarantees, and what it refuses to know (human ruling 2026-08-12). Tests
-pin these behaviors (`tests/index.test.ts`). Each entry — **E1** through **E8**
-— grounds a structural constraint above: the constraint states the rule, the
-entry states why this shape rather than its alternatives.
+pin these behaviors (`tests/index.test.ts`; E10's rows are banked skipped in
+`tests/failure-accounts.test.ts` until Phase 1 un-skips them). Each entry —
+**E1** through **E10** — grounds a structural constraint above: the constraint
+states the rule, the entry states why this shape rather than its alternatives.
 
 - **E1 — Pure frozen plain data.** Everything the region publishes is plain
   objects, arrays, and primitives — no methods, no getters, no accessor API.
@@ -248,7 +273,9 @@ entry states why this shape rather than its alternatives.
   chain of derivations, where per-stage envelopes localize failure to the stage
   that owns it and let phase accessibility be derived mechanically from the
   stages. One envelope, six stages: a consumer learns one narrowing pattern, and
-  everything under it stays plain, postMessage-safe, honestly freezable.
+  everything under it stays plain, postMessage-safe, honestly freezable. (The
+  failure arm may additionally carry the stage's account under the same `value`
+  name — the surrendered half of this either/or, weighed and recorded at E10.)
 - **E8 — Level-blindness.** No level knowledge in the region's data or pipeline,
   because every consumer above relies on the facts meaning the same thing
   whatever level is selected. Enforcement-as-mask — the package's "Mask, not
@@ -283,6 +310,22 @@ entry states why this shape rather than its alternatives.
   the caller's side, the residence question the leaf's README recorded as
   deliberately unresolved until this campaign's close resolved it in place (the
   leaf README's § Why-this-module-exists now carries the resolution).
+- **E10 — The same-key account** (human rulings 2026-09-01 and 2026-09-02). A
+  failed stage may carry its partial or recovered data under the same `value`
+  name its success arm uses, distinguished only by `ok: false` — chosen over a
+  differently-named member or a third `ok` state because it keeps one reading
+  pattern, one path grammar, and one shape per stage: the recovered account
+  flows through the same downstream derivations a trustworthy value would, and
+  every existing narrowing site keeps meaning what it meant. The weighed cost:
+  "a stage is a value or a cause, never both" stops being structural, and the
+  guard is the `ok` discriminant backed by the permanently-optional member's
+  `undefined` at any read that skips the narrowing — never scaffolding to
+  tighten away. The instruments are labeled by the arm: the token prefix is the
+  machine's own reading cut short; the recovered tree and the projections over
+  it are the recovering reader's, invented nodes enumerated on the ast arm and
+  marked through the environment structure. Consumers are named prospectively at
+  the fact-admission constraint; the presence grammar and the loud/graceful
+  consequences are README § Failure grammar's.
 
 ## Parse decisions
 
@@ -308,12 +351,15 @@ bullet below:
   the order the source reads; a node with no grouping parentheses has no entry,
   and an empty list is never published. The record is the parser's reading,
   complete: parentheses that change what the program means are recorded like any
-  other, and no judgment about which mattered is derived. It adds no parse
-  setting a consumer must mirror — parsing with the shared leaf's published
-  settings reproduces the published tree shape; where the parentheses sat is the
-  region's own record beside that shape, not a parse-shape difference. At a
-  parenthesis's own offset the offset index resolves to the enclosing node; a
-  consumer needing paren→node builds the one-pass reverse index from the record.
+  other, and no judgment about which mattered is derived. (Within a recovered
+  account the record is the recovering reader's own, and a missing entry there
+  is the reader's silence, never an assertion about the source — human ruling
+  2026-09-02; README § Glossary — paren span.) It adds no parse setting a
+  consumer must mirror — parsing with the shared leaf's published settings
+  reproduces the published tree shape; where the parentheses sat is the region's
+  own record beside that shape, not a parse-shape difference. At a parenthesis's
+  own offset the offset index resolves to the enclosing node; a consumer needing
+  paren→node builds the one-pass reverse index from the record.
 - **Q6 — Nodes, tokens, and comments all carry source spans.** The scope
   analyzer reads node ranges and throws without them; tokens and comments carry
   the same span vocabulary so every parse fact cross-navigates in one currency —
