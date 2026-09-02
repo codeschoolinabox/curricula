@@ -1088,6 +1088,57 @@ unregistered — still true [measured 2026-08-30: `grep -c pinned-guard
 that marker's substitute and its only possible home, because tests in this repo
 carry no comments.
 
+### The `spellme` LENS's rulings (2026-09-01)
+
+One, the human's, taken at wave 3's checkpoint #4 while discussing what partial
+tokenization will ask of this lens. **The work is deferred** — "we'll dig deeper
+into updating spellme later once embody is updated" — but the ruling is recorded
+now, because the thing this campaign has failed at six times is recording a
+ruling in the turn it was given rather than the turn it was used.
+
+- (human ruling 2026-09-01) **`spellme` WILL carry logic explaining why a
+  tokenization failed, from a tokenization perspective, and the
+  one-lens-explains-errors reading is wrong.** In the human's words: _"more than
+  one lens can help learners understand errors, different errors happen at
+  different phases and different exercises can help different learners
+  understand them better. spellme will focus on tokenization errors from a
+  tokenization perspective, i'd like to add the logic to help learners
+  understand why it failed."_
+
+  ⚠ **This supersedes a claim in `README.md` § Edge cases**, which currently
+  says of a program that does not lex that "explaining the reader's own error is
+  the **error-interpreting lens** … it belongs to the package, not to this
+  lens's family". That sentence stays for now and is **not yet wrong**: the lens
+  genuinely declines today, and these documents describe the tree as it is. It
+  is corrected in the commit that lands the behavior, not before.
+
+  ⚠ **It also narrows a 2026-08-13 ruling without overturning it.** That ruling
+  makes "the scanner's stopping point" its own lens, and it still does. What is
+  now spellme's is the **explanation of a tokenization failure at the
+  tokenization phase**; a separate exercise built on where the scanner stopped
+  remains a separate lens. The boundary between them is not yet drawn and is the
+  first thing the deferred unit has to settle.
+
+  ⚠ **The orchestrator was wrong about the scope of this** when the question was
+  first put — it read § Edge cases as excluding this lens from error work
+  entirely, and offered that reading as though it were settled. The human's
+  correction is the ruling above. Recorded because a reviewer or a later reader
+  finding only the README sentence would reach the same wrong conclusion.
+
+  **Owed by the deferred unit** — see § Deferred's partial-data entry and
+  [`../embody-partial-facts/BRIEF.md`](../embody-partial-facts/BRIEF.md):
+  `applicability` must answer a question it does not answer today (how much
+  sequence is enough to drive the exercise, which is a contract decision rather
+  than a loosened `&&`); `readStream`'s precondition throw and `DOCS.md` §
+  Execution phases 3's **mount-stable** annotation both change meaning once the
+  published member can arrive partial; and `deriveAccessibility`'s barring of
+  `ast` on `!facts.tokens.ok` needs **re-examining rather than extending**. ⚠ At
+  HEAD `StageFailure` still has no value arm at all [read: `embody/types.ts` —
+  "A stage that failed — as data, never a throw", the type carrying only `ok:
+  false` and `cause`], while `StageCause` already publishes the stopping point
+  as an `offset` its own comment calls "directly sliceable" [read: same file].
+  So the stopping point is already available and the prefix is not.
+
 ### The `spellme` LENS — Phase 1, wave 3 (IN PROGRESS)
 
 ⚠ **Do not count the rows of anything here. RUN THIS** — and note it takes
