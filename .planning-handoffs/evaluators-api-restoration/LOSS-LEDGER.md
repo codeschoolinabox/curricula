@@ -1092,6 +1092,16 @@ execution and never holds one alone.
   committed step semantics. Encoded at I3 (the emission + the wire arm +
   narrow-record-message's new leg, a ruled cross-increment extension of I2's
   landed seam).
+- **The no-native-dialog posture stands — asked twice, resolved the same way
+  (2026-08-11 at W0.3; 2026-09-02 at R6's 🔍).** Both times the human asked
+  whether run should fall back to the thread's built-in prompt/alert/confirm
+  when unmocked; both times the ratified HR-9 supersede row (its D5b history on
+  the table) answered without re-opening. The 2026-09-02 exchange adds the
+  human's own consumer-side resolution, worth keeping beside the row: io mocks
+  are plain functions, so a lens WANTING native dialogs passes the built-ins as
+  its mocks (`{ prompt: window.prompt.bind(window), … }`) — a consumer pattern
+  requiring no contract change. A third asking should be answered from this
+  bullet.
 - **The stack-parse residual converts WORKER-SIDE (human ruling 2026-09-01, the
   P0-I enrichment increment's named design question).** The no-live-frame
   residual's position is parsed in the SPLICED text's coordinates; loop-guard's
