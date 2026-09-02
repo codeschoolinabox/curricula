@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 
-import debugPropsLens from '../../../../lenses/debug-props/index.jsx';
 import parsonsLens from '../../../../lenses/parsons/index.jsx';
 import writemeLens from '../../../../lenses/writeme/index.jsx';
 import joinLensRoster from '../join-lens-roster.js';
@@ -8,11 +7,7 @@ import joinLensRoster from '../join-lens-roster.js';
 describe('joinLensRoster', () => {
 	describe('no injections', () => {
 		it('empty injections → exactly the built-in roster', () => {
-			expect(joinLensRoster([])).toEqual([
-				parsonsLens,
-				writemeLens,
-				debugPropsLens,
-			]);
+			expect(joinLensRoster([])).toEqual([parsonsLens, writemeLens]);
 		});
 	});
 
@@ -87,7 +82,6 @@ describe('joinLensRoster', () => {
 			expect(joinLensRoster([highlight])).toEqual([
 				parsonsLens,
 				writemeLens,
-				debugPropsLens,
 				highlight,
 			]);
 		});

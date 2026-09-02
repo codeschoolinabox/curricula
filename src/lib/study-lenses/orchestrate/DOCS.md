@@ -77,7 +77,8 @@ comes from.
 ```mermaid
 flowchart TD
     PROPS["host props<br/>(defaults, never locks)"]
-    CFG["composed study configuration<br/>(joined rosters · cascade, learner layer final)"]
+    ROSTERS["joined rosters<br/>(lenses and levels, appended once at mount)"]
+    CFG["composed study configuration<br/>(the cascade, learner layer final)"]
     SNP["snippet<br/>(source + type, as last settled)"]
     EMB["frozen embodiment"]
     VER["level verdicts<br/>(one memoized validate per settle + level)"]
@@ -87,7 +88,8 @@ flowchart TD
     CAPTION["the caption<br/>(one occupant: the cause block, the count line, or nothing)"]
     SUR["rendered study environment<br/>(surface pane: editor XOR one excursion — open lens or generator ·<br/>rail · level UI · mask)"]
     CANDIDATE["candidate program<br/>(the accept-eligible arm of one generative ask)"]
-    PROPS -->|"join rosters at mount, loud collisions"| CFG
+    PROPS -->|"join rosters at mount, loud collisions"| ROSTERS
+    ROSTERS -->|"the roster the cascade resolves over"| CFG
     PROPS -->|"initial snippet + type, seeds the editor"| SNP
     PROPS -->|"initial-focus request, honored at mount"| SUR
     SNP -->|"embody per settle, pure"| EMB
@@ -194,19 +196,19 @@ README's tree names the files these shapes live in.)
 The top component is the single owner of everything session-scoped; every other
 holder is ephemeral or derived.
 
-| State                                                                                                                                                                                                                       | Holder                                                                                                                                                   |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Session choices (level key, posture, type, config tweaks — the open-lens choice lives in the pane occupant)                                                                                                                 | the top component                                                                                                                                        |
-| The pane occupant (`PaneOccupant`: the editor arm with its remount seed, the lens arm with the open lens's name, its open-time settled pair and the opened overrides, or the generator arm with its open-time settled pair) | the top component — one discriminated slot; the union makes "a lens without its snapshot" and "overrides outliving the open choice" unrepresentable      |
-| The live source (the buffer as last edited — survives editor unmounts)                                                                                                                                                      | the settle hook's ref, owned by the top component's hook instance; the hook exposes a live-source read and an immediate flush                            |
-| The settled snippet (`SettledSnippet`)                                                                                                                                                                                      | the top component, written only by the settle loop                                                                                                       |
-| The study derivation (`StudyDerivation`)                                                                                                                                                                                    | the top component, recomputed per settle                                                                                                                 |
-| The validate memo                                                                                                                                                                                                           | inside the per-instance memoized validate the top component holds                                                                                        |
-| Joined rosters, the bus instance, the generator socket                                                                                                                                                                      | the top component, created once at mount — the socket's mount-stability is what the generator's abort-and-retire mechanics key on                        |
-| Open/closed flags (level list, guide reveal)                                                                                                                                                                                | each surface, ephemeral                                                                                                                                  |
-| The announcer's previous blocked-state value (edge-triggered: it speaks the transition into and out of blocked, and the blocked state derives at render rather than arriving as an event)                                   | the top component — a ref, never a settle-keyed value; comparing it against the current render's mask state is what makes a TRANSITION detectable at all |
-| The announcer's previous barring-edge position (edge-triggered: the edge moves inside a settle, which the announcer may not speak)                                                                                          | the top component — a ref, compared per settle; the settle itself is never announced, so only its effect on the edge is                                  |
-| The generation job (idle → loading → generating → preview \| refused)                                                                                                                                                       | the generator view, ephemeral per mount — never a session choice; dispose-as-unmount is the cancellation                                                 |
+| State                                                                                                                                                                                                                                                                                                                                                                    | Holder                                                                                                                                                   |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Session choices (level key, posture, type, config tweaks — the open-lens choice lives in the pane occupant)                                                                                                                                                                                                                                                              | the top component                                                                                                                                        |
+| The pane occupant (`PaneOccupant`: the editor arm with its remount seed, the lens arm with the open lens's name, its open-time settled pair and the opened overrides, or the generator arm with its open-time settled pair)                                                                                                                                              | the top component — one discriminated slot; the union makes "a lens without its snapshot" and "overrides outliving the open choice" unrepresentable      |
+| The live source (the buffer as last edited — survives editor unmounts)                                                                                                                                                                                                                                                                                                   | the settle hook's ref, owned by the top component's hook instance; the hook exposes a live-source read and an immediate flush                            |
+| The settled snippet (`SettledSnippet`)                                                                                                                                                                                                                                                                                                                                   | the top component, written only by the settle loop                                                                                                       |
+| The study derivation (`StudyDerivation`)                                                                                                                                                                                                                                                                                                                                 | the top component, recomputed per settle                                                                                                                 |
+| The validate memo                                                                                                                                                                                                                                                                                                                                                        | inside the per-instance memoized validate the top component holds                                                                                        |
+| Joined rosters, the bus instance, the generator socket                                                                                                                                                                                                                                                                                                                   | the top component, created once at mount — the socket's mount-stability is what the generator's abort-and-retire mechanics key on                        |
+| Open/closed flags (level list, guide reveal)                                                                                                                                                                                                                                                                                                                             | each surface, ephemeral                                                                                                                                  |
+| The announcer's previous blocked-state value (edge-triggered: it speaks the transition into and out of blocked, and the blocked state derives at render rather than arriving as an event)                                                                                                                                                                                | the top component — a ref, never a settle-keyed value; comparing it against the current render's mask state is what makes a TRANSITION detectable at all |
+| The announcer's previous barring-edge position — a remembered PREVIOUS derived value, which is not in tension with the edge being drawn and never stored: what is never stored is the CURRENT edge, and this row exists because a transition is undetectable without its predecessor (edge-triggered: the edge moves inside a settle, which the announcer may not speak) | the top component — a ref, compared per settle; the settle itself is never announced, so only its effect on the edge is                                  |
+| The generation job (idle → loading → generating → preview \| refused)                                                                                                                                                                                                                                                                                                    | the generator view, ephemeral per mount — never a session choice; dispose-as-unmount is the cancellation                                                 |
 
 ### The settle loop
 
@@ -435,9 +437,9 @@ verdicts without consulting a level twice.
   CURRENT derivation — a flush-at-open can do this, since the offer was made
   against pre-flush facts — the pane renders nothing that frame; the orphan
   defense (the same judgment's other projection) then disposes and announces.
-  With collection-vetted recommendations, a lens's `main` never mounts against
-  an embodiment its applicability rejected — unreachable by construction, which
-  is what lets the invariants throw loud in prod.
+  With collection-vetted recommendations, a lens never mounts against an
+  embodiment its applicability rejected — unreachable by construction, which is
+  what lets the invariants throw loud in prod.
 - The mask projects the masking library's state — the selected level's
   assessment crossed with the posture; the blocked overlay is part of the top
   component's render (in-file until a second call site exists). Every mask input
@@ -496,6 +498,19 @@ verdicts without consulting a level twice.
   under a mounted generator. The same reading applies where one surface opens
   over another: opening a lens over the generator announces the generator's
   close before the lens's open, because the two facts ride two events.
+- **The lens contract gained a required member, and that is a host-visible
+  break.** A lens now authors its own learner-facing label. REQUIRED rather than
+  optional, because the point is that no lens can reach a learner's tray with
+  only its machine name — an optional field closes the hole for whoever
+  remembers it and leaves it open by default, which is the shape this region
+  rejects everywhere else. The cost is real and is named rather than absorbed:
+  the lens contract is part of the package's public, versioned surface, so an
+  embedding site that injects a lens must add the label before it compiles.
+- **A development harness is injected, never built in.** The debug lens carries
+  no exercise and no recommendation and its own documents say it is not a
+  pedagogical surface, so it is not on the built-in roster — the same treatment
+  the scaffolding level takes, and for the same reason: a default mount is a
+  learner's, and what ships by default is what a learner meets.
 - **No public-surface change.** The generator adds no host prop and no reserved
   configuration key: the socket is composition-root-internal, held in
   mount-frozen session state, and the view receives it as a prop for its own
@@ -531,11 +546,16 @@ verdicts without consulting a level twice.
   re-render — the one-commit batching argument for the pane flip depends on it.
   The effect registration order — the settled announce BEFORE the orphan defense
   — is a pinned invariant: the orphan bus sequence depends entirely on hook call
-  order. **The announcer's two edge-detecting effects register AFTER both**, and
-  that position is pinned for the same reason: they compare a remembered
-  previous value against the value this commit rendered, so a detector that ran
-  before the settle announce would compare against a value the region has not
-  yet committed to and speak a transition that did not happen. The settle hook's
+  order. **The announcer's two edge-detecting effects register AFTER both, and
+  all four are passive effects**, which is the whole of the pin. The reason is
+  SEQUENCING on the bus, not observation: every effect in one commit sees the
+  same committed values whatever its position, so registration order cannot
+  change what a detector reads. What it does change is what a subscriber hears
+  first — and the `settled` announce and the orphan defense's close must reach
+  the bus before the announcer speaks about the state they explain. The
+  passive-effect clause is load-bearing rather than incidental: a layout effect
+  runs before every passive one regardless of where it is registered, so
+  reaching for one here would silently break the order. The settle hook's
   live-source read and immediate flush are fresh function identities per render
   and must never key an effect or memo.
 - **Why the composition root is here.** One place joins, so one place can be

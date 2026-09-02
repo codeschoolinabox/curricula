@@ -47,10 +47,6 @@ const ENTWINED_BREAK: StageCause = {
 	stage: 'entwined',
 	message: 'the syntax tree does not span its source.',
 };
-const ENVIRONMENT_BREAK: StageCause = {
-	stage: 'environment',
-	message: 'a name escaped its scope.',
-};
 const TOKENS_BARRED = buildStations([
 	'openable',
 	'bare',
@@ -133,17 +129,6 @@ describe.skip('deriveCaption', () => {
 		it('an ast break leaves two waiting rather than three', () => {
 			const caption = deriveCaption(AST_BARRED, AST_BREAK);
 			expect(caption.holds === 'cause' && caption.unreached).toBe(2);
-		});
-
-		it('the stations decide the arm, so an environment-staged cause that bars nothing still yields the count line', () => {
-			const stations = buildStations([
-				'openable',
-				'bare',
-				'bare',
-				'bare',
-				'bare',
-			]);
-			expect(deriveCaption(stations, ENVIRONMENT_BREAK).holds).toBe('count');
 		});
 	});
 

@@ -30,7 +30,9 @@ export type TrayEntryIntent = {
 
 /**
  * What the rail receives. Stations render in exactly the given order — the
- * rail never sorts, never inserts, and never knows the canonical five.
+ * rail never sorts and never inserts. It knows the five phase NAMES, because
+ * it keys copy against that vocabulary — knowing the names is not knowing the
+ * ORDER, which has exactly one truth and it is not here.
  *
  * @remarks
  * `openLensName` is the committed open lens the occupant dot marks. `null`

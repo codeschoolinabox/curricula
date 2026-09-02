@@ -637,8 +637,12 @@ this region owns.
     `not reached` says that, in the past tense a learner can act on. Retiring
     `waiting` as **copy** costs nothing now precisely because it is no longer
     the union member; under the old reading it would have meant renaming a type.
-    **The union member's own name is a separate question and is 0.3's**, now
-    that nothing learner-facing depends on it.
+    **The union member's own name was 0.3's question and 0.3 answered it:
+    `waiting` STANDS.** The objection above is to its GLOSS rather than to the
+    name — a barred phase is not queued behind anything — and the gloss is what
+    changed. Renaming the member to `barred` would name a station's STANDING
+    after the phase's own property, collapsing the one distinction this
+    vocabulary is most insistent on.
 
   - **The tray's own heading** — `ways to study the <label>`, keyed against the
     same phase-name record as the labels, so a tray never names a phase
@@ -800,13 +804,9 @@ this region owns.
   recorded here and grounds nothing. Designed in
   [`ux/wireframes.md`](./ux/wireframes.md) and drawn there through every state.
 - **station** — the rail's per-phase element: one per phase, in the machine's
-  fixed order, carrying **four** things:
+  fixed order, carrying **three** things:
   - the **phase** — the data name, the key everything else zips against. Never
     drawn.
-  - the **label** and the **short label** — the two learner-facing strings from
-    **display labels**. The tray draws the full label (`Tokens · spelling`); the
-    rail draws the short label where width demands it (`Tokens`). Two strings,
-    not one truncated at render, because truncation is not a vocabulary choice.
   - the **standing** — the three-valued indicator the rail draws beside the
     name: **openable** (the phase is reachable and something fits it, drawn with
     its count), **bare** (reachable, nothing fits — the ordinary case at four of
@@ -815,16 +815,26 @@ this region owns.
     decoupled, see `glossary · display labels`).
   - the **tray**, where the phase has one.
 
-  **Four, and the `●` is not a fifth** (human ruling 2026-08-19). The rail draws
-  a filled dot on the station whose lens the pane is currently holding — the
-  **occupant dot** — and it is **not a station property**: it is a projection of
-  the **pane occupant**, which the region is already handed per settle, read at
-  render. Storing it on the station would be a second source of truth for which
-  lens is open. It is orthogonal to the standing rather than a value of it —
-  `▾ 2 ●` is an _openable_ station that is _also_ the open lens's — so it could
-  not be folded into that three-valued union in any case. It marks **no station
-  at all** when the pane holds the editor or the generator, which is the fact
-  the nameplate's class-2 route turns on.
+  **The label and the short label are NOT among them, and the rule is where the
+  string's author is** (0.3). Both are a total function of the phase through
+  **display labels**, which the rail imports for every other string it draws —
+  so carrying them would duplicate a lookup the surface already performs. What
+  DOES travel on the projection is a string authored outside this region: a tray
+  entry carries the lens's own `label` beside the lens's name, because a lens
+  names itself and this region does not key that. **Carried where the author is
+  elsewhere; keyed where the vocabulary is ours.** The tray still draws the full
+  label and the rail the short one — both looked up, neither carried.
+
+  **Three, and the `●` is not a fourth** (human ruling 2026-08-19). The rail
+  draws a filled dot on the station whose lens the pane is currently holding —
+  the **occupant dot** — and it is **not a station property**: it is a
+  projection of the **pane occupant**, which the region is already handed per
+  settle, read at render. Storing it on the station would be a second source of
+  truth for which lens is open. It is orthogonal to the standing rather than a
+  value of it — `▾ 2 ●` is an _openable_ station that is _also_ the open lens's
+  — so it could not be folded into that three-valued union in any case. It marks
+  **no station at all** when the pane holds the editor or the generator, which
+  is the fact the nameplate's class-2 route turns on.
 
   **The three drawn forms are presentation, not display copy** — the standing's
   `▾ N` and `·`, and the occupant dot. Only `waiting` has a drawn string; the

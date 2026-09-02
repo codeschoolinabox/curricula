@@ -12,11 +12,11 @@ constrains only this surface.
 ## Execution phases
 
 1. **Derive the stations** (sync, pure, per settle) — one station per phase in
-   the machine's fixed order, each carrying its phase, its two labels, its
-   standing, and its tray where it has one. The standing is a projection of
-   reachability and kit; the kit is the phase's attached lenses recovered on the
-   joined roster. Input: the embodiment's per-phase study record + the joined
-   lens roster. Output: the ordered stations.
+   the machine's fixed order, each carrying its phase, its standing, and its
+   tray where it has one. The standing is a projection of reachability and kit;
+   the kit is the phase's attached lenses recovered on the joined roster. Input:
+   the embodiment's per-phase study record + the joined lens roster. Output: the
+   ordered stations.
 
 2. **Derive the caption** (sync, pure, per settle) — resolve one slot's total
    precedence and produce the arm it holds. **The arm is chosen off the stations
@@ -60,7 +60,9 @@ flowchart TD
 ## Structural constraints
 
 - **The order is never minted** — stations draw in the given order; the rail
-  neither sorts nor knows the canonical five. One phase-order truth, elsewhere.
+  neither sorts nor inserts. It knows the five phase NAMES, because it keys copy
+  against that vocabulary; knowing the names is not knowing the ORDER, and the
+  order has exactly one truth, elsewhere.
 - **The caption resolves its precedence BEFORE it has anything to draw.** One
   slot, two producers, a total order between them — a render path that consults
   both producers and then chooses between two rendered strings is a structural
@@ -133,7 +135,9 @@ distinction between a derivation library and a surface's own projection.
   rail only asks, and one intent is all it raises.
 - Fit and accessibility — embody's, arriving computed.
 - The strings the rail draws — [`../display-labels.ts`](../display-labels.ts)
-  keys every one; the rail imports and never spells.
+  keys every one of the strings this region owns, and the rail imports rather
+  than spells them. A lens's own label is the LENS's and travels on the tray
+  entry — carried, not keyed.
 - The narrow-viewport geometry — the honest small-screen form is a vertical
   list: the same parts in the same order, one station per phase, an optional
   tray per station, and the barring edge between two of them. Only the direction

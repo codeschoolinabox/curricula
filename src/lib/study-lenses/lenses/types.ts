@@ -104,6 +104,13 @@ export type Lens = Gateable & {
 	 * machine vocabulary and no surface may draw it: a learner reads
 	 * _rebuild the order_, never `parsons`. Authored by the lens, because a
 	 * lens's own name for itself is not a consuming region's to key.
+	 *
+	 * ONE TEST GOVERNS IT, and it is the same one the orchestrator applies to
+	 * every string it keys: would a learner who never read this package's
+	 * glossary understand it? So a label carries no contract vocabulary —
+	 * not `lens`, not `phase` as a machine name, not a mark value — and a
+	 * lens whose honest answer is "no learner meets this" belongs off the
+	 * built-in roster rather than in a tray with a label nobody can read.
 	 */
 	readonly label: string;
 	/** The React component — a thin wrapper over the lens's pure core. */

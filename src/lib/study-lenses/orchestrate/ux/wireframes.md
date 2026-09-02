@@ -103,9 +103,10 @@ Three facts about that data shape every drawing below:
 - **the rail** — the lifecycle drawn as the machine's own conveyor: a line, one
   **station** per phase in the machine's order, and the **barring edge** drawn
   between two stations rather than on either of them.
-- **station** — the rail's per-phase element: its **phase**, its **label** and
-  **short label**, its **standing**, and its tray if it has one. The region
-  README enumerates all four and says why `standing` is deliberately not called
+- **station** — the rail's per-phase element: its **phase**, its **standing**,
+  and its tray if it has one. Its label and short label are keyed at render
+  rather than carried, and a tray entry carries the lens's own label. The region
+  README enumerates all three and says why `standing` is deliberately not called
   a mark — a **fit mark** is a level's classification and is exported; a
   standing is openable · bare · waiting, and no level is involved in it. **Never
   the phase itself** — the phase is the data, the station is what renders it.
