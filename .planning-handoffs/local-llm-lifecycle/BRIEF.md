@@ -458,3 +458,15 @@ clause ("a fired signal settles `aborted` whatever the adapter's promise then
 does") plus the abort-then-rejection skipped test; batch the four one-line
 minors. The README's adapter-obligations wording gap (its committed list omits
 the resolve-decomposed duty) goes to the gate agenda, not an edit.
+
+### Phase-1 backend watch items (recorded 2026-09-02 — durable home)
+
+Two hazards measured against WebLLM v0.2.84's implementation during Phase-0
+planning, carried here so Phase 1 inherits them from the tree (a plan file is
+not a record): **(1)** `triggerStop` commits the truncated assistant message to
+the engine's conversation history — verify the adapter's per-call-messages
+pattern keeps a cancelled reply out of the next prompt; **(2)** worker-mode
+`interruptGenerate` is fire-and-forget across `postMessage` — the flag can land
+after a generation already ended, which is the late-abort poison arm. Both sit
+under ruling 4's usable-after-abort commitment; the third watch item (the
+interrupt-flag poison behavior itself) is already recorded at ruling 4.
