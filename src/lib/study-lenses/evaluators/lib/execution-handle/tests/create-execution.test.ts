@@ -375,7 +375,7 @@ describe('edge cases', () => {
 		expect(settled.ok).toBe(true);
 	});
 
-	it.skip('a source result rejection settles the source-defect result', async () => {
+	it('a source result rejection settles the source-defect result', async () => {
 		const source = createStreamingSource([], { ok: true, events: [] });
 		const rejecting = {
 			...source,
@@ -560,7 +560,7 @@ describe('the laws the quarry never had', () => {
 		expect(source.nextCalls()).toBe(0);
 	});
 
-	it.skip('a throwing source is never re-entered', async () => {
+	it('a throwing source is never re-entered', async () => {
 		let calls = 0;
 		const source = createStreamingSource(['a'], { ok: true, events: [] });
 		const throwing = {
@@ -578,7 +578,7 @@ describe('the laws the quarry never had', () => {
 		expect(calls).toBe(1);
 	});
 
-	it.skip('a throwing source settles the source-defect result', async () => {
+	it('a throwing source settles the source-defect result', async () => {
 		const source = createStreamingSource(['a'], { ok: true, events: [] });
 		const throwing = {
 			...source,
@@ -589,6 +589,73 @@ describe('the laws the quarry never had', () => {
 		const execution = createExecution(throwing);
 
 		expect(await execution.result).toBe(DEFECT);
+	});
+
+	it('the thrown cause reaches sourceDefectResult', async () => {
+		const failure = new Error('assembly failed');
+		let seen: unknown;
+		const source = createStreamingSource(['a'], { ok: true, events: [] });
+		const throwing = {
+			...source,
+			start(_mode: 'iterate' | 'batch') {
+				throw failure;
+			},
+			sourceDefectResult(cause: unknown): MockResult {
+				seen = cause;
+				return DEFECT;
+			},
+		};
+		const execution = createExecution(throwing);
+
+		await execution.result;
+
+		expect(seen).toBe(failure);
+	});
+
+	it('a mid-pull rejection cause reaches sourceDefectResult', async () => {
+		const failure = new Error('pull failed');
+		let seen: unknown;
+		const source = createStreamingSource(['a'], { ok: true, events: [] });
+		const rejecting = {
+			...source,
+			events: {
+				next(): Promise<IteratorResult<string>> {
+					return Promise.reject(failure);
+				},
+			},
+			sourceDefectResult(cause: unknown): MockResult {
+				seen = cause;
+				return DEFECT;
+			},
+		};
+		const execution = createExecution(rejecting);
+
+		await execution.result;
+
+		expect(seen).toBe(failure);
+	});
+
+	it('a stop-throw cause reaches sourceDefectResult', async () => {
+		const failure = new Error('stop failed');
+		let seen: unknown;
+		const source = createStreamingSource(['a', 'b'], { ok: true, events: [] });
+		const throwingStop = {
+			...source,
+			stop() {
+				throw failure;
+			},
+			sourceDefectResult(cause: unknown): MockResult {
+				seen = cause;
+				return DEFECT;
+			},
+		};
+		const execution = createExecution(throwingStop);
+		await execution[Symbol.asyncIterator]().next();
+
+		execution.cancel();
+		await execution.result;
+
+		expect(seen).toBe(failure);
 	});
 
 	it('a settle during the first pull stands the drainer down', async () => {
@@ -828,7 +895,7 @@ describe('the laws the quarry never had', () => {
 		expect(source.stopCalls()).toBe(1);
 	});
 
-	it.skip('an events rejection mid-pull settles the source-defect result', async () => {
+	it('an events rejection mid-pull settles the source-defect result', async () => {
 		const source = createStreamingSource(['a'], { ok: true, events: [] });
 		const rejecting = {
 			...source,
@@ -842,7 +909,161 @@ describe('the laws the quarry never had', () => {
 		expect(await execution.result).toBe(DEFECT);
 	});
 
-	it.skip('a stop that throws settles the source-defect result', async () => {
+	it('a rejecting pull stands the drainer down', async () => {
+		let pulls = 0;
+		const source = createStreamingSource(['a'], { ok: true, events: [] });
+		const rejecting = {
+			...source,
+			events: {
+				next(): Promise<IteratorResult<string>> {
+					pulls += 1;
+					if (pulls === 1) {
+						return Promise.reject<IteratorResult<string>>(
+							new Error('pull broke'),
+						);
+					}
+					return Promise.resolve({ value: 'x', done: false });
+				},
+			},
+		};
+		const execution = createExecution(rejecting);
+		await execution.result;
+
+		await execution.result;
+		await execution.result;
+
+		expect(pulls).toBe(1);
+	});
+
+	it('a result-rejection defect settle still attempts disposal', async () => {
+		const source = createStreamingSource([], { ok: true, events: [] });
+		const rejecting = {
+			...source,
+			result: Promise.reject<MockResult>(new Error('source broke')),
+		};
+		const execution = createExecution(rejecting);
+
+		await execution.result;
+
+		expect(source.returnCalls()).toBe(1);
+	});
+
+	it('a cancel after a defect-routed settle never calls stop', async () => {
+		const source = createStreamingSource([], { ok: true, events: [] });
+		const rejecting = {
+			...source,
+			result: Promise.reject<MockResult>(new Error('source broke')),
+		};
+		const execution = createExecution(rejecting);
+		await execution.result;
+
+		execution.cancel();
+
+		expect(source.stopCalls()).toBe(0);
+	});
+
+	it('a defect-routed pull rejection also attempts disposal', async () => {
+		let disposals = 0;
+		const source = createStreamingSource(['a'], { ok: true, events: [] });
+		const rejecting = {
+			...source,
+			events: {
+				next: () =>
+					Promise.reject<IteratorResult<string>>(new Error('pull broke')),
+				return(): Promise<IteratorResult<string>> {
+					disposals += 1;
+					return Promise.resolve({ value: undefined, done: true });
+				},
+			},
+		};
+		const execution = createExecution(rejecting);
+
+		await execution.result;
+
+		expect(disposals).toBe(1);
+	});
+
+	it('an iterate-mode pull rejection settles the source-defect result', async () => {
+		const source = createStreamingSource(['a'], { ok: true, events: [] });
+		const rejecting = {
+			...source,
+			events: {
+				next: () =>
+					Promise.reject<IteratorResult<string>>(new Error('pull broke')),
+			},
+		};
+		const execution = createExecution(rejecting);
+		await execution[Symbol.asyncIterator]().next();
+
+		expect(await execution.result).toBe(DEFECT);
+	});
+
+	it('an iterate-mode pull rejection ends the iterator', async () => {
+		const source = createStreamingSource(['a'], { ok: true, events: [] });
+		const rejecting = {
+			...source,
+			events: {
+				next: () =>
+					Promise.reject<IteratorResult<string>>(new Error('pull broke')),
+			},
+		};
+		const execution = createExecution(rejecting);
+
+		const step = await execution[Symbol.asyncIterator]().next();
+
+		expect(step.done).toBe(true);
+	});
+
+	it('a second pull after a defect-routed settle stays inert', async () => {
+		let pulls = 0;
+		const source = createStreamingSource(['a'], { ok: true, events: [] });
+		const rejecting = {
+			...source,
+			events: {
+				next(): Promise<IteratorResult<string>> {
+					pulls += 1;
+					return Promise.reject<IteratorResult<string>>(
+						new Error('pull broke'),
+					);
+				},
+			},
+		};
+		const execution = createExecution(rejecting);
+		const iterator = execution[Symbol.asyncIterator]();
+		await iterator.next();
+
+		await iterator.next();
+
+		expect(pulls).toBe(1);
+	});
+
+	it('a pull rejection after delivered events settles the source-defect result', async () => {
+		let pulls = 0;
+		const source = createStreamingSource(['a'], { ok: true, events: [] });
+		const rejecting = {
+			...source,
+			events: {
+				next(): Promise<IteratorResult<string>> {
+					pulls += 1;
+					if (pulls === 1) {
+						return Promise.resolve({ value: 'a', done: false });
+					}
+					return Promise.reject<IteratorResult<string>>(
+						new Error('pull broke'),
+					);
+				},
+			},
+		};
+		const execution = createExecution(rejecting);
+		const iterator = execution[Symbol.asyncIterator]();
+		await iterator.next();
+
+		await iterator.next();
+
+		expect(await execution.result).toBe(DEFECT);
+	});
+
+	it('a stop that throws settles the source-defect result', async () => {
 		const source = createStreamingSource(['a', 'b'], { ok: true, events: [] });
 		const throwing = {
 			...source,

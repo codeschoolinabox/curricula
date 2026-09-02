@@ -248,6 +248,13 @@ kept it true in the deprecated region:
 - **One-shot** — a settled streaming handle does not replay; the result's events
   array is the record (HR-2; the quarry's replay iterator and `.result.logs`
   cache do not cross).
+- **Trusted fallback thunks** (human ruling 2026-09-01) — the source's
+  `inertCancelResult` and `sourceDefectResult` are TRUSTED seam members: a
+  throwing fallback is deliberately not defect-routed — a source-author bug at
+  the seam. On the synchronous routes (a `start` throw, a `stop` throw) the
+  fallback's own throw propagates out of the library to the caller; on the
+  fire-and-forget routes (a `result` rejection, a drainer pull rejection) it
+  becomes an unobserved rejection and the settle never resolves.
 - **Settle ends consumption — a guarantee and a best effort.** GUARANTEED,
   library-side, unconditional: on the settle, whatever the mode, the library
   stops pulling `events` and ends any live consumer iterator; later pulls are

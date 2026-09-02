@@ -5,23 +5,13 @@
  * closes before `start` runs, one internal drainer behind every batch
  * ignition, the memoized settle that IS the source's `result`
  * (defect-routed), idempotent out-of-band cancel with a teardown latch
- * that pre-empts the start latch, one-shot streaming, and
+ * that pre-empts the start latch, one-shot streaming,
  * settle-ends-consumption (guaranteed library-side; best-effort source
- * disposal, never awaited). README.md § The laws carries each law with
- * its pin; DOCS.md carries the sketch.
- *
- * Phase 1 in flight: this body carries Install (extras over controls,
- * frozen last), Ignite through one start latch (both batch doors and
- * the consumer iterator's first pull, each fixing the mode), both
- * Drive paths (the drainer racing the settle against each pull; the
- * memoized consumer iterator forwarding the source's events behind a
- * one-microtask settled re-check), Settle ending consumption (drainer
- * stand-down, live-iterator end, best-effort source disposal), and
- * Teardown's cancel routes (inert-cancel settle; post-ignition
- * `stop()` at most once, never queued behind a pending pull;
- * post-settlement and repeat cancels inert on the source; break
- * resolving only after the settle). The defect routes land with the
- * last X1 increment against the committed-skipped suite in tests/.
+ * disposal, never awaited), and the source-defect routing that makes
+ * every route fulfill — a throw or rejection from any source member
+ * answers the evaluator's own `sourceDefectResult` through the one
+ * settle door, never a rejection. README.md § The laws carries each
+ * law with its pin; DOCS.md carries the sketch.
  */
 
 import type {
@@ -61,6 +51,7 @@ export default function createExecution<
 	const state: HandleState<TEvent, TResult> = {
 		source,
 		settle: null,
+		settleWith: null,
 		mode: null,
 		iterator: null,
 		settled: false,
@@ -115,9 +106,14 @@ export default function createExecution<
 /**
  * The one ignition gate every touch routes through: closes the start
  * latch (the settle assignment, BEFORE `start` runs), fixes the mode
- * for the handle's life, tells the source the engaged mode, and — on a
- * batch ignition of a streaming source only — engages the drainer.
- * Later touches of either kind answer the already-latched settle.
+ * for the handle's life, subscribes the one settle door to the
+ * source's `result` (fulfillments pass through; a rejection routes to
+ * the source-defect result — the memoized settle never rejects),
+ * tells the source the engaged mode, and — on a batch ignition of a
+ * streaming source only — engages the drainer. A `start` that throws
+ * settles the source-defect result and never engages the drainer; the
+ * closed latch is what makes the throw unrepeatable. Later touches of
+ * either kind answer the already-latched settle.
  */
 function ignite<TEvent, TResult>(
 	state: HandleState<TEvent, TResult>,
@@ -125,24 +121,32 @@ function ignite<TEvent, TResult>(
 ): Promise<TResult> {
 	if (state.settle === null) {
 		// eslint-disable-next-line functional/immutable-data -- the start latch is the handle's one mutable cell (engine RunState precedent; sanctioned in this cluster's ar-3 consultation)
-		state.settle = state.source.result;
+		state.settle = new Promise<TResult>(function holdTheSettle(resolve) {
+			// eslint-disable-next-line functional/immutable-data -- the settle door's resolver rides the same sanctioned state record
+			state.settleWith = resolve;
+		});
 		// eslint-disable-next-line functional/immutable-data -- the mode latch rides the same state record (fixed at ignition, human ruling 2026-08-18)
 		state.mode = mode;
-		void state.settle.then(
-			function markSettled() {
-				// eslint-disable-next-line functional/immutable-data -- the settled flag closes the same sanctioned state record; post-settlement cancels read it to stay inert on the source
-				state.settled = true;
-				attemptSourceDisposal(state.source.events);
+		void state.source.result.then(
+			function settleFromSource(result: TResult) {
+				settleExecution(state, result);
 			},
-			function ignoreUntilDefectRouting() {},
+			function routeResultRejection(error: unknown) {
+				settleExecution(state, state.source.sourceDefectResult(error));
+			},
 		);
-		state.source.start(mode);
+		try {
+			state.source.start(mode);
+		} catch (error) {
+			settleExecution(state, state.source.sourceDefectResult(error));
+			return state.settle;
+		}
 		if (mode === 'batch' && state.source.events !== undefined) {
-			// Deliberate gap until the defect-routes increment: a rejecting
-			// pull is an unhandled rejection here — as is a settle rejection
-			// on a pure-iterate consumption that never touches .result; the
-			// source-defect routing lands with its committed-skipped rows.
-			void drainUntilSettleOrExhaustion(state.settle, state.source.events);
+			void drainUntilSettleOrExhaustion(
+				state,
+				state.settle,
+				state.source.events,
+			);
 		}
 	}
 	return state.settle;
@@ -155,18 +159,25 @@ function ignite<TEvent, TResult>(
  * delivered items (the result's own record is the evaluator's), exit
  * on events-exhaustion OR the settle, whichever comes first — each
  * pull races the settle, so a mid-drain settle stands the drainer
- * down with no further pulls owed, even while a pull is suspended.
+ * down with no further pulls owed, even while a pull is suspended. A
+ * pull that rejects settles the source-defect result and stands the
+ * drainer down the same way.
  */
-async function drainUntilSettleOrExhaustion<TResult>(
+async function drainUntilSettleOrExhaustion<TEvent, TResult>(
+	state: HandleState<TEvent, TResult>,
 	settle: Promise<TResult>,
 	events: AsyncIterator<unknown>,
 ): Promise<void> {
-	const settleEndsTheDrain = settle.then(toEndStep, toEndStep);
-	for (;;) {
-		const step = await Promise.race([settleEndsTheDrain, events.next()]);
-		if (step.done === true) {
-			return;
+	const settleEndsTheDrain = settle.then(toEndStep);
+	try {
+		for (;;) {
+			const step = await Promise.race([settleEndsTheDrain, events.next()]);
+			if (step.done === true) {
+				return;
+			}
 		}
+	} catch (error) {
+		settleExecution(state, state.source.sourceDefectResult(error));
 	}
 }
 
@@ -237,7 +248,12 @@ function createConsumerIterator<TEvent, TResult>(
 				if (state.settled || state.stopped) {
 					return { value: undefined, done: true };
 				}
-				return events.next();
+				return events
+					.next()
+					.then(undefined, function routePullRejection(error: unknown) {
+						settleExecution(state, state.source.sourceDefectResult(error));
+						return { value: undefined, done: true as const };
+					});
 			});
 		},
 		return(): Promise<IteratorResult<TEvent>> {
@@ -250,7 +266,37 @@ function createConsumerIterator<TEvent, TResult>(
 	};
 }
 
-// ─── Phase 4: Settle — settle ends consumption ────────────────────────────────
+// ─── Phase 4: Settle — the one settle door ────────────────────────────────────
+
+/**
+ * The one door every started route settles through — the source's own
+ * fulfilled `result` and all four defect routes (`start` throws,
+ * `result` rejects, `events` rejects mid-pull, `stop` throws) alike.
+ * Idempotent: the first settle wins — the settled guard makes the
+ * later routes inert and keeps disposal single-shot. Marks the
+ * teardown latch's settled cell, resolves the memoized settle, and
+ * attempts the best-effort source disposal. The fallback thunks
+ * (`inertCancelResult`, `sourceDefectResult`) are TRUSTED seam
+ * members and a throwing fallback is deliberately not defect-routed —
+ * a source-author bug at the seam. What that costs depends on the
+ * route: on the synchronous routes (a `start` throw, a `stop` throw)
+ * the fallback's throw propagates out of the library to the caller;
+ * on the two fire-and-forget routes (a `result` rejection, a drainer
+ * pull rejection) it becomes an unobserved rejection and the settle
+ * never resolves. Trusted means trusted.
+ */
+function settleExecution<TEvent, TResult>(
+	state: HandleState<TEvent, TResult>,
+	result: TResult,
+): void {
+	if (state.settled) {
+		return;
+	}
+	// eslint-disable-next-line functional/immutable-data -- the settled flag closes the same sanctioned state record; post-settlement cancels and pulls read it to stay inert on the source
+	state.settled = true;
+	state.settleWith?.(result);
+	attemptSourceDisposal(state.source.events);
+}
 
 /**
  * The best-effort half of settle-ends-consumption: disposal of the
@@ -300,14 +346,21 @@ function cancelExecution<TEvent, TResult>(
 	} else if (state.mode !== null && !state.settled && !state.stopped) {
 		// eslint-disable-next-line functional/immutable-data -- the stop-once latch rides the same sanctioned state record
 		state.stopped = true;
-		state.source.stop();
+		try {
+			state.source.stop();
+		} catch (error) {
+			settleExecution(state, state.source.sourceDefectResult(error));
+		}
 	}
 	return state.settle;
 }
 
 /**
- * The handle's internal state: the settle field IS the start latch;
- * the mode field is the mode latch, fixed at ignition for the
+ * The handle's internal state: the settle field IS the start latch —
+ * a deferred every route resolves through the one settle door
+ * (`settleExecution`), so the memoized settle never rejects; the
+ * settleWith field is that door's resolver, set when the latch
+ * closes; the mode field is the mode latch, fixed at ignition for the
  * handle's life; the iterator field memoizes the one consumer
  * iterator a streaming handle ever answers; the settled and stopped
  * flags are the teardown latch's two cells — settled makes a late
@@ -317,6 +370,7 @@ function cancelExecution<TEvent, TResult>(
 type HandleState<TEvent, TResult> = {
 	readonly source: StreamingSource<TEvent, TResult> | ResultOnlySource<TResult>;
 	settle: Promise<TResult> | null;
+	settleWith: ((result: TResult) => void) | null;
 	mode: ExecutionMode | null;
 	iterator: AsyncIterator<TEvent> | null;
 	settled: boolean;
