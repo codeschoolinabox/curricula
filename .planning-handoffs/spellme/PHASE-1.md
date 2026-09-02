@@ -1236,17 +1236,62 @@ campaign already names; the trimming is disclosed rather than silent.
    the 2026-08-26 ruling. ⚠ **A form the twin draws with a button, drawn without
    one, is not that form** — and the only instrument that found this was a human
    looking at the surface.
-3. **Tab does not reach the element-kind buttons — UNRESOLVED, and the one
-   finding that could be behavioral.** Two causes are consistent with the report
-   and they are not equally serious: either the buttons are genuinely out of the
-   tab order, which contradicts `ux/user-journeys.md` Journey 5 outright and is
-   a defect; or tab reaches them and **nothing renders differently**, which is
-   cause 1 again. Ruled out by measurement: nothing in this module sets
-   `tabindex`, and the orchestrator's `inert` wrapper cannot be active, because
-   `inert` blocks pointer events too and the human's clicks worked. Not ruled
-   out: a missing focus indicator. **Carried as a gate on the stylesheet
-   increment and re-checked at 🔍 #4**, with a visible focus indicator among its
-   named obligations either way.
+3. ✅ **RESOLVED 2026-09-01 — NOT A DEFECT, and not this package's to fix. Do
+   not go looking for this.** Re-checked at 🔍 #4 once the stylesheet shipped a
+   focus indicator, which killed the "reached but invisible" arm. The deciding
+   observation was a SPLIT, not a single datum: in the human's browser tab
+   reaches the **extent stepper** but none of the buttons, and **in Firefox the
+   buttons are reached normally** (human observations, 2026-09-01). That is the
+   signature of **macOS Safari's default tab order**, which includes text fields
+   and excludes buttons and links until "Press Tab to highlight each item on a
+   webpage" is switched on. The DOM was correct all along [measured 2026-09-01,
+   against the rendered surface: the controls are `BUTTON`, `tabIndex` **0**,
+   `disabled` false, carrying no `tabindex` attribute, inside neither a
+   `fieldset[disabled]` nor an `[inert]` subtree].
+
+   ⚠ **The exposure is PACKAGE-WIDE and nobody has looked at it** [measured
+   2026-09-01: `<button>` occurrences — `parsons/index.tsx` **7**,
+   `writeme/index.tsx` **3**, `spellme/index.tsx` **3**, and the orchestrator's
+   own chrome **4**]. Every one is unreachable in that configuration. It
+   surfaced here first only because Journey 5 is the package's one twin written
+   for a keyboard learner — which is the twin earning its keep, not a spellme
+   defect.
+
+   ⚠ **`ux/user-journeys.md` Journey 5 makes a claim that is FALSE in a shipping
+   browser's default configuration** — "They tab to the kind picker, arrow
+   through ten options, tab to the extent stepper … **It works** … Nothing about
+   this lens requires pointing." In a default Safari that journey gets one of
+   its four steps. The twin is not edited on this evidence: whether it should
+   qualify the claim by browser, or whether the SURFACE should change so the
+   claim becomes true, is the human's and is the open question below.
+
+   ⚠ **The strongest lead is in the twin's own wording, and it is a design
+   question rather than a fix.** "Tab to the kind picker, **arrow through** ten
+   options" describes one tab stop plus arrow keys — which is how a **native
+   radio group** behaves. Radios are form controls, like the number input that
+   IS reached, so a radio-group picker would plausibly be reachable in Safari's
+   default and would give the arrow-key roving Journey 5 narrates for free —
+   closing the gap an `ar-4` independently raised, that the implementation gives
+   ten tab stops where the twin implies one. ⚠ **It is NOT proposed here**, for
+   two reasons: it reopens the 2026-08-26 ruling making `aria-pressed` the sole
+   carrier of the selected kind, which a radio group carries differently; and
+   that radios sit in Safari's reduced tab order is **inferred from the
+   number-input result, not measured** [the on-page radios are `disabled` and so
+   unreachable by construction, which is why the cheap test was unavailable].
+
+   **The superseded reasoning, kept because it is the record:** **Tab does not
+   reach the element-kind buttons — UNRESOLVED, and the one finding that could
+   be behavioral.** Two causes are consistent with the report and they are not
+   equally serious: either the buttons are genuinely out of the tab order, which
+   contradicts `ux/user-journeys.md` Journey 5 outright and is a defect; or tab
+   reaches them and **nothing renders differently**, which is cause 1 again.
+   Ruled out by measurement: nothing in this module sets `tabindex`, and the
+   orchestrator's `inert` wrapper cannot be active, because `inert` blocks
+   pointer events too and the human's clicks worked. Not ruled out: a missing
+   focus indicator. **Carried as a gate on the stylesheet increment and
+   re-checked at 🔍 #4**, with a visible focus indicator among its named
+   obligations either way.
+
 4. **The `[study source]` button is not the orchestrator's and is not legacy.**
    The human asked for it to be commented out or deleted as "legacy". It is the
    sandbox page's own fixture: `spiralearn/sandbox/orchestrate/index.mdx` gives
