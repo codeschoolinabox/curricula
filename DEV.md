@@ -643,20 +643,21 @@ after the twin they hold** (human ruling 2026-08-13). A twin sits in the module
 directory next to `README.md`, `DOCS.md` and `types.ts` — not in a separate
 tree, not under a docs root. **This codifies what the repo already does rather
 than introducing anything** — the machine twin is already written as a
-notional-machine document beside its module's README and DOCS in two live
-modules, and both link to it
-([`src/lib/study-lenses/language-levels/jej/notional-machine.md`](./src/lib/study-lenses/language-levels/jej/notional-machine.md)
-is one; `src/lib/embody/language-levels/just-enough-javascript/` holds the
-other) [measured 2026-08-13: `git ls-files | grep -i notional-machine` → four
-files, a `.md` and an `.svg` under each of those two directories].
+notional-machine document beside its module's README and DOCS across the regions
+that hold one [measured 2026-09-01: `git ls-files | grep 'notional-machine\.md'`
+→ **10** files in 10 directories, two of which also hold an `.svg`; the tree
+moves, so re-measure rather than quoting this]. One caveat the count exposes: at
+least one of them sits three levels below its region's README rather than beside
+it, so the lookup below is a convention the tree does not yet uniformly honour.
 
-| `twin-doc`           | The document it names                                |
-| -------------------- | ---------------------------------------------------- |
-| `machine`            | a notional-machine document, `.md` beside the README |
-| `user`               | a ux directory beside the README — see below         |
-| `learner`, `teacher` | **unnamed** — no instance has ever been owed         |
-| `both`               | the two documents that kind of work names            |
-| `none`               | nothing; the recorded answer discharges 0.2          |
+| `twin-doc`           | The document it names                                                          |
+| -------------------- | ------------------------------------------------------------------------------ |
+| `machine`            | a notional-machine document, `.md` beside the README                           |
+| `data`               | a data-model document, **data-model.md**, beside the README — see below        |
+| `user`               | a ux directory beside the README — see below                                   |
+| `learner`, `teacher` | **unnamed** — no instance has ever been owed                                   |
+| `both`               | **historical** — retired 2026-09-01; the two documents that kind of work named |
+| `none`               | nothing; the recorded answer discharges 0.2                                    |
 
 **The user twin is a directory, and which documents it holds is the module's own
 call** (human ruling 2026-08-13, given the first time a `user` twin was owed —
@@ -705,6 +706,135 @@ Frustrations / Scenario) and `07-backlog.md` (_"As a [type of user] I want to
 Should / Could). **Prefer the curriculum's forms to inventing house ones** where
 the module's audience is taught them — a twin in a private vocabulary is one
 more thing between the module and the people it models.
+
+**The data twin is one document, named for what it models** (human ruling
+2026-09-01). Where the machine twin models what does the processing, the data
+twin models what is processed — the plumbing, and the negative-space shape the
+water takes. A module may owe both; neither is nested in the other, and this row
+therefore follows the machine row's formula rather than the user row's.
+
+**Why it is not a `## Data model` section in `DOCS.md` — gate position.**
+`DOCS.md` is written at step 0.3, alongside `types.ts` and after AR-1, so a
+section there can only describe the types. A twin is written at 0.2 and
+challenged by AR-1 before the types lock, so it constrains them. Identity,
+residency and lifetime are decisions that belong before a contract locks, not
+after.
+
+**Why it is not a section in the README either — volume and separability, not
+gate position.** The README also sits before the types, at 0.1, so gate position
+alone does not choose between them and it is not claimed to (human ruling
+2026-09-01, on AR-1's challenge). Two other things do. A data model large enough
+to constrain a `types.ts` is large enough to unbalance a README whose job is to
+explain the module in plain language — the same reason the machine twin is a
+document rather than a README section, and the machine twins now run from 116 to
+840 lines. And a separate document is separately reviewable, separately
+staleable, and separately citable from the prose that introduces the module.
+**Below that size the README section is right and this row is not owed.** The
+threshold is a judgement and no number is pinned; the machine twins' floor of
+116 lines is the usable marker, against a section case of 33 [measured
+2026-09-01]. That section case is worth reading before deciding:
+`git grep -n 'Ownership boundary'` finds holder-ownership, a shared coordinate
+system and a between-calls lifetime rule, carried in a README and reaching AR-1
+exactly as a twin would.
+
+**Where the machine twin ends and the data twin begins — the split matters more
+than any other boundary here, because the two documents sit side by side**
+(human ruling 2026-09-01). A machine twin already models entities, not merely
+run phases: `git grep -n '^### Bindings'` finds a machine twin giving each
+binding a scope it lives in, a `'tdz' | 'initialized' | 'dead'` status, and a
+declare-to-dead lifecycle, above a containment model distinguishing direct
+containment from reference. Identity, ownership, lifetime and temporal
+invariants, all of them, in a notional-machine document. **The line is whose
+data it is.** A machine twin models the entities the modelled machine holds as
+part of being that machine — the language's bindings, scopes and realms are
+furniture of the machine a reader must predict. A data twin models the shapes
+**this module itself** produces, holds and hands on: what crosses its boundary,
+what lives in its own holders, and what a consumer receives.
+
+**Where the module _is_ the machine, "whose" does not decide, and the tie-break
+is what a reader needs the shape for** (human ruling 2026-09-01, on AR-1's
+second challenge). This is not the edge case but the common one: only the
+language-level machine twins model something other than their own module, and in
+`lib/engine` the handle, the item stream and the time budget are each
+simultaneously furniture of the modelled machine and a shape the module hands
+on. So: if a reader needs the shape to **predict what the machine will do**, it
+is machine-twin material — which is what a machine twin's
+`## Predictions worth making` section is usually for. **That heading is where
+the test tends to be written down, not a precondition for applying it**: seven
+of the ten machine twins carry it, and the designated first instance is not
+among them, yet the test still decides its central object below [measured
+2026-09-01; these counts move — re-measure rather than quoting them]. If a
+reader needs it to **hold the value correctly once received** — who owns it now,
+how long it lives, whether it is ground or recomputable, what makes two of them
+the same — it is data-twin material, **even though this module produced it**.
+The designated first instance turns on exactly this: its machine twin already
+says its published sequence is "derived from the channels plus the source, never
+by scanning again", which is a prediction about the machine; that sequence's
+holders and lifetime are not, and they are what its data twin is for.
+
+**What the data twin owns, stated against the artifacts that overlap it.**
+`types.ts` carries one shape's structure; a `## Data flow` diagram carries the
+route, its nodes shapes and its edges transformations. For the module's own
+shapes, the data twin carries what neither can state: what makes two values
+**the same** value; which holder **owns** each shape, where the data-flow rules
+make holders deliberately invisible; each shape's **lifetime**, its creation and
+destruction conditions; which shapes are **ground truth** and which are
+recomputable cache; the invariants binding two separately-held values **at the
+same instant**; and **non-persistence stated positively** — this shape is never
+written down, it exists only between here and there. The last of those is why
+the row exists at all: a shape that is only generated or transformed looks
+identical to a persisted one in every other artifact.
+
+**One boundary rule, because the two names are one word apart.** A
+`## Data flow` section is the route; the data twin is the water. The flow draws
+each shape as a node and each transformation as an edge, and **a statement that
+fits in a node label or an edge label belongs in the flow**. What the twin adds
+about a node it cannot draw — who holds that shape, how long, what makes two of
+them the same, and whether it is ground or cache — belongs here.
+
+**Deliberately unrepresentable states are not this document's alone.**
+`types.ts` is the enforcement mechanism and stays authoritative for the illegal
+states a union can foreclose. The data twin names the ones the type system
+**cannot** reach — temporal ("this must never outlive that") and cross-holder
+("these two must never disagree") — and records which reachable-illegal states
+were left representable, and why.
+
+**No format is pinned and no menu is named** (human ruling 2026-09-01). What the
+document owns is fixed above; which sections it uses is the module's own call,
+justified where that module documents itself. The ux menu was named only when a
+campaign owed eight at once, and the revision before it declined to name a menu
+at all on the ground that pinning a set ahead of its second use invents the
+convention — this document has no instances yet [measured 2026-09-01: `git
+ls-files | grep -c data-model` → **0**]. Revisit when a second module owes one,
+and date the ruling here. For the shape of this material as the repo writes it
+today, `git grep -n 'State residency'` finds the closest thing there is.
+
+**`data`, not `state` — the synonym is dispatched here rather than left
+standing** (human ruling 2026-09-01). Five of the six sections the repo has
+written on this material are named for _state_ — `State slots` twice,
+`State design`, `State mutation model` and `State residency`; only
+`Ownership boundary` is not [measured 2026-09-01]. The axis value is `data`
+anyway, because _state_ names a subset: what a holder currently holds. This row
+also covers shapes produced and handed straight on without ever being held,
+which is the non-persistence case it exists for. A module that titles a section
+of its data twin `## State residency` is using the narrower word correctly; the
+value stays `data`, and step 0.1's synonym rule is discharged by saying which is
+which rather than by picking one and hoping.
+
+**Why this row is named while `learner` and `teacher` stay unnamed, when all
+three have zero instances** (human ruling 2026-09-01). The row is a
+**precondition** of its first instance in a way a menu is not: without the
+value, the twin ask at 0.2 has nothing to offer and the commit body nothing to
+record, so the first data model could not be written at all. `learner` and
+`teacher` have no pending instance, so naming their documents would be invention
+rather than precondition. That is the test — not that someone intends to write
+one.
+
+**`embody` is the designated first instance** (human ruling 2026-09-01) — the
+data core of the study-lenses region, whose model is derived from learner needs
+intersected with the ECMAScript specification and the Acorn / ESLint tooling
+models. `orchestrate` is the next candidate, and its transport is gated on its
+own next Phase-0 reshape, under a loss ledger then rather than now.
 
 **`learner` and `teacher` stay parked, deliberately.** Neither has ever been
 owed [measured 2026-08-13: no commit body records either value]. Naming a
@@ -1186,7 +1316,12 @@ and "curriculum work"; the record key is `work:`.
 whole reason they are two kinds:**
 
 - **Software work** owes the **machine** and the **user** — one F-twin and one
-  V-twin.
+  V-twin — and may additionally owe a written account of its **data** (human
+  ruling 2026-09-01). That third document adds no third _stance_: F and V remain
+  the pair, and `twin-doc` is a documentation axis that never asserts who holds
+  what (the blockquote closing [§ twin-doc](#twin-doc)). What it adds is a third
+  thing that can be modelled — the water, as well as the plumbing and the
+  person.
 - **Curriculum work** owes the **learner** and the **teacher** — two audiences
   of one artifact, and two genuinely different twinnings, not two readings of
   one (human ruling 2026-08-04). A teacher running material in class needs
@@ -1203,12 +1338,12 @@ whole reason they are two kinds:**
 
 ### twin-doc
 
-`twin-doc` names **which reader this work owes a written account to**. Values:
+`twin-doc` names **which model this work owes a written account of**. Values:
 
-| Kind            | Values                                      |
-| --------------- | ------------------------------------------- |
-| software work   | `machine` · `user` · `both` · **`none`**    |
-| curriculum work | `learner` · `teacher` · `both` · **`none`** |
+| Kind            | Values                                   |
+| --------------- | ---------------------------------------- |
+| software work   | `machine` · `user` · `data` · **`none`** |
+| curriculum work | `learner` · `teacher` · **`none`**       |
 
 **The value is settled by asking — the twin ask, at Phase 0 step 0.2** (human
 ruling 2026-08-11, the epistemology strip). The question, both of its branches,
@@ -1216,6 +1351,97 @@ which values each kind of work is offered, what silence means, and where the
 answer is recorded are stated once, in
 [§ Phase 0](#phase-0-documentation-specification-before-any-code)'s twin ask —
 not restated here, so the two cannot drift apart.
+
+**A value may name more than one model, written as a `+` list in the canonical
+order — `machine + user + data` for software work, `learner + teacher` for
+curriculum work** (human ruling 2026-09-01). `both` is **retired from new
+records** and survives only as the historical value it was: in a commit body
+written before 2026-09-01 it means the two documents that kind of work named,
+which is unambiguous there because the row had exactly two members when it was
+written. Its meaning is kept on the naming table's own row in
+[§ Directory Documentation Convention](#directory-documentation-convention),
+which is where a reader who lands on a historical `both` goes to decode it.
+
+**The ground for retiring it is measured, not stylistic.**
+`git log --all --grep='twin-doc: machine'` returns 40 commits — 39 genuine
+settings-line records and one that only discusses the value in prose — and
+misses all 31 that record `twin-doc: both`, every one of which is
+`work: software` and so owed a machine twin [all measured 2026-09-01; the corpus
+moves, so re-measure rather than quoting these] — so the corpus under-reports
+machine twins by nearly half, and no quantifier value can repair that. Renaming
+it `all` was considered and rejected: it inherits the same blindness, and it
+re-runs the silent widening the first time a fourth value lands.
+
+**Flatten before you grep, and match the value token, never the full list.** A
+list is longer than the quantifier it replaces, and the settings line wraps (the
+hazard below) — so a break falling inside a list defeats both
+`twin-doc: machine + user` and the line-anchored `twin-doc:.*machine`, and it
+defeats them worst for whichever value sits last in canonical order. The
+wrap-immune form puts the record separator **before** each commit, so flattening
+yields one line per commit with its SHA attached, and anchors the match on the
+settings line's own prefix so the pattern cannot wander into prose:
+
+```bash
+git log --all --format='%x00%H %B' | tr '\n' ' ' | tr '\0' '\n' \
+  | grep -E 'work: [a-z]+ (-|·) twin-doc: [a-z+ ]*machine'
+```
+
+**Three traps were found by mutation-testing this before publishing it, and each
+one shipped in a draft first** [measured 2026-09-01]. Separating by _field_
+rather than by record emits two lines per commit and leaves every match
+unattributed. An unanchored `twin-doc:.*machine` over a flattened body crosses
+into prose and reported **29** records of `data`, a value with **zero**. And
+putting `·` inside a bracket expression — `[-·]`, `[^·-]` — makes the command
+**locale-dependent**: under `LC_ALL=C` it returned 4 where it should return 39,
+because a multibyte character in a bracket expression is only well-defined under
+a UTF-8 locale. The form above is ASCII-only inside its brackets and takes the
+separator as an alternation instead, so it gives the same answer under both. Its
+passing conditions: counts on ground truth, one line per commit, a fixture whose
+settings line breaks mid-list still matches, a value that is not first in its
+list still matches, and a prose-only body does not.
+
+**The hazard is latent, not yet realized** — no settings line in the corpus
+currently wraps inside `twin-doc` [measured 2026-09-01], which is why the naive
+grep's error today is the `both` blindness rather than a wrap. It is written
+down now because the list form is what makes wrapping likely.
+
+Putting the newest value first in canonical order was considered as a cheaper
+mitigation and rejected: it reduces one value's exposure and leaves the form
+broken for the others. The order stays append-only, and it is _the_ order and
+not _an_ order — two renderings of one set would defeat the grep this retirement
+exists to buy.
+
+**`data` is a software value only** (human ruling 2026-09-01). The curriculum
+row **gains no new value** — whether a curriculum unit owes a data model is
+unruled, and that row is still unexercised. It does lose `both`, because the
+list grammar is grammar and applies to both kinds; its canonical order is given
+above so that a curriculum unit owing two twins has a form to record, which
+retiring the quantifier without one would have taken away.
+
+**The definition sentence changed, and the change is a correction rather than an
+accommodation** (human ruling 2026-09-01). It read "which **reader** this work
+owes a written account **to**" — false of every value the axis has ever had. A
+notional machine reads nothing, and the `user` twin is not written for users
+either, which this file ruled when it named that directory `ux`: "user-docs
+reads as documentation _for_ users, which is close to the opposite of what a
+twin is"
+([§ Directory Documentation Convention](#directory-documentation-convention),
+human ruling 2026-08-14). Adding `data`, which reads nothing either, made a
+latent inaccuracy load-bearing.
+
+**The correction widens what the axis can admit, so the criterion is stated
+rather than left implicit** (human ruling 2026-09-01, on AR-1's challenge).
+"Reader" was false, but it was also **bounded** — it admitted only things that
+could be cast as audiences. "Model … of" admits anything nameable, so without a
+stop the axis drifts toward a value per artifact. The stop: **a value is
+admitted where a module owes a written account that must precede its own
+contract, and no 0.1 or 0.3 artifact can carry it at the size it needs.** Both
+halves are required, and the second is what the `user` and `data` rows each had
+to argue. Note also what `twin-doc` is not: this is a **documentation** axis,
+and `twin` is its inherited name, not a claim on
+`spiralearn/frogramming-and-vibetoading/ontology.md` § 4's predict-and-twin
+stance — which is the same point the blockquote closing this section already
+makes from the other direction.
 
 **The curriculum row is defined and currently unexercised.** Phase 0's artifacts
 are a module `README.md`, `types.ts`, a `DOCS.md` sketch and a test suite, none
@@ -1235,7 +1461,7 @@ wrap-immune. This is the hazard [§ Sourced claims](#sourced-claims) already
 names for tags; it applies to the settings line itself, and it is recorded here
 because it cost two corrections.
 
-> **Declaring a `twin-doc` names which reader is owed a document. It never
+> **Declaring a `twin-doc` names which model is owed a document. It never
 > asserts that the author holds that twin.** The taught term for producing the
 > artifact of a practice without the stance behind it is
 > _ceremony-without-twin_, and it is a failure symptom. No `twin-doc` value is
@@ -1543,7 +1769,7 @@ aspirational gate — restore it as the per-commit gate once the lint debt clear
 - [ ] Errors handled gracefully past the boundary check
 - [ ] `README.md` exists and is current in every modified directory
 - [ ] Phase 0 step 0.2 discharged and recorded: the commit body carries the
-      work-routing settings line, and at any `twin-doc` other than `none` the
+      work-routing settings line, and at any `twin-doc` other than `none` every
       named twin document exists and is current
 - [ ] `DOCS.md` written (new module) or updated (structural change); reflects
       actual implementation phases and constraints
@@ -1963,14 +2189,17 @@ required?_
 - **On "no", that is the entire twin ask.** No delegate is named, nothing is
   written into the README, and the step is discharged by the recorded answer
   itself.
-- **On "yes", a second question asks _which reader_**, offering the value set
-  for this work's kind — `machine` · `user` · `both` for software work,
-  `learner` · `teacher` · `both` for curriculum work. **The kind is never
-  asked**: it is derived from the path, mechanically
+- **On "yes", a second question asks _which model_**, offering the value set for
+  this work's kind — `machine` · `user` · `data` for software work, `learner` ·
+  `teacher` for curriculum work. More than one may be named, and the answer is
+  then recorded as a `+` list in the canonical order ([§ twin-doc](#twin-doc)).
+  **The kind is never asked**: it is derived from the path, mechanically
   ([§ Software work and curriculum work](#software-work-and-curriculum-work)),
   so the right values are offered without a third question.
-- **At any value other than `none`, the step produces the twin document
-  itself.** `twin-doc` keeps every value it has.
+- **At any value other than `none`, the step produces every twin document the
+  value names** — one per value in the list, not one per answer. `twin-doc`
+  keeps every value it has, less the retired quantifier `both`
+  ([§ twin-doc](#twin-doc)).
 
 **This is an ask, not a gate.** It does not block, and it does not add a second
 human gate — Phase 0 still has exactly one, at the end. It fires **once per
@@ -2038,6 +2267,19 @@ leave a twin in the tree contradicting `twin-doc: none` in the record. That is
 not the same-record cost accepted below, which is about a default nobody
 objected to, not about an affirmative answer being overwritten.
 
+**The bound resolves per value, not per module** (human ruling 2026-09-01). A
+module can hold one twin and owe another — a notional-machine document present,
+a data-model document absent — and the sentence above, written when a module
+either had a twin or had none, gives that case no answer. It resolves this way:
+**silence leaves standing exactly the values whose documents are present**, and
+nothing further. A value in the record naming a document that is **not** in the
+tree is not a silence case at all. It is a defect, and **AR-1 reports it — or
+AR-5's documentation-sync check, at a declared ceremony that did not fire
+AR-1**, because the step that owed that document did not produce it. The partial
+state was already reachable at the retired `both`, where two documents were owed
+and one could be missing; the list form makes it expressible rather than
+creating it.
+
 **Finding the twin is a lookup, not a search** (human ruling 2026-08-13). A twin
 document lives in the module directory beside `README.md`, `DOCS.md` and
 `types.ts`, under the name its own row gives it —
@@ -2048,8 +2290,8 @@ its menu serves, so no single formula covers both.) So "does a twin exist?" is
 answered by looking in one place. (This closes a gap recorded earlier the same
 day, when nothing fixed a twin's location and the bound above was therefore
 inert. One row — `learner` and `teacher` — is still deliberately unnamed; the
-bound holds for `machine` and for `user`, the only two values any module has
-ever owed.)
+bound holds for every named row, which is `machine`, `data` and `user`. Only
+`machine` and `user` have ever been owed by a module [measured 2026-09-01].)
 
 **The accepted cost, recorded so it is not rediscovered as a defect** (human
 ruling 2026-08-13). Four things are true and were in view when this was ruled:
@@ -2504,12 +2746,12 @@ is not modeled here, and
 ### AR-1: Design Challenge
 
 **Trigger:** During Phase 0, after the README (0.1) and step 0.2's ask, before
-`types.ts` locks the contract (0.3). It challenges the README **and** the twin
-together **wherever a twin is owed**; at `twin-doc: none` the recorded answer
-discharges 0.2 and this reviewer challenges the README alone — which is its
-complete input set at that value, not half of one. **Skip:** Only when the human
-explicitly opts out, or when the declared ceremony level does not include this
-review.
+`types.ts` locks the contract (0.3). It challenges the README **and** every twin
+the value names, together **wherever a twin is owed**; at `twin-doc: none` the
+recorded answer discharges 0.2 and this reviewer challenges the README alone —
+which is its complete input set at that value, not half of one. **Skip:** Only
+when the human explicitly opts out, or when the declared ceremony level does not
+include this review.
 
 <strong>Focus areas:</strong>
 
@@ -2531,11 +2773,11 @@ review.
   unnecessarily?
 - Are the types over- or under-specified?
 
-**Provide to agent:** README updates, **the twin wherever one is owed**, any
-design notes, existing codebase patterns. At `twin-doc: none` there is no twin
-to hand over and the README is this reviewer's complete input; at any other
-value, AR-1 challenges the README and the twin together, so handing over the
-README alone gives it half its inputs.
+**Provide to agent:** README updates, **every twin the value names**, any design
+notes, existing codebase patterns. At `twin-doc: none` there is no twin to hand
+over and the README is this reviewer's complete input; at any other value, AR-1
+challenges the README and every named twin together, so handing over the README
+alone — or a subset of what the value names — gives it a fraction of its inputs.
 
 ### AR-2: Architectural Sketch Challenge
 
@@ -2690,9 +2932,9 @@ that has none.
 - Documentation sync: do README, DOCS.md, types, JSDoc, and tests all agree?
   Include Phase 0 step 0.2. At `twin-doc: none` there is no document to audit —
   the discharge is the recorded answer, so the check is that the commit body
-  carries a settings line at all. At any other value the named twin document
-  must exist, describe what was built, and still name the right reader; if these
-  increments changed who this work owes an account to, the value is stale.
+  carries a settings line at all. At any other value every named twin document
+  must exist, describe what was built, and still name the right model; if these
+  increments changed what this work owes an account of, the value is stale.
   **Judge whether the recorded answer is still _true_ of the changeset, not
   whether it was ever _wise_** — the latter is AR-1's question, and re-opening
   it here turns the merge gate into a second design review.
@@ -2730,12 +2972,12 @@ that has none.
 `git rev-parse HEAD`) and the modified file paths — the reviewer runs
 `git diff <baseline>..HEAD` itself — plus the original task description and the
 **Phase 0 spec paths** for modified modules: `README.md`, `types.ts`, `DOCS.md`,
-**and the twin document wherever one is owed** — at `twin-doc: none` there is
-none, and the commit body's settings line is what discharges 0.2. **Not
-`DOCS.md` alone** — the spec is those artifacts read together, so a reviewer
-handed one of them runs its scope-vs-spec check against a fraction of the spec.
-Pass paths, not pasted contents: the reviewer has Read and Bash — `git grep`
-covers search — and pulls its own inputs.
+**and every twin document the value names** — at `twin-doc: none` there is none,
+and the commit body's settings line is what discharges 0.2. **Not `DOCS.md`
+alone** — the spec is those artifacts read together, so a reviewer handed one of
+them runs its scope-vs-spec check against a fraction of the spec. Pass paths,
+not pasted contents: the reviewer has Read and Bash — `git grep` covers search —
+and pulls its own inputs.
 
 ## Linting Conventions
 
