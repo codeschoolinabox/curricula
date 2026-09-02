@@ -587,15 +587,15 @@ this region owns.
   the phase order keeps exactly one truth. **Each phase carries TWO authored
   strings, not one plus a derivation** — the full label and the **short label**
   the rail draws where width demands it: `Source` · `Tokens` · `AST` ·
-  `Environment` · `Evaluation`, keyed against the same record. Authored rather
-  than derived (`label` up to its `·`) deliberately, and the reason is this
-  entry's own discipline: truncation is not a vocabulary choice, and a rule that
-  happens to work on five labels would silently return the whole string for the
-  sixth that carries no separator — `Source` already exercises that case. **The
-  four fit marks' learner-facing copy is display labelling too**, and takes the
-  same discipline: keyed by the mark it renders, zipped against the mark
-  vocabulary, never a positional list. The four strings: `fits` ·
-  `steps outside` · `modules only` · `can't tell yet`. A mark is machine
+  `Environment` · `Evaluation`, keyed against the same phase-name vocabulary.
+  Authored rather than derived (`label` up to its `·`) deliberately, and the
+  reason is this entry's own discipline: truncation is not a vocabulary choice,
+  and a rule that happens to work on five labels would silently return the whole
+  string for the sixth that carries no separator — `Source` already exercises
+  that case. **The four fit marks' learner-facing copy is display labelling
+  too**, and takes the same discipline: keyed by the mark it renders, zipped
+  against the mark vocabulary, never a positional list. The four strings: `fits`
+  · `steps outside` · `modules only` · `can't tell yet`. A mark is machine
   vocabulary — a learner reads that their code _steps outside_ a level, never
   that it is `does-not-fit`.
 
@@ -825,10 +825,10 @@ this region owns.
   elsewhere; keyed where the vocabulary is ours.** The tray still draws the full
   label and the rail the short one — both looked up, neither carried.
 
-  **Three, and the `●` is not a fourth.** The exclusion is the 2026-08-19
-  ruling’s, which stated it as “not a fifth” against the four things a station
-  then carried; the ordinal moved with the count at 0.3 and the ruling did not.
-  The rail draws a filled dot on the station whose lens the pane is currently
+  **Three, and the `●` is not a fourth** (human ruling 2026-08-19). That ruling
+  stated the exclusion as "not a fifth", against the four things a station then
+  carried; the ordinal moved with the count at 0.3 and the ruling did not. The
+  rail draws a filled dot on the station whose lens the pane is currently
   holding — the **occupant dot** — and it is **not a station property**: it is a
   projection of the **pane occupant**, which the region is already handed per
   settle, read at render. Storing it on the station would be a second source of
@@ -1028,5 +1028,10 @@ this region owns.
   its menu serves rather than for one modeled thing (human ruling 2026-08-14).
 - [`types.ts`](./types.ts) — the host surface: `StudyLensesProperties`,
   `FitMark`.
+- [`rail/`](./rail/README.md) — the lifecycle surface: its contract, its
+  [sketch](./rail/DOCS.md), and the one intent it raises. The sibling surfaces
+  that navigate to a lifecycle surface still name `phases-panel/`, which is what
+  still renders; those references move with the directory, in the Phase 1
+  increment that retires it.
 - The rendered surfaces and derivation libraries document themselves in their
   own directories.

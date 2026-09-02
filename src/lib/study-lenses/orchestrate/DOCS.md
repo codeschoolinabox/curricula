@@ -78,7 +78,7 @@ comes from.
 flowchart TD
     PROPS["host props<br/>(defaults, never locks)"]
     ROSTERS["joined rosters<br/>(lenses and levels, appended once at mount)"]
-    CFG["composed study configuration<br/>(the cascade, learner layer final)"]
+    CASCADE["the resolved configuration cascade<br/>(per lens name, learner layer final)"]
     SNP["snippet<br/>(source + type, as last settled)"]
     EMB["frozen embodiment"]
     VER["level verdicts<br/>(one memoized validate per settle + level)"]
@@ -89,17 +89,18 @@ flowchart TD
     SUR["rendered study environment<br/>(surface pane: editor XOR one excursion — open lens or generator ·<br/>rail · level UI · mask)"]
     CANDIDATE["candidate program<br/>(the accept-eligible arm of one generative ask)"]
     PROPS -->|"join rosters at mount, loud collisions"| ROSTERS
-    ROSTERS -->|"the roster the cascade resolves over"| CFG
+    ROSTERS -->|"the roster the cascade resolves over"| CASCADE
     PROPS -->|"initial snippet + type, seeds the editor"| SNP
     PROPS -->|"initial-focus request, honored at mount"| SUR
     SNP -->|"embody per settle, pure"| EMB
-    CFG -->|"supplies the joined roster"| EMB
+    ROSTERS -->|"supplies the joined lens roster"| EMB
     EMB -->|"assemble parse facts once, validate per level, memoized"| VER
-    CFG -->|"supplies the registered levels, names the selected one"| VER
+    ROSTERS -->|"supplies the registered levels"| VER
+    CASCADE -->|"names the selected level"| VER
     VER -->|"classify: × admitted types × current type"| MARKS
     SNP -->|"the current type"| MARKS
-    EMB -->|"each phase's accessibility"| STATIONS
-    CFG -->|"supplies the joined roster — the kit each station discloses"| STATIONS
+    EMB -->|"each phase's accessibility and its attached lenses"| STATIONS
+    ROSTERS -->|"recovers each phase's renderable kit"| STATIONS
     STATIONS -->|"how many stand bare, how many stand waiting — and which arm"| CAPTION
     EMB -->|"a barred phase's cause, carrying the stage that keys its framing"| CAPTION
     STATIONS -->|"render, mechanical"| SUR
@@ -108,9 +109,9 @@ flowchart TD
     MARKS -->|"selector marks · mask = selected assessment × strict posture"| SUR
     EMB -->|"the fitting lenses' recommendations, collected + ranked"| RECS
     RECS -->|"rendered through the mask; opening carries the recommendation's overrides into the cascade"| SUR
-    CFG -->|"posture + resolved configs"| SUR
+    CASCADE -->|"posture + resolved configs"| SUR
     SUR -->|"edits debounced to the settle · type toggle and excursion-open settle immediately"| SNP
-    SUR -->|"level · posture · config tweaks, session-scoped (the open excursion lives in the pane occupant)"| CFG
+    SUR -->|"level · posture · config tweaks, session-scoped (the open excursion lives in the pane occupant)"| CASCADE
     SUR -->|"one generative ask: the frozen seed + the learner's prompt, across the socket —<br/>async; refusal-as-data, so a refusal never leaves the view"| CANDIDATE
     CANDIDATE -->|"accepted: enters the one edit intake, settling immediately"| SNP
 ```
@@ -281,11 +282,13 @@ verdicts without consulting a level twice.
 
 ### The render projection
 
-- The five phases' display labels live in one record keyed by phase name, zipped
-  against embody's runtime order constant at the point of use; never a
-  positional list. Each phase carries TWO authored strings — the full label and
-  the short label the rail draws — so the record's value is a pair, never a
-  string plus a truncation rule.
+- The five phases' display labels live in TWO records over one key vocabulary —
+  the full labels and the short labels the rail draws — each total over the
+  phase names and zipped against embody's runtime order constant at the point of
+  use; never a positional list. Both strings are AUTHORED and neither is derived
+  from the other: a truncation rule is not a vocabulary choice, and it would
+  silently return the whole string for a label carrying no separator, which
+  `Source` already exercises.
 - A **station** is what renders one phase on the rail, and carries the phase
   (the key everything zips against, never drawn), the standing (`openable` ·
   `bare` · `waiting`), and its tray where it has one. **The openable and bare

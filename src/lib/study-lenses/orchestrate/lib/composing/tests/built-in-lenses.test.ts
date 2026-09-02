@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import hasMachineVocabulary from '../../../has-machine-vocabulary.js';
 import builtInLenses from '../built-in-lenses.js';
 
 describe('builtInLenses', () => {
@@ -29,17 +30,9 @@ describe('builtInLenses', () => {
 		});
 
 		it('carries no term a learner would need the glossary for', () => {
-			const needsTheGlossary =
-				/\b(lens|lenses|embodiment|applicability|gateable|barring edge|openable|undetermined|does-not-fit|not-applicable-for-type)\b/i;
 			expect(
-				builtInLenses.some((lens) => needsTheGlossary.test(lens.label)),
+				builtInLenses.some((lens) => hasMachineVocabulary(lens.label)),
 			).toBe(false);
-		});
-
-		it('permits a term the operational test admits, such as phase', () => {
-			const needsTheGlossary =
-				/\b(lens|lenses|embodiment|applicability|gateable|barring edge|openable|undetermined|does-not-fit|not-applicable-for-type)\b/i;
-			expect(needsTheGlossary.test('walk the phases in order')).toBe(false);
 		});
 	});
 });

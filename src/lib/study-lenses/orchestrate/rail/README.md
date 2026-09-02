@@ -4,8 +4,9 @@ The lifecycle drawn as the machine's own conveyor: a line carrying one
 **station** per phase in the machine's fixed order, with the **barring edge**
 drawn between the last reachable station and the first waiting one, each
 station's **tray** opening beneath the line, and **the caption** beneath that.
-It supersedes the lifecycle strip — the row of per-phase selects this region
-shipped first.
+It is the region's one lifecycle surface: the machine's health and the kit's
+richness are drawn in different channels, so an empty phase reads as a named
+step with nothing yet to open rather than as a control that failed.
 
 The region [README](../README.md) owns what the rail means in the study
 environment and the vocabulary it draws; this document owns the rail's own

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import DISPLAY_LABELS from '../display-labels.js';
+import hasMachineVocabulary from '../has-machine-vocabulary.js';
 
 describe.skip('DISPLAY_LABELS', () => {
 	describe('the none-state (Zero)', () => {
@@ -188,19 +189,24 @@ describe.skip('DISPLAY_LABELS', () => {
 			).toBe(true);
 		});
 
-		it('no drawn string carries a machine token', () => {
+		it('no keyed family carries a term a learner would need the glossary for', () => {
 			const drawn = [
 				...Object.values(DISPLAY_LABELS.phaseLabels),
+				...Object.values(DISPLAY_LABELS.phaseShortLabels),
 				...Object.values(DISPLAY_LABELS.fitMarks),
 				...Object.values(DISPLAY_LABELS.causeFramings),
 				...Object.values(DISPLAY_LABELS.blockedWaysOut),
+				...Object.values(DISPLAY_LABELS.emptyStationReasons),
+				...Object.values(DISPLAY_LABELS.emptyCountLines),
+				...Object.values(DISPLAY_LABELS.unreachedCountLines),
+				...Object.values(DISPLAY_LABELS.nameplateForms),
 				DISPLAY_LABELS.standingWaiting,
-			].join(' ');
-			expect(
-				['does-not-fit', 'not-applicable-for-type', 'barring edge'].some(
-					(token) => drawn.includes(token),
-				),
-			).toBe(false);
+				DISPLAY_LABELS.trayHeading,
+				DISPLAY_LABELS.proposalsHeading,
+				DISPLAY_LABELS.nameplatePhaseTail,
+				DISPLAY_LABELS.noneStateLevel,
+			];
+			expect(drawn.some((copy) => hasMachineVocabulary(copy))).toBe(false);
 		});
 	});
 

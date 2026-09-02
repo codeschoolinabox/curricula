@@ -195,6 +195,18 @@ describe.skip('deriveCaption', () => {
 			expect(() => deriveCaption(stations, AST_BREAK)).toThrow();
 		});
 
+		it('throws when every station stands bare and the empty count leaves its domain', () => {
+			const stations = buildStations([
+				'bare',
+				'bare',
+				'bare',
+				'bare',
+				'bare',
+				'bare',
+			]);
+			expect(() => deriveCaption(stations, null)).toThrow();
+		});
+
 		it('throws when the waiting suffix is outside the unreached count domain', () => {
 			const stations = buildStations([
 				'openable',

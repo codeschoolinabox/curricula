@@ -85,6 +85,54 @@ describe.skip('Rail', () => {
 			).toEqual(['source', 'tokens', 'ast', 'environment', 'evaluation']);
 		});
 
+		it('draws the waiting standing as its learner-facing word', () => {
+			const { container } = render(
+				<Rail
+					stations={barredStations()}
+					caption={CAUSE_CAPTION}
+					openLensName={null}
+					onTrayEntry={vi.fn()}
+				/>,
+			);
+			expect(
+				container.querySelector('[data-station="evaluation"]')?.textContent,
+			).toContain('not reached');
+		});
+
+		it('draws an openable station s kit count', () => {
+			const { container } = render(
+				<Rail
+					stations={fiveStations()}
+					caption={COUNT_CAPTION}
+					openLensName={null}
+					onTrayEntry={vi.fn()}
+				/>,
+			);
+			expect(
+				container.querySelector('[data-station="source"]')?.textContent,
+			).toContain('2');
+		});
+
+		it('an open tray draws the full label, not the short one', () => {
+			const { container } = render(
+				<Rail
+					stations={fiveStations()}
+					caption={COUNT_CAPTION}
+					openLensName={null}
+					onTrayEntry={vi.fn()}
+				/>,
+			);
+			const control = container.querySelector(
+				'[data-station="source"] [data-station-tray-control]',
+			);
+			if (control) {
+				fireEvent.click(control);
+			}
+			expect(
+				container.querySelector('[data-station-tray]')?.textContent,
+			).toContain('ways to study the Source');
+		});
+
 		it('draws each station s standing', () => {
 			const { container } = render(
 				<Rail
@@ -114,7 +162,7 @@ describe.skip('Rail', () => {
 			);
 			expect(
 				container.querySelector('[data-station="tokens"]')?.textContent,
-			).toContain('Tokens');
+			).not.toContain('·');
 		});
 
 		it('never draws a phase s data name', () => {
@@ -206,7 +254,9 @@ describe.skip('Rail', () => {
 				/>,
 			);
 			expect(
-				container.querySelector('[data-station="tokens"] button'),
+				container.querySelector(
+					'[data-station="tokens"] [data-station-tray-control]',
+				),
 			).toBeNull();
 		});
 
