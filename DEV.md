@@ -627,8 +627,8 @@ Every source directory under `src/` has both a `README.md` and a `DOCS.md`:
 - Every directory has a `README.md` AND a `DOCS.md`
 - `DOCS.md` captures the "why" — tradeoffs, alternatives considered,
   constraints, and the **data flow diagram** for this directory's abstraction
-  level. Keep it short. It is NOT an API reference — JSDoc handles that.
-  Hand-maintained: fix it or delete it if it goes stale.
+  level. It is NOT an API reference — JSDoc handles that. Hand-maintained: fix
+  it or delete it if it goes stale.
 - For **new modules**, DOCS.md is written inside Phase 0 step 0.3 as an
   **architectural sketch**, before any implementation exists. This is the
   structural target the Refactor step is held against. See format below.
@@ -886,7 +886,6 @@ Format constraints:
 - Out-of-scope concerns (explicit boundary)
 - **No function names, no variable names, no pseudocode** — if it looks like
   code, it has crossed the line into implementation. Rewrite in prose.
-- Short enough to read in 60 seconds
 
 **Data flow diagram** — in every `DOCS.md`, a `## Data flow` section contains a
 Mermaid flowchart depicting the **data's journey** through the module:
