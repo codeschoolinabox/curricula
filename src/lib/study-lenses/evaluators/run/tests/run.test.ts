@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
 import deriveFacts from '../../../embody/derive-facts.js';
+import DEFAULT_SECONDS from '../../../lib/engine/default-seconds.js';
 import type { EngineError } from '../../../lib/engine/types.js';
 import type { Evaluator } from '../../types.js';
+import createRunHandle from '../create-run-handle.js';
 import run from '../index.js';
 import type {
 	RunDefectCause,
@@ -19,11 +21,11 @@ function buildSpec(source: string): RunSpec {
 	};
 }
 
-function expectHandle(answer: ReturnType<typeof run.main>): RunHandle {
-	if ('refused' in answer) {
-		throw new Error(`expected a handle, got a refusal: ${answer.reason}`);
+function buildHandle(spec: RunSpec): RunHandle {
+	if (!spec.facts.ast.ok) {
+		throw new Error(`fixture spec must parse: ${spec.facts.source.value}`);
 	}
-	return answer;
+	return createRunHandle(spec, spec.facts.ast.value);
 }
 
 describe('run — the kind envelope (live compile probes)', () => {
@@ -74,44 +76,91 @@ describe('run — the kind envelope (live compile probes)', () => {
 });
 
 describe('run — sync surface (unit tier)', () => {
-	it.skip('handle.code echoes facts.source.value, the learner’s own text', () => {
+	it('handle.code echoes facts.source.value, the learner’s own text', () => {
 		const spec = buildSpec('let x = 1;\n');
-		const handle = expectHandle(run.main({ ...spec, iterations: 3 }));
+		const handle = buildHandle(spec);
 		expect(handle.code).toBe('let x = 1;\n');
 	});
 
-	it.skip('handle.ast is the facts’ parsed root, by reference', () => {
+	it('handle.code echoes a different source too, never a fixed text', () => {
+		const handle = buildHandle(buildSpec('const y = 2;\n'));
+		expect(handle.code).toBe('const y = 2;\n');
+	});
+
+	it('handle.ast is the facts’ parsed root, by reference', () => {
 		const spec = buildSpec('let x = 1;\n');
-		const handle = expectHandle(run.main(spec));
-		expect(spec.facts.ast.ok && handle.ast).toBe(
-			spec.facts.ast.ok ? spec.facts.ast.value : null,
-		);
+		const handle = buildHandle(spec);
+		expect(handle.ast).toBe(spec.facts.ast.ok ? spec.facts.ast.value : null);
 	});
 
-	it.skip('options.seconds is populated from the machinery default when unset', () => {
-		const handle = expectHandle(run.main(buildSpec('let x = 1;\n')));
-		expect(typeof handle.options.seconds).toBe('number');
+	it('options.seconds is populated from the machinery default when unset', () => {
+		const handle = buildHandle(buildSpec('let x = 1;\n'));
+		expect(handle.options.seconds).toBe(DEFAULT_SECONDS);
 	});
 
-	it.skip('options.seconds echoes an explicit budget', () => {
-		const handle = expectHandle(
-			run.main({ ...buildSpec('let x = 1;\n'), seconds: 10 }),
-		);
+	it('options.seconds echoes an explicit budget', () => {
+		const handle = buildHandle({ ...buildSpec('let x = 1;\n'), seconds: 10 });
 		expect(handle.options.seconds).toBe(10);
 	});
 
-	it.skip('options.iterations rides as given, no default', () => {
-		const handle = expectHandle(run.main(buildSpec('let x = 1;\n')));
+	it('options.seconds echoes an explicit zero budget, never the default', () => {
+		const handle = buildHandle({ ...buildSpec('let x = 1;\n'), seconds: 0 });
+		expect(handle.options.seconds).toBe(0);
+	});
+
+	it('options.iterations rides as given, no default', () => {
+		const handle = buildHandle(buildSpec('let x = 1;\n'));
 		expect(handle.options.iterations).toBeUndefined();
 	});
 
-	it.skip('the handle is frozen at creation', () => {
-		const handle = expectHandle(run.main(buildSpec('let x = 1;\n')));
+	it('options.iterations echoes an explicit cap', () => {
+		const handle = buildHandle({ ...buildSpec('let x = 1;\n'), iterations: 3 });
+		expect(handle.options.iterations).toBe(3);
+	});
+
+	it('options.io holds the caller’s mocks by reference, as given', () => {
+		function promptMock(): null {
+			return null;
+		}
+		const handle = buildHandle({
+			...buildSpec('let x = 1;\n'),
+			io: { prompt: promptMock },
+		});
+		expect(handle.options.io?.prompt).toBe(promptMock);
+	});
+
+	it('the echoed io record is a frozen copy', () => {
+		function promptMock(): null {
+			return null;
+		}
+		const handle = buildHandle({
+			...buildSpec('let x = 1;\n'),
+			io: { prompt: promptMock },
+		});
+		expect(Object.isFrozen(handle.options.io)).toBe(true);
+	});
+
+	it('creating a handle never freezes the caller’s io record', () => {
+		function promptMock(): null {
+			return null;
+		}
+		const io = { prompt: promptMock };
+		buildHandle({ ...buildSpec('let x = 1;\n'), io });
+		expect(Object.isFrozen(io)).toBe(false);
+	});
+
+	it('options.io is absent when none was supplied', () => {
+		const handle = buildHandle(buildSpec('let x = 1;\n'));
+		expect(handle.options.io).toBeUndefined();
+	});
+
+	it('the handle is frozen at creation', () => {
+		const handle = buildHandle(buildSpec('let x = 1;\n'));
 		expect(Object.isFrozen(handle)).toBe(true);
 	});
 
-	it.skip('reading the echoes never ignites the run', async () => {
-		const handle = expectHandle(run.main(buildSpec('let x = 1;\n')));
+	it('reading the echoes never ignites the run', async () => {
+		const handle = buildHandle(buildSpec('let x = 1;\n'));
 		const observed =
 			handle.code.length >= 0 &&
 			handle.ast.type === 'Program' &&
@@ -147,28 +196,28 @@ describe('run — refusals (unit tier: this environment has no Worker)', () => {
 });
 
 describe('run — pre-spawn cancel and the settle base (unit tier)', () => {
-	it.skip('cancel before any touch settles the cancel outcome', async () => {
-		const handle = expectHandle(run.main(buildSpec('let x = 1;\n')));
+	it('cancel before any touch settles the cancel outcome', async () => {
+		const handle = buildHandle(buildSpec('let x = 1;\n'));
 		handle.cancel();
 		const result = await handle.result;
 		expect(result.outcome).toBe('cancel');
 	});
 
-	it.skip('multiple cancels are idempotent', async () => {
-		const handle = expectHandle(run.main(buildSpec('let x = 1;\n')));
+	it('multiple cancels are idempotent', async () => {
+		const handle = buildHandle(buildSpec('let x = 1;\n'));
 		handle.cancel();
 		handle.cancel();
 		const result = await handle.result;
 		expect(result.outcome).toBe('cancel');
 	});
 
-	it.skip('handle.result is memoized', () => {
-		const handle = expectHandle(run.main(buildSpec('let x = 1;\n')));
+	it('handle.result is memoized', () => {
+		const handle = buildHandle(buildSpec('let x = 1;\n'));
 		expect(handle.result).toBe(handle.result);
 	});
 
-	it.skip('await handle and await handle.result reach the same settling', async () => {
-		const handle = expectHandle(run.main(buildSpec('let x = 1;\n')));
+	it('await handle and await handle.result reach the same settling', async () => {
+		const handle = buildHandle(buildSpec('let x = 1;\n'));
 		handle.cancel();
 		const [a, b] = [await handle, await handle.result];
 		expect(a).toBe(b);
