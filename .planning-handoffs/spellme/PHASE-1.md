@@ -1310,6 +1310,82 @@ increment earlier** — and the correction paid immediately: `ar-4` found
 `data-extent` disagreeing with the text beside it, and the human then exercised
 the fixed surface rather than one that moved underneath them.
 
+**🔍 checkpoint #4 — the CSS arrangement whole. PASSED, with one design finding
+routed onward and no behavioral defect.** The human's words, on the three typed
+paths the default fixture cannot reach:
+
+> 1. "the newline is placed in the left b[u]cket. I think it could be visually
+>    dropped. or, maybe it can be highligh[t]ed in the code as a different color
+>    and it can also show up in a third 'drop' box matching that color w[i]th an
+>    indication of where it belonged in the source code? which means comments
+>    can have a similar UI logic applied. or maybe better yet, whit[e] space
+>    (newlines included, see #2) don't go anywhere but are simply rendered as
+>    characters with a whitespace color in the source code? but I know newlines
+>    sometimes are meaning[fu]l, what's a good way to deal with this? move them
+>    down when they are and ignore them when they're dead whitespace?"
+> 2. "ok"
+> 3. "lgtm"
+
+⚠ Five typos are bracketed rather than reproduced. The cspell reason the earlier
+checkpoints gave for trimming is **gone** — the tool was uninstalled at
+`9baca1e7` — so the practice survives on readability alone, and the edits are
+disclosed rather than silent.
+
+**And the three obligations checkpoint #3 left on the stylesheet are all
+discharged**, each in the human's own words: the pressed state — _"yes, the
+buttons show highlighted when clicked"_; the focus indicator — _"I did see a
+ring around it"_; and the proposed run, confirmed as part of _"the highlighting
+and setting aside seem to work"_. The tab-order finding is closed separately
+above, and is **not** a defect.
+
+⚠ **The `↵` STAYS for this wave — human ruling 2026-09-02, one word: "keep
+it."** Taken after the analysis below, so it is a decision about a measured
+surface rather than a deferral.
+
+⛔ **THE MARK FIRES ON EVERY LINE, AND THE TWIN'S DEFENCE OF IT IS FALSE.**
+`ux/wireframes.md` § What has no wireframe, deliberately argues the mark is
+"rare enough not to crowd". It is not rare: `isMarked` returns `true` for
+**every** `LineTerminator`, unconditionally [read: `core.ts`], so a learner
+accumulates one mark per line [measured 2026-09-01: a five-line program yields
+`newlinesInSource` 5 and `markedElementsInStream` 5]. The human reached the same
+conclusion from the running surface without the measurement. **A signal that
+fires on every line carries no information**, which is the honest form of the
+twin's own recorded doubt about clutter.
+
+⚠ **"Move them down when they are meaningful" is BARRED, and that is an answer
+rather than a limitation to engineer around.** Whether a break is meaningful is
+whether automatic semicolon insertion fired, which depends on the **production**
+it lands in — the syntactic grammar, the `ast` phase. `README.md` § The three
+fates already rules the mark names "a property, never a consequence … this lens
+does not know that", and § The lens object makes reading **no** syntax tree the
+thing that lets this lens serve a program that lexes but does not parse. Sorting
+newlines by significance spends exactly that capability, and is a different lens
+on the same footing as "the scanner's stopping point".
+
+⭐ **The route the human proposed third is the strongest, and it is the SAME GAP
+an `ar-4` found independently.** Their wording: whitespace "don't go anywhere
+but are simply rendered as characters with a whitespace color in the source
+code". The reviewer's finding, reached from the other direction, is that
+`README.md` § UI structure's third non-hue signal — "an evaporating one hatched"
+— **has no carrier and may never have one**, because every consumed element's
+text is joined into one `[data-spellme-consumed]` span. Rendering that run **per
+element** rather than joined is one change that satisfies both: it gives
+whitespace an in-place signal of its own, discharges README's third promise,
+keeps the two-container arrangement the twin argues for, and demotes the `↵`
+from sole whitespace signal to a decision on its own merits. **It is a
+DOM-contract change, so it is the human's, and it is NOT wave 3's** — recorded
+here and routed to its own unit, where it may ride with the partial-tokenization
+work since both reshape the same region.
+
+⚠ **The other two options the human floated are recorded with what they collide
+with**, so neither is rediscovered as new. Dropping the mark reopens the
+2026-08-20 ruling that both marked fates are drawn. A third colour-linked "drop"
+box collides twice: `README.md` defines _evaporates_ as leaving "nothing at
+all", which a container for evaporated things contradicts, and routing comments
+there too would collapse _set-aside_ and _consumed_ into one destination,
+erasing the distinction the three fates exist to teach — plus the standing
+"never colour alone" constraint would need a non-hue partner for the linking.
+
 ⚠ **TWO CONSECUTIVE REVIEWERS CONCLUDED THIS LENS IS UNREACHABLE IN A BROWSER,
 and both were wrong the same way.** Each reached for
 `orchestrate/lib/composing/built-in-lenses.ts`, found `spellme` correctly
