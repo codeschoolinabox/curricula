@@ -1,5 +1,3 @@
-<!-- cspell:ignore spellme wireframes failable unbuilt -->
-
 # embody partial facts — Phase 0 launch prompt
 
 You are running **Phase 0 (DDD only)** for a possible reshape of `embody`'s
@@ -26,8 +24,21 @@ against its qualifying list and read whichever of `AGENTS.md` /
 
 Then `DEV.md` §§ **Phase 0: Documentation Specification**, **Adversarial Review
 Protocol** (AR-1 and AR-2's Trigger and _Provide to agent_ lines), **twin-doc**,
-**Work routing and ceremony**, **Sourced claims**, **Ruling provenance**, and
-**Shared-worktree git mechanics**.
+**Directory Documentation Convention**, **Work routing and ceremony**, **Sourced
+claims**, **Ruling provenance**, and **Shared-worktree git mechanics**.
+
+⚠ **Directory Documentation Convention is on that list for a reason and was
+missing from it until 2026-09-01.** It holds the twin naming table, the `ux/`
+menu, the size threshold that can make a `data` twin not owed, and the
+machine/data tie-break this unit is the ruled case for. Reading the twin
+instructions below without it is how the twin step lands wrong.
+
+⚠ **Both `AGENTS` files are stale on one point, and `DEV.md` governs.** They say
+the agent records `none` if no answer comes and that 0.2 "produces no file" at
+`twin-doc: none`. True in general, **false for this module**: a twin already
+exists here, so silence leaves `machine` standing and `none` must not be
+recorded. `DEV.md` § Phase 0 is the governing statement on conflict, and it says
+so itself.
 
 ⚠ **This is a RESHAPE, not a new module.** `DEV.md` § Phase 0 bites "where a
 module, a contract, or a region is being established **or reshaped**". All three
@@ -99,20 +110,75 @@ plausibly _would_ want a token prefix. **Establishing which consumer this serves
 is upstream of every other decision here**, because it decides whether a prefix
 is needed at all.
 
-## ⚠ The twin — this module HAS one, and it is the document most at risk
+## ⚠ The twins — this module HAS one, may be owed three, and one of them is the document most at risk
 
-**`twin-doc: machine`.** `embody/notional-machine.md` exists and
-`embody/README.md` calls it **"the machine twin"** twice [read: `README.md`
-lines 287 and 415], matching `DEV.md`'s definition of the `machine` value — "a
-notional-machine document, `.md` beside the README".
+> **Changed 2026-09-01, after this brief was written.** `twin-doc` gained a
+> third software value, `data`, and the quantifier `both` was retired in favour
+> of `+` lists in the canonical order `machine + user + data` (`DEV.md` §
+> twin-doc, § Directory Documentation Convention; commits `805089f3`,
+> `7d246612`, `4c17dcf7`). Three consequences for this unit, all below: 0.2's
+> ask is no longer a yes/no about one document; AR-1 must be handed every twin
+> the recorded value names; and **`embody` is the designated first instance of
+> the `data` twin** — that designation is written into `DEV.md`, and the human's
+> stated intent when making it was to use this campaign to write **all** twins
+> for one module. That is intent, not a recorded answer: `DEV.md` § Phase 0 says
+> the answer is re-asked, not remembered, across a session boundary. **Put the
+> ask.**
+
+**The machine twin exists.** `embody/notional-machine.md` and `embody/README.md`
+calls it **"the machine twin"** twice [read: `README.md` lines 327 and 477,
+re-measured 2026-09-01; the 287/415 recorded earlier were the wrong lines],
+matching `DEV.md`'s definition of the `machine` value — "a notional-machine
+document, `.md` beside the README".
 
 Consequences, all binding:
 
-- **AR-1 challenges the README _and_ the twin together.** Handing it the README
-  alone gives it half its inputs [read: `DEV.md` § AR-1 _Provide to agent_].
-- 0.2's ask is **confirmed, not defaulted** — `DEV.md` § Phase 0: where a twin
-  already exists, the tree is the answer and silence leaves it standing. Do
-  **not** record `none`.
+- **AR-1 challenges the README _and every twin the recorded value names_,
+  together.** Handing it the README alone, or a subset of the twins, gives it a
+  fraction of its inputs [read: `DEV.md` § AR-1 _Provide to agent_].
+- 0.2's ask is **confirmed, not defaulted, and it now resolves per value** —
+  `DEV.md` § Phase 0: silence leaves standing exactly the values whose documents
+  are present. `machine` is present, so silence leaves `machine` standing and
+  you do **not** record `none`. Silence does **not** add `data` or `user`; only
+  an answer does.
+- **A recorded value naming a document that is not in the tree is a defect AR-1
+  reports**, not a silence case. So if the answer comes back
+  `machine + user + data`, all three documents exist before `ar-1` spawns, or
+  the review is reviewing a value the tree does not honour.
+- **`embody` has no `ux/` directory** [measured 2026-09-01: `git ls-files
+  src/lib/study-lenses/embody/ | grep '/ux/'` → no matches. The unfiltered glob
+  returns **32** files, so do not eyeball it — an earlier draft of this bullet
+  recorded a hand-picked four as that command's output, which is fabricated
+  evidence and was caught by a context-free validator].
+- **The `user` twin is a DIRECTORY with a menu, not a document.** `DEV.md` §
+  Directory Documentation Convention: `ux/` beside the README, holding "a
+  **menu, not a fixture**… **nothing on it is required**" — personas, user
+  journeys, wireframes, user stories, story sequencing, each owed by a different
+  risk. One file named `ux.md` is the wrong artifact and AR-1 will say so. Copy
+  the shape from the tree: `git ls-files | grep '/ux/'` finds `spellme/ux/`
+  (journeys + wireframes) and `orchestrate/ux/` (personas + journeys +
+  wireframes).
+- **The `data` twin has a threshold, and it may say no file is owed.** Same
+  section: "**Below that size the README section is right and this row is not
+  owed.** The threshold is a judgement and no number is pinned; the machine
+  twins' floor of 116 lines is the usable marker, against a section case of 33."
+  Scale on this module [measured 2026-09-01: `wc -l`]: `notional-machine.md`
+  202, `README.md` 482. **Evaluate the threshold before writing a file** — a
+  `## Data model` section in the README is a legitimate outcome of a `data`
+  answer, and this brief's earlier draft asserted otherwise.
+- **The document, where one is owed, is named `data-model.md`**, beside the
+  README. No instance exists anywhere to copy [measured 2026-09-01: `git
+  ls-files | grep -c data-model` → 0].
+- **A late answer re-opens 0.2 rather than being absorbed.** `DEV.md` § Phase 0:
+  an answer arriving after `ar-1` spawns means produce the twin and **re-run
+  AR-1 before 0.3 closes**.
+- **The machine/data split is ruled, and this module is the case it was ruled
+  on.** `DEV.md` § Directory Documentation Convention: where the module _is_ the
+  machine, "whose data is it" does not decide, and the tie-break is what a
+  reader needs the shape for — to predict what the machine will do (machine
+  twin) or to hold the value correctly once received (data twin), **even though
+  this module produced it**. The worked example in that ruling is this module's
+  own published sequence. Read it before splitting a paragraph between the two.
 - ⛔ **That twin models the scanner in full**, in sections titled
   `## The scanner — the lexical phase, modeled in full` and
   `### The scanner's turn — asked, then read`. **A partial-tokenization contract
@@ -123,12 +189,12 @@ Consequences, all binding:
 ## Measured state — re-measure everything
 
 `node scripts/repo-facts.mjs`, 2026-08-27, **abridged** (the `(via …)`
-provenance lines and `cspell version` are dropped; re-run it yourself):
+provenance lines are dropped; re-run it yourself):
 
 ```text
 MEASURED AT 2026-08-27T21:33:00.542Z, not asserted — supersedes any memory or handoff claim about these numbers.
 node version vs engines: v20.11.0 vs engines ">=22.11.0" — BELOW the engines minimum
-tsc errors: 0
+tsc errors: <RE-MEASURE — the recorded 0 is stale; 13 on 2026-09-02, all foreign, in aithor/* and study-lenses/lib/local-llm/*>
 markdownlint errors (repo-wide): 8113
 HEAD: 08dd99f922e862b6b6a13b6cc0b995ab6326eb0d
 ```
@@ -209,12 +275,24 @@ nodes** — dummy identifiers where the source has nothing. This package's claim
 is that it shows the machine's own account. Publishing a tree the language never
 produced is a **curriculum contract decision**. Frame it; do not settle it.
 
-### 3. `entwined` and `environment` — no independent failure mode
+### 3. `entwined` and `environment` — downstream of `ast`, but NOT failure-free
 
-Both short-circuit upstream and their own `try` blocks catch embody defects, not
-learner data; `eslint-scope`'s `analyze()` needs a complete `Program` [read:
-`embody/derive-environment.ts`]. Their partialness is **entirely downstream of
-`ast`'s** — decide `ast` and both are decided, at no extra design cost.
+Corrected 2026-09-01; the earlier text was wrong and its citation covered only
+the half that was true. Both short-circuit upstream, and `eslint-scope`'s
+`analyze()` needs a complete `Program` [read: `embody/derive-environment.ts`].
+But **each originates its own cause**, and `types.ts` says so: "`entwined` and
+`environment` fail only as guarded embody defects, reported loudly. **Each may
+originate a `StageCause`**" [read: `embody/types.ts`]. `derive-entwined.ts` has
+**no `try` block at all** [measured 2026-09-01: `grep -c '\btry\b'` → 0 in
+`derive-entwined.ts`, 1 in `derive-environment.ts`]; what it has is a
+span-invariant guard originating `stage: 'entwined'` directly [measured
+2026-09-01: `git grep -n "stage: 'entwined'" -- src/lib/study-lenses/embody/` →
+one non-test hit].
+
+Their partialness is still **downstream of `ast`'s**, so deciding `ast` decides
+the shape. It does not follow that they cost nothing to design — a stage that
+originates its own cause has a failure mode of its own, and "at no extra design
+cost" was the sentence that would have had you skip it.
 
 ### 4. Short-circuit sites — there are several, and §3 is not all of them
 
@@ -228,9 +306,12 @@ inadequate discriminator at every one of them** — those rules need
 
 ### The blast radius is a floor
 
-**17** non-test, non-deprecated files read a stage's `.ok` [measured 2026-08-27;
-**re-run it**, it moves]. Heaviest:
-`orchestrate/lib/validating/assemble-parse-facts.ts` (4),
+**17** non-test, non-deprecated files read a stage's `.ok` [measured 2026-08-27
+with `git grep -ln '\.ok' -- 'src/**/*.ts' 'src/**/*.tsx' | grep -v '/tests/' |
+grep -v '^src/lib/embody/'` — "non-deprecated" means excluding
+`src/lib/embody/`, the legacy JEJ tree, whose path differs from the target
+module only by prefix; without that exclusion it is 25; **re-run it**, it
+moves]. Heaviest: `orchestrate/lib/validating/assemble-parse-facts.ts` (4),
 `lib/questioning/quizzing/quizzing-questioner.ts` (4), then
 `derive-accessibility.ts` and `lenses/spellme/core.ts` (3 each). ⚠ **A `.ok`
 grep cannot see destructured narrowing** (`const { ok } = stage`), so the true
@@ -254,7 +335,10 @@ meaning shifted" is the failure mode to design against.
    elements too?** `deriveInputElements` runs over a complete tokenization and
    its precondition is closed "by construction" by that. Tiling a prefix is a
    `lib/scanning` contract question, possibly its own unit.
-5. **`twin-doc`** — confirm `machine`; the twin exists (see above).
+5. **`twin-doc`** — put the ask; `machine` is confirmed by the tree, and `data`
+   and `user` are open. The human's designation of this module as the first
+   `data` instance is recorded in `DEV.md`, but the answer is re-asked, not
+   remembered (see above).
 6. **`ceremony`** — the human's alone. Never state it; ask if unset.
 
 ## Out of scope
@@ -272,12 +356,12 @@ meaning shifted" is the failure mode to design against.
 ## Ceremony
 
 ```text
-work: software · twin-doc: machine · ceremony: <the human's — never state it> · prospective
+work: software · twin-doc: <the ask's answer — `machine` alone, or any `+` list in the canonical order `machine + user + data`> · ceremony: <the human's — never state it> · prospective
 ```
 
 - **AR-1** after 0.1 and 0.2's ask, before `types.ts` locks — **over the README
-  AND `notional-machine.md`**. **AR-2** after the `DOCS.md` sketch, inside 0.3.
-  Invoke `ar-1` / `ar-2` **by name**; **never pass a `model` parameter**.
+  AND every twin the value names**. **AR-2** after the `DOCS.md` sketch, inside
+  0.3. Invoke `ar-1` / `ar-2` **by name**; **never pass a `model` parameter**.
 - `ar-2` and `ar-5` **inherit the session model**, so a Fable session gets them
   at Fable's tier — the reason this unit runs on the strongest tier.
 
@@ -295,8 +379,7 @@ work: software · twin-doc: machine · ceremony: <the human's — never state it
 > `git log/show/diff/status/grep/rev-parse/ls-files/ls-tree`; `grep`, `sed -n`,
 > `awk`, `perl -0777 -ne` (print only), `wc`, `ls`, `cat`, `head`, `tail`, `od`,
 > `diff`; `npx vitest run`, `npx tsc --noEmit`, `npx eslint <file>` (no
-> `--fix`), `npx cspell`, `npx prettier --check`,
-> `npx markdownlint-cli2 --no-globs`.
+> `--fix`), `npx prettier --check`, `npx markdownlint-cli2 --no-globs`.
 
 ## Commit form — one shell invocation, explicit pathspec
 
@@ -312,11 +395,17 @@ denied by `.claude/hooks/governance-guard.py`. Never push, branch, amend,
 contention, wait and retry. **Announce every commit: full SHA + message.**
 
 **Per-file checkpoints:** `.ts`/`.tsx` → `npx eslint <file>`; `.md` →
-`npx markdownlint-cli2 --no-globs "<file>"`; any → `npx cspell <file>`; plus
-`npx prettier --write` **before** grepping your own citations, and
-`npx tsc --noEmit` at its measured baseline. ⚠ **eslint is vacuous on `.css` and
-`.mdx`** — it exits 0 while reporting the file ignored. Never `eslint --fix`;
-never eslint a `.md`.
+`npx markdownlint-cli2 --no-globs "<file>"`; plus
+`npx prettier --write -- <your own paths>` **before** grepping your own
+citations — scope it, the worktree is shared and a bare `--write` reflows a
+peer's drifted docs — and `npx tsc --noEmit` at its measured baseline. ⚠
+**eslint is vacuous on `.css` and `.mdx`** — it exits 0 while reporting the file
+ignored. Never `eslint --fix`; never eslint a `.md`. ⛔ **cspell is RETIRED** —
+uninstalled and unwired at `9baca1e7` (2026-08-29), two days after this brief
+was first written [measured 2026-09-01: `grep -c cspell package.json` → 0]. Its
+absence is **not** breakage; four agents have now read it as such. `npx cspell`
+still resolves, to a stray out-of-repo v5 with no repo config, so it exits clean
+and tells you nothing. Do not run it and do not restore it.
 
 ## Traps carried in from the campaign that found this
 
@@ -347,10 +436,13 @@ never eslint a `.md`.
 1. **0.1** — `embody/README.md` amended: what a failed stage publishes, in the
    domain's own words, with the ubiquitous language for it (is a partial
    tokenization a "prefix"? a "reading"? the vocabulary is part of the design).
-2. **0.2** — the twin ask, put and recorded; `machine` confirmed. **If the
-   design changes what the scanner is modeled as doing, `notional-machine.md` is
-   amended in the same step** — it is canon, not commentary.
-3. **AR-1**, by name, over the README **and** the twin.
+2. **0.2** — the twin ask, put and recorded; `machine` confirmed by the tree,
+   `data` and `user` open. **If the design changes what the scanner is modeled
+   as doing, `notional-machine.md` is amended in the same step** — it is canon,
+   not commentary. **Every value the answer names owes its document before AR-1
+   spawns**, so an answer of `machine + user + data` makes this step three
+   documents, two of them new.
+3. **AR-1**, by name, over the README **and** every twin the value names.
 4. **0.3** — `embody/types.ts` amended, the `DOCS.md` sketch updated **including
    its Mermaid data flow**, and the tests written for real and **committed
    skipped**.
@@ -368,6 +460,17 @@ and `ar-2` have both returned and every concern has a documented response;
 `npx tsc --noEmit` sits at its measured baseline; the embody suite is green with
 the new tests skipped; and the work is **presented to the human, who has not yet
 approved Phase 1**. Implementation begins only after that approval.
+
+⚠ **There is a second DONE, for the outcome this brief explicitly blesses.** If
+the human rules that the error-interpreting lens carries this and nothing new is
+built in embody, there is no `types.ts` amendment and no new test — so the
+definition above is unreachable, and **AR-2 has no input, because it challenges
+the sketch against the types**. DONE is then: the README amended to say what a
+failed stage does **not** publish and why; the ruling recorded in-repo where it
+binds; AR-1 over that README; **AR-2 declared `n/a` on the settings line with
+its reason**; and a closing commit body stating the unit's answer was "nothing
+to build here". Do not stretch the first definition over this — declare which
+one you are under.
 
 ⚠ **Validate any handoff you write with a context-free agent before treating it
 as final** (`AGENTS.principal.md`, invariant 12). This one was, and it mattered.
