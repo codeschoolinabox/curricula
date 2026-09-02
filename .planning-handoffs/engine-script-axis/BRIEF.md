@@ -1160,14 +1160,23 @@ HR-24 exists. Each names the step that owes it.
   `worker/` is invisible to the only instrument that enforces the latch rule.
 - **`SetupMessage.execution` is a required field no compiler enforces — owed by
   Phase 1's first script increment.** `postMessage` erases the envelope type at
-  its only construction site (`worker/transport.ts`) and `bootstrap.ts` casts on
-  the way in, so tsc is green today with the field absent. Phase 1 both passes
-  it and annotates the literal, so the type becomes the guard it reads as. The
-  four capability-probe rows in
+  every construction site and `bootstrap.ts` casts on the way in, so tsc is
+  green today with the field absent. There are **THREE** construction sites, not
+  the one an earlier revision of this bullet named — `worker/transport.ts`
+  (production) plus two direct-drive test harnesses,
+  `tests/bootstrap.browser.test.ts` and
+  `tests/latched-built-ins.browser.test.ts`, the second belonging to
+  prerequisite 1's suite
+  `[measured: git grep -n "kind: 'setup'" -- src/lib/study-lenses/lib/engine → transport.ts:140, bootstrap.browser.test.ts:57, latched-built-ins.browser.test.ts:38; re-run it — lines drift]`.
+  Phase 1 passes the field and annotates the literal at ALL THREE, or a
+  bootstrap that reads `setup.execution` meets `undefined` from the two test
+  harnesses and nothing complains. The capability-probe rows in
   `tests/conformance/transport/script-execution.browser.test.ts` are what catch
-  it if that is forgotten: they need a host that REFUSES scripts, which is the
-  module-worker tier that exists today, so they un-skip without waiting on the
-  classic tier and fail if the path never reaches setup.
+  the production site if that is forgotten: two of the four need a host that
+  REFUSES scripts — the module-worker tier that exists today — so they un-skip
+  without waiting on the classic tier and fail if the path never reaches setup;
+  the other two assert the probe stays quiet on the module and function paths.
+  The test-harness sites have no such catcher; the sweep above is theirs.
 - **Pin the capability-probe rows to a module worker BEFORE repointing
   `scriptRun` — owed by Phase 1's first script increment.** In
   `tests/conformance/transport/script-execution.browser.test.ts`, three of the

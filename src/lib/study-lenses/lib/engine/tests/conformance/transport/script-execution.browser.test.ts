@@ -9,20 +9,30 @@
  * SEVENTEEN ROWS ARE COMMITTED SKIPPED, and they split two ways. The
  * thirteen that RUN a script wait on the classic-worker test tier: only a
  * classic worker can call `importScripts`, and this project's workers are
- * module workers. The four probe rows wait on nothing but Phase 1 — they
- * need a host that REFUSES scripts, which is exactly the tier that exists
- * today, so un-skipping them proves the execution path reaches setup at
- * all. That makes them the cheapest first increment and the self-catching
- * check on `SetupMessage.execution`, a field no compiler enforces at its
- * construction site.
+ * module workers. The four probe rows wait on nothing but Phase 1. TWO of
+ * them ('settles worker-error when the host cannot run scripts', 'yields
+ * no items when the probe refuses the host') need a host that REFUSES
+ * scripts — exactly the module-worker tier that exists today; the other
+ * two assert the probe stays quiet on the module and function paths,
+ * which any tier can prove. Un-skipping them proves the execution path
+ * reaches setup at all: the cheapest first increment, and the
+ * self-catching check on `SetupMessage.execution`, a field no compiler
+ * enforces at its construction sites.
  *
  * The one live row measures the platform fact the probe rests on, and it
  * runs on today's tier precisely because today's tier is the mismatching
  * one.
  *
- * When the classic tier lands, `scriptRun` below is the only thing that
- * changes: every script-running row goes through it, and none of them
- * names a worker entry, a bundling strategy, or a tier-specific path.
+ * ⚠ When the classic tier lands, repointing `scriptRun` is NOT the whole
+ * flip. The two refusing probe rows above ride the same helper and need
+ * a module worker FOREVER: give them their own module-worker helper or a
+ * `workerFactory` override (`scriptRun` spreads `...overrides` last, so
+ * an override wins) BEFORE `scriptRun` repoints, or they become
+ * unsatisfiable while skipped and never say so. The ordering constraint
+ * of record is `.planning-handoffs/engine-script-axis/BRIEF.md` § 12's
+ * pin bullet. The thirteen script-running rows do all go through
+ * `scriptRun`, and none of them names a worker entry, a bundling
+ * strategy, or a tier-specific path.
  */
 
 import { describe, expect, it } from 'vitest';
