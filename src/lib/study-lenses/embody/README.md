@@ -1,4 +1,4 @@
-<!-- cspell:ignore Gateable entwine entwined entwining -->
+<!-- cspell:ignore Gateable entwine entwined entwining spellme -->
 
 # embody
 
@@ -110,7 +110,10 @@ and not otherwise — are recorded by id in
 3. **One tree, shared by reference** (E6). Within one embodiment, every fact
    holds the same node objects by reference — identity followed from one fact
    into another lands on the same node. Across embodiments no identity holds:
-   persist paths, never objects.
+   persist paths, never objects. At most one tree holds the path grammar per
+   embodiment — the machine's, or, when its parse fails, the recovered tree the
+   failure arms carry ([§ Failure grammar](#failure-grammar)); the two never
+   coexist.
 4. **Per-instance, no shared state** (E5). One embodiment knows nothing of
    another — no module-level cache, no cross-instance communication.
 5. **Level-blind** (E8). Nothing in the region's data or pipeline knows what a
@@ -136,15 +139,19 @@ embodiment.
    order — the tokens spell out the source, the tree resolves the tokens, the
    binding ties tree back to text, the scope structure reads tree, binding, and
    snippet type together. A failure never stops the walk: a stage whose input is
-   missing fails carrying the upstream cause, its origin still named inside it.
-   A learner's typo stops nothing — the failed stage is itself a fact, rendered
-   inside the lifecycle phase that owns it. The tokens stage's value carries the
-   token stream together with the comments the tokenizer sets aside — those two
-   emerge from one pass, so they travel together. On a successful tokenization
-   the value also carries `inputElements`: the same source re-read in the
-   specification's own vocabulary, derived over the stream by calling the shared
-   scanning leaf ([`../lib/scanning/`](../lib/scanning/README.md)) — optional in
-   the contract, absent only when that derivation itself defects
+   missing fails carrying the upstream cause, its origin still named inside it —
+   and where the failed input carries an account
+   ([§ Failure grammar](#failure-grammar)), the stage derives over that account
+   instead and publishes the result as its own failure arm's value, the upstream
+   cause still carried. A learner's typo stops nothing — the failed stage is
+   itself a fact, rendered inside the lifecycle phase that owns it. The tokens
+   stage's value carries the token stream together with the comments the
+   tokenizer sets aside — those two emerge from one pass, so they travel
+   together. On a successful tokenization the value also carries
+   `inputElements`: the same source re-read in the specification's own
+   vocabulary, derived over the stream by calling the shared scanning leaf
+   ([`../lib/scanning/`](../lib/scanning/README.md)) — optional in the contract,
+   absent only when that derivation itself defects
    ([§ Failure grammar](#failure-grammar)).
 2. **Derive phase accessibility.** From the tagged stages, each of the five
    lifecycle phases learns whether it can open. The rules are fixed and follow
@@ -231,7 +238,11 @@ knows nor cares — the wrapped predicate is the whole interface embody has onto
 lens's level reasoning. The tokens and ast stages are the parse facts a level's
 validator consumes, so the one-parse-truth constraint is satisfied by
 construction: whoever needs a parse reads this region's stages instead of
-parsing again.
+parsing again. One ruled exception sits beside it, not against it: on a failed
+parse the recovering reader re-reads the source once, and its output is an
+account on a failure arm, never the parse truth
+([§ Failure grammar](#failure-grammar), human ruling 2026-09-01: one derivation
+pass per instrument).
 
 ## Failure grammar
 
@@ -243,10 +254,76 @@ the failure also raises a loud development-mode report:
   or ast stage carries its structured cause, downstream phases render barred
   with it, and nothing is reported loudly — a broken program is a normal state
   worth studying.
+- **A failed stage may still carry its value — partial or recovered — and
+  `ok: false` is the label** (human rulings 2026-09-01: the facts serve the
+  whole lens roster, each publication justified by a named consumer's need; a
+  partial stage stays `ok: false`; the account lives under the same `value` name
+  its trustworthy sibling uses, distinguished by the arm that carries it). A
+  failure is studied in place, and what renders there is more than the cause.
+  The tokens stage's failure carries the **token prefix** as its value: the
+  tokens the scanner had produced, and the comments it had set aside, when the
+  turn that failed was reached — the same shape a successful tokenization
+  publishes, marked untrustworthy by the arm it rides. The prefix also carries
+  the same reading re-read in the specification's own vocabulary: a **bounded**
+  input-element sequence over exactly what the completed turns reach — the
+  source cut at the account's own extent (the end of the last token or set-aside
+  comment, whichever is later) and handed to the same scanning leaf under its
+  unchanged tiling contract (human ruling 2026-09-01: input elements too,
+  bounded by slicing). Where the cause reports an `offset`, the extent sits at
+  or before it — the offset is the machine's report; the extent is the account's
+  own, defined even when the machine reports none.
+- **A grammar failure may carry the recovering reader's account — a different
+  instrument's, never the machine's** (human rulings 2026-09-01: an invented
+  tree is admissible only as a labeled, separate account — and the label is the
+  failure arm itself; one derivation pass is per instrument — the machine parses
+  once, and a failed parse may be re-read once by the recovering reader, whose
+  output never enters a trustworthy value). When the program lexes but does not
+  parse, the ast stage's failure carries as its value the **recovered tree** —
+  the tree the **recovering reader** builds by inventing the least structure
+  that lets reading continue — with its **invented nodes** enumerated beside it,
+  so a lens renders real structure and invention distinguishably. The account
+  flows downstream the way a trustworthy value would, published exactly when the
+  recovered tree is: the entwined stage's failure carries the entwined binding
+  of the recovered tree with the real token stream — one path grammar, and the
+  only `byPath` this embodiment has — and the environment stage's failure
+  carries the analyzer's reading over the recovered tree, every element that
+  rests on an invented node marked as such in the structure (human ruling
+  2026-09-01: the environment account is included, invention marked). A tokens
+  failure bars the ast phase, and no recovered account is published anywhere in
+  that embodiment.
+- **The accounts serve named consumers** (human ruling 2026-09-01): the
+  error-interpreting lens the package roster names across both parse phases —
+  not yet built; this contract is part of what it will be built on — reads the
+  prefix and the recovered accounts; the scanner's-stopping-point lens of the
+  spellme family reads the prefix. The environment account is published for the
+  same roster by explicit ruling rather than a named reader (human ruling
+  2026-09-01) — publication stays justified per consumer or per ruling, never
+  maximal by default.
+- **The label is a discriminant, not a wall — an accepted cost, weighed** (human
+  ruling 2026-09-01). Under one shared `value` name, a read that skips the
+  narrowing can reach an account where it once reached nothing; "the accounts
+  never blend into the trustworthy stages" is kept by the `ok` discriminant a
+  consumer must respect — and by nothing stronger.
+- **Every account is optional in the type, permanently** (human ruling
+  2026-09-02). The `undefined` a skipped narrowing meets is the standing
+  mechanical guard behind the accepted cost above — never scaffolding to tighten
+  away. Presence at runtime follows one grammar: the token prefix is published
+  on every tokens failure (a stop before any complete turn yields empty
+  channels); the recovered tree exactly when the program lexes but does not
+  parse; the recovered binding and the analyzer's reading over it exactly when
+  the recovered tree is published; and each is absent past that only when its
+  own derivation defects — loudly, degrading that account alone (the defect
+  bullet below).
 - **A defect in embody's own machinery is loud to the developer, graceful to the
-  learner.** An entwining or scope-analysis failure raises a loud
-  development-mode report; a throwing applicability gate is degraded to
-  not-applicable and reported the same way. What a failure bars follows
+  learner.** An entwining or scope-analysis failure over the machine's valid
+  tree raises a loud development-mode report; a throwing applicability gate is
+  degraded to not-applicable and reported the same way. **Loudness follows the
+  cause's own `stage`, never bare `ok: false`**: a failure arm carrying an
+  upstream cause is not this stage's defect, whether or not it also carries an
+  account. A defect while deriving an account degrades that account alone — the
+  arm keeps its cause, the member is absent, and the development-mode report
+  speaks of the account failing, never of a broken machine invariant (the same
+  grammar as the input-element enrichment below). What a failure bars follows
   dependency: the source⇄tree binding underpins every later surface, so an
   entwining failure bars the phases below it; the scope structure is terminal —
   no later phase reads it — so an environment failure renders inside the
@@ -277,6 +354,15 @@ rule:
   tokenization except when the derivation itself defected
   ([§ Failure grammar](#failure-grammar)). A consumer that needs it checks for
   it; absence is a reported embody defect, never a property of the program.
+- **A failure arm's `value` is its account — same name, same shape, never the
+  same trust.** After `ok` narrows false, `value` where present is the partial
+  or recovered account ([§ Failure grammar](#failure-grammar)); a consumer that
+  needs one checks for it, and every consumer that only narrows `ok` reads
+  exactly what it always read. Read `value` without narrowing and the type hands
+  back the union with `undefined` — the discriminant, not the name, is what
+  separates trustworthy from recovered. And the accounts live on the fact
+  stages, never on the phase payloads: a lens rendering at a barred phase
+  reaches into the facts for them.
 
 ## What lives here
 
@@ -285,6 +371,7 @@ rule:
 | `README.md` (this)                             | contributors   | the region's domain model + navigation                                                 |
 | [`DOCS.md`](./DOCS.md)                         | developers     | the architectural sketch, structural constraints, and decisions                        |
 | [`notional-machine.md`](./notional-machine.md) | contributors   | the machine twin — the factory model, the scanner in full                              |
+| [`data-model.md`](./data-model.md)             | contributors   | the data twin — what the region's shapes are, who holds them, and for how long         |
 | [`types.ts`](./types.ts)                       | every consumer | the keystone contracts — `Snippet` · `Facts` · `Gateable` · `Embodiment`               |
 | `index.ts`                                     | consumers      | the factory's boundary — `embody()`                                                    |
 | `derive-facts.ts`                              | implementers   | the six fact stages, threaded once in dependency order                                 |
@@ -312,6 +399,41 @@ this region owns.
 - **fact stage** — one tagged derivation result inside the Facts: either the
   stage's value, or a structured cause of failure. The unit applicability
   predicates test and accessibility reads from.
+- **account** — what a failed stage publishes beside its cause: its own `value`,
+  partial or recovered, under the same name and shape a trustworthy value
+  carries, distinguished only by the `ok: false` arm that holds it (human ruling
+  2026-09-01). Every account is attributed to an instrument — the machine's own
+  partial reading, or the recovering reader's — and the arm is the attribution.
+- **token prefix** — the machine's account of a tokens-stage stop: the tokens
+  the scanner had produced, and the comments it had set aside, when the turn
+  that failed was reached — the tokens failure arm's `value`. A prefix of the
+  scanner's own reading, not of any completed stream — the program has none. Its
+  **extent** is the end of the last token or set-aside comment, whichever is
+  later — the account's own boundary, defined even when the cause carries no
+  `offset`; where the cause reports one, the extent sits at or before it. The
+  prefix also carries the same reading in the specification's own vocabulary: a
+  bounded input-element sequence over the source cut at that extent, handed to
+  the same scanning leaf under its unchanged tiling contract (human ruling
+  2026-09-01: bounded by slicing, the leaf untouched) — optional under the same
+  single absence condition as the success arm's member: absent exactly when that
+  derivation defects, the same reported defect.
+- **recovering reader** — the second instrument a grammar failure may bring in:
+  a reader that re-reads the source the machine's parse refused, bridging what
+  the source lacks by inventing the least structure that lets reading continue.
+  Not the machine — its output is an account, never a trustworthy value, and the
+  machine twin models the machine alone (the reader owes its own section there
+  when it is installed).
+- **recovered tree** — the recovering reader's tree over a program that lexes
+  but does not parse: the ast failure arm's `value`, with its invented nodes
+  enumerated beside it (human ruling 2026-09-01: admissible only as this
+  labeled, separate account). Downstream — published exactly when it is — the
+  entwined failure arm carries its entwined binding with the real token stream,
+  and the environment failure arm the analyzer's reading over it — together the
+  recovered account of the program.
+- **invented node** — a node of a recovered tree with no source of its own: the
+  recovering reader supplied it where the grammar demanded something the source
+  lacks. Enumerated on the ast failure arm; every environment element resting on
+  one is marked in the structure. Never present in the machine's tree.
 - **input elements** — the tokens stage's `inputElements` member: the same
   source re-read in the specification's own vocabulary — ECMA-262's
   input-element sequence, one named element per span — present on a successful
@@ -362,10 +484,14 @@ this region owns.
   around — dynamic `import()`'s, for one.)
 - **paren span** — where one pair of grouping parentheses sat: `start` at the
   `(`, `end` one past the `)` — half-open offsets in UTF-16 code units, the same
-  `start`/`end` vocabulary every node and token carries. The parser's own
-  recorded positions, never re-derived from the text. A node wrapped more than
-  once carries one span per pair, outermost first; a node with no grouping
-  parentheses has no entry at all. At a paren's own offset, `byOffset` resolves
+  `start`/`end` vocabulary every node and token carries. Within the machine's
+  binding, the parser's own recorded positions, never re-derived from the text;
+  a node with no grouping parentheses has no entry at all — the absence is
+  itself the parser's reading. Within a recovered account the record is the
+  **recovering reader's** own, of whatever it recovered — possibly nothing — and
+  a missing entry there is the reader's silence, never an assertion about the
+  source (human ruling 2026-09-02). A node wrapped more than once carries one
+  span per pair, outermost first. At a paren's own offset, `byOffset` resolves
   to the enclosing node — a consumer needing paren→node builds the one-pass
   reverse index from this record.
 - **environment** — the derived static scope structure, pre-execution: the stage
@@ -414,5 +540,7 @@ this region owns.
   constraints, and decisions.
 - [`notional-machine.md`](./notional-machine.md) — the machine twin: the
   factory's machine model, with the scanner modeled in full.
+- [`data-model.md`](./data-model.md) — the data twin: identity, ownership, and
+  lifetime for every shape the region produces, holds, or hands on.
 - [`types.ts`](./types.ts) — the keystone contracts: `Snippet`, `Facts`, the
   lifecycle vocabulary, `Gateable`, `Embodiment`.

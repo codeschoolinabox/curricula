@@ -105,6 +105,31 @@ flowchart TD
     SPEC -.->|"equal, except where<br/>recorded below"| PUB
 ```
 
+### When the scanner stops
+
+A turn that cannot produce an input element ends the reading. The scanner stops
+at the character it cannot spend, and everything read before that turn stands:
+one element was produced per completed turn, and nothing past the stopping point
+was ever read — the machine has no account of it, and this model claims none.
+The tokens stage publishes an account of the stop itself: the failure's cause
+keeps the machine's own words — and its stopping point where the machine reports
+one — and the failure arm's value is the **token prefix**: the tokens of every
+completed turn, with the comments set aside along the way (README § Failure
+grammar, human ruling 2026-09-01). The one-sequence restoration above extends to
+a stopped reading exactly as far as what was kept reaches (human ruling
+2026-09-01: the prefix publishes input elements too, bounded by slicing): the
+source is cut at the account's own extent — the end of the last token or
+set-aside comment, whichever is later — and the same leaf restores over the cut,
+its tiling contract unchanged, asserting nothing past the stopping point.
+
+A **recovered tree** — the grammar failure's account — is a second instrument's
+output: a **recovering reader**, not the machine this document models. Its
+shapes are data the region publishes, so they are modeled in the data twin
+([`data-model.md`](./data-model.md)) and labeled at the contract (README §
+Failure grammar). The reader itself is not modeled here because it is not
+installed; like the stages this file names without modeling, it owes its own
+section of this document when it is — extension, not inheritance.
+
 ### What the grammar's shape predicts
 
 Two consequences of the lexical grammar that look wrong until the model is held
