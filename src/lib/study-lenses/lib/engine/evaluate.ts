@@ -1,7 +1,7 @@
 /**
  * @file The factory — handle assembly, pump, termination machine,
  * timer, and call dispatch (DOCS.md § Architectural Sketch, execution
- * phases 1–5).
+ * phases 1–6).
  *
  * Each run's state lives in ONE mutable record threaded through the
  * named phases below — the engine is the campaign's declared impurity
@@ -140,7 +140,7 @@ function createHandle(state: RunState): EngineHandle {
 	return handle as EngineHandle;
 }
 
-// ─── Phase 2: sandbox start ───────────────────────────────────────────────────
+// ─── Phase 3: sandbox start ───────────────────────────────────────────────────
 
 /**
  * Starts the run on the first pull or result access; later calls are
@@ -200,7 +200,7 @@ async function runToSettlement(
 	settle(state);
 }
 
-// ─── Phase 3: streaming (pump · call dispatch) ────────────────────────────────
+// ─── Phase 4: streaming (pump · call dispatch) ────────────────────────────────
 
 /**
  * The thread-side message loop: receives worker events FIFO, runs the
@@ -367,7 +367,7 @@ async function dispatchCall(
 	state.budget?.resume();
 }
 
-// ─── Phase 4: stop (first writer wins) ────────────────────────────────────────
+// ─── Phase 5: stop (first writer wins) ────────────────────────────────────────
 
 /**
  * The single first-write-wins write point: the halt and every
@@ -387,7 +387,7 @@ function requestStop(state: RunState, cause: StopCause): void {
 	}
 }
 
-// ─── Phase 5: settlement ──────────────────────────────────────────────────────
+// ─── Phase 6: settlement ──────────────────────────────────────────────────────
 
 /**
  * Classifies the stop into the settlement (structured data only —

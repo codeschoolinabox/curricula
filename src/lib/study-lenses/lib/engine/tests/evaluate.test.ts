@@ -15,7 +15,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import evaluate from '../evaluate.js';
-import type { EngineHandle } from '../types.js';
+import type { EngineHandle, HaltPhase } from '../types.js';
 import type {
 	Transport,
 	TransportEvent,
@@ -198,6 +198,496 @@ describe('evaluate', () => {
 			await handle.result;
 
 			expect(seen.init?.execution).toBe('module');
+		});
+	});
+
+	describe('the creation gate (Z-A1) — committed skipped until Phase 1', () => {
+		it.skip('lets a program that parses through to the transport', async () => {
+			const seen = { init: null as TransportInit | null };
+			const stubTransport: Transport = Object.freeze({
+				start: (init: TransportInit) => {
+					seen.init = init;
+					return Promise.resolve();
+				},
+				next: (): Promise<TransportEvent> =>
+					Promise.resolve({
+						kind: 'halt',
+						haltKind: 'natural-end',
+						payload: {},
+					}),
+				hasPendingEvent: () => false,
+				resume: () => {},
+				respond: () => {},
+				terminate: () => {},
+			});
+			const handle = evaluate(
+				{
+					code: 'const x = 1;',
+					workerFactory: () => {
+						throw new Error('unused — stub transport never spawns');
+					},
+					threadLogic: { onMessage: (message) => message },
+					execution: 'module',
+				},
+				() => stubTransport,
+			);
+			await handle.result;
+
+			expect(seen.init?.code).toBe('const x = 1;');
+		});
+
+		it.skip('settles errored when the parser refuses a module-goal program', async () => {
+			const handle = evaluate(
+				{
+					code: 'const = ;',
+					workerFactory: () => {
+						throw new Error('the factory must not run behind the gate');
+					},
+					threadLogic: { onMessage: (message) => message },
+					execution: 'module',
+				},
+				() => {
+					throw new Error('no transport may be created behind the gate');
+				},
+			);
+			const { settlement } = await handle.result;
+
+			expect(settlement.outcome).toBe('errored');
+		});
+
+		it.skip('settles errored when the parser refuses a script-goal program', async () => {
+			const handle = evaluate(
+				{
+					code: 'const = ;',
+					workerFactory: () => {
+						throw new Error('the factory must not run behind the gate');
+					},
+					threadLogic: { onMessage: (message) => message },
+					execution: 'script',
+				},
+				() => {
+					throw new Error('no transport may be created behind the gate');
+				},
+			);
+			const { settlement } = await handle.result;
+
+			expect(settlement.outcome).toBe('errored');
+		});
+
+		it.skip('lets a long parseable script through to the transport', async () => {
+			const seen = { started: false };
+			const stubTransport: Transport = Object.freeze({
+				start: () => {
+					seen.started = true;
+					return Promise.resolve();
+				},
+				next: (): Promise<TransportEvent> =>
+					Promise.resolve({
+						kind: 'halt',
+						haltKind: 'natural-end',
+						payload: {},
+					}),
+				hasPendingEvent: () => false,
+				resume: () => {},
+				respond: () => {},
+				terminate: () => {},
+			});
+			const handle = evaluate(
+				{
+					code: 'let total = 0;\n'.repeat(500),
+					workerFactory: () => {
+						throw new Error('unused — stub transport never spawns');
+					},
+					threadLogic: { onMessage: (message) => message },
+					execution: 'script',
+				},
+				() => stubTransport,
+			);
+			await handle.result;
+
+			expect(seen.started).toBe(true);
+		});
+
+		it.skip('never invokes the worker factory for a program the parser refuses', async () => {
+			const seen = { factoryCalls: 0 };
+			const handle = evaluate(
+				{
+					code: 'const = ;',
+					workerFactory: () => {
+						seen.factoryCalls += 1;
+						throw new Error('unreachable');
+					},
+					threadLogic: { onMessage: (message) => message },
+					execution: 'script',
+				},
+				() => {
+					throw new Error('no transport may be created behind the gate');
+				},
+			);
+			await handle.result;
+
+			expect(seen.factoryCalls).toBe(0);
+		});
+
+		it.skip('carries the creation phase on a refused program', async () => {
+			const handle = evaluate(
+				{
+					code: 'const = ;',
+					workerFactory: () => {
+						throw new Error('the factory must not run behind the gate');
+					},
+					threadLogic: { onMessage: (message) => message },
+					execution: 'script',
+				},
+				() => {
+					throw new Error('no transport may be created behind the gate');
+				},
+			);
+			const { settlement } = await handle.result;
+
+			expect((settlement.halt as { phase?: HaltPhase }).phase).toBe('creation');
+		});
+
+		it.skip('stamps the engine as the author of a refused stop payload', async () => {
+			const handle = evaluate(
+				{
+					code: 'const = ;',
+					workerFactory: () => {
+						throw new Error('the factory must not run behind the gate');
+					},
+					threadLogic: { onMessage: (message) => message },
+					execution: 'script',
+				},
+				() => {
+					throw new Error('no transport may be created behind the gate');
+				},
+			);
+			const { settlement } = await handle.result;
+
+			expect(settlement.haltOrigin).toBe('engine');
+		});
+
+		it.skip('carries the parser position on a refused program', async () => {
+			const handle = evaluate(
+				{
+					code: 'let x = ;',
+					workerFactory: () => {
+						throw new Error('the factory must not run behind the gate');
+					},
+					threadLogic: { onMessage: (message) => message },
+					execution: 'script',
+				},
+				() => {
+					throw new Error('no transport may be created behind the gate');
+				},
+			);
+			const { settlement } = await handle.result;
+
+			expect(settlement.halt).toMatchObject({ line: 1, column: 8 });
+		});
+
+		it.skip('reports no consumed budget for a program refused before the run', async () => {
+			const handle = evaluate(
+				{
+					code: 'const = ;',
+					workerFactory: () => {
+						throw new Error('the factory must not run behind the gate');
+					},
+					threadLogic: { onMessage: (message) => message },
+					execution: 'script',
+				},
+				() => {
+					throw new Error('no transport may be created behind the gate');
+				},
+			);
+			const { settlement } = await handle.result;
+
+			expect(settlement.durationMs).toBe(0);
+		});
+
+		it.skip('accepts a hashbang on the script goal', async () => {
+			const seen = { started: false };
+			const stubTransport: Transport = Object.freeze({
+				start: () => {
+					seen.started = true;
+					return Promise.resolve();
+				},
+				next: (): Promise<TransportEvent> =>
+					Promise.resolve({
+						kind: 'halt',
+						haltKind: 'natural-end',
+						payload: {},
+					}),
+				hasPendingEvent: () => false,
+				resume: () => {},
+				respond: () => {},
+				terminate: () => {},
+			});
+			const handle = evaluate(
+				{
+					code: '#!/usr/bin/env node\nlet x = 1;',
+					workerFactory: () => {
+						throw new Error('unused — stub transport never spawns');
+					},
+					threadLogic: { onMessage: (message) => message },
+					execution: 'script',
+				},
+				() => stubTransport,
+			);
+			await handle.result;
+
+			expect(seen.started).toBe(true);
+		});
+
+		it.skip('refuses a top-level return on the script goal', async () => {
+			const handle = evaluate(
+				{
+					code: 'return 1;',
+					workerFactory: () => {
+						throw new Error('the factory must not run behind the gate');
+					},
+					threadLogic: { onMessage: (message) => message },
+					execution: 'script',
+				},
+				() => {
+					throw new Error('no transport may be created behind the gate');
+				},
+			);
+			const { settlement } = await handle.result;
+
+			expect(settlement.outcome).toBe('errored');
+		});
+
+		it.skip('refuses new.target on the script goal', async () => {
+			const handle = evaluate(
+				{
+					code: 'new.target;',
+					workerFactory: () => {
+						throw new Error('the factory must not run behind the gate');
+					},
+					threadLogic: { onMessage: (message) => message },
+					execution: 'script',
+				},
+				() => {
+					throw new Error('no transport may be created behind the gate');
+				},
+			);
+			const { settlement } = await handle.result;
+
+			expect(settlement.outcome).toBe('errored');
+		});
+
+		it.skip('accepts a top-level lexical shadow of a restricted global', async () => {
+			const seen = { started: false };
+			const stubTransport: Transport = Object.freeze({
+				start: () => {
+					seen.started = true;
+					return Promise.resolve();
+				},
+				next: (): Promise<TransportEvent> =>
+					Promise.resolve({
+						kind: 'halt',
+						haltKind: 'natural-end',
+						payload: {},
+					}),
+				hasPendingEvent: () => false,
+				resume: () => {},
+				respond: () => {},
+				terminate: () => {},
+			});
+			const handle = evaluate(
+				{
+					code: 'let NaN = 1;',
+					workerFactory: () => {
+						throw new Error('unused — stub transport never spawns');
+					},
+					threadLogic: { onMessage: (message) => message },
+					execution: 'script',
+				},
+				() => stubTransport,
+			);
+			await handle.result;
+
+			expect(seen.started).toBe(true);
+		});
+
+		it.skip('accepts top-level await on the module goal', async () => {
+			const seen = { started: false };
+			const stubTransport: Transport = Object.freeze({
+				start: () => {
+					seen.started = true;
+					return Promise.resolve();
+				},
+				next: (): Promise<TransportEvent> =>
+					Promise.resolve({
+						kind: 'halt',
+						haltKind: 'natural-end',
+						payload: {},
+					}),
+				hasPendingEvent: () => false,
+				resume: () => {},
+				respond: () => {},
+				terminate: () => {},
+			});
+			const handle = evaluate(
+				{
+					code: 'await Promise.resolve();',
+					workerFactory: () => {
+						throw new Error('unused — stub transport never spawns');
+					},
+					threadLogic: { onMessage: (message) => message },
+					execution: 'module',
+				},
+				() => stubTransport,
+			);
+			await handle.result;
+
+			expect(seen.started).toBe(true);
+		});
+
+		it.skip('never parses the function path', async () => {
+			const seen = { started: false };
+			const stubTransport: Transport = Object.freeze({
+				start: () => {
+					seen.started = true;
+					return Promise.resolve();
+				},
+				next: (): Promise<TransportEvent> =>
+					Promise.resolve({
+						kind: 'halt',
+						haltKind: 'natural-end',
+						payload: {},
+					}),
+				hasPendingEvent: () => false,
+				resume: () => {},
+				respond: () => {},
+				terminate: () => {},
+			});
+			const handle = evaluate(
+				{
+					code: 'return 1;',
+					workerFactory: () => {
+						throw new Error('unused — stub transport never spawns');
+					},
+					threadLogic: { onMessage: (message) => message },
+				},
+				() => stubTransport,
+			);
+			await handle.result;
+
+			expect(seen.started).toBe(true);
+		});
+
+		it.skip('defers to the transport when the parser cannot reach a verdict', async () => {
+			const seen = { started: false };
+			const stubTransport: Transport = Object.freeze({
+				start: () => {
+					seen.started = true;
+					return Promise.resolve();
+				},
+				next: (): Promise<TransportEvent> =>
+					Promise.resolve({
+						kind: 'halt',
+						haltKind: 'natural-end',
+						payload: {},
+					}),
+				hasPendingEvent: () => false,
+				resume: () => {},
+				respond: () => {},
+				terminate: () => {},
+			});
+			const handle = evaluate(
+				{
+					code: `${'('.repeat(60_000)}1${')'.repeat(60_000)}`,
+					workerFactory: () => {
+						throw new Error('unused — stub transport never spawns');
+					},
+					threadLogic: { onMessage: (message) => message },
+					execution: 'script',
+				},
+				() => stubTransport,
+			);
+			const { settlement } = await handle.result;
+
+			expect([seen.started, settlement.haltOrigin]).toEqual([true, 'worker']);
+		});
+
+		it.skip('never throws out of a result access when the parser gives up', () => {
+			const stubTransport: Transport = Object.freeze({
+				start: () => Promise.resolve(),
+				next: (): Promise<TransportEvent> =>
+					Promise.resolve({
+						kind: 'halt',
+						haltKind: 'natural-end',
+						payload: {},
+					}),
+				hasPendingEvent: () => false,
+				resume: () => {},
+				respond: () => {},
+				terminate: () => {},
+			});
+			const handle = evaluate(
+				{
+					code: `${'('.repeat(60_000)}1${')'.repeat(60_000)}`,
+					workerFactory: () => {
+						throw new Error('unused — stub transport never spawns');
+					},
+					threadLogic: { onMessage: (message) => message },
+					execution: 'module',
+				},
+				() => stubTransport,
+			);
+
+			expect(() => handle.result).not.toThrow();
+		});
+
+		it.skip('runs the refinement hook on a refused program', async () => {
+			const handle = evaluate(
+				{
+					code: 'const = ;',
+					workerFactory: () => {
+						throw new Error('the factory must not run behind the gate');
+					},
+					threadLogic: {
+						onMessage: (message) => message,
+						refineError: () => 'refined',
+					},
+					execution: 'script',
+				},
+				() => {
+					throw new Error('no transport may be created behind the gate');
+				},
+			);
+			const { settlement } = await handle.result;
+
+			expect(settlement.refinement).toBe('refined');
+		});
+
+		it.skip('keeps the halt when the refinement hook throws on a refused program', async () => {
+			const handle = evaluate(
+				{
+					code: 'const = ;',
+					workerFactory: () => {
+						throw new Error('the factory must not run behind the gate');
+					},
+					threadLogic: {
+						onMessage: (message) => message,
+						refineError: () => {
+							throw new Error('refiner exploded');
+						},
+					},
+					execution: 'script',
+				},
+				() => {
+					throw new Error('no transport may be created behind the gate');
+				},
+			);
+			const { settlement } = await handle.result;
+
+			expect([
+				(settlement.halt as { phase?: HaltPhase }).phase,
+				settlement.error?.cause,
+			]).toEqual(['creation', 'hook-error']);
 		});
 	});
 

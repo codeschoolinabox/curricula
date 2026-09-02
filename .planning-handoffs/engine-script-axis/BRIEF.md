@@ -1158,6 +1158,27 @@ HR-24 exists. Each names the step that owes it.
   under `worker/` is caught by `latched-built-ins.test.ts`'s LIVE
   `readdirSync(WORKER_DIRECTORY)` classification row, while a file outside
   `worker/` is invisible to the only instrument that enforces the latch rule.
+- **`SetupMessage.execution` is a required field no compiler enforces — owed by
+  Phase 1's first script increment.** `postMessage` erases the envelope type at
+  its only construction site (`worker/transport.ts`) and `bootstrap.ts` casts on
+  the way in, so tsc is green today with the field absent. Phase 1 both passes
+  it and annotates the literal, so the type becomes the guard it reads as. The
+  four capability-probe rows in
+  `tests/conformance/transport/script-execution.browser.test.ts` are what catch
+  it if that is forgotten: they need a host that REFUSES scripts, which is the
+  module-worker tier that exists today, so they un-skip without waiting on the
+  classic tier and fail if the path never reaches setup.
+- **The blob-URL revocation constraint is UNBANKED, deliberately — owed by
+  nobody, named so it is not mistaken for covered.** `DOCS.md` § Structural
+  constraints requires both blob-carrying paths to revoke their object URL on
+  every exit, throwing path included. Nothing in the ZOMBIES suite asserts it,
+  because revocation is not observable from inside the learner's program: the
+  program never receives the URL, and the engine's only observer would be a
+  resource-timing count that measures the browser rather than the engine. A row
+  named for revocation whose assertion cannot fail is worse than no row — the
+  earlier draft carried exactly such a row and it was renamed to what it
+  actually measures. If Phase 1 finds an honest instrument, this is the
+  constraint it belongs to.
 - **The exact acorn pin (`^8.16.0` → `8.16.0`) lands with Phase 1's parse
   gate**, not with Phase 0 (HR-24). Phase 0 records it as contract; the
   `package.json` edit is shared configuration and rides the commit that first

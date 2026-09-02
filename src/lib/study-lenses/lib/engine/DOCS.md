@@ -21,29 +21,56 @@ Settlement.
    first item that becomes ready with no consumer iterator in existence, the
    engine drains on the consumer's behalf (phase 3) — `result` always settles.
 
-2. **Sandbox start** (async, first pull or result access) — a module worker is
-   spawned via the spec's worker factory (which loads the consumer's thin worker
-   entry); readiness is confirmed by handshake; shared memory and the worker
-   config are delivered at setup; the consumer's worker logic returns its
-   globals (validated as identifiers, loudly, on either path) and optional halt
-   serializer; the code is delivered and run via one of two paths selected by
-   the spec's `execution` preference — the `'function'` path wraps it in
-   `new Function` (globals as parameters, strict per the `strict` preference);
-   the `'module'` path runs it as an ES module (globals installed on globalThis,
-   always strict — the `strict` preference is inert). A code-level `SyntaxError`
-   (an unparseable or uncompilable program) is caught at construction or module
-   instantiation on either path and surfaced as a worker-authored throw halt,
-   settling `errored` — never a worker-error (which is reserved for environment,
-   factory, and setup failures). Environment failures — shared memory
-   unavailable, a throwing worker factory — are worker-error terminations with
-   the condition in the engine error, never throws; consumer setup failures
-   (invalid global keys, a throwing setup, clone-unsafe worker config) settle
-   the same way; and an engine-internal defect (a contract-violating value that
-   reaches runtime, e.g. a factory returning a non-`Worker`) settles loudly the
-   same way, the defect named in the engine error — the engine never hangs and
-   never throws.
+2. **Creation gate** (sync, first pull or result access, before anything is
+   spawned) — on the `'module'` and `'script'` paths only, acorn parses the code
+   at `ecmaVersion: 'latest'` on the corresponding goal. A program the parser
+   REFUSES settles `errored` from here: the worker factory is never invoked,
+   **no transport is constructed**, and no shared memory is allocated: the gate
+   precedes every run resource, which is the landmark to hold an implementation
+   against. The stop record is an `EngineHalt` the thread authors, carrying
+   `phase: 'creation'` and acorn's position, with `haltOrigin: 'engine'`, routed
+   through the same errored-halt classification a worker-authored throw takes,
+   so `refineError` fires on it unchanged. `'function'` is not parsed:
+   `new Function` is its own gate.
 
-3. **Streaming** (async, per message) — the running program emits messages one
+   **A gate that cannot decide defers.** Only a parse REFUSAL settles the run
+   here; a parser failure that reaches no verdict — acorn exhausting its own
+   call stack — is caught, and the run proceeds as though the path were ungated.
+   So the gate has one refusal shape and no throwing exit: nothing propagates
+   synchronously out of a pull or a `result` access.
+
+3. **Sandbox start** (async, first pull or result access) — a worker is spawned
+   via the spec's worker factory (which loads the consumer's thin worker entry;
+   module or classic is the toolchain's answer, and it pairs with the execution
+   path); readiness is confirmed by handshake; shared memory, the worker config
+   and the execution path are delivered at setup, where the `'script'` path
+   probes `importScripts` before any global is installed; the consumer's worker
+   logic returns its globals (validated as identifiers, loudly, on every path)
+   and optional halt serializer; the code is delivered and run via one of THREE
+   paths selected by the spec's `execution` preference — the `'function'` path
+   wraps it in `new Function` (globals as parameters, strict per the `strict`
+   preference); the `'module'` path runs it as an ES module from a blob URL
+   (globals installed on globalThis, always strict — the `strict` preference is
+   inert); the `'script'` path runs it as a genuine Script Record via
+   `importScripts` on a blob URL (globals installed on globalThis, the program's
+   bytes verbatim — the `strict` preference is inert here too, nothing is
+   prepended, so a script is sloppy unless it says otherwise). Both
+   blob-carrying paths revoke their object URL on every exit. Three kinds of
+   code-level `SyntaxError` still reach the worker — `new Function` construction
+   on the unparsed path; a script instantiation failure the gate cannot see
+   (`let NaN = 1`); and the real syntax error of a program the gate ABSTAINED
+   on, which the host's own parser reports here — and each is caught there and
+   surfaced as a worker-authored throw halt, settling `errored`, never a
+   worker-error (which is reserved for environment, factory, and setup
+   failures). Environment failures — shared memory unavailable, a throwing
+   worker factory — are worker-error terminations with the condition in the
+   engine error, never throws; consumer setup failures (invalid global keys, a
+   throwing setup, clone-unsafe worker config) settle the same way; and an
+   engine-internal defect (a contract-violating value that reaches runtime, e.g.
+   a factory returning a non-`Worker`) settles loudly the same way, the defect
+   named in the engine error — the engine never hangs and never throws.
+
+4. **Streaming** (async, per message) — the running program emits messages one
    at a time under the pause protocol; each is handed to the message hook and
    either dropped (immediate resume) or yielded (frozen at yield; the worker
    resumes on the next pull — the consumer's, or the engine's own when draining
@@ -54,21 +81,22 @@ Settlement.
    patterns — call, then emit carrying the returned value — rely on this). The
    time budget counts only while the worker is unblocked.
 
-4. **Stop** (first writer wins; async on the in-flight-call path) — either the
-   worker stops on its own — synchronously at the function path's natural end,
-   or asynchronously when the module path's module-evaluation promise fulfills
-   (work scheduled beyond the natural end, a pending timer, never runs); a
-   rejecting module evaluation reaches the halt author as a throw, exactly like
-   a function-path throw; the bootstrap posts exactly one halt either way,
+5. **Stop** (first writer wins; async on the in-flight-call path) — either the
+   worker stops on its own — synchronously at the `'function'` and `'script'`
+   paths' natural ends, or asynchronously when the `'module'` path's
+   module-evaluation promise fulfills (work scheduled beyond the natural end, a
+   pending timer, never runs on any path); a rejecting module evaluation and a
+   throwing script both reach the halt author as a throw, exactly like a
+   function-path throw; the bootstrap posts exactly one halt whichever path ran,
    authored by the consumer's halt serializer or the engine default — or the
    thread stops the run (cancel, fail with payload, timeout, worker crash, call
-   error, hook error). The halt and the termination causes claim the same
-   first-write-wins slot: exactly one stop settles a run; anything later —
-   including after settlement — is a no-op. When a call is in flight, stop
-   processing awaits it (discarding the response) before teardown — the one
-   async leg of stopping.
+   error, hook error), or the creation gate refuses it before any worker exists.
+   The halt and the termination causes claim the same first-write-wins slot:
+   exactly one stop settles a run; anything later — including after settlement —
+   is a no-op. When a call is in flight, stop processing awaits it (discarding
+   the response) before teardown — the one async leg of stopping.
 
-5. **Settlement** (sync) — the outcome is classified from structured stop data;
+6. **Settlement** (sync) — the outcome is classified from structured stop data;
    the refinement hook runs on errored halts; the settlement (outcome, carried
    data, consumed-budget duration) and the items array are frozen; the sandbox
    is torn down — on every path.
@@ -79,7 +107,9 @@ Settlement.
 flowchart TD
     SPEC[spec<br/>code · worker factory · worker config ·<br/>thread logic · seconds · strict · execution ·<br/>yield charge] --> HANDLE[lazy handle<br/>no work before first pull or result access]
     HANDLE -->|cancel or fail before the run starts| SETTLE
-    HANDLE -->|first pull or result access| RUN[running program in module worker<br/>globals injected · halt serializer registered]
+    HANDLE -->|first pull or result access| GATE{creation gate<br/>acorn, thread-side, 'latest'<br/>module and script goals only}
+    GATE -->|the parser REFUSES it — no spawn,<br/>engine-authored halt, phase 'creation'| FWW
+    GATE -->|"parses, is not parsed ('function'),<br/>or the parser could not decide —<br/>spawn · handshake · setup, where<br/>'script' probes importScripts first"| RUN[running program in the sandbox<br/>'function': globals as parameters, sync end<br/>'module': globals on globalThis, async end<br/>'script': globals on globalThis, sync end]
     RUN -->|emit: clone-safe message,<br/>pauses until disposed| MSG[message on thread]
     MSG -->|message hook| DY{drop or yield?<br/>items frozen at yield}
     DY -->|drop — immediate resume| RUN
@@ -90,7 +120,7 @@ flowchart TD
     CALL --> RUN
     RUN -->|halt — authored worker-side,<br/>posted once per worker-side stop| FWW[one first-write-wins stop slot]
     TERM[termination causes<br/>cancel · fail · timeout · worker error ·<br/>call error · hook error] --> FWW
-    FWW -->|classify · refine errored halts · freeze| SETTLE[settlement<br/>outcome · halt? · refinement? ·<br/>failReason? · error? · durationMs<br/>sandbox torn down]
+    FWW -->|classify · refine errored halts · freeze| SETTLE[settlement<br/>outcome · halt? · haltOrigin? · refinement? ·<br/>failReason? · error? · durationMs<br/>sandbox torn down]
     STREAM --> RESULT[result<br/>frozen items + settlement]
     SETTLE --> RESULT
 ```
@@ -122,10 +152,15 @@ flowchart TD
   pull and while the call hook runs. A consumer that emits at every program step
   waives the fee with `yieldCharge: false`; the PAUSES are unconditional, so a
   waived run still stops its clock for yield-waits and call servicing, and still
-  times out on real wall-clock time.
-- **The natural end ends the run — on both paths.** Work scheduled beyond it (a
-  pending timer) never runs; the module path's asynchronous natural end changes
-  when the stop fires, never whether trailing work runs.
+  times out on real wall-clock time. Because the budget arms only when the code
+  begins running, a run that never gets there — refused at the creation gate, or
+  ended by an environment failure — reports `durationMs: 0` by that same rule
+  rather than by a special case. The gate's own parse is not charged: it is
+  synchronous on the calling thread and outside the budget entirely.
+- **The natural end ends the run — on all three paths.** Work scheduled beyond
+  it (a pending timer) never runs. `'function'` and `'script'` end
+  synchronously, `'module'` asynchronously when its evaluation promise settles;
+  the asynchrony changes WHEN the stop fires, never whether trailing work runs.
 - **Freeze at yield; freeze at settlement.** The engine freezes its OWN
   structures — each yielded item, the items array, the settlement object — and
   never deep-freezes consumer payload interiors (halt, refinement, failReason);
@@ -154,14 +189,49 @@ flowchart TD
   unavailable and a throwing worker factory settle as errored with the condition
   in the engine error. Serving the cross-origin isolation headers (COOP/COEP) is
   the host page's responsibility.
-- **The engine spawns only what the factory returns.** Worker construction is
-  consumer-owned; the engine asserts nothing about the worker at runtime
-  (module-vs-classic, adjacency, bundler). A _throwing_ worker factory is a
-  worker-error settlement; a factory returning a non-`Worker` is a consumer-side
-  type error (it lands on the internal-defect path if it reaches runtime). The
-  adjacency and `{ type: 'module' }` requirements are consumer obligations,
-  doc-enforced (§ Why this design → Module workers), never type-enforced — a
-  branded wrapper to enforce them would be the forbidden re-splitting helper.
+- **The engine spawns only what the factory returns, and asserts one thing about
+  it.** Worker construction is consumer-owned and the engine asserts nothing
+  about the worker at runtime — module-vs-classic, adjacency, bundler — **except
+  the `'script'` path's `importScripts` capability probe**, which runs at setup,
+  before any consumer global is installed, and settles a mismatch as
+  worker-error. The carve-out is bounded to that one path and that one question.
+  A _throwing_ worker factory is a worker-error settlement; a factory returning
+  a non-`Worker` is a consumer-side type error (it lands on the internal-defect
+  path if it reaches runtime). Adjacency and the worker-type/execution-path
+  pairing are consumer obligations, doc-enforced (§ Why this design → Module
+  workers), never type-enforced.
+- **The engine's source transformations are a closed set of exactly one.** The
+  `'function'` path prepends `"use strict";\n` when the consumer asks for it.
+  Nothing else rewrites the program's bytes: the `'module'` and `'script'` paths
+  deliver it verbatim, and the creation gate READS without writing. This is
+  stated as a set so a future increment has to change the set rather than add
+  quietly to it — the retired module line-1 marker would have been the second
+  member, and declining it is why acorn is here.
+- **Halts have two authoring SIDES, and the engine's own payload is typed.**
+  Worker-side stops are authored by `serializeHalt` — or, when the consumer
+  supplies none, by the engine's worker-side default — and posted by the
+  bootstrap; the creation gate's is authored on the thread. `haltOrigin` is
+  present exactly when `halt` is and names the side; a consumer narrowing the
+  halt to its own shape reads THAT, never the payload. Every payload the ENGINE
+  authors is one exported `EngineHalt` — shared `{ name, message }` core,
+  optional `phase`, optional `line`/`column` that only the gate fills. The type
+  is the single place that literal is written; once Phase 1 annotates the
+  authors with it, a compiler rather than a conformance test is what keeps them
+  from drifting.
+- **A blob-carrying path revokes its object URL on every exit.** `'module'` and
+  `'script'` both deliver the program as a blob and both revoke in a `finally`,
+  throwing path included. `importScripts` is synchronous, so the script path's
+  revoke lands on the same turn as its execution — identical discipline,
+  different turn boundary (worker/DOCS.md § Capture order).
+- **`strict` is honored on `'function'` alone.** `'module'` is always strict by
+  the language's rule; on `'script'` it is an ignored input, because the engine
+  prepends nothing. Moving a snippet between those paths changes its strictness
+  silently — a consumer-visible cost accepted for fidelity.
+- **The gate's language level is contract, not configuration.** `ecmaVersion` is
+  `'latest'` — a gate must never be stricter than the instrumenters whose output
+  it receives — and acorn's version pins exactly, so the level cannot move under
+  a learner on an `npm update`. That pin is a repo-wide manifest edit shared
+  with every other acorn reader here.
 - **The sandbox is torn down on every path.**
 
 ### Out of scope
@@ -171,16 +241,27 @@ flowchart TD
   payloads and refinements opaquely.
 - Payload vocabularies: NM events, categories, whitelists — consumer logic on
   either side of the boundary.
-- Gates and refusal — downstream concerns (the evaluators region's: embody's
-  evaluation-phase gate and an evaluator's refusal-as-data both fire before the
-  engine is ever invoked).
+- PEDAGOGICAL gates and refusal — downstream concerns (the evaluators region's:
+  embody's evaluation-phase gate and an evaluator's refusal-as-data both decide
+  whether a program should be run at all, and both fire before the engine is
+  ever invoked). The engine's own creation gate is a different thing under the
+  same word: it decides only whether the program PARSES on the goal it was posed
+  as, and it is owned here (§ Execution phases, item 2).
 - Deep-freezing consumer payloads — downstream owners freeze their own data
   (e.g. an evaluator's own deep pass).
 - Replay by re-iterating a settled handle — the result's items array is the
   cache; each evaluate call is a fresh run.
 - Inferring the execution path from the code — the engine never sniffs for
   `import`/`export`; path selection is consumer-owned (the consuming lens maps
-  the snippet type onto the axis).
+  the snippet type onto the path). **Reading is not inferring**, and the
+  boundary is stated rather than left to be deduced: the creation gate parses
+  the code to classify a FAILURE PHASE for the path it was already given. It
+  never lets what it read choose the path.
+- Choosing a toolchain that can run the requested path — `'script'` needs a
+  worker the bundler emits CLASSIC, and asking for it under a toolchain that
+  produces module workers gets a worker-error settlement from the capability
+  probe rather than a run. The engine detects the mismatch; it does not choose
+  the build.
 - COOP/COEP hosting headers; caching; per-run indexes; derived analytics;
   rendering and pedagogy.
 
@@ -216,11 +297,37 @@ Two consequences are deliberate. **(1) The duplicated adjacent
 load-bearing.** A centralizing helper (`moduleWorker(url)`) would move the
 `new Worker` into the helper's module — re-splitting it from the consumer's
 `new URL` and re-breaking webpack. Do NOT DRY it up. **(2) The engine no longer
-guarantees `{ type: 'module' }`** — a consumer that omits it gets a classic
-worker whose ESM imports fail. Neither constraint is type-enforceable
+guarantees `{ type: 'module' }`, and the worker's type PAIRS with the execution
+path** — a consumer that omits the option under a toolchain that honors it gets
+a classic worker whose ESM imports fail, while webpack strips the option and
+emits every worker chunk classic regardless, which is both why the `'module'`
+path keeps working in production and why `'script'` is possible there at all.
+The imperative stays unconditional (keep the option); what is conditional is
+what the toolchain does with it. Neither constraint is type-enforceable
 (`() => Worker` can't encode the options, and a branded wrapper to enforce them
 is exactly the forbidden helper), so the guard is documentation by necessity —
-see the `workerFactory` JSDoc and README § Public API.
+see the `workerFactory` JSDoc and README § Public API. The measured basis is the
+client build at ~90% certainty; the real engine's worker has not been run inside
+a production page, which is why the `'script'` path probes rather than trusts.
+
+### One author for the engine's own payload
+
+The engine authors a stop payload in two places — the worker-side default, when
+a consumer supplies no `serializeHalt`, and the creation gate — and the fake
+transport carries a third copy of the first. `EngineHalt` types all three, and
+Phase 1 extracts the author itself into `worker/` so there is one implementation
+as well as one type.
+
+`worker/` is the right home for a reason that outlives any test: realm is fixed
+by the import graph, and a module `bootstrap.ts` imports is worker-realm by that
+rule — placing it elsewhere would put a worker-realm module outside the
+directory whose rule governs it, and incidentally outside the predicate that
+mechanizes that rule. The cost is three edits into another unit's committed
+suite, not one: the live realm-classification row gains a filename; the pinned
+capture set for `bootstrap.ts` LOSES `Error` and `String`, because the extracted
+author is what reads them; and the new module takes on its own latch obligation
+for those two names. Named here so the second unit to arrive inherits it rather
+than discovers it.
 
 ### Fully opaque items
 

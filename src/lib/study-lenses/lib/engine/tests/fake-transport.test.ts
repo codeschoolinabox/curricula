@@ -264,5 +264,56 @@ describe('createFakeTransport', () => {
 
 			expect(items).toEqual(['undefined']);
 		});
+
+		it.skip('ignores execution script and injects globals as parameters', async () => {
+			const handle = fakeRun('emit(typeof globalThis.emit);', {
+				execution: 'script',
+			});
+			const { items } = await handle.result;
+
+			expect(items).toEqual(['undefined']);
+		});
+
+		it.skip('keeps a top-level var out of globalThis under execution script', async () => {
+			const handle = fakeRun(
+				'var reached = 1;emit(typeof globalThis.reached);',
+				{ execution: 'script' },
+			);
+			const { items } = await handle.result;
+
+			expect(items).toEqual(['undefined']);
+		});
+	});
+
+	describe('the creation gate applies above the transport seam (Z-C1)', () => {
+		it.skip('refuses an unparseable script before the fake is created', async () => {
+			const handle = fakeRun('const = ;', { execution: 'script' });
+			const { settlement } = await handle.result;
+
+			expect(settlement.haltOrigin).toBe('engine');
+		});
+
+		it.skip('refuses a top-level return posed on the script goal', async () => {
+			const handle = fakeRun('return 1;', { execution: 'script' });
+			const { settlement } = await handle.result;
+
+			expect(settlement.outcome).toBe('errored');
+		});
+
+		it.skip('defers to the worker when the parser cannot reach a verdict', async () => {
+			const handle = fakeRun(`${'('.repeat(60_000)}1${')'.repeat(60_000)}`, {
+				execution: 'script',
+			});
+			const { settlement } = await handle.result;
+
+			expect(settlement.haltOrigin).toBe('worker');
+		});
+
+		it.skip('runs the same top-level return posed on the function path', async () => {
+			const handle = fakeRun('return 1;');
+			const { settlement } = await handle.result;
+
+			expect(settlement.outcome).toBe('completed');
+		});
 	});
 });

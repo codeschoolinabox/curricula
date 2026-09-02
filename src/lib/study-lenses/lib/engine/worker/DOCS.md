@@ -44,7 +44,10 @@ flowchart LR
   `addEventListener` on the worker global is the site where that applies.
 - **The worker-realm import graph is static and acyclic**: that absence of
   cycles is what makes every capture bound before the execute turn. A cycle, or
-  a worker-realm module reached only by dynamic import, is out of contract.
+  a worker-realm module reached only by dynamic import, is out of contract. The
+  learner's program is not part of this graph on any path — it arrives as a blob
+  the engine imports or `importScripts`es at execute time, which is exactly why
+  the captures must already be bound by then.
 - **Latches are module-private**: no capture crosses a module boundary, so none
   appears in [../types.ts](../types.ts) or [types.ts](./types.ts).
 
@@ -92,9 +95,13 @@ sequenceDiagram
 ```
 
 The loop is the point. Engine reads are interleaved with the program, not queued
-behind it: an emission pauses and posts mid-run, and the module path's blob
-revoke and halt post land on a later turn after evaluation settles. Every one of
-those reads happens in a realm the program has already had the chance to edit.
+behind it. An emission pauses and posts mid-run. The module path's blob revoke
+and halt post land on a LATER turn, after evaluation settles; the script path's
+land on the SAME turn, because `importScripts` is synchronous and returns into
+the engine's own frame. Both orderings are covered by the same rule, which is
+the point of stating it as a rule: every one of those reads happens in a realm
+the program has already had the chance to edit, whether or not a turn boundary
+separates them.
 
 ### What counts as compliant
 

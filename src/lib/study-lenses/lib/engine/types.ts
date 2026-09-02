@@ -6,9 +6,13 @@
  * narrow at their own layer. The engine never reads a payload's
  * shape; its only payload constraint is structured-clone safety.
  *
- * This module imports nothing: the engine is dependency-free, and this file
- * pins only what consumers touch. Engine-internal machinery (the worker
- * message protocol, the shared-memory layout) lives in `worker/`, not here.
+ * This module imports nothing, and pins only what consumers touch. The
+ * engine depends on no region of this package — importability, not
+ * import-freedom, is the load-bearing property — and carries exactly one
+ * external dependency, acorn, imported thread-side for the creation gate
+ * and never shipped into a worker chunk. Engine-internal machinery (the
+ * worker message protocol, the shared-memory layout) lives in `worker/`,
+ * not here.
  *
  * Vocabulary is pinned in README.md § Glossary; outcome carriage is pinned
  * in README.md § How a run ends.
@@ -24,24 +28,39 @@ type EvaluateSpec = {
 	/** The program, as an opaque string — instrumented or not. */
 	readonly code: string;
 	/**
-	 * Constructs THIS run's module worker. MUST be authored as ONE
-	 * syntactically adjacent expression in the CONSUMER's module:
+	 * Constructs THIS run's worker. MUST be authored as ONE syntactically
+	 * adjacent expression in the CONSUMER's module, and MUST keep
+	 * `{ type: 'module' }`:
 	 *
 	 *   () => new Worker(new URL('./entry.ts', import.meta.url), { type: 'module' })
 	 *
 	 * The factory loads a thin per-consumer worker entry (a few lines wiring
-	 * the engine's bootstrap to this consumer's worker logic). The consumer
-	 * owns construction — not the engine — for two load-bearing reasons:
-	 * (1) ADJACENCY — webpack's static worker detection emits a real worker
-	 *     chunk only when `new Worker(new URL(...))` is one expression;
-	 *     splitting the URL from `new Worker`, or hiding it behind a helper,
-	 *     regresses to a raw-`.ts` asset that crashes (`worker-error`).
-	 * (2) MODULE TYPE — omitting `{ type: 'module' }` yields a classic worker
-	 *     whose ESM `import`s fail at load (also `worker-error`).
+	 * the engine's bootstrap to this consumer's worker logic). Two obligations
+	 * ride it, and they are different in kind:
+	 * (1) ADJACENCY, unconditionally — webpack's static worker detection emits
+	 *     a real worker chunk only when `new Worker(new URL(...))` is one
+	 *     expression; splitting the URL from `new Worker`, or hiding it behind
+	 *     a helper, regresses to a raw-`.ts` asset that crashes
+	 *     (`worker-error`).
+	 * (2) WORKER TYPE, PAIRED with `execution` — omitting `{ type: 'module' }`
+	 *     under a toolchain that honors the option yields a classic worker
+	 *     whose ESM `import`s fail at load (also `worker-error`). Behind the
+	 *     imperative: the entry imports the bootstrap, so the worker must be
+	 *     able to resolve those imports — either it IS a module worker (what
+	 *     Vite and the vitest browser tier produce) or a bundler has already
+	 *     inlined them into a classic chunk (what webpack does — it strips
+	 *     `{ type: 'module' }` and emits every worker chunk classic).
+	 *     `execution: 'script'` additionally needs `importScripts`, which only
+	 *     a classic worker can call; a module worker exposes the name and
+	 *     throws on the call, so no `typeof` guard detects the mismatch and the
+	 *     script path probes it at setup instead.
 	 * Neither is type-enforceable (`() => Worker` cannot encode the options),
 	 * and a branded wrapper to enforce them would BE the forbidden re-splitting
-	 * helper — so the guard is doc-only by necessity. Dynamic module delivery
-	 * stays unsupported; the URL is a static literal (bundlers stay static).
+	 * helper — so this comment and README § Public API ARE the guard. The
+	 * pairing rests on a ~90%-certainty measurement of the client build; the
+	 * real engine's worker has not been executed inside a production page.
+	 * Dynamic module delivery stays unsupported; the URL is a static literal
+	 * (bundlers stay static).
 	 */
 	readonly workerFactory: () => Worker;
 	/** Clone-safe data delivered verbatim to the worker logic at setup. */
@@ -52,21 +71,48 @@ type EvaluateSpec = {
 	/**
 	 * Run the code under a `"use strict"` prefix. Default true; consumers
 	 * running sloppy-mode constructs (`with`) pass false.
+	 *
+	 * Honored on the `'function'` path ALONE. `'module'` is always strict by
+	 * the language's own rule, and on `'script'` this is an IGNORED INPUT —
+	 * the engine prepends nothing, so a script is sloppy unless its own first
+	 * line says otherwise, and both values behave identically with no signal.
+	 * Left flat rather than made unrepresentable by a discriminated union
+	 * (human ruling 2026-08-31, HR-25): the union is noisier for every
+	 * consumer that spreads a spec. Forced strictness is therefore one of the
+	 * reasons to choose `'function'` over `'script'`.
 	 */
 	readonly strict?: boolean;
 	/**
-	 * How the worker executes the code. Default `'function'` — the code is
-	 * wrapped in `new Function`, run under the `strict` preference, and its
-	 * globals arrive as the function's parameters; its natural end is
-	 * synchronous. `'module'` delivers and runs the code as an ES module
-	 * (always strict — `strict` is moot); its globals are installed on the
-	 * worker's `globalThis` (a module cannot receive parameters), and its
-	 * natural end is asynchronous — the natural-end halt fires when the
-	 * module-evaluation promise settles; work scheduled beyond it never
-	 * runs. A module evaluation that rejects reaches `serializeHalt` as
-	 * `kind: 'throw'`, exactly like a function-path throw.
+	 * Which of three paths the worker runs the code on. Default
+	 * `'function'`, deliberately: it is what every future consumer naming no
+	 * path is posed by, and flipping a default silently re-poses all of them
+	 * at once.
+	 *
+	 * - `'function'` — the code becomes a `new Function` body under the
+	 *   `strict` preference, globals arriving as the function's parameters;
+	 *   its natural end is synchronous. A SIMULATION of a script, not a
+	 *   script: top-level `var` is a wrapper local, a top-level `return` is
+	 *   legal, and a syntax error names the wrapper's own brace.
+	 * - `'module'` — delivered and run as an ES module (always strict);
+	 *   globals install on the worker's `globalThis` (a module takes no
+	 *   parameters), and the natural end is asynchronous — it fires when the
+	 *   module-evaluation promise settles, and work scheduled beyond it never
+	 *   runs.
+	 * - `'script'` — delivered and run as a genuine Script Record via
+	 *   `importScripts` on a blob URL; globals install on `globalThis` (a
+	 *   script takes no parameters either) and the natural end is
+	 *   synchronous. Top-level `var` reaches `globalThis`, top-level `this`
+	 *   IS `globalThis`, there is no `arguments` binding, and a hashbang
+	 *   runs. It is the one value whose validity depends on the consumer's
+	 *   BUILD TOOLCHAIN: only a classic worker can call `importScripts`, so
+	 *   it runs under webpack and not under Vite dev or the vitest browser
+	 *   project, whose workers are module workers.
+	 *
+	 * An evaluation that throws or rejects reaches `serializeHalt` as
+	 * `kind: 'throw'` on every path. `'module'` and `'script'` are parsed
+	 * thread-side before any spawn — see `HaltPhase`.
 	 */
-	readonly execution?: 'function' | 'module';
+	readonly execution?: ExecutionPath;
 	/**
 	 * Charge the flat per-yield fee against the time budget. Default true;
 	 * densely emitting consumers — an intercept evaluator, the tracers —
@@ -82,6 +128,16 @@ type EvaluateSpec = {
 	 */
 	readonly yieldCharge?: boolean;
 };
+
+/**
+ * Which of three paths the worker runs the code on. Deliberately NOT
+ * `ExecutionAxis` — that is the evaluators region's name for its own,
+ * narrower type, and the same discipline keeps `EngineSettlement` apart
+ * from an evaluator kind's `Settlement`. Also not a parse goal: a
+ * consumer may pose script-goal facts on the `'function'` path, and the
+ * engine will not object.
+ */
+type ExecutionPath = 'function' | 'module' | 'script';
 
 /** The consumer-authored thread-side hooks. */
 type ThreadLogic = {
@@ -183,11 +239,32 @@ type SettlementOutcome =
 type EngineSettlement = {
 	readonly outcome: SettlementOutcome;
 	/**
-	 * Worker-authored stop payload — present on EVERY worker-side stop:
+	 * The program's stop payload — present on EVERY worker-side stop:
 	 * completed (natural end) AND errored-by-throw. Absent on main-thread
-	 * terminations (cancel, fail, timeout, worker crash, call error).
+	 * terminations (cancel, fail, timeout, worker crash, call error) with
+	 * ONE exception: a creation-gate refusal carries a halt the ENGINE
+	 * authored on the thread, for a program that never reached a worker.
+	 * `haltOrigin` tells the two apart; the payload's shape never should.
+	 * Typed `unknown` because a consumer-authored payload is opaque here;
+	 * where `haltOrigin` is `'engine'` the shape is `EngineHalt`.
 	 */
 	readonly halt?: unknown;
+	/**
+	 * WHICH SIDE authored `halt` — present exactly when `halt` is, so its
+	 * absence never needs interpreting. `'worker'` for every worker-side
+	 * stop, whether the consumer's `serializeHalt` wrote it or the engine's
+	 * worker-side default did; `'engine'` for the one creation-gate stop,
+	 * authored on the thread because there is no worker to author it in.
+	 *
+	 * This is what a consumer that SUPPLIED a `serializeHalt` reads to know
+	 * whether the payload is its own: `'worker'` means its hook ran,
+	 * `'engine'` means the gate refused before any worker existed and the
+	 * payload is an `EngineHalt`. (A consumer that omits `serializeHalt`
+	 * receives `EngineHalt` on every path and knows so statically.) The
+	 * discrimination is structural — classification never inspects a
+	 * payload's shape (human ruling 2026-08-31, HR-25).
+	 */
+	readonly haltOrigin?: 'worker' | 'engine';
 	/** `refineError`'s annotation — present only on errored halts. */
 	readonly refinement?: unknown;
 	/**
@@ -251,11 +328,14 @@ type WorkerApi = {
 /**
  * The returned globals' delivery depends on `EvaluateSpec.execution`: on the
  * `'function'` path they are injected as `new Function` parameters around the
- * code; on the `'module'` path they are installed on the worker's `globalThis`
- * (a module cannot receive function parameters). Keys MUST be valid JavaScript
- * identifiers so the code can reference them; the bootstrap rejects invalid
- * keys at setup on either path, settling the run as errored (worker-error),
- * never throwing. Collision avoidance is consumer-owned.
+ * code; on the `'module'` and `'script'` paths they are installed on the
+ * worker's `globalThis`, because neither a module nor a script can receive
+ * parameters. Keys MUST be valid JavaScript identifiers so the code can
+ * reference them; the bootstrap rejects invalid keys at setup on EVERY path,
+ * settling the run as errored (worker-error), never throwing. Collision
+ * avoidance is consumer-owned — and on `'script'` a collision is visible to
+ * the program in a way it is not elsewhere: a top-level `var` of the same name
+ * overwrites the global property, and a top-level `let` shadows it.
  */
 type WorkerGlobals = Readonly<Record<string, unknown>>;
 
@@ -267,17 +347,77 @@ type WorkerGlobals = Readonly<Record<string, unknown>>;
 type HaltKind = 'natural-end' | 'throw';
 
 /**
- * Where a `'throw'` halt's error arose: `'creation'` — the program failed
- * before it ran (the `'function'` path's `new Function` construction);
- * `'evaluation'` — it failed while running. The split is structural on
- * the `'function'` path (which try/catch caught). The `'module'` path
- * delivers `'evaluation'` for every rejection of its single-stage
- * dynamic import — parse success is the consumer's own precondition
- * upstream, and a link-stage failure (an unresolvable import specifier)
- * rides `'evaluation'` as a named residual of the one-stage import, not
- * a classification the engine can structurally make.
+ * Where a `'throw'` stop's error arose: `'creation'` — the program failed
+ * before it ran; `'evaluation'` — it failed while running. The split is
+ * structural, never the error's type, but WHICH structure decides it
+ * depends on the path.
+ *
+ * - `'function'` — which try/catch caught: `new Function` construction
+ *   versus the body. Unchanged.
+ * - `'module'` and `'script'` — the creation gate, an acorn parse that
+ *   runs THREAD-SIDE before any worker exists. A `'creation'` stop on
+ *   these paths therefore never reaches `serializeHalt`; the engine
+ *   authors it (see `EngineSettlement.haltOrigin`).
+ *
+ * Gating both goals rather than only the new one was a CHOICE (human
+ * rulings 2026-08-26, HR-23). The narrow fork — gate `'script'` alone,
+ * leave `'module'` byte-identical — was posed and declined, and two costs
+ * were accepted knowingly. A module PARSE failure that shipped as
+ * `'evaluation'` now reports `'creation'`. And the `'module'` path's
+ * accepted grammar NARROWS to acorn's, which rejects some constructs a
+ * host accepts (decorators, measured at both 2024 and `'latest'`) —
+ * deliberate, since learners are not guaranteed to run on V8.
+ *
+ * **An undecided gate defers** (human ruling 2026-09-01, HR-26). Only a
+ * parse REFUSAL produces `'creation'` here. A parser that fails without
+ * reaching a verdict — acorn exhausting its own call stack on deeply
+ * nested input, which instrumented source reaches long before a learner's
+ * does — decides nothing about the program, so the gate abstains and the
+ * run proceeds to the worker exactly as though the path were ungated. The
+ * gate's failure mode is FALSE REFUSAL, and refusing on the parser's own
+ * limit would be that failure. So: the gate never throws at its caller,
+ * and a program it could not judge is never reported as the learner's
+ * syntax error.
+ *
+ * Three residuals survive the change, all named rather than covered. A
+ * link-stage failure (an unresolvable import specifier) parses fine and
+ * still rides `'evaluation'`, because the one-stage dynamic import gives
+ * no structural link/run boundary. A `'script'` program that passes the
+ * gate can still fail as the script is instantiated (`let NaN = 1`,
+ * which depends on the live global object and no static parser can see).
+ * And an ABSTAINED program's genuine syntax error is reported by the
+ * host's own parser, from the worker, so it too arrives labelled
+ * `'evaluation'`. All three are mislabelled phases, never false refusals
+ * — and the third costs the least, because the learner then reads the
+ * host's own words about their own program, inside the budget.
  */
 type HaltPhase = 'creation' | 'evaluation';
+
+/**
+ * The engine's OWN stop payload — the shape `EngineSettlement.halt` takes
+ * whenever the engine authored it rather than the consumer. Consumer
+ * payloads stay opaque (`unknown`) because the engine must never read
+ * them; this one is the engine's own data, and no genericity argument
+ * covers it.
+ *
+ * Two sites author it and they share this core rather than three separate
+ * literals drifting apart: the worker-side default (when `serializeHalt`
+ * is absent) and the creation gate. Only the gate carries a position, and
+ * it is acorn's verbatim — `line` 1-based, `column` 0-based — so a
+ * consumer drawing a caret converts once, at its own edge. Both members
+ * are optional because a parser can fail without one: see `HaltPhase` for
+ * what the gate does when it cannot decide.
+ *
+ * A natural end authors `{ name: 'natural-end', message: '' }` and carries
+ * no phase.
+ */
+type EngineHalt = {
+	readonly name: string;
+	readonly message: string;
+	readonly phase?: HaltPhase;
+	readonly line?: number;
+	readonly column?: number;
+};
 
 /**
  * The consumer's worker-side halt author, invoked by the bootstrap on
@@ -299,9 +439,10 @@ type SerializeHalt = (
 type WorkerSetupResult = {
 	readonly globals: WorkerGlobals;
 	/**
-	 * Absent → the engine defaults the halt payload to { name, message } —
-	 * drawn from the raw error on throws, and
-	 * { name: 'natural-end', message: '' } on natural ends.
+	 * Absent → the engine authors the payload itself, as an `EngineHalt`:
+	 * `{ name, message, phase }` drawn from the raw error on throws (human
+	 * ruling 2026-08-25), and `{ name: 'natural-end', message: '' }` on
+	 * natural ends. `EngineHalt` is the one place that literal is written.
 	 */
 	readonly serializeHalt?: SerializeHalt;
 };
@@ -312,8 +453,9 @@ type WorkerSetupResult = {
  * parameter injection via the returned globals is the shadowing channel, not
  * the only one — setup may also install worker-global state on the worker's
  * globalThis (how lookup-resolved instrumentation hooks register). On the
- * `'module'` path the returned globals are themselves installed on globalThis
- * (a module takes no parameters).
+ * `'module'` and `'script'` paths the returned globals are themselves
+ * installed on globalThis, so the two channels coincide (neither takes
+ * parameters).
  */
 type WorkerSetup = (api: WorkerApi, workerConfig: unknown) => WorkerSetupResult;
 
@@ -322,11 +464,13 @@ type WorkerSetup = (api: WorkerApi, workerConfig: unknown) => WorkerSetupResult;
 export type {
 	CallResponse,
 	EngineError,
+	EngineHalt,
 	EngineHandle,
 	EngineResult,
 	EngineSettlement,
 	Evaluate,
 	EvaluateSpec,
+	ExecutionPath,
 	HaltKind,
 	HaltPhase,
 	SerializeHalt,

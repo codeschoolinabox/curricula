@@ -91,8 +91,8 @@ The spec is the whole coupling surface:
     `serializeHalt` as `kind: 'throw'`, exactly like a function-path throw, with
     `phase: 'evaluation'` — the one-stage dynamic import gives no structural
     link/run boundary, so an unresolvable import specifier rides `'evaluation'`
-    as a named residual (see `HaltPhase`). Its parse failures do not reach the
-    worker at all; the creation gate below takes them.
+    as a named residual (see `HaltPhase`). Parse failures the gate REFUSES do
+    not reach the worker at all; one it cannot judge does.
   - `'script'` — the code is delivered and run as a genuine **Script Record**,
     via `importScripts` on a blob URL. **It is the first spec value whose
     validity depends on the consumer's build toolchain**, and today that means
@@ -107,10 +107,10 @@ The spec is the whole coupling surface:
     `globalThis`, there is no `arguments` binding, a hashbang runs, and a
     top-level `return` or `new.target` is the syntax error the language says it
     is. A runtime throw reaches `serializeHalt` with `phase: 'evaluation'` — the
-    thread has already proved the source parses. Moving a snippet from
-    `'function'` to `'script'` therefore drops the `strict: true` default
-    silently: correct fidelity, surprising diff, and a `with` program that
-    degrades to a syntax error today will simply run.
+    gate ran on the thread, so a program it refused never got here. Moving a
+    snippet from `'function'` to `'script'` therefore drops the `strict: true`
+    default silently: correct fidelity, surprising diff, and a `with` program
+    that degrades to a syntax error today will simply run.
 - `yieldCharge` — whether each yield deducts the flat yield charge from the
   budget. Defaults to true; densely emitting consumers (an intercept evaluator
   when its spec carries an iteration cap, the tracers) pass false, because at
@@ -184,9 +184,18 @@ layers, deliberately different names.
 
 `'module'` and `'script'` are **parsed thread-side before anything is spawned**
 — acorn, `ecmaVersion: 'latest'`, on the module goal and the script goal
-respectively. A program that does not parse settles `errored` with no sandbox
+respectively. A program the parser REFUSES settles `errored` with no sandbox
 ever constructed: **the worker factory is never invoked**, and no shared memory
 is allocated.
+
+**A gate that cannot decide defers.** Only a refusal settles the run here. Where
+the parser fails without reaching a verdict — acorn exhausting its own call
+stack on deeply nested input, which instrumented source reaches long before a
+learner's does — the gate abstains and the run proceeds to the worker exactly as
+though the path were ungated. A gate's failure mode is FALSE REFUSAL, and
+refusing a program because the parser hit its own limit would be that failure.
+The program usually fails anyway, in the host's own parser, in the host's own
+words, inside the budget — which is a better answer than the engine's.
 
 The stop it authors is a halt like any other, with two things a consumer needs
 in order to handle it structurally rather than by inspection:
@@ -378,7 +387,7 @@ Five generic outcomes — the engine's complete vocabulary:
 | --------------------------------- | ----------- | --------------------- |
 | program reached its natural end   | `completed` | `halt`                |
 | program threw (halt)              | `errored`   | `halt`, `refinement?` |
-| program did not parse (the gate)  | `errored`   | `halt`, `refinement?` |
+| the gate refuses the program      | `errored`   | `halt`, `refinement?` |
 | consumer called `cancel()`        | `cancelled` | —                     |
 | consumer called `fail(reason)`    | `failed`    | `failReason`          |
 | time budget exhausted             | `timed-out` | `error`               |
@@ -529,10 +538,11 @@ Using a different name in code is a bug, not a stylistic choice.
   nor the same as a parse goal: a consumer may pose script-goal facts on the
   `'function'` path and the engine will not object.
 - **creation gate** — the thread-side acorn parse that runs before any sandbox
-  is spawned, on the `'module'` and `'script'` paths. A program that fails it
-  settles `errored` with an engine-authored halt carrying `phase: 'creation'`,
-  and the worker factory is never invoked. It gates evaluation on whether the
-  program parses; it is not the evaluators region's kind of gate (embody's
+  is spawned, on the `'module'` and `'script'` paths. A program the parser
+  REFUSES settles `errored` with an engine-authored halt carrying
+  `phase: 'creation'`, and the worker factory is never invoked; a program it
+  cannot judge is deferred to the worker instead. It gates evaluation on whether
+  the program parses; it is not the evaluators region's kind of gate (embody's
   evaluation-phase gate, an evaluator's refusal-as-data), which decide whether a
   program should be run at all and fire before the engine is invoked.
 - **parse goal** — which grammar the gate parses a program under: the **module
@@ -556,10 +566,13 @@ Using a different name in code is a bug, not a stylistic choice.
   global is installed. It is the engine's one runtime assertion about the worker
   it was handed, and a failure settles `worker-error` rather than surfacing
   inside the learner's program.
-- **haltOrigin** — `'worker'` or `'engine'`: who authored the halt on the
-  settlement. Every worker-side stop is `'worker'`; the creation gate's stop is
-  `'engine'`. It exists so a consumer that narrows the halt to its own shape
-  discriminates structurally rather than by inspecting the payload.
+- **haltOrigin** — `'worker'` or `'engine'`: which SIDE authored the halt on the
+  settlement. Every worker-side stop is `'worker'`, whether the consumer's
+  `serializeHalt` wrote it or the engine's worker-side default did; the creation
+  gate's stop is `'engine'`, authored on the thread. A consumer that supplied a
+  `serializeHalt` reads it to know whether the payload is its own; one that
+  omitted it receives an `EngineHalt` everywhere and knows so statically. Either
+  way the discrimination is structural rather than an inspection of the payload.
 - **phase** — where a `'throw'` halt's error arose, `'creation'` or
   `'evaluation'`; typed `HaltPhase`, and never a settlement field. The engine
   passes it as an ARGUMENT to `serializeHalt`; whether it survives into the

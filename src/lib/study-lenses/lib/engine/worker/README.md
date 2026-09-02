@@ -61,14 +61,14 @@ Realm is fixed by the import graph, so this table is derived, not declared. The
 thread realm is unreachable from a program and every thread-side module is left
 live — an exemption of reach, not of rigour.
 
-| module                   | realm  | captures                                                                                                                                                                                           |
-| ------------------------ | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bootstrap.ts`           | worker | `postMessage`; `globalThis`; `Atomics.store` `.load` `.wait` `.notify`; `URL.createObjectURL` `.revokeObjectURL`; `Object.freeze` `.keys` `.defineProperty`; `Blob`; `Function`; `Error`; `String` |
-| `read-call-response.ts`  | worker | `Atomics.store` `.load` (its decoder singleton is already at module scope)                                                                                                                         |
-| `create-buffer-views.ts` | both   | `Int32Array`; `Uint8Array`; `Object.freeze`                                                                                                                                                        |
-| `protocol.ts`            | both   | none — its only ambient read already sits at module scope                                                                                                                                          |
-| every thread-side module | thread | left live                                                                                                                                                                                          |
-| `types.ts`               | none   | erased at compile time; runs nowhere                                                                                                                                                               |
+| module                   | realm  | captures                                                                                                                                                                                                            |
+| ------------------------ | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bootstrap.ts`           | worker | `postMessage`; `globalThis`; `importScripts`; `Atomics.store` `.load` `.wait` `.notify`; `URL.createObjectURL` `.revokeObjectURL`; `Object.freeze` `.keys` `.defineProperty`; `Blob`; `Function`; `Error`; `String` |
+| `read-call-response.ts`  | worker | `Atomics.store` `.load` (its decoder singleton is already at module scope)                                                                                                                                          |
+| `create-buffer-views.ts` | both   | `Int32Array`; `Uint8Array`; `Object.freeze`                                                                                                                                                                         |
+| `protocol.ts`            | both   | none — its only ambient read already sits at module scope                                                                                                                                                           |
+| every thread-side module | thread | left live                                                                                                                                                                                                           |
+| `types.ts`               | none   | erased at compile time; runs nowhere                                                                                                                                                                                |
 
 The entries are callables, not the namespaces they hang off, because that is
 what the rule requires. `globalThis` is the one object capture: the listener
@@ -106,23 +106,34 @@ per-site record. The rule closes the class rather than the reachable instances
 (human ruling 2026-08-27, resolving the reviewer's narrowing challenge). Also
 encoded: the 2026-08-27 human rulings that set this unit's full Phase 0 and
 answered its twin ask `machine`; HR-13 as the ceremony level this unit runs at.
-HR-20 is untouched and stays untouched: **no third execution path is ratified
-here**, the two paths documented are the two that ship, and
-`evaluators/types.ts`'s closed `ExecutionAxis` union and its tsc tripwire are
-not reached by this unit.
+HR-20 is untouched and stays untouched by the latch: **no execution path was
+ratified here**, and `evaluators/types.ts`'s closed `ExecutionAxis` union and
+its tsc tripwire are not reached by this unit. (A third path, `'script'`, was
+ratified afterwards by its own design review — see
+[../README.md § Public API](../README.md). It changes what this directory
+captures, below, not what the latch rule says.)
 
 **NOT discharged here, named for honesty:** no LOSS-LEDGER classification rows —
 the engine carries none in that table, and "no rows" is the discharge rather
-than silence. The `'script'` axis and everything in
-`.planning-handoffs/engine-script-axis/BRIEF.md` belong to a later unit; this
-one is its prerequisite and ratifies nothing about it. **One consequence of that
-unit lands here and nothing tripwires it:** HR-23 also rules that gating the
-parse thread-side moves a module _parse_ failure from `'evaluation'` to
-`'creation'`, which will falsify `../types.ts`'s `HaltPhase` note,
-`bootstrap.ts:240-243`, and the module-path prediction row in
-[../notional-machine.md](../notional-machine.md). That amendment is the axis
-unit's, not this one's. The `Error[Symbol.hasInstance]` residual above is named,
-not closed.
+than silence. The `Error[Symbol.hasInstance]` residual above is named, not
+closed.
+
+**Handed forward, and now discharged.** The three amendments this section
+predicted — `../types.ts`'s `HaltPhase` note, `bootstrap.ts`'s in-code twin of
+it, and the module-path prediction row in
+[../notional-machine.md](../notional-machine.md) — all landed with the
+`'script'` axis's own Phase 0, which is where they belonged.
+
+**The new capture is a cross-unit tripwire, and it is recorded here because
+nothing else will say it.** `importScripts` joins `bootstrap.ts`'s row above
+because the script path resolves it in the worker realm and the rule is
+mechanical. The latch suite pins that row's contents as an exact array
+(`tests/latched-built-ins.test.ts`, the row named _"the captures in
+`bootstrap.ts` name exactly the globals the README lists for it"_). That row is
+committed skipped; whichever lands second — the latch's Phase 1, which un-skips
+it, or the script path's Phase 1, which adds the capture — inherits the job of
+keeping the array and this table in step. They are one edit, in two files, and
+the suite is the only thing that notices.
 
 ## Navigation
 

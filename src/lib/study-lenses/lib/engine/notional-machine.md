@@ -27,8 +27,8 @@ pause/event-ready flags.
 Nothing runs at construction. The factory assembles a handle; the sandbox is
 spawned on the first pull, and a cancel or failure before that settles without
 spawning anything at all. On the two paths the machine parses — `'module'` and
-`'script'` — the parse also happens before the spawn, so a program that cannot
-parse settles without a sandbox ever existing.
+`'script'` — the parse also happens before the spawn, so a program the parser
+REFUSES settles without a sandbox ever existing.
 
 ## States and transitions
 
@@ -37,7 +37,7 @@ stateDiagram-v2
     [*] --> Assembled : the factory runs nothing
     Assembled --> Settled : cancel or fail before the first pull — no spawn
     Assembled --> Settled : first pull, but the creation gate<br/>refuses the program ('module'/'script') — no spawn
-    Assembled --> Spawning : first pull, and the program parses<br/>(or is not parsed at all — 'function')
+    Assembled --> Spawning : first pull, and the program parses,<br/>is not parsed at all ('function'),<br/>or the gate could not decide and deferred
     Spawning --> Settled : environment failure — no SharedArrayBuffer,<br/>factory threw, or the worker failed to load
     Spawning --> Ready : the worker posts `ready`
     Ready --> Settled : setup failure — consumer setup threw,<br/>an invalid global key, a global that cannot install,<br/>or the script path's capability probe failed
@@ -168,11 +168,18 @@ something a consumer opts out of rather than something it is given.
 
 Two of the three paths are parsed before anything is spawned. `'module'` and
 `'script'` go through the machine's **creation gate** — acorn, on the thread, on
-the module goal and the script goal respectively — so an unparseable program
-never reaches a sandbox: no worker is constructed, and the stop is authored on
-the thread carrying `phase: 'creation'`. `'function'` is not parsed; the
-`new Function` construction is its own gate, and its failures are already
+the module goal and the script goal respectively — so a program the parser
+REFUSES never reaches a sandbox: no worker is constructed, and the stop is
+authored on the thread carrying `phase: 'creation'`. `'function'` is not parsed;
+the `new Function` construction is its own gate, and its failures are already
 `'creation'`.
+
+A gate that cannot decide **defers**. Where the parser fails without reaching a
+verdict — acorn exhausting its own call stack — the machine abstains and runs
+the program anyway, because a gate's failure mode is refusing something that
+would have worked. Such a program usually fails in the worker instead, in the
+host's own parser and inside the budget, which is a better answer than the
+machine's.
 
 The gate runs **synchronously, on whichever thread called `evaluate`**, and is
 not charged to the time budget — the budget arms when the code begins running,
@@ -224,9 +231,10 @@ anything, and each is checkable.
 | `globalThis.postMessage = null`, `'module'`        | the halt still posts — the engine latched it. Unlatched, this settles `timed-out` for a program that finished                                                                                                            |
 | `return 1` at top level, `'function'`              | runs — it is a function body                                                                                                                                                                                             |
 | `return 1` at top level, `'module'` or `'script'`  | the creation gate refuses it before anything spawns: `errored`, phase `'creation'`, and the worker factory is never invoked                                                                                              |
-| any unparseable program, `'module'` or `'script'`  | the same — no sandbox is constructed, and the stop payload is the engine's own, not the consumer's `serializeHalt`'s. `haltOrigin` reads `'engine'`; on every other stop that carries a halt it reads `'worker'`         |
+| a program the gate REFUSES, `'module'`/`'script'`  | the same — no sandbox is constructed, and the stop payload is the engine's own, not the consumer's `serializeHalt`'s. `haltOrigin` reads `'engine'`; on every other stop that carries a halt it reads `'worker'`         |
+| 60,000 nested parens, `'script'`                   | the gate ABSTAINS — acorn exhausts its own call stack and decides nothing, so the program runs and the worker's own parser reports the error, inside the budget, with `haltOrigin: 'worker'`                             |
 | throws on line 3, `'module'` or `'script'`         | phase `'evaluation'` — it parsed at the gate, so the failure is genuinely at run time                                                                                                                                    |
-| `import './nope.js'`, `'module'`                   | phase `'evaluation'` — an unresolvable specifier parses fine and fails at link, and the single-stage import gives no link/run boundary. The one thing the gate cannot see                                                |
+| `import './nope.js'`, `'module'`                   | phase `'evaluation'` — an unresolvable specifier parses fine and fails at link, and the single-stage import gives no link/run boundary. One of the three things the gate cannot report                                   |
 | `let NaN = 1;`, `'script'`                         | it PASSES the gate, then fails as the script is instantiated, so it reports phase `'evaluation'`. No static parser sees this — it depends on the live global object — and the divergence is a label, never a refusal     |
 | an infinite loop                                   | the time budget fires and the worker is terminated mid-instruction; the budget counts only while the worker is unblocked                                                                                                 |
 | emits in a tight loop                              | each emission pauses the program until the thread disposes of it, and each **yield** deducts the yield charge — drops are not charged, and a consumer that yields at every step waives the fee with `yieldCharge: false` |

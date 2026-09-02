@@ -9,7 +9,7 @@
  * only the call response rides the shared-memory slot.
  */
 
-import type { CallResponse, HaltKind } from '../types.js';
+import type { CallResponse, ExecutionPath, HaltKind } from '../types.js';
 
 /** Typed views over the shared buffer — layout in `./protocol.ts`. */
 type BufferViews = {
@@ -19,19 +19,31 @@ type BufferViews = {
 
 // ─── Thread → worker envelopes ────────────────────────────────────────────────
 
-/** Delivers shared memory and the consumer's config before execution. */
+/**
+ * Delivers shared memory, the consumer's config, and the execution path
+ * before execution.
+ *
+ * The path rides SETUP as well as execute (human rulings 2026-08-26,
+ * HR-23) because the `'script'` path's capability probe has to run before
+ * any consumer global is installed, and `handleSetup` cannot otherwise
+ * know which path is coming. The alternative — relocating the probe into
+ * the script path's own execute branch — was posed and declined: an
+ * unconditional probe would throw in the vitest browser tier, whose
+ * workers are module workers, and break the shipped suite.
+ */
 type SetupMessage = {
 	readonly kind: 'setup';
 	readonly sharedBuffer: SharedArrayBuffer;
 	readonly workerConfig: unknown;
+	readonly execution: ExecutionPath;
 };
 
-/** Delivers the program, its strict preference, and its execution axis. */
+/** Delivers the program, its strict preference, and its execution path. */
 type ExecuteMessage = {
 	readonly kind: 'execute';
 	readonly code: string;
 	readonly strict: boolean;
-	readonly execution: 'function' | 'module';
+	readonly execution: ExecutionPath;
 };
 
 type ToWorkerMessage = SetupMessage | ExecuteMessage;
@@ -99,11 +111,14 @@ type TransportInit = {
 	readonly workerConfig: unknown;
 	readonly strict: boolean;
 	/**
-	 * The execution axis, already defaulted by the factory (`evaluate`
+	 * The execution path, already defaulted by the factory (`evaluate`
 	 * resolves the spec's optional field to `'function'`) — required
-	 * here so no transport re-defaults it.
+	 * here so no transport re-defaults it. The creation gate has already
+	 * run by the time a transport starts, so a program it REFUSED never
+	 * reaches this type. A program it could not judge does — an abstained
+	 * gate defers to the worker (see `../types.js`, `HaltPhase`).
 	 */
-	readonly execution: 'function' | 'module';
+	readonly execution: ExecutionPath;
 };
 
 /**

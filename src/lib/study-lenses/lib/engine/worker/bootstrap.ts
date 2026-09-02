@@ -237,10 +237,15 @@ async function executeModule(
 	try {
 		await import(/* webpackIgnore: true */ /* @vite-ignore */ url);
 	} catch (error) {
-		// Phase is 'evaluation' for every module rejection: the one-stage
-		// dynamic import gives no structural parse/link/run boundary, parse
-		// success is the consumer's upstream precondition, and the
-		// link-stage residual is named at the HaltPhase declaration.
+		// Phase is 'evaluation' for every module rejection that REACHES here.
+		// The creation gate parses thread-side before any spawn, so a parse
+		// failure it REFUSED settles as 'creation' without a worker and
+		// never arrives at this catch. Two kinds still do: a genuine
+		// run-time throw, and the residuals the gate cannot separate — a
+		// link-stage failure (an unresolvable specifier parses fine and
+		// fails at link), and a program the gate ABSTAINED on, whose real
+		// syntax error the host reports here instead. Named at the
+		// HaltPhase declaration.
 		postHalt(state, 'throw', error, 'evaluation');
 		return;
 	} finally {
