@@ -23,69 +23,75 @@ function sleep(ms: number): Promise<void> {
 }
 
 describe('run — the door: a handle or a refusal, as data', () => {
-	it.skip('main(validSpec) returns a handle, not a refusal', () => {
+	it('main(validSpec) returns a handle, not a refusal', () => {
 		const answer = run.main(buildSpec('1 + 1;\n'));
 		expect('refused' in answer).toBe(false);
 	});
 
-	it.skip('a spec outside the gate is a spec refusal naming the spec', () => {
+	it('a spec outside the gate is a spec refusal naming the spec', () => {
 		const answer = run.main(buildSpec('let x ='));
 		expect('refused' in answer && answer.reason).toMatch(/spec|gate|ast/u);
 	});
 
-	it.skip('a spec refusal is frozen', () => {
+	it('a spec refusal is frozen', () => {
 		const answer = run.main(buildSpec('let x ='));
 		expect(Object.isFrozen(answer)).toBe(true);
 	});
 });
 
 describe('run — the happy path', () => {
-	it.skip('a trivial program completes ok', async () => {
+	it('a trivial program completes ok', async () => {
 		const result = await expectHandle(run.main(buildSpec('1 + 1;\n')));
 		expect(result.ok).toBe(true);
 	});
 
-	it.skip('a loop-free clean run carries an honest zero count', async () => {
+	it('a loop-free clean run carries an honest zero count', async () => {
 		const result = await expectHandle(run.main(buildSpec('1 + 1;\n')));
 		expect(result.outcome === 'complete' && result.iterationCount).toBe(0);
 	});
 
-	it.skip('result.ast is the handle’s own echo', async () => {
+	it('a looping clean run carries its real non-zero count', async () => {
+		const source = 'let i = 0;\nwhile (i < 3) {\n\ti = i + 1;\n}\n';
+		const result = await expectHandle(run.main(buildSpec(source)));
+		expect(result.outcome === 'complete' && result.iterationCount).toBe(3);
+	});
+
+	it('result.ast is the handle’s own echo', async () => {
 		const handle = expectHandle(run.main(buildSpec('1 + 1;\n')));
 		const result = await handle;
 		expect(result.ast).toBe(handle.ast);
 	});
 
-	it.skip('the result is deep-frozen', async () => {
+	it('the result is deep-frozen', async () => {
 		const result = await expectHandle(run.main(buildSpec('1 + 1;\n')));
 		expect(Object.isFrozen(result)).toBe(true);
 	});
 });
 
 describe('run — timeout', () => {
-	it.skip('an explicit budget ends a spinning loop as timeout', async () => {
+	it('an explicit budget ends a spinning loop as timeout', async () => {
 		const spec = { ...buildSpec('while (true) {}\n'), seconds: 0.5 };
 		const result = await expectHandle(run.main(spec));
 		expect(result.outcome).toBe('timeout');
 	});
 
-	it.skip('the timeout arm echoes the budget as its limit', async () => {
+	it('the timeout arm echoes the budget as its limit', async () => {
 		const spec = { ...buildSpec('while (true) {}\n'), seconds: 0.5 };
 		const result = await expectHandle(run.main(spec));
 		expect(result.outcome === 'timeout' && result.error.limit).toBe(0.5);
 	});
 
-	it.skip('the timeout arm surfaces the consumed budget', async () => {
+	it('the timeout arm surfaces the consumed budget', async () => {
 		const spec = { ...buildSpec('while (true) {}\n'), seconds: 0.5 };
 		const result = await expectHandle(run.main(spec));
-		expect(result.outcome === 'timeout' && typeof result.error.durationMs).toBe(
-			'number',
-		);
+		expect(
+			result.outcome === 'timeout' && result.error.durationMs,
+		).toBeGreaterThan(0);
 	});
 });
 
 describe('run — the iteration cap', () => {
-	it.skip('a capped loop trips as iteration-limit with the whole trip record', async () => {
+	it('a capped loop trips as iteration-limit with the whole trip record', async () => {
 		const spec = { ...buildSpec('while (true) {}\n'), iterations: 100 };
 		const result = await expectHandle(run.main(spec));
 		expect(
@@ -93,7 +99,7 @@ describe('run — the iteration cap', () => {
 		).toBe(1);
 	});
 
-	it.skip('the tripped arm carries the real run total', async () => {
+	it('the tripped arm carries the real run total', async () => {
 		const spec = { ...buildSpec('while (true) {}\n'), iterations: 100 };
 		const result = await expectHandle(run.main(spec));
 		expect(
@@ -102,7 +108,7 @@ describe('run — the iteration cap', () => {
 		).toBe(true);
 	});
 
-	it.skip('an unguarded RangeError is NOT misclassified as iteration-limit', async () => {
+	it('an unguarded RangeError is NOT misclassified as iteration-limit', async () => {
 		const result = await expectHandle(
 			run.main(buildSpec("'a'.repeat(2 ** 32);\n")),
 		);
@@ -111,7 +117,7 @@ describe('run — the iteration cap', () => {
 });
 
 describe('run — runtime errors', () => {
-	it.skip('a learner throw surfaces as the javascript arm', async () => {
+	it('a learner throw surfaces as the javascript arm', async () => {
 		const result = await expectHandle(run.main(buildSpec('null();\n')));
 		expect(
 			result.outcome === 'error' &&
@@ -120,7 +126,7 @@ describe('run — runtime errors', () => {
 		).toBe('TypeError');
 	});
 
-	it.skip('a throw-backed arm carries the halt’s iteration count', async () => {
+	it('a throw-backed arm carries the halt’s iteration count', async () => {
 		const source = 'let i = 0;\nwhile (i < 3) {\n\ti = i + 1;\n}\nnull();\n';
 		const spec = { ...buildSpec(source), iterations: 100 };
 		const result = await expectHandle(run.main(spec));
@@ -132,8 +138,8 @@ describe('run — runtime errors', () => {
 	});
 });
 
-describe('run — error phase (skipped until the E2 engine increment lands, the run chain’s opener)', () => {
-	it.skip('a runtime throw carries phase evaluation', async () => {
+describe('run — error phase', () => {
+	it('a runtime throw carries phase evaluation', async () => {
 		const result = await expectHandle(run.main(buildSpec('null();\n')));
 		expect(
 			result.outcome === 'error' &&
@@ -142,16 +148,20 @@ describe('run — error phase (skipped until the E2 engine increment lands, the 
 		).toBe('evaluation');
 	});
 
-	it.skip('a construction failure carries phase creation', async () => {
-		const result = await expectHandle(run.main(buildSpec('null();\n')));
+	it('a construction failure carries phase creation', async () => {
+		const result = await expectHandle(
+			run.main(buildSpec('with (Math) { PI; }\n')),
+		);
 		expect(
-			result.outcome === 'error' && result.error.kind === 'javascript',
-		).toBe(true);
+			result.outcome === 'error' &&
+				result.error.kind === 'javascript' &&
+				result.error.phase,
+		).toBe('creation');
 	});
 });
 
 describe('run — io mocks answer', () => {
-	it.skip('a prompt mock answers and the program completes', async () => {
+	it('a prompt mock answers and the program completes', async () => {
 		const spec: RunSpec = {
 			...buildSpec("let x = prompt('?');\n"),
 			io: { prompt: () => 'answered' },
@@ -160,7 +170,7 @@ describe('run — io mocks answer', () => {
 		expect(result.outcome).toBe('complete');
 	});
 
-	it.skip('alert and confirm mocks both serve', async () => {
+	it('alert and confirm mocks both serve', async () => {
 		const spec: RunSpec = {
 			...buildSpec("alert('hi');\nlet a = confirm('ok?');\n"),
 			// eslint-disable-next-line unicorn/no-useless-undefined -- the explicit undefined IS alert's legal no-answer
@@ -170,10 +180,23 @@ describe('run — io mocks answer', () => {
 		expect(result.outcome).toBe('complete');
 	});
 
-	it.skip('a null prompt answer rides the channel', async () => {
+	it('a null prompt answer rides the channel', async () => {
 		const spec: RunSpec = {
-			...buildSpec('let x = prompt();\n'),
+			...buildSpec(
+				"let x = prompt();\nif (x !== null) { throw new Error('wrong value'); }\n",
+			),
 			io: { prompt: () => null },
+		};
+		const result = await expectHandle(run.main(spec));
+		expect(result.outcome).toBe('complete');
+	});
+
+	it('the delivered answer is the mock’s own value, not a placeholder', async () => {
+		const spec: RunSpec = {
+			...buildSpec(
+				"let x = prompt('?');\nif (x !== 'answered') { throw new Error('wrong value'); }\n",
+			),
+			io: { prompt: () => 'answered' },
 		};
 		const result = await expectHandle(run.main(spec));
 		expect(result.outcome).toBe('complete');
@@ -181,7 +204,7 @@ describe('run — io mocks answer', () => {
 });
 
 describe('run — the io posture (classified io errors)', () => {
-	it.skip('an unmocked verb ends the run as an io error naming the verb', async () => {
+	it('an unmocked verb ends the run as an io error naming the verb', async () => {
 		const result = await expectHandle(
 			run.main(buildSpec('let x = prompt();\n')),
 		);
@@ -192,7 +215,7 @@ describe('run — the io posture (classified io errors)', () => {
 		).toBe('prompt');
 	});
 
-	it.skip('a rejecting mock is an io error, never a machinery defect', async () => {
+	it('a rejecting mock is an io error, never a machinery defect', async () => {
 		const spec: RunSpec = {
 			...buildSpec('let x = prompt();\n'),
 			io: { prompt: () => Promise.reject(new Error('boom')) },
@@ -201,7 +224,7 @@ describe('run — the io posture (classified io errors)', () => {
 		expect(result.outcome === 'error' && result.error.kind).toBe('io');
 	});
 
-	it.skip('an invalid prompt answer is an io error, never a coercion', async () => {
+	it('an invalid prompt answer is an io error, never a coercion', async () => {
 		const spec: RunSpec = {
 			...buildSpec('let x = prompt();\n'),
 			io: { prompt: () => 42 as unknown as string },
@@ -210,7 +233,7 @@ describe('run — the io posture (classified io errors)', () => {
 		expect(result.outcome === 'error' && result.error.kind).toBe('io');
 	});
 
-	it.skip('an undefined confirm answer is an io error — the reference’s coercion does not return', async () => {
+	it('an undefined confirm answer is an io error — the reference’s coercion does not return', async () => {
 		const spec: RunSpec = {
 			...buildSpec('let a = confirm();\n'),
 			io: { confirm: () => undefined as unknown as boolean },
@@ -221,7 +244,7 @@ describe('run — the io posture (classified io errors)', () => {
 });
 
 describe('run — cancel', () => {
-	it.skip('cancel during execution settles the cancel outcome', async () => {
+	it('cancel during execution settles the cancel outcome', async () => {
 		const handle = expectHandle(run.main(buildSpec('while (true) {}\n')));
 		const settling = handle.result;
 		await sleep(20);
@@ -230,7 +253,7 @@ describe('run — cancel', () => {
 		expect(result.outcome).toBe('cancel');
 	});
 
-	it.skip('cancel during a slow mock discards the answer and still answers cancel', async () => {
+	it('cancel during a slow mock discards the answer and still answers cancel', async () => {
 		let mockSettled = false;
 		const spec: RunSpec = {
 			...buildSpec('let x = prompt();\n'),
@@ -250,7 +273,7 @@ describe('run — cancel', () => {
 		expect(result.outcome === 'cancel' && mockSettled).toBe(true);
 	});
 
-	it.skip('cancel outranks the io flag when a cancelled mock then fails (precedence step 0)', async () => {
+	it('cancel outranks the io flag when a cancelled mock then fails (precedence step 0)', async () => {
 		const spec: RunSpec = {
 			...buildSpec('let x = prompt();\n'),
 			io: {
@@ -268,7 +291,7 @@ describe('run — cancel', () => {
 		expect(result.outcome).toBe('cancel');
 	});
 
-	it.skip('cancel after settlement is inert', async () => {
+	it('cancel after settlement is inert', async () => {
 		const handle = expectHandle(run.main(buildSpec('1 + 1;\n')));
 		const first = await handle;
 		handle.cancel();
@@ -276,7 +299,7 @@ describe('run — cancel', () => {
 		expect(first).toBe(second);
 	});
 
-	it.skip('cancel races the budget: first writer wins', async () => {
+	it('cancel races the budget: first writer wins', async () => {
 		const spec = { ...buildSpec('while (true) {}\n'), seconds: 0.1 };
 		const handle = expectHandle(run.main(spec));
 		await handle.result;
@@ -286,8 +309,8 @@ describe('run — cancel', () => {
 	});
 });
 
-describe('run — the defect channel', () => {
-	it.skip('a machinery failure surfaces discriminated, never learner-shaped', async () => {
+describe('run — the healthy path is never misrouted to defect', () => {
+	it('a clean run never answers the defect arm', async () => {
 		const result = await expectHandle(run.main(buildSpec('1 + 1;\n')));
 		expect(
 			result.outcome === 'error' && result.error.kind === 'defect'
