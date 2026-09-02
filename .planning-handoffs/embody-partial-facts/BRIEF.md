@@ -143,8 +143,9 @@ Consequences, all binding:
   an answer does.
 - **A recorded value naming a document that is not in the tree is a defect AR-1
   reports**, not a silence case. So if the answer comes back
-  `machine + user + data`, all three documents exist before `ar-1` spawns, or
-  the review is reviewing a value the tree does not honour.
+  `machine + user + data`, every one of those three has its artifact in the tree
+  before `ar-1` spawns — a document, a `ux/` directory, or a README section, per
+  the rules below — or the review is reviewing a value the tree does not honour.
 - **`embody` has no `ux/` directory** [measured 2026-09-01: `git ls-files
   src/lib/study-lenses/embody/ | grep '/ux/'` → no matches. The unfiltered glob
   returns **32** files, so do not eyeball it — an earlier draft of this bullet
@@ -194,10 +195,19 @@ provenance lines are dropped; re-run it yourself):
 ```text
 MEASURED AT 2026-08-27T21:33:00.542Z, not asserted — supersedes any memory or handoff claim about these numbers.
 node version vs engines: v20.11.0 vs engines ">=22.11.0" — BELOW the engines minimum
-tsc errors: <RE-MEASURE — the recorded 0 is stale; 13 on 2026-09-02, all foreign, in aithor/* and study-lenses/lib/local-llm/*>
+tsc errors: 0
 markdownlint errors (repo-wide): 8113
 HEAD: 08dd99f922e862b6b6a13b6cc0b995ab6326eb0d
 ```
+
+⛔ **`tsc errors: 0` in that block is STALE, and it is the one line above you
+must not act on.** It stays in place because the block is quoted output and
+editing it would stop it being that. Re-measure before using any baseline: the
+count was **13** on 2026-09-02, every one foreign, in `aithor/*` and
+`study-lenses/lib/local-llm/*`. Reading pre-existing debt as damage you caused
+has burned four agents in this repo. Every other figure in the block is stale
+too — that is what "re-run it yourself" means — but this is the only one whose
+staleness looks like a defect you introduced.
 
 ⚠ The markdownlint field **caches for 24 hours** and was stamped ~1h before the
 rest. Re-run `npm run lint:md` if it matters. ⚠ Node is **below** the engines
@@ -306,11 +316,23 @@ inadequate discriminator at every one of them** — those rules need
 
 ### The blast radius is a floor
 
-**17** non-test, non-deprecated files read a stage's `.ok` [measured 2026-08-27
-with `git grep -ln '\.ok' -- 'src/**/*.ts' 'src/**/*.tsx' | grep -v '/tests/' |
-grep -v '^src/lib/embody/'` — "non-deprecated" means excluding
-`src/lib/embody/`, the legacy JEJ tree, whose path differs from the target
-module only by prefix; without that exclusion it is 25; **re-run it**, it
+**17** non-test, non-deprecated files read a stage's `.ok` [measured 2026-09-01
+with:
+
+```bash
+git grep -ln '\.ok' -- 'src/**/*.ts' 'src/**/*.tsx' \
+  | grep -v '/tests/' | grep -v '^src/lib/embody/' \
+  | grep -v -- '--deprecated-architecture'
+```
+
+**Run it and confirm it returns 17 before trusting either the number or the
+command.** "Non-deprecated" means excluding **two** trees, not one:
+`src/lib/embody/`, the legacy JEJ tree whose path differs from the target module
+only by prefix, and `src/lib/study-lenses--deprecated-architecture/`. Omitting
+the second returns 21; omitting both returns 29. A revision of this bracket
+published the one-exclusion pipeline beside the number 17, which it does not
+return — the count was right and the command was wrong, which is trap 2 in this
+brief's own list, committed inside the fix meant to close it. **Re-run it**, it
 moves]. Heaviest: `orchestrate/lib/validating/assemble-parse-facts.ts` (4),
 `lib/questioning/quizzing/quizzing-questioner.ts` (4), then
 `derive-accessibility.ts` and `lenses/spellme/core.ts` (3 each). ⚠ **A `.ok`
@@ -340,6 +362,15 @@ meaning shifted" is the failure mode to design against.
    `data` instance is recorded in `DEV.md`, but the answer is re-asked, not
    remembered (see above).
 6. **`ceremony`** — the human's alone. Never state it; ask if unset.
+
+**When to put them — this decides more than sequencing, now that a ruling
+selects which DONE governs.** Put rulings **1, 5 and 6 before drafting 0.1**.
+Ruling 1 selects the DONE, and the two demand different README content — "what a
+failed stage publishes" versus "what a failed stage does **not** publish and
+why" — so an agent who drafts first may write the wrong section and then defend
+it. Ruling 5 is the twin ask, which `DEV.md` fixes at 0.2 and whose answer
+window closes when `ar-1` spawns. Rulings 2, 3 and 4 are design questions the
+README draft can surface, and are fine to put alongside it.
 
 ## Out of scope
 
@@ -439,9 +470,11 @@ and tells you nothing. Do not run it and do not restore it.
 2. **0.2** — the twin ask, put and recorded; `machine` confirmed by the tree,
    `data` and `user` open. **If the design changes what the scanner is modeled
    as doing, `notional-machine.md` is amended in the same step** — it is canon,
-   not commentary. **Every value the answer names owes its document before AR-1
-   spawns**, so an answer of `machine + user + data` makes this step three
-   documents, two of them new.
+   not commentary. **Every value the answer names owes its artifact before AR-1
+   spawns** — artifact, not document: `user` is a `ux/` **directory** holding a
+   menu, and `data` may be owed as a `## Data model` **section in the README**
+   if it falls under the size threshold. Read the twin bullets above before
+   creating anything; this list is a checklist, not the rules.
 3. **AR-1**, by name, over the README **and** every twin the value names.
 4. **0.3** — `embody/types.ts` amended, the `DOCS.md` sketch updated **including
    its Mermaid data flow**, and the tests written for real and **committed
@@ -466,11 +499,15 @@ the human rules that the error-interpreting lens carries this and nothing new is
 built in embody, there is no `types.ts` amendment and no new test — so the
 definition above is unreachable, and **AR-2 has no input, because it challenges
 the sketch against the types**. DONE is then: the README amended to say what a
-failed stage does **not** publish and why; the ruling recorded in-repo where it
-binds; AR-1 over that README; **AR-2 declared `n/a` on the settings line with
-its reason**; and a closing commit body stating the unit's answer was "nothing
-to build here". Do not stretch the first definition over this — declare which
-one you are under.
+failed stage does **not** publish and why; **0.2 still put and still recorded,
+and every artifact its answer names still produced** — the twin ask is
+independent of whether anything is built, so a `machine + user + data` answer
+owes its artifacts here exactly as under the first definition; the ruling
+recorded in-repo where it binds; **AR-1 over that README and every twin the
+value names**, never the README alone; **AR-2 declared `n/a` on the settings
+line with its reason**; and a closing commit body stating the unit's answer was
+"nothing to build here". Do not stretch the first definition over this — declare
+which one you are under.
 
 ⚠ **Validate any handoff you write with a context-free agent before treating it
 as final** (`AGENTS.principal.md`, invariant 12). This one was, and it mattered.
