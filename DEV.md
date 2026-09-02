@@ -653,14 +653,14 @@ and a `DOCS.md`, and all ten of those READMEs link to the twin [measured
 artifact — the just-enough-javascript language level has no `types.ts` — so the
 lookup below is honoured on the two files it turns on.
 
-| `twin-doc`           | The document it names                                                          |
-| -------------------- | ------------------------------------------------------------------------------ |
-| `machine`            | a notional-machine document, `.md` beside the README                           |
-| `data`               | a data-model document, **data-model.md**, beside the README — see below        |
-| `user`               | a ux directory beside the README — see below                                   |
-| `learner`, `teacher` | **unnamed** — no instance has ever been owed                                   |
-| `both`               | **historical** — retired 2026-09-01; the two documents that kind of work named |
-| `none`               | nothing; the recorded answer discharges 0.2                                    |
+| `twin-doc`           | The document it names                                                                                                              |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `machine`            | a notional-machine document, `.md` beside the README                                                                               |
+| `data`               | a data-model document, **data-model.md**, beside the README — or, below the size threshold, a section inside the README; see below |
+| `user`               | a ux directory beside the README — see below                                                                                       |
+| `learner`, `teacher` | **unnamed** — no instance has ever been owed                                                                                       |
+| `both`               | **historical** — retired 2026-09-01; the two documents that kind of work named                                                     |
+| `none`               | nothing; the recorded answer discharges 0.2                                                                                        |
 
 **The user twin is a directory, and which documents it holds is the module's own
 call** (human ruling 2026-08-13, given the first time a `user` twin was owed —
@@ -736,26 +736,31 @@ staleable, and separately citable from the prose that introduces the module.
 right — the value is still recorded**, because what the value names is the
 account, not the file it happens to live in. The threshold is a judgement and no
 number is pinned; the machine twins' floor of 116 lines is the usable marker,
-against a section case of 33 [measured 2026-09-01: `git ls-files | grep
-'notional-machine.md' | xargs wc -l` for the floor; the section case is
-`Ownership boundary`'s span in the README that carries it]. That section case is
-worth reading before deciding: `git grep -n 'Ownership boundary'` finds
+against a section case of 33 [measured 2026-09-01 against **committed** state,
+since the working tree may carry a peer's edits — for the floor, `git ls-files |
+grep 'notional-machine.md' | while read f; do git show HEAD:$f | wc -l; done |
+sort -n | head -1`; for the section case, the span between its heading and the
+next `##` — `grep -n '^## '` on `src/lib/study-lenses/lib/questioning/README.md`
+gives 407 and 440. The obvious awk range form is wrong here and returns 1,
+because its end pattern also matches its start line]. That section case is worth
+reading before deciding: `git grep -n 'Ownership boundary'` finds
 holder-ownership, a shared coordinate system and a between-calls lifetime rule,
 carried in a README and reaching AR-1 exactly as a twin would.
 
 **Where the machine twin ends and the data twin begins — the split matters more
 than any other boundary here, because the two documents sit side by side**
-(human ruling 2026-09-01). A machine twin already models entities, not merely
-run phases: `git grep -n '^### Bindings'` finds a machine twin giving each
-binding a scope it lives in, a `'tdz' | 'initialized' | 'dead'` status, and a
-declare-to-dead lifecycle, beneath a containment model that distinguishes direct
-containment from reference. Identity, ownership, lifetime and temporal
-invariants, all of them, in a notional-machine document. **The line is whose
-data it is.** A machine twin models the entities the modelled machine holds as
-part of being that machine — the language's bindings, scopes and realms are
-furniture of the machine a reader must predict. A data twin models the shapes
-**this module itself** produces, holds and hands on: what crosses its boundary,
-what lives in its own holders, and what a consumer receives.
+(adopted 2026-09-01 under AR-1's challenge; not separately ruled). A machine
+twin already models entities, not merely run phases:
+`git grep -n '^### Bindings'` finds a machine twin giving each binding a scope
+it lives in, a `'tdz' | 'initialized' | 'dead'` status, and a declare-to-dead
+lifecycle, beneath a containment model that distinguishes direct containment
+from reference. Identity, ownership, lifetime and temporal invariants, all of
+them, in a notional-machine document. **The line is whose data it is.** A
+machine twin models the entities the modelled machine holds as part of being
+that machine — the language's bindings, scopes and realms are furniture of the
+machine a reader must predict. A data twin models the shapes **this module
+itself** produces, holds and hands on: what crosses its boundary, what lives in
+its own holders, and what a consumer receives.
 
 **Where the module _is_ the machine, "whose" does not decide, and the tie-break
 is what a reader needs the shape for** (adopted 2026-09-01 under AR-1's second
@@ -769,13 +774,15 @@ do**, it is machine-twin material — which is what a machine twin's
 the test tends to be written down, not a precondition for applying it**: seven
 of the ten machine twins carry it, and the designated first instance is not
 among them, yet the test still decides its central object below [measured
-2026-09-01; these counts move — re-measure rather than quoting them]. If a
-reader needs it to **hold the value correctly once received** — who owns it now,
-how long it lives, whether it is ground or recomputable, what makes two of them
-the same — it is data-twin material, **even though this module produced it**.
-The designated first instance turns on exactly this: its machine twin already
-says its published sequence is "derived from the channels plus the source, never
-by scanning again", which is a prediction about the machine; that sequence's
+2026-09-01: `git grep -ln 'Predictions worth making' -- '*notional-machine.md' |
+wc -l` → 7, against `git ls-files | grep -c 'notional-machine.md'` → 10; these
+counts move, so re-measure rather than quoting them]. If a reader needs it to
+**hold the value correctly once received** — who owns it now, how long it lives,
+whether it is ground or recomputable, what makes two of them the same — it is
+data-twin material, **even though this module produced it**. The designated
+first instance turns on exactly this: its machine twin already says its
+published sequence is "derived from the channels plus the source, never by
+scanning again", which is a prediction about the machine; that sequence's
 holders and lifetime are not, and they are what its data twin is for.
 
 **What the data twin owns, stated against the artifacts that overlap it.**
@@ -805,15 +812,16 @@ states a union can foreclose. The data twin names the ones the type system
 ("these two must never disagree") — and records which reachable-illegal states
 were left representable, and why.
 
-**No format is pinned and no menu is named** (human ruling 2026-09-01). What the
-document owns is fixed above; which sections it uses is the module's own call,
-justified where that module documents itself. The ux menu was named only when a
-campaign owed eight at once, and the revision before it declined to name a menu
-at all on the ground that pinning a set ahead of its second use invents the
-convention — this document has no instances yet [measured 2026-09-01: `git
-ls-files | grep -c data-model` → **0**]. Revisit when a second module owes one,
-and date the ruling here. For the shape of this material as the repo writes it
-today, `git grep -n 'State residency'` finds the closest thing there is.
+**No format is pinned and no menu is named** (human ruling 2026-09-01, at plan
+approval). What the document owns is fixed above; which sections it uses is the
+module's own call, justified where that module documents itself. The ux menu was
+named only when a campaign owed eight at once, and the revision before it
+declined to name a menu at all on the ground that pinning a set ahead of its
+second use invents the convention — this document has no instances yet [measured
+2026-09-01: `git ls-files | grep -c data-model` → **0**]. Revisit when a second
+module owes one, and date the ruling here. For the shape of this material as the
+repo writes it today, `git grep -n 'State residency'` finds the closest thing
+there is.
 
 **`data`, not `state` — the synonym is dispatched here rather than left
 standing** (adopted 2026-09-01 under AR-1's challenge; not separately ruled).
@@ -1410,11 +1418,15 @@ settings line breaks mid-list still matches, a value that is not first in its
 list still matches, and a prose-only body does not.
 
 **The hazard is latent, not yet realized** — no settings line in the corpus
-currently wraps inside `twin-doc` [measured 2026-09-01: the flattened pipeline
-above and a line-anchored `--grep='twin-doc: machine'` return the same commit
-set, so no record is reachable only by flattening], which is why the naive
-grep's error today is the `both` blindness rather than a wrap. It is written
-down now because the list form is what makes wrapping likely.
+currently wraps inside `twin-doc` [measured 2026-09-01: **flattened minus
+anchored is empty** — every record the line-anchored `--grep='twin-doc:
+machine'` finds, the flattened pipeline finds too, and none is reachable only by
+flattening, which is what a wrap would produce. The two sets are **not** equal,
+and an earlier revision of this tag wrongly said they were: the anchored form
+returns one more, the prose-only `10e2dc0c`, the false positive documented three
+paragraphs above], which is why the naive grep's error today is the `both`
+blindness rather than a wrap. It is written down now because the list form is
+what makes wrapping likely.
 
 Putting the newest value first in canonical order was considered as a cheaper
 mitigation and rejected: it reduces one value's exposure and leaves the form
@@ -1430,12 +1442,12 @@ above so that a curriculum unit owing two twins has a form to record, which
 retiring the quantifier without one would have taken away.
 
 **The definition sentence changed, and the change is a correction rather than an
-accommodation** (human ruling 2026-09-01). It read "which **reader** this work
-owes a written account **to**" — false of every value the axis has ever had. A
-notional machine reads nothing, and the `user` twin is not written for users
-either, which this file ruled when it named that directory `ux`: "user-docs
-reads as documentation _for_ users, which is close to the opposite of what a
-twin is"
+accommodation** (human ruling 2026-09-01, at plan approval). It read "which
+**reader** this work owes a written account **to**" — false of every value the
+axis has ever had. A notional machine reads nothing, and the `user` twin is not
+written for users either, which this file ruled when it named that directory
+`ux`: "user-docs reads as documentation _for_ users, which is close to the
+opposite of what a twin is"
 ([§ Directory Documentation Convention](#directory-documentation-convention),
 human ruling 2026-08-14). Adding `data`, which reads nothing either, made a
 latent inaccuracy load-bearing.

@@ -159,14 +159,19 @@ Consequences, all binding:
   the shape from the tree: `git ls-files | grep '/ux/'` finds `spellme/ux/`
   (journeys + wireframes) and `orchestrate/ux/` (personas + journeys +
   wireframes).
-- **The `data` twin has a threshold, and it may say no file is owed.** Same
-  section: "**Below that size the README section is right and this row is not
-  owed.** The threshold is a judgement and no number is pinned; the machine
-  twins' floor of 116 lines is the usable marker, against a section case of 33."
-  Scale on this module [measured 2026-09-01: `wc -l`]: `notional-machine.md`
-  202, `README.md` 482. **Evaluate the threshold before writing a file** — a
-  `## Data model` section in the README is a legitimate outcome of a `data`
-  answer, and this brief's earlier draft asserted otherwise.
+- **The `data` twin has a threshold, and below it the value is still recorded
+  but no separate file is owed.** Same section: "**Below that size the separate
+  document is not owed and a README section is right — the value is still
+  recorded**, because what the value names is the account, not the file it
+  happens to live in. The threshold is a judgement and no number is pinned; the
+  machine twins' floor of 116 lines is the usable marker, against a section case
+  of 33." Scale on this module [measured 2026-09-01: `wc -l`]:
+  `notional-machine.md` 202, `README.md` 482. **Evaluate the threshold before
+  writing a file** — a `## Data model` section in the README is a legitimate
+  outcome of a `data` answer, and **you still record `data` either way**. Two
+  earlier drafts of this bullet got this wrong in opposite directions: the first
+  said a `data` answer always means a new file, the second quoted a sentence
+  DEV.md had already replaced, which read as "record nothing".
 - **The document, where one is owed, is named `data-model.md`**, beside the
   README. No instance exists anywhere to copy [measured 2026-09-01: `git
   ls-files | grep -c data-model` → 0].
