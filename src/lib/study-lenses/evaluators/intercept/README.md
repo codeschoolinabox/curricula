@@ -378,10 +378,13 @@ its position from a stack parse at the worker's stop-record author — the
 campaign's ONE escalated exception to the never-a-stack-parse ruling, its
 strength argument in the ledger's P0-I bullet: the alternatives were losing
 attribution the reference had, or a fallback with no input at all. The parsed
-position is in the SPLICED text's coordinates; the conversion through the
-guard's splice offsets — and the `byOffset` deepest-covering ascent that turns
-the converted span into a node — is the enrichment increment's named design
-question, stated and not solved here.
+position is in the SPLICED text's coordinates, and the correction is the
+WORKER'S (human ruling 2026-09-01, ledger `9e692aa7`): the worker config carries
+per-line column deltas computed at assembly where both texts exist, and the halt
+author corrects the column BEFORE stamping — lines are preserved 1:1 by every
+instrumentation pass, so one coordinate space rides the wire, matching the
+wrap's original-parse stamps. The corrected position joins its entwined node
+thread-side like any original-space span (`nodeAtLoc`, the enrichment surface).
 
 **The worker stop record is intercept's own** —
 `{ natural, errorName, message, loc, trip, iterationCount }` — and here the

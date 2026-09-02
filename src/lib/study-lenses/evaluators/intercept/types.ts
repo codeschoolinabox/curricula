@@ -467,8 +467,10 @@ export type InterceptHandle = Execution<InterceptEvent, InterceptResult> & {
  * settlement mapper narrows on `natural` and reads a phase, never a
  * fabricated default. The throw arm's `loc` is the attributed call site:
  * the wrap's innermost live call read from the raw throw's stamp, or the
- * one sanctioned stack-parse position (spliced-coordinate conversion is
- * the enrichment increment's named question); `null` where neither gave
+ * one sanctioned stack-parse position for the no-live-frame residual — a
+ * zero-width span whose spliced-space column the author corrects through
+ * the config's per-line deltas BEFORE stamping, so one coordinate space
+ * rides the wire (human ruling 2026-09-01); `null` where neither gave
  * one.
  */
 export type InterceptHalt =
@@ -482,9 +484,22 @@ export type InterceptHalt =
  * `iterationLimit` is the spec's `iterations`, passed through UNCHANGED
  * (pin intercept:394; the cap policy is the evaluator's, and intercept's
  * policy is pass-through).
+ *
+ * `spliceColumnDeltas` carries the residual stack parse's per-line column
+ * deltas (human ruling 2026-09-01): keyed by 1-based line in the shared
+ * line space — every instrumentation pass preserves lines 1:1, so
+ * original, spliced, and running lines are one space — each value the
+ * UTF-16 column shift splicing added to that line. Computed at assembly,
+ * where the original and instrumented texts both exist; consumed by the
+ * halt author, which subtracts the line's delta from a residual stack
+ * position's column BEFORE stamping — one coordinate space on the wire,
+ * matching the wrap's original-parse stamps. An absent record, an absent
+ * line, or a delta larger than the column corrects nothing: the column
+ * passes through, never negative.
  */
 export type InterceptWorkerConfig = {
 	readonly iterationLimit?: number;
+	readonly spliceColumnDeltas?: Readonly<Record<number, number>>;
 };
 
 // ─── Seam 3: the wire record (worker → thread) ───────────────────────────────
@@ -633,4 +648,41 @@ export type InterceptPendingInteraction = PendingInteraction<
 	readonly loc: InterceptLoc | null;
 	readonly start: number | null;
 	readonly end: number | null;
+};
+
+// ─── The enrichment (thread-side, inside onMessage) ──────────────────────────
+
+/**
+ * What enrichment accepts (DOCS.md § Execution phases, phase 5's inputs):
+ * a narrowed wire record; the io flag's stream half — the wire error
+ * shape plus the failing `source`, thread-authored where the flag
+ * classifies, never crossing the worker seam; or the channel's pending
+ * interaction. Items arrive deep-frozen by their authors — the record at
+ * the narrowing, the interaction at the channel, the io item where it is
+ * classified (the region's freeze-where-authored constraint) — and
+ * enrichment builds the delivered event as its own object, so no item is
+ * ever written.
+ */
+export type InterceptEnrichable =
+	| InterceptWireRecord
+	| (WireErrorRecord & { readonly source: string })
+	| InterceptPendingInteraction;
+
+/**
+ * One run's enrichment surface (HR-12) — built once per run by
+ * `enrich-event.ts`, consumed inside the engine's `onMessage` hook and at
+ * the settlement's attribution reads: `enrich` turns one arriving item
+ * into the delivered event (the enumerable attribution resolved through
+ * the deepest-exact-span join, the graph views installed as
+ * NON-ENUMERABLE accessors, the timeline linked), and `nodeAtLoc` joins
+ * an original-space line/column span — a trip's loop span, the residual
+ * halt position — to its entwined node through the session's lineStarts
+ * table. The timeline pointer behind `prev`/`next` is the NAMED
+ * no-mutable-closures exception, scoped: accessors are installed inside
+ * `onMessage` before return and never written after yield (HR-12's
+ * mechanism bullet).
+ */
+export type InterceptEnrichment = {
+	readonly enrich: (item: InterceptEnrichable) => InterceptEvent;
+	readonly nodeAtLoc: (loc: InterceptLoc) => EntwinedNode | null;
 };

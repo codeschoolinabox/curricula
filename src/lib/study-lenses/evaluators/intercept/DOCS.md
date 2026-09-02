@@ -150,8 +150,10 @@ flowchart TD
 - **Why the attribution fallback carries the one sanctioned stack parse** (human
   ruling 2026-08-19): a throw with no live wrapped frame has no other input —
   the alternatives were losing attribution the reference had or a fallback with
-  no arm; the parsed position is in spliced coordinates, and the conversion is
-  the enrichment increment's named question.
+  no arm; the parsed position is in spliced coordinates, and its column is
+  corrected WORKER-SIDE through the config's per-line splice deltas before
+  stamping (human ruling 2026-09-01, ledger `9e692aa7`) — one coordinate space
+  on the wire.
 - **Why record-only console** (human ruling 2026-08-19): the record IS the
   observation and the lens renders it; the host console stays the machinery's.
   The whole-surface trap with an open-string `method` keeps every legal call

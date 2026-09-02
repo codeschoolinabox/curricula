@@ -149,6 +149,22 @@ function stampedThrowOf(
 	throw new Error('the wrapped call did not throw');
 }
 
+function residualErrorOf(stack: string): TypeError {
+	const error = new TypeError('boom');
+	error.stack = stack;
+	return error;
+}
+
+function tripErrorWithStack(setup: Setup, stack: string): unknown {
+	try {
+		setup.guardCall(2, '3:4:5:6');
+	} catch (error) {
+		(error as { stack?: string }).stack = stack;
+		return error;
+	}
+	throw new Error('the guard did not trip');
+}
+
 describe('interceptWorkerSetup', () => {
 	describe('the injected surface', () => {
 		it('injects the guard helpers, the loc wrap, the console, and the three dialogs', () => {
@@ -849,6 +865,197 @@ describe('interceptWorkerSetup', () => {
 				expect(() => setup.guardCall(1, '1:0:1:20')).not.toThrow();
 			},
 		);
+	});
+
+	describe('the residual stack parse — the ruled worker-side column correction', () => {
+		it('a residual throw with no parseable learner frame keeps loc null', () => {
+			const halt = setupWith().authorHalt(
+				'throw',
+				residualErrorOf(
+					'TypeError: boom\n    at runScriptInThisContext (node:internal/vm:144:10)',
+				),
+				'evaluation',
+			);
+
+			expect(halt.loc).toBeNull();
+		});
+
+		it('a stack getter that throws degrades to loc null', () => {
+			const trap = Object.defineProperty(new TypeError('boom'), 'stack', {
+				get() {
+					throw new Error('trapped');
+				},
+			});
+
+			expect(
+				setupWith().authorHalt('throw', trap, 'evaluation').loc,
+			).toBeNull();
+		});
+
+		it('a module-path frame attributes at its own line — the blob is the code', () => {
+			const halt = setupWith().authorHalt(
+				'throw',
+				residualErrorOf(
+					'TypeError: boom\n    at blob:http://sandbox.test/0001-aaaa:2:6',
+				),
+				'evaluation',
+			);
+
+			expect(halt.loc).toStrictEqual({
+				start: { line: 2, column: 5 },
+				end: { line: 2, column: 5 },
+			});
+		});
+
+		it('a function-path frame subtracts the wrapper and the strict prefix', () => {
+			const halt = setupWith().authorHalt(
+				'throw',
+				residualErrorOf(
+					'TypeError: boom\n    at eval (eval at <anonymous> ([eval]:5:15), <anonymous>:5:6)\n    at [eval]:6:3',
+				),
+				'evaluation',
+			);
+
+			expect(halt.loc).toStrictEqual({
+				start: { line: 2, column: 5 },
+				end: { line: 2, column: 5 },
+			});
+		});
+
+		it("a spliced line's column is corrected by the config deltas", () => {
+			const setup = setupWith(undefined, { spliceColumnDeltas: { 2: 3 } });
+			const halt = setup.authorHalt(
+				'throw',
+				residualErrorOf(
+					'TypeError: boom\n    at eval (eval at <anonymous> ([eval]:5:15), <anonymous>:5:6)',
+				),
+				'evaluation',
+			);
+
+			expect(halt.loc).toStrictEqual({
+				start: { line: 2, column: 2 },
+				end: { line: 2, column: 2 },
+			});
+		});
+
+		it('the correction applies on the module path too — one rule, both frame shapes', () => {
+			const setup = setupWith(undefined, { spliceColumnDeltas: { 2: 1 } });
+			const halt = setup.authorHalt(
+				'throw',
+				residualErrorOf(
+					'TypeError: boom\n    at blob:http://sandbox.test/0001-aaaa:2:6',
+				),
+				'evaluation',
+			);
+
+			expect(halt.loc?.start.column).toBe(4);
+		});
+
+		it('an unspliced line passes through uncorrected', () => {
+			const setup = setupWith(undefined, { spliceColumnDeltas: { 9: 3 } });
+			const halt = setup.authorHalt(
+				'throw',
+				residualErrorOf(
+					'TypeError: boom\n    at eval (eval at <anonymous> ([eval]:5:15), <anonymous>:5:6)',
+				),
+				'evaluation',
+			);
+
+			expect(halt.loc?.start.column).toBe(5);
+		});
+
+		it('a delta larger than the column leaves it uncorrected — never negative', () => {
+			const setup = setupWith(undefined, { spliceColumnDeltas: { 2: 99 } });
+			const halt = setup.authorHalt(
+				'throw',
+				residualErrorOf(
+					'TypeError: boom\n    at eval (eval at <anonymous> ([eval]:5:15), <anonymous>:5:6)',
+				),
+				'evaluation',
+			);
+
+			expect(halt.loc?.start.column).toBe(5);
+		});
+
+		it('the line always survives the correction', () => {
+			const setup = setupWith(undefined, { spliceColumnDeltas: { 2: 3 } });
+			const halt = setup.authorHalt(
+				'throw',
+				residualErrorOf(
+					'TypeError: boom\n    at eval (eval at <anonymous> ([eval]:5:15), <anonymous>:5:6)',
+				),
+				'evaluation',
+			);
+
+			expect(halt.loc?.start.line).toBe(2);
+		});
+
+		it('a frame above the learner text is skipped, never mis-attributed', () => {
+			const halt = setupWith().authorHalt(
+				'throw',
+				residualErrorOf(
+					'TypeError: boom\n    at <anonymous>:3:1\n    at blob:http://sandbox.test/0001-aaaa:2:6',
+				),
+				'evaluation',
+			);
+
+			expect(halt.loc?.start.line).toBe(2);
+		});
+
+		it('the residual position is zero-width — a position, not a span', () => {
+			const halt = setupWith().authorHalt(
+				'throw',
+				residualErrorOf(
+					'TypeError: boom\n    at blob:http://sandbox.test/0001-aaaa:2:6',
+				),
+				'evaluation',
+			);
+
+			expect(halt.loc?.start).toStrictEqual(halt.loc?.end);
+		});
+
+		it('the residual error record still crosses with every attribution leg null', () => {
+			const setup = setupWith(undefined, { spliceColumnDeltas: { 2: 3 } });
+			setup.authorHalt(
+				'throw',
+				residualErrorOf(
+					'TypeError: boom\n    at eval (eval at <anonymous> ([eval]:5:15), <anonymous>:5:6)',
+				),
+				'evaluation',
+			);
+
+			expect([
+				setup.emitted[0]?.loc,
+				setup.emitted[0]?.start,
+				setup.emitted[0]?.end,
+			]).toEqual([null, null, null]);
+		});
+
+		it('a stamped throw never stack-parses — the wrap wins', () => {
+			const setup = setupWith(undefined, { spliceColumnDeltas: { 2: 3 } });
+			const thrown = stampedThrowOf(setup, '9:9:9:12:100:103', () => {
+				throw new TypeError('x');
+			});
+			(thrown as { stack?: string }).stack =
+				'TypeError: x\n    at eval (eval at <anonymous> ([eval]:5:15), <anonymous>:5:6)';
+
+			expect(setup.authorHalt('throw', thrown, 'evaluation').loc).toStrictEqual(
+				{
+					start: { line: 9, column: 9 },
+					end: { line: 9, column: 12 },
+				},
+			);
+		});
+
+		it('a marked trip never stack-parses — the trip owns its attribution', () => {
+			const setup = setupWith(undefined, { iterationLimit: 0 });
+			const thrown = tripErrorWithStack(
+				setup,
+				'RangeError: Loop 2 exceeded 0 iterations.\n    at eval (eval at <anonymous> ([eval]:5:15), <anonymous>:5:6)',
+			);
+
+			expect(setup.authorHalt('throw', thrown, 'evaluation').loc).toBeNull();
+		});
 	});
 
 	describe('the engine contract', () => {

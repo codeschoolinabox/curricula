@@ -46,6 +46,7 @@ import type {
 	InterceptInteractionRequest,
 	InterceptLoc,
 	InterceptWireRecord,
+	LimitTrip,
 } from './types.js';
 
 /**
@@ -67,7 +68,10 @@ export default function interceptWorkerSetup(
 	workerConfig: unknown,
 ): WorkerSetupResult {
 	const run = createRunState();
-	const base = createGuardedWorkerBase(workerConfig, buildFinisher(api, run));
+	const base = createGuardedWorkerBase(
+		workerConfig,
+		buildFinisher(api, run, readColumnDeltas(workerConfig)),
+	);
 
 	// WHY the exemption: the console trap must stay a plain mutable surface —
 	// a learner reassigning console.log disables its own observation and the
@@ -98,6 +102,11 @@ export default function interceptWorkerSetup(
  * precedent).
  */
 const LOC_STAMP_KEY = '__$callLoc';
+
+/** The residual parse's `'function'`-path line base: two spec-pinned
+ * dynamic-Function wrapper lines plus the strict prefix's one (the
+ * kind's recorded strict collapse). */
+const FUNCTION_PATH_LINE_BASE = 3;
 
 type RunState = {
 	/** The wrap's stack of ENCODED stamps; top = the executing call site. */
@@ -138,7 +147,9 @@ function createRunState(): RunState {
  * error record for the learner's own run-ending throw — the trip and the
  * natural end emit nothing; the halt ends their timeline (human ruling
  * 2026-08-26, the ledger's in-stream-error bullet) — then widen the core
- * with the attributed call site read from the raw throw's stamp. The
+ * with the attributed call site read from the raw throw's stamp, or the
+ * one sanctioned stack-parse position for the no-live-frame residual,
+ * its column corrected worker-side (human ruling 2026-09-01). The
  * emission keys off the core's already-classified `trip`, never a
  * heuristic on the raw error (a forged guard message is an ordinary
  * learner throw). A defect anywhere in here degrades to the unfinished
@@ -147,6 +158,7 @@ function createRunState(): RunState {
 function buildFinisher(
 	api: WorkerApi,
 	run: RunState,
+	columnDeltas: Readonly<Record<string, unknown>>,
 ): FinishHalt<InterceptHalt> {
 	return function finishInterceptHalt(core, rawError): InterceptHalt {
 		if (core.natural) {
@@ -158,11 +170,37 @@ function buildFinisher(
 				encoded === null ? NULL_ATTRIBUTION : decodeStampLegs(encoded);
 			api.emit(buildErrorRecord(core.errorName, core.message, run, legs));
 		}
-		// The halt needs only the SPAN — a sound span attributes the stop
-		// record even where the offset legs are corrupt (the separate-leg
-		// validation, I1's recorded seam flag).
-		return { ...core, loc: encoded === null ? null : decodeStampSpan(encoded) };
+		return {
+			...core,
+			loc: attributeThrow(core, encoded, rawError, columnDeltas),
+		};
 	};
+}
+
+/**
+ * The throw arm's attribution, in the ruled precedence: a live wrapped
+ * frame's stamp wins — and the halt needs only its SPAN, so a sound span
+ * attributes the stop record even where the offset legs are corrupt (the
+ * separate-leg validation, I1's recorded seam flag). A marked trip never
+ * stack-parses: the trip record owns its attribution, and the loop's own
+ * span is already the richer answer. Only the learner's no-live-frame
+ * residual takes the one sanctioned stack parse (human ruling
+ * 2026-08-19; the worker-side column correction, human ruling
+ * 2026-09-01).
+ */
+function attributeThrow(
+	core: { readonly trip: LimitTrip | null },
+	encoded: string | null,
+	rawError: unknown,
+	columnDeltas: Readonly<Record<string, unknown>>,
+): InterceptLoc | null {
+	if (encoded !== null) {
+		return decodeStampSpan(encoded);
+	}
+	if (core.trip !== null) {
+		return null;
+	}
+	return parseResidualSpan(rawError, columnDeltas);
 }
 
 /** The wire error record, its step minted from the one shared sequence. */
@@ -439,4 +477,143 @@ function decodeStampSpan(encoded: string): InterceptLoc | null {
 		start: { line: startLine, column: startColumn },
 		end: { line: endLine, column: endColumn },
 	};
+}
+
+/**
+ * The residual correction's config half, read once at setup. Reading
+ * `unknown` is the narrowing, not a policy gate (readCap's own pattern in
+ * the base): the record rides as opaque values and each per-line delta is
+ * re-checked at its read, so a malformed member corrects nothing rather
+ * than crashing a halt.
+ */
+function readColumnDeltas(
+	workerConfig: unknown,
+): Readonly<Record<string, unknown>> {
+	// WHY the cast: workerConfig is clone-transported and contractually
+	// unknown at the engine boundary; the member is re-checked here, not
+	// trusted.
+	const { spliceColumnDeltas } = (workerConfig ?? {}) as {
+		readonly spliceColumnDeltas?: unknown;
+	};
+	return typeof spliceColumnDeltas === 'object' && spliceColumnDeltas !== null
+		? (spliceColumnDeltas as Readonly<Record<string, unknown>>)
+		: {};
+}
+
+/**
+ * The one sanctioned stack parse (human ruling 2026-08-19), for the
+ * learner throw no wrapped frame stamped: scan the raw error's stack for
+ * the first frame that points into the learner's own code, subtract that
+ * frame shape's harness line base, correct the column through the
+ * config's per-line deltas (human ruling 2026-09-01), and answer a
+ * zero-width original-space span — a position, not an extent. `null`
+ * wherever the stack gives nothing: the residual is best-effort
+ * attribution, never a guess.
+ *
+ * WHY the guard is local rather than the base's builder catch: the base
+ * degrades a THROWING finisher to the unfinished CORE, whose
+ * per-evaluator `loc` member does not exist at all — so relying on it
+ * would deliver `loc: undefined`, never the contract's `null` (ar-3
+ * 2026-09-01, the stack-getter row). Guarded like `readStampedEncoding`:
+ * a trapping stack is unattributed, never a worker crash.
+ */
+function parseResidualSpan(
+	rawError: unknown,
+	columnDeltas: Readonly<Record<string, unknown>>,
+): InterceptLoc | null {
+	try {
+		if (typeof rawError !== 'object' || rawError === null) {
+			return null;
+		}
+		const { stack } = rawError as { readonly stack?: unknown };
+		if (typeof stack !== 'string') {
+			return null;
+		}
+		for (const frameLine of stack.split('\n')) {
+			const position = parseFrameLine(frameLine, columnDeltas);
+			if (position !== null) {
+				return position;
+			}
+		}
+		return null;
+	} catch {
+		return null;
+	}
+}
+
+/**
+ * One stack line → the corrected position, or null for a line that is
+ * not a learner-code frame: no trailing `:line:column`, no learner-code
+ * marker (an engine or platform frame — which is also what keeps an
+ * error MESSAGE line from false-matching), or a position above the
+ * learner's own first line. Stack positions arrive 1-based in both
+ * axes; the region's columns are 0-based, so the column shifts down one
+ * before the delta correction.
+ */
+function parseFrameLine(
+	frameLine: string,
+	columnDeltas: Readonly<Record<string, unknown>>,
+): InterceptLoc | null {
+	const trailing = /:(\d+):(\d+)\)?\s*$/.exec(frameLine);
+	if (trailing === null) {
+		return null;
+	}
+	const lineBase = frameLineBase(frameLine);
+	if (lineBase === null) {
+		return null;
+	}
+	const stackLine = Number(trailing[1]);
+	const stackColumn = Number(trailing[2]);
+	const line = stackLine - lineBase;
+	if (line < 1 || stackColumn < 1) {
+		return null;
+	}
+	const column = correctColumn(columnDeltas, line, stackColumn - 1);
+	return { start: { line, column }, end: { line, column } };
+}
+
+/**
+ * The frame's harness line base, keyed by the learner-code marker the
+ * frame carries. A dynamic-Function frame — V8 renders `<anonymous>`,
+ * Firefox `> Function` — is the engine's `'function'` path: the
+ * spec-pinned `new Function` wrapper costs two lines and the kind's
+ * strict collapse a third (the bootstrap prepends `"use strict";\n`;
+ * the collapse is recorded at the region root). A blob frame is the
+ * `'module'` path, whose blob IS the code — line 1 is line 1. The
+ * function markers test FIRST: a browser's dynamic-Function frame names
+ * the constructing blob too, and the trailing position is the
+ * function-space one.
+ */
+function frameLineBase(frameLine: string): number | null {
+	if (frameLine.includes('<anonymous>') || frameLine.includes('> Function')) {
+		return FUNCTION_PATH_LINE_BASE;
+	}
+	if (frameLine.includes('blob:')) {
+		return 0;
+	}
+	return null;
+}
+
+/**
+ * The ruled per-line correction: subtract the line's delta from the
+ * column — splicing preserves lines and shifts columns, only on lines it
+ * touched. An absent line, a malformed delta, or a delta larger than the
+ * column corrects nothing: a position the delta provably cannot describe
+ * passes through, never negative.
+ */
+function correctColumn(
+	columnDeltas: Readonly<Record<string, unknown>>,
+	line: number,
+	column: number,
+): number {
+	const delta = columnDeltas[String(line)];
+	if (
+		typeof delta !== 'number' ||
+		!Number.isFinite(delta) ||
+		delta <= 0 ||
+		column < delta
+	) {
+		return column;
+	}
+	return column - delta;
 }
