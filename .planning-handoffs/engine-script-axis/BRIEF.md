@@ -1168,6 +1168,20 @@ HR-24 exists. Each names the step that owes it.
   it if that is forgotten: they need a host that REFUSES scripts, which is the
   module-worker tier that exists today, so they un-skip without waiting on the
   classic tier and fail if the path never reaches setup.
+- **Pin the capability-probe rows to a module worker BEFORE repointing
+  `scriptRun` — owed by Phase 1's first script increment.** In
+  `tests/conformance/transport/script-execution.browser.test.ts`, three of the
+  four capability-probe rows reach the tier through the same `scriptRun` helper
+  the thirteen script rows use, and two of those three — _"settles worker-error
+  when the host cannot run scripts"_ and _"yields no items when the probe
+  refuses the host"_ — require a host that REFUSES scripts, which is the
+  module-worker tier. The moment `scriptRun` points at a classic worker they
+  become unsatisfiable, and because they are committed skipped they will never
+  say so. Give them their own module-worker helper, or a `workerFactory`
+  override (`scriptRun` spreads `...overrides` last, so an override wins;
+  `moduleRun` cannot serve them because it hardcodes `execution: 'module'`),
+  before the flip. Recorded here because the handoff that found it is
+  short-lived and this file is not.
 - **The blob-URL revocation constraint is UNBANKED, deliberately — owed by
   nobody, named so it is not mistaken for covered.** `DOCS.md` § Structural
   constraints requires both blob-carrying paths to revoke their object URL on
