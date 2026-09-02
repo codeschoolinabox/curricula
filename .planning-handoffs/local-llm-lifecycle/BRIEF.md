@@ -9,32 +9,6 @@
 > § Wave 2 is PAUSED, **and the `### Rulings carried…` section directly below
 > it**, which constrains settle-items 3, 4 and 8.
 
-## Launch prompt — paste this into a fresh Fable session
-
-```text
-Read .planning-handoffs/local-llm-lifecycle/BRIEF.md and follow it.
-
-Start with the repo-root CLAUDE.md governance router — check your own model id
-against its qualifying list and read whichever AGENTS file matches, end to end,
-before any other work. Then DEV.md as it directs.
-
-You are opening Phase 0 of the local-llm outward-contract campaign, Phase 0 only.
-The brief is the binding scope. Enter plan mode; run a Plan-agent design pass
-before exiting it.
-
-Re-measure everything before you plan. HEAD moves several times an hour here and
-there are 80+ unpushed commits. Run node scripts/repo-facts.mjs and paste its
-output rather than retyping any number.
-
-Three things you should not discover the hard way, all in the brief: the eight
-settle-items are the HUMAN's to rule and you may not write a (human ruling)
-parenthetical for any of them until answered; this campaign deliberately does not
-rewrite the load engine, though the brief names four seams where that line is not
-clean; and a twin document IS owed here.
-
-Then confirm alignment with me in one message before executing.
-```
-
 ## Before reading further
 
 1. Read the repo-root `CLAUDE.md` router, check your model id against its
@@ -409,3 +383,62 @@ and that section ever disagree, that section is right.
   `src/lib/study-lenses/orchestrate/generator/README.md` — note it calls
   **retiring** the load-bearing half, so cancellation buys freed device work,
   not correctness.
+
+## Rulings (human, 2026-08-26 — answered at plan approval, recorded same turn)
+
+The eight settle-items and the two Phase-0 asks, as answered via the plan-mode
+batch (AskUserQuestion, plan `read-planning-handoffs-local-llm-lifecyc-
+ancient-swing`). These move into the module's own README/DOCS/types as dated
+`(human ruling 2026-08-26)` parentheticals as those documents are authored;
+the commit bodies enumerate the transfer.
+
+1. **Failure channel: TWO channels** — an unknown model name becomes a
+   **returned refusal with its own distinct cause** (typo-vs-device
+   distinctness survives as a value); genuine infrastructure faults (the probe
+   rejection) remain rejections. The unknown-name throw is retired.
+2. **Generation lifecycle: a typed outcome** — `generate` resolves an
+   ok-boolean union: success carries the decomposed result; failure carries a
+   small cause vocabulary + optional detail. No attempts ledger (generation
+   has no descent; attempts/repair are aithor's curated loop).
+3. **Ownership: accept + document one-generation-at-a-time per loaded model.**
+   Queue-with-identity is a recorded obligation owed by whichever campaign
+   introduces a second concurrent consumer — deferred, not evaporated.
+4. **Abort semantics: abort resolves as a value** (an `aborted` generation
+   outcome, never a rejection), plus the commitment: **a signal aborted at any
+   time — mid-flight or after settlement — leaves the loaded model usable; the
+   next `generate` proceeds normally.** (Forced by WebLLM v0.2.84's measured
+   interrupt-flag poison behavior; the fix mechanism is Phase-1
+   implementation, not contract.)
+5. **Mid-generation device loss: recovery stays OUT; `device-lost` is named**
+   honestly in the generation-failure cause vocabulary (naming ≠ recovering).
+   Folded into ruling 2's adopted vocabulary.
+6. **Streaming: OUT of the outward contract, deliberately.** The wording
+   leaves the adapter's internal use of WebLLM streaming legal.
+7. **NextStep knowledge: stays consumer-side.** aithor keeps
+   `causeToNextStep`; local-llm's delivery-agnostic boundary holds. Answered,
+   not deferred — this is the settle-item half of Wave 2's unblock condition.
+8. **Handle shape: `{ generate }` unchanged; cancel is per-call** —
+   `generate(prompt, options?: { signal?: AbortSignal })`. The
+   `{ result, cancel }` handle is rejected (call-site churn, duplicated
+   AbortSignal semantics).
+
+- **Ceremony: `full`** (the human's answer; AR-1 · AR-2 · AR-5 fire in this
+  docs-and-types phase; AR-3/AR-4 defer to Phase-1 un-skips — wording flagged
+  for confirmation at the gate).
+- **Twin ask (0.2 re-ask): `machine` stands** — confirmed before `ar-1`
+  spawned, so the answer window closed with an answer; no silence collision.
+
+### AR-1 PAUSE resolution (human, 2026-09-01)
+
+ar-1 (opus) returned PAUSE on 0.1/0.2 — 2 blockers, 8 important, 5 minor. The
+human approved: **fix all 15** per the reviewer's counter-proposals, and ruled
+the two open calls:
+
+- **The `causeToNextStep` compile break** (widening `LoadFailureCause` with
+  `unknown-model` red-lights aithor's exhaustiveness guard): resolved as the
+  **frozen collateral ledger** in commit 2's body, handed to Wave 2 — the
+  alternative sanctioned one-line aithor arm was **declined**; zero aithor
+  edits this campaign.
+- **Releasing a loaded model**: recorded as an explicit README § Excludes
+  exclusion — nothing unloads a loaded model; a release verb is **deferred to
+  the campaign that first needs one**. No new verb this campaign.

@@ -41,15 +41,18 @@ bring no model up, the runtime **refuses** rather than reaching for a server.
 ## Type ownership & dependency direction
 
 This module **owns its contract and depends on no consumer.** The generic types
-— the **loaded model**, the **generation result**, the **runtime adapter**, and
-this module's own **load failure** — are defined here; consumers import and
-**re-map** them. A consumer's own refusal vocabulary (e.g. aithor's
-`no-model-available`) is a _re-mapping of_ this module's load failure, never the
-other way round. The dependency arrow points **down**, from a consumer in
-`embody/` or `lenses/` into this `lib/` module, never up — exactly as the
-sandbox engine's `EngineHandle` is re-mapped by embody into its own
-`EvaluateHandle`. The names are deliberately distinct at the seam: a **loaded
-model** here is _not_ a run handle.
+— the **loaded model**, the **generation outcome** (its result and failure
+halves), the **runtime adapter**, and this module's own **load failure** — are
+defined here; consumers import and **re-map** them. A consumer's own refusal
+vocabulary (e.g. aithor's `no-model-available`) is a _re-mapping of_ this
+module's load failure, never the other way round. One spelling converges by
+design: `unknown-model`, which aithor already speaks consumer-side, is now
+produced here as a load-failure cause — a consumer re-maps it or adopts the
+spelling verbatim; the arrow's direction is unchanged. The dependency arrow
+points **down**, from a consumer in `embody/` or `lenses/` into this `lib/`
+module, never up — exactly as the sandbox engine's `EngineHandle` is re-mapped
+by embody into its own `EvaluateHandle`. The names are deliberately distinct at
+the seam: a **loaded model** here is _not_ a run handle.
 
 > **Integration note.** aithor formerly defined its own `Model` type; it now
 > imports `LoadedModel` from here and re-maps this module's `LoadFailure` into
@@ -67,8 +70,9 @@ fall on either side of one internal seam:
    device, match its capabilities against the catalog, and either pick the best
    model for it or refuse because nothing fits. No I/O, no model.
 2. **Given a model, run it.** — the **impure lifecycle**: bring it up once
-   (fetch-once, load-once-reuse), send it a prompt, decompose the reply. The two
-   impure seams (the stateful loader, the non-deterministic call) live here.
+   (fetch-once, load-once-reuse), send it a prompt (cancellable per call),
+   decompose the reply. The two impure seams (the stateful loader, the
+   non-deterministic call) live here.
 
 Everything about _judging_ the output — is it valid, in-subset, worth showing
 raw or cleaned — belongs to the consumer. The runtime is **thorough at model
@@ -77,11 +81,27 @@ management** (picking, loading, running, decomposing) and **silent on meaning**.
 ## Ubiquitous language
 
 - **Loaded model** — a model brought into memory:
-  `generate(prompt) → GenerationResult`. Always local; runs on the learner's
-  device, never a remote service. _Not_ a run handle (the engine/embody
-  `*Handle` family) — a loaded model is a thing you call `generate` on, not a
-  lazy run you iterate.
-- **Generation result** — the model's reply, **decomposed** into its parts:
+  `generate(prompt, { signal? }) → generation outcome`. Always local; runs on
+  the learner's device, never a remote service. A loaded model is **shared**:
+  every caller that resolves the same catalog id on one constructed runtime
+  receives the same instance, so **one generation runs at a time per loaded
+  model** (human ruling 2026-08-26) binds across all holders, not per holder — a
+  bound no single holder can keep alone, which is why the queue that would lift
+  it is a recorded obligation; until it exists, serializing is the consumer
+  side's. See the refusal map's concurrent-generate row. _Not_ a run handle (the
+  engine/embody `*Handle` family) — a loaded model is a thing you call
+  `generate` on, not a lazy run you iterate.
+- **Generation outcome** — what one `generate` call resolves to, always a value:
+  the **generation result** on success, or a **generation failure** naming why
+  that one call produced nothing (human ruling 2026-08-26). `ok` is the
+  discriminant — true exactly on the result. One call, one outcome — there is no
+  generation-time descent, no attempts ledger, no retry; a repair loop is the
+  consumer's. _Not_ the region's `*Outcome` string unions (the engine's
+  `SettlementOutcome`, the evaluators' `EvaluationOutcome`), which name how a
+  run ended — here the outcome is the whole returned value, and the failure
+  causes are the analogue of those names.
+- **Generation result** — the model's reply on success, **decomposed** into its
+  parts:
   - **`raw`** — the **byte-exact, unmodified** model output. The consumers that
     want the model's drift "as-is" (aithor's uncurated path) read this; nothing
     here mutates it.
@@ -91,6 +111,27 @@ management** (picking, loading, running, decomposing) and **silent on meaning**.
   - **`thinkTrace?`** — a model's `<think>` reasoning, when it emits one.
     Decomposition _separates_ the parts by model-format; it never cleans or
     judges.
+- **Generation failure** — the typed refusal of one generation: **`aborted`**
+  (the call's own signal fired — deliberately bare, no `detail`; the aborter
+  already knows why), **`device-lost`** (the GPU dropped mid-generation — named
+  honestly, never recovered), or **`generation-failed`** (any other backend
+  fault), the latter two with an optional diagnostic `detail`. A value, never a
+  rejection. Two naming notes: `device-lost` also appears load-side, same
+  spelling, as a per-candidate cause inside a load failure's diagnostic
+  `attempts` ledger — visible there, but never a terminal load cause (the chain
+  folds it into `all-candidates-exhausted`); it is a consumer-facing cause only
+  at generation time. And the undiscriminated cause here is `generation-failed`,
+  not the load ledger's `unknown` — consumer-facing generation causes name the
+  failed act; `unknown` belongs to the diagnostic vocabulary.
+- **Cancellation** — the per-call `AbortSignal` `generate` accepts. Aborting
+  settles that one call with the `aborted` failure and **leaves the loaded model
+  usable** — the next `generate` proceeds normally, whatever the signal's
+  timing. The abort reason is not echoed — `aborted` is deliberately reason-free
+  — and the spelling is deliberate too: `aborted` is the `AbortSignal`'s own
+  word, kept verbatim at this seam, where the region's stop vocabulary elsewhere
+  says `cancel`/`cancelled`. Cancellation reaches the generation only: the
+  load-time descent takes no signal, and cancelling never frees an in-flight
+  weight fetch (the backend offers no lever).
 - **Catalog** — the static, **open, growing set** of candidate models, held as
   **data, not an enum** so the set is never foreclosed. Each **catalog entry**
   carries cross-runtime metadata (family, params, license, size-class,
@@ -102,8 +143,16 @@ management** (picking, loading, running, decomposing) and **silent on meaning**.
   capture.
 - **Runtime adapter** — a per-runtime-kind backend driver that turns a catalog
   entry's load parameters into a uniform **loaded model**. One adapter per
-  runtime kind, not per model. (A different sense of "adapter" than `lib/`'s
-  shape- producing _callback_ adapters — this one drives a backend.)
+  runtime kind, not per model. The loaded model a consumer receives is the
+  module's own, wrapping the adapter's: the module settles an already-aborted
+  call before the adapter is ever engaged, and classifies a domain fault the
+  adapter lets escape into the failure vocabulary — the generation-side sibling
+  of the load chain's own error classification. For every call that does reach
+  it, an adapter — shipped or host-injected — owes three behaviors: honor the
+  per-call signal as soon as its backend allows; an abort ends only that call,
+  as the `aborted` outcome; the model stays usable at **any** abort timing. (A
+  different sense of "adapter" than `lib/`'s shape- producing _callback_
+  adapters — this one drives a backend.)
 - **Adapter map** — the host-supplied map of runtime kind → runtime adapter,
   given **at construction**. The host **registers only the runtimes it ships**;
   an entry whose runtimes are all absent from the map is simply not loadable
@@ -129,8 +178,9 @@ management** (picking, loading, running, decomposing) and **silent on meaning**.
 - **Fetch-once, load-once-reuse** — the model lifecycle the runtime drives: a
   named model's weights are fetched once and cached on the device, then brought
   into memory on first use and reused. Concurrent loads of the same model before
-  the first settles **share one in-flight bring-up** (no double-fetch). The
-  network is touched only for that one-time fetch; every later load is offline.
+  the first settles **share one in-flight bring-up** (no double-fetch); a
+  **failed** bring-up is not kept — a later `load` re-attempts it. The network
+  is touched only for that one-time fetch; every later load is offline.
 - **Fallback chain** — the ordered descent of feasible `(model, runtime)`
   **candidates** that `load` tries: the cost-aware default, then smaller, then a
   switch to a CPU/WASM runtime. The descent is **silent and honest** — the
@@ -143,15 +193,17 @@ management** (picking, loading, running, decomposing) and **silent on meaning**.
   each its own catalog entry with its own id.
 - **Load failure** — the structured refusal when no model can be brought up. It
   names a **delivery-agnostic cause** (this module never names a product):
-  either a **pre-flight** `no-feasible-model` (the device can run nothing —
-  surfaceable before any bring-up) or a **post-flight** terminal cause after the
-  chain was tried (`all-candidates-exhausted`, `fetch-failed`, `storage-quota`,
-  or `cache-evicted`), the latter carrying a diagnostic per-candidate `attempts`
+  either a **pre-flight** cause the chain never ran for — `no-feasible-model`
+  (the device can run nothing — surfaceable before any bring-up) or
+  `unknown-model` (the requested name is absent from the catalog; **its own
+  cause, kept distinct so a typo never masquerades as "your device can't run
+  it"** — a returned refusal, no longer a throw, human ruling 2026-08-26) — or a
+  **post-flight** terminal cause after the chain was tried
+  (`all-candidates-exhausted`, `fetch-failed`, `storage-quota`, or
+  `cache-evicted`), the latter carrying a diagnostic per-candidate `attempts`
   ledger. This is the single source of truth consumers re-map (e.g. aithor's
   `no-model-available`) and the signal a consumer turns into a next step — incl.
-  recommending a native app. **Distinct from an _unknown model name_** — a name
-  absent from the catalog is a programmer error and **throws**, it is not a
-  refusal.
+  recommending a native app.
 - **Terminal refusal** — a `LoadFailure` whose cause means there is no
   in-browser path left (`no-feasible-model` / `all-candidates-exhausted`). It is
   itself the consumer's cue to recommend a native runtime; this module names the
@@ -160,14 +212,17 @@ management** (picking, loading, running, decomposing) and **silent on meaning**.
 ## What it produces (the boundary)
 
 - **In:** a finished **prompt**, an optional **selection** (a named model or a
-  preference over the feasible set), and an optional **progress** callback for
-  the one-time fetch. No JeJ, no feature subset, no validation flag, no sampling
-  override — those are not this runtime's vocabulary.
-- **Out:** a **loaded model** whose `generate(prompt)` resolves to a
-  **GenerationResult** (`raw`, `code`, `thinkTrace?`), or a **load failure**
-  when the device can bring nothing up. The runtime never returns a judged,
-  gated, or validated program — it returns the model's output, decomposed.
-  Whether to use `.code` or `.raw` is the consumer's call.
+  preference over the feasible set), an optional **progress** callback for the
+  one-time fetch, and — per `generate` call — an optional **`AbortSignal`**. No
+  JeJ, no feature subset, no validation flag, no sampling override — those are
+  not this runtime's vocabulary.
+- **Out:** a **loaded model** whose `generate(prompt, { signal? })` resolves to
+  a **generation outcome** — on success the decomposed **generation result**
+  (`raw`, `code`, `thinkTrace?`), on failure a typed **generation failure**
+  (`aborted` · `device-lost` · `generation-failed`) — or a **load failure** when
+  the device can bring nothing up. The runtime never returns a judged, gated, or
+  validated program — it returns the model's output, decomposed. Whether to use
+  `.code` or `.raw` is the consumer's call.
 
 There is **one caller entry point**, `load(selection?, onProgress?)`, obtained
 from a constructed runtime
@@ -194,6 +249,12 @@ through `onProgress`; the load-once memory bring-up hides behind the `await`.
 - **Sampling defaults** — per-model generation defaults (temperature, token
   bounds, stop conditions). This is _running the model well_, owned here so
   consumers carry no sampling concern; there is no per-call sampling override.
+- **The generation outcome vocabulary & abort semantics** — the typed per-call
+  outcome (the result, or `aborted` · `device-lost` · `generation-failed`), the
+  per-call `AbortSignal` parameter, and the usable-after-abort guarantee **as
+  made to consumers** (human ruling 2026-08-26). The behavior behind that
+  guarantee is every runtime adapter's to keep — the adapter's obligations are
+  in the glossary.
 - **Decomposition** — parsing a model's reply into a GenerationResult by its
   model-format. Separation only — `.raw` stays byte-exact; never validation.
 
@@ -212,15 +273,30 @@ through `onProgress`; the load-once memory bring-up hides behind the `await`.
   _when_ its lifecycle runs, not the math.
 - **JeJ, the language level, pedagogy** — the runtime is JeJ-agnostic; once text
   exists it is an ordinary string the consumer interprets.
+- **Outward streaming** — `generate` answers once, with a complete outcome; no
+  token stream or iterator crosses this boundary (human ruling 2026-08-26 — no
+  consumer asks for one, and a complete-candidate gate sits downstream). The
+  adapter may consume a backend's streaming interface internally; none of it is
+  surfaced.
+- **Generation queueing / per-caller identity** — one generation at a time per
+  loaded model is the documented contract; a queue with per-caller cancel
+  identity is owed by whichever campaign introduces a second concurrent
+  consumer, not by this one.
+- **Releasing a loaded model** — nothing unloads it; a model brought up lives
+  for the session, and later loads reuse it. A release verb is deferred to the
+  campaign that first needs one.
 
 ## Edge cases (the refusal map)
 
-Every _domain_ "can't proceed" resolves to a **load failure** (a
-device/availability limit, expected) or a **throw** (a programmer error). A load
-failure ends a **fallback chain**: `load` descends the feasible candidates, and
-a single candidate's failure is _intermediate_ — the chain records it and tries
-the next. The failure is returned only when the chain is exhausted (or was
-empty). An infrastructure fault in the probe is a third path, noted at the end:
+Every _domain_ "can't proceed" resolves to a **returned value** — a **load
+failure** at load time, a **generation failure** at generation time; the only
+rejections left are genuine infrastructure faults, which no contract can promise
+away (human ruling 2026-08-26: two channels — values for domain outcomes,
+rejections for infrastructure). A load failure ends a **fallback chain**: `load`
+descends the feasible candidates, and a single candidate's failure is
+_intermediate_ — the chain records it and tries the next. The failure is
+returned only when the chain is exhausted (or was empty). An infrastructure
+fault in the probe is the rejection path, noted at the end:
 
 - **No WebGPU, but a CPU/WASM runtime is registered and a tiny model is
   feasible** → loads that rung. No-WebGPU is _not_ an automatic refusal; only an
@@ -241,9 +317,14 @@ empty). An infrastructure fault in the probe is a third path, noted at the end:
   pre-flight gate can disable the feature with an accurate note).
 - **A feasible model whose every runtime is absent from the adapter map** → load
   failure (`no-feasible-model`).
-- **An unknown model name (absent from the catalog)** → **throws** — a
-  programmer error, not a device limit, kept distinct so a typo never
-  masquerades as "your device can't run it."
+- **An unknown model name (absent from the catalog)** → load failure, cause
+  `unknown-model` (**pre-flight** — the chain never runs, no attempts). Its own
+  cause, kept distinct from every device limit so a typo never masquerades as
+  "your device can't run it" (human ruling 2026-08-26: a returned refusal, no
+  longer a throw — so no consumer needs a catalog pre-check to dodge it).
+- **An empty model name (`{ model: '' }`)** → treated as no selection — the
+  pick-for-me default proceeds; only a **non-empty** name absent from the
+  catalog is `unknown-model`.
 - **Concurrent `load()` of the same selection before the first settles** → one
   shared in-flight bring-up per candidate; the chain is deterministic, so
   concurrent identical loads converge on the same winner (no double-fetch, no
@@ -268,11 +349,37 @@ empty). An infrastructure fault in the probe is a third path, noted at the end:
 - **Cache eviction while offline** → a previously-loadable candidate becomes
   `cache-evicted`; offline-capability is **best-effort** (a durable cache and
   `navigator.storage.persist()` mitigate it, they do not guarantee it).
-- **The capability probe itself rejects** (e.g. an injection or environment
-  fault, not a domain refusal) → the rejection propagates unchanged from `load`
-  and from `canRun` (which is the probe). It is neither a `LoadFailure` nor the
-  unknown-name programmer error, so it is not collapsed into either — probe
-  faults are the host's to handle.
+- **`generate` called with a signal already aborted** → the call settles with
+  the `aborted` failure and the backend is never asked — no generation starts,
+  nothing to interrupt.
+- **`generate` aborted mid-flight (its per-call signal fires)** → that one call
+  settles with the `aborted` generation failure — a value, never a rejection;
+  any partial text is discarded, and **the loaded model stays usable**: the next
+  `generate` proceeds normally.
+- **A signal aborted late — after its call already settled** → nothing: the
+  settled outcome stands and no later call is affected. The usable-after-abort
+  guarantee covers aborts at **any** time — already aborted at call time,
+  mid-flight, or after settlement — a guarantee this module must supply because
+  no backend is trusted to give it for free.
+- **The model call itself fails mid-generation** → the `generation-failed`
+  failure — or `device-lost` when the GPU dropped — as a value. There is no
+  generation-time re-descent and no device-loss recovery (both out of scope);
+  after a `device-lost` the loaded model may be unusable — only `aborted`
+  carries the usable-after guarantee.
+- **Concurrent `generate` calls on one loaded model** → outside the contract:
+  **one generation runs at a time per loaded model** (human ruling 2026-08-26).
+  Under the contract a cancel always names the only generation there is; a
+  second in-flight caller's cancel has no honorable meaning. (The one adapter
+  shipped in this tree drives a backend that serializes per model internally;
+  the bound stands on the contract, not on any backend.) A consumer needing
+  concurrency needs the queue-with-identity this module deliberately does not
+  own.
+- **The capability probe itself rejects** (an injection or environment fault,
+  not a domain refusal) → the rejection propagates unchanged from `load` and
+  from `canRun` (which is the probe). It is not a `LoadFailure` of any cause —
+  no cause, no attempts; the distinction is the two channels themselves (domain
+  refusals return, infrastructure rejects). Probe faults are the host's to
+  handle.
 
 ## Design commitments
 
@@ -284,10 +391,12 @@ empty). An infrastructure fault in the probe is a third path, noted at the end:
   device is rescued where one would have failed — but a device can have zero
   feasible candidates, and the chain then honestly refuses. The descent is
   silent; honesty lives in `resolvedId`, never in a learner opt-in.
-- **Failure causes are delivery-agnostic.** A `LoadFailure` names a typed device
-  or availability cause and **never a product or a "download the app" string**.
-  The consumer owns the cause→guidance mapping (incl. recommending a native
-  runtime); this keeps the local-only / no-server-hatch invariant intact.
+- **Failure causes are delivery-agnostic.** A load or generation failure names a
+  typed device or availability cause and **never a product or a "download the
+  app" string**. The consumer owns the cause→guidance mapping — incl.
+  recommending a native runtime, and incl. aithor's cause→next-step derivation,
+  which stays consumer-side (human ruling 2026-08-26, reaffirming this
+  boundary); this keeps the local-only / no-server-hatch invariant intact.
 - **Code-oriented, JeJ-agnostic.** It assumes models emit code (a fenced block,
   an optional `<think>` trace) but knows nothing of the JeJ subset, admission,
   or conformance. It is _not_ engine-level domain-free; it is honestly scoped to
@@ -316,6 +425,26 @@ empty). An infrastructure fault in the probe is a third path, noted at the end:
 - **The default is cost-aware, not maximal.** A device that _can_ run the
   heaviest model is not made to download it by default; the heavier rung is
   opt-in. The resolved model is always reported.
+- **Domain failure is a value on both verbs; rejections are reserved for
+  infrastructure** (human ruling 2026-08-26). `load` returns its load failure
+  (`unknown-model` included); `generate` returns its generation failure
+  (`aborted` included). What still rejects — a broken capability probe, a
+  backend defect — is an infrastructure fault no contract can promise away.
+- **An abort leaves the loaded model usable.** A per-call signal aborted at
+  **any** time — already aborted at call time, mid-generation, or after its call
+  settled — forestalls or ends that one call and taints nothing: the next
+  `generate` proceeds normally. This is a stated commitment precisely because no
+  backend is trusted to give it for free.
+- **Cancelling never frees a download.** The load-time descent takes no signal
+  and an in-flight weight fetch cannot be aborted (the backend offers no lever);
+  cancellation is a generation-time affordance only. A consumer must never
+  promise a learner otherwise.
+- **One generation at a time per loaded model** (human ruling 2026-08-26). The
+  documented ownership constraint — see the refusal map's concurrent-generate
+  row; the queue that would lift it belongs to the campaign that first needs it.
+- **`generate` answers once — no outward stream** (human ruling 2026-08-26). The
+  complete outcome is the whole answer; the adapter may consume a backend's
+  streaming interface internally, and none of it crosses this boundary.
 - **The generator returns code; it never judges it.** No validation,
   conformance, or gating crosses this boundary — the consumer judges per
   use-case.
@@ -331,11 +460,11 @@ empty). An infrastructure fault in the probe is a third path, noted at the end:
 
 The impure surface is two seams: the **stateful loader** (a named model brought
 to memory, load-once with in-flight dedup) and the **non-deterministic model
-call** (loaded model → output). Everything else — capability matching,
-feasibility, selection, catalog queries, load-failure-cause selection, and the
-whole **decomposition** of a reply into a GenerationResult — is pure given those
-two injected. The internal seam (pure selection core vs. impure lifecycle) is
-the test boundary.
+call** (loaded model → outcome, cancellable per call). Everything else —
+capability matching, feasibility, selection, catalog queries, load-failure-cause
+selection, and the whole **decomposition** of a reply into a GenerationResult —
+is pure given those two injected. The internal seam (pure selection core vs.
+impure lifecycle) is the test boundary.
 
 - **The pure selection core is unit-tested with injected fakes** — a fake
   capability probe (canned `navigator.gpu`/limits/memory) and a fake adapter map
@@ -347,7 +476,16 @@ the test boundary.
   one in-flight bring-up, with no real fetch.
 - **The refusal invariant** — an empty feasible set (no registered runtime can
   fit anything) yields a load failure, never a thrown exception or a half-loaded
-  model; an unknown model name throws.
+  model; an unknown model name yields its own pre-flight load failure, likewise
+  never a throw.
+- **The generation outcome & abort cluster, by injected fake** — a fake adapter
+  drives the outcome union: success decomposition, the `aborted` value on a
+  mid-flight signal, the pre-aborted call settling `aborted` with the fake never
+  engaged, the late-abort no-op, and usable-after-abort at the core's level —
+  the core neither marks a model dead nor blocks the next `generate` after an
+  abort. A green fake is evidence for logic only; the guarantee proper — the
+  real backend's cooperative interrupt and its flag hygiene — is browser-lane,
+  real-device evidence.
 - **Transport fidelity is real-only** — like [`engine/`][engine], a green fake
   is evidence for logic, never for a backend's real fetch/cache/run behavior;
   that is checked against the real runtime on a real device.
@@ -367,6 +505,9 @@ the test boundary.
   `llm-client`; this module is the same thing, **renamed `local-llm`** to encode
   the local-only invariant — "client" wrongly implies a remote service.)
 - [`./DOCS.md`](./DOCS.md) — this module's architecture sketch.
+- [`./notional-machine.md`](./notional-machine.md) — the machine twin: the
+  operational model a holder predicts against (the descent, the load-once cache,
+  the generation/abort machine).
 - [`./types.ts`](./types.ts) — the contract in TypeScript (the catalog, the
-  per-runtime load union, the loaded model and GenerationResult, the load
+  per-runtime load union, the loaded model and its generation outcome, the load
   failure).
