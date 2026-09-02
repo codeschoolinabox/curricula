@@ -7,10 +7,9 @@ import BrowserOnly from '@docusaurus/BrowserOnly';
 # StudyLenses — checkpoint
 
 The full instrument, live, with the built-in JEJ level, the injected scaffolding
-level, the three ported lenses (parsons and writeme in the Source select;
-debug-props is panel-excluded — reachable only as a focus request), and two
-page-injected lenses: "notes" (self-recommending) and `spellme`, in the **Tokens
-· spelling** station.
+level, the two built-in lenses (parsons and writeme, in the Source station), and
+two page-injected lenses: "notes" (self-recommending) and `spellme`, in the
+**Tokens · spelling** station.
 
 `spellme` is injected here **while it is being built**, so its surface is
 incomplete on purpose — this page is where its sandbox checkpoints are
@@ -75,6 +74,7 @@ export function InstrumentHarness() {
 		require('@site/src/lib/study-lenses/lenses/spellme/index.tsx').default;
 	const notesLens = {
 		name: 'notes',
+		label: 'read notes on the source',
 		applicability: () => true,
 		phase: 'source',
 		main: ({ embodiment, config }) => (

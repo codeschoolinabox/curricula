@@ -825,9 +825,11 @@ this region owns.
   elsewhere; keyed where the vocabulary is ours.** The tray still draws the full
   label and the rail the short one — both looked up, neither carried.
 
-  **Three, and the `●` is not a fourth** (human ruling 2026-08-19). The rail
-  draws a filled dot on the station whose lens the pane is currently holding —
-  the **occupant dot** — and it is **not a station property**: it is a
+  **Three, and the `●` is not a fourth.** The exclusion is the 2026-08-19
+  ruling’s, which stated it as “not a fifth” against the four things a station
+  then carried; the ordinal moved with the count at 0.3 and the ruling did not.
+  The rail draws a filled dot on the station whose lens the pane is currently
+  holding — the **occupant dot** — and it is **not a station property**: it is a
   projection of the **pane occupant**, which the region is already handed per
   settle, read at render. Storing it on the station would be a second source of
   truth for which lens is open. It is orthogonal to the standing rather than a
