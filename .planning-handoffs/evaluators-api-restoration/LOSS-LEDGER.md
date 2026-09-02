@@ -1351,6 +1351,43 @@ execution and never holds one alone.
     above at no extra cost.
   - Recorded here per HR-21. Encoded on landing at
     `src/lib/study-lenses/lib/engine/types.ts` and `DOCS.md`.
+- **The `'script'` axis's Phase 0 is APPROVED, a Fable review of it is owed
+  before the axis's Phase 1, and HR-15's reach over the engine is deliberately
+  left open (human rulings 2026-09-01, HR-27).** The Phase-0 → Phase-1 gate for
+  the axis unit, taken with the unit's three commits and both AR cycles
+  presented.
+  - **Phase 0 stands as committed** — `cd47a856` (HR-24), `4185f9d0` (README and
+    the amended twin, after `ar-1`), `b0525f13` (`types.ts`, `worker/types.ts`,
+    the `DOCS.md` sketch, and 42 rows committed skipped, after `ar-2`). The
+    contract is locked. Two things were weighed at the gate rather than
+    discovered later: the `workerFactory` pairing rule rests on a ~90%-certainty
+    measurement of the client build, the real engine's worker never having run
+    inside a production page; and HR-26's abstain rule was taken mid-review and
+    inverted an invariant six documents asserted, whose sweep took three `ar-2`
+    rounds to complete.
+  - **A Fable-tier review of the Phase-0 artifacts is owed before the axis's
+    Phase 1 begins**, over and above the `ar-1`/`ar-2` pair the unit already
+    ran. It reviews the three commits as a whole rather than any single
+    artifact, and it is run by the human as a fresh session rather than
+    dispatched as a subagent. It does NOT block prerequisite 2, which touches
+    shared test configuration and no part of the axis contract — the two can run
+    at the same time.
+  - **Phase 1 of the axis is unblocked by this ruling but still gated by
+    prerequisite 2** — the classic-worker test tier. No classic worker, no red
+    test. Prerequisite 1's Phase 1 (the latch's 27 rows) must additionally be
+    green before any axis code commits, per HR-23.
+  - **Whether HR-15's early-sandbox-page requirement reaches the engine is NOT
+    decided here.** The engine is a shared leaf with no user-loadable surface
+    and this unit declared the 🔍 skip accordingly, but prerequisite 3 needs a
+    permanent route regardless. The question is answered when prerequisite 3
+    runs, with the route in hand rather than in the abstract. If it is answered
+    yes, that page increment is 🔍-bearing and runs in the orchestrator rather
+    than fanning out.
+  - **The next unit is prerequisite 2**, taken up by a fresh session — this one
+    had carried three AR cycles and a design unit, and the campaign's own
+    practice sends design-shaped work to a fresh reader.
+  - Recorded here per HR-21. The Phase-0 artifacts it approves are encoded at
+    `src/lib/study-lenses/lib/engine/`.
 
 ### The ratification, and what it settled (human ruling 2026-08-06)
 
