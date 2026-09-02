@@ -277,12 +277,16 @@ argues one is appropriate here, or offers you a menu is drafting your phrase —
 
 **The one carve-out, so the test above does not misfire.** Offering you a menu
 is part of the banned pattern **for ceremony** and is exactly right **for the
-twin ask's second question**, which offers `machine` · `user` · `both` for
-software work and `learner` · `teacher` · `both` for curriculum work. The
-difference is that those are the axis's whole closed value set, fixed in
-`DEV.md` and selected by a path the agent does not choose — so it is reading you
-the options, not drafting your answer. A ceremony menu is drafting, because the
-agent picks which levels to put in front of you.
+twin ask's second question**, which offers `machine` · `user` · `data` for
+software work and `learner` · `teacher` for curriculum work, any combination
+being recordable as a `+` list. The difference is that those are the axis's
+whole closed value set, fixed in `DEV.md` and selected by a path the agent does
+not choose — so it is reading you the options, not drafting your answer. **The
+set is closed, not frozen**: it gained `data` on 2026-09-01, and the carve-out
+survives a widening only because the agent still does not pick which values to
+put in front of you. If you are ever offered a subset, that is drafting. A
+ceremony menu is drafting, because the agent picks which levels to put in front
+of you.
 
 **Phrases below are listed verbatim.** The agent should accept close paraphrases
 ("skip the alignment check" for "skip alignment check") but reject
@@ -471,10 +475,13 @@ agent claims things are done; you verify they actually are.
   reached you, 0.2 was skipped, and a `twin-doc: none` on the settings line is
   recording an answer nobody gave. **You are the only check on this** — a
   skipped ask and an unanswered one are identical in the record, so nothing
-  downstream can catch it. Then: if you said yes, the named twin document exists
-  and this is where you read it. If you said no — **or said nothing, which
-  records `none`** — the recorded answer on the settings line **is** the whole
-  of step 0.2 and **there is nothing in the working tree to look for**; an
+  downstream can catch it. Then: if you said yes, **every** document the
+  recorded value names exists — a value may name more than one, written as a `+`
+  list, so count them against the value — and this is where you read them. A
+  value naming a document that is not in the tree is a defect, not a silence:
+  the step that owed it did not produce it. If you said no — **or said nothing,
+  which records `none`** — the recorded answer on the settings line **is** the
+  whole of step 0.2 and **there is nothing in the working tree to look for**; an
   absent artifact here is not a skipped step. Last, check a settings line is
   present at all: an increment that ships without one ships without it forever,
   since amend is forbidden.
@@ -484,11 +491,12 @@ agent claims things are done; you verify they actually are.
   not a lapse; at `light` neither fires and AR-5 carries the whole gate. Check
   the level before you check the agents, or you will flag a compliant agent for
   skipping a review its level never asked for.
-- Whichever fired, verify **AR-1 was handed the twin as well as the README
-  wherever a twin was owed** — it challenges both together, so at any `twin-doc`
-  other than `none` an AR-1 that only saw the README reviewed half of what it is
-  for. At `twin-doc: none` there is no twin to hand over and the README **is**
-  its complete input; do not flag that as a half-fed review.
+- Whichever fired, verify **AR-1 was handed every twin the value names, as well
+  as the README** — it challenges them together, so at any `twin-doc` other than
+  `none` an AR-1 that saw only the README, or only some of the twins, reviewed a
+  fraction of what it is for. Count the names in the value; a `+` list names
+  more than one. At `twin-doc: none` there is no twin to hand over and the
+  README **is** its complete input; do not flag that as a half-fed review.
 - **Ask to see the skipped test suite.** The full ZOMBIES suite is written for
   real at 0.3 and committed in a skipped state; Phase 1 un-skips one at a time.
   The tests should report as skipped, not as absent — a Phase 0 with no suite
@@ -718,7 +726,8 @@ recurring coaching pattern (3+ sessions in a row), new collaborator joining, a
 new model qualifies for principal governance (append its model-id substring to
 CLAUDE.md's qualifying list — the list only, never rename `AGENTS.principal.md`
 itself), a new tool hook or tracked-settings change lands (restart sessions, run
-its live-fire probes, `npm run test:hooks`). Audit at ~400 lines.
+its live-fire probes, `npm run test:hooks`), **a closed value set gains or loses
+a value**. Audit at ~400 lines.
 
 **A step that keeps its number and changes its meaning is the dangerous case**,
 because nothing fails loudly — every other kind of change leaves a dangling
@@ -726,6 +735,15 @@ reference that something eventually trips over. Watch for that one specifically.
 **Step 0.2 has now done it twice** — it meant _README_ before 2026-08-04, then
 _the twin or the block discharging it_, and since 2026-08-13 _the twin ask, and
 the twin wherever one is owed_. Both changes kept the number.
+
+**A closed value set gaining a value is the same hazard in different clothes,
+and it is why that trigger was added** (2026-09-01, when `twin-doc` gained
+`data`). Nothing is renamed, renumbered or reordered; every heading, anchor,
+link and step number survives; `npm run check:governance` reports clean, because
+no check in this repo reads a value set. Only the prose goes wrong — and it goes
+wrong in the recitals that enumerate the set, which was three of the six listed
+below. A widening slips past every other trigger on the list while doing exactly
+the damage the list exists to catch.
 
 **When a workflow step changes shape, this file recites that workflow in six
 places and they are not next to each other.** That is why a stale recital
