@@ -1,18 +1,24 @@
 <!doctype html>
+<!-- cspell:ignore COEP unmocked btns affordance vite -->
 <!--
   run evaluator sandbox — permanent dev infrastructure, not part of run's
-  contract. Built EARLY per the campaign's sandbox cadence (HR-15) and
-  extended per increment; the deprecated page and the quarry's are the
-  ruled fidelity targets the completed page carries the union of.
+  contract. R6 completes the page as the UNION of the two ruled fidelity
+  targets (HR-15): the quarry's page (io toggles, console dumps, the
+  unexpected-throw catch, timeout preset, max-seconds control) and the
+  deprecated port's page (checkpoint presets, axis select, iteration-cap
+  control with the empty-string guard, SAB banner, cancel affordance) —
+  each adapted to the handle kind: the run is awaited (result-only), the
+  settlement speaks the reference outcome vocabulary, and unmocked
+  dialogs classify as the io arm instead of throwing.
 
   Serve:  npx vite --config src/lib/study-lenses/evaluators/run/vite.sandbox.config.ts
   Open:   /evaluators/run/sandbox.html
 
   This page drives run through the KIND SURFACE — applicability, then
   main — never its internal factory, so what it exercises is exactly what
-  a consuming lens gets. While the run chain is mid-build, driving a
-  preset renders the honest current answer: a refusal (as data), or the
-  not-implemented throw from the stub — never a faked result.
+  a consuming lens gets. The slow-mock rig demonstrates DISCARD-ON-STOP
+  (cancel during a pending mock answers 'cancel'; the late answer is
+  discarded) — the quarry's cancel-waits-for-mock rig is superseded.
 -->
 <html lang="en">
 	<head>
@@ -29,7 +35,7 @@
 				font-family: monospace;
 				font-size: 13px;
 				padding: 1.5rem;
-				max-width: 820px;
+				max-width: 860px;
 				margin: 0 auto;
 			}
 			h1 {
@@ -40,87 +46,400 @@
 				color: #666;
 				margin-bottom: 1rem;
 			}
-			button {
-				font: inherit;
-				margin: 0 0.4rem 0.4rem 0;
-				padding: 0.3rem 0.6rem;
+			#banner {
+				margin-bottom: 1rem;
+				padding: 0.6rem;
+				border-left: 3px solid #c00;
+				background: #fff0f0;
+				color: #c00;
+				display: none;
 			}
-			pre {
-				background: #f4f4f4;
-				padding: 0.8rem;
-				margin-top: 1rem;
+			textarea {
+				width: 100%;
+				min-height: 7em;
+				font-family: monospace;
+				font-size: 13px;
+				padding: 0.5rem;
+				border: 2px solid #333;
+			}
+			.presets {
+				margin-top: 0.5rem;
+			}
+			.presets summary {
+				cursor: pointer;
+				color: #555;
+				font-size: 12px;
+			}
+			.preset-btns {
+				margin-top: 0.4rem;
+				display: flex;
+				gap: 0.5rem;
+				flex-wrap: wrap;
+			}
+			.controls,
+			.io-mocks {
+				margin-top: 0.75rem;
+				display: flex;
+				gap: 0.75rem;
+				align-items: center;
+				flex-wrap: wrap;
+			}
+			.io-mocks {
+				padding: 0.5rem;
+				border: 1px dashed #999;
+				background: #fafafa;
+			}
+			button {
+				padding: 0.4rem 1.2rem;
+				font-family: monospace;
+				font-size: 13px;
+				cursor: pointer;
+				border: 2px solid #333;
+				background: #eee;
+			}
+			button:disabled {
+				opacity: 0.5;
+				cursor: not-allowed;
+			}
+			label {
+				font-size: 12px;
+			}
+			input[type='number'],
+			input[type='text'] {
+				width: 7em;
+				font-family: monospace;
+				font-size: 13px;
+				padding: 0.25rem;
+				border: 2px solid #333;
+			}
+			select {
+				font-family: monospace;
+				font-size: 12px;
+				border: 2px solid #333;
+				padding: 0.2rem;
+			}
+			#settlement {
+				margin-top: 0.75rem;
+				padding: 0.6rem;
+				border: 1px dashed #999;
+				background: #fafafa;
 				white-space: pre-wrap;
-				word-break: break-word;
+				min-height: 7em;
+			}
+			p.console-note {
+				margin-top: 0.75rem;
+				padding: 0.5rem;
+				border-left: 3px solid #840;
+				background: #fff8e6;
+				font-size: 11px;
+				color: #555;
 			}
 		</style>
 	</head>
 	<body>
 		<h1>run evaluator sandbox</h1>
 		<p class="note">
-			Shell stage: presets name the completed page's coverage (io toggles,
-			timeout and defect arms, result dumps, the unexpected-throw catch arrive
-			with their increments). Driving a preset today shows the honest in-build
-			answer.
+			Drives <strong>run</strong> through the kind surface and reports how the
+			run ended. run emits no events — the whole output is the result. The
+			handle and result also dump to the dev-tools console as
+			<code>[run handle]</code> / <code>[run result]</code>.
 		</p>
-		<div id="presets"></div>
-		<pre id="output">idle — pick a preset</pre>
+
+		<div id="banner"></div>
+
+		<textarea
+			id="code"
+			title="the program to run"
+			aria-label="the program to run"
+		>
+let total = 0;
+for (let i = 0; i &lt; 5; i = i + 1) {
+	total = total + i;
+}
+</textarea
+		>
+
+		<details open class="presets">
+			<summary>checkpoint snippets</summary>
+			<div class="preset-btns">
+				<button
+					type="button"
+					class="preset"
+					data-code="let total = 0;
+for (let i = 0; i &lt; 5; i = i + 1) {
+	total = total + i;
+}"
+				>
+					[1 · clean]
+				</button>
+				<button type="button" class="preset" data-code="null();">
+					[2 · runtime error]
+				</button>
+				<button
+					type="button"
+					class="preset"
+					data-code="while (true) {
+	let x = 1;
+}"
+					data-iterations="1000"
+				>
+					[3 · loop cap]
+				</button>
+				<button
+					type="button"
+					class="preset"
+					data-code="let answer = prompt('what is your name?');
+let sure = confirm('are you sure?');
+alert('noted!');"
+				>
+					[4 · dialogs → mocks or io error]
+				</button>
+				<button
+					type="button"
+					class="preset"
+					data-code="while (true) {
+	let x = 1;
+}"
+					data-seconds="0.5"
+				>
+					[5 · timeout (0.5s)]
+				</button>
+				<button
+					type="button"
+					class="preset"
+					data-code="while (true) {
+	let x = 1;
+}"
+				>
+					[6 · uncapped → cancel]
+				</button>
+			</div>
+		</details>
+
+		<div class="io-mocks">
+			<label>
+				<input id="promptOn" type="checkbox" checked />
+				mock <code>prompt</code> →
+				<input id="promptValue" type="text" value="Ada" />
+			</label>
+			<label>
+				<input id="promptSlow" type="checkbox" />
+				slow (2s — cancel to see discard-on-stop)
+			</label>
+			<label>
+				<input id="confirmOn" type="checkbox" checked />
+				mock <code>confirm</code> →
+				<select id="confirmValue">
+					<option value="true">true</option>
+					<option value="false">false</option>
+				</select>
+			</label>
+			<label>
+				<input id="alertOn" type="checkbox" checked />
+				mock <code>alert</code>
+			</label>
+		</div>
+
+		<div class="controls">
+			<button id="run" type="button">[run]</button>
+			<button id="cancel" type="button" disabled>[cancel]</button>
+			<label
+				>axis:
+				<select id="axis">
+					<option value="function">function (script posed)</option>
+					<option value="module">module</option>
+				</select>
+			</label>
+			<label>
+				<input
+					id="capEnabled"
+					type="checkbox"
+					title="enforce an iteration cap"
+				/>
+				max iterations:
+				<input
+					id="cap"
+					type="number"
+					min="-10"
+					placeholder="none"
+					title="the iteration cap, passed to the spec unchanged"
+				/>
+			</label>
+			<label>
+				max seconds:
+				<input
+					id="seconds"
+					type="number"
+					min="0"
+					step="0.5"
+					placeholder="engine default"
+					title="the run budget in seconds; empty rides the engine default"
+				/>
+			</label>
+		</div>
+
+		<div id="settlement">click [run] to begin.</div>
+
+		<p class="console-note">
+			The program's own <code>console.log</code> prints to the worker's native
+			console — open dev tools to see it. run neither traps nor forwards it;
+			that is intercept's job.
+		</p>
+
 		<script type="module">
 			import deriveFacts from '../../embody/derive-facts.ts';
 			import run from './index.ts';
 
-			const PRESETS = [
-				{ name: 'happy path', source: '1 + 1;\n' },
-				{ name: 'runtime error', source: 'null();\n' },
-				{ name: 'timeout (0.5s)', source: 'while (true) {}\n', seconds: 0.5 },
-				{
-					name: 'iteration cap (100)',
-					source: 'while (true) {}\n',
-					iterations: 100,
-				},
-				{ name: 'unmocked prompt', source: 'let x = prompt();\n' },
-			];
+			const codeEl = document.getElementById('code');
+			const runBtn = document.getElementById('run');
+			const cancelBtn = document.getElementById('cancel');
+			const axisEl = document.getElementById('axis');
+			const capEnabledEl = document.getElementById('capEnabled');
+			const capEl = document.getElementById('cap');
+			const secondsEl = document.getElementById('seconds');
+			const settlementEl = document.getElementById('settlement');
+			const bannerEl = document.getElementById('banner');
+			const io = {
+				promptOn: document.getElementById('promptOn'),
+				promptValue: document.getElementById('promptValue'),
+				promptSlow: document.getElementById('promptSlow'),
+				confirmOn: document.getElementById('confirmOn'),
+				confirmValue: document.getElementById('confirmValue'),
+				alertOn: document.getElementById('alertOn'),
+			};
 
-			const output = document.querySelector('#output');
-			const presets = document.querySelector('#presets');
-
-			function show(value) {
-				output.textContent =
-					typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+			// The engine's pause protocol lives on shared memory; without the
+			// isolation headers there is nothing to run in, and run refuses.
+			if (typeof SharedArrayBuffer === 'undefined') {
+				bannerEl.textContent =
+					'⚠ SharedArrayBuffer is unavailable — serve this page with COOP/COEP headers (the vite config named at the top of this file). run will refuse until then.';
+				bannerEl.style.display = 'block';
+				runBtn.disabled = true;
 			}
 
-			async function drive(preset) {
-				show(`driving "${preset.name}" through the kind surface…`);
+			for (const button of document.querySelectorAll('.preset')) {
+				button.addEventListener('click', () => {
+					codeEl.value = button.dataset.code;
+					const cap = button.dataset.iterations;
+					capEnabledEl.checked = cap !== undefined;
+					capEl.value = cap ?? '';
+					secondsEl.value = button.dataset.seconds ?? '';
+				});
+			}
+
+			// WHY the empty-string guard: Number('') is 0, and a cap of 0 trips
+			// on the very first guard call — absent stays absent.
+			function readCap() {
+				if (!capEnabledEl.checked || capEl.value === '') {
+					return undefined;
+				}
+				return Number(capEl.value);
+			}
+
+			function readSeconds() {
+				return secondsEl.value === '' ? undefined : Number(secondsEl.value);
+			}
+
+			function readMocks() {
+				const mocks = {};
+				if (io.promptOn.checked) {
+					const value = io.promptValue.value;
+					mocks.prompt = io.promptSlow.checked
+						? () =>
+								new Promise((resolve) => setTimeout(() => resolve(value), 2000))
+						: () => value;
+				}
+				if (io.confirmOn.checked) {
+					mocks.confirm = () => io.confirmValue.value === 'true';
+				}
+				if (io.alertOn.checked) {
+					mocks.alert = () => undefined;
+				}
+				return mocks;
+			}
+
+			function describe(result) {
+				const lines = [`outcome: ${result.outcome}`, `ok: ${result.ok}`];
+				if (result.iterationCount !== undefined) {
+					lines.push(`iterationCount: ${result.iterationCount}`);
+				}
+				if (result.error !== undefined) {
+					const { error } = result;
+					lines.push(`error.kind: ${error.kind}`, `error.name: ${error.name}`);
+					lines.push(`error.message: ${error.message}`);
+					if (error.phase !== undefined) {
+						lines.push(`error.phase: ${error.phase}`);
+					}
+					if (error.limit !== undefined) {
+						lines.push(`error.limit: ${error.limit}`);
+					}
+					if (error.durationMs !== undefined) {
+						lines.push(`error.durationMs: ${Math.round(error.durationMs)}`);
+					}
+					if (error.iterationCount !== undefined) {
+						lines.push(`error.iterationCount: ${error.iterationCount}`);
+					}
+					if (error.trip !== undefined && error.trip !== null) {
+						const { loopIndex, loc } = error.trip;
+						lines.push(
+							`error.trip.loopIndex: ${loopIndex}`,
+							`error.trip.loc: ${loc.start.line}:${loc.start.column} → ${loc.end.line}:${loc.end.column}`,
+						);
+					}
+				}
+				return lines.join('\n');
+			}
+
+			let liveHandle = null;
+
+			runBtn.addEventListener('click', async () => {
+				const axis = axisEl.value;
+				const facts = deriveFacts({
+					source: codeEl.value,
+					type: axis === 'module' ? 'module' : 'script',
+				});
+				const cap = readCap();
+				const seconds = readSeconds();
+				const spec = {
+					facts,
+					execution: axis,
+					io: readMocks(),
+					...(cap === undefined ? {} : { iterations: cap }),
+					...(seconds === undefined ? {} : { seconds }),
+				};
+
+				settlementEl.textContent = `applicability: ${run.applicability(spec)}\nrunning…`;
+
+				// The unexpected-throw catch (a quarry-page feature): a THROW out
+				// of the kind surface is a defect worth seeing raw on this page —
+				// refusals and error outcomes arrive as data, never here.
 				try {
-					const facts = deriveFacts({ source: preset.source, type: 'script' });
-					const spec = {
-						facts,
-						execution: 'function',
-						...(preset.seconds === undefined
-							? {}
-							: { seconds: preset.seconds }),
-						...(preset.iterations === undefined
-							? {}
-							: { iterations: preset.iterations }),
-					};
-					const verdict = run.applicability(spec);
 					const answer = run.main(spec);
 					if ('refused' in answer) {
-						show({ applicability: verdict, refusal: answer });
+						settlementEl.textContent = `refused: ${answer.reason}`;
 						return;
 					}
+					console.log('[run handle]', answer);
+					runBtn.disabled = true;
+					cancelBtn.disabled = false;
+					liveHandle = answer;
 					const result = await answer;
-					show({ applicability: verdict, result });
+					console.log('[run result]', result);
+					settlementEl.textContent = describe(result);
 				} catch (error) {
-					show(`honest in-build state — main threw:\n${String(error)}`);
+					settlementEl.textContent = `UNEXPECTED THROW (a defect — the kind surface answers data):\n${String(error)}`;
+				} finally {
+					liveHandle = null;
+					runBtn.disabled = false;
+					cancelBtn.disabled = true;
 				}
-			}
+			});
 
-			for (const preset of PRESETS) {
-				const button = document.createElement('button');
-				button.textContent = preset.name;
-				button.addEventListener('click', () => void drive(preset));
-				presets.append(button);
-			}
+			cancelBtn.addEventListener('click', () => {
+				if (liveHandle !== null) {
+					liveHandle.cancel();
+				}
+			});
 		</script>
 	</body>
 </html>
