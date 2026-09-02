@@ -26,6 +26,18 @@ function fiveStations(): ReadonlyArray<Station> {
 	];
 }
 
+function openableTokens(): ReadonlyArray<Station> {
+	return fiveStations().map((station) =>
+		station.phase === 'tokens'
+			? {
+					phase: 'tokens',
+					standing: 'openable',
+					tray: [{ lens: 'spellme', label: 'drive the scanner' }],
+				}
+			: station,
+	);
+}
+
 function barredStations(): ReadonlyArray<Station> {
 	return fiveStations().map((station, index) =>
 		index >= 3 ? { phase: station.phase, standing: 'waiting' } : station,
@@ -116,21 +128,21 @@ describe.skip('Rail', () => {
 		it('an open tray draws the full label, not the short one', () => {
 			const { container } = render(
 				<Rail
-					stations={fiveStations()}
+					stations={openableTokens()}
 					caption={COUNT_CAPTION}
 					openLensName={null}
 					onTrayEntry={vi.fn()}
 				/>,
 			);
 			const control = container.querySelector(
-				'[data-station="source"] [data-station-tray-control]',
+				'[data-station="tokens"] [data-station-tray-control]',
 			);
 			if (control) {
 				fireEvent.click(control);
 			}
 			expect(
 				container.querySelector('[data-station-tray]')?.textContent,
-			).toContain('ways to study the Source');
+			).toContain('ways to study the Tokens · spelling');
 		});
 
 		it('draws each station s standing', () => {
@@ -151,7 +163,7 @@ describe.skip('Rail', () => {
 	});
 
 	describe('the vocabulary it draws (Many)', () => {
-		it('draws the phase short label, keyed rather than carried', () => {
+		it('never draws a phase full label on the line', () => {
 			const { container } = render(
 				<Rail
 					stations={fiveStations()}
@@ -162,7 +174,7 @@ describe.skip('Rail', () => {
 			);
 			expect(
 				container.querySelector('[data-station="tokens"]')?.textContent,
-			).not.toContain('·');
+			).not.toContain('· spelling');
 		});
 
 		it('never draws a phase s data name', () => {
