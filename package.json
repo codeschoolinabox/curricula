@@ -69,6 +69,7 @@
 		"@docusaurus/preset-classic": "^3.7.0",
 		"@mlc-ai/web-llm": "^0.2.84",
 		"acorn": "^8.16.0",
+		"acorn-loose": "^8.5.2",
 		"ajv": "^8.18.0",
 		"aran": "^5.2.2",
 		"astring": "^1.9.0",
