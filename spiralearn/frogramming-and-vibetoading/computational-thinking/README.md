@@ -190,5 +190,6 @@ did not reproduce — is why this note exists.
   sense.
 - **Tie-in re-verification.** Run each citation in `tie-ins.md`; do not read
   from notes.
-- **Standing on its own.** A reader with no F&V exposure reads this file and the
-  seven documents, and reports what the argument depends on that is not here.
+- **Standing on its own.** A reader with no F&V exposure reads this file and
+  everything in the reading order, and reports what the argument depends on that
+  is not here.

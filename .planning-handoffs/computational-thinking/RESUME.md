@@ -31,11 +31,14 @@ reason this file is shaped this way.
 - **Network fetch is available** — `WebFetch` works, and Naur was fetched with
   it. Note the standing rule below about what a fetch is not.
 - **Scope boundary.** No F&V curriculum file has been touched. The campaign's
-  commits reach exactly two places: everything under `computational-thinking/`,
-  and `DEV.md` once, for the governance change `6c34c970` made on explicit
-  instruction [measured 2026-09-03: `git log --name-only 8882352d~1..8f20eb34
-  --pretty=format: | sort -u`]. `tie-ins.md` is a table of **findings** about
-  F&V, not a work order — do not act on its rows.
+  commits reach **three** places: everything under `computational-thinking/`,
+  `DEV.md` once for the governance change `6c34c970`, and this handoff [measured
+  2026-09-03: `git log --name-only 8882352d~1..HEAD --pretty=format: | sort
+  -u`]. **Use `HEAD`, not a pinned SHA** — an earlier revision published a range
+  ending at `8f20eb34`, which predates this file's creation, so the command
+  structurally could not surface the third place and "confirmed" a false claim.
+  `tie-ins.md` is a table of **findings** about F&V, not a work order — do not
+  act on its rows.
 
 ## Decision rights
 
@@ -54,22 +57,23 @@ never edited without explicit human instruction in the conversation.
 
 ## State
 
-Eleven commits on `main`, none pushed (`main` has no upstream, so "unpushed" is
+Twelve commits on `main`, none pushed (`main` has no upstream, so "unpushed" is
 consistent with the tree rather than directly verifiable).
 
-| SHA        | What                                                         | Rulings it records                                                   |
-| ---------- | ------------------------------------------------------------ | -------------------------------------------------------------------- |
-| `8882352d` | the document set established                                 | condition-3 split; F's far target; V-as-CT is pedagogy not ontology  |
-| `99bfcce1` | L1/L6 rename, condition (c), CT by way of a notional machine | modelling/meaningful; predictive usefulness; Ch1 half-beats F-only   |
-| `3504af6a` | Naur read in full                                            | essay-vs-experiment distinction; the attribution hazard              |
-| `9b161cda` | Naur's decay mechanism                                       | decay is not a context-size problem                                  |
-| `596554bc` | `this-codebase.md`                                           | Naur's remedies invert for an LLM collaborator                       |
-| `6c34c970` | **governance** — twin-doc conformance check in AR-4          | conformance not judgement; FLAG don't decide; states its own limit   |
-| `8f20eb34` | two decayed greps and one stale governance claim fixed       | never publish a count whose subject includes the document stating it |
-| `712edf2a` | this handoff, after a context-free audit                     | decision rights; the operating frame                                 |
-| `31e830b6` | `on-pseudocode.md`, `the-stack.svg`, the causal-edge fix     | the stack's floor is where medium-independence fails                 |
-| `970100ce` | **the chain replaces the triangle**                          | the chain is the axis; correctives split at the pivot; F's axis only |
-| `4e3857e1` | the triangle deleted; this file's inventory corrected        | —                                                                    |
+| SHA        | What                                                           | Rulings it records                                                                          |
+| ---------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `8882352d` | the document set established                                   | condition-3 split; F's far target; V-as-CT is pedagogy not ontology                         |
+| `99bfcce1` | L1/L6 rename, condition (c), CT by way of a notional machine   | modelling/meaningful; predictive usefulness; Ch1 half-beats F-only; **essay-vs-experiment** |
+| `3504af6a` | Naur read in full                                              | the attribution hazard — lines 601+ of the transcription are not Naur                       |
+| `9b161cda` | Naur's decay mechanism                                         | decay is not a context-size problem                                                         |
+| `596554bc` | `this-codebase.md`                                             | Naur's remedies invert for an LLM collaborator                                              |
+| `6c34c970` | **governance** — twin-doc conformance check in AR-4            | conformance not judgement; FLAG don't decide; states its own limit                          |
+| `8f20eb34` | two decayed greps and one stale governance claim fixed         | never publish a count whose subject includes the document stating it                        |
+| `712edf2a` | this handoff, after a context-free audit                       | decision rights; the operating frame                                                        |
+| `31e830b6` | `on-pseudocode.md`, `the-stack.svg`, the causal-edge fix       | the stack's floor is where medium-independence fails                                        |
+| `970100ce` | **the chain replaces the triangle**                            | the chain is the axis; correctives split at the pivot; F's axis only                        |
+| `4e3857e1` | the triangle deleted; this file's inventory corrected          | —                                                                                           |
+| `e1cf6177` | the handoff updated for the chain; tie-ins' work-order grammar | do not widen a scope the human scoped                                                       |
 
 Eleven authored Markdown files plus two figures — `the-chain.svg` and
 `the-stack.svg` — and the Naur transcription. `markdownlint` returns 0 across
@@ -77,10 +81,19 @@ the authored set; all six remaining errors in the directory are in
 `programming-as-theory-building.md`, a verbatim source transcription left
 unreformatted on purpose [measured 2026-09-03]. All relative links resolve.
 
-**Not mine, leave alone:** `draft.mmd` and `on-pseudocode.md` (both untracked;
-`on-pseudocode.md` is currently 0 bytes). The tracked provenance — `plann.txt`,
+**Not mine:** `this-codebase.md` carries an **uncommitted two-line addition by
+the human** — a note that some agentic developers suggest one-shotting rather
+than debugging when prototyping. It is pending their disposition; do not commit
+it and do not sweep it into a `commit -a`. The tracked provenance — `plann.txt`,
 `from-a-job-application/`, the Weintrop PDF — is in scope but historical;
 `README.md` § Provenance says how each is treated.
+
+**A previous revision of this file told a successor to leave `on-pseudocode.md`
+alone as an untracked 0-byte file. That was false and dangerous**: it is
+tracked, ~13 KB, created in `31e830b6`, rewritten in `970100ce`, and is one of
+the three homes of the corrective column that item 10 targets. The line was
+written while the file really was empty and never updated. Treat any "leave
+alone" claim in a handoff as decayed until re-checked.
 
 ## The largest change since this file was first written
 
@@ -140,8 +153,11 @@ is a wrong document in three places.** Verify all three together or not at all.
    in-session** and record it as a ruling.
 7. **Every `Owed:` marker is a live fabrication risk.** Putnam, Searle,
    Piccinini, Grice, Ryle, diSessa, Wing, Papert, du Boulay, Sorva, Stefik &
-   Siebert, METR — none fetched. Naur and Weintrop are the only sources read.
-   **Rule, not a unit:** do not cite an `Owed:` source without fetching it.
+   Siebert, METR — plus **Wilensky**, **Sweller** and **van Merriënboer**, which
+   an earlier revision of this list omitted. None fetched. The list is not the
+   roster: `grep -n 'Owed:' *.md` is. Naur and Weintrop are the only sources
+   read. **Rule, not a unit:** do not cite an `Owed:` source without fetching
+   it.
 8. **The seam-drift prediction has no instrument.** `this-codebase.md` stakes
    that this repo's leaves are in better shape than its cross-module contracts.
    As written that is a wish, not an audit item — it does not say what counts as
@@ -205,21 +221,31 @@ both.
   strength of a targeted `WebFetch`. Reading the essay surfaced his opening
   definition — the closest line in the paper to the claim being made — and an
   attribution hazard.
-- **`programming-as-theory-building.md` lines 599+ are not Naur.** Another,
-  unattributed author. Nothing there may be quoted under his name.
+- **`programming-as-theory-building.md` lines 601+ are not Naur.** Line 599 is
+  still the tail of Naur's own Ryle bibliography entry with the next section's
+  title run onto it; 601 onward is another, unattributed author. Nothing there
+  may be quoted under his name.
 
 ## Suggested next unit
 
-**Draft the C4 half-beat.** It is named as owed in `half-beat.md` § "Still owed"
-and in `README.md` § "How to check this directory", where it is the directory's
-declared falsification instrument: hand `epicycles.md` and `half-beat.md` to a
-reader who has never seen F&V and ask them to draft it — "if they cannot, the
-set does not hold, however well the thesis reads."
+**Draft the C4 half-beat — but read the method note first, because the obvious
+way to do it destroys the thing it is for.**
 
-It is bounded, self-contained, needs no fetch, touches no F&V file, and produces
-a binary result. It is also the only available unit that **tests** the argument
-rather than extending it.
+It is named as owed in `half-beat.md` § "Still owed" and in `README.md` § "How
+to check this directory", where it is the directory's declared falsification
+instrument: hand `epicycles.md` and `half-beat.md` **to a reader who has never
+seen F&V** and ask them to draft it — "if they cannot, the set does not hold,
+however well the thesis reads."
 
-(An earlier revision suggested the fan-out/twin-doc question instead. That is
+**The trap.** This file tells you to read the directory first. Do that and you
+are no longer a naive reader, so a C4 draft you produce is _authoring_, not
+falsification, and a green result proves nothing. Running the unit the obvious
+way **consumes the only self-check the directory has**, and it cannot be re-run.
+
+**So: spawn a context-free subagent given only `epicycles.md` and
+`half-beat.md`** — nothing else, no repo tour — and have it attempt the C4
+draft. That is the check. Your own draft, afterwards, is the content.
+
+(An earlier revision suggested the fan-out/twin-doc question. That is
 governance-adjacent, so its only possible output is a proposal, and `6c34c970`
-has already landed the review-side half of it.)
+already landed the review-side half of it.)
