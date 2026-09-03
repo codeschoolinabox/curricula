@@ -37,61 +37,42 @@ curriculum has the shape it already has.
 
 ## The picture
 
-![F's axis, ordered by causal contact with matter](./the-chain.svg)
+![F's axis: from a physical process to the study of formal structures](./the-chain.svg)
 
-Seven positions in a row, ordered by how much contact each has with matter. On
-the left, things that touch a machine: the artifact itself, the notional machine
-that models it, the code that drives it. On the right, things that do not:
-pseudocode, formal notation, and the study of formal structures. **The
-computational thoughts are the pivot**, and everything else is placed relative
-to them.
+At the far left a physical process. Then a **ladder of language levels**, each
+implemented in the one to its left — machine code, assembly, C++, JavaScript —
+with a dashed boundary marking where medium-independence begins: to its left is
+the medium, to its right are rules indifferent to it.
 
-The useful column is underneath: **what can contradict you.** Machines disagree
-with you on the left, proofs disagree with you on the right — which leaves
-pseudocode the one position with no external corrective at all. That column is
-the argument of [on-pseudocode.md](./on-pseudocode.md), and it is why the axis
-is worth drawing rather than listing.
+**The notional machines sit below the ladder, not on it.** There is one per
+level, and you choose which to model; the rest stay black boxes by choice rather
+than ignorance. That is what "at a chosen level of abstraction" means, and it is
+why you do not need to know how a CPU works to write JavaScript. `README.md` and
+`thesis.md` both already said there is no such thing as _the_ notional machine —
+only ones chosen for a purpose and an audience.
 
-**Code is ringed** because it is the position you learn to hand over, and the
-chain shows what sits on either side of it:
+**JavaScript carries two marks at once**, and their coincidence is the course's
+central tension: it is the level you learn to **delegate**, and the level whose
+machine you must **twin**. `ontology.md:1257` is the consequence — "Frogramming
+with delegation is only sustainable if you keep the direct NM view alive."
 
-- **the thoughts** are yours. Understanding is non-delegable, which is
-  `ontology.md` §1's first principle.
-- **the notional machine** is yours to twin — and it is the vocabulary you and
-  an LLM work in. `ontology.md:1240-1243` calls this NM-grounded conversation:
-  "Make the NM declare a `const balance = 0`…" You specify behaviour in the
-  machine's terms and verify what comes back against it. The LLM is an
-  interlocutor there, never the owner of the twin.
-- **code** is delegable. This is the part the course teaches you to hand over.
-- **the artifact** was never yours to do. Electrons through matter — physical,
-  embodied, and going to happen whoever wrote the instructions.
+**The pivot divides causing from describing.** To its left, everything is part
+of the chain that actually produces the physical process. To its right, the
+computational thoughts a person holds, and the notations that describe without
+driving.
 
-Three things the figure deliberately does not say, because they are prose:
-
-**This is F's axis.** Computing's empirical and design work — systems, HCI, ML,
-software engineering — is not excluded from the curriculum by its absence here;
-it lives on V's side and in the F&V integration. Meaningful computation, which
-needs both stances, is L6 and not a position on this axis.
-
-**Positions 1–6 are things and representations; CS / theory is not.** It is a
-discipline whose objects are the other positions, which is why the figure sets
-it apart. Complexity analysis is not an algorithm; it is the study of
-algorithms.
-
-**It is drawn linear on purpose, and it wraps.** Code is a formal language and
-can be reasoned about mathematically; theory is used to study physical
-computation in the world, which closes the ring. Both are purpose-inversions — a
-position used for the other purpose than its characteristic one — so the linear
-reading is the characteristic-purpose reading and the loops are what a learner
-meets later. `ontology.md` §9 already handles its own ladder this way: "a
-coupling, not a precedence" that "adds no rung" and is "deliberately absent from
-learner-facing copy."
-
-**And why pseudocode is the interesting position.** It sits where neither
-corrective reaches. Its purpose is a third thing — communicating, between people
-who hold the theory — so its only corrective is the reader, who is not an
-independent check. That is the subject of
+Underneath: **what you can check it against.** A level is checkable exactly
+where someone has built a machine for it — Study Lenses for JavaScript's, proof
+assistants for formal notation's. Two positions have none. The thoughts have
+nothing _directly_, which is why the twin and the instruments exist at all. And
+pseudocode has nothing and **can** have nothing, because there is no fixed
+semantics to build a machine against. That is the subject of
 [on-pseudocode.md](./on-pseudocode.md).
+
+The right-hand side is marked **not yet layered**. It wants the same treatment —
+gradations of formalisation between a thought and a complexity class — and
+`welcome-to-algorithms/` is where that should come from, since its target is the
+formal end.
 
 ![The layers under the artifact](./the-stack.svg)
 
