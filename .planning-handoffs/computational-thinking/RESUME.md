@@ -67,11 +67,11 @@ consistent with the tree rather than directly verifiable).
 | `6c34c970` | **governance** — twin-doc conformance check in AR-4          | conformance not judgement; FLAG don't decide; states its own limit  |
 | `8f20eb34` | two decayed greps and one stale governance claim fixed       | —                                                                   |
 
-Ten authored Markdown files plus `the-triangle.svg` and the Naur transcription.
-`markdownlint` returns 0 across the authored set; all six remaining errors in
-the directory are in `programming-as-theory-building.md`, a verbatim source
-transcription left unreformatted on purpose [measured 2026-09-03]. All relative
-links resolve.
+Eleven authored Markdown files plus two figures — `the-chain.svg` and
+`the-stack.svg` — and the Naur transcription. `markdownlint` returns 0 across
+the authored set; all six remaining errors in the directory are in
+`programming-as-theory-building.md`, a verbatim source transcription left
+unreformatted on purpose [measured 2026-09-03]. All relative links resolve.
 
 **Not mine, leave alone:** `draft.mmd` and `on-pseudocode.md` (both untracked;
 `on-pseudocode.md` is currently 0 bytes). The tracked provenance — `plann.txt`,
