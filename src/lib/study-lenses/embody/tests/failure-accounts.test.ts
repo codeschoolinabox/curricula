@@ -20,7 +20,7 @@ describe('failure accounts', () => {
 			expect(!stage.ok && stage.value?.tokens.length).toBe(1);
 		});
 
-		it.skip('a longer reading keeps every completed turn', () => {
+		it('a longer reading keeps every completed turn', () => {
 			const stage = deriveTokens({ source: "let x = 'oops", type: 'module' });
 			expect(!stage.ok && stage.value?.tokens.length).toBe(3);
 		});
