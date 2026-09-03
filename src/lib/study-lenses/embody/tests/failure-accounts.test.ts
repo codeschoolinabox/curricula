@@ -69,12 +69,13 @@ describe('failure accounts', () => {
 			).toBe('//c\nlet');
 		});
 
-		it.skip('the extent sits at or before the reported stopping point', () => {
+		it('the extent sits at or before the reported stopping point', () => {
 			const stage = deriveTokens({ source: "let x = 'oops", type: 'module' });
 			expect(
 				!stage.ok &&
 					stage.cause.offset !== undefined &&
-					(stage.value?.inputElements?.at(-1)?.end ?? 0) <= stage.cause.offset,
+					(stage.value?.inputElements?.at(-1)?.end ??
+						Number.MAX_SAFE_INTEGER) <= stage.cause.offset,
 			).toBe(true);
 		});
 
