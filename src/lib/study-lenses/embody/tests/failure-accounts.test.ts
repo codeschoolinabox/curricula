@@ -79,8 +79,27 @@ describe('failure accounts', () => {
 			).toBe(true);
 		});
 
-		it.skip('bounded element token indices stay inside the prefix', () => {
-			const stage = deriveTokens({ source: "let x = 'oops", type: 'module' });
+		it('a reading of many statements keeps every completed turn', () => {
+			const stage = deriveTokens({
+				source: "let a = 1; let b = 'oops",
+				type: 'module',
+			});
+			expect(!stage.ok && stage.value?.tokens.length).toBe(8);
+		});
+
+		it('the bounded sequence tiles the longer prefix completely', () => {
+			const stage = deriveTokens({
+				source: "let a = 1; let b = 'oops",
+				type: 'module',
+			});
+			expect(!stage.ok && stage.value?.inputElements?.length).toBe(14);
+		});
+
+		it('bounded element token indices stay inside the prefix', () => {
+			const stage = deriveTokens({
+				source: "let a = 1; let b = 'oops",
+				type: 'module',
+			});
 			const prefix = stage.ok ? undefined : stage.value;
 			const tokenCount = prefix?.tokens.length ?? 0;
 			expect(
