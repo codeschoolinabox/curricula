@@ -2936,6 +2936,22 @@ include this review.
   architectural sketch? Are the named execution phases present and distinct? Are
   concerns properly separated, or have phases been collapsed into an
   undifferentiated block to pass tests?
+- **Twin-doc conformance**: where the module owes a twin
+  ([§ twin-doc](#twin-doc)), does this change conform to it — the identities,
+  ownership, lifetimes and predictions it records? A correct change and a change
+  that fits the module's model are different things, and tests cannot tell them
+  apart: a desired modification can usually be realized several ways, all
+  correct, some extending the model and some patching around it. **Where the
+  change and the twin disagree, FLAG the divergence; do not decide it.** A twin
+  is an architectural contract on the same footing as `DOCS.md`, so which of the
+  two is wrong is the human's call. Report the specific line of the twin and the
+  specific behaviour that departs from it.
+  _This check reaches inconsistency with the **written** model only._ Whether a
+  change fits the model nobody wrote down is not automatable and is what the
+  human gate is for; treating this bullet as if it covered that is the
+  ceremony-without-twin failure the same section names. At `twin-doc: none` the
+  bullet is n/a and the DOCS.md sketch above carries the structural question
+  alone.
 - **Fake It residue**: Are there hardcoded or special-cased values that should
   have been triangulated away? If the implementation returns a fixed value for
   any non-trivial input, triangulation was incomplete.
