@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 560" width="1180" height="560" role="img" aria-labelledby="ctl cds">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 350" width="1180" height="350" role="img" aria-labelledby="ctl cds">
   <title id="ctl">The F-side chain, ordered by causal contact with matter</title>
   <desc id="cds">Seven positions in a row. From the left: the computational artifact, a physical machine, corrected by physics; the notional machine, a dynamic model of the artifact, corrected by the running machine through study lenses; code, static executable instructions, corrected by the interpreter; the computational thoughts held by a person, which nothing corrects directly; pseudocode, a target-less non-executable representation of a thought, which nothing corrects at all; formal representations of algorithms, corrected by proof; and CS or theory, the formal study of formally defined computational structures, corrected by proof at the meta-level. A pivot at the computational thoughts divides the chain: everything to its left touches a machine, everything to its right does not. Correctives come from machines on the left and proofs on the right, so pseudocode sits where neither reaches. Code is ringed as the position a practitioner learns to delegate. The seventh position is set apart because it is a discipline whose objects are the other positions, not another representation.</desc>
   <style>
@@ -102,20 +102,11 @@
   <text x="1119" y="286" text-anchor="middle" class="s muted">proof, at the</text>
   <text x="1119" y="302" text-anchor="middle" class="s muted">meta-level</text>
 
-  <text x="290" y="346" text-anchor="middle" class="k muted">machines disagree with you over here</text>
-  <text x="900" y="346" text-anchor="middle" class="k muted">proofs disagree with you over here</text>
 
   <!-- callouts -->
   <path d="M829 194 L829 214" class="accent" fill="none" stroke-width="2" marker-end="url(#cdn)"/>
-  <text x="829" y="386" text-anchor="middle" class="s muted">Pseudocode sits where neither reaches. Its purpose is a third thing —</text>
-  <text x="829" y="402" text-anchor="middle" class="s muted">communicating — and its only corrective is the reader, who is not</text>
-  <text x="829" y="418" text-anchor="middle" class="s muted">an independent check.</text>
 
   <text x="427" y="222" text-anchor="middle" class="g accenttag">THE DELEGABLE POSITION</text>
 
 
-  <!-- footers -->
-  <text x="590" y="492" text-anchor="middle" class="s muted">This is F's axis. Computing's empirical and design work — systems, HCI, ML, software engineering — is not excluded; it lives on V's side and in the F&amp;V integration.</text>
-  <text x="590" y="512" text-anchor="middle" class="s muted">Positions 1–6 are things and representations. CS / theory is set apart because it is a discipline whose objects are the other positions.</text>
-  <text x="590" y="532" text-anchor="middle" class="s muted">Drawn linear on purpose. It wraps — code can be studied formally, theory can be applied to physical computation — and those loops are off-characteristic uses, met later.</text>
 </svg>

@@ -66,11 +66,32 @@ chain shows what sits on either side of it:
 - **the artifact** was never yours to do. Electrons through matter — physical,
   embodied, and going to happen whoever wrote the instructions.
 
-Two notes the figure carries in a line each. This is **F's axis**: computing's
-empirical and design work is not excluded by its absence, it lives on V's side
-and in the F&V integration. And the axis is **drawn linear on purpose** — it
-wraps, since code can be studied formally and theory can be applied to physical
-computation, and those loops are off-characteristic uses met later.
+Three things the figure deliberately does not say, because they are prose:
+
+**This is F's axis.** Computing's empirical and design work — systems, HCI, ML,
+software engineering — is not excluded from the curriculum by its absence here;
+it lives on V's side and in the F&V integration. Meaningful computation, which
+needs both stances, is L6 and not a position on this axis.
+
+**Positions 1–6 are things and representations; CS / theory is not.** It is a
+discipline whose objects are the other positions, which is why the figure sets
+it apart. Complexity analysis is not an algorithm; it is the study of
+algorithms.
+
+**It is drawn linear on purpose, and it wraps.** Code is a formal language and
+can be reasoned about mathematically; theory is used to study physical
+computation in the world, which closes the ring. Both are purpose-inversions — a
+position used for the other purpose than its characteristic one — so the linear
+reading is the characteristic-purpose reading and the loops are what a learner
+meets later. `ontology.md` §9 already handles its own ladder this way: "a
+coupling, not a precedence" that "adds no rung" and is "deliberately absent from
+learner-facing copy."
+
+**And why pseudocode is the interesting position.** It sits where neither
+corrective reaches. Its purpose is a third thing — communicating, between people
+who hold the theory — so its only corrective is the reader, who is not an
+independent check. That is the subject of
+[on-pseudocode.md](./on-pseudocode.md).
 
 ![The layers under the artifact](./the-stack.svg)
 
