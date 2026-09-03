@@ -86,6 +86,16 @@ const POST_MESSAGE = postMessage as unknown as (
 	message: FromWorkerMessage,
 ) => void;
 
+// WHY at module load: same realm, same reason as POST_MESSAGE above — bound
+// before the execute turn (DOCS.md § Capture order). WHY four members and not
+// the namespace: `const ATOMICS = Atomics;` is defeated by a program's
+// `Atomics.store = …`; a member capture is not (README.md § Realms). None of
+// the four consults a receiver, so detaching them is safe.
+const ATOMICS_STORE = Atomics.store;
+const ATOMICS_LOAD = Atomics.load;
+const ATOMICS_WAIT = Atomics.wait;
+const ATOMICS_NOTIFY = Atomics.notify;
+
 const IDENTIFIER_RE = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
 const NATURAL_END: HaltKind = 'natural-end';
 
@@ -320,13 +330,13 @@ function defaultHaltPayload(
  * posted; then block until the thread releases the pause.
  */
 function emitPausing(views: BufferViews, message: unknown): void {
-	Atomics.store(views.control, PROTOCOL.PAUSE_INDEX, PROTOCOL.PAUSE_PAUSED);
-	Atomics.store(
+	ATOMICS_STORE(views.control, PROTOCOL.PAUSE_INDEX, PROTOCOL.PAUSE_PAUSED);
+	ATOMICS_STORE(
 		views.control,
 		PROTOCOL.EVENT_READY_INDEX,
 		PROTOCOL.EVENT_READY,
 	);
-	Atomics.notify(views.control, PROTOCOL.EVENT_READY_INDEX);
+	ATOMICS_NOTIFY(views.control, PROTOCOL.EVENT_READY_INDEX);
 
 	POST_MESSAGE({ kind: 'message', message });
 
@@ -334,24 +344,24 @@ function emitPausing(views: BufferViews, message: unknown): void {
 	// Atomics.wait; without it a spurious wake resumes the program
 	// while the thread is still disposing of the message.
 	while (
-		Atomics.load(views.control, PROTOCOL.PAUSE_INDEX) === PROTOCOL.PAUSE_PAUSED
+		ATOMICS_LOAD(views.control, PROTOCOL.PAUSE_INDEX) === PROTOCOL.PAUSE_PAUSED
 	) {
-		Atomics.wait(views.control, PROTOCOL.PAUSE_INDEX, PROTOCOL.PAUSE_PAUSED);
+		ATOMICS_WAIT(views.control, PROTOCOL.PAUSE_INDEX, PROTOCOL.PAUSE_PAUSED);
 	}
 }
 
 /** Posts the call request, blocks until RESPONDED, decodes the response. */
 function callBlocking(views: BufferViews, request: unknown) {
-	Atomics.store(views.control, PROTOCOL.CONTROL_INDEX, PROTOCOL.SIGNAL_WAITING);
+	ATOMICS_STORE(views.control, PROTOCOL.CONTROL_INDEX, PROTOCOL.SIGNAL_WAITING);
 
 	POST_MESSAGE({ kind: 'call', request });
 
 	// WHY the while loop: spurious-wakeup guard, same as the pause wait.
 	while (
-		Atomics.load(views.control, PROTOCOL.CONTROL_INDEX) !==
+		ATOMICS_LOAD(views.control, PROTOCOL.CONTROL_INDEX) !==
 		PROTOCOL.SIGNAL_RESPONDED
 	) {
-		Atomics.wait(
+		ATOMICS_WAIT(
 			views.control,
 			PROTOCOL.CONTROL_INDEX,
 			PROTOCOL.SIGNAL_WAITING,

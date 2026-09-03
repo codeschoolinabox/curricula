@@ -362,7 +362,7 @@ describe('latched built-ins', () => {
 			expect(first.message).toBe('still here');
 		});
 
-		it.skip('function path — rebinding the whole Atomics namespace does not cost the program its emission', async () => {
+		it('function path — rebinding the whole Atomics namespace does not cost the program its emission', async () => {
 			const { worker, next } = await startRun(
 				{},
 				'globalThis.Atomics = null;\nemit("still here");',
