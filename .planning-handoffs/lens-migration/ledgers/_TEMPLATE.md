@@ -2024,20 +2024,20 @@ extracted back out of this file]:
 | ⛔ **an ELIDED-ONLY split** — only the `…`-bearing fragments move to `reasoned`                  | `NOTE: … source fragment(s) …`, **exit 0**, and **`GEN1-QUOTE-ABSENT` falls 17 → 10** [measured 2026-08-26, the `elided` mode below, 50 fragments moved]. The seven deleted are verbatim the seven this arm was published for finding — the ones the 2026-08-19 stopgap skipped as truncated. **One NOTE line for seven deletions**, which is why the before/after comparison and not this NOTE is the detector                                                                                                                                           |
 | a cluster whose annotation **re-mentions** a listed class                                        | **SILENT.** Counting mentions rather than distinct names reported `parsons-047` as "declares 2, lists 5" over a correct row                                                                                                                                                                                                                                                                                                                                                                                                                               |
 
-⛔ **THE FINDING SET IS THE ASSERTION. THE EXIT CODE IS NOT.** The four
-migration rows — `CORRECT`, `PARTIAL`, `HALF-PARTIAL` and `ELIDED-ONLY` —
-**all** exit 0, and three of them are defects: each prints one `NOTE` line and
-exits clean while deleting 17, 10 and 7 published findings respectively. **Read
-every split against the `CORRECT` row: `GEN1-QUOTE-ABSENT` must come back at 17
-on `parsons`.** A run of this arm over a migrated ledger is not evidence of
-anything until that number is compared.
+⛔ **THE FINDING SET IS THE ASSERTION. THE EXIT CODE IS NOT.** `CORRECT`,
+`PARTIAL`, `HALF-PARTIAL` and `ELIDED-ONLY` **all** exit 0, and every one but
+`CORRECT` is a defect: each prints one `NOTE` line and exits clean while
+deleting published findings — `PARTIAL` 17, `HALF-PARTIAL` 10, `ELIDED-ONLY` 7.
+**Read every split against the `CORRECT` row: `GEN1-QUOTE-ABSENT` must come back
+at 17 on `parsons`.** A run of this arm over a migrated ledger is not evidence
+of anything until that number is compared.
 
-⚠️ **That sentence said _"Four of the rows above exit 0"_ for one commit, and
-eleven of the eighteen do** [found 2026-08-26 by AR-5]. It meant the four
-migration rows and read as a count over the whole table — understating by nearly
-three times how many rows exit 0, **in the paragraph whose only job is to stop a
-reader trusting exit 0.** The rows are named now. Another count beside a list,
-caught by a reviewer rather than by any gate.
+⚠️ **That sentence said _"Four of the rows above exit 0"_ for one commit**
+[found 2026-08-26 by AR-5]. It meant `CORRECT`, `PARTIAL`, `HALF-PARTIAL` and
+`ELIDED-ONLY` and read as a count over the whole table — understating, **in the
+paragraph whose only job is to stop a reader trusting exit 0**, how many rows
+exit 0. The rows are named now. Another count beside a list, caught by a
+reviewer rather than by any gate.
 
 ⚠️ ~~The two split rows above published `FAIL: … exit 1`.~~ **STRUCK 2026-08-26
 by AR-5** — the shipping check emits `NOTE:` and never sets `$bad`, and has
@@ -2218,8 +2218,9 @@ qfrags() {  # qfrags <ledger.md> <row-id-prefix> <column-name>
 # `diff`, so the floors above buy nothing unless something reads them. This also
 # asserts the two sides describe the same ledger before any line is believed.
 fragdiff() {  # fragdiff <before.md> <after.md> <row-id-prefix> <before-col> <after-col>
-  # `local` on every name: without it a call from an interactive shell clobbers
-  # b, a, nb, na and rc in the caller. The diff is computed ONCE, into d.
+  # `local` on every name this function assigns: without it a call from an
+  # interactive shell clobbers them in the caller. The diff is computed ONCE,
+  # into d.
   local b a nb na d
   b=$(mktemp); a=$(mktemp)
   qfrags "$1" "$3" "$4" > "$b" || { rm -f "$b" "$a"; echo "FAIL: the BEFORE side refused"; return 1; }

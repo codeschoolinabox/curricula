@@ -8,7 +8,7 @@ closes; nothing here is end-state documentation. -->
 <!-- cspell:ignore loosenings capitalisation enshittifying keyable unbuildable -->
 <!-- cspell:ignore normalises undercounted oldd clauding zakey nocite -->
 <!-- cspell:ignore Explorotron multibyte provless unreachable -->
-<!-- cspell:ignore qfrags fragdiff reparented -->
+<!-- cspell:ignore qfrags fragdiff mkfixture reparented -->
 <!-- a human ruling quoted verbatim; do not translate it and do not "fix" it: -->
 <!-- cspell:ignore séparé -->
 
@@ -23,19 +23,20 @@ rulings inside them are the human's, not negotiable by an agent.
 
 ## Read this first, because it is the thing most likely to bite you
 
-**This canon failed its own instrument four times, in the same way each time.**
-AR-1 ran four rounds and returned PAUSE on all four. Two of round 2's three
-blockers were **introduced by round 1's fixes**. The pattern is specific and you
-will reproduce it if you are not watching for it:
+**This canon failed its own instrument repeatedly, in the same way each time.**
+AR-1 returned PAUSE round after round, and round 2's blockers were **mostly
+introduced by round 1's fixes**. The pattern is specific and you will reproduce
+it if you are not watching for it:
 
 > A correction is written as a new paragraph, and **the corrected text is left
 > standing beside it.** The document then says two opposite things, and a reader
 > working from the list rather than the prose gets the wrong one.
 
 That is how a ruled question stayed on an open-questions list, how a withdrawn
-count survived in two documents of three, and how a recipient fix landed in one
-file of two. **Strike, do not rebut.** When something is ruled, remove it from
-wherever it was asked and leave a pointer to the ruling.
+count survived in some of the documents carrying it but not all, and how a
+recipient fix landed in some but not all of the files it was owed to. **Strike,
+do not rebut.** When something is ruled, remove it from wherever it was asked
+and leave a pointer to the ruling.
 
 The second pattern, equally reproducible:
 
@@ -50,8 +51,8 @@ verify the diff — every sentence the fix touched, plus every sentence that cit
 it.** That alone would have caught three of round 3's blockers in minutes.
 
 Third, and it applies to reviewers too: **a reviewer's count is a hypothesis.**
-Of the reviewer-supplied numbers accepted this campaign, three did not reproduce
-and were corrected rather than adopted. Re-measure before you write.
+Of the reviewer-supplied numbers accepted this campaign, several did not
+reproduce and were corrected rather than adopted. Re-measure before you write.
 
 ## What is committed
 
@@ -206,13 +207,13 @@ wrong one."_ Here the table is right and the heading is wrong.
 **The units, in this order, ONE SESSION EACH. The order is ruled — it is not the
 reading session's to re-pick, and neither is collapsing them into one session.**
 
-|             | unit                                                                                                                                                                               | why it sits here                                                                                                                                                                                                                               |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ~~STEP 1a~~ | ~~the Gen-1 second-root read and the ledger append~~                                                                                                                               | **DONE at `fd6066b3`** — 33 rows appended, `048`–`080`. Struck rather than ticked                                                                                                                                                              |
-| ~~STEP 1b~~ | ~~the re-investigation half of the twin pilot~~                                                                                                                                    | **DONE — `7c3da9aa`, `1478049f`, `390e8d54`.** Ledger 80 → **120 rows**. Struck rather than ticked                                                                                                                                             |
-| **STEP 1c** | [the `quoted`/`reasoned` migration](#-start-here--step-1c-is-the-migration-the-twin-is-blocked-behind-it) — **template half DONE (7 commits); the LEDGER half is where you start** | a human ruling of 2026-08-20 changes the row shape of all eight ledgers, and **the twin is blocked behind it**                                                                                                                                 |
-| **STEP 1d** | the `parsons` twin itself, co-authored                                                                                                                                             | AR-1 forbids drafting it from the ledger as it stands — see the blocker below                                                                                                                                                                  |
-| **STEP 2**  | [the template amendments](#step-2--three-template-amendments-then-_family-fmd), then `_family-f.md`'s inventory shape                                                              | ⚠️ ~~now **seven**, not three. STEP 1c lands two of them; five remain~~ — **STRUCK: no number here.** § The template amendments is THE list and rules that no number anywhere is to be transcribed; this cell transcribed three, all now wrong |
+|             | unit                                                                                                                                                                   | why it sits here                                                                                                                                                                                                                               |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ~~STEP 1a~~ | ~~the Gen-1 second-root read and the ledger append~~                                                                                                                   | **DONE at `fd6066b3`** — 33 rows appended, `048`–`080`. Struck rather than ticked                                                                                                                                                              |
+| ~~STEP 1b~~ | ~~the re-investigation half of the twin pilot~~                                                                                                                        | **DONE — `7c3da9aa`, `1478049f`, `390e8d54`.** Ledger 80 → **120 rows**. Struck rather than ticked                                                                                                                                             |
+| **STEP 1c** | [the `quoted`/`reasoned` migration](#-start-here--step-1c-is-the-migration-the-twin-is-blocked-behind-it) — **template half DONE; the LEDGER half is where you start** | a human ruling of 2026-08-20 changes the row shape of all eight ledgers, and **the twin is blocked behind it**                                                                                                                                 |
+| **STEP 1d** | the `parsons` twin itself, co-authored                                                                                                                                 | AR-1 forbids drafting it from the ledger as it stands — see the blocker below                                                                                                                                                                  |
+| **STEP 2**  | [the template amendments](#step-2--three-template-amendments-then-_family-fmd), then `_family-f.md`'s inventory shape                                                  | ⚠️ ~~now **seven**, not three. STEP 1c lands two of them; five remain~~ — **STRUCK: no number here.** § The template amendments is THE list and rules that no number anywhere is to be transcribed; this cell transcribed three, all now wrong |
 
 ## ⛔ START HERE — STEP 1c is the migration; the twin is blocked behind it
 
@@ -233,8 +234,8 @@ which is the one class this campaign's own invariant 13 exists to stop.
 > ⚠️ **This line has carried a wrong count twice** — "seven" when it was ten,
 > then "eleven" when the table listed ten — each caught by a context-free reader
 > rather than by any gate. **The list is the record; a count beside a list is a
-> second statement of the same fact, and this file has now demonstrated three
-> times that the second one goes stale.** Derive it:
+> second statement of the same fact, and this file has repeatedly demonstrated
+> that the second one goes stale.** Derive it:
 > `git log --oneline 23f4555b..HEAD -- .planning-handoffs/lens-migration/`.
 >
 > ⛔ **EIGHT OF THEM ARE ALREADY PUSHED, AND NOT BY THIS CAMPAIGN.** See § The
@@ -245,15 +246,15 @@ which is the one class this campaign's own invariant 13 exists to stop.
 > once by AR-5, and the third time it was the fixing commit that made it stale
 > again. `git log` reconstructs SHAs; it does not reconstruct why:
 >
-> | phase | what                                                                                                                                                          |
-> | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-> | 1     | `### The structural-integrity check` — NEW. Burial by fence **and** by HTML comment                                                                           |
-> | 2     | `### The transport check` — cell-scoped, proven a byte-identical no-op first                                                                                  |
-> | 3     | **AR-2, three rounds** — PAUSE, PAUSE, CONSIDER. Each found its defect in the previous round's newest code                                                    |
-> | 4     | `### The Gen-1 arm` — NEW, and RUN against the quarry. Found 15 non-transporting quotations where the campaign recorded 8, plus a 16th of another class       |
-> | 5     | **AR-1, two rounds** — PAUSE then CONSIDER. Four floors the arm did not have; a SET arm counting mentions not distinct names                                  |
-> | 6     | **Two context-free validations** — both found defects no gate could see, including that the target state this file prescribes failed the gate this file built |
-> | 7     | **AR-5, two rounds** — the push state, a census that did not close, and a misplaced-quotation predicate wrong in both directions                              |
+> | phase | what                                                                                                                                                                                                                                           |
+> | ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+> | 1     | `### The structural-integrity check` — NEW. Burial by fence **and** by HTML comment                                                                                                                                                            |
+> | 2     | `### The transport check` — cell-scoped, proven a byte-identical no-op first                                                                                                                                                                   |
+> | 3     | **AR-2** — its rounds repeatedly found their defect in the code the previous round's fix had just written. This cell is a sample and not the record; its outcomes are in § The AR trail, which is where each gate's outcome is recorded        |
+> | 4     | `### The Gen-1 arm` — NEW, and RUN against the quarry. Found 15 non-transporting quotations where the campaign recorded 8, plus a 16th of another class                                                                                        |
+> | 5     | **AR-1** — floors the arm did not have; a SET arm counting mentions not distinct names. This cell is a sample and not the record; its outcomes are in § The AR trail                                                                           |
+> | 6     | **Two context-free validations** — both found defects no gate could see, including that the target state this file prescribes failed the gate this file built                                                                                  |
+> | 7     | **AR-5** — among its findings: the push state, a census that did not close, and a misplaced-quotation predicate wrong in both directions. This cell is a sample and not the record; the full trail, keyed by closing commit, is § The AR trail |
 >
 > ⚠️ **The earlier SHA table said SEVEN and omitted two**, and a reader could
 > not tell whether the false thing named in one of the omitted subjects was
@@ -342,10 +343,9 @@ which is the one class this campaign's own invariant 13 exists to stop.
 > [AGENTS.principal.md § Handoff agency](../../AGENTS.principal.md#handoff-agency--the-agent-owns-the-call)
 > rules _"Design ahead → always fresh"_, and this file's own § Read this first
 > records three consecutive same-session fix rounds each introducing the defect
-> they removed. The template half took **three AR-2 rounds**, and every one of
-> them found a defect in the PREVIOUS round's newest code — never in the fixes
-> for the reproduced findings. Expect that pattern; it is why the re-verify is
-> not optional.
+> they removed. AR-2's rounds on the template half repeatedly found their defect
+> in the PREVIOUS round's newest code — never in the fixes for the reproduced
+> findings. Expect that pattern; it is why the re-verify is not optional.
 >
 > **Two standing rulings that bind this unit and are stated FAR below** — a
 > context-free reader found one 363 lines down and the other 1,185, neither
@@ -419,64 +419,142 @@ enough not to re-wrap, and run `prettier --write` three times and diff.**
 
 ### ⛔ The AR trail — which gates closed, and the one that did not
 
-| gate                        | rounds | outcome                                            |
-| --------------------------- | ------ | -------------------------------------------------- |
-| **AR-2** (the two checks)   | 3      | PAUSE, PAUSE, **CONSIDER** — closed                |
-| **AR-1** (the commit group) | 2      | PAUSE, **CONSIDER** — closed                       |
-| **context-free validation** | 2      | both found defects no gate could see; both applied |
-| **AR-5** (pre-merge)        | 5      | PAUSE ×5 — ⛔ **NOT CLOSED**                       |
+| review                             | outcome                                                                                                                                                       |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **AR-2** (STEP 1c's template half) | PAUSE, PAUSE, **CONSIDER** — verdicts over the template half only                                                                                             |
+| **AR-1** (STEP 1c's template half) | PAUSE, **CONSIDER** — verdicts over the template half only. An earlier and separate AR-1 series is recorded at § AR-1 rounds 3 and 4, and is not these rounds |
+| **context-free validation**        | both found defects no gate could see; both applied, for the rounds at `7da05610` and `edecc4ac`                                                               |
+| **AR-5** (pre-merge)               | PAUSE                                                                                                                                                         |
 
-⛔ **AR-5 has now run five rounds and closed none of them. Rounds 4 and 5 both
-ran on 2026-08-26 and both found their defects in the round before.**
+⚠️ **This table carried a `rounds` column and a `status` column, both struck
+rather than recounted.** The `rounds` column carried a round count beside a
+verdict cell listing the same rounds, and both were short — the round over
+`78b93ada` had already run. The `status` column's `SETTLED` half restated what
+the `outcome` cell already carries, and asserted a standing that goes stale; its
+re-fire triggers were not derivable from `outcome`. For the gates that closed,
+the `rounds` column and the `SETTLED` half both restated what the `outcome` cell
+says. This file's own rule governs, under § START HERE — STEP 1c: _"The list is
+the record; a count beside a list is a second statement of the same fact …"_
+This table has now watched that second statement go stale.
 
-- **Round 4**, over the nine unpushed SHAs, returned three blockers: a heading
-  insertion at `b30016ce` had reparented § The Gen-1 arm's trigger, its owed
-  items and its amendment-4 note into the new section; the mutation corpus
-  published `FAIL … exit 1` where the shipping check emits `NOTE … exit 0`; and
-  the partial-split detector could neither fail nor be reached from the runbook.
-  All three are closed at `b7459ffd`, and round 5 verified each independently.
-- **Round 5**, over `b7459ffd` alone, returned **four more — every one in that
-  commit's own new text**: a ⛔ extraction warning describing an invocation the
-  same diff had deleted (obeying it truncated `fragdiff` into a syntax error); a
-  struck count still live twelve lines below the change that falsified it; the
-  `elided` fixture figures not reproducing from a self-contradicting prose
-  recipe; and three wrong counts in the immutable commit body.
+A review is SETTLED when a round of it returned PROCEED or CONSIDER; PAUSE never
+settles it. AR-5 is OPEN because no round has. The context-free validation
+returns findings rather than a verdict; applying them settles its round. AR-1's
+and AR-2's CONSIDER verdicts over the template half are read out of `3517e58f`'s
+body [measured 2026-09-02: `git show -s --format=%B 3517e58f`].
 
-⛔ **`b7459ffd`'s body carries three numbers that are wrong, and it cannot be
+⛔ **AR-5 rounds are keyed on the commit that CLOSED them, not on an ordinal.**
+An ordinal renumbers when a round is inserted, and it collides with the other
+gates' sequences — the AR-1 series in this file are not one sequence: § AR-1
+rounds 3 and 4 numbers a different one. A closing SHA does neither, and it is
+read out of an immutable body rather than inferred from ordering.
+
+⛔ **Standing rule for this section: no bare count in prose** (human ruling
+2026-08-31). Where a figure would go, name the set instead. **Exempt**: SHAs;
+the gate names AR-1, AR-2 and AR-5; any figure carried inside a `[measured:]` or
+`[read:]` tag, which invariant 13 requires; any figure quoted from or corrected
+against an immutable commit body inside a ⛔ errata paragraph; and enumerations,
+which are what the rule asks for in a count's place. ⚠️ **It is enforced by
+review only, and no gate can check it.** No pattern fires on prose numerals
+alone — this section's subject is gates literally named AR-1/AR-2/AR-5, its keys
+are hex SHAs, and its errata paragraphs deliberately carry corrected figures; a
+pattern narrow enough to spare those spares the prose too. **Replace a count
+with a weaker word, never a stronger quantifier** — `repeatedly` is the model;
+`every` and `each round` are the failure.
+
+A row's `closed by` names the commit that fixed that round's blockers. That
+commit cannot name itself, so the row lands empty. **An empty cell is a pending
+back-fill until a campaign commit lands after the closing commit; only then is
+it a missed one.** Derive the candidates with
+`git log --oneline 23f4555b..HEAD -- .planning-handoffs/lens-migration/`, run
+from the repository root for the reason § What is committed gives.
+
+| closed by    | what the round found                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `daf2bb84`   | PAUSE over the SHA table this file then published, since struck. The push state was first among its findings and it was false: commits this campaign believed droppable had already been pushed by a concurrent session. ⚠️ The round closed by `4e85d50d` reports on these findings without naming any of them — and this campaign keeps no AR log, so this table is the whole record of what the AR-5 rounds found                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `4e85d50d`   | PAUSE, both defects in `edecc4ac`: the `$qq == 0` narrowing missed a half-partial split, and it was still falsely refusing. Together they are what `4e85d50d`'s subject calls _"wrong in both directions"_                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `b30016ce`   | PAUSE over `4e85d50d`'s own new text: the elided-fragment skip deleted at exit 0 the published findings the Gen-1 arm was built to find — enumerated in `_TEMPLATE.md` § The Gen-1 arm — and the caveat refusal was not closed, its earlier fixture having passed by accident. No row-scoped predicate can decide it, so it stops refusing and reports, which is why nothing in this campaign gates a partial split and why gate 5 exists                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `b7459ffd`   | PAUSE over the campaign's then-unpushed commits: a heading insertion at `b30016ce` had reparented § The Gen-1 arm's trigger, its owed items and its amendment-4 note into the new section; the mutation corpus published `FAIL … exit 1` where the shipping check emits `NOTE … exit 0`; and the partial-split detector could neither fail nor be reached from the runbook. The round closed by `78b93ada` verified each independently                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `78b93ada`   | PAUSE, and every blocker sat in `b7459ffd`'s own new text: a ⛔ extraction warning describing an invocation the same diff had deleted (obeying it truncated `fragdiff` into a syntax error); a count struck from § The gate arguments and left live in the pointer to it inside § The gates you must run; the `elided` fixture figures not reproducing from a self-contradicting prose recipe; and wrong counts in the immutable commit body                                                                                                                                                                                                                                                                                                                                                                                                    |
+| _(none yet)_ | ⛔ **AR-5 stays OPEN. This round reviewed `78b93ada`.** PAUSE: a `local` enumeration naming a variable the same diff had deleted and omitting the one it added; a stale AR-5 round count contradicted by a sibling table; a line-count citation; and a count beside a list inside the ⚠️ note that corrected a count beside a list. **Its blockers are closed.** Its remaining findings — an unverifiable universal in § The gates you must run, a document count standing beside a shorter list, `mkfixture`/`qfrags`/`fragdiff` on no trigger list, and `fragdiff` converting a `diff` error into a clean pass — are the next commit's unit. Its MINORs are recorded in no campaign commit body I searched, and the round has no closing commit that could carry them [measured 2026-09-02: `git show -s --format=%B` over the campaign SHAs] |
+
+⛔ **`78b93ada` stands in the table above both as the commit that closed one
+round and as the commit the last row's round reviewed.** Its body records that
+its own round's blockers all sat in `b7459ffd`'s new text [read: `78b93ada`'s
+body — _"four blockers, every one in that commit's own new text"_], and the
+round that has not closed found the same of `78b93ada`. That is why the round
+over this commit goes to a fresh session.
+
+⛔ **The immutable bodies number these rounds; this table keys them on their
+closing commit instead**, per the ruling above. `4e85d50d`, `b30016ce`,
+`b7459ffd` and `78b93ada` open by naming the AR-5 round they close, in the
+literal form `AR-5 round N`; `daf2bb84` names none [measured 2026-09-02:
+`git show -s --format=%B <sha> | /usr/bin/grep -oE 'AR-5 round [0-9]+'` over
+every keyed row above], so a reader holding an ordinal resolves it by reading
+those bodies rather than from a second keyed list published here. ⚠️ **Cautions:
+the predicate axis, and the round with no ordinal.** A body also numbers rounds
+on a **predicate** axis, and those figures do not resolve against this table —
+`b30016ce` calls itself _"the FIFTH round on one predicate"_ in the commit that
+closes `AR-5 round 3`, and `4e85d50d` calls itself _"the THIRD consecutive round
+to break this one line"_ in the commit that closes `AR-5 round 2`. And the round
+that has not closed **has no closing commit, and none of the bodies this table
+keys names an ordinal for it.**
+
+⛔ **`b7459ffd`'s body carries numbers that are wrong, and it cannot be
 amended.** Corrected here so a reader who greps the body does not inherit them
 [all measured 2026-08-26]: the `fragdiff` corpus is **ten** rows, not nine; the
 commit added **five** cspell ignore entries carrying **four** distinct words,
 not three; and its `elided 50 -> 10` line was unreproducible from the recipe it
 shipped — the builder is now published as a program and the figure re-derives.
 
+⛔ **`78b93ada`'s body cites a distance in lines, and it cannot be amended
+either.** Its BLOCKER 2 reads _"left the pointer to it live twelve lines below
+the gate-5 row that falsified it"_. **The offset was wrong when it was written,
+not rotted since** [measured 2026-08-27: `git show
+b7459ffd:.planning-handoffs/lens-migration/RESUME.md | /usr/bin/grep -nE 'all
+seven, collected|migration fragment count'`]. The campaign bans the form in its
+own words — `_TEMPLATE.md` § The transport check carries it inline, _"cited by
+section, never by line count -- \"47 lines above\" was 67 by the next day"_.
+(`FIDELITY-METHOD.md` § Columns states the same rule for quarry citations in the
+`evidence` column; a commit body is neither.) Without the offset the finding is
+**a count struck from § The gate arguments, left live in the pointer to it
+inside § The gates you must run**; the strike record is that section's own ⚠️
+note.
+
 **AR-5 must still close over the campaign's unpushed SHAs before any push.**
 
-Why it was handed over rather than run again: five consecutive rounds each found
-their defect in the previous round's newest code, and the last two were in a
-context long past the point where
+Why the fix went to a fresh session rather than another in-place round: the
+rounds closed by `b7459ffd` and `78b93ada` both ran in a context long past the
+point where
 [AGENTS.principal.md § Handoff agency](../../AGENTS.principal.md#handoff-agency--the-agent-owns-the-call)
-says to stop — _"a learned lesson repeats as an error"_. A sixth round on a
-spent context is the pattern, not the cure.
+says to stop — _"a learned lesson repeats as an error"_. The round over
+`78b93ada` then ran fresh and still found its blockers inside that commit, which
+is why a fresh context is necessary and not sufficient.
+
+### The measured baseline you inherit
 
 **Everything else is measured green** on the tree you inherit — **and "green" is
 not the same as "covered", which is what the paragraph below is for.** The
 programs are named, never counted: `firstblock`, `glossterm`, the Pass-1 gate,
 the structural check, the transport check, the Gen-1 arm, `qfrags`/`fragdiff`.
 All extract and run except the **Pass-1 gate**, which does **not** `bash -n` as
-published — its three placeholder assignments contain `<`, a shell redirect;
-substitute them first [measured 2026-08-26]. Then:
+published — its `L=`, `LENS=` and `CENSUS=` placeholder assignments contain `<`,
+a shell redirect; substitute them first [measured 2026-08-26]. Then:
 `parsons rows=120 parsed=57 nocite=76 unreachable=76 provless=76` and
 `writeme-019 UNQUOTED (1 of 2 cited)` unmoved; Gen-1 `findings=27` decomposing
 as **17 QUOTE-ABSENT + 9 REFUSED + 1 GEN1-COUNT**; the structural check exit 0
-on all nine campaign documents; prettier idempotent; markdownlint 0; cspell 0.
+on `SPEC.md`, `FIDELITY-METHOD.md`, `LISTERS-6-7-DESIGN.md`, this file and
+`ledgers/{_TEMPLATE,_boundary,_playbook,parsons,writeme}.md`; prettier
+idempotent; markdownlint 0; cspell 0.
 
-⛔ **Campaign documents REFUSE the transport check, and that is correct rather
-than a defect to fix. Named, never counted** — ⚠️ this paragraph said "two" for
-one commit and the answer is three [found 2026-08-26 by AR-5, which is the same
-count-beside-a-list defect the commit above struck twice elsewhere]:
+⛔ **The campaign documents the transport check refuses are refusing it
+correctly, and that is not a defect to fix. Named, never counted** — ⚠️ this
+paragraph was short of the list below for one commit [relayed: AR-5, 2026-08-26
+— the same count-beside-a-list defect the commit above struck elsewhere]:
 
-- `FIDELITY-METHOD.md` — five row-shaped lines in § Worked rows plus a
-  ledger-shaped header, no `## Rows` → `BREACH SCHEMA`, exit 1.
+- `FIDELITY-METHOD.md` — § Worked rows carries row-shaped lines for
+  `blanks-041`, `blanks-042`, `blanks-043`, `annotate-007` and `parsons-018`,
+  plus a ledger-shaped header, no `## Rows` → `BREACH SCHEMA`, exit 1.
 - `RESUME.md` — its **first** `| # |` header is the published target header row
   itself, which resolves `quoted` and `reasoned`; no `## Rows` →
   `BREACH SCHEMA`, exit 1, **and** the zero-rows floor.
@@ -487,6 +565,16 @@ count-beside-a-list defect the commit above struck twice elsewhere]:
 
 [all measured 2026-08-26, the check extracted from this campaign's own template
 and run on each of the nine documents]
+
+⚠️ **Errata on the transport-check refusal paragraph, with different
+dispositions.** Its opening read _"Campaign documents REFUSE"_ — a universal the
+`doc=not-a-ledger` bullet falsifies, since `SPEC.md`, `LISTERS-6-7-DESIGN.md`,
+`_boundary.md` and `_playbook.md` exit 0 and refuse nothing. **That one was
+corrected in place**, and is recorded here for the audit trail. Its `[relayed:]`
+tag also carries a directional reference to a commit, with no SHA anywhere in
+the transport-check refusal paragraph — **that one was NOT corrected in place**,
+because an edit inside an evidence tag would change what this file reports a
+reviewer as having said.
 
 **Do not touch the resolver** — it is on § The amendment gate's trigger list and
 a refusal on a wrong path is correctly signed. So this file refuses the gate
@@ -1375,8 +1463,8 @@ reproduced by measurement, not relayed.**
    were already `869`/`916` on 2026-08-18** [measured]. An earlier revision of
    this line said "ten lines above"; the correction to "47" is also wrong, and
    the real distance was 67 when last measured. This is the third rotted
-   line-number citation in one paragraph, which is why § Columns bans citing by
-   line number at all.)
+   line-number citation in one paragraph, which is why § Columns bans citing
+   quarry content by line number.)
 
    ⚠️ **It gates WAVE 2 as well as Family F, and the first draft of this section
    said only Family F.** `dropdowns`, `variables` and six of Family F's seven
