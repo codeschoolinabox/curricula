@@ -114,7 +114,27 @@ title; measured
 The discharge argument is unchanged — all four sites are pinned.) Phase 1
 re-verifies per increment at AR-3.
 
-## Out-of-scope confirmations
+## Phase-1 session 1 notes (2026-09-02, cluster A closed)
+
+Written at the cluster-A close by the executing session; the commit bodies (14
+commits, `91718a0f`..`190a494e`) are the full record. Three findings promised
+"to the campaign record at close":
+
+- **The drain is acorn's `getToken()` loop, not `for…of`** (A3, AR-3
+  counter-proposal adopted): plain method calls have no loose-mode compilation
+  class, eliminating the Docusaurus wrap-hazard by construction. Verified
+  against the built bundle at A3's 🔍. FOLLOW-ON (unbuilt): a durable grep-based
+  CI guard for the iteration-hazard class over tokenizer call sites, so a future
+  edit trips a gate instead of relying on the WHY comment.
+- **Between A2 and A8 the extent formula rode on review alone, not a red test**
+  (A6 C(b)): the front-load departure was named at A2, but A8's AR-3 then
+  measured that `.end`-only assertions are undershoot-insensitive — even
+  `extent = 0` passed all then-live rows. Resolution: the three text-join rows
+  (A8, `93b5d18b`) now force the formula; the A8/JOIN-1 pair over one fixture
+  must never be pruned as "redundant" (the vacuity would silently reopen).
+- **freezeExceptions widened at A3** (`index.ts`): token-type singletons
+  excepted from whichever arm publishes tokens; pinned by an embody()-path row
+  in `tests/index.test.ts`.
 
 - `spellme` untouched; evaluators untouched; no lens built; no dependency
   installed; `DOCS.md`/`types.ts` changes were this Phase-0's contract work
