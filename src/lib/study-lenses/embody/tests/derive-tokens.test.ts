@@ -87,6 +87,11 @@ describe('deriveTokens', () => {
 				const stage = deriveTokens({ source: '01', type: 'module' });
 				expect(!stage.ok && stage.cause.offset).toBe(0);
 			});
+
+			it('→ publishes the empty prefix as its account', () => {
+				const stage = deriveTokens({ source: '01', type: 'module' });
+				expect(!stage.ok && stage.value?.tokens).toEqual([]);
+			});
 		});
 
 		describe('unterminated string at the source start', () => {
@@ -152,13 +157,6 @@ describe('deriveTokens', () => {
 		it('empty source → the empty element sequence, present', () => {
 			const stage = deriveTokens({ source: '', type: 'script' });
 			expect(stage.ok && stage.value.inputElements).toEqual([]);
-		});
-
-		it('a spelling failure publishes only its cause — no sequence anywhere', () => {
-			const stage = deriveTokens({ source: '01', type: 'module' });
-			expect(
-				!stage.ok && !('value' in stage) && !('inputElements' in stage),
-			).toBe(true);
 		});
 
 		it('a one-token program → one NumericLiteral element', () => {

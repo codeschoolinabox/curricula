@@ -18,7 +18,9 @@ import type { FactStage, Snippet, Tokens } from './types.js';
  * (a legacy octal literal is a valid token in a script but a tokenize error in
  * a module). A source that does not tokenize is data, not a throw: the stage
  * carries a `StageCause` in the parser's own voice, with the offset and
- * position the machine reports.
+ * position the machine reports — and beside it the failure arm publishes the
+ * stage's account, the token prefix of README § Failure grammar, under the
+ * same `value` name its success arm uses.
  *
  * The input-element sequence is derived by calling the shared scanning leaf
  * over the reading this function just produced — the source, tokens and
@@ -62,7 +64,14 @@ export default function deriveTokens(snippet: Snippet): FactStage<Tokens> {
 			}),
 		);
 	} catch (error) {
-		return { ok: false, cause: toStageCause(error, 'tokens') };
+		// `Array.from`'s internal array is discarded when the tokenizer throws,
+		// so the set-aside comments are the only channel that survives the stop
+		// at this drain — the prefix's token channel has nothing to publish.
+		return {
+			ok: false,
+			cause: toStageCause(error, 'tokens'),
+			value: { tokens: [], comments },
+		};
 	}
 
 	try {

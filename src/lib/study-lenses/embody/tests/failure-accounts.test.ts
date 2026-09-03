@@ -5,7 +5,7 @@ import embody from '../index.js';
 
 describe('failure accounts', () => {
 	describe('the token prefix', () => {
-		it.skip('a stop before any complete turn publishes an empty prefix', () => {
+		it('a stop before any complete turn publishes an empty prefix', () => {
 			const stage = deriveTokens({ source: '@', type: 'module' });
 			expect(!stage.ok && stage.value?.tokens).toEqual([]);
 		});
