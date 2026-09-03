@@ -192,5 +192,5 @@ predict, and that only appeared on contact:
 ## Related
 
 - [epicycles.md](./epicycles.md) — the general form and the criterion
-- [observability.md](./observability.md) — condition 3b, of which the gate item
-  is the exercise form
+- [observability.md](./observability.md) — legibility, of which the gate item is
+  the exercise form

@@ -3,44 +3,41 @@
 > Author-facing design memo. Part of the `computational-thinking/` set; start at
 > [README.md](./README.md).
 
-[thesis.md](./thesis.md) splits what was one condition into two. This document
-develops the second, because it is the one the course runs on.
+The original formulation asked that a correspondence be "observed and
+manipulated." Those are two different requirements, and separating them is what
+lets each do its own job.
 
-- **3a — intervention.** The correspondence supports intervention. Perturb the
-  artifact and the correspondence covaries; perturb the target and it covaries
-  back. This is what makes computation _meaningful_, and it is what defeats the
-  triviality objection.
-- **3b — observability.** The correspondence is observable and manipulable with
-  the instruments at hand. This is what makes computation _legible_, and it is
-  what the course is built around.
+**Predictive usefulness** — L1's condition (c) — is what makes a computation
+model something at all, and it is what answers the triviality objection.
+**Legibility** — this document's subject, L2 — is whether the correspondence can
+be observed and manipulated with the instruments at hand. That is what makes it
+_teachable_, and it is what the course is built around.
 
 ## Why they had to be separated
 
-The original condition read "when this isometry can be observed and
-manipulated." Two words, two jobs, and only one of them can carry the
-metaphysics.
+Observability cannot carry the metaphysical job, and the reason is worth being
+clear about because the mistake is natural.
 
-"Observed" cannot. Putnam's construction and Searle's wall argument establish
-that some mapping exists between any open physical system and any automaton.
-Adding "…and it must be observable" removes none of those mappings; it filters
-which ones we _notice_, and indexes the answer to an observer with instruments.
-That is a concession to Searle's observer-relativity, not a reply to Putnam.
+Putnam's construction and Searle's wall argument establish that some mapping
+exists between any open physical system and any automaton. Adding "…and it must
+be observable" removes none of those mappings. It filters which ones we happen
+to _notice_, and so indexes the answer to an observer and their instruments —
+which is a concession to Searle's observer-relativity, not a reply to Putnam.
 
-"Manipulated" can. Manipulation is interventionist causation, and a
-counterfactual-supporting, componentially structured correspondence is exactly
-what Putnam's constructions lack — they are fitted to a single actual
-trajectory.
+Predictive usefulness does remove them, because Putnam's mappings predict
+nothing: they are fitted to one run that already happened. That argument is made
+at L1 in [thesis.md](./thesis.md) and is not repeated here.
 
-The raw material was always in the sentence. Only the emphasis was wrong.
+What is left for observability is the question this document is about, and it is
+not a lesser one. It decides what a course can actually work at.
 
-> Owed: Putnam (1988); Searle (1992); Chalmers (1996); Woodward (2003). None
-> fetched. Do not cite without reading.
+> Owed: Putnam (1988); Searle (1992). Neither fetched. Do not cite without
+> reading.
 
 ## The instrument-relativity is the point, not a problem
 
-3b makes legibility relative to available instruments. That consequence is
-owned, not reluctantly accepted, and it is the reason this course has not been
-taught yet:
+Legibility is relative to available instruments. That consequence is owned, not
+reluctantly accepted, and it is the reason this course has not been taught yet:
 
 > Without observability and prediction-based quizzing, the level of twinning the
 > course targets cannot be taught, so learners cannot reach the deeper questions
@@ -52,10 +49,10 @@ And the contrast that makes it concrete:
 > program output, or visible behaviour — and imprecise, unverifiable analogies
 > of what happens in the middle.
 
-That is a claim about **what can be taught**, and it is why 3b is a separate
-node. Stated as a claim about what _exists_, it would be a reductio: a program
-would not be meaningful computation before a tool was built and would become so
-afterward. Stated as a claim about access, it is just true, and it is the
+That is a claim about **what can be taught**, and it is why legibility is a
+separate node. Stated as a claim about what _exists_, it would be a reductio: a
+program would not model anything before a tool was built and would start to once
+one afterward. Stated as a claim about access, it is just true, and it is the
 infrastructure bet the whole curriculum rests on.
 
 ## The criterion
@@ -67,7 +64,7 @@ Not "where it is simple enough." Not "where it is advanced." Applied to
 `ontology.md` §9's seven analytical lenses, this turns an editorial scope
 decision into a consequence:
 
-| Lens                       | Status               | Why, under 3b                                       |
+| Lens                       | Status               | Why, under legibility                               |
 | -------------------------- | -------------------- | --------------------------------------------------- |
 | 1 Platonic                 | deferred             | no manipulable correspondence available to anyone   |
 | 2 Physics / material       | deferred             | not reachable from a browser                        |
@@ -89,8 +86,8 @@ setting. Build one and the lens opens — which is what the roadmap's Trees → 
 work done there — accountability questions, the three senses of access, who
 bears the consequences — is rhetorical and ethical reasoning _that computational
 thinking informs_. That is not a demotion; it is a description, and it is
-symmetric: lens 7 fails 3b for the same reason lenses 1–3 do, with no special
-pleading in either direction.
+symmetric: lens 7 fails legibility for the same reason lenses 1–3 do, with no
+special pleading in either direction.
 
 ## Instruments, and the same design move twice
 
@@ -120,21 +117,21 @@ rationalisation.
 
 ## The deliberate crack
 
-3b is worded generally — _the instruments at hand_ — and not tuned to Study
-Lenses, on purpose. It leaves room for cases where observation is itself the
-difficulty rather than a matter of tooling. Quantum computation is the obvious
-one: measurement disturbs the state, so the correspondence resists observation
-for reasons that are not engineering.
+The criterion is worded generally — _the instruments at hand_ — and not tuned to
+Study Lenses, on purpose. It leaves room for cases where observation is itself
+the difficulty rather than a matter of tooling. Quantum computation is the
+obvious one: measurement disturbs the state, so the correspondence resists
+observation for reasons that are not engineering.
 
 Those cases are L4 asides, not curriculum. But a criterion that could not
 accommodate them would be a criterion about Study Lenses wearing a general
 disguise.
 
-## Both conditions are learner-facing instruments
+## The criteria are learner-facing instruments
 
-3a and 3b are not definitional hygiene. The course uses them as grounding for
-identifying and exploring more exotic forms of computation — learners apply them
-to candidate systems and decide cases.
+Predictive usefulness and legibility are not definitional hygiene. The course
+uses them as grounding for identifying and exploring more exotic forms of
+computation — learners apply them to candidate systems and decide cases.
 
 That sets a higher bar than surviving review. A criterion is good enough for a
 paper if it is defensible; it is good enough here only if a learner can pick up
@@ -144,6 +141,6 @@ to be right.
 
 ## Related
 
-- [thesis.md](./thesis.md) — where 3a and 3b sit in the DAG
+- [thesis.md](./thesis.md) — where the L1 conditions and L2 sit in the DAG
 - [meaning.md](./meaning.md) — why the observer cannot be smuggled into L1
-- [half-beat.md](./half-beat.md) — 3b turned into an assessable exercise
+- [half-beat.md](./half-beat.md) — legibility turned into an assessable exercise

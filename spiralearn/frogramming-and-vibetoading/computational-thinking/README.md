@@ -14,7 +14,7 @@
 
 ## The claim
 
-> **Meaning, legibility, and notation are three separate additions to bare
+> **Modelling, legibility, and notation are three separate additions to bare
 > computation. Computational thinking requires all three — which is why it
 > cannot be taught abstracted from a medium.**
 
@@ -23,9 +23,14 @@ names a commitment this course has made.
 
 | Addition                                  | What supplies it                                     |
 | ----------------------------------------- | ---------------------------------------------------- |
-| a second system (meaning)                 | the domain — user-facing, text-manipulating programs |
+| a second system (modelling)               | the domain — user-facing, text-manipulating programs |
 | an observer with instruments (legibility) | Study Lenses · `embody`                              |
-| a notation                                | Just Enough JavaScript                               |
+| a machine to think through                | JEJ's notional machine, operated through JEJ         |
+
+**Meaningful computation** is not one of the three. It is what the whole thing
+is for: an artifact that participates in a situation and is taken some way by
+someone. It sits at the far end of the chain, and it is what the course is named
+after.
 
 The thesis is not a preamble to the curriculum. It is an account of why the
 curriculum has the shape it already has.
@@ -43,20 +48,41 @@ the last has causal influence, which is why one edge carries an arrow.
 Two corners have instruments that make them legible. The third does not yet:
 that gap is what the half-beat is for.
 
+The ringed corner is the one you learn to hand over, and the picture makes four
+different relationships to delegation visible at once:
+
+- **the idea** is yours. Understanding is non-delegable, which is `ontology.md`
+  §1's first principle.
+- **the notional machine** is yours to twin — and it is the vocabulary you and
+  an LLM work in. `ontology.md:1240-1243` calls this NM-grounded conversation:
+  "Make the NM declare a `const balance = 0`…" You specify behaviour in the
+  machine's terms and verify what comes back against it. The LLM is an
+  interlocutor there, never the owner of the twin.
+- **the programming language** is delegable. This is the part the course teaches
+  you to hand over.
+- **the computation itself** was never yours to do. Electrons through matter,
+  ones and zeroes on a board — physical, embodied, and going to happen whoever
+  wrote the instructions.
+
+The ring is drawn in the same colour as the causal arrow, and that is not
+decoration: the part you delegate is the only part with causal power over the
+machine. Which is exactly why `ontology.md:1257` insists that "Frogramming with
+delegation is only sustainable if you keep the direct NM view alive."
+
 ## Reading order
 
 Written in dependency order. Each stands alone; each cites the others.
 
-|     | Document                                                   | What it argues                                                                                          |
-| --- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| 0   | [meaning.md](./meaning.md)                                 | "Meaningful" is two senses — semantic and rhetorical — deliberately homonymous, and never to be bridged |
-| 1   | [thesis.md](./thesis.md)                                   | The definitional DAG, layer by layer, and the claim it establishes                                      |
-| 2   | [observability.md](./observability.md)                     | Intervention and observability split apart, and the criterion that decides what a course can work at    |
-| 3   | [computational-languages.md](./computational-languages.md) | The genus, algorithms as its second species, and what survives notation-relativity                      |
-| 4   | [domain.md](./domain.md)                                   | Text as the domain, and the reply owed to Weintrop                                                      |
-| 5   | [epicycles.md](./epicycles.md)                             | Learning-to-program → programming-to-learn as repeated half-beats                                       |
-| 6   | [half-beat.md](./half-beat.md)                             | One drafted, one deliberately bad, and the gate item                                                    |
-| 7   | [tie-ins.md](./tie-ins.md)                                 | Findings about F&V — a map, not a work order                                                            |
+|     | Document                                                   | What it argues                                                                                                 |
+| --- | ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| 0   | [meaning.md](./meaning.md)                                 | Why "meaning" splits into two named nodes — modelling at L1, meaningful at L6 — instead of one word doing both |
+| 1   | [thesis.md](./thesis.md)                                   | The definitional DAG, layer by layer, and the claim it establishes                                             |
+| 2   | [observability.md](./observability.md)                     | Legibility as its own node, and the criterion that decides what a course can work at                           |
+| 3   | [computational-languages.md](./computational-languages.md) | The genus, algorithms as its second species, and what survives notation-relativity                             |
+| 4   | [domain.md](./domain.md)                                   | Text as the domain, and the reply owed to Weintrop                                                             |
+| 5   | [epicycles.md](./epicycles.md)                             | Learning-to-program → programming-to-learn as repeated half-beats                                              |
+| 6   | [half-beat.md](./half-beat.md)                             | One drafted, one deliberately bad, and the gate item                                                           |
+| 7   | [tie-ins.md](./tie-ins.md)                                 | Findings about F&V — a map, not a work order                                                                   |
 
 Start at 0 if you want the argument. Start at 7 if you are redrafting the
 course. Start at 6 if you want to know whether any of this survives contact with
@@ -64,13 +90,13 @@ a chapter.
 
 ## What connects them
 
-- **0 → 1.** The thesis defines "meaningful computation", and the title word is
-  a deliberate pun. `meaning.md` comes first so the pun is declared before it is
-  used.
-- **1 → 2.** The thesis splits one condition into intervention (what makes
-  computation meaningful) and observability (what makes it legible).
-  `observability.md` develops the second, because it is the one the course runs
-  on.
+- **0 → 1.** The thesis uses "modelling" and "meaningful" for two different
+  nodes. `meaning.md` comes first so the split is established before either word
+  is put to work.
+- **1 → 2.** The thesis separates predictive usefulness (what makes a
+  computation model something) from observability (what makes that modelling
+  legible). `observability.md` develops the second, because it is the one the
+  course runs on.
 - **1 → 3.** The genus/species distinction is L3 of the DAG. Algorithms are the
   second species, which is what makes the genus visible at all.
 - **3 → 4.** If the thoughts are notation-relative, the notation and the domain

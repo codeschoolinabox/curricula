@@ -1,89 +1,87 @@
-# Meaning — two senses, kept apart
+# Meaning — why the word sits at the top of the chain
 
 > Author-facing design memo. Part of the `computational-thinking/` set; start at
 > [README.md](./README.md).
 
-The course is called _Meaningful Computation through Affordance-Discovery
-Cycle(s)_. The word "meaningful" is doing two jobs, deliberately. This document
-names both and refuses to merge them.
+"Meaning" names two different things, and the chain gives them two different
+names so nobody has to keep them apart by discipline.
 
-## The two senses
+## The two things
 
-**Semantic meaning.** The artifact's states correspond to another system's
-states. This is Grice's _natural_ meaning — "those spots mean measles" —
-indication grounded in reliable covariation, with no communicative intention
-anywhere in it. It is a **two-place** relation: artifact, target. Nobody has to
-be watching for it to hold.
+**States tracking states.** A thermostat's internal state corresponds to the
+temperature of a room. Warm the room and the state moves; move the state and the
+room warms. That relationship holds whether or not anyone is watching — it is a
+fact about two systems, not about anybody's understanding of them. Grice called
+this _natural_ meaning, the sense in which spots mean measles: reliable
+covariation, no intention anywhere in it.
 
-**Rhetorical meaning.** What a piece of work is _for_, and whether an audience
-takes it that way. Grice's meaning-nn: an intention that the audience recognise
-the intention as such. This is the sense `ontology.md`'s rhetorical situation
-runs on, and the sense Lupe Fiasco's _conceit_ names in the whole-rhetorical-
-situation strand.
+In this set that relationship is called **modelling computation**, and it lives
+at L1.
 
-## Why they are not unified here
+**Something being taken some way by someone.** What a piece of work is _for_,
+offered by someone, and received. Grice's non-natural meaning: an intention that
+the audience recognise the intention as such. This is the sense `ontology.md`'s
+rhetorical situation runs on, and the sense its conceit names.
 
-An earlier draft proposed a bridge: _"meaning is never in the artifact; it is in
-the relation between artifact and interpreter."_ That sentence is cut, and it is
-worth recording why, because it is seductive.
+In this set that is called **meaningful computation**, and it lives at L6.
 
-It contradicts the thesis. Conditions (a) and (b) of meaningful computation are
-two-place properties of the artifact–target pair — no interpreter appears in
-them. So either the interpreter is constitutive, in which case meaningful
-computation is observer-relative and Searle wins; or the bridge sentence is
+## Why the split, rather than one word doing both
+
+An earlier draft used "meaningful computation" for the L1 relation and then had
+to spend a document insisting the word never slide into its other sense. That
+was a workaround, and the tell was how much upkeep it needed.
+
+The slide it was guarding against is real. Arguing from state-correspondence to
+rhetorical conclusions — _the states correspond, therefore the program
+communicates_ — is invalid, and so is the reverse, _the audience understood it,
+therefore the model is correct_. A single word makes both look like short steps.
+
+Grice separated the two senses precisely because the surface word misleads. Two
+names is the same fix, applied earlier.
+
+It also puts the word where the course needs it. **Meaningful Computation** as a
+title now names what the work is for rather than the machinery underneath it,
+which is the better thing for a title to name.
+
+> Owed: Grice, "Meaning" (1957). Not fetched.
+
+## What was tempting and is wrong
+
+A bridge sentence: _meaning is never in the artifact; it is in the relation
+between artifact and interpreter._
+
+It sounds unifying and it contradicts the thesis. L1's conditions (a) and (b)
+are properties of the artifact–target pair; no interpreter appears in them. So
+either the interpreter is constitutive — and then modelling is
+observer-relative, which hands the argument to Searle — or the sentence is
 false. There is no third reading.
 
-"Both are relational, therefore one word" also equivocates on a determinable.
-Causation is relational. Being north of is relational. The genus carries no
-content down to the species.
-
-Grice separated these two senses _precisely because the surface word misleads_.
-Reaching for a bridge is reaching across the gap he opened on purpose.
-
-## So: declare the pun
-
-Two senses of one English word, homonymous by design. The title carries both
-because the course carries both — F's work is semantic, V's work is rhetorical,
-and a practitioner holding both twins is working in both senses at once. That is
-a real fact about the practice, not a lucky coincidence in the vocabulary, and
-saying so is stronger than pretending the word is univocal.
-
-**The term's tell**, for learners: _meaningful to whom, about what?_ The two
-legitimate answers are the two senses above. A learner who cannot answer either
-is using the word as praise.
+"Both are relational, therefore one word" also proves too much. Causation is
+relational. Being north of is relational. The genus carries no content down to
+the species.
 
 ## Derived and original intentionality
 
-A distinction the bridge would have erased, worth keeping (Haugeland; Dennett):
-the artifact's semantics is **derived** — parasitic on an interpreter who set it
-up. The rhetorical conceit is **original** — it is the interpreter's own.
-Collapsing these is the specific move that makes observer-relativity
-unavoidable, so the distinction is load-bearing rather than decorative.
+Worth keeping, and it belongs at L6 (Haugeland; Dennett). The artifact's
+semantics is **derived** — it is parasitic on someone who set it up. The
+rhetorical conceit is **original**; it is the author's own. Collapsing those two
+is the specific move that makes observer-relativity unavoidable, which is why
+the distinction earns its place rather than decorating the page.
 
-## What sliding looks like
+## Drafting hazards
 
-Drafting hazards, stated so they can be caught in review:
-
-- Using "meaningful" as a value word ("a meaningful exercise") anywhere the
-  technical sense is in play. Two existing sites in the curriculum already do
-  this innocently — `pedagogy.md:52` and `study-lenses.md:180-181` — and both
-  predate the term.
-- Arguing from semantic meaning to rhetorical conclusions: "the states
-  correspond, therefore the program communicates."
-- Arguing the reverse: "the audience understood it, therefore the model is
-  correct."
-- Any sentence where swapping one sense for the other leaves the sentence
-  looking fine. That is the test.
-
-## A vocabulary collision to avoid
-
-"Tie-in" is used in this set for a **one-direction citation link into F&V**
-([tie-ins.md](./tie-ins.md)). It was briefly also used for _a connotation a word
-carries_. It no longer is. `pedagogy.md:401`'s "beware lazy conflations" applies
-to this set's own vocabulary first.
+- "Meaningful" used as a value word — _a meaningful exercise_ — anywhere the
+  technical sense is live. Two sites in the curriculum already do this
+  innocently and predate the term: `pedagogy.md:52` and
+  `study-lenses.md:180-181`. Both are quotations when they appear here and stay
+  as written.
+- Using "meaningful" for the L1 relation. That is modelling.
+- Any sentence where swapping one sense for the other leaves it looking fine.
+  That is the test.
 
 ## Related
 
-- [thesis.md](./thesis.md) — where meaningful computation is defined
+- [thesis.md](./thesis.md) — where modelling and meaningful computation are
+  defined
 - [observability.md](./observability.md) — the observer, and where it
   legitimately enters

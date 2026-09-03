@@ -15,10 +15,10 @@ Chapter 0 sets it.
 
 ## Why the domain is not optional
 
-[thesis.md](./thesis.md) makes meaningful computation require a **second
-system** — the target. A course with no target teaches computation without
-meaning, by its own definition. So the domain is not a flavouring decision. It
-is the L1 ingredient, and something has to supply it.
+[thesis.md](./thesis.md) makes modelling computation require a **second system**
+— the target. A course with no target teaches computation without meaning, by
+its own definition. So the domain is not a flavouring decision. It is the L1
+ingredient, and something has to supply it.
 
 ## Subject-matter-agnostic and discipline-situated at once
 
@@ -43,7 +43,7 @@ discipline, and name the alternative explicitly:
 
 > "This differs markedly from teaching computational thinking as part of a
 > standalone course in which the assignments that students are given tend to be
-> divorced from real-world problems and applications." [read: Weintrop et al.,
+> divorced from real-world problems and applications." [read: Weintrop et al., >
 > *J Sci Educ Technol* (2016) 25:127–147, **p.128**, > right column]
 
 Two things to be honest about when using this. The sentence sits in a motivation
@@ -98,7 +98,19 @@ any strong reading of one-practice-two-target-distances. Both readings should be
 stated. Presenting only the supportive one would be the same selective citation
 the Weintrop reply is trying to avoid.
 
-> Owed: a source for this finding. It is currently an unsourced assertion.
+**Two different kinds of support, which must not be run together.** The finding
+is _experimental_: computing-education researchers ran studies and measured the
+gap. Naur's essay offers a _mechanism_ that would explain it — the theory a
+programmer holds is a theory about a particular world, and it does not travel to
+a different one — and [thesis.md](./thesis.md) develops that mechanism from L1's
+modelling relation. An essay proposing a mechanism is not a study measuring an
+effect, and this document should not let the more quotable of the two stand in
+for the more load-bearing.
+
+> **Owed, and load-bearing: the CER experiments themselves.** They are what
+> establish the finding and they are named nowhere in this set. Until they are
+> cited, the claim rests on an essay and an analogy — not enough for a
+> curriculum that asks learners to tell a mechanism from evidence for it.
 
 ## The design was already made
 
@@ -129,7 +141,7 @@ enumerated in prose on p.128 [read]; Fig. 2 on p.135 is a raster diagram of the
 same. One practice in the modeling category is worth lifting directly:
 
 > **Assessing Computational Models** asks which aspects of a phenomenon have
-> been faithfully modeled and which have been simplified or ignored [read:
+> been faithfully modeled and which have been simplified or ignored [read: >
 > p.137].
 
 That is condition (a) turned into a teachable practice, and it is close to the

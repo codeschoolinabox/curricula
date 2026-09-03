@@ -17,8 +17,8 @@ have: "computational language" appears **zero times** across the F&V documents
 ## Algorithms are the second species, and they are why the genus is visible
 
 An algorithm is an abstract symbolic representation of how the notional machine
-transforms data. It represents meaningful computation. It has no causal
-influence over any artifact. So it is a computational language that is **not** a
+transforms data. It represents modelling computation. It has no causal influence
+over any artifact. So it is a computational language that is **not** a
 programming language — the genus and the species, pulled apart, on one page.
 
 This matters more than it sounds. **A genus with one visible species is not a
@@ -146,7 +146,7 @@ corrections before it appears anywhere learner-facing:
 
 ## Open
 
-**Type or token.** "A symbolic representation of meaningful computation" is
+**Type or token.** "A symbolic representation of modelling computation" is
 ambiguous between the system (French) and the utterance (a French sentence). A
 programming language is a type; an algorithm is closer to a token. The course
 teaches a language through programs, so it lives on both sides. Decide before

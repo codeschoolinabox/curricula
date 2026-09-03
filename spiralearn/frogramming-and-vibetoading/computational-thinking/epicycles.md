@@ -23,7 +23,7 @@ Two positions sit in the source material and read as a contradiction.
 > "Learning a programming language is a separate process from learning
 > computational thinking. Courses often try teaching both at once. I prefer to
 > teach programming language and composition skills first then build higher
-> level thinking on this foundation." [read:
+> level thinking on this foundation." [read: >
 > `from-a-job-application/ltp-ptl.md:3`]
 >
 > "So this course will gradually interweave more complex forms of computational
@@ -108,11 +108,11 @@ words:
 
 That is a **pedagogy** ruling, not a claim about what computational thinking is.
 It belongs here and not in [thesis.md](./thesis.md). By the thesis's own three
-conditions V's Ch2 practice _is_ meaningful computation — `ontology.md:936-946`
+conditions V's Ch2 practice _is_ modelling computation — `ontology.md:936-946`
 describes a real second system, mapped both ways, with inference from
-intermediary states and a manipulable correspondence. Ruling that V is "not CT"
-would contradict the thesis. Ruling that CT is the wrong instrument for V's ends
-does not.
+intermediary states and predictions a learner can check. Ruling that V is "not
+CT" would contradict the thesis. Ruling that CT is the wrong instrument for V's
+ends does not.
 
 ## Where the ethics lands, and why it stops being an open question
 
@@ -138,7 +138,7 @@ The V flavour does not run through Ch1. The chapter design already says why:
 
 > "The proposals stayed modest (greet, gate, retry, validate) so the discoveries
 > could go deep. Ch2 swings the other hand: the proposals get the depth." [read:
-> `chapters.md:1117-1119`]
+> > `chapters.md:1117-1119`]
 
 Running V half-beats through Ch1 would dissolve the F-hand / V-hand split the
 whole course is built on. And it is unnecessary: **Ch2's V1–V5 ladder is already
@@ -205,9 +205,9 @@ learner can break it.**
 
 If the only available response is agreement, it is filler.
 
-This is condition 3b ([observability.md](./observability.md)) turned into an
-editorial rule. Publish it _with a rejected counterexample beside it_ — see
-[half-beat.md](./half-beat.md) — because drafters who see only the rule will
+This is the legibility criterion ([observability.md](./observability.md)) turned
+into an editorial rule. Publish it _with a rejected counterexample beside it_ —
+see [half-beat.md](./half-beat.md) — because drafters who see only the rule will
 write the bad version and believe they have complied.
 
 **A hard constraint, not a preference: the artifact must be falsifiable by
