@@ -111,6 +111,15 @@ const REVOKE_OBJECT_URL = URL.revokeObjectURL;
 // (README.md § Realms), not because any row can reach it.
 const BLOB = Blob;
 
+// WHY at module load: three reads sit after the program — two in the engine's
+// own halt author, which runs on every stop, and one in describeError, which
+// names what threw in a `failure` post. Latching fixes the BINDING, not the
+// object: a program that redefines Error[Symbol.hasInstance] still reaches
+// these reads, and that residual is named rather than closed (README.md § What
+// the rule does not reach).
+const ERROR = Error;
+const STRING = String;
+
 const IDENTIFIER_RE = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
 const NATURAL_END: HaltKind = 'natural-end';
 
@@ -331,8 +340,8 @@ function defaultHaltPayload(
 		return { name: NATURAL_END, message: '' };
 	}
 	return {
-		name: rawError instanceof Error ? rawError.name : 'Error',
-		message: rawError instanceof Error ? rawError.message : String(rawError),
+		name: rawError instanceof ERROR ? rawError.name : 'Error',
+		message: rawError instanceof ERROR ? rawError.message : STRING(rawError),
 		phase,
 	};
 }
@@ -408,7 +417,7 @@ function findInvalidGlobalKey(
 }
 
 function describeError(error: unknown): string {
-	return error instanceof Error
+	return error instanceof ERROR
 		? `${error.name}: ${error.message}`
-		: String(error);
+		: STRING(error);
 }

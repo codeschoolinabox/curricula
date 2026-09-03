@@ -175,7 +175,7 @@ describe('latched built-ins', () => {
 	});
 
 	describe('several rebound globals at once', () => {
-		it.skip('rebinding postMessage, URL, Error and String together still yields a faithful halt', async () => {
+		it('rebinding postMessage, URL, Error and String together still yields a faithful halt', async () => {
 			const { worker, next } = await startRun(
 				{ omitSerializeHalt: true },
 				'globalThis.postMessage = null;\nglobalThis.URL = null;\nglobalThis.Error = null;\nglobalThis.String = null;\nthrow new TypeError("boom");',
@@ -297,7 +297,7 @@ describe('latched built-ins', () => {
 			});
 		});
 
-		it.skip('a replaced Error constructor does not cost the halt its name', async () => {
+		it('a replaced Error constructor does not cost the halt its name', async () => {
 			const { worker, next } = await startRun(
 				{ omitSerializeHalt: true },
 				'globalThis.Error = function () {};\nthrow new TypeError("boom");',
@@ -314,7 +314,7 @@ describe('latched built-ins', () => {
 	});
 
 	describe('the boundaries of the guarantee', () => {
-		it.skip('the engine default halt author is immune to a replaced String', async () => {
+		it('the engine default halt author is immune to a replaced String', async () => {
 			const { worker, next } = await startRun(
 				{ omitSerializeHalt: true },
 				'globalThis.String = function () { return "CLOBBERED"; };\nthrow {};',
@@ -325,7 +325,7 @@ describe('latched built-ins', () => {
 			expect(halt.payload.message).toBe('[object Object]');
 		});
 
-		it.skip('consumer worker logic latches its own — a replaced String reaches the consumer halt author', async () => {
+		it('consumer worker logic latches its own — a replaced String reaches the consumer halt author', async () => {
 			const { worker, next } = await startRun(
 				{},
 				'globalThis.String = function () { return "CLOBBERED"; };\nthrow {};',
@@ -336,7 +336,7 @@ describe('latched built-ins', () => {
 			expect(halt.payload.message).toBe('CLOBBERED');
 		});
 
-		it.skip('a redefined Error hasInstance still reaches the halt author — a named residual, not a covered one', async () => {
+		it('a redefined Error hasInstance still reaches the halt author — a named residual, not a covered one', async () => {
 			const { worker, next } = await startRun(
 				{ omitSerializeHalt: true },
 				'Object.defineProperty(Error, Symbol.hasInstance, { value: () => false });\nthrow new TypeError("boom");',
