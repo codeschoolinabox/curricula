@@ -110,7 +110,7 @@ describe('latched built-ins', () => {
 	});
 
 	describe('a program that rebinds nothing', () => {
-		it.skip('function path — the natural-end halt arrives', async () => {
+		it('function path — the natural-end halt arrives', async () => {
 			const { worker, next } = await startRun({ omitSerializeHalt: true }, '');
 			const halt = await within(next);
 			worker.terminate();
@@ -122,7 +122,7 @@ describe('latched built-ins', () => {
 			});
 		});
 
-		it.skip('module path — the natural-end halt arrives', async () => {
+		it('module path — the natural-end halt arrives', async () => {
 			const { worker, next } = await startRun(
 				{ omitSerializeHalt: true },
 				'',
@@ -207,7 +207,7 @@ describe('latched built-ins', () => {
 	});
 
 	describe('which writes reach the engine globals', () => {
-		it.skip('module path — an explicit global write lands on the shared global object', async () => {
+		it('module path — an explicit global write lands on the shared global object', async () => {
 			const { worker, next } = await startRun(
 				{},
 				'globalThis.probe = 1;\nemit(globalThis.probe === 1);',
@@ -220,7 +220,7 @@ describe('latched built-ins', () => {
 			expect(first.message).toBe(true);
 		});
 
-		it.skip('module path — a top-level var does not land on the shared global object', async () => {
+		it('module path — a top-level var does not land on the shared global object', async () => {
 			const { worker, next } = await startRun(
 				{},
 				'var probe = 1;\nemit(globalThis.probe === 1);',
@@ -233,7 +233,7 @@ describe('latched built-ins', () => {
 			expect(first.message).toBe(false);
 		});
 
-		it.skip('function path, sloppy — an undeclared assignment lands on the shared global object', async () => {
+		it('function path, sloppy — an undeclared assignment lands on the shared global object', async () => {
 			const { worker, next } = await startRun(
 				{},
 				'probe = 1;\nemit(globalThis.probe === 1);',
@@ -245,7 +245,7 @@ describe('latched built-ins', () => {
 			expect(first.message).toBe(true);
 		});
 
-		it.skip('function path — a top-level var is a wrapper local', async () => {
+		it('function path — a top-level var is a wrapper local', async () => {
 			const { worker, next } = await startRun(
 				{},
 				'var probe = 1;\nemit(globalThis.probe === 1);',

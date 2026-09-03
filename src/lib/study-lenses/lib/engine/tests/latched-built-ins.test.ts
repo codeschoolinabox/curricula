@@ -165,7 +165,7 @@ describe('the latch rule over the worker realm', () => {
 		expect(ambientReads('create-buffer-views.ts')).toEqual([]);
 	});
 
-	it.skip('protocol.ts reads no ambient name from inside a function body', () => {
+	it('protocol.ts reads no ambient name from inside a function body', () => {
 		expect(ambientReads('protocol.ts')).toEqual([]);
 	});
 
@@ -183,15 +183,15 @@ describe('the latch rule over the worker realm', () => {
 		]);
 	});
 
-	it.skip('bootstrap.ts captures no namespace whose members it calls', () => {
+	it('bootstrap.ts captures no namespace whose members it calls', () => {
 		expect(namespaceCaptures('bootstrap.ts')).toEqual([]);
 	});
 
-	it.skip('read-call-response.ts captures no namespace whose members it calls', () => {
+	it('read-call-response.ts captures no namespace whose members it calls', () => {
 		expect(namespaceCaptures('read-call-response.ts')).toEqual([]);
 	});
 
-	it.skip('create-buffer-views.ts captures no namespace whose members it calls', () => {
+	it('create-buffer-views.ts captures no namespace whose members it calls', () => {
 		expect(namespaceCaptures('create-buffer-views.ts')).toEqual([]);
 	});
 });
