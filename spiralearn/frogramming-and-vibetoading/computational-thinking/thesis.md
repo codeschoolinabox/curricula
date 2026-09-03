@@ -417,6 +417,48 @@ not give you the theory, and an LLM is not someone you can work "in close
 contact with" in the sense his education passage requires. That is a claim worth
 making. It is not a claim Naur made.
 
+### Decay, and why it is not a context-size problem
+
+Naur's account of how programs rot is the most directly useful thing in the
+essay for a course that teaches delegation:
+
+> "On the basis of the Theory Building View the decay of a program text as a
+> result of modifications made by programmers without a proper grasp of the
+> underlying theory becomes understandable. As a matter of fact, if viewed
+> merely as a change of the program text and of the external behaviour of the
+> execution, a given desired modification may usually be realized in many
+> different ways, **all correct**. At the same time, if viewed in relation to
+> the theory of the program these ways may look very different, some of them
+> perhaps conforming to that theory or extending it in a natural way, while
+> others may be wholly inconsistent with that theory, perhaps having the
+> character of unintegrated patches on the main part of the program."
+
+Two consequences worth drawing out.
+
+**The failure is invisible to the verification you would normally reach for.**
+All the candidate modifications are correct. Tests pass on every one of them. So
+whatever discriminates between an extension of the theory and an unintegrated
+patch, it is not behaviour, and it is not a test suite. It is the theory, and
+the theory is in a person.
+
+**And it is not a context-size problem.** The tempting reading is that a
+collaborator with a bigger window would do better. Naur's Case 1 is the control
+experiment for exactly that, and it was run on humans. Group B had the full
+annotated program text, "much additional written design discussion," and
+personal advice — and still proposed solutions "based instead on additions to
+that structure in the form of patches that effectively destroyed its power and
+simplicity," which group A "were able to spot instantly." Ten years later the
+original structure was "still visible, but made entirely ineffective by
+amorphous additions of many different kinds."
+
+Everything that could be written down was written down and handed over. The
+theory still did not travel. If that is right, then more context does not close
+the gap in principle — the thing that would close it was never in the text.
+
+This is the strongest form of the course's argument about delegation, and it is
+also the most careful: it says nothing about what a model can or cannot do. It
+says what a program text can and cannot carry.
+
 **And one part of Naur is awkward for this curriculum, which is a reason to
 quote it rather than skip it.** He concludes that "for the primary activity of
 the programming there can be no right method," and dismisses programming methods
