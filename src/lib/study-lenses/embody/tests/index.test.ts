@@ -120,6 +120,14 @@ describe('embody', () => {
 			).toBe(true);
 		});
 
+		it('a failing prefix leaves acorn token types unfrozen', () => {
+			const { facts } = embody('let @');
+			const prefix = facts.tokens.ok ? undefined : facts.tokens.value;
+			expect(
+				prefix !== undefined && !Object.isFrozen(prefix.tokens[0]?.type),
+			).toBe(true);
+		});
+
 		it('freezes the input-element sequence deeply', () => {
 			const { facts } = embody('let x = 1');
 			const sequence = facts.tokens.ok

@@ -15,7 +15,7 @@ describe('failure accounts', () => {
 			expect(!stage.ok && stage.value?.inputElements).toEqual([]);
 		});
 
-		it.skip('a one-turn reading keeps its one token', () => {
+		it('a one-turn reading keeps its one token', () => {
 			const stage = deriveTokens({ source: 'let @', type: 'module' });
 			expect(!stage.ok && stage.value?.tokens.length).toBe(1);
 		});

@@ -1,4 +1,4 @@
-import { tokenizer } from 'acorn';
+import { tokenizer, tokTypes } from 'acorn';
 import type { Comment, Token } from 'acorn';
 
 import deriveInputElements from '../lib/scanning/derive-input-elements.js';
@@ -44,52 +44,57 @@ export default function deriveTokens(snippet: Snippet): FactStage<Tokens> {
 	// data and its cause speaks in the parser's voice; the enrichment below is
 	// embody's machinery, so it stays OUTSIDE this try — a defect there must
 	// stay loud, never dressed up as a spelling error the learner never made.
-	let tokens: Token[];
+	const tokens: Token[] = [];
 	try {
-		// `Array.from`, never `[...tokenizer(…)]`: Docusaurus/Babel compiles
-		// spread in loose mode to `[].concat(x)`, which wraps a non-array
-		// iterable instead of draining it. That bites harder here than at the
-		// Set/Map sites — a wrapped tokenizer is never DRAINED, so it never
-		// throws, so this stage reports `ok` for source that does not lex and
-		// every phase barred by a tokens failure silently reopens. No test in
-		// this repo's harness can see it (vitest/esbuild, tsc and jsdom all
-		// compile the spread correctly); only the bundled site does.
-		tokens = Array.from(
-			tokenizer(snippet.source, {
-				sourceType: snippet.type,
-				ecmaVersion: ECMA_VERSION,
-				onComment: comments,
-				// ranges gives tokens and comments the same [start, end] span
-				// vocabulary the ast stage's nodes carry — one cross-navigation
-				// currency across the parse facts. No consumer reads it yet; the
-				// option lands ahead of one by ruling (facts expose what the
-				// machine computes). Tests pin it on both arrays.
-				ranges: true,
-			}),
-		);
+		// drained by plain `getToken()` calls — never `[...tokenizer(…)]`,
+		// `Array.from`, or `for…of` over the iterator: Docusaurus/Babel
+		// compiles iteration constructs in loose mode (spread becomes
+		// `[].concat(x)`, which wraps a non-array iterable instead of
+		// draining it) — a wrapped tokenizer is never DRAINED, so it never
+		// throws, so this stage would report `ok` for source that does not
+		// lex and every phase barred by a tokens failure would silently
+		// reopen. No test in this repo's harness can see that (vitest/esbuild,
+		// tsc and jsdom all compile iteration correctly); only the bundled
+		// site does. Plain method calls have no compilation class at all —
+		// and the accumulator survives the throw, which is what lets the
+		// catch publish the token prefix.
+		const reader = tokenizer(snippet.source, {
+			sourceType: snippet.type,
+			ecmaVersion: ECMA_VERSION,
+			onComment: comments,
+			// ranges gives tokens and comments the same [start, end] span
+			// vocabulary the ast stage's nodes carry — one cross-navigation
+			// currency across the parse facts. No consumer reads it yet; the
+			// option lands ahead of one by ruling (facts expose what the
+			// machine computes). Tests pin it on both arrays.
+			ranges: true,
+		});
+		for (
+			let token = reader.getToken();
+			token.type !== tokTypes.eof;
+			token = reader.getToken()
+		) {
+			tokens.push(token);
+		}
 	} catch (error) {
-		// `Array.from`'s internal array is discarded when the tokenizer throws,
-		// so the set-aside comments are the only channel that survives the stop
-		// at this drain — the prefix's token channel has nothing to publish.
-		const prefixTokens: Token[] = [];
 		const cause = toStageCause(error, 'tokens');
 		// the bounded sequence rides the leaf's unchanged tiling contract over
 		// the source cut at the account's own extent — the end of the last
 		// token or set-aside comment, whichever is later; 0 over empty channels
 		try {
 			const extent = Math.max(
-				prefixTokens.at(-1)?.end ?? 0,
+				tokens.at(-1)?.end ?? 0,
 				comments.at(-1)?.end ?? 0,
 			);
 			const inputElements = deriveInputElements({
 				code: snippet.source.slice(0, extent),
-				tokens: prefixTokens,
+				tokens,
 				comments,
 			});
 			return {
 				ok: false,
 				cause,
-				value: { tokens: prefixTokens, comments, inputElements },
+				value: { tokens, comments, inputElements },
 			};
 		} catch (error_) {
 			// a throw here degrades the account alone: the arm keeps its cause,
@@ -100,7 +105,7 @@ export default function deriveTokens(snippet: Snippet): FactStage<Tokens> {
 					error_ instanceof Error ? error_.message : String(error_)
 				})`,
 			);
-			return { ok: false, cause, value: { tokens: prefixTokens, comments } };
+			return { ok: false, cause, value: { tokens, comments } };
 		}
 	}
 

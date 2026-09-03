@@ -35,16 +35,16 @@ export default function embody(
 // freeze-what-you-own: lens refs belong to their defining modules, and each
 // token's `type` is an acorn process-global singleton shared by every parse
 // in the process — freezing either would reach outside the embodiment. The
-// set is transient build-time state, discarded on return.
+// published tokens ride either arm (the token prefix is a tokens failure's
+// account), so both arms' types are excepted. The set is transient
+// build-time state, discarded on return.
 function freezeExceptions(
 	facts: Facts,
 	lenses: ReadonlyArray<Gateable>,
 ): ReadonlySet<object> {
 	const except = new Set<object>(lenses);
-	if (facts.tokens.ok) {
-		for (const token of facts.tokens.value.tokens) {
-			except.add(token.type);
-		}
+	for (const token of facts.tokens.value?.tokens ?? []) {
+		except.add(token.type);
 	}
 	return except;
 }
