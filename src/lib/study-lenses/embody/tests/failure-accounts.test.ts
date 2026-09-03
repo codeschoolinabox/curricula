@@ -30,6 +30,16 @@ describe('failure accounts', () => {
 			expect(!stage.ok && stage.value?.comments.length).toBe(1);
 		});
 
+		it('a stop with no comment set aside carries an empty comment channel', () => {
+			const stage = deriveTokens({ source: 'let @', type: 'module' });
+			expect(!stage.ok && stage.value?.comments).toEqual([]);
+		});
+
+		it('every comment set aside before the stop is kept', () => {
+			const stage = deriveTokens({ source: '//a\n//b\nlet @', type: 'module' });
+			expect(!stage.ok && stage.value?.comments.length).toBe(2);
+		});
+
 		it('the bounded sequence starts at offset zero', () => {
 			const stage = deriveTokens({ source: "let x = 'oops", type: 'module' });
 			expect(!stage.ok && stage.value?.inputElements?.[0]?.start).toBe(0);
