@@ -35,7 +35,7 @@ describe('failure accounts', () => {
 			expect(!stage.ok && stage.value?.inputElements?.[0]?.start).toBe(0);
 		});
 
-		it.skip('the bounded sequence ends at the last token when no comment follows', () => {
+		it('the bounded sequence ends at the last token when no comment follows', () => {
 			const stage = deriveTokens({ source: "let x = 'oops", type: 'module' });
 			expect(!stage.ok && stage.value?.inputElements?.at(-1)?.end).toBe(7);
 		});
