@@ -40,9 +40,33 @@ describe('failure accounts', () => {
 			expect(!stage.ok && stage.value?.inputElements?.at(-1)?.end).toBe(7);
 		});
 
-		it.skip('the extent follows the later channel when a comment outlasts the tokens', () => {
+		it('the extent follows the later channel when a comment outlasts the tokens', () => {
 			const stage = deriveTokens({ source: 'let //c\n@', type: 'module' });
 			expect(!stage.ok && stage.value?.inputElements?.at(-1)?.end).toBe(7);
+		});
+
+		it('the bounded texts join to the sliced source when the comment outlasts the tokens', () => {
+			const stage = deriveTokens({ source: 'let //c\n@', type: 'module' });
+			expect(
+				!stage.ok &&
+					stage.value?.inputElements?.map((element) => element.text).join(''),
+			).toBe('let //c');
+		});
+
+		it('the bounded texts join to the sliced source when no comment follows', () => {
+			const stage = deriveTokens({ source: "let x = 'oops", type: 'module' });
+			expect(
+				!stage.ok &&
+					stage.value?.inputElements?.map((element) => element.text).join(''),
+			).toBe('let x =');
+		});
+
+		it('the bounded texts join to the sliced source when the tokens outlast the comment', () => {
+			const stage = deriveTokens({ source: '//c\nlet @', type: 'module' });
+			expect(
+				!stage.ok &&
+					stage.value?.inputElements?.map((element) => element.text).join(''),
+			).toBe('//c\nlet');
 		});
 
 		it.skip('the extent sits at or before the reported stopping point', () => {
