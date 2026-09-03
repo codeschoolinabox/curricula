@@ -71,8 +71,20 @@ export default function bootstrap(setup: WorkerSetup): void {
 		}
 	});
 
-	post({ kind: 'ready' });
+	POST_MESSAGE({ kind: 'ready' });
 }
+
+// WHY at module load: a program runs in this realm and shares its global
+// object, so a `postMessage` resolved after the program starts is whatever the
+// program left behind. Bound here it is bound before the execute turn (DOCS.md
+// § Capture order; the rule itself is README.md § Realms). Losing the receiver
+// is safe — a detached postMessage reaches the thread from a
+// DedicatedWorkerGlobalScope [measured: this suite's live probe rows].
+// WHY the cast: DOM types declare window.postMessage(message, targetOrigin);
+// the worker-scoped single-argument form needs it.
+const POST_MESSAGE = postMessage as unknown as (
+	message: FromWorkerMessage,
+) => void;
 
 const IDENTIFIER_RE = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
 const NATURAL_END: HaltKind = 'natural-end';
@@ -104,7 +116,7 @@ function handleSetup(
 		const result = setup(api, workerConfig);
 		const invalidKey = findInvalidGlobalKey(result.globals);
 		if (invalidKey !== undefined) {
-			post({
+			POST_MESSAGE({
 				kind: 'failure',
 				name: 'EngineSetupError',
 				message: `global key is not a valid identifier: "${invalidKey}"`,
@@ -122,7 +134,7 @@ function handleSetup(
 		// eslint-disable-next-line functional/immutable-data -- run-state record
 		state.serializeHalt = result.serializeHalt ?? null;
 	} catch (error) {
-		post({
+		POST_MESSAGE({
 			kind: 'failure',
 			name: 'EngineSetupError',
 			message: `consumer setup threw: ${describeError(error)}`,
@@ -137,7 +149,7 @@ function handleExecute(state: RunState, message: ExecuteMessage): void {
 		// normal pattern), a FAILED setup leaves this guard armed — the run
 		// then produces TWO failure posts: the setup's and this one. The
 		// thread-side transport settles on the first and discards the rest.
-		post({
+		POST_MESSAGE({
 			kind: 'failure',
 			name: 'EngineSetupError',
 			message: 'execute received before setup completed',
@@ -222,7 +234,7 @@ async function executeModule(
 			// be redefined — a consumer setup failure. Settle loudly, the way
 			// the function path's parameter shadowing never has to: the engine
 			// never hangs and never throws.
-			post({
+			POST_MESSAGE({
 				kind: 'failure',
 				name: 'EngineSetupError',
 				message: `global "${name}" cannot be installed on globalThis: ${describeError(error)}`,
@@ -263,7 +275,7 @@ function postHalt(
 	phase?: HaltPhase,
 ): void {
 	if (state.serializeHalt === null) {
-		post({
+		POST_MESSAGE({
 			kind: 'halt',
 			haltKind: kind,
 			payload: defaultHaltPayload(kind, rawError, phase),
@@ -272,13 +284,13 @@ function postHalt(
 	}
 
 	try {
-		post({
+		POST_MESSAGE({
 			kind: 'halt',
 			haltKind: kind,
 			payload: state.serializeHalt(kind, rawError, phase),
 		});
 	} catch (error) {
-		post({
+		POST_MESSAGE({
 			kind: 'failure',
 			name: 'EngineHaltError',
 			message: `halt serializer threw: ${describeError(error)}`,
@@ -316,7 +328,7 @@ function emitPausing(views: BufferViews, message: unknown): void {
 	);
 	Atomics.notify(views.control, PROTOCOL.EVENT_READY_INDEX);
 
-	post({ kind: 'message', message });
+	POST_MESSAGE({ kind: 'message', message });
 
 	// WHY the while loop: the spec allows spurious wakeups from
 	// Atomics.wait; without it a spurious wake resumes the program
@@ -332,7 +344,7 @@ function emitPausing(views: BufferViews, message: unknown): void {
 function callBlocking(views: BufferViews, request: unknown) {
 	Atomics.store(views.control, PROTOCOL.CONTROL_INDEX, PROTOCOL.SIGNAL_WAITING);
 
-	post({ kind: 'call', request });
+	POST_MESSAGE({ kind: 'call', request });
 
 	// WHY the while loop: spurious-wakeup guard, same as the pause wait.
 	while (
@@ -376,10 +388,4 @@ function describeError(error: unknown): string {
 	return error instanceof Error
 		? `${error.name}: ${error.message}`
 		: String(error);
-}
-
-function post(message: FromWorkerMessage): void {
-	// WHY the cast: DOM types declare window.postMessage(message,
-	// targetOrigin); the worker-scoped single-argument form needs it.
-	(postMessage as unknown as (m: FromWorkerMessage) => void)(message);
 }

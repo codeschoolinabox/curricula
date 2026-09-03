@@ -141,7 +141,7 @@ describe('latched built-ins', () => {
 	});
 
 	describe('one rebound global', () => {
-		it.skip('function path — nulling postMessage does not cost the program its halt', async () => {
+		it('function path — nulling postMessage does not cost the program its halt', async () => {
 			const { worker, next } = await startRun(
 				{ omitSerializeHalt: true },
 				'globalThis.postMessage = null;',
@@ -156,7 +156,7 @@ describe('latched built-ins', () => {
 			});
 		});
 
-		it.skip('module path — nulling postMessage does not cost the program its halt', async () => {
+		it('module path — nulling postMessage does not cost the program its halt', async () => {
 			const { worker, next } = await startRun(
 				{ omitSerializeHalt: true },
 				'globalThis.postMessage = null;',
@@ -349,7 +349,7 @@ describe('latched built-ins', () => {
 	});
 
 	describe('additional sanity', () => {
-		it.skip('module path — a nulled postMessage does not cost the program its emission', async () => {
+		it('module path — a nulled postMessage does not cost the program its emission', async () => {
 			const { worker, next } = await startRun(
 				{},
 				'globalThis.postMessage = null;\nemit("still here");',
