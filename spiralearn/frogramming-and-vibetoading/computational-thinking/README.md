@@ -99,9 +99,10 @@ Written in dependency order. Each stands alone; each cites the others.
 | 8   | [this-codebase.md](./this-codebase.md)                     | This repository read through the thesis — and where Naur's remedies invert for an LLM collaborator             |
 | 9   | [on-pseudocode.md](./on-pseudocode.md)                     | Why pseudocode-first inverts the sequence — it is notes about a machine you have not met                       |
 
-Start at 0 if you want the argument. Start at 7 if you are redrafting the
-course. Start at 6 if you want to know whether any of this survives contact with
-a chapter.
+Start at 0 if you want the argument. Start at 7 if you are redrafting the course
+— read its header first, since its rows are findings and not a change list.
+Start at 6 if you want to know whether any of this survives contact with a
+chapter.
 
 ## What connects them
 

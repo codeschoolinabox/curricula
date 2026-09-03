@@ -54,18 +54,22 @@ never edited without explicit human instruction in the conversation.
 
 ## State
 
-Seven commits on `main`, none pushed (`main` has no upstream, so "unpushed" is
+Eleven commits on `main`, none pushed (`main` has no upstream, so "unpushed" is
 consistent with the tree rather than directly verifiable).
 
-| SHA        | What                                                         | Rulings it records                                                  |
-| ---------- | ------------------------------------------------------------ | ------------------------------------------------------------------- |
-| `8882352d` | the document set established                                 | condition-3 split; F's far target; V-as-CT is pedagogy not ontology |
-| `99bfcce1` | L1/L6 rename, condition (c), CT by way of a notional machine | modelling/meaningful; predictive usefulness; Ch1 half-beats F-only  |
-| `3504af6a` | Naur read in full                                            | essay-vs-experiment distinction; the attribution hazard             |
-| `9b161cda` | Naur's decay mechanism                                       | decay is not a context-size problem                                 |
-| `596554bc` | `this-codebase.md`                                           | Naur's remedies invert for an LLM collaborator                      |
-| `6c34c970` | **governance** — twin-doc conformance check in AR-4          | conformance not judgement; FLAG don't decide; states its own limit  |
-| `8f20eb34` | two decayed greps and one stale governance claim fixed       | —                                                                   |
+| SHA        | What                                                         | Rulings it records                                                   |
+| ---------- | ------------------------------------------------------------ | -------------------------------------------------------------------- |
+| `8882352d` | the document set established                                 | condition-3 split; F's far target; V-as-CT is pedagogy not ontology  |
+| `99bfcce1` | L1/L6 rename, condition (c), CT by way of a notional machine | modelling/meaningful; predictive usefulness; Ch1 half-beats F-only   |
+| `3504af6a` | Naur read in full                                            | essay-vs-experiment distinction; the attribution hazard              |
+| `9b161cda` | Naur's decay mechanism                                       | decay is not a context-size problem                                  |
+| `596554bc` | `this-codebase.md`                                           | Naur's remedies invert for an LLM collaborator                       |
+| `6c34c970` | **governance** — twin-doc conformance check in AR-4          | conformance not judgement; FLAG don't decide; states its own limit   |
+| `8f20eb34` | two decayed greps and one stale governance claim fixed       | never publish a count whose subject includes the document stating it |
+| `712edf2a` | this handoff, after a context-free audit                     | decision rights; the operating frame                                 |
+| `31e830b6` | `on-pseudocode.md`, `the-stack.svg`, the causal-edge fix     | the stack's floor is where medium-independence fails                 |
+| `970100ce` | **the chain replaces the triangle**                          | the chain is the axis; correctives split at the pivot; F's axis only |
+| `4e3857e1` | the triangle deleted; this file's inventory corrected        | —                                                                    |
 
 Eleven authored Markdown files plus two figures — `the-chain.svg` and
 `the-stack.svg` — and the Naur transcription. `markdownlint` returns 0 across
@@ -77,6 +81,31 @@ unreformatted on purpose [measured 2026-09-03]. All relative links resolve.
 `on-pseudocode.md` is currently 0 bytes). The tracked provenance — `plann.txt`,
 `from-a-job-application/`, the Weintrop PDF — is in scope but historical;
 `README.md` § Provenance says how each is treated.
+
+## The largest change since this file was first written
+
+`970100ce` **replaced the triangle figure with a chain**, and it is not a
+re-draw. The triangle's apex fused two positions — "the idea (cognitive)" and
+"the algorithm (formal)" — because it had no room for pseudocode, which sits
+between them. Retired, then deleted in `4e3857e1`.
+
+F's axis is now seven positions ordered by **causal contact with matter**: the
+artifact, the notional machine, code, the computational thoughts, pseudocode,
+formal notation, CS / theory. **Position 4 is the pivot** — machine-facing to
+its left, not to its right. The **corrective column** is the payload: machines
+disagree with you on the left, proofs on the right, so pseudocode is the one
+position with no external corrective while wearing the costume of one.
+
+Two constraints on it, both human rulings. It is **F's axis** — computing's
+empirical and design work lives on V's side and in the F&V integration, and V
+enters perpendicular at the pivot. And it is **linear on purpose**: it wraps,
+since code can be studied formally and theory applied to physical computation,
+and those are purpose-inversions handled in `ontology.md` §9's already-ratified
+register — a coupling, not a precedence, absent from learner-facing copy.
+
+The corrective column now appears in three places — `thesis.md`,
+`on-pseudocode.md` and `the-chain.svg`. **It is the argument, so a drifted cell
+is a wrong document in three places.** Verify all three together or not at all.
 
 ## Where I suspect I am wrong
 
@@ -125,6 +154,28 @@ unreformatted on purpose [measured 2026-09-03]. All relative links resolve.
    legibility nor notation, in which case the two hats fall out of the DAG
    structurally. Raised, never worked. **Proposal only.**
 
+10. **The corrective column's cells are asserted, not derived.** "Physics"
+    corrects the artifact; "proof" corrects formal notation; the interpreter
+    corrects code. Each is plausible and none was argued. The column is the
+    whole argument of `on-pseudocode.md`, so a wrong cell is a wrong document in
+    three files. **Settle in-session** — but check every cell, not the
+    interesting ones.
+11. **Position 7's type-shift may want more than a note.** Positions 1–6 are
+    things and representations; CS / theory is a discipline whose objects are
+    the other positions. The figure marks it by drawing it apart. Whether that
+    is enough, or whether it belongs on a different axis entirely, is unworked.
+    **Proposal only.**
+12. **The wrap-arounds are footnoted, not worked.** Code studied formally,
+    theory applied to physical computation. They are labelled purpose-inversions
+    and deferred to half-beats and L4. If the ring turns out to be load-bearing
+    rather than decorative, the linear presentation is a simplification the
+    documents do not admit to. **Proposal only.**
+
+**Item 9 is partly answered.** "Whether the DAG should branch onto V and F" now
+has a partial answer in the chain: V enters perpendicular at position 4 rather
+than branching from modelling computation. Whether that settles it or just
+relocates it is open.
+
 **Three further gaps named in `README.md` § Known gaps that are not above** —
 the spiderweb-topology placement of computational thinking, whether target
 systems are localisable by partner communities under the Reusability Paradox,
@@ -139,6 +190,13 @@ both.
   interventionism written into condition (c) in the author's voice. The pattern
   was named in writing after the second, and then happened again. Assume you
   will do it too.
+- **Do not widen the scope of something the human scoped.** Distinct from the
+  wording rule above and not covered by it: the wording was kept and the _range
+  it applied to_ was inflated. Caught when a note about one-shotting during
+  **prototyping** was read as a tension with a ruling about **maintaining a
+  codebase that already has a theory**. Fourth instance of the same family in
+  one session. When a statement arrives with a context attached, the context is
+  part of the claim.
 - **Run the string you publish.** Two published greps had decayed by the time
   the directory was finished; both were in committed prose and neither was
   caught by the author. `grep` here is ugrep. **A count whose subject includes
