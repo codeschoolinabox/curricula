@@ -280,7 +280,7 @@ describe('latched built-ins', () => {
 			expect(first).toEqual({ kind: 'call', request: 'ping' });
 		});
 
-		it.skip('nulling URL still revokes the blob and reaches the natural end', async () => {
+		it('nulling URL still revokes the blob and reaches the natural end', async () => {
 			const { worker, next } = await startRun(
 				{ omitSerializeHalt: true },
 				'globalThis.URL = null;',

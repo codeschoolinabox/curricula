@@ -96,6 +96,21 @@ const ATOMICS_LOAD = Atomics.load;
 const ATOMICS_WAIT = Atomics.wait;
 const ATOMICS_NOTIFY = Atomics.notify;
 
+// WHY at module load: the module path builds its blob URL before importing the
+// program and revokes it after. The create is safe by timing; the REVOKE is the
+// exposed read — it runs in a `finally` on the far side of the program's turn
+// (DOCS.md § Capture order), and a throw there replaces the pending return,
+// costing the run its halt entirely. Members, not the URL namespace; neither
+// consults a receiver.
+// eslint-disable-next-line @typescript-eslint/unbound-method -- a WebIDL static takes no this-value. The rule fires here and not on Atomics only because its own SUPPORTED_GLOBALS allowlist carries Atomics and not URL; the TS declarations are the same shape. Binding would answer it but makes Function.prototype.bind a new residual, which Phase 0 declined
+const CREATE_OBJECT_URL = URL.createObjectURL;
+// eslint-disable-next-line @typescript-eslint/unbound-method -- same allowlist gap, same WebIDL reason; and this is the one of the two the null-URL row actually proves
+const REVOKE_OBJECT_URL = URL.revokeObjectURL;
+
+// Read once, before the program runs -- latched under the mechanical rule
+// (README.md § Realms), not because any row can reach it.
+const BLOB = Blob;
+
 const IDENTIFIER_RE = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
 const NATURAL_END: HaltKind = 'natural-end';
 
@@ -253,9 +268,7 @@ async function executeModule(
 		}
 	}
 
-	const url = URL.createObjectURL(
-		new Blob([code], { type: 'text/javascript' }),
-	);
+	const url = CREATE_OBJECT_URL(new BLOB([code], { type: 'text/javascript' }));
 	try {
 		await import(/* webpackIgnore: true */ /* @vite-ignore */ url);
 	} catch (error) {
@@ -271,7 +284,7 @@ async function executeModule(
 		postHalt(state, 'throw', error, 'evaluation');
 		return;
 	} finally {
-		URL.revokeObjectURL(url);
+		REVOKE_OBJECT_URL(url);
 	}
 
 	postHalt(state, NATURAL_END);
