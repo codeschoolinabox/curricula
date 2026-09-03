@@ -62,7 +62,7 @@ export default function bootstrap(setup: WorkerSetup): void {
 	};
 
 	// eslint-disable-next-line sonarjs/post-message -- a dedicated worker's message source is its own spawning thread; there is no foreign origin
-	globalThis.addEventListener('message', function handleMessage(event) {
+	GLOBAL_SCOPE.addEventListener('message', function handleMessage(event) {
 		const message = event.data as ToWorkerMessage;
 		if (message.kind === 'setup') {
 			handleSetup(state, setup, message.sharedBuffer, message.workerConfig);
@@ -120,6 +120,18 @@ const BLOB = Blob;
 const ERROR = Error;
 const STRING = String;
 
+// WHY at module load: the module path installs the consumer's globals on the
+// shared global object and freezes the api, both of which resolve Object
+// members; the function path builds the runner with Function. Members for
+// Object, never the namespace. WHY globalThis is the ONE object capture: the
+// listener registration needs its receiver, and a bare addEventListener pulled
+// off it would lose one — it is also the target defineProperty writes into.
+const GLOBAL_SCOPE = globalThis;
+const OBJECT_FREEZE = Object.freeze;
+const OBJECT_KEYS = Object.keys;
+const OBJECT_DEFINE_PROPERTY = Object.defineProperty;
+const FUNCTION_CONSTRUCTOR = Function;
+
 const IDENTIFIER_RE = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
 const NATURAL_END: HaltKind = 'natural-end';
 
@@ -137,7 +149,7 @@ function handleSetup(
 	workerConfig: unknown,
 ): void {
 	const views = createBufferViews(sharedBuffer);
-	const api = Object.freeze({
+	const api = OBJECT_FREEZE({
 		emit(message: unknown): void {
 			emitPausing(views, message);
 		},
@@ -205,7 +217,7 @@ function executeFunction(
 	code: string,
 	strict: boolean,
 ): void {
-	const names = Object.keys(globals);
+	const names = OBJECT_KEYS(globals);
 	const values = names.map(function valueFor(name) {
 		return globals[name];
 	});
@@ -217,8 +229,11 @@ function executeFunction(
 	// and sloppy bodies.
 	let run: (...runArguments: readonly unknown[]) => unknown;
 	try {
-		// eslint-disable-next-line @typescript-eslint/no-implied-eval, sonarjs/code-eval -- running opaque consumer code in the sandbox IS this module's purpose
-		run = new Function(...names, body) as (
+		// WHY no no-implied-eval directive: that rule matches on the callee's
+		// NAME, so latching Function past it costs this site its static eval
+		// guard. sonarjs/code-eval follows the alias and still fires.
+		// eslint-disable-next-line sonarjs/code-eval -- running opaque consumer code in the sandbox IS this module's purpose
+		run = new FUNCTION_CONSTRUCTOR(...names, body) as (
 			...runArguments: readonly unknown[]
 		) => unknown;
 	} catch (error) {
@@ -249,14 +264,17 @@ async function executeModule(
 	globals: Record<string, unknown>,
 	code: string,
 ): Promise<void> {
-	for (const name of Object.keys(globals)) {
+	for (const name of OBJECT_KEYS(globals)) {
 		try {
 			// WHY defineProperty, not bracket assignment: an own-property
 			// write bypasses inherited accessor setters, so a global named
 			// `__proto__` installs a real binding instead of repointing
 			// globalThis's prototype. The keys are already identifier-valid.
-			// eslint-disable-next-line functional/immutable-data -- globalThis installation IS the module path's delivery channel
-			Object.defineProperty(globalThis, name, {
+			// The immutable-data directive that stood here is gone with the latch:
+			// the rule only fires on a member-expression callee, and the capture is
+			// a bare one. globalThis installation IS the module path's delivery
+			// channel, which is why it was suppressed rather than avoided.
+			OBJECT_DEFINE_PROPERTY(GLOBAL_SCOPE, name, {
 				value: globals[name],
 				writable: true,
 				configurable: true,
@@ -402,13 +420,13 @@ function callBlocking(views: BufferViews, request: unknown) {
 function findInvalidGlobalKey(
 	globals: Readonly<Record<string, unknown>>,
 ): string | undefined {
-	return Object.keys(globals).find(function isInvalid(key) {
+	return OBJECT_KEYS(globals).find(function isInvalid(key) {
 		if (!IDENTIFIER_RE.test(key)) {
 			return true;
 		}
 		try {
-			// eslint-disable-next-line @typescript-eslint/no-implied-eval, sonarjs/code-eval -- a parameter-name probe: the platform itself is the authority on reserved words
-			new Function(key, '"use strict";');
+			// eslint-disable-next-line sonarjs/code-eval -- a parameter-name probe: the platform itself is the authority on reserved words; no-implied-eval no longer sees this site, see executeFunction
+			new FUNCTION_CONSTRUCTOR(key, '"use strict";');
 			return false;
 		} catch {
 			return true;

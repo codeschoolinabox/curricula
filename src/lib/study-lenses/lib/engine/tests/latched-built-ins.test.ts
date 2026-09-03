@@ -81,9 +81,20 @@ function ambientNames(fileName: string, insideFunction: boolean): string[] {
 	const source = readFileSync(WORKER_DIRECTORY + fileName, 'utf8');
 	const names = new Set<string>();
 	collectInto(names, parseModule(source).globalScope, false, insideFunction);
+	// WHY code-unit order and not `localeCompare`: locale collation treats case
+	// as a tertiary key, so `globalThis` would sort between `Function` and
+	// `Object` and the pinned array below could never match — and the row's
+	// verdict would then depend on the runner's ICU build and locale. This is a
+	// machine-comparable name set, not a list shown to anyone, so the rule's
+	// premise does not hold here (human ruling 2026-09-03).
 	return Array.from(names)
 		.filter((name) => !IMMUTABLE_GLOBALS.has(name))
-		.toSorted((left, right) => left.localeCompare(right));
+		.toSorted(function byCodeUnit(left, right) {
+			if (left === right) {
+				return 0;
+			}
+			return left < right ? -1 : 1;
+		});
 }
 
 // WHY resolve-to-global rather than the scope manager's `through` list: the
@@ -153,7 +164,7 @@ describe('the latch rule over the worker realm', () => {
 		expect(bareNamespaceBindings('const STORE = Atomics.store;')).toEqual([]);
 	});
 
-	it.skip('bootstrap.ts reads no ambient name from inside a function body', () => {
+	it('bootstrap.ts reads no ambient name from inside a function body', () => {
 		expect(ambientReads('bootstrap.ts')).toEqual([]);
 	});
 
@@ -169,7 +180,7 @@ describe('the latch rule over the worker realm', () => {
 		expect(ambientReads('protocol.ts')).toEqual([]);
 	});
 
-	it.skip('the captures in bootstrap.ts name exactly the globals the README lists for it', () => {
+	it('the captures in bootstrap.ts name exactly the globals the README lists for it', () => {
 		expect(moduleScopeCaptures('bootstrap.ts')).toEqual([
 			'Atomics',
 			'Blob',
