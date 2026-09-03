@@ -599,7 +599,11 @@ function frameLineBase(frameLine: string): number | null {
  * column — splicing preserves lines and shifts columns, only on lines it
  * touched. An absent line, a malformed delta, or a delta larger than the
  * column corrects nothing: a position the delta provably cannot describe
- * passes through, never negative.
+ * passes through, never negative. Known approximation, stated at both
+ * halves (the assembly side is `create-intercept-handle.ts`'s
+ * `spliceColumnDeltasOf`): a line carrying more than one insertion gets
+ * one summed delta, so a position between the insertions over-corrects —
+ * the clamp above is what bounds that to best-effort attribution.
  */
 function correctColumn(
 	columnDeltas: Readonly<Record<string, unknown>>,
