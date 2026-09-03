@@ -123,7 +123,6 @@ function SpellmeMain({ config, embodiment }: LensProperties): ReactElement {
 	// ⚠ `session.attempts` is permanently 0 until `settle` exists, so at this
 	// wave only a ZERO threshold opens either region. That is not a placeholder:
 	// it is the whole reason the suite carries a `{ oneMoreAfter: 0 }` fixture.
-	const isOneMoreOpen = session.attempts >= oneMoreAfter;
 	const isWayPastOpen = session.attempts >= skipAfter;
 
 	// Everything behind the cursor has already met its fate — that is what
@@ -148,19 +147,30 @@ function SpellmeMain({ config, embodiment }: LensProperties): ReactElement {
 	// CLAIM five hundred. The control keeps the raw number the learner typed; the
 	// span describes what the span holds.
 	const shownExtent = Math.min(extent, unspent.length);
+	// The one-more field needs BOTH the threshold and a character to ask about,
+	// and it must be computed here because `shownExtent` is its second input.
+	// That value is CLAMPED to the text left on the tape, so once the stepper
+	// reaches the end `unspent.slice(0, shownExtent + 1)` and
+	// `unspent.slice(0, shownExtent)` are the same string and the two stacked runs
+	// stop differing. The twin's whole reason for stacking them is that "the extra
+	// character is the only thing that moves between the two lines"; drawn there,
+	// nothing moves and the field says one more character changes nothing — the
+	// inverse of what it teaches. So the question is not asked when it has no
+	// referent (human ruling 2026-09-03), which is the same refuse-rather-than-
+	// coerce posture as the factory declining an out-of-range threshold.
+	const isOneMoreOpen =
+		session.attempts >= oneMoreAfter && shownExtent < unspent.length;
 	// The consumed half of the mark. A set-aside comment carries `data-marked` on
 	// its jar entry; a consumed line break leaves this instead, at the position
 	// the grammar read it (`./DOCS.md` § Structural constraints). PRESENCE is the
 	// mark — there is no false-valued twin, because an unmarked consumed element
 	// leaves nothing at all, which is what evaporates MEANS.
 	//
-	// ⚠ **This shape is REPLACED, not extended, when fallen elements land**
-	// (wave 5, with the claim loop). A second `.map()` appended beside this one
-	// would render all breaks then all fallen elements — or the reverse — which
-	// silently violates the stream order the comment below asserts. The
-	// replacement is ONE ordered pass over `taken`, branching per element. It is
-	// deliberately not written yet: nothing falls until `settle` exists, so
-	// there is nothing to interleave with and no test could reach it.
+	// ⚠ **Fallen elements REPLACE this shape rather than joining it.** A second
+	// `.map()` beside this one renders all breaks then all fallen elements — or
+	// the reverse — which violates the stream order the token tape asserts. The
+	// form that holds both is ONE ordered pass over `taken`, branching per
+	// element.
 	const breaks = taken.filter(
 		(streamElement) =>
 			streamElement.fate === 'consumed' && streamElement.marked,
@@ -187,8 +197,8 @@ function SpellmeMain({ config, embodiment }: LensProperties): ReactElement {
 			{/* What has fallen, in stream order, plus the marks for the line
 			    breaks the grammar read as the tape filled — including one read
 			    before anything has fallen at all (`./README.md` § Glossary, _the
-			    tapes_). Nothing falls until the claim loop lands, so at this wave
-			    the tape holds marks alone. */}
+			    tapes_). A mark is not a fallen element and carries no provenance:
+			    nothing claimed it. */}
 			<section data-spellme-tokens>
 				{breaks.map((streamElement) => (
 					<span data-spellme-break key={streamElement.element.start}>
@@ -315,11 +325,11 @@ function SpellmeMain({ config, embodiment }: LensProperties): ReactElement {
 						</div>
 					)}
 					{/* Drawn as `[ claim it ]` in the twin's fresh-mount frame and
-					    specified at `./README.md` § UI structure. INERT in this wave
-					    by ruling — the stepper and the picker are live, submitting
-					    and judging are not, and `judgeClaim`/`settle` are still
-					    stubs. It renders because a claim form the twin draws with a
-					    button, drawn without one, is not this form. */}
+					    specified at `./README.md` § UI structure. It carries no handler
+					    while `judgeClaim` and `settle` are stubs (human ruling
+					    2026-08-26: the stepper and the picker are live, submitting and
+					    judging are not). It renders regardless, because a claim form the
+					    twin draws with a button, drawn without one, is not this form. */}
 					<button data-spellme-submit type="button">
 						claim it
 					</button>
@@ -328,14 +338,8 @@ function SpellmeMain({ config, embodiment }: LensProperties): ReactElement {
 					    is a legitimate move and a control that looked like giving up
 					    would teach that being stuck is a failure rather than a place
 					    (`./ux/wireframes.md` § After the fourth wrong claim). INERT
-					    alongside submit by the same 2026-08-26 ruling: handing an
-					    element over moves the cursor, and `settle` is still a stub.
-
-					    ⚠ Covered by no test that could fail until Block C's
-					    `{ skipAfter: 0 }` lock lands — the only enabled test naming
-					    this selector asserts its ABSENCE at the default threshold,
-					    which an omitted control would also pass. Disclosed here
-					    rather than left for a reviewer to find. */}
+					    alongside submit by the same 2026-08-26 ruling: handing an element
+					    over moves the cursor, and `settle` is a stub. */}
 					{isWayPastOpen && (
 						<button data-spellme-skip type="button">
 							let the machine
@@ -348,8 +352,8 @@ function SpellmeMain({ config, embodiment }: LensProperties): ReactElement {
 			    The three verdict attributes are ABSENT until the first submitted
 			    claim — `./README.md` § UI structure, "treat absence as unclaimed,
 			    not as a state" — so each renders `undefined` and React drops it
-			    rather than emitting an empty string. Nothing fills them in this
-			    wave; judging is a later seam. */}
+			    rather than emitting an empty string. `judgeClaim` fills them; it is
+			    a separate seam from rendering them. */}
 			<div
 				data-spellme-verdicts
 				aria-live="polite"
@@ -469,12 +473,9 @@ function textOf(run: ReadonlyArray<StreamElement>): string {
  * cheap and sufficient: ten DISTINCT values, each type-pinned to a ten-member
  * union, is the whole union exactly once by pigeonhole.
  *
- * ⚠ **THAT TEST DOES NOT EXIST YET.** It is owed, not landed — no test in this
- * module asserts distinctness [measured 2026-08-30: zero hits for `new Set`,
- * `distinct` or `unique` across all three test files, against a positive
- * control]. An earlier draft of this comment said it "lands with the others",
- * which was false, and a false safety net is worse than a named gap: it tells
- * the next reader to skip the check that is missing.
+ * The distinctness assertion is `tests/component.test.tsx`'s
+ * `offers ten distinct element kinds`, which counts a `Set` of the rendered
+ * `data-element-kind` values.
  */
 const CLAIMABLE_KINDS: ReadonlyArray<ClaimableKind> = freezeInPlace<
 	ReadonlyArray<ClaimableKind>
@@ -523,14 +524,15 @@ const ONE_MORE_ANSWERS: ReadonlyArray<{
 /**
  * What a consumed line break leaves on the token tape.
  *
- * ⚠ **A PROPOSAL, not a settled design.** `./ux/wireframes.md`
- * § What has no wire-frame, deliberately records this visual as **owed and
- * undesigned** and defers it to a sandbox checkpoint against a running surface,
- * so something must exist for the human to react to. It meets the two
- * constraints that document does state: it is a glyph rather than colour alone,
- * and it says a line break is read here and nothing about whether automatic
- * semicolon insertion fired — which depends on the production, and which this
- * lens does not know.
+ * A glyph rather than colour alone, and it says a line break is read here and
+ * nothing about whether automatic semicolon insertion fired — which depends on
+ * the production, and which this lens does not know. Those are the two
+ * constraints `./ux/wireframes.md` states for this mark.
+ *
+ * ⚠ **It fires on EVERY line**, because `isMarked` is true for every
+ * `LineTerminator`. `ux/wireframes.md`'s argument that the mark is "rare enough
+ * not to crowd" is therefore false, and the density is a known open question
+ * rather than a settled design (human ruling 2026-09-02: it stays as drawn).
  */
 const BREAK_MARK = '↵';
 

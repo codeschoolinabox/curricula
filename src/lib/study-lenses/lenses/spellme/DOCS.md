@@ -276,10 +276,11 @@ flowchart TD
   character is gone and proves nothing". A correct DOM with no arrangement is
   not this lens working. What the stylesheet may **not** settle is unchanged:
   the two semantic roles' hues and the fall's motion design stay in
-  [§ Out of scope](#out-of-scope), and the consumed line break's mark stays owed
-  to a sandbox checkpoint by
-  [ux/wireframes.md § What has no wireframe, deliberately](./ux/wireframes.md#what-has-no-wireframe-deliberately).
-  None of the three becomes decidable just because a stylesheet exists.
+  [§ Out of scope](#out-of-scope). The consumed line break's mark keeps the
+  glyph a sandbox checkpoint exercised (human ruling 2026-09-02), while its
+  DENSITY stays open: it fires on every line, which
+  [ux/wireframes.md](./ux/wireframes.md) argues it does not. None of those
+  becomes decidable just because a stylesheet exists.
 
 ## Navigation
 

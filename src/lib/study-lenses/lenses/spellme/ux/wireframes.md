@@ -212,20 +212,26 @@ against the sandbox checkpoint, not agreed in advance from a picture — and it 
 the one element of this surface where the author would rather be surprised than
 right.
 
-**The consumed line break's mark**, and this one is owed rather than refused.
+**The consumed line break's mark**, and this one was owed rather than refused.
 The ruling of 2026-08-20 says the token tape marks it; what that mark looks like
-beside a row of tokens is not drawn, and drawing it in ASCII would fix a
-decision this document has no grounds for. It is the same case as the falling
-animation — settle it at the sandbox checkpoint, against a running surface. Two
-constraints it must meet, both from the jar's mark above: never colour alone,
-and it says a line break is read here and nothing about automatic semicolon
-insertion.
+beside a row of tokens was not drawn here, because drawing it in ASCII would fix
+a decision this document has no grounds for. Two constraints it had to meet,
+both from the jar's mark above: never colour alone, and it says a line break is
+read here and nothing about automatic semicolon insertion.
 
-> ⚠ **doubt.** A mark for something that evaporated may read as clutter on a
-> tape whose whole job is showing what survived. The honest counter is that ASI
-> is precisely the thing a learner cannot see and most needs to, and that a mark
-> which appears only where the grammar reads a break is rare enough not to
-> crowd.
+(human ruling 2026-09-02) **A `↵` glyph was exercised at a sandbox checkpoint
+and STAYS.** What that settled is the glyph, not the density — see the corrected
+doubt below.
+
+> ⚠ **doubt, and half of it is now MEASURED FALSE.** A mark for something that
+> evaporated may read as clutter on a tape whose whole job is showing what
+> survived. The counter offered here was that ASI is precisely the thing a
+> learner cannot see and most needs to, and that a mark which appears only where
+> the grammar reads a break is rare enough not to crowd. **The second half does
+> not hold**: the grammar reads a break at EVERY line ending, so the mark fires
+> once per line rather than rarely [measured 2026-09-01]. The first half stands.
+> The mark stays for now (human ruling 2026-09-02); its density is an open
+> question, not a settled design.
 
 **The declined state**, and for a sharper reason: there is no surface to draw.
 When the embodiment's input-element derivation defects, applicability declines

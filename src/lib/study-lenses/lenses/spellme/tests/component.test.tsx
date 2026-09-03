@@ -278,6 +278,39 @@ describe('spellme surface', () => {
 			},
 		);
 
+		it('hides the one-more field once the stepper reaches the end of the tape', () => {
+			const container = renderLens('const x = 1', { oneMoreAfter: 0 });
+			fireEvent.change(pick(container, '[data-spellme-extent] input'), {
+				target: { value: '11' },
+			});
+			expect(container.querySelector('[data-spellme-one-more]')).toBeNull();
+		});
+
+		it('carries the cursor past the trivia it advanced over', () => {
+			expect(root(renderLens('// hi\nconst x = 1')).dataset.cursor).toBe('2');
+		});
+
+		it('leaves no break mark for a set-aside comment carrying a line break', () => {
+			expect(
+				renderLens('/* a\nb */').querySelectorAll('[data-spellme-break]'),
+			).toHaveLength(0);
+		});
+
+		it('keeps only set-aside elements in the jar', () => {
+			expect(
+				renderLens('// hi\nconst x = 1').querySelectorAll(
+					'[data-spellme-set-aside]',
+				),
+			).toHaveLength(1);
+		});
+
+		it('renders the legend as a plain region rather than a disclosure', () => {
+			expect(
+				renderLens('const x = 1').querySelector('[data-spellme-legend]')
+					?.tagName,
+			).toBe('DIV');
+		});
+
 		it('draws the one-more question against the extent on the stepper', () => {
 			const container = renderLens('const x = 1', { oneMoreAfter: 0 });
 			fireEvent.change(pick(container, '[data-spellme-extent] input'), {

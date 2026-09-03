@@ -1139,6 +1139,50 @@ ruling in the turn it was given rather than the turn it was used.
   as an `offset` its own comment calls "directly sliceable" [read: same file].
   So the stopping point is already available and the prefix is not.
 
+### The `spellme` LENS's rulings (2026-09-03, wave 3 AR-5 fix round)
+
+Two, both the human's, taken when `ar-5` returned **PAUSE** at the wave
+boundary.
+
+- (human ruling 2026-09-03) **The one-more field is HIDDEN when there is no one
+  more character to ask about.** `ar-5` found the field degenerates at the
+  tape's end: `shownExtent` is clamped to the remaining text, so once the
+  stepper reaches or passes it both stacked runs render the SAME string
+  [measured 2026-09-03: at a stepper of 11 over `const x = 1`, "on the stepper"
+  and "one more" are both `const x = 1`]. `ux/wireframes.md` states the
+  arrangement's whole reason as "the extra character is the only thing that
+  moves between the two lines" — at that boundary nothing moves, and the surface
+  tells a learner that one more character changes nothing, which is the inverse
+  of the lesson. The human chose hiding over drawing an end-of-source marker. It
+  keeps `M = stepper + 1` as the entire rule and refuses to draw a question with
+  no referent, matching this module's refuse-rather-than-coerce posture. ⚠
+  `README.md` § One more character specifies `M > L`, `M = L` and `M < L` and is
+  **silent on `M >` remaining**; the boundary sentence lands with the fix.
+
+- (human ruling 2026-09-03) **Status prose leaves this module's source.** Source
+  comments state contracts and reasons; any sentence naming a wave, a block, a
+  checkpoint or a not-yet moves here. Adopted as a RULE rather than as three
+  corrections, on `ar-5`'s evidence: all three of its blocker's false claims are
+  status sentences, and **no non-status comment in this module rotted** — the
+  "why `aria-pressed` and not a `data-*` hook", "why `Number` and not
+  `parseInt`", "why `<dl>` and not four paragraphs" and "why `pre-wrap` is
+  load-bearing" comments are all still true. `DEV.md`'s anti-pattern table
+  already names the class ("Status hedging in docs"); what is new is the
+  measured correlation between that class and every rotted claim here.
+
+  ⚠ **The blocker it answers: three claims TRUE WHEN WRITTEN and falsified by a
+  later commit of the same wave**, left standing by the commits after them.
+  `index.tsx`'s "THAT TEST DOES NOT EXIST YET" — carrying a `[measured:]` tag —
+  against `offers ten distinct element kinds`, which uses `new Set` and landed
+  at `5777b589`; the skip button's "covered by no test that could fail until
+  Block C's lock lands", after that lock landed; and `spellme.css` Layer 5
+  calling the tab finding unresolved and its cause "behavioral", after
+  `a4585f77` recorded it RESOLVED and never a defect. ⚠ **The first has now been
+  wrong in BOTH directions** at one site: it once claimed a lock that did not
+  exist, was corrected to say the gap was open, and then the test landed and the
+  correction became the new false claim. That is the argument for the rule over
+  another round of corrections.
+
 ### The `spellme` LENS — Phase 1, wave 3 (IN PROGRESS)
 
 ⚠ **Do not count the rows of anything here. RUN THIS** — and note it takes

@@ -183,12 +183,25 @@ is a small integer, so the primary control is a stepper and dragging on the
 source is the enhancement — not the other way round. Nothing about this lens
 requires pointing.
 
+⚠ **Two clauses of that journey are not true of the surface as built, and both
+were measured rather than argued.** The picker is ten independent buttons with
+no grouping and no arrow-key handling, so it is ten tab stops rather than one
+stop and ten arrows. And in a default macOS Safari **no** button is reached at
+all — its tab order excludes buttons until a preference is changed — so only the
+stepper is reachable there, while Firefox reaches everything. The second is a
+browser default rather than a property of this lens, and it is package-wide.
+Both are open; neither is a defect this lens introduced.
+
 The verdicts land in an `aria-live` region, so they are announced rather than
-only coloured — verdicts, never "marks". (human ruling 2026-08-20) A _mark_ in
-this lens names one property and only this one: the syntactic grammar reads a
-line break here. Two elements carry it — a comment containing a terminator, and
-a consumed line terminator itself — and neither is a judgement of anything the
-learner did. The three fates carry a border style as well as a hue.
+only coloured — verdicts, never "marks". ⚠ **As contracted, that region cannot
+announce**: it carries three `data-*` attributes and no text content, and
+assistive technology observes a live region through its accessible CONTENT.
+Whether it gains text is an open contract question, owed by the wave that
+produces a verdict to announce. (human ruling 2026-08-20) A _mark_ in this lens
+names one property and only this one: the syntactic grammar reads a line break
+here. Two elements carry it — a comment containing a terminator, and a consumed
+line terminator itself — and neither is a judgement of anything the learner did.
+The three fates carry a border style as well as a hue.
 
 > ⚠ **doubt.** The one place this may still break is the falling animation:
 > motion is the reward the whole loop is built around, and a learner who has

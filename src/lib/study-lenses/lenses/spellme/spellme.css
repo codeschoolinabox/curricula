@@ -19,8 +19,8 @@
  *   1. The two semantic roles' hues — `attested` and `diverging`.
  *      `./DOCS.md` § Out of scope makes the palette a package-wide question this
  *      lens does not settle alone. No custom property is declared for them here,
- *      deliberately: nothing consumes one while judging is a stub, so a
- *      declaration would be dead code wearing the shape of a decision.
+ *      deliberately: nothing consumes one, so a declaration would be dead code
+ *      wearing the shape of a decision.
  *   2. The fall's motion design and its reduced-motion equivalent. Hence NO
  *      `transition`, NO `animation` and NO `@keyframes` anywhere in this file —
  *      `../parsons/parsons.css` carries an unguarded `transition` and is
@@ -110,8 +110,8 @@
 }
 
 /* The run the learner is proposing. It must be distinct from BOTH neighbours,
- * which is one of the three obligations sandbox checkpoint #3 left on this file:
- * the mechanism was correct and a learner could see none of it. Underline plus a
+ * because a proposed run a learner cannot distinguish from spent or unreached
+ * text is a control that plainly does nothing. Underline plus a
  * tinted ground rather than colour alone, so it survives a monochrome reading.
  * `min-width` keeps a zero-width proposal from vanishing at the tape's end. */
 [data-lens='spellme'] [data-spellme-proposed] {
@@ -134,8 +134,8 @@
  * element dotted, an evaporating one hatched. Only the DOTTED case is drawn
  * here, and the two absences are not the same absence:
  *
- *   · SOLID has no carrier YET. `data-spellme-element` arrives with the claim
- *     loop, and styling it is that wave's.
+ *   · SOLID has no carrier: `data-spellme-element` is rendered by the claim
+ *     loop, which is where styling it belongs.
  *   · HATCHED may have no carrier EVER, under the DOM contract as it stands.
  *     An evaporating element gets no node of its own — every consumed element's
  *     text is joined into the single `[data-spellme-consumed]` span — so there
@@ -190,8 +190,7 @@
 	cursor: pointer;
 }
 
-/* The pressed state — the first of checkpoint #3's three obligations, and the
- * one the human could see only in the inspector. `aria-pressed` is the ONLY
+/* The pressed state. `aria-pressed` is the ONLY
  * carrier of which kind is selected (human ruling 2026-08-26), so this selector
  * is the whole mechanism rather than a decoration over a `data-*` twin.
  * Precedent: `../writeme/writeme.css` styles
@@ -267,17 +266,17 @@
 
 /* ── Layer 5 — focus ───────────────────────────────────────────────────────
  *
- * The third of checkpoint #3's obligations, and the live hypothesis for its one
- * unresolved finding: the human reported that tab does not reach the
- * element-kind buttons, nothing in this module sets `tabindex`, and the
- * orchestrator's `inert` wrapper is ruled out because `inert` blocks pointer
- * events and the clicks worked. "Reached but invisible" is what remains, and
- * this rule is the test of it.
+ * Every interactive descendant draws where focus is. `ux/user-journeys.md`
+ * Journey 5 is written for a learner who does not use a mouse, so a control
+ * that cannot be seen to hold focus is a control that journey cannot use.
  *
  * ⚠ Neither sibling stylesheet carries a `:focus-visible` rule at all
  * [measured 2026-08-30], so this is new here rather than a house pattern being
- * followed — and if tab still fails to reach the buttons once this ships, the
- * cause is behavioral and not cosmetic. NEVER add `outline: none` to this file.
+ * followed. NEVER add `outline: none` to this file.
+ *
+ * ⚠ It does not make the buttons TAB-REACHABLE, and nothing in CSS can: macOS
+ * Safari excludes buttons from its default tab order, which is a browser
+ * setting rather than a property of this surface. The exposure is package-wide.
  */
 [data-lens='spellme'] :focus-visible {
 	outline: 3px solid var(--ifm-color-primary, #2e8555);
@@ -347,7 +346,11 @@
  * OS preference can disagree with the theme the reader actually chose. Deleted
  * rather than repaired, because there is nothing left for it to do.
  *
- * ⚠ `../parsons/parsons.css` carries the same `@media (prefers-color-scheme:
- * dark)` shape and is presumably dead the same way. NOT this file's to fix, and
- * recorded so the finding outlives the commit that found it.
+ * ⚠ `../parsons/parsons.css` carries the same shape, and only HALF the
+ * diagnosis transfers. Its two blocks are keyed to the same wrong signal — the
+ * OS preference rather than the theme the reader chose — but they set literal
+ * `rgba()` tints over Wong colours rather than `--ifm-*` variables, so they are
+ * NOT redundant the way these were. Repointing them at `html[data-theme='dark']`
+ * would visibly change parsons, where the same repoint here would have changed
+ * nothing. NOT this file's to fix; recorded so the finding outlives the commit.
  */

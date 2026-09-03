@@ -174,6 +174,13 @@ the length of the run being asked about — the stepper's value **plus one** —
   answer is approximate: a proper prefix is occasionally a legal element by
   itself, as `1` is inside `1_000`. Stated at the field rather than hidden.
 
+**The field is absent when the stepper has reached the end of the tape** (human
+ruling 2026-09-03). There is no one-more character to ask about there, so the
+question has no referent: the run at the stepper and the run one longer are the
+same characters, and a field drawn on them would say that one more character
+changes nothing. Declining to ask is the same refusal the factory makes of an
+out-of-range threshold.
+
 The stepper-plus-one framing is the whole rule, and writing it any other way
 introduces an off-by-one: a stepper resting exactly on the boundary asks about
 one character too many, which is precisely the case the question exists to
@@ -221,6 +228,9 @@ with [`../parsons/`](../parsons/README.md)'s view toggle and
 The module's default export is a frozen `Lens` per [`../types.ts`](../types.ts):
 
 - `name: 'spellme'` · `phase: 'tokens'`
+- `label: 'drive the scanner'` — what a learner reads where this lens is
+  offered. Required by the kind contract, because `name` is machine vocabulary
+  and no surface may draw it.
 - `main` — the React component: `<div data-lens="spellme">`, the input tape, the
   token tape, the jar, the claim form, the per-field verdicts, the fates panel
   and the legend.
@@ -358,6 +368,13 @@ explains the answer vocabulary, which they cannot.
 **diverging**; each of the three fates additionally carries a non-hue signal, so
 the surface reads without colour at all: a token-tape element solid, a set-aside
 element dotted, an evaporating one hatched.
+
+⚠ **The third of those has no carrier in the tree as it stands.** Every consumed
+element's text is joined into one `data-spellme-consumed` span, so an
+evaporating element has no node of its own to hatch; only the marked sub-case,
+which leaves `data-spellme-break`, is drawable. Rendering the consumed run per
+element would give it one, and that is a contract question rather than a styling
+one.
 
 **The roles are named here; the hues are not** (human ruling 2026-08-14). They
 resolve through CSS custom properties, and the standing candidates are Wong's
