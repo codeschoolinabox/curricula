@@ -283,6 +283,26 @@ and tracking it. Participation folds the artifact in. That is why `ontology.md`
 §2 puts the software _inside_ the rhetorical circle rather than outside looking
 at it, and it is the strange-loop shape §14's MU tribute is built around.
 
+Naur describes the mechanism, in 1985, without naming it:
+
+> "It is invariably the case that a program, once in operation, will be felt to
+> be only part of the answer to the problems at hand. Also the very use of the
+> program itself will inspire ideas for further useful services that the program
+> ought to provide. Hence the need for ways to handle modifications." —
+> [programming-as-theory-building.md](./programming-as-theory-building.md)
+
+Two claims there, and each lands on a node this chain already has. _Only part of
+the answer to the problems at hand_ is a model found wanting once it meets its
+target — condition (c) experienced from the inside rather than argued about. And
+_the very use of the program will inspire ideas for further useful services_ is
+participation: the artifact enters a situation and changes what is wanted there.
+
+Note what Naur does with it. He uses it to establish that modification is
+inevitable, which is why holding the theory matters, which is why the theory
+cannot be recovered from the program text. Participation is not a decorative
+observation at the top of the chain — it is the reason the rest of the chain has
+to be held by a person.
+
 The node was called _intentional computation_ in earlier drafts, and the rename
 is not a loss. Grice's non-natural meaning is defined by intention — an
 intention that the audience recognise the intention as such — and
@@ -350,11 +370,25 @@ least convenient.
 
 Naur argues that what programming produces is not the text but a _theory_ in
 Ryle's sense — someone with the theory "knows how to do certain things and in
-addition can support the actual doing with explanations, justifications." The
-first capability he lists is precisely the modelling relation of L1: the
-programmer with the theory "can explain how the solution relates to the affairs
-of the world that it helps to handle." Naur's theory is the modelling relation
-held in a person's head.
+addition can support the actual doing with explanations, justifications."
+
+His subject is L1. He says so in his opening definition: programming is "the
+activity of matching some significant part and aspect of an activity in the real
+world to the formal symbol manipulation that can be done by a program running on
+a computer." And the first capability he lists is condition (a), in both
+directions: the programmer must explain "for each part of the program text …
+what aspect or activity of the world is matched by it. Conversely, for any
+aspect or activity of the world the programmer is able to state its manner of
+mapping into the program text."
+
+He also states the human half of condition (c). Every model leaves things out,
+and Naur is explicit about who decides what: "the decision that a part of the
+world is relevant can only be made by someone who understands the whole world.
+This understanding must be contributed by the programmer." Box tells us all
+models are wrong; Naur tells us that choosing what a model is wrong _about_ is a
+judgement someone has to make.
+
+Naur's theory is the modelling relation, held in a person's head.
 
 His sharp claims are about documentation, not about AI. "The full program text
 and additional documentation is insufficient in conveying to even the highly
@@ -363,13 +397,36 @@ reestablishing the theory of a program merely from the documentation, is
 strictly impossible"; and theory passes to a new programmer only where they
 "work in close contact with the programmers who already possess the theory."
 
+The sharpest part of his argument is about **rules**, and it is more useful here
+than the documentation claim. Ryle's theory is defined against rule-following,
+by a regress: "if the exercise of intelligence depended on following rules there
+would have to be rules about how to follow rules, and about how to follow the
+rules about following rules, etc. in an infinite regress, which is absurd." What
+the theory actually rests on is a judgement of similarity between situations in
+the world — and that judgement, Naur says, "could not, in principle, be
+expressed in terms of rules … no more than the similarities of many other kinds
+of objects, such as human faces, tunes, or tastes of wine."
+
 **Be careful how far this is pushed.** Naur nowhere says that delegating
 code-writing prevents theory-building — he was writing in 1985 about handovers
-between teams. Extending him to AI is an extension, and it should be labelled as
-one. What does transfer is the shape of the argument: if the theory cannot be
-recovered from the artifact, then having the artifact produced for you does not
-give you the theory, and an LLM is not a theory-holder you can apprentice to.
-That is a claim worth making. It is not a claim Naur made.
+between teams, and the word "computer" appears in his text as the thing a
+program runs on, never as a collaborator. Extending him to AI is an extension
+and should be labelled as one. What transfers is the shape: if the theory cannot
+be recovered from the artifact, then having the artifact produced for you does
+not give you the theory, and an LLM is not someone you can work "in close
+contact with" in the sense his education passage requires. That is a claim worth
+making. It is not a claim Naur made.
+
+**And one part of Naur is awkward for this curriculum, which is a reason to
+quote it rather than skip it.** He concludes that "for the primary activity of
+the programming there can be no right method," and dismisses programming methods
+as systems of rules. A course is a method-shaped object. What survives is his
+own answer to the same problem: the education "would have to turn in the
+direction of furthering the understanding and talent for theory formation," and
+"the most hopeful approach would be to have the student work on concrete
+problems under guidance, in an active and constructive environment." He then
+adds, honestly, that "to what extent this can be taught at all must remain an
+open question." A curriculum that cites him should carry that sentence too.
 
 ### Why programming is domain-tied
 
@@ -401,9 +458,15 @@ argument that fluency in a language is not the thing being taught:
 > — the author
 
 Naur, "Programming as Theory Building" (1985), is in this directory at
-[programming-as-theory-building.md](./programming-as-theory-building.md); every
-quotation above is from that text. It is a Markdown transcription and has not
-been checked against the primary publication.
+[programming-as-theory-building.md](./programming-as-theory-building.md), read
+in full; every quotation above is from Naur's own text, lines 14–598 of that
+file. It is a Markdown transcription and has not been checked against the
+primary publication.
+
+**Attribution hazard in that file.** Everything after line 599 — the section
+"Applying 'Theory Building'", on Kent Beck and the XP metaphor — is **not
+Naur**. It is unattributed in the transcription. It is interesting and relevant
+to `metaphor.md`, but nothing from it may be quoted under Naur's name.
 
 > Owed: Ryle, _The Concept of Mind_ (1949), which Naur relies on. Not fetched.
 >
