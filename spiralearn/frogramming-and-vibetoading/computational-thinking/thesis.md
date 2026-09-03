@@ -246,18 +246,61 @@ Its counterpart at computation-scope:
 > of it — and the programming language is the only one of the three that also
 > causes it._
 
-**Both hold. They are the same triangle read at two levels** — the notional
-machine is the shared corner, the programming language the shared third, and
-what differs is the first: _idea_ (cognitive) or _algorithm_ (formal). Drawn in
-[the-triangle.svg](./the-triangle.svg).
+**Both hold, and they name different positions on one axis.** An earlier figure
+drew them as two faces of a single corner — "the idea (cognitive)" and "the
+algorithm (formal)", divided by a dashed line because they would not sit
+together. They would not sit together because they are not one thing. The idea
+is held by a person; the algorithm is written to be reasoned about; and
+**pseudocode sits between them**, which the figure had no room for and so fused
+the positions on either side of it.
 
-Three things the drawing fixes that prose lets slide. **The centre is a physical
-process**, not an abstract invariant floating above its representations — the
-corners represent something that is actually happening. **The notation corner is
-the programming language, not "source code"** — text, blocks, and flowcharts are
-all notations with causal influence, and privileging text would smuggle in a
-claim the thesis does not make. And **the notional machine corner carries its
-calibration**: it is not _the_ abstraction of the artifact but a chosen one.
+Laid out, F's range is an axis ordered by **causal contact with matter** — drawn
+in [the-chain.svg](./the-chain.svg):
+
+| #   | Position                   | What corrects you                                        |
+| --- | -------------------------- | -------------------------------------------------------- |
+| 1   | the artifact               | physics                                                  |
+| 2   | the notional machine       | the running machine, via study lenses                    |
+| 3   | code                       | the interpreter                                          |
+| 4   | the computational thoughts | nothing directly — hence the twin, hence the instruments |
+| 5   | pseudocode                 | nothing                                                  |
+| 6   | formal notation            | proof                                                    |
+| 7   | CS / theory                | proof, at the meta-level                                 |
+
+**Position 4 is the pivot**: everything to its left touches a machine,
+everything to its right does not. Correctives follow the same split — machines
+disagree with you on the left, proofs on the right — which is why position 5 is
+the one place with no external corrective, and why it is the subject of
+[on-pseudocode.md](./on-pseudocode.md).
+
+Three things the axis fixes that the earlier figure let slide. The thing being
+represented is **a physical process**, not an abstract invariant floating above
+its representations. The notation position is **code**, not "source code" —
+text, blocks and flowcharts are all notations with causal influence, and
+privileging text would smuggle in a claim the thesis does not make. And position
+2 **carries its calibration**: it is not _the_ abstraction of the artifact but a
+chosen one, which [the-stack.svg](./the-stack.svg) draws by expanding position 1
+into layers the notional machine could target.
+
+This is the same axis `ontology.md` §3 already names as F's range — artifact ↔
+NM ↔ CS/theory — at higher resolution. Positions 3 to 6 are what §3 leaves
+implicit between its chain-points.
+
+**It is drawn linear on purpose, and it wraps.** Code is a formal language and
+can be reasoned about mathematically; theory is used to study physical
+computation in the world, which closes the ring. Both are **purpose-inversions**
+— a position used for the other purpose than its characteristic one — so the
+linear reading is the characteristic-purpose reading and the loops are what a
+learner meets later. `ontology.md` §9 already handles its own ladder this way,
+as "a coupling, not a precedence" that "adds no rung" and is "deliberately
+absent from learner-facing copy"; the same treatment applies here rather than a
+new convention.
+
+Note what the axis does not carry. **This is F's side.** Computing's empirical
+and design work — systems, HCI, ML, software engineering — is not excluded from
+the curriculum by its absence here; it lives on V's side and in the F&V
+integration, and V enters this axis perpendicular at position 4, since
+meaningful computation needs both.
 
 ### L5 — applied computation
 

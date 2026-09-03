@@ -37,37 +37,50 @@ curriculum has the shape it already has.
 
 ## The picture
 
-![A computation and its three representations](./the-triangle.svg)
+![F's axis, ordered by causal contact with matter](./the-chain.svg)
 
-At the centre, a computation: a physical process taking place in the world.
-Around it, three representations of that process — the **idea** a practitioner
-holds (and its formal face, the **algorithm**), the **notional machine** at a
-chosen level of abstraction, and the **programming language** that says it. Only
-the last has causal influence, which is why one edge carries an arrow.
+Seven positions in a row, ordered by how much contact each has with matter. On
+the left, things that touch a machine: the artifact itself, the notional machine
+that models it, the code that drives it. On the right, things that do not:
+pseudocode, formal notation, and the study of formal structures. **The
+computational thoughts are the pivot**, and everything else is placed relative
+to them.
 
-Two corners have instruments that make them legible. The third does not yet:
-that gap is what the half-beat is for.
+The useful column is underneath: **what can contradict you.** Machines disagree
+with you on the left, proofs disagree with you on the right — which leaves
+pseudocode the one position with no external corrective at all. That column is
+the argument of [on-pseudocode.md](./on-pseudocode.md), and it is why the axis
+is worth drawing rather than listing.
 
-The ringed corner is the one you learn to hand over, and the picture makes four
-different relationships to delegation visible at once:
+**Code is ringed** because it is the position you learn to hand over, and the
+chain shows what sits on either side of it:
 
-- **the idea** is yours. Understanding is non-delegable, which is `ontology.md`
-  §1's first principle.
+- **the thoughts** are yours. Understanding is non-delegable, which is
+  `ontology.md` §1's first principle.
 - **the notional machine** is yours to twin — and it is the vocabulary you and
   an LLM work in. `ontology.md:1240-1243` calls this NM-grounded conversation:
   "Make the NM declare a `const balance = 0`…" You specify behaviour in the
   machine's terms and verify what comes back against it. The LLM is an
   interlocutor there, never the owner of the twin.
-- **the programming language** is delegable. This is the part the course teaches
-  you to hand over.
-- **the computation itself** was never yours to do. Electrons through matter,
-  ones and zeroes on a board — physical, embodied, and going to happen whoever
-  wrote the instructions.
+- **code** is delegable. This is the part the course teaches you to hand over.
+- **the artifact** was never yours to do. Electrons through matter — physical,
+  embodied, and going to happen whoever wrote the instructions.
 
-The ring is drawn in the same colour as the causal arrow, and that is not
-decoration: the part you delegate is the only part with causal power over the
-machine. Which is exactly why `ontology.md:1257` insists that "Frogramming with
-delegation is only sustainable if you keep the direct NM view alive."
+Two notes the figure carries in a line each. This is **F's axis**: computing's
+empirical and design work is not excluded by its absence, it lives on V's side
+and in the F&V integration, and V enters perpendicular at the pivot. And the
+axis is **drawn linear on purpose** — it wraps, since code can be studied
+formally and theory can be applied to physical computation, and those loops are
+off-characteristic uses met later.
+
+![The layers under the artifact](./the-stack.svg)
+
+The second figure expands the chain's first position. Every layer between
+notation and physics is itself a computational artifact, so every layer can
+carry a notional machine of its own — which is what "at a chosen level of
+abstraction" means, and why you do not need to know how a CPU works to write
+JavaScript. It bottoms out where medium-independence fails: above the line,
+rules indifferent to their medium; below it, the medium.
 
 ## Reading order
 

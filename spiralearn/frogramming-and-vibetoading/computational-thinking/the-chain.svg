@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 620" width="1180" height="620" role="img" aria-labelledby="ctl cds">
+  <title id="ctl">The F-side chain, ordered by causal contact with matter</title>
+  <desc id="cds">Seven positions in a row. From the left: the computational artifact, a physical machine, corrected by physics; the notional machine, a dynamic model of the artifact, corrected by the running machine through study lenses; code, static executable instructions, corrected by the interpreter; the computational thoughts held by a person, which nothing corrects directly; pseudocode, a target-less non-executable representation of a thought, which nothing corrects at all; formal representations of algorithms, corrected by proof; and CS or theory, the formal study of formally defined computational structures, corrected by proof at the meta-level. A pivot at the computational thoughts divides the chain: everything to its left touches a machine, everything to its right does not. Correctives come from machines on the left and proofs on the right, so pseudocode sits where neither reaches. Code is ringed as the position a practitioner learns to delegate. The seventh position is set apart because it is a discipline whose objects are the other positions, not another representation.</desc>
+  <style>
+    :root { color-scheme: light dark; }
+    .ink { fill: #14181d; }
+    .muted { fill: #5b6672; }
+    .line { stroke: #9aa5b1; }
+    .box { fill: #ffffff; stroke: #14181d; }
+    .soft { fill: #ffffff; stroke: #9aa5b1; }
+    .accent { stroke: #b4530a; }
+    .accentfill { fill: #b4530a; }
+    .accenttag { fill: #b4530a; font-weight: 640; }
+    .tag { fill: #6b7683; }
+    @media (prefers-color-scheme: dark) {
+      .ink { fill: #e8ecf1; }
+      .muted { fill: #9aa5b1; }
+      .line { stroke: #55606c; }
+      .box { fill: #14181d; stroke: #e8ecf1; }
+      .soft { fill: #14181d; stroke: #55606c; }
+      .accent { stroke: #e8913f; }
+      .accentfill { fill: #e8913f; }
+      .accenttag { fill: #e8913f; }
+      .tag { fill: #8792a0; }
+    }
+    text { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+    .h { font-size: 15px; font-weight: 640; }
+    .s { font-size: 11.5px; }
+    .g { font-size: 11px; letter-spacing: .05em; }
+    .k { font-size: 12.5px; font-style: italic; }
+  </style>
+  <defs>
+    <marker id="cdn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" class="accentfill"/>
+    </marker>
+  </defs>
+
+  <text x="590" y="34" text-anchor="middle" class="g tag">ORDERED BY CAUSAL CONTACT WITH MATTER</text>
+
+  <!-- the pivot -->
+  <path d="M568 62 L568 470" class="line" fill="none" stroke-width="1.3" stroke-dasharray="6 5"/>
+  <text x="556" y="80" text-anchor="end" class="k muted">touches a machine</text>
+  <text x="580" y="80" class="k muted">touches no machine</text>
+
+  <!-- positions -->
+  <rect x="24" y="104" width="150" height="86" rx="10" class="box" stroke-width="1.6"/>
+  <text x="99" y="132" text-anchor="middle" class="h ink">the artifact</text>
+  <text x="99" y="152" text-anchor="middle" class="s muted">a physical</text>
+  <text x="99" y="168" text-anchor="middle" class="s muted">machine</text>
+
+  <rect x="188" y="104" width="150" height="86" rx="10" class="box" stroke-width="1.6"/>
+  <text x="263" y="132" text-anchor="middle" class="h ink">the notional</text>
+  <text x="263" y="150" text-anchor="middle" class="h ink">machine</text>
+  <text x="263" y="170" text-anchor="middle" class="s muted">dynamic; a chosen level</text>
+
+  <rect x="344" y="96" width="166" height="102" rx="14" fill="none" class="accent" stroke-width="2.2" stroke-dasharray="7 5"/>
+  <rect x="352" y="104" width="150" height="86" rx="10" class="box" stroke-width="1.6"/>
+  <text x="427" y="132" text-anchor="middle" class="h ink">code</text>
+  <text x="427" y="152" text-anchor="middle" class="s muted">static, executable</text>
+  <text x="427" y="168" text-anchor="middle" class="s muted">instructions</text>
+
+  <rect x="590" y="104" width="150" height="86" rx="10" class="box" stroke-width="1.6"/>
+  <text x="665" y="132" text-anchor="middle" class="h ink">the computational</text>
+  <text x="665" y="150" text-anchor="middle" class="h ink">thoughts</text>
+  <text x="665" y="170" text-anchor="middle" class="s muted">held by a person</text>
+
+  <rect x="754" y="104" width="150" height="86" rx="10" class="box" stroke-width="2.2" style="stroke:#b4530a"/>
+  <text x="829" y="132" text-anchor="middle" class="h ink">pseudocode</text>
+  <text x="829" y="152" text-anchor="middle" class="s muted">static, target-less,</text>
+  <text x="829" y="168" text-anchor="middle" class="s muted">non-executable</text>
+
+  <rect x="918" y="104" width="150" height="86" rx="10" class="box" stroke-width="1.6"/>
+  <text x="993" y="132" text-anchor="middle" class="h ink">formal notation</text>
+  <text x="993" y="152" text-anchor="middle" class="s muted">algorithms written</text>
+  <text x="993" y="168" text-anchor="middle" class="s muted">to be reasoned about</text>
+
+  <rect x="1082" y="104" width="74" height="86" rx="10" class="soft" stroke-width="1.3" stroke-dasharray="5 4"/>
+  <text x="1119" y="136" text-anchor="middle" class="h ink">CS /</text>
+  <text x="1119" y="154" text-anchor="middle" class="h ink">theory</text>
+  <text x="1119" y="174" text-anchor="middle" class="s muted">a study</text>
+
+  <!-- connectors -->
+  <path d="M174 147 L186 147" class="line" stroke-width="1.4"/>
+  <path d="M338 147 L350 147" class="line" stroke-width="1.4"/>
+  <path d="M502 147 L588 147" class="line" stroke-width="1.4"/>
+  <path d="M740 147 L752 147" class="line" stroke-width="1.4"/>
+  <path d="M904 147 L916 147" class="line" stroke-width="1.4"/>
+  <path d="M1068 147 L1080 147" class="line" stroke-width="1.4" stroke-dasharray="4 3"/>
+
+  <!-- correctives -->
+  <text x="590" y="242" text-anchor="middle" class="g tag">WHAT CAN CONTRADICT YOU</text>
+  <path d="M24 258 L1156 258" class="line" fill="none" stroke-width="1" opacity=".5"/>
+
+  <text x="99" y="286" text-anchor="middle" class="s muted">physics</text>
+  <text x="263" y="286" text-anchor="middle" class="s muted">the running machine,</text>
+  <text x="263" y="302" text-anchor="middle" class="s muted">via study lenses</text>
+  <text x="427" y="286" text-anchor="middle" class="s muted">the interpreter</text>
+  <text x="665" y="286" text-anchor="middle" class="s muted">nothing directly — hence</text>
+  <text x="665" y="302" text-anchor="middle" class="s muted">the twin, hence the instruments</text>
+  <text x="829" y="288" text-anchor="middle" class="h accenttag">nothing</text>
+  <text x="993" y="286" text-anchor="middle" class="s muted">proof</text>
+  <text x="1119" y="286" text-anchor="middle" class="s muted">proof, at the</text>
+  <text x="1119" y="302" text-anchor="middle" class="s muted">meta-level</text>
+
+  <text x="290" y="346" text-anchor="middle" class="k muted">machines disagree with you over here</text>
+  <text x="900" y="346" text-anchor="middle" class="k muted">proofs disagree with you over here</text>
+
+  <!-- callouts -->
+  <path d="M829 194 L829 214" class="accent" fill="none" stroke-width="2" marker-end="url(#cdn)"/>
+  <text x="829" y="386" text-anchor="middle" class="s muted">Pseudocode sits where neither reaches. Its purpose is a third thing —</text>
+  <text x="829" y="402" text-anchor="middle" class="s muted">communicating — and its only corrective is the reader, who is not</text>
+  <text x="829" y="418" text-anchor="middle" class="s muted">an independent check.</text>
+
+  <text x="427" y="222" text-anchor="middle" class="g accenttag">THE DELEGABLE POSITION</text>
+
+  <!-- V enters at the pivot -->
+  <path d="M665 470 L665 200" class="line" fill="none" stroke-width="1.2" stroke-dasharray="3 4" opacity=".8"/>
+  <rect x="556" y="474" width="218" height="52" rx="10" class="soft" stroke-width="1.3"/>
+  <text x="665" y="496" text-anchor="middle" class="s muted">V enters here, perpendicular:</text>
+  <text x="665" y="514" text-anchor="middle" class="s muted">meaningful computation needs both.</text>
+
+  <!-- footers -->
+  <text x="590" y="562" text-anchor="middle" class="s muted">This is F's axis. Computing's empirical and design work — systems, HCI, ML, software engineering — is not excluded; it lives on V's side and in the F&amp;V integration.</text>
+  <text x="590" y="582" text-anchor="middle" class="s muted">Positions 1–6 are things and representations. CS / theory is set apart because it is a discipline whose objects are the other positions.</text>
+  <text x="590" y="602" text-anchor="middle" class="s muted">Drawn linear on purpose. It wraps — code can be studied formally, theory can be applied to physical computation — and those loops are off-characteristic uses, met later.</text>
+</svg>

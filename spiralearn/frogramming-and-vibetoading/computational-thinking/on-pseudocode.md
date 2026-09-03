@@ -12,6 +12,26 @@ teaching.
 The argument is a corollary of the chain in [thesis.md](./thesis.md) rather than
 a new position, which is the main reason to believe it.
 
+## It delegates the interpreter to the reader
+
+Start with what pseudocode actually is, mechanically.
+
+Code's semantics is supplied by the machine. You write it, something runs it,
+and what comes back is not up to you. Pseudocode's semantics is supplied by
+**the reader's notional machine** — there is nothing else that could supply it.
+
+So pseudocode _is_ executable. It runs on wetware, against a twin the reader has
+to already hold. That is the whole asymmetry in one sentence: with a strong twin
+it runs, and with no twin it does not run at all — and nothing announces the
+failure, because the thing that would have announced it is the interpreter you
+just handed to the reader.
+
+This is why pseudocode feels so natural to experts and does so little for
+beginners. Experts are running it. Beginners are looking at it.
+
+And it is the presupposition made mechanical. "Start with pseudocode, then learn
+the language" asks a learner to write for an interpreter they do not have.
+
 ## Pseudocode is illegible computation
 
 L2 says a modelling computation is **legible** when the correspondence between
@@ -28,6 +48,34 @@ right or wrong about; no updating, because nothing diverges.
 By the directory's own criterion, pseudocode is illegible computation. That is
 the whole argument in one sentence, and everything below is consequence.
 
+## Where it sits, and what that costs it
+
+The chain in [thesis.md](./thesis.md) orders positions by causal contact with
+matter, and the useful column is what can contradict you at each one.
+
+| Position                   | What corrects you                                        |
+| -------------------------- | -------------------------------------------------------- |
+| the artifact               | physics                                                  |
+| the notional machine       | the running machine, via study lenses                    |
+| code                       | the interpreter                                          |
+| the computational thoughts | nothing directly — hence the twin, hence the instruments |
+| **pseudocode**             | **nothing**                                              |
+| formal notation            | proof                                                    |
+| CS / theory                | proof, at the meta-level                                 |
+
+Correctives come from two places and the pivot separates them: **machines**
+disagree with you on the left of the thoughts, **proofs** disagree with you on
+the right. Pseudocode sits where neither reaches.
+
+Its purpose is a third thing. It is not for applying a thought to a machine and
+not for studying the thought formally — it is for **communicating**, between
+people who hold the theory. So its only corrective is the reader, and a reader
+is not an independent check: they may share the misconception, and a reader with
+a strong twin will silently repair an ambiguity rather than surface it.
+
+That is interpreter-delegation with a mechanism under it, and it is why the
+position is the one place on the chain with no external corrective.
+
 ## It fails in the worst available way: it looks legible
 
 Prose does not pretend. A paragraph describing an algorithm is obviously a
@@ -35,12 +83,12 @@ paragraph, and nobody mistakes reading it for checking it.
 
 Pseudocode has the surface of code — keywords, indentation, control flow, the
 visual rhythm of a program. So a learner writing it believes they are doing the
-thing that code does, and they are not. The feedback that would tell them
-otherwise is precisely what has been removed.
+thing that code does, and they are not. The feedback that runnable code would
+give them otherwise is precisely what has been removed.
 
 This is the two-layer misconception mechanism the curriculum is already built
 against: a wrong model that produces right-looking output long enough to become
-load-bearing. A learner can write fluent, confident, entirely unrunnable
+load-bearing. A learner can write fluent, confident, entirely incorrect
 pseudocode for months and receive nothing back that contradicts them. Their
 notional machine is being built out of unopposed guesses.
 
@@ -76,6 +124,23 @@ undefined because they are different for every writer.
 
 This is a stronger claim than "it is unnatural until trained," and it explains
 why the training never arrives: there is nothing stable to be trained on.
+
+### Why mathematics gets away with being unrunnable
+
+Formal notation sits on the same side of the pivot as pseudocode: it drives no
+machine either. It survives because **proof is a corrective**. You can be wrong
+in mathematics and be shown wrong, by derivation rather than by execution.
+Pseudocode has neither execution nor derivation.
+
+There is a second difference, and it is a difference in kind rather than degree.
+The right end of the chain is not intrinsically unrunnable — it is unrunnable
+until someone builds the implementation, and for mathematics people have. Lean,
+Coq and Agda are implementations of mathematical notation; a proof assistant is
+a machine that disagrees with you about proofs.
+
+**Pseudocode cannot be given one**, because there is no fixed semantics to
+implement. That is not an accident of nobody having bothered. It is what
+pseudocode is.
 
 ## Why "start with pseudocode" presupposes what it teaches
 

@@ -41,7 +41,8 @@
     </marker>
   </defs>
 
-  <text x="450" y="42" text-anchor="middle" class="g tag">EACH LAYER IS REALISED BY THE ONE BENEATH IT</text>
+  <text x="450" y="30" text-anchor="middle" class="g tag">EXPANDING THE CHAIN’S FIRST POSITION — THE ARTIFACT</text>
+  <text x="450" y="52" text-anchor="middle" class="g tag">EACH LAYER IS REALISED BY THE ONE BENEATH IT</text>
 
   <!-- the fan: a notional machine can target any layer -->
   <path d="M278 323 L332 207" class="accent" fill="none" stroke-width="2" marker-end="url(#ptA)"/>

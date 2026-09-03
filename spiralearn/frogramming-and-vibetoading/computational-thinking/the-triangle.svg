@@ -1,3 +1,15 @@
+<!--
+  SUPERSEDED 2026-09-03 by the-chain.svg. Kept as a record, not as a current figure.
+
+  Its apex fused two positions. "the idea (cognitive)" and "the algorithm (formal)"
+  were drawn as two faces of one corner, divided by a dashed line because they
+  would not sit together. They would not sit together because they are not one
+  thing: the idea is held by a person, the algorithm is written to be reasoned
+  about, and PSEUDOCODE SITS BETWEEN THEM. The triangle had no room for that
+  position, so it fused the two on either side of it.
+
+  Do not render or link this. See the-chain.svg.
+-->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 712" width="880" height="712" role="img"
   aria-labelledby="ttl dsc">
   <title id="ttl">A computation, and its three representations</title>

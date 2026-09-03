@@ -76,11 +76,13 @@ From `plann.txt:47-49`: learning computational thinking is two entwined jobs —
 learn a symbolic computational language, _and_ learn to have the thoughts that
 language represents.
 
-The second job is the one no curriculum names, and it is why the apex of
-[the-triangle.svg](./the-triangle.svg) has no instrument beside it. Study Lenses
-serves the machine corner. JEJ serves the notation corner. The idea corner — the
-computational thoughts a learner has to build alongside the language — is served
-by nothing yet. See [epicycles.md](./epicycles.md) and
+The second job is the one no curriculum names, and the chain shows why it is
+easy to miss. Study Lenses serves position 2, the notional machine. JEJ serves
+position 3, code. **Position 4 — the computational thoughts a learner has to
+build alongside the language — is served by nothing yet**, and the corrective
+column says the same thing from the other side: nothing contradicts you there
+directly, which is why the twin needs instruments built for it. See
+[the-chain.svg](./the-chain.svg), [epicycles.md](./epicycles.md) and
 [half-beat.md](./half-beat.md).
 
 ## Lineage, handled carefully
