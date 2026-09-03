@@ -132,7 +132,7 @@ describe('failure accounts', () => {
 			expect(statement?.type).toBe('VariableDeclaration');
 		});
 
-		it.skip('the invented nodes are enumerated exactly when the tree is published', () => {
+		it('the invented nodes are enumerated exactly when the tree is published', () => {
 			const { facts } = embody('const x = ;');
 			expect(
 				!facts.ast.ok &&
