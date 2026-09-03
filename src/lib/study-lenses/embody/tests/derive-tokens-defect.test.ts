@@ -32,3 +32,26 @@ describe('deriveTokens — a defecting enrichment derivation', () => {
 		expect(errorSpy).toHaveBeenCalledTimes(1);
 	});
 });
+
+describe('deriveTokens — a defecting bounded derivation over a failing tokenization', () => {
+	it('still publishes the prefix account', () => {
+		const stage = deriveTokens({ source: '@', type: 'module' });
+		expect(!stage.ok && stage.value?.tokens).toEqual([]);
+	});
+
+	it('keeps its cause beside the degraded account', () => {
+		const stage = deriveTokens({ source: '@', type: 'module' });
+		expect(!stage.ok && stage.cause.stage).toBe('tokens');
+	});
+
+	it('publishes the account without the bounded sequence', () => {
+		const stage = deriveTokens({ source: '@', type: 'module' });
+		expect(!stage.ok && stage.value?.inputElements).toBeUndefined();
+	});
+
+	it('reports the defect loudly', () => {
+		const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+		deriveTokens({ source: '@', type: 'module' });
+		expect(errorSpy).toHaveBeenCalledTimes(1);
+	});
+});

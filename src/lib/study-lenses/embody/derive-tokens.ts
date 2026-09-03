@@ -25,11 +25,15 @@ import type { FactStage, Snippet, Tokens } from './types.js';
  * The input-element sequence is derived by calling the shared scanning leaf
  * over the reading this function just produced — the source, tokens and
  * comments of one tokenizer pass, which is what closes the leaf's
- * input-coherence precondition by construction. The call is guarded on its
- * own, outside the tokenize catch: a leaf throw is an embody-machinery
- * defect, never learner data — loud to the developer, and the stage still
- * publishes ok, without the member. The enrichment degrades alone, barring
- * nothing.
+ * input-coherence precondition by construction. Both arms call it, each
+ * guarded on its own: on a successful tokenization the call sits outside the
+ * tokenize catch — a leaf throw there is an embody-machinery defect, never
+ * learner data, loud to the developer, and the stage still publishes ok
+ * without the member; within a tokens failure the account's bounded call
+ * rides the source cut at the prefix's own extent, and a throw there
+ * degrades the account alone — the arm keeps its cause, the member is
+ * absent, and the report speaks of the account failing. Either way the
+ * derivation degrades alone, barring nothing.
  */
 export default function deriveTokens(snippet: Snippet): FactStage<Tokens> {
 	// acorn's own array-accumulator form of `onComment`, filled as the drain
@@ -67,11 +71,37 @@ export default function deriveTokens(snippet: Snippet): FactStage<Tokens> {
 		// `Array.from`'s internal array is discarded when the tokenizer throws,
 		// so the set-aside comments are the only channel that survives the stop
 		// at this drain — the prefix's token channel has nothing to publish.
-		return {
-			ok: false,
-			cause: toStageCause(error, 'tokens'),
-			value: { tokens: [], comments },
-		};
+		const prefixTokens: Token[] = [];
+		const cause = toStageCause(error, 'tokens');
+		// the bounded sequence rides the leaf's unchanged tiling contract over
+		// the source cut at the account's own extent — the end of the last
+		// token or set-aside comment, whichever is later; 0 over empty channels
+		try {
+			const extent = Math.max(
+				prefixTokens.at(-1)?.end ?? 0,
+				comments.at(-1)?.end ?? 0,
+			);
+			const inputElements = deriveInputElements({
+				code: snippet.source.slice(0, extent),
+				tokens: prefixTokens,
+				comments,
+			});
+			return {
+				ok: false,
+				cause,
+				value: { tokens: prefixTokens, comments, inputElements },
+			};
+		} catch (error_) {
+			// a throw here degrades the account alone: the arm keeps its cause,
+			// the member is absent, and the report speaks of the account
+			// failing — never of a broken machine invariant
+			console.error(
+				`deriveTokens: the bounded input-element derivation threw over the token prefix — the account degrades without its sequence (${
+					error_ instanceof Error ? error_.message : String(error_)
+				})`,
+			);
+			return { ok: false, cause, value: { tokens: prefixTokens, comments } };
+		}
 	}
 
 	try {

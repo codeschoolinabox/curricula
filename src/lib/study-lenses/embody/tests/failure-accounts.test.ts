@@ -10,7 +10,7 @@ describe('failure accounts', () => {
 			expect(!stage.ok && stage.value?.tokens).toEqual([]);
 		});
 
-		it.skip('an empty prefix carries an empty bounded sequence, not an absent one', () => {
+		it('an empty prefix carries an empty bounded sequence, not an absent one', () => {
 			const stage = deriveTokens({ source: '@', type: 'module' });
 			expect(!stage.ok && stage.value?.inputElements).toEqual([]);
 		});
