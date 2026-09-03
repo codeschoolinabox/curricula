@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 790" width="900" height="790" role="img" aria-labelledby="stl sds">
+  <title id="stl">Where a notional machine can point</title>
+  <desc id="sds">A vertical stack. At the top, the source code you write. Beneath it, each layer that realises the one above: JEJ's notional-machine level, the JavaScript engine, the CPU, transistors and voltage. Short arrows between the layers mark the causal chain — the text is realised, layer by layer, as a physical process at the bottom. On the left, a single notional machine box fans arrows to every layer, because a notional machine can be built for any of them; the arrow to JEJ's level is drawn solid because that is the layer this course chooses. A dashed floor near the bottom marks where medium-independence ends: below it is not computation but what computation is made of.</desc>
+  <style>
+    :root { color-scheme: light dark; }
+    .ink { fill: #14181d; }
+    .muted { fill: #5b6672; }
+    .line { stroke: #9aa5b1; }
+    .box { fill: #ffffff; stroke: #14181d; }
+    .soft { fill: #ffffff; stroke: #9aa5b1; }
+    .accent { stroke: #b4530a; }
+    .accentfill { fill: #b4530a; }
+    .accenttag { fill: #b4530a; font-weight: 640; }
+    .tag { fill: #6b7683; }
+    @media (prefers-color-scheme: dark) {
+      .ink { fill: #e8ecf1; }
+      .muted { fill: #9aa5b1; }
+      .line { stroke: #55606c; }
+      .box { fill: #14181d; stroke: #e8ecf1; }
+      .soft { fill: #14181d; stroke: #55606c; }
+      .accent { stroke: #e8913f; }
+      .accentfill { fill: #e8913f; }
+      .accenttag { fill: #e8913f; }
+      .tag { fill: #8792a0; }
+    }
+    text { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+    .h { font-size: 18px; font-weight: 640; }
+    .s { font-size: 13px; }
+    .g { font-size: 11.5px; letter-spacing: .05em; }
+    .c { font-size: 20px; font-weight: 640; }
+  </style>
+  <defs>
+    <marker id="down" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" class="accentfill"/>
+    </marker>
+    <marker id="pt" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" class="line" fill="#9aa5b1"/>
+    </marker>
+    <marker id="ptA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" class="accentfill"/>
+    </marker>
+  </defs>
+
+  <text x="450" y="42" text-anchor="middle" class="g tag">EACH LAYER IS REALISED BY THE ONE BENEATH IT</text>
+
+  <!-- the fan: a notional machine can target any layer -->
+  <path d="M278 323 L332 207" class="accent" fill="none" stroke-width="2" marker-end="url(#ptA)"/>
+  <path d="M278 323 L332 287" class="line" fill="none" stroke-width="1.2" stroke-dasharray="4 4" marker-end="url(#pt)"/>
+  <path d="M278 323 L332 367" class="line" fill="none" stroke-width="1.2" stroke-dasharray="4 4" marker-end="url(#pt)"/>
+  <path d="M278 323 L332 447" class="line" fill="none" stroke-width="1.2" stroke-dasharray="4 4" marker-end="url(#pt)"/>
+
+  <rect x="28" y="280" width="250" height="86" rx="12" class="box" stroke-width="1.6"/>
+  <text x="153" y="312" text-anchor="middle" class="h ink">a notional machine</text>
+  <text x="153" y="334" text-anchor="middle" class="s muted">can be built for any layer —</text>
+  <text x="153" y="352" text-anchor="middle" class="s muted">you choose which one</text>
+  <text x="153" y="398" text-anchor="middle" class="s muted">Below whichever rung you pick,</text>
+  <text x="153" y="416" text-anchor="middle" class="s muted">everything is black-boxed by</text>
+  <text x="153" y="434" text-anchor="middle" class="s muted">choice, not by ignorance.</text>
+
+  <!-- the causal chain -->
+  <path d="M560 158 L560 174" class="accent" fill="none" stroke-width="2" marker-end="url(#down)"/>
+  <path d="M560 238 L560 254" class="accent" fill="none" stroke-width="2" marker-end="url(#down)"/>
+  <path d="M560 318 L560 334" class="accent" fill="none" stroke-width="2" marker-end="url(#down)"/>
+  <path d="M560 398 L560 414" class="accent" fill="none" stroke-width="2" marker-end="url(#down)"/>
+  <path d="M560 478 L560 500" class="accent" fill="none" stroke-width="2" marker-end="url(#down)"/>
+
+  <rect x="340" y="96" width="440" height="62" rx="10" class="box" stroke-width="1.6"/>
+  <text x="560" y="122" text-anchor="middle" class="h ink">the source code</text>
+  <text x="560" y="143" text-anchor="middle" class="s muted">what you write — and what you can delegate</text>
+
+  <rect x="340" y="176" width="440" height="62" rx="10" class="box" stroke-width="2.2" style="stroke:#b4530a"/>
+  <text x="560" y="202" text-anchor="middle" class="h ink">the language-level machine</text>
+  <text x="560" y="223" text-anchor="middle" class="s muted">bindings, scopes, values, coercion, events</text>
+  <text x="800" y="200" class="g tag">§9 lens 4</text>
+  <text x="800" y="220" class="g accenttag">JEJ MODELS</text>
+  <text x="800" y="236" class="g accenttag">THIS ONE</text>
+
+  <rect x="340" y="256" width="440" height="62" rx="10" class="soft" stroke-width="1.4"/>
+  <text x="560" y="282" text-anchor="middle" class="h ink">the JavaScript engine</text>
+  <text x="560" y="303" text-anchor="middle" class="s muted">parse, bytecode, optimise, collect garbage</text>
+  <text x="800" y="292" class="g tag">§9 lens 3</text>
+
+  <rect x="340" y="336" width="440" height="62" rx="10" class="soft" stroke-width="1.4"/>
+  <text x="560" y="362" text-anchor="middle" class="h ink">the CPU</text>
+  <text x="560" y="383" text-anchor="middle" class="s muted">instructions, registers, cache, pipelines</text>
+  <text x="800" y="372" class="g tag">§9 lens 3</text>
+
+  <rect x="340" y="416" width="440" height="62" rx="10" class="soft" stroke-width="1.4"/>
+  <text x="560" y="442" text-anchor="middle" class="h ink">transistors and voltage</text>
+  <text x="560" y="463" text-anchor="middle" class="s muted">gates, thresholds, switching</text>
+  <text x="800" y="452" class="g tag">§9 lens 2</text>
+
+  <!-- the floor -->
+  <path d="M40 512 L860 512" class="line" fill="none" stroke-width="1.4" stroke-dasharray="6 5"/>
+  <text x="450" y="534" text-anchor="middle" class="g tag">MEDIUM-INDEPENDENCE ENDS HERE</text>
+
+  <rect x="340" y="552" width="440" height="76" rx="10" class="soft" stroke-width="1.3" stroke-dasharray="5 4"/>
+  <text x="560" y="584" text-anchor="middle" class="c ink">a computation</text>
+  <text x="560" y="608" text-anchor="middle" class="s muted">electrons through matter — a physical process</text>
+
+  <text x="450" y="672" text-anchor="middle" class="s muted">Every rung above the line is itself a computational artifact, so every rung can be modelled by a notional machine of its own.</text>
+  <text x="450" y="694" text-anchor="middle" class="s muted">Below the line there is no rule indifferent to its medium — that is not computation, it is what computation is made of.</text>
+  <text x="450" y="726" text-anchor="middle" class="s muted">The stack stops where you stop needing it, not where the layers run out.</text>
+</svg>

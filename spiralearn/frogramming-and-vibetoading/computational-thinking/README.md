@@ -84,6 +84,7 @@ Written in dependency order. Each stands alone; each cites the others.
 | 6   | [half-beat.md](./half-beat.md)                             | One drafted, one deliberately bad, and the gate item                                                           |
 | 7   | [tie-ins.md](./tie-ins.md)                                 | Findings about F&V — a map, not a work order                                                                   |
 | 8   | [this-codebase.md](./this-codebase.md)                     | This repository read through the thesis — and where Naur's remedies invert for an LLM collaborator             |
+| 9   | [on-pseudocode.md](./on-pseudocode.md)                     | Why pseudocode-first inverts the sequence — it is notes about a machine you have not met                       |
 
 Start at 0 if you want the argument. Start at 7 if you are redrafting the
 course. Start at 6 if you want to know whether any of this survives contact with
@@ -110,6 +111,10 @@ a chapter.
 - **all → 8.** What follows for this repository, which is itself an instance of
   the thing being argued about — including the failures of the session that
   wrote these documents.
+- **1, 2, 3 → 9.** A worked application: pseudocode fails L2's legibility
+  criterion, sits in L3's non-causal species, and has no semantics for L3's
+  notation-relativity to bite on. Read it as a test of whether the chain decides
+  cases.
 
 ## Provenance
 
