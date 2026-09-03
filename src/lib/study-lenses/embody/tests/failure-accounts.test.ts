@@ -121,9 +121,15 @@ describe('failure accounts', () => {
 	});
 
 	describe('the recovered account', () => {
-		it.skip('a program that lexes but does not parse carries a recovered tree', () => {
+		it('a program that lexes but does not parse carries a recovered tree', () => {
 			const { facts } = embody('const x = ;');
 			expect(!facts.ast.ok && facts.ast.value?.type).toBe('Program');
+		});
+
+		it('the recovered tree carries the statement the reader recovered', () => {
+			const { facts } = embody('const x = ;');
+			const statement = facts.ast.ok ? undefined : facts.ast.value?.body[0];
+			expect(statement?.type).toBe('VariableDeclaration');
 		});
 
 		it.skip('the invented nodes are enumerated exactly when the tree is published', () => {

@@ -1,5 +1,6 @@
 import { parse } from 'acorn';
 import type { Node, ParenthesizedExpression, Program } from 'acorn';
+import { parse as looseParse } from 'acorn-loose';
 
 import ECMA_VERSION from './ecma-version.js';
 import isNode from './is-node.js';
@@ -25,7 +26,10 @@ import type {
  * script). A failed tokens stage short-circuits: the ast stage carries the
  * tokens cause unchanged — spelling precedes grammar, and the failure's origin
  * stays named. A source that does not parse is data, not a throw: the stage
- * carries a `StageCause` in the parser's own voice.
+ * carries a `StageCause` in the parser's own voice — and beside it the failure
+ * arm publishes the stage's account, the recovered tree of README § Failure
+ * grammar: the recovering reader's re-read of the source, its invented nodes
+ * enumerated, under the same `value` name the success arm uses.
  *
  * The parse recognizes grouping parentheses; this stage drops them again before
  * returning, so the published tree is ESTree-shaped and no path ever traverses
@@ -66,7 +70,7 @@ export default function deriveAst(
 			preserveParens: true,
 		});
 	} catch (error) {
-		return toFailedDerivation(toStageCause(error, 'ast'));
+		return toRecoveredDerivation(toStageCause(error, 'ast'), snippet);
 	}
 
 	return {
@@ -78,6 +82,58 @@ export default function deriveAst(
 function toFailedDerivation(cause: StageCause): AstDerivation {
 	// nothing to record: the fold never ran, because there was no tree to fold
 	return { ast: { ok: false, cause }, parenSpansByNode: new Map() };
+}
+
+/**
+ * The recovering reader's derivation over a program that lexes but does not
+ * parse: acorn-loose re-reads the source once — the one re-read the
+ * per-instrument constraint admits — bridging what the source lacks by
+ * inventing the least structure that lets reading continue. The recovered
+ * tree rides the failure arm as the stage's account beside the machine's own
+ * cause, and the reader's grouping-paren record leaves as the derivation's
+ * second half, exactly as the machine's would. Deliberately its own function
+ * beside `toFailedDerivation`: the tokens short-circuit must never recover
+ * (a tokens failure publishes no recovered tree), and the split keeps that
+ * true by shape.
+ *
+ * The read and the fold are guarded as one unit, unlike the machine arm,
+ * where the fold stays outside the try because it walks a tree the parser
+ * validated. Here both are one account derivation over an instrument's
+ * unvalidated output, and README § Failure grammar rules the whole class: a
+ * defect while deriving an account degrades that account alone — the arm
+ * keeps its cause, no member publishes (an unfolded tree would carry
+ * parenthesis nodes no path may traverse), and the report speaks of the
+ * account failing, never of a broken machine invariant.
+ */
+function toRecoveredDerivation(
+	cause: StageCause,
+	snippet: Snippet,
+): AstDerivation {
+	// recovering is embody machinery deriving an account: a throw from it
+	// degrades the account alone — the arm keeps the machine's cause, no
+	// member publishes, and the report speaks of the account failing
+	try {
+		// the reader mirrors the machine's options so the recovered tree reads
+		// the source under the same goal, language year, span vocabulary, and
+		// paren recording the machine's tree would have carried
+		const recovered = looseParse(snippet.source, {
+			sourceType: snippet.type,
+			ecmaVersion: ECMA_VERSION,
+			ranges: true,
+			preserveParens: true,
+		});
+		return {
+			ast: { ok: false, cause, value: recovered, invented: [] },
+			parenSpansByNode: foldGroupingParens(recovered),
+		};
+	} catch (error) {
+		console.error(
+			`deriveAst: deriving the recovered account threw over a grammar failure — the account degrades without its tree (${
+				error instanceof Error ? error.message : String(error)
+			})`,
+		);
+		return { ast: { ok: false, cause }, parenSpansByNode: new Map() };
+	}
 }
 
 /**

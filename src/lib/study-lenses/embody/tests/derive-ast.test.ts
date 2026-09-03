@@ -375,10 +375,16 @@ describe('deriveAst', () => {
 		});
 
 		describe('grouping-parentheses record', () => {
-			it('a grammar error records nothing', () => {
+			it('a recovered reading with no grouping parentheses records nothing', () => {
 				const snippet = { source: 'const', type: 'script' } as const;
 				const derivation = deriveAst(snippet, deriveTokens(snippet));
 				expect(derivation.parenSpansByNode.size).toBe(0);
+			});
+
+			it("a recovered reading records the reader's own parens", () => {
+				const snippet = { source: 'x = (1 + 2', type: 'script' } as const;
+				const derivation = deriveAst(snippet, deriveTokens(snippet));
+				expect(derivation.parenSpansByNode.size).toBe(1);
 			});
 
 			it('a failed tokens stage records nothing', () => {
