@@ -1,0 +1,14 @@
+For ten years I've been fully fascinated by how people learn programming and learn the kinds of thinking code supports.   A few questions under this umbrella have pushed my teaching the furthest:
+- Can computational thinking really be abstracted away from computational mediums? 
+- How does the thinking tool a student uses (code, visuals, language) limit or shape their computational thinking?
+- How closely is a beginner programmer's algorithmic knowledge tied to their first (and so far only) programming language?
+- How can we help learners 1) separate computational thoughts from code-linguistic thoughts to learn both more effectively, then 2) reintegrate those skills to become strong programmers?
+
+Computing education researchers have done a pretty good job addressing these questions, but their work often stops with a publication (instead of useable tools) and isolates aspects of the learning process with no guidance for reintegration.  To bring this research and my own experiments to life, I have another set of questions:
+- How can I design learning environments that maximize how many hours of feedback-driven studying my learners get for every minute of my prep time I invest?
+- How can I create a learning environment that explicitly supports quick, experimental exercises without burdening the content authors?
+- How can I make it easier to study and teach programming using evidence-based practices than any alternative?
+
+All these questions and the teaching samples they inspired are not academic exercises.  They are frameworks and tooling I co-designed over years of running small schools with very limited instructor time, multiple cohorts in parallel, and no budget for infrastructure.  I found time spent optimizing instructional design always paid off when juggling all the responsibilities of teaching, preparing content, working with hiring partners, training coaches, applying for funding, etc.   Every misconception I could preempt meant less time spent answering questions, wrangling volunteers, remediating learners, and ultimately fewer drop-outs.
+
+Over the last year I've started teaching 6-12th graders in tutoring and weekend sessions.  At first I expected younger learners to be bored or blocked by code reading and prediction exercises I'd developed with adults.  To the contrary, so far they have enjoyed using Study Lenses!  They treat program prediction like a game, and they are motivated to push through because they can feel their progress and know they are learning more than with any course they'd followed before.   From this I've learned that good learning design is intrinsically engaging.  When a curriculum's path is clear, its progress is tangible, and the skills are motivating, the rest is decoration.

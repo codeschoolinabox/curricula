@@ -1,0 +1,124 @@
+--- what is this course about? ---
+
+What is a computational artifact?  It's a physical or conceptual system/machine that can change over time.
+
+
+What is computation?  It's how a computational artifact's internal state:
+- represents/models data internally
+- transforms internal data representations
+
+
+What is "meaningful" computation?  It's when a computational artifact's internal states:
+- can be mapped from _and_ to the internal states of another system
+- when information about the target system can be inferred by intermediary states of the computational artifact
+- when this isometry can be observed and manipulated
+
+
+What is a computational language?  it's a symbolic representation of meaningful computation.
+
+
+What is computational thinking?  It's understanding, predicting, discussing and designing meaningful computation by way of a computational language:
+- how the artifact represents/models aspects of the target system as data
+- how the information is processed internally
+- how internal states map back to the target system
+
+
+What is a programming language?  It's a computational language that has causal influence over a computational artifact.
+
+
+What is a notional machine?  It's an event-based representation of the computational artifact a programming language influences that can be learned, discussed, debugged, and visualized.
+
+
+What is applied computation?  It's using a programming language to understand, predict, discuss and design the world around you.
+
+
+What is intentional computation?  It's applying computation to modify the world towards more desirable states.
+
+
+--- how this course will explore computation ---
+
+
+we'll start by deeply understanding a "simple" programming language (part of JavaScript, Just Enough JavaScript (JEJ)).  Why?  Because programming languages come from a long tradition of representing and operationalizing computation, they do a pretty good job of bridging human ways of thinking into causal instructions for a computational artifact†.
+
+As you become comfortable with the two sides of JEJ - how it represents computational thoughts for humans to understand, and how the same notation causally _programs_ a computational artifact - you will gradually transition from _learning to program_ to _programming to learn_ -> in other words, as you master one computational language, this fluency will free you to explore more interesting concepts without fumbling with language.  think of it like learning a new human language:  you need to first have a basic fluency/automaticity with the vocabulary and grammar before you can use the language to understand and express more rich or abstract ideas.
+
+The big difference is this:
+- when learning a new human language you already have the _thoughts_ you want to express or discuss**** (me hungry, what color that thing?, where you from?), you only need to learn a new medium to _represent_ and _discuss_ these thoughts.
+- when learning a programming language, not everyone* naturally has the types of thoughts these languages are designed to represent.  So learning computational thinking is a two-part, entwined endeavor:
+  - learn a symbolic computational language
+  - learn to have the thoughts this language represents
+
+So this course will gradually interweave more complex forms of computational thinking as it introduces the JEJ language features to express and manipulate these thoughts, and once mastered in JEJ you will explore how your new computational thoughts can be used to understand or interact with different parts of our wonderful world in new ways.
+
+
+
+
+* but not all!  Some people naturally have a more computational way of thinking, so learning a language to express those thoughts comes more easily because they already know what they want to say**.
+
+** you'll even find that experienced programmers can struggle to learn a new programming language when it's model of computation (programming paradigm) isn't one they're familiar with!  for example transitioning from OOP to FP isn't just swapping one syntax for another, it's actually replacing one notional machine with an entirely different one.  the new syntax is just a symptom of differences in the notional machines***.
+
+*** superficial similarities in syntax across languages can actually obfuscate the differences in NMs and slow learning!
+
+So it is with computational thinking -
+
+
+**** sort of.  people fluent in multiple languages know there are some concepts that can't be expressed in other languages.  and more strongly, linguistic relativity claims that language has causal influence over which thoughts or feelings you're even capable of having!
+
+
+--- why learn a programming language when AI can write code? ---
+
+because you need to learn _some_ way to represent computational thoughts if you want to communicate with others, and programming languages are a rich, conventional, and prolific means of representing and embodying computing.  they will give you access to richer discussions, study resources, and agency in a computational world.
+
+and why learn syntax, even if you won't be writing it?  Because programming language syntax may be challenging to learn but it represents a rich understanding of it's computational artifact* (notional machine) and will allow you to more precisely model what happens in your computation.
+
+
+* not to say it's the _best_ or most helpful one, an experiment showed that common c-style languages are no easier to learn for beginners than random languages with the same computational model!
+
+--- † ---
+
+> written pre-LLMs
+> see also ./ontology.md's breakdown of how LLMs relate to _Learnable Programming_
+
+## Programming Languages
+
+High-level programming languages like JavaScript are a compromise between how
+people think and how a computer works. Programming languages are not always easy
+for people to learn but they're definitely easier than directly telling a
+computer what to do (writing 1's and 0's).
+
+Because humans are so much better at learning and understanding than computers
+are (for now), programming languages have been designed to leave all the hard
+work for us. It's our job to make sure our instructions for the computer are
+perfectly structured and do exactly what we want. The computer just _parses_
+(interprets) our code and follows the instructions without any understanding or
+thinking.
+
+You can think of a programming language as the developer's UI for the computer.
+Because this UI isn't very intuitive you will need to spend a lot of time
+studying syntax and other details before you can program with ease. This is why
+you will be focusing on _understanding_ programs before writing them.
+
+[**_Learnable Programming_**](http://worrydream.com/LearnableProgramming/) said
+it best:
+
+> - **Programming is a way of thinking, not a rote skill**. Learning about "for"
+>   loops is not learning to program, any more than learning about pencils is
+>   learning to draw.
+> - **People understand what they can see**. If a programmer cannot see what a
+>   program is doing, she can't understand it.
+>
+> Thus, the goals of a programming system should be:
+>
+> - to support and encourage powerful ways of thinking
+> - to enable programmers to see and understand the execution of their programs
+>
+> ...
+>
+> _How do we get people to understand programming?_
+>
+> We change programming. We turn it into something that's understandable by
+> people.
+
+Until the future when computers are designed to understand us, we're stuck with
+programming systems where we do the hard work of understand computers. Hopefully
+Welcome to JS & Study Lenses can make this journey easier.
