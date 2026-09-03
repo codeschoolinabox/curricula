@@ -1,0 +1,136 @@
+<!doctype html>
+<!-- cspell:ignore COEP unmocked vite -->
+<!--
+  intercept evaluator sandbox — permanent dev infrastructure, not part of
+  intercept's contract. Built at the SHELL stage per the campaign's
+  sandbox cadence (HR-15: pages early, extended per increment); I8
+  completes it as the union of the two ruled fidelity targets — the
+  deprecated page's five C2 checkpoint flows (console event with loc →
+  clean · prompt card suspend → answer → record · confirm Cancel
+  returnValue false · unanswered card + cancel → inert stale answer ·
+  loop-cap with the loop's own span), its full-data serializer
+  (present-but-undefined rendered, live respond shown), and io-mock
+  toggles.
+
+  Serve:  npx vite --config src/lib/study-lenses/evaluators/intercept/vite.sandbox.config.ts
+  Open:   /evaluators/intercept/sandbox.html
+
+  This page drives intercept through the KIND SURFACE — applicability,
+  then main — never its internal factory. While the intercept chain is
+  mid-build, driving a preset renders the honest current answer: a
+  refusal (as data), or the not-implemented throw from the stub — never
+  a faked stream.
+-->
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>intercept evaluator sandbox</title>
+		<style>
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+			body {
+				font-family: monospace;
+				font-size: 13px;
+				padding: 1.5rem;
+				max-width: 860px;
+				margin: 0 auto;
+			}
+			h1 {
+				font-size: 1.1rem;
+				margin-bottom: 0.4rem;
+			}
+			p.note {
+				color: #666;
+				margin-bottom: 1rem;
+			}
+			button {
+				font: inherit;
+				margin: 0 0.4rem 0.4rem 0;
+				padding: 0.3rem 0.6rem;
+			}
+			pre {
+				background: #f4f4f4;
+				padding: 0.8rem;
+				margin-top: 1rem;
+				white-space: pre-wrap;
+				word-break: break-word;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>intercept evaluator sandbox</h1>
+		<p class="note">
+			Shell stage: presets name the completed page's five checkpoint flows (they
+			arrive with I6–I8: the streaming cards, io toggles, and the full-data
+			serializer). Driving a preset today shows the honest in-build answer.
+		</p>
+		<div id="presets"></div>
+		<pre id="output">idle — pick a preset</pre>
+		<script type="module">
+			import deriveFacts from '../../embody/derive-facts.ts';
+			import intercept from './index.ts';
+
+			const PRESETS = [
+				{
+					name: 'console event with loc',
+					source: 'console.log("hallo");\n',
+				},
+				{ name: 'prompt card', source: 'let name = prompt("who?");\n' },
+				{ name: 'confirm card', source: 'let sure = confirm("sure?");\n' },
+				{
+					name: 'loop cap (100)',
+					source: 'while (true) {\n\tlet x = 1;\n}\n',
+					iterations: 100,
+				},
+				{ name: 'runtime error', source: 'null();\n' },
+			];
+
+			const output = document.querySelector('#output');
+			const presets = document.querySelector('#presets');
+
+			function show(value) {
+				output.textContent =
+					typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+			}
+
+			async function drive(preset) {
+				show(`driving "${preset.name}" through the kind surface…`);
+				try {
+					const facts = deriveFacts({ source: preset.source, type: 'script' });
+					const spec = {
+						facts,
+						execution: 'function',
+						...(preset.iterations === undefined
+							? {}
+							: { iterations: preset.iterations }),
+					};
+					const verdict = intercept.applicability(spec);
+					const answer = intercept.main(spec);
+					if ('refused' in answer) {
+						show({ applicability: verdict, refusal: answer });
+						return;
+					}
+					const events = [];
+					for await (const event of answer) {
+						events.push(event);
+					}
+					const result = await answer;
+					show({ applicability: verdict, events, result });
+				} catch (error) {
+					show(`honest in-build state — main threw:\n${String(error)}`);
+				}
+			}
+
+			for (const preset of PRESETS) {
+				const button = document.createElement('button');
+				button.textContent = preset.name;
+				button.addEventListener('click', () => void drive(preset));
+				presets.append(button);
+			}
+		</script>
+	</body>
+</html>
