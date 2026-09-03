@@ -39,35 +39,37 @@ curriculum has the shape it already has.
 
 ![F's axis: from a physical process to the study of formal structures](./the-chain.svg)
 
-At the far left a physical process. Then a **ladder of language levels**, each
-implemented in the one to its left — machine code, assembly, C++, JavaScript —
-with a dashed boundary marking where medium-independence begins: to its left is
-the medium, to its right are rules indifferent to it.
+The left side runs **static → dynamic → physical**. Code is the instructions at
+rest. The notional machines are the dynamic account of what those instructions
+do while running. The artifact is the physical process itself. That is
+`ontology.md:703-709`'s static and dynamic faces of artifact-speak, laid out.
 
-**The notional machines sit below the ladder, not on it.** There is one per
-level, and you choose which to model; the rest stay black boxes by choice rather
-than ignorance. That is what "at a chosen level of abstraction" means, and it is
-why you do not need to know how a CPU works to write JavaScript. `README.md` and
-`thesis.md` both already said there is no such thing as _the_ notional machine —
-only ones chosen for a purpose and an audience.
+**Notional machines are plural, and the ladder beneath them is why.** There is
+one per language level — machine code, assembly, C++, JavaScript — and you
+choose which to model; the rest stay black boxes by choice rather than
+ignorance. That is what "at a chosen level of abstraction" means, and why you do
+not need to know how a CPU works to write JavaScript. Both `README.md:453` and
+`thesis.md:162` already said there is no such thing as _the_ notional machine.
 
-**JavaScript carries two marks at once**, and their coincidence is the course's
-central tension: it is the level you learn to **delegate**, and the level whose
-machine you must **twin**. `ontology.md:1257` is the consequence — "Frogramming
-with delegation is only sustainable if you keep the direct NM view alive."
+**The two marks sit on different boxes, and that is the course's whole
+delegation story.** Code is the delegable position. The notional machines are
+yours to twin. `ontology.md:1257` is the consequence — "Frogramming with
+delegation is only sustainable if you keep the direct NM view alive."
 
-**The pivot divides causing from describing.** To its left, everything is part
-of the chain that actually produces the physical process. To its right, the
-computational thoughts a person holds, and the notations that describe without
-driving.
+**The pivot divides causing from describing**, which is `thesis.md:246`'s claim:
+of the representations, only code also causes the process.
 
-Underneath: **what you can check it against.** A level is checkable exactly
-where someone has built a machine for it — Study Lenses for JavaScript's, proof
-assistants for formal notation's. Two positions have none. The thoughts have
-nothing _directly_, which is why the twin and the instruments exist at all. And
-pseudocode has nothing and **can** have nothing, because there is no fixed
-semantics to build a machine against. That is the subject of
+Underneath: **what you can check it against.** A position is checkable where
+someone has built a machine for it — Study Lenses for JavaScript's notional
+machine, proof assistants for formal notation. Two positions have none. The
+thoughts have nothing _directly_, which is why the twin and the instruments
+exist at all. And pseudocode has nothing and **can** have nothing, because there
+is no fixed semantics to build a machine against — the subject of
 [on-pseudocode.md](./on-pseudocode.md).
+
+Note what the interpreter's cell says, because it is easy to over-read: it
+adjudicates what code _means_, never whether you meant it. Naur's "many
+different ways, all correct" is exactly the gap it does not cover.
 
 The right-hand side is marked **not yet layered**. It wants the same treatment —
 gradations of formalisation between a thought and a complexity class — and

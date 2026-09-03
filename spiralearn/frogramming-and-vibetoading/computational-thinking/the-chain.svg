@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1140 470" width="1140" height="470" role="img" aria-labelledby="ctl cds">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 440" width="1120" height="440" role="img" aria-labelledby="ctl cds">
   <title id="ctl">The F-side: from a physical process to the study of formal structures</title>
-  <desc id="cds">A row of positions. At the far left, the artifact — a physical process. A dashed boundary marks where medium-independence begins: to its left is the medium, to its right are languages. Then a ladder of language levels, each implemented in the one to its left: machine code, assembly, C++, and JavaScript. JavaScript is both the chain's code position, ringed as the part a practitioner learns to delegate, and the level Just Enough JavaScript models. Beneath the ladder a box reading "notional machines" fans arrows to every level, because each language level has a machine of its own and you choose which to model; the arrow to JavaScript is solid, and Study Lenses is the instrument that makes that one checkable. Then a pivot, and to its right the computational thoughts held by a person, pseudocode which has no machine and can have none, formal notation whose machines are proof assistants, and CS or theory set apart as a discipline whose objects are the other positions. The right-hand side is not yet layered.</desc>
+  <desc id="cds">A row of positions. At the far left the artifact, a physical process. Then notional machines — the dynamic account of what the code does while running — marked as yours to twin. Beneath them a ladder of language levels they can be built for: machine code, assembly, C++, JavaScript, with JavaScript picked out because that is the level Just Enough JavaScript models. Then code, the static instructions at rest, ringed as the position a practitioner learns to delegate. A dashed pivot divides these, which cause the process, from what lies right of it, which describes it: the computational thoughts held by a person, pseudocode, formal notation, and CS or theory set apart as a discipline whose objects are the other positions. Underneath, a row giving what each position can be checked against; pseudocode has nothing, and no machine can be built for it. The right-hand side is not yet layered.</desc>
   <style>
     :root { color-scheme: light dark; }
     .ink { fill: #14181d; }
@@ -24,9 +24,9 @@
       .tag { fill: #8792a0; }
     }
     text { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
-    .h { font-size: 14.5px; font-weight: 640; }
-    .hh { font-size: 15px; font-weight: 640; }
-    .s { font-size: 10.5px; }
+    .h { font-size: 15px; font-weight: 640; }
+    .s { font-size: 11px; }
+    .t { font-size: 10px; }
     .g { font-size: 10.5px; letter-spacing: .05em; }
     .k { font-size: 11.5px; font-style: italic; }
   </style>
@@ -34,93 +34,85 @@
     <marker id="up" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
       <path d="M0 0 L10 5 L0 10 z" class="accentfill"/>
     </marker>
-    <marker id="upm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M0 0 L10 5 L0 10 z" fill="#9aa5b1"/>
-    </marker>
   </defs>
 
-  <text x="390" y="30" text-anchor="middle" class="g tag">EACH LEVEL IMPLEMENTED IN THE ONE TO ITS LEFT</text>
+  <text x="240" y="30" text-anchor="middle" class="g tag">STATIC &#8594; DYNAMIC &#8594; PHYSICAL</text>
 
-  <rect x="16" y="60" width="108" height="76" rx="10" class="box" stroke-width="1.6"/>
-  <text x="70" y="90" text-anchor="middle" class="hh ink">the artifact</text>
-  <text x="70" y="110" text-anchor="middle" class="s muted">a physical</text>
-  <text x="70" y="124" text-anchor="middle" class="s muted">process</text>
+  <rect x="18" y="56" width="126" height="80" rx="10" class="box" stroke-width="1.6"/>
+  <text x="81" y="88" text-anchor="middle" class="h ink">the artifact</text>
+  <text x="81" y="110" text-anchor="middle" class="s muted">a physical process</text>
 
-  <path d="M136 48 L136 156" class="line" fill="none" stroke-width="1.3" stroke-dasharray="6 5"/>
-  <text x="142" y="152" class="k muted">medium-independence begins</text>
+  <rect x="176" y="56" width="150" height="80" rx="10" class="box" stroke-width="1.6"/>
+  <text x="251" y="84" text-anchor="middle" class="h ink">notional machines</text>
+  <text x="251" y="104" text-anchor="middle" class="s muted">dynamic — what the code</text>
+  <text x="251" y="118" text-anchor="middle" class="s muted">does while it runs</text>
+  <text x="251" y="156" text-anchor="middle" class="g accenttag">YOURS TO TWIN</text>
 
-  <rect x="150" y="60" width="112" height="76" rx="9" class="soft" stroke-width="1.3"/>
-  <text x="206" y="92" text-anchor="middle" class="h ink">machine code</text>
-  <text x="206" y="114" text-anchor="middle" class="s muted">what the CPU decodes</text>
+  <rect x="358" y="46" width="146" height="100" rx="14" fill="none" class="accent" stroke-width="2" stroke-dasharray="7 5"/>
+  <rect x="366" y="56" width="130" height="80" rx="10" class="box" stroke-width="1.6"/>
+  <text x="431" y="88" text-anchor="middle" class="h ink">code</text>
+  <text x="431" y="110" text-anchor="middle" class="s muted">static — instructions</text>
+  <text x="431" y="124" text-anchor="middle" class="s muted">at rest</text>
+  <text x="431" y="166" text-anchor="middle" class="g accenttag">THE DELEGABLE POSITION</text>
 
-  <rect x="272" y="60" width="112" height="76" rx="9" class="soft" stroke-width="1.3"/>
-  <text x="328" y="92" text-anchor="middle" class="h ink">assembly</text>
-  <text x="328" y="114" text-anchor="middle" class="s muted">mnemonics for it</text>
+  <path d="M144 96 L174 96" class="line" stroke-width="1.4"/>
+  <path d="M326 96 L364 96" class="line" stroke-width="1.4"/>
 
-  <rect x="394" y="60" width="112" height="76" rx="9" class="soft" stroke-width="1.3"/>
-  <text x="450" y="92" text-anchor="middle" class="h ink">C++</text>
-  <text x="450" y="114" text-anchor="middle" class="s muted">what the engine is in</text>
+  <!-- language ladder: what the notional machines can be built for -->
+  <path d="M251 136 L251 210" class="line" fill="none" stroke-width="1.1" stroke-dasharray="3 4"/>
+  <text x="251" y="230" text-anchor="middle" class="t tag">ONE PER LANGUAGE LEVEL — YOU CHOOSE WHICH TO MODEL</text>
+  <rect x="60" y="244" width="88" height="34" rx="7" class="soft" stroke-width="1.2"/>
+  <text x="104" y="266" text-anchor="middle" class="s ink">machine code</text>
+  <rect x="156" y="244" width="88" height="34" rx="7" class="soft" stroke-width="1.2"/>
+  <text x="200" y="266" text-anchor="middle" class="s ink">assembly</text>
+  <rect x="252" y="244" width="88" height="34" rx="7" class="soft" stroke-width="1.2"/>
+  <text x="296" y="266" text-anchor="middle" class="s ink">C++</text>
+  <rect x="348" y="244" width="94" height="34" rx="7" class="box" stroke-width="1.8" style="stroke:#b4530a"/>
+  <text x="395" y="266" text-anchor="middle" class="s ink">JavaScript</text>
+  <path d="M148 261 L154 261" class="line" stroke-width="1.2"/>
+  <path d="M244 261 L250 261" class="line" stroke-width="1.2"/>
+  <path d="M340 261 L346 261" class="line" stroke-width="1.2"/>
+  <text x="251" y="298" text-anchor="middle" class="g accenttag">JEJ MODELS THIS ONE — STUDY LENSES MAKES IT CHECKABLE</text>
 
-  <rect x="510" y="50" width="132" height="96" rx="14" fill="none" class="accent" stroke-width="2" stroke-dasharray="7 5"/>
-  <rect x="518" y="60" width="116" height="76" rx="9" class="box" stroke-width="2" style="stroke:#b4530a"/>
-  <text x="576" y="92" text-anchor="middle" class="hh ink">JavaScript</text>
-  <text x="576" y="114" text-anchor="middle" class="s muted">code you write</text>
-  <text x="576" y="166" text-anchor="middle" class="g accenttag">THE DELEGABLE LEVEL —</text>
-  <text x="576" y="180" text-anchor="middle" class="g accenttag">AND THE ONE YOU MUST TWIN</text>
+  <path d="M534 34 L534 200" class="line" fill="none" stroke-width="1.3" stroke-dasharray="6 5"/>
+  <text x="522" y="40" text-anchor="end" class="k muted">these cause the process</text>
+  <text x="546" y="40" class="k muted">these describe it</text>
+  <path d="M504 96 L532 96" class="line" stroke-width="1.4"/>
 
-  <path d="M262 98 L270 98" class="line" stroke-width="1.3"/>
-  <path d="M384 98 L392 98" class="line" stroke-width="1.3"/>
-  <path d="M506 98 L516 98" class="line" stroke-width="1.3"/>
+  <rect x="548" y="56" width="124" height="80" rx="10" class="box" stroke-width="1.6"/>
+  <text x="610" y="82" text-anchor="middle" class="h ink">the computational</text>
+  <text x="610" y="100" text-anchor="middle" class="h ink">thoughts</text>
+  <text x="610" y="120" text-anchor="middle" class="s muted">held by a person</text>
 
-  <path d="M356 250 L210 142" class="line" fill="none" stroke-width="1.1" stroke-dasharray="4 4" marker-end="url(#upm)"/>
-  <path d="M356 250 L330 142" class="line" fill="none" stroke-width="1.1" stroke-dasharray="4 4" marker-end="url(#upm)"/>
-  <path d="M356 250 L448 142" class="line" fill="none" stroke-width="1.1" stroke-dasharray="4 4" marker-end="url(#upm)"/>
-  <path d="M356 250 L566 142" class="accent" fill="none" stroke-width="2" marker-end="url(#up)"/>
+  <rect x="688" y="56" width="120" height="80" rx="10" class="box" stroke-width="1.6"/>
+  <text x="748" y="90" text-anchor="middle" class="h ink">pseudocode</text>
+  <text x="748" y="112" text-anchor="middle" class="s muted">no machine can be built</text>
 
-  <rect x="232" y="256" width="248" height="64" rx="10" class="box" stroke-width="1.6"/>
-  <text x="356" y="282" text-anchor="middle" class="hh ink">notional machines</text>
-  <text x="356" y="302" text-anchor="middle" class="s muted">one per level — you choose which to</text>
-  <text x="356" y="315" text-anchor="middle" class="s muted">model, and the rest stay black boxes</text>
-  <text x="356" y="344" text-anchor="middle" class="g accenttag">JEJ MODELS THIS ONE — STUDY LENSES MAKES IT CHECKABLE</text>
+  <rect x="824" y="56" width="120" height="80" rx="10" class="box" stroke-width="1.6"/>
+  <text x="884" y="90" text-anchor="middle" class="h ink">formal notation</text>
+  <text x="884" y="112" text-anchor="middle" class="s muted">proof assistants run it</text>
 
-  <path d="M666 40 L666 214" class="line" fill="none" stroke-width="1.3" stroke-dasharray="6 5"/>
-  <text x="654" y="46" text-anchor="end" class="k muted">these cause the process</text>
-  <text x="678" y="46" class="k muted">these describe it</text>
-  <path d="M642 98 L664 98" class="line" stroke-width="1.3"/>
+  <rect x="960" y="56" width="56" height="80" rx="10" class="soft" stroke-width="1.3" stroke-dasharray="5 4"/>
+  <text x="988" y="90" text-anchor="middle" class="h ink">CS /</text>
+  <text x="988" y="108" text-anchor="middle" class="h ink">theory</text>
 
-  <rect x="680" y="60" width="118" height="76" rx="10" class="box" stroke-width="1.6"/>
-  <text x="739" y="86" text-anchor="middle" class="h ink">the computational</text>
-  <text x="739" y="102" text-anchor="middle" class="h ink">thoughts</text>
-  <text x="739" y="122" text-anchor="middle" class="s muted">held by a person</text>
+  <path d="M672 96 L686 96" class="line" stroke-width="1.4"/>
+  <path d="M808 96 L822 96" class="line" stroke-width="1.4"/>
+  <path d="M944 96 L958 96" class="line" stroke-width="1.4" stroke-dasharray="4 3"/>
 
-  <rect x="812" y="60" width="112" height="76" rx="10" class="box" stroke-width="1.6"/>
-  <text x="868" y="90" text-anchor="middle" class="h ink">pseudocode</text>
-  <text x="868" y="114" text-anchor="middle" class="s muted">no machine can be built</text>
+  <text x="800" y="196" text-anchor="middle" class="g tag">NOT YET LAYERED</text>
 
-  <rect x="938" y="60" width="112" height="76" rx="10" class="box" stroke-width="1.6"/>
-  <text x="994" y="90" text-anchor="middle" class="h ink">formal notation</text>
-  <text x="994" y="114" text-anchor="middle" class="s muted">proof assistants run it</text>
-
-  <rect x="1064" y="60" width="52" height="76" rx="10" class="soft" stroke-width="1.3" stroke-dasharray="5 4"/>
-  <text x="1090" y="92" text-anchor="middle" class="h ink">CS /</text>
-  <text x="1090" y="108" text-anchor="middle" class="h ink">theory</text>
-
-  <path d="M798 98 L810 98" class="line" stroke-width="1.3"/>
-  <path d="M924 98 L936 98" class="line" stroke-width="1.3"/>
-  <path d="M1050 98 L1062 98" class="line" stroke-width="1.3" stroke-dasharray="4 3"/>
-
-  <text x="898" y="204" text-anchor="middle" class="g tag">NOT YET LAYERED</text>
-
-  <text x="570" y="392" text-anchor="middle" class="g tag">WHAT YOU CAN CHECK IT AGAINST</text>
-  <path d="M16 406 L1116 406" class="line" fill="none" stroke-width="1" opacity=".5"/>
-
-  <text x="70" y="430" text-anchor="middle" class="s muted">measurement</text>
-  <text x="328" y="430" text-anchor="middle" class="s muted">each level&#8217;s own machine, where someone built one</text>
-  <text x="576" y="430" text-anchor="middle" class="s muted">the engine, via Study Lenses</text>
-  <text x="739" y="430" text-anchor="middle" class="s muted">nothing directly &#8212; hence</text>
-  <text x="739" y="444" text-anchor="middle" class="s muted">the twin, hence the instruments</text>
-  <text x="868" y="432" text-anchor="middle" class="h accenttag">nothing</text>
-  <text x="994" y="430" text-anchor="middle" class="s muted">proof</text>
-  <text x="1090" y="430" text-anchor="middle" class="s muted">proof, and</text>
-  <text x="1090" y="444" text-anchor="middle" class="s muted">measurement</text>
+  <text x="540" y="356" text-anchor="middle" class="g tag">WHAT YOU CAN CHECK IT AGAINST</text>
+  <path d="M18 370 L1096 370" class="line" fill="none" stroke-width="1" opacity=".5"/>
+  <text x="81" y="394" text-anchor="middle" class="s muted">measurement</text>
+  <text x="251" y="394" text-anchor="middle" class="s muted">the running machine,</text>
+  <text x="251" y="408" text-anchor="middle" class="s muted">via Study Lenses</text>
+  <text x="431" y="394" text-anchor="middle" class="s muted">the interpreter — on what it</text>
+  <text x="431" y="408" text-anchor="middle" class="s muted">means, not whether you meant it</text>
+  <text x="610" y="394" text-anchor="middle" class="s muted">nothing directly — hence</text>
+  <text x="610" y="408" text-anchor="middle" class="s muted">the twin, hence the instruments</text>
+  <text x="748" y="396" text-anchor="middle" class="h accenttag">nothing</text>
+  <text x="884" y="394" text-anchor="middle" class="s muted">proof</text>
+  <text x="988" y="394" text-anchor="middle" class="s muted">proof, and</text>
+  <text x="988" y="408" text-anchor="middle" class="s muted">measurement</text>
 </svg>
