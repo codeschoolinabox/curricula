@@ -32,8 +32,8 @@
  *      rather than something to approve.
  *   4. Where a verdict sits. The twin draws verdicts "against the fields they
  *      judge, not in a banner", while the DOM has one verdicts region after the
- *      form. Nothing renders a verdict until judging lands, so this file must
- *      not invent a banner and thereby settle by default what no one has ruled.
+ *      form. This file must not invent a banner and thereby settle by default
+ *      what no one has ruled.
  *
  * ⚠ AND TWO THINGS THE WIRE-FRAMES DRAW THAT THE DOM DOES NOT RENDER: the region
  * labels (INPUT / TOKENS / SET ASIDE) and the jar's "carries a line break"

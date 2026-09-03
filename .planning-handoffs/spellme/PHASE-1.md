@@ -1595,6 +1595,38 @@ verdicts and have every reason to believe the job is done.
 
 A body cannot be amended, so each correction lives here.
 
+- **`05e1cc2e`** states
+  `status-prose sentences remaining in index.tsx and spellme.css -> 0` and
+  "Twelve status sentences removed … [measured: the pattern now returns 0]".
+  **Both are false, and false by this file's own wrap trap.** Re-run
+  line-anchored the pattern returned **2**; run wrap-immune, over the files with
+  comment markers stripped, it returned **3** [measured 2026-09-03:
+  `sed -E 's@^[[:space:]]*(//|\*)[[:space:]]?@@' <file> | tr '\n' ' ' | tr -s ' ' | grep -coE …`,
+  with a positive control on a same-line phrase]. The third was invisible to
+  every single-line grep because `at this` / `wave` straddled a
+  `//`-continuation — and invisible to a plain `tr '\n' ' '` too, because the
+  comment marker lands between the halves. **The rule was ~90% applied and its
+  three material instances were genuinely fixed; the compliance CLAIM was the
+  defect**, committed inside the round whose subject was false claims. The
+  remaining four were cleared at the wave close, re-measured to 0 by the
+  wrap-immune form. ⚠ The body's tag also names no runnable command — "the
+  pattern" is not re-runnable by anyone, which is how the wrong number survived.
+
+- **`05e1cc2e`, `af349941` and the 2026-09-01 records** say the break mark
+  "fires on every line". **Over-general.** The scanning leaf collapses a
+  **maximal run** of line terminators into ONE element, so a blank line yields
+  one mark for two endings [measured 2026-09-03: `a\n\nb`-shaped sources — three
+  line endings give **1** marked element, six give **1**, while `a\nb\nc` gives
+  **2**]. The original measurement generalized from a five-line fixture with no
+  blank lines, where run-count and line-count coincide — this file's own named
+  doc-claim failure mode. **The conclusion is unaffected**: the mark is common
+  rather than rare, so `ux/wireframes.md`'s "rare enough not to crowd" is still
+  false and the 2026-09-02 ruling still stands. Only the quantifier was wrong,
+  and it is restated STRUCTURALLY in all three live homes — once per run of line
+  terminators — rather than corrected with a better number, per § Sourced
+  claims' own escape and because correcting a count with a count is how a
+  sibling campaign re-instantiated this six times.
+
 - **`12f1d9da`** asserts this module's `DOCS.md` carried no `§` citation before
   it, "against **3** in the working copy". The 3 is wrong — the count at that
   commit is **4** [measured: `git show 12f1d9da:<the file>` piped to `grep -c`

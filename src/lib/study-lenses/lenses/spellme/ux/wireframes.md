@@ -228,10 +228,12 @@ doubt below.
 > survived. The counter offered here was that ASI is precisely the thing a
 > learner cannot see and most needs to, and that a mark which appears only where
 > the grammar reads a break is rare enough not to crowd. **The second half does
-> not hold**: the grammar reads a break at EVERY line ending, so the mark fires
-> once per line rather than rarely [measured 2026-09-01]. The first half stands.
-> The mark stays for now (human ruling 2026-09-02); its density is an open
-> question, not a settled design.
+> not hold**: the mark fires once per RUN of line terminators — once per line
+> ending where no two are adjacent, and once for a whole block of blank lines,
+> because the scanning leaf collapses a maximal run into one element. Common
+> rather than rare, which is what this counter needed it not to be. The first
+> half stands. The mark stays for now (human ruling 2026-09-02); its density is
+> an open question, not a settled design.
 
 **The declined state**, and for a sharper reason: there is no surface to draw.
 When the embodiment's input-element derivation defects, applicability declines

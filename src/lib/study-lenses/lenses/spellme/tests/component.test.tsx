@@ -290,20 +290,6 @@ describe('spellme surface', () => {
 			expect(root(renderLens('// hi\nconst x = 1')).dataset.cursor).toBe('2');
 		});
 
-		it('leaves no break mark for a set-aside comment carrying a line break', () => {
-			expect(
-				renderLens('/* a\nb */').querySelectorAll('[data-spellme-break]'),
-			).toHaveLength(0);
-		});
-
-		it('keeps only set-aside elements in the jar', () => {
-			expect(
-				renderLens('// hi\nconst x = 1').querySelectorAll(
-					'[data-spellme-set-aside]',
-				),
-			).toHaveLength(1);
-		});
-
 		it('renders the legend as a plain region rather than a disclosure', () => {
 			expect(
 				renderLens('const x = 1').querySelector('[data-spellme-legend]')
@@ -382,6 +368,20 @@ describe('spellme surface', () => {
 			expect(
 				renderLens('// hi\nconst x = 1').querySelectorAll(
 					'[data-spellme-break]',
+				),
+			).toHaveLength(1);
+		});
+
+		it('leaves no break mark for a set-aside comment carrying a line break', () => {
+			expect(
+				renderLens('/* a\nb */').querySelectorAll('[data-spellme-break]'),
+			).toHaveLength(0);
+		});
+
+		it('keeps only set-aside elements in the jar', () => {
+			expect(
+				renderLens('// hi\nconst x = 1').querySelectorAll(
+					'[data-spellme-set-aside]',
 				),
 			).toHaveLength(1);
 		});

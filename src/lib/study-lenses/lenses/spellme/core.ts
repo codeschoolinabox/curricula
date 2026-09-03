@@ -279,7 +279,7 @@ const FATE_BY_KIND = freezeInPlace<
  * kind table at `../../lib/scanning/README.md` — "a run of LF, CR, U+2028,
  * U+2029".
  *
- * All four, and not just `\n`: the only fixture asserting a marked comment
+ * All four, and not just `\n`: every fixture STRING asserting a marked comment
  * uses `\n`, so `text.includes('\n')` passes this module's entire suite and is
  * wrong for a comment carrying any of the other three.
  */

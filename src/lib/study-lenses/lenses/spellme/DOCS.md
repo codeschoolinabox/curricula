@@ -278,9 +278,10 @@ flowchart TD
   the two semantic roles' hues and the fall's motion design stay in
   [§ Out of scope](#out-of-scope). The consumed line break's mark keeps the
   glyph a sandbox checkpoint exercised (human ruling 2026-09-02), while its
-  DENSITY stays open: it fires on every line, which
-  [ux/wireframes.md](./ux/wireframes.md) argues it does not. None of those
-  becomes decidable just because a stylesheet exists.
+  DENSITY stays open: it fires once per run of line terminators, which
+  [ux/wireframes.md § What has no wireframe, deliberately](./ux/wireframes.md#what-has-no-wireframe-deliberately)
+  argues is rare and is not. None of those becomes decidable just because a
+  stylesheet exists.
 
 ## Navigation
 

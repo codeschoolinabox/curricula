@@ -120,9 +120,9 @@ function SpellmeMain({ config, embodiment }: LensProperties): ReactElement {
 	// `oneMoreAfter: 0` is precisely the setting an educator wanting that trade
 	// reaches for.
 	//
-	// ⚠ `session.attempts` is permanently 0 until `settle` exists, so at this
-	// wave only a ZERO threshold opens either region. That is not a placeholder:
-	// it is the whole reason the suite carries a `{ oneMoreAfter: 0 }` fixture.
+	// ⚠ Nothing raises `session.attempts` while `settle` throws, so a zero
+	// threshold is the only setting that opens this control — which is why the
+	// suite and the sandbox both carry one.
 	const isWayPastOpen = session.attempts >= skipAfter;
 
 	// Everything behind the cursor has already met its fate — that is what
@@ -339,7 +339,7 @@ function SpellmeMain({ config, embodiment }: LensProperties): ReactElement {
 					    would teach that being stuck is a failure rather than a place
 					    (`./ux/wireframes.md` § After the fourth wrong claim). INERT
 					    alongside submit by the same 2026-08-26 ruling: handing an element
-					    over moves the cursor, and `settle` is a stub. */}
+					    over moves the cursor, which `settle` owns. */}
 					{isWayPastOpen && (
 						<button data-spellme-skip type="button">
 							let the machine
@@ -529,10 +529,13 @@ const ONE_MORE_ANSWERS: ReadonlyArray<{
  * the production, and which this lens does not know. Those are the two
  * constraints `./ux/wireframes.md` states for this mark.
  *
- * ⚠ **It fires on EVERY line**, because `isMarked` is true for every
- * `LineTerminator`. `ux/wireframes.md`'s argument that the mark is "rare enough
- * not to crowd" is therefore false, and the density is a known open question
- * rather than a settled design (human ruling 2026-09-02: it stays as drawn).
+ * ⚠ **It fires once per RUN of line terminators** — once per line ending where
+ * no two are adjacent, and once for a whole block of blank lines, because the
+ * scanning leaf collapses a maximal run into one element (the rule `core.ts`'s
+ * `LINE_TERMINATORS` JSDoc quotes). Common rather than rare, which is enough to
+ * falsify `ux/wireframes.md`'s "rare enough not to crowd"; the density is a
+ * known open question rather than a settled design (human ruling 2026-09-02: it
+ * stays as drawn).
  */
 const BREAK_MARK = '↵';
 
