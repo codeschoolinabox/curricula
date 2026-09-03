@@ -686,3 +686,22 @@ export type InterceptEnrichment = {
 	readonly enrich: (item: InterceptEnrichable) => InterceptEvent;
 	readonly nodeAtLoc: (loc: InterceptLoc) => EntwinedNode | null;
 };
+
+// ─── Seam 5: the io flag (io seam → mapper) ──────────────────────────────────
+
+/**
+ * intercept's closure-side io classification record — the settlement
+ * mapper's precedence step 1 reads it, outranked only by the consumer's
+ * stop in either direction (step 0's cancel/fail split; run's step-0
+ * ruling 2026-08-19, mirrored). The record IS the io arm's error,
+ * complete: classification happens at the io seam, where the failing
+ * surface is known — an invalid mock answer, a throwing dialog mock, a
+ * throwing or rejecting console callback all reach the machinery as its
+ * generic causes, so the mapper rides this record onto the arm unchanged
+ * and re-derives nothing. The same failure also lands in the stream as a
+ * step-stamped `'error'` event with its `source` (the flag's stream
+ * half, {@link InterceptEnrichable}'s middle variant) — errors land
+ * twice by design. The alias is that identity's zero-drift record, the
+ * `RunIoFlag` pattern (`../run/types.ts`).
+ */
+export type InterceptIoFlag = IoResultError;
