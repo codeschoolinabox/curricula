@@ -11,8 +11,11 @@ over a computational artifact.
 
 The genus is the thing this set adds that the curriculum does not currently
 have: "computational language" appears **zero times** across the F&V documents
-[measured: `grep -rniE 'computational language' --include='*.md' .` in
-`spiralearn/frogramming-and-vibetoading/`].
+[measured 2026-09-03: `grep -rniE 'computational language' --include='*.md'
+--exclude-dir=computational-thinking .` run from
+`spiralearn/frogramming-and-vibetoading/`]. The exclusion is not optional —
+without it the same command returns 18, because this directory is full of the
+phrase. See [tie-ins.md](./tie-ins.md) § "Two hazards".
 
 ## Algorithms are the second species, and they are why the genus is visible
 

@@ -142,10 +142,12 @@ settle, but it is the question to ask of the practice.
 
 ## What review can and cannot reach
 
-Naur's decay mechanism implies a review question that nothing here currently
-asks. AR-4 checks conformance to the DOCS.md sketch; the sharper question is
-whether a change **conforms to the twin docs**, and where it does not, whether
-the reviewer flags the divergence rather than deciding it.
+Naur's decay mechanism implies a review question the protocol did not previously
+ask, and now does. AR-4 checked conformance to the DOCS.md sketch; `DEV.md`
+gained a **twin-doc conformance** focus area in `6c34c970`, on explicit human
+instruction — does a change conform to the identities, ownership, lifetimes and
+predictions the twin records, and where it does not, does the reviewer **flag
+the divergence rather than deciding it**?
 
 Phrasing it as conformance is deliberate. It converts an irreducible judgement
 into a checkable one, which is the only form a reviewer without the theory can

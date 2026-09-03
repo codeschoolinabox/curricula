@@ -77,13 +77,24 @@ curriculum's own, and `from-a-job-application/study-lenses.md`. Rows above
 always prefix the latter. Do not resolve a bare `study-lenses.md` to the wrong
 one.
 
-**Scope command.** Every count in this table is of the **curriculum proper** and
-requires excluding this directory, because these documents quote the strings
-they count. "computational thinking" appears **9** times with the exclusion and
-**16** without it [measured: both]:
-`grep -rniE 'computational thinking' --include='*.md' --exclude-dir=computational-thinking .`
+**Scope command.** Every count in this table is of the **curriculum proper**,
+and reproducing one requires excluding this directory — these documents quote
+the strings they count, so the directory contaminates any measurement of it. The
+only form that reproduces, run from `spiralearn/frogramming-and-vibetoading/`:
 
-The title-string row is the live example of the hazard: documenting its own grep
-put the literal string into a fourteenth file and moved the number it reports.
-Any count published here changes the thing it measures. Re-run with the
-exclusion, and `grep` on this machine is ugrep — run the string you publish.
+```sh
+grep -rniE '<term>' --include='*.md' --exclude-dir=computational-thinking .
+```
+
+"computational thinking" returns **9** [measured 2026-09-03].
+
+**Do not publish the un-excluded number.** An earlier revision of this paragraph
+did, giving 16; by the time the directory was finished the same command returned
+**57** [measured 2026-09-03]. That paragraph had itself warned that "any count
+published here changes the thing it measures" — and shipped the decaying figure
+anyway, which is this directory's own named failure mode, committed. A count
+whose subject includes the document stating it is not a measurement; it is a
+fuse.
+
+`grep` on this machine is ugrep. Run the string you publish, and re-run it
+before trusting any number in this table.
