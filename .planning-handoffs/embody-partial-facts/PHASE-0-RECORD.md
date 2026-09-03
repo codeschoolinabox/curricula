@@ -104,9 +104,15 @@ trailing phases on `!facts.entwined.ok` [read this session: each file's guard
 clauses] — because accounts ride failure arms and `ok: false` still
 discriminates at every site (the AR-1 round-2 reviewer re-derived the same
 conclusion independently). DOCS § Execution phases step 1 states the flow rule
-the sites implement, and the four "a tokens failure publishes no …" rows in
-`tests/failure-accounts.test.ts` pin the sites' behavior. Phase 1 re-verifies
-per increment at AR-3.
+the sites implement, and the three "a tokens failure publishes no …" rows in
+`tests/failure-accounts.test.ts` pin three of the sites' behavior — the fourth
+site (`deriveAccessibility`) is pinned by the row "phase accessibility is
+unchanged by an account" under its own title. (Corrected 2026-09-02 at Phase-1
+launch: this paragraph originally counted four rows under the "publishes no"
+title; measured
+`grep -c "a tokens failure publishes no" tests/failure-accounts.test.ts` → 3.
+The discharge argument is unchanged — all four sites are pinned.) Phase 1
+re-verifies per increment at AR-3.
 
 ## Out-of-scope confirmations
 
