@@ -30,7 +30,7 @@ describe('failure accounts', () => {
 			expect(!stage.ok && stage.value?.comments.length).toBe(1);
 		});
 
-		it.skip('the bounded sequence starts at offset zero', () => {
+		it('the bounded sequence starts at offset zero', () => {
 			const stage = deriveTokens({ source: "let x = 'oops", type: 'module' });
 			expect(!stage.ok && stage.value?.inputElements?.[0]?.start).toBe(0);
 		});
