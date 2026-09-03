@@ -114,11 +114,22 @@ title; measured
 The discharge argument is unchanged — all four sites are pinned.) Phase 1
 re-verifies per increment at AR-3.
 
+## Out-of-scope confirmations (Phase 0)
+
+- `spellme` untouched; evaluators untouched; no lens built; no dependency
+  installed; `DOCS.md`/`types.ts` changes were this Phase-0's contract work
+  under the human's rulings, with AR-1/AR-2 run and resolved.
+
 ## Phase-1 session 1 notes (2026-09-02, cluster A closed)
 
-Written at the cluster-A close by the executing session; the commit bodies (14
-commits, `91718a0f`..`190a494e`) are the full record. Three findings promised
-"to the campaign record at close":
+Written at the cluster-A close by the executing session; the commit bodies are
+the full record — **15 campaign commits, the explicit list `91718a0f` `8b56b0ed`
+`4822a514` `04746915` `77996a32` `78a4efcf` `23c5b3e9` `cd7c3191` `a7c82c54`
+`67d8ac6c` `93b5d18b` `0a91568a` `72261473` `190a494e` `a2143997`, never a git
+range** (a range `x..y` excludes its left endpoint, and foreign commits from
+concurrent sessions interleave on `main` — running the earlier revision's
+published `91718a0f..190a494e` returns a wrong set whose count matched by
+coincidence). Three findings promised "to the campaign record at close":
 
 - **The drain is acorn's `getToken()` loop, not `for…of`** (A3, AR-3
   counter-proposal adopted): plain method calls have no loose-mode compilation
@@ -136,6 +147,8 @@ commits, `91718a0f`..`190a494e`) are the full record. Three findings promised
   excepted from whichever arm publishes tokens; pinned by an embody()-path row
   in `tests/index.test.ts`.
 
-- `spellme` untouched; evaluators untouched; no lens built; no dependency
-  installed; `DOCS.md`/`types.ts` changes were this Phase-0's contract work
-  under the human's rulings, with AR-1/AR-2 run and resolved.
+S2 added-row candidate (AR-5 minor 3): no live row pins that the token prefix's
+own objects freeze WITH their arm — the pin row covers only the token-type
+exception, and the banked "accounts freeze with their arms" row pins the ast
+arm. Cheap `Object.isFrozen` row over a failing prefix's value via `embody()`,
+under the standing added-rows ruling.
