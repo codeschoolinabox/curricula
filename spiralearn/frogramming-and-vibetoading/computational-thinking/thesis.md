@@ -299,8 +299,8 @@ new convention.
 Note what the axis does not carry. **This is F's side.** Computing's empirical
 and design work — systems, HCI, ML, software engineering — is not excluded from
 the curriculum by its absence here; it lives on V's side and in the F&V
-integration, and V enters this axis perpendicular at position 4, since
-meaningful computation needs both.
+integration. Meaningful computation, which needs both stances, is L6 and not a
+position on this axis.
 
 ### L5 — applied computation
 

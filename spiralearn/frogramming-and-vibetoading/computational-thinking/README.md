@@ -68,10 +68,9 @@ chain shows what sits on either side of it:
 
 Two notes the figure carries in a line each. This is **F's axis**: computing's
 empirical and design work is not excluded by its absence, it lives on V's side
-and in the F&V integration, and V enters perpendicular at the pivot. And the
-axis is **drawn linear on purpose** — it wraps, since code can be studied
-formally and theory can be applied to physical computation, and those loops are
-off-characteristic uses met later.
+and in the F&V integration. And the axis is **drawn linear on purpose** — it
+wraps, since code can be studied formally and theory can be applied to physical
+computation, and those loops are off-characteristic uses met later.
 
 ![The layers under the artifact](./the-stack.svg)
 
