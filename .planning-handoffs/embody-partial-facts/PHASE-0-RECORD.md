@@ -123,9 +123,11 @@ re-verifies per increment at AR-3.
 ## Phase-1 session 1 notes (2026-09-02, cluster A closed)
 
 Written at the cluster-A close by the executing session; the commit bodies are
-the full record — **15 campaign commits, the explicit list `91718a0f` `8b56b0ed`
+the full record — **16 campaign commits, the explicit list `91718a0f` `8b56b0ed`
 `4822a514` `04746915` `77996a32` `78a4efcf` `23c5b3e9` `cd7c3191` `a7c82c54`
-`67d8ac6c` `93b5d18b` `0a91568a` `72261473` `190a494e` `a2143997`, never a git
+`67d8ac6c` `93b5d18b` `0a91568a` `72261473` `190a494e` `a2143997` `81cf9157`
+(the last a corrective commit landed after these notes were first written,
+resolving the S1 AR-5 PAUSE; appended 2026-09-03 at the S2 open), never a git
 range** (a range `x..y` excludes its left endpoint, and foreign commits from
 concurrent sessions interleave on `main` — running the earlier revision's
 published `91718a0f..190a494e` returns a wrong set whose count matched by
