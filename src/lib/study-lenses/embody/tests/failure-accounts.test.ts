@@ -25,7 +25,7 @@ describe('failure accounts', () => {
 			expect(!stage.ok && stage.value?.tokens.length).toBe(3);
 		});
 
-		it.skip('comments set aside before the stop travel with the prefix', () => {
+		it('comments set aside before the stop travel with the prefix', () => {
 			const stage = deriveTokens({ source: '//c\nlet @', type: 'module' });
 			expect(!stage.ok && stage.value?.comments.length).toBe(1);
 		});
