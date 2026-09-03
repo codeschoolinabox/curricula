@@ -83,6 +83,7 @@ Written in dependency order. Each stands alone; each cites the others.
 | 5   | [epicycles.md](./epicycles.md)                             | Learning-to-program → programming-to-learn as repeated half-beats                                              |
 | 6   | [half-beat.md](./half-beat.md)                             | One drafted, one deliberately bad, and the gate item                                                           |
 | 7   | [tie-ins.md](./tie-ins.md)                                 | Findings about F&V — a map, not a work order                                                                   |
+| 8   | [this-codebase.md](./this-codebase.md)                     | This repository read through the thesis — and where Naur's remedies invert for an LLM collaborator             |
 
 Start at 0 if you want the argument. Start at 7 if you are redrafting the
 course. Start at 6 if you want to know whether any of this survives contact with
@@ -106,6 +107,9 @@ a chapter.
 - **5 → 6.** A general form nobody has drafted is untested. `half-beat.md` is
   the falsification instrument.
 - **all → 7.** What follows for the existing course, recorded as findings.
+- **all → 8.** What follows for this repository, which is itself an instance of
+  the thing being argued about — including the failures of the session that
+  wrote these documents.
 
 ## Provenance
 
