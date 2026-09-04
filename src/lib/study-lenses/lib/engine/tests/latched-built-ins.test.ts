@@ -168,11 +168,11 @@ describe('the latch rule over the worker realm', () => {
 		expect(ambientReads('bootstrap.ts')).toEqual([]);
 	});
 
-	it.skip('read-call-response.ts reads no ambient name from inside a function body', () => {
+	it('read-call-response.ts reads no ambient name from inside a function body', () => {
 		expect(ambientReads('read-call-response.ts')).toEqual([]);
 	});
 
-	it.skip('create-buffer-views.ts reads no ambient name from inside a function body', () => {
+	it('create-buffer-views.ts reads no ambient name from inside a function body', () => {
 		expect(ambientReads('create-buffer-views.ts')).toEqual([]);
 	});
 

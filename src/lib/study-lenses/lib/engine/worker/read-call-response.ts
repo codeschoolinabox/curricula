@@ -17,7 +17,7 @@ import type { BufferViews } from './types.js';
  */
 export default function readCallResponse(views: BufferViews): CallResponse {
 	const response = decodeResponse(views);
-	Atomics.store(views.control, PROTOCOL.CONTROL_INDEX, PROTOCOL.SIGNAL_IDLE);
+	ATOMICS_STORE(views.control, PROTOCOL.CONTROL_INDEX, PROTOCOL.SIGNAL_IDLE);
 
 	return response;
 }
@@ -26,21 +26,28 @@ export default function readCallResponse(views: BufferViews): CallResponse {
 // the house pattern for codecs, like regex literals.
 const DECODER = new TextDecoder();
 
+// WHY at module load: this module is worker-realm, so a program shares its
+// global object and both reads below happen AFTER the program has started —
+// the response arrives mid-run (README.md § Realms). Members, never the
+// Atomics namespace; neither consults a receiver.
+const ATOMICS_STORE = Atomics.store;
+const ATOMICS_LOAD = Atomics.load;
+
 /** Maps the response-type slot back to the CallResponse vocabulary. */
 function decodeResponse(views: BufferViews): CallResponse {
-	const responseType = Atomics.load(
+	const responseType = ATOMICS_LOAD(
 		views.control,
 		PROTOCOL.RESPONSE_TYPE_INDEX,
 	);
 
 	if (responseType === PROTOCOL.RESPONSE_BOOLEAN) {
-		return Atomics.load(views.control, PROTOCOL.VALUE_FLAG_INDEX) === 1;
+		return ATOMICS_LOAD(views.control, PROTOCOL.VALUE_FLAG_INDEX) === 1;
 	}
 	if (responseType === PROTOCOL.RESPONSE_NULL) {
 		return null;
 	}
 	if (responseType === PROTOCOL.RESPONSE_STRING) {
-		const byteLength = Atomics.load(
+		const byteLength = ATOMICS_LOAD(
 			views.control,
 			PROTOCOL.PAYLOAD_LENGTH_INDEX,
 		);
