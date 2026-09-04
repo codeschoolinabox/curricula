@@ -1103,6 +1103,21 @@ execution and never holds one alone.
   its mocks (`{ prompt: window.prompt.bind(window), … }`) — a consumer pattern
   requiring no contract change. A third asking should be answered from this
   bullet.
+- **The variables tracer is SUPERSEDED-BY-KLVE (human ruling 2026-09-04).**
+  HR-10's "trace/variables port" scope row and § 8's P0-V/W5 unit are
+  superseded: the next tracer evaluator wraps the klve core (`sl-trace-js-klve`
+  — Kelley van Evert's Babel meta-syntactic transform; per-step scope snapshots
+  are the variables payload) ON THIS ENGINE — the Babel instrumentation plugin
+  runs thread-side exactly as intercept's splice+wrap does, the worker executes
+  the transpiled text with an injected collector global, and the steps ride the
+  wire; the package's own `new Function` main-thread executor is NOT taken.
+  Named trade, recorded: the posed text is Babel's reading (a second parse truth
+  beside the engine's) — steps carry instrument-time stamps from the original
+  parse, so attribution stays stamp-based. Aran's semantics tracer remains the
+  later deep tracer (unchanged). P0-V-on-engine is recorded as the fidelity
+  successor ONLY if klve's limits bite; the W1.b Appendix-B audit rows stay
+  ratifiable against whichever builds. The klve evaluator gets its own Phase 0
+  in a fresh session (the design-ahead rule).
 - **The stack-parse residual converts WORKER-SIDE (human ruling 2026-09-01, the
   P0-I enrichment increment's named design question).** The no-live-frame
   residual's position is parsed in the SPLICED text's coordinates; loop-guard's
