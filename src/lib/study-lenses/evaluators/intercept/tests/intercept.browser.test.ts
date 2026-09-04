@@ -30,17 +30,17 @@ function sleep(ms: number): Promise<void> {
 }
 
 describe('intercept — the door: a handle or a refusal, as data', () => {
-	it.skip('main(validSpec) returns a handle whose code echoes the source', () => {
+	it('main(validSpec) returns a handle whose code echoes the source', () => {
 		const answer = intercept.main(buildSpec('1 + 1;\n'));
 		expect(!('refused' in answer) && answer.code).toBe('1 + 1;\n');
 	});
 
-	it.skip('a spec outside the gate is a spec refusal naming the spec', () => {
+	it('a spec outside the gate is a spec refusal naming the spec', () => {
 		const answer = intercept.main(buildSpec('let x ='));
 		expect('refused' in answer && answer.reason).toMatch(/spec|gate|ast/u);
 	});
 
-	it.skip('an entwined-only gate failure is also a spec refusal', () => {
+	it('an entwined-only gate failure is also a spec refusal', () => {
 		const healthy = buildSpec('1 + 1;\n');
 		const spec: InterceptSpec = {
 			...healthy,
@@ -55,14 +55,14 @@ describe('intercept — the door: a handle or a refusal, as data', () => {
 		expect('refused' in intercept.main(spec)).toBe(true);
 	});
 
-	it.skip('a spec refusal is frozen', () => {
+	it('a spec refusal is frozen', () => {
 		const answer = intercept.main(buildSpec('let x ='));
 		expect(Object.isFrozen(answer)).toBe(true);
 	});
 });
 
 describe('intercept — the stream (worker order, steps, one shot)', () => {
-	it.skip('console moments arrive in worker order', async () => {
+	it('console moments arrive in worker order', async () => {
 		const source = "console.log('one');\nconsole.log('two');\n";
 		const events: InterceptEvent[] = [];
 		for await (const event of expectHandle(intercept.main(buildSpec(source)))) {
@@ -73,7 +73,7 @@ describe('intercept — the stream (worker order, steps, one shot)', () => {
 		).toEqual(['one', 'two']);
 	});
 
-	it.skip('steps are strictly increasing', async () => {
+	it('steps are strictly increasing', async () => {
 		const source = "console.log('a');\nconsole.log('b');\n";
 		const steps: number[] = [];
 		for await (const event of expectHandle(intercept.main(buildSpec(source)))) {
@@ -82,7 +82,7 @@ describe('intercept — the stream (worker order, steps, one shot)', () => {
 		expect(steps[1] > steps[0]).toBe(true);
 	});
 
-	it.skip('a mocked dialog leaves a step GAP — the ask consumed an ordinal', async () => {
+	it('a mocked dialog leaves a step GAP — the ask consumed an ordinal', async () => {
 		const spec: InterceptSpec = {
 			...buildSpec("console.log('before');\nlet x = prompt();\n"),
 			io: { prompt: () => 'answered' },
@@ -94,7 +94,7 @@ describe('intercept — the stream (worker order, steps, one shot)', () => {
 		).toBe(true);
 	});
 
-	it.skip('an exotic console method records faithfully (whole-surface trap)', async () => {
+	it('an exotic console method records faithfully (whole-surface trap)', async () => {
 		const result = await expectHandle(
 			intercept.main(buildSpec("console.profile('p');\n")),
 		);
@@ -105,7 +105,7 @@ describe('intercept — the stream (worker order, steps, one shot)', () => {
 		).toBe(true);
 	});
 
-	it.skip('a settled stream does not replay', async () => {
+	it('a settled stream does not replay', async () => {
 		const handle = expectHandle(
 			intercept.main(buildSpec("console.log('x');\n")),
 		);
@@ -122,7 +122,7 @@ describe('intercept — the stream (worker order, steps, one shot)', () => {
 });
 
 describe('intercept — the generator surface', () => {
-	it.skip('next() steps one moment', async () => {
+	it('next() steps one moment', async () => {
 		const handle = expectHandle(
 			intercept.main(buildSpec("console.log('a');\n")),
 		);
@@ -130,7 +130,7 @@ describe('intercept — the generator surface', () => {
 		expect(first.done === false && first.value.event).toBe('console');
 	});
 
-	it.skip('stepping then looping continues — no restart, no replay', async () => {
+	it('stepping then looping continues — no restart, no replay', async () => {
 		const source = "console.log('a');\nconsole.log('b');\nconsole.log('c');\n";
 		const handle = expectHandle(intercept.main(buildSpec(source)));
 		await handle.next();
@@ -144,7 +144,7 @@ describe('intercept — the generator surface', () => {
 		).toEqual(['c']);
 	});
 
-	it.skip('return() resolves the COMPLETE result after settlement', async () => {
+	it('return() resolves the COMPLETE result after settlement', async () => {
 		const handle = expectHandle(
 			intercept.main(buildSpec("console.log('a');\nconsole.log('b');\n")),
 		);
@@ -155,7 +155,7 @@ describe('intercept — the generator surface', () => {
 		);
 	});
 
-	it.skip('for-await break awaits settlement — the stated behavior change', async () => {
+	it('for-await break awaits settlement — the stated behavior change', async () => {
 		const handle = expectHandle(
 			intercept.main(buildSpec("console.log('a');\nconsole.log('b');\n")),
 		);
@@ -166,7 +166,7 @@ describe('intercept — the generator surface', () => {
 		expect(result.outcome).toBe('cancel');
 	});
 
-	it.skip('throw(thrown) settles fail with the reason, by reference', async () => {
+	it('throw(thrown) settles fail with the reason, by reference', async () => {
 		const handle = expectHandle(
 			intercept.main(buildSpec("console.log('a');\nconsole.log('b');\n")),
 		);
@@ -182,7 +182,7 @@ describe('intercept — the generator surface', () => {
 });
 
 describe('intercept — asks and answers', () => {
-	it.skip('a mock answers BEFORE a pending interaction is minted', async () => {
+	it('a mock answers BEFORE a pending interaction is minted', async () => {
 		const spec: InterceptSpec = {
 			...buildSpec('let x = prompt();\n'),
 			io: { prompt: () => 'answered' },
@@ -193,7 +193,7 @@ describe('intercept — asks and answers', () => {
 		).toBe(false);
 	});
 
-	it.skip('the answered record carries what the program received', async () => {
+	it('the answered record carries what the program received', async () => {
 		const spec: InterceptSpec = {
 			...buildSpec('let x = prompt();\n'),
 			io: { prompt: () => 'answered' },
@@ -206,7 +206,7 @@ describe('intercept — asks and answers', () => {
 		).toBe(true);
 	});
 
-	it.skip('an unmocked ask while stepping is a pending interaction; respond resumes', async () => {
+	it('an unmocked ask while stepping is a pending interaction; respond resumes', async () => {
 		const handle = expectHandle(
 			intercept.main(buildSpec('let x = prompt();\n')),
 		);
@@ -219,7 +219,7 @@ describe('intercept — asks and answers', () => {
 		expect(result.outcome).toBe('complete');
 	});
 
-	it.skip('answering twice is inert — the first answer won', async () => {
+	it('answering twice is inert — the first answer won', async () => {
 		const handle = expectHandle(
 			intercept.main(buildSpec('let x = prompt();\n')),
 		);
@@ -237,7 +237,7 @@ describe('intercept — asks and answers', () => {
 		).toBe(true);
 	});
 
-	it.skip('answering after teardown is a no-op', async () => {
+	it('answering after teardown is a no-op', async () => {
 		const handle = expectHandle(
 			intercept.main(buildSpec('let x = prompt();\n')),
 		);
@@ -252,7 +252,7 @@ describe('intercept — asks and answers', () => {
 		expect(() => pending('too late')).not.toThrow();
 	});
 
-	it.skip('a wrong answer shape is a loud, retryable error at the responder', async () => {
+	it('a wrong answer shape is a loud, retryable error at the responder', async () => {
 		const handle = expectHandle(
 			intercept.main(buildSpec('let x = prompt();\n')),
 		);
@@ -271,7 +271,7 @@ describe('intercept — asks and answers', () => {
 		expect(threwLoudly && result.outcome === 'complete').toBe(true);
 	});
 
-	it.skip('under a batch drain an unmocked ask cancels the run — the structural posture', async () => {
+	it('under a batch drain an unmocked ask cancels the run — the structural posture', async () => {
 		const result = await expectHandle(
 			intercept.main(buildSpec("console.log('before');\nlet x = prompt();\n")),
 		);
@@ -281,7 +281,7 @@ describe('intercept — asks and answers', () => {
 		).toBe(true);
 	});
 
-	it.skip('an unmocked dialog while stepping is two adjacent moments in events', async () => {
+	it('an unmocked dialog while stepping is two adjacent moments in events', async () => {
 		const handle = expectHandle(
 			intercept.main(buildSpec('let x = prompt();\n')),
 		);
@@ -297,7 +297,7 @@ describe('intercept — asks and answers', () => {
 		expect(result.events[askIndex + 1]?.event).toBe('prompt');
 	});
 
-	it.skip('an invalid mock answer is an io error, never a coercion', async () => {
+	it('an invalid mock answer is an io error, never a coercion', async () => {
 		const spec: InterceptSpec = {
 			...buildSpec('let a = confirm();\n'),
 			io: { confirm: () => undefined as unknown as boolean },
@@ -306,7 +306,38 @@ describe('intercept — asks and answers', () => {
 		expect(result.outcome === 'error' && result.error.kind).toBe('io');
 	});
 
-	it.skip('a throwing console callback is an io error naming its source', async () => {
+	it('an alert mock’s returned value is discarded — the record carries the void contract', async () => {
+		const spec: InterceptSpec = {
+			...buildSpec("alert('hi');\n"),
+			io: { alert: () => 'ignored' as unknown as undefined },
+		};
+		const result = await expectHandle(intercept.main(spec));
+		expect(
+			result.outcome === 'complete' &&
+				result.events.some(
+					(event) => event.event === 'alert' && event.return === undefined,
+				),
+		).toBe(true);
+	});
+
+	it('a throwing dialog mock is an io error naming its source', async () => {
+		const spec: InterceptSpec = {
+			...buildSpec('let x = prompt();\n'),
+			io: {
+				prompt: () => {
+					throw new Error('mock broke');
+				},
+			},
+		};
+		const result = await expectHandle(intercept.main(spec));
+		expect(
+			result.outcome === 'error' &&
+				result.error.kind === 'io' &&
+				result.error.source,
+		).toBe('prompt');
+	});
+
+	it('a throwing console callback is an io error naming its source', async () => {
 		const spec: InterceptSpec = {
 			...buildSpec("console.log('x');\n"),
 			io: {
@@ -327,12 +358,12 @@ describe('intercept — asks and answers', () => {
 });
 
 describe('intercept — outcomes and consumer stops', () => {
-	it.skip('a trivial program completes ok', async () => {
+	it('a trivial program completes ok', async () => {
 		const result = await expectHandle(intercept.main(buildSpec('1 + 1;\n')));
 		expect(result.ok).toBe(true);
 	});
 
-	it.skip('fail settles ok:true with the reason by reference', async () => {
+	it('fail settles ok:true with the reason by reference', async () => {
 		const handle = expectHandle(
 			intercept.main(buildSpec("console.log('a');\nconsole.log('b');\n")),
 		);
@@ -345,7 +376,7 @@ describe('intercept — outcomes and consumer stops', () => {
 		).toBe(reason);
 	});
 
-	it.skip('cancel outranks a failing mock — step 0', async () => {
+	it('cancel outranks a failing mock — step 0', async () => {
 		const spec: InterceptSpec = {
 			...buildSpec('let x = prompt();\n'),
 			io: {
@@ -363,7 +394,7 @@ describe('intercept — outcomes and consumer stops', () => {
 		expect(result.outcome).toBe('cancel');
 	});
 
-	it.skip('a learner throw carries the attributed call site', async () => {
+	it('a learner throw carries the attributed call site', async () => {
 		const result = await expectHandle(intercept.main(buildSpec('null();\n')));
 		expect(
 			result.outcome === 'error' &&
@@ -372,7 +403,23 @@ describe('intercept — outcomes and consumer stops', () => {
 		).toBe(true);
 	});
 
-	it.skip('a capped loop trips with the whole trip record and the real total', async () => {
+	it('a module-axis statement throw takes the residual stack-parse position (blob line base)', async () => {
+		const spec: InterceptSpec = {
+			facts: deriveFacts({ source: 'null.foo;\n', type: 'module' }),
+			execution: 'module',
+		};
+		const result = await expectHandle(intercept.main(spec));
+		expect(
+			result.outcome === 'error' &&
+				result.error.kind === 'javascript' &&
+				result.error.loc,
+		).toStrictEqual({
+			start: { line: 1, column: 5 },
+			end: { line: 1, column: 5 },
+		});
+	});
+
+	it('a capped loop trips with the whole trip record and the real total', async () => {
 		const spec = { ...buildSpec('while (true) {}\n'), iterations: 50 };
 		const result = await expectHandle(intercept.main(spec));
 		expect(
@@ -382,7 +429,7 @@ describe('intercept — outcomes and consumer stops', () => {
 		).toBe(true);
 	});
 
-	it.skip('an uncapped spec keeps the per-yield fee — pin :495’s own case', async () => {
+	it('an uncapped spec keeps the per-yield fee — pin :495’s own case', async () => {
 		const source = Array.from(
 			{ length: 200 },
 			(_unused, index) => `console.log(${index});`,
@@ -392,7 +439,7 @@ describe('intercept — outcomes and consumer stops', () => {
 		expect(result.outcome).toBe('timeout');
 	});
 
-	it.skip('the timeout arm echoes limit and durationMs', async () => {
+	it('the timeout arm echoes limit and durationMs', async () => {
 		const spec = { ...buildSpec('while (true) {}\n'), seconds: 0.3 };
 		const result = await expectHandle(intercept.main(spec));
 		expect(
@@ -404,7 +451,7 @@ describe('intercept — outcomes and consumer stops', () => {
 });
 
 describe('intercept — enrichment and the joins', () => {
-	it.skip('a console moment carries loc, offsets, and nodePath together', async () => {
+	it('a console moment carries loc, offsets, and nodePath together', async () => {
 		const result = await expectHandle(
 			intercept.main(buildSpec("console.log('x');\n")),
 		);
@@ -416,7 +463,7 @@ describe('intercept — enrichment and the joins', () => {
 		).toBe(true);
 	});
 
-	it.skip('offsets are valid in the facts’ coordinate space', async () => {
+	it('offsets are valid in the facts’ coordinate space', async () => {
 		const spec = buildSpec("console.log('x');\n");
 		const result = await expectHandle(intercept.main(spec));
 		const record = result.events.find((event) => event.event === 'console');
@@ -427,7 +474,7 @@ describe('intercept — enrichment and the joins', () => {
 		).toContain('console.log');
 	});
 
-	it.skip('event.node answers the real entwined node without an enumerable key', async () => {
+	it('event.node answers the real entwined node without an enumerable key', async () => {
 		const result = await expectHandle(
 			intercept.main(buildSpec("console.log('x');\n")),
 		);
@@ -437,21 +484,21 @@ describe('intercept — enrichment and the joins', () => {
 		).toBe(true);
 	});
 
-	it.skip('serializing an event never cycles', async () => {
+	it('serializing an event never cycles', async () => {
 		const result = await expectHandle(
 			intercept.main(buildSpec("console.log('x');\n")),
 		);
 		expect(() => JSON.stringify(result.events)).not.toThrow();
 	});
 
-	it.skip('prev and next chain the timeline as accessors', async () => {
+	it('prev and next chain the timeline as accessors', async () => {
 		const result = await expectHandle(
 			intercept.main(buildSpec("console.log('a');\nconsole.log('b');\n")),
 		);
 		expect(result.events[1]?.prev).toBe(result.events[0]);
 	});
 
-	it.skip('visitCounts counts records, keyed by resolved nodePath', async () => {
+	it('visitCounts counts records, keyed by resolved nodePath', async () => {
 		const result = await expectHandle(
 			intercept.main(buildSpec("console.log('a');\nconsole.log('b');\n")),
 		);
@@ -460,7 +507,7 @@ describe('intercept — enrichment and the joins', () => {
 		);
 	});
 
-	it.skip('a mocked dialog counts once — records, not delivered events', async () => {
+	it('a mocked dialog counts once — records, not delivered events', async () => {
 		const spec: InterceptSpec = {
 			...buildSpec('let x = prompt();\n'),
 			io: { prompt: () => 'answered' },
@@ -471,7 +518,7 @@ describe('intercept — enrichment and the joins', () => {
 		);
 	});
 
-	it.skip('eventsByNode joins every event, asks included', async () => {
+	it('eventsByNode joins every event, asks included', async () => {
 		const handle = expectHandle(
 			intercept.main(buildSpec('let x = prompt();\n')),
 		);
@@ -487,7 +534,7 @@ describe('intercept — enrichment and the joins', () => {
 		);
 	});
 
-	it.skip('an in-stream error event lands in order with its step', async () => {
+	it('an in-stream error event lands in order with its step', async () => {
 		const result = await expectHandle(
 			intercept.main(buildSpec("console.log('before');\nnull();\n")),
 		);
@@ -497,7 +544,7 @@ describe('intercept — enrichment and the joins', () => {
 		expect(errorIndex).toBeGreaterThan(0);
 	});
 
-	it.skip('an io failure’s stream event carries source; a learner throw’s does not', async () => {
+	it('an io failure’s stream event carries source; a learner throw’s does not', async () => {
 		const ioSpec: InterceptSpec = {
 			...buildSpec('let a = confirm();\n'),
 			io: { confirm: () => undefined as unknown as boolean },
@@ -518,12 +565,12 @@ describe('intercept — enrichment and the joins', () => {
 		).toBe(true);
 	});
 
-	it.skip('the result is deep-frozen', async () => {
+	it('the result is deep-frozen', async () => {
 		const result = await expectHandle(intercept.main(buildSpec('1 + 1;\n')));
 		expect(Object.isFrozen(result)).toBe(true);
 	});
 
-	it.skip('result.entwined is the handle’s own echo', async () => {
+	it('result.entwined is the handle’s own echo', async () => {
 		const handle = expectHandle(intercept.main(buildSpec('1 + 1;\n')));
 		const result = await handle;
 		expect(result.entwined).toBe(handle.entwined);
