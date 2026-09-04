@@ -29,6 +29,38 @@ function sleep(ms: number): Promise<void> {
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+describe('intercept — the door: a handle or a refusal, as data', () => {
+	it.skip('main(validSpec) returns a handle whose code echoes the source', () => {
+		const answer = intercept.main(buildSpec('1 + 1;\n'));
+		expect(!('refused' in answer) && answer.code).toBe('1 + 1;\n');
+	});
+
+	it.skip('a spec outside the gate is a spec refusal naming the spec', () => {
+		const answer = intercept.main(buildSpec('let x ='));
+		expect('refused' in answer && answer.reason).toMatch(/spec|gate|ast/u);
+	});
+
+	it.skip('an entwined-only gate failure is also a spec refusal', () => {
+		const healthy = buildSpec('1 + 1;\n');
+		const spec: InterceptSpec = {
+			...healthy,
+			facts: {
+				...healthy.facts,
+				entwined: {
+					ok: false,
+					cause: { stage: 'entwined', message: 'doctored for the OR' },
+				},
+			} as InterceptSpec['facts'],
+		};
+		expect('refused' in intercept.main(spec)).toBe(true);
+	});
+
+	it.skip('a spec refusal is frozen', () => {
+		const answer = intercept.main(buildSpec('let x ='));
+		expect(Object.isFrozen(answer)).toBe(true);
+	});
+});
+
 describe('intercept — the stream (worker order, steps, one shot)', () => {
 	it.skip('console moments arrive in worker order', async () => {
 		const source = "console.log('one');\nconsole.log('two');\n";
