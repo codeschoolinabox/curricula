@@ -64,9 +64,64 @@ before designing anything — the vocabulary is theirs and you inherit it
 unchanged.
 
 The member is **optional**, absent exactly when the derivation itself defected.
-`spellme`'s gate is the precedent and is almost certainly yours verbatim [read:
-`lenses/spellme/core.ts` — `facts.tokens.ok && facts.tokens.value.inputElements
-!== undefined`].
+
+## ⛔ PARTIAL TOKENIZATIONS — read this before you write the gate
+
+**A failed tokens stage now PUBLISHES ITS ELEMENTS, and handling that is
+squarely this lens's job** (human ruling 2026-09-05). An earlier revision of
+this brief told you to copy `spellme`'s gate and to decline a program that does
+not lex. **Both are now wrong**, and following them builds the lens that misses
+its best material.
+
+`StageFailure` gained a value arm [read: `embody/types.ts` — `StageFailure<Value
+= never> = { readonly ok: false; readonly cause: StageCause; readonly value?:
+Value }`], and the tokens stage fills it [read: `embody/derive-tokens.ts` —
+`return { ok: false, cause, value: { tokens, comments, inputElements } };`].
+
+**`facts.tokens` now has FOUR states, not two**, and your gate must say which it
+serves:
+
+| `ok`        | `value.inputElements` | what it is                                                                                  |
+| ----------- | --------------------- | ------------------------------------------------------------------------------------------- |
+| `true`      | present               | a clean tokenization — the whole source                                                     |
+| `true`      | **absent**            | embody machinery defect; the enrichment threw. Loud in dev, never a property of the program |
+| **`false`** | **present**           | ⭐ **a partial reading — the prefix that lexed.** The case the human asked about            |
+| `false`     | absent                | the account degraded too; cause only                                                        |
+
+⚠ **`spellme`'s gate accepts only row 1 and is therefore NOT your precedent**
+[read: `lenses/spellme/core.ts` — `facts.tokens.ok &&
+facts.tokens.value.inputElements !== undefined`]. Copying it declines exactly
+the case you exist to show. Whether you serve rows 1 and 3, or row 3 as well but
+differently, is a design decision — **put it in the batched ask.**
+
+**What the prefix contains**, and it is more careful than "the tokens so far"
+[read: `embody/README.md` § Failure grammar, and `embody/types.ts`'s
+`inputElements` doc]:
+
+- the tokens produced and comments set aside **when the failing turn was
+  reached** — "the same shape a successful tokenization publishes, marked
+  untrustworthy by the arm it rides";
+- **a BOUNDED input-element sequence** over "exactly what the completed turns
+  reach — the source cut at the account's own extent (the end of the last token
+  or set-aside comment, whichever is later)", handed to the same scanning leaf
+  **under its unchanged tiling contract**. It still tiles; it tiles a prefix.
+- ⚠ **the extent is the account's own, not the machine's**: "Where the cause
+  reports an `offset`, the extent sits at or before it — the offset is the
+  machine's report; the extent is the account's own, defined even when the
+  machine reports none." Do not draw `cause.offset` as the stopping point; the
+  sequence's own end is.
+
+⚠ **`ok` is "a discriminant, not a wall — an accepted cost, weighed"** (human
+ruling 2026-09-01): under one shared `value` name, "a read that skips the
+narrowing can reach an account where it once reached nothing." Nothing
+structural stops you drawing an untrustworthy prefix as though it were
+trustworthy. **If your surface does not distinguish them, nothing else will.**
+
+⭐ **EMBODY PUBLISHES THIS FOR A LENS OF YOUR FAMILY, BY NAME.** § Failure
+grammar's consumer list (human ruling 2026-09-01): "the
+**scanner's-stopping-point lens of the spellme family reads the prefix**." That
+is very close to what you are, and it is why the boundary in question 5 needs
+the human before you write a README.
 
 ## Measured state
 
@@ -222,20 +277,30 @@ that registers it.
 **5. Where this lens stops, so it does not grow into two others.** Two
 boundaries are already ruled and you inherit both:
 
-- **Explaining a tokenization failure is `spellme`'s** (human ruling
-  2026-09-01), not yours. If the source does not lex, decline — do not narrate.
-  ⚠ **That work is DEFERRED** until embody publishes partial data, so spellme
-  does not do it yet either.
+- **EXPLAINING WHY a tokenization failed is `spellme`'s** (human ruling
+  2026-09-01), not yours. ⚠ **An earlier revision of this brief said "if the
+  source does not lex, decline" — and that is now wrong**: you do not decline,
+  because the elements are published. What stays spellme's is the
+  **explanation**. Showing a prefix and where it ends is not explaining why it
+  ended. ⚠ Spellme does not do its half yet — deferred pending exactly the
+  embody change that has now landed, so **expect that lens to move under you.**
 - **"The scanner's stopping point" is a third lens** (human ruling 2026-08-13).
   Stepping to the end of a sequence is not the same exercise as asking where the
   scanner stopped and why.
 
-⚠ **DO NOT WRITE A README THAT ASSERTS A CLEAN SPLIT BETWEEN THOSE TWO.** The
-same 2026-09-01 ruling says in terms that it "narrows a 2026-08-13 ruling
-without overturning it … **The boundary between them is not yet drawn and is the
-first thing the deferred unit has to settle.**" Nobody has drawn it. State your
-side of it — no prediction, no narration of failures — and leave the seam named
-rather than resolved.
+⛔ **DO NOT ASSERT A CLEAN SPLIT BETWEEN THOSE TWO — THIS IS NOW THE UNIT'S
+SHARPEST QUESTION.** The 2026-09-01 ruling says in terms that it "narrows a
+2026-08-13 ruling without overturning it … **The boundary between them is not
+yet drawn and is the first thing the deferred unit has to settle.**" Nobody has
+drawn it, and embody has since published the prefix naming "the
+scanner's-stopping-point lens of the spellme family" as its reader.
+
+**Three candidate lenses now overlap on one published account**: the stepper you
+were asked for, the scanner's-stopping-point lens embody's consumer list names,
+and spellme's own deferred failure-explanation work. **You may well BE the
+second**, or the second may be a third exercise over the same prefix. ⚠ **Put it
+to the human first and do not resolve it yourself** — a README that quietly
+claims the stopping-point territory forecloses a lens the roster already names.
 
 ⚠ **One thing you do NOT change by existing — and an earlier revision of this
 brief got it exactly backwards.** `spellme/README.md` § Edge cases reads, whole:
