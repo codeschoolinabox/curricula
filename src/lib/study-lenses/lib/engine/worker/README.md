@@ -119,11 +119,13 @@ lose one.
   "mechanized, and exhaustive" is exhaustive over ambient **identifier
   references**, not over reachable globals. Named, not covered, like the
   `Error[Symbol.hasInstance]` residual above.
-- **What each tier can and cannot separate, per SITE.** The two instruments do
-  not cover the same reads, and the split is by call site rather than by name —
-  a name is not uniformly covered just because one of its sites is. Every
-  capture below fails the placement predicate when un-latched, so the structural
-  tier reaches all of them; what varies is whether a behavioral row does too.
+- **What each tier can and cannot separate, per SITE — among the `Atomics`
+  reads.** That family is where the two tiers diverge; every other capture's
+  status is stated in its own in-code WHY. Across the twelve worker-realm
+  `Atomics` reads the split is by call site rather than by name — a name is not
+  uniformly covered just because one of its sites is. Every capture below fails
+  the placement predicate when un-latched, so the structural tier reaches all of
+  them; what varies is whether a behavioral row does too.
   - **Discriminated behaviorally:** `Atomics.notify` and `emitPausing`'s two
     `.store` reads — all three run before the emission is posted, so un-latching
     any one of them costs the program its message. Also `callBlocking`'s `.load`
@@ -131,13 +133,22 @@ lose one.
     program the response to its own call.
   - `.notify` is discriminated **only by the row that rebinds the whole
     namespace**, never by one that replaces the member alone: a missed wake is
-    unobservable, but a failed read is not. The two are different failures and
-    only the second is visible here.
+    unobservable — nothing anywhere waits on the event-ready slot, and the
+    thread side, being the main realm, cannot call `Atomics.wait` at all — but a
+    failed read is not. The two are different failures and only the second is
+    visible here.
   - **Not discriminated behaviorally:** `callBlocking`'s `.store`,
     `read-call-response`'s `.store`, `Atomics.wait`, and the pause loop's own
     `.load`. For these four the placement predicate **is** the instrument. Note
     that `.load` and `.store` each appear on both lists — which is the point of
     reading this map by site rather than by name.
+  - **Two of those four CANNOT be covered; two merely ARE NOT.** `.wait` and the
+    pause loop's `.load` are inherent: see the equivalence argument below. The
+    two `.store` reads are a gap in the row set, not a limit — no committed row
+    combines a broken `.store` with a `call()`, and one that did
+    (`globalThis.Atomics = null` followed by `emit(call(…))`) would throw at
+    `callBlocking`'s store before its request is posted and move both into the
+    discriminated column. Writing it is a live option, not a closed door.
   - `.wait` is undiscriminable for a different reason than the rest, and the
     reason is worth keeping: not unreachability but **equivalence** — a
     busy-spin substitute holds the single-threaded worker exactly as
