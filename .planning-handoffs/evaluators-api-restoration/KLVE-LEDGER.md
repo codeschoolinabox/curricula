@@ -1,0 +1,509 @@
+<!-- TRANSITIONAL — the klve tracer evaluator's fidelity ledger. Row ids are
+`klve-NNN`, stable forever, cited by the unit's README § Discharges and every
+commit body. Retires when the klve evaluator's Phase 1 closes its last open
+row. -->
+<!-- cspell:ignore blankenated cname jsviz klve thenable undescribe undescribed undescribes renumber renumbered renumbering -->
+
+# klve tracer evaluator — FIDELITY LEDGER
+
+Every public-surface member and behavior of the klve reference, classified,
+so the port loses nothing silently. The reference is the read-only package
+`@study-lenses/trace-js-klve`
+(`/Users/master/Documents/0-teach-code/0-spiralearn/0-study-lenses-committee/sl-trace-js-klve/`),
+per the SUPERSEDED-BY-KLVE ruling (human, 2026-09-04 —
+[LOSS-LEDGER.md § Rulings of record](./LOSS-LEDGER.md)). The port target is
+the evaluators-region unit this ledger's rows bind (Phase 0 in progress; the
+working name `evaluators/klve/` is itself a ledgered question).
+
+**Method and vocabulary, cited not restated.** Disposition vocabulary: the
+ratified code parent's (HR-4, [LOSS-LEDGER.md](./LOSS-LEDGER.md) preamble) —
+`restore` (the default) · `supersede` (only with a named strength argument) ·
+`drop` (only with human sign-off) · `ADDITION` · `restore-as-doc` ·
+`already survives` · `drop-as-loss` · `restore — DEFERRED (<owner>,
+<ruling>)`. Three-pass discipline, list-never-a-count, and quote-verbatim
+evidence: [`../lens-migration/FIDELITY-METHOD.md`](../lens-migration/FIDELITY-METHOD.md).
+Per-port ledger-file shape: [`../editor-gutter-port/LEDGER.md`](../editor-gutter-port/LEDGER.md).
+
+**The column set is this unit's own synthesis** (stated per the method's own
+transport rule): `#` · `member` · `prov` · `disposition` · `rationale` ·
+`evidence` · `discharged by` · `gate`. The vocabulary is the code parent's;
+`discharged by`/`gate` are FIDELITY-METHOD's; **`prov`** is this unit's —
+`core` (klve's own mechanics: `trace.ts`, `types.ts`, `filter-steps.ts`,
+`ast-map.ts`, the files the package marks external, adapted from
+jsviz.klve.nl) versus `integration` (the package's wrapper layer: the
+`record/index.ts` adapter, schema/verify-options, langs/id, the executor
+seam). The split exists because the human ruled the two layers differently
+[relayed: human, the plan gate 2026-09-05 — "the old tracer was quickly
+hacked around klve, it may be necessary to improve the way it was integrated
+into / converted to a tracer; that can be part of your plan"]: `core` rows
+default `restore` and supersede only with a named strength argument;
+`integration` rows may take `supersede`/`ADDITION` with a named improvement
+argument, the relayed mandate as their ground — still human-ratified, never
+silent.
+
+**Evidence convention:** quarry citations are by exported symbol, function
+name, or heading — never line numbers (they rot). `trace.ts § REPORT` means
+the function of that name in the quarry's `src/record/trace.ts`. Quotes are
+verbatim.
+
+## Pass banner
+
+**PASS 1 — SEEDED 2026-09-05** from live commands over the quarry (the
+§ Reference inventory below is their output, pasted). **PASS 2 —
+ADJUDICATED 2026-09-05, same session, sources open in context** (whole-file
+reads of every `src/record/` file plus the wrapper surfaces this ledger
+rows). Operator deviation from the method's fresh-reader rule, recorded for
+ar-1/AR-5: no migration has been performed yet, so the blind-author
+rationale does not yet apply, and Pass 3's fresh counter-ledger is the
+independence backstop. **PASS 3 — ROUND 1 DONE 2026-09-05**: a fresh counter-ledger agent read
+every source whole AND ran the quarry's own built dist read-only (probe over
+`dist/record/index.js`; scripts committed at
+[`klve-probes/`](./klve-probes/), re-runnable read-only). It
+answered both questions — missing affordances, wrong rows, provenance
+errors, misquote/miscount flags, an escalation framed on a false premise
+(enumerated in its report, applied below, never counted here). **ROUND 2
+DONE 2026-09-05**: the same agent re-attacked the amended ledger with two
+further probe runs — nine more measured reference behaviors (rows
+klve-084–090 and the r8 extensions), three precision defects in the round-1
+applications (klve-025/035's before-only set, klve-053's tag scope,
+r8(iv)'s receiver-loss half), one vocabulary breach (klve-078), one
+provenance split (klve-057/083), one double-ownership (klve-012/080) — ALL
+APPLIED. It found ZERO misquotes in the amended material — that half
+passes, earned. Rows citing `[measured: Pass-3 probe]` carry observed
+behavior of the quarry's built dist (probe scripts committed at
+[`klve-probes/`](./klve-probes/) — five files, re-runnable read-only
+against the quarry's absolute path). Id `klve-088` is deliberately UNASSIGNED — its finding (the
+undefined-value key hole) landed as klve-030's amendment, and ids are never
+reused. **ROUND 3 DONE 2026-09-05** (converging — boundary facts and doc
+drifts, no crash-grade findings): one measured REFUTATION of a round-2
+causal clause (klve-089's export path dies at runtime, not parse — the
+discriminator probe's fallback-loc evidence), one false verbatim label
+fixed, klve-090's data.logs qualifier, klve-046's bare-describe
+overstatement, klve-056's mixed-subject split, new rows klve-091/092/093,
+a third doc drift — ALL APPLIED. **ROUND 4 DONE 2026-09-05** (the
+counter-ledger's own strict sweep also caught three of ITS prior
+imprecisions — the iterate rule reached both sides): the async-arrow
+collapse (klve-043 amended + r8(x)), the member-call error reshape
+(klve-094 + r8(xi), correcting klve-056/r5's previously unbacked
+"learner-shaped" claim), the `index` distinguisher facet, the @throws
+trim — ALL APPLIED. **ROUND 5 DONE 2026-09-05 — PASS 3 CLOSED: Question 1
+PASSES (exhaustion earned; the borderline residue named and held below the
+affordance bar) and Question 2 PASSES (every measured tag maps to a
+retained probe output; no misquote, no wrong disposition-evidence pairing,
+no provenance error remains).** The pass covers ledger-to-source and
+ledger-to-measurement fidelity; region-side citations are ar-1/ar-2's,
+close-condition row resolution is AR-5's, and the UNSETTLED escalations
+r1–r9 are RATIFICATION's — still the human's, all of them. **RATIFICATION — PENDING** (bulk-confirm + the § Escalations rows
+individually; the campaign's 2026-08-06 precedent).
+
+⛔ Pass 2 is not a completeness claim. An audit that can only check its own
+rows is complete by construction [read: FIDELITY-METHOD § Why this exists].
+
+## Close conditions — adapted for a Phase-0-first unit, the adaptation ours
+
+FIDELITY-METHOD § At AR-5's single rule is open-rows-zero; the P1 carve-out
+below is THIS unit's adaptation (a Phase 0 commits its suite skipped, so "a
+test title appears in a passing run" is Phase 1's bar):
+
+1. A row is OPEN when its `discharged by` is empty, or names an artifact
+   that does not RESOLVE. Resolve at Phase 0 means: a named README/DOCS
+   heading exists in the committed docs; a named type member compiles; a
+   named test title is PRESENT in the collected skipped suite.
+2. Rows gated `P1:<increment>` are not open at this unit's Phase-0 AR-5 —
+   the gate column defers them, and the Phase-0 → Phase-1 gate presentation
+   lists them.
+3. Every `UNSETTLED` marker must be gone by ratification — a ratified ledger
+   carries dispositions, not candidates.
+4. A `supersede` row's strength argument must quote or cite the ruling it
+   rests on; an `integration` improvement row must name its improvement and
+   cite the relayed mandate.
+
+## Rulings of record
+
+- **Plan-gate rulings (human, 2026-09-05):** the banked
+  `writing-evaluators-on-the-engine` skill is NOT authored in this unit's
+  session; region-root touches 1–4 (the plan's § Region-root touches) are
+  PRE-AUTHORIZED to land in the 0.3 commit under ar-2's review.
+- **The quick-hack integration mandate (human, 2026-09-05, relayed
+  verbatim in the preamble above)** — the ground for every
+  `integration`-provenance improvement row.
+- **r8 RULED (human, 2026-09-05, at ratification): REPAIR ALL ELEVEN.**
+  Every measured defect facet (i)–(xi) is repaired in the vendored copy as
+  a named supersede whose strength argument is the region's own
+  instrumentation-soundness premise (HR-19); the suite pins NATIVE
+  semantics; Phase 0 locks the direction, repairs land in Phase 1.
+- **The fidelity posture is REFRAMED (human, 2026-09-05, at ratification —
+  relayed verbatim):** "we are building a tracer that uses KLVE as the
+  core to generate events, the old tracer is a reference but not gospel
+  especially when it comes to consumer-facing API shape and internal
+  implementations. and config options + event data should be locked
+  according to ecmascript as with embodiments." Consequence for this
+  ledger's rows: `restore` on § A (options) and § B (step taxonomy) rows
+  means restore-the-CAPABILITY — the consumer-facing SHAPE re-locks to
+  ECMAScript/region vocabulary (the embodiments' ESTree/acorn grammar;
+  e.g. Babel's `NumericLiteral`/`StringLiteral` splits map to the
+  grammar's terms via a fixed internal table; the option groupings
+  re-derive from the ECMAScript grammar rather than klve's audit
+  groupings), and every shape delta is still enumerated at 0.1's
+  correspondence table — capability loss stays a defect, shape
+  re-locking is the ruled design.
+- **Events are ENTWINEABLE by requirement (human, 2026-09-05):** "the
+  events should be entwineable (meaning they carry node paths for the
+  program embodiments)" — klve-074's node-path enrichment upgrades from
+  ADDITION-beside to a REQUIRED event property of the port's delivered
+  events.
+- **The twin answer arrived at ratification, inside the 0.2 window
+  (human, 2026-09-05):** "we should also have a data twin and a NM twin
+  for this tracer" — recorded `twin-doc: machine + data` (canonical
+  order). Per DEV.md § 0.2, an answer arriving before ar-1 spawns is THE
+  answer; both artifacts are owed (the machine twin as
+  `notional-machine.md`; the data twin per its naming row —
+  `data-model.md` above the size threshold, a README section below).
+- **r10 — OPEN, conditional acceptance recorded (human, 2026-09-05):**
+  the candidates r1–r5 + r9 are accepted "pending the answer to this
+  question: is it feasible to rework the internals of KLVE so the
+  configuration applies at tracing time instead of post-filtering?" —
+  the Aran two-instrumentation-kinds frame (capture vs meta-control,
+  thread-side residual filtering, internal-only tracking for caps).
+  The session's feasibility answer: YES — see § r10 feasibility below;
+  final confirmation rides the human's bulk read.
+- Further ratification rulings land here when taken.
+
+### r10 feasibility — the instrument-time configuration rework (answered 2026-09-05)
+
+FEASIBLE, and it strengthens the accepted candidates. The design frame is
+the human's own (Aran's split): the vendored plugin separates **capture
+instrumentation** (config-gated at transform time: whether a node type's
+REPORT wrapper is emitted at all; whether scope-snapshot IIFEs are baked;
+which data legs a report composes) from **meta-control instrumentation**
+(UNCONDITIONAL: the loop restructures, cache temps, the return rewrite,
+and the collector's counter/cap channel). The collector's `report()`
+splits its two jobs: it ALWAYS increments the executed-site counter and
+checks caps (so `maxSteps` keeps klve's meaning — executed instrumented
+sites — independent of what is emitted), and it emits only what the
+resolved configuration admits. Consequences, named:
+
+- **Loop caps become real for klve**: the restructured `while(true)` head
+  is a meta-control site — counting iterations there implements the
+  region's shared `spec.iterations` semantics WITHOUT loop-guard splicing,
+  dissolving most of must-answer (h)'s collision (the guard-vs-Babel
+  ordering question disappears; the trip classifies structurally in the
+  halt author; the region sentence "the iteration guard enforces" needs at
+  most a comment-grade amendment naming per-evaluator enforcement, ar-1's
+  to challenge).
+- **Streaming becomes economical**: the engine charges a full pause
+  round-trip per emit even when dropped — instrument-time gating means
+  un-configured steps never emit at all, which is the engine's own
+  "gate worker-side, BEFORE emitting" discipline verbatim.
+- **The renumber (r1) strengthens**: emission ordinals are worker-minted
+  contiguous by construction.
+- **Two fidelity deltas to row when the human confirms**: (a) logs on
+  filtered steps — klve's post-filter silently LOSES logs attached to a
+  step the node filter drops; instrument-time gating re-attaches them to
+  the next emitted step (an improvement, named, never silent); (b) the
+  cap's counting basis is preserved by argument (the counter counts
+  executed sites, exactly what klve's raw `_steps.length` counted), and
+  the suite pins the equivalence.
+- **Cost**: a deeper vendored-plugin rework than the r8 repairs — options
+  thread into the plugin config and every capture site consults them; the
+  differential property (instrument-time output ≡ klve post-filter output
+  for any config, modulo the two named deltas) becomes a suite
+  obligation.
+
+## Reference inventory (Pass 1 — pasted from live commands, 2026-09-05)
+
+Package `README.md` headings: Pedagogical Purpose · Who Is This For ·
+Install · Quick Start · API Summary · Design Principles (What this package
+provides / What this package does NOT do) · Architecture · Contributing ·
+License. Package `DOCS.md` headings: Why this tracer exists · Architecture ·
+Key decisions (Why Babel (`@babel/standalone`) / Why the engine is treated
+as external / Why steps are 0-indexed internally and 1-indexed in output /
+Why options use JSON Schema + verifyOptions) · What this package
+deliberately does NOT do. `src/record/README.md` headings: What this
+directory contains · External Code · The Pipeline · What `index.ts`
+exposes · Tests.
+
+`src/record/types.ts` exported types (12): `SourceLocation`,
+`PrimitiveDescriptor`, `CompoundDescriptor`, `ValueDescriptor`,
+`HeapObject`, `DescribedValue`, `JsKlveDetail`, `RawStep`,
+`JsKlveNameConfig`, `JsKlveFilterConfig`, `JsKlveOptions`, `JsKlveStep`;
+104 `readonly` member lines [measured: grep -c].
+
+Quarry-internal doc drifts, recorded not fixed: `ast-map.ts § CONFIG_TO_AST`'s
+header says "23 unique types" against 24 pairs; the package README
+§ Architecture and `record/README.md` name the engine file `tracer.ts` — the
+file is `trace.ts`; `trace.ts § trace`'s own JSDoc says "@returns Promise
+resolving to array of execution steps" on a function that returns the array
+synchronously (the @throws lines are true of it and are not drift).
+
+The 24 config↔AST pairs (`ast-map.ts § CONFIG_TO_AST`): declarations.variable; loops.{for,while}; conditionals.{if,ternary};
+blocks.{try,expressionStatement}; calls.{call,new};
+access.{member,identifier};
+operators.{binary,unary,logical,assignment,update,sequence};
+literals.{numeric,string,boolean,array,object};
+functions.{arrow,expression}.
+
+`ACTION_MAP` (trace.ts, 24 entries): Identifier→read ·
+MemberExpression→access · AssignmentExpression→assign ·
+UpdateExpression→update · VariableDeclaration→declare ·
+CallExpression→call · NewExpression→construct ·
+Binary/Unary/Logical/SequenceExpression→compute ·
+ConditionalExpression/IfStatement→branch · For/WhileStatement→loop ·
+TryStatement→protect · ExpressionStatement→evaluate ·
+Arrow/FunctionExpression→define ·
+Numeric/String/BooleanLiteral, Array/ObjectExpression→literal; absent
+type → `'unknown'` (`extractDetail`'s fallback).
+
+Wrapper surface (`src/` beyond `record/`): `index.ts` (the four
+`@study-lenses/tracing` wrappers), `options-schema.ts` +
+`options.schema.json`, `verify-options/` (the mutual-exclusion throw),
+`langs.ts` (`['js','mjs','cjs']`), `id.ts` (`'js:klve'`), `utils/`,
+`tests/`. Quarry test suites: `record/tests/record.test.ts` (99 `it(`),
+`record/tests/filter-steps.test.ts` (27 `it(`) [measured: grep -c] — test
+titles are transport evidence for the unit's own suite.
+
+## Escalations awaiting ratification (r1–r9)
+
+Referenced by rows below; each is UNSETTLED until the human rules.
+
+- **r1 — the renumber ↔ the region's never-renumbers rule.** klve's output
+  `step` is the post-filter contiguous 1..N ordinal (`index.ts`); the
+  region commits "worker-authored order is authoritative … enrichment adds
+  fields, never renumbers" and "step is worker-minted". Candidate: run the
+  filter AND the renumber worker-side, so the final numbering IS
+  worker-minted and both contracts hold.
+- **r2 — `maxTime` + engine `seconds` coexist.** Candidate: restore both;
+  klve's `maxTime` is raw wall-clock at `report()` (worker-side, free), the
+  engine budget pauses across emissions/calls — different meanings, both
+  honest, both enforced.
+- **r3 — the undescribe locus.** Candidate: thread-side undescribe
+  reproducing klve's exact output (the quarry's own post-pass); the
+  described wire form is transport internals. Any described-form exposure
+  is a separate ADDITION row, never a replacement. Note `undescribe`'s
+  `FAKE_CONSTRUCTORS` uses `new Function` — thread-side CSP consideration
+  named.
+- **r4 — the `__V__` namespace vs the region's `__$` collision-guard
+  convention.** Candidate: keep `__V__` (the transpiled text hardcodes the
+  configured ns; fidelity) — the plugin config makes it settable, so the
+  region may pass its own; decided at ratification.
+- **r5 — console and dialogs.** Quarry: `console.log` alone is trapped
+  (described at call time, attached to the NEXT step's `logs`); every other
+  console member is absent from the executor's SHADOWING const, so
+  `console.warn(…)` dies — through klve-094's rewritten `.call` error
+  shape, not a learner-shaped TypeError [measured: Pass-3 probe V1]. **The
+  executor is otherwise NOT sandboxed** — only `console` and the ns are shadowed; the scope chain
+  reaches the real host global (klve-083), so in the quarry's browser
+  habitat `alert`/`prompt`/`confirm` are LIVE native dialogs — the
+  reference behavior for an unmocked dialog is the dialog itself
+  [measured: Pass-3 probe — learner code reads the host `globalThis`]. On
+  the engine: the worker HAS a native console and NO native dialogs, and
+  the sandbox is constitutive. Candidates: trap `console.log` into the
+  collector (restore); other console methods native-or-absent (a named
+  delta either way); dialogs unmocked = learner-shaped ReferenceError in a
+  worker — a DELTA from the reference's browser behavior, named, with the
+  asked-twice no-native-dialog bullet binding any dialog answer (a lens
+  wanting native dialogs passes the built-ins as mocks — the consumer-side
+  pattern that bullet records).
+- **r6 — the executor replacement seams.** The `new Function` main-thread
+  executor does not cross (the supersession bullet is the strength
+  argument for every row in § F that supersedes an executor behavior);
+  strict posture: the quarry runs the transpiled text SLOPPY (the executor
+  wrapper carries no `"use strict"`), the region ruled the kind strict
+  ("the kind poses every run under the machinery's strict default;
+  strict-versus-sloppy is a recorded deliberate collapse" — region README
+  § The spec) — a region-ruled supersede whose consequence is named.
+- **r7 — the integration-improvement set.** Which `integration` rows are
+  kept vs deliberately bettered (renumber locus, error-mapping layer,
+  schema layering, trap placement, ns config, the dead wrapper knobs
+  klve-079, the schema constraints klve-082), each improvement named, the
+  relayed mandate the ground.
+- **r8 — the reference transform's MEASURED semantic defects: bug-compatible
+  restore vs repair-as-named-supersede.** Pass 3 measured four places where
+  the reference transform CHANGES what runs, against native JS: (i)
+  `continue` in a restructured `for` skips the hoisted update — a native
+  3-iteration loop never advances and trips the cap [measured: Pass-3
+  probe]; (ii) per-iteration `let` capture breaks — closures yield
+  `[3,3,3]` where native yields `[0,1,2]` [measured]; (iii) `s++` on a
+  string stores `"51"` via the rewrite's binary `+` where native ToNumeric
+  stores `6` [measured]; (iv) an optional call `a?.b()` throws
+  (`(null , __V__.report(...)) is not a function` — instrumentation leaking
+  into the learner's error) where native yields `undefined` [measured] —
+  plus (v) dead code after `return` EXECUTES (the rewritten return lands
+  below the next sibling) and the return statement gets no after step
+  [measured: `"DEAD"` logged]. Rounds 2–4 widened (iv) and extended the
+  list — the labels below are the record, never a count: (iv)
+  ALSO loses the receiver on a NON-null optional method call — `o?.m()`
+  reports `this === o` false where plain `o.m()` is true [measured]; (vi)
+  `describe` INVOKES GETTERS (`Object.entries` walk) and an instrumented
+  getter re-enters the machinery — an object literal with a getter is a
+  stack-overflow crash, and snapshotting has observer side effects
+  [measured]; (vii) BigInt has no describe arm and misdescribes as `{}`
+  [measured: `10n + 5n` → step value `{}`]; (viii) a null-prototype object
+  crashes describe reading `constructor.name`, surfaced learner-shaped
+  [measured]; (x) the arrow replacement DROPS `async` —
+  `(async () => 1)()` returns `1`; an awaiting async arrow dies on legal
+  syntax while the detail layer stamps `async: true`; arrow-specific (the
+  async FunctionExpression control keeps async) [measured]; (xi) the
+  member-call rewrite reshapes the not-a-function error — a typo'd method
+  call reads `.call` off `undefined`, naming a token the learner never
+  wrote [measured]; (ix) module-only nodes CORRUPT under the plugin — `import x
+  from "y"` parses and the Expression visitor then wraps the
+  ImportDeclaration's source (a Babel invariant error leaking to the
+  learner), `export const a = 1` parses, survives transform, and dies at RUNTIME
+  inside `new Function` — misclassified as ParseError with the fallback
+  loc by klve-061's ladder [both measured; the round-2 "unpassed
+  sourceType" causal framing was REFUTED by a round-3 discriminator probe]
+  — decisive for the module axis: the vendored plugin needs module-node
+  handling or the axis refuses.
+  The region's premise is "instrumentation assumed sound … the wrap never
+  changes what runs" (HR-19); the reference itself violates it here. The
+  question: restore bug-compatible (fidelity to klve, mistraces preserved
+  and named in the NM) or repair each in the vendored copy as a supersede
+  whose strength argument is the region's own soundness premise.
+  Per-defect answers are legal (e.g. repair iv's error leak, keep i–iii
+  bug-compatible). The human rules; nothing is repaired silently.
+- **r9 — the async-continuation boundary.** Post-`await` learner code is
+  INVISIBLE to the reference trace: the continuation runs after the steps
+  array is copied/filtered, so its reports and logs are silently lost
+  [measured: Pass-3 probe — `mark = 2` after `await 0` produces no step].
+  The port must decide its collection window: the engine's `'function'`
+  path ends synchronously (same loss shape), the `'module'` path awaits
+  top-level settlement (a called-not-awaited async function still races
+  the halt). Ties to must-answer (b) (when steps ride the wire) and the
+  NM's honesty lines. The human rules the posture; the reference's own
+  behavior is the restore baseline.
+
+## Rows
+
+### § A — the options surface
+
+| # | member | prov | disposition | rationale | evidence | discharged by | gate |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| klve-001 | `declarations.variable` toggle → VariableDeclaration | core | restore | node-type inclusion toggle; default true | `types.ts § JsKlveOptions`; `ast-map.ts § CONFIG_TO_AST` | types.ts options member · test "declarations.variable false removes VariableDeclaration steps" | P0 |
+| klve-002 | `loops.{for,while}` toggles | core | restore | as klve-001, two keys | same | types.ts · filter suite rows | P0 |
+| klve-003 | `conditionals.{if,ternary}` toggles | core | restore | as klve-001 | same | types.ts · filter suite rows | P0 |
+| klve-004 | `blocks.{try,expressionStatement}` toggles | core | restore | as klve-001 | same | types.ts · filter suite rows | P0 |
+| klve-005 | `calls.{call,new}` toggles | core | restore | as klve-001 | same | types.ts · filter suite rows | P0 |
+| klve-006 | `access.{member,identifier}` toggles | core | restore | as klve-001 | same | types.ts · filter suite rows | P0 |
+| klve-007 | `operators.{binary,unary,logical,assignment,update,sequence}` toggles | core | restore | as klve-001, six keys | same | types.ts · filter suite rows | P0 |
+| klve-008 | `literals.{numeric,string,boolean,array,object}` toggles | core | restore | as klve-001, five keys | same | types.ts · filter suite rows | P0 |
+| klve-009 | `functions.{arrow,expression}` toggles | core | restore | as klve-001 | same | types.ts · filter suite rows | P0 |
+| klve-010 | the 24-pair config↔AST map (+ inverted `AST_TO_CONFIG`, `ALL_AST_TYPES`) | core | restore | the mapping IS the toggles' semantics; the header's "23 unique types" vs 24 pairs is quarry drift, recorded not fixed | `ast-map.ts § CONFIG_TO_AST` header: "Based on audit of actual tracer output (23 unique types)" — table holds 24 | types.ts (the map transported) · README correspondence table | P0 |
+| klve-011 | unknown step `type` passes the node filter | core | restore | lookup miss defaults pass — `flatConfig[configPath] ?? true` and `nodeLookup[step.type] === false` alone excludes | `filter-steps.ts § buildNodeLookup`, `§ filterSteps` | test "a step type outside the map is never filtered" | P0 |
+| klve-012 | `filter.names.{include,exclude}` — the name filter over detail's name/target/callee/property; nameless steps pass (empty-list semantics are klve-080's, one owner) | core | restore | the name-filter mechanics; klve-080 owns the empty-list claim so ratification reaches it once | `types.ts § JsKlveNameConfig` — "Nameless steps (ForStatement, literals, etc.) always pass through"; `filter-steps.ts § passesNameFilter` | types.ts · tests "include keeps only steps naming x", "nameless steps pass under include" | P0 |
+| klve-013 | include-wins leniency INSIDE filterSteps when both name lists set | core | restore | the filter layer is deliberately lenient; the constraint bites at the boundary (klve-014) | `filter-steps.ts § fillNameConfig` — "include takes precedence if both provided" | test "filter layer prefers include when both provided" | P0 |
+| klve-014 | include/exclude mutual exclusion enforced at the options boundary | integration | UNSETTLED → restore (constraint), form per r7 | the CONSTRAINT transfers; the quarry enforces it wrapper-side with a typed throw; the port's seam (spec-time validation vs refusal) is the design's | `verify-options/index.ts § verifyOptions` — "filter.names.include and filter.names.exclude are mutually exclusive — provide one or the other" (`OptionsSemanticInvalidError`) | README § the options contract · types or spec-validation row | P0 |
+| klve-015 | `filter.timing.{before,after}` | core | restore | drop a timing phase from output | `types.ts § JsKlveFilterConfig`; `filter-steps.ts § passesNodeAndTimingFilters` | types.ts · tests "timing.before false removes before steps" | P0 |
+| klve-016 | `filter.data.{scopes,value,logs,dt,loc}` stripping; `step`/`category`/`type`/`time`/`detail` never stripped | core | restore | per-field output shaping; the keep-set is fixed | `filter-steps.ts § stripData` | types.ts · one test per strip field + "detail survives every data config" | P0 |
+| klve-017 | defaults: every toggle true, no name filter, both timings, all data | core | restore | 1-arg/empty-options calls are first-class | `filter-steps.ts § DEFAULT_FILTER_CONFIG`; `index.ts` — `filterSteps(rawSteps, options ?? {})` | test "empty options yields the unfiltered shape" | P0 |
+| klve-018 | `maxSteps` — trip pre-push at `report()`; `null` = unlimited | core | restore | worker-side, free; the step that would exceed is never recorded | `trace.ts § report` — "if (limits.maxSteps !== null && nsObject._steps.length >= limits.maxSteps)" | spec widening member · test "maxSteps N settles the cap outcome with N steps recorded" | P0 |
+| klve-019 | `maxTime` — `dt > maxTime` checked at every report; `null` = unlimited | core | restore (r2) | raw wall-clock at the collector; coexists with the engine budget, different meanings both honest | `trace.ts § report` — "const dt = Date.now() - nsObject._t0" then the limit check | spec widening member · test "maxTime trips as klve's own cap, not the engine budget" | P0 |
+| klve-020 | the wrapper's `meta.max.{steps,time}` layering | integration | supersede — the spec widening carries `maxSteps`/`maxTime` directly | the FIELDS restore (klve-018/019); the wrapper envelope does not cross; ground: the relayed mandate + the kind's spec shape | `index.ts § record` signature — `{ meta, options }`; the region kind's `EvaluationSpec` | types.ts spec widening | P0 |
+| klve-080 | empty name lists mean NO filtering — `{include: []}` filters nothing, and an empty list does not count as "provided" for the mutual-exclusion check | core | restore | the reference's own pinned semantics; a port validating `[] + ['x']` as a conflict would refuse programs the reference accepts | `filter-steps.ts § fillNameConfig` — length-gated branches; `verify-options/index.ts` — `hasInclude = Array.isArray(names.include) && names.include.length > 0`; record.test.ts title "applies no filtering with empty include array" | test "an empty include list filters nothing; empty + exclude is legal" | P0 |
+| klve-081 | the init step passes EVERY filter — node toggles, timing, names alike | core | restore | the trace's anchor row survives any configuration | `filter-steps.ts § passesNodeAndTimingFilters` — "if (step.category === 'init') return true"; `§ passesNameFilter` — same guard; record.test.ts title "always keeps init step regardless of filters" | test "the init step survives every filter" (klve-023's) | P0 |
+
+### § B — the step taxonomy
+
+| # | member | prov | disposition | rationale | evidence | discharged by | gate |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| klve-021 | `step` ordinal — 0-based internal, 1-based contiguous in output | core | UNSETTLED → restore via r1 | the output contract; where the renumber runs decides the region-rule collision | `DOCS.md § Why steps are 0-indexed internally and 1-indexed in output`; `index.ts` — "step: index + 1" | types.ts step member · r1's ratified resolution recorded in README | P0 |
+| klve-022 | `category: 'init' \| 'statement' \| 'expression'` | core | restore | the three-way taxonomy is the trace's spine | `types.ts § RawStep` | types.ts · correspondence table row | P0 |
+| klve-023 | the init step — internal literal `{category:'init', step:0}`; in OUTPUT it is `step: 1` (the renumber has no init exemption), no loc/type/time, and it passes EVERY filter (node, timing, names) | core | restore | the trace's zeroth row; loc-less so node joins are n/a (the P0-I loc-null exclusion precedent downstream); the output ordinal is the reference's own pinned behavior | `trace.ts § executeInstrumented` — "_steps: [{ category: 'init', step: 0 }]"; record.test.ts titles "produces init step first", "assigns sequential step numbers starting at 1", "always keeps init step regardless of filters"; `filter-steps.ts § passesNodeAndTimingFilters` — `if (step.category === 'init') return true`; [measured: Pass-3 probe — output first step `{"step":1,"category":"init"}`] | tests "the first step is the init step, numbered 1 in output", "the init step survives every filter" · NM joins-n/a line | P0 |
+| klve-024 | `type` — the Babel AST node-type string | core | restore | attribution vocabulary | `types.ts § RawStep` | types.ts · correspondence table | P0 |
+| klve-025 | `time: 'before' \| 'after'` — expressions after-only except `_reportBefore`; a statement reports before AND after only where its node survives unreplaced AND completes normally: While/For (replaced loc-less), Return (rewritten), and Break/Continue/Throw (the after is inserted but control never reaches it) emit `before` alone | core | restore | the two-phase semantics as MEASURED — the enter-side `replaceWith` defeats the exit report for the restructured kinds, and abrupt-completion statements never execute their inserted after | `trace.ts § Statement.enter/exit`; `§ Expression` — `maybeBeforeReporter`; [measured: Pass-3 probe — While/For/Return/Break/Continue/Throw steps carry `time:'before'` only] | types.ts · tests "a plain statement yields before and after", "a while statement yields before only", "an abrupt-completion statement yields before only", "a loop test yields a before step each iteration" | P0 |
+| klve-026 | `dt` — ms since trace start, stamped per report | core | restore | the timing datum `filter.data.dt` governs | `trace.ts § report` | types.ts · test "dt is monotonic non-decreasing" | P0 |
+| klve-027 | `loc` — ESTree span (1-based line, 0-based col) BAKED at instrument time from the parse the plugin ran on | core | restore | stamp-based attribution — the supersession bullet's named trade ("the posed text is Babel's reading … steps carry instrument-time stamps") | `trace.ts § meta` — "loc: node.loc"; `types.ts § SourceLocation` | types.ts · NM second-parse-truth line · test "loc matches the source span" | P0 |
+| klve-028 | `scopes` — visible-binding snapshots, innermost original scope first, walking parents; per-binding `try{return id}catch{}` IIFE through `describe`, evaluated AT the report; restructure-internal scopes skipped (`_definitelySkip`) | core | restore | THE variables payload the supersession leans on; live values at step time, clone-safe described on the wire | `trace.ts § meta` — the scope walk and the IIFE builder; `§ Statement.enter` — the `_definitelySkip` marks | types.ts · scope-snapshot suite rows ("a scope snapshot carries the binding's value at that step", "TDZ reads snapshot as undefined via the catch arm", "restructure-internal scopes never appear") | P0 |
+| klve-029 | the `(!)` non-original-scope suffix — UNREACHABLE in this copy | core | restore-as-doc | pushed scopes are always `_original`, so the suffix branch never lands in output; recorded so nobody "restores" a behavior the reference never exhibits | `trace.ts § meta` — suffix at the entry builder; push guarded by "currentScope._original && !currentScope._definitelySkip" | README § the correspondence table's scopes row (the vestigial branch named) | P0 |
+| klve-030 | `value` — the reported expression's value; statements report none; an expression that evaluates to `undefined` carries NO value key in output (indistinguishable from a statement's absence — the observability hole named) | core | restore (r3) | the per-step value, described→undescribed round-trip, with the measured undefined carve-out — `stripData` copies only `step.value !== undefined` | `trace.ts § REPORT` — value or `undefined`; `§ report` — "meta.value = nsObject.describe(value)"; `filter-steps.ts § stripData` — "if (dataConfig.value && step.value !== undefined)"; [measured: Pass-3 probe — `let x; x;` yields no value key on the read step] | types.ts · tests "an expression step carries its value", "an undefined-valued expression carries no value key" | P0 |
+| klve-031 | `logs` — console.log lines since the previous step, attached to THIS step, then cleared | core | restore | the log-attachment semantics; values described at call time (mutation-safe snapshot) | `trace.ts § executeInstrumented` — the console.log trap; `§ report` — "meta.logs = nsObject._logs; nsObject._logs = []" | types.ts · tests "logs attach to the next step", "logged objects snapshot at log time" | P0 |
+| klve-032 | `detail` — always present on non-init steps; `action` from ACTION_MAP with `'unknown'` fallback | core | restore | the semantic-action layer | `trace.ts § extractDetail` — "Always returns a detail object (never undefined)"; `§ ACTION_MAP` | types.ts · correspondence table | P0 |
+| klve-033 | the per-type detail fields, member-complete: `action` (klve-032's semantics; the member itself lives here too), `operator`/`prefix` (unary, update), `kind`/`target` (declarations; assignment/update target), `computed`/`property`/`optional` (member), `name` (identifier, named fn), `arity`/`callee`/`method` (calls), `async`/`generator`/`expressionBody` (functions), `hasAlternate` (if/ternary), `hasCatch`/`hasFinally` (try), `hasInit`/`hasTest`/`hasUpdate` (for), `elementCount`/`propertyCount` (array/object literals) | core | restore | the detail vocabulary transfers member-complete — enumerated, never counted (a prior revision printed "22" against a 23-member type; the enumeration is the record) | `types.ts § JsKlveDetail` (every optional member enumerated left); `trace.ts § extractDetail` (each branch) | types.ts JsKlveDetail transported · per-type detail suite rows | P0 |
+| klve-034 | the ACTION_MAP action vocabulary (read/access/assign/update/declare/call/construct/compute/branch/loop/protect/evaluate/define/literal/unknown) | core | restore | shared vocabulary a consumer keys on | `trace.ts § ACTION_MAP` (pasted whole in § Reference inventory) | types.ts action union or documented set · correspondence table | P0 |
+| klve-090 | output shape UNDER ENABLED `filter.data.logs` (the default): every non-init step carries `logs` (an empty `[]` when nothing logged); the init step carries NO logs key; `data.logs: false` strips the key (klve-016's row) | core | restore | the always-present-key/init-absent asymmetry is what a round-trip fidelity suite actually asserts; the qualifier keeps this row consistent with klve-016 | [measured: Pass-3 probe at defaults — non-init steps carry `logs: []`; the init step has no logs key]; quarry test title "excludes logs when data.logs is false" | output-fidelity suite row "logs key presence per step kind, defaults" | P0 |
+
+### § C — instrumentation semantics
+
+| # | member | prov | disposition | rationale | evidence | discharged by | gate |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| klve-035 | statements get a before report (non-block, loc-bearing); the after report lands only on kinds the enter pass leaves in place AND that complete normally (klve-025 names the before-only set); blocks themselves unreported | core | restore | the statement-level trace grain as measured — the enter/exit source symmetry survives neither the enter-side replacements nor abrupt completion | `trace.ts § Statement.enter/exit` — "if (!t.isBlockStatement(path.node))" both sides; [measured: Pass-3 probe per klve-025] | tests per klve-025's split | P0 |
+| klve-036 | FunctionDeclaration bodies are not statement-instrumented at declaration (hoisted); calls into them trace normally | core | restore | hoisting honesty | `trace.ts § Statement.enter` — "Skip function declarations (hoisted)" | test "a function declaration emits no declaration step" | P0 |
+| klve-037 | `return` rewrite — value through `__V__.return` (correct, measured), NO after step lands (the replacement is loc-less), and the re-inserted real return lands BELOW the next sibling, so **dead code after `return` executes** | core | UNSETTLED → r8(v) | the value half restores; the dead-code-executes half is a measured semantic defect of the reference — r8 rules bug-compatible vs repaired | `trace.ts § Statement.enter` — the ReturnStatement branch (`getSibling(path.key + 1).insertAfter(…)`); [measured: Pass-3 probe — `return 7; console.log("DEAD")` logs `"DEAD"`; the return step is `time:'before'` only; the returned value is 7] | r8's ruling recorded · tests "a return's value is faithful", plus the r8-ruled row for dead code | P0 |
+| klve-038 | `while` RESTRUCTURE → `while(true){TMP=test; if(!TMP)break; body}`; test carries `_reportBefore`; the synthetic if-scope skipped | core | restore | the loop-tracing mechanism — every iteration reports the test, so the step cap bounds every while loop; an HR-19 restatement rides the unit README (instrumentation assumed sound; a restructure defect presents as the learner's own) | `trace.ts § Statement.enter` — the WhileStatement branch | DOCS § the transform contract · test "each while iteration yields a test step" | P0 |
+| klve-039 | `for` RESTRUCTURE → block{init; while(true){TMP=test; if(!TMP)break; body; update}}; test+update `_reportBefore`; **bare `for(;;)` (null test/update) breaks the transform** (static reading — setting `_reportBefore` on null; a conformance row measures it); **`continue` skips the relocated update — a native 3-iteration loop never advances and trips the cap** [measured: Pass-3 probe]; **per-iteration `let` capture breaks — closures yield `[3,3,3]` vs native `[0,1,2]`** [measured: Pass-3 probe] | core | UNSETTLED → r8(i)(ii) for the two measured defects; restore for the mechanism | the mechanism restores; the two measured semantic defects are r8's — bug-compatible vs repaired, ruled never silent; the `for(;;)` edge classifies per (l) | `trace.ts § Statement.enter` — the ForStatement branch; "forNode.test._reportBefore = true" unconditionally after the initType split | DOCS § transform contract · r8's ruling recorded · skipped tests "for(;;) classifies per the transform-failure posture", "continue semantics per r8's ruling", "let capture per r8's ruling" | P0 |
+| klve-040 | Expression wrap — `(before?, __V__.report(expr, meta))` sequence; `_done` idempotence | core | restore | the expression-grain trace | `trace.ts § Expression` — the normal case | test "nested expressions each report once" | P0 |
+| klve-041 | CallExpression rewrite — `(callee).call(tmpContext, args)`; member callees get their own access report with the receiver cached; computed preserved. Optional-chain calls take the generic wrap BUT the Expression visitor wraps the chain's OptionalMemberExpression too, **SEVERING the chain both ways: on null, `a?.b()` throws `(null , __V__.report(...)) is not a function` — instrumentation leaking into a learner-shaped error — where native yields `undefined`; on NON-null, `o?.m()` silently loses its receiver — `this === o` reports false where plain `o.m()` is true** [measured: Pass-3 probe, both] | core | UNSETTLED → r8(iv) for the severed chain; restore for the rewrite | call tracing with receiver-correct `this` restores OFF the optional path (control measured true); the optional-chain defect is r8's — and its error-message leak is the strongest repair candidate (the region never leaks machinery into learner errors) | `trace.ts § Expression` — the isCallExpression branch; the `contextual` path; [measured: Pass-3 probe] | tests "a method call reports access then call" · r8's ruling recorded | P0 |
+| klve-042 | UpdateExpression rewrites — prefix and postfix forms; three values observable (prior, stored, returned). **The rewrite uses binary `+`/`-`, not native ToNumeric: `let s="5"; s++` stores `"51"` where native stores `6`** [measured: Pass-3 probe; `--` unaffected] | core | UNSETTLED → r8(iii) for the `++` coercion; restore for the observability | the three-values observability restores; the string-`++` behavior is a measured defect that MISTEACHES the exact coercion story a tracer exists to teach — r8 rules it | `trace.ts § Expression` — the isUpdateExpression branches; `t.binaryExpression(operator[0] as '+' \| '-', …)` | tests "postfix returns old value", "prefix returns new value" · r8's ruling recorded | P0 |
+| klve-043 | Arrow wrap — the arrow is REPLACED by `function(){…}.bind(this)`; report-after ('define'). **The replacement DROPS `async`: `(async () => 1)()` returns `1`, not a Promise; an async arrow that awaits dies at runtime — `await is not defined`, fallback loc — while the detail layer stamps `async: true` on the very arrow it runs sync; an async FunctionExpression (wrapped, not replaced) keeps its async-ness — the defect is arrow-specific** [measured: Pass-3 probe V2/V3/V4] | core | UNSETTLED → r8(x) for the async collapse; restore for the sync-arrow wrap | klve's own semantics for sync arrows (the `arguments`/`new.target` deltas stay honesty lines); the async collapse is r8-weight — a legal program returns the wrong type or dies on legal syntax | `trace.ts § ArrowFunctionExpression` — the functionExpression + bind replacement (no async flag carried); quarry test title "includes async flag on async ArrowFunctionExpression" | DOCS § transform contract's named deltas · r8's ruling recorded · tests "a sync arrow reports define", async rows per r8(x) | P0 |
+| klve-044 | FunctionExpression wrapped in report-after ('define'; name/arity/async/generator detail) | core | restore | as klve-043 without the rewrite | `trace.ts § FunctionExpression` | test "a function expression reports define" | P0 |
+| klve-045 | `bailoutLval` — assignment targets uninstrumented EXCEPT computed member properties | core | restore | writes are not reads; the computed-key exception keeps `a[i]=x` tracing `i` | `trace.ts § bailoutLval` — "Bail out of LVals EXCEPT computed properties" | test "an assignment's LHS identifier yields no read step; its computed key does" | P0 |
+| klve-046 | the collector protocol — configurable `ns` (default `'__V__'`); `report(value, meta)` returns the value (transparent); `cache[n]` temp slots; `__V__.return`; describe reachable ONLY as `__V__.describe` (the executed code's scope holds exactly two shadowed names, `console` and the ns; the context's bare `describe` property is dead weight nothing exposes) | core | restore (r4 names the ns question) | the injected-global contract the engine setup will author — the supersession bullet's "setup-authored injected global carries the step collector"; a port minting a bare `describe` global would exceed the reference | `trace.ts § trace` — `const ns = '__V__'`; `§ transpilerPlugin` config; `§ executeInstrumented` — the executor's two consts | types.ts worker-config/collector contract · DOCS data flow | P0 |
+| klve-047 | instrument-time idempotence flags (`_done`, `_reportBefore`) ride AST nodes | core | restore | plugin-internal protocol; matters to any vendored adaptation (k) | `trace.ts` — `_done` guards in every visitor | DOCS § transform contract | P0 |
+| klve-094 | the member-call rewrite REWRITES the not-a-function error — a typo'd method call (`obj.mispelled()`, `console.warn(…)` under the log-only trap) reads `.call` off `undefined`: `Cannot read properties of undefined (reading 'call')`, a RuntimeError naming a token the learner never wrote, where native says `<name> is not a function` | core | UNSETTLED → r8(xi) | one of the most common learner errors arrives instrumentation-shaped — the r8 leak family beside (iv)'s `__V__.report` leak | `trace.ts § Expression` — the contextual rewrite's `.call(…)`; [measured: Pass-3 probe V1 — `console.warn("x")` → RuntimeError "Cannot read properties of undefined (reading 'call')"] | r8's ruling recorded · suite row "a typo'd method call's error shape per r8(xi)" | P0 |
+
+### § D — describe / undescribe
+
+| # | member | prov | disposition | rationale | evidence | discharged by | gate |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| klve-048 | primitives described as-is; `symbol` → `{type:'symbol', str}`; undescribe re-mints `Symbol(desc)` | core | restore | clone-safe value vocabulary | `types.ts § PrimitiveDescriptor`; `trace.ts § describe/undescribe` | types.ts descriptor types · round-trip test | P0 |
+| klve-049 | compounds → heap index; shared references and cycles preserved via the identity map | core | restore | serialization without infinite recursion; identity within one described value | `trace.ts § describe` — "} else if (map.has(value as object)) {" returning "{ category: 'compound', at: map.get(value as object)! }" | round-trip tests "a cyclic object survives describe", "two refs to one object share a heap slot" | P0 |
+| klve-050 | HeapObject classification — function · promise (thenable duck-type: `'then' in value && 'catch' in value`) · array (+length) · object (+`cname` constructor name) | core | restore | the compound taxonomy, duck-typing included (a thenable non-promise classifies promise — reference behavior, recorded) | `trace.ts § describe`; `types.ts § HeapObject` | types.ts · tests per classification | P0 |
+| klve-051 | undescribe FAKES — fake function, never-resolving Promise, length-true Array, `FAKE_CONSTRUCTORS` by cname (via `new Function`), plain `{}`; entries reattached recursively | core | restore (r3 — locus + the `new Function` CSP note) | the fakes ARE klve's output contract; consumers receive undescribed values | `trace.ts § undescribe` + `§ FAKE_CONSTRUCTORS` | thread-side undescribe module · tests "a traced function value arrives as a callable fake", "a class instance's constructor name survives" | P0 |
+| klve-052 | the post-execution round-trip — value, scopes, logs ALL undescribed before output | core | restore (r3) | output identity with the reference | `trace.ts § executeInstrumented` — the post-pass over steps ("undescribe(step.value)", `undescribeScope`, logs map) | the seam module · output-fidelity suite rows | P0 |
+| klve-084 | `describe` INVOKES GETTERS — its own-enumerable walk runs `Object.entries`, so snapshotting has OBSERVER SIDE EFFECTS, and an instrumented getter re-enters the machinery: **an object literal with a getter is a stack-overflow crash even if never referenced again** | core | UNSETTLED → r8(vi) | a hard reference limit AND a semantics violation (observation executes learner code); bug-compatible vs repaired (own-data walk without invocation) is r8's | `trace.ts § describe` — "for (const [key, v] of Object.entries(value as object))"; [measured: Pass-3 probe — `const o = { get g() { return 7; } };` → RuntimeError "Maximum call stack size exceeded"; native clean] | r8's ruling recorded · suite row "a getter-bearing literal classifies per r8(vi)" | P0 |
+| klve-086 | BigInt has no describe arm — falls to the compound path and round-trips as `{}` | core | UNSETTLED → r8(vii) | misdescription of a primitive; restore-with-limit-named vs a bigint arm | `types.ts § PrimitiveDescriptor` — the union carries string/boolean/number/null/undefined/symbol only; [measured: Pass-3 probe — `10n + 5n` step value `{}`] | r8's ruling recorded · suite row | P0 |
+| klve-087 | a null-prototype object CRASHES describe — `constructor.name` on a constructor-less object, surfaced as the learner's own RuntimeError | core | UNSETTLED → r8(viii) | same family as klve-086; the crash presents learner-shaped (HR-19's cost, live) | `trace.ts § describe` — "object.cname = value.constructor.name;"; [measured: Pass-3 probe — `Object.create(null)` → RuntimeError "Cannot read properties of undefined (reading 'name')"] | r8's ruling recorded · suite row | P0 |
+| klve-091 | `FAKE_CONSTRUCTORS` is MODULE-LEVEL state — the undescribe cache persists across `record()` calls (two traces of `class Foo` share the identical fake constructor object); the README's "does NOT … Persist or accumulate traces across calls" is the standing claim this wrinkles | core | restore-as-doc (the claim) + the wrinkle to r3 (the port's cache scope — per-run vs per-session — rides the undescribe-locus ruling) | steps never persist (the claim holds for traces); the constructor-identity cache does — a consumer comparing constructors across traces observes it | `trace.ts § FAKE_CONSTRUCTORS` — module-level `const`; package `README.md § What this package does NOT do` — "Persist or accumulate traces across calls"; [measured: Pass-3 probe — identical `.constructor` object across two record() calls] | README § boundary · r3's ruling | P0 |
+| klve-092 | snapshot completeness boundary — described compounds carry OWN-ENUMERABLE STRING-KEYED entries only: non-enumerable and symbol-keyed properties are absent from round-tripped values | core | restore | the boundary a consumer can rely on, stated; follows from the `Object.entries` walk (klve-084's evidence) | `trace.ts § describe` — the `Object.entries` walk; [measured: Pass-3 probe — `hid` (non-enumerable) and a symbol key both absent; `keys=["vis"]`] | suite row "snapshots carry own-enumerable string keys only" | P0 |
+| klve-093 | a description-less `Symbol()` re-mints as `Symbol('')` — output `description` is `''` where native is `undefined` | core | restore | reference behavior, the native drift named (the `/^Symbol\((.*)\)$/` regex always matches, so the no-description case yields the empty string) | `trace.ts § undescribe` — the symbol re-mint; [measured: Pass-3 probe] | suite row "Symbol() round-trips with empty-string description (reference drift named)" | P0 |
+
+### § E — execution and limits
+
+| # | member | prov | disposition | rationale | evidence | discharged by | gate |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| klve-053 | the steps-cap trip — throw at `report()` when `_steps.length >= maxSteps`; the tripping step is never recorded; the message names N+1 [measured: Pass-3 probe at cap 5 — "Trace has 6 steps, exceeds max 5"]; the guard's `_steps.length` includes the init pseudo-step, so cap N admits N entries counting init (code-derived from the quoted guard — unobservable through the reference's throwing `record()`, assertable only where the port's halt carries the collected steps) | core | restore + structural reclassification (klve-055) | trip semantics transfer with their exact counting; the measured tag scopes to the message, the count is derived and says so; classification is ours | `trace.ts § report` — the maxSteps check and its message; [measured: Pass-3 probe at cap 5 — the message text] | halt-author trip classification (j) · tests "the cap message names N+1", plus the entries count where the port's halt carries steps | P0 |
+| klve-054 | the time-cap trip — `dt > maxTime` at a report | core | restore (r2) | as klve-053 for time | `trace.ts § report` — the maxTime check | as klve-053 | P0 |
+| klve-055 | `LimitExceededError` (kind `'steps' \| 'time'`, actual value) | integration | supersede — a structural marked-throw shape classified in the halt author | the CLASS is the wrapper's (`@study-lenses/tracing`, not crossing); the engine contract makes limit classification consumer-owned inside `serializeHalt`, structural never message-match | `trace.ts` imports `LimitExceededError`; engine README § serializeHalt — "limit classification is consumer-owned" | types.ts halt record · (j) suite rows | P0 |
+| klve-056 | the `console.log` trap — described at call time, pushed to `_logs`, attached to the next report (klve-031) | core | UNSETTLED → r5 | the trap's collector semantics cross; the OTHER-members fact (absent in the executor's shadowing const — a `console.warn(…)` call dies through klve-094's rewritten error shape, NOT a learner-shaped TypeError) is executor-seam subject matter and lives in r5's text — one subject per row, the 057/083 retag rule applied | `trace.ts § executeInstrumented` — the console.log trap; [measured: Pass-3 probe V1 per klve-094] | README § io posture · r5's ruling recorded | P0 |
+| klve-057 | the transpiled text runs SLOPPY in the quarry (no `"use strict"` in the executor wrapper) | integration | supersede — the kind's strict collapse governs | region ruling: "The kind poses every run under the machinery's strict default: strict-versus-sloppy is a recorded deliberate collapse" (region README § The spec); consequence named: sloppy-only constructs error differently on the port; a future sloppiness widening stays representable | `trace.ts § executeInstrumented` — `executorCode` carries no strict directive; region `evaluators/README.md § The spec` | README § the posing delta · conformance row | P0 |
+| klve-058 | synchronous `trace(code, limits) → RawStep[]` — trace.ts's OWN default export | core | supersede — the kind envelope (`main(spec) → handle \| refusal`) | the supersession bullet: "this evaluator speaks the REGION kind envelope"; the sync entry is core (one of the four external files), so this is a core supersede whose strength IS the human ruling — not a free integration improvement | supersession bullet; region `types.ts § Evaluator`; `trace.ts § trace` (default export) | index.ts evaluator object · types.ts | P0 |
+| klve-059 | context injection via `new Function` + `this` | integration | supersede — engine worker + setup-authored injected global | the supersession bullet verbatim: "the worker executes the transpiled text with an injected collector global, and the steps ride the wire; the package's own `new Function` main-thread executor is NOT taken" | supersession bullet (LOSS-LEDGER § Rulings); `trace.ts § executeInstrumented` | DOCS data flow · worker-setup contract in types.ts | P0 |
+| klve-083 | the executor is NOT isolated — only `console` and the ns are shadowed; learner code reaches the real host global (`globalThis`, `window`, `fetch`, live browser dialogs) | integration | supersede — the engine's worker sandbox | measured reference behavior the port deliberately does not reproduce: the supersession bullet's executor exclusion plus the engine's constitutive sandbox; consequences named — r5's dialog delta, and no host-global leakage into step values | `trace.ts § executeInstrumented` — the executor shadows two names; [measured: Pass-3 probe — learner code read the host `globalThis`] | DOCS § the sandbox delta · NM honesty line | P0 |
+| klve-078 | EMPTY code fails the transform — `Babel transform failed to produce code` (the adapter's RuntimeError surfacing is klve-061's ladder) | core | restore | a zero-input edge; the behavior restores and the port's transform-failure posture (l) places its classification — creation-phase, structurally; the reference's own test pins the surfaced form | `trace.ts § transpile` — "if (!result?.code) { throw new Error('Babel transform failed to produce code'); }"; record.test.ts title "throws RuntimeError for empty code"; [measured: Pass-3 probe] | transform-failure suite row "empty code classifies per (l)" | P0 |
+| klve-085 | post-`await` learner code is INVISIBLE — the continuation runs after the steps array is copied/filtered; its reports and logs are silently lost | core | UNSETTLED → r9 | the collection-window boundary; the reference's behavior is the restore baseline, the port's window is r9's ruling; the NM owes the honesty line either way | `trace.ts § executeInstrumented` — steps read synchronously after `executor.call(context)`; [measured: Pass-3 probe — `mark = 2` after `await 0` yields no step; the in-trace read answers 1] | r9's ruling recorded · NM honesty line · suite row | P0 |
+| klve-089 | module-only nodes under the plugin, MEASURED — two distinct death routes: `import x from "y"` dies AT TRANSFORM (the Expression visitor wraps the ImportDeclaration's source — `unknown file: Property source of ImportDeclaration expected node to be of a type ["StringLiteral"] but instead got "SequenceExpression"` — a Babel invariant error surfaced as RuntimeError); `export const a = 1` PARSES, survives transform, and dies AT RUNTIME inside `new Function` — a runtime SyntaxError the adapter ladder misclassifies as ParseError with the FALLBACK loc `{1,0}` and no code frame (klve-061's misclassification, demonstrated live; a REAL Babel ParseError carries its true loc and a framed excerpt — the consumer's distinguisher) | core | UNSETTLED → r8(ix) | decisive for the module axis (klve-075's explicit sourceType makes module nodes REACHABLE): the vendored plugin needs module-node handling (skip import/export sources) or the axis refuses — ruled, never silent; the package advertises MJS while its own path corrupts it | [measured: Pass-3 probe rounds 2–3 — the import message verbatim incl. its `unknown file:` prefix (trailing space included); export-on-line-3 → ParseError loc `{"line":1,"column":0}` vs a genuine parse error's `{"line":3,"column":6,"index":20}` + code frame — `index` present on real parse errors, absent on the fallback, a third distinguisher facet]; `langs.ts` — mjs advertised | r8's ruling recorded · the conformance cluster's module-axis rows | P0 |
+
+### § F — the adapter and wrapper boundary
+
+| # | member | prov | disposition | rationale | evidence | discharged by | gate |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| klve-060 | the post-filter 1..N contiguous renumber | integration | UNSETTLED → r1 | output contract vs region never-renumbers; r1's candidate keeps both | `index.ts` — "Renumber steps to start at 1 … step: index + 1" | r1's resolution in README + types | P0 |
+| klve-061 | adapter error mapping, the FULL ladder: `instanceof SyntaxError` → `ParseError` UNCONDITIONALLY — a learner's RUNTIME SyntaxError (`JSON.parse("{")`) is misclassified as a parse failure [measured: Pass-3 probe]; `LimitExceededError` passthrough; other `Error` → `RuntimeError(1,0)`; a NON-Error throw (`throw "s"`) escapes RAW, outside the documented trio [measured: Pass-3 probe] | integration | supersede — the region's channels (must-answer l) | the tracing-package error classes do not cross; the port speaks refusal/outcome/defect and the engine's structural creation/evaluation split makes the runtime-SyntaxError misclassification unnecessary to reproduce; Babel's `.loc` survives INTO whatever (l) rules ("Prefer that over message parsing — it's stable"); the non-Error edge is already the halt author's job (non-Error throws classify `'Error'`/`String(thrown)`) | `index.ts § record` — the catch ladder; [measured: Pass-3 probe, both edges] | (l)'s decision in README + types · transform-failure suite rows incl. the two measured edges | P0 |
+| klve-062 | the `RecordFunction` Promise contract | integration | supersede — the kind handle | wrapper contract, not crossing | `index.ts` — "RecordFunction contract requires Promise; trace() is sync" | types.ts handle | P0 |
+| klve-063 | the four `@study-lenses/tracing` wrappers (`trace`/`tracify`/`embody`/`embodify`) | integration | drop-as-loss — the region kind envelope is the consumer surface | ruled by the supersession bullet ("its `@study-lenses/tracing` wrapper contract" does not cross); the affordance (four call styles) is the wrapper ecosystem's, not this evaluator's | package `README.md § API Summary` | README § what does NOT cross | P0 |
+| klve-064 | JSON-Schema + verifyOptions layering (ajv draft-07 + semantic pass) | integration | supersede — types.ts + seam validation carry the constraints (r7) | the CONSTRAINTS transfer (klve-014's mutual exclusion; the schema's structure IS types.ts's); the ajv machinery is wrapper-side; forward-compat 10 keeps richer config trees representable | package `DOCS.md § Why options use JSON Schema + verifyOptions`; `options-schema.ts` | types.ts · README § the options contract | P0 |
+| klve-065 | `langs` `['js','mjs','cjs']` routing | integration | drop-as-loss — the region's facts/axis replace file-extension routing | the axis + `facts.type` carry the goal; `cjs` has NO axis counterpart — named narrowing: a cjs snippet poses as 'function' and `require` is a learner-shaped ReferenceError | `langs.ts` (pasted in inventory) | README § boundary (the cjs narrowing named) | P0 |
+| klve-066 | `id` `'js:klve'` cache key | integration | drop-as-loss | wrapper cache concern; the name candidate survives into (a) | `id.ts` — "Used as a cache-invalidation key by the API layer" | README § boundary | P0 |
+| klve-067 | the pipeline order — trace → filter (core stages); the renumber stage is klve-060's (`record/README.md` itself labels it "← index.ts", the adapter) | core | restore (renumber leg: r1 via klve-060) | the order is semantic (filter before renumber is what makes `step` contiguous-post-filter); one stage, one row, one provenance — the renumber's is integration | `record/README.md § The Pipeline` — "renumber steps (1-indexed) ← index.ts" | DOCS § Data flow · r1 | P0 |
+| klve-077 | the `tracer` introspection surface — `export default trace` beside a frozen `tracer` object (`Object.freeze(tracer)`, frozen `langs`, deep-frozen `optionsSchema` CLONE per `utils/` deepFreeze) exposing `id`/`langs`/`optionsSchema`/`verifyOptions`/`record` "for introspection … or for use in custom wrappers" — direct `record()` calls are a documented consumer affordance | integration | drop-as-loss, with named survivals | the wrapper-object surface is the tracing ecosystem's (klve-063's ground); what survives: the name into (a), the options schema's CONSTRAINTS into klve-064/082, direct-invocation into the kind's `main` | `src/index.ts` — the tracer export and its doc comment; `src/utils/README.md` — deepFreeze "creates a clone and freezes the clone" | README § boundary (the survivals named) | P0 |
+| klve-079 | the wrapper accepts `meta.max.{iterations,callstack}` (plus `range`, `timestamps`, `debug.ast` in the wrapper meta) and ENFORCES NONE of them — silent no-op knobs | integration | UNSETTLED → SPLIT under r10: `iterations` becomes IMPLEMENTED (meta-control loop counting honors the region's shared `spec.iterations` — the human's own r10 example); `callstack` dropped-for-now (revivable later as an ADDITION via entry-depth meta-control — never a silent knob); `range`/`timestamps`/`debug.ast` dropped (wrapper meta) | the adapter consumes only `max.steps`/`max.time`; a dead knob is accepted-but-inert configuration, the exact dishonesty the region refuses (`strict`-on-script is documented-inert BY RULING, these were inert by accident) | `record/index.ts` — only `meta.max.steps`/`meta.max.time` read; record.test.ts DEFAULT_META — "max: { steps: null, iterations: null, callstack: null, time: null }" | r7/r10's rulings recorded · README § the options contract | P0 |
+| klve-082 | the options schema's structural constraints — `"additionalProperties": false` at every level (unknown keys refused) and `"uniqueItems": true` on the name lists | integration | UNSETTLED → r7 | the constraints' fates differ by mechanism: excess-property refusal is partly structural in TS and fully checkable at the seam; uniqueItems is seam-only; each is kept-at-the-seam or dropped WITH sign-off, never silently lost in the schema→types translation | `options.schema.json` — additionalProperties/uniqueItems throughout | r7's ruling recorded · types.ts + seam-validation rows | P0 |
+
+### § G — package-doc affordances
+
+| # | member | prov | disposition | rationale | evidence | discharged by | gate |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| klve-068 | the neutral-infrastructure posture — "makes no pedagogical decisions" | core | restore-as-doc | the unit README's domain model carries it; matches the region's lens/evaluator split | package `README.md § Pedagogical Purpose` — "It makes no pedagogical decisions — those belong in the tools that consume it." | README domain model | P0 |
+| klve-069 | deliberate granularity — "every expression evaluation … is captured. Educational tools decide which subset to show" | core | restore-as-doc | the options surface is this affordance's mechanism (§ A carries the members) | package `README.md § Pedagogical Purpose` | README domain model + § A rows | P0 |
+| klve-070 | named decision — Why Babel | core | restore-as-doc | transports as a named `## Why …` decision (the lister-2 discipline: named decisions never flatten) | package `DOCS.md § Why Babel (@babel/standalone)` | DOCS § Decisions (named) | P0 |
+| klve-071 | named decision — Why the engine is treated as external (`@ts-nocheck`, lint-excluded, do-not-edit) | core | UNSETTLED → adjudicated under (k) | the vendoring story decides whether the port keeps the external-code fence or adapts under ledger rows | package `DOCS.md § Why the engine is treated as external`; `record/README.md § External Code` | (k)'s decision in README/DOCS | P0 |
+| klve-072 | attribution — the engine code is Kelley van Evert's (jsviz.klve.nl); the PACKAGE license is "MIT © 2025 Evan Cole" — two distinct credits, both cross | core | restore | authorship crosses with the code; conflating the engine author with the package's license holder is the miscitation a prior revision made | package `README.md § Architecture` — "pre-existing code by Kelley van Evert"; `DOCS.md § Why this tracer exists`; `record/README.md § External Code`; `trace.ts` header; package `README.md § License` — "MIT © 2025 Evan Cole" | README attribution line · vendored-file headers | P0 |
+
+### § H — region-side ADDITIONs (named so the boundary is visible; none replaces a klve member)
+
+| # | member | prov | disposition | rationale | evidence | discharged by | gate |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| klve-073 | the kind envelope + spec (facts, axis, engine budget, refusal species, outcome vocabulary, halt/defect channels) | integration | ADDITION | the region contract the evaluator joins; rides in region style | region `evaluators/{README,types.ts}` | README · types.ts | P0 |
+| klve-074 | `node-at-span` joins + offset enrichment where spans are exact | integration | ADDITION | the supersession bullet's join clause; misses are honest nulls (init step n/a) | supersession bullet — "steps join our facts via embody/node-at-span where spans are exact" | README · NM honesty line · enrichment types | P0 |
+| klve-075 | explicit `sourceType` into the Babel transform (the quarry passes none) | integration | ADDITION | the ruled design ("sourceType passed EXPLICITLY from the snippet's own type"); the module path is beyond-quarry territory — this unit's own posture, conformance-rowed per axis | supersession bullet + launch prompt; `trace.ts § transpile` (no sourceType) | types.ts · conformance cluster rows | P0 |
+| klve-076 | the halt author + structural cap classification + transform-failure posture | integration | ADDITION | the engine seam surfaces klve never had; (j)/(l) decide shapes | engine README § serializeHalt; intercept precedent | types.ts halt/seam records | P0 |

@@ -1478,6 +1478,19 @@ execution and never holds one alone.
     `src/lib/study-lenses/lib/engine/tests/latched-built-ins{,.browser}.test.ts`
     and `worker/README.md`.
 
+- **The klve unit's fidelity rows live in their own ledger (2026-09-05).**
+  The SUPERSEDED-BY-KLVE unit's member-by-member classification —
+  `restore`-default over the whole `@study-lenses/trace-js-klve` public
+  surface, with a `core`/`integration` provenance split carrying the human's
+  relayed integration-improvement mandate — is
+  [`KLVE-LEDGER.md`](./KLVE-LEDGER.md), beside this file; its § Rulings of
+  record holds that unit's rulings, starting with two taken at its plan gate
+  (human, 2026-09-05): the banked `writing-evaluators-on-the-engine` skill is
+  NOT authored in that unit's session, and four enumerated region-root doc
+  amendments are pre-authorized to land in its 0.3 commit under ar-2 review.
+  This bullet is the pointer HR-21's home-section rule owes; the rows
+  themselves are never mirrored here.
+
 ### The ratification, and what it settled (human ruling 2026-08-06)
 
 One pass over every row. The bulk confirm covered all proposed rows, including
