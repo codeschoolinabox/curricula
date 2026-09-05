@@ -137,10 +137,11 @@ The port's shape obligations, from the rulings:
   sweep is YOURS, under close condition 2b's re-point rule — a MIXED row
   re-points its tracer-only token to the migration-side equivalent or to the
   TRACER row that already owns that artifact, and re-gates `TRACER` only where
-  no migration-side half exists; re-pointing never touches a ratified
-  disposition, and NM-dependent cells resolve after your 0.2 answer, so the
-  sweep completes at your 0.3 commit); and each must-answer decided with its
-  trade named.
+  no migration-side half exists — and where NEITHER fits, the orphaned-NM-line
+  case, records a NEW TRACER-gated row per 2b's third escape; re-pointing never
+  touches a ratified disposition, and NM-dependent cells resolve after your 0.2
+  answer, so the sweep completes at your 0.3 commit); and each must-answer
+  decided with its trade named.
 - **The must-answers** (each an ar-1 target): the module name; the
   one-concept-per-file decomposition map; the public API surface (the transform,
   the collector factory, describe/undescribe exports, the options seam with
@@ -172,7 +173,7 @@ The port's shape obligations, from the rulings:
   recorded value names, the KLVE-LEDGER, the quarry and original paths, the
   sibling/region docs. State IN THE PROMPT: the reviewer sourced-claims rule;
   the HR-21 three-part check including that every cited klve-NNN resolves; the
-  §§ B/D north-star sweep (ruling 4); the strays list (below) is owed deletion,
+  §§ A–F north-star sweep (ruling 4); the strays list (below) is owed deletion,
   not canon.
 - **0.3**: `types.ts` (the options surface, the step/emission types in the
   ECMAScript-locked vocabulary, the collector contract, the describe/undescribe
