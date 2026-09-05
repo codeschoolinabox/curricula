@@ -255,7 +255,7 @@ describe('deriveStations', () => {
 		});
 	});
 
-	describe.skip('what a station carries (Interfaces)', () => {
+	describe('what a station carries (Interfaces)', () => {
 		it('a bare station carries its phase and its standing and nothing else', () => {
 			expect(
 				Object.keys(deriveStations(buildStudy(), [])[1] ?? {}).toSorted(
@@ -279,6 +279,30 @@ describe('deriveStations', () => {
 			expect(
 				deriveStations(buildStudy({ source: [parsons] }), [parsons])[0],
 			).not.toHaveProperty('occupant');
+		});
+
+		it('an openable station carries its phase, its standing, and its tray, and nothing else', () => {
+			const parsons = buildLens('parsons');
+			expect(
+				Object.keys(
+					deriveStations(buildStudy({ source: [parsons] }), [parsons])[0] ?? {},
+				).toSorted((left, right) => left.localeCompare(right)),
+			).toEqual(['phase', 'standing', 'tray']);
+		});
+
+		it('a waiting station carries its phase and its standing, and nothing else', () => {
+			const study = buildStudy(
+				{},
+				{
+					phases: ['ast', 'environment', 'evaluation'],
+					cause: { stage: 'tokens', message: 'Invalid or unexpected token.' },
+				},
+			);
+			expect(
+				Object.keys(deriveStations(study, [])[2] ?? {}).toSorted(
+					(left, right) => left.localeCompare(right),
+				),
+			).toEqual(['phase', 'standing']);
 		});
 	});
 
