@@ -306,7 +306,7 @@ describe('deriveStations', () => {
 		});
 	});
 
-	describe.skip('a kit the roster cannot recover (Exceptions)', () => {
+	describe('a kit the roster cannot recover (Exceptions)', () => {
 		it('an attached lens absent from the joined roster never enters a tray', () => {
 			const parsons = buildLens('parsons');
 			const stray = buildLens('stray');
@@ -318,6 +318,13 @@ describe('deriveStations', () => {
 				source?.standing === 'openable' &&
 					source.tray.map((entry) => entry.lens),
 			).toEqual(['parsons']);
+		});
+
+		it('an unrecoverable lens with a name never seen in the roster is dropped just the same', () => {
+			const ghost = buildLens('ghost');
+			expect(
+				deriveStations(buildStudy({ ast: [ghost] }), [])[2]?.standing,
+			).toBe('bare');
 		});
 
 		it('a phase whose only attached lens is unrecoverable stands bare', () => {
