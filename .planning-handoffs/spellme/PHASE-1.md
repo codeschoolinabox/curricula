@@ -1595,6 +1595,19 @@ verdicts and have every reason to believe the job is done.
 
 A body cannot be amended, so each correction lives here.
 
+- **`bbcb291e`** (the `scan-stepper` brief's partial-data redirect) carries two
+  `[read:]` tags **with their evidence deleted**: "StageFailure<Value = never>
+  now carries \n [read: embody/types.ts]" and "derive-tokens.ts fills it — \n
+  [read: that file]". Both should have quoted the code they cite. **Cause: the
+  commit body was passed through an UNQUOTED heredoc**, so the shell ran every
+  backtick span in it as command substitution and replaced each with its output
+  — empty, plus errors on stderr. The claims are true; the evidence a `[read:]`
+  tag exists to carry is gone. The two quotes, restored here:
+  `StageFailure<Value = never> = { readonly ok: false; readonly cause: StageCause; readonly value?: Value }`
+  [read: `embody/types.ts`], and
+  `return { ok: false, cause, value: { tokens, comments, inputElements } };`
+  [read: `embody/derive-tokens.ts`].
+
 - **`05e1cc2e`** states
   `status-prose sentences remaining in index.tsx and spellme.css -> 0` and
   "Twelve status sentences removed … [measured: the pattern now returns 0]".
@@ -1745,6 +1758,14 @@ finding, never the author re-reading their own body.
   and do not silently upgrade anything.
 - **`git grep -c "it.skip"` unscoped also matches `scanning/README.md`.** Scope
   it to the test file.
+- ⛔ **AN UNQUOTED HEREDOC EXECUTES A COMMIT BODY'S BACKTICKS**, and what it
+  destroys is precisely the evidence in `[read:]` tags — the quoted code — while
+  the surrounding prose survives and reads fine. `git commit -F - <<EOF` runs
+  every `` `…` `` span as a command; `<<'EOF'` does not. The failure is silent
+  in the body and loud only on stderr, which scrolls past, and **the body is
+  immutable**, so it cannot be repaired afterwards. **Always quote the
+  delimiter, and read back the committed body before moving on** —
+  `git show -s --format=%B <sha>`. Cost one body on 2026-09-05 (`bbcb291e`).
 - **`prettier` collapses whitespace INSIDE an inline code span**, so a verbatim
   quote of an ASCII frame is silently rewritten whenever the paragraph reflows —
   the run of spaces positioning a label at a frame's right edge becomes one
