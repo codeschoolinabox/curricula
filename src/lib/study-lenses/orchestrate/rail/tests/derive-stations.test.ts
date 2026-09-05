@@ -89,7 +89,7 @@ describe('deriveStations', () => {
 		});
 	});
 
-	describe.skip('several lenses across several phases (Many)', () => {
+	describe('several lenses across several phases (Many)', () => {
 		it('a phase with two fitting lenses discloses both', () => {
 			const parsons = buildLens('parsons');
 			const writeme = buildLens('writeme');
@@ -118,6 +118,27 @@ describe('deriveStations', () => {
 					station.standing === 'openable' ? station.tray.length : 0,
 				),
 			).toEqual([1, 0, 3, 0, 0]);
+		});
+
+		it('a phase late in the order counts its own recoverable kit too', () => {
+			const spellme = buildLens('spellme');
+			expect(
+				deriveStations(buildStudy({ environment: [spellme] }), [spellme])[3]
+					?.standing,
+			).toBe('openable');
+		});
+
+		it('reads the machine s order rather than the study record s own key order', () => {
+			const scrambled = {
+				evaluation: { accessible: true, lenses: [] },
+				environment: { accessible: true, lenses: [] },
+				ast: { accessible: true, lenses: [] },
+				tokens: { accessible: true, lenses: [] },
+				source: { accessible: true, lenses: [] },
+			} as const;
+			expect(
+				deriveStations(scrambled, []).map((station) => station.phase),
+			).toEqual(['source', 'tokens', 'ast', 'environment', 'evaluation']);
 		});
 
 		it('returns one station per phase in the machine s fixed order', () => {
