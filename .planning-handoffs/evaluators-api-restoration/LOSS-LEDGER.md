@@ -1117,7 +1117,9 @@ execution and never holds one alone.
   later deep tracer (unchanged). P0-V-on-engine is recorded as the fidelity
   successor ONLY if klve's limits bite; the W1.b Appendix-B audit rows stay
   ratifiable against whichever builds. The klve evaluator gets its own Phase 0
-  in a fresh session (the design-ahead rule).
+  in a fresh session (the design-ahead rule). _(That sentence now runs through
+  TWO fresh sessions — the migration-first split, 2026-09-05; see the klve
+  pointer bullet's sub-bullet below.)_
 - **The stack-parse residual converts WORKER-SIDE (human ruling 2026-09-01, the
   P0-I enrichment increment's named design question).** The no-live-frame
   residual's position is parsed in the SPLICED text's coordinates; loop-guard's

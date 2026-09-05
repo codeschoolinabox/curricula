@@ -133,10 +133,14 @@ The port's shape obligations, from the rulings:
   vocabulary, derived from the ratified ledger rows — every shape delta
   enumerated; capability loss stays a defect); § Discharges per HR-21,
   three-part — the rulings encoded; the ledger row ids this design discharges
-  (the FIDELITY-METHOD gate check: every cited klve-NNN resolves; any `P0` row
-  this unit cannot discharge re-gates `TRACER` in the same commit, per close
-  condition 2b — the assignment sweep is YOUR 0.1 obligation); and each
-  must-answer decided with its trade named.
+  (the FIDELITY-METHOD gate check: every cited klve-NNN resolves; the assignment
+  sweep is YOURS, under close condition 2b's re-point rule — a MIXED row
+  re-points its tracer-only token to the migration-side equivalent or to the
+  TRACER row that already owns that artifact, and re-gates `TRACER` only where
+  no migration-side half exists; re-pointing never touches a ratified
+  disposition, and NM-dependent cells resolve after your 0.2 answer, so the
+  sweep completes at your 0.3 commit); and each must-answer decided with its
+  trade named.
 - **The must-answers** (each an ar-1 target): the module name; the
   one-concept-per-file decomposition map; the public API surface (the transform,
   the collector factory, describe/undescribe exports, the options seam with
@@ -144,19 +148,26 @@ The port's shape obligations, from the rulings:
   re-derived from the grammar; the Babel type-name mapping table); the
   differential-property harness design; which r8 repairs change observable
   output and how the suite pins NATIVE semantics; the north-star re-adjudication
-  of klve-030/050/093 plus any instance your §§ B/D sweep finds under ruling 4's
-  criterion; the coercion-legs design and sequencing (klve-097 — differential
-  spine first); the typed-deviation roster; the `babel-standalone.d.ts` strategy
-  (transport + extend the package's 292-line declaration); the transform-side
-  halves of parse-posture and transform-failure (module-node handling per
-  r8(ix); the library's own failure surface, empty code included — the
-  envelope-side halves are the tracer unit's); the sandbox's checkpoint flows
-  (ruling 9 — design content here, built in Phase 1).
+  of klve-030/050/093/085 plus any instance your §§ A–F sweep finds under ruling
+  4's criterion (085's remedy crosses the split — the tracer-side disposition
+  path applies); the coercion-legs design and sequencing (klve-097 —
+  differential spine first); the typed-deviation roster; the
+  `babel-standalone.d.ts` strategy (transport + extend the package's 292-line
+  declaration); the transform-side halves of parse-posture and transform-failure
+  (module-node handling per r8(ix); the library's own failure surface, empty
+  code included — the envelope-side halves are the tracer unit's); the sandbox's
+  checkpoint flows (ruling 9 — design content here, built in Phase 1); and the
+  container-README member bullet — `evaluators/lib/README.md` gains your
+  module's line (its admission rule was already widened by PAUSE-resolution
+  ruling 10, landed with the ratification commits).
 - **0.2 the twin ask, VERBATIM and FRESH**: put DEV.md § 0.2's question to the
   human for THIS module — the tracer unit's early `machine + data` answer does
   NOT carry (the ledger's twin bullet is scope-annotated). Produce every
   artifact the recorded value names before ar-1; the answer window closes at
-  ar-1.
+  ar-1. Four ratified rows discharge partly into "NM honesty/joins" lines —
+  klve-023, klve-027, klve-083, klve-085 — so the answer decides where those
+  lines land: a machine twin here, or re-pointed/re-gated per close condition
+  2b's re-point rule; put that consequence in front of the human with the ask.
 - **ar-1** (registered; no model param): provide the README, every twin the
   recorded value names, the KLVE-LEDGER, the quarry and original paths, the
   sibling/region docs. State IN THE PROMPT: the reviewer sourced-claims rule;
@@ -174,7 +185,10 @@ The port's shape obligations, from the rulings:
   capture-gating rows (an un-configured node emits nothing and costs nothing);
   counting/cap rows (klve-096's equivalence); the describe/undescribe round-trip
   rows incl. the north-star re-adjudicated cases; transform-failure rows (empty
-  code; module-node handling); compile probes where types pin.
+  code; module-node handling); the parse-posture CONFORMANCE rows,
+  transform-side (klve-075's explicit `sourceType`, klve-089's module-node
+  handling — the rows' "conformance cluster" discharge vocabulary maps here);
+  compile probes where types pin.
 - **ar-2** (registered; inherits the session model): provide the sketch, README,
   types, suite paths, every twin, the KLVE-LEDGER. State the reviewer
   sourced-claims rule IN THE PROMPT.
@@ -200,8 +214,8 @@ inspector · the INSTRUMENTED-SOURCE view), draft feature order per ruling 9
 (plumbing → statements → declarations + scope snapshots →
 identifiers/literals/operators → calls → loops → functions/arrows →
 conditionals/try → describe depth cases → filters → coercion legs) — both
-"adjustable if/as the dev process requires" (human). 🔍-bearing increments never
-fan out.
+adjustable as the dev process requires (the human's recorded selection — a
+paraphrase, not a quote). 🔍-bearing increments never fan out.
 
 ## Out of scope (binding)
 
