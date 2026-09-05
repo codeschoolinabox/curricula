@@ -148,7 +148,7 @@ describe('deriveStations', () => {
 		});
 	});
 
-	describe.skip('the barring geometry (Boundaries)', () => {
+	describe('the barring geometry (Boundaries)', () => {
 		it('a tokens failure leaves the last three stations waiting', () => {
 			const study = buildStudy(
 				{},
@@ -195,6 +195,41 @@ describe('deriveStations', () => {
 					.filter((station) => station.standing === 'waiting')
 					.map((station) => station.phase),
 			).toEqual(['environment', 'evaluation']);
+		});
+
+		it('a barred phase with a recoverable kit still stands waiting', () => {
+			const spellme = buildLens('spellme');
+			const study = buildStudy(
+				{ environment: [spellme] },
+				{
+					phases: ['ast', 'environment', 'evaluation'],
+					cause: { stage: 'tokens', message: 'Invalid or unexpected token.' },
+				},
+			);
+			expect(deriveStations(study, [spellme])[3]?.standing).toBe('waiting');
+		});
+
+		it('a barred phase with a recoverable kit still carries no tray', () => {
+			const spellme = buildLens('spellme');
+			const study = buildStudy(
+				{ environment: [spellme] },
+				{
+					phases: ['ast', 'environment', 'evaluation'],
+					cause: { stage: 'tokens', message: 'Invalid or unexpected token.' },
+				},
+			);
+			expect(deriveStations(study, [spellme])[3]).not.toHaveProperty('tray');
+		});
+
+		it('a waiting station carries no cause of its own', () => {
+			const study = buildStudy(
+				{},
+				{
+					phases: ['ast', 'environment', 'evaluation'],
+					cause: { stage: 'tokens', message: 'Invalid or unexpected token.' },
+				},
+			);
+			expect(deriveStations(study, [])[2]).not.toHaveProperty('cause');
 		});
 
 		it('the phase where the machine broke keeps a reachable standing', () => {

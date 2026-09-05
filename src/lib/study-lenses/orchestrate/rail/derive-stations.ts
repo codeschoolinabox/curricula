@@ -48,16 +48,32 @@ export default function deriveStations(
 	return freezeInPlace(stations);
 }
 
-// Each arm is annotated `: Station` before it is returned, so a stray field —
-// a `tray` left `undefined` on a bare station, say — is an excess-property
-// error here rather than a shape the freeze step would carry through. The
-// annotation is the guard: `freezeInPlace` infers its own type parameter from
-// whatever it is handed, so it checks nothing on its own.
+// Each arm is annotated `: Station` before it is returned, so a stray field
+// written into a LITERAL — a `tray` left `undefined` on a bare station, say —
+// is an excess-property error here rather than a shape the freeze step would
+// carry through; `freezeInPlace` infers its type parameter from whatever it is
+// handed and checks nothing on its own.
+//
+// That annotation reaches literals ONLY, and the boundary is worth naming: a
+// SPREAD of the same wrong shape — `{ ...lifecyclePhase, phase, standing }`,
+// which is this repo's own object-threading idiom and so the likeliest slip —
+// type-checks clean. Only the per-arm tests catch that one.
 function toStation(
 	phase: LifecyclePhaseName,
 	lifecyclePhase: LifecyclePhase,
 	roster: JoinedLensRoster,
 ): Station {
+	// Barring is TOTAL over kit, so this guard sits above the recovery rather
+	// than overriding its result: a barred phase still lists what would render
+	// there — "the phase is closed, not emptied" (embody's join-study) — so
+	// deciding bare-or-openable first would recover a kit, fire the recovery's
+	// own defect report on any unrecoverable ref, and then discard both for a
+	// station whose standing was already settled.
+	if (!lifecyclePhase.accessible) {
+		const waiting: Station = { phase, standing: 'waiting' };
+		return waiting;
+	}
+
 	const kit = recoverRenderableLenses(roster, lifecyclePhase.lenses);
 
 	// Destructure-and-rebuild rather than cast: `.map()` yields a plain array,
