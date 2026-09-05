@@ -335,9 +335,36 @@ describe('deriveStations', () => {
 		});
 	});
 
-	describe.skip('what it owns (Simple)', () => {
+	describe('what it owns (Simple)', () => {
 		it('freezes the station list', () => {
 			expect(Object.isFrozen(deriveStations(buildStudy(), []))).toBe(true);
+		});
+
+		it('freezes an openable station s tray', () => {
+			const parsons = buildLens('parsons');
+			const [source] = deriveStations(buildStudy({ source: [parsons] }), [
+				parsons,
+			]);
+			expect(
+				source?.standing === 'openable' && Object.isFrozen(source.tray),
+			).toBe(true);
+		});
+
+		it('freezes each tray entry', () => {
+			const parsons = buildLens('parsons');
+			const [source] = deriveStations(buildStudy({ source: [parsons] }), [
+				parsons,
+			]);
+			expect(
+				source?.standing === 'openable' &&
+					source.tray.every((entry) => Object.isFrozen(entry)),
+			).toBe(true);
+		});
+
+		it('leaves the attached lens itself unfrozen', () => {
+			const parsons = buildLens('parsons');
+			deriveStations(buildStudy({ source: [parsons] }), [parsons]);
+			expect(Object.isFrozen(parsons)).toBe(false);
 		});
 
 		it('freezes each station', () => {
