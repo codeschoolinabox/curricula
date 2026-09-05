@@ -53,10 +53,10 @@ fresh session — none of its work is yours.
    unassigned; the list is the record, never a count); the nine
    launch-discussion rulings in § Rulings of record (2026-09-05 — RE-CONFIRM
    nothing, re-litigate nothing; they bind); § Close conditions incl. the
-   `TRACER:` gate (2b); § Escalations (r1–r9; r10 sits under § Rulings of
-   record) as historical record with the post-ratification state line. Every
-   `[measured: Pass-3 probe]` row is reproducible via the committed scripts at
-   `klve-probes/` (read-only imports of the quarry's dist).
+   `TRACER` gate (close condition 2b); § Escalations (r1–r9; r10 sits under §
+   Rulings of record) as historical record with the post-ratification state
+   line. Every `[measured: Pass-3 probe]` row is reproducible via the committed
+   scripts at `klve-probes/` (read-only imports of the quarry's dist).
 4. The region, whole files: `src/lib/study-lenses/evaluators/README.md` and
    `notional-machine.md` (the lattice you do NOT extend — your library is not an
    evaluator; read them for vocabulary and boundaries);
@@ -159,7 +159,7 @@ The port's shape obligations, from the rulings:
   checkpoint flows (ruling 9 — design content here, built in Phase 1); and the
   container-README member bullet — `evaluators/lib/README.md` gains your
   module's line (its admission rule was already widened by PAUSE-resolution
-  ruling 10, landed with the ratification commits).
+  ruling 10, landed at the AR fix commit `8e454e1e`).
 - **0.2 the twin ask, VERBATIM and FRESH**: put DEV.md § 0.2's question to the
   human for THIS module — the tracer unit's early `machine + data` answer does
   NOT carry (the ledger's twin bullet is scope-annotated). Produce every
