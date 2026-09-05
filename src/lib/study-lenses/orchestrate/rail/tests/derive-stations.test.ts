@@ -59,7 +59,7 @@ describe('deriveStations', () => {
 		});
 	});
 
-	describe.skip('one lens fits one phase (One)', () => {
+	describe('one lens fits one phase (One)', () => {
 		it('that station stands openable', () => {
 			const parsons = buildLens('parsons');
 			expect(
