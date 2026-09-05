@@ -4,6 +4,7 @@ import clearEventReady from '../worker/clear-event-ready.js';
 import createBufferViews from '../worker/create-buffer-views.js';
 import PROTOCOL from '../worker/protocol.js';
 import type { BufferViews } from '../worker/types.js';
+import writeCallResponse from '../worker/write-call-response.js';
 import writeResumeSignal from '../worker/write-resume-signal.js';
 
 type Inbox = () => Promise<unknown>;
@@ -56,6 +57,27 @@ function within(next: Inbox, ms = 500): Promise<unknown> {
 		next(),
 		new Promise((resolve) => setTimeout(() => resolve('NOTHING ARRIVED'), ms)),
 	]);
+}
+
+// WHY the caller keeps `pending`: a raced read that times out leaves its
+// resolver registered in the inbox, so a later `next()` registers a SECOND one
+// and never sees the message the first still owns. `within` above is fine where
+// nothing reads again afterwards; this one is for the case that does. `probe`
+// answers "has anything arrived yet"; `pending` is the read itself, still live.
+function readWithProbe(
+	next: Inbox,
+	ms = 500,
+): { pending: Promise<unknown>; probe: Promise<unknown> } {
+	const pending = next();
+	return {
+		pending,
+		probe: Promise.race([
+			pending,
+			new Promise((resolve) =>
+				setTimeout(() => resolve('NOTHING ARRIVED'), ms),
+			),
+		]),
+	};
 }
 
 function inboxFor(worker: Worker): Inbox {
@@ -192,17 +214,23 @@ describe('latched built-ins', () => {
 			});
 		});
 
-		it.skip('replacing Atomics.store still pauses between two emissions', async () => {
+		it('replacing Atomics.store still pauses between two emissions', async () => {
 			const { worker, views, next } = await startRun(
 				{},
 				'Atomics.store = function () {};\nemit("a");\nemit("b");',
 			);
 			const first = (await within(next)) as { message: string };
+			const { pending, probe } = readWithProbe(next);
+			const whilePaused = await probe;
 			resumeWorker(views);
-			const second = (await within(next)) as { message: string };
+			const second = (await pending) as { message: string };
 			worker.terminate();
 
-			expect([first.message, second.message]).toEqual(['a', 'b']);
+			expect([first.message, whilePaused, second.message]).toEqual([
+				'a',
+				'NOTHING ARRIVED',
+				'b',
+			]);
 		});
 	});
 
@@ -258,26 +286,20 @@ describe('latched built-ins', () => {
 	});
 
 	describe('each built-in the program can reach after it starts', () => {
-		it.skip('a replaced Atomics.notify still delivers the emission', async () => {
-			const { worker, next } = await startRun(
-				{},
-				'Atomics.notify = function () {};\nemit("through");',
-			);
-			const first = (await within(next)) as { message: string };
-			worker.terminate();
-
-			expect(first.message).toBe('through');
-		});
-
-		it.skip('a replaced Atomics.load still returns the thread response into the program', async () => {
-			const { worker, next } = await startRun(
+		it('a replaced Atomics.load still returns the thread response into the program', async () => {
+			const { worker, views, next } = await startRun(
 				{},
 				'Atomics.load = function () { return 0; };\nemit(call("ping"));',
 			);
-			const first = await within(next);
+			const request = await within(next);
+			writeCallResponse(views, 'pong');
+			const emitted = await within(next);
 			worker.terminate();
 
-			expect(first).toEqual({ kind: 'call', request: 'ping' });
+			expect([request, emitted]).toEqual([
+				{ kind: 'call', request: 'ping' },
+				{ kind: 'message', message: 'pong' },
+			]);
 		});
 
 		it('nulling URL still revokes the blob and reaches the natural end', async () => {
@@ -314,6 +336,17 @@ describe('latched built-ins', () => {
 	});
 
 	describe('the boundaries of the guarantee', () => {
+		it('a replaced Atomics.notify does not stop the emission — a missed wake is unobservable from the thread', async () => {
+			const { worker, next } = await startRun(
+				{},
+				'Atomics.notify = function () {};\nemit("through");',
+			);
+			const first = (await within(next)) as { message: string };
+			worker.terminate();
+
+			expect(first.message).toBe('through');
+		});
+
 		it('the engine default halt author is immune to a replaced String', async () => {
 			const { worker, next } = await startRun(
 				{ omitSerializeHalt: true },
