@@ -92,6 +92,43 @@ lose one.
   handler, and it can confuse its own run in ways no capture prevents. What the
   rule guarantees is that ordinary shadowing never turns into a wrong answer
   about the program.
+- **The linter that was watching the call.** Two rules here match a callee by
+  **name** or by **AST shape** rather than by the value it resolves to, so
+  latching walks the site out from under them:
+  `@typescript-eslint/no-implied-eval` requires the callee to be literally named
+  `Function` before it resolves any type, and `functional/immutable-data`
+  returns early unless the callee is a member expression. `bootstrap.ts`'s two
+  `new Function` sites therefore keep one static guard (`sonarjs/code-eval`,
+  which follows the alias) where they had two, and its `defineProperty` site
+  keeps none; each stale directive's reason survives as a plain comment at its
+  site. This is a property of the tooling, not of the rule — but it is a
+  standing cost of latching anything the linters watch by name, and it is why a
+  capture is never landed without re-reading what stopped firing.
+  (`create-buffer-views.ts`'s `Object.freeze` was checked against the same
+  hazard and disarms nothing: `freeze` is not in `functional/immutable-data`'s
+  mutator set, and no rule here targets `Atomics`.)
+- **A door the placement check cannot see through.** `globalThis` is captured as
+  an **object** rather than a callable, because the listener registration needs
+  its receiver. That makes it the one capture a future function body can pivot
+  through — `GLOBAL_SCOPE.Reflect`, `GLOBAL_SCOPE.fetch` — to reach a brand-new,
+  never-latched global, live, at call time. Both instruments report such a file
+  compliant: the scope walk sees a locally-resolved const and a property name,
+  never a global identifier reference, and the granularity check reads
+  initializers only. So
+  [DOCS.md § What counts as compliant](./DOCS.md#what-counts-as-compliant)'s
+  "mechanized, and exhaustive" is exhaustive over ambient **identifier
+  references**, not over reachable globals. Named, not covered, like the
+  `Error[Symbol.hasInstance]` residual above.
+- **What each tier can and cannot separate.** The two instruments do not cover
+  the same names, and the split is not the one reachability alone would predict.
+  `Atomics.wait` and the pause loop's own `.load` are captured but **cannot be
+  discriminated behaviorally at all**: a busy-spin substitute is externally
+  equivalent to a genuine block against shared memory, since both hold the
+  single-threaded worker equally unresponsive. `Atomics.notify` cannot be either
+  — nothing anywhere waits on the event-ready slot, and the thread side, being
+  the main realm, cannot call `Atomics.wait` at all. For all three the placement
+  predicate **is** the instrument, and it does catch them. `.store` and
+  `.load`'s two other sites are discriminated by the behavioral tier as well.
 
 ## Discharges
 
