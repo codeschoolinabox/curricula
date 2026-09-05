@@ -46,7 +46,7 @@ function buildStudy(
 	>;
 }
 
-describe.skip('deriveStations', () => {
+describe('deriveStations', () => {
 	describe('nothing fits any phase (Zero)', () => {
 		it('every station stands bare', () => {
 			expect(
@@ -59,7 +59,7 @@ describe.skip('deriveStations', () => {
 		});
 	});
 
-	describe('one lens fits one phase (One)', () => {
+	describe.skip('one lens fits one phase (One)', () => {
 		it('that station stands openable', () => {
 			const parsons = buildLens('parsons');
 			expect(
@@ -89,7 +89,7 @@ describe.skip('deriveStations', () => {
 		});
 	});
 
-	describe('several lenses across several phases (Many)', () => {
+	describe.skip('several lenses across several phases (Many)', () => {
 		it('a phase with two fitting lenses discloses both', () => {
 			const parsons = buildLens('parsons');
 			const writeme = buildLens('writeme');
@@ -127,7 +127,7 @@ describe.skip('deriveStations', () => {
 		});
 	});
 
-	describe('the barring geometry (Boundaries)', () => {
+	describe.skip('the barring geometry (Boundaries)', () => {
 		it('a tokens failure leaves the last three stations waiting', () => {
 			const study = buildStudy(
 				{},
@@ -199,7 +199,7 @@ describe.skip('deriveStations', () => {
 		});
 	});
 
-	describe('what a station carries (Interfaces)', () => {
+	describe.skip('what a station carries (Interfaces)', () => {
 		it('a bare station carries its phase and its standing and nothing else', () => {
 			expect(
 				Object.keys(deriveStations(buildStudy(), [])[1] ?? {}).toSorted(
@@ -226,7 +226,7 @@ describe.skip('deriveStations', () => {
 		});
 	});
 
-	describe('a kit the roster cannot recover (Exceptions)', () => {
+	describe.skip('a kit the roster cannot recover (Exceptions)', () => {
 		it('an attached lens absent from the joined roster never enters a tray', () => {
 			const parsons = buildLens('parsons');
 			const stray = buildLens('stray');
@@ -248,7 +248,7 @@ describe.skip('deriveStations', () => {
 		});
 	});
 
-	describe('what it owns (Simple)', () => {
+	describe.skip('what it owns (Simple)', () => {
 		it('freezes the station list', () => {
 			expect(Object.isFrozen(deriveStations(buildStudy(), []))).toBe(true);
 		});

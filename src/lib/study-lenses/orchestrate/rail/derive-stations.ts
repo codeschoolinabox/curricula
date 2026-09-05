@@ -20,10 +20,15 @@
  * A tray entry carries the lens's own authored label beside its name, because
  * a lens names itself and this region does not key that string.
  *
- * Phase 0 stub: the surface is the contract this unit locks; the body lands
- * in Phase 1, un-skipping its suite one cluster at a time.
+ * The order is READ, never minted: the phase order has exactly one truth and
+ * it is embody's runtime constant. Iterating the study record's own keys
+ * would mint the order from object insertion order instead, which every
+ * fixture happens to satisfy and the contract forbids.
  */
 
+import freezeInPlace from '@utils/freeze-in-place.js';
+
+import LIFECYCLE_PHASE_ORDER from '../../embody/lifecycle-phase-order.js';
 import type { LifecyclePhase, LifecyclePhaseName } from '../../embody/types.js';
 import type { JoinedLensRoster } from '../lib/composing/types.js';
 import type { Station } from '../types.js';
@@ -32,5 +37,13 @@ export default function deriveStations(
 	_study: Readonly<Record<LifecyclePhaseName, LifecyclePhase>>,
 	_roster: JoinedLensRoster,
 ): ReadonlyArray<Station> {
-	throw new Error('deriveStations: not implemented');
+	// Zip the machine's fixed order. Every station stands bare until the
+	// standing has something to vary on — the kit arm arrives with the
+	// one-lens cluster, the reachability arm with the barring geometry.
+	const stations = LIFECYCLE_PHASE_ORDER.map((phase) => ({
+		phase,
+		standing: 'bare' as const,
+	}));
+
+	return freezeInPlace(stations);
 }
