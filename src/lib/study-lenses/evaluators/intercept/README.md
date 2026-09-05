@@ -32,6 +32,8 @@ intercept/
 │                             generator-surface extras
 ├── map-settlement.ts         the seam: engine settlement → intercept's
 │                             result
+├── create-interaction-channel.ts  the pending interaction's mint: one
+│                             answer, teardown-inert respond
 ├── serve-ask.ts              thread-side ask service: mock-before-mint,
 │                             per-verb validation, the pending interaction
 ├── enrich-event.ts           wire record → delivered event: offsets,
@@ -86,17 +88,20 @@ newer `InterceptIoMocks` alternative was considered and declined, human ruling
 2026-08-19). intercept's `IoMocks` is the reference's shape —
 `prompt`/`alert`/`confirm`, value or Promise — plus the reference's `console`:
 per-method callbacks (`IoConsole`, closed over the reference's nineteen
-`ConsoleMethod` keys), each AWAITED before the program continues. intercept
-consumes the machinery's per-yield fee waiver CONDITIONALLY (human ruling
-2026-08-19): `yieldCharge` is false exactly when the spec carries a FINITE,
-POSITIVE `iterations` cap — a cap that cannot trip (`Infinity`, `NaN`, absent)
-is not an owner of loop safety, so those spellings keep the fee — because the
-waiver's premise is that loop safety rests on the cap: the waiver and a real cap
-arrive together, and loop safety always has exactly one named owner. An uncapped
-spec keeps the fee, and pin intercept:495 stays RETAINED for exactly the
-fee-charged case it was written about; :504's discipline (loose floors, never
-exact counts) binds every budget-adjacent suite row, though its flat arithmetic
-exists only where the fee does.
+`ConsoleMethod` keys), each awaited before the NEXT moment is delivered — the
+shipped guarantee is next-delivery gating at a one-call lag (the emitting call's
+own return is already in flight; at the stream's tail the settle is what is
+gated), never a pause at the callback's own call site. intercept consumes the
+machinery's per-yield fee waiver CONDITIONALLY (human ruling 2026-08-19):
+`yieldCharge` is false exactly when the spec carries a FINITE, POSITIVE
+`iterations` cap — a cap that cannot trip (`Infinity`, `NaN`, absent) is not an
+owner of loop safety, so those spellings keep the fee — because the waiver's
+premise is that loop safety rests on the cap: the waiver and a real cap arrive
+together, and loop safety always has exactly one named owner. An uncapped spec
+keeps the fee, and pin intercept:495 stays RETAINED for exactly the fee-charged
+case it was written about; :504's discipline (loose floors, never exact counts)
+binds every budget-adjacent suite row, though its flat arithmetic exists only
+where the fee does.
 
 ## The handle
 
@@ -290,14 +295,14 @@ intercept's result is discriminated on `outcome` — run's HR-4 exception,
 mirrored with its citation (each arm carries exactly the fields that exist for
 it; runtime values identical to a flat shape):
 
-| `outcome`           | `ok`    | `error` arm (`kind`)                   | carries                                                                                                                  |
-| ------------------- | ------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `'complete'`        | `true`  | —                                      | `iterationCount`                                                                                                         |
-| `'cancel'`          | `true`  | —                                      | — (the machinery's cancel route discards a halt)                                                                         |
-| `'fail'`            | `true`  | —                                      | `reason` — the consumer's payload, by reference                                                                          |
-| `'timeout'`         | `false` | `'timeout'`                            | `limit` + `durationMs`; no count — no halt exists                                                                        |
-| `'iteration-limit'` | `false` | `'iteration-limit'`                    | the whole `trip` record + `iterationCount`                                                                               |
-| `'error'`           | `false` | `'javascript'` \| `'io'` \| `'defect'` | `'javascript'`: the attributed `loc` + `iterationCount` + phase; `'io'`/`'defect'`: no count — the run ended thread-side |
+| `outcome`           | `ok`    | `error` arm (`kind`)                   | carries                                                                                                                                                                       |
+| ------------------- | ------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `'complete'`        | `true`  | —                                      | `iterationCount`                                                                                                                                                              |
+| `'cancel'`          | `true`  | —                                      | — (the machinery's cancel route discards a halt)                                                                                                                              |
+| `'fail'`            | `true`  | —                                      | `reason` — the consumer's payload, by reference and FROZEN THROUGH (the quarry's own fail-arm behavior: an object the consumer keeps using elsewhere is frozen by the settle) |
+| `'timeout'`         | `false` | `'timeout'`                            | `limit` + `durationMs`; no count — no halt exists                                                                                                                             |
+| `'iteration-limit'` | `false` | `'iteration-limit'`                    | the whole `trip` record + `iterationCount`                                                                                                                                    |
+| `'error'`           | `false` | `'javascript'` \| `'io'` \| `'defect'` | `'javascript'`: the attributed `loc` + `iterationCount` + phase; `'io'`/`'defect'`: no count — the run ended thread-side                                                      |
 
 The `'fail'` arm carries no count either: the fail door speaks the machinery's
 own `fail`, which ends the run thread-side — no worker stop record exists to
@@ -322,10 +327,10 @@ same record the handle carries), `visitCounts`, and `eventsByNode`.
   throw, or the one sanctioned stack-parse position for the no-live-frame
   residual (§ The seam carries the exception and its constraint). The
   `'javascript'` arm's phase is run's convergence (`ErrorPhase`, the one arm
-  where it varies; rows skipped until the E2 engine increment). The reference's
-  `line?`/`phase` on the timeout and iteration-limit arms do not return — run's
-  phase convergence covers the phase halves, and those arms' `line` has no
-  honest source on engine-made stops (named drops).
+  where it varies; the rows run live against the landed E2 split). The
+  reference's `line?`/`phase` on the timeout and iteration-limit arms do not
+  return — run's phase convergence covers the phase halves, and those arms'
+  `line` has no honest source on engine-made stops (named drops).
 - **visitCounts / eventsByNode** — the per-node join and count, both keyed by
   resolved `nodePath`, both accumulated thread-side. `visitCounts` counts
   RECORDS, the reference's own semantics: one count per dialog (at its record,
@@ -440,8 +445,9 @@ fail, pending interaction, io mocks, enrichment ([`../README.md`](../README.md)
   both in the facts' coordinate space; `null` together where no wrap attributed.
 - **attribution fallback** — settlement-side attribution for a throw with no
   live wrapped frame: the one sanctioned stack-parse position (§ The seam),
-  converted and joined to its entwined node via `byOffset` ascent at the
-  enrichment increment.
+  column-corrected WORKER-SIDE through the config's per-line splice deltas
+  (human ruling 2026-09-01 — one coordinate space on the wire) and joined to its
+  entwined node via `byOffset` ascent at enrichment.
 - **the stop record** — intercept's worker-authored stop payload: run's members
   plus the attributed call site.
 - **verb / io error / io flag** — run's entries, borrowed whole
@@ -471,10 +477,9 @@ at:
 - **`entwining.browser.test.ts` (43)** — the heaviest cluster, ADAPTED under
   HR-12: `node`/`prev`/`next`/`callee` assertions re-target the non-enumerable
   accessors; `nodePathSource` rows drop (audit-refuted); `node.events[]` and
-  identity rows re-target `eventsByNode`; deepest-exact-span join rows stay
-  SKIPPED until the join helper lands beside its consumer (`nodeAtSpan`, the
-  enrichment increment, HR-22 — the sketch states the join as contract and
-  builds nothing).
+  identity rows re-target `eventsByNode`; deepest-exact-span join rows run LIVE
+  through the landed join helper (`nodeAtSpan` in `embody/`, built with its
+  consumer at enrichment per HR-22).
 - **DROP, each with its named reason**: `replay.browser.test.ts` (9 — HR-2,
   replay stays out); `validation.test.ts` (14 — the gate arms resolved upstream:
   parse superseded to the embodiment, validation drop-as-loss with its recorded
@@ -554,12 +559,12 @@ non-enumerable through the facts' entwined record; `eventsByNode` +
 the attribution fallback with its named input and one sanctioned exception);
 HR-17/HR-18/HR-19 (refusal-as-data with the shared environment wording;
 level-blind; instrumentation assumed sound — the wrap changes nothing); HR-20
-(the two-value phase on the `'javascript'` arm only, run's convergence; rows
-skipped until E2); HR-21 (this section); HR-22 (the join helper builds beside
-its consumer — the sketch states the deepest- exact-span contract and builds
-nothing). NOT discharged here, named for honesty: HR-15 (sandbox cadence — the
-intercept chain builds and extends `sandbox.html`, each user-observable
-increment firing its own 🔍).
+(the two-value phase on the `'javascript'` arm only, run's convergence; the rows
+run live against the landed E2 split); HR-21 (this section); HR-22 (the join
+helper landed beside its consumer — `nodeAtSpan`, the deepest-exact-span
+contract, joined live at enrichment). NOT discharged here, named for honesty:
+HR-15 (sandbox cadence — the intercept chain builds and extends `sandbox.html`,
+each user-observable increment firing its own 🔍).
 
 **Ledger rows answered, by verbatim member cell** (the quarry is "reference";
 `src/lib/study-lenses/evaluators-deprecated/` is "the deprecated port"):

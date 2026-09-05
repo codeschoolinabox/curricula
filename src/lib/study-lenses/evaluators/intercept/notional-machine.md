@@ -80,6 +80,12 @@ specified consequences:
   resumes the run from the event itself — never through the iterator; answering
   twice is inert; answering after teardown is a no-op. A wrong answer SHAPE is a
   loud, retryable error at the responder — the run holds, unharmed.
+- **alert's answer is discarded, mock or respond.** The void contract: any
+  answer releases the suspension, the record carries `undefined` — stated and
+  not policed (README § io), so a mock returning a value is not an io failure.
+- **A throwing dialog MOCK is the io arm, symmetrically.** The mock is the
+  lens's own code; its throw classifies exactly as an invalid answer does — the
+  learner-facing io error, never a machinery defect.
 - **No mock, batch drain: the run cancels at that ask.** Nobody is stepping, so
   nobody could ever respond — "unanswered" is STRUCTURAL (no mock supplied for
   that verb), never a timer. The run settles `'cancel'` with the events so far.

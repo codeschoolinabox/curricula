@@ -21,7 +21,8 @@ refusal out, nothing thrown at the learner.
 run/
 ├── types.ts             run's contract: the spec widening, the handle, the
 │                        result, the error taxonomy, the seam records
-│                        (RunHalt, the worker config)
+│                        (RunHalt, the worker config,
+│                        RunIoRequest, RunIoFlag)
 ├── notional-machine.md  the machine twin: run's fill of the region NM's
 │                        black box
 ├── index.ts             the Evaluator object: name · applicability · main
@@ -230,9 +231,9 @@ carries no phase: a broken machine is not a phase of the learner's program.
 - **`'javascript'`** — the program's own failure: a runtime throw, or a
   construction failure. Carries `name`, `message`, the halt's `iterationCount`,
   and `phase: 'creation' | 'evaluation'` — did the program fail before it ran,
-  or while running. The engine's error-phase split is its own future increment
-  (the run chain's opener, human ruling 2026-08-17); run's suite keeps its phase
-  rows skipped until that increment lands, and the sketch names the dependency.
+  or while running. The engine's error-phase split landed as the run chain's
+  opener (E2, `a2ff78b0`, per the human ruling 2026-08-17); the suite's phase
+  rows run live against it.
 - **`'io'`** — the io layer's failure: an unmocked verb was called, a mock threw
   or rejected, or a mock's answer failed validation. Carries the `verb`, `name`,
   `message`. This arm is an ADDITION carrying a named supersede (recorded in the
@@ -268,14 +269,15 @@ increment, deferred at ratification (2026-08-06).
 
 ## The seam
 
-run's source over the region's execution-handle library is result-only: the
-library tells it `'batch'`, its `start` assembles the machinery spec and begins
-the run, its `stop` is the machinery's cancel, and its `result` is the
-settlement mapping's output. The mapping is total by a precedence rule over the
-CARRIED DATA plus exactly one evaluator-owned input — run's io classification
-flag, recorded closure-side at the io seam, because an io failure reaches the
-machinery as its generic call-error cause and only run knows the exchange it
-interrupted. The precedence, in order:
+run rides the engine's strict-by-default construction — the posed program runs
+in strict mode on every axis. Its source over the region's execution-handle
+library is result-only: the library tells it `'batch'`, its `start` assembles
+the machinery spec and begins the run, its `stop` is the machinery's cancel, and
+its `result` is the settlement mapping's output. The mapping is total by a
+precedence rule over the CARRIED DATA plus exactly one evaluator-owned input —
+run's io classification flag, recorded closure-side at the io seam, because an
+io failure reaches the machinery as its generic call-error cause and only run
+knows the exchange it interrupted. The precedence, in order:
 
 0. **A consumer-ended run settles `'cancel'`, whatever else happened** — the
    consumer's explicit stop outranks even the io flag (human ruling 2026-08-19):
@@ -408,8 +410,8 @@ answer classified, per verb), the io-flag precedence (a flagged run settles
 `'io'`, never `'defect'`), the clean-arm iteration count, `durationMs` on the
 timeout arm, the two-touch result-only ignition over the library (the library's
 own suite pins the base laws; run's rows pin only its widening), the inbound
-compile-time mirror probe on the defect causes, and the phase rows — skipped
-until the engine's error-phase increment lands.
+compile-time mirror probe on the defect causes, and the phase rows — live
+against the engine's landed error-phase split (E2).
 
 ## Discharges
 
@@ -438,8 +440,8 @@ this unit); HR-19 (instrumentation assumed sound — the guard's splices are
 trusted; a guard-introduced failure presents as the learner's own); HR-20 (the
 two-value phase, spelled `'evaluation'`, carried only where it varies — the
 `'javascript'` arm, human ruling 2026-08-18; the quarry's `'execution'` does not
-return; the engine split is the run chain's opening increment, human ruling
-2026-08-17, and the suite's phase rows stay skipped until it lands); HR-21 (this
+return; the engine split landed as the run chain's opening increment, human
+ruling 2026-08-17, and the suite's phase rows run live against it); HR-21 (this
 section). NOT discharged here, named for honesty: HR-5, HR-7, HR-12
 (intercept's), HR-15 (sandbox cadence — the run chain builds and extends
 `sandbox.html`, each user-observable increment firing its own checkpoint).

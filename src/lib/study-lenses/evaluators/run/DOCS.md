@@ -66,8 +66,10 @@ flowchart TD
 ### Structural constraints
 
 - **The io flag is the mapper's one evaluator-owned input** — everything else is
-  the carried settlement; the flag is recorded closure-side, at run's wrapper,
-  before the machinery can mislabel an io failure as a machinery defect; and the
+  the carried settlement (plus `ast` and `seconds`, the two pass-through echoes
+  the result and the timeout arm's `limit` re-state — inputs to the flow, never
+  to arm selection); the flag is recorded closure-side, at run's wrapper, before
+  the machinery can mislabel an io failure as a machinery defect; and the
   consumer's cancel outranks it (precedence step 0).
 - **The halt is narrowed exactly once, thread-side** — anything failing the
   narrowing routes to the defensive defect arm, never read field by field.
@@ -96,8 +98,8 @@ flowchart TD
 - The intercept surfaces (generator members, pending interactions, enrichment),
   the engine's internals, the deprecated region, `danger`.
 - The error-phase mechanism beyond the declared vocabulary — the engine's
-  try/catch split is the run chain's opening increment (E2); the suite's phase
-  rows stay skipped until it lands.
+  try/catch split (E2) landed as the run chain's opening increment; the phase
+  rows run live against it. The mechanism stays engine-owned.
 - `sandbox.html` until the chain's own increment (HR-15 cadence).
 - Run-side error positions (`line`) — a named future increment, never a stack
   parse.

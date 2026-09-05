@@ -30,9 +30,11 @@ unit.
    the io seam: mock first, the answer validated per verb and written back; no
    mock → the pending interaction while stepping, the structural cancel under a
    batch drain; any io failure — invalid answer, throwing mock, throwing console
-   callback — RECORDS THE IO FLAG and ends the run through the machinery's call
-   channel. Input: an ask. Output: the validated answer written back, the minted
-   interaction, or the flagged end.
+   callback — RECORDS THE IO FLAG. A dialog failure ends the run through the
+   machinery's call channel; a console-callback failure CANNOT (console is
+   emit-only) — it ends through a synthetic non-consumer settlement at the
+   mapper, the same flag deciding the arm. Input: an ask. Output: the validated
+   answer written back, the minted interaction, or the flagged end.
 5. **Enrich and deliver** (async, outbound, per record) — the worker's records
    are narrowed once and ENRICHED (offsets, node path, callee path, the graph
    accessors; a flagged io failure also lands here as a step-stamped in-stream
@@ -94,6 +96,10 @@ flowchart TD
   `'fail'`).
 - **The stop record is narrowed exactly once, thread-side** — anything failing
   the narrowing routes to the defensive defect arm.
+- **The wire record is deep-frozen at the narrowing site** — the engine's
+  freeze-at-yield is shallow, so interior freezing of `args`/`loc` lives in
+  `narrow-record-message`; enrichment separately builds and owns the delivered
+  event.
 - **Engine spellings never reach the result** — the defect-cause mirror is
   compile-locked inbound; the mapper speaks reference vocabulary only.
 - **The deep freeze is intercept's** — with the accessors as the named, scoped
@@ -119,11 +125,16 @@ flowchart TD
 - Caller duties, ruled: a mock's and a responder's liveness (`cancel()` is the
   exit), a mock's side effects, the spec's coherence.
 - The join helper (`nodeAtSpan`) — the deepest-exact-span contract is stated;
-  the helper builds beside its consumer at the enrichment increment (HR-22),
-  which also owes the stack-parse position's spliced-coordinate conversion.
+  the helper landed in `embody/` beside its consumer (HR-22), and the
+  stack-parse position's conversion landed worker-side (human ruling
+  2026-09-01). Both stay out of this sketch's own phases.
 - run's surfaces, the engine's internals, the deprecated region, `danger`.
-- The error-phase mechanism beyond the declared vocabulary (E2, the run chain's
-  opener; phase rows skipped until it lands).
+- The creation-gate halt (`haltOrigin: 'engine'`) — unreachable today (the
+  engine sets the field nowhere); the increment that wires the engine's creation
+  gate to intercept's `'module'` axis owes the mapper a decision about surfacing
+  it as a learner error rather than the defensive arm.
+- The error-phase mechanism beyond the declared vocabulary (E2 landed as the run
+  chain's opener; the phase rows run live against it).
 - `sandbox.html` until the chain's own increments (HR-15 cadence; the deprecated
   page's five checkpoint flows are the named inventory).
 
