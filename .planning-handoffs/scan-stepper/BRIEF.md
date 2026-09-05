@@ -39,9 +39,16 @@ the close of the wave — that wave is still in progress; see § Measured state.
 
 **That sentence is the whole seed and it is small on purpose.** Do not grow it
 into a second `spellme`. The distinguishing property is the one the human named:
-**no prediction.** There is no claim, no gate, no verdict, no attempt count, no
-way past, and nothing the learner can get wrong. A cursor moves; the source
-re-colours. That is the lens.
+**no prediction.** There is no claim, no verdict, no attempt count, no way past,
+and nothing the learner can get wrong. A cursor moves; the source re-colours.
+That is the lens.
+
+⚠ **`gate` is a HOMONYM here and this brief uses both senses.** `spellme`'s
+glossary separates them and 0.1's must too: **the gate** is its learner-facing
+rule that the stream advances only on a correct claim — **you have none of
+that** — while _the gate_ elsewhere, including in § PARTIAL TOKENIZATIONS, means
+`applicability`, whether the lens is offered at all. **You do have one of
+those.** Resolve the collision in your glossary rather than carrying it forward.
 
 ## Why this is its own lens rather than a mode of `spellme`
 
@@ -81,12 +88,12 @@ Value }`], and the tokens stage fills it [read: `embody/derive-tokens.ts` —
 **`facts.tokens` now has FOUR states, not two**, and your gate must say which it
 serves:
 
-| `ok`        | `value.inputElements` | what it is                                                                                  |
-| ----------- | --------------------- | ------------------------------------------------------------------------------------------- |
-| `true`      | present               | a clean tokenization — the whole source                                                     |
-| `true`      | **absent**            | embody machinery defect; the enrichment threw. Loud in dev, never a property of the program |
-| **`false`** | **present**           | ⭐ **a partial reading — the prefix that lexed.** The case the human asked about            |
-| `false`     | absent                | the account degraded too; cause only                                                        |
+| `ok`        | `value.inputElements` | what it is                                                                                                                                                                      |
+| ----------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `true`      | present               | a clean tokenization — the whole source                                                                                                                                         |
+| `true`      | **absent**            | embody machinery defect; the enrichment threw. Loud in dev, never a property of the program                                                                                     |
+| **`false`** | **present**           | ⭐ **a partial reading — the prefix that lexed.** The case the human asked about                                                                                                |
+| `false`     | **absent**            | the account DEGRADED — the element derivation threw over the prefix. ⚠ `value` is STILL present, carrying `tokens` and `comments`; only `inputElements` is missing. Loud in dev |
 
 ⚠ **`spellme`'s gate accepts only row 1 and is therefore NOT your precedent**
 [read: `lenses/spellme/core.ts` — `facts.tokens.ok &&
@@ -128,11 +135,11 @@ the human before you write a README.
 **Re-measure every row; nothing here is pinned.** Each carries the command.
 
 | Fact                               | Value                                                                           | Command                                                                                                                                                                                                                                                                                                    |
-| ---------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| ---------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `spellme` suite                    | `Tests 91 passed \| 27 skipped (118)`                                           | `npx vitest run --project unit src/lib/study-lenses/lenses/spellme`                                                                                                                                                                                                                                        |
 | lenses declaring `phase: 'tokens'` | **exactly one** — `spellme`                                                     | `grep -rn "phase: 'tokens'" src/lib/study-lenses/lenses/ --include=*.ts --include=*.tsx`                                                                                                                                                                                                                   |
 | `Lens` requires                    | `name`, `label`, `applicability`, `main`; `phase`/`config`/`recommend` optional | read `lenses/types.ts` + `embody/types.ts` § Gateable                                                                                                                                                                                                                                                      |
-| `FATE_BY_KIND` exported?           | **no**, nor `ADVANCES_ON_ITS_OWN`                                               | `grep -nE 'FATE_BY_KIND                                                                                                                                                                                                                                                                                    | ADVANCES_ON_ITS_OWN' lenses/spellme/core.ts`then check none sits on an`export` line |
+| `FATE_BY_KIND` exported?           | **no**, nor `ADVANCES_ON_ITS_OWN`                                               | `grep -nE 'FATE_BY_KIND\|ADVANCES_ON_ITS_OWN' src/lib/study-lenses/lenses/spellme/core.ts` — then check no hit sits on an `export` line                                                                                                                                                                    |
 | cross-lens imports                 | **zero**                                                                        | `grep -rhoE "from '\\.\\.?/[^']*'" src/lib/study-lenses/lenses/ --include=*.ts --include=*.tsx \| sort -u` — READ the list; a cross-lens import reads `../spellme/core.js`, and today the only cross-directory hits are `../../embody/`, `../../lib/scanning/`, `../../types.js`, `../core.js`, `../lib/…` |
 | `npx tsc --noEmit`                 | **RED repo-wide**, zero under `lenses/`                                         | `npx tsc --noEmit \| grep "study-lenses/lenses/"` — ⚠ the shorter `grep lenses/` matches `study-**lenses**/` and returns the package's every error                                                                                                                                                         |
 | whole-repo vitest                  | **9 or 10** failing files — the tenth is the intermittent named below           | `npx vitest run --project unit`                                                                                                                                                                                                                                                                            |
@@ -180,14 +187,15 @@ the tail's), `npx markdownlint-cli2 --no-globs "<file>"`, `npx tsc --noEmit`,
 `npx prettier --check`. **`eslint` is vacuous on `.css` and `.mdx`** — it exits
 0 while reporting the file ignored.
 
-## The five questions Phase 0 has to answer, and none is yours to settle alone
+## The six questions Phase 0 has to answer, and none is yours to settle alone
 
 ### How to ask — the mechanism, because four of these are blocking
 
 **Batch every open question into ONE `AskUserQuestion` call before writing a
-line of the README**, plus the `twin-doc` ask, the `ceremony` level, and **the
-`label` string** — required on `Lens`, learner-facing, and this brief forbids
-you the shortcut everyone else used, so it is the name question wearing
+line of the README**, plus the `twin-doc` ask, the `ceremony` level, **which of
+the four `facts.tokens` states your gate serves** (§ PARTIAL TOKENIZATIONS), and
+**the `label` string** — required on `Lens`, learner-facing, and this brief
+forbids you the shortcut everyone else used, so it is the name question wearing
 different clothes. Do not dribble them out; do not answer them yourself. If the
 session is non-interactive, **stop and surface them in your final message rather
 than guessing** — question 1 blocks the directory name, and a directory renamed
@@ -215,9 +223,16 @@ fate. But `spellme`'s `types.ts` calls `Fate` **"this lens's word"**, derived
 from the element kind. ⚠ The line "reports the kind and says nothing about
 destinations" is **`spellme`'s prose about `lib/scanning`** [read:
 `lenses/spellme/types.ts`, the `Fate` doc] — that leaf never disclaims
-destinations in its own voice, which weakens the SECOND route's counter-argument
-below — "it promotes a word `spellme` claims as its own" — rather than
-strengthening it. Three routes, and the human picks:
+destinations in its own voice. ⛔ **THAT WAS FALSE, and an earlier revision drew
+the opposite conclusion from it.** The leaf disclaims destinations explicitly,
+in its own list of what it does not do [read: `lib/scanning/DOCS.md` —
+"**Destinations.** Where an element goes, what it means to a learner, whether it
+is claimable — all consumer vocabulary. This module reports what the scanner
+produced and says nothing about what becomes of it."]. So the SECOND route —
+extract to `lib/` — has a **stronger** counter-argument than that revision
+credited: the leaf has already ruled destinations to be the CONSUMER's
+vocabulary, not its own. Read that passage before answering. Three routes, and
+the human picks:
 
 - **duplicate the tables** — two 14-row records plus the
   `ClaimableKind`/`AdvancingKind` unions. ⚠ Larger than it sounds, and it
@@ -240,6 +255,16 @@ strengthening it. Three routes, and the human picks:
   here does today [measured 2026-09-04: zero cross-lens imports].
 
 **Do not decide this in code.** It is an `AR-1` question and a human ruling.
+
+⚠ **BEFORE QUESTIONS 3 AND 4: a whitespace run is ONE element, not many.** The
+scanning leaf collapses "whitespace and line-terminator runs … to maximal runs —
+the leaf's one deliberate departure from the specification, **reversible by
+splitting a run's text per character**" [read: `embody/types.ts`, the
+`inputElements` doc]. A five-space indent is a **single** element; a blank line
+is one `LineTerminator` spanning both endings. **This decides both questions
+below** — what a step steps over, and what a per-element highlight can colour.
+If you want per-character whitespace the leaf names the reversal, and taking it
+is a design decision, not a detail.
 
 **3. The cursor model, which is genuinely NEW and is not `spellme`'s.**
 `spellme`'s `positionCursor` **only advances**, skips trivia, and is documented
@@ -303,30 +328,38 @@ to the human first and do not resolve it yourself** — a README that quietly
 claims the stopping-point territory forecloses a lens the roster already names.
 
 ⚠ **One thing you do NOT change by existing — and an earlier revision of this
-brief got it exactly backwards.** `spellme/README.md` § Edge cases reads, whole:
-"spellme is the only lens declaring the `tokens` phase, and **every further lens
-of this family reads the same published member** — so on this defect the phase
-empties however many of them exist. **It is not a transient roster accident that
-a second lens would fix.**" That document **already anticipated you** and denies
-in terms that a second lens fixes the empty-phase problem, because you read the
-same optional member and decline for the same reason. The earlier revision
-truncated that sentence at its first comma and told you to flag the opposite.
-**Do not raise it.** The only true staleness is the sub-clause "is the only
-lens" — a copy nit in `spellme`'s README, and not yours to edit unasked.
+brief got it exactly backwards.** `spellme/README.md` § Edge cases —
+specifically its sub-paragraph "The accepted cost, stated rather than absorbed",
+one part of a section running some fifty lines — reads: "spellme is the only
+lens declaring the `tokens` phase, and **every further lens of this family reads
+the same published member** — so on this defect the phase empties however many
+of them exist. **It is not a transient roster accident that a second lens would
+fix.**" That document **already anticipated you** and denies in terms that a
+second lens fixes the empty-phase problem, because you read the same optional
+member and go unoffered for the same reason when it is absent altogether. The
+earlier revision truncated that sentence at its first comma and told you to flag
+the opposite. **Do not raise it.** The only true staleness is the sub-clause "is
+the only lens" — a copy nit in `spellme`'s README, and not yours to edit
+unasked.
 
 ## What to read, and in what order
 
 1. `lenses/spellme/README.md` — the vocabulary, the three fates, the mark, the
-   gate, the published member. **You inherit all of it.**
-2. `lib/scanning/README.md` — the derivation's own rules.
-3. `lenses/spellme/DOCS.md` — the sketch's shape, and § Structural constraints
+   published member. **You inherit the VOCABULARY.** ⚠ **You do NOT inherit its
+   gate** — see § PARTIAL TOKENIZATIONS: that gate accepts only a clean
+   tokenization and declines exactly the case you exist to show.
+1. `lib/scanning/DOCS.md` § what this module does not do — **required reading**,
+   and the passage that decides question 2. It is the leaf's own voice on
+   destinations.
+1. `lib/scanning/README.md` — the derivation's own rules.
+1. `lenses/spellme/DOCS.md` — the sketch's shape, and § Structural constraints
    for the two-layer split (pure core, one component file that knows React).
-4. `lenses/spellme/ux/user-journeys.md` and `ux/wireframes.md` — what a `user`
+1. `lenses/spellme/ux/user-journeys.md` and `ux/wireframes.md` — what a `user`
    twin looks like when it is doing its job. **Both are canon there; checking
    one and generalizing is that module's twice-committed failure.**
-5. `lenses/parsons/` and `lenses/writeme/` — the house component shape, the
+1. `lenses/parsons/` and `lenses/writeme/` — the house component shape, the
    config-narrowing idiom, the scoped stylesheet.
-6. `.planning-handoffs/spellme/PHASE-1.md` § Traps — every trap there applies to
+1. `.planning-handoffs/spellme/PHASE-1.md` § Traps — every trap there applies to
    you, because you are in the same tree with the same tools.
 
 ## Phase 0, in order — three artifact-named steps, not seven numbered ones
