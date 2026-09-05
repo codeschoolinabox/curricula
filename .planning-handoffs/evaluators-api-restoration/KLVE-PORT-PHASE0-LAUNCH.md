@@ -44,16 +44,19 @@ fresh session — none of its work is yours.
 2. `.planning-handoffs/evaluators-api-restoration/LOSS-LEDGER.md` — the
    SUPERSEDED-BY-KLVE bullet (grep is case-sensitive: "SUPERSEDED-BY-KLVE"), the
    klve pointer bullet with its 2026-09-05 sub-bullet, and § Rulings of record
-   end to end.
+   end to end; follow the HR-21 bullet's pointer into the LOSS-LEDGER preamble
+   for the full three-part Discharges statement (rulings · the fourteen
+   forward-compat requirements via the `git show a8a0128d:` command there ·
+   classification rows + FLAGs).
 3. **`.planning-handoffs/evaluators-api-restoration/KLVE-LEDGER.md` IN FULL —
    your spine, now RATIFIED.** The rows (ids klve-001–097, 088 deliberately
    unassigned; the list is the record, never a count); the nine
    launch-discussion rulings in § Rulings of record (2026-09-05 — RE-CONFIRM
    nothing, re-litigate nothing; they bind); § Close conditions incl. the
-   `TRACER:` gate (2b); § Escalations r1–r10 as historical record with the
-   post-ratification state line. Every `[measured: Pass-3 probe]` row is
-   reproducible via the committed scripts at `klve-probes/` (read-only imports
-   of the quarry's dist).
+   `TRACER:` gate (2b); § Escalations (r1–r9; r10 sits under § Rulings of
+   record) as historical record with the post-ratification state line. Every
+   `[measured: Pass-3 probe]` row is reproducible via the committed scripts at
+   `klve-probes/` (read-only imports of the quarry's dist).
 4. The region, whole files: `src/lib/study-lenses/evaluators/README.md` and
    `notional-machine.md` (the lattice you do NOT extend — your library is not an
    evaluator; read them for vocabulary and boundaries);
@@ -76,8 +79,10 @@ fresh session — none of its work is yours.
    `src/ui/Step.jsx` — the ancestor whose architecture the port returns to
    (worker-hosted, describe on the wire, undescribe at render).
 7. For the coercion-legs vocabulary (klve-097): the deprecated Aran config
-   surface, read-only, via HR-16's archaeology (LOSS-LEDGER § Rulings of record,
-   the HR-16 bullet carries the commands).
+   surface, read-only, via HR-16's archaeology (LOSS-LEDGER § Rulings of record;
+   the HR-16 bullet carries the commands and pins its SHAs — note its "the
+   quarry" means the deprecated in-repo trace/semantics lineage, NOT this
+   document's sl-trace-js-klve quarry).
 
 ## The design frame (rulings by pointer — never re-litigate)
 
@@ -214,7 +219,8 @@ authored; only a fresh explicit human instruction reopens it).
 
 ## Measured baselines (the recording session's, 2026-09-05 — diff your own Step-0 re-measurement against these)
 
-Pasted verbatim from `node scripts/repo-facts.mjs`:
+Pasted verbatim from `node scripts/repo-facts.mjs` (lint:md is cache-served by
+the script's slow-measurement cache; its timestamp lags the others by design):
 
 ```text
 MEASURED AT 2026-09-05T20:14:28.947Z, not asserted — supersedes any memory or handoff claim about these numbers.
@@ -279,8 +285,9 @@ deletion or foreign work, not canon): `scripts/lib/check-tables/`,
 - The campaign SHA union: read the accumulated union from the LATEST campaign
   commit's body
   (`git log --oneline -- .planning-handoffs/evaluators-api-restoration/` finds
-  it), append every commit you land, in every body — the list is the record,
-  never a count.
+  it), append every commit you land, in every body — carry it in the
+  continuation form the latest body itself shows ("continues from 70fb20a7 … now
+  carries …"); the list is the record, never a count.
 - STOP at the human gate; Phase 1 launches fresh from your gate presentation.
   The human holds: the twin ask's answer, every PAUSE verdict, the Phase-0 →
   Phase-1 gate.
