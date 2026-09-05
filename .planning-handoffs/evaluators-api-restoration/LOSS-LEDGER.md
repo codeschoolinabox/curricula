@@ -1416,6 +1416,54 @@ execution and never holds one alone.
   - Recorded here per HR-21. The Phase-0 artifacts it approves are encoded at
     `src/lib/study-lenses/lib/engine/`.
 
+- **The latch suite's own instruments are corrected, and its non-discriminating
+  rows are repaired rather than accepted (human rulings 2026-09-03 and
+  2026-09-04, HR-28).** Five rulings taken during prerequisite 1's Phase 1. They
+  are recorded here because the plan file that carried them sits outside the
+  repo, where the lookup
+  [DEV.md § Ruling provenance](../../DEV.md#ruling-provenance) cannot reach them
+  — and because an `ar-4` round PAUSED on a body that cited this number before
+  it existed anywhere.
+  - **Row `:172`'s ordering defect is fixed INSTRUMENT-SIDE, not
+    expectation-side.** The pinned nine-name literal is in UTF-16 code-unit
+    order while `ambientNames` sorted with `localeCompare`, which treats case as
+    a tertiary key and puts `globalThis` between `Function` and `Object` — so
+    the row could not pass under any correct implementation
+    `[measured: node, the two orderings compared]`. The comparator moves; the
+    human-gated literal is left untouched. This also removes a latent dependency
+    on the runner's ICU build and locale.
+  - **Three committed rows measured non-discriminating are STRENGTHENED, not
+    accepted as characterization.** `replacing Atomics.store still pauses…` and
+    `a replaced Atomics.load still returns the thread response…` passed
+    identically against a fully unlatched engine; both are repaired to
+    discriminate. `a replaced Atomics.notify…` cannot discriminate at this tier
+    by construction — the thread never waits on the buffer — and is renamed to
+    say so and moved into `the boundaries of the guarantee`, the block that
+    already holds the `Error[Symbol.hasInstance]` residual. Deleting it was
+    declined; the file's own convention keeps a named residual.
+  - **Measure before deciding.** The three rows above were not repaired on the
+    strength of a reviewer's reading: they were probed against the unlatched
+    engine first, and the repairs were then mutation-tested. `.load` went from
+    zero behavioral coverage — the debt `95002db3`'s body records — to covered
+    at both its real sites. `.wait` remains behaviorally undiscriminable and is
+    closed by the structural tier instead.
+  - **`bareNamespaceBindings`' annotated-capture evasion is REPORTED AND
+    DEFERRED.** A bare namespace capture written
+    `const ATOMICS: typeof Atomics = Atomics;` or
+    `const ATOMICS = globalThis.Atomics;` escapes the granularity guard's regex.
+    Hardening it is a follow-on, not this Phase 1's work; first recorded at
+    `ac787b27`.
+  - **Two residuals are APPROVED for amendment into
+    `worker/README.md § What the rule does not reach`, and are OWED there:**
+    that latching can silently disarm a linter matching on a callee's name or
+    shape, and that the one bare-object capture (`globalThis`) is a door the
+    placement predicate cannot see through. `91d60bc8` recorded both rather than
+    taking them, a README edit being the human's; the approval is this ruling,
+    and the edit itself lands in its own increment.
+  - Recorded here per HR-21. Encoded at
+    `src/lib/study-lenses/lib/engine/tests/latched-built-ins{,.browser}.test.ts`;
+    the `worker/README.md` half is owed, not yet landed.
+
 ### The ratification, and what it settled (human ruling 2026-08-06)
 
 One pass over every row. The bulk confirm covered all proposed rows, including
