@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import DISPLAY_LABELS from '../display-labels.js';
 import hasMachineVocabulary from '../has-machine-vocabulary.js';
 
-describe.skip('DISPLAY_LABELS', () => {
+describe('DISPLAY_LABELS', () => {
 	describe('the none-state (Zero)', () => {
 		it('displays as plain JavaScript', () => {
 			expect(DISPLAY_LABELS.noneStateLevel).toBe('plain JavaScript');
@@ -105,10 +105,15 @@ describe.skip('DISPLAY_LABELS', () => {
 			expect(DISPLAY_LABELS.nameplateForms.editor).toBe('your code');
 		});
 
-		it('the lens and generator arms share the occupant form', () => {
-			expect(DISPLAY_LABELS.nameplateForms.lens).toBe(
+		it('the lens and generator arms share one authored occupant form', () => {
+			expect([
+				DISPLAY_LABELS.nameplateForms.lens,
 				DISPLAY_LABELS.nameplateForms.generator,
-			);
+			]).toEqual(['the pane holds:', 'the pane holds:']);
+		});
+
+		it('the nameplate frames the phase label with its own tail', () => {
+			expect(DISPLAY_LABELS.nameplatePhaseTail).toBe('a way to study');
 		});
 
 		it('the tray heading frames the phase label', () => {
@@ -221,7 +226,12 @@ describe.skip('DISPLAY_LABELS', () => {
 					DISPLAY_LABELS.phaseLabels,
 					DISPLAY_LABELS.phaseShortLabels,
 					DISPLAY_LABELS.fitMarks,
+					DISPLAY_LABELS.nameplateForms,
+					DISPLAY_LABELS.emptyStationReasons,
+					DISPLAY_LABELS.emptyCountLines,
+					DISPLAY_LABELS.unreachedCountLines,
 					DISPLAY_LABELS.causeFramings,
+					DISPLAY_LABELS.blockedWaysOut,
 				].every((family) => Object.isFrozen(family)),
 			).toBe(true);
 		});

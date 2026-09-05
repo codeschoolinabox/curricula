@@ -799,6 +799,50 @@ its **home of record**, twice, which is the rule firing rather than the rule
 breaking. Receipt-rule amendment 4 does **not** fire: no `also asserts` column
 widens.
 
+### Rulings taken 2026-09-04/05 — Phase 1's opening gates
+
+(Human rulings 2026-09-04, and R-AT on 2026-09-05.) Six, all asked before any
+code was written, on the same precedent as the two sets above: recorded in the
+commit that OPENS Phase 1, because every increment after it cites them. **Three
+of the six were asked because the Phase-0 → Phase-1 launch prompt named them as
+open; two more were found in the tree during planning and had no answer at all;
+the sixth resolves an AR-3 verdict.**
+
+| #        | ruling                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **R-AO** | **`tests/display-labels.test.ts` un-skips as ONE commit, and `ar-3` fires ONCE over the whole file.** Its subject was written at 0.3, so all 32 tests pass the instant the file is un-skipped: there is no red phase, no stub, no Fake It to expire, and **AR-3's stated trigger — "after the first FAILING test" — is unsatisfiable**. The gate still fires; only its granularity degrades, from per-increment to once over the file. **AR-4 is `n/a`** — the increment writes no implementation. The suite is a PIN on existing code rather than a TDD unit.                                                                                  |
+| **R-AP** | **The Phase-1 increment unit is ONE ZOMBIES CLUSTER, not one test.** `DEV.md` § Phase 1 step 5 reads "exactly one test goes red per increment, and AR-3 fires on it", and AR-3's own Trigger line reads "under tests-committed-skipped, [that] is each un-skip" — which for the three rail units is 59 increments and 59 AR-3s. Coarsening it to the seven ZOMBIES blocks per file gives **21 increments**, one AR-3 + one AR-4 + one commit each. **This is a ceremony ruling and therefore the human's alone**; an agent may never state or lower `ceremony`.                                                                                 |
+| **R-AQ** | **The mount is SPLIT from the retirement, into two increments.** Increment **A** swaps `PhasesPanel` for `Rail` in `orchestrate/index.tsx` and rewrites the coupled top-component suite; increment **B**, a separate commit, retires `phases-panel/`. The split keeps the governance-surface edit and the out-of-pathspec sandbox files in their own reviewable commit, and lets the checkpoints run before anything is deleted. **The mount could never have come first** — `rail/index.tsx` throws on render, so mounting before the three units are green takes the browser red, not merely the tests.                                       |
+| **R-AR** | **The 🔍 sandbox checkpoints T1–T16 BLOCK increment A's commit.** `PHASE-1-CHECKPOINT-LEDGER.md` opens with a standing 2026-07-18 mandate deferring 🔍 rows to that ledger so they "do not block on the maintainer's presence", and the Phase-1 launch prompt instead lists T1–T16 under the gates the human holds. **The launch prompt supersedes for this campaign**: increment A stops after quality checks, the human replays all sixteen at a real browser, observations are reported verbatim, and a behavioural defect blocks the commit. The ledger mandate is untouched elsewhere.                                                     |
+| **R-AS** | **Increment B's pathspec widening is NOT pre-authorised — the agent stops and re-asks.** Retiring `phases-panel/` necessarily reaches `DEV.md`, which cites the directory as a worked example and is governance surface, and `spiralearn/sandbox/index.mdx` + `spiralearn/sandbox/phases-panel/index.mdx`, which sit outside the campaign's three paths. **0.3's two widenings do not carry into Phase 1.** Increments 0 through A land first; then the exact file list is presented and the session waits.                                                                                                                                     |
+| **R-AT** | **AR-3's CONSIDER on increment 0 resolves by minimal in-place strengthening plus a recorded deferral, not by a five-family test rewrite.** Two edits land — the freeze assertion widens from four keyed families to all nine, and the two wholly-unpinned scalars gain literal pins. Everything else AR-3 raised is recorded as accepted-and-deferred, on the precedent of the seven recorded-not-fixed AR-5 items. **The ground is this campaign's own measured signature**: the fix round introduced 3 of 10, then 4 of 9, then 5 of 8, then 6 of 8 findings, and a rewrite of seven tests inside a Phase-0-gated file is exactly that shape. |
+
+**What R-AT defers, enumerated so the deferral is checkable rather than a
+gesture.** Four items, none of them a live defect — every shipped value in
+`display-labels.ts` verified correct. (1) Five keyed families are pinned by a
+key-set totality test or a spot check but not both, so a
+wrong-but-glossary-clean value would pass: `phaseShortLabels`, `nameplateForms`,
+`emptyStationReasons`, `emptyCountLines`, `unreachedCountLines`. (2) The `drawn`
+array the machine-vocabulary test walks is hand-enumerated; it is exhaustive
+against all fourteen `DisplayLabels` fields today, and nothing ties it to the
+type, so a fifteenth field would be silently unchecked. (3)
+`rail/tests/index.test.tsx` hardcodes its own copies of two drawn strings rather
+than importing `DISPLAY_LABELS`, so a future copy change desyncs them silently —
+routed to that unit's own AR-3 rather than fixed here. (4) AR-3's proposed
+recursive string-flattener is **rejected outright, not deferred**: `DEV.md` §
+Minimal Logic in Tests forbids logic in tests — "No `if`, no loops, no
+try-catch" — so the counter-proposal cannot land in any form.
+
+**And one mechanism worth carrying, because it makes item 1 sharper than it
+looks.** AR-3 measured, and this session confirms, that passing an object
+literal through `freezeInPlace` defeats TypeScript's excess-property check: a
+**lost** required key on any `Record<K, V>` family still fails `tsc`, but a
+**gained** one does not, because the literal's type is inferred at the generic
+parameter rather than checked against the annotation. So for every keyed family
+here, a runtime assertion over the exact key set is the only thing standing
+between the current shape and silent key creep — the type system does not back
+it up the way the annotation makes it look.
+
 ## 0.3 entry conditions — the deferrals' ONLY home
 
 R-M (human ruling 2026-08-17) took the deferral notes back OUT of
