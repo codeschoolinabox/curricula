@@ -1491,6 +1491,21 @@ execution and never holds one alone.
   the rulings' home section owes under the klve plan's Step-2 instruction and
   DEV.md § Ruling provenance (HR-21 itself is the Discharges rule and does not
   state it); the rows themselves are never mirrored here.
+  - **Ratified, split, and re-vehicled (human, 2026-09-05, at the superseding
+    launch's in-session discussion — the nine launch-discussion rulings recorded
+    verbatim in KLVE-LEDGER § Rulings of record, never mirrored here).** By
+    pointer: the klve unit's RATIFICATION is DONE; the vehicle is an ADAPTED
+    TYPESCRIPT PORT of the klve core (no blackbox vendoring; named typed
+    deviations; r8 repairs and r10 instrument-time configuration threaded
+    through the port); the unit SPLITS migration-first — an instrumentation-port
+    library unit at `evaluators/lib/` precedes the tracer evaluator unit, so the
+    supersession bullet's "gets its own Phase 0 in a fresh session" now runs
+    through TWO fresh sessions (the migration unit launches from
+    `KLVE-PORT-PHASE0-LAUNCH.md`, beside the klve ledger); the human's
+    north-star binds both units — ECMAScript fidelity in the final data emitted
+    from tracer events to the generator consumer, mechanism free; and the
+    sandbox-first, feature-by-feature cadence (engine light-case host) governs
+    the migration unit's Phase 1.
 
 ### The ratification, and what it settled (human ruling 2026-08-06)
 
