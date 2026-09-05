@@ -19,17 +19,25 @@ careful reader may ignore.
 2026-08-19]. `lib/classifying` was reconciled alongside it (153 of 153). § Where
 things stand carries the SHA list; the status lives here, not elsewhere.
 
-🚧 **`spellme` PHASE 1 IS UNDER WAY — waves 1 AND 2 are CLOSED (2026-08-20 and
-2026-08-25).**
+🚧 **`spellme` PHASE 1 IS UNDER WAY — waves 1, 2 AND 3 are CLOSED (2026-08-20,
+2026-08-25 and 2026-09-05).** Waves 4 and 5 remain: the claim loop's core, then
+the five component tests that drive it.
 
-▶ **NEXT IS WAVE 3, and its launch prompt is committed at
-[`./PHASE1-WAVE-3-BRIEF.md`](./PHASE1-WAVE-3-BRIEF.md)** — the static surface
-(23 of `component.test.tsx`'s 28 skipped tests), the sandbox injection, and the
-campaign's **first 🔍 eyeball checkpoint**. It runs in the **orchestrator**, not
-a worker, and it opens with **one question that must go to the human before the
-first edit** — the un-skip order, where file order and ZOMBIES order disagree.
-That brief was context-free validated; the validation returned nine must-fixes
-against its first draft and all nine are applied.
+▶ **NEXT IS WAVE 4 — `judgeClaim`, `handOver` and `settle`, the 22 remaining
+`core.test.ts` skips. NO BRIEF EXISTS FOR IT YET.** Wave 5 is the five
+`component.test.tsx` skips that drive the claim loop, and they are named in the
+wave-3 close section below.
+
+⚠ **`PHASE1-WAVE-3-BRIEF.md` and `PHASE1-WAVE-3-RESUME.md` are now CLOSED
+RECORDS, not live status.** Both describe a wave that finished 2026-09-05; the
+resume prompt in particular reads as live throughout and is not. **Do not launch
+anything against either.** Wave 3's outcome is the close section below.
+
+⚠ This banner said "NEXT IS WAVE 3" from 2026-08-20 until 2026-09-05 — true for
+the whole wave, and stale the moment it closed. **That is the fourth time this
+file has carried a stale next-banner**, a defect its own paragraph below
+documents about itself. A banner announcing what is next expires the moment
+someone finishes it, not only when they start it.
 
 See § The `spellme` LENS — Phase 1, wave 1 and § … wave 2 for their SHA lists —
 **re-run their loops rather than counting rows; the wave-1 sentence said "ten"
@@ -1183,7 +1191,7 @@ boundary.
   correction became the new false claim. That is the argument for the rule over
   another round of corrections.
 
-### The `spellme` LENS — Phase 1, wave 3 (IN PROGRESS)
+### The `spellme` LENS — Phase 1, wave 3 (CLOSED 2026-09-05)
 
 ⚠ **Do not count the rows of anything here. RUN THIS** — and note it takes
 **three** paths, not two: wave 2's loop covered the module and the handoffs
@@ -1590,6 +1598,83 @@ harness and CSS hooks — which reconciles the announcement channel with
 rather than in a banner. **Recorded now rather than at the wave that wires
 `judgeClaim`**, because that wave will fill the three attributes with real
 verdicts and have every reason to believe the job is done.
+
+**🔍 checkpoint #5 — the wave's close. The human's word: "lgtm."** All five
+checkpoints are spent and all five passed. #3 passed with redirects and every
+one of its three named obligations is discharged; #4 passed with one design
+finding routed onward.
+
+#### Wave 3 — CLOSED, state at close
+
+[all measured 2026-09-05 by the orchestrator, not relayed]
+
+- Scoped suite `Test Files 3 passed (3)` · `Tests 91 passed | 27 skipped (118)`.
+- **`npx tsc --noEmit`: zero errors under `lenses/`.** The repo-wide number is
+  red and foreign — a peer's in-flight `GenerationOutcome` refactor with files
+  uncommitted.
+- The 27 skips are **wave 4's 22 core tests** and **wave 5's 5 component
+  tests**, which are exactly the `fireEvent` claim-loop set:
+  `moves the cursor after a correct claim`,
+  `leaves the cursor where it is after a wrong claim`,
+  `removes the claim form once the last element has fallen`,
+  `keeps the token tape after the last element has fallen`,
+  `shows no summary once the last element has fallen`.
+- Module and handoff trees clean under this campaign's paths.
+
+**The SHA list — RE-RUN IT, do not read it.** The loop is § the wave-3 heading's
+own, and it returns 36 entries of which **two are FOREIGN** — `253e6684` and
+`dd8b85cb`, a peer's orchestrate-ux campaign, which added the required `label`
+to `Lens` and reworked the sandbox mdx. Neither is this wave's and neither may
+be attributed to it.
+
+**What the wave built.** Every region `README.md` § UI structure names now
+renders: the input tape with its three spans, the token tape with its break
+marks, the jar, the claim form with the ten-kind picker and the live extent
+stepper, the threshold-gated one-more field and way past, the verdicts region,
+the fates panel, and the legend — plus the module's own stylesheet, which
+`DOCS.md` § Decisions makes part of the lens's value rather than decoration.
+
+**What the wave cost, and what it bought.** Five 🔍 checkpoints, one `ar-3`, six
+`ar-4` verdicts, an `ar-5` **PAUSE** and its re-verification, thirteen authored
+regression locks, and **sixteen mutants killed**. ⚠ **Every AR round found at
+least one false claim, and every one was in PROSE I had written rather than in
+the code.** The suite never went red for a defect the reviews found. That is the
+wave's transferable finding and it is the same one wave 3 opened with.
+
+⚠ **The `ar-5` PAUSE is worth reading in full above**: three claims in end-state
+source, each TRUE WHEN WRITTEN and falsified by a later commit of this same
+wave. One had been wrong in BOTH directions at one site. The fix was a RULE —
+status prose leaves this module's source (human ruling 2026-09-03) — rather than
+three corrections, on the reviewer's measured evidence that every rotted comment
+was a status sentence and no non-status comment rotted.
+
+**What wave 3 hands forward, none of it blocking:**
+
+- **Wave 4** is `judgeClaim`/`handOver`/`settle` — the 22 core skips. **Wave 5**
+  is the five component tests above.
+- ⛔ **A writable lock is OWED by the wave that wires judging**: the live region
+  carries three `data-*` attributes and no text, so it can never announce, while
+  `ux/user-journeys.md` Journey 5 says it does. In wave 3 `lastVerdicts` is
+  permanently null and an empty region is CORRECT, so the lock could not be
+  written. **Do not let the wave that fills those attributes believe the job is
+  done.**
+- **`data-attempts` cannot be locked until `attempts` can move** — the mutant
+  survives by construction. Kept and disclosed; wave 4 closes it.
+- **The per-element consumed run** — `README.md` § UI structure promises "an
+  evaporating one hatched" and that signal has no carrier, because every
+  consumed element's text is joined into one span. A DOM-contract question, the
+  human's, and the same change the human independently proposed at 🔍 #4.
+- **The break mark fires once per RUN of line terminators**, so it is common
+  rather than rare and the twin's crowding counter-argument is falsified. The
+  mark stays (human ruling 2026-09-02); its density is open.
+- **The button tab-order exposure is package-wide** — 17 controls across three
+  lenses and the orchestrator's chrome are unreachable in a default macOS
+  Safari. Not a defect any of them introduced.
+- **`parsons.css` carries a dead `prefers-color-scheme` block**, and only half
+  this module's diagnosis transfers to it.
+- **Partial tokenization** — embody has since landed it, and `spellme` will
+  carry the explanation of a tokenization failure (human ruling 2026-09-01). Its
+  own gate accepts only a clean stage today and therefore under-serves.
 
 #### Corrections to immutable commit bodies
 
