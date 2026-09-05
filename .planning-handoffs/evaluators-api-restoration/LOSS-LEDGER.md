@@ -1460,9 +1460,23 @@ execution and never holds one alone.
     placement predicate cannot see through. `91d60bc8` recorded both rather than
     taking them, a README edit being the human's; the approval is this ruling,
     and the edit itself lands in its own increment.
+  - **A THIRD residual — the per-SITE tier map — is approved after the fact
+    (human ruling 2026-09-04, at AR-5's PAUSE).** `77dc4dc7` landed three
+    bullets where this ruling had approved two, and the unapproved one stated
+    the tier split backwards for two names: it said `Atomics.notify` cannot be
+    discriminated behaviorally when it can, and implied `.store` is covered
+    generally when only two of its four sites are
+    `[measured: un-latching ATOMICS_NOTIFY alone fails the whole-namespace row; un-latching callBlocking's or read-call-response's .store alone leaves all 21 rows green — raised by AR-5, reproduced twice since]`.
+    The bullet is kept rather than deleted because the site-level map exists
+    nowhere else and a reader would otherwise re-derive it by mutation — but it
+    is rewritten per site, and **the count of approved residuals is now three,
+    so the README and this ruling agree.** The generalisation that produced the
+    error is worth naming: "the row that replaces this member cannot
+    discriminate it" was widened to "this name cannot be discriminated", across
+    a scope the measurement never covered.
   - Recorded here per HR-21. Encoded at
-    `src/lib/study-lenses/lib/engine/tests/latched-built-ins{,.browser}.test.ts`;
-    the `worker/README.md` half is owed, not yet landed.
+    `src/lib/study-lenses/lib/engine/tests/latched-built-ins{,.browser}.test.ts`
+    and `worker/README.md`.
 
 ### The ratification, and what it settled (human ruling 2026-08-06)
 

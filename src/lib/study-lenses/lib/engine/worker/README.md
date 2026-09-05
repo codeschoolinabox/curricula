@@ -119,16 +119,30 @@ lose one.
   "mechanized, and exhaustive" is exhaustive over ambient **identifier
   references**, not over reachable globals. Named, not covered, like the
   `Error[Symbol.hasInstance]` residual above.
-- **What each tier can and cannot separate.** The two instruments do not cover
-  the same names, and the split is not the one reachability alone would predict.
-  `Atomics.wait` and the pause loop's own `.load` are captured but **cannot be
-  discriminated behaviorally at all**: a busy-spin substitute is externally
-  equivalent to a genuine block against shared memory, since both hold the
-  single-threaded worker equally unresponsive. `Atomics.notify` cannot be either
-  — nothing anywhere waits on the event-ready slot, and the thread side, being
-  the main realm, cannot call `Atomics.wait` at all. For all three the placement
-  predicate **is** the instrument, and it does catch them. `.store` and
-  `.load`'s two other sites are discriminated by the behavioral tier as well.
+- **What each tier can and cannot separate, per SITE.** The two instruments do
+  not cover the same reads, and the split is by call site rather than by name —
+  a name is not uniformly covered just because one of its sites is. Every
+  capture below fails the placement predicate when un-latched, so the structural
+  tier reaches all of them; what varies is whether a behavioral row does too.
+  - **Discriminated behaviorally:** `Atomics.notify` and `emitPausing`'s two
+    `.store` reads — all three run before the emission is posted, so un-latching
+    any one of them costs the program its message. Also `callBlocking`'s `.load`
+    and `read-call-response`'s `.load`: un-latching either alone costs the
+    program the response to its own call.
+  - `.notify` is discriminated **only by the row that rebinds the whole
+    namespace**, never by one that replaces the member alone: a missed wake is
+    unobservable, but a failed read is not. The two are different failures and
+    only the second is visible here.
+  - **Not discriminated behaviorally:** `callBlocking`'s `.store`,
+    `read-call-response`'s `.store`, `Atomics.wait`, and the pause loop's own
+    `.load`. For these four the placement predicate **is** the instrument. Note
+    that `.load` and `.store` each appear on both lists — which is the point of
+    reading this map by site rather than by name.
+  - `.wait` is undiscriminable for a different reason than the rest, and the
+    reason is worth keeping: not unreachability but **equivalence** — a
+    busy-spin substitute holds the single-threaded worker exactly as
+    unresponsive as a genuine block, so no observation from the thread can tell
+    them apart.
 
 ## Discharges
 
@@ -166,11 +180,16 @@ nothing else will say it.** `importScripts` joins `bootstrap.ts`'s row above
 because the script path resolves it in the worker realm and the rule is
 mechanical. The latch suite pins that row's contents as an exact array
 (`tests/latched-built-ins.test.ts`, the row named _"the captures in
-`bootstrap.ts` name exactly the globals the README lists for it"_). That row is
-committed skipped; whichever lands second — the latch's Phase 1, which un-skips
-it, or the script path's Phase 1, which adds the capture — inherits the job of
-keeping the array and this table in step. They are one edit, in two files, and
-the suite is the only thing that notices.
+`bootstrap.ts` name exactly the globals the README lists for it"_). **That row
+is green and pins NINE names, while the table above lists ten — and the mismatch
+is deliberate.** `importScripts` cannot be captured yet: this repo's
+`tsconfig.json` sets `"lib": ["ESNext", "DOM"]` with no `WebWorker`, so the name
+is not a declared global and a capture of it does not typecheck. So the row's
+own title is false by exactly one name until the script path lands. Do not
+rename it and do not reconcile it by editing the array — the script path's Phase
+1 adds the capture and the tenth name together, and that row is the only thing
+that will notice if it adds one without the other. They are one edit, in two
+files.
 
 ## Navigation
 
