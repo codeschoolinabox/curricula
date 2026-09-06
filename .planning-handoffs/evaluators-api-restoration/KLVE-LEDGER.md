@@ -386,6 +386,56 @@ title appears in a passing run" is Phase 1's bar):
   from `dt` gaps ≥ 20ms (`add_waiting_time_steps.js`) — an affordance the
   package dropped; derivable consumer-side from `dt` on every step, so it rides
   as NM/data-twin material for the owning units, not a row.
+- **Path B and the migration unit's ar-1 PAUSE resolutions (human, 2026-09-06 —
+  the step-instrumentation 0.1 rounds):** the library's config + event contracts
+  ADOPT the semantics tracer's surface
+  (`src/lib/embody/lib/evaluating/trace/semantics/`, read-only), widened from
+  JEJ to full JS — the expression/resolve split implemented, ValueRepresentation
+  adopted, the cheap widening set (var/function/param bindings, function/catch
+  scopes, call/return/this/new/ define) in, the rest deferred-but-representable;
+  reuse of the semantics implementation layers is high-fidelity copy-then-adapt,
+  never simplified; the module renamed `step-instrumentation` (plugin name field
+  stays `stepperize`). First-round fix-all: the decline roster (typeof/delete
+  operands, direct-eval callees, super spines, await/yield positions,
+  optional-chain interiors, LVals, `with`) with measured r8-extension rows owed;
+  TDZ snapshot marking is STRUCTURAL and differentiates per spec — `var`
+  honestly snapshots `undefined` (initialized at instantiation), let/const/class
+  in TDZ mark `{ unreadable: 'tdz' }`; per-leg gating table; `instrument`
+  returns the namespace; built-in describe/VR widening (Error/Date/Symbol);
+  committed fixture oracle; intrinsic latching; klve-078 RE-ADJUDICATED (empty
+  code is a legal Program — supersede, this ruling its strength argument) and
+  klve-028 RE-ADJUDICATED (the TDZ mark — supersede, same). Second-round
+  blockers: (B1) a SITE is one observation point, klve's push basis — the cap
+  and klve-096's equivalence count sites, not emitted records; (B2) the anchor
+  is the LIFECYCLE-ANCHOR FAMILY — the trace opens with one anchor event per
+  pre-evaluation embodiment phase (`source` · `tokens` · `ast` · `environment`,
+  embody's own spelling), each at nodePath `$` with whole-program loc/offsets,
+  passing every filter (klve-023/081's capability re-homed; entwinement rides
+  the embodiment's own phase structures); (B3) "the klve reference" is the
+  module's term — the bare region term stays the region's; (B4) the library
+  neither injects nor strips strictness — the text's own directive semantics
+  ride through instrumentation, the output is legal in both modes, klve-057's
+  sloppy-constructs consequence is a HOST-posing delta named in the machine
+  twin, and `with` is refused on this unit's own ground (statically
+  un-instrumentable scope); (B5) the module keeps its own cap marker; the
+  iterations/always-splice region collision is recorded as a TRACER-gated row +
+  FLAG, decided by the tracer unit with both instruments in view. Also ruled:
+  `loc` AND the `start`/`end` offsets are BOTH constitutive on every event
+  ("let's have loc, why not. but also offset, which is more standard across
+  embodiments") — klve-016's loc-strip leg is superseded by the adopted base
+  shape, named. _(Fix-round-2 refinements, human "ok to all" 2026-09-06:
+  `instrument` additionally returns a `programStamp` that `createCollector`
+  consumes — the anchors' whole-program stamp is mintable and the
+  pairing-by-construction discipline extends to it; a SITE is a TEXT-DERIVED
+  observation point only — klve's push set exactly, since klve wrapped
+  this/arrows/templates as expressions — synthetic events (scope lifecycle,
+  declare bursts, markers, the anchors beyond their one ratified basis
+  contribution) are emissions, never sites, and a gated-off point keeps its
+  meta-control count touch, so the cap basis is both config-independent and
+  klve-equivalent; visit counts bump once per node EVALUATION, at its entry
+  point; `with` is a REFUSAL, not a decline — absent from the declines manifest
+  by construction; the anchors are a named third epistemic category — asserted
+  lifecycle markers, beside observed and inferred.)_
 - Further ratification rulings land here when taken.
 
 ### r10 feasibility — the instrument-time configuration rework (answered 2026-09-05)
