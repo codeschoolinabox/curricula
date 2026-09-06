@@ -826,13 +826,23 @@ guess. **These are its blockers, verified.** They are not open questions about
 the subject matter — they are places this handoff is underspecified, and the fix
 for each is cheap for you and impossible for them.
 
-1. **`ontology.md` is cited about six times with no path, and two files match.**
-   `spiralearn/frogramming-and-vibetoading/ontology.md` (1619 lines) and
-   `spiralearn/welcome-to-frogramming/ontology.md` (1566 lines) [measured
-   2026-09-06]. **Every line number in this file and in the directory refers to
-   the `frogramming-and-vibetoading/` copy**; the same numbers land on unrelated
-   text in the other. The validator said it would have coin-flipped. Pin the
-   path on first use in whatever you write next.
+1. ~~**`ontology.md` is ambiguous.**~~ **RESOLVED by the human, 2026-09-06: it
+   is the one in F&V.** Every `ontology.md` citation in this file and in the
+   theory directory means
+   **`spiralearn/frogramming-and-vibetoading/ontology.md`** (1619 lines). Read
+   it there and nowhere else.
+
+   **Why the ambiguity existed, so you can dismiss it on sight rather than
+   re-checking.** `spiralearn/welcome-to-frogramming/ontology.md` (1566 lines)
+   also exists, and the same line numbers land on unrelated text in it. It is
+   not a rival: `cbbe5bfe` (2026-07-02) split the reshaped course into
+   `frogramming-and-vibetoading/` and **restored `welcome-to-frogramming/` as a
+   historical record**. The live file was last touched `88db816c` (2026-07-28,
+   the ring frame that `RESUME.md` § The figure cites as precedent); the
+   historical one has not moved since the split. **`welcome-to-frogramming/` is
+   history — never cite it, and treat any line number that does not resolve as a
+   sign you opened the wrong file.**
+
 2. **There is no course to merge _into_.**
    `spiralearn/data-shapes-processes-relationships/` contains exactly one entry:
    `computational-thinking--to-merge/`. So "merge into the course" currently has
