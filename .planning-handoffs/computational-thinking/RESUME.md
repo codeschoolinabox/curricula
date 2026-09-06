@@ -32,37 +32,40 @@ Two arguments for the split, kept apart so one does not smuggle in the other:
    only this one holds, trimming F&V is cheaper than a third course with a third
    toolchain.
 
-## The destination exists, and moving there is the first unit
+## Where everything is now
 
-`spiralearn/data-shapes-processes-relationships/` (placeholder name) was created
-by the human as a **peer of `frogramming-and-vibetoading/`** — the right level
-for a course, rather than a directory nested inside the course it comments on.
+The theory directory **has been moved** — by the human, not by an agent — from
+`spiralearn/frogramming-and-vibetoading/computational-thinking/` to
+`spiralearn/data-shapes-processes-relationships/computational-thinking--to-merge/`,
+recorded in `521ee5af`. `data-shapes-processes-relationships/` (placeholder
+name) is a **peer of `frogramming-and-vibetoading/`**, which is the right level
+for a course rather than a directory nested inside the course it comments on.
 
-**The theory directory migrates into it, and F&V is cleared of it.** Seventeen
-files: eleven authored Markdown, two figures, the Naur transcription, the
-Weintrop PDF, `plann.txt`, and `from-a-job-application/`.
+**The move lost nothing** [measured 2026-09-06: per-file md5 of `git show
+HEAD:<old path>` against the new location]. Twenty of twenty-one files are
+byte-identical; the exception is `this-codebase.md`, which carries the human's
+own two-line addition about agentic developers one-shotting during prototyping.
+Every relative link resolves at the new path, and no document cites F&V through
+a relative link — all F&V references are prose — so nothing broke.
 
-**This is a governed migration, and the requirement is easy to miss.**
-`DEV.md:1095`: "Migration is transport, not authorship" — every omission, merge
-or reword enumerated in a **loss ledger**, in the commit body or the plan, with
-its justification; `:1116` adds that deletion is enumerated like any other
-removal. Transport verbatim by default. A move that quietly improves prose on
-the way is the failure this rule exists to catch.
+**The `--to-merge` suffix is the human's and carries intent.** This material is
+to be merged _into_ the course, not kept as a subdirectory of it. **That
+reconciliation is the first unit, and it is where a loss ledger is actually
+owed.** `DEV.md:1095` — "Migration is transport, not authorship" — every
+omission, merge or reword enumerated with its justification, `:1116` adding
+deletion. A verbatim move needs no ledger and did not get one; **a merge that
+rewords on the way is exactly the failure that rule exists to catch**, and this
+one will reword, because eleven documents written as a self-standing argument
+have to become parts of a course.
 
-**Do it before drafting anything new.** Every file that lands in the old
-location first makes the ledger longer and the move more expensive.
-
-Three things the move changes beyond paths:
+Two things the new location changes beyond paths:
 
 - **`tie-ins.md` changes role.** It is currently findings about F&V written from
-  a directory _inside_ F&V. Afterwards it is findings about a **sibling
-  course**, written from a peer. The one-direction citation boundary survives
-  but means something different, and rows like "the curriculum already claims
-  Ch1 teaches CT" become cross-course findings — so the deferred redraft they
-  feed becomes a cross-course campaign.
-- **Every internal link and every F&V citation in the eleven documents needs
-  re-checking**, not rewriting. They cite F&V from inside it today; most should
-  still resolve, but anything written as a relative sibling path will not.
+  a directory _inside_ F&V. It is now findings about a **sibling course**,
+  written from a peer. The one-direction citation boundary survives but means
+  something different, and rows like "the curriculum already claims Ch1 teaches
+  CT" are now cross-course findings — so the deferred redraft they feed is a
+  cross-course campaign.
 - **The placeholder name has already answered an open question.**
   `data-shapes-processes-relationships` names three peers, which commits to data
   being a **peer** of process and relationship. That is exactly what was left
@@ -409,15 +412,18 @@ Data Structures = Programs_** — prior art for two of the three threads.
   `work: governance`.
 - **Network fetch is available** — `WebFetch` works, and Naur was fetched with
   it. Note the standing rule below about what a fetch is not.
-- **Scope boundary.** No F&V curriculum file has been touched, and the course
-  half has produced no files at all. The campaign's commits reach **three**
-  places: everything under `computational-thinking/`, `DEV.md` once for the
-  governance change `6c34c970`, and this handoff [measured 2026-09-03: `git log
-  --name-only 8882352d~1..HEAD --pretty=format: | sort -u`]. **Use `HEAD`, not a
-  pinned SHA** — an earlier revision published a range ending at `8f20eb34`,
-  which predates this file's creation, so the command structurally could not
-  surface the third place and "confirmed" a false claim. `tie-ins.md` is a table
-  of **findings** about F&V, not a work order — do not act on its rows.
+- **Scope boundary.** No F&V _curriculum_ file has been touched — F&V appears in
+  the campaign's history only because the theory directory used to live inside
+  it and has now left. The campaign's commits reach four places [measured
+  2026-09-06: `git log --name-only 8882352d~1..HEAD --pretty=format: | sort
+  -u`]: `spiralearn/data-shapes-processes-relationships/` (the course, current
+  home), `spiralearn/frogramming-and-vibetoading/computational-thinking/` (its
+  former home, now empty), `DEV.md` once for the governance change `6c34c970`,
+  and this handoff. **Use `HEAD`, not a pinned SHA** — an earlier revision
+  published a range ending at `8f20eb34`, which predates this file's creation,
+  so the command structurally could not surface its own counterexample and
+  "confirmed" a false claim. `tie-ins.md` is a table of **findings** about F&V,
+  not a work order — do not act on its rows.
 
 ## Decision rights
 
@@ -436,23 +442,34 @@ never edited without explicit human instruction in the conversation.
 
 ## State
 
-Twelve commits on `main`, none pushed (`main` has no upstream, so "unpushed" is
-consistent with the tree rather than directly verifiable).
+Twenty commits on `main` by the path filter below, plus `6c34c970` which touched
+only `DEV.md` and the filter therefore misses — twenty-one in all. None pushed
+(`main` has no upstream, so "unpushed" is consistent with the tree rather than
+directly verifiable).
 
-| SHA        | What                                                           | Rulings it records                                                                          |
-| ---------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `8882352d` | the document set established                                   | condition-3 split; F's far target; V-as-CT is pedagogy not ontology                         |
-| `99bfcce1` | L1/L6 rename, condition (c), CT by way of a notional machine   | modelling/meaningful; predictive usefulness; Ch1 half-beats F-only; **essay-vs-experiment** |
-| `3504af6a` | Naur read in full                                              | the attribution hazard — lines 601+ of the transcription are not Naur                       |
-| `9b161cda` | Naur's decay mechanism                                         | decay is not a context-size problem                                                         |
-| `596554bc` | `this-codebase.md`                                             | Naur's remedies invert for an LLM collaborator                                              |
-| `6c34c970` | **governance** — twin-doc conformance check in AR-4            | conformance not judgement; FLAG don't decide; states its own limit                          |
-| `8f20eb34` | two decayed greps and one stale governance claim fixed         | never publish a count whose subject includes the document stating it                        |
-| `712edf2a` | this handoff, after a context-free audit                       | decision rights; the operating frame                                                        |
-| `31e830b6` | `on-pseudocode.md`, `the-stack.svg`, the causal-edge fix       | the stack's floor is where medium-independence fails                                        |
-| `970100ce` | **the chain replaces the triangle**                            | the chain is the axis; correctives split at the pivot; F's axis only                        |
-| `4e3857e1` | the triangle deleted; this file's inventory corrected          | —                                                                                           |
-| `e1cf6177` | the handoff updated for the chain; tie-ins' work-order grammar | do not widen a scope the human scoped                                                       |
+| SHA        | What                                                                                         | Rulings it records                                                                          |
+| ---------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `8882352d` | the document set established                                                                 | condition-3 split; F's far target; V-as-CT is pedagogy not ontology                         |
+| `99bfcce1` | L1/L6 rename, condition (c), CT by way of a notional machine                                 | modelling/meaningful; predictive usefulness; Ch1 half-beats F-only; **essay-vs-experiment** |
+| `3504af6a` | Naur read in full                                                                            | the attribution hazard — lines 601+ of the transcription are not Naur                       |
+| `9b161cda` | Naur's decay mechanism                                                                       | decay is not a context-size problem                                                         |
+| `596554bc` | `this-codebase.md`                                                                           | Naur's remedies invert for an LLM collaborator                                              |
+| `6c34c970` | **governance** — twin-doc conformance check in AR-4                                          | conformance not judgement; FLAG don't decide; states its own limit                          |
+| `8f20eb34` | two decayed greps and one stale governance claim fixed                                       | never publish a count whose subject includes the document stating it                        |
+| `712edf2a` | this handoff, after a context-free audit                                                     | decision rights; the operating frame                                                        |
+| `31e830b6` | `on-pseudocode.md`, `the-stack.svg`, the causal-edge fix                                     | the stack's floor is where medium-independence fails                                        |
+| `970100ce` | **the chain replaces the triangle**                                                          | the chain is the axis; correctives split at the pivot; F's axis only                        |
+| `4e3857e1` | the triangle deleted; this file's inventory corrected                                        | —                                                                                           |
+| `e1cf6177` | the handoff updated for the chain; tie-ins' work-order grammar                               | do not widen a scope the human scoped                                                       |
+| `8dd0ae1f` | the two handoffs merged into one campaign                                                    | the theory _is_ the course's theory                                                         |
+| `cca18948` | the destination recorded — **and its body describes two sections its diff does not contain** | —                                                                                           |
+| `88ad8f09` | the sections `cca18948` claimed                                                              | a match string written before prettier runs is stale by the time it runs                    |
+| `521ee5af` | the human's move of the theory directory, recorded                                           | loss ledger nil; the _merge_ is where one is owed                                           |
+
+**Do not trust this table's completeness — list it instead:**
+`git log --oneline -- spiralearn/data-shapes-processes-relationships spiralearn/frogramming-and-vibetoading/computational-thinking .planning-handoffs/computational-thinking`.
+The table carries the _rulings_; the log carries the _commits_, and this file
+has already shipped a stale count of them twice.
 
 Eleven authored Markdown files plus two figures — `the-chain.svg` and
 `the-stack.svg` — and the Naur transcription. `markdownlint` returns 0 across
@@ -633,10 +650,11 @@ already landed the review-side half of it.)
 
 ### Sequence
 
-1. **Migrate** `computational-thinking/` into
-   `spiralearn/data-shapes-processes-relationships/` under a loss ledger, and
-   clear it out of F&V. Verbatim transport; re-check links and F&V citations.
-2. Then the two units below.
+1. **Merge `computational-thinking--to-merge/` into the course**, under a loss
+   ledger. The move is done and lost nothing; the _merge_ will reword, and that
+   is what the ledger is for.
+2. Then the two units below — the three must-reads, and the expression-only
+   binding test.
 3. Then design.
 
 ### And on the course half, before any design
