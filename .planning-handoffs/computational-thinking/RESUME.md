@@ -598,6 +598,14 @@ draft. That is the check. Your own draft, afterwards, is the content.
 governance-adjacent, so its only possible output is a proposal, and `6c34c970`
 already landed the review-side half of it.)
 
+### Sequence
+
+1. **Migrate** `computational-thinking/` into
+   `spiralearn/data-shapes-processes-relationships/` under a loss ledger, and
+   clear it out of F&V. Verbatim transport; re-check links and F&V citations.
+2. Then the two units below.
+3. Then design.
+
 ### And on the course half, before any design
 
 Two units, both cheap, both blocking:
