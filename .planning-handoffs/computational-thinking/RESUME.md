@@ -19,11 +19,11 @@ Vibetoading and Welcome to Algorithms.
 
 Its scope has a principled home already in the built work: **it owns the
 position neither existing course does.** The chain in
-`computational-thinking/thesis.md` runs artifact → notional machines → code |
-the computational thoughts | pseudocode → formal notation → CS/theory. F&V lives
-left of the pivot; WtA lives right of it. **The computational thoughts belong to
-neither, and their check-cell reads "nothing directly."** The position with the
-least apparatus and the most need has no course.
+`computational-thinking--to-merge/thesis.md` runs artifact → notional machines →
+code | the computational thoughts | pseudocode → formal notation → CS/theory.
+F&V lives left of the pivot; WtA lives right of it. **The computational thoughts
+belong to neither, and their check-cell reads "nothing directly."** The position
+with the least apparatus and the most need has no course.
 
 Two arguments for the split, kept apart so one does not smuggle in the other:
 
@@ -91,14 +91,16 @@ line, already the confusion every teacher has watched.
 
 ### The third thread
 
-**Data**, alongside process and relationship. Three kinds of description: what
-happens, what holds, **what things are** — the third having its own notations in
-types, schemas, grammars, algebraic data types. A JSON schema is neither a
-process nor a relationship; it is a shape.
+**Data**, as a third _kind of description_: what happens, what holds, **what
+things are** — the third having its own notations in types, schemas, grammars,
+algebraic data types. A JSON schema is neither a process nor a relationship; it
+is a shape.
 
-"Thread" rather than "peer" is deliberate and matches `ontology.md` §8, where
-data already runs _through_ the curriculum as its red thread rather than sitting
-alongside things.
+**Whether it is a _peer_ or a _thread_ is the unresolved part, and this document
+has used both words.** "Thread" matches `ontology.md` §8, where data runs
+_through_ the curriculum rather than sitting alongside things. "Peer" is what
+the three-kinds framing above implies, and what the directory name asserts. They
+are not compatible. Decide it.
 
 > **The human nearly wrote `data: relationships and processes` and did not, "for
 > now."** Recorded verbatim because it is unresolved and the phrasing matters:
@@ -113,7 +115,7 @@ idea and algorithm fused into one corner). The test: can you describe data in a
 way that presupposes neither a process over it nor a relationship among it?
 Probably yes — a schema does — but run the test before committing.
 
-## Language: two live options
+## Language: two live options, and one superseded
 
 ### Option B — the front-runner: expression-oriented and statement-oriented JS levels
 
@@ -137,12 +139,13 @@ importing purity, higher-order functions, laziness and monads — all irrelevant
 here. It also sidesteps the paradigm argument, which `ontology.md` §13 already
 defers to Ch4.
 
-**The levels are additive, not parallel.** Every statement contains expressions,
-so statement-oriented is a _superset_: begin with expressions only, then admit
-statements and examine what is gained and lost. That is SICP's sequencing, it is
-one language level extending another rather than two dialects forking, and
-**"what did admitting statements cost me?" is a better question than "which do
-you prefer?"**
+**Additive in grammar, forking in pedagogy — and the human ruled both.** Every
+statement contains expressions, so statement-oriented is grammatically a
+_superset_; "what did admitting statements cost me?" is a better question than
+"which do you prefer?". But the human's ruling was explicit: "yes, they're
+additive. but we'll treat them as forking." The supersetness is accounted for by
+the **shared foundation** below; the fork is where the two answers to
+_composition_ diverge. Do not read the next paragraph as contradicting this one.
 
 **Shared foundation, then a fork on composition, then a merge.** The human's
 structure, and it is better than a grammatical split:
@@ -201,14 +204,17 @@ it.**
 **JEJ-F (functional) and JEJ-P (procedural)** — one language, two constrained
 subsets, taught as a contrast.
 
-**Its decisive advantage is that it isolates the variable.** Same notional
-machine, same physical process, two notations — so any difference in what a
-learner can _think_ is attributable to the notation alone. That experiment
-cannot be run across two languages, because too much varies at once.
-`ontology.md` §13 already asserts that JS is multi-paradigm syntactically while
-running one NM, and that "paradigm choices are partly about which event
-vocabulary you want to think in." Two subsets **demonstrate** that instead of
-asserting it.
+**These two advantages belong to the front-runner as well** — both are JS
+subsets, so both isolate the variable and both cost one stack. They are recorded
+here only because this is where they were first argued.
+
+**It isolates the variable.** Same notional machine, same physical process, two
+notations — so any difference in what a learner can _think_ is attributable to
+the notation alone. That experiment cannot be run across two languages, because
+too much varies at once. `ontology.md` §13 already asserts that JS is
+multi-paradigm syntactically while running one NM, and that "paradigm choices
+are partly about which event vocabulary you want to think in." Two subsets
+**demonstrate** that instead of asserting it.
 
 **It answers Backus with his own structure.** His objection is that the
 orderly/disorderly split lives inside a language on either side of the
@@ -377,10 +383,10 @@ Data Structures = Programs_** — prior art for two of the three threads.
 - **The linguistic mix-in.** Fluidly discussing kinds of thought and the
   languages that express them — a higher-level objective, not a fully-developed
   one. Already committed to by the genus in
-  `computational-thinking/computational-languages.md`. **The discipline that
-  keeps it from becoming hand-wavy: only claim relativity you can demonstrate**
-  — the same computation in two notations affording different questions. Shown,
-  not asserted.
+  `computational-thinking--to-merge/computational-languages.md`. **The
+  discipline that keeps it from becoming hand-wavy: only claim relativity you
+  can demonstrate** — the same computation in two notations affording different
+  questions. Shown, not asserted.
 - **Refactoring as formal manipulation.** Programs can be transformed by rule,
   but equivalence is relative to a chosen notional machine, where mathematical
   equality is not observer-relative in the same way. BSI already has the
@@ -403,8 +409,9 @@ Data Structures = Programs_** — prior art for two of the three threads.
   written. **The campaign is at a human gate, not mid-flight**; nothing is
   half-done in either half. Redrafting the F&V course around it is a separate,
   later campaign that has not been authorised.
-- **Ceremony.** Documentation commits take the full AR cycle in this repo. The
-  five doc commits below predate that being applied to this directory; if you
+- **Ceremony.** Documentation commits take the full AR cycle in this repo.
+  **None of this campaign's twenty-one commits ran it** — the set was drafted,
+  reviewed by ad-hoc subagents, and committed without the AR gates. If you
   extend the set, run it.
 - **Commit settings line.**
   `work: curriculum authoring · twin-doc: none · prospective` (or
@@ -477,12 +484,13 @@ the authored set; all six remaining errors in the directory are in
 `programming-as-theory-building.md`, a verbatim source transcription left
 unreformatted on purpose [measured 2026-09-03]. All relative links resolve.
 
-**Not mine:** `this-codebase.md` carries an **uncommitted two-line addition by
-the human** — a note that some agentic developers suggest one-shotting rather
-than debugging when prototyping. It is pending their disposition; do not commit
-it and do not sweep it into a `commit -a`. The tracked provenance — `plann.txt`,
-`from-a-job-application/`, the Weintrop PDF — is in scope but historical;
-`README.md` § Provenance says how each is treated.
+**Not mine, but now committed:** `this-codebase.md` carries a two-line addition
+by the human — a note that some agentic developers suggest one-shotting rather
+than debugging when prototyping. It rode into `521ee5af` with the move (git
+scored that file at 98% similarity, the rest at 100%). It is theirs; do not
+rewrite it. The tracked provenance — `plann.txt`, `from-a-job-application/`, the
+Weintrop PDF — is in scope but historical; `README.md` § Provenance says how
+each is treated.
 
 **A previous revision of this file told a successor to leave `on-pseudocode.md`
 alone as an untracked 0-byte file. That was false and dangerous**: it is
@@ -491,30 +499,47 @@ the three homes of the corrective column that item 10 targets. The line was
 written while the file really was empty and never updated. Treat any "leave
 alone" claim in a handoff as decayed until re-checked.
 
-## The largest change since this file was first written
+## The figure, and how much it moved
 
-`970100ce` **replaced the triangle figure with a chain**, and it is not a
-re-draw. The triangle's apex fused two positions — "the idea (cognitive)" and
-"the algorithm (formal)" — because it had no room for pseudocode, which sits
-between them. Retired, then deleted in `4e3857e1`.
+`970100ce` **replaced the triangle with a chain**, and it is not a re-draw. The
+triangle's apex fused two positions — "the idea (cognitive)" and "the algorithm
+(formal)" — because it had no room for pseudocode, which sits between them.
+Retired, then deleted in `4e3857e1`.
 
-F's axis is now seven positions ordered by **causal contact with matter**: the
-artifact, the notional machine, code, the computational thoughts, pseudocode,
-formal notation, CS / theory. **Position 4 is the pivot** — machine-facing to
-its left, not to its right. The **corrective column** is the payload: machines
-disagree with you on the left, proofs on the right, so pseudocode is the one
-position with no external corrective while wearing the costume of one.
+**Then the chain itself was rebuilt three times in the session's final hour, and
+several claims made about it did not survive.** What the figure says now:
 
-Two constraints on it, both human rulings. It is **F's axis** — computing's
-empirical and design work lives on V's side and in the F&V integration, and V
-enters perpendicular at the pivot. And it is **linear on purpose**: it wraps,
-since code can be studied formally and theory applied to physical computation,
-and those are purpose-inversions handled in `ontology.md` §9's already-ratified
-register — a coupling, not a precedence, absent from learner-facing copy.
+- **The left side reads static → dynamic → physical** — code, then notional
+  machines, then the artifact. That is `ontology.md:703-709`'s own static and
+  dynamic faces of artifact-speak, and it replaced "ordered by causal contact
+  with matter", which was the agent's imposed frame and never the human's.
+- **Notional machines are plural and sit _below_ the chain**, not on it, with a
+  ladder of language levels beneath — machine code, assembly, C++, JavaScript.
+  This dissolved a review finding: the earlier figure ranked the notional
+  machine above code, contradicting `thesis.md:246`'s "the programming language
+  is the only one of the three that also causes it".
+- **The pivot divides causing from describing**, not "touches a machine /
+  touches no machine".
+- **The check row reads "what you can check it against"**, not "what can
+  contradict you", with four cells corrected: the artifact takes _measurement_
+  rather than "physics"; code's says _the interpreter — on what it means, not
+  whether you meant it_; CS/theory takes _proof, and measurement_.
+- **The right side is marked NOT YET LAYERED**, with `welcome-to-algorithms/`
+  named as where that layering should come from.
 
-The corrective column now appears in three places — `thesis.md`,
-`on-pseudocode.md` and `the-chain.svg`. **It is the argument, so a drifted cell
-is a wrong document in three places.** Verify all three together or not at all.
+**A claim to strike on sight.** An earlier revision of this file said "V enters
+perpendicular at the pivot" and attributed it to a human ruling. **It was
+neither — it was the agent widening the human's parenthetical about meaningful
+computation into a structural claim, and it was cut from the figure, `thesis.md`
+and `README.md` in `e887972a`.** V is not on this axis. Meaningful computation
+needs both stances, is L6, and is not a position here. If you find that claim
+anywhere, it is residue.
+
+**The check row appears in three places** — `thesis.md`, `on-pseudocode.md` and
+`the-chain.svg`. It is the argument, so a drifted cell is a wrong document in
+three places. The cells were corrected in the figure during the rebuild;
+**whether all three copies still agree has not been re-verified since**, and
+that is the first thing to check.
 
 ## Where I suspect I am wrong
 
@@ -566,12 +591,33 @@ is a wrong document in three places.** Verify all three together or not at all.
    legibility nor notation, in which case the two hats fall out of the DAG
    structurally. Raised, never worked. **Proposal only.**
 
-10. **The corrective column's cells are asserted, not derived.** "Physics"
-    corrects the artifact; "proof" corrects formal notation; the interpreter
-    corrects code. Each is plausible and none was argued. The column is the
-    whole argument of `on-pseudocode.md`, so a wrong cell is a wrong document in
-    three files. **Settle in-session** — but check every cell, not the
-    interesting ones.
+10. **The figure and the prose have diverged, and this is the single most
+    concrete defect in the set.** `the-chain.svg` was rebuilt three times in the
+    session's last hour; `thesis.md` § L4 and `on-pseudocode.md` were not
+    brought with it. Measured 2026-09-06:
+
+    |                  | `thesis.md` / `on-pseudocode.md` | `the-chain.svg`                                              |
+    | ---------------- | -------------------------------- | ------------------------------------------------------------ |
+    | header           | "What corrects you"              | "what you can check it against"                              |
+    | the artifact     | physics                          | measurement                                                  |
+    | code             | the interpreter                  | the interpreter — on what it means, not whether you meant it |
+    | CS / theory      | proof, at the meta-level         | proof, and measurement                                       |
+    | notional machine | **position 2 on the chain**      | **off the chain**, plural, with a language ladder beneath    |
+
+    So the two documents describe the **superseded** figure, including its
+    ranking of the notional machine above code — the thing that contradicts
+    `thesis.md:246`'s own "the programming language is the only one of the three
+    that also causes it". The prose is not merely stale; it re-asserts a
+    contradiction the figure was rebuilt to remove.
+
+    A review also judged four of the seven original cells imprecise or wrong,
+    and its unification is worth adopting while fixing this: **a position has a
+    corrective exactly when it has a fixed semantics someone can mechanise a
+    check against** — which needs no pivot, survives the position-7
+    counterexample, and is already written in `on-pseudocode.md`'s "no fixed
+    semantics" section. **Settle in-session.** This is the first real repair the
+    directory needs.
+
 11. **Position 7's type-shift may want more than a note.** Positions 1–6 are
     things and representations; CS / theory is a discipline whose objects are
     the other positions. The figure marks it by drawing it apart. Whether that
@@ -583,10 +629,9 @@ is a wrong document in three places.** Verify all three together or not at all.
     rather than decorative, the linear presentation is a simplification the
     documents do not admit to. **Proposal only.**
 
-**Item 9 is partly answered.** "Whether the DAG should branch onto V and F" now
-has a partial answer in the chain: V enters perpendicular at position 4 rather
-than branching from modelling computation. Whether that settles it or just
-relocates it is open.
+**Item 9 is not answered.** An earlier revision claimed it was partly settled by
+"V entering perpendicular at position 4" — that claim was struck (see § The
+figure). The DAG-branch question is untouched.
 
 **Three further gaps named in `README.md` § Known gaps that are not above** —
 the spiderweb-topology placement of computational thinking, whether target
