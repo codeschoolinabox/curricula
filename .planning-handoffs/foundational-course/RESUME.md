@@ -74,7 +74,44 @@ Probably yes — a schema does — but run the test before committing.
 
 ## Language: two live options
 
-### Option B, raised last and possibly the stronger: two subsets of JS
+### Option B — the front-runner: expression-oriented and statement-oriented JS levels
+
+Raised last, and it supersedes the functional/procedural framing below on three
+counts.
+
+**It is statically gateable.** "Functional" is a discipline a learner can cheat;
+**expression-versus-statement is grammatical**, so a parser can enforce it. That
+buys Racket's `#lang`-level enforcement without leaving JS, using AST tooling
+the repo already has — and it removes the main advantage Lisp had.
+
+**It is Backus's own vocabulary.** Not functional versus procedural: "The first
+world comprises the right sides of assignment statements. This is an orderly
+world of **expressions**… The second world of conventional programming languages
+is the world of **statements**." The strongest objection's own terms.
+
+**The grammar mirrors the thesis.** An expression _denotes a value_; a statement
+_does something_. Denoting versus doing is relationship versus process at the
+grammatical level. Functional/procedural only loosely tracks that while
+importing purity, higher-order functions, laziness and monads — all irrelevant
+here. It also sidesteps the paradigm argument, which `ontology.md` §13 already
+defers to Ch4.
+
+**The levels are additive, not parallel.** Every statement contains expressions,
+so statement-oriented is a _superset_: begin with expressions only, then admit
+statements and examine what is gained and lost. That is SICP's sequencing, it is
+one language level extending another rather than two dialects forking, and
+**"what did admitting statements cost me?" is a better question than "which do
+you prefer?"**
+
+**The feasibility question to test first.** An expression-only JS has no way to
+bind a name — `const` is a statement — so binding happens by application:
+`((x) => f(x))(5)` rather than `const x = 5; f(x)`. That is either the best
+available first lesson (binding _is_ function application; the substitution
+model made visible, which is what Study Lenses could show) or unbearable arrow
+noise for a beginner. **Test it on a real snippet before the design commits to
+it.**
+
+### Option B′, superseded but recorded: functional and procedural subsets
 
 **JEJ-F (functional) and JEJ-P (procedural)** — one language, two constrained
 subsets, taught as a contrast.
