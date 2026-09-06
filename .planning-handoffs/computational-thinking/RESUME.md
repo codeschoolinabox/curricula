@@ -32,10 +32,43 @@ Two arguments for the split, kept apart so one does not smuggle in the other:
    only this one holds, trimming F&V is cheaper than a third course with a third
    toolchain.
 
-> **A location question this merge exposes.** The theory directory currently
-> sits at `spiralearn/frogramming-and-vibetoading/computational-thinking/` —
-> _inside_ F&V. If it is becoming its own course, that path is wrong. Nothing
-> has been moved; flagging it before anything else accretes there.
+## The destination exists, and moving there is the first unit
+
+`spiralearn/data-shapes-processes-relationships/` (placeholder name) was created
+by the human as a **peer of `frogramming-and-vibetoading/`** — the right level
+for a course, rather than a directory nested inside the course it comments on.
+
+**The theory directory migrates into it, and F&V is cleared of it.** Seventeen
+files: eleven authored Markdown, two figures, the Naur transcription, the
+Weintrop PDF, `plann.txt`, and `from-a-job-application/`.
+
+**This is a governed migration, and the requirement is easy to miss.**
+`DEV.md:1095`: "Migration is transport, not authorship" — every omission, merge
+or reword enumerated in a **loss ledger**, in the commit body or the plan, with
+its justification; `:1116` adds that deletion is enumerated like any other
+removal. Transport verbatim by default. A move that quietly improves prose on
+the way is the failure this rule exists to catch.
+
+**Do it before drafting anything new.** Every file that lands in the old
+location first makes the ledger longer and the move more expensive.
+
+Three things the move changes beyond paths:
+
+- **`tie-ins.md` changes role.** It is currently findings about F&V written from
+  a directory _inside_ F&V. Afterwards it is findings about a **sibling
+  course**, written from a peer. The one-direction citation boundary survives
+  but means something different, and rows like "the curriculum already claims
+  Ch1 teaches CT" become cross-course findings — so the deferred redraft they
+  feed becomes a cross-course campaign.
+- **Every internal link and every F&V citation in the eleven documents needs
+  re-checking**, not rewriting. They cite F&V from inside it today; most should
+  still resolve, but anything written as a relative sibling path will not.
+- **The placeholder name has already answered an open question.**
+  `data-shapes-processes-relationships` names three peers, which commits to data
+  being a **peer** of process and relationship. That is exactly what was left
+  open — the human "nearly wrote `data: relationships and processes`" and did
+  not. The name settles it by accident. Decide it deliberately; the
+  peer-versus-medium test recorded under § The thesis has not been run.
 
 ## The thesis, as it stood at the end of discussion
 
