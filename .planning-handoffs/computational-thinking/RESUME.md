@@ -21,9 +21,10 @@ Its scope has a principled home already in the built work: **it owns the
 position neither existing course does.** The chain in
 `computational-thinking--to-merge/thesis.md` runs artifact → notional machines →
 code | the computational thoughts | pseudocode → formal notation → CS/theory.
-F&V lives left of the pivot; WtA lives right of it. **The computational thoughts
-belong to neither, and their check-cell reads "nothing directly."** The position
-with the least apparatus and the most need has no course.
+The existing courses sit on either side of the pivot; **the computational
+thoughts belong to neither, and their check-cell reads "nothing directly."** The
+position with the least apparatus and the most need has no course. (State that
+in terms of the positions, not the courses — see the V/F ruling below.)
 
 Two arguments for the split, kept apart so one does not smuggle in the other:
 
@@ -31,6 +32,74 @@ Two arguments for the split, kept apart so one does not smuggle in the other:
 2. **Scope pressure** — F&V "has ballooned into madness" (the human's words). If
    only this one holds, trimming F&V is cheaper than a third course with a third
    toolchain.
+
+## Ruling: V and F do not appear in this course
+
+**Human, 2026-09-06, and it lands after everything below was written — so read
+the rest of this file through it.**
+
+> "We will also be removing all V and F talk. Those are distinctions introduced
+> in the V&F course, not that will underly this one. They are built on top of
+> what's taught here." / "They can stay in a separate file/folder that ties the
+> concepts from this new course to the V&F course."
+
+**The reason is structural, not stylistic.** This course is the _prerequisite_.
+Frogramming and Vibetoading are stances a learner meets **later**, defined in
+terms of material this course teaches. A prerequisite that presupposes its
+dependant's vocabulary is circular — and the direction of travel `README.md:12`
+already declares ("these documents cite F&V; F&V does not yet cite back") is the
+symptom, not the licence.
+
+**Scope, measured 2026-09-06**
+[`grep -ohE 'F&V|V&F|[Ff]rogramming|[Vv]ibetoading|\bV-side\b|\bF-side\b|\bV\b|\bF\b' *.md *.svg | sort | uniq -c`]:
+65 hits across ten files — `tie-ins.md` 17, `epicycles.md` 14, `README.md` 12,
+`thesis.md` 9, `computational-languages.md` 5, `domain.md` 2, `half-beat.md` 2,
+`observability.md` 2, `on-pseudocode.md` 1, `the-chain.svg` 1. Clean:
+`meaning.md`, `this-codebase.md`, `the-stack.svg`.
+
+**The figure's one hit is not a stray.** `the-chain.svg:2` is its accessible
+`<title>`: _"The F-side: from a physical process to the study of formal
+structures."_ `e887972a` cut the V mark from the canvas and left the figure's
+own name behind — so the figure is still **named** for a distinction this course
+does not have, in the element a screen reader announces first. Rename it with
+whatever replaces the F's-axis justification; the two are the same decision.
+
+**The destination is already half-built.** `tie-ins.md` is exactly the "separate
+file that ties the concepts to the V&F course" the human describes — it is
+findings about F&V written from outside. So the move is: **strip V/F everywhere
+else, and let `tie-ins.md` (promoted to a folder if it outgrows a file) absorb
+what is genuinely about the relationship.**
+
+**This is not a find-and-replace, and one substitution will not work.** Three
+things are load-bearing and break when V/F leave:
+
+1. **The chain is currently justified _as F's axis_ — and that is what excuses
+   its omissions.** `thesis.md:299-301` says "This is F's side. Computing's
+   empirical and design work… lives on V's side and in the F&V integration."
+   `README.md:40`'s figure caption is "F's axis". Delete V/F and the axis loses
+   its account of **why systems, HCI, ML and software engineering are absent** —
+   which was a deliberate answer to a review finding, not an accident. **A
+   replacement justification is owed before the strip lands**, or the figure
+   starts silently claiming CS is only theory. This is the hard part of the
+   unit.
+2. **`epicycles.md` may not survive as a document of this course.** Fourteen
+   hits, and its spine — the F half-beat and the V half-beat, the "one practice,
+   two target-distances" reading — is _about_ F&V's spiral. Judge whether it is
+   a this-course document with F&V examples, or an F&V document that has been
+   sitting here. If the latter it moves wholesale to the tie-in, and § Suggested
+   next unit's C4 exercise moves with it.
+3. **`thesis.md` § L4's "would collapse onto F" argument** (`:198-199`,
+   `:221-224`) is doing real work — it is why "by way of a model of the target"
+   is stated generally. Restate the argument without naming F; the
+   generalisation is the point and it does not need the stance to make it.
+
+**Do not treat the earlier ruling "F's axis only" (`970100ce`, recorded in the
+state table) as still binding.** It is superseded by this one. The axis is now
+_the_ axis of this course, and it needs its scope defended on its own terms.
+
+**Sequence it before the merge**, not after: merging eleven documents into a
+course while their vocabulary is about to change means rewording twice, and the
+loss ledger owed for the merge would record churn rather than decisions.
 
 ## Where everything is now
 
@@ -465,7 +534,7 @@ directly verifiable).
 | `8f20eb34` | two decayed greps and one stale governance claim fixed                                       | never publish a count whose subject includes the document stating it                        |
 | `712edf2a` | this handoff, after a context-free audit                                                     | decision rights; the operating frame                                                        |
 | `31e830b6` | `on-pseudocode.md`, `the-stack.svg`, the causal-edge fix                                     | the stack's floor is where medium-independence fails                                        |
-| `970100ce` | **the chain replaces the triangle**                                                          | the chain is the axis; correctives split at the pivot; F's axis only                        |
+| `970100ce` | **the chain replaces the triangle**                                                          | the chain is the axis; correctives split at the pivot; ~~F's axis only~~ **superseded**     |
 | `4e3857e1` | the triangle deleted; this file's inventory corrected                                        | —                                                                                           |
 | `e1cf6177` | the handoff updated for the chain; tie-ins' work-order grammar                               | do not widen a scope the human scoped                                                       |
 | `8dd0ae1f` | the two handoffs merged into one campaign                                                    | the theory _is_ the course's theory                                                         |
@@ -689,18 +758,35 @@ way **consumes the only self-check the directory has**, and it cannot be re-run.
 `half-beat.md`** — nothing else, no repo tour — and have it attempt the C4
 draft. That is the check. Your own draft, afterwards, is the content.
 
+**Caveat added after the V/F ruling landed.** This unit's two inputs are
+`epicycles.md` and `half-beat.md` — the two most V/F-saturated documents in the
+set (14 and 2 hits). A context-free reader handed them today meets F half-beats
+and V half-beats with no definition of either, so the exercise would measure the
+missing vocabulary rather than the directory's coherence, and it **cannot be
+re-run** once spent. Either strip those two files first and then run it, or
+accept that what you are testing is the pre-strip set. Do not spend the
+falsification instrument on a version of the documents that is about to change.
+
 (An earlier revision suggested the fan-out/twin-doc question. That is
 governance-adjacent, so its only possible output is a proposal, and `6c34c970`
 already landed the review-side half of it.)
 
 ### Sequence
 
-1. **Merge `computational-thinking--to-merge/` into the course**, under a loss
+**The V/F strip now sits ahead of everything, and it displaces the C4 unit as
+the suggested first move** — see § Ruling for why it sequences before the merge,
+and read the caveat above before deciding whether C4 is still the right unit at
+all.
+
+1. **Strip V and F**, with the replacement justification for the axis's scope
+   drafted first, `epicycles.md`'s fate decided, and `the-chain.svg`'s `<title>`
+   renamed. The tie-in material lands in `tie-ins.md`.
+2. **Merge `computational-thinking--to-merge/` into the course**, under a loss
    ledger. The move is done and lost nothing; the _merge_ will reword, and that
    is what the ledger is for.
-2. Then the two units below — the three must-reads, and the expression-only
+3. Then the two units below — the three must-reads, and the expression-only
    binding test.
-3. Then design.
+4. Then design.
 
 ### And on the course half, before any design
 
