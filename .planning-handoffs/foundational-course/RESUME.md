@@ -103,6 +103,50 @@ one language level extending another rather than two dialects forking, and
 **"what did admitting statements cost me?" is a better question than "which do
 you prefer?"**
 
+**Shared foundation, then a fork on composition, then a merge.** The human's
+structure, and it is better than a grammatical split:
+
+- **Shared:** data types, operators, **bindings**. Both branches need all three.
+- **Fork on composition** — how you build a bigger computation from those
+  pieces. Functions, recursion and the ternary on one side; control flow,
+  sequencing and mutation on the other.
+- **Merge**, where the interesting ambiguities live: functions with side effects
+  and no return, inline IIFEs. Constructable around, and worth constructing
+  toward rather than avoiding.
+
+**Answer to "can you do purely statement-based JS?" — no, and the asymmetry is
+load-bearing.** Every statement contains expressions: `if (x > 1)` has one,
+`x = x + 1;` has one on its right. Backus knew this; his orderly world _is_ "the
+right sides of assignment statements." So **expression-only is possible and
+statement-only is not.** Two consequences: the branches are not symmetric
+siblings, and a clean grammatical fork cannot be drawn — which is exactly why
+the fork belongs at composition. Note also that the shared foundation already
+contains statements, since `const x = 5;` is one.
+
+**The NM already emits the seam, and this is the strongest grounding
+available.** `embody`'s notional machine distinguishes four binding events —
+`category: 'binding'` events, declare → initialize → access → update [read:
+`src/lib/embody/language-levels/just-enough-javascript/notional-machine.md:637`;
+there is a dedicated section on postfix update event ordering at `:502`].
+
+**The `update` event is where the process/relationship seam sits,
+mechanically.** Declare, initialize and access are all compatible with a
+timeless reading — the name denotes a value. Update is not: afterwards the same
+name denotes something different, so _when_ you ask begins to matter. That is
+SICP §3.1.3's referential-transparency claim expressed in the event vocabulary
+this curriculum's own machine already emits, rather than imported from Scheme.
+
+So the thesis is **readable in the event stream**, which means Study Lenses can
+show it rather than assert it: trace a program with no update events against one
+with them, and the difference in what can be reasoned about is visible. That is
+the demonstration the course needs if it is to avoid the failure
+`on-pseudocode.md` diagnoses — being about notation with nothing to check
+against.
+
+It also makes `const` versus `let` structural rather than stylistic: `const`
+makes update events impossible, `let` admits them. JS supplies the marker for
+free.
+
 **The feasibility question to test first.** An expression-only JS has no way to
 bind a name — `const` is a statement — so binding happens by application:
 `((x) => f(x))(5)` rather than `const x = 5; f(x)`. That is either the best
