@@ -21,14 +21,19 @@ Its scope has a principled home already in the built work: **it owns the
 position neither existing course does.** The chain in
 `computational-thinking--to-merge/thesis.md` runs artifact → notional machines →
 code | the computational thoughts | pseudocode → formal notation → CS/theory.
-The existing courses sit on either side of the pivot; **the computational
-thoughts belong to neither, and their check-cell reads "nothing directly."** The
-position with the least apparatus and the most need has no course. (State that
-in terms of the positions, not the courses — see the V/F ruling below.)
+The existing courses sit at opposite ends of it; **the computational thoughts
+belong to neither, and their check-cell reads "nothing directly."** The position
+with the least apparatus and the most need has no course.
+
+**Do not restate this as "position 4 has no home."** That numbering is the
+_superseded_ figure's (item 10), where the thoughts sat **at** the pivot. In the
+rebuilt figure the pivot divides causing from describing and the thoughts sit
+**right** of it, with pseudocode and formal notation. The argument survives the
+renumbering — the check-cell is what carries it — but the phrasing does not.
 
 Two arguments for the split, kept apart so one does not smuggle in the other:
 
-1. **Pedagogical** — position 4 has no home.
+1. **Pedagogical** — the computational thoughts have no home.
 2. **Scope pressure** — F&V "has ballooned into madness" (the human's words). If
    only this one holds, trimming F&V is cheaper than a third course with a third
    toolchain.
@@ -115,7 +120,16 @@ HEAD:<old path>` against the new location]. Twenty of twenty-one files are
 byte-identical; the exception is `this-codebase.md`, which carries the human's
 own two-line addition about agentic developers one-shotting during prototyping.
 Every relative link resolves at the new path, and no document cites F&V through
-a relative link — all F&V references are prose — so nothing broke.
+a relative link — all F&V references are prose.
+
+**But something did break, and it is a published command inside the set.**
+`README.md:184-185` tells a reader to run its definitional-reachability grep
+"from `frogramming-and-vibetoading/`" against `computational-thinking/`. That
+path no longer exists; the command now fails with
+`ugrep: warning: computational-thinking/: No such file or directory`. A pure
+file move cannot break links but **can** invalidate instructions that name paths
+in prose — so "the move lost nothing" is a claim about bytes, not about the set
+still working. Re-point that command as part of the merge.
 
 **The `--to-merge` suffix is the human's and carries intent.** This material is
 to be merged _into_ the course, not kept as a subdirectory of it. **That
@@ -490,21 +504,31 @@ Data Structures = Programs_** — prior art for two of the three threads.
   it. Note the standing rule below about what a fetch is not.
 - **Scope boundary.** No F&V _curriculum_ file has been touched — F&V appears in
   the campaign's history only because the theory directory used to live inside
-  it and has now left. The campaign's commits reach four places [measured
-  2026-09-06: `git log --name-only 8882352d~1..HEAD --pretty=format: | sort
-  -u`]: `spiralearn/data-shapes-processes-relationships/` (the course, current
-  home), `spiralearn/frogramming-and-vibetoading/computational-thinking/` (its
-  former home, now empty), `DEV.md` once for the governance change `6c34c970`,
-  and this handoff. **Use `HEAD`, not a pinned SHA** — an earlier revision
-  published a range ending at `8f20eb34`, which predates this file's creation,
-  so the command structurally could not surface its own counterexample and
-  "confirmed" a false claim. `tie-ins.md` is a table of **findings** about F&V,
-  not a work order — do not act on its rows.
+  it and has now left. The campaign's commits reach five places:
+  `spiralearn/data-shapes-processes-relationships/` (the course, current home),
+  `spiralearn/frogramming-and-vibetoading/computational-thinking/` (its former
+  home, now empty), `.planning-handoffs/computational-thinking/`,
+  `.planning-handoffs/foundational-course/` (the course half, before `8dd0ae1f`
+  merged the threads), and `DEV.md` once for `6c34c970`.
+
+  **Two commands for this have now been published and both were false — do not
+  publish a third without running it.** The first pinned a range ending at
+  `8f20eb34`, which predates this file, so it could not surface its own
+  counterexample. The second,
+  `git log --name-only 8882352d~1..HEAD --pretty=format: | sort -u`, was worse:
+  a **commit range in a shared worktree sweeps up every concurrent campaign.**
+  Measured 2026-09-06 it spans **78 commits across 13 top-level areas** —
+  `src/lib`, and seven foreign `.planning-handoffs/` directories — and the "four
+  places" it was cited for was simply wrong. **A range is never the instrument
+  here; a pathspec is.** Use the listing command under § State. `tie-ins.md` is
+  a table of **findings** about F&V, not a work order — do not act on its rows.
 
 ## Decision rights
 
-The validator found four of nine items below blocked on this, so it is stated
-explicitly.
+The validator found four items below blocked on this, so it is stated
+explicitly. **The list below runs 1–12; items 10, 11 and 12 carry their verdict
+inline** (10 settle in-session, 11 and 12 proposal-only) rather than appearing
+in the two groups here.
 
 **You may settle in-session:** items 2, 5, 6, 7, 8, and drafting the C4
 half-beat. These extend or verify the argument without altering a ruling.
@@ -518,40 +542,70 @@ never edited without explicit human instruction in the conversation.
 
 ## State
 
-Twenty commits on `main` by the path filter below, plus `6c34c970` which touched
-only `DEV.md` and the filter therefore misses — twenty-one in all. None pushed
+**Twenty-seven commits** [measured 2026-09-06: the listing command below returns
+26; `6c34c970` touches only `DEV.md` and no pathspec catches it]. None pushed
 (`main` has no upstream, so "unpushed" is consistent with the tree rather than
 directly verifiable).
 
-| SHA        | What                                                                                         | Rulings it records                                                                          |
-| ---------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `8882352d` | the document set established                                                                 | condition-3 split; F's far target; V-as-CT is pedagogy not ontology                         |
-| `99bfcce1` | L1/L6 rename, condition (c), CT by way of a notional machine                                 | modelling/meaningful; predictive usefulness; Ch1 half-beats F-only; **essay-vs-experiment** |
-| `3504af6a` | Naur read in full                                                                            | the attribution hazard — lines 601+ of the transcription are not Naur                       |
-| `9b161cda` | Naur's decay mechanism                                                                       | decay is not a context-size problem                                                         |
-| `596554bc` | `this-codebase.md`                                                                           | Naur's remedies invert for an LLM collaborator                                              |
-| `6c34c970` | **governance** — twin-doc conformance check in AR-4                                          | conformance not judgement; FLAG don't decide; states its own limit                          |
-| `8f20eb34` | two decayed greps and one stale governance claim fixed                                       | never publish a count whose subject includes the document stating it                        |
-| `712edf2a` | this handoff, after a context-free audit                                                     | decision rights; the operating frame                                                        |
-| `31e830b6` | `on-pseudocode.md`, `the-stack.svg`, the causal-edge fix                                     | the stack's floor is where medium-independence fails                                        |
-| `970100ce` | **the chain replaces the triangle**                                                          | the chain is the axis; correctives split at the pivot; ~~F's axis only~~ **superseded**     |
-| `4e3857e1` | the triangle deleted; this file's inventory corrected                                        | —                                                                                           |
-| `e1cf6177` | the handoff updated for the chain; tie-ins' work-order grammar                               | do not widen a scope the human scoped                                                       |
-| `8dd0ae1f` | the two handoffs merged into one campaign                                                    | the theory _is_ the course's theory                                                         |
-| `cca18948` | the destination recorded — **and its body describes two sections its diff does not contain** | —                                                                                           |
-| `88ad8f09` | the sections `cca18948` claimed                                                              | a match string written before prettier runs is stale by the time it runs                    |
-| `521ee5af` | the human's move of the theory directory, recorded                                           | loss ledger nil; the _merge_ is where one is owed                                           |
+**This file has now shipped a wrong count of its own commits three times** — 20,
+then 21, now corrected to 27. The last miss was structural rather than
+arithmetic: the filter omitted `.planning-handoffs/foundational-course/`, the
+course half's own handoff directory, so **three commits — `f14ca589`,
+`7ea4eec7`, `844080ec` — were invisible to every check run on this file.** They
+carry the expression/statement supersession and the `update`-event seam, i.e.
+the whole front-runner language design. When two threads merge, the merged
+file's filter must union both threads' paths; this one did not until now.
 
-**Do not trust this table's completeness — list it instead:**
-`git log --oneline -- spiralearn/data-shapes-processes-relationships spiralearn/frogramming-and-vibetoading/computational-thinking .planning-handoffs/computational-thinking`.
-The table carries the _rulings_; the log carries the _commits_, and this file
-has already shipped a stale count of them twice.
+| SHA        | What                                                                                         | Rulings it records                                                                                                                                                                             |
+| ---------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `8882352d` | the document set established                                                                 | condition-3 split; ~~F's far target~~; ~~V-as-CT is pedagogy not ontology~~ — **both V/F-framed, see the Ruling; the underlying distinctions may survive a restatement, the wording does not** |
+| `99bfcce1` | L1/L6 rename, condition (c), CT by way of a notional machine                                 | modelling/meaningful; predictive usefulness; ~~Ch1 half-beats F-only~~ (V/F-framed); **essay-vs-experiment**                                                                                   |
+| `3504af6a` | Naur read in full                                                                            | the attribution hazard — lines 601+ of the transcription are not Naur                                                                                                                          |
+| `9b161cda` | Naur's decay mechanism                                                                       | decay is not a context-size problem                                                                                                                                                            |
+| `596554bc` | `this-codebase.md`                                                                           | Naur's remedies invert for an LLM collaborator                                                                                                                                                 |
+| `6c34c970` | **governance** — twin-doc conformance check in AR-4                                          | conformance not judgement; FLAG don't decide; states its own limit                                                                                                                             |
+| `8f20eb34` | two decayed greps and one stale governance claim fixed                                       | never publish a count whose subject includes the document stating it                                                                                                                           |
+| `712edf2a` | this handoff, after a context-free audit                                                     | decision rights; the operating frame                                                                                                                                                           |
+| `31e830b6` | `on-pseudocode.md`, `the-stack.svg`, the causal-edge fix                                     | the stack's floor is where medium-independence fails                                                                                                                                           |
+| `970100ce` | **the chain replaces the triangle**                                                          | the chain is the axis; correctives split at the pivot; ~~F's axis only~~ **superseded**                                                                                                        |
+| `4e3857e1` | the triangle deleted; this file's inventory corrected                                        | —                                                                                                                                                                                              |
+| `e1cf6177` | the handoff updated for the chain; tie-ins' work-order grammar                               | do not widen a scope the human scoped                                                                                                                                                          |
+| `8dd0ae1f` | the two handoffs merged into one campaign                                                    | the theory _is_ the course's theory                                                                                                                                                            |
+| `cca18948` | the destination recorded — **and its body describes two sections its diff does not contain** | —                                                                                                                                                                                              |
+| `88ad8f09` | the sections `cca18948` claimed                                                              | a match string written before prettier runs is stale by the time it runs                                                                                                                       |
+| `521ee5af` | the human's move of the theory directory, recorded                                           | loss ledger nil; the _merge_ is where one is owed                                                                                                                                              |
+
+**Do not trust this table's completeness — list it instead** [runs clean
+2026-09-06, returns 26]:
+
+```sh
+git log --oneline -- \
+  spiralearn/data-shapes-processes-relationships \
+  spiralearn/frogramming-and-vibetoading/computational-thinking \
+  .planning-handoffs/computational-thinking \
+  .planning-handoffs/foundational-course
+```
+
+Add `6c34c970` by hand. The table carries the _rulings_; the log carries the
+_commits_. **The table below is missing the three `foundational-course` commits
+and is known-incomplete** — it was built from the old filter.
 
 Eleven authored Markdown files plus two figures — `the-chain.svg` and
 `the-stack.svg` — and the Naur transcription. `markdownlint` returns 0 across
-the authored set; all six remaining errors in the directory are in
-`programming-as-theory-building.md`, a verbatim source transcription left
-unreformatted on purpose [measured 2026-09-03]. All relative links resolve.
+the **eleven authored files**. The directory _tree_ carries **ten** errors, not
+six [measured 2026-09-06]: six in `programming-as-theory-building.md` (a
+verbatim source transcription left unreformatted on purpose) plus four in the
+provenance folder — `from-a-job-application/ltp-ptl.md` (3) and
+`from-a-job-application/study-lenses.md` (1). An earlier revision said "all six
+… in the directory", which was true of the authored set and false of the tree.
+All relative links resolve.
+
+**Measure this from the repo root with `npm run lint:md`, never from inside the
+directory.** Running `npx markdownlint-cli2` with the directory as CWD does not
+resolve the repo config, so MD013 line-length fires on every reflowed paragraph
+and the same tree reports **160** errors instead of 10 — all false. This was
+walked into while _verifying_ the number above, which is the point: the wrong
+invocation does not fail, it just lies.
 
 **Not mine, but now committed:** `this-codebase.md` carries a two-line addition
 by the human — a note that some agentic developers suggest one-shotting rather
@@ -601,8 +655,13 @@ perpendicular at the pivot" and attributed it to a human ruling. **It was
 neither — it was the agent widening the human's parenthetical about meaningful
 computation into a structural claim, and it was cut from the figure, `thesis.md`
 and `README.md` in `e887972a`.** V is not on this axis. Meaningful computation
-needs both stances, is L6, and is not a position here. If you find that claim
-anywhere, it is residue.
+is L6 and is not a position here. If you find that claim anywhere, it is
+residue.
+
+(The gloss "meaningful computation needs both stances" is itself V/F-framed and
+falls under the Ruling. What survives is the L6 definition in `thesis.md` — a
+relation between a computation and an audience, which needs no course vocabulary
+to state.)
 
 **The check row appears in three places** — `thesis.md`, `on-pseudocode.md` and
 `the-chain.svg`. It is the argument, so a drifted cell is a wrong document in
@@ -619,10 +678,12 @@ that is the first thing to check.
    check all three. **Proposal only**: L6's name is a ruling.
 2. **"By way of a model of the target" may only assert what it claims.**
    `thesis.md` § L4 says this generalisation stops computational thinking
-   collapsing onto F. Test it against V: what is the model when the target is a
-   person, and does the rest of the chain still apply? `tie-ins.md`'s
-   `ontology.md:936-946` row is the material to test with. **Settle
-   in-session.**
+   collapsing onto one stance. The substance is whether the chain still applies
+   when **the target is a person rather than a machine** — which does not need
+   the stance names. `tie-ins.md`'s `ontology.md:936-946` row is the material to
+   test with, and it is V-framed; that is fine **because `tie-ins.md` is the
+   tie-in document and the Ruling exempts it.** Run the test there, carry only
+   the stance-free conclusion back. **Settle in-session.**
 3. **"Modelling computation" is untested against a learner.** It replaced
    "meaningful" partly because that read as praise; "modelling" may read as
    jargon, which is a different failure, not a fixed one. **No LLM session can
@@ -643,11 +704,13 @@ that is the first thing to check.
    in-session** and record it as a ruling.
 7. **Every `Owed:` marker is a live fabrication risk.** Putnam, Searle,
    Piccinini, Grice, Ryle, diSessa, Wing, Papert, du Boulay, Sorva, Stefik &
-   Siebert, METR — plus **Wilensky**, **Sweller** and **van Merriënboer**, which
-   an earlier revision of this list omitted. None fetched. The list is not the
-   roster: `grep -n 'Owed:' *.md` is. Naur and Weintrop are the only sources
-   read. **Rule, not a unit:** do not cite an `Owed:` source without fetching
-   it.
+   Siebert, METR, Wilensky, Sweller, van Merriënboer — **plus Chalmers,
+   Woodward, Hertz, Craik and Rosen (`README.md:151-152`), which two successive
+   revisions of this prose list omitted.** None fetched. **The prose list has
+   now been wrong twice; stop maintaining it and run the grep** —
+   `grep -n 'Owed:' *.md` is the roster, this sentence is not. Naur and Weintrop
+   are the only sources read. **Rule, not a unit:** do not cite an `Owed:`
+   source without fetching it.
 8. **The seam-drift prediction has no instrument.** `this-codebase.md` stakes
    that this repo's leaves are in better shape than its cross-module contracts.
    As written that is a wish, not an audit item — it does not say what counts as
@@ -684,8 +747,26 @@ that is the first thing to check.
     corrective exactly when it has a fixed semantics someone can mechanise a
     check against** — which needs no pivot, survives the position-7
     counterexample, and is already written in `on-pseudocode.md`'s "no fixed
-    semantics" section. **Settle in-session.** This is the first real repair the
-    directory needs.
+    semantics" section. **Settle in-session.**
+
+    **Correction: the row lives in _four_ places, not three — and the fourth is
+    already right.** `README.md:62-72` carries it as prose, in the **new**
+    wording: "what you can check it against", "of the representations, only code
+    also causes the process", and the interpreter cell's "it adjudicates what
+    code _means_, never whether you meant it". So `README.md` and
+    `the-chain.svg` agree, and the two stale files are outvoted 2–2 by document
+    count but 2–0 by recency. Repair direction: bring `thesis.md` and
+    `on-pseudocode.md` up to `README.md`, which already did this work.
+
+    **And the table above is not the whole drift.** Also still stale, and not
+    listed in it: `thesis.md:257` and `on-pseudocode.md:52` retain "ordered by
+    **causal contact with matter**", the agent-imposed frame § The figure
+    records as replaced by static → dynamic → physical; and `thesis.md:269`
+    retains "everything to its left **touches a machine**", replaced by causing
+    versus describing. **Do not treat the table as the checklist** — re-derive
+    the drift from the figure.
+
+    This is the first real repair the directory needs.
 
 11. **Position 7's type-shift may want more than a note.** Positions 1–6 are
     things and representations; CS / theory is a discipline whose objects are
@@ -738,6 +819,52 @@ both.
   title run onto it; 601 onward is another, unattributed author. Nothing there
   may be quoted under his name.
 
+## What a cold reader cannot resolve
+
+A context-free agent given only this file was asked where it would have to
+guess. **These are its blockers, verified.** They are not open questions about
+the subject matter — they are places this handoff is underspecified, and the fix
+for each is cheap for you and impossible for them.
+
+1. **`ontology.md` is cited about six times with no path, and two files match.**
+   `spiralearn/frogramming-and-vibetoading/ontology.md` (1619 lines) and
+   `spiralearn/welcome-to-frogramming/ontology.md` (1566 lines) [measured
+   2026-09-06]. **Every line number in this file and in the directory refers to
+   the `frogramming-and-vibetoading/` copy**; the same numbers land on unrelated
+   text in the other. The validator said it would have coin-flipped. Pin the
+   path on first use in whatever you write next.
+2. **There is no course to merge _into_.**
+   `spiralearn/data-shapes-processes-relationships/` contains exactly one entry:
+   `computational-thinking--to-merge/`. So "merge into the course" currently has
+   no destination — the unit is really _author the course's spine, then merge_,
+   or possibly just _rename the directory_. **The human should say which**; it
+   is a curriculum-identity call, not an agent's.
+3. **`JEJ-F` collides with the V/F ruling as a string.** The front-runner's
+   superseded option names a subset "JEJ-F (functional)", and the scope grep's
+   `\bF\b` catches it. It is unrelated to Frogramming. **Exempt it** — or
+   better, note that Option B′ is superseded anyway and the name need not
+   survive.
+4. **The course's name is contradicted by its own README.** `README.md:33` — "it
+   is what the course is named after", of _meaningful computation_. The
+   directory is `data-shapes-processes-relationships`. Both are placeholders
+   standing in different places, and § Where everything is now treats the
+   directory name as having accidentally settled the data question. **A merger
+   cannot tell which to preserve.** Settle the name before merging.
+5. **No decision right is assigned for `epicycles.md`'s fate or the
+   peer-versus-thread question for data.** Both say "decide it"; § Decision
+   rights covers neither. **Both are curriculum-identity, so both are
+   proposal-only** — stated here so the next agent does not have to infer it.
+6. **The three must-reads have no locations.** Backus is described as "freely
+   available" with no URL; SICP §3.1.3 and Kieran (1981) have neither path nor
+   URL. Budget for finding them, and note that MCP connectors in a
+   non-interactive session may be unauthorised.
+7. **Which AR gates apply to an authoring campaign is never stated.** §
+   Operating frame says the twenty-seven commits did not run the cycle and "if
+   you extend the set, run it", but AR-1…AR-5 are code-shaped (`types.ts`, test
+   strategy, implementation audit). **Ask the human which gates bind prose**
+   rather than inventing a mapping — `DEV.md` is governance surface and this
+   handoff cannot rule on it.
+
 ## Suggested next unit
 
 **Draft the C4 half-beat — but read the method note first, because the obvious
@@ -773,6 +900,14 @@ already landed the review-side half of it.)
 
 ### Sequence
 
+**C4's status, stated once so it stops moving.** It is no longer the suggested
+_first_ unit — the V/F strip is — but it is **not dropped**: `README.md:181-182`
+makes it this directory's declared falsification instrument, so it stays owed,
+and it appears as step 3 below. If `epicycles.md` moves wholesale to the tie-in,
+C4 moves with it and the directory needs a **replacement** falsification
+instrument, which would then be a new open item. Decide that when you decide
+`epicycles.md`'s fate, not before.
+
 **The V/F strip now sits ahead of everything, and it displaces the C4 unit as
 the suggested first move** — see § Ruling for why it sequences before the merge,
 and read the caveat above before deciding whether C4 is still the right unit at
@@ -784,9 +919,11 @@ all.
 2. **Merge `computational-thinking--to-merge/` into the course**, under a loss
    ledger. The move is done and lost nothing; the _merge_ will reword, and that
    is what the ledger is for.
-3. Then the two units below — the three must-reads, and the expression-only
+3. **Then C4**, per the caveat above — after the strip, so the context-free
+   reader is not being tested on vocabulary the course no longer has.
+4. Then the two units below — the three must-reads, and the expression-only
    binding test.
-4. Then design.
+5. Then design.
 
 ### And on the course half, before any design
 
