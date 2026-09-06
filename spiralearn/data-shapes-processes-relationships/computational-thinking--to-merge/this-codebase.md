@@ -39,6 +39,8 @@ come to hold the theory.**
   more dangerous than the disease. **This is why the design phase is first and
   immutable here: not because up-front design is superior in general, but
   because the collaborator cannot be trusted to revisit it well.**
+  - Interesting to note that some agentic developers suggest one-shotting things
+    instead of debugging or fixing when prototyping.
 - _Documentation as a memory aid._ Naur's Case 2 has fault-finding programmers
   relying on "their ready knowledge of the system **and** the annotated program
   text" — the text works because they already hold the theory. Here the reader
