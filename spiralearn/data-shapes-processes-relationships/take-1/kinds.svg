@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 715" width="900" height="715" role="img" aria-labelledby="kT kD">
+  <title id="kT">Three kinds of data thought, each with its own internal check, all crossing one reality check</title>
+  <desc id="kD">A data thought sits in a circle at the centre. Three rays leave it and cross a large dashed circle: the reality check. Straight up runs the shape ray, through a node labelled shape — what the data is — with examples an array of numbers, a grammar production, and a foreign key, the last annotated as encoding a relationship while still being a shape. Its internal check is whether the schema itself parses. Where it crosses the reality check it asks whether the data actually measures or describes something about the world, and whether that correspondence is framed correctly — and that crossing is marked as a hand-off seam to CDSP, the Collaborative Data Science Projects curriculum. Up and to the right runs the procedural ray, through a node labelled procedural — what happens and in what order — with the examples x equals x plus one and a for-loop; its internal check is whether it runs at all, and at the reality check it asks whether the computational model behaves like the world well enough to predict with, and whether the output has a use in the world. Down and to the left runs the relational ray, through a node labelled relational — what holds among values, the kind mathematics describes — with examples start less-than-or-equal-to end, a recurrence relation and a complexity bound; its internal check is whether the derivation is valid, and at the reality check it asks whether the formula lets you predict or understand something in the observable world.</desc>
+  <style>
+    :root { color-scheme: light dark; }
+    .ink { fill: #14181d; }
+    .muted { fill: #5b6a6d; }
+    .tag { fill: #8b989a; }
+    .edge { stroke: #14181d; fill: none; }
+    .ring { stroke: #a03e2f; fill: none; }
+    .ringfill { fill: #a03e2f; }
+    .box { fill: #ffffff; stroke: #14181d; }
+    .wfline { stroke: #2c5f5a; fill: none; }
+    .wf { fill: #2c5f5a; }
+    text { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+    .h { font-size: 13.5px; font-weight: 640; }
+    .s { font-size: 11.5px; }
+    .t { font-size: 10px; }
+    .g { font-size: 9px; letter-spacing: .14em; }
+    @media (prefers-color-scheme: dark) {
+      .ink { fill: #e7ebeb; }
+      .muted { fill: #9daaac; }
+      .tag { fill: #6d7b7d; }
+      .edge { stroke: #e7ebeb; }
+      .ring { stroke: #e08670; }
+      .ringfill { fill: #e08670; }
+      .box { fill: #14181a; stroke: #e7ebeb; }
+      .wfline { stroke: #6fb5ac; }
+      .wf { fill: #6fb5ac; }
+    }
+  </style>
+
+  <circle cx="450" cy="330" r="200" class="ring" stroke-width="2" stroke-dasharray="8 7"/>
+
+  <!-- rays -->
+  <path d="M450 286 L450 244" class="edge" stroke-width="1.5"/>
+  <path d="M450 196 L450 128" class="edge" stroke-width="1.5"/>
+  <path d="M490 313 L497 310" class="edge" stroke-width="1.5"/>
+  <path d="M589 268 L640 244" class="edge" stroke-width="1.5"/>
+  <path d="M410 348 L403 351" class="edge" stroke-width="1.5"/>
+  <path d="M311 393 L260 417" class="edge" stroke-width="1.5"/>
+
+  <!-- centre -->
+  <circle cx="450" cy="330" r="44" class="box" stroke-width="1.8"/>
+  <text x="450" y="326" text-anchor="middle" class="h ink">a data</text>
+  <text x="450" y="343" text-anchor="middle" class="h ink">thought</text>
+
+  <!-- SHAPE -->
+  <rect x="388" y="198" width="124" height="44" rx="4" class="box" stroke-width="1.6"/>
+  <text x="450" y="218" text-anchor="middle" class="h ink">shape</text>
+  <text x="450" y="233" text-anchor="middle" class="t muted">what the data is</text>
+  <text x="522" y="206" class="t ink">Array&lt;number&gt;</text>
+  <text x="522" y="219" class="t ink">a grammar production</text>
+  <text x="522" y="232" class="ringfill t">a foreign key</text>
+  <text x="522" y="244" class="t muted">encodes a relationship,</text>
+  <text x="522" y="256" class="t muted">and is still a shape</text>
+  <text x="380" y="214" text-anchor="end" class="g wf">INTERNAL</text>
+  <text x="380" y="227" text-anchor="end" class="t ink">does the schema parse</text>
+  <text x="450" y="48" text-anchor="middle" class="s ink">does it actually measure or describe</text>
+  <text x="450" y="65" text-anchor="middle" class="s ink">something about the world &#8212; and is that</text>
+  <text x="450" y="82" text-anchor="middle" class="s ink">correspondence framed correctly?</text>
+  <text x="450" y="103" text-anchor="middle" class="g ringfill">HAND-OFF SEAM &#8212; CDSP</text>
+  <text x="450" y="118" text-anchor="middle" class="t muted">Collaborative Data Science Projects</text>
+
+  <!-- PROCEDURAL -->
+  <rect x="497" y="288" width="92" height="44" rx="4" class="box" stroke-width="1.6"/>
+  <text x="543" y="308" text-anchor="middle" class="h ink">procedural</text>
+  <text x="543" y="323" text-anchor="middle" class="t muted">what happens</text>
+  <text x="543" y="350" text-anchor="middle" class="t ink">x = x + 1 &#183; a for-loop</text>
+  <text x="543" y="274" text-anchor="middle" class="g wf">INTERNAL &#183; DOES IT RUN</text>
+  <text x="664" y="196" class="s ink">does the computational model</text>
+  <text x="664" y="213" class="s ink">behave like the world, closely</text>
+  <text x="664" y="230" class="s ink">enough to predict with?</text>
+  <text x="664" y="256" class="s ink">and / or does the output</text>
+  <text x="664" y="273" class="s ink">have a use in the world?</text>
+
+  <!-- RELATIONAL -->
+  <rect x="311" y="348" width="92" height="44" rx="4" class="box" stroke-width="1.6"/>
+  <text x="357" y="368" text-anchor="middle" class="h ink">relational</text>
+  <text x="357" y="383" text-anchor="middle" class="t muted">what holds</text>
+  <text x="357" y="412" text-anchor="middle" class="t ink">start &lt;= end</text>
+  <text x="357" y="425" text-anchor="middle" class="t ink">f(n) = f(n-1) + f(n-2)</text>
+  <text x="357" y="438" text-anchor="middle" class="t ink">T(n) = O(n log n)</text>
+  <text x="357" y="452" text-anchor="middle" class="t muted">the kind mathematics describes</text>
+  <text x="303" y="360" text-anchor="end" class="g wf">INTERNAL</text>
+  <text x="303" y="373" text-anchor="end" class="t ink">is the derivation valid</text>
+  <text x="236" y="470" text-anchor="end" class="s ink">does the formula let you</text>
+  <text x="236" y="487" text-anchor="end" class="s ink">predict or understand something</text>
+  <text x="236" y="504" text-anchor="end" class="s ink">in the observable world?</text>
+
+  <text x="450" y="560" text-anchor="middle" class="g ringfill">THE REALITY CHECK &#8212; ONE BOUNDARY, THREE DIFFERENT CROSSINGS</text>
+  <text x="450" y="578" text-anchor="middle" class="t muted">internal validity = well-formedness &#183; external validity = correspondence</text>
+  <text x="450" y="602" text-anchor="middle" class="s muted">the internal check differs by kind &#8212; a parser, an interpreter, a derivation &#8212; and so does the crossing.</text>
+  <text x="450" y="620" text-anchor="middle" class="s muted">What is one is the boundary: every kind has to meet the world, and none of them meets it the same way.</text>
+  <text x="450" y="648" text-anchor="middle" class="s muted">the notation does not decide the kind &#8212; a schema can carry a relational thought,</text>
+  <text x="450" y="665" text-anchor="middle" class="s muted">and a foreign key is a shape that happens to encode a relationship.</text>
+  <text x="450" y="690" text-anchor="middle" class="g tag">THREE KINDS OF QUESTION ABOUT ONE SUBJECT</text>
+</svg>

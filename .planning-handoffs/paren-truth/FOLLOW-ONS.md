@@ -196,7 +196,7 @@ concurrently. Scoped gate: `npx vitest run --project unit src/lib/study-lenses/`
 with per-file attribution of any foreign failure; `npx tsc --noEmit` must stay
 at 0. Expect loud CodeMirror/jsdom stderr from orchestrate/editor's tests — that
 file still passes; it is noise, not a failure. Shared tree: pathspec-stage and
-commit in ONE invocation, staged diff exclusively yours, announce full SHAs,
+commit in ONE invocation, the pathspec protects you, not a clean index, announce full SHAs,
 NEVER push.
 ```
 
@@ -507,7 +507,7 @@ Ceremony: full — plan mode + Plan agent, ar-3 after the first failing test, ar
 after self-review, ar-5 over YOUR OWN baseline SHA. Scoped gate: `npx vitest run
 --project unit src/lib/study-lenses/` with per-file attribution of foreign
 failures; `npx tsc --noEmit` stays at 0. Shared tree: pathspec-stage and commit
-in ONE invocation, staged diff exclusively yours, announce full SHAs, NEVER push.
+in ONE invocation, the pathspec protects you, not a clean index, announce full SHAs, NEVER push.
 ```
 
 ---
@@ -582,7 +582,7 @@ touching one, it gets the same treatment.
 Ceremony: full. Scoped gate: `npx vitest run --project unit
 src/lib/study-lenses/` with per-file attribution of foreign failures; `npx tsc
 --noEmit` stays at 0; markdownlint and cspell per changed file. Shared tree:
-pathspec-stage and commit in ONE invocation, staged diff exclusively yours,
+pathspec-stage and commit in ONE invocation, the pathspec protects you, not a clean index,
 announce full SHAs, NEVER push.
 ```
 

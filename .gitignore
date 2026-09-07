@@ -34,3 +34,6 @@ __pycache__/
 
 # machine-generated oracle cache (scripts/repo-facts.mjs)
 .claude/cache/
+
+# local methodology notes
+.translationing

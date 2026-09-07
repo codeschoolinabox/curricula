@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 340" width="640" height="340" role="img" aria-labelledby="wpT wpD">
+  <title id="wpT">Where this course works: two axes, two seams</title>
+  <desc id="wpD">A plane. The horizontal axis runs from a thought held in a person, through a thought written down, to a thought run on a machine. The vertical axis runs from informal to formal. A dashed vertical seam marks the notional machine, beyond which lies the physical artifact. A dashed horizontal seam marks the formal study of computation. The shaded rectangle inside both seams is where this course works, and holds four marks: a data thought, pseudocode, code, and mathematical notation.</desc>
+  <style>
+    :root { color-scheme: light dark; }
+    .ink { fill: #14181d; }
+    .muted { fill: #5b6a6d; }
+    .tag { fill: #8b989a; }
+    .edge { stroke: #14181d; fill: none; }
+    .area { fill: #2c5f5a; }
+    .holds { fill: #2c5f5a; }
+    text { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+    .h { font-size: 13px; font-weight: 640; }
+    .s { font-size: 11px; }
+    .t { font-size: 10px; }
+    .g { font-size: 10px; letter-spacing: .12em; }
+    @media (prefers-color-scheme: dark) {
+      .ink { fill: #e7ebeb; }
+      .muted { fill: #9daaac; }
+      .tag { fill: #6d7b7d; }
+      .edge { stroke: #e7ebeb; }
+      .area { fill: #6fb5ac; }
+      .holds { fill: #6fb5ac; }
+    }
+  </style>
+
+  <rect x="72" y="96" width="356" height="152" class="area" opacity="0.1"/>
+
+  <path d="M72 248 L600 248" class="edge" stroke-width="1.4"/>
+  <path d="M72 248 L72 60" class="edge" stroke-width="1.4"/>
+
+  <text x="250" y="274" text-anchor="middle" class="s ink">held in a person &#8594; written down &#8594; run</text>
+  <text x="34" y="170" text-anchor="middle" class="s ink" transform="rotate(-90 34 170)">informal &#8594; formal</text>
+
+  <path d="M428 60 L428 264" class="edge" stroke-width="1.5" stroke-dasharray="6 5"/>
+  <text x="440" y="206" class="g tag">SEAM &#183; A MACHINE</text>
+  <text x="440" y="222" class="s ink">the notional machine</text>
+  <text x="440" y="238" class="t muted">beyond: the physical artifact</text>
+
+  <path d="M56 96 L600 96" class="edge" stroke-width="1.5" stroke-dasharray="6 5"/>
+  <text x="72" y="84" class="g tag">SEAM &#183; A DISCIPLINE</text>
+  <text x="200" y="84" class="s ink">the formal study of computation</text>
+
+  <text x="250" y="164" text-anchor="middle" class="h holds">this course works here</text>
+
+  <circle cx="130" cy="214" r="4" class="ink"/>
+  <text x="130" y="205" text-anchor="middle" class="t ink">a data thought</text>
+  <circle cx="250" cy="196" r="4" class="ink"/>
+  <text x="250" y="187" text-anchor="middle" class="t ink">pseudocode</text>
+  <circle cx="380" cy="214" r="4" class="ink"/>
+  <text x="380" y="205" text-anchor="middle" class="t ink">code</text>
+  <circle cx="250" cy="122" r="4" class="ink"/>
+  <text x="250" y="113" text-anchor="middle" class="t ink">mathematical notation</text>
+
+  <text x="320" y="308" text-anchor="middle" class="s muted">two seams because there are two axes — not two neighbours on one line</text>
+  <text x="320" y="326" text-anchor="middle" class="t tag">NOTATIONS ARE POINTS · SEAMS ARE EDGES</text>
+</svg>

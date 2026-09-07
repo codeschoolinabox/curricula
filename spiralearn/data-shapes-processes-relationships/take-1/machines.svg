@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 480" width="840" height="480" role="img" aria-labelledby="mT mD">
+  <title id="mT">Each notation has its own notional machine, and the differences are the point</title>
+  <desc id="mD">Five notations in a row, each above its own notional machine. Machine code sits above an idealized von Neumann machine with an instruction pointer, memory cells and registers. C sits above a machine with a call stack, a heap, pointers into both, and undefined behaviour where the model runs out. JavaScript sits above a machine with scopes and closures, a binding lifecycle of declare, initialize, access and update, coercion and an event loop. A regular expression sits above a machine of positions in a string, alternatives and backtracking. Mathematical notation sits above nothing: it has no machine to run, marked in rust. A note records that these are not one machine seen at different levels, and that flattening them toward the von Neumann machine removes exactly what each one is for. At the bottom, a shaded band shows the one arrangement where the machine is genuinely held fixed: two grammatical subsets of one language, expression-oriented and statement-oriented, over a single engine and a single notional machine.</desc>
+  <style>
+    :root { color-scheme: light dark; }
+    .ink { fill: #14181d; }
+    .muted { fill: #5b6a6d; }
+    .tag { fill: #8b989a; }
+    .edge { stroke: #14181d; fill: none; }
+    .box { fill: #ffffff; stroke: #14181d; }
+    .nm { fill: #ffffff; stroke: #9aa5b1; }
+    .absent { fill: #a03e2f; }
+    .absentline { stroke: #a03e2f; fill: none; }
+    .absentbox { fill: #ffffff; stroke: #a03e2f; }
+    .band { fill: #2c5f5a; }
+    .holds { fill: #2c5f5a; }
+    .holdsline { stroke: #2c5f5a; fill: none; }
+    text { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+    .h { font-size: 12.5px; font-weight: 640; }
+    .s { font-size: 11px; }
+    .t { font-size: 9.5px; }
+    .g { font-size: 9px; letter-spacing: .13em; }
+    @media (prefers-color-scheme: dark) {
+      .ink { fill: #e7ebeb; }
+      .muted { fill: #9daaac; }
+      .tag { fill: #6d7b7d; }
+      .edge { stroke: #e7ebeb; }
+      .box { fill: #14181a; stroke: #e7ebeb; }
+      .nm { fill: #14181a; stroke: #55606c; }
+      .absent { fill: #e08670; }
+      .absentline { stroke: #e08670; }
+      .absentbox { fill: #14181a; stroke: #e08670; }
+      .band { fill: #6fb5ac; }
+      .holds { fill: #6fb5ac; }
+      .holdsline { stroke: #6fb5ac; }
+    }
+  </style>
+
+  <text x="20" y="24" class="g tag">A NOTATION, AND THE MACHINE IT IS READ AGAINST &#8212; ONE EACH</text>
+
+  <!-- machine code -->
+  <rect x="20" y="40" width="140" height="32" rx="3" class="box" stroke-width="1.4"/>
+  <text x="90" y="61" text-anchor="middle" class="h ink">machine code</text>
+  <path d="M90 72 L90 96" class="edge" stroke-width="1.3"/>
+  <rect x="20" y="96" width="140" height="96" rx="3" class="nm" stroke-width="1.3"/>
+  <text x="30" y="114" class="t muted">an idealized</text>
+  <text x="30" y="127" class="t ink">von Neumann machine</text>
+  <text x="30" y="146" class="t ink">an instruction pointer</text>
+  <text x="30" y="159" class="t ink">memory cells</text>
+  <text x="30" y="172" class="t ink">registers, one step at a time</text>
+
+  <!-- C -->
+  <rect x="180" y="40" width="140" height="32" rx="3" class="box" stroke-width="1.4"/>
+  <text x="250" y="61" text-anchor="middle" class="h ink">C</text>
+  <path d="M250 72 L250 96" class="edge" stroke-width="1.3"/>
+  <rect x="180" y="96" width="140" height="96" rx="3" class="nm" stroke-width="1.3"/>
+  <text x="190" y="114" class="t muted">a stack-and-heap machine</text>
+  <text x="190" y="133" class="t ink">a call stack</text>
+  <text x="190" y="146" class="t ink">a heap, pointers into both</text>
+  <text x="190" y="159" class="t ink">undefined behaviour</text>
+  <text x="190" y="172" class="t muted">where the model runs out</text>
+
+  <!-- JavaScript -->
+  <rect x="340" y="40" width="140" height="32" rx="3" class="box" stroke-width="1.4"/>
+  <text x="410" y="61" text-anchor="middle" class="h ink">JavaScript</text>
+  <path d="M410 72 L410 96" class="edge" stroke-width="1.3"/>
+  <rect x="340" y="96" width="140" height="96" rx="3" class="nm" stroke-width="1.3"/>
+  <text x="350" y="114" class="t muted">an event-emitting machine</text>
+  <text x="350" y="133" class="t ink">scopes and closures</text>
+  <text x="350" y="146" class="t ink">declare &#8594; initialize &#8594;</text>
+  <text x="350" y="159" class="t ink">access &#8594; update</text>
+  <text x="350" y="172" class="t ink">coercion, an event loop</text>
+
+  <!-- regex -->
+  <rect x="500" y="40" width="140" height="32" rx="3" class="box" stroke-width="1.4"/>
+  <text x="570" y="61" text-anchor="middle" class="h ink">a regular expression</text>
+  <path d="M570 72 L570 96" class="edge" stroke-width="1.3"/>
+  <rect x="500" y="96" width="140" height="96" rx="3" class="nm" stroke-width="1.3"/>
+  <text x="510" y="114" class="t muted">a matching machine</text>
+  <text x="510" y="133" class="t ink">a position in a string</text>
+  <text x="510" y="146" class="t ink">alternatives</text>
+  <text x="510" y="159" class="t ink">backtracking</text>
+  <text x="510" y="172" class="t muted">no memory of what it passed</text>
+
+  <!-- mathematical notation -->
+  <rect x="660" y="40" width="160" height="32" rx="3" class="absentbox" stroke-width="1.5"/>
+  <text x="740" y="61" text-anchor="middle" class="h absent">mathematical notation</text>
+  <path d="M740 72 L740 110" class="absentline" stroke-width="1.4" stroke-dasharray="4 4"/>
+  <circle cx="740" cy="118" r="7" class="absentline" stroke-width="1.5" fill="none"/>
+  <text x="740" y="146" text-anchor="middle" class="s absent">no machine to run</text>
+  <text x="740" y="162" text-anchor="middle" class="t muted">derivation, not execution</text>
+
+  <text x="20" y="224" class="s muted">These are not one machine seen at four levels of detail. Each affords different predictions, and</text>
+  <text x="20" y="241" class="s muted">the operational differences are what make each one teachable &#8212; flattening them toward the von</text>
+  <text x="20" y="258" class="s muted">Neumann machine removes exactly the thing a learner would use it for.</text>
+
+  <!-- the genuine control -->
+  <rect x="20" y="288" width="800" height="128" rx="4" class="band" opacity="0.09"/>
+  <text x="36" y="312" class="g holds">WHERE THE MACHINE IS GENUINELY HELD FIXED</text>
+
+  <rect x="120" y="330" width="180" height="34" rx="3" class="box" stroke-width="1.4"/>
+  <text x="210" y="352" text-anchor="middle" class="s ink">expression-oriented JS</text>
+  <rect x="380" y="330" width="180" height="34" rx="3" class="box" stroke-width="1.4"/>
+  <text x="470" y="352" text-anchor="middle" class="s ink">statement-oriented JS</text>
+  <path d="M210 364 L300 392" class="holdsline" stroke-width="1.4"/>
+  <path d="M470 364 L380 392" class="holdsline" stroke-width="1.4"/>
+  <rect x="256" y="392" width="168" height="30" rx="3" class="box" stroke-width="1.6"/>
+  <text x="340" y="412" text-anchor="middle" class="s ink">one engine, one machine</text>
+  <text x="600" y="348" class="t muted">Two grammatical subsets of one language.</text>
+  <text x="600" y="362" class="t muted">Same notional machine, same events,</text>
+  <text x="600" y="376" class="t muted">two notations &#8212; so any difference in</text>
+  <text x="600" y="390" class="t muted">what can be thought is the notation&#8217;s.</text>
+
+  <text x="20" y="452" class="s muted">Across the top row you are comparing machines. Only in the band are you comparing notations.</text>
+  <text x="20" y="472" class="g tag">THE EXPERIMENT&#8217;S REAL HOME</text>
+</svg>

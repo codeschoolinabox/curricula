@@ -134,7 +134,11 @@
 
 		<div id="banner"></div>
 
-		<textarea id="code" title="the program to run" aria-label="the program to run">
+		<textarea
+			id="code"
+			title="the program to run"
+			aria-label="the program to run"
+		>
 let total = 0;
 for (let i = 0; i &lt; 5; i = i + 1) {
 	total = total + i;
@@ -145,10 +149,14 @@ for (let i = 0; i &lt; 5; i = i + 1) {
 		<details open class="presets">
 			<summary>checkpoint snippets</summary>
 			<div class="preset-btns">
-				<button type="button" class="preset" data-code="let total = 0;
+				<button
+					type="button"
+					class="preset"
+					data-code="let total = 0;
 for (let i = 0; i &lt; 5; i = i + 1) {
 	total = total + i;
-}">
+}"
+				>
 					[1 · clean]
 				</button>
 				<button type="button" class="preset" data-code="null();">
@@ -190,7 +198,11 @@ for (let i = 0; i &lt; 5; i = i + 1) {
 				</select>
 			</label>
 			<label>
-				<input id="capEnabled" type="checkbox" title="enforce an iteration cap" />
+				<input
+					id="capEnabled"
+					type="checkbox"
+					title="enforce an iteration cap"
+				/>
 				max iterations:
 				<input
 					id="cap"
@@ -206,8 +218,8 @@ for (let i = 0; i &lt; 5; i = i + 1) {
 
 		<p class="console-note">
 			The program's own <code>console.log</code> prints to the worker's native
-			console — open dev tools to see it. run neither traps nor forwards it; that
-			is intercept's job.
+			console — open dev tools to see it. run neither traps nor forwards it;
+			that is intercept's job.
 		</p>
 
 		<script type="module">

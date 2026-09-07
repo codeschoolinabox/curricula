@@ -127,13 +127,13 @@ nondeterministic runtime facts, and any questioner may deliberately randomize
 wording or option order. The kind's laws are elsewhere — the envelope,
 assessment as data, cells and anchors on every item — never in the means.
 
-What a dynamic questioner's own Phase 0 settles: the shape its runtime
-facts take; its tier placement if it consumes the evaluators region; and
-its re-encounter story under randomization. The ask seam is settled (human
-ruling 2026-08-18): ask answers directly or behind a promise that settles
-as data — consumers await uniformly, and a sync leaf is untouched. The
-`serves` gate stays static either way: a pure, synchronous predicate over
-the parsed facts — gate on statics, run inside ask.
+What a dynamic questioner's own Phase 0 settles: the shape its runtime facts
+take; its tier placement if it consumes the evaluators region; and its
+re-encounter story under randomization. The ask seam is settled (human ruling
+2026-08-18): ask answers directly or behind a promise that settles as data —
+consumers await uniformly, and a sync leaf is untouched. The `serves` gate stays
+static either way: a pure, synchronous predicate over the parsed facts — gate on
+statics, run inside ask.
 
 ## One grid (the curriculum commitment)
 
@@ -358,11 +358,10 @@ parent owns.
   correct answer, and the accumulated evidence a learner has demonstrated a
   form. Neither exists in the open register (charter law, § Ownership boundary).
 - **family / feature** — each engine's own coarse taxonomy axis; related,
-  partial, non-isomorphic, no total map (see § Taxonomies). One further
-  homonym, resolved the way quizzing's glossary resolves it: lowercase
-  unqualified "family" in this region's prose means the questioner family
-  (the kind this README defines); code-voiced `Family` always means
-  quizzing's taxonomy type.
+  partial, non-isomorphic, no total map (see § Taxonomies). One further homonym,
+  resolved the way quizzing's glossary resolves it: lowercase unqualified
+  "family" in this region's prose means the questioner family (the kind this
+  README defines); code-voiced `Family` always means quizzing's taxonomy type.
 - **form** — the closed register's typed field: the stable content-spec key of
   one generator's output. The open register has no `form` field; its counterpart
   is the analyzer id. "Form" in this README means "one question template an

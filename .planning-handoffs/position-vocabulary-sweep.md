@@ -105,6 +105,6 @@ Gates: per-file eslint / markdownlint-cli2 --no-globs / cspell on every
 changed file; npx tsc --noEmit at its measured session-start baseline;
 npx vitest run --project unit src/lib/study-lenses/ with per-file
 attribution of any foreign failure. Shared tree: pathspec-stage and commit
-in ONE invocation, staged diff exclusively yours, announce full SHAs, NEVER
+in ONE invocation, the pathspec protects you, not a clean index, announce full SHAs, NEVER
 push.
 ```

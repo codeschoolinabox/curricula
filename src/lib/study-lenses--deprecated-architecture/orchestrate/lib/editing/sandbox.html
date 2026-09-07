@@ -112,10 +112,10 @@
 	<body>
 		<h1>Editor Sandbox</h1>
 		<p class="hint">
-			Hover JS keywords for docs. Type for completions (try 'va' for
-			the blocked-item demo — appears in popup with explanation,
-			Enter dismisses without inserting). Cmd/Ctrl-Shift-F to
-			format. JeJ violations appear as red markers in the gutter.
+			Hover JS keywords for docs. Type for completions (try 'va' for the
+			blocked-item demo — appears in popup with explanation, Enter dismisses
+			without inserting). Cmd/Ctrl-Shift-F to format. JeJ violations appear as
+			red markers in the gutter.
 		</p>
 
 		<div class="controls">
@@ -160,7 +160,10 @@
 			import intercept from '../../lib/evaluating/intercept/intercept.ts';
 			import trace from '../../api/trace.ts';
 			// api/debug.ts not yet implemented — stub so sandbox loads
-			const debug = async (_code) => ({ ok: false, error: { kind: 'javascript', message: 'debug not yet implemented' } });
+			const debug = async (_code) => ({
+				ok: false,
+				error: { kind: 'javascript', message: 'debug not yet implemented' },
+			});
 
 			// ─── Sample code ───────────────────────────────────────
 
@@ -222,9 +225,7 @@ console.log(greeting, add(count, 8));
 							'Creates a block-scoped variable that can be reassigned',
 						isJEJ: true,
 						example: 'let age = 25;\nage = 26;',
-						commonMistakes: [
-							'Redeclaration: let x = 1; let x = 2; // Error!',
-						],
+						commonMistakes: ['Redeclaration: let x = 1; let x = 2; // Error!'],
 						whenToUse: 'When you need a variable that might change',
 					},
 					const: {
@@ -237,52 +238,41 @@ console.log(greeting, add(count, 8));
 					function: {
 						description: 'Declares a reusable block of code',
 						isJEJ: false,
-						example:
-							'function greet(name) {\n\treturn "Hello, " + name;\n}',
+						example: 'function greet(name) {\n\treturn "Hello, " + name;\n}',
 						commonMistakes: [
 							'Forgetting return statement',
 							'Calling without parentheses',
 						],
-						whenToUse:
-							'In modern JavaScript, when you need to reuse code',
+						whenToUse: 'In modern JavaScript, when you need to reuse code',
 						whyNotInJej:
 							'A way to package some statements under a name so you can run them with different inputs. JEJ programs run as one flat sequence — defining your own functions opens up a new language level with a new notional machine.',
 					},
 					console: {
-						description:
-							'Browser/Node.js object for debugging and output',
+						description: 'Browser/Node.js object for debugging and output',
 						isJEJ: true,
 						example: 'console.log("Hello!");',
-						whenToUse:
-							'For debugging and seeing what your code does',
+						whenToUse: 'For debugging and seeing what your code does',
 					},
 					return: {
-						description:
-							'Sends a value back from a function and exits',
+						description: 'Sends a value back from a function and exits',
 						isJEJ: true,
 						example: 'function add(a, b) {\n\treturn a + b;\n}',
 						commonMistakes: ['Code after return never runs'],
 						whenToUse: 'To send results back from functions',
 					},
 					if: {
-						description:
-							'Executes code only when a condition is true',
+						description: 'Executes code only when a condition is true',
 						isJEJ: true,
 						example: 'if (age >= 18) {\n\tconsole.log("adult");\n}',
-						commonMistakes: [
-							'Using = instead of === in condition',
-						],
-						whenToUse:
-							'When you need to make decisions in your code',
+						commonMistakes: ['Using = instead of === in condition'],
+						whenToUse: 'When you need to make decisions in your code',
 					},
 					for: {
 						description: 'Repeats code a specific number of times',
 						isJEJ: true,
-						example:
-							'for (let i = 0; i < 5; i++) {\n\tconsole.log(i);\n}',
+						example: 'for (let i = 0; i < 5; i++) {\n\tconsole.log(i);\n}',
 						commonMistakes: ['Off-by-one errors'],
-						whenToUse:
-							'When you know exactly how many times to repeat',
+						whenToUse: 'When you know exactly how many times to repeat',
 					},
 				};
 				return docs[word] || null;
@@ -374,37 +364,33 @@ console.log(greeting, add(count, 8));
 				containerEl.innerHTML = '';
 
 				const lang = languageEl.value;
-				const isJS =
-					lang === 'javascript' || lang === 'typescript';
+				const isJS = lang === 'javascript' || lang === 'typescript';
 
 				// TODO(phase-b): replace stub with embody(SAMPLE_CODE) once real parsing is wired in.
 				// createEditor reads only embodiment.source.code; Phase A stub supplies just that.
 				const sampleEmbodiment = { source: { code: SAMPLE_CODE } };
-				currentEditor = await createEditor(/** @type {any} */ (sampleEmbodiment), {
-					language: lang,
-					parent: containerEl,
-					...(isJS
-						? {
-								linters: [lintWithJeJ],
-								docLookup: lookupDoc,
-								completions: getCompletions,
-								format: format,
-								onFormat(result) {
-									if (result.changed) {
-										appendLog(
-											'format',
-											'formatted — changes applied',
-										);
-									} else {
-										appendLog(
-											'format',
-											'formatted — no changes needed',
-										);
-									}
-								},
-							}
-						: {}),
-				});
+				currentEditor = await createEditor(
+					/** @type {any} */ (sampleEmbodiment),
+					{
+						language: lang,
+						parent: containerEl,
+						...(isJS
+							? {
+									linters: [lintWithJeJ],
+									docLookup: lookupDoc,
+									completions: getCompletions,
+									format: format,
+									onFormat(result) {
+										if (result.changed) {
+											appendLog('format', 'formatted — changes applied');
+										} else {
+											appendLog('format', 'formatted — no changes needed');
+										}
+									},
+								}
+							: {}),
+					},
+				);
 
 				statusEl.textContent = `editor created (${lang})`;
 				appendLog('info', `created editor with language: ${lang}`);
@@ -453,10 +439,7 @@ console.log(greeting, add(count, 8));
 					currentEditor.destroy();
 					currentEditor = null;
 					statusEl.textContent = 'editor destroyed';
-					appendLog(
-						'warn',
-						'destroyed — click [recreate] to make a new one',
-					);
+					appendLog('warn', 'destroyed — click [recreate] to make a new one');
 				});
 
 			document
@@ -466,13 +449,10 @@ console.log(greeting, add(count, 8));
 					await makeEditor();
 				});
 
-			languageEl.addEventListener(
-				'change',
-				async function onLanguageChange() {
-					clearLog();
-					await makeEditor();
-				},
-			);
+			languageEl.addEventListener('change', async function onLanguageChange() {
+				clearLog();
+				await makeEditor();
+			});
 
 			// ─── JeJ execution button handlers ─────────────────────
 
@@ -547,10 +527,7 @@ console.log(greeting, add(count, 8));
 								);
 							}
 						} else {
-							appendLog(
-								'info',
-								`run: ${result.logs.length} event(s)`,
-							);
+							appendLog('info', `run: ${result.logs.length} event(s)`);
 						}
 					} catch (err) {
 						appendLog('error', `run threw: ${err.message}`);
@@ -609,10 +586,7 @@ console.log(greeting, add(count, 8));
 					const code = currentEditor.content;
 					const btn = document.getElementById('btn-debug');
 					btn.disabled = true;
-					appendLog(
-						'info',
-						'debugging — open DevTools before this runs!',
-					);
+					appendLog('info', 'debugging — open DevTools before this runs!');
 
 					try {
 						const result = await debug(code);
@@ -667,7 +641,7 @@ console.log(greeting, add(count, 8));
 			// ─── Init ───────────────────────────────────────────────
 
 			makeEditor().catch(function onInitError(err) {
-				statusEl.textContent = 'init failed: ' + (err && err.message || err);
+				statusEl.textContent = 'init failed: ' + ((err && err.message) || err);
 				statusEl.style.color = '#f48771';
 				console.error('makeEditor startup rejected:', err);
 			});

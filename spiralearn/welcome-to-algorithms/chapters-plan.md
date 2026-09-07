@@ -21,6 +21,13 @@ spiral, exercises, and LLM study integration.
 
 ## Proposed Structure (Lighter Chapters)
 
+### Part 0: Levels of Abstraction
+
+- (re)introduce some vocab for framing the coming chapters
+- Purpose, Behavior, Strategy, Implementation
+- abstraction transitions
+- ...
+
 ### Part I: Algorithm Patterns
 
 These chapters follow the analytical chain (smallest problem → growth → state →
@@ -93,7 +100,14 @@ testable functions.
   explicit treatment.
 - Prerequisite: Functions (learners test functions they already wrote)
 
-### Part III: Complexity
+### Part III: Recursion
+
+- introduce the language mechanism
+- explore it as a strategy (the 5 parts)
+- compare/contrast it to iteration
+- ... see previous courses and notes about recursion
+
+### Part IV: Complexity
 
 <strong>Chapter 7: Complexity & Big O</strong>
 

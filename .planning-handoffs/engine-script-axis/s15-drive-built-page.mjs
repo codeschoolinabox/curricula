@@ -11,9 +11,8 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const { chromium } = await import(
-	'file:///Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/node_modules/playwright/index.mjs'
-);
+const { chromium } =
+	await import('file:///Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/node_modules/playwright/index.mjs');
 
 const ROOT = process.argv[2];
 const PORT = 8137;

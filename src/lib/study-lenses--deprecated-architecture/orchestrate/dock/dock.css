@@ -81,7 +81,10 @@
  * the state cues above are all instantaneous, so nothing is lost without them). */
 @media (prefers-reduced-motion: no-preference) {
 	[data-orchestrator-dock] button {
-		transition: background-color 120ms, border-color 120ms, box-shadow 120ms;
+		transition:
+			background-color 120ms,
+			border-color 120ms,
+			box-shadow 120ms;
 	}
 }
 

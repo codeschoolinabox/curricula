@@ -113,11 +113,11 @@ alone, so the classification call moved inside the questioner (a sibling
 lib-tier leaf, runtime import — legal under the import law). Two consequences
 the Stage-3 design review ratified and the port landed: the composition seam
 lives in the questioner for roster consumers, and a consumer that also needs
-classified tokens would classify twice unless the engine's two-input entry
-stays public BESIDE the envelope — so both surfaces are public (the engine
-entry for classified-sharing consumers, who classify exactly once; the
-questioner as the family's roster surface). The port's oracle was unaffected —
-the wrap added an entry, it did not change one.
+classified tokens would classify twice unless the engine's two-input entry stays
+public BESIDE the envelope — so both surfaces are public (the engine entry for
+classified-sharing consumers, who classify exactly once; the questioner as the
+family's roster surface). The port's oracle was unaffected — the wrap added an
+entry, it did not change one.
 
 ### Out of scope
 
@@ -237,22 +237,21 @@ collateral) until it retires.
   "pure and stateless" — its content (assessment as data; no learner state)
   stands; blanket generation-purity does not. Grading determinism was NOT
   loosened. The dynamic questioner's open seams (runtime-facts shape; tier
-  placement if it consumes the evaluators region) are recorded in README
-  § Static and dynamic ground truth — the third recorded seam, the
-  sync-typed ask, was resolved by the 2026-08-18 widening (next row).
-- **Ask is async-capable** (human ruling 2026-08-18, the Stage-3 gate
-  round): the return widens to
+  placement if it consumes the evaluators region) are recorded in README §
+  Static and dynamic ground truth — the third recorded seam, the sync-typed ask,
+  was resolved by the 2026-08-18 widening (next row).
+- **Ask is async-capable** (human ruling 2026-08-18, the Stage-3 gate round):
+  the return widens to
   `TAnswer | QuestionerRefusal | Promise<TAnswer | QuestionerRefusal>`.
-  Consumers await uniformly (awaiting a plain value is the identity); a
-  sync leaf satisfies the widened type unchanged — the landed socratizing
-  questioner compiles untouched (measured at the design review, tsc probe
-  against the real import); `serves` stays sync/static by law. A returned
-  promise settles as data and never rejects — the refusal shape covers
-  every non-answer, and an async throw would be an unlegislated third
-  channel. Declined alternative: uniform `Promise` returns, which would
-  force-wrap every sync leaf. `Promise` over `PromiseLike` is deliberate
-  strictness. Cancellation is unmodeled and deferred — an abort parameter
-  is its own family-wide signature event.
+  Consumers await uniformly (awaiting a plain value is the identity); a sync
+  leaf satisfies the widened type unchanged — the landed socratizing questioner
+  compiles untouched (measured at the design review, tsc probe against the real
+  import); `serves` stays sync/static by law. A returned promise settles as data
+  and never rejects — the refusal shape covers every non-answer, and an async
+  throw would be an unlegislated third channel. Declined alternative: uniform
+  `Promise` returns, which would force-wrap every sync leaf. `Promise` over
+  `PromiseLike` is deliberate strictness. Cancellation is unmodeled and deferred
+  — an abort parameter is its own family-wide signature event.
 - **No open/closed register type is minted.** No forward code discriminates on
   the register; minting a discriminant with no consumer would be the first step
   of reviving the orchestrator.

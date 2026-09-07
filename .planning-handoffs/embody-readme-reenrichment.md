@@ -255,6 +255,6 @@ Baselines: re-measure at YOUR start (node scripts/repo-facts.mjs); peer
 sessions commit into this tree concurrently. Gates: markdownlint-cli2
 --no-globs + cspell per changed file; tsc and the scoped unit suite stay at
 your measured baselines. Shared tree: pathspec-stage and commit by FILENAME
-in ONE invocation, staged diff exclusively yours, announce full SHAs, NEVER
+in ONE invocation, the pathspec protects you, not a clean index, announce full SHAs, NEVER
 push.
 ```

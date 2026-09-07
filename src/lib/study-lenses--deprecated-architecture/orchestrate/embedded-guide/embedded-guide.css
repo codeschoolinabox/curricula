@@ -54,7 +54,10 @@
 /* Hover cross-fade — added only when motion is welcome (reduced-motion-safe). */
 @media (prefers-reduced-motion: no-preference) {
 	[data-orchestrator-guide] > button {
-		transition: background-color 120ms, border-color 120ms, box-shadow 120ms;
+		transition:
+			background-color 120ms,
+			border-color 120ms,
+			box-shadow 120ms;
 	}
 }
 

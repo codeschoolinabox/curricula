@@ -40,38 +40,35 @@ READ-ONLY).
 
 ## Group-key grammar — the mastery-propagation identity system [S3]
 
-PROMOTED (Stage 3 landed): the six-axis grammar, the pairwise
-non-prefixing law (oracle-asserted against the live sibling
-serializers), binding identity as `declarationRange` ONLY
-(kind never folds into a key), and the keying-vs-inline placement
-convention now live in `src/lib/study-lenses/lib/questioning/quizzing/`
-README § Glossary "Group key" and DOCS § Structural constraints.
+PROMOTED (Stage 3 landed): the six-axis grammar, the pairwise non-prefixing law
+(oracle-asserted against the live sibling serializers), binding identity as
+`declarationRange` ONLY (kind never folds into a key), and the keying-vs-inline
+placement convention now live in
+`src/lib/study-lenses/lib/questioning/quizzing/` README § Glossary "Group key"
+and DOCS § Structural constraints.
 
 ## The R-6 occurrence-class ruling (`usage:occ`) — READ BEFORE WIRING SCOPE [S3]
 
-PROMOTED (Stage 3 landed): the five-fact account, the
-occurrence-class table, the tracked-set boundary (ruling R-6), and
-resolveBinding's five pinned constraints now live in
-`src/lib/study-lenses/lib/questioning/quizzing/DOCS.md` § Where scope
-comes from, with the glossary entries (tracked set, occ fallback,
-scope forest) in that module's README. ERRATUM, corrected in place at
-promotion (2026-08-25): this section's original body said
-`resolve-binding.test.ts` holds 22 tests; the file holds **17** in
-both the quarry blob and the ported oracle [measured at port: grep -c
-"it(" → 17; the U4 worker re-confirmed at the blob].
+PROMOTED (Stage 3 landed): the five-fact account, the occurrence-class table,
+the tracked-set boundary (ruling R-6), and resolveBinding's five pinned
+constraints now live in `src/lib/study-lenses/lib/questioning/quizzing/DOCS.md`
+§ Where scope comes from, with the glossary entries (tracked set, occ fallback,
+scope forest) in that module's README. ERRATUM, corrected in place at promotion
+(2026-08-25): this section's original body said `resolve-binding.test.ts` holds
+22 tests; the file holds **17** in both the quarry blob and the ported oracle
+[measured at port: grep -c "it(" → 17; the U4 worker re-confirmed at the blob].
 
 ## Grading — total, binary, one-sided [S3; range grading also pinned lens-side, S5]
 
-The [S3] half is PROMOTED (Stage 3 landed): totality/never-throws,
-binary exhaustive set-equality across three variants = FOUR modes,
-the malformed/incorrect boundary, the one-sided seam, and the
-retracted "subset counts" note now live in the quizzing README
-(§ Public API "Grading is one-sided") and DOCS (§ Grading, incl. the
-promoted 11-of-12 mode-pair coverage note). REMAINING lens-side
-[S5]: range comparison is pinned in BOTH directions AGAIN lens-side
-in `grade-ranges.test.ts`, and the no-penalty half of malformed is
-pinned cross-cluster in `mastery.test.ts`'s malformed-is-a-no-op —
-a UI bug must not cost the learner mastery.
+The [S3] half is PROMOTED (Stage 3 landed): totality/never-throws, binary
+exhaustive set-equality across three variants = FOUR modes, the
+malformed/incorrect boundary, the one-sided seam, and the retracted "subset
+counts" note now live in the quizzing README (§ Public API "Grading is
+one-sided") and DOCS (§ Grading, incl. the promoted 11-of-12 mode-pair coverage
+note). REMAINING lens-side [S5]: range comparison is pinned in BOTH directions
+AGAIN lens-side in `grade-ranges.test.ts`, and the no-penalty half of malformed
+is pinned cross-cluster in `mastery.test.ts`'s malformed-is-a-no-op — a UI bug
+must not cost the learner mastery.
 
 ## Mastery — two channels, monotonic, color-free [S5]
 
@@ -95,63 +92,57 @@ Pinned in `lenses/quiz/tests/mastery.test.ts` + `decorations.test.ts`:
 
 ## Earned propagation — credit as data, asymmetric by design [S3 producer / S5 fold]
 
-The PRODUCER half is PROMOTED (Stage 3 landed): unlocks as namespaced
-groupKeys carried by emitted peers (deduped, source-ordered), only
-the sameness forms carrying the field, V10a/V10b group membership,
-V10c's deliberate self-exclusion, the V10b↔V7 bulk-credit bijection
-both directions, and globals-contribute-targets-never-unlocks now
-live in the quizzing README § Glossary "Sameness unlock" and the
-catalog's V10 rows. REMAINING consumer-fold [S5] (pinned in
-`lenses/quiz/tests/mastery.test.ts` inc 7): a correct sameness
-gesture credits the deduped {own groupKey} ∪ item.unlocks one step
-each, accruing on prior progress, capped at 1, PRESERVING a peer's
-prior wrong mark; an incorrect gesture flags only the own group and
-never propagates; empty unlocks tolerated; credit operates in the
-groupKey namespace — never item ids — which is what lets it survive
-re-keys.
+The PRODUCER half is PROMOTED (Stage 3 landed): unlocks as namespaced groupKeys
+carried by emitted peers (deduped, source-ordered), only the sameness forms
+carrying the field, V10a/V10b group membership, V10c's deliberate
+self-exclusion, the V10b↔V7 bulk-credit bijection both directions, and
+globals-contribute-targets-never-unlocks now live in the quizzing README §
+Glossary "Sameness unlock" and the catalog's V10 rows. REMAINING consumer-fold
+[S5] (pinned in `lenses/quiz/tests/mastery.test.ts` inc 7): a correct sameness
+gesture credits the deduped {own groupKey} ∪ item.unlocks one step each,
+accruing on prior progress, capped at 1, PRESERVING a peer's prior wrong mark;
+an incorrect gesture flags only the own group and never propagates; empty
+unlocks tolerated; credit operates in the groupKey namespace — never item ids —
+which is what lets it survive re-keys.
 
 ## Generator registry — ordering is a contract [S3; panel admission S5]
 
-The [S3] half is PROMOTED (Stage 3 landed): the
-token→node→program tier pin, registry-then-stream order (the
-reverse-registry negative twin's live pin is the module's
-run-generators oracle), deliberately-not-source-order, the
-10-generator post-realm taxonomy with V4-fires-last, and the
-surgical-excision record now live in the quizzing README (§ Public
-API "Ordered"), DOCS § Decisions (registry-order row), and
-LOSS-LEDGER § A (the excision inventory, landed at U9). REMAINING
-[S5]: the panel admits by MODE (`mcq` | `click-token` |
+The [S3] half is PROMOTED (Stage 3 landed): the token→node→program tier pin,
+registry-then-stream order (the reverse-registry negative twin's live pin is the
+module's run-generators oracle), deliberately-not-source-order, the 10-generator
+post-realm taxonomy with V4-fires-last, and the surgical-excision record now
+live in the quizzing README (§ Public API "Ordered"), DOCS § Decisions
+(registry-order row), and LOSS-LEDGER § A (the excision inventory, landed at
+U9). REMAINING [S5]: the panel admits by MODE (`mcq` | `click-token` |
 `select-in-code`), never by a form allowlist — pinned in
 `lenses/quiz/tests/build-quiz.test.ts`.
 
 ## Two-stream descent + the use-type taxonomy [S3]
 
-PROMOTED (Stage 3 landed): the one-descent/two-disjoint-streams
-contract, object-literal keys excluded from BOTH streams, the 4-kind
-use-type taxonomy with its pinned edge rulings, and V4's two-chains
-pedagogy now live in the quizzing README (§ Glossary "Anchor
-stream" / "Use-type taxonomy", § Edge cases, the catalog's V4 row)
-and DOCS § Structural constraints.
+PROMOTED (Stage 3 landed): the one-descent/two-disjoint-streams contract,
+object-literal keys excluded from BOTH streams, the 4-kind use-type taxonomy
+with its pinned edge rulings, and V4's two-chains pedagogy now live in the
+quizzing README (§ Glossary "Anchor stream" / "Use-type taxonomy", § Edge cases,
+the catalog's V4 row) and DOCS § Structural constraints.
 
 ## Defensive guards — the engine gates on parsed, not validated [S3]
 
-PROMOTED (Stage 3 landed): var-laundering with per-binding guards,
-V2's contextual-keyword next-token guard, V6b's group separation
-(`element-type:const-update`, deliberately not `category:keyword`),
-and the representative rule (source-first anchor, TDZ-safe, the
-anchor is itself a target) now live in the quizzing README (§ Edge
-cases, § The question catalog) and DOCS § Decisions.
+PROMOTED (Stage 3 landed): var-laundering with per-binding guards, V2's
+contextual-keyword next-token guard, V6b's group separation
+(`element-type:const-update`, deliberately not `category:keyword`), and the
+representative rule (source-first anchor, TDZ-safe, the anchor is itself a
+target) now live in the quizzing README (§ Edge cases, § The question catalog)
+and DOCS § Decisions.
 
 ## QuizFilter — declared, NOT built; Stage 3 inherits a build decision [S3]
 
-PROMOTED (Stage 3 landed): declared-not-consumed (the no-op is
-oracle-pinned), the filter-semantics contract, and the build-
-decision inheritance now live in the quizzing README
-§ Configuration and DOCS § Decisions. NOTE: this section's original
-"1-based inclusive LINES" sentence was SUPERSEDED by the 2026-08-18
-ruling — `QuizFilter.range` is a zero-indexed half-open OFFSET span
-(the family's anchor law; recorded in the module docs). The quiz
-lens's own unconsumed `categories` knob remains Stage-5 material.
+PROMOTED (Stage 3 landed): declared-not-consumed (the no-op is oracle-pinned),
+the filter-semantics contract, and the build- decision inheritance now live in
+the quizzing README § Configuration and DOCS § Decisions. NOTE: this section's
+original "1-based inclusive LINES" sentence was SUPERSEDED by the 2026-08-18
+ruling — `QuizFilter.range` is a zero-indexed half-open OFFSET span (the
+family's anchor law; recorded in the module docs). The quiz lens's own
+unconsumed `categories` knob remains Stage-5 material.
 
 ## Answer modes — five, with a build-state ledger [S5; the AnswerMode vocabulary rides S3's types port]
 
@@ -159,11 +150,11 @@ The `AnswerMode` vocabulary is **five** modes today — `mcq`, `click-token`,
 `click-line`, `select-in-code`, `multi-mcq` — additive-open going forward (the
 "end-state" framing was retired by the 2026-08-18 gate-round ruling, landed at
 a9e4d522: a new mode is an additive cross-consumer contract event), with a
-build-state ledger the plan compresses to four: `multi-mcq` is enumerated but not built; `click-line` is
-graded but not generated (pending `Source.offsets`). One variant per assessment
-gesture; capture mechanics fold within a variant. Interaction invariants pinned
-in `lenses/quiz/tests/anchors.test.ts` + `component.test.tsx` +
-`pending.test.ts`:
+build-state ledger the plan compresses to four: `multi-mcq` is enumerated but
+not built; `click-line` is graded but not generated (pending `Source.offsets`).
+One variant per assessment gesture; capture mechanics fold within a variant.
+Interaction invariants pinned in `lenses/quiz/tests/anchors.test.ts` +
+`component.test.tsx` + `pending.test.ts`:
 
 - **Never-auto-arm**: `defaultActiveTab` = first `mcq` by full scan; null when
   no mcq exists → the panel stays unarmed (a code-answer default would silently
@@ -217,13 +208,12 @@ ratification items).
 
 ## Catalog frame and future forms [S3]
 
-PROMOTED (Stage 3 landed): the Block-Model catalog frame, the
-families build order, the curated-vs-generated provenance
-distinction, the enumerated future forms V9/V12/V13/V14, and the
-partial non-isomorphic Family↔Feature correspondence now live in
-the quizzing README (§ The question catalog, § Glossary). NOTE: this
-section's original "bounded by JEJ's finite concept set" clause was
-SUPERSEDED by locked decision 9 (2026-08-11) — the bank is
+PROMOTED (Stage 3 landed): the Block-Model catalog frame, the families build
+order, the curated-vs-generated provenance distinction, the enumerated future
+forms V9/V12/V13/V14, and the partial non-isomorphic Family↔Feature
+correspondence now live in the quizzing README (§ The question catalog, §
+Glossary). NOTE: this section's original "bounded by JEJ's finite concept set"
+clause was SUPERSEDED by locked decision 9 (2026-08-11) — the bank is
 UN-bounded; `serves` is the serve-this-code test.
 
 ## Reading guide

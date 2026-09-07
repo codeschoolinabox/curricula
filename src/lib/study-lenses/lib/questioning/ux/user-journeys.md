@@ -26,10 +26,10 @@ pre-structural to uni-structural (SOLO) on its concepts; reading at the atom
 level of the text-surface dimension.
 
 **The path:** closed-register items ask "what kind of element is this?" against
-single anchors. Each answer meets a verdict; feedback explains in NM
-vocabulary why the answer is what it is. The learner's grid position barely
-moves — and should not: many small correct namings build the uni-structural
-floor everything else stands on.
+single anchors. Each answer meets a verdict; feedback explains in NM vocabulary
+why the answer is what it is. The learner's grid position barely moves — and
+should not: many small correct namings build the uni-structural floor everything
+else stands on.
 
 **A wrong turn earns:** a verdict plus the machine's explanation — never a score
 that follows them, and never a locked door (mastery display and gating are
