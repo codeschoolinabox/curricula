@@ -92,6 +92,12 @@ points are settled.
 8. **A degradation row is deliberately absent** (AR-5 concern 7): no skipped row
    pins "defect while deriving an account → member absent, cause kept" — left to
    the per-un-skip AR-3s, chosen rather than missed.
+9. **Zero-dummy boundary row deliberately absent** (S2 B3 AR-3 concern 3,
+   2026-09-03): `foo(1,2` throws under acorn yet recovers under loose with ZERO
+   dummy nodes [measured: the B3 reviewer's live probe] — a recovered tree with
+   an empty `invented` is a legal, reachable state no row pins. Candidate
+   boundary row for a later increment; not landed at B3, recorded so it is not
+   lost.
 
 ## Where the BRIEF's short-circuit enumeration was discharged (AR-5 concern 3)
 

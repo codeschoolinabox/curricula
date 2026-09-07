@@ -10,6 +10,7 @@ vi.mock('acorn-loose', () => ({
 	parse: () => {
 		throw new Error('forced reader defect');
 	},
+	isDummy: () => false,
 }));
 
 afterEach(() => {

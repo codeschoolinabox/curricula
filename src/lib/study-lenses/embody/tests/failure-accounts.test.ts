@@ -141,7 +141,7 @@ describe('failure accounts', () => {
 			).toBe(true);
 		});
 
-		it.skip('every enumerated invention is a node of the recovered tree itself', () => {
+		it('every enumerated invention is a node of the recovered tree itself', () => {
 			const { facts } = embody('const x = ;');
 			const recovered = facts.ast.ok ? undefined : facts.ast.value;
 			const invented = facts.ast.ok ? [] : (facts.ast.invented ?? []);
@@ -162,6 +162,12 @@ describe('failure accounts', () => {
 			expect(
 				invented.length > 0 && invented.every((node) => members.has(node)),
 			).toBe(true);
+		});
+
+		it('a reading inventing twice enumerates both inventions distinctly', () => {
+			const { facts } = embody('const x = ; const y = ;');
+			const invented = facts.ast.ok ? [] : (facts.ast.invented ?? []);
+			expect(invented.length === 2 && new Set(invented).size === 2).toBe(true);
 		});
 
 		it.skip('a tokens failure publishes no recovered tree', () => {

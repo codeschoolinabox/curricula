@@ -1,6 +1,6 @@
 import { parse } from 'acorn';
 import type { Node, ParenthesizedExpression, Program } from 'acorn';
-import { parse as looseParse } from 'acorn-loose';
+import { isDummy, parse as looseParse } from 'acorn-loose';
 
 import ECMA_VERSION from './ecma-version.js';
 import isNode from './is-node.js';
@@ -122,9 +122,17 @@ function toRecoveredDerivation(
 			ranges: true,
 			preserveParens: true,
 		});
+		// the fold mutates the tree in place, so it runs before the invention
+		// walk — every enumerated node is a node of the published tree
+		const parenSpansByNode = foldGroupingParens(recovered);
 		return {
-			ast: { ok: false, cause, value: recovered, invented: [] },
-			parenSpansByNode: foldGroupingParens(recovered),
+			ast: {
+				ok: false,
+				cause,
+				value: recovered,
+				invented: enumerateInventions(recovered),
+			},
+			parenSpansByNode,
 		};
 	} catch (error) {
 		console.error(
@@ -220,4 +228,40 @@ function unwrapGroupingParens(
 /** Whether the parse built this node around a pair of grouping parentheses. */
 function isGroupingParens(node: Node): node is ParenthesizedExpression {
 	return node.type === 'ParenthesizedExpression';
+}
+
+/**
+ * Every invented node of the recovered tree — the nodes the recovering
+ * reader supplied where the grammar demanded something the source lacks —
+ * by reference into the tree itself, each once, in tree-walk order. A
+ * reading the reader bridged without inventing enumerates none: an empty
+ * enumeration beside a published tree is a legal state. The transient Set
+ * guards the one-wrapper-per-slot reuse the parse permits (see NodePath);
+ * Array.from, never a spread — the Docusaurus loose-mode hazard the
+ * tokenizer drain documents applies to spreading any non-array iterable.
+ */
+function enumerateInventions(recovered: Program): ReadonlyArray<Node> {
+	const invented = new Set<Node>();
+	collectInventions(recovered, invented);
+	return Array.from(invented);
+}
+
+function collectInventions(node: Node, invented: Set<Node>): void {
+	if (isDummy(node)) {
+		invented.add(node);
+	}
+	for (const child of childNodes(node)) {
+		collectInventions(child, invented);
+	}
+}
+
+// a node's direct child nodes, from object-valued and array-valued slots
+// alike — the node check is what excludes every non-child key
+function childNodes(node: Node): readonly Node[] {
+	const slots = node as unknown as Record<string, unknown>;
+	return Object.values(slots).flatMap((value) =>
+		(Array.isArray(value) ? value : [value]).filter(
+			(element): element is Node => isNode(element),
+		),
+	);
 }
