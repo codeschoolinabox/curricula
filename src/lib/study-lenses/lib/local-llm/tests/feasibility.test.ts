@@ -313,7 +313,7 @@ describe('selectFeasible', () => {
 	});
 
 	describe('named model membership', () => {
-		it.skip('an unknown model id does not throw', () => {
+		it('an unknown model id does not throw', () => {
 			expect(() =>
 				selectFeasible({
 					catalog: [webllmEntry({ id: 'real', vramRequiredMB: 1000 })],
