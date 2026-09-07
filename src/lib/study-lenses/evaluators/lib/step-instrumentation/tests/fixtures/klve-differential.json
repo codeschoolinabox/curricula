@@ -1,0 +1,3320 @@
+{
+	"generatedFrom": "/Users/master/Documents/0-teach-code/0-spiralearn/0-study-lenses-committee/sl-trace-js-klve/dist/record/index.js",
+	"entries": [
+		{
+			"name": "defaults-arithmetic",
+			"code": "let x = 1 + 2; x;",
+			"options": {},
+			"steps": [
+				{
+					"step": 1,
+					"category": "init"
+				},
+				{
+					"step": 2,
+					"category": "statement",
+					"type": "VariableDeclaration",
+					"time": "before",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 0,
+							"index": 0
+						},
+						"end": {
+							"line": 1,
+							"column": 14,
+							"index": 14
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{}
+					],
+					"logs": [],
+					"detail": {
+						"action": "declare",
+						"kind": "let",
+						"target": "x"
+					}
+				},
+				{
+					"step": 3,
+					"category": "expression",
+					"type": "NumericLiteral",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 8,
+							"index": 8
+						},
+						"end": {
+							"line": 1,
+							"column": 9,
+							"index": 9
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{}
+					],
+					"value": 1,
+					"logs": [],
+					"detail": {
+						"action": "literal"
+					}
+				},
+				{
+					"step": 4,
+					"category": "expression",
+					"type": "NumericLiteral",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 12,
+							"index": 12
+						},
+						"end": {
+							"line": 1,
+							"column": 13,
+							"index": 13
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{}
+					],
+					"value": 2,
+					"logs": [],
+					"detail": {
+						"action": "literal"
+					}
+				},
+				{
+					"step": 5,
+					"category": "expression",
+					"type": "BinaryExpression",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 8,
+							"index": 8
+						},
+						"end": {
+							"line": 1,
+							"column": 13,
+							"index": 13
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{}
+					],
+					"value": 3,
+					"logs": [],
+					"detail": {
+						"action": "compute",
+						"operator": "+"
+					}
+				},
+				{
+					"step": 6,
+					"category": "statement",
+					"type": "VariableDeclaration",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 0,
+							"index": 0
+						},
+						"end": {
+							"line": 1,
+							"column": 14,
+							"index": 14
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"x": 3
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "declare",
+						"kind": "let",
+						"target": "x"
+					}
+				},
+				{
+					"step": 7,
+					"category": "statement",
+					"type": "ExpressionStatement",
+					"time": "before",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 15,
+							"index": 15
+						},
+						"end": {
+							"line": 1,
+							"column": 17,
+							"index": 17
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"x": 3
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "evaluate"
+					}
+				},
+				{
+					"step": 8,
+					"category": "expression",
+					"type": "Identifier",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 15,
+							"index": 15
+						},
+						"end": {
+							"line": 1,
+							"column": 16,
+							"index": 16
+						},
+						"identifierName": "x"
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"x": 3
+						}
+					],
+					"value": 3,
+					"logs": [],
+					"detail": {
+						"action": "read",
+						"name": "x"
+					}
+				},
+				{
+					"step": 9,
+					"category": "statement",
+					"type": "ExpressionStatement",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 15,
+							"index": 15
+						},
+						"end": {
+							"line": 1,
+							"column": 17,
+							"index": 17
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"x": 3
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "evaluate"
+					}
+				}
+			]
+		},
+		{
+			"name": "defaults-strings-logs",
+			"code": "let s = \"a\"; console.log(s + \"b\");",
+			"options": {},
+			"steps": [
+				{
+					"step": 1,
+					"category": "init"
+				},
+				{
+					"step": 2,
+					"category": "statement",
+					"type": "VariableDeclaration",
+					"time": "before",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 0,
+							"index": 0
+						},
+						"end": {
+							"line": 1,
+							"column": 12,
+							"index": 12
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{}
+					],
+					"logs": [],
+					"detail": {
+						"action": "declare",
+						"kind": "let",
+						"target": "s"
+					}
+				},
+				{
+					"step": 3,
+					"category": "expression",
+					"type": "StringLiteral",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 8,
+							"index": 8
+						},
+						"end": {
+							"line": 1,
+							"column": 11,
+							"index": 11
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{}
+					],
+					"value": "a",
+					"logs": [],
+					"detail": {
+						"action": "literal"
+					}
+				},
+				{
+					"step": 4,
+					"category": "statement",
+					"type": "VariableDeclaration",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 0,
+							"index": 0
+						},
+						"end": {
+							"line": 1,
+							"column": 12,
+							"index": 12
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"s": "a"
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "declare",
+						"kind": "let",
+						"target": "s"
+					}
+				},
+				{
+					"step": 5,
+					"category": "statement",
+					"type": "ExpressionStatement",
+					"time": "before",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 13,
+							"index": 13
+						},
+						"end": {
+							"line": 1,
+							"column": 34,
+							"index": 34
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"s": "a"
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "evaluate"
+					}
+				},
+				{
+					"step": 6,
+					"category": "expression",
+					"type": "Identifier",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 13,
+							"index": 13
+						},
+						"end": {
+							"line": 1,
+							"column": 20,
+							"index": 20
+						},
+						"identifierName": "console"
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"s": "a"
+						}
+					],
+					"value": {},
+					"logs": [],
+					"detail": {
+						"action": "read",
+						"name": "console"
+					}
+				},
+				{
+					"step": 7,
+					"category": "expression",
+					"type": "MemberExpression",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 13,
+							"index": 13
+						},
+						"end": {
+							"line": 1,
+							"column": 24,
+							"index": 24
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"s": "a"
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "access",
+						"computed": false,
+						"property": "log"
+					}
+				},
+				{
+					"step": 8,
+					"category": "expression",
+					"type": "Identifier",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 25,
+							"index": 25
+						},
+						"end": {
+							"line": 1,
+							"column": 26,
+							"index": 26
+						},
+						"identifierName": "s"
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"s": "a"
+						}
+					],
+					"value": "a",
+					"logs": [],
+					"detail": {
+						"action": "read",
+						"name": "s"
+					}
+				},
+				{
+					"step": 9,
+					"category": "expression",
+					"type": "StringLiteral",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 29,
+							"index": 29
+						},
+						"end": {
+							"line": 1,
+							"column": 32,
+							"index": 32
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"s": "a"
+						}
+					],
+					"value": "b",
+					"logs": [],
+					"detail": {
+						"action": "literal"
+					}
+				},
+				{
+					"step": 10,
+					"category": "expression",
+					"type": "BinaryExpression",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 25,
+							"index": 25
+						},
+						"end": {
+							"line": 1,
+							"column": 32,
+							"index": 32
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"s": "a"
+						}
+					],
+					"value": "ab",
+					"logs": [],
+					"detail": {
+						"action": "compute",
+						"operator": "+"
+					}
+				},
+				{
+					"step": 11,
+					"category": "expression",
+					"type": "CallExpression",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 13,
+							"index": 13
+						},
+						"end": {
+							"line": 1,
+							"column": 33,
+							"index": 33
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"s": "a"
+						}
+					],
+					"logs": [
+						[
+							"ab"
+						]
+					],
+					"detail": {
+						"action": "call",
+						"arity": 1,
+						"callee": "log",
+						"method": true
+					}
+				},
+				{
+					"step": 12,
+					"category": "statement",
+					"type": "ExpressionStatement",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 13,
+							"index": 13
+						},
+						"end": {
+							"line": 1,
+							"column": 34,
+							"index": 34
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"s": "a"
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "evaluate"
+					}
+				}
+			]
+		},
+		{
+			"name": "while-loop",
+			"code": "let i = 0; while (i < 2) { i = i + 1; }",
+			"options": {},
+			"steps": [
+				{
+					"step": 1,
+					"category": "init"
+				},
+				{
+					"step": 2,
+					"category": "statement",
+					"type": "VariableDeclaration",
+					"time": "before",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 0,
+							"index": 0
+						},
+						"end": {
+							"line": 1,
+							"column": 10,
+							"index": 10
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{}
+					],
+					"logs": [],
+					"detail": {
+						"action": "declare",
+						"kind": "let",
+						"target": "i"
+					}
+				},
+				{
+					"step": 3,
+					"category": "expression",
+					"type": "NumericLiteral",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 8,
+							"index": 8
+						},
+						"end": {
+							"line": 1,
+							"column": 9,
+							"index": 9
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{}
+					],
+					"value": 0,
+					"logs": [],
+					"detail": {
+						"action": "literal"
+					}
+				},
+				{
+					"step": 4,
+					"category": "statement",
+					"type": "VariableDeclaration",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 0,
+							"index": 0
+						},
+						"end": {
+							"line": 1,
+							"column": 10,
+							"index": 10
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"i": 0
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "declare",
+						"kind": "let",
+						"target": "i"
+					}
+				},
+				{
+					"step": 5,
+					"category": "statement",
+					"type": "WhileStatement",
+					"time": "before",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 11,
+							"index": 11
+						},
+						"end": {
+							"line": 1,
+							"column": 39,
+							"index": 39
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"i": 0
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "loop"
+					}
+				},
+				{
+					"step": 6,
+					"category": "expression",
+					"type": "BinaryExpression",
+					"time": "before",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 18,
+							"index": 18
+						},
+						"end": {
+							"line": 1,
+							"column": 23,
+							"index": 23
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"i": 0
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "compute",
+						"operator": "<"
+					}
+				},
+				{
+					"step": 7,
+					"category": "expression",
+					"type": "Identifier",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 18,
+							"index": 18
+						},
+						"end": {
+							"line": 1,
+							"column": 19,
+							"index": 19
+						},
+						"identifierName": "i"
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"i": 0
+						}
+					],
+					"value": 0,
+					"logs": [],
+					"detail": {
+						"action": "read",
+						"name": "i"
+					}
+				},
+				{
+					"step": 8,
+					"category": "expression",
+					"type": "NumericLiteral",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 22,
+							"index": 22
+						},
+						"end": {
+							"line": 1,
+							"column": 23,
+							"index": 23
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"i": 0
+						}
+					],
+					"value": 2,
+					"logs": [],
+					"detail": {
+						"action": "literal"
+					}
+				},
+				{
+					"step": 9,
+					"category": "expression",
+					"type": "BinaryExpression",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 18,
+							"index": 18
+						},
+						"end": {
+							"line": 1,
+							"column": 23,
+							"index": 23
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"i": 0
+						}
+					],
+					"value": true,
+					"logs": [],
+					"detail": {
+						"action": "compute",
+						"operator": "<"
+					}
+				},
+				{
+					"step": 10,
+					"category": "statement",
+					"type": "ExpressionStatement",
+					"time": "before",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 27,
+							"index": 27
+						},
+						"end": {
+							"line": 1,
+							"column": 37,
+							"index": 37
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{},
+						{
+							"i": 0
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "evaluate"
+					}
+				},
+				{
+					"step": 11,
+					"category": "expression",
+					"type": "Identifier",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 31,
+							"index": 31
+						},
+						"end": {
+							"line": 1,
+							"column": 32,
+							"index": 32
+						},
+						"identifierName": "i"
+					},
+					"dt": 0,
+					"scopes": [
+						{},
+						{
+							"i": 0
+						}
+					],
+					"value": 0,
+					"logs": [],
+					"detail": {
+						"action": "read",
+						"name": "i"
+					}
+				},
+				{
+					"step": 12,
+					"category": "expression",
+					"type": "NumericLiteral",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 35,
+							"index": 35
+						},
+						"end": {
+							"line": 1,
+							"column": 36,
+							"index": 36
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{},
+						{
+							"i": 0
+						}
+					],
+					"value": 1,
+					"logs": [],
+					"detail": {
+						"action": "literal"
+					}
+				},
+				{
+					"step": 13,
+					"category": "expression",
+					"type": "BinaryExpression",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 31,
+							"index": 31
+						},
+						"end": {
+							"line": 1,
+							"column": 36,
+							"index": 36
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{},
+						{
+							"i": 0
+						}
+					],
+					"value": 1,
+					"logs": [],
+					"detail": {
+						"action": "compute",
+						"operator": "+"
+					}
+				},
+				{
+					"step": 14,
+					"category": "expression",
+					"type": "AssignmentExpression",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 27,
+							"index": 27
+						},
+						"end": {
+							"line": 1,
+							"column": 36,
+							"index": 36
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{},
+						{
+							"i": 1
+						}
+					],
+					"value": 1,
+					"logs": [],
+					"detail": {
+						"action": "assign",
+						"operator": "=",
+						"target": "i"
+					}
+				},
+				{
+					"step": 15,
+					"category": "statement",
+					"type": "ExpressionStatement",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 27,
+							"index": 27
+						},
+						"end": {
+							"line": 1,
+							"column": 37,
+							"index": 37
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{},
+						{
+							"i": 1
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "evaluate"
+					}
+				},
+				{
+					"step": 16,
+					"category": "expression",
+					"type": "BinaryExpression",
+					"time": "before",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 18,
+							"index": 18
+						},
+						"end": {
+							"line": 1,
+							"column": 23,
+							"index": 23
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"i": 1
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "compute",
+						"operator": "<"
+					}
+				},
+				{
+					"step": 17,
+					"category": "expression",
+					"type": "Identifier",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 18,
+							"index": 18
+						},
+						"end": {
+							"line": 1,
+							"column": 19,
+							"index": 19
+						},
+						"identifierName": "i"
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"i": 1
+						}
+					],
+					"value": 1,
+					"logs": [],
+					"detail": {
+						"action": "read",
+						"name": "i"
+					}
+				},
+				{
+					"step": 18,
+					"category": "expression",
+					"type": "NumericLiteral",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 22,
+							"index": 22
+						},
+						"end": {
+							"line": 1,
+							"column": 23,
+							"index": 23
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"i": 1
+						}
+					],
+					"value": 2,
+					"logs": [],
+					"detail": {
+						"action": "literal"
+					}
+				},
+				{
+					"step": 19,
+					"category": "expression",
+					"type": "BinaryExpression",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 18,
+							"index": 18
+						},
+						"end": {
+							"line": 1,
+							"column": 23,
+							"index": 23
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"i": 1
+						}
+					],
+					"value": true,
+					"logs": [],
+					"detail": {
+						"action": "compute",
+						"operator": "<"
+					}
+				},
+				{
+					"step": 20,
+					"category": "statement",
+					"type": "ExpressionStatement",
+					"time": "before",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 27,
+							"index": 27
+						},
+						"end": {
+							"line": 1,
+							"column": 37,
+							"index": 37
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{},
+						{
+							"i": 1
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "evaluate"
+					}
+				},
+				{
+					"step": 21,
+					"category": "expression",
+					"type": "Identifier",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 31,
+							"index": 31
+						},
+						"end": {
+							"line": 1,
+							"column": 32,
+							"index": 32
+						},
+						"identifierName": "i"
+					},
+					"dt": 0,
+					"scopes": [
+						{},
+						{
+							"i": 1
+						}
+					],
+					"value": 1,
+					"logs": [],
+					"detail": {
+						"action": "read",
+						"name": "i"
+					}
+				},
+				{
+					"step": 22,
+					"category": "expression",
+					"type": "NumericLiteral",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 35,
+							"index": 35
+						},
+						"end": {
+							"line": 1,
+							"column": 36,
+							"index": 36
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{},
+						{
+							"i": 1
+						}
+					],
+					"value": 1,
+					"logs": [],
+					"detail": {
+						"action": "literal"
+					}
+				},
+				{
+					"step": 23,
+					"category": "expression",
+					"type": "BinaryExpression",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 31,
+							"index": 31
+						},
+						"end": {
+							"line": 1,
+							"column": 36,
+							"index": 36
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{},
+						{
+							"i": 1
+						}
+					],
+					"value": 2,
+					"logs": [],
+					"detail": {
+						"action": "compute",
+						"operator": "+"
+					}
+				},
+				{
+					"step": 24,
+					"category": "expression",
+					"type": "AssignmentExpression",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 27,
+							"index": 27
+						},
+						"end": {
+							"line": 1,
+							"column": 36,
+							"index": 36
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{},
+						{
+							"i": 2
+						}
+					],
+					"value": 2,
+					"logs": [],
+					"detail": {
+						"action": "assign",
+						"operator": "=",
+						"target": "i"
+					}
+				},
+				{
+					"step": 25,
+					"category": "statement",
+					"type": "ExpressionStatement",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 27,
+							"index": 27
+						},
+						"end": {
+							"line": 1,
+							"column": 37,
+							"index": 37
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{},
+						{
+							"i": 2
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "evaluate"
+					}
+				},
+				{
+					"step": 26,
+					"category": "expression",
+					"type": "BinaryExpression",
+					"time": "before",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 18,
+							"index": 18
+						},
+						"end": {
+							"line": 1,
+							"column": 23,
+							"index": 23
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"i": 2
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "compute",
+						"operator": "<"
+					}
+				},
+				{
+					"step": 27,
+					"category": "expression",
+					"type": "Identifier",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 18,
+							"index": 18
+						},
+						"end": {
+							"line": 1,
+							"column": 19,
+							"index": 19
+						},
+						"identifierName": "i"
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"i": 2
+						}
+					],
+					"value": 2,
+					"logs": [],
+					"detail": {
+						"action": "read",
+						"name": "i"
+					}
+				},
+				{
+					"step": 28,
+					"category": "expression",
+					"type": "NumericLiteral",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 22,
+							"index": 22
+						},
+						"end": {
+							"line": 1,
+							"column": 23,
+							"index": 23
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"i": 2
+						}
+					],
+					"value": 2,
+					"logs": [],
+					"detail": {
+						"action": "literal"
+					}
+				},
+				{
+					"step": 29,
+					"category": "expression",
+					"type": "BinaryExpression",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 18,
+							"index": 18
+						},
+						"end": {
+							"line": 1,
+							"column": 23,
+							"index": 23
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"i": 2
+						}
+					],
+					"value": false,
+					"logs": [],
+					"detail": {
+						"action": "compute",
+						"operator": "<"
+					}
+				}
+			]
+		},
+		{
+			"name": "method-call",
+			"code": "const o = { m: function () { return 7; } }; o.m();",
+			"options": {},
+			"steps": [
+				{
+					"step": 1,
+					"category": "init"
+				},
+				{
+					"step": 2,
+					"category": "statement",
+					"type": "VariableDeclaration",
+					"time": "before",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 0,
+							"index": 0
+						},
+						"end": {
+							"line": 1,
+							"column": 43,
+							"index": 43
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{}
+					],
+					"logs": [],
+					"detail": {
+						"action": "declare",
+						"kind": "const",
+						"target": "o"
+					}
+				},
+				{
+					"step": 3,
+					"category": "expression",
+					"type": "FunctionExpression",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 15,
+							"index": 15
+						},
+						"end": {
+							"line": 1,
+							"column": 40,
+							"index": 40
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{}
+					],
+					"logs": [],
+					"detail": {
+						"action": "define",
+						"name": null,
+						"arity": 0
+					}
+				},
+				{
+					"step": 4,
+					"category": "expression",
+					"type": "ObjectExpression",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 10,
+							"index": 10
+						},
+						"end": {
+							"line": 1,
+							"column": 42,
+							"index": 42
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{}
+					],
+					"value": {},
+					"logs": [],
+					"detail": {
+						"action": "literal",
+						"propertyCount": 1
+					}
+				},
+				{
+					"step": 5,
+					"category": "statement",
+					"type": "VariableDeclaration",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 0,
+							"index": 0
+						},
+						"end": {
+							"line": 1,
+							"column": 43,
+							"index": 43
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"o": {}
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "declare",
+						"kind": "const",
+						"target": "o"
+					}
+				},
+				{
+					"step": 6,
+					"category": "statement",
+					"type": "ExpressionStatement",
+					"time": "before",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 44,
+							"index": 44
+						},
+						"end": {
+							"line": 1,
+							"column": 50,
+							"index": 50
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"o": {}
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "evaluate"
+					}
+				},
+				{
+					"step": 7,
+					"category": "expression",
+					"type": "Identifier",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 44,
+							"index": 44
+						},
+						"end": {
+							"line": 1,
+							"column": 45,
+							"index": 45
+						},
+						"identifierName": "o"
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"o": {}
+						}
+					],
+					"value": {},
+					"logs": [],
+					"detail": {
+						"action": "read",
+						"name": "o"
+					}
+				},
+				{
+					"step": 8,
+					"category": "expression",
+					"type": "MemberExpression",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 44,
+							"index": 44
+						},
+						"end": {
+							"line": 1,
+							"column": 47,
+							"index": 47
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"o": {}
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "access",
+						"computed": false,
+						"property": "m"
+					}
+				},
+				{
+					"step": 9,
+					"category": "statement",
+					"type": "ReturnStatement",
+					"time": "before",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 29,
+							"index": 29
+						},
+						"end": {
+							"line": 1,
+							"column": 38,
+							"index": 38
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{},
+						{
+							"o": {}
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "unknown"
+					}
+				},
+				{
+					"step": 10,
+					"category": "expression",
+					"type": "NumericLiteral",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 36,
+							"index": 36
+						},
+						"end": {
+							"line": 1,
+							"column": 37,
+							"index": 37
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{},
+						{
+							"o": {}
+						}
+					],
+					"value": 7,
+					"logs": [],
+					"detail": {
+						"action": "literal"
+					}
+				},
+				{
+					"step": 11,
+					"category": "expression",
+					"type": "CallExpression",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 44,
+							"index": 44
+						},
+						"end": {
+							"line": 1,
+							"column": 49,
+							"index": 49
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"o": {}
+						}
+					],
+					"value": 7,
+					"logs": [],
+					"detail": {
+						"action": "call",
+						"arity": 0,
+						"callee": "m",
+						"method": true
+					}
+				},
+				{
+					"step": 12,
+					"category": "statement",
+					"type": "ExpressionStatement",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 44,
+							"index": 44
+						},
+						"end": {
+							"line": 1,
+							"column": 50,
+							"index": 50
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"o": {}
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "evaluate"
+					}
+				}
+			]
+		},
+		{
+			"name": "node-toggle-off",
+			"code": "let x = 1 + 2; x;",
+			"options": {
+				"access": {
+					"identifier": false
+				}
+			},
+			"steps": [
+				{
+					"step": 1,
+					"category": "init"
+				},
+				{
+					"step": 2,
+					"category": "statement",
+					"type": "VariableDeclaration",
+					"time": "before",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 0,
+							"index": 0
+						},
+						"end": {
+							"line": 1,
+							"column": 14,
+							"index": 14
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{}
+					],
+					"logs": [],
+					"detail": {
+						"action": "declare",
+						"kind": "let",
+						"target": "x"
+					}
+				},
+				{
+					"step": 3,
+					"category": "expression",
+					"type": "NumericLiteral",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 8,
+							"index": 8
+						},
+						"end": {
+							"line": 1,
+							"column": 9,
+							"index": 9
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{}
+					],
+					"value": 1,
+					"logs": [],
+					"detail": {
+						"action": "literal"
+					}
+				},
+				{
+					"step": 4,
+					"category": "expression",
+					"type": "NumericLiteral",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 12,
+							"index": 12
+						},
+						"end": {
+							"line": 1,
+							"column": 13,
+							"index": 13
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{}
+					],
+					"value": 2,
+					"logs": [],
+					"detail": {
+						"action": "literal"
+					}
+				},
+				{
+					"step": 5,
+					"category": "expression",
+					"type": "BinaryExpression",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 8,
+							"index": 8
+						},
+						"end": {
+							"line": 1,
+							"column": 13,
+							"index": 13
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{}
+					],
+					"value": 3,
+					"logs": [],
+					"detail": {
+						"action": "compute",
+						"operator": "+"
+					}
+				},
+				{
+					"step": 6,
+					"category": "statement",
+					"type": "VariableDeclaration",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 0,
+							"index": 0
+						},
+						"end": {
+							"line": 1,
+							"column": 14,
+							"index": 14
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"x": 3
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "declare",
+						"kind": "let",
+						"target": "x"
+					}
+				},
+				{
+					"step": 7,
+					"category": "statement",
+					"type": "ExpressionStatement",
+					"time": "before",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 15,
+							"index": 15
+						},
+						"end": {
+							"line": 1,
+							"column": 17,
+							"index": 17
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"x": 3
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "evaluate"
+					}
+				},
+				{
+					"step": 8,
+					"category": "statement",
+					"type": "ExpressionStatement",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 15,
+							"index": 15
+						},
+						"end": {
+							"line": 1,
+							"column": 17,
+							"index": 17
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"x": 3
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "evaluate"
+					}
+				}
+			]
+		},
+		{
+			"name": "timing-before-off",
+			"code": "let i = 0; while (i < 2) { i = i + 1; }",
+			"options": {
+				"filter": {
+					"timing": {
+						"before": false
+					}
+				}
+			},
+			"steps": [
+				{
+					"step": 1,
+					"category": "init"
+				},
+				{
+					"step": 2,
+					"category": "expression",
+					"type": "NumericLiteral",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 8,
+							"index": 8
+						},
+						"end": {
+							"line": 1,
+							"column": 9,
+							"index": 9
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{}
+					],
+					"value": 0,
+					"logs": [],
+					"detail": {
+						"action": "literal"
+					}
+				},
+				{
+					"step": 3,
+					"category": "statement",
+					"type": "VariableDeclaration",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 0,
+							"index": 0
+						},
+						"end": {
+							"line": 1,
+							"column": 10,
+							"index": 10
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"i": 0
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "declare",
+						"kind": "let",
+						"target": "i"
+					}
+				},
+				{
+					"step": 4,
+					"category": "expression",
+					"type": "Identifier",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 18,
+							"index": 18
+						},
+						"end": {
+							"line": 1,
+							"column": 19,
+							"index": 19
+						},
+						"identifierName": "i"
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"i": 0
+						}
+					],
+					"value": 0,
+					"logs": [],
+					"detail": {
+						"action": "read",
+						"name": "i"
+					}
+				},
+				{
+					"step": 5,
+					"category": "expression",
+					"type": "NumericLiteral",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 22,
+							"index": 22
+						},
+						"end": {
+							"line": 1,
+							"column": 23,
+							"index": 23
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"i": 0
+						}
+					],
+					"value": 2,
+					"logs": [],
+					"detail": {
+						"action": "literal"
+					}
+				},
+				{
+					"step": 6,
+					"category": "expression",
+					"type": "BinaryExpression",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 18,
+							"index": 18
+						},
+						"end": {
+							"line": 1,
+							"column": 23,
+							"index": 23
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"i": 0
+						}
+					],
+					"value": true,
+					"logs": [],
+					"detail": {
+						"action": "compute",
+						"operator": "<"
+					}
+				},
+				{
+					"step": 7,
+					"category": "expression",
+					"type": "Identifier",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 31,
+							"index": 31
+						},
+						"end": {
+							"line": 1,
+							"column": 32,
+							"index": 32
+						},
+						"identifierName": "i"
+					},
+					"dt": 0,
+					"scopes": [
+						{},
+						{
+							"i": 0
+						}
+					],
+					"value": 0,
+					"logs": [],
+					"detail": {
+						"action": "read",
+						"name": "i"
+					}
+				},
+				{
+					"step": 8,
+					"category": "expression",
+					"type": "NumericLiteral",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 35,
+							"index": 35
+						},
+						"end": {
+							"line": 1,
+							"column": 36,
+							"index": 36
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{},
+						{
+							"i": 0
+						}
+					],
+					"value": 1,
+					"logs": [],
+					"detail": {
+						"action": "literal"
+					}
+				},
+				{
+					"step": 9,
+					"category": "expression",
+					"type": "BinaryExpression",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 31,
+							"index": 31
+						},
+						"end": {
+							"line": 1,
+							"column": 36,
+							"index": 36
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{},
+						{
+							"i": 0
+						}
+					],
+					"value": 1,
+					"logs": [],
+					"detail": {
+						"action": "compute",
+						"operator": "+"
+					}
+				},
+				{
+					"step": 10,
+					"category": "expression",
+					"type": "AssignmentExpression",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 27,
+							"index": 27
+						},
+						"end": {
+							"line": 1,
+							"column": 36,
+							"index": 36
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{},
+						{
+							"i": 1
+						}
+					],
+					"value": 1,
+					"logs": [],
+					"detail": {
+						"action": "assign",
+						"operator": "=",
+						"target": "i"
+					}
+				},
+				{
+					"step": 11,
+					"category": "statement",
+					"type": "ExpressionStatement",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 27,
+							"index": 27
+						},
+						"end": {
+							"line": 1,
+							"column": 37,
+							"index": 37
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{},
+						{
+							"i": 1
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "evaluate"
+					}
+				},
+				{
+					"step": 12,
+					"category": "expression",
+					"type": "Identifier",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 18,
+							"index": 18
+						},
+						"end": {
+							"line": 1,
+							"column": 19,
+							"index": 19
+						},
+						"identifierName": "i"
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"i": 1
+						}
+					],
+					"value": 1,
+					"logs": [],
+					"detail": {
+						"action": "read",
+						"name": "i"
+					}
+				},
+				{
+					"step": 13,
+					"category": "expression",
+					"type": "NumericLiteral",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 22,
+							"index": 22
+						},
+						"end": {
+							"line": 1,
+							"column": 23,
+							"index": 23
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"i": 1
+						}
+					],
+					"value": 2,
+					"logs": [],
+					"detail": {
+						"action": "literal"
+					}
+				},
+				{
+					"step": 14,
+					"category": "expression",
+					"type": "BinaryExpression",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 18,
+							"index": 18
+						},
+						"end": {
+							"line": 1,
+							"column": 23,
+							"index": 23
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"i": 1
+						}
+					],
+					"value": true,
+					"logs": [],
+					"detail": {
+						"action": "compute",
+						"operator": "<"
+					}
+				},
+				{
+					"step": 15,
+					"category": "expression",
+					"type": "Identifier",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 31,
+							"index": 31
+						},
+						"end": {
+							"line": 1,
+							"column": 32,
+							"index": 32
+						},
+						"identifierName": "i"
+					},
+					"dt": 0,
+					"scopes": [
+						{},
+						{
+							"i": 1
+						}
+					],
+					"value": 1,
+					"logs": [],
+					"detail": {
+						"action": "read",
+						"name": "i"
+					}
+				},
+				{
+					"step": 16,
+					"category": "expression",
+					"type": "NumericLiteral",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 35,
+							"index": 35
+						},
+						"end": {
+							"line": 1,
+							"column": 36,
+							"index": 36
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{},
+						{
+							"i": 1
+						}
+					],
+					"value": 1,
+					"logs": [],
+					"detail": {
+						"action": "literal"
+					}
+				},
+				{
+					"step": 17,
+					"category": "expression",
+					"type": "BinaryExpression",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 31,
+							"index": 31
+						},
+						"end": {
+							"line": 1,
+							"column": 36,
+							"index": 36
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{},
+						{
+							"i": 1
+						}
+					],
+					"value": 2,
+					"logs": [],
+					"detail": {
+						"action": "compute",
+						"operator": "+"
+					}
+				},
+				{
+					"step": 18,
+					"category": "expression",
+					"type": "AssignmentExpression",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 27,
+							"index": 27
+						},
+						"end": {
+							"line": 1,
+							"column": 36,
+							"index": 36
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{},
+						{
+							"i": 2
+						}
+					],
+					"value": 2,
+					"logs": [],
+					"detail": {
+						"action": "assign",
+						"operator": "=",
+						"target": "i"
+					}
+				},
+				{
+					"step": 19,
+					"category": "statement",
+					"type": "ExpressionStatement",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 27,
+							"index": 27
+						},
+						"end": {
+							"line": 1,
+							"column": 37,
+							"index": 37
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{},
+						{
+							"i": 2
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "evaluate"
+					}
+				},
+				{
+					"step": 20,
+					"category": "expression",
+					"type": "Identifier",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 18,
+							"index": 18
+						},
+						"end": {
+							"line": 1,
+							"column": 19,
+							"index": 19
+						},
+						"identifierName": "i"
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"i": 2
+						}
+					],
+					"value": 2,
+					"logs": [],
+					"detail": {
+						"action": "read",
+						"name": "i"
+					}
+				},
+				{
+					"step": 21,
+					"category": "expression",
+					"type": "NumericLiteral",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 22,
+							"index": 22
+						},
+						"end": {
+							"line": 1,
+							"column": 23,
+							"index": 23
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"i": 2
+						}
+					],
+					"value": 2,
+					"logs": [],
+					"detail": {
+						"action": "literal"
+					}
+				},
+				{
+					"step": 22,
+					"category": "expression",
+					"type": "BinaryExpression",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 18,
+							"index": 18
+						},
+						"end": {
+							"line": 1,
+							"column": 23,
+							"index": 23
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"i": 2
+						}
+					],
+					"value": false,
+					"logs": [],
+					"detail": {
+						"action": "compute",
+						"operator": "<"
+					}
+				}
+			]
+		},
+		{
+			"name": "names-include",
+			"code": "let a = 1; let b = 2; a; b;",
+			"options": {
+				"filter": {
+					"names": {
+						"include": [
+							"a"
+						]
+					}
+				}
+			},
+			"steps": [
+				{
+					"step": 1,
+					"category": "init"
+				},
+				{
+					"step": 2,
+					"category": "statement",
+					"type": "VariableDeclaration",
+					"time": "before",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 0,
+							"index": 0
+						},
+						"end": {
+							"line": 1,
+							"column": 10,
+							"index": 10
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{}
+					],
+					"logs": [],
+					"detail": {
+						"action": "declare",
+						"kind": "let",
+						"target": "a"
+					}
+				},
+				{
+					"step": 3,
+					"category": "expression",
+					"type": "NumericLiteral",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 8,
+							"index": 8
+						},
+						"end": {
+							"line": 1,
+							"column": 9,
+							"index": 9
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{}
+					],
+					"value": 1,
+					"logs": [],
+					"detail": {
+						"action": "literal"
+					}
+				},
+				{
+					"step": 4,
+					"category": "statement",
+					"type": "VariableDeclaration",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 0,
+							"index": 0
+						},
+						"end": {
+							"line": 1,
+							"column": 10,
+							"index": 10
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"a": 1
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "declare",
+						"kind": "let",
+						"target": "a"
+					}
+				},
+				{
+					"step": 5,
+					"category": "expression",
+					"type": "NumericLiteral",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 19,
+							"index": 19
+						},
+						"end": {
+							"line": 1,
+							"column": 20,
+							"index": 20
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"a": 1
+						}
+					],
+					"value": 2,
+					"logs": [],
+					"detail": {
+						"action": "literal"
+					}
+				},
+				{
+					"step": 6,
+					"category": "statement",
+					"type": "ExpressionStatement",
+					"time": "before",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 22,
+							"index": 22
+						},
+						"end": {
+							"line": 1,
+							"column": 24,
+							"index": 24
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"a": 1,
+							"b": 2
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "evaluate"
+					}
+				},
+				{
+					"step": 7,
+					"category": "expression",
+					"type": "Identifier",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 22,
+							"index": 22
+						},
+						"end": {
+							"line": 1,
+							"column": 23,
+							"index": 23
+						},
+						"identifierName": "a"
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"a": 1,
+							"b": 2
+						}
+					],
+					"value": 1,
+					"logs": [],
+					"detail": {
+						"action": "read",
+						"name": "a"
+					}
+				},
+				{
+					"step": 8,
+					"category": "statement",
+					"type": "ExpressionStatement",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 22,
+							"index": 22
+						},
+						"end": {
+							"line": 1,
+							"column": 24,
+							"index": 24
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"a": 1,
+							"b": 2
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "evaluate"
+					}
+				},
+				{
+					"step": 9,
+					"category": "statement",
+					"type": "ExpressionStatement",
+					"time": "before",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 25,
+							"index": 25
+						},
+						"end": {
+							"line": 1,
+							"column": 27,
+							"index": 27
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"a": 1,
+							"b": 2
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "evaluate"
+					}
+				},
+				{
+					"step": 10,
+					"category": "statement",
+					"type": "ExpressionStatement",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 25,
+							"index": 25
+						},
+						"end": {
+							"line": 1,
+							"column": 27,
+							"index": 27
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"a": 1,
+							"b": 2
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "evaluate"
+					}
+				}
+			]
+		},
+		{
+			"name": "data-stripped",
+			"code": "let x = 5; x;",
+			"options": {
+				"filter": {
+					"data": {
+						"scopes": false,
+						"dt": false
+					}
+				}
+			},
+			"steps": [
+				{
+					"step": 1,
+					"category": "init"
+				},
+				{
+					"step": 2,
+					"category": "statement",
+					"type": "VariableDeclaration",
+					"time": "before",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 0,
+							"index": 0
+						},
+						"end": {
+							"line": 1,
+							"column": 10,
+							"index": 10
+						}
+					},
+					"logs": [],
+					"detail": {
+						"action": "declare",
+						"kind": "let",
+						"target": "x"
+					}
+				},
+				{
+					"step": 3,
+					"category": "expression",
+					"type": "NumericLiteral",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 8,
+							"index": 8
+						},
+						"end": {
+							"line": 1,
+							"column": 9,
+							"index": 9
+						}
+					},
+					"value": 5,
+					"logs": [],
+					"detail": {
+						"action": "literal"
+					}
+				},
+				{
+					"step": 4,
+					"category": "statement",
+					"type": "VariableDeclaration",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 0,
+							"index": 0
+						},
+						"end": {
+							"line": 1,
+							"column": 10,
+							"index": 10
+						}
+					},
+					"logs": [],
+					"detail": {
+						"action": "declare",
+						"kind": "let",
+						"target": "x"
+					}
+				},
+				{
+					"step": 5,
+					"category": "statement",
+					"type": "ExpressionStatement",
+					"time": "before",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 11,
+							"index": 11
+						},
+						"end": {
+							"line": 1,
+							"column": 13,
+							"index": 13
+						}
+					},
+					"logs": [],
+					"detail": {
+						"action": "evaluate"
+					}
+				},
+				{
+					"step": 6,
+					"category": "expression",
+					"type": "Identifier",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 11,
+							"index": 11
+						},
+						"end": {
+							"line": 1,
+							"column": 12,
+							"index": 12
+						},
+						"identifierName": "x"
+					},
+					"value": 5,
+					"logs": [],
+					"detail": {
+						"action": "read",
+						"name": "x"
+					}
+				},
+				{
+					"step": 7,
+					"category": "statement",
+					"type": "ExpressionStatement",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 11,
+							"index": 11
+						},
+						"end": {
+							"line": 1,
+							"column": 13,
+							"index": 13
+						}
+					},
+					"logs": [],
+					"detail": {
+						"action": "evaluate"
+					}
+				}
+			]
+		},
+		{
+			"name": "logs-on-filtered-step",
+			"code": "console.log(\"kept\"); let x = 1; x;",
+			"options": {
+				"blocks": {
+					"expressionStatement": false
+				}
+			},
+			"steps": [
+				{
+					"step": 1,
+					"category": "init"
+				},
+				{
+					"step": 2,
+					"category": "expression",
+					"type": "Identifier",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 0,
+							"index": 0
+						},
+						"end": {
+							"line": 1,
+							"column": 7,
+							"index": 7
+						},
+						"identifierName": "console"
+					},
+					"dt": 0,
+					"scopes": [
+						{}
+					],
+					"value": {},
+					"logs": [],
+					"detail": {
+						"action": "read",
+						"name": "console"
+					}
+				},
+				{
+					"step": 3,
+					"category": "expression",
+					"type": "MemberExpression",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 0,
+							"index": 0
+						},
+						"end": {
+							"line": 1,
+							"column": 11,
+							"index": 11
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{}
+					],
+					"logs": [],
+					"detail": {
+						"action": "access",
+						"computed": false,
+						"property": "log"
+					}
+				},
+				{
+					"step": 4,
+					"category": "expression",
+					"type": "StringLiteral",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 12,
+							"index": 12
+						},
+						"end": {
+							"line": 1,
+							"column": 18,
+							"index": 18
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{}
+					],
+					"value": "kept",
+					"logs": [],
+					"detail": {
+						"action": "literal"
+					}
+				},
+				{
+					"step": 5,
+					"category": "expression",
+					"type": "CallExpression",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 0,
+							"index": 0
+						},
+						"end": {
+							"line": 1,
+							"column": 19,
+							"index": 19
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{}
+					],
+					"logs": [
+						[
+							"kept"
+						]
+					],
+					"detail": {
+						"action": "call",
+						"arity": 1,
+						"callee": "log",
+						"method": true
+					}
+				},
+				{
+					"step": 6,
+					"category": "statement",
+					"type": "VariableDeclaration",
+					"time": "before",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 21,
+							"index": 21
+						},
+						"end": {
+							"line": 1,
+							"column": 31,
+							"index": 31
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{}
+					],
+					"logs": [],
+					"detail": {
+						"action": "declare",
+						"kind": "let",
+						"target": "x"
+					}
+				},
+				{
+					"step": 7,
+					"category": "expression",
+					"type": "NumericLiteral",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 29,
+							"index": 29
+						},
+						"end": {
+							"line": 1,
+							"column": 30,
+							"index": 30
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{}
+					],
+					"value": 1,
+					"logs": [],
+					"detail": {
+						"action": "literal"
+					}
+				},
+				{
+					"step": 8,
+					"category": "statement",
+					"type": "VariableDeclaration",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 21,
+							"index": 21
+						},
+						"end": {
+							"line": 1,
+							"column": 31,
+							"index": 31
+						}
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"x": 1
+						}
+					],
+					"logs": [],
+					"detail": {
+						"action": "declare",
+						"kind": "let",
+						"target": "x"
+					}
+				},
+				{
+					"step": 9,
+					"category": "expression",
+					"type": "Identifier",
+					"time": "after",
+					"loc": {
+						"start": {
+							"line": 1,
+							"column": 32,
+							"index": 32
+						},
+						"end": {
+							"line": 1,
+							"column": 33,
+							"index": 33
+						},
+						"identifierName": "x"
+					},
+					"dt": 0,
+					"scopes": [
+						{
+							"x": 1
+						}
+					],
+					"value": 1,
+					"logs": [],
+					"detail": {
+						"action": "read",
+						"name": "x"
+					}
+				}
+			]
+		},
+		{
+			"name": "cap-trip",
+			"code": "let i = 0; while (true) { i = i + 1; }",
+			"options": {},
+			"error": {
+				"name": "LimitExceededError",
+				"message": "Trace has 26 steps, exceeds max 25"
+			}
+		}
+	]
+}
